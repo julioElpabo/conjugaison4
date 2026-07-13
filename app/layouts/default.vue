@@ -1,3 +1,8 @@
+<script setup lang="ts">
+const route = useRoute()
+const isAdminRoute = computed(() => route.path === '/admin' || route.path.startsWith('/admin/'))
+</script>
+
 <template>
   <div class="site-shell">
     <header class="site-header">
@@ -13,7 +18,7 @@
       </div>
     </header>
 
-    <main class="site-main">
+    <main :class="['site-main', { 'site-main--admin': isAdminRoute }]">
       <slot />
     </main>
 
@@ -140,6 +145,11 @@ a {
   padding: 38px 0 64px;
 }
 
+.site-main--admin {
+  width: calc(100% - 24px);
+  max-width: none;
+}
+
 .site-footer {
   min-height: 150px;
   padding: 42px 24px;
@@ -174,6 +184,10 @@ a {
   .site-main {
     width: min(100% - 20px, 1180px);
     padding-top: 22px;
+  }
+
+  .site-main--admin {
+    width: calc(100% - 10px);
   }
 }
 </style>

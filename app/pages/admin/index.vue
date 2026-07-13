@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { getAdminErrorMessage } from '~/composables/useAdminAuth'
+import AdminNewVerbForm from '~/components/admin/NewVerbForm.vue'
+import AdminVerbCatalogue from '~/components/admin/VerbCatalogue.vue'
+import AdminVerbEditor from '~/components/admin/VerbEditor.vue'
 
 interface CatalogueVerb {
   id: number
@@ -254,8 +257,6 @@ watch(user, (currentUser) => {
           </div>
         </header>
 
-        <PermanentChallengeForm />
-
         <p v-if="catalogueError" class="admin-notice admin-notice--error" role="alert">
           {{ catalogueError }}
           <button class="admin-button admin-button--small" type="button" @click="fetchCatalogue()">
@@ -264,7 +265,7 @@ watch(user, (currentUser) => {
         </p>
 
         <div class="admin-home__workspace">
-          <VerbCatalogue
+          <AdminVerbCatalogue
             :verbs="catalogue.verbes"
             :selected-id="selectedId"
             :loading="catalogueLoading"
@@ -273,7 +274,7 @@ watch(user, (currentUser) => {
           />
 
           <div class="admin-home__editor">
-            <NewVerbForm
+            <AdminNewVerbForm
               v-if="showCreate"
               :saving="creating"
               :error="createError"
@@ -298,7 +299,7 @@ watch(user, (currentUser) => {
               </button>
             </div>
 
-            <VerbEditor
+            <AdminVerbEditor
               v-else-if="detail"
               :detail="detail"
               :modes="catalogue.modes"
@@ -341,7 +342,7 @@ watch(user, (currentUser) => {
 .admin-home__workspace {
   display: grid;
   min-width: 0;
-  grid-template-columns: minmax(210px, 260px) minmax(0, 1fr);
+  grid-template-columns: minmax(250px, 300px) minmax(0, 1fr);
   gap: 22px;
 }
 

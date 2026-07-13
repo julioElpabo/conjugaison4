@@ -1,0 +1,2242 @@
+{
+  "info": {
+    "_postman_id": "15288d19-9c17-4b55-af86-02bd7fa2784f",
+    "name": "Tests conjugaisons - corrigé",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "16388819"
+  },
+  "item": [
+    {
+      "name": "nous ouvrons",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"ouvrir\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"nous | ouvrir | présent (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"nous ouvrons\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"nous ouvrons\");",
+              "    pm.expect(data.reponses).to.include(\"ouvrons\");",
+              "})",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"ouvrons\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"ouvrir\",\n    \"auxiliaire\": \"avoir\",\n    \"participe_passé\": \"ouvert\",\n    \"participe_présent\": \"ouvrant\",\n    \"verbe_auxiliaire_infinitif\": \"avoir\",\n    \"verbe_auxiliaire_participe_present\": \"ayant\",\n    \"pronom\": \"nous\",\n    \"tempsname\": \"présent\",\n    \"isTempsCompose\": \"0\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "il est allé",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"aller\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"il | aller | passé composé (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"il est allé\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"il est allé\");",
+              "    pm.expect(data.reponses).to.include(\"est allé\");",
+              "})"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"est allé\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"aller\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"allé\",\n    \"participe_présent\": \"allant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"il\",\n    \"tempsname\": \"passé composé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "elle est allée",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"aller\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"elle | aller | passé composé (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"elle est allée\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"elle est allée\");",
+              "    pm.expect(data.reponses).to.include(\"est allée\");",
+              "})"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"est allé\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"aller\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"allé\",\n    \"participe_présent\": \"allant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"elle\",\n    \"tempsname\": \"passé composé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "iel est allé(e)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"aller\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"iel | aller | passé composé (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"iel est allé(e)\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"iel est allé\");",
+              "    pm.expect(data.reponses).to.include(\"iel est allée\");",
+              "    pm.expect(data.reponses).to.include(\"est allé\");",
+              "    pm.expect(data.reponses).to.include(\"est allée\");",
+              "    pm.expect(data.reponses).to.include(\"iel est allé(e)\");",
+              "    pm.expect(data.reponses).to.include(\"iel est allé.e\");",
+              "    ",
+              "})"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"est allé\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"aller\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"allé\",\n    \"participe_présent\": \"allant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"iel\",\n    \"tempsname\": \"passé composé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "iels sont allé(e)s",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"aller\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"iels | aller | passé composé (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"iels sont allé(e)s\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"iels sont allés\");",
+              "    pm.expect(data.reponses).to.include(\"iels sont allées\");",
+              "    pm.expect(data.reponses).to.include(\"sont allés\");",
+              "    pm.expect(data.reponses).to.include(\"sont allées\");",
+              "    pm.expect(data.reponses).to.include(\"iels sont allé(e)s\");",
+              "    pm.expect(data.reponses).to.include(\"iels sont allé.e.s\");",
+              "    ",
+              "})"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"sont allés\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"aller\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"allé\",\n    \"participe_présent\": \"allant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"iels\",\n    \"tempsname\": \"passé composé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "elle a ouvert",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"ouvrir\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"elle | ouvrir | passé composé (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"elle a ouvert\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"elle a ouvert\");",
+              "    pm.expect(data.reponses).to.include(\"a ouvert\");",
+              "})",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"a ouvert\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"ouvrir\",\n    \"auxiliaire\": \"avoir\",\n    \"participe_passé\": \"ouvert\",\n    \"participe_présent\": \"ouvrant\",\n    \"verbe_auxiliaire_infinitif\": \"avoir\",\n    \"verbe_auxiliaire_participe_present\": \"ayant\",\n    \"pronom\": \"elle\",\n    \"tempsname\": \"passé composé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "elles sont allées",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"aller\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"elles | aller | passé composé (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"elles sont allées\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"elles sont allées\");",
+              "    pm.expect(data.reponses).to.include(\"sont allées\");",
+              "})",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"sont allés\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"aller\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"allé\",\n    \"participe_présent\": \"allant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"elles\",\n    \"tempsname\": \"passé composé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "vous êtes allés",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"aller\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"vous | aller | passé composé (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"vous êtes allés\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"vous êtes allé\");",
+              "    pm.expect(data.reponses).to.include(\"vous êtes allés\");",
+              "     pm.expect(data.reponses).to.include(\"vous êtes allée\");",
+              "      pm.expect(data.reponses).to.include(\"vous êtes allées\");",
+              "})",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"êtes allés\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"aller\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"allé\",\n    \"participe_présent\": \"allant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"vous\",\n    \"tempsname\": \"passé composé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "elle est allée",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"aller\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"elles | aller | passé composé (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"elles sont allées\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"elles sont allées\");",
+              "    pm.expect(data.reponses).to.include(\"sont allées\");",
+              "})",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"sont allés\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"aller\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"allé\",\n    \"participe_présent\": \"allant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"elles\",\n    \"tempsname\": \"passé composé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "elles ont ouvert",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"ouvrir\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"elles | ouvrir | passé composé (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"elles ont ouvert\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"elles ont ouvert\");",
+              "    pm.expect(data.reponses).to.include(\"ont ouvert\");",
+              "})",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"ont ouvert\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"ouvrir\",\n    \"auxiliaire\": \"avoir\",\n    \"participe_passé\": \"ouvert\",\n    \"participe_présent\": \"ouvrant\",\n    \"verbe_auxiliaire_infinitif\": \"avoir\",\n    \"verbe_auxiliaire_participe_present\": \"ayant\",\n    \"pronom\": \"elles\",\n    \"tempsname\": \"passé composé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "j'aime",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"aimer\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"je | aimer | présent (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"j'aime\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"j'aime\");",
+              "    pm.expect(data.reponses).to.include(\"aime\");",
+              "})",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"aime\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"aimer\",\n    \"auxiliaire\": \"avoir\",\n    \"participe_passé\": \"aimé\",\n    \"participe_présent\": \"aimant\",\n    \"verbe_auxiliaire_infinitif\": \"avoir\",\n    \"verbe_auxiliaire_participe_present\": \"ayant\",\n    \"pronom\": \"je\",\n    \"tempsname\": \"présent\",\n    \"isTempsCompose\": \"0\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "j'ai eu",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"avoir\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"je | avoir | passé composé (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"j'ai eu\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"j'ai eu\");",
+              "    pm.expect(data.reponses).to.include(\"ai eu\");",
+              "})",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"ai eu\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"avoir\",\n    \"auxiliaire\": \"avoir\",\n    \"participe_passé\": \"eu\",\n    \"participe_présent\": \"ayant\",\n    \"verbe_auxiliaire_infinitif\": \"avoir\",\n    \"verbe_auxiliaire_participe_present\": \"ayant\",\n    \"pronom\": \"je\",\n    \"tempsname\": \"passé composé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "j'ai",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"avoir\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"je | avoir | présent (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"j'ai\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"j'ai\");",
+              "    pm.expect(data.reponses).to.include(\"ai\");",
+              "})",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"ai\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"avoir\",\n    \"auxiliaire\": \"avoir\",\n    \"participe_passé\": \"eu\",\n    \"participe_présent\": \"ayant\",\n    \"verbe_auxiliaire_infinitif\": \"avoir\",\n    \"verbe_auxiliaire_participe_present\": \"ayant\",\n    \"pronom\": \"je\",\n    \"tempsname\": \"présent\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "que tu sois venu",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"venir\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"tu | venir | passé (subjonctif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"que tu sois venu\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"que tu sois venu\");",
+              "    pm.expect(data.reponses).to.include(\"tu sois venu\");",
+              "    pm.expect(data.reponses).to.include(\"sois venu\");",
+              "",
+              "    pm.expect(data.reponses).to.include(\"que tu sois venue\");",
+              "    pm.expect(data.reponses).to.include(\"tu sois venue\");",
+              "    pm.expect(data.reponses).to.include(\"sois venue\");",
+              "})",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"sois venu\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"venir\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"venu\",\n    \"participe_présent\": \"venant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"tu\",\n    \"tempsname\": \"passé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"subjonctif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "que j'ouvre",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"ouvrir\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"je | ouvrir | présent (subjonctif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"que j'ouvre\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"que j'ouvre\");",
+              "    pm.expect(data.reponses).to.include(\"j'ouvre\");",
+              "    pm.expect(data.reponses).to.include(\"ouvre\");",
+              "})",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"ouvre\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"ouvrir\",\n    \"auxiliaire\": \"avoir\",\n    \"participe_passé\": \"ouvert\",\n    \"participe_présent\": \"ouvrant\",\n    \"verbe_auxiliaire_infinitif\": \"avoir\",\n    \"verbe_auxiliaire_participe_present\": \"ayant\",\n    \"pronom\": \"je\",\n    \"tempsname\": \"présent\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"subjonctif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "que j'aie ouvert",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"ouvrir\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"je | ouvrir | passé (subjonctif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"que j'aie ouvert\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"que j'aie ouvert\");",
+              "    pm.expect(data.reponses).to.include(\"j'aie ouvert\");",
+              "    pm.expect(data.reponses).to.include(\"aie ouvert\");",
+              "})",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"aie ouvert\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"ouvrir\",\n    \"auxiliaire\": \"avoir\",\n    \"participe_passé\": \"ouvert\",\n    \"participe_présent\": \"ouvrant\",\n    \"verbe_auxiliaire_infinitif\": \"avoir\",\n    \"verbe_auxiliaire_participe_present\": \"ayant\",\n    \"pronom\": \"je\",\n    \"tempsname\": \"passé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"subjonctif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "qu'elle soit allée",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"aller\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"elle | aller | passé (subjonctif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"qu'elle soit allée\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"qu'elle soit allée\");",
+              "    pm.expect(data.reponses).to.include(\"elle soit allée\");",
+              "    pm.expect(data.reponses).to.include(\"soit allée\");",
+              "})",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"soit allé\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"aller\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"allé\",\n    \"participe_présent\": \"allant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"elle\",\n    \"tempsname\": \"passé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"subjonctif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "qu'elles soient allées",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"aller\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"elles | aller | passé (subjonctif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"qu'elles soient allées\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"qu'elles soient allées\");",
+              "    pm.expect(data.reponses).to.include(\"elles soient allées\");",
+              "    pm.expect(data.reponses).to.include(\"soient allées\");",
+              "})",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"soient allés\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"aller\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"allé\",\n    \"participe_présent\": \"allant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"elles\",\n    \"tempsname\": \"passé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"subjonctif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "elles seraient parties",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"partir\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"elles | partir | passé (conditionnel)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"elles seraient parties\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"elles seraient parties\");",
+              "    pm.expect(data.reponses).to.include(\"seraient parties\");",
+              "})",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"seraient partis\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"partir\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"parti\",\n    \"participe_présent\": \"partant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"elles\",\n    \"tempsname\": \"passé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"conditionnel\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "mange!",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"manger\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"tu | manger | présent (impératif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"mange!\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"mange!\");",
+              "    pm.expect(data.reponses).to.include(\"mange\");",
+              "})",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"mange\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"manger\",\n    \"auxiliaire\": \"avoir\",\n    \"participe_passé\": \"mangé\",\n    \"participe_présent\": \"mangeant\",\n    \"verbe_auxiliaire_infinitif\": \"avoir\",\n    \"verbe_auxiliaire_participe_present\": \"ayant\",\n    \"pronom\": \"tu\",\n    \"tempsname\": \"présent\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"impératif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "soyons allés!",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"aller\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"nous | aller | passé (impératif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"soyons allés!\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"soyons allés!\");",
+              "    pm.expect(data.reponses).to.include(\"soyons allés\");",
+              "})",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"soyons allés\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"aller\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"allé\",\n    \"participe_présent\": \"allant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"nous\",\n    \"tempsname\": \"passé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"impératif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "soyez morts",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"mourir\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"vous | mourir | passé (impératif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"soyez morts!\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"soyez mort!\");",
+              "    pm.expect(data.reponses).to.include(\"soyez morts\");",
+              "    pm.expect(data.reponses).to.include(\"soyez morte\");",
+              "    pm.expect(data.reponses).to.include(\"soyez mortes\");",
+              "})",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"soyez morts\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"mourir\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"mort\",\n    \"participe_présent\": \"mourant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"vous\",\n    \"tempsname\": \"passé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"impératif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "soyons morts",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"mourir\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"nous | mourir | passé (impératif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"soyons morts!\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              " ",
+              "    pm.expect(data.reponses).to.include(\"soyons morts\");",
+              "    pm.expect(data.reponses).to.include(\"soyons mortes\");",
+              "})",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"soyons morts\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"mourir\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"mort\",\n    \"participe_présent\": \"mourant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"nous\",\n    \"tempsname\": \"passé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"impératif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "sois mort",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"mourir\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"tu | mourir | passé (impératif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"sois mort!\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"sois mort!\");",
+              "    pm.expect(data.reponses).to.include(\"sois mort\");",
+              "    pm.expect(data.reponses).to.include(\"sois morte\");",
+              "    pm.expect(data.reponses).to.include(\"sois morte!\");",
+              "})",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"sois mort\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"mourir\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"mort\",\n    \"participe_présent\": \"mourant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"tu\",\n    \"tempsname\": \"passé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"impératif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "elle est arrivée",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"arriver\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"elle | arriver | passé composé (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"elle est arrivée\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"est arrivée\");",
+              "     pm.expect(data.reponses).to.include(\"elle est arrivée\");",
+              "})",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"est arrivé\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"arriver\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"arrivé\",\n    \"participe_présent\": \"arrivant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"elle\",\n    \"tempsname\": \"passé composé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "nous sommes sorties",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"sortir\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"nous | sortir | passé composé (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"nous sommes sortis\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"sommes sortis\");",
+              "    pm.expect(data.reponses).to.include(\"nous sommes sortis\");",
+              "    pm.expect(data.reponses).to.include(\"sommes sorties\");",
+              "    pm.expect(data.reponses).to.include(\"nous sommes sorties\");",
+              "})",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"sommes sortis\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"sortir\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"sorti\",\n    \"participe_présent\": \"sortant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"nous\",\n    \"tempsname\": \"passé composé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "elle est sortie",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"sortir\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"elle | sortir | passé composé (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"elle est sortie\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"est sortie\");",
+              "     pm.expect(data.reponses).to.include(\"elle est sortie\");",
+              "})",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"est sorti\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"sortir\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"sorti\",\n    \"participe_présent\": \"sortant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"elle\",\n    \"tempsname\": \"passé composé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "je suis sortie",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"sortir\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"je | sortir | passé composé (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"je suis sorti\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"suis sorti\");",
+              "    pm.expect(data.reponses).to.include(\"je suis sorti\");",
+              "    pm.expect(data.reponses).to.include(\"suis sortie\");",
+              "    pm.expect(data.reponses).to.include(\"je suis sortie\");",
+              "})",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"suis sorti\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"sortir\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"sorti\",\n    \"participe_présent\": \"sortant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"je\",\n    \"tempsname\": \"passé composé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "vous êtes sortie",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"sortir\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"vous | sortir | passé composé (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"vous êtes sortis\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"êtes sorti\");",
+              "    pm.expect(data.reponses).to.include(\"vous êtes sorti\");",
+              "    pm.expect(data.reponses).to.include(\"êtes sortis\");",
+              "    pm.expect(data.reponses).to.include(\"vous êtes sortis\");",
+              "    pm.expect(data.reponses).to.include(\"êtes sortie\");",
+              "    pm.expect(data.reponses).to.include(\"vous êtes sortie\");",
+              "    pm.expect(data.reponses).to.include(\"êtes sorties\");",
+              "    pm.expect(data.reponses).to.include(\"vous êtes sorties\");",
+              "})",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"êtes sortis\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"sortir\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"sorti\",\n    \"participe_présent\": \"sortant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"vous\",\n    \"tempsname\": \"passé composé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "elles se sont assises",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var data = pm.response.json()",
+              "pm.test(\"Titre\", ()=>{",
+              "    pm.expect(data.titre).to.equal(\"s'asseoir\");",
+              "})",
+              "pm.test(\"Consigne\", ()=>{",
+              "    pm.expect(data.consigne).to.equal(\"elles | s'asseoir | passé composé (indicatif)\");",
+              "})",
+              "pm.test(\"Réponses pour corrigé\", ()=>{",
+              "    pm.expect(data.reponsesPourCorrige).to.include(\"elles se sont assises\");",
+              "})",
+              "pm.test(\"Réponses acceptées\", ()=>{",
+              "    pm.expect(data.reponses).to.include(\"se sont assises\");",
+              "    pm.expect(data.reponses).to.include(\"elles se sont assises\");",
+              "})",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set(\"nombreConjugaisons\", 6);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"conjugaison1\": \"se sont assises\",\n    \"conjugaison2\": \"\",\n    \"conjugaison3\": \"\",\n    \"infinitif\": \"s'asseoir\",\n    \"auxiliaire\": \"être\",\n    \"participe_passé\": \"assis\",\n    \"participe_présent\": \"s'asseyant\",\n    \"verbe_auxiliaire_infinitif\": \"être\",\n    \"verbe_auxiliaire_participe_present\": \"étant\",\n    \"pronom\": \"elles\",\n    \"tempsname\": \"passé composé\",\n    \"isTempsCompose\": \"1\",\n    \"modename\": \"indicatif\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apiverbes3.tatitotu.ch/api/{{fichierQuiRetourneLeQuestionnaire}}",
+          "protocol": "https",
+          "host": [
+            "apiverbes3",
+            "tatitotu",
+            "ch"
+          ],
+          "path": [
+            "api",
+            "{{fichierQuiRetourneLeQuestionnaire}}"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

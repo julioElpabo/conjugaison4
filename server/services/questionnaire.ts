@@ -1,6 +1,8 @@
 import type { RowDataPacket } from 'mysql2/promise'
 import type { ExerciseQuestion, QuestionnaireRequest } from '../types/public-api'
 import { useDatabase } from '../utils/database'
+import { formatAnswer, formatConjugationQuestion } from './question-formatter'
+import { formatNonFiniteQuestion } from './non-finite-formatter'
 
 interface IdRow extends RowDataPacket { id: number }
 
@@ -56,10 +58,6 @@ function shuffle<T>(values: T[]) {
   return values
 }
 
-function upperFirst(value: string) {
-  return value ? value.charAt(0).toLocaleUpperCase('fr-CH') + value.slice(1) : value
-}
-
 function normalized(value: string) {
   return value.trim().toLocaleLowerCase('fr-CH')
 }
@@ -77,138 +75,6 @@ function choosePronoun(pronom: string, inclusive: boolean) {
     return shuffle(inclusive ? ['ils', 'elles', 'iels'] : ['ils', 'elles'])[0]!
   }
   return pronom
-}
-
-function masculineSingularForm(form: string, participle: string) {
-  if (!participle) return form.endsWith('s') ? form.slice(0, -1) : form
-  if (form.endsWith(participle)) return form
-  if (form.endsWith(`${participle}s`)) return form.slice(0, -1)
-  return form
-}
-
-function applyAgreement(
-  form: string,
-  pronoun: string,
-  compound: boolean,
-  auxiliary: string,
-  participle: string
-) {
-  if (!compound || normalized(auxiliary) !== 'être') {
-    return form
-  }
-  const stem = masculineSingularForm(form, participle)
-  if (pronoun === 'elle') {
-    return `${stem}e`
-  }
-  if (pronoun === 'elles') {
-    return `${stem}es`
-  }
-  if (pronoun === 'iel') {
-    return `${stem}(e)`
-  }
-  if (pronoun === 'iels') {
-    return `${stem}(e)s`
-  }
-  return form
-}
-
-function agreementVariants(
-  form: string,
-  pronoun: string,
-  compound: boolean,
-  auxiliary: string,
-  participle: string
-) {
-  const canonical = applyAgreement(form, pronoun, compound, auxiliary, participle)
-  const variants = [canonical]
-  if (!compound || normalized(auxiliary) !== 'être') {
-    return variants
-  }
-
-  const stem = masculineSingularForm(form, participle)
-
-  if (pronoun === 'iel') {
-    variants.push(`${stem}e`, `${stem}.e`)
-  } else if (pronoun === 'iels') {
-    variants.push(`${stem}es`, `${stem}.e.s`)
-  } else if (['je', 'tu'].includes(pronoun)) {
-    variants.push(`${stem}`, `${stem}e`)
-  } else if (pronoun === 'nous') {
-    variants.push(`${stem}es`)
-  } else if (pronoun === 'vous') {
-    variants.push(stem, `${stem}e`, `${stem}s`, `${stem}es`)
-  }
-  return unique(variants)
-}
-
-function withPronoun(pronoun: string, form: string) {
-  return pronoun === 'je' && startsWithVowel(form) ? `j'${form}` : `${pronoun} ${form}`
-}
-
-function formatAnswer(pronoun: string, form: string, mode: string) {
-  const normalizedMode = normalized(mode)
-  if (normalizedMode === 'impératif') {
-    return `${form}!`
-  }
-  const phrase = withPronoun(pronoun, form)
-  if (normalizedMode === 'subjonctif') {
-    return `${startsWithVowel(pronoun) ? "qu'" : 'que '}${phrase}`
-  }
-  return phrase
-}
-
-function answerVariants(row: ConjugationRow, pronoun: string) {
-  const baseForms = unique([row.conjugaison1, row.conjugaison2, row.conjugaison3])
-  const answers: string[] = []
-  for (const baseForm of baseForms) {
-    for (const form of agreementVariants(
-      baseForm,
-      pronoun,
-      Boolean(row.is_compound),
-      row.auxiliaire,
-      row.participe_passe
-    )) {
-      const canonical = formatAnswer(pronoun, form, row.mode_name)
-      answers.push(canonical, form)
-      if (normalized(row.mode_name) === 'impératif') {
-        answers.push(form.replace(/!$/, ''))
-      } else {
-        answers.push(withPronoun(pronoun, form))
-      }
-    }
-  }
-  return unique(answers)
-}
-
-function conjugationQuestion(row: ConjugationRow, inclusivePronouns: boolean): ExerciseQuestion {
-  const pronoun = choosePronoun(row.pronom, inclusivePronouns)
-  const correctedForms = unique([row.conjugaison1, row.conjugaison2, row.conjugaison3])
-    .map(form => applyAgreement(
-      form,
-      pronoun,
-      Boolean(row.is_compound),
-      row.auxiliaire,
-      row.participe_passe
-    ))
-    .map(form => formatAnswer(pronoun, form, row.mode_name))
-
-  return {
-    id: `c-${row.id}`,
-    verbeId: Number(row.verbe_id),
-    tenseId: Number(row.temp_id),
-    personId: Number(row.personne_id),
-    titre: row.infinitif,
-    consigne: `${pronoun} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`,
-    reponses: answerVariants(row, pronoun),
-    reponsesPourCorrige: unique(correctedForms),
-    infinitif: row.infinitif,
-    pronom: pronoun,
-    temps: row.temps_name,
-    mode: row.mode_name,
-    conjugaison1: row.conjugaison1,
-    conjugaison2: row.conjugaison2 || '',
-    conjugaison3: row.conjugaison3 || ''
-  }
 }
 
 function articleForTense(tense: string, mode: string) {
@@ -252,50 +118,6 @@ function identificationQuestion(row: ConjugationRow): ExerciseQuestion {
     conjugaison1: row.conjugaison1,
     conjugaison2: row.conjugaison2 || '',
     conjugaison3: row.conjugaison3 || ''
-  }
-}
-
-function nonFiniteQuestion(
-  verb: NonFiniteVerbRow,
-  tense: TenseSelectionRow
-): ExerciseQuestion | null {
-  const mode = normalized(tense.mode_name)
-  const tenseName = normalized(tense.name)
-  const infinitive = upperFirst(verb.infinitif)
-  let label: string
-  let answer: string
-
-  if (mode === 'participe' && tenseName === 'présent') {
-    label = 'Le participe présent'
-    answer = upperFirst(verb.participe_present)
-  } else if (mode === 'participe' && tenseName === 'passé') {
-    label = 'Le participe passé'
-    answer = upperFirst(verb.participe_passe)
-  } else if (mode === 'gérondif' && tenseName === 'présent') {
-    label = 'Le gérondif présent'
-    answer = `En ${verb.participe_present}`
-  } else if (mode === 'gérondif' && tenseName === 'passé' && verb.auxiliaire_participe_present) {
-    label = 'Le gérondif passé'
-    answer = `En ${verb.auxiliaire_participe_present} ${verb.participe_passe}`
-  } else {
-    return null
-  }
-
-  return {
-    id: `n-${verb.id}-${tense.id}`,
-    verbeId: Number(verb.id),
-    tenseId: Number(tense.id),
-    personId: null,
-    titre: infinitive,
-    consigne: `${label} de ${infinitive}`,
-    reponses: [answer],
-    reponsesPourCorrige: [answer],
-    infinitif: verb.infinitif,
-    temps: tense.name,
-    mode: tense.mode_name,
-    conjugaison1: answer,
-    conjugaison2: '',
-    conjugaison3: ''
   }
 }
 
@@ -363,7 +185,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
     `, [...request.verbIds, ...finiteIds])
 
     questions.push(...rows.map(row => request.exerciseKind === 'conjugation'
-      ? conjugationQuestion(row, request.inclusivePronouns)
+      ? formatConjugationQuestion(row, choosePronoun(row.pronom, request.inclusivePronouns))
       : identificationQuestion(row)))
   }
 
@@ -380,7 +202,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
 
     for (const verb of verbs) {
       for (const tense of nonFiniteTenses) {
-        const question = nonFiniteQuestion(verb, tense)
+        const question = formatNonFiniteQuestion(verb, tense)
         if (question) questions.push(question)
       }
     }

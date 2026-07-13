@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import {
+  conjugationModeOrder,
+  conjugationTenseLabel,
+  conjugationTenseOrder,
+  isFiniteConjugationMode,
+} from '~~/shared/data/conjugation-display'
+
 interface AdminVerb {
   id: number
   infinitif: string
@@ -72,6 +79,16 @@ const people = [
   { id: 9, short: 'ils / elles', label: 'Troisième personne du pluriel' }
 ] as const
 
+function peopleForMode(mode: string) {
+  return mode.trim().toLocaleLowerCase('fr-CH') === 'impératif'
+    ? people.filter(person => [5, 7, 8].includes(person.id))
+    : people
+}
+
+function modeAnchor(mode: string) {
+  return `mode-${mode.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLocaleLowerCase('fr').replace(/[^a-z]+/g, '-')}`
+}
+
 const draft = reactive<VerbSavePayload>({
   infinitif: '',
   participePresent: '',
@@ -83,14 +100,16 @@ const draft = reactive<VerbSavePayload>({
 const initialSnapshot = ref('')
 
 const groups = computed(() => [...props.modes]
-  .sort((left, right) => left.order - right.order || left.id - right.id)
+  .filter(mode => isFiniteConjugationMode(mode.name))
+  .sort((left, right) => conjugationModeOrder(left.name) - conjugationModeOrder(right.name) || left.id - right.id)
   .map(mode => ({
     mode,
     tenses: props.tenses
       .filter(tense => tense.modeId === mode.id)
+      .sort((left, right) => conjugationTenseOrder(mode.name, left.name) - conjugationTenseOrder(mode.name, right.name) || left.id - right.id)
       .map(tense => ({
         ...tense,
-        rows: people.map(person => ({
+        rows: peopleForMode(mode.name).map(person => ({
           person,
           conjugation: draft.conjugations.find(item => (
             item.tenseId === tense.id && item.personId === person.id
@@ -99,6 +118,13 @@ const groups = computed(() => [...props.modes]
       }))
   }))
   .filter(group => group.tenses.length > 0))
+
+const auxiliaryParticiple = computed(() => draft.auxiliaire === 'être' ? 'étant' : 'ayant')
+const nonFiniteForms = computed(() => ({
+  infinitivePast: [draft.auxiliaire, draft.participePasse].filter(Boolean).join(' '),
+  gerundPresent: draft.participePresent ? `en ${draft.participePresent}` : '',
+  gerundPast: draft.participePasse ? `en ${auxiliaryParticiple.value} ${draft.participePasse}` : '',
+}))
 
 function payload(): VerbSavePayload {
   return {
@@ -214,14 +240,6 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
         <input v-model="draft.infinitif" maxlength="255" required>
       </label>
       <label class="admin-field">
-        <span>Participe présent</span>
-        <input v-model="draft.participePresent" maxlength="255">
-      </label>
-      <label class="admin-field">
-        <span>Participe passé</span>
-        <input v-model="draft.participePasse" maxlength="255">
-      </label>
-      <label class="admin-field">
         <span>Auxiliaire *</span>
         <select v-model="draft.auxiliaire" required>
           <option value="avoir">avoir</option>
@@ -243,21 +261,30 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
         </span>
       </div>
 
-      <details
-        v-for="(group, groupIndex) in groups"
+      <nav class="verb-editor__mode-nav" aria-label="Accès rapide aux modes">
+        <a v-for="group in groups" :key="group.mode.id" :href="`#${modeAnchor(group.mode.name)}`">
+          {{ group.mode.name }}
+        </a>
+        <a href="#mode-participe">Participe</a>
+        <a href="#mode-infinitif">Infinitif</a>
+        <a href="#mode-gerondif">Gérondif</a>
+      </nav>
+
+      <section
+        v-for="group in groups"
         :key="group.mode.id"
+        :id="modeAnchor(group.mode.name)"
         class="verb-editor__mode"
-        :open="groupIndex === 0"
       >
-        <summary>
-          <span>{{ group.mode.name }}</span>
+        <header class="verb-editor__mode-heading">
+          <h2>{{ group.mode.name }}</h2>
           <small>{{ group.tenses.length }} temps</small>
-        </summary>
+        </header>
 
         <div class="verb-editor__tenses">
           <article v-for="tense in group.tenses" :key="tense.id" class="tense-card">
             <header>
-              <h3>{{ tense.name }}</h3>
+              <h3>{{ conjugationTenseLabel(group.mode.name, tense.name) }}</h3>
               <span v-if="tense.isCompound">Composé</span>
             </header>
 
@@ -303,7 +330,32 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
             </div>
           </article>
         </div>
-      </details>
+      </section>
+
+      <section class="verb-editor__non-finite" aria-labelledby="non-finite-title">
+        <header>
+          <h2 id="non-finite-title">Formes non personnelles</h2>
+          <p class="admin-muted">Participe, infinitif et gérondif, dans l’ordre du site de référence.</p>
+        </header>
+
+        <div class="verb-editor__non-finite-grid">
+          <article id="mode-participe">
+            <h3>Participe</h3>
+            <label class="admin-field"><span>Présent</span><input v-model="draft.participePresent" maxlength="255"></label>
+            <label class="admin-field"><span>Passé</span><input v-model="draft.participePasse" maxlength="255"></label>
+          </article>
+          <article id="mode-infinitif">
+            <h3>Infinitif</h3>
+            <label class="admin-field"><span>Présent</span><input :value="draft.infinitif" readonly></label>
+            <label class="admin-field"><span>Passé généré</span><input :value="nonFiniteForms.infinitivePast" readonly></label>
+          </article>
+          <article id="mode-gerondif">
+            <h3>Gérondif</h3>
+            <label class="admin-field"><span>Présent généré</span><input :value="nonFiniteForms.gerundPresent" readonly></label>
+            <label class="admin-field"><span>Passé généré</span><input :value="nonFiniteForms.gerundPast" readonly></label>
+          </article>
+        </div>
+      </section>
     </section>
 
     <div class="verb-editor__footer">
@@ -366,6 +418,54 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
   gap: 13px;
 }
 
+.verb-editor__non-finite {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+}
+
+.verb-editor__non-finite header h2,
+.verb-editor__non-finite header p,
+.verb-editor__non-finite article h3 {
+  margin: 0;
+}
+
+.verb-editor__non-finite header p {
+  margin-top: 5px;
+  font-size: .88rem;
+}
+
+.verb-editor__non-finite-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.verb-editor__non-finite article {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 15px;
+  background: #f7fafb;
+  border-radius: 10px;
+}
+
+.verb-editor__non-finite article[id] {
+  scroll-margin-top: 60px;
+}
+
+.verb-editor__non-finite article h3 {
+  color: var(--admin-navy);
+  text-transform: capitalize;
+}
+
+.verb-editor__non-finite input[readonly] {
+  color: #536675;
+  background: #edf3f6;
+}
+
 .verb-editor__grid-heading {
   align-items: start;
 }
@@ -398,11 +498,12 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
 .verb-editor__mode {
   min-width: 0;
   overflow: hidden;
+  scroll-margin-top: 16px;
   border: 1px solid var(--admin-border);
   border-radius: 12px;
 }
 
-.verb-editor__mode > summary {
+.verb-editor__mode-heading {
   display: flex;
   min-height: 48px;
   padding: 12px 15px;
@@ -410,15 +511,51 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
   justify-content: space-between;
   color: var(--admin-navy);
   background: #f3f8fa;
-  cursor: pointer;
-  font-weight: 850;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.verb-editor__mode-heading h2 {
+  margin: 0;
+  font-size: 1.15rem;
   text-transform: capitalize;
 }
 
-.verb-editor__mode > summary small {
+.verb-editor__mode-heading small {
   color: var(--admin-muted);
   font-weight: 600;
   text-transform: none;
+}
+
+.verb-editor__mode-nav {
+  position: sticky;
+  z-index: 8;
+  top: 0;
+  display: flex;
+  margin-inline: -2px;
+  padding: 7px 2px;
+  gap: 6px;
+  overflow-x: auto;
+  background: rgb(255 255 255 / 94%);
+  backdrop-filter: blur(8px);
+}
+
+.verb-editor__mode-nav a {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  color: var(--admin-blue-dark);
+  background: #edf6f8;
+  border: 1px solid #c9dfe6;
+  border-radius: 99px;
+  text-decoration: none;
+  font-size: .76rem;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.verb-editor__mode-nav a:hover,
+.verb-editor__mode-nav a:focus-visible {
+  color: white;
+  background: var(--admin-blue-dark);
 }
 
 .verb-editor__tenses {
@@ -532,6 +669,10 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
   }
 
   .verb-editor__metadata {
+    grid-template-columns: 1fr;
+  }
+
+  .verb-editor__non-finite-grid {
     grid-template-columns: 1fr;
   }
 

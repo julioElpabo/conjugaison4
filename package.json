@@ -10,7 +10,9 @@
     "data:asseoir": "node --env-file=.env scripts/add-asseoir-variants.mjs",
     "data:audit-variants": "node --env-file=.env scripts/audit-academie-variants.mjs",
     "data:apply-variants": "node --env-file=.env scripts/apply-academie-variants.mjs",
-    "test": "node --test tests/*.test.mjs",
+    "data:repair-integrity": "node --env-file=.env scripts/repair-conjugation-integrity.mjs",
+    "test": "node --env-file-if-exists=.env --experimental-strip-types --test tests/*.test.mjs",
+    "test:conjugations": "node --env-file-if-exists=.env --experimental-strip-types --test tests/*conjugation*.test.mjs",
     "typecheck": "nuxt typecheck",
     "postinstall": "nuxt prepare"
   },

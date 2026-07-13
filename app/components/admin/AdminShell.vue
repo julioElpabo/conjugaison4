@@ -32,6 +32,8 @@ async function signOut() {
 
       <nav class="admin-shell__nav" aria-label="Navigation d’administration">
         <NuxtLink to="/admin">Verbes</NuxtLink>
+        <NuxtLink to="/admin/tests">Tests</NuxtLink>
+        <NuxtLink to="/admin/users">Utilisateurs</NuxtLink>
         <NuxtLink to="/charts">Statistiques</NuxtLink>
         <NuxtLink to="/mon-compte">Mon compte</NuxtLink>
       </nav>
@@ -58,7 +60,11 @@ async function signOut() {
 
 <style scoped>
 .admin-shell {
-  overflow: hidden;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin-inline: 0;
+  overflow: visible;
 }
 
 .admin-shell__header {
@@ -70,6 +76,7 @@ async function signOut() {
   gap: 20px;
   color: white;
   background: var(--admin-navy);
+  border-radius: 18px 18px 0 0;
 }
 
 .admin-shell__identity {
@@ -130,6 +137,7 @@ async function signOut() {
 }
 
 .admin-shell__content {
+  width: 100%;
   min-width: 0;
   padding: clamp(18px, 3vw, 34px);
 }

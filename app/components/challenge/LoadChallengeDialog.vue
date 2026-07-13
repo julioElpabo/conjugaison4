@@ -13,9 +13,10 @@ const emit = defineEmits<{
 
 const code = ref('')
 const input = useTemplateRef<HTMLInputElement>('code-input')
+const dialog = useTemplateRef<HTMLElement>('load-dialog')
 const localError = ref('')
 
-onMounted(() => input.value?.focus())
+useDialogFocus(dialog, () => emit('close'), input)
 
 function submit() {
   const normalized = normalizeChallengeCode(code.value)
@@ -28,17 +29,12 @@ function submit() {
   emit('load', normalized)
 }
 
-function onKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') {
-    emit('close')
-  }
-}
 </script>
 
 <template>
   <Teleport to="body">
-    <div class="dialog-backdrop" @click.self="emit('close')" @keydown="onKeydown">
-      <section class="app-dialog load-dialog" role="dialog" aria-modal="true" aria-labelledby="load-title">
+    <div class="dialog-backdrop" @click.self="emit('close')">
+      <section ref="load-dialog" class="app-dialog load-dialog" role="dialog" aria-modal="true" aria-labelledby="load-title" tabindex="-1">
         <button class="dialog-close" type="button" aria-label="Fermer" @click="emit('close')">×</button>
         <p class="dialog-kicker">Défi enregistré</p>
         <h2 id="load-title">Charger un défi</h2>

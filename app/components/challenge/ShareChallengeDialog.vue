@@ -10,10 +10,9 @@ const emit = defineEmits<{
 
 const copyStatus = ref('')
 const closeButton = useTemplateRef<HTMLButtonElement>('close-button')
+const dialog = useTemplateRef<HTMLElement>('share-dialog')
 
-onMounted(() => {
-  closeButton.value?.focus()
-})
+useDialogFocus(dialog, () => emit('close'), closeButton)
 
 async function copy(value: string, label: string) {
   try {
@@ -24,17 +23,12 @@ async function copy(value: string, label: string) {
   }
 }
 
-function onKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') {
-    emit('close')
-  }
-}
 </script>
 
 <template>
   <Teleport to="body">
-    <div class="dialog-backdrop" @click.self="emit('close')" @keydown="onKeydown">
-      <section class="app-dialog share-dialog" role="dialog" aria-modal="true" aria-labelledby="share-title">
+    <div class="dialog-backdrop" @click.self="emit('close')">
+      <section ref="share-dialog" class="app-dialog share-dialog" role="dialog" aria-modal="true" aria-labelledby="share-title" tabindex="-1">
         <button ref="close-button" class="dialog-close" type="button" aria-label="Fermer" @click="emit('close')">
           ×
         </button>

@@ -1,0 +1,4992 @@
+{
+  "generatedAt": "2026-07-13T05:54:11.617Z",
+  "source": "https://www.dictionnaire-academie.fr/aide-en-ligne.html",
+  "catalogueVerbCount": 486,
+  "searchedBaseVerbCount": 433,
+  "matchedArticleCount": 432,
+  "candidateBaseVerbCount": 17,
+  "updates": [
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12144,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "je",
+      "primary": "ai absous",
+      "alternatives": [
+        "ai absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12159,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "tu",
+      "primary": "as absous",
+      "alternatives": [
+        "as absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12174,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "il",
+      "primary": "a absous",
+      "alternatives": [
+        "a absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12189,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "nous",
+      "primary": "avons absous",
+      "alternatives": [
+        "avons absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12204,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "vous",
+      "primary": "avez absous",
+      "alternatives": [
+        "avez absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12219,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "ils",
+      "primary": "ont absous",
+      "alternatives": [
+        "ont absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12146,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "je",
+      "primary": "avais absous",
+      "alternatives": [
+        "avais absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12161,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "tu",
+      "primary": "avais absous",
+      "alternatives": [
+        "avais absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12176,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "il",
+      "primary": "avait absous",
+      "alternatives": [
+        "avait absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12191,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "nous",
+      "primary": "avions absous",
+      "alternatives": [
+        "avions absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12206,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "vous",
+      "primary": "aviez absous",
+      "alternatives": [
+        "aviez absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12221,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "ils",
+      "primary": "avaient absous",
+      "alternatives": [
+        "avaient absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12147,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "je",
+      "primary": "eus absous",
+      "alternatives": [
+        "eus absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12162,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "tu",
+      "primary": "eus absous",
+      "alternatives": [
+        "eus absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12177,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "il",
+      "primary": "eut absous",
+      "alternatives": [
+        "eut absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12192,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "nous",
+      "primary": "eûmes absous",
+      "alternatives": [
+        "eûmes absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12207,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "vous",
+      "primary": "eûtes absous",
+      "alternatives": [
+        "eûtes absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12222,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "ils",
+      "primary": "eurent absous",
+      "alternatives": [
+        "eurent absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12145,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "je",
+      "primary": "aurai absous",
+      "alternatives": [
+        "aurai absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12160,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "tu",
+      "primary": "auras absous",
+      "alternatives": [
+        "auras absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12175,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "il",
+      "primary": "aura absous",
+      "alternatives": [
+        "aura absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12190,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "nous",
+      "primary": "aurons absous",
+      "alternatives": [
+        "aurons absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12205,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "vous",
+      "primary": "aurez absous",
+      "alternatives": [
+        "aurez absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12220,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "ils",
+      "primary": "auront absous",
+      "alternatives": [
+        "auront absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12153,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "je",
+      "primary": "aurais absous",
+      "alternatives": [
+        "aurais absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12168,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "tu",
+      "primary": "aurais absous",
+      "alternatives": [
+        "aurais absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12183,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "il",
+      "primary": "aurait absous",
+      "alternatives": [
+        "aurait absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12198,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "nous",
+      "primary": "aurions absous",
+      "alternatives": [
+        "aurions absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12213,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "vous",
+      "primary": "auriez absous",
+      "alternatives": [
+        "auriez absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12228,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "ils",
+      "primary": "auraient absous",
+      "alternatives": [
+        "auraient absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12149,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "je",
+      "primary": "aie absous",
+      "alternatives": [
+        "aie absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12164,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "tu",
+      "primary": "aies absous",
+      "alternatives": [
+        "aies absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12179,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "il",
+      "primary": "ait absous",
+      "alternatives": [
+        "ait absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12194,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "nous",
+      "primary": "ayons absous",
+      "alternatives": [
+        "ayons absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12209,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "vous",
+      "primary": "ayez absous",
+      "alternatives": [
+        "ayez absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12224,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "ils",
+      "primary": "aient absous",
+      "alternatives": [
+        "aient absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12151,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "je",
+      "primary": "eusse absous",
+      "alternatives": [
+        "eusse absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12166,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "tu",
+      "primary": "eusses absous",
+      "alternatives": [
+        "eusses absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12181,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "il",
+      "primary": "eût absous",
+      "alternatives": [
+        "eût absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12196,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "nous",
+      "primary": "eussions absous",
+      "alternatives": [
+        "eussions absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12211,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "vous",
+      "primary": "eussiez absous",
+      "alternatives": [
+        "eussiez absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "rowId": 12226,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "ils",
+      "primary": "eussent absous",
+      "alternatives": [
+        "eussent absout"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A0175"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59838,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "m'assieds",
+      "alternatives": [
+        "m'assois"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59839,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "t'assieds",
+      "alternatives": [
+        "t'assois"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59840,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "s'assied",
+      "alternatives": [
+        "s'assoit"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59841,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "nous asseyons",
+      "alternatives": [
+        "nous assoyons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59842,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "vous asseyez",
+      "alternatives": [
+        "vous assoyez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59843,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "s'asseyent",
+      "alternatives": [
+        "s'assoient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59850,
+      "mode": "indicatif",
+      "tense": "imparfait",
+      "pronoun": "je",
+      "primary": "m'asseyais",
+      "alternatives": [
+        "m'assoyais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59851,
+      "mode": "indicatif",
+      "tense": "imparfait",
+      "pronoun": "tu",
+      "primary": "t'asseyais",
+      "alternatives": [
+        "t'assoyais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59852,
+      "mode": "indicatif",
+      "tense": "imparfait",
+      "pronoun": "il",
+      "primary": "s'asseyait",
+      "alternatives": [
+        "s'assoyait"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59853,
+      "mode": "indicatif",
+      "tense": "imparfait",
+      "pronoun": "nous",
+      "primary": "nous asseyions",
+      "alternatives": [
+        "nous assoyions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59854,
+      "mode": "indicatif",
+      "tense": "imparfait",
+      "pronoun": "vous",
+      "primary": "vous asseyiez",
+      "alternatives": [
+        "vous assoyiez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59855,
+      "mode": "indicatif",
+      "tense": "imparfait",
+      "pronoun": "ils",
+      "primary": "s'asseyaient",
+      "alternatives": [
+        "s'assoyaient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59874,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "je",
+      "primary": "m'assiérai",
+      "alternatives": [
+        "m'assoirai"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59875,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "tu",
+      "primary": "t'assiéras",
+      "alternatives": [
+        "t'assoiras"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59876,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "il",
+      "primary": "s'assiéra",
+      "alternatives": [
+        "s'assoira"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59877,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "nous",
+      "primary": "nous assiérons",
+      "alternatives": [
+        "nous assoirons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59878,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "vous",
+      "primary": "vous assiérez",
+      "alternatives": [
+        "vous assoirez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59879,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "ils",
+      "primary": "s'assiéront",
+      "alternatives": [
+        "s'assoiront"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59910,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "m'assiérais",
+      "alternatives": [
+        "m'assoirais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59911,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "t'assiérais",
+      "alternatives": [
+        "t'assoirais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59912,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "s'assiérait",
+      "alternatives": [
+        "s'assoirait"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59913,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "nous assiérions",
+      "alternatives": [
+        "nous assoirions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59914,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "vous assiériez",
+      "alternatives": [
+        "vous assoiriez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59915,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "s'assiéraient",
+      "alternatives": [
+        "s'assoiraient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59886,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "m'asseye",
+      "alternatives": [
+        "m'assoie"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59887,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "t'asseyes",
+      "alternatives": [
+        "t'assoies"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59888,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "s'asseye",
+      "alternatives": [
+        "s'assoie"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59889,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "nous asseyions",
+      "alternatives": [
+        "nous assoyions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59890,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "vous asseyiez",
+      "alternatives": [
+        "vous assoyiez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59891,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "s'asseyent",
+      "alternatives": [
+        "s'assoient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59928,
+      "mode": "impératif",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "assieds-toi",
+      "alternatives": [
+        "assois-toi"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59929,
+      "mode": "impératif",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "asseyons-nous",
+      "alternatives": [
+        "assoyons-nous"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 247,
+      "infinitive": "s'asseoir",
+      "rowId": 59930,
+      "mode": "impératif",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "asseyez-vous",
+      "alternatives": [
+        "assoyez-vous"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 103,
+      "infinitive": "assiéger",
+      "rowId": 8476,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "je",
+      "primary": "assiégerai",
+      "alternatives": [
+        "assiègerai"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2843"
+    },
+    {
+      "verbId": 103,
+      "infinitive": "assiéger",
+      "rowId": 8489,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "tu",
+      "primary": "assiégeras",
+      "alternatives": [
+        "assiègeras"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2843"
+    },
+    {
+      "verbId": 103,
+      "infinitive": "assiéger",
+      "rowId": 8502,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "il",
+      "primary": "assiégera",
+      "alternatives": [
+        "assiègera"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2843"
+    },
+    {
+      "verbId": 103,
+      "infinitive": "assiéger",
+      "rowId": 8515,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "nous",
+      "primary": "assiégerons",
+      "alternatives": [
+        "assiègerons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2843"
+    },
+    {
+      "verbId": 103,
+      "infinitive": "assiéger",
+      "rowId": 8528,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "vous",
+      "primary": "assiégerez",
+      "alternatives": [
+        "assiègerez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2843"
+    },
+    {
+      "verbId": 103,
+      "infinitive": "assiéger",
+      "rowId": 8541,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "ils",
+      "primary": "assiégeront",
+      "alternatives": [
+        "assiègeront"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2843"
+    },
+    {
+      "verbId": 103,
+      "infinitive": "assiéger",
+      "rowId": 8485,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "assiégerais",
+      "alternatives": [
+        "assiègerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2843"
+    },
+    {
+      "verbId": 103,
+      "infinitive": "assiéger",
+      "rowId": 8498,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "assiégerais",
+      "alternatives": [
+        "assiègerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2843"
+    },
+    {
+      "verbId": 103,
+      "infinitive": "assiéger",
+      "rowId": 8511,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "assiégerait",
+      "alternatives": [
+        "assiègerait"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2843"
+    },
+    {
+      "verbId": 103,
+      "infinitive": "assiéger",
+      "rowId": 8524,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "assiégerions",
+      "alternatives": [
+        "assiègerions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2843"
+    },
+    {
+      "verbId": 103,
+      "infinitive": "assiéger",
+      "rowId": 8537,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "assiégeriez",
+      "alternatives": [
+        "assiègeriez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2843"
+    },
+    {
+      "verbId": 103,
+      "infinitive": "assiéger",
+      "rowId": 8550,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "assiégeraient",
+      "alternatives": [
+        "assiègeraient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2843"
+    },
+    {
+      "verbId": 101,
+      "infinitive": "céder",
+      "rowId": 8320,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "je",
+      "primary": "céderai",
+      "alternatives": [
+        "cèderai"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1222"
+    },
+    {
+      "verbId": 101,
+      "infinitive": "céder",
+      "rowId": 8333,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "tu",
+      "primary": "céderas",
+      "alternatives": [
+        "cèderas"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1222"
+    },
+    {
+      "verbId": 101,
+      "infinitive": "céder",
+      "rowId": 8346,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "il",
+      "primary": "cédera",
+      "alternatives": [
+        "cèdera"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1222"
+    },
+    {
+      "verbId": 101,
+      "infinitive": "céder",
+      "rowId": 8359,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "nous",
+      "primary": "céderons",
+      "alternatives": [
+        "cèderons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1222"
+    },
+    {
+      "verbId": 101,
+      "infinitive": "céder",
+      "rowId": 8372,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "vous",
+      "primary": "céderez",
+      "alternatives": [
+        "cèderez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1222"
+    },
+    {
+      "verbId": 101,
+      "infinitive": "céder",
+      "rowId": 8385,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "ils",
+      "primary": "céderont",
+      "alternatives": [
+        "cèderont"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1222"
+    },
+    {
+      "verbId": 101,
+      "infinitive": "céder",
+      "rowId": 8329,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "céderais",
+      "alternatives": [
+        "cèderais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1222"
+    },
+    {
+      "verbId": 101,
+      "infinitive": "céder",
+      "rowId": 8342,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "céderais",
+      "alternatives": [
+        "cèderais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1222"
+    },
+    {
+      "verbId": 101,
+      "infinitive": "céder",
+      "rowId": 8355,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "céderait",
+      "alternatives": [
+        "cèderait"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1222"
+    },
+    {
+      "verbId": 101,
+      "infinitive": "céder",
+      "rowId": 8368,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "céderions",
+      "alternatives": [
+        "cèderions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1222"
+    },
+    {
+      "verbId": 101,
+      "infinitive": "céder",
+      "rowId": 8381,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "céderiez",
+      "alternatives": [
+        "cèderiez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1222"
+    },
+    {
+      "verbId": 101,
+      "infinitive": "céder",
+      "rowId": 8394,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "céderaient",
+      "alternatives": [
+        "cèderaient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1222"
+    },
+    {
+      "verbId": 81,
+      "infinitive": "espérer",
+      "rowId": 27084,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "je",
+      "primary": "espérerai",
+      "alternatives": [
+        "espèrerai"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2630"
+    },
+    {
+      "verbId": 81,
+      "infinitive": "espérer",
+      "rowId": 27085,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "tu",
+      "primary": "espéreras",
+      "alternatives": [
+        "espèreras"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2630"
+    },
+    {
+      "verbId": 81,
+      "infinitive": "espérer",
+      "rowId": 27086,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "il",
+      "primary": "espérera",
+      "alternatives": [
+        "espèrera"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2630"
+    },
+    {
+      "verbId": 81,
+      "infinitive": "espérer",
+      "rowId": 27087,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "nous",
+      "primary": "espérerons",
+      "alternatives": [
+        "espèrerons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2630"
+    },
+    {
+      "verbId": 81,
+      "infinitive": "espérer",
+      "rowId": 27088,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "vous",
+      "primary": "espérerez",
+      "alternatives": [
+        "espèrerez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2630"
+    },
+    {
+      "verbId": 81,
+      "infinitive": "espérer",
+      "rowId": 27089,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "ils",
+      "primary": "espéreront",
+      "alternatives": [
+        "espèreront"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2630"
+    },
+    {
+      "verbId": 81,
+      "infinitive": "espérer",
+      "rowId": 27120,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "espérerais",
+      "alternatives": [
+        "espèrerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2630"
+    },
+    {
+      "verbId": 81,
+      "infinitive": "espérer",
+      "rowId": 27121,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "espérerais",
+      "alternatives": [
+        "espèrerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2630"
+    },
+    {
+      "verbId": 81,
+      "infinitive": "espérer",
+      "rowId": 27122,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "espérerait",
+      "alternatives": [
+        "espèrerait"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2630"
+    },
+    {
+      "verbId": 81,
+      "infinitive": "espérer",
+      "rowId": 27123,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "espérerions",
+      "alternatives": [
+        "espèrerions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2630"
+    },
+    {
+      "verbId": 81,
+      "infinitive": "espérer",
+      "rowId": 27124,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "espéreriez",
+      "alternatives": [
+        "espèreriez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2630"
+    },
+    {
+      "verbId": 81,
+      "infinitive": "espérer",
+      "rowId": 27125,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "espéreraient",
+      "alternatives": [
+        "espèreraient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2630"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16317,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "essaie",
+      "alternatives": [
+        "essaye"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16318,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "essaies",
+      "alternatives": [
+        "essayes"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16319,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "essaie",
+      "alternatives": [
+        "essaye"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16322,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "essaient",
+      "alternatives": [
+        "essayent"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16353,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "je",
+      "primary": "essaierai",
+      "alternatives": [
+        "essayerai"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16354,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "tu",
+      "primary": "essaieras",
+      "alternatives": [
+        "essayeras"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16355,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "il",
+      "primary": "essaiera",
+      "alternatives": [
+        "essayera"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16356,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "nous",
+      "primary": "essaierons",
+      "alternatives": [
+        "essayerons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16357,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "vous",
+      "primary": "essaierez",
+      "alternatives": [
+        "essayerez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16358,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "ils",
+      "primary": "essaieront",
+      "alternatives": [
+        "essayeront"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16389,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "essaierais",
+      "alternatives": [
+        "essayerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16390,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "essaierais",
+      "alternatives": [
+        "essayerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16391,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "essaierait",
+      "alternatives": [
+        "essayerait"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16392,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "essaierions",
+      "alternatives": [
+        "essayerions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16393,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "essaieriez",
+      "alternatives": [
+        "essayeriez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16394,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "essaieraient",
+      "alternatives": [
+        "essayeraient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16365,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "essaie",
+      "alternatives": [
+        "essaye"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16366,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "essaies",
+      "alternatives": [
+        "essayes"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16367,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "essaie",
+      "alternatives": [
+        "essaye"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16370,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "essaient",
+      "alternatives": [
+        "essayent"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 157,
+      "infinitive": "essayer",
+      "rowId": 16407,
+      "mode": "impératif",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "essaie",
+      "alternatives": [
+        "essaye"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9E2664"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33830,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "je",
+      "primary": "ai mu",
+      "alternatives": [
+        "ai mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33831,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "tu",
+      "primary": "as mu",
+      "alternatives": [
+        "as mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33832,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "il",
+      "primary": "a mu",
+      "alternatives": [
+        "a mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33833,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "nous",
+      "primary": "avons mu",
+      "alternatives": [
+        "avons mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33834,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "vous",
+      "primary": "avez mu",
+      "alternatives": [
+        "avez mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33835,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "ils",
+      "primary": "ont mu",
+      "alternatives": [
+        "ont mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33842,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "je",
+      "primary": "avais mu",
+      "alternatives": [
+        "avais mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33843,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "tu",
+      "primary": "avais mu",
+      "alternatives": [
+        "avais mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33844,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "il",
+      "primary": "avait mu",
+      "alternatives": [
+        "avait mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33845,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "nous",
+      "primary": "avions mu",
+      "alternatives": [
+        "avions mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33846,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "vous",
+      "primary": "aviez mu",
+      "alternatives": [
+        "aviez mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33847,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "ils",
+      "primary": "avaient mu",
+      "alternatives": [
+        "avaient mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33854,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "je",
+      "primary": "eus mu",
+      "alternatives": [
+        "eus mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33855,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "tu",
+      "primary": "eus mu",
+      "alternatives": [
+        "eus mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33856,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "il",
+      "primary": "eut mu",
+      "alternatives": [
+        "eut mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33857,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "nous",
+      "primary": "eûmes mu",
+      "alternatives": [
+        "eûmes mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33858,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "vous",
+      "primary": "eûtes mu",
+      "alternatives": [
+        "eûtes mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33859,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "ils",
+      "primary": "eurent mu",
+      "alternatives": [
+        "eurent mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33866,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "je",
+      "primary": "aurai mu",
+      "alternatives": [
+        "aurai mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33867,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "tu",
+      "primary": "auras mu",
+      "alternatives": [
+        "auras mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33868,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "il",
+      "primary": "aura mu",
+      "alternatives": [
+        "aura mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33869,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "nous",
+      "primary": "aurons mu",
+      "alternatives": [
+        "aurons mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33870,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "vous",
+      "primary": "aurez mu",
+      "alternatives": [
+        "aurez mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33871,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "ils",
+      "primary": "auront mu",
+      "alternatives": [
+        "auront mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33902,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "je",
+      "primary": "aurais mu",
+      "alternatives": [
+        "aurais mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33903,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "tu",
+      "primary": "aurais mu",
+      "alternatives": [
+        "aurais mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33904,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "il",
+      "primary": "aurait mu",
+      "alternatives": [
+        "aurait mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33905,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "nous",
+      "primary": "aurions mu",
+      "alternatives": [
+        "aurions mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33906,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "vous",
+      "primary": "auriez mu",
+      "alternatives": [
+        "auriez mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33907,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "ils",
+      "primary": "auraient mu",
+      "alternatives": [
+        "auraient mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33878,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "je",
+      "primary": "aie mu",
+      "alternatives": [
+        "aie mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33879,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "tu",
+      "primary": "aies mu",
+      "alternatives": [
+        "aies mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33880,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "il",
+      "primary": "ait mu",
+      "alternatives": [
+        "ait mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33881,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "nous",
+      "primary": "ayons mu",
+      "alternatives": [
+        "ayons mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33882,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "vous",
+      "primary": "ayez mu",
+      "alternatives": [
+        "ayez mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33883,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "ils",
+      "primary": "aient mu",
+      "alternatives": [
+        "aient mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33890,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "je",
+      "primary": "eusse mu",
+      "alternatives": [
+        "eusse mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33891,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "tu",
+      "primary": "eusses mu",
+      "alternatives": [
+        "eusses mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33892,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "il",
+      "primary": "eût mu",
+      "alternatives": [
+        "eût mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33893,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "nous",
+      "primary": "eussions mu",
+      "alternatives": [
+        "eussions mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33894,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "vous",
+      "primary": "eussiez mu",
+      "alternatives": [
+        "eussiez mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33895,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "ils",
+      "primary": "eussent mu",
+      "alternatives": [
+        "eussent mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33917,
+      "mode": "impératif",
+      "tense": "passé",
+      "pronoun": "tu",
+      "primary": "aie mu",
+      "alternatives": [
+        "aie mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33918,
+      "mode": "impératif",
+      "tense": "passé",
+      "pronoun": "nous",
+      "primary": "ayons mu",
+      "alternatives": [
+        "ayons mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 16,
+      "infinitive": "mouvoir",
+      "rowId": 33919,
+      "mode": "impératif",
+      "tense": "passé",
+      "pronoun": "vous",
+      "primary": "ayez mu",
+      "alternatives": [
+        "ayez mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33926,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "je",
+      "primary": "me suis mu",
+      "alternatives": [
+        "me suis mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33927,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "tu",
+      "primary": "t'es mu",
+      "alternatives": [
+        "t'es mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33928,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "il",
+      "primary": "s'est mu",
+      "alternatives": [
+        "s'est mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33929,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "nous",
+      "primary": "nous sommes mus",
+      "alternatives": [
+        "nous sommes mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33930,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "vous",
+      "primary": "vous êtes mus",
+      "alternatives": [
+        "vous êtes mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33931,
+      "mode": "indicatif",
+      "tense": "passé composé",
+      "pronoun": "ils",
+      "primary": "se sont mus",
+      "alternatives": [
+        "se sont mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33938,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "je",
+      "primary": "m'étais mu",
+      "alternatives": [
+        "m'étais mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33939,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "tu",
+      "primary": "t'étais mu",
+      "alternatives": [
+        "t'étais mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33940,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "il",
+      "primary": "s'était mu",
+      "alternatives": [
+        "s'était mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33941,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "nous",
+      "primary": "nous étions mus",
+      "alternatives": [
+        "nous étions mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33942,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "vous",
+      "primary": "vous étiez mus",
+      "alternatives": [
+        "vous étiez mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33943,
+      "mode": "indicatif",
+      "tense": "plus-que-parfait",
+      "pronoun": "ils",
+      "primary": "s'étaient mus",
+      "alternatives": [
+        "s'étaient mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33950,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "je",
+      "primary": "me fus mu",
+      "alternatives": [
+        "me fus mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33951,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "tu",
+      "primary": "te fus mu",
+      "alternatives": [
+        "te fus mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33952,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "il",
+      "primary": "se fut mu",
+      "alternatives": [
+        "se fut mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33953,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "nous",
+      "primary": "nous fûmes mus",
+      "alternatives": [
+        "nous fûmes mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33954,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "vous",
+      "primary": "vous fûtes mus",
+      "alternatives": [
+        "vous fûtes mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33955,
+      "mode": "indicatif",
+      "tense": "passé antérieur",
+      "pronoun": "ils",
+      "primary": "se furent mus",
+      "alternatives": [
+        "se furent mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33962,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "je",
+      "primary": "me serai mu",
+      "alternatives": [
+        "me serai mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33963,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "tu",
+      "primary": "te seras mu",
+      "alternatives": [
+        "te seras mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33964,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "il",
+      "primary": "se sera mu",
+      "alternatives": [
+        "se sera mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33965,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "nous",
+      "primary": "nous serons mus",
+      "alternatives": [
+        "nous serons mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33966,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "vous",
+      "primary": "vous serez mus",
+      "alternatives": [
+        "vous serez mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33967,
+      "mode": "indicatif",
+      "tense": "futur antérieur",
+      "pronoun": "ils",
+      "primary": "se seront mus",
+      "alternatives": [
+        "se seront mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33998,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "je",
+      "primary": "me serais mu",
+      "alternatives": [
+        "me serais mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33999,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "tu",
+      "primary": "te serais mu",
+      "alternatives": [
+        "te serais mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 34000,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "il",
+      "primary": "se serait mu",
+      "alternatives": [
+        "se serait mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 34001,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "nous",
+      "primary": "nous serions mus",
+      "alternatives": [
+        "nous serions mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 34002,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "vous",
+      "primary": "vous seriez mus",
+      "alternatives": [
+        "vous seriez mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 34003,
+      "mode": "conditionnel",
+      "tense": "passé 1",
+      "pronoun": "ils",
+      "primary": "se seraient mus",
+      "alternatives": [
+        "se seraient mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33974,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "je",
+      "primary": "me sois mu",
+      "alternatives": [
+        "me sois mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33975,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "tu",
+      "primary": "te sois mu",
+      "alternatives": [
+        "te sois mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33976,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "il",
+      "primary": "se soit mu",
+      "alternatives": [
+        "se soit mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33977,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "nous",
+      "primary": "nous soyons mus",
+      "alternatives": [
+        "nous soyons mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33978,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "vous",
+      "primary": "vous soyez mus",
+      "alternatives": [
+        "vous soyez mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33979,
+      "mode": "subjonctif",
+      "tense": "passé",
+      "pronoun": "ils",
+      "primary": "se soient mus",
+      "alternatives": [
+        "se soient mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33986,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "je",
+      "primary": "me fusse mu",
+      "alternatives": [
+        "me fusse mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33987,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "tu",
+      "primary": "te fusses mu",
+      "alternatives": [
+        "te fusses mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33988,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "il",
+      "primary": "se fût mu",
+      "alternatives": [
+        "se fût mû"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33989,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "nous",
+      "primary": "nous fussions mus",
+      "alternatives": [
+        "nous fussions mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33990,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "vous",
+      "primary": "vous fussiez mus",
+      "alternatives": [
+        "vous fussiez mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 291,
+      "infinitive": "se mouvoir",
+      "rowId": 33991,
+      "mode": "subjonctif",
+      "tense": "plus-que-parfait",
+      "pronoun": "ils",
+      "primary": "se fussent mus",
+      "alternatives": [
+        "se fussent mûs"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9M3065"
+    },
+    {
+      "verbId": 123,
+      "infinitive": "ouïr",
+      "rowId": 12952,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "je",
+      "primary": "ouïrai",
+      "alternatives": [
+        "orrai"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9O0956"
+    },
+    {
+      "verbId": 123,
+      "infinitive": "ouïr",
+      "rowId": 12967,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "tu",
+      "primary": "ouïras",
+      "alternatives": [
+        "orras"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9O0956"
+    },
+    {
+      "verbId": 123,
+      "infinitive": "ouïr",
+      "rowId": 12997,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "nous",
+      "primary": "ouïrons",
+      "alternatives": [
+        "orrons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9O0956"
+    },
+    {
+      "verbId": 123,
+      "infinitive": "ouïr",
+      "rowId": 13012,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "vous",
+      "primary": "ouïrez",
+      "alternatives": [
+        "orrez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9O0956"
+    },
+    {
+      "verbId": 123,
+      "infinitive": "ouïr",
+      "rowId": 13027,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "ils",
+      "primary": "ouïront",
+      "alternatives": [
+        "orront"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9O0956"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5354,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "paie",
+      "alternatives": [
+        "paye"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5367,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "paies",
+      "alternatives": [
+        "payes"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5380,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "paie",
+      "alternatives": [
+        "paye"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5393,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "paient",
+      "alternatives": [
+        "payent"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5356,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "je",
+      "primary": "paierai",
+      "alternatives": [
+        "payerai"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5369,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "tu",
+      "primary": "paieras",
+      "alternatives": [
+        "payeras"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5382,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "il",
+      "primary": "paiera",
+      "alternatives": [
+        "payera"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5408,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "nous",
+      "primary": "paierons",
+      "alternatives": [
+        "payerons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5421,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "vous",
+      "primary": "paierez",
+      "alternatives": [
+        "payerez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5395,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "ils",
+      "primary": "paieront",
+      "alternatives": [
+        "payeront"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5365,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "paierais",
+      "alternatives": [
+        "payerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5378,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "paierais",
+      "alternatives": [
+        "payerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5391,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "paierait",
+      "alternatives": [
+        "payerait"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5417,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "paierions",
+      "alternatives": [
+        "payerions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5430,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "paieriez",
+      "alternatives": [
+        "payeriez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5404,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "paieraient",
+      "alternatives": [
+        "payeraient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5363,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "paie",
+      "alternatives": [
+        "paye"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5376,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "paies",
+      "alternatives": [
+        "payes"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5389,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "paie",
+      "alternatives": [
+        "paye"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5402,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "paient",
+      "alternatives": [
+        "payent"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 42,
+      "infinitive": "payer",
+      "rowId": 5375,
+      "mode": "impératif",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "paie",
+      "alternatives": [
+        "paye"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P1095"
+    },
+    {
+      "verbId": 392,
+      "infinitive": "préférer",
+      "rowId": 42517,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "je",
+      "primary": "préférerai",
+      "alternatives": [
+        "préfèrerai"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P3990"
+    },
+    {
+      "verbId": 392,
+      "infinitive": "préférer",
+      "rowId": 42518,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "tu",
+      "primary": "préféreras",
+      "alternatives": [
+        "préfèreras"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P3990"
+    },
+    {
+      "verbId": 392,
+      "infinitive": "préférer",
+      "rowId": 42519,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "il",
+      "primary": "préférera",
+      "alternatives": [
+        "préfèrera"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P3990"
+    },
+    {
+      "verbId": 392,
+      "infinitive": "préférer",
+      "rowId": 42520,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "nous",
+      "primary": "préférerons",
+      "alternatives": [
+        "préfèrerons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P3990"
+    },
+    {
+      "verbId": 392,
+      "infinitive": "préférer",
+      "rowId": 42521,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "vous",
+      "primary": "préférerez",
+      "alternatives": [
+        "préfèrerez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P3990"
+    },
+    {
+      "verbId": 392,
+      "infinitive": "préférer",
+      "rowId": 42522,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "ils",
+      "primary": "préféreront",
+      "alternatives": [
+        "préfèreront"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P3990"
+    },
+    {
+      "verbId": 392,
+      "infinitive": "préférer",
+      "rowId": 42553,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "préférerais",
+      "alternatives": [
+        "préfèrerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P3990"
+    },
+    {
+      "verbId": 392,
+      "infinitive": "préférer",
+      "rowId": 42554,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "préférerais",
+      "alternatives": [
+        "préfèrerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P3990"
+    },
+    {
+      "verbId": 392,
+      "infinitive": "préférer",
+      "rowId": 42555,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "préférerait",
+      "alternatives": [
+        "préfèrerait"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P3990"
+    },
+    {
+      "verbId": 392,
+      "infinitive": "préférer",
+      "rowId": 42556,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "préférerions",
+      "alternatives": [
+        "préfèrerions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P3990"
+    },
+    {
+      "verbId": 392,
+      "infinitive": "préférer",
+      "rowId": 42557,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "préféreriez",
+      "alternatives": [
+        "préfèreriez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P3990"
+    },
+    {
+      "verbId": 392,
+      "infinitive": "préférer",
+      "rowId": 42558,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "préféreraient",
+      "alternatives": [
+        "préfèreraient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P3990"
+    },
+    {
+      "verbId": 91,
+      "infinitive": "protéger",
+      "rowId": 7541,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "je",
+      "primary": "protégerai",
+      "alternatives": [
+        "protègerai"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 91,
+      "infinitive": "protéger",
+      "rowId": 7554,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "tu",
+      "primary": "protégeras",
+      "alternatives": [
+        "protègeras"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 91,
+      "infinitive": "protéger",
+      "rowId": 7567,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "il",
+      "primary": "protégera",
+      "alternatives": [
+        "protègera"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 91,
+      "infinitive": "protéger",
+      "rowId": 7593,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "nous",
+      "primary": "protégerons",
+      "alternatives": [
+        "protègerons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 91,
+      "infinitive": "protéger",
+      "rowId": 7606,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "vous",
+      "primary": "protégerez",
+      "alternatives": [
+        "protègerez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 91,
+      "infinitive": "protéger",
+      "rowId": 7580,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "ils",
+      "primary": "protégeront",
+      "alternatives": [
+        "protègeront"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 91,
+      "infinitive": "protéger",
+      "rowId": 7550,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "protégerais",
+      "alternatives": [
+        "protègerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 91,
+      "infinitive": "protéger",
+      "rowId": 7563,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "protégerais",
+      "alternatives": [
+        "protègerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 91,
+      "infinitive": "protéger",
+      "rowId": 7576,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "protégerait",
+      "alternatives": [
+        "protègerait"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 91,
+      "infinitive": "protéger",
+      "rowId": 7602,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "protégerions",
+      "alternatives": [
+        "protègerions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 91,
+      "infinitive": "protéger",
+      "rowId": 7615,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "protégeriez",
+      "alternatives": [
+        "protègeriez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 91,
+      "infinitive": "protéger",
+      "rowId": 7589,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "protégeraient",
+      "alternatives": [
+        "protègeraient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 301,
+      "infinitive": "se protéger",
+      "rowId": 34877,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "je",
+      "primary": "me protégerai",
+      "alternatives": [
+        "me protègerai"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 301,
+      "infinitive": "se protéger",
+      "rowId": 34878,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "tu",
+      "primary": "te protégeras",
+      "alternatives": [
+        "te protègeras"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 301,
+      "infinitive": "se protéger",
+      "rowId": 34879,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "il",
+      "primary": "se protégera",
+      "alternatives": [
+        "se protègera"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 301,
+      "infinitive": "se protéger",
+      "rowId": 34880,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "nous",
+      "primary": "nous protégerons",
+      "alternatives": [
+        "nous protègerons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 301,
+      "infinitive": "se protéger",
+      "rowId": 34881,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "vous",
+      "primary": "vous protégerez",
+      "alternatives": [
+        "vous protègerez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 301,
+      "infinitive": "se protéger",
+      "rowId": 34882,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "ils",
+      "primary": "se protégeront",
+      "alternatives": [
+        "se protègeront"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 301,
+      "infinitive": "se protéger",
+      "rowId": 34913,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "me protégerais",
+      "alternatives": [
+        "me protègerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 301,
+      "infinitive": "se protéger",
+      "rowId": 34914,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "te protégerais",
+      "alternatives": [
+        "te protègerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 301,
+      "infinitive": "se protéger",
+      "rowId": 34915,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "se protégerait",
+      "alternatives": [
+        "se protègerait"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 301,
+      "infinitive": "se protéger",
+      "rowId": 34916,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "nous protégerions",
+      "alternatives": [
+        "nous protègerions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 301,
+      "infinitive": "se protéger",
+      "rowId": 34917,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "vous protégeriez",
+      "alternatives": [
+        "vous protègeriez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 301,
+      "infinitive": "se protéger",
+      "rowId": 34918,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "se protégeraient",
+      "alternatives": [
+        "se protègeraient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9P4734"
+    },
+    {
+      "verbId": 189,
+      "infinitive": "répéter",
+      "rowId": 19985,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "je",
+      "primary": "répéterai",
+      "alternatives": [
+        "répèterai"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9R1858"
+    },
+    {
+      "verbId": 189,
+      "infinitive": "répéter",
+      "rowId": 19986,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "tu",
+      "primary": "répéteras",
+      "alternatives": [
+        "répèteras"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9R1858"
+    },
+    {
+      "verbId": 189,
+      "infinitive": "répéter",
+      "rowId": 19987,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "il",
+      "primary": "répétera",
+      "alternatives": [
+        "répètera"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9R1858"
+    },
+    {
+      "verbId": 189,
+      "infinitive": "répéter",
+      "rowId": 19988,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "nous",
+      "primary": "répéterons",
+      "alternatives": [
+        "répèterons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9R1858"
+    },
+    {
+      "verbId": 189,
+      "infinitive": "répéter",
+      "rowId": 19989,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "vous",
+      "primary": "répéterez",
+      "alternatives": [
+        "répèterez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9R1858"
+    },
+    {
+      "verbId": 189,
+      "infinitive": "répéter",
+      "rowId": 19990,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "ils",
+      "primary": "répéteront",
+      "alternatives": [
+        "répèteront"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9R1858"
+    },
+    {
+      "verbId": 189,
+      "infinitive": "répéter",
+      "rowId": 20021,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "répéterais",
+      "alternatives": [
+        "répèterais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9R1858"
+    },
+    {
+      "verbId": 189,
+      "infinitive": "répéter",
+      "rowId": 20022,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "répéterais",
+      "alternatives": [
+        "répèterais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9R1858"
+    },
+    {
+      "verbId": 189,
+      "infinitive": "répéter",
+      "rowId": 20023,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "répéterait",
+      "alternatives": [
+        "répèterait"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9R1858"
+    },
+    {
+      "verbId": 189,
+      "infinitive": "répéter",
+      "rowId": 20024,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "répéterions",
+      "alternatives": [
+        "répèterions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9R1858"
+    },
+    {
+      "verbId": 189,
+      "infinitive": "répéter",
+      "rowId": 20025,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "répéteriez",
+      "alternatives": [
+        "répèteriez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9R1858"
+    },
+    {
+      "verbId": 189,
+      "infinitive": "répéter",
+      "rowId": 20026,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "répéteraient",
+      "alternatives": [
+        "répèteraient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9R1858"
+    },
+    {
+      "verbId": 243,
+      "infinitive": "suggérer",
+      "rowId": 26226,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "je",
+      "primary": "suggérerai",
+      "alternatives": [
+        "suggèrerai"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9S3314"
+    },
+    {
+      "verbId": 243,
+      "infinitive": "suggérer",
+      "rowId": 26227,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "tu",
+      "primary": "suggéreras",
+      "alternatives": [
+        "suggèreras"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9S3314"
+    },
+    {
+      "verbId": 243,
+      "infinitive": "suggérer",
+      "rowId": 26228,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "il",
+      "primary": "suggérera",
+      "alternatives": [
+        "suggèrera"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9S3314"
+    },
+    {
+      "verbId": 243,
+      "infinitive": "suggérer",
+      "rowId": 26229,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "nous",
+      "primary": "suggérerons",
+      "alternatives": [
+        "suggèrerons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9S3314"
+    },
+    {
+      "verbId": 243,
+      "infinitive": "suggérer",
+      "rowId": 26230,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "vous",
+      "primary": "suggérerez",
+      "alternatives": [
+        "suggèrerez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9S3314"
+    },
+    {
+      "verbId": 243,
+      "infinitive": "suggérer",
+      "rowId": 26231,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "ils",
+      "primary": "suggéreront",
+      "alternatives": [
+        "suggèreront"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9S3314"
+    },
+    {
+      "verbId": 243,
+      "infinitive": "suggérer",
+      "rowId": 26262,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "suggérerais",
+      "alternatives": [
+        "suggèrerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9S3314"
+    },
+    {
+      "verbId": 243,
+      "infinitive": "suggérer",
+      "rowId": 26263,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "suggérerais",
+      "alternatives": [
+        "suggèrerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9S3314"
+    },
+    {
+      "verbId": 243,
+      "infinitive": "suggérer",
+      "rowId": 26264,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "suggérerait",
+      "alternatives": [
+        "suggèrerait"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9S3314"
+    },
+    {
+      "verbId": 243,
+      "infinitive": "suggérer",
+      "rowId": 26265,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "suggérerions",
+      "alternatives": [
+        "suggèrerions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9S3314"
+    },
+    {
+      "verbId": 243,
+      "infinitive": "suggérer",
+      "rowId": 26266,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "suggéreriez",
+      "alternatives": [
+        "suggèreriez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9S3314"
+    },
+    {
+      "verbId": 243,
+      "infinitive": "suggérer",
+      "rowId": 26267,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "suggéreraient",
+      "alternatives": [
+        "suggèreraient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9S3314"
+    },
+    {
+      "verbId": 6,
+      "infinitive": "vouloir",
+      "rowId": 3445,
+      "mode": "impératif",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "veuille",
+      "alternatives": [
+        "veux"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9V1230"
+    },
+    {
+      "verbId": 6,
+      "infinitive": "vouloir",
+      "rowId": 3490,
+      "mode": "impératif",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "voulons",
+      "alternatives": [
+        "veuillons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9V1230"
+    },
+    {
+      "verbId": 6,
+      "infinitive": "vouloir",
+      "rowId": 3505,
+      "mode": "impératif",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "veuillez",
+      "alternatives": [
+        "voulez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9V1230"
+    }
+  ],
+  "primaryCorrections": [
+    {
+      "verbId": 507,
+      "infinitive": "celebrer",
+      "rowId": 54536,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "je",
+      "previousPrimary": "celebrerai",
+      "primary": "célébrerai",
+      "alternatives": [
+        "célèbrerai"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1241"
+    },
+    {
+      "verbId": 507,
+      "infinitive": "celebrer",
+      "rowId": 54549,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "tu",
+      "previousPrimary": "celebreras",
+      "primary": "célébreras",
+      "alternatives": [
+        "célèbreras"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1241"
+    },
+    {
+      "verbId": 507,
+      "infinitive": "celebrer",
+      "rowId": 54562,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "il",
+      "previousPrimary": "celebrera",
+      "primary": "célébrera",
+      "alternatives": [
+        "célèbrera"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1241"
+    },
+    {
+      "verbId": 507,
+      "infinitive": "celebrer",
+      "rowId": 54588,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "nous",
+      "previousPrimary": "celebrerons",
+      "primary": "célébrerons",
+      "alternatives": [
+        "célèbrerons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1241"
+    },
+    {
+      "verbId": 507,
+      "infinitive": "celebrer",
+      "rowId": 54601,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "vous",
+      "previousPrimary": "celebrerez",
+      "primary": "célébrerez",
+      "alternatives": [
+        "célèbrerez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1241"
+    },
+    {
+      "verbId": 507,
+      "infinitive": "celebrer",
+      "rowId": 54575,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "ils",
+      "previousPrimary": "celebreront",
+      "primary": "célébreront",
+      "alternatives": [
+        "célèbreront"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1241"
+    },
+    {
+      "verbId": 507,
+      "infinitive": "celebrer",
+      "rowId": 54545,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "je",
+      "previousPrimary": "celebrerais",
+      "primary": "célébrerais",
+      "alternatives": [
+        "célèbrerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1241"
+    },
+    {
+      "verbId": 507,
+      "infinitive": "celebrer",
+      "rowId": 54558,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "tu",
+      "previousPrimary": "celebrerais",
+      "primary": "célébrerais",
+      "alternatives": [
+        "célèbrerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1241"
+    },
+    {
+      "verbId": 507,
+      "infinitive": "celebrer",
+      "rowId": 54571,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "il",
+      "previousPrimary": "celebrerait",
+      "primary": "célébrerait",
+      "alternatives": [
+        "célèbrerait"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1241"
+    },
+    {
+      "verbId": 507,
+      "infinitive": "celebrer",
+      "rowId": 54597,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "nous",
+      "previousPrimary": "celebrerions",
+      "primary": "célébrerions",
+      "alternatives": [
+        "célèbrerions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1241"
+    },
+    {
+      "verbId": 507,
+      "infinitive": "celebrer",
+      "rowId": 54610,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "vous",
+      "previousPrimary": "celebreriez",
+      "primary": "célébreriez",
+      "alternatives": [
+        "célèbreriez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1241"
+    },
+    {
+      "verbId": 507,
+      "infinitive": "celebrer",
+      "rowId": 54584,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "ils",
+      "previousPrimary": "celebreraient",
+      "primary": "célébreraient",
+      "alternatives": [
+        "célèbreraient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C1241"
+    },
+    {
+      "verbId": 523,
+      "infinitive": "considerer",
+      "rowId": 56168,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "je",
+      "previousPrimary": "considererai",
+      "primary": "considérerai",
+      "alternatives": [
+        "considèrerai"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C3697"
+    },
+    {
+      "verbId": 523,
+      "infinitive": "considerer",
+      "rowId": 56181,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "tu",
+      "previousPrimary": "considereras",
+      "primary": "considéreras",
+      "alternatives": [
+        "considèreras"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C3697"
+    },
+    {
+      "verbId": 523,
+      "infinitive": "considerer",
+      "rowId": 56194,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "il",
+      "previousPrimary": "considerera",
+      "primary": "considérera",
+      "alternatives": [
+        "considèrera"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C3697"
+    },
+    {
+      "verbId": 523,
+      "infinitive": "considerer",
+      "rowId": 56220,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "nous",
+      "previousPrimary": "considererons",
+      "primary": "considérerons",
+      "alternatives": [
+        "considèrerons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C3697"
+    },
+    {
+      "verbId": 523,
+      "infinitive": "considerer",
+      "rowId": 56233,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "vous",
+      "previousPrimary": "considererez",
+      "primary": "considérerez",
+      "alternatives": [
+        "considèrerez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C3697"
+    },
+    {
+      "verbId": 523,
+      "infinitive": "considerer",
+      "rowId": 56207,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "ils",
+      "previousPrimary": "considereront",
+      "primary": "considéreront",
+      "alternatives": [
+        "considèreront"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C3697"
+    },
+    {
+      "verbId": 523,
+      "infinitive": "considerer",
+      "rowId": 56177,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "je",
+      "previousPrimary": "considererais",
+      "primary": "considérerais",
+      "alternatives": [
+        "considèrerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C3697"
+    },
+    {
+      "verbId": 523,
+      "infinitive": "considerer",
+      "rowId": 56190,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "tu",
+      "previousPrimary": "considererais",
+      "primary": "considérerais",
+      "alternatives": [
+        "considèrerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C3697"
+    },
+    {
+      "verbId": 523,
+      "infinitive": "considerer",
+      "rowId": 56203,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "il",
+      "previousPrimary": "considererait",
+      "primary": "considérerait",
+      "alternatives": [
+        "considèrerait"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C3697"
+    },
+    {
+      "verbId": 523,
+      "infinitive": "considerer",
+      "rowId": 56229,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "nous",
+      "previousPrimary": "considererions",
+      "primary": "considérerions",
+      "alternatives": [
+        "considèrerions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C3697"
+    },
+    {
+      "verbId": 523,
+      "infinitive": "considerer",
+      "rowId": 56242,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "vous",
+      "previousPrimary": "considereriez",
+      "primary": "considéreriez",
+      "alternatives": [
+        "considèreriez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C3697"
+    },
+    {
+      "verbId": 523,
+      "infinitive": "considerer",
+      "rowId": 56216,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "ils",
+      "previousPrimary": "considereraient",
+      "primary": "considéreraient",
+      "alternatives": [
+        "considèreraient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9C3697"
+    },
+    {
+      "verbId": 555,
+      "infinitive": "differer",
+      "rowId": 59432,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "je",
+      "previousPrimary": "differerai",
+      "primary": "différerai",
+      "alternatives": [
+        "diffèrerai"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9D2456"
+    },
+    {
+      "verbId": 555,
+      "infinitive": "differer",
+      "rowId": 59445,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "tu",
+      "previousPrimary": "differeras",
+      "primary": "différeras",
+      "alternatives": [
+        "diffèreras"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9D2456"
+    },
+    {
+      "verbId": 555,
+      "infinitive": "differer",
+      "rowId": 59458,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "il",
+      "previousPrimary": "differera",
+      "primary": "différera",
+      "alternatives": [
+        "diffèrera"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9D2456"
+    },
+    {
+      "verbId": 555,
+      "infinitive": "differer",
+      "rowId": 59484,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "nous",
+      "previousPrimary": "differerons",
+      "primary": "différerons",
+      "alternatives": [
+        "diffèrerons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9D2456"
+    },
+    {
+      "verbId": 555,
+      "infinitive": "differer",
+      "rowId": 59497,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "vous",
+      "previousPrimary": "differerez",
+      "primary": "différerez",
+      "alternatives": [
+        "diffèrerez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9D2456"
+    },
+    {
+      "verbId": 555,
+      "infinitive": "differer",
+      "rowId": 59471,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "ils",
+      "previousPrimary": "differeront",
+      "primary": "différeront",
+      "alternatives": [
+        "diffèreront"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9D2456"
+    },
+    {
+      "verbId": 555,
+      "infinitive": "differer",
+      "rowId": 59441,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "je",
+      "previousPrimary": "differerais",
+      "primary": "différerais",
+      "alternatives": [
+        "diffèrerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9D2456"
+    },
+    {
+      "verbId": 555,
+      "infinitive": "differer",
+      "rowId": 59454,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "tu",
+      "previousPrimary": "differerais",
+      "primary": "différerais",
+      "alternatives": [
+        "diffèrerais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9D2456"
+    },
+    {
+      "verbId": 555,
+      "infinitive": "differer",
+      "rowId": 59467,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "il",
+      "previousPrimary": "differerait",
+      "primary": "différerait",
+      "alternatives": [
+        "diffèrerait"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9D2456"
+    },
+    {
+      "verbId": 555,
+      "infinitive": "differer",
+      "rowId": 59493,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "nous",
+      "previousPrimary": "differerions",
+      "primary": "différerions",
+      "alternatives": [
+        "diffèrerions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9D2456"
+    },
+    {
+      "verbId": 555,
+      "infinitive": "differer",
+      "rowId": 59506,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "vous",
+      "previousPrimary": "differeriez",
+      "primary": "différeriez",
+      "alternatives": [
+        "diffèreriez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9D2456"
+    },
+    {
+      "verbId": 555,
+      "infinitive": "differer",
+      "rowId": 59480,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "ils",
+      "previousPrimary": "differeraient",
+      "primary": "différeraient",
+      "alternatives": [
+        "diffèreraient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9D2456"
+    }
+  ],
+  "unchanged": [
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1622,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "assieds",
+      "alternatives": [
+        "assois"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1637,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "assieds",
+      "alternatives": [
+        "assois"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1652,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "assied",
+      "alternatives": [
+        "assoit"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1682,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "asseyons",
+      "alternatives": [
+        "assoyons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1697,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "asseyez",
+      "alternatives": [
+        "assoyez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1667,
+      "mode": "indicatif",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "asseyent",
+      "alternatives": [
+        "assoient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1623,
+      "mode": "indicatif",
+      "tense": "imparfait",
+      "pronoun": "je",
+      "primary": "asseyais",
+      "alternatives": [
+        "assoyais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1638,
+      "mode": "indicatif",
+      "tense": "imparfait",
+      "pronoun": "tu",
+      "primary": "asseyais",
+      "alternatives": [
+        "assoyais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1653,
+      "mode": "indicatif",
+      "tense": "imparfait",
+      "pronoun": "il",
+      "primary": "asseyait",
+      "alternatives": [
+        "assoyait"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1683,
+      "mode": "indicatif",
+      "tense": "imparfait",
+      "pronoun": "nous",
+      "primary": "asseyions",
+      "alternatives": [
+        "assoyions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1698,
+      "mode": "indicatif",
+      "tense": "imparfait",
+      "pronoun": "vous",
+      "primary": "asseyiez",
+      "alternatives": [
+        "assoyiez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1668,
+      "mode": "indicatif",
+      "tense": "imparfait",
+      "pronoun": "ils",
+      "primary": "asseyaient",
+      "alternatives": [
+        "assoyaient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1624,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "je",
+      "primary": "assiérai",
+      "alternatives": [
+        "assoirai"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1639,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "tu",
+      "primary": "assiéras",
+      "alternatives": [
+        "assoiras"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1654,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "il",
+      "primary": "assiéra",
+      "alternatives": [
+        "assoira"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1684,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "nous",
+      "primary": "assiérons",
+      "alternatives": [
+        "assoirons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1699,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "vous",
+      "primary": "assiérez",
+      "alternatives": [
+        "assoirez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1669,
+      "mode": "indicatif",
+      "tense": "futur",
+      "pronoun": "ils",
+      "primary": "assiéront",
+      "alternatives": [
+        "assoiront"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1635,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "assiérais",
+      "alternatives": [
+        "assoirais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1650,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "assiérais",
+      "alternatives": [
+        "assoirais"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1665,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "assiérait",
+      "alternatives": [
+        "assoirait"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1695,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "assiérions",
+      "alternatives": [
+        "assoirions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1710,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "assiériez",
+      "alternatives": [
+        "assoiriez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1680,
+      "mode": "conditionnel",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "assiéraient",
+      "alternatives": [
+        "assoiraient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1631,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "je",
+      "primary": "asseye",
+      "alternatives": [
+        "assoie"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1646,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "asseyes",
+      "alternatives": [
+        "assoies"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1661,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "il",
+      "primary": "asseye",
+      "alternatives": [
+        "assoie"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1691,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "asseyions",
+      "alternatives": [
+        "assoyions"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1706,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "asseyiez",
+      "alternatives": [
+        "assoyiez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1676,
+      "mode": "subjonctif",
+      "tense": "présent",
+      "pronoun": "ils",
+      "primary": "asseyent",
+      "alternatives": [
+        "assoient"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1645,
+      "mode": "impératif",
+      "tense": "présent",
+      "pronoun": "tu",
+      "primary": "assieds",
+      "alternatives": [
+        "assois"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1690,
+      "mode": "impératif",
+      "tense": "présent",
+      "pronoun": "nous",
+      "primary": "asseyons",
+      "alternatives": [
+        "assoyons"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    },
+    {
+      "verbId": 45,
+      "infinitive": "asseoir",
+      "rowId": 1705,
+      "mode": "impératif",
+      "tense": "présent",
+      "pronoun": "vous",
+      "primary": "asseyez",
+      "alternatives": [
+        "assoyez"
+      ],
+      "source": "https://www.dictionnaire-academie.fr/conjuguer/A9A2823"
+    }
+  ],
+  "unresolved": [
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "mode": "impératif",
+      "tense": "passé",
+      "pronoun": "tu",
+      "forms": [
+        "aie absous",
+        "aie absout"
+      ],
+      "reason": "ligne absente"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "mode": "impératif",
+      "tense": "passé",
+      "pronoun": "nous",
+      "forms": [
+        "ayons absous",
+        "ayons absout"
+      ],
+      "reason": "ligne absente"
+    },
+    {
+      "verbId": 113,
+      "infinitive": "absoudre",
+      "mode": "impératif",
+      "tense": "passé",
+      "pronoun": "vous",
+      "forms": [
+        "ayez absous",
+        "ayez absout"
+      ],
+      "reason": "ligne absente"
+    }
+  ],
+  "missingArticles": [
+    "cycler"
+  ]
+}

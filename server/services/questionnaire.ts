@@ -182,13 +182,15 @@ function answerVariants(row: ConjugationRow, pronoun: string) {
 
 function conjugationQuestion(row: ConjugationRow, inclusivePronouns: boolean): ExerciseQuestion {
   const pronoun = choosePronoun(row.pronom, inclusivePronouns)
-  const correctedForm = applyAgreement(
-    row.conjugaison1,
-    pronoun,
-    Boolean(row.is_compound),
-    row.auxiliaire,
-    row.participe_passe
-  )
+  const correctedForms = unique([row.conjugaison1, row.conjugaison2, row.conjugaison3])
+    .map(form => applyAgreement(
+      form,
+      pronoun,
+      Boolean(row.is_compound),
+      row.auxiliaire,
+      row.participe_passe
+    ))
+    .map(form => formatAnswer(pronoun, form, row.mode_name))
 
   return {
     id: `c-${row.id}`,
@@ -198,7 +200,7 @@ function conjugationQuestion(row: ConjugationRow, inclusivePronouns: boolean): E
     titre: row.infinitif,
     consigne: `${pronoun} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`,
     reponses: answerVariants(row, pronoun),
-    reponsesPourCorrige: [formatAnswer(pronoun, correctedForm, row.mode_name)],
+    reponsesPourCorrige: unique(correctedForms),
     infinitif: row.infinitif,
     pronom: pronoun,
     temps: row.temps_name,

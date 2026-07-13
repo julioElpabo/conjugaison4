@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ExerciseAttempt, ExerciseQuestion } from '~~/shared/types/conjugation'
-import { validateAnswer } from '~~/shared/utils/answer'
+import { getAlternativeCorrections, validateAnswer } from '~~/shared/utils/answer'
 
 const props = defineProps<{
   questions: ExerciseQuestion[]
@@ -24,6 +24,9 @@ const finished = ref(false)
 const sequence = ref(0)
 const input = useTemplateRef<HTMLInputElement>('chat-answer')
 const thread = useTemplateRef<HTMLElement>('chat-thread')
+const dialog = useTemplateRef<HTMLElement>('chat-dialog')
+
+useDialogFocus(dialog, () => emit('close'), input)
 
 const currentQuestion = computed(() => props.questions[currentIndex.value])
 const correctCount = computed(() => attempts.value.filter(item => item.status === 'correct').length)
@@ -60,7 +63,11 @@ function submit() {
   })
 
   if (result.isCorrect) {
-    addMessage('coach', 'Exactement, bravo !', 'success')
+    const alternatives = getAlternativeCorrections(candidate, question.reponsesPourCorrige)
+    const alternativeText = alternatives.join(' ou ')
+    const punctuation = /[.!?]$/u.test(alternativeText) ? '' : '.'
+    const detail = alternatives.length ? ` On peut aussi répondre : ${alternativeText}${punctuation}` : ''
+    addMessage('coach', `Exactement, bravo !${detail}`, 'success')
   } else {
     addMessage(
       'coach',
@@ -98,23 +105,16 @@ function restart() {
   askCurrentQuestion()
 }
 
-function onKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') emit('close')
-}
-
 onMounted(() => {
-  document.body.classList.add('dialog-open')
   addMessage('coach', 'Bonjour ! Je vais te proposer quelques conjugaisons.')
   askCurrentQuestion()
 })
-
-onBeforeUnmount(() => document.body.classList.remove('dialog-open'))
 </script>
 
 <template>
   <Teleport to="body">
-    <div class="chat-overlay" @keydown="onKeydown">
-      <section class="chat-dialog" role="dialog" aria-modal="true" aria-labelledby="chat-title">
+    <div class="chat-overlay">
+      <section ref="chat-dialog" class="chat-dialog" role="dialog" aria-modal="true" aria-labelledby="chat-title" tabindex="-1">
         <header class="chat-header">
           <div class="coach-avatar" aria-hidden="true">T</div>
           <div>

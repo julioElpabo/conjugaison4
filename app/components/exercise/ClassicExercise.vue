@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ExerciseAttempt, ExerciseQuestion } from '~~/shared/types/conjugation'
-import { validateAnswer } from '~~/shared/utils/answer'
+import { getAlternativeCorrections, validateAnswer } from '~~/shared/utils/answer'
 
 const props = defineProps<{
   questions: ExerciseQuestion[]
@@ -19,26 +19,24 @@ const isFinished = ref(false)
 const answerInput = useTemplateRef<HTMLInputElement>('answer-input')
 const dialog = useTemplateRef<HTMLElement>('exercise-dialog')
 
+useDialogFocus(dialog, () => emit('close'), answerInput)
+
 const currentQuestion = computed(() => props.questions[currentIndex.value])
 const correctCount = computed(() => attempts.value.filter(attempt => attempt.status === 'correct').length)
 const scorePercent = computed(() => attempts.value.length
   ? Math.round(correctCount.value / attempts.value.length * 100)
   : 0)
 const correction = computed(() => currentQuestion.value?.reponsesPourCorrige.join(' ou ') ?? '')
+const alternativeCorrections = computed(() => currentQuestion.value
+  ? getAlternativeCorrections(answer.value, currentQuestion.value.reponsesPourCorrige)
+  : [])
+const alternativeText = computed(() => alternativeCorrections.value.join(' ou '))
+const alternativePunctuation = computed(() => /[.!?]$/u.test(alternativeText.value) ? '' : '.')
 const titleMessage = computed(() => {
   if (scorePercent.value >= 90) return 'Excellent !'
   if (scorePercent.value >= 60) return 'Bravo !'
   if (scorePercent.value >= 40) return 'Bel effort !'
   return 'Continue, tu progresses !'
-})
-
-onMounted(() => {
-  document.body.classList.add('dialog-open')
-  nextTick(() => answerInput.value?.focus())
-})
-
-onBeforeUnmount(() => {
-  document.body.classList.remove('dialog-open')
 })
 
 function submitAnswer() {
@@ -83,16 +81,11 @@ function restart() {
   nextTick(() => answerInput.value?.focus())
 }
 
-function onKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') {
-    emit('close')
-  }
-}
 </script>
 
 <template>
   <Teleport to="body">
-    <div class="exercise-overlay" @keydown="onKeydown">
+    <div class="exercise-overlay">
       <section
         ref="exercise-dialog"
         class="exercise-dialog"
@@ -164,6 +157,9 @@ function onKeydown(event: KeyboardEvent) {
           >
             <strong>{{ feedback === 'correct' ? 'Bravo, c’est juste !' : 'Pas tout à fait.' }}</strong>
             <p v-if="feedback === 'incorrect'">La réponse attendue était : <strong>{{ correction }}</strong>.</p>
+            <p v-else-if="alternativeCorrections.length">
+              On peut aussi répondre : <strong>{{ alternativeText }}</strong>{{ alternativePunctuation }}
+            </p>
             <p v-else>Tu peux passer à la question suivante.</p>
           </div>
         </div>

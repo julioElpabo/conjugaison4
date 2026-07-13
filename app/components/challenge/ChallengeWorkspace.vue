@@ -234,20 +234,15 @@ function onToggleTense(id: number) {
       </div>
 
       <template v-else>
-        <ChallengeActions
-          :ready="isReady"
-          :busy-action="busyAction"
-          @exercise="prepareExercise"
-          @print="preparePrint"
-          @save="saveChallenge"
-          @load="isLoadOpen = true"
-        />
-
         <p v-if="actionError" class="workspace-message workspace-message--error" role="alert">{{ actionError }}</p>
         <p v-else-if="notice" class="workspace-message workspace-message--success" aria-live="polite">{{ notice }}</p>
-        <p v-else-if="!isReady" class="workspace-message" aria-live="polite">
-          Sélectionne au moins un verbe et un temps pour lancer ton défi.
-        </p>
+
+        <div class="challenge-restore">
+          <span>Tu as reçu ou enregistré un défi&nbsp;?</span>
+          <button class="text-button" type="button" :disabled="Boolean(busyAction)" @click="isLoadOpen = true">
+            Charger un défi avec son code
+          </button>
+        </div>
 
         <PresetPicker
           :presets="challengePresets"
@@ -287,6 +282,20 @@ function onToggleTense(id: number) {
           />
         </div>
 
+        <div class="challenge-summary" :class="{ 'challenge-summary--incomplete': !isReady }" aria-live="polite">
+          <div>
+            <p class="builder-card__eyebrow">Résumé de ton défi</p>
+            <strong v-if="isReady">
+              {{ selectedVerbs.length }} verbe{{ selectedVerbs.length > 1 ? 's' : '' }} ·
+              {{ selectedTenses.length }} temps ·
+              {{ challenge.questionCount }} questions
+            </strong>
+            <strong v-else>Ton défi n’est pas encore complet</strong>
+          </div>
+          <p v-if="!isReady">Sélectionne au moins un verbe et un temps pour pouvoir le lancer.</p>
+          <p v-else>{{ challenge.exerciseKind === 'conjugation' ? 'Conjuguer les formes demandées' : 'Trouver le mode et le temps' }}</p>
+        </div>
+
         <ChallengeActions
           class="challenge-actions--bottom"
           :ready="isReady"
@@ -294,7 +303,6 @@ function onToggleTense(id: number) {
           @exercise="prepareExercise"
           @print="preparePrint"
           @save="saveChallenge"
-          @load="isLoadOpen = true"
         />
       </template>
     </div>

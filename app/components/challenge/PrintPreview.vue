@@ -15,6 +15,9 @@ const emit = defineEmits<{
 }>()
 
 const sheetNumber = Math.floor(Math.random() * 9000) + 1000
+const dialog = useTemplateRef<HTMLElement>('print-dialog')
+
+useDialogFocus(dialog, () => emit('close'))
 
 function print() {
   window.print()
@@ -105,7 +108,7 @@ function downloadWord() {
 
 <template>
   <Teleport to="body">
-    <div class="print-overlay" role="dialog" aria-modal="true" aria-labelledby="print-preview-title">
+    <div ref="print-dialog" class="print-overlay" role="dialog" aria-modal="true" aria-labelledby="print-preview-title" tabindex="-1">
       <div class="print-toolbar no-print">
         <div>
           <strong id="print-preview-title">Aperçu avant impression</strong>

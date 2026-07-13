@@ -139,3 +139,29 @@ export function isAnswerCorrect(
   return validateAnswer(answer, expectedAnswers, options).isCorrect
 }
 
+/**
+ * Retourne les autres formes canoniques qui auraient également été justes.
+ * Une réponse sans pronom peut correspondre à un corrigé qui le contient ; la
+ * ponctuation finale de l'impératif est également facultative dans l'exercice.
+ */
+export function getAlternativeCorrections(
+  answer: unknown,
+  corrections: readonly unknown[],
+): string[] {
+  const safeAnswer = typeof answer === 'string' ? answer : ''
+  const normalizedAnswer = normalizeAnswer(safeAnswer).replace(/[.!?]+$/u, '')
+  const safeCorrections = Array.isArray(corrections)
+    ? corrections.filter((candidate): candidate is string => typeof candidate === 'string' && candidate.trim().length > 0)
+    : []
+
+  if (!normalizedAnswer || safeCorrections.length < 2) return []
+
+  const matchingIndex = safeCorrections.findIndex((correction) => {
+    const normalizedCorrection = normalizeAnswer(correction).replace(/[.!?]+$/u, '')
+    return normalizedCorrection === normalizedAnswer
+      || normalizedCorrection.endsWith(normalizedAnswer)
+  })
+
+  if (matchingIndex < 0) return []
+  return safeCorrections.filter((_, index) => index !== matchingIndex)
+}

@@ -9,7 +9,6 @@
 
         <nav aria-label="Navigation principale">
           <NuxtLink to="/">Accueil</NuxtLink>
-          <NuxtLink to="/admin">Admin</NuxtLink>
         </nav>
       </div>
     </header>
@@ -20,7 +19,10 @@
 
     <footer class="site-footer">
       <p>Un outil gratuit pour travailler la conjugaison française.</p>
-      <a href="mailto:christophe.roulet@edu-vd.ch">Contact</a>
+      <div class="site-footer__links">
+        <a href="mailto:christophe.roulet@edu-vd.ch">Contact</a>
+        <NuxtLink to="/admin">Administration</NuxtLink>
+      </div>
     </footer>
   </div>
 </template>
@@ -154,13 +156,18 @@ a {
   color: white;
 }
 
+.site-footer__links {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+}
+
 @media (max-width: 640px) {
   .site-header__inner {
     min-height: 62px;
   }
 
-  .site-brand span,
-  .site-header nav a[href="/admin"] {
+  .site-brand span {
     display: none;
   }
 

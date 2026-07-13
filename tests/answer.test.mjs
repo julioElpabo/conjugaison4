@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
 import {
+  getAlternativeCorrections,
   isAnswerCorrect,
   normalizeAnswer,
   validateAnswer,
@@ -24,6 +25,22 @@ describe('normalizeAnswer', () => {
       normalizeAnswer('  Vous  aimez  ', { ignoreWhitespace: false, ignoreCase: false }),
       'Vous  aimez',
     )
+  })
+})
+
+describe('getAlternativeCorrections', () => {
+  it('signale la seconde conjugaison après une réponse complète ou sans pronom', () => {
+    const corrections = ["j'assieds", "j'assois"]
+    assert.deepEqual(getAlternativeCorrections("j'assieds", corrections), ["j'assois"])
+    assert.deepEqual(getAlternativeCorrections('assois', corrections), ["j'assieds"])
+  })
+
+  it("tolère l'absence de ponctuation à l'impératif", () => {
+    assert.deepEqual(getAlternativeCorrections('assieds', ['assieds!', 'assois!']), ['assois!'])
+  })
+
+  it("ne suggère rien lorsqu'il n'existe pas d'autre forme", () => {
+    assert.deepEqual(getAlternativeCorrections('aime', ['tu aimes']), [])
   })
 })
 
@@ -91,4 +108,3 @@ describe('validateAnswer', () => {
     assert.equal(validateAnswer('aimes', ['aime']).reason, 'no-match')
   })
 })
-

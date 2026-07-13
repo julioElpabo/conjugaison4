@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { challengePresets } from '~~/shared/data/challenge-presets'
 import type { ChallengePreset, ExerciseQuestion } from '~~/shared/types/conjugation'
 import ChallengeActions from './ChallengeActions.vue'
 import ChallengeOptions from './ChallengeOptions.vue'
@@ -245,7 +244,7 @@ function onToggleTense(id: number) {
         </div>
 
         <PresetPicker
-          :presets="challengePresets"
+          :presets="catalogue.presets"
           :active-preset-id="activePresetId"
           @select="selectPreset"
         />

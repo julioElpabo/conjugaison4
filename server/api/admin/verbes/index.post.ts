@@ -1,4 +1,5 @@
 import type { ResultSetHeader } from 'mysql2/promise'
+import { refreshVerbMetadata } from '../../../services/verb-metadata'
 
 export default defineEventHandler(async (event) => {
   requireAdministrator(event)
@@ -13,11 +14,13 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const [result] = await useDatabase().execute<ResultSetHeader>(`
+    const database = useDatabase()
+    const [result] = await database.execute<ResultSetHeader>(`
       INSERT INTO verbes (infinitif, \`participe_présent\`, \`participe_passé\`, auxiliaire)
       VALUES (?, ?, ?, ?)
     `, [infinitif, participePresent, participePasse, auxiliaire])
 
+    await refreshVerbMetadata(database, result.insertId)
     return { ok: true, id: result.insertId }
   } catch (error) {
     if (typeof error === 'object' && error && 'code' in error && error.code === 'ER_DUP_ENTRY') {

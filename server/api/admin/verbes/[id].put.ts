@@ -1,4 +1,5 @@
 import type { PoolConnection } from 'mysql2/promise'
+import { refreshVerbMetadata } from '../../../services/verb-metadata'
 
 interface ConjugationInput {
   personId?: unknown
@@ -105,6 +106,7 @@ export default defineEventHandler(async (event) => {
     }
 
     await replaceConjugations(connection, id, infinitif, conjugations)
+    await refreshVerbMetadata(connection, id)
     await connection.commit()
     return { ok: true, id }
   } catch (error) {

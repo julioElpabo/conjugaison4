@@ -14,6 +14,7 @@ const groupLabels: Record<string, string> = {
   school: 'Niveaux scolaires',
   'verb-group': 'Groupes de verbes',
   spelling: 'Difficultés particulières',
+  semantic: 'Sens des verbes',
   training: 'Entraînements'
 }
 

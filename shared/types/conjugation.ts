@@ -13,6 +13,24 @@ export interface Verb extends VerbSummary {
   participePresent: string | null
   participePasse: string | null
   auxiliaire: string | null
+  groupeConjugaison: 1 | 2 | 3 | null
+  familleConjugaison: string | null
+  terminaison: string | null
+  typePronominal: 'aucun' | 'occasionnel' | 'essentiel'
+  estImpersonnel: boolean
+  estDefectif: boolean
+  personnesDisponibles: number[]
+  typeHInitial: 'muet' | 'aspire' | null
+  niveauDifficulte: number | null
+  niveauCecrl: string | null
+  rangFrequence: number | null
+  registrePrincipal: string | null
+  formeCanonique: string
+  statutValidation: 'genere' | 'a_verifier' | 'valide'
+  particularites: string[]
+  niveauxScolaires: string[]
+  parcoursCif: string[]
+  categoriesSemantiques: string[]
 }
 
 export interface ConjugationMode {
@@ -64,6 +82,7 @@ export type ChallengePresetGroup =
   | 'school'
   | 'verb-group'
   | 'spelling'
+  | 'semantic'
   | 'training'
 
 export interface ChallengePreset extends ChallengeConfig {
@@ -71,6 +90,7 @@ export interface ChallengePreset extends ChallengeConfig {
   label: string
   description: string
   group: ChallengePresetGroup
+  criteria?: readonly unknown[]
 }
 
 /** Forme compatible avec les questionnaires de l'application historique. */

@@ -11,6 +11,7 @@
     "data:audit-variants": "node --env-file=.env scripts/audit-academie-variants.mjs",
     "data:apply-variants": "node --env-file=.env scripts/apply-academie-variants.mjs",
     "data:repair-integrity": "node --env-file=.env scripts/repair-conjugation-integrity.mjs",
+    "data:migrate-verb-metadata": "node --env-file=.env --experimental-strip-types scripts/migrate-verb-metadata.mjs",
     "test": "node --env-file-if-exists=.env --experimental-strip-types --test tests/*.test.mjs",
     "test:conjugations": "node --env-file-if-exists=.env --experimental-strip-types --test tests/*conjugation*.test.mjs",
     "typecheck": "nuxt typecheck",

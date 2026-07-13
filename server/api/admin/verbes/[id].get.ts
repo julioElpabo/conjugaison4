@@ -6,7 +6,23 @@ interface VerbRow extends RowDataPacket {
   participe_present: string
   participe_passe: string
   auxiliaire: string
+  groupe_conjugaison: number | null
+  famille_conjugaison: string | null
+  terminaison_infinitif: string | null
+  type_pronominal: string
+  est_impersonnel: number
+  est_defectif: number
+  niveau_difficulte: number | null
+  niveau_cecrl: string | null
+  registre_principal: string | null
+  forme_canonique: string | null
+  statut_validation: string
+  particularites: string | string[] | null
+  niveaux_scolaires: string | string[] | null
+  parcours_cif: string | string[] | null
 }
+
+interface CategoryRow extends RowDataPacket { slug: string, label: string, sort_order: number }
 
 interface ConjugationRow extends RowDataPacket {
   id: number
@@ -26,14 +42,18 @@ export default defineEventHandler(async (event) => {
   }
 
   const database = useDatabase()
-  const [[verb], [conjugations]] = await Promise.all([
+  const [[verb], [conjugations], [categories]] = await Promise.all([
     database.execute<VerbRow[]>(`
       SELECT id, infinitif,
         \`participe_présent\` AS participe_present,
         \`participe_passé\` AS participe_passe,
-        auxiliaire
-      FROM verbes
-      WHERE id = ?
+        v.auxiliaire, v.groupe_conjugaison, f.slug AS famille_conjugaison, v.terminaison_infinitif,
+        v.type_pronominal, v.est_impersonnel, v.est_defectif, v.niveau_difficulte, v.niveau_cecrl,
+        v.registre_principal, v.forme_canonique, v.statut_validation, v.particularites,
+        v.niveaux_scolaires, v.parcours_cif
+      FROM verbes v
+      LEFT JOIN familles_conjugaison f ON f.id = v.famille_conjugaison_id
+      WHERE v.id = ?
       LIMIT 1
     `, [id]),
     database.execute<ConjugationRow[]>(`
@@ -42,11 +62,22 @@ export default defineEventHandler(async (event) => {
       FROM verbesconjugues
       WHERE verbe_id = ?
       ORDER BY temp_id, personne_id
+    `, [id]),
+    database.execute<CategoryRow[]>(`
+      SELECT DISTINCT cs.slug, cs.label, cs.sort_order FROM verbe_sens vs
+      INNER JOIN verbe_sens_categories vsc ON vsc.sens_id=vs.id
+      INNER JOIN categories_semantiques cs ON cs.id=vsc.categorie_id
+      WHERE vs.verbe_id=? ORDER BY cs.sort_order, cs.label
     `, [id])
   ])
 
   if (!verb[0]) {
     throw createError({ statusCode: 404, statusMessage: 'Verbe introuvable' })
+  }
+
+  const array = (value: string | string[] | null) => {
+    if (Array.isArray(value)) return value
+    try { return value ? JSON.parse(value) : [] } catch { return [] }
   }
 
   return {
@@ -55,7 +86,22 @@ export default defineEventHandler(async (event) => {
       infinitif: verb[0].infinitif,
       participePresent: verb[0].participe_present,
       participePasse: verb[0].participe_passe,
-      auxiliaire: verb[0].auxiliaire
+      auxiliaire: verb[0].auxiliaire,
+      groupeConjugaison: verb[0].groupe_conjugaison,
+      familleConjugaison: verb[0].famille_conjugaison,
+      terminaison: verb[0].terminaison_infinitif,
+      typePronominal: verb[0].type_pronominal,
+      estImpersonnel: Boolean(verb[0].est_impersonnel),
+      estDefectif: Boolean(verb[0].est_defectif),
+      niveauDifficulte: verb[0].niveau_difficulte,
+      niveauCecrl: verb[0].niveau_cecrl,
+      registrePrincipal: verb[0].registre_principal,
+      formeCanonique: verb[0].forme_canonique || verb[0].infinitif,
+      statutValidation: verb[0].statut_validation,
+      particularites: array(verb[0].particularites),
+      niveauxScolaires: array(verb[0].niveaux_scolaires),
+      parcoursCif: array(verb[0].parcours_cif),
+      categoriesSemantiques: categories,
     },
     conjugations
   }

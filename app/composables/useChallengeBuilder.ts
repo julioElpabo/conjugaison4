@@ -1,5 +1,6 @@
 import type {
   ChallengeConfig as CoreChallengeConfig,
+  ChallengePreset,
   ConjugationMode,
   ConjugationTense,
   ExerciseKind,
@@ -14,6 +15,7 @@ export interface Catalogue {
   verbes: Verb[]
   modes: ConjugationMode[]
   temps: Tense[]
+  presets: ChallengePreset[]
 }
 
 export interface PrintOptions {
@@ -67,7 +69,8 @@ export function useChallengeBuilder() {
   const catalogue = useState<Catalogue>('challenge-catalogue', () => ({
     verbes: [],
     modes: [],
-    temps: []
+    temps: [],
+    presets: []
   }))
   const challenge = useState<ChallengeConfig>('challenge-config', createDefaultChallenge)
   const catalogueStatus = useState<'idle' | 'loading' | 'success' | 'error'>('challenge-catalogue-status', () => 'idle')
@@ -106,7 +109,8 @@ export function useChallengeBuilder() {
       catalogue.value = {
         verbes: [...response.verbes].sort((a, b) => a.infinitif.localeCompare(b.infinitif, 'fr')),
         modes: [...response.modes].sort((a, b) => a.order - b.order || a.id - b.id),
-        temps: [...response.temps]
+        temps: [...response.temps],
+        presets: [...response.presets]
       }
 
       const validVerbIds = new Set(catalogue.value.verbes.map(verb => verb.id))

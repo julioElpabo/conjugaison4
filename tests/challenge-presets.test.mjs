@@ -2,26 +2,57 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
 import {
-  CHALLENGE_PRESETS,
   challengeConfigFromLegacyTuple,
   challengeConfigToLegacyTuple,
-  challengePresets,
+  challengePresetDefinitions,
   getChallengePreset,
   inspectPresetCompatibility,
   isChallengePresetId,
+  resolveChallengePresets,
 } from '../shared/data/challenge-presets.ts'
 
-describe('challengePresets', () => {
-  it('expose les 23 défis historiques avec des identifiants uniques', () => {
-    assert.equal(challengePresets.length, 23)
-    assert.equal(new Set(challengePresets.map(preset => preset.id)).size, 23)
+function verb(id, infinitif, metadata = {}) {
+  return {
+    id, infinitif, participePresent: '', participePasse: '', auxiliaire: 'avoir',
+    groupeConjugaison: 1, familleConjugaison: 'er-regulier', terminaison: 'er', typePronominal: 'aucun',
+    estImpersonnel: false, estDefectif: false, personnesDisponibles: [4, 5, 6, 7, 8, 9], typeHInitial: null,
+    niveauDifficulte: 1, niveauCecrl: null, rangFrequence: null, registrePrincipal: 'courant',
+    formeCanonique: infinitif, statutValidation: 'genere', particularites: [], niveauxScolaires: [],
+    parcoursCif: [], categoriesSemantiques: [], ...metadata,
+  }
+}
+
+const verbs = [
+  verb(41, 'aimer', { niveauxScolaires: ['5P'], categoriesSemantiques: ['emotion'] }),
+  verb(7, 'manger', { particularites: ['ger'] }),
+  verb(99, 'venir', { groupeConjugaison: 3, familleConjugaison: 'venir-tenir', terminaison: 'ir', categoriesSemantiques: ['mouvement'] }),
+  verb(5, 'se laver', { typePronominal: 'occasionnel', particularites: ['pronominal'], categoriesSemantiques: ['corps'] }),
+  verb(12, 'absoudre', { groupeConjugaison: 3, terminaison: 're', niveauDifficulte: 3, registrePrincipal: 'rare' }),
+]
+
+describe('défis résolus par critères', () => {
+  it('expose les 28 défis avec des identifiants uniques et sans liste de verbes figée', () => {
+    assert.equal(challengePresetDefinitions.length, 28)
+    assert.equal(new Set(challengePresetDefinitions.map(preset => preset.id)).size, 28)
+    assert.ok(challengePresetDefinitions.every(preset => !Object.hasOwn(preset, 'verbIds')))
     assert.equal(isChallengePresetId('7H'), true)
     assert.equal(isChallengePresetId('inconnu'), false)
   })
 
-  it('normalise chaque preset en configuration valide', () => {
-    for (const preset of challengePresets) {
-      assert.ok(preset.verbIds.length > 0, `${preset.id}: aucun verbe`)
+  it('résout les groupes, les difficultés et le sens à partir des métadonnées', () => {
+    const resolved = Object.fromEntries(resolveChallengePresets(verbs).map(preset => [preset.id, preset]))
+    assert.deepEqual(resolved['5P'].verbIds, [41])
+    assert.deepEqual(resolved.ger.verbIds, [7])
+    assert.deepEqual(resolved.groupe3ir.verbIds, [99])
+    assert.deepEqual(resolved.pronominaux.verbIds, [5])
+    assert.deepEqual(resolved.rares.verbIds, [12])
+    assert.deepEqual(resolved.difficiles.verbIds, [12])
+    assert.deepEqual(resolved['sens-mouvement'].verbIds, [99])
+    assert.deepEqual(resolved['sens-corps'].verbIds, [5])
+  })
+
+  it('produit des configurations valides', () => {
+    for (const preset of resolveChallengePresets(verbs)) {
       assert.ok(preset.tenseIds.length > 0, `${preset.id}: aucun temps`)
       assert.ok(Number.isInteger(preset.questionCount) && preset.questionCount > 0)
       assert.equal(new Set(preset.verbIds).size, preset.verbIds.length, `${preset.id}: verbes en double`)
@@ -34,27 +65,16 @@ describe('challengePresets', () => {
     }
   })
 
-  it('est adapté aux IDs connus de la base cible', () => {
-    assert.equal(CHALLENGE_PRESETS.cer.verbIds.includes(262), false)
-    assert.equal(CHALLENGE_PRESETS['ger-cer'].verbIds.includes(262), false)
-    assert.equal(CHALLENGE_PRESETS.groupe3.verbIds.filter(id => id === 31).length, 1)
-
-    const combined = new Set([
-      ...CHALLENGE_PRESETS.ger.verbIds,
-      ...CHALLENGE_PRESETS.cer.verbIds,
-    ])
-    assert.deepEqual(new Set(CHALLENGE_PRESETS['ger-cer'].verbIds), combined)
-  })
-
   it('retourne une copie qui ne modifie pas le catalogue', () => {
-    const copy = getChallengePreset('5P')
+    const copy = getChallengePreset('5P', verbs)
     assert.ok(copy)
     copy.verbIds.push(9999)
     copy.tenseIds.length = 0
 
-    assert.equal(CHALLENGE_PRESETS['5P'].verbIds.includes(9999), false)
-    assert.deepEqual(CHALLENGE_PRESETS['5P'].tenseIds, [1, 2])
-    assert.equal(getChallengePreset('inconnu'), null)
+    const fresh = getChallengePreset('5P', verbs)
+    assert.equal(fresh.verbIds.includes(9999), false)
+    assert.deepEqual(fresh.tenseIds, [1, 2])
+    assert.equal(getChallengePreset('inconnu', verbs), null)
   })
 })
 
@@ -100,4 +120,3 @@ describe('inspectPresetCompatibility', () => {
     })
   })
 })
-

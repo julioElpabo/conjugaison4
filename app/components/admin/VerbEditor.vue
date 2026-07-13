@@ -12,6 +12,21 @@ interface AdminVerb {
   participePresent: string
   participePasse: string
   auxiliaire: string
+  groupeConjugaison?: number | null
+  familleConjugaison?: string | null
+  terminaison?: string | null
+  typePronominal?: string
+  estImpersonnel?: boolean
+  estDefectif?: boolean
+  niveauDifficulte?: number | null
+  niveauCecrl?: string | null
+  registrePrincipal?: string | null
+  formeCanonique?: string
+  statutValidation?: string
+  particularites?: string[]
+  niveauxScolaires?: string[]
+  parcoursCif?: string[]
+  categoriesSemantiques?: Array<{ slug: string, label: string }>
 }
 
 interface AdminConjugation {
@@ -248,6 +263,33 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
       </label>
     </fieldset>
 
+    <section class="verb-editor__classification" aria-labelledby="classification-title">
+      <div>
+        <h2 id="classification-title">Classement grammatical et sémantique</h2>
+        <p class="admin-muted">Ces critères sont recalculés lors de l’enregistrement et déterminent les défis prêts à l’emploi.</p>
+      </div>
+      <dl>
+        <div><dt>Groupe</dt><dd>{{ detail.verb.groupeConjugaison || 'À déterminer' }}</dd></div>
+        <div><dt>Famille</dt><dd>{{ detail.verb.familleConjugaison || 'À déterminer' }}</dd></div>
+        <div><dt>Terminaison</dt><dd>{{ detail.verb.terminaison ? `-${detail.verb.terminaison}` : '—' }}</dd></div>
+        <div><dt>Pronominalité</dt><dd>{{ detail.verb.typePronominal || 'aucun' }}</dd></div>
+        <div><dt>Difficulté</dt><dd>{{ detail.verb.niveauDifficulte ? `${detail.verb.niveauDifficulte}/3` : '—' }}</dd></div>
+        <div><dt>Niveau CECRL</dt><dd>{{ detail.verb.niveauCecrl || 'Non renseigné' }}</dd></div>
+        <div><dt>Registre</dt><dd>{{ detail.verb.registrePrincipal || 'courant' }}</dd></div>
+        <div><dt>Forme canonique</dt><dd>{{ detail.verb.formeCanonique || detail.verb.infinitif }}</dd></div>
+      </dl>
+      <div class="verb-editor__tags">
+        <strong>Catégories de sens</strong>
+        <span v-for="category in detail.verb.categoriesSemantiques" :key="category.slug">{{ category.label }}</span>
+        <em v-if="!detail.verb.categoriesSemantiques?.length">À classer</em>
+      </div>
+      <div class="verb-editor__tags">
+        <strong>Défis et particularités</strong>
+        <span v-for="tag in [...(detail.verb.niveauxScolaires || []), ...(detail.verb.parcoursCif || []), ...(detail.verb.particularites || [])]" :key="tag">{{ tag }}</span>
+        <em v-if="![...(detail.verb.niveauxScolaires || []), ...(detail.verb.parcoursCif || []), ...(detail.verb.particularites || [])].length">Aucune étiquette</em>
+      </div>
+    </section>
+
     <section class="verb-editor__conjugations" aria-labelledby="conjugations-title">
       <div class="verb-editor__grid-heading">
         <div>
@@ -416,6 +458,72 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
   display: grid;
   min-width: 0;
   gap: 13px;
+}
+
+.verb-editor__classification {
+  display: grid;
+  gap: 15px;
+  padding: 18px;
+  background: #f7fafb;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+}
+
+.verb-editor__classification h2,
+.verb-editor__classification p {
+  margin: 0;
+}
+
+.verb-editor__classification dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  gap: 8px;
+}
+
+.verb-editor__classification dl > div {
+  padding: 10px;
+  background: white;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+}
+
+.verb-editor__classification dt {
+  color: var(--admin-muted);
+  font-size: .7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.verb-editor__classification dd {
+  margin: 4px 0 0;
+  color: var(--admin-navy);
+  font-weight: 750;
+}
+
+.verb-editor__tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.verb-editor__tags strong {
+  width: 100%;
+  color: var(--admin-navy);
+}
+
+.verb-editor__tags span {
+  padding: 4px 8px;
+  color: var(--admin-blue-dark);
+  background: #e4f3f6;
+  border-radius: 99px;
+  font-size: .76rem;
+  font-weight: 750;
+}
+
+.verb-editor__tags em {
+  color: var(--admin-muted);
 }
 
 .verb-editor__non-finite {
@@ -674,6 +782,10 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
 
   .verb-editor__non-finite-grid {
     grid-template-columns: 1fr;
+  }
+
+  .verb-editor__classification dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .verb-editor__state {

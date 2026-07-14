@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ExerciseQuestion } from '~~/shared/types/conjugation'
 import type { ExerciseKind, PrintOptions, Tense, Verb } from '~/composables/useChallengeBuilder'
+import { TENSE_IDENTIFICATION_INSTRUCTION } from '~~/shared/utils/exercise-instructions'
 import {
   correctionItemHeight,
   exerciseItemHeight,
@@ -146,7 +147,7 @@ async function downloadPdf() {
       if (props.exerciseKind === 'tense-identification') {
         pdf.setDrawColor(120, 120, 120)
         pdf.rect(left, y, 176, 10)
-        pdf.text('Indique le mode et le temps de chaque forme conjuguée.', left + 3, y + 6)
+        pdf.text(TENSE_IDENTIFICATION_INSTRUCTION, left + 3, y + 6)
         y += 15
       }
       return y + 2
@@ -320,7 +321,7 @@ async function downloadWord() {
       exerciseChildren.push(new Paragraph({
         spacing: { before: 160, after: 160 },
         border: { top: { style: BorderStyle.SINGLE, size: 4, color: '777777' }, bottom: { style: BorderStyle.SINGLE, size: 4, color: '777777' }, left: { style: BorderStyle.SINGLE, size: 4, color: '777777' }, right: { style: BorderStyle.SINGLE, size: 4, color: '777777' } },
-        children: [new TextRun({ text: 'Indique le mode et le temps de chaque forme conjuguée.', size: 19, font: 'Arial' })]
+        children: [new TextRun({ text: TENSE_IDENTIFICATION_INSTRUCTION, size: 19, font: 'Arial' })]
       }))
     }
     exerciseChildren.push(new Table({
@@ -496,7 +497,7 @@ async function downloadWord() {
             <p v-if="pageIndex === 0 && options.showVerbs"><strong>Verbes :</strong> {{ verbs.map(verb => verb.infinitif).join(', ') }}</p>
             <p v-if="pageIndex === 0 && options.showTenses"><strong>Temps :</strong> {{ tenses.map(tense => tense.name).join(', ') }}</p>
             <p v-if="pageIndex === 0 && exerciseKind === 'tense-identification'" class="print-instruction">
-              Indique le mode et le temps de chaque forme conjuguée.
+              {{ TENSE_IDENTIFICATION_INSTRUCTION }}
             </p>
           </header>
 

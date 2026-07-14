@@ -145,7 +145,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
 
         <div v-if="!isFinished && currentQuestion" class="exercise-question">
           <p v-if="exerciseKind === 'tense-identification'" class="question-instruction">
-            Trouve le mode et le temps de cette forme :
+            {{ currentQuestion.instruction }}
           </p>
           <template v-if="exerciseKind === 'conjugation' && currentQuestion.complement">
             <p class="question-context" aria-label="Contexte grammatical">

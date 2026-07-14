@@ -91,7 +91,7 @@ function chatExport() {
       person: question.pronom,
       mode: question.mode,
       tense: question.temps,
-      instruction: question.consigne,
+      instruction: [question.instruction, question.consigne].filter(Boolean).join('\n'),
       expectedAnswers: question.reponsesPourCorrige,
       complement: question.complement || null,
       agreementReminder: question.agreementReminder || null,
@@ -150,7 +150,7 @@ function addMessage(author: ChatMessage['author'], text: string, tone?: ChatMess
 function contextFor(question?: ExerciseQuestion): CoachMessageContext {
   const reminder = question?.agreementReminder
   return {
-    instruction: question?.consigne,
+    instruction: question ? [question.instruction, question.consigne].filter(Boolean).join('\n') : undefined,
     verb: question?.infinitif || reminder?.infinitive,
     complement: reminder?.complement || question?.complement,
     participle: reminder?.participle,
@@ -206,6 +206,7 @@ async function askCurrentQuestion() {
   if (!question) return
   posingQuestion.value = true
   await addCoachReaction('question', contextFor(question))
+  if (question.instruction) await addCoachText(question.instruction, undefined, true)
   await addCoachText(question.consigne, undefined, true)
   posingQuestion.value = false
   await nextTick()

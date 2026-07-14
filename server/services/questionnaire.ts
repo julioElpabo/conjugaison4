@@ -5,6 +5,7 @@ import { formatAnswer, formatConjugationQuestion } from './question-formatter'
 import { formatNonFiniteQuestion } from './non-finite-formatter'
 import { generatePronominalRow, type PronominalSourceRow } from './pronominal-formatter'
 import { decodePronominalSelectionId } from '../../shared/utils/pronominal-selection'
+import { TENSE_IDENTIFICATION_INSTRUCTION } from '../../shared/utils/exercise-instructions'
 
 interface IdRow extends RowDataPacket { id: number }
 
@@ -111,6 +112,18 @@ function normalized(value: string) {
   return value.trim().toLocaleLowerCase('fr-CH')
 }
 
+export function allowsAnteposedComplement(row: Pick<ConjugationRow, 'is_compound' | 'mode_name'>) {
+  return Boolean(row.is_compound) && normalized(row.mode_name) !== 'impératif'
+}
+
+export function hasVisibleAnteposedAgreement(candidate: Pick<ComplementRow, 'fonction_objet' | 'texte_antepose' | 'genre' | 'nombre'>) {
+  const gender = candidate.genre ? normalized(candidate.genre).normalize('NFD').replace(/\p{Diacritic}/gu, '') : ''
+  const number = candidate.nombre ? normalized(candidate.nombre) : ''
+  return candidate.fonction_objet === 'cod'
+    && Boolean(candidate.texte_antepose && candidate.genre && candidate.nombre)
+    && (gender === 'feminin' || number === 'pluriel')
+}
+
 function startsWithVowel(value: string) {
   const first = value.trim().normalize('NFD').replace(/\p{Diacritic}/gu, '').charAt(0).toLowerCase()
   return 'aeiouy'.includes(first)
@@ -135,7 +148,7 @@ function articleForTense(tense: string, mode: string) {
   return `${article}${tense} du ${normalizedMode}`
 }
 
-function identificationQuestion(row: ConjugationRow): ExerciseQuestion {
+export function identificationQuestion(row: ConjugationRow): ExerciseQuestion {
   const pronoun = row.pronom
   const phrase = formatAnswer(pronoun, row.conjugaison1, row.mode_name)
   const tense = normalized(row.temps_name)
@@ -157,6 +170,7 @@ function identificationQuestion(row: ConjugationRow): ExerciseQuestion {
     tenseId: Number(row.temp_id),
     personId: Number(row.personne_id),
     titre: row.infinitif,
+    instruction: TENSE_IDENTIFICATION_INSTRUCTION,
     consigne: phrase,
     reponses: unique(answers),
     reponsesPourCorrige: [correction],
@@ -325,15 +339,19 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
       }
     }
 
-    questions.push(...rows.map((row) => {
+    const rowsForQuestions = request.includeComplements && request.complementPlacement === 'before'
+      ? rows.filter(row => Boolean(row.is_compound))
+      : rows
+
+    questions.push(...rowsForQuestions.map((row) => {
       const candidates = complementsByVerb.get(Number(row.verbe_id)) ?? []
-      const anteposable = normalized(row.mode_name) === 'impératif'
+      const anteposable = !allowsAnteposedComplement(row)
         ? []
-        : candidates.filter(candidate => candidate.fonction_objet === 'cod'
-            && candidate.texte_antepose && candidate.genre && candidate.nombre)
-      const useBefore = request.complementPlacement === 'before'
+        : candidates.filter(hasVisibleAnteposedAgreement)
+      const useBefore = allowsAnteposedComplement(row) && request.complementPlacement === 'before'
         ? anteposable.length > 0
-        : request.complementPlacement === 'mixed' && anteposable.length > 0 && Math.random() < 0.5
+        : allowsAnteposedComplement(row) && request.complementPlacement === 'mixed'
+          && anteposable.length > 0 && Math.random() < 0.5
       const complement = randomComplement(useBefore ? anteposable : candidates)
       const enrichedRow = complement
         ? {
@@ -353,7 +371,8 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
     }))
   }
 
-  if (nonFiniteTenses.length > 0 && request.exerciseKind === 'conjugation') {
+  if (nonFiniteTenses.length > 0 && request.exerciseKind === 'conjugation'
+      && !(request.includeComplements && request.complementPlacement === 'before')) {
     const verbs: NonFiniteVerbRow[] = []
     if (verbIds.length > 0) {
       const [storedVerbs] = await database.execute<NonFiniteVerbRow[]>(`

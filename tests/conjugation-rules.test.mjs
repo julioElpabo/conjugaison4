@@ -105,8 +105,10 @@ describe('compléments d’objet dans les questions', () => {
       mode_name: 'impératif',
       complement_phrase: 'une pomme',
     }), 'tu')
-    assert.ok(question.reponses.includes('mange une pomme!'))
-    assert.deepEqual(question.reponsesPourCorrige, ['mange une pomme!'])
+    assert.ok(question.reponses.includes('mange une pomme !'))
+    assert.equal(isAnswerCorrect('mange une pomme!', question.reponses), true)
+    assert.equal(isAnswerCorrect('mange une pomme', question.reponses), true)
+    assert.deepEqual(question.reponsesPourCorrige, ['mange une pomme !'])
     assert.equal(question.consigne, '… une pomme | manger | présent (impératif)')
     assert.equal(question.saisiePrefixe, '')
   })
@@ -187,7 +189,20 @@ describe('accords du participe passé', () => {
 
 describe('impératif et ponctuation', () => {
   it('retire le pronom sujet et ajoute la ponctuation', () => {
-    assert.equal(formatAnswer('tu', 'mange', 'impératif'), 'mange!')
+    assert.equal(formatAnswer('tu', 'mange', 'impératif'), 'mange !')
+  })
+
+  it("accepte le point d’exclamation avec ou sans espace, ainsi que son absence", () => {
+    const question = formatConjugationQuestion(row({
+      conjugaison1: 'mange',
+      conjugaison2: '',
+      mode_name: 'impératif',
+      temp_id: 9,
+    }), 'tu')
+    assert.equal(isAnswerCorrect('mange !', question.reponses), true)
+    assert.equal(isAnswerCorrect('mange!', question.reponses), true)
+    assert.equal(isAnswerCorrect('mange', question.reponses), true)
+    assert.deepEqual(question.reponsesPourCorrige, ['mange !'])
   })
 
   it('accepte assieds-toi et assois-toi', () => {

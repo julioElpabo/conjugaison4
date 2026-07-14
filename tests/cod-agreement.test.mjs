@@ -2,7 +2,25 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
 import { formatConjugationQuestion } from '../server/services/question-formatter.ts'
+import { allowsAnteposedComplement, hasVisibleAnteposedAgreement } from '../server/services/questionnaire.ts'
 import { isAnswerCorrect } from '../shared/utils/answer.ts'
+
+describe('sélection des COD antéposés', () => {
+  it('réserve le COD antéposé aux temps composés hors impératif', () => {
+    assert.equal(allowsAnteposedComplement({ is_compound: 1, mode_name: 'indicatif' }), true)
+    assert.equal(allowsAnteposedComplement({ is_compound: 0, mode_name: 'indicatif' }), false)
+    assert.equal(allowsAnteposedComplement({ is_compound: 1, mode_name: 'impératif' }), false)
+  })
+
+  it('écarte le masculin singulier, les COI et les compléments non antéposables', () => {
+    const base = { fonction_objet: 'cod', texte_antepose: 'la chanson', genre: 'féminin', nombre: 'singulier' }
+    assert.equal(hasVisibleAnteposedAgreement(base), true)
+    assert.equal(hasVisibleAnteposedAgreement({ ...base, texte_antepose: 'les trains', genre: 'masculin', nombre: 'pluriel' }), true)
+    assert.equal(hasVisibleAnteposedAgreement({ ...base, texte_antepose: 'le train', genre: 'masculin' }), false)
+    assert.equal(hasVisibleAnteposedAgreement({ ...base, fonction_objet: 'coi' }), false)
+    assert.equal(hasVisibleAnteposedAgreement({ ...base, texte_antepose: null }), false)
+  })
+})
 
 function source(overrides = {}) {
   return {
@@ -146,7 +164,7 @@ describe('COD avec les temps simples et l’impératif', () => {
 
     assert.equal(question.saisiePrefixe, '')
     assert.equal(question.consigne, '… une pomme | manger | présent (impératif)')
-    assert.deepEqual(question.reponsesPourCorrige, ['mange une pomme!'])
+    assert.deepEqual(question.reponsesPourCorrige, ['mange une pomme !'])
     assert.equal(isAnswerCorrect('mange', question.reponses), true)
   })
 
@@ -163,8 +181,10 @@ describe('COD avec les temps simples et l’impératif', () => {
     assert.equal(question.saisiePrefixe, '')
     assert.equal(question.consigne, '… du riz | manger | passé (impératif)')
     assert.ok(question.reponses.includes('ayons mangé'))
-    assert.ok(question.reponses.includes('ayons mangé du riz!'))
-    assert.deepEqual(question.reponsesPourCorrige, ['ayons mangé du riz!'])
+    assert.ok(question.reponses.includes('ayons mangé du riz !'))
+    assert.equal(isAnswerCorrect('ayons mangé du riz!', question.reponses), true)
+    assert.equal(isAnswerCorrect('ayons mangé du riz', question.reponses), true)
+    assert.deepEqual(question.reponsesPourCorrige, ['ayons mangé du riz !'])
     assert.equal(isAnswerCorrect('nous ayons mangé', question.reponses), false)
   })
 })

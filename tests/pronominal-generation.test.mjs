@@ -34,6 +34,7 @@ function source(overrides = {}) {
 const auxiliaries = [
   { personne_id: 4, mode_name: 'indicatif', temps_name: 'présent', conjugaison1: 'suis' },
   { personne_id: 6, mode_name: 'indicatif', temps_name: 'présent', conjugaison1: 'est' },
+  { personne_id: 7, mode_name: 'indicatif', temps_name: 'présent', conjugaison1: 'sommes' },
   { personne_id: 9, mode_name: 'indicatif', temps_name: 'présent', conjugaison1: 'sont' },
   { personne_id: 5, mode_name: 'impératif', temps_name: 'présent', conjugaison1: 'sois' },
 ]
@@ -71,6 +72,27 @@ describe('génération des emplois pronominaux', () => {
     }), auxiliaries)
     const question = formatConjugationQuestion(row, 'elles')
     assert.deepEqual(question.reponsesPourCorrige, ['elles se sont joué'])
+  })
+
+  it('accorde « nous nous sommes protégés » au pluriel sans variante singulière', () => {
+    const row = generatePronominalRow(source({
+      personne_id: 7,
+      pronom: 'nous',
+      temp_id: 5,
+      temps_name: 'passé composé',
+      mode_name: 'indicatif',
+      is_compound: 1,
+      infinitif_pronominal: 'se protéger',
+      participe_passe: 'protégé',
+      regle_accord: 'selon_construction',
+    }), auxiliaries)
+    const question = formatConjugationQuestion(row, 'nous')
+
+    assert.deepEqual(question.reponsesPourCorrige, [
+      'nous nous sommes protégés',
+      'nous nous sommes protégées',
+    ])
+    assert.ok(!question.reponses.includes('nous nous sommes protégé'))
   })
 
   it("place le pronom après l'auxiliaire à l'impératif passé", () => {

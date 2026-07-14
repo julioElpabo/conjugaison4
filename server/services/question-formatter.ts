@@ -94,6 +94,7 @@ function agreementVariants(
   auxiliary: string,
   participle: string,
   agreementRule?: string | null,
+  allowInvariableConstruction = false,
 ) {
   const canonical = applyAgreement(form, pronoun, compound, auxiliary, participle, agreementRule)
   const variants = [canonical]
@@ -101,7 +102,7 @@ function agreementVariants(
 
   const stem = masculineSingularForm(form, participle)
   if (agreementRule === 'invariable') return [stem]
-  if (agreementRule === 'selon_construction') variants.push(stem)
+  if (agreementRule === 'selon_construction' && allowInvariableConstruction) variants.push(stem)
   if (pronoun === 'iel') {
     variants.push(stem, `${stem}e`, `${stem}.e`)
   } else if (pronoun === 'iels') {
@@ -116,6 +117,12 @@ function agreementVariants(
   return unique(variants)
 }
 
+function allowsInvariableConstruction(row: ConjugationSourceRow) {
+  return row.agreement_rule === 'selon_construction'
+    && row.complement_position === 'after'
+    && row.complement_function === 'cod'
+}
+
 function withPronoun(pronoun: string, form: string, infinitive = '') {
   return pronoun === 'je' && startsWithElidableSound(form, infinitive) ? `j'${form}` : `${pronoun} ${form}`
 }
@@ -124,7 +131,7 @@ function withComplement(answer: string, complement: string) {
   const trimmed = answer.trim()
   const punctuation = trimmed.match(/[!?]$/u)?.[0] ?? ''
   const stem = punctuation ? trimmed.slice(0, -1).trimEnd() : trimmed
-  return `${stem} ${complement.trim()}${punctuation}`
+  return `${stem} ${complement.trim()}${punctuation ? ` ${punctuation}` : ''}`
 }
 
 function agreedParticiple(participle: string, gender?: string | null, number?: string | null) {
@@ -178,7 +185,7 @@ function inputPrefix(
 
 export function formatAnswer(pronoun: string, form: string, mode: string, infinitive = '') {
   const normalizedMode = normalized(mode)
-  if (normalizedMode === 'impératif') return `${form}!`
+  if (normalizedMode === 'impératif') return `${form.trimEnd()} !`
 
   const phrase = withPronoun(pronoun, form, infinitive)
   if (normalizedMode === 'subjonctif') {
@@ -198,6 +205,7 @@ function answerVariants(row: ConjugationSourceRow, pronoun: string) {
       row.auxiliaire,
       row.participe_passe,
       row.agreement_rule,
+      allowsInvariableConstruction(row),
     )) {
       const agreedForm = applyAnteposedCodAgreement(form, row)
       const canonical = formatAnswer(pronoun, agreedForm, row.mode_name, row.infinitif)
@@ -231,6 +239,7 @@ export function formatConjugationQuestion(
         row.auxiliaire,
         row.participe_passe,
         row.agreement_rule,
+        allowsInvariableConstruction(row),
       ))
     : sourceForms.map(form => applyAgreement(
         form,

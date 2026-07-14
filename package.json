@@ -9,6 +9,7 @@
     "preview": "nuxt preview",
     "data:asseoir": "node --env-file=.env scripts/add-asseoir-variants.mjs",
     "data:audit-variants": "node --env-file=.env scripts/audit-academie-variants.mjs",
+    "data:add-visible-anteposed-complements": "node --env-file=.env scripts/add-visible-anteposed-complements.mjs",
     "data:apply-variants": "node --env-file=.env scripts/apply-academie-variants.mjs",
     "data:repair-integrity": "node --env-file=.env scripts/repair-conjugation-integrity.mjs",
     "data:migrate-verb-metadata": "node --env-file=.env --experimental-strip-types scripts/migrate-verb-metadata.mjs",

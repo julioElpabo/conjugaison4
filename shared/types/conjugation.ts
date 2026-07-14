@@ -58,6 +58,7 @@ export interface ConjugationTense {
   name: string
   isCompound: boolean
   selected: boolean
+  example?: string
   mode?: Pick<ConjugationMode, 'id' | 'name' | 'order'>
 }
 
@@ -115,6 +116,7 @@ export interface ChallengePreset extends ChallengeConfig {
 export interface ExerciseQuestion {
   id?: string | number
   titre: string
+  instruction?: string
   consigne: string
   reponses: readonly string[]
   reponsesPourCorrige: readonly string[]

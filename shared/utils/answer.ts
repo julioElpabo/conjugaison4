@@ -156,12 +156,19 @@ export function getAlternativeCorrections(
 
   if (!normalizedAnswer || safeCorrections.length < 2) return []
 
-  const matchingIndex = safeCorrections.findIndex((correction) => {
-    const normalizedCorrection = normalizeAnswer(correction).replace(/[.!?]+$/u, '')
-    return normalizedCorrection === normalizedAnswer
-      || normalizedCorrection.endsWith(normalizedAnswer)
-  })
+  const normalizedCorrections = safeCorrections.map(correction => (
+    normalizeAnswer(correction).replace(/[.!?]+$/u, '')
+  ))
+  const matchesAnswer = (normalizedCorrection: string) => (
+    normalizedCorrection === normalizedAnswer || normalizedCorrection.endsWith(normalizedAnswer)
+  )
 
-  if (matchingIndex < 0) return []
-  return safeCorrections.filter((_, index) => index !== matchingIndex)
+  if (!normalizedCorrections.some(matchesAnswer)) return []
+  const seen = new Set<string>()
+  return safeCorrections.filter((_, index) => {
+    const normalizedCorrection = normalizedCorrections[index]!
+    if (matchesAnswer(normalizedCorrection) || seen.has(normalizedCorrection)) return false
+    seen.add(normalizedCorrection)
+    return true
+  })
 }

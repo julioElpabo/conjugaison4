@@ -36,7 +36,12 @@ describe('getAlternativeCorrections', () => {
   })
 
   it("tolère l'absence de ponctuation à l'impératif", () => {
-    assert.deepEqual(getAlternativeCorrections('assieds', ['assieds!', 'assois!']), ['assois!'])
+    assert.deepEqual(getAlternativeCorrections('assieds', ['assieds !', 'assois !']), ['assois !'])
+  })
+
+  it("ne présente jamais la ponctuation comme une autre possibilité", () => {
+    assert.deepEqual(getAlternativeCorrections('mange', ['mange !', 'mange!', 'mange']), [])
+    assert.deepEqual(getAlternativeCorrections('mange!', ['mange !', 'mange']), [])
   })
 
   it("ne suggère rien lorsqu'il n'existe pas d'autre forme", () => {

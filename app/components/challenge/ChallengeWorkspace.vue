@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ChallengePreset, ClassicComplementChoice, ExerciseQuestion } from '~~/shared/types/conjugation'
+import type { ChallengePreset, ExerciseQuestion } from '~~/shared/types/conjugation'
 import ChallengeActions from './ChallengeActions.vue'
 import ChallengeOptions from './ChallengeOptions.vue'
 import LoadChallengeDialog from './LoadChallengeDialog.vue'
@@ -14,7 +14,6 @@ import CoachPicker from '../exercise/CoachPicker.vue'
 import type { CoachProfile } from '~~/shared/types/coach'
 import { getChallengeErrorMessage, useChallengeBuilder } from '~/composables/useChallengeBuilder'
 import { useChallengeApi } from '~/composables/useChallengeApi'
-import { classicComplementChoiceConfig } from '~~/shared/utils/classic-complement-choice'
 import '~/assets/css/main.css'
 
 const props = defineProps<{
@@ -62,13 +61,6 @@ const complementPlacementLabel = computed(() => ({
   mixed: 'parfois avant',
   before: 'avant si possible'
 }[challenge.value.complementPlacement]))
-const classicComplementVerb = computed(() => {
-  if (challenge.value.exerciseKind !== 'conjugation') return null
-  return selectedVerbs.value.find(verb => Boolean(verb.complementExample?.before))
-    ?? selectedVerbs.value.find(verb => Boolean(verb.complementExample))
-    ?? null
-})
-
 const shareUrl = computed(() => shareCode.value
   ? new URL(`/defi/${encodeURIComponent(shareCode.value)}`, requestUrl.origin).toString()
   : '')
@@ -140,17 +132,11 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   actionError.value = ''
 }
 
-async function prepareExercise(mode: 'classic' | 'chat', complementChoice?: ClassicComplementChoice) {
+async function prepareExercise(mode: 'classic' | 'chat') {
   if (!isReady.value) return
   if (mode === 'chat') {
     isCoachPickerOpen.value = true
     return
-  }
-  if (mode === 'classic' && complementChoice) {
-    const complementConfig = classicComplementChoiceConfig(complementChoice)
-    challenge.value.includeComplements = complementConfig.includeComplements
-    challenge.value.complementPlacement = complementConfig.complementPlacement
-    markAsCustom()
   }
   busyAction.value = 'exercise'
   clearMessages()
@@ -308,6 +294,7 @@ function onToggleTense(id: number) {
           <TensePicker
             :modes="catalogue.modes"
             :tenses="catalogue.temps"
+            :verbs="selectedVerbs"
             :selected-ids="challenge.tenseIds"
             :past-simple-pronouns="challenge.pastSimplePronouns"
             @toggle="onToggleTense"
@@ -320,9 +307,14 @@ function onToggleTense(id: number) {
             :question-count="challenge.questionCount"
             :exercise-kind="challenge.exerciseKind"
             :inclusive-pronouns="challenge.inclusivePronouns"
+            :include-complements="challenge.includeComplements"
+            :complement-placement="challenge.complementPlacement"
+            :complement-verbs="selectedVerbs"
             @update-question-count="challenge.questionCount = $event; markAsCustom()"
             @update-exercise-kind="challenge.exerciseKind = $event"
             @update-inclusive-pronouns="challenge.inclusivePronouns = $event"
+            @update-include-complements="challenge.includeComplements = $event; markAsCustom()"
+            @update-complement-placement="challenge.complementPlacement = $event; markAsCustom()"
           />
         </div>
 
@@ -349,7 +341,6 @@ function onToggleTense(id: number) {
           class="challenge-actions--bottom"
           :ready="isReady"
           :busy-action="busyAction"
-          :complement-verb="classicComplementVerb"
           @exercise="prepareExercise"
           @print="preparePrint"
           @save="saveChallenge"

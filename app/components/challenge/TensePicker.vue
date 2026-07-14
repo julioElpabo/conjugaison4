@@ -2,12 +2,14 @@
 import type {
   ConjugationMode,
   PastSimplePronouns,
-  Tense
+  Tense,
+  Verb
 } from '~/composables/useChallengeBuilder'
 
 const props = defineProps<{
   modes: ConjugationMode[]
   tenses: Tense[]
+  verbs: Verb[]
   selectedIds: number[]
   pastSimplePronouns: PastSimplePronouns
 }>()
@@ -20,6 +22,20 @@ const emit = defineEmits<{
 }>()
 
 const selectedSet = computed(() => new Set(props.selectedIds))
+interface TenseExample {
+  emphasis: string
+  rest: string
+}
+
+const examples = ref<Record<number, TenseExample>>({})
+const examplesLoading = ref(false)
+const exampleVerbs = computed(() => {
+  const withCod = props.verbs.filter(verb => verb.complementExample?.functionObject === 'cod')
+  return withCod.length ? withCod : props.verbs
+})
+const exampleRequestKey = computed(() => (
+  `${exampleVerbs.value.map(verb => verb.id).join(',')}|${props.tenses.map(tense => tense.id).join(',')}`
+))
 const groups = computed(() => props.modes
   .map(mode => ({
     mode,
@@ -27,14 +43,39 @@ const groups = computed(() => props.modes
   }))
   .filter(group => group.tenses.length > 0))
 
-const showsPastSimpleOption = computed(() => (
-  selectedSet.value.has(4) || selectedSet.value.has(8)
-))
+function isPastSimple(tense: Tense) {
+  return tense.name.trim().toLocaleLowerCase('fr').normalize('NFC') === 'passé simple'
+}
 
 function onPastSimplePronounsChange(event: Event) {
   const value = (event.target as HTMLInputElement).value as PastSimplePronouns
   emit('updatePastSimplePronouns', value)
 }
+
+let exampleRequest = 0
+async function loadExamples() {
+  const request = ++exampleRequest
+  examples.value = {}
+  if (!exampleVerbs.value.length || !props.tenses.length) return
+  examplesLoading.value = true
+  try {
+    const response = await $fetch<{ examples: Record<number, TenseExample> }>('/api/tense-examples', {
+      method: 'POST',
+      body: {
+        verbIds: exampleVerbs.value.map(verb => verb.id),
+        tenseIds: props.tenses.map(tense => tense.id),
+      },
+    })
+    if (request === exampleRequest) examples.value = response.examples
+  } catch {
+    if (request === exampleRequest) examples.value = {}
+  } finally {
+    if (request === exampleRequest) examplesLoading.value = false
+  }
+}
+
+onMounted(loadExamples)
+watch(exampleRequestKey, () => void loadExamples())
 </script>
 
 <template>
@@ -62,44 +103,174 @@ function onPastSimplePronounsChange(event: Event) {
       <fieldset v-for="group in groups" :key="group.mode.id" class="tense-group">
         <legend>{{ group.mode.name }}</legend>
         <div class="tense-group__items">
-          <label v-for="tense in group.tenses" :key="tense.id" class="switch-row">
-            <input
-              type="checkbox"
-              :checked="selectedSet.has(tense.id)"
-              @change="emit('toggle', tense.id)"
-            >
-            <span class="switch-row__control" aria-hidden="true" />
-            <span>
-              {{ tense.name }}
-              <small v-if="tense.isCompound">temps composé</small>
-            </span>
-          </label>
+          <template v-for="tense in group.tenses" :key="tense.id">
+            <div class="tense-row">
+              <span class="tense-info">
+                <button
+                  type="button"
+                  :aria-label="`Voir un exemple au ${tense.name}`"
+                  :aria-describedby="`tense-example-${tense.id}`"
+                >i</button>
+                <span :id="`tense-example-${tense.id}`" class="tense-tooltip" role="tooltip">
+                  <template v-if="examples[tense.id]">
+                    Exemple: <strong>{{ examples[tense.id]!.emphasis }}</strong><template v-if="examples[tense.id]!.rest"> {{ examples[tense.id]!.rest }}</template>
+                  </template>
+                  <template v-else>{{ examplesLoading ? 'Chargement…' : 'Exemple momentanément indisponible.' }}</template>
+                </span>
+              </span>
+              <label class="switch-row">
+                <input
+                  type="checkbox"
+                  :checked="selectedSet.has(tense.id)"
+                  @change="emit('toggle', tense.id)"
+                >
+                <span class="switch-row__control" aria-hidden="true" />
+                <span>
+                  {{ tense.name }}
+                  <small v-if="tense.isCompound">temps composé</small>
+                </span>
+              </label>
+            </div>
+
+            <Transition name="past-simple-options">
+              <div v-if="isPastSimple(tense) && selectedSet.has(tense.id)" class="past-simple-options">
+                <fieldset class="inline-choice">
+                  <legend>Au passé simple et au passé antérieur</legend>
+                  <label>
+                    <input
+                      type="radio"
+                      name="past-simple-pronouns"
+                      value="all"
+                      :checked="pastSimplePronouns === 'all'"
+                      @change="onPastSimplePronounsChange"
+                    >
+                    Tous les pronoms
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="past-simple-pronouns"
+                      value="third-person-only"
+                      :checked="pastSimplePronouns === 'third-person-only'"
+                      @change="onPastSimplePronounsChange"
+                    >
+                    Seulement il / elle et ils / elles
+                  </label>
+                </fieldset>
+              </div>
+            </Transition>
+          </template>
         </div>
       </fieldset>
     </div>
-
-    <fieldset v-if="showsPastSimpleOption" class="inline-choice">
-      <legend>Au passé simple et au passé antérieur</legend>
-      <label>
-        <input
-          type="radio"
-          name="past-simple-pronouns"
-          value="all"
-          :checked="pastSimplePronouns === 'all'"
-          @change="onPastSimplePronounsChange"
-        >
-        Tous les pronoms
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="past-simple-pronouns"
-          value="third-person-only"
-          :checked="pastSimplePronouns === 'third-person-only'"
-          @change="onPastSimplePronounsChange"
-        >
-        Seulement il / elle et ils / elles
-      </label>
-    </fieldset>
   </section>
 </template>
+
+<style scoped>
+.tense-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.tense-row .switch-row {
+  flex: 1;
+}
+
+.tense-info {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.tense-info > button {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  place-items: center;
+  color: var(--brand);
+  background: #eef7f4;
+  border: 1px solid #9dbdb4;
+  border-radius: 50%;
+  font-family: Georgia, serif;
+  font-size: .76rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.tense-tooltip {
+  position: absolute;
+  z-index: 40;
+  bottom: calc(100% + 8px);
+  left: -8px;
+  width: max-content;
+  max-width: none;
+  padding: 9px 11px;
+  visibility: hidden;
+  color: white;
+  background: #233f3a;
+  border-radius: 9px;
+  box-shadow: 0 10px 28px rgb(24 54 47 / 24%);
+  font-size: .78rem;
+  line-height: 1.4;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 140ms ease, transform 140ms ease, visibility 140ms;
+}
+
+.tense-tooltip strong {
+  margin-right: .28em;
+  font-weight: 800;
+  letter-spacing: .018em;
+}
+
+.tense-tooltip::after {
+  position: absolute;
+  top: 100%;
+  left: 13px;
+  border: 6px solid transparent;
+  border-top-color: #233f3a;
+  content: '';
+}
+
+.tense-info:hover .tense-tooltip,
+.tense-info:focus-within .tense-tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.past-simple-options {
+  max-height: 220px;
+  overflow: hidden;
+}
+
+.past-simple-options .inline-choice {
+  margin: 2px 0 4px 44px;
+  padding: 12px;
+}
+
+.past-simple-options-enter-active,
+.past-simple-options-leave-active {
+  transition: max-height 240ms ease, opacity 180ms ease, transform 240ms ease;
+}
+
+.past-simple-options-enter-from,
+.past-simple-options-leave-to {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-7px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tense-tooltip,
+  .past-simple-options-enter-active,
+  .past-simple-options-leave-active {
+    transition: none;
+  }
+}
+</style>

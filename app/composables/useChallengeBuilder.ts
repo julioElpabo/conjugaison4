@@ -102,7 +102,10 @@ export function useChallengeBuilder() {
   ))
 
   async function loadCatalogue(force = false) {
-    if (!force && catalogueStatus.value === 'success') {
+    const hasTenseExamples = catalogue.value.temps.length > 0
+      && catalogue.value.temps.every(tense => Boolean(tense.example?.trim()))
+
+    if (!force && catalogueStatus.value === 'success' && hasTenseExamples) {
       return catalogue.value
     }
 

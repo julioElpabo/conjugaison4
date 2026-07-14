@@ -3,6 +3,7 @@ import { resolveChallengePresets } from '../../shared/data/challenge-presets'
 import type { Verb } from '../../shared/types/conjugation'
 import { encodePronominalSelectionId } from '../../shared/utils/pronominal-selection'
 import { useDatabase } from '../utils/database'
+import { buildTenseExamples, type MangerFormForExample } from './tense-examples'
 
 interface VerbeRow extends RowDataPacket {
   id: number
@@ -62,9 +63,11 @@ interface TempsRow extends RowDataPacket {
   selected: number
 }
 
+interface MangerExampleRow extends RowDataPacket, MangerFormForExample {}
+
 export async function getCatalogue() {
   const database = useDatabase()
-  const [verbesResult, modesResult, tempsResult, semanticResult, pronominalResult, complementResult] = await Promise.all([
+  const [verbesResult, modesResult, tempsResult, semanticResult, pronominalResult, complementResult, mangerExamplesResult] = await Promise.all([
     database.execute<VerbeRow[]>(`
       SELECT v.id, v.infinitif,
              \`participe_présent\` AS participe_present,
@@ -118,6 +121,16 @@ export async function getCatalogue() {
       ORDER BY vs.verbe_id,
         (cv.fonction_objet='cod' AND c.texte_antepose IS NOT NULL) DESC,
         cv.id, c.id
+    `),
+    database.execute<MangerExampleRow[]>(`
+      SELECT vc.temp_id, p.pronom, vc.conjugaison1, m.name AS mode_name
+      FROM verbesconjugues vc
+      INNER JOIN verbes v ON v.id=vc.verbe_id
+      INNER JOIN personnes p ON p.id=vc.personne_id
+      INNER JOIN temps t ON t.id=vc.temp_id
+      INNER JOIN modes m ON m.id=t.mode_id
+      WHERE v.infinitif='manger' AND vc.conjugaison1 <> ''
+      ORDER BY vc.temp_id, p.id
     `),
   ])
 
@@ -219,6 +232,15 @@ export async function getCatalogue() {
   })
   const catalogueVerbs = [...verbs, ...virtualPronominals]
     .sort((left, right) => left.infinitif.localeCompare(right.infinitif, 'fr') || left.id - right.id)
+  const modeNameById = new Map(modesResult[0].map(mode => [Number(mode.id), mode.name]))
+  const tenseExamples = buildTenseExamples(
+    tempsResult[0].map(tense => ({
+      id: Number(tense.id),
+      mode: modeNameById.get(Number(tense.mode_id)) ?? '',
+      name: tense.name,
+    })),
+    mangerExamplesResult[0],
+  )
 
   return {
     verbes: catalogueVerbs,
@@ -232,7 +254,8 @@ export async function getCatalogue() {
       modeId: Number(row.mode_id),
       name: row.name,
       isCompound: Boolean(row.is_compound),
-      selected: Boolean(row.selected)
+      selected: Boolean(row.selected),
+      example: tenseExamples.get(Number(row.id))
     })),
     presets: resolveChallengePresets(catalogueVerbs),
   }

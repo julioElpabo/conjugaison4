@@ -14,6 +14,14 @@ export interface ConjugationSourceRow {
   temps_name: string
   is_compound: number
   mode_name: string
+  agreement_rule?: string | null
+  complement_phrase?: string | null
+  complement_position?: 'after' | 'before'
+  complement_anteposed?: string | null
+  complement_gender?: string | null
+  complement_number?: string | null
+  complement_function?: 'cod' | 'coi' | null
+  complement_preposition?: string | null
 }
 
 function unique(values: string[]) {
@@ -65,9 +73,11 @@ function applyAgreement(
   pronoun: string,
   compound: boolean,
   auxiliary: string,
-  participle: string
+  participle: string,
+  agreementRule?: string | null,
 ) {
   if (!compound || normalized(auxiliary) !== 'être') return form
+  if (agreementRule === 'invariable') return masculineSingularForm(form, participle)
 
   const stem = masculineSingularForm(form, participle)
   if (pronoun === 'elle') return `${stem}e`
@@ -82,13 +92,16 @@ function agreementVariants(
   pronoun: string,
   compound: boolean,
   auxiliary: string,
-  participle: string
+  participle: string,
+  agreementRule?: string | null,
 ) {
-  const canonical = applyAgreement(form, pronoun, compound, auxiliary, participle)
+  const canonical = applyAgreement(form, pronoun, compound, auxiliary, participle, agreementRule)
   const variants = [canonical]
   if (!compound || normalized(auxiliary) !== 'être') return variants
 
   const stem = masculineSingularForm(form, participle)
+  if (agreementRule === 'invariable') return [stem]
+  if (agreementRule === 'selon_construction') variants.push(stem)
   if (pronoun === 'iel') {
     variants.push(stem, `${stem}e`, `${stem}.e`)
   } else if (pronoun === 'iels') {
@@ -105,6 +118,62 @@ function agreementVariants(
 
 function withPronoun(pronoun: string, form: string, infinitive = '') {
   return pronoun === 'je' && startsWithElidableSound(form, infinitive) ? `j'${form}` : `${pronoun} ${form}`
+}
+
+function withComplement(answer: string, complement: string) {
+  const trimmed = answer.trim()
+  const punctuation = trimmed.match(/[!?]$/u)?.[0] ?? ''
+  const stem = punctuation ? trimmed.slice(0, -1).trimEnd() : trimmed
+  return `${stem} ${complement.trim()}${punctuation}`
+}
+
+function agreedParticiple(participle: string, gender?: string | null, number?: string | null) {
+  let result = participle
+  if (gender === 'feminin') {
+    const exceptions: Record<string, string> = {
+      absous: 'absoute', dissous: 'dissoute', dû: 'due', mû: 'mue', crû: 'crue',
+    }
+    result = exceptions[result] ?? (result.endsWith('e') ? result : `${result}e`)
+  }
+  if (number === 'pluriel' && !/[sx]$/u.test(result)) result += 's'
+  return result
+}
+
+function applyAnteposedCodAgreement(form: string, row: ConjugationSourceRow) {
+  if (row.complement_position !== 'before'
+      || !row.is_compound
+      || normalized(row.auxiliaire) !== 'avoir'
+      || !row.participe_passe
+      || !row.complement_gender
+      || !row.complement_number
+      || !form.endsWith(row.participe_passe)) {
+    return form
+  }
+  const agreed = agreedParticiple(row.participe_passe, row.complement_gender, row.complement_number)
+  return `${form.slice(0, -row.participe_passe.length)}${agreed}`
+}
+
+function withAnteposedComplement(answer: string, pronoun: string, mode: string, complement: string) {
+  const clause = normalized(mode) === 'subjonctif'
+    ? answer
+    : startsWithVowel(pronoun) ? `qu'${answer}` : `que ${answer}`
+  return `${complement.trim()} ${clause}`
+}
+
+function inputPrefix(
+  pronoun: string,
+  form: string,
+  mode: string,
+  infinitive: string,
+  position?: 'after' | 'before',
+) {
+  if (normalized(mode) === 'impératif') return ''
+  const formatted = formatAnswer(pronoun, form, mode, infinitive)
+  const base = formatted.endsWith(form)
+    ? formatted.slice(0, -form.length).trimEnd()
+    : pronoun
+  if (position !== 'before' || normalized(mode) === 'subjonctif') return base
+  return startsWithVowel(pronoun) ? `qu'${base}` : `que ${base}`
 }
 
 export function formatAnswer(pronoun: string, form: string, mode: string, infinitive = '') {
@@ -127,33 +196,85 @@ function answerVariants(row: ConjugationSourceRow, pronoun: string) {
       pronoun,
       Boolean(row.is_compound),
       row.auxiliaire,
-      row.participe_passe
+      row.participe_passe,
+      row.agreement_rule,
     )) {
-      const canonical = formatAnswer(pronoun, form, row.mode_name, row.infinitif)
-      answers.push(canonical, form)
+      const agreedForm = applyAnteposedCodAgreement(form, row)
+      const canonical = formatAnswer(pronoun, agreedForm, row.mode_name, row.infinitif)
+      answers.push(canonical, agreedForm)
       if (normalized(row.mode_name) === 'impératif') {
-        answers.push(form.replace(/!$/, ''))
+        answers.push(agreedForm.replace(/!$/, ''))
       } else {
-        answers.push(withPronoun(pronoun, form, row.infinitif))
+        answers.push(withPronoun(pronoun, agreedForm, row.infinitif))
+      }
+      if (row.complement_position === 'before' && row.complement_anteposed) {
+        answers.push(withAnteposedComplement(canonical, pronoun, row.mode_name, row.complement_anteposed))
       }
     }
   }
-  return unique(answers)
+  const baseAnswers = unique(answers)
+  return row.complement_phrase && row.complement_position !== 'before'
+    ? unique([...baseAnswers, ...baseAnswers.map(answer => withComplement(answer, row.complement_phrase!))])
+    : baseAnswers
 }
 
 export function formatConjugationQuestion(
   row: ConjugationSourceRow,
   pronoun: string
 ): ExerciseQuestion {
-  const correctedForms = unique([row.conjugaison1, row.conjugaison2, row.conjugaison3])
-    .map(form => applyAgreement(
-      form,
-      pronoun,
-      Boolean(row.is_compound),
-      row.auxiliaire,
-      row.participe_passe
-    ))
+  const sourceForms = unique([row.conjugaison1, row.conjugaison2, row.conjugaison3])
+  const correctedForms = (row.agreement_rule === 'selon_construction'
+    ? sourceForms.flatMap(form => agreementVariants(
+        form,
+        pronoun,
+        Boolean(row.is_compound),
+        row.auxiliaire,
+        row.participe_passe,
+        row.agreement_rule,
+      ))
+    : sourceForms.map(form => applyAgreement(
+        form,
+        pronoun,
+        Boolean(row.is_compound),
+        row.auxiliaire,
+        row.participe_passe,
+        row.agreement_rule,
+      )))
+    .map(form => applyAnteposedCodAgreement(form, row))
     .map(form => formatAnswer(pronoun, form, row.mode_name, row.infinitif))
+  const displayedCorrections = row.complement_position === 'before' && row.complement_anteposed
+    ? correctedForms.map(answer => withAnteposedComplement(answer, pronoun, row.mode_name, row.complement_anteposed!))
+    : row.complement_phrase
+      ? correctedForms.map(answer => withComplement(answer, row.complement_phrase!))
+    : correctedForms
+  const prompt = row.complement_position === 'before' && row.complement_anteposed
+    ? `${row.complement_anteposed} ${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif, 'before')} … | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
+    : row.complement_phrase
+    ? `${normalized(row.mode_name) === 'impératif' ? '' : `${pronoun} `}… ${row.complement_phrase} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
+    : `${pronoun} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
+  const displayedComplement = row.complement_position === 'before'
+    ? row.complement_anteposed
+    : row.complement_phrase
+  const hasAvoirParticipleRule = Boolean(row.is_compound)
+    && normalized(row.auxiliaire) === 'avoir'
+    && Boolean(displayedComplement)
+    && (row.complement_function === 'cod' || row.complement_function === 'coi')
+  const agreementReminder = hasAvoirParticipleRule
+    ? {
+        kind: (row.complement_function === 'coi'
+          ? 'coi'
+          : row.complement_position === 'before' ? 'cod-before' : 'cod-after') as 'cod-before' | 'cod-after' | 'coi',
+        infinitive: row.infinitif,
+        complement: displayedComplement!,
+        preposition: row.complement_preposition,
+        participle: row.complement_function === 'cod' && row.complement_position === 'before'
+          && row.complement_gender && row.complement_number
+          ? agreedParticiple(row.participe_passe, row.complement_gender, row.complement_number)
+          : row.participe_passe,
+        gender: (row.complement_gender as 'masculin' | 'feminin' | null | undefined) ?? null,
+        number: (row.complement_number as 'singulier' | 'pluriel' | null | undefined) ?? null,
+      }
+    : undefined
 
   return {
     id: `c-${row.id}`,
@@ -161,15 +282,21 @@ export function formatConjugationQuestion(
     tenseId: Number(row.temp_id),
     personId: Number(row.personne_id),
     titre: row.infinitif,
-    consigne: `${pronoun} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`,
+    consigne: prompt,
     reponses: answerVariants(row, pronoun),
-    reponsesPourCorrige: unique(correctedForms),
+    reponsesPourCorrige: unique(displayedCorrections),
     infinitif: row.infinitif,
     pronom: pronoun,
     temps: row.temps_name,
     mode: row.mode_name,
     conjugaison1: row.conjugaison1,
     conjugaison2: row.conjugaison2 || '',
-    conjugaison3: row.conjugaison3 || ''
+    conjugaison3: row.conjugaison3 || '',
+    complement: row.complement_position === 'before'
+      ? row.complement_anteposed || undefined
+      : row.complement_phrase || undefined,
+    complementPosition: row.complement_position,
+    saisiePrefixe: inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif, row.complement_position),
+    ...(agreementReminder ? { agreementReminder } : {}),
   }
 }

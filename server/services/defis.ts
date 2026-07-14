@@ -3,9 +3,14 @@ import type { RowDataPacket } from 'mysql2/promise'
 import type { DefiDefinition } from '../types/public-api'
 import { useDatabase } from '../utils/database'
 import { parseDefiDefinition, PublicInputError, serializeDefi } from './public-api-validation'
+import {
+  decodePronominalSelectionId,
+  encodePronominalSelectionId,
+} from '../../shared/utils/pronominal-selection'
 
 interface CountRow extends RowDataPacket { count: number }
 interface DefiRow extends RowDataPacket { name: string; defi: string }
+interface LegacyPronominalRow extends RowDataPacket { id: number; legacy_verbe_id: number }
 
 const CODE_ALPHABET = 'ABCDEFGHKLMNPQRSTUVWXYZ23456789'
 const CODE_PATTERN = /^[A-HK-NP-Z2-9]{2}(?:-[A-HK-NP-Z2-9]{2}){3}$/
@@ -34,17 +39,33 @@ export function normalizeDefiCode(value: string | undefined) {
 
 export async function assertDefiSelectionExists(definition: DefiDefinition) {
   const database = useDatabase()
-  const [verbResult, tenseResult] = await Promise.all([
-    database.execute<CountRow[]>(
-      `SELECT COUNT(*) AS count FROM verbes WHERE id IN (${placeholders(definition.verbIds)})`,
-      definition.verbIds
-    ),
+  const verbIds = definition.verbIds.filter(id => id > 0)
+  const pronominalUseIds = definition.verbIds
+    .filter(id => id < 0)
+    .map(decodePronominalSelectionId)
+    .filter((id): id is number => id !== null)
+  const [verbResult, pronominalResult, tenseResult] = await Promise.all([
+    verbIds.length > 0
+      ? database.execute<CountRow[]>(
+          `SELECT COUNT(*) AS count FROM verbes WHERE id IN (${placeholders(verbIds)}) AND est_archive = 0`,
+          verbIds
+        )
+      : Promise.resolve([[{ count: 0 }]] as unknown as Awaited<ReturnType<typeof database.execute<CountRow[]>>>),
+    pronominalUseIds.length > 0
+      ? database.execute<CountRow[]>(
+          `SELECT COUNT(*) AS count FROM emplois_pronominaux
+           WHERE id IN (${placeholders(pronominalUseIds)}) AND actif = 1 AND verbe_id IS NOT NULL`,
+          pronominalUseIds
+        )
+      : Promise.resolve([[{ count: 0 }]] as unknown as Awaited<ReturnType<typeof database.execute<CountRow[]>>>),
     database.execute<CountRow[]>(
       `SELECT COUNT(*) AS count FROM temps WHERE id IN (${placeholders(definition.tenseIds)})`,
       definition.tenseIds
     )
   ])
-  if (Number(verbResult[0][0]?.count) !== definition.verbIds.length) {
+  if (Number(verbResult[0][0]?.count) !== verbIds.length
+      || Number(pronominalResult[0][0]?.count) !== pronominalUseIds.length
+      || verbIds.length + pronominalUseIds.length !== definition.verbIds.length) {
     throw new PublicInputError('Un ou plusieurs verbes sont inconnus')
   }
   if (Number(tenseResult[0][0]?.count) !== definition.tenseIds.length) {
@@ -75,7 +96,8 @@ export async function saveDefi(definition: DefiDefinition) {
 }
 
 export async function getDefi(code: string): Promise<DefiDefinition> {
-  const [rows] = await useDatabase().execute<DefiRow[]>(
+  const database = useDatabase()
+  const [rows] = await database.execute<DefiRow[]>(
     'SELECT name, defi FROM defis WHERE name = ? ORDER BY id DESC LIMIT 1',
     [code]
   )
@@ -83,7 +105,24 @@ export async function getDefi(code: string): Promise<DefiDefinition> {
   if (!row) throw new DefiNotFoundError('Défi introuvable')
 
   try {
-    return parseDefiDefinition(JSON.parse(row.defi))
+    const definition = parseDefiDefinition(JSON.parse(row.defi))
+    const legacyIds = definition.verbIds.filter(id => id > 0)
+    if (legacyIds.length === 0) return definition
+
+    const [aliases] = await database.execute<LegacyPronominalRow[]>(`
+      SELECT id, legacy_verbe_id
+      FROM emplois_pronominaux
+      WHERE legacy_verbe_id IN (${placeholders(legacyIds)})
+        AND actif = 1 AND verbe_id IS NOT NULL
+    `, legacyIds)
+    if (aliases.length === 0) return definition
+
+    const byLegacyId = new Map(aliases.map(alias => [
+      Number(alias.legacy_verbe_id),
+      encodePronominalSelectionId(Number(alias.id)),
+    ]))
+    definition.verbIds = [...new Set(definition.verbIds.map(id => byLegacyId.get(id) ?? id))]
+    return definition
   } catch {
     throw new DefiStorageError('Le défi enregistré est illisible')
   }

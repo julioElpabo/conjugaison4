@@ -1,5 +1,6 @@
 import type {
   ChallengePrintOptions,
+  ComplementPlacement,
   DefiDefinition,
   ExerciseKind,
   PastSimplePronouns,
@@ -14,7 +15,9 @@ const QUESTIONNAIRE_KEYS = new Set([
   'questionCount',
   'exerciseKind',
   'pastSimplePronouns',
-  'inclusivePronouns'
+  'inclusivePronouns',
+  'includeComplements',
+  'complementPlacement'
 ])
 
 const DEFI_KEYS = new Set([
@@ -25,6 +28,8 @@ const DEFI_KEYS = new Set([
   'exerciseKind',
   'pastSimplePronouns',
   'inclusivePronouns',
+  'includeComplements',
+  'complementPlacement',
   'printOptions'
 ])
 
@@ -42,8 +47,8 @@ const PRINT_OPTION_KEYS = new Set([
 const DEFAULT_PRINT_OPTIONS: ChallengePrintOptions = {
   title: 'Défi de conjugaison',
   showGrade: true,
-  showVerbs: true,
-  showTenses: true,
+  showVerbs: false,
+  showTenses: false,
   showFirstName: true,
   showLastName: true,
   showDate: true,
@@ -61,13 +66,13 @@ function assertOnlyKeys(value: Record<string, unknown>, allowed: Set<string>) {
   }
 }
 
-function parseIds(value: unknown, label: string, maximum: number): number[] {
+function parseIds(value: unknown, label: string, maximum: number, allowVirtual = false): number[] {
   if (!Array.isArray(value) || value.length === 0 || value.length > maximum) {
     throw new PublicInputError(`${label} doit contenir entre 1 et ${maximum} identifiants`)
   }
 
   const ids = value.map((id) => {
-    if (!Number.isSafeInteger(id) || Number(id) <= 0) {
+    if (!Number.isSafeInteger(id) || Number(id) === 0 || (!allowVirtual && Number(id) < 0)) {
       throw new PublicInputError(`${label} contient un identifiant invalide`)
     }
     return Number(id)
@@ -107,6 +112,11 @@ function parsePastSimplePronouns(value: unknown): PastSimplePronouns {
   throw new PublicInputError('pastSimplePronouns doit valoir all ou third-person-only')
 }
 
+function parseComplementPlacement(value: unknown): ComplementPlacement {
+  if (value === 'after' || value === 'mixed' || value === 'before') return value
+  throw new PublicInputError('complementPlacement doit valoir after, mixed ou before')
+}
+
 function parsePrintOptions(value: unknown): ChallengePrintOptions {
   if (value === undefined) {
     return { ...DEFAULT_PRINT_OPTIONS }
@@ -141,14 +151,22 @@ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest 
   if (typeof value.inclusivePronouns !== 'boolean') {
     throw new PublicInputError('inclusivePronouns doit être un booléen')
   }
+  const includeComplements = value.includeComplements ?? false
+  if (typeof includeComplements !== 'boolean') {
+    throw new PublicInputError('includeComplements doit être un booléen')
+  }
 
   return {
-    verbIds: parseIds(value.verbIds, 'verbIds', 500),
+    verbIds: parseIds(value.verbIds, 'verbIds', 500, true),
     tenseIds: parseIds(value.tenseIds, 'tenseIds', 30),
     questionCount: parseQuestionCount(value.questionCount),
     exerciseKind: parseExerciseKind(value.exerciseKind),
     pastSimplePronouns: parsePastSimplePronouns(value.pastSimplePronouns),
-    inclusivePronouns: value.inclusivePronouns
+    inclusivePronouns: value.inclusivePronouns,
+    includeComplements,
+    complementPlacement: value.complementPlacement === undefined
+      ? 'after'
+      : parseComplementPlacement(value.complementPlacement)
   }
 }
 
@@ -192,15 +210,23 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
   if (typeof inclusivePronouns !== 'boolean') {
     throw new PublicInputError('inclusivePronouns doit être un booléen')
   }
+  const includeComplements = modernValue.includeComplements ?? false
+  if (typeof includeComplements !== 'boolean') {
+    throw new PublicInputError('includeComplements doit être un booléen')
+  }
 
   return {
     version: 1,
-    verbIds: parseIds(modernValue.verbIds, 'verbIds', 500),
+    verbIds: parseIds(modernValue.verbIds, 'verbIds', 500, true),
     tenseIds: parseIds(modernValue.tenseIds, 'tenseIds', 30),
     questionCount: parseQuestionCount(modernValue.questionCount),
     exerciseKind,
     pastSimplePronouns,
     inclusivePronouns,
+    includeComplements,
+    complementPlacement: modernValue.complementPlacement === undefined
+      ? 'after'
+      : parseComplementPlacement(modernValue.complementPlacement),
     printOptions: parsePrintOptions(modernValue.printOptions)
   }
 }

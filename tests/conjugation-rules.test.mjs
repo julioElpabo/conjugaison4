@@ -44,6 +44,17 @@ describe('formes multiples reconnues par le correcteur', () => {
       assert.deepEqual(getAlternativeCorrections(testCase.answer, testCase.forms), [testCase.forms[0]])
     })
   }
+
+  it('sépare les variantes historiques du participe présent', () => {
+    const question = formatNonFiniteQuestion({
+      id: -3,
+      infinitif: "s'asseoir",
+      participe_present: "s'asseyant-s'assoyant",
+      participe_passe: 'assis',
+      auxiliaire_participe_present: "s'étant",
+    }, { id: 20, name: 'présent', mode_name: 'participe' })
+    assert.deepEqual(question?.reponsesPourCorrige, ["S'asseyant", "S'assoyant"])
+  })
 })
 
 describe('apostrophes et élisions françaises', () => {
@@ -63,6 +74,83 @@ describe('apostrophes et élisions françaises', () => {
     assert.equal(formatAnswer('il', 'aille', 'subjonctif'), "qu'il aille")
     assert.equal(formatAnswer('elle', 'aille', 'subjonctif'), "qu'elle aille")
     assert.equal(formatAnswer('elles', 'aillent', 'subjonctif'), "qu'elles aillent")
+  })
+})
+
+describe('compléments d’objet dans les questions', () => {
+  it('affiche une phrase naturelle et accepte la forme seule ou la phrase complète', () => {
+    const question = formatConjugationQuestion(row({
+      infinitif: 'manger',
+      conjugaison1: 'mangeait',
+      conjugaison2: '',
+      temps_name: 'imparfait',
+      complement_phrase: 'des pommes',
+    }), 'il')
+
+    assert.equal(question.consigne, 'il … des pommes | manger | imparfait (indicatif)')
+    assert.ok(question.reponses.includes('mangeait'))
+    assert.ok(question.reponses.includes('il mangeait'))
+    assert.ok(question.reponses.includes('mangeait des pommes'))
+    assert.ok(question.reponses.includes('il mangeait des pommes'))
+    assert.deepEqual(question.reponsesPourCorrige, ['il mangeait des pommes'])
+    assert.equal(question.complement, 'des pommes')
+    assert.equal(question.saisiePrefixe, 'il')
+  })
+
+  it('place le complément avant la ponctuation de l’impératif', () => {
+    const question = formatConjugationQuestion(row({
+      infinitif: 'manger',
+      conjugaison1: 'mange',
+      conjugaison2: '',
+      mode_name: 'impératif',
+      complement_phrase: 'une pomme',
+    }), 'tu')
+    assert.ok(question.reponses.includes('mange une pomme!'))
+    assert.deepEqual(question.reponsesPourCorrige, ['mange une pomme!'])
+    assert.equal(question.consigne, '… une pomme | manger | présent (impératif)')
+    assert.equal(question.saisiePrefixe, '')
+  })
+
+  it('prépare un préfixe naturel devant le champ pour les formes élidées', () => {
+    const indicative = formatConjugationQuestion(row({
+      infinitif: 'aimer',
+      conjugaison1: 'aime',
+      complement_phrase: 'ce morceau',
+    }), 'je')
+    const subjunctive = formatConjugationQuestion(row({
+      infinitif: 'aimer',
+      conjugaison1: 'aime',
+      mode_name: 'subjonctif',
+      complement_phrase: 'ce morceau',
+    }), 'elle')
+
+    assert.equal(indicative.saisiePrefixe, "j'")
+    assert.equal(subjunctive.saisiePrefixe, "qu'elle")
+  })
+
+  it('antépose le COD et accorde le participe passé employé avec avoir', () => {
+    const question = formatConjugationQuestion(row({
+      infinitif: 'manger',
+      conjugaison1: 'avez mangé',
+      conjugaison2: '',
+      temps_name: 'passé composé',
+      is_compound: 1,
+      auxiliaire: 'avoir',
+      participe_passe: 'mangé',
+      complement_phrase: 'des pommes',
+      complement_position: 'before',
+      complement_anteposed: 'les pommes',
+      complement_gender: 'feminin',
+      complement_number: 'pluriel',
+    }), 'vous')
+
+    assert.equal(question.consigne, 'les pommes que vous … | manger | passé composé (indicatif)')
+    assert.equal(question.complement, 'les pommes')
+    assert.equal(question.complementPosition, 'before')
+    assert.equal(question.saisiePrefixe, 'que vous')
+    assert.ok(question.reponses.includes('avez mangées'))
+    assert.equal(question.reponses.includes('avez mangé'), false)
+    assert.deepEqual(question.reponsesPourCorrige, ['les pommes que vous avez mangées'])
   })
 })
 

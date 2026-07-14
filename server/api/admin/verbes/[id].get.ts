@@ -23,6 +23,15 @@ interface VerbRow extends RowDataPacket {
 }
 
 interface CategoryRow extends RowDataPacket { slug: string, label: string, sort_order: number }
+interface ComplementRow extends RowDataPacket {
+  construction_id: number
+  complement_id: number | null
+  code: string
+  fonction_objet: string
+  preposition: string | null
+  patron: string
+  texte: string | null
+}
 
 interface ConjugationRow extends RowDataPacket {
   id: number
@@ -42,11 +51,11 @@ export default defineEventHandler(async (event) => {
   }
 
   const database = useDatabase()
-  const [[verb], [conjugations], [categories]] = await Promise.all([
+  const [[verb], [conjugations], [categories], [complements]] = await Promise.all([
     database.execute<VerbRow[]>(`
-      SELECT id, infinitif,
-        \`participe_présent\` AS participe_present,
-        \`participe_passé\` AS participe_passe,
+      SELECT v.id, v.infinitif,
+        v.\`participe_présent\` AS participe_present,
+        v.\`participe_passé\` AS participe_passe,
         v.auxiliaire, v.groupe_conjugaison, f.slug AS famille_conjugaison, v.terminaison_infinitif,
         v.type_pronominal, v.est_impersonnel, v.est_defectif, v.niveau_difficulte, v.niveau_cecrl,
         v.registre_principal, v.forme_canonique, v.statut_validation, v.particularites,
@@ -68,6 +77,15 @@ export default defineEventHandler(async (event) => {
       INNER JOIN verbe_sens_categories vsc ON vsc.sens_id=vs.id
       INNER JOIN categories_semantiques cs ON cs.id=vsc.categorie_id
       WHERE vs.verbe_id=? ORDER BY cs.sort_order, cs.label
+    `, [id]),
+    database.execute<ComplementRow[]>(`
+      SELECT cv.id AS construction_id, c.id AS complement_id, cv.code, cv.fonction_objet, cv.preposition,
+             cv.patron, c.texte
+      FROM verbe_sens vs
+      INNER JOIN constructions_verbales cv ON cv.sens_id=vs.id AND cv.actif=1
+      LEFT JOIN complements_verbaux c ON c.construction_id=cv.id AND c.actif=1
+      WHERE vs.verbe_id=?
+      ORDER BY cv.id, c.id
     `, [id])
   ])
 
@@ -79,6 +97,17 @@ export default defineEventHandler(async (event) => {
     if (Array.isArray(value)) return value
     try { return value ? JSON.parse(value) : [] } catch { return [] }
   }
+  const constructions = [...new Map(complements.map(row => [Number(row.construction_id), {
+    id: Number(row.construction_id),
+    code: row.code,
+    fonctionObjet: row.fonction_objet,
+    preposition: row.preposition,
+    patron: row.patron,
+    complements: complements
+      .filter(item => Number(item.construction_id) === Number(row.construction_id))
+      .filter(item => item.complement_id !== null && item.texte !== null)
+      .map(item => ({ id: Number(item.complement_id), texte: String(item.texte) })),
+  }])).values()]
 
   return {
     verb: {
@@ -103,6 +132,7 @@ export default defineEventHandler(async (event) => {
       parcoursCif: array(verb[0].parcours_cif),
       categoriesSemantiques: categories,
     },
-    conjugations
+    conjugations,
+    constructions,
   }
 })

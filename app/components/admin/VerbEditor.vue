@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getAdminErrorMessage } from '~/composables/useAdminAuth'
 import {
   conjugationModeOrder,
   conjugationTenseLabel,
@@ -38,9 +39,24 @@ interface AdminConjugation {
   conjugaison3: string
 }
 
+interface AdminComplement {
+  id: number
+  texte: string
+}
+
+interface AdminConstruction {
+  id: number
+  code: string
+  fonctionObjet: string
+  preposition: string | null
+  patron: string
+  complements: AdminComplement[]
+}
+
 interface VerbDetail {
   verb: AdminVerb
   conjugations: AdminConjugation[]
+  constructions?: AdminConstruction[]
 }
 
 interface CatalogueMode {
@@ -113,6 +129,12 @@ const draft = reactive<VerbSavePayload>({
 })
 
 const initialSnapshot = ref('')
+const complementGroups = ref<AdminConstruction[]>([])
+const complementDrafts = reactive<Record<number, string>>({})
+const firstComplementDraft = ref('')
+const complementBusy = ref('')
+const complementError = ref('')
+const complementSuccess = ref('')
 
 const groups = computed(() => [...props.modes]
   .filter(mode => isFiniteConjugationMode(mode.name))
@@ -211,11 +233,95 @@ function submit() {
   }
 }
 
+function resetComplements() {
+  complementGroups.value = (props.detail.constructions ?? []).map(construction => ({
+    ...construction,
+    complements: construction.complements.map(complement => ({ ...complement }))
+  }))
+  complementError.value = ''
+  complementSuccess.value = ''
+  firstComplementDraft.value = ''
+}
+
+async function addComplement(construction: AdminConstruction) {
+  const texte = (complementDrafts[construction.id] ?? '').replace(/\s+/g, ' ').trim()
+  if (!texte || complementBusy.value) return
+
+  complementBusy.value = `add:${construction.id}`
+  complementError.value = ''
+  complementSuccess.value = ''
+  try {
+    const response = await $fetch<{ complement: AdminComplement }>(
+      `/api/admin/verbes/${props.detail.verb.id}/complements`,
+      {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: { constructionId: construction.id, texte }
+      }
+    )
+    construction.complements.push(response.complement)
+    complementDrafts[construction.id] = ''
+    complementSuccess.value = `Le complément « ${response.complement.texte} » a été ajouté.`
+  } catch (error) {
+    complementError.value = getAdminErrorMessage(error, 'Impossible d’ajouter ce complément.')
+  } finally {
+    complementBusy.value = ''
+  }
+}
+
+async function deleteComplement(construction: AdminConstruction, complement: AdminComplement) {
+  if (complementBusy.value || !window.confirm(`Supprimer le complément « ${complement.texte} » ?`)) return
+
+  complementBusy.value = `delete:${complement.id}`
+  complementError.value = ''
+  complementSuccess.value = ''
+  try {
+    await $fetch(`/api/admin/verbes/${props.detail.verb.id}/complements/${complement.id}`, {
+      method: 'DELETE',
+      credentials: 'same-origin'
+    })
+    construction.complements = construction.complements.filter(item => item.id !== complement.id)
+    complementSuccess.value = `Le complément « ${complement.texte} » a été supprimé.`
+  } catch (error) {
+    complementError.value = getAdminErrorMessage(error, 'Impossible de supprimer ce complément.')
+  } finally {
+    complementBusy.value = ''
+  }
+}
+
+async function addFirstComplement() {
+  const texte = firstComplementDraft.value.replace(/\s+/g, ' ').trim()
+  if (!texte || complementBusy.value) return
+
+  complementBusy.value = 'add:new'
+  complementError.value = ''
+  complementSuccess.value = ''
+  try {
+    const response = await $fetch<{
+      construction: Omit<AdminConstruction, 'complements'>
+      complement: AdminComplement
+    }>(`/api/admin/verbes/${props.detail.verb.id}/complements`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      body: { texte }
+    })
+    complementGroups.value.push({ ...response.construction, complements: [response.complement] })
+    firstComplementDraft.value = ''
+    complementSuccess.value = `La liste COD a été créée avec « ${response.complement.texte} ».`
+  } catch (error) {
+    complementError.value = getAdminErrorMessage(error, 'Impossible de créer cette liste de compléments.')
+  } finally {
+    complementBusy.value = ''
+  }
+}
+
 watch(
   () => [props.detail, props.tenses] as const,
   resetDraft,
   { immediate: true }
 )
+
+watch(() => props.detail, resetComplements, { immediate: true })
 
 watch(dirty, value => emit('dirtyChange', value), { immediate: true })
 </script>
@@ -288,6 +394,90 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
         <span v-for="tag in [...(detail.verb.niveauxScolaires || []), ...(detail.verb.parcoursCif || []), ...(detail.verb.particularites || [])]" :key="tag">{{ tag }}</span>
         <em v-if="![...(detail.verb.niveauxScolaires || []), ...(detail.verb.parcoursCif || []), ...(detail.verb.particularites || [])].length">Aucune étiquette</em>
       </div>
+    </section>
+
+    <section class="verb-editor__complements" aria-labelledby="complements-title">
+      <div>
+        <h2 id="complements-title">Compléments proposés dans les exercices</h2>
+        <p class="admin-muted">
+          Ces fragments sont liés à un sens et à une construction validée du verbe.
+        </p>
+      </div>
+      <p v-if="complementSuccess" class="admin-notice admin-notice--success" role="status">
+        {{ complementSuccess }}
+      </p>
+      <p v-if="complementError" class="admin-notice admin-notice--error" role="alert">
+        {{ complementError }}
+      </p>
+      <article v-for="construction in complementGroups" :key="construction.id">
+        <header>
+          <strong>{{ construction.fonctionObjet.toUpperCase() }}</strong>
+          <span>{{ construction.patron }}</span>
+          <small>{{ construction.complements.length }} / 30 compléments</small>
+        </header>
+        <p v-if="construction.complements.length" class="verb-editor__sentence-preview">
+          Exemple : il … {{ construction.complements[0]?.texte }}
+        </p>
+        <div class="verb-editor__complement-list">
+          <span v-for="complement in construction.complements" :key="complement.id">
+            {{ complement.texte }}
+            <button
+              type="button"
+              :disabled="Boolean(complementBusy)"
+              :title="`Supprimer « ${complement.texte} »`"
+              :aria-label="`Supprimer le complément ${complement.texte}`"
+              @click="deleteComplement(construction, complement)"
+            >
+              <span aria-hidden="true">×</span>
+            </button>
+          </span>
+        </div>
+        <div class="verb-editor__complement-add">
+          <label :for="`complement-${construction.id}`">Ajouter un complément</label>
+          <div>
+            <input
+              :id="`complement-${construction.id}`"
+              v-model="complementDrafts[construction.id]"
+              maxlength="180"
+              placeholder="Ex. une pomme"
+              :disabled="Boolean(complementBusy) || construction.complements.length >= 30"
+              @keydown.enter.prevent="addComplement(construction)"
+            >
+            <button
+              class="admin-button admin-button--small"
+              type="button"
+              :disabled="Boolean(complementBusy) || !complementDrafts[construction.id]?.trim() || construction.complements.length >= 30"
+              @click="addComplement(construction)"
+            >
+              {{ complementBusy === `add:${construction.id}` ? 'Ajout…' : 'Ajouter' }}
+            </button>
+          </div>
+        </div>
+      </article>
+      <article v-if="!complementGroups.length" class="verb-editor__empty-complements">
+        <p class="admin-muted">Aucun complément validé pour ce verbe.</p>
+        <div class="verb-editor__complement-add">
+          <label :for="`first-complement-${detail.verb.id}`">Ajouter un premier complément COD</label>
+          <div>
+            <input
+              :id="`first-complement-${detail.verb.id}`"
+              v-model="firstComplementDraft"
+              maxlength="180"
+              placeholder="Ex. une proposition"
+              :disabled="Boolean(complementBusy)"
+              @keydown.enter.prevent="addFirstComplement"
+            >
+            <button
+              class="admin-button admin-button--small"
+              type="button"
+              :disabled="Boolean(complementBusy) || !firstComplementDraft.trim()"
+              @click="addFirstComplement"
+            >
+              {{ complementBusy === 'add:new' ? 'Création…' : 'Créer la liste COD' }}
+            </button>
+          </div>
+        </div>
+      </article>
     </section>
 
     <section class="verb-editor__conjugations" aria-labelledby="conjugations-title">
@@ -499,6 +689,130 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
   margin: 4px 0 0;
   color: var(--admin-navy);
   font-weight: 750;
+}
+
+.verb-editor__complements {
+  display: grid;
+  gap: 13px;
+  padding: 18px;
+  background: #f7fafb;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+}
+
+.verb-editor__complements h2,
+.verb-editor__complements p {
+  margin: 0;
+}
+
+.verb-editor__complements article {
+  display: grid;
+  gap: 10px;
+  padding: 13px;
+  background: white;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+}
+
+.verb-editor__complements article header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--admin-navy);
+}
+
+.verb-editor__complements article header span,
+.verb-editor__complements article header small {
+  color: var(--admin-muted);
+}
+
+.verb-editor__complements article header small {
+  margin-left: auto;
+}
+
+.verb-editor__sentence-preview {
+  color: var(--admin-blue-dark);
+  font-weight: 750;
+}
+
+.verb-editor__complement-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.verb-editor__complement-list > span {
+  display: inline-flex;
+  padding: 4px 4px 4px 9px;
+  align-items: center;
+  gap: 4px;
+  color: var(--admin-blue-dark);
+  background: #e4f3f6;
+  border-radius: 99px;
+  font-size: .76rem;
+  font-weight: 700;
+}
+
+.verb-editor__complement-list button {
+  display: inline-grid;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  place-items: center;
+  color: #6b7780;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.verb-editor__complement-list button:hover,
+.verb-editor__complement-list button:focus-visible {
+  color: white;
+  background: #a83d32;
+  outline: 0;
+}
+
+.verb-editor__complement-list button:disabled {
+  opacity: .45;
+  cursor: wait;
+}
+
+.verb-editor__complement-add {
+  display: grid;
+  max-width: 560px;
+  gap: 5px;
+}
+
+.verb-editor__complement-add label {
+  color: var(--admin-navy);
+  font-size: .76rem;
+  font-weight: 800;
+}
+
+.verb-editor__complement-add > div {
+  display: flex;
+  align-items: stretch;
+  gap: 7px;
+}
+
+.verb-editor__complement-add input {
+  min-width: 0;
+  min-height: 38px;
+  padding: 7px 10px;
+  flex: 1 1 auto;
+  border: 1px solid #becdd6;
+  border-radius: 7px;
+}
+
+.verb-editor__complement-add input:focus {
+  border-color: var(--admin-blue);
+  outline: 0;
+  box-shadow: 0 0 0 2px rgb(23 107 135 / 13%);
 }
 
 .verb-editor__tags {

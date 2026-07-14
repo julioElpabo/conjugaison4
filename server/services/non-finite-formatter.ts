@@ -22,6 +22,10 @@ function upperFirst(value: string) {
   return value ? value.charAt(0).toLocaleUpperCase('fr-CH') + value.slice(1) : value
 }
 
+function variants(value: string) {
+  return [...new Set(value.split('-').map(part => part.trim()).filter(part => part && part !== '-'))]
+}
+
 export function formatNonFiniteQuestion(
   verb: NonFiniteVerbSource,
   tense: NonFiniteTenseSource,
@@ -30,23 +34,25 @@ export function formatNonFiniteQuestion(
   const tenseName = normalized(tense.name)
   const infinitive = upperFirst(verb.infinitif)
   let label: string
-  let answer: string
+  let answers: string[]
 
   if (mode === 'participe' && tenseName === 'présent') {
     label = 'Le participe présent'
-    answer = upperFirst(verb.participe_present)
+    answers = variants(verb.participe_present).map(upperFirst)
   } else if (mode === 'participe' && tenseName === 'passé') {
     label = 'Le participe passé'
-    answer = upperFirst(verb.participe_passe)
+    answers = variants(verb.participe_passe).map(upperFirst)
   } else if (mode === 'gérondif' && tenseName === 'présent') {
     label = 'Le gérondif présent'
-    answer = `En ${verb.participe_present}`
+    answers = variants(verb.participe_present).map(form => `En ${form}`)
   } else if (mode === 'gérondif' && tenseName === 'passé' && verb.auxiliaire_participe_present) {
     label = 'Le gérondif passé'
-    answer = `En ${verb.auxiliaire_participe_present} ${verb.participe_passe}`
+    answers = variants(verb.participe_passe)
+      .map(form => `En ${verb.auxiliaire_participe_present} ${form}`)
   } else {
     return null
   }
+  if (answers.length === 0) return null
 
   return {
     id: `n-${verb.id}-${tense.id}`,
@@ -55,13 +61,13 @@ export function formatNonFiniteQuestion(
     personId: null,
     titre: infinitive,
     consigne: `${label} de ${infinitive}`,
-    reponses: [answer],
-    reponsesPourCorrige: [answer],
+    reponses: answers,
+    reponsesPourCorrige: answers,
     infinitif: verb.infinitif,
     temps: tense.name,
     mode: tense.mode_name,
-    conjugaison1: answer,
-    conjugaison2: '',
-    conjugaison3: '',
+    conjugaison1: answers[0]!,
+    conjugaison2: answers[1] || '',
+    conjugaison3: answers[2] || '',
   }
 }

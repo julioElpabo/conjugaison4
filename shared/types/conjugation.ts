@@ -31,6 +31,19 @@ export interface Verb extends VerbSummary {
   niveauxScolaires: string[]
   parcoursCif: string[]
   categoriesSemantiques: string[]
+  pronominalisable?: boolean
+  isPronominalForm?: boolean
+  baseVerbId?: number | null
+  pronominalUseId?: number | null
+  pronominalType?: string | null
+  pronounFunction?: string | null
+  agreementRule?: string | null
+  requiredPreposition?: string | null
+  complementExample?: {
+    functionObject: 'cod' | 'coi'
+    after: string
+    before: string | null
+  } | null
 }
 
 export interface ConjugationMode {
@@ -57,6 +70,8 @@ export interface GrammaticalPerson {
 
 export type PastSimplePronouns = 'all' | 'third-person-only'
 export type ExerciseKind = 'conjugation' | 'tense-identification'
+export type ComplementPlacement = 'after' | 'mixed' | 'before'
+export type ClassicComplementChoice = 'none' | ComplementPlacement
 
 /**
  * Configuration moderne d'un exercice. Les listes sont en lecture seule afin
@@ -69,6 +84,8 @@ export interface ChallengeConfig {
   exerciseKind: ExerciseKind
   pastSimplePronouns: PastSimplePronouns
   inclusivePronouns: boolean
+  includeComplements: boolean
+  complementPlacement: ComplementPlacement
 }
 
 /** Format historique stocké dans la table `defis`. */
@@ -83,6 +100,7 @@ export type ChallengePresetGroup =
   | 'verb-group'
   | 'spelling'
   | 'semantic'
+  | 'agreement'
   | 'training'
 
 export interface ChallengePreset extends ChallengeConfig {
@@ -110,6 +128,19 @@ export interface ExerciseQuestion {
   conjugaison1?: string
   conjugaison2?: string | null
   conjugaison3?: string | null
+  complement?: string
+  complementPosition?: 'after' | 'before'
+  /** Préfixe grammatical affiché juste avant le champ de réponse (ex. « il », « j’ », « qu’elle »). */
+  saisiePrefixe?: string
+  agreementReminder?: {
+    kind: 'cod-before' | 'cod-after' | 'coi'
+    infinitive: string
+    complement: string
+    preposition?: string | null
+    participle: string
+    gender?: 'masculin' | 'feminin' | null
+    number?: 'singulier' | 'pluriel' | null
+  }
 }
 
 export type ExerciseAttemptStatus = 'correct' | 'incorrect'

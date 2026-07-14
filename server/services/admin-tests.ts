@@ -3,6 +3,8 @@ import { readdir } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 
 import { conjugationScenarioResults } from './postman-conjugation-results'
+import { listCoaches } from './coaches'
+import { auditCoachCredibility } from '../../shared/utils/coach-credibility'
 
 const TEST_DIRECTORY = resolve(process.cwd(), 'tests')
 const MAX_OUTPUT_LENGTH = 200_000
@@ -25,7 +27,22 @@ const TEST_CATALOG: Record<string, { title: string, description: string, categor
   },
   'conjugation-rules.test.mjs': {
     title: 'Règles du français et correcteur',
-    description: 'Formes multiples, apostrophes, élisions, accords, impératif, participe et gérondif.',
+    description: 'Formes multiples, compléments d’objet, apostrophes, accords, impératif, participe et gérondif.',
+    category: 'Conjugaison française',
+  },
+  'verb-complements.test.mjs': {
+    title: 'Catalogue des COD et COI',
+    description: 'Contrôle la transitivité, les constructions et les compléments naturels COD ou COI proposés dans les phrases.',
+    category: 'Conjugaison française',
+  },
+  'complement-placement.test.mjs': {
+    title: 'Position et morphologie des compléments',
+    description: 'Contrôle l’antéposition, les déterminants, les élisions, le genre et le nombre des COD.',
+    category: 'Conjugaison française',
+  },
+  'cod-agreement.test.mjs': {
+    title: 'COD avant/après et accords',
+    description: 'Teste les COD avant et après le verbe au masculin, féminin, singulier et pluriel, ainsi que les temps simples, composés et l’impératif.',
     category: 'Conjugaison française',
   },
   'conjugation-database.test.mjs': {
@@ -53,6 +70,11 @@ const TEST_CATALOG: Record<string, { title: string, description: string, categor
     description: 'Contrôle les adresses électroniques, mots de passe, rôles et données de compte.',
     category: 'Administration',
   },
+  'coach-conversation-scenarios.test.mjs': {
+    title: 'Conversations et crédibilité des coaches',
+    description: 'Simule les échanges, les délais, les corrections, les GIFs et 60 interventions par coach pour détecter les répétitions mécaniques.',
+    category: 'Exercices et défis',
+  },
 }
 
 const RESULT_GROUP_CATALOG: Record<string, { title: string, description: string }> = {
@@ -71,6 +93,9 @@ const RESULT_GROUP_CATALOG: Record<string, { title: string, description: string 
   'collection Postman — formatage des conjugaisons': { title: 'Formes verbales par mode', description: 'Scénarios détaillés dans l’interface de conjugaison ci-dessous.' },
   'formes multiples reconnues par le correcteur': { title: 'Formes multiples', description: 'Acceptation et annonce des autres solutions correctes.' },
   'apostrophes et élisions françaises': { title: 'Apostrophes et élisions', description: 'Voyelles, h muet, h aspiré et tournures du subjonctif.' },
+  'compléments d’objet dans les questions': { title: 'Phrases avec un COD', description: 'Présentation de la phrase et acceptation de la forme seule ou de la phrase complète.' },
+  'compléments d’objet validés': { title: 'Données des compléments', description: 'Quantité, transitivité, absence de doublons et cohérence des associations lexicales.' },
+  'préparation grammaticale des COD antéposés': { title: 'COD placés avant le verbe', description: 'Déterminants, élisions, genre et nombre nécessaires à l’accord.' },
   'accords du participe passé': { title: 'Accord du participe passé', description: 'Accords avec être, absence d’accord avec avoir et formes inclusives.' },
   'impératif et ponctuation': { title: 'Impératif, tirets et ponctuation', description: 'Absence de pronom sujet, formes pronominales et s euphonique devant y ou en.' },
   'participe, infinitif et gérondif': { title: 'Formes non personnelles', description: 'Participe présent/passé et gérondif présent/passé.' },
@@ -80,6 +105,13 @@ const RESULT_GROUP_CATALOG: Record<string, { title: string, description: string 
   'verbes irréguliers fondamentaux': { title: 'Verbes irréguliers', description: 'Être, avoir, aller, faire, dire, venir, tenir et prendre.' },
   'verbes défectifs et impersonnels': { title: 'Verbes défectifs', description: 'Falloir et pleuvoir sans génération de personnes inexistantes.' },
   'intégrité des 486 verbes du catalogue': { title: 'Audit complet du catalogue', description: 'Doublons, métadonnées, variantes, relations, formes manquantes et auxiliaires.' },
+  'scénarios chronologiques du chat': { title: 'Déroulement des conversations', description: 'Ordre des bulles, consigne finale, correction, délai de trois secondes, grammaire et fin du questionnaire.' },
+  'crédibilité des douze coaches': { title: 'Crédibilité des coaches', description: 'Diversité des formulations, absence de répétitions immédiates et variété des réactions visuelles.' },
+}
+
+async function coachCredibilityResults() {
+  const coaches = await listCoaches(useDatabase(), true)
+  return coaches.map((coach, index) => auditCoachCredibility(coach, 10_000 + index))
 }
 
 export async function availableAdminTests() {
@@ -139,13 +171,15 @@ function repairPrompt(
   files: string[],
   groups: ReturnType<typeof structuredTestGroups>,
   scenarios: Awaited<ReturnType<typeof conjugationScenarioResults>>,
+  coachReports: Awaited<ReturnType<typeof coachCredibilityResults>>,
   output: string,
 ) {
   const failedGroups = groups
     .map(group => ({ ...group, cases: group.cases.filter(testCase => !testCase.passed && !testCase.skipped) }))
     .filter(group => group.cases.length > 0)
   const failedScenarios = scenarios.filter(scenario => !scenario.passed)
-  if (failedGroups.length === 0 && failedScenarios.length === 0) return ''
+  const failedCoaches = coachReports.filter(report => !report.passed)
+  if (failedGroups.length === 0 && failedScenarios.length === 0 && failedCoaches.length === 0) return ''
 
   const lines = [
     'Analyse et répare les tests de conjugaison en échec dans ce projet.',
@@ -171,6 +205,12 @@ function repairPrompt(
       lines.push(`  - ${assertion.property} : attendu ${JSON.stringify(assertion.expected)}, obtenu ${JSON.stringify(assertion.actual)}`)
     }
   }
+  for (const report of failedCoaches) {
+    lines.push(`- Crédibilité de ${report.coachName} — score ${report.score} %`)
+    for (const check of report.checks.filter(check => !check.passed)) {
+      lines.push(`  - ${check.label} : attendu ${check.expected}, obtenu ${check.actual}`)
+    }
+  }
   lines.push('', 'Journal technique utile :', '```text', output.slice(-14_000), '```')
   return lines.join('\n')
 }
@@ -187,7 +227,7 @@ export async function runAdminTests(requestedFiles: string[]) {
   const execution = await new Promise<{ exitCode: number, stdout: string, stderr: string, timedOut: boolean }>((resolveExecution) => {
     execFile(
       process.execPath,
-      ['--env-file-if-exists=.env', '--experimental-strip-types', '--test', '--test-concurrency=1', '--test-reporter=tap', ...files.map(file => join(TEST_DIRECTORY, file))],
+      ['--env-file-if-exists=.env', '--import', 'tsx', '--test', '--test-concurrency=1', '--test-reporter=tap', ...files.map(file => join(TEST_DIRECTORY, file))],
       { cwd: process.cwd(), timeout: 60_000, maxBuffer: 2_000_000 },
       (error, stdout, stderr) => {
         const exitCode = error && typeof error.code === 'number' ? error.code : (error ? 1 : 0)
@@ -203,6 +243,9 @@ export async function runAdminTests(requestedFiles: string[]) {
   const output = `${execution.stdout}${execution.stderr ? `\n${execution.stderr}` : ''}`.slice(-MAX_OUTPUT_LENGTH)
   const conjugationScenarios = files.includes('postman-conjugation.test.mjs')
     ? await conjugationScenarioResults()
+    : []
+  const coachCredibility = files.includes('coach-conversation-scenarios.test.mjs')
+    ? await coachCredibilityResults()
     : []
   const groups = structuredTestGroups(output)
   return {
@@ -220,7 +263,8 @@ export async function runAdminTests(requestedFiles: string[]) {
     },
     groups,
     conjugationScenarios,
-    repairPrompt: repairPrompt(files, groups, conjugationScenarios, output),
+    coachCredibility,
+    repairPrompt: repairPrompt(files, groups, conjugationScenarios, coachCredibility, output),
     output,
   }
 }

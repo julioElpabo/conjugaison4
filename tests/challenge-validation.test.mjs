@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
+import { classicComplementChoiceConfig } from '../shared/utils/classic-complement-choice.ts'
+
 import {
   parseDefiDefinition,
   parseQuestionnaireRequest,
@@ -22,6 +24,8 @@ describe('validation des défis partagés', () => {
     assert.equal(challenge.exerciseKind, 'conjugation')
     assert.equal(challenge.pastSimplePronouns, 'third-person-only')
     assert.equal(challenge.inclusivePronouns, true)
+    assert.equal(challenge.includeComplements, false)
+    assert.equal(challenge.complementPlacement, 'after')
     assert.equal(challenge.printOptions.title, 'Défi de conjugaison')
   })
 
@@ -34,6 +38,8 @@ describe('validation des défis partagés', () => {
       exerciseKind: 'tense-identification',
       pastSimplePronouns: 'all',
       inclusivePronouns: true,
+      includeComplements: true,
+      complementPlacement: 'mixed',
       printOptions: {
         title: 'Ma fiche',
         showGrade: false,
@@ -71,5 +77,64 @@ describe('validation des questionnaires', () => {
 
     assert.equal(request.exerciseKind, 'conjugation')
     assert.equal(request.pastSimplePronouns, 'third-person-only')
+    assert.equal(request.includeComplements, false)
+    assert.equal(request.complementPlacement, 'after')
+  })
+
+  it('valide les options de présence et de position des compléments', () => {
+    const request = parseQuestionnaireRequest({
+      verbIds: [1], tenseIds: [5], questionCount: 5,
+      exerciseKind: 'conjugation', pastSimplePronouns: 'all', inclusivePronouns: false,
+      includeComplements: true, complementPlacement: 'before'
+    })
+    assert.equal(request.includeComplements, true)
+    assert.equal(request.complementPlacement, 'before')
+    assert.throws(
+      () => parseQuestionnaireRequest({ ...request, complementPlacement: 'partout' }),
+      PublicInputError
+    )
+  })
+
+  it('accepte un emploi pronominal représenté par un identifiant virtuel négatif', () => {
+    const request = parseQuestionnaireRequest({
+      verbIds: [-66],
+      tenseIds: [1],
+      questionCount: 5,
+      exerciseKind: 'conjugation',
+      pastSimplePronouns: 'all',
+      inclusivePronouns: false
+    })
+
+    assert.deepEqual(request.verbIds, [-66])
+  })
+
+  it('continue de refuser zéro et les identifiants de temps négatifs', () => {
+    const base = {
+      verbIds: [1], tenseIds: [1], questionCount: 5,
+      exerciseKind: 'conjugation', pastSimplePronouns: 'all', inclusivePronouns: false
+    }
+    assert.throws(() => parseQuestionnaireRequest({ ...base, verbIds: [0] }), PublicInputError)
+    assert.throws(() => parseQuestionnaireRequest({ ...base, tenseIds: [-1] }), PublicInputError)
+  })
+})
+
+describe('menu de lancement de l’exercice classique', () => {
+  it('traduit les quatre choix en options de questionnaire', () => {
+    assert.deepEqual(classicComplementChoiceConfig('none'), {
+      includeComplements: false,
+      complementPlacement: 'after',
+    })
+    assert.deepEqual(classicComplementChoiceConfig('after'), {
+      includeComplements: true,
+      complementPlacement: 'after',
+    })
+    assert.deepEqual(classicComplementChoiceConfig('before'), {
+      includeComplements: true,
+      complementPlacement: 'before',
+    })
+    assert.deepEqual(classicComplementChoiceConfig('mixed'), {
+      includeComplements: true,
+      complementPlacement: 'mixed',
+    })
   })
 })

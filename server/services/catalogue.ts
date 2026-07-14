@@ -1,6 +1,7 @@
 import type { RowDataPacket } from 'mysql2/promise'
 import { resolveChallengePresets } from '../../shared/data/challenge-presets'
 import type { Verb } from '../../shared/types/conjugation'
+import { encodePronominalSelectionId } from '../../shared/utils/pronominal-selection'
 import { useDatabase } from '../utils/database'
 
 interface VerbeRow extends RowDataPacket {
@@ -26,9 +27,26 @@ interface VerbeRow extends RowDataPacket {
   particularites: string | string[] | null
   niveaux_scolaires: string | string[] | null
   parcours_cif: string | string[] | null
+  pronominalisable: number
 }
 
 interface SemanticRow extends RowDataPacket { verbe_id: number, slug: string, sort_order: number }
+interface ComplementExampleRow extends RowDataPacket {
+  verbe_id: number
+  fonction_objet: 'cod' | 'coi'
+  texte: string
+  texte_antepose: string | null
+}
+interface PronominalUseRow extends RowDataPacket {
+  id: number
+  verbe_id: number
+  infinitif_pronominal: string
+  type_emploi: string
+  fonction_pronom: string
+  regle_accord: string
+  preposition: string | null
+  statut_validation: string
+}
 
 interface ModeRow extends RowDataPacket {
   id: number
@@ -46,7 +64,7 @@ interface TempsRow extends RowDataPacket {
 
 export async function getCatalogue() {
   const database = useDatabase()
-  const [verbesResult, modesResult, tempsResult, semanticResult] = await Promise.all([
+  const [verbesResult, modesResult, tempsResult, semanticResult, pronominalResult, complementResult] = await Promise.all([
     database.execute<VerbeRow[]>(`
       SELECT v.id, v.infinitif,
              \`participe_présent\` AS participe_present,
@@ -55,9 +73,11 @@ export async function getCatalogue() {
              v.terminaison_infinitif, v.type_pronominal, v.est_impersonnel, v.est_defectif,
              v.personnes_disponibles, v.type_h_initial, v.niveau_difficulte, v.niveau_cecrl,
              v.rang_frequence, v.registre_principal, v.forme_canonique, v.statut_validation,
-             v.particularites, v.niveaux_scolaires, v.parcours_cif
+             v.particularites, v.niveaux_scolaires, v.parcours_cif,
+             v.pronominalisable
       FROM verbes v
       LEFT JOIN familles_conjugaison f ON f.id = v.famille_conjugaison_id
+      WHERE v.est_archive = 0
       ORDER BY COALESCE(v.forme_canonique, v.infinitif), v.id
     `),
     database.execute<ModeRow[]>(`
@@ -79,6 +99,26 @@ export async function getCatalogue() {
       INNER JOIN categories_semantiques cs ON cs.id = vsc.categorie_id
       ORDER BY vs.verbe_id, cs.sort_order, cs.slug
     `),
+    database.execute<PronominalUseRow[]>(`
+      SELECT id, verbe_id, infinitif_pronominal, type_emploi, fonction_pronom,
+             regle_accord, preposition, statut_validation
+      FROM emplois_pronominaux
+      WHERE actif=1 AND verbe_id IS NOT NULL
+      ORDER BY infinitif_pronominal, id
+    `),
+    database.execute<ComplementExampleRow[]>(`
+      SELECT vs.verbe_id, cv.fonction_objet, c.texte, c.texte_antepose
+      FROM verbe_sens vs
+      INNER JOIN constructions_verbales cv ON cv.sens_id=vs.id
+      INNER JOIN complements_verbaux c ON c.construction_id=cv.id
+      INNER JOIN verbes v ON v.id=vs.verbe_id
+      WHERE v.est_archive=0 AND cv.actif=1 AND cv.statut_validation='valide'
+        AND c.actif=1 AND c.statut_validation='valide'
+        AND cv.fonction_objet IN ('cod', 'coi')
+      ORDER BY vs.verbe_id,
+        (cv.fonction_objet='cod' AND c.texte_antepose IS NOT NULL) DESC,
+        cv.id, c.id
+    `),
   ])
 
   const parseArray = <T>(value: string | T[] | null): T[] => {
@@ -96,6 +136,17 @@ export async function getCatalogue() {
     const categories = semanticsByVerb.get(Number(row.verbe_id)) ?? []
     categories.push(row.slug)
     semanticsByVerb.set(Number(row.verbe_id), categories)
+  }
+  const complementByVerb = new Map<number, Verb['complementExample']>()
+  for (const row of complementResult[0]) {
+    const verbId = Number(row.verbe_id)
+    if (!complementByVerb.has(verbId)) {
+      complementByVerb.set(verbId, {
+        functionObject: row.fonction_objet,
+        after: row.texte,
+        before: row.texte_antepose,
+      })
+    }
   }
 
   const verbs: Verb[] = verbesResult[0].map(row => ({
@@ -122,10 +173,55 @@ export async function getCatalogue() {
       niveauxScolaires: parseArray<string>(row.niveaux_scolaires),
       parcoursCif: parseArray<string>(row.parcours_cif),
       categoriesSemantiques: semanticsByVerb.get(Number(row.id)) ?? [],
+      pronominalisable: Boolean(row.pronominalisable),
+      isPronominalForm: /^(s['’]|se\s)/iu.test(row.infinitif),
+      baseVerbId: null,
+      pronominalUseId: null,
+      pronominalType: null,
+      pronounFunction: null,
+      agreementRule: null,
+      requiredPreposition: null,
+      complementExample: complementByVerb.get(Number(row.id)) ?? null,
     }))
 
+  const byId = new Map(verbs.map(verb => [verb.id, verb]))
+  const virtualPronominals: Verb[] = pronominalResult[0].flatMap((use) => {
+    const base = byId.get(Number(use.verbe_id))
+    if (!base) return []
+    const pronominalParticiple = (base.participePresent || '')
+      .split('-')
+      .map(form => form.trim())
+      .filter(Boolean)
+      .map((form) => {
+        const first = form.normalize('NFD').replace(/\p{Diacritic}/gu, '').charAt(0).toLowerCase()
+        const elide = 'aeiouy'.includes(first) || (first === 'h' && base.typeHInitial !== 'aspire')
+        return `${elide ? "s'" : 'se '}${form}`
+      })
+      .join('-')
+    return [{
+      ...base,
+      id: encodePronominalSelectionId(Number(use.id)),
+      infinitif: use.infinitif_pronominal,
+      participePresent: pronominalParticiple,
+      auxiliaire: 'être',
+      typePronominal: use.type_emploi === 'essentiel' ? 'essentiel' : 'occasionnel',
+      particularites: [...new Set([...base.particularites, 'pronominal'])],
+      pronominalisable: true,
+      isPronominalForm: true,
+      baseVerbId: base.id,
+      pronominalUseId: Number(use.id),
+      pronominalType: use.type_emploi,
+      pronounFunction: use.fonction_pronom,
+      agreementRule: use.regle_accord,
+      requiredPreposition: use.preposition,
+      complementExample: null,
+    }]
+  })
+  const catalogueVerbs = [...verbs, ...virtualPronominals]
+    .sort((left, right) => left.infinitif.localeCompare(right.infinitif, 'fr') || left.id - right.id)
+
   return {
-    verbes: verbs,
+    verbes: catalogueVerbs,
     modes: modesResult[0].map(row => ({
       id: Number(row.id),
       name: row.name,
@@ -138,6 +234,6 @@ export async function getCatalogue() {
       isCompound: Boolean(row.is_compound),
       selected: Boolean(row.selected)
     })),
-    presets: resolveChallengePresets(verbs),
+    presets: resolveChallengePresets(catalogueVerbs),
   }
 }

@@ -238,7 +238,7 @@ body.dialog-open {
   background: rgba(255, 255, 255, 0.16);
 }
 
-.action-button span:last-child {
+.action-button > span:nth-child(2) {
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -253,6 +253,105 @@ body.dialog-open {
   color: inherit;
   font-size: 0.76rem;
   opacity: 0.75;
+}
+
+.classic-action {
+  position: relative;
+  min-width: 0;
+}
+
+.classic-action > .action-button {
+  width: 100%;
+  height: 100%;
+}
+
+.classic-action__chevron {
+  margin-left: auto;
+  font-size: 1.3rem;
+  line-height: 1;
+  transition: transform 160ms ease;
+}
+
+.action-button[aria-expanded='true'] .classic-action__chevron {
+  transform: rotate(180deg);
+}
+
+.classic-complement-menu {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 10px);
+  left: 0;
+  display: grid;
+  width: min(650px, calc(100vw - 44px));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #b9cbc5;
+  border-radius: 17px;
+  background: #fff;
+  box-shadow: 0 20px 50px rgba(24, 54, 47, 0.22);
+  color: var(--ink);
+}
+
+.classic-complement-menu__heading {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 4px 7px;
+}
+
+.classic-complement-menu__heading strong {
+  color: var(--brand-dark);
+  font-size: 0.92rem;
+}
+
+.classic-complement-menu__heading span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.classic-complement-menu > button {
+  display: flex;
+  min-width: 0;
+  min-height: 66px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px 12px;
+  border: 1px solid #d7e2de;
+  border-radius: 12px;
+  background: #f6faf8;
+  color: var(--ink);
+  text-align: left;
+}
+
+.classic-complement-menu > button:hover,
+.classic-complement-menu > button:focus-visible {
+  border-color: var(--brand);
+  background: var(--brand-pale);
+}
+
+.classic-complement-menu__label {
+  color: var(--brand-dark);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.classic-complement-menu > button small {
+  overflow: hidden;
+  max-width: 100%;
+  color: var(--muted);
+  font-size: 0.73rem;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.classic-complement-menu > button b {
+  color: var(--brand);
 }
 
 .challenge-save {
@@ -924,38 +1023,6 @@ body.dialog-open {
   line-height: 1.35;
 }
 
-.print-options {
-  margin: 20px 18px 0;
-  border: 1px solid var(--line);
-  border-radius: 13px;
-  background: #fafcfb;
-}
-
-.print-options summary {
-  padding: 13px 14px;
-  color: var(--brand-dark);
-  cursor: pointer;
-  font-size: 0.88rem;
-  font-weight: 750;
-}
-
-.print-options .field-stack {
-  margin-top: 8px;
-}
-
-.check-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  padding: 0 0 10px;
-}
-
-.check-row--compact {
-  align-items: center;
-  margin-top: 5px;
-  margin-bottom: 5px;
-  font-size: 0.8rem;
-}
-
 .primary-button,
 .secondary-button {
   min-height: 43px;
@@ -1188,6 +1255,77 @@ body.dialog-open {
   line-height: 1.16;
 }
 
+.question-context {
+  display: flex;
+  margin: 0 0 32px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 7px 10px;
+  color: var(--muted);
+  font-size: 0.98rem;
+}
+
+.question-context strong {
+  color: var(--brand-dark);
+  font-weight: 800;
+}
+
+.question-context i {
+  color: #b6c4c0;
+  font-style: normal;
+}
+
+.completion-form {
+  display: grid;
+  justify-items: center;
+  gap: 17px;
+}
+
+.completion-sentence {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: #264b46;
+  font-size: clamp(1.45rem, 3.5vw, 2.25rem);
+  font-weight: 760;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.completion-sentence input {
+  width: clamp(160px, 22vw, 230px);
+  min-height: 54px;
+  padding: 8px 12px;
+  color: var(--ink);
+  background: white;
+  border: 1px solid #bfcfca;
+  border-radius: 11px;
+  font-size: clamp(1.15rem, 2.3vw, 1.55rem);
+  font-weight: 700;
+  text-align: center;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.completion-sentence input:focus {
+  border-color: var(--brand);
+  outline: 0;
+  box-shadow: 0 0 0 4px rgba(52, 95, 88, 0.12);
+}
+
+.completion-sentence input.is-valid {
+  border-color: var(--success);
+  background: var(--success-pale);
+}
+
+.completion-sentence input.is-invalid {
+  border-color: var(--danger);
+  background: var(--danger-pale);
+}
+
 .answer-form {
   text-align: left;
 }
@@ -1236,6 +1374,34 @@ body.dialog-open {
   border-color: #dfaaa4;
   background: var(--danger-pale);
   color: #8c3833;
+}
+
+.grammar-reminder {
+  margin-top: 14px;
+  padding-top: 13px;
+  border-top: 1px solid currentColor;
+}
+
+.grammar-reminder > strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--brand-dark);
+  font-size: 0.9rem;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.grammar-reminder p {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.grammar-reminder small {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
 }
 
 .exercise-results {
@@ -1361,6 +1527,113 @@ body.dialog-open {
   font-size: 0.78rem;
 }
 
+.print-preview-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  align-items: start;
+  gap: 28px;
+  padding: 0 28px;
+}
+
+.print-settings {
+  position: sticky;
+  top: 88px;
+  max-height: calc(100vh - 112px);
+  margin: 25px 0;
+  padding: 22px;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 18px;
+  background: #f8fbfa;
+  box-shadow: 0 10px 30px rgba(15, 32, 28, 0.24);
+  color: #253d38;
+}
+
+.print-settings__heading {
+  padding-bottom: 18px;
+  border-bottom: 1px solid #d9e4e0;
+}
+
+.print-settings__heading p {
+  margin: 0 0 4px;
+  color: var(--brand);
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.print-settings__heading h2 {
+  margin: 0 0 7px;
+  color: var(--brand-dark);
+  font-size: 1.25rem;
+}
+
+.print-settings__heading span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.print-settings__field {
+  display: grid;
+  gap: 7px;
+  margin: 20px 0;
+  color: #334b46;
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+.print-settings__field input {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid #b8cbc5;
+  border-radius: 9px;
+  background: white;
+  color: #213a35;
+  font: inherit;
+  font-weight: 500;
+}
+
+.print-settings__group {
+  display: grid;
+  gap: 4px;
+  margin: 18px 0 0;
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 1px solid #d9e4e0;
+}
+
+.print-settings__group legend {
+  padding: 0 0 7px;
+  color: var(--brand-dark);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.print-settings__group label {
+  display: flex;
+  min-height: 39px;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 9px;
+  border-radius: 9px;
+  color: #3d5650;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.print-settings__group label:hover {
+  background: #eaf2ef;
+}
+
+.print-settings__group input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brand);
+}
+
 .print-document {
   width: min(210mm, calc(100% - 28px));
   max-width: none;
@@ -1418,6 +1691,25 @@ body.dialog-open {
   line-height: 1.4;
 }
 
+.print-sheet__header .print-running-header {
+  margin: -8mm 0 8mm;
+  color: #5a5a5a;
+  font-size: 8.5pt;
+  font-weight: 400;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.print-site-reference {
+  position: absolute;
+  right: 17mm;
+  bottom: 10mm;
+  left: 17mm;
+  color: #666;
+  font-size: 8pt;
+  text-align: center;
+}
+
 .print-instruction {
   padding: 3mm;
   border: 1px solid #777;
@@ -1429,14 +1721,16 @@ body.dialog-open {
 }
 
 .print-questions li {
-  margin: 0 0 6mm;
+  min-height: 9.5mm;
+  margin: 0;
   padding-left: 3mm;
   font-size: 10.5pt;
+  line-height: 5mm;
 }
 
 .answer-line {
-  display: inline-block;
-  width: 70mm;
+  float: right;
+  width: 51mm;
   margin-left: 4mm;
   border-bottom: 1px dotted #333;
 }
@@ -1444,10 +1738,22 @@ body.dialog-open {
 .print-questions--answers li {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(55mm, 0.85fr);
+  align-items: center;
   gap: 8mm;
-  margin-bottom: 3.5mm;
-  padding-bottom: 3mm;
+  min-height: 8mm;
+  margin: 0;
+  padding: 1.5mm 0;
   border-bottom: 1px solid #ddd;
+  box-sizing: border-box;
+  line-height: 5mm;
+}
+
+.print-questions--answers li > span,
+.print-questions--answers li > strong {
+  display: block;
+  align-self: center;
+  margin: 0;
+  line-height: inherit;
 }
 
 @media (max-width: 1180px) {
@@ -1457,10 +1763,6 @@ body.dialog-open {
 
   .options-card {
     grid-column: 1 / -1;
-  }
-
-  .options-card .check-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .preset-groups {
@@ -1504,6 +1806,16 @@ body.dialog-open {
     flex-basis: 36px;
     width: 36px;
     height: 36px;
+  }
+
+  .classic-complement-menu {
+    grid-template-columns: 1fr;
+  }
+
+  .classic-complement-menu__heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
   }
 
   .preset-panel {
@@ -1570,6 +1882,20 @@ body.dialog-open {
     padding-top: 10px;
   }
 
+  .question-context {
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  .completion-sentence {
+    gap: 8px;
+  }
+
+  .completion-sentence input {
+    width: min(230px, 65vw);
+    min-height: 54px;
+  }
+
   .answer-form__row,
   .share-value > div,
   .print-toolbar {
@@ -1589,10 +1915,6 @@ body.dialog-open {
   .print-toolbar > div:last-child {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-  }
-
-  .options-card .check-grid {
-    grid-template-columns: 1fr;
   }
 
   .challenge-restore {
@@ -1633,6 +1955,23 @@ body.dialog-open {
   }
 }
 
+@media (max-width: 900px) {
+  .print-preview-layout {
+    display: block;
+    padding: 0 14px;
+  }
+
+  .print-settings {
+    position: static;
+    max-height: none;
+    margin: 18px auto;
+  }
+
+  .print-document {
+    width: min(210mm, 100%);
+  }
+}
+
 @media print {
   @page {
     size: A4 portrait;
@@ -1667,6 +2006,11 @@ body.dialog-open {
   .print-document {
     width: 210mm;
     margin: 0;
+  }
+
+  .print-preview-layout {
+    display: block;
+    padding: 0;
   }
 
   .print-sheet {

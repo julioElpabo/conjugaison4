@@ -10,6 +10,8 @@ export interface QuestionnaireRequest {
   exerciseKind: ChallengeConfig['exerciseKind']
   pastSimplePronouns: ChallengeConfig['pastSimplePronouns']
   inclusivePronouns: boolean
+  includeComplements: boolean
+  complementPlacement: ChallengeConfig['complementPlacement']
 }
 
 export function toQuestionnaireRequest(challenge: ChallengeConfig): QuestionnaireRequest {
@@ -19,7 +21,9 @@ export function toQuestionnaireRequest(challenge: ChallengeConfig): Questionnair
     questionCount: challenge.questionCount,
     exerciseKind: challenge.exerciseKind,
     pastSimplePronouns: challenge.pastSimplePronouns,
-    inclusivePronouns: challenge.inclusivePronouns
+    inclusivePronouns: challenge.inclusivePronouns,
+    includeComplements: challenge.includeComplements,
+    complementPlacement: challenge.complementPlacement
   }
 }
 
@@ -49,6 +53,8 @@ export function useChallengeApi() {
         exerciseKind: challenge.exerciseKind,
         pastSimplePronouns: challenge.pastSimplePronouns,
         inclusivePronouns: challenge.inclusivePronouns,
+        includeComplements: challenge.includeComplements,
+        complementPlacement: challenge.complementPlacement,
         printOptions: { ...challenge.printOptions }
       }
     })

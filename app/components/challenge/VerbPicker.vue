@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Verb } from '~/composables/useChallengeBuilder'
+import { matchingVerbs, normalizeVerbSearch } from '~~/shared/utils/verb-search'
 
 const props = defineProps<{
   verbs: Verb[]
@@ -15,12 +16,6 @@ const emit = defineEmits<{
 const query = ref('')
 const input = useTemplateRef<HTMLInputElement>('verb-input')
 
-const normalizeForSearch = (value: string) => value
-  .normalize('NFD')
-  .replace(/[\u0300-\u036f]/g, '')
-  .toLocaleLowerCase('fr')
-  .trim()
-
 const selectedIdSet = computed(() => new Set(props.selectedIds))
 const selectedVerbs = computed(() => {
   const byId = new Map(props.verbs.map(verb => [verb.id, verb]))
@@ -30,14 +25,15 @@ const selectedVerbs = computed(() => {
 })
 
 const suggestions = computed(() => {
-  const needle = normalizeForSearch(query.value)
+  const needle = normalizeVerbSearch(query.value)
   if (!needle) {
     return []
   }
 
-  return props.verbs
-    .filter(verb => !selectedIdSet.value.has(verb.id))
-    .filter(verb => normalizeForSearch(verb.infinitif).startsWith(needle))
+  return matchingVerbs(
+    props.verbs.filter(verb => !selectedIdSet.value.has(verb.id)),
+    query.value,
+  )
     .slice(0, 8)
 })
 
@@ -102,7 +98,8 @@ function addFirstSuggestion() {
         <li v-for="verb in suggestions" :key="verb.id" role="option">
           <button type="button" @click="addVerb(verb)">
             <strong>{{ verb.infinitif }}</strong>
-            <span v-if="verb.auxiliaire">auxiliaire {{ verb.auxiliaire }}</span>
+            <span v-if="verb.isPronominalForm && verb.baseVerbId">forme pronominale générée</span>
+            <span v-else-if="verb.auxiliaire">auxiliaire {{ verb.auxiliaire }}</span>
           </button>
         </li>
       </ul>

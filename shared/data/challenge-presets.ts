@@ -2,6 +2,7 @@ import type {
   ChallengeConfig,
   ChallengePreset,
   ChallengePresetGroup,
+  ComplementPlacement,
   LegacyChallengeTuple,
   TenseId,
   Verb,
@@ -25,6 +26,7 @@ export type VerbCriterion =
   | { field: FilterableVerbField, operator: 'includes', value: string }
   | { field: FilterableVerbField, operator: 'not-in', value: readonly (string | number)[] }
   | { field: FilterableVerbField, operator: 'gte', value: number }
+  | { field: 'complementExample', operator: 'has-anteposable-cod' }
 
 export interface ChallengePresetDefinition {
   readonly id: string
@@ -34,6 +36,8 @@ export interface ChallengePresetDefinition {
   readonly criteria: readonly VerbCriterion[]
   readonly tenseIds: readonly TenseId[]
   readonly questionCount: number
+  readonly includeComplements?: boolean
+  readonly complementPlacement?: ComplementPlacement
 }
 
 const personalPresent = [1] as const
@@ -62,6 +66,11 @@ export const challengePresetDefinitions = [
   { id: 'sens-cognition', label: 'Pensée et connaissance', description: 'Penser, savoir, comprendre, apprendre et décider.', group: 'semantic', criteria: [{ field: 'categoriesSemantiques', operator: 'includes', value: 'cognition' }], tenseIds: coreTenses, questionCount: 20 },
   { id: 'sens-emotion', label: 'Émotions et appréciation', description: 'Aimer, préférer, craindre, rire et ressentir.', group: 'semantic', criteria: [{ field: 'categoriesSemantiques', operator: 'includes', value: 'emotion' }], tenseIds: coreTenses, questionCount: 20 },
   { id: 'sens-corps', label: 'Corps et besoins', description: 'Manger, boire, dormir et prendre soin de soi.', group: 'semantic', criteria: [{ field: 'categoriesSemantiques', operator: 'includes', value: 'corps' }], tenseIds: coreTenses, questionCount: 20 },
+  { id: 'cod-apres-passe-compose', label: '1. COD après le verbe', description: 'Reconnaître qu’un COD placé après ne commande pas l’accord du participe passé.', group: 'agreement', criteria: [{ field: 'complementExample', operator: 'has-anteposable-cod' }], tenseIds: [5], questionCount: 20, includeComplements: true, complementPlacement: 'after' },
+  { id: 'cod-avant-passe-compose', label: '2. COD avant le verbe', description: 'Accorder le participe passé avec un COD antéposé au passé composé.', group: 'agreement', criteria: [{ field: 'complementExample', operator: 'has-anteposable-cod' }], tenseIds: [5], questionCount: 20, includeComplements: true, complementPlacement: 'before' },
+  { id: 'cod-avant-indicatif-compose', label: '3. Tous les temps composés', description: 'Accorder le COD antéposé aux quatre temps composés de l’indicatif.', group: 'agreement', criteria: [{ field: 'complementExample', operator: 'has-anteposable-cod' }], tenseIds: [5, 6, 7, 8], questionCount: 30, includeComplements: true, complementPlacement: 'before' },
+  { id: 'cod-mixte-indicatif-compose', label: '4. Avant ou après ?', description: 'Décider s’il faut accorder selon la position du COD dans la phrase.', group: 'agreement', criteria: [{ field: 'complementExample', operator: 'has-anteposable-cod' }], tenseIds: [5, 6, 7, 8], questionCount: 30, includeComplements: true, complementPlacement: 'mixed' },
+  { id: 'cod-mixte-tous-modes', label: '5. Défi expert', description: 'COD avant ou après avec les temps composés de l’indicatif, du subjonctif et du conditionnel.', group: 'agreement', criteria: [{ field: 'complementExample', operator: 'has-anteposable-cod' }], tenseIds: [5, 6, 7, 8, 11, 17, 15, 19], questionCount: 40, includeComplements: true, complementPlacement: 'mixed' },
   { id: 'rares', label: 'Verbes rares', description: 'Verbes marqués comme rares ou vieillis.', group: 'training', criteria: [{ field: 'registrePrincipal', operator: 'equals', value: 'rare' }], tenseIds: coreTenses, questionCount: 20 },
   { id: 'difficiles', label: 'Verbes difficiles', description: 'Conjugaisons de difficulté élevée.', group: 'training', criteria: [{ field: 'niveauDifficulte', operator: 'gte', value: 3 }], tenseIds: coreTenses, questionCount: 20 },
   { id: 'pronominaux', label: 'Verbes pronominaux', description: 'Tous les verbes pronominaux du catalogue.', group: 'training', criteria: [{ field: 'typePronominal', operator: 'not-equals', value: 'aucun' }], tenseIds: coreTenses, questionCount: 20 },
@@ -74,6 +83,10 @@ export const challengePresetDefinitions = [
 export type ChallengePresetId = (typeof challengePresetDefinitions)[number]['id']
 
 function matchesCriterion(verb: Verb, criterion: VerbCriterion) {
+  if (criterion.operator === 'has-anteposable-cod') {
+    return verb.complementExample?.functionObject === 'cod'
+      && Boolean(verb.complementExample.before)
+  }
   const value = verb[criterion.field]
   if (criterion.operator === 'includes') return Array.isArray(value) && value.includes(criterion.value)
   if (criterion.operator === 'not-in') return !criterion.value.includes(value as string | number)
@@ -83,10 +96,14 @@ function matchesCriterion(verb: Verb, criterion: VerbCriterion) {
 }
 
 function verbsForDefinition(definition: ChallengePresetDefinition, verbs: readonly Verb[]) {
-  if (definition.id === 'ger-cer') {
-    return verbs.filter(verb => verb.particularites.includes('ger') || verb.particularites.includes('cer'))
+  if (definition.id === 'pronominaux') {
+    return verbs.filter(verb => verb.isPronominalForm || verb.typePronominal !== 'aucun')
   }
-  return verbs.filter(verb => definition.criteria.every(criterion => matchesCriterion(verb, criterion)))
+  const lexicalVerbs = verbs.filter(verb => !verb.isPronominalForm)
+  if (definition.id === 'ger-cer') {
+    return lexicalVerbs.filter(verb => verb.particularites.includes('ger') || verb.particularites.includes('cer'))
+  }
+  return lexicalVerbs.filter(verb => definition.criteria.every(criterion => matchesCriterion(verb, criterion)))
 }
 
 export function resolveChallengePresets(verbs: readonly Verb[]): ChallengePreset[] {
@@ -102,6 +119,8 @@ export function resolveChallengePresets(verbs: readonly Verb[]): ChallengePreset
     exerciseKind: 'conjugation',
     pastSimplePronouns: 'all',
     inclusivePronouns: false,
+    includeComplements: 'includeComplements' in definition ? definition.includeComplements : false,
+    complementPlacement: 'complementPlacement' in definition ? definition.complementPlacement : 'after',
   }))
 }
 
@@ -129,6 +148,8 @@ export function challengeConfigFromLegacyTuple(tuple: LegacyChallengeTuple): Cha
     exerciseKind: 'conjugation',
     pastSimplePronouns: 'all',
     inclusivePronouns: false,
+    includeComplements: false,
+    complementPlacement: 'after',
   }
 }
 

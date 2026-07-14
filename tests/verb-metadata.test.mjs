@@ -28,6 +28,27 @@ async function classifiedVerbs() {
     LEFT JOIN categories_semantiques cs ON cs.id=vsc.categorie_id
     GROUP BY v.id, f.slug ORDER BY v.id
   `)
+  const [complements] = await database.execute(`
+    SELECT vs.verbe_id, cv.fonction_objet, c.texte, c.texte_antepose
+    FROM verbe_sens vs
+    INNER JOIN constructions_verbales cv ON cv.sens_id=vs.id
+    INNER JOIN complements_verbaux c ON c.construction_id=cv.id
+    WHERE cv.actif=1 AND cv.statut_validation='valide'
+      AND c.actif=1 AND c.statut_validation='valide'
+    ORDER BY vs.verbe_id,
+      (cv.fonction_objet='cod' AND c.texte_antepose IS NOT NULL) DESC,
+      cv.id, c.id
+  `)
+  const complementByVerb = new Map()
+  for (const complement of complements) {
+    if (!complementByVerb.has(Number(complement.verbe_id))) {
+      complementByVerb.set(Number(complement.verbe_id), {
+        functionObject: complement.fonction_objet,
+        after: complement.texte,
+        before: complement.texte_antepose,
+      })
+    }
+  }
   return rows.map(row => ({
     id: Number(row.id), infinitif: row.infinitif, participePresent: row['participe_présent'], participePasse: row['participe_passé'], auxiliaire: row.auxiliaire,
     groupeConjugaison: Number(row.groupe_conjugaison), familleConjugaison: row.famille_conjugaison, terminaison: row.terminaison_infinitif,
@@ -37,6 +58,7 @@ async function classifiedVerbs() {
     registrePrincipal: row.registre_principal, formeCanonique: row.forme_canonique, statutValidation: row.statut_validation,
     particularites: parseArray(row.particularites), niveauxScolaires: parseArray(row.niveaux_scolaires), parcoursCif: parseArray(row.parcours_cif),
     categoriesSemantiques: row.categories ? row.categories.split(',') : [],
+    complementExample: complementByVerb.get(Number(row.id)) ?? null,
   }))
 }
 
@@ -68,6 +90,7 @@ describe('métadonnées grammaticales des verbes', () => {
     }
     assert.equal(presets.find(preset => preset.id === '5P').verbIds.length, 10)
     assert.ok(presets.find(preset => preset.id === 'groupe1').verbIds.length > 300)
+    assert.ok(presets.find(preset => preset.id === 'cod-avant-passe-compose').verbIds.length >= 290)
   })
 })
 

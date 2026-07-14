@@ -32,6 +32,8 @@ async function signOut() {
 
       <nav class="admin-shell__nav" aria-label="Navigation d’administration">
         <NuxtLink to="/admin">Verbes</NuxtLink>
+        <NuxtLink to="/admin/characters">Caractères</NuxtLink>
+        <NuxtLink to="/admin/coaches">Coaches</NuxtLink>
         <NuxtLink to="/admin/tests">Tests</NuxtLink>
         <NuxtLink to="/admin/users">Utilisateurs</NuxtLink>
         <NuxtLink to="/charts">Statistiques</NuxtLink>

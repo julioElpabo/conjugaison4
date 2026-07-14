@@ -32,6 +32,16 @@ const alternativeCorrections = computed(() => currentQuestion.value
   : [])
 const alternativeText = computed(() => alternativeCorrections.value.join(' ou '))
 const alternativePunctuation = computed(() => /[.!?]$/u.test(alternativeText.value) ? '' : '.')
+const agreementReminder = computed(() => currentQuestion.value?.agreementReminder)
+const agreementFeatures = computed(() => {
+  const reminder = agreementReminder.value
+  if (!reminder?.gender || !reminder.number) return ''
+  return `${reminder.gender === 'feminin' ? 'féminin' : 'masculin'} ${reminder.number}`
+})
+const indirectRecognition = computed(() => {
+  const preposition = agreementReminder.value?.preposition || 'à'
+  return `${agreementReminder.value?.infinitive} ${preposition} qui ? / ${preposition} quoi ?`
+})
 const titleMessage = computed(() => {
   if (scorePercent.value >= 90) return 'Excellent !'
   if (scorePercent.value >= 60) return 'Bravo !'
@@ -81,6 +91,23 @@ function restart() {
   nextTick(() => answerInput.value?.focus())
 }
 
+function onDocumentKeydown(event: KeyboardEvent) {
+  if (event.key !== 'Enter'
+    || event.isComposing
+    || event.repeat
+    || isFinished.value
+    || feedback.value === 'idle') {
+    return
+  }
+
+  event.preventDefault()
+  event.stopPropagation()
+  nextQuestion()
+}
+
+onMounted(() => document.addEventListener('keydown', onDocumentKeydown))
+onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown))
+
 </script>
 
 <template>
@@ -120,9 +147,54 @@ function restart() {
           <p v-if="exerciseKind === 'tense-identification'" class="question-instruction">
             Trouve le mode et le temps de cette forme :
           </p>
-          <p class="question-text">{{ currentQuestion.consigne }}</p>
+          <template v-if="exerciseKind === 'conjugation' && currentQuestion.complement">
+            <p class="question-context" aria-label="Contexte grammatical">
+              <span>Verbe : <strong>{{ currentQuestion.infinitif }}</strong></span>
+              <i aria-hidden="true">|</i>
+              <span>Mode : <strong>{{ currentQuestion.mode }}</strong></span>
+              <i aria-hidden="true">|</i>
+              <span>Temps : <strong>{{ currentQuestion.temps }}</strong></span>
+              <template v-if="currentQuestion.mode?.toLocaleLowerCase('fr') === 'impératif'">
+                <i aria-hidden="true">|</i>
+                <span>Personne : <strong>{{ currentQuestion.pronom }}</strong></span>
+              </template>
+            </p>
 
-          <form class="answer-form" @submit.prevent="feedback === 'idle' ? submitAnswer() : nextQuestion()">
+            <form class="completion-form" @submit.prevent="feedback === 'idle' ? submitAnswer() : nextQuestion()">
+              <div class="completion-sentence">
+                <span v-if="currentQuestion.complementPosition === 'before'">{{ currentQuestion.complement }}</span>
+                <span v-if="currentQuestion.saisiePrefixe" class="completion-sentence__prefix">{{ currentQuestion.saisiePrefixe }}</span>
+                <input
+                  id="exercise-answer"
+                  ref="answer-input"
+                  v-model="answer"
+                  type="text"
+                  autocomplete="off"
+                  :aria-label="`Forme conjuguée de ${currentQuestion.infinitif}`"
+                  :disabled="feedback !== 'idle'"
+                  :class="{
+                    'is-valid': feedback === 'correct',
+                    'is-invalid': feedback === 'incorrect'
+                  }"
+                  :aria-invalid="feedback === 'incorrect'"
+                  :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : undefined"
+                >
+                <span v-if="currentQuestion.complementPosition !== 'before'">
+                  {{ currentQuestion.complement }}{{ currentQuestion.mode?.toLocaleLowerCase('fr') === 'impératif' ? ' !' : '' }}
+                </span>
+              </div>
+              <button v-if="feedback === 'idle'" class="primary-button" type="submit" :disabled="!answer.trim()">
+                Vérifier
+              </button>
+              <button v-else class="primary-button" type="submit">
+                {{ currentIndex === questions.length - 1 ? 'Voir mes résultats' : 'Question suivante' }}
+              </button>
+            </form>
+          </template>
+
+          <p v-else class="question-text">{{ currentQuestion.consigne }}</p>
+
+          <form v-if="!(exerciseKind === 'conjugation' && currentQuestion.complement)" class="answer-form" @submit.prevent="feedback === 'idle' ? submitAnswer() : nextQuestion()">
             <label for="exercise-answer">Ta réponse</label>
             <div class="answer-form__row">
               <input
@@ -161,6 +233,66 @@ function restart() {
               On peut aussi répondre : <strong>{{ alternativeText }}</strong>{{ alternativePunctuation }}
             </p>
             <p v-else>Tu peux passer à la question suivante.</p>
+
+            <aside v-if="agreementReminder" class="grammar-reminder">
+              <strong>Rappel de la règle</strong>
+
+              <template v-if="agreementReminder.kind === 'cod-before'">
+                <p v-if="feedback === 'correct'">
+                  C’est juste : le COD <strong>« {{ agreementReminder.complement }} »</strong> est placé avant
+                  le verbe <strong>« {{ agreementReminder.infinitive }} »</strong>. Avec l’auxiliaire
+                  <em>avoir</em>, le participe passé s’accorde donc avec ce COD<span v-if="agreementFeatures">,
+                  {{ agreementFeatures }}</span> : <strong>« {{ agreementReminder.participle }} »</strong>.
+                </p>
+                <p v-else>
+                  Ici, le COD <strong>« {{ agreementReminder.complement }} »</strong> est placé avant le verbe
+                  <strong>« {{ agreementReminder.infinitive }} »</strong>. Avec <em>avoir</em>, il commande
+                  l’accord du participe passé<span v-if="agreementFeatures"> au {{ agreementFeatures }}</span> :
+                  <strong>« {{ agreementReminder.participle }} »</strong>.
+                </p>
+                <small>
+                  Pour reconnaître le COD, pose « {{ agreementReminder.infinitive }} qui ? » ou
+                  « {{ agreementReminder.infinitive }} quoi ? ». Il répond sans préposition.
+                </small>
+              </template>
+
+              <template v-else-if="agreementReminder.kind === 'cod-after'">
+                <p v-if="feedback === 'correct'">
+                  C’est juste : le COD <strong>« {{ agreementReminder.complement }} »</strong> est placé après
+                  le verbe <strong>« {{ agreementReminder.infinitive }} »</strong>. Avec <em>avoir</em>, on
+                  n’accorde pas le participe passé avec un COD placé après : il reste
+                  <strong>« {{ agreementReminder.participle }} »</strong>.
+                </p>
+                <p v-else>
+                  Ici, le COD <strong>« {{ agreementReminder.complement }} »</strong> est placé après le verbe
+                  <strong>« {{ agreementReminder.infinitive }} »</strong>. Il ne commande donc aucun accord :
+                  le participe passé reste <strong>« {{ agreementReminder.participle }} »</strong>.
+                </p>
+                <small>
+                  Pour reconnaître le COD, pose « {{ agreementReminder.infinitive }} qui ? » ou
+                  « {{ agreementReminder.infinitive }} quoi ? ». Il répond sans préposition.
+                </small>
+              </template>
+
+              <template v-else>
+                <p v-if="feedback === 'correct'">
+                  C’est juste : <strong>« {{ agreementReminder.complement }} »</strong> n’est pas un COD,
+                  mais un COI du verbe <strong>« {{ agreementReminder.infinitive }} »</strong>. Un COI ne
+                  commande jamais l’accord du participe passé employé avec <em>avoir</em> : il reste
+                  <strong>« {{ agreementReminder.participle }} »</strong>.
+                </p>
+                <p v-else>
+                  Attention : <strong>« {{ agreementReminder.complement }} »</strong> n’est pas un COD, mais
+                  un COI du verbe <strong>« {{ agreementReminder.infinitive }} »</strong>. Si tu as accordé le
+                  participe avec ce complément, il ne fallait pas : il reste
+                  <strong>« {{ agreementReminder.participle }} »</strong>.
+                </p>
+                <small>
+                  Pour reconnaître le COI, repère sa préposition et pose la question
+                  « {{ indirectRecognition }} ».
+                </small>
+              </template>
+            </aside>
           </div>
         </div>
 

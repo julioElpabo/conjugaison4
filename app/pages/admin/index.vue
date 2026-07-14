@@ -89,7 +89,7 @@ async function fetchCatalogue(loadSelection = true) {
       credentials: 'same-origin'
     })
     catalogue.value = {
-      verbes: [...response.verbes].sort((a, b) => a.infinitif.localeCompare(b.infinitif, 'fr')),
+      verbes: response.verbes.filter(verb => verb.id > 0).sort((a, b) => a.infinitif.localeCompare(b.infinitif, 'fr')),
       modes: [...response.modes].sort((a, b) => a.order - b.order || a.id - b.id),
       temps: [...response.temps]
     }

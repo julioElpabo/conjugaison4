@@ -23,19 +23,26 @@ function verb(id, infinitif, metadata = {}) {
 }
 
 const verbs = [
-  verb(41, 'aimer', { niveauxScolaires: ['5P'], categoriesSemantiques: ['emotion'] }),
-  verb(7, 'manger', { particularites: ['ger'] }),
+  verb(41, 'aimer', {
+    niveauxScolaires: ['5P'], categoriesSemantiques: ['emotion'],
+    complementExample: { functionObject: 'cod', after: 'cette chanson', before: 'la chanson' },
+  }),
+  verb(7, 'manger', {
+    particularites: ['ger'],
+    complementExample: { functionObject: 'cod', after: 'une pomme', before: 'la pomme' },
+  }),
   verb(99, 'venir', { groupeConjugaison: 3, familleConjugaison: 'venir-tenir', terminaison: 'ir', categoriesSemantiques: ['mouvement'] }),
   verb(5, 'se laver', { typePronominal: 'occasionnel', particularites: ['pronominal'], categoriesSemantiques: ['corps'] }),
   verb(12, 'absoudre', { groupeConjugaison: 3, terminaison: 're', niveauDifficulte: 3, registrePrincipal: 'rare' }),
 ]
 
 describe('défis résolus par critères', () => {
-  it('expose les 28 défis avec des identifiants uniques et sans liste de verbes figée', () => {
-    assert.equal(challengePresetDefinitions.length, 28)
-    assert.equal(new Set(challengePresetDefinitions.map(preset => preset.id)).size, 28)
+  it('expose les 33 défis avec des identifiants uniques et sans liste de verbes figée', () => {
+    assert.equal(challengePresetDefinitions.length, 33)
+    assert.equal(new Set(challengePresetDefinitions.map(preset => preset.id)).size, 33)
     assert.ok(challengePresetDefinitions.every(preset => !Object.hasOwn(preset, 'verbIds')))
     assert.equal(isChallengePresetId('7H'), true)
+    assert.equal(isChallengePresetId('cod-avant-passe-compose'), true)
     assert.equal(isChallengePresetId('inconnu'), false)
   })
 
@@ -49,10 +56,27 @@ describe('défis résolus par critères', () => {
     assert.deepEqual(resolved.difficiles.verbIds, [12])
     assert.deepEqual(resolved['sens-mouvement'].verbIds, [99])
     assert.deepEqual(resolved['sens-corps'].verbIds, [5])
+    assert.deepEqual(resolved['cod-apres-passe-compose'].verbIds, [41, 7])
+    assert.deepEqual(resolved['cod-avant-passe-compose'].verbIds, [41, 7])
+    assert.deepEqual(resolved['cod-mixte-tous-modes'].verbIds, [41, 7])
+  })
+
+  it('configure la progression COD avec les compléments et les temps attendus', () => {
+    const resolved = Object.fromEntries(resolveChallengePresets(verbs).map(preset => [preset.id, preset]))
+    assert.deepEqual(resolved['cod-apres-passe-compose'].tenseIds, [5])
+    assert.equal(resolved['cod-apres-passe-compose'].includeComplements, true)
+    assert.equal(resolved['cod-apres-passe-compose'].complementPlacement, 'after')
+    assert.deepEqual(resolved['cod-avant-passe-compose'].tenseIds, [5])
+    assert.equal(resolved['cod-avant-passe-compose'].complementPlacement, 'before')
+    assert.deepEqual(resolved['cod-avant-indicatif-compose'].tenseIds, [5, 6, 7, 8])
+    assert.equal(resolved['cod-mixte-indicatif-compose'].complementPlacement, 'mixed')
+    assert.deepEqual(resolved['cod-mixte-tous-modes'].tenseIds, [5, 6, 7, 8, 11, 17, 15, 19])
   })
 
   it('produit des configurations valides', () => {
     for (const preset of resolveChallengePresets(verbs)) {
+      const definition = challengePresetDefinitions.find(candidate => candidate.id === preset.id)
+      assert.ok(definition)
       assert.ok(preset.tenseIds.length > 0, `${preset.id}: aucun temps`)
       assert.ok(Number.isInteger(preset.questionCount) && preset.questionCount > 0)
       assert.equal(new Set(preset.verbIds).size, preset.verbIds.length, `${preset.id}: verbes en double`)
@@ -62,6 +86,8 @@ describe('défis résolus par critères', () => {
       assert.equal(preset.exerciseKind, 'conjugation')
       assert.equal(preset.pastSimplePronouns, 'all')
       assert.equal(preset.inclusivePronouns, false)
+      assert.equal(preset.includeComplements, definition.includeComplements ?? false)
+      assert.equal(preset.complementPlacement, definition.complementPlacement ?? 'after')
     }
   })
 
@@ -89,6 +115,8 @@ describe('conversion du format historique', () => {
       exerciseKind: 'conjugation',
       pastSimplePronouns: 'all',
       inclusivePronouns: false,
+      includeComplements: false,
+      complementPlacement: 'after',
     })
     assert.deepEqual(challengeConfigToLegacyTuple(config), [[1, 2], [1, 3], 12])
   })
@@ -108,6 +136,8 @@ describe('inspectPresetCompatibility', () => {
         exerciseKind: 'conjugation',
         pastSimplePronouns: 'all',
         inclusivePronouns: false,
+        includeComplements: false,
+        complementPlacement: 'after',
       },
       [1, 2],
       [1],

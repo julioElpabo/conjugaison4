@@ -32,6 +32,15 @@ interface TestResultGroup {
   passed: boolean
   cases: Array<{ title: string, passed: boolean, skipped: boolean }>
 }
+interface CoachCredibilityCheck { id: string, label: string, passed: boolean, expected: string, actual: string }
+interface CoachCredibilityReport {
+  coachId: number
+  coachName: string
+  characterName: string
+  score: number
+  passed: boolean
+  checks: CoachCredibilityCheck[]
+}
 interface TestRun {
   success: boolean
   exitCode: number
@@ -41,6 +50,7 @@ interface TestRun {
   summary: { tests: number, suites: number, passed: number, failed: number, skipped: number }
   groups: TestResultGroup[]
   conjugationScenarios: ConjugationScenario[]
+  coachCredibility: CoachCredibilityReport[]
   repairPrompt: string
   output: string
 }
@@ -263,6 +273,28 @@ watch(user, (current) => {
             </details>
           </div>
 
+          <section v-if="result.coachCredibility.length" class="credibility-report" aria-labelledby="credibility-title">
+            <header>
+              <div><p class="admin-eyebrow">Conversation simulée</p><h3 id="credibility-title">Crédibilité des coaches</h3></div>
+              <strong>{{ result.coachCredibility.filter(report => report.passed).length }}/{{ result.coachCredibility.length }} crédibles</strong>
+            </header>
+            <div class="credibility-grid">
+              <details v-for="report in result.coachCredibility" :key="report.coachId" :open="!report.passed">
+                <summary>
+                  <span :class="['credibility-score', report.passed ? 'is-passed' : 'is-failed']">{{ report.score }} %</span>
+                  <span><strong>{{ report.coachName }}</strong><small>{{ report.characterName }}</small></span>
+                  <b>{{ report.passed ? 'Crédible' : 'À améliorer' }}</b>
+                </summary>
+                <ul>
+                  <li v-for="check in report.checks" :key="check.id" :class="{ 'is-failed': !check.passed }">
+                    <span :class="['postman-status', check.passed ? 'is-passed' : 'is-failed']">{{ check.passed ? '✓' : '×' }}</span>
+                    <span><strong>{{ check.label }}</strong><small>{{ check.passed ? check.actual : `Attendu : ${check.expected} · Obtenu : ${check.actual}` }}</small></span>
+                  </li>
+                </ul>
+              </details>
+            </div>
+          </section>
+
           <div v-if="result.conjugationScenarios.length" class="postman-report">
             <header class="postman-report__header">
               <div>
@@ -410,6 +442,24 @@ watch(user, (current) => {
 .test-groups ul { display: grid; margin: 0; padding: 8px 14px 12px 48px; gap: 7px; list-style: none; }
 .test-groups li { display: grid; grid-template-columns: 21px 1fr auto; align-items: center; gap: 8px; color: #365669; font-size: .87rem; }
 .test-groups li small { color: var(--admin-muted); }
+.credibility-report { margin: 24px 0; padding: 18px; border: 1px solid var(--admin-border); border-radius: 12px; }
+.credibility-report > header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.credibility-report h3 { margin: 2px 0 0; color: var(--admin-navy); }
+.credibility-report > header > strong { color: var(--admin-muted); }
+.credibility-grid { display: grid; margin-top: 15px; grid-template-columns: repeat(auto-fit,minmax(min(360px,100%),1fr)); gap: 9px; }
+.credibility-grid details { overflow: hidden; border: 1px solid var(--admin-border); border-radius: 9px; }
+.credibility-grid summary { display: grid; padding: 12px; grid-template-columns: 58px 1fr auto; align-items: center; gap: 10px; list-style: none; background: #f7f9fa; }
+.credibility-grid summary::-webkit-details-marker { display: none; }
+.credibility-grid summary > span:nth-child(2) { display: grid; }
+.credibility-grid summary small { color: var(--admin-muted); }
+.credibility-grid summary b { color: var(--admin-muted); font-size: .78rem; }
+.credibility-score { display: grid; min-height: 42px; place-items: center; color: white; background: var(--admin-red); border-radius: 8px; font-weight: 900; }
+.credibility-score.is-passed { background: var(--admin-green); }
+.credibility-grid ul { display: grid; margin: 0; padding: 10px; gap: 6px; list-style: none; }
+.credibility-grid li { display: grid; padding: 7px; grid-template-columns: 22px 1fr; align-items: start; gap: 8px; border-radius: 7px; }
+.credibility-grid li.is-failed { background: #fff1ef; }
+.credibility-grid li > span:last-child { display: grid; }
+.credibility-grid li small { margin-top: 2px; color: var(--admin-muted); line-height: 1.35; }
 .postman-report { width: 100%; max-width: 100%; min-width: 0; margin: 24px 0; overflow: hidden; border: 1px solid var(--admin-border); border-radius: 12px; }
 .postman-report__header { display: flex; padding: 16px 18px; align-items: center; justify-content: space-between; gap: 16px; background: #f7f9fa; border-bottom: 1px solid var(--admin-border); }
 .postman-report__header h3, .postman-report__detail h3 { margin: 2px 0 0; color: var(--admin-navy); }

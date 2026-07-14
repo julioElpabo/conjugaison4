@@ -15,6 +15,7 @@ const groupLabels: Record<string, string> = {
   'verb-group': 'Groupes de verbes',
   spelling: 'Difficultés particulières',
   semantic: 'Sens des verbes',
+  agreement: 'COD et participes passés',
   training: 'Entraînements'
 }
 

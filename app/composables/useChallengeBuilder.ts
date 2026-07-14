@@ -4,11 +4,12 @@ import type {
   ConjugationMode,
   ConjugationTense,
   ExerciseKind,
+  ComplementPlacement,
   PastSimplePronouns,
   Verb
 } from '~~/shared/types/conjugation'
 
-export type { ConjugationMode, ExerciseKind, PastSimplePronouns, Verb }
+export type { ComplementPlacement, ConjugationMode, ExerciseKind, PastSimplePronouns, Verb }
 export type Tense = ConjugationTense
 
 export interface Catalogue {
@@ -41,14 +42,16 @@ export interface SharedChallenge {
   exerciseKind?: ExerciseKind
   pastSimplePronouns?: PastSimplePronouns
   inclusivePronouns?: boolean
+  includeComplements?: boolean
+  complementPlacement?: ComplementPlacement
   printOptions?: Partial<PrintOptions>
 }
 
 const createDefaultPrintOptions = (): PrintOptions => ({
   title: 'Défi de conjugaison',
   showGrade: true,
-  showVerbs: true,
-  showTenses: true,
+  showVerbs: false,
+  showTenses: false,
   showFirstName: true,
   showLastName: true,
   showDate: true,
@@ -62,6 +65,8 @@ const createDefaultChallenge = (): ChallengeConfig => ({
   exerciseKind: 'conjugation',
   pastSimplePronouns: 'all',
   inclusivePronouns: false,
+  includeComplements: false,
+  complementPlacement: 'after',
   printOptions: createDefaultPrintOptions()
 })
 
@@ -185,6 +190,8 @@ export function useChallengeBuilder() {
       exerciseKind: shared.exerciseKind ?? challenge.value.exerciseKind,
       pastSimplePronouns: shared.pastSimplePronouns ?? challenge.value.pastSimplePronouns,
       inclusivePronouns: shared.inclusivePronouns ?? challenge.value.inclusivePronouns,
+      includeComplements: shared.includeComplements ?? false,
+      complementPlacement: shared.complementPlacement ?? 'after',
       printOptions: {
         ...challenge.value.printOptions,
         ...(shared.printOptions ?? {})

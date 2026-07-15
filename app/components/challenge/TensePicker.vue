@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type {
   ConjugationMode,
-  PastSimplePronouns,
   Tense,
   Verb
 } from '~/composables/useChallengeBuilder'
@@ -11,14 +10,12 @@ const props = defineProps<{
   tenses: Tense[]
   verbs: Verb[]
   selectedIds: number[]
-  pastSimplePronouns: PastSimplePronouns
 }>()
 
 const emit = defineEmits<{
   toggle: [id: number]
   selectAll: []
   clear: []
-  updatePastSimplePronouns: [value: PastSimplePronouns]
 }>()
 
 const selectedSet = computed(() => new Set(props.selectedIds))
@@ -49,15 +46,6 @@ const groups = computed(() => props.modes
     }
   })
   .filter(group => group.tenses.length > 0))
-
-function isPastSimple(tense: Tense) {
-  return tense.name.trim().toLocaleLowerCase('fr').normalize('NFC') === 'passé simple'
-}
-
-function onPastSimplePronounsChange(event: Event) {
-  const value = (event.target as HTMLInputElement).value as PastSimplePronouns
-  emit('updatePastSimplePronouns', value)
-}
 
 let exampleRequest = 0
 async function loadExamples() {
@@ -139,21 +127,6 @@ watch(exampleRequestKey, () => void loadExamples())
                 </label>
               </div>
 
-              <Transition name="past-simple-options">
-                <div v-if="isPastSimple(tense) && selectedSet.has(tense.id)" class="past-simple-options">
-                  <fieldset class="inline-choice">
-                    <legend>Au passé simple et au passé antérieur</legend>
-                    <label>
-                      <input type="radio" name="past-simple-pronouns" value="all" :checked="pastSimplePronouns === 'all'" @change="onPastSimplePronounsChange">
-                      Tous les pronoms
-                    </label>
-                    <label>
-                      <input type="radio" name="past-simple-pronouns" value="third-person-only" :checked="pastSimplePronouns === 'third-person-only'" @change="onPastSimplePronounsChange">
-                      Seulement il / elle et ils / elles
-                    </label>
-                  </fieldset>
-                </div>
-              </Transition>
                 </div>
               </template>
             </div>
@@ -260,32 +233,8 @@ watch(exampleRequestKey, () => void loadExamples())
   transform: translateY(0);
 }
 
-.past-simple-options {
-  max-height: 220px;
-  overflow: hidden;
-}
-
-.past-simple-options .inline-choice {
-  margin: 2px 0 4px 44px;
-  padding: 12px;
-}
-
-.past-simple-options-enter-active,
-.past-simple-options-leave-active {
-  transition: max-height 240ms ease, opacity 180ms ease, transform 240ms ease;
-}
-
-.past-simple-options-enter-from,
-.past-simple-options-leave-to {
-  max-height: 0;
-  opacity: 0;
-  transform: translateY(-7px);
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .tense-tooltip,
-  .past-simple-options-enter-active,
-  .past-simple-options-leave-active {
+  .tense-tooltip {
     transition: none;
   }
 }

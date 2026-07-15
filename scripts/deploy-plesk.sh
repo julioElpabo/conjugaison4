@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
- 
+
 set -Eeuo pipefail
 
 # Les actions Git de Plesk peuvent être lancées avec un PATH minimal.

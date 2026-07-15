@@ -2,17 +2,19 @@
 
 set -Eeuo pipefail
 
+# Les actions Git de Plesk peuvent être lancées avec un PATH minimal qui ne
+# contient même pas les utilitaires système comme dirname.
+export PATH="/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+
 application_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$application_root"
 
-if ! command -v npm >/dev/null 2>&1; then
-  for node_bin in /opt/plesk/node/24/bin /opt/plesk/node/22/bin; do
-    if [[ -x "$node_bin/npm" ]]; then
-      export PATH="$node_bin:$PATH"
-      break
-    fi
-  done
-fi
+for node_bin in /opt/plesk/node/26/bin /opt/plesk/node/24/bin /opt/plesk/node/22/bin; do
+  if [[ -x "$node_bin/node" && -x "$node_bin/npm" ]]; then
+    export PATH="$node_bin:$PATH"
+    break
+  fi
+done
 
 if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
   echo 'Une version de Node.js compatible est introuvable. Activez Node.js 22 ou 24 dans le Node.js Toolkit de Plesk.' >&2

@@ -69,6 +69,12 @@ npm run build      # compilation de production
 npm run preview    # aperçu de la compilation
 ```
 
+## Déploiement
+
+Le déploiement automatique depuis GitHub vers Plesk est décrit dans
+[`docs/deploiement-plesk.md`](docs/deploiement-plesk.md). Le serveur de
+production se lance avec `npm start` après `npm run build`.
+
 ## Tests
 
 Les règles métier utilisent le moteur de test intégré à Node (`node:test`) : il

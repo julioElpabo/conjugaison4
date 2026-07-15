@@ -17,12 +17,12 @@ for node_bin in /opt/plesk/node/26/bin /opt/plesk/node/24/bin /opt/plesk/node/22
 done
 
 if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
-  echo 'Une version de Node.js compatible est introuvable. Activez Node.js 22 ou 24 dans le Node.js Toolkit de Plesk.' >&2
+  echo 'Une version de Node.js compatible est introuvable. Activez Node.js 22, 24 ou 26 dans le Node.js Toolkit de Plesk.' >&2
   exit 1
 fi
 
 node -e "const [major, minor] = process.versions.node.split('.').map(Number); const valid = (major === 22 && minor >= 12) || (major === 24 && minor >= 11) || major >= 26; if (!valid) process.exit(1)" || {
-  echo "Version de Node.js incompatible : $(node --version). Utilisez Node.js 22.12+, 24.11+ ou une branche prise en charge par le projet." >&2
+  echo "Version de Node.js incompatible : $(node --version). Utilisez Node.js 22.12+, 24.11+ ou 26+." >&2
   exit 1
 }
 

@@ -6,6 +6,8 @@ import { formatNonFiniteQuestion } from './non-finite-formatter'
 import { generatePronominalRow, type PronominalSourceRow } from './pronominal-formatter'
 import { decodePronominalSelectionId } from '../../shared/utils/pronominal-selection'
 import { TENSE_IDENTIFICATION_INSTRUCTION } from '../../shared/utils/exercise-instructions'
+import type { ComplementOption } from '../../shared/types/conjugation'
+import { indirectRelative } from './indirect-relative'
 
 interface IdRow extends RowDataPacket { id: number }
 
@@ -231,6 +233,9 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
   const nonFiniteTenses = selectedTenses.filter(row => ['participe', 'gérondif'].includes(normalized(row.mode_name)))
   const database = useDatabase()
   const questions: ExerciseQuestion[] = []
+  const requestedComplementOptions = request.complementOptions || []
+  const onlyBeforeComplements = requestedComplementOptions.length > 0
+    && requestedComplementOptions.every(option => option.endsWith('-before'))
   const verbIds = request.verbIds.filter(id => id > 0)
   const pronominalUseIds = request.verbIds
     .filter(id => id < 0)
@@ -339,28 +344,41 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
       }
     }
 
-    const rowsForQuestions = request.includeComplements && request.complementPlacement === 'before'
-      ? rows.filter(row => Boolean(row.is_compound))
+    const rowsForQuestions = onlyBeforeComplements
+      ? rows.filter(row => normalized(row.mode_name) !== 'impératif'
+        && (requestedComplementOptions.includes('coi-before') || Boolean(row.is_compound)))
       : rows
 
     questions.push(...rowsForQuestions.map((row) => {
       const candidates = complementsByVerb.get(Number(row.verbe_id)) ?? []
-      const anteposable = !allowsAnteposedComplement(row)
-        ? []
-        : candidates.filter(hasVisibleAnteposedAgreement)
-      const useBefore = allowsAnteposedComplement(row) && request.complementPlacement === 'before'
-        ? anteposable.length > 0
-        : allowsAnteposedComplement(row) && request.complementPlacement === 'mixed'
-          && anteposable.length > 0 && Math.random() < 0.5
-      const complement = randomComplement(useBefore ? anteposable : candidates)
-      const enrichedRow = complement
+      const availableOptions = requestedComplementOptions.flatMap((option) => {
+        const [functionObject, position] = option.split('-') as ['cod' | 'coi', 'after' | 'before']
+        const matching = candidates.filter(candidate => candidate.fonction_objet === functionObject)
+          .filter((candidate) => {
+            if (position === 'after') return true
+            if (functionObject === 'cod') return allowsAnteposedComplement(row) && hasVisibleAnteposedAgreement(candidate)
+            return normalized(row.mode_name) !== 'impératif' && Boolean(indirectRelative(candidate.texte, candidate.preposition))
+          })
+        return matching.length ? [{ option, matching }] : []
+      })
+      const selectedOption = availableOptions[Math.floor(Math.random() * availableOptions.length)]
+      const complement = selectedOption ? randomComplement(selectedOption.matching) : null
+      const option = selectedOption?.option as ComplementOption | undefined
+      const useBefore = option?.endsWith('-before') || false
+      const relative = complement && option === 'coi-before'
+        ? indirectRelative(complement.texte, complement.preposition)
+        : null
+      const canUseComplement = Boolean(complement) && (!useBefore
+        || (option === 'cod-before' ? Boolean(complement?.texte_antepose) : Boolean(relative)))
+      const enrichedRow = complement && canUseComplement
         ? {
             ...row,
             complement_phrase: complement.texte,
             complement_position: useBefore ? 'before' as const : 'after' as const,
-            complement_anteposed: useBefore ? complement.texte_antepose : null,
-            complement_gender: useBefore ? complement.genre : null,
-            complement_number: useBefore ? complement.nombre : null,
+            complement_anteposed: useBefore ? (relative?.antecedent || complement.texte_antepose) : null,
+            complement_relative_pronoun: relative?.relativePronoun || null,
+            complement_gender: option === 'cod-before' ? complement.genre : null,
+            complement_number: option === 'cod-before' ? complement.nombre : null,
             complement_function: complement.fonction_objet,
             complement_preposition: complement.preposition,
           }
@@ -372,7 +390,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
   }
 
   if (nonFiniteTenses.length > 0 && request.exerciseKind === 'conjugation'
-      && !(request.includeComplements && request.complementPlacement === 'before')) {
+      && !onlyBeforeComplements) {
     const verbs: NonFiniteVerbRow[] = []
     if (verbIds.length > 0) {
       const [storedVerbs] = await database.execute<NonFiniteVerbRow[]>(`

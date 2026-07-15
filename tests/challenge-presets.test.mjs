@@ -117,6 +117,7 @@ describe('conversion du format historique', () => {
       inclusivePronouns: false,
       includeComplements: false,
       complementPlacement: 'after',
+      complementOptions: [],
     })
     assert.deepEqual(challengeConfigToLegacyTuple(config), [[1, 2], [1, 3], 12])
   })

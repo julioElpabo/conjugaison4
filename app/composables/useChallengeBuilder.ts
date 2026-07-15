@@ -5,11 +5,13 @@ import type {
   ConjugationTense,
   ExerciseKind,
   ComplementPlacement,
+  ComplementOption,
   PastSimplePronouns,
   Verb
 } from '~~/shared/types/conjugation'
+import { DEFAULT_COMPLEMENT_OPTIONS, legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils/complement-options'
 
-export type { ComplementPlacement, ConjugationMode, ExerciseKind, PastSimplePronouns, Verb }
+export type { ComplementOption, ComplementPlacement, ConjugationMode, ExerciseKind, PastSimplePronouns, Verb }
 export type Tense = ConjugationTense
 
 export interface Catalogue {
@@ -44,6 +46,7 @@ export interface SharedChallenge {
   inclusivePronouns?: boolean
   includeComplements?: boolean
   complementPlacement?: ComplementPlacement
+  complementOptions?: ComplementOption[]
   printOptions?: Partial<PrintOptions>
 }
 
@@ -65,8 +68,9 @@ const createDefaultChallenge = (): ChallengeConfig => ({
   exerciseKind: 'conjugation',
   pastSimplePronouns: 'all',
   inclusivePronouns: false,
-  includeComplements: false,
+  includeComplements: true,
   complementPlacement: 'after',
+  complementOptions: [...DEFAULT_COMPLEMENT_OPTIONS],
   printOptions: createDefaultPrintOptions()
 })
 
@@ -188,13 +192,19 @@ export function useChallengeBuilder() {
 
   function applySharedChallenge(shared: SharedChallenge) {
     applySelection(shared)
+    const complementOptions = shared.complementOptions
+      ?? (shared.includeComplements === undefined
+        ? [...DEFAULT_COMPLEMENT_OPTIONS]
+        : legacyComplementOptions(shared.includeComplements, shared.complementPlacement ?? 'after'))
+    const legacy = legacyComplementConfig(complementOptions)
     challenge.value = {
       ...challenge.value,
       exerciseKind: shared.exerciseKind ?? challenge.value.exerciseKind,
       pastSimplePronouns: shared.pastSimplePronouns ?? challenge.value.pastSimplePronouns,
       inclusivePronouns: shared.inclusivePronouns ?? challenge.value.inclusivePronouns,
-      includeComplements: shared.includeComplements ?? false,
-      complementPlacement: shared.complementPlacement ?? 'after',
+      includeComplements: legacy.includeComplements,
+      complementPlacement: legacy.complementPlacement,
+      complementOptions,
       printOptions: {
         ...challenge.value.printOptions,
         ...(shared.printOptions ?? {})

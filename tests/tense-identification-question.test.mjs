@@ -26,7 +26,7 @@ test('utilise la même question pour identifier le mode et le temps', () => {
   })
 
   assert.equal(question.instruction, TENSE_IDENTIFICATION_INSTRUCTION)
-  assert.equal(question.instruction, 'Quel est le mode et le temps de cette forme conjuguée?')
+  assert.equal(question.instruction, 'Quel est le temps et le mode de cette forme conjuguée ?')
   assert.equal(question.consigne, 'il abandonnait')
   assert.deepEqual(question.reponsesPourCorrige, ["L'imparfait de l'indicatif"])
 })

@@ -26,6 +26,7 @@ describe('validation des défis partagés', () => {
     assert.equal(challenge.inclusivePronouns, true)
     assert.equal(challenge.includeComplements, false)
     assert.equal(challenge.complementPlacement, 'after')
+    assert.deepEqual(challenge.complementOptions, [])
     assert.equal(challenge.printOptions.title, 'Défi de conjugaison')
   })
 
@@ -40,6 +41,7 @@ describe('validation des défis partagés', () => {
       inclusivePronouns: true,
       includeComplements: true,
       complementPlacement: 'mixed',
+      complementOptions: ['cod-after', 'coi-before'],
       printOptions: {
         title: 'Ma fiche',
         showGrade: false,
@@ -79,6 +81,7 @@ describe('validation des questionnaires', () => {
     assert.equal(request.pastSimplePronouns, 'third-person-only')
     assert.equal(request.includeComplements, false)
     assert.equal(request.complementPlacement, 'after')
+    assert.deepEqual(request.complementOptions, [])
   })
 
   it('valide les options de présence et de position des compléments', () => {
@@ -89,8 +92,18 @@ describe('validation des questionnaires', () => {
     })
     assert.equal(request.includeComplements, true)
     assert.equal(request.complementPlacement, 'before')
+    assert.deepEqual(request.complementOptions, ['cod-before'])
+    const independent = parseQuestionnaireRequest({
+      ...request,
+      complementOptions: ['cod-after', 'coi-after', 'coi-before'],
+    })
+    assert.deepEqual(independent.complementOptions, ['cod-after', 'coi-after', 'coi-before'])
     assert.throws(
       () => parseQuestionnaireRequest({ ...request, complementPlacement: 'partout' }),
+      PublicInputError
+    )
+    assert.throws(
+      () => parseQuestionnaireRequest({ ...request, complementOptions: ['ailleurs'] }),
       PublicInputError
     )
   })

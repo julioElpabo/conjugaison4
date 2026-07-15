@@ -1,11 +1,13 @@
 import type {
   ChallengePrintOptions,
+  ComplementOption,
   ComplementPlacement,
   DefiDefinition,
   ExerciseKind,
   PastSimplePronouns,
   QuestionnaireRequest
 } from '../types/public-api'
+import { legacyComplementConfig, legacyComplementOptions, normalizeComplementOptions } from '../../shared/utils/complement-options'
 
 export class PublicInputError extends Error {}
 
@@ -17,7 +19,8 @@ const QUESTIONNAIRE_KEYS = new Set([
   'pastSimplePronouns',
   'inclusivePronouns',
   'includeComplements',
-  'complementPlacement'
+  'complementPlacement',
+  'complementOptions'
 ])
 
 const DEFI_KEYS = new Set([
@@ -30,6 +33,7 @@ const DEFI_KEYS = new Set([
   'inclusivePronouns',
   'includeComplements',
   'complementPlacement',
+  'complementOptions',
   'printOptions'
 ])
 
@@ -117,6 +121,14 @@ function parseComplementPlacement(value: unknown): ComplementPlacement {
   throw new PublicInputError('complementPlacement doit valoir after, mixed ou before')
 }
 
+function parseComplementOptions(value: unknown): ComplementOption[] {
+  const parsed = normalizeComplementOptions(value)
+  if (!Array.isArray(value) || parsed.length !== value.length) {
+    throw new PublicInputError('complementOptions contient une option invalide')
+  }
+  return parsed
+}
+
 function parsePrintOptions(value: unknown): ChallengePrintOptions {
   if (value === undefined) {
     return { ...DEFAULT_PRINT_OPTIONS }
@@ -156,6 +168,13 @@ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest 
     throw new PublicInputError('includeComplements doit être un booléen')
   }
 
+  const complementPlacement = value.complementPlacement === undefined
+    ? 'after'
+    : parseComplementPlacement(value.complementPlacement)
+  const complementOptions = value.complementOptions === undefined
+    ? legacyComplementOptions(includeComplements, complementPlacement)
+    : parseComplementOptions(value.complementOptions)
+  const resolvedLegacy = legacyComplementConfig(complementOptions)
   return {
     verbIds: parseIds(value.verbIds, 'verbIds', 500, true),
     tenseIds: parseIds(value.tenseIds, 'tenseIds', 30),
@@ -163,10 +182,9 @@ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest 
     exerciseKind: parseExerciseKind(value.exerciseKind),
     pastSimplePronouns: parsePastSimplePronouns(value.pastSimplePronouns),
     inclusivePronouns: value.inclusivePronouns,
-    includeComplements,
-    complementPlacement: value.complementPlacement === undefined
-      ? 'after'
-      : parseComplementPlacement(value.complementPlacement)
+    includeComplements: resolvedLegacy.includeComplements,
+    complementPlacement: resolvedLegacy.complementPlacement,
+    complementOptions,
   }
 }
 
@@ -215,6 +233,13 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
     throw new PublicInputError('includeComplements doit être un booléen')
   }
 
+  const complementPlacement = modernValue.complementPlacement === undefined
+    ? 'after'
+    : parseComplementPlacement(modernValue.complementPlacement)
+  const complementOptions = modernValue.complementOptions === undefined
+    ? legacyComplementOptions(includeComplements, complementPlacement)
+    : parseComplementOptions(modernValue.complementOptions)
+  const resolvedLegacy = legacyComplementConfig(complementOptions)
   return {
     version: 1,
     verbIds: parseIds(modernValue.verbIds, 'verbIds', 500, true),
@@ -223,10 +248,9 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
     exerciseKind,
     pastSimplePronouns,
     inclusivePronouns,
-    includeComplements,
-    complementPlacement: modernValue.complementPlacement === undefined
-      ? 'after'
-      : parseComplementPlacement(modernValue.complementPlacement),
+    includeComplements: resolvedLegacy.includeComplements,
+    complementPlacement: resolvedLegacy.complementPlacement,
+    complementOptions,
     printOptions: parsePrintOptions(modernValue.printOptions)
   }
 }

@@ -212,3 +212,28 @@ describe('COI placé après le verbe', () => {
     assert.equal(question.agreementReminder?.participle, 'parlé')
   })
 })
+
+describe('COI placé avant le verbe', () => {
+  it('construit une relative indirecte sans accorder le participe', () => {
+    const question = formatConjugationQuestion(source({
+      infinitif: 'participer',
+      conjugaison1: 'participe',
+      temps_name: 'présent',
+      is_compound: 0,
+      participe_passe: 'participé',
+      complement_phrase: 'à une réunion',
+      complement_position: 'before',
+      complement_anteposed: 'la réunion',
+      complement_relative_pronoun: 'à laquelle',
+      complement_function: 'coi',
+      complement_preposition: 'à',
+    }), 'il')
+
+    assert.deepEqual(question.reponsesPourCorrige, ['la réunion à laquelle il participe'])
+    assert.ok(question.reponses.includes('la réunion à laquelle il participe'))
+    assert.equal(question.consigne, 'la réunion à laquelle il … | participer | présent (indicatif)')
+    assert.equal(question.complementFunction, 'coi')
+    assert.equal(question.relativePronoun, 'à laquelle')
+    assert.equal(question.saisiePrefixe, 'il')
+  })
+})

@@ -20,6 +20,7 @@
     "data:expand-complements": "node --env-file=.env --experimental-strip-types scripts/expand-verb-complements.mjs",
     "data:audit-academie-complements": "node --env-file=.env scripts/audit-academie-complements.mjs",
     "data:equip-all-complements": "node --env-file=.env scripts/equip-all-verb-complements.mjs",
+    "data:add-ecrire-coi": "node --env-file=.env scripts/add-ecrire-coi.mjs",
     "data:migrate-coaches": "node --env-file=.env scripts/migrate-coaches.mjs",
     "data:import-coach-media": "node --env-file=.env scripts/import-coach-media.mjs",
     "test": "node --env-file-if-exists=.env --import tsx --test tests/*.test.mjs",

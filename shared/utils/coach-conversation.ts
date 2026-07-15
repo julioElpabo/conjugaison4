@@ -22,7 +22,6 @@ export function openingTurnPlan(): CoachTurnStep[] {
 export function answerTurnPlan(options: {
   correct: boolean
   hasAlternative?: boolean
-  grammarEvent?: 'cod-before' | 'cod-after' | 'coi'
   streak?: boolean
   hasNext: boolean
 }): CoachTurnStep[] {
@@ -31,7 +30,6 @@ export function answerTurnPlan(options: {
     eventType: options.correct ? (options.hasAlternative ? 'correct-alternative' : 'correct') : 'incorrect',
   }]
   if (options.correct && options.hasAlternative) steps.push({ kind: 'alternative' })
-  if (options.grammarEvent) steps.push({ kind: 'reaction', eventType: options.grammarEvent })
   if (options.correct && options.streak) steps.push({ kind: 'reaction', eventType: 'streak' })
   steps.push({ kind: 'delay', milliseconds: CHAT_NEXT_QUESTION_DELAY_MS })
   steps.push(options.hasNext ? { kind: 'next-question' } : { kind: 'finish' })

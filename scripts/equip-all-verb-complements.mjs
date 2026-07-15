@@ -62,7 +62,7 @@ const childSafeDirect = {
 // tandis que la construction conserve séparément sa valeur grammaticale.
 const indirectSeeds = {
   assister: ['à', 'une réunion'], croire: ['à', 'une histoire'], discuter: ['de', 'un projet'],
-  douter: ['de', 'une réponse'], jouer: ['à', 'un jeu'], manquer: ['à', 'une obligation'],
+  douter: ['de', 'une réponse'], écrire: ['à', 'une mère'], jouer: ['à', 'un jeu'], manquer: ['à', 'une obligation'],
   parler: ['à', 'un ami'], penser: ['à', 'une solution'], plaire: ['à', 'un public'],
   réfléchir: ['à', 'une question'], répondre: ['à', 'une demande'], réussir: ['à', 'un examen'],
   rire: ['de', 'une plaisanterie'], servir: ['à', 'un projet'], songer: ['à', 'un voyage'],

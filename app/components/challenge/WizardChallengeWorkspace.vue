@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { ChallengePreset, ExerciseQuestion } from '~~/shared/types/conjugation'
+import type { ChallengePreset, ComplementOption, ExerciseQuestion } from '~~/shared/types/conjugation'
+import { legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils/complement-options'
 import type { CoachProfile } from '~~/shared/types/coach'
 import { getChallengeErrorMessage, useChallengeBuilder } from '~/composables/useChallengeBuilder'
 import { normalizeChallengeCode, useChallengeApi } from '~/composables/useChallengeApi'
@@ -99,6 +100,10 @@ function expectedAnswerParts(question: ExerciseQuestion | undefined) {
   if (question.complementPosition === 'before' && question.complement && answer.startsWith(question.complement)) {
     start = question.complement.length
     while (/\s/u.test(answer[start] ?? '')) start += 1
+    if (question.relativePronoun && answer.slice(start).startsWith(question.relativePronoun)) {
+      start += question.relativePronoun.length
+      while (/\s/u.test(answer[start] ?? '')) start += 1
+    }
   }
   if (question.saisiePrefixe && answer.slice(start).startsWith(question.saisiePrefixe)) {
     start += question.saisiePrefixe.length
@@ -219,8 +224,9 @@ function restartChallenge() {
   challenge.value.exerciseKind = 'conjugation'
   challenge.value.pastSimplePronouns = 'all'
   challenge.value.inclusivePronouns = false
-  challenge.value.includeComplements = false
+  challenge.value.includeComplements = true
   challenge.value.complementPlacement = 'after'
+  challenge.value.complementOptions = ['cod-after', 'coi-after']
   activePresetId.value = undefined
   presetExpanded.value = false
   presetStage.value = 'groups'
@@ -248,6 +254,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   challenge.value.inclusivePronouns = preset.inclusivePronouns
   challenge.value.includeComplements = preset.includeComplements
   challenge.value.complementPlacement = preset.complementPlacement
+  challenge.value.complementOptions = preset.complementOptions ?? legacyComplementOptions(preset.includeComplements, preset.complementPlacement)
   activePresetId.value = preset.id
   notice.value = ''
   actionError.value = ''
@@ -295,6 +302,14 @@ function onToggleTense(id: number) {
   toggleTense(id)
 }
 
+function updateComplementOptions(options: ComplementOption[]) {
+  const legacy = legacyComplementConfig(options)
+  challenge.value.complementOptions = options
+  challenge.value.includeComplements = legacy.includeComplements
+  challenge.value.complementPlacement = legacy.complementPlacement
+  markAsCustom()
+}
+
 async function refreshConjugationExample() {
   if (!isReady.value) {
     conjugationInstructionRaw.value = ''
@@ -312,28 +327,37 @@ async function refreshConjugationExample() {
   const loadingStartedAt = Date.now()
   conjugationExampleLoading.value = true
   try {
-    const exampleComplementPlacement = challenge.value.complementPlacement === 'mixed'
-      ? 'before'
-      : challenge.value.complementPlacement
+    const exampleComplementOption = challenge.value.complementOptions.filter((option) => {
+      const functionObject = option.slice(0, 3) as 'cod' | 'coi'
+      return selectedVerbs.value.some((verb) => {
+        const supportsFunction = verb.complementFunctions?.includes(functionObject)
+          || verb.complementExample?.functionObject === functionObject
+        return supportsFunction && (!option.endsWith('-before')
+          || verb.anteposableComplementFunctions?.includes(functionObject)
+          || (functionObject === 'cod' && Boolean(verb.complementExample?.before)))
+      })
+    }).at(-1)
+    const exampleComplementPlacement: 'before' | 'after' = exampleComplementOption?.endsWith('-before') ? 'before' : 'after'
     const needsComplement = challenge.value.exerciseKind === 'conjugation'
-      && challenge.value.includeComplements
+      && Boolean(exampleComplementOption)
     const exampleConfig = {
       ...challenge.value,
       questionCount: 50,
       inclusivePronouns: false,
       includeComplements: needsComplement,
       complementPlacement: exampleComplementPlacement,
+      complementOptions: exampleComplementOption ? [exampleComplementOption] : [],
     }
     const needsAnteposedComplement = challenge.value.exerciseKind === 'conjugation'
       && needsComplement
-      && exampleComplementPlacement === 'before'
+      && exampleComplementOption?.endsWith('-before')
     const matchesExample = (question: ExerciseQuestion) => (
       (question.pronom === 'il' || question.personId === 6)
         && (!needsComplement
-          || (needsAnteposedComplement
-            ? question.complementPosition === 'before'
-              && Boolean(question.complement)
-            : question.complementPosition === 'after' && Boolean(question.complement)))
+          || (question.complementFunction === exampleComplementOption?.slice(0, 3)
+            && (needsAnteposedComplement
+              ? question.complementPosition === 'before' && Boolean(question.complement)
+              : question.complementPosition === 'after' && Boolean(question.complement))))
     )
     const findExample = async (config: typeof exampleConfig, attempts = 3) => {
       for (let attempt = 0; attempt < attempts; attempt += 1) {
@@ -419,6 +443,7 @@ watch(
     () => challenge.value.tenseIds.join(','),
     () => challenge.value.includeComplements,
     () => challenge.value.complementPlacement,
+    () => challenge.value.complementOptions.join(','),
     () => challenge.value.exerciseKind,
     () => challenge.value.inclusivePronouns,
   ],
@@ -679,8 +704,7 @@ async function saveChallenge() {
                 :question-count="challenge.questionCount"
                 :exercise-kind="challenge.exerciseKind"
                 :inclusive-pronouns="challenge.inclusivePronouns"
-                :include-complements="challenge.includeComplements"
-                :complement-placement="challenge.complementPlacement"
+                :complement-options="challenge.complementOptions"
                 :complement-verbs="selectedVerbs"
                 :conjugation-instruction="conjugationInstruction"
                 :conjugation-question-context="conjugationQuestionContext"
@@ -695,8 +719,7 @@ async function saveChallenge() {
                 @update-question-count="challenge.questionCount = $event; markAsCustom()"
                 @update-exercise-kind="challenge.exerciseKind = $event; markAsCustom()"
                 @update-inclusive-pronouns="challenge.inclusivePronouns = $event; markAsCustom()"
-                @update-include-complements="challenge.includeComplements = $event; markAsCustom()"
-                @update-complement-placement="challenge.complementPlacement = $event; markAsCustom()"
+                @update-complement-options="updateComplementOptions"
               />
 
             </div>

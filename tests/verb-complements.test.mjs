@@ -104,6 +104,21 @@ describe('compléments d’objet validés', { skip: !databaseConfigured }, () =>
 })
 
 describe('catalogue étendu des COD et COI', { skip: !databaseConfigured }, () => {
+  it('propose à la fois des COD et des COI pour écrire', async () => {
+    const [rows] = await database.execute(`
+      SELECT cv.fonction_objet, cv.preposition, c.texte
+      FROM constructions_verbales cv
+      INNER JOIN verbe_sens vs ON vs.id=cv.sens_id
+      INNER JOIN verbes v ON v.id=vs.verbe_id
+      INNER JOIN complements_verbaux c ON c.construction_id=cv.id AND c.actif=1
+      WHERE v.infinitif='écrire' AND cv.actif=1 AND cv.statut_validation='valide'
+        AND c.statut_validation='valide'
+    `)
+    assert.ok(rows.some(row => row.fonction_objet === 'cod' && row.texte === 'une lettre'))
+    assert.ok(rows.some(row => row.fonction_objet === 'coi' && row.preposition === 'à'
+      && row.texte === 'à sa mère'))
+  })
+
   it('conserve entre dix et trente compléments validés pour les 31 verbes du catalogue étendu', async () => {
     const [rows] = await database.execute(`
       SELECT v.infinitif, cv.fonction_objet, cv.preposition, COUNT(c.id) AS total

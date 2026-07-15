@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { ChallengePreset, ExerciseQuestion } from '~~/shared/types/conjugation'
+import type { ChallengePreset, ComplementOption, ExerciseQuestion } from '~~/shared/types/conjugation'
+import { legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils/complement-options'
 import ChallengeActions from './ChallengeActions.vue'
 import ChallengeOptions from './ChallengeOptions.vue'
 import LoadChallengeDialog from './LoadChallengeDialog.vue'
@@ -61,6 +62,13 @@ const complementPlacementLabel = computed(() => ({
   mixed: 'parfois avant',
   before: 'avant si possible'
 }[challenge.value.complementPlacement]))
+function updateComplementOptions(options: ComplementOption[]) {
+  const legacy = legacyComplementConfig(options)
+  challenge.value.complementOptions = options
+  challenge.value.includeComplements = legacy.includeComplements
+  challenge.value.complementPlacement = legacy.complementPlacement
+  markAsCustom()
+}
 const shareUrl = computed(() => shareCode.value
   ? new URL(`/defi/${encodeURIComponent(shareCode.value)}`, requestUrl.origin).toString()
   : '')
@@ -125,6 +133,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   challenge.value.inclusivePronouns = preset.inclusivePronouns
   challenge.value.includeComplements = preset.includeComplements
   challenge.value.complementPlacement = preset.complementPlacement
+  challenge.value.complementOptions = preset.complementOptions ?? legacyComplementOptions(preset.includeComplements, preset.complementPlacement)
   activePresetId.value = preset.id
   notice.value = randomCount
     ? `${randomCount} verbes ont été tirés au hasard dans « ${preset.label} ».`
@@ -307,14 +316,12 @@ function onToggleTense(id: number) {
             :question-count="challenge.questionCount"
             :exercise-kind="challenge.exerciseKind"
             :inclusive-pronouns="challenge.inclusivePronouns"
-            :include-complements="challenge.includeComplements"
-            :complement-placement="challenge.complementPlacement"
+            :complement-options="challenge.complementOptions"
             :complement-verbs="selectedVerbs"
             @update-question-count="challenge.questionCount = $event; markAsCustom()"
             @update-exercise-kind="challenge.exerciseKind = $event"
             @update-inclusive-pronouns="challenge.inclusivePronouns = $event"
-            @update-include-complements="challenge.includeComplements = $event; markAsCustom()"
-            @update-complement-placement="challenge.complementPlacement = $event; markAsCustom()"
+            @update-complement-options="updateComplementOptions"
           />
         </div>
 

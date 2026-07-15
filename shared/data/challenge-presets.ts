@@ -8,6 +8,7 @@ import type {
   Verb,
   VerbId,
 } from '../types/conjugation.ts'
+import { legacyComplementOptions } from '../utils/complement-options'
 
 type FilterableVerbField =
   | 'groupeConjugaison'
@@ -107,21 +108,26 @@ function verbsForDefinition(definition: ChallengePresetDefinition, verbs: readon
 }
 
 export function resolveChallengePresets(verbs: readonly Verb[]): ChallengePreset[] {
-  return challengePresetDefinitions.map(definition => ({
-    id: definition.id,
-    label: definition.label,
-    description: definition.description,
-    group: definition.group,
-    criteria: definition.criteria.map(criterion => ({ ...criterion })),
-    verbIds: verbsForDefinition(definition, verbs).map(verb => verb.id),
-    tenseIds: [...definition.tenseIds],
-    questionCount: definition.questionCount,
-    exerciseKind: 'conjugation',
-    pastSimplePronouns: 'all',
-    inclusivePronouns: false,
-    includeComplements: 'includeComplements' in definition ? definition.includeComplements : false,
-    complementPlacement: 'complementPlacement' in definition ? definition.complementPlacement : 'after',
-  }))
+  return challengePresetDefinitions.map((definition) => {
+    const includeComplements = 'includeComplements' in definition ? definition.includeComplements : false
+    const complementPlacement = 'complementPlacement' in definition ? definition.complementPlacement : 'after'
+    return {
+      id: definition.id,
+      label: definition.label,
+      description: definition.description,
+      group: definition.group,
+      criteria: definition.criteria.map(criterion => ({ ...criterion })),
+      verbIds: verbsForDefinition(definition, verbs).map(verb => verb.id),
+      tenseIds: [...definition.tenseIds],
+      questionCount: definition.questionCount,
+      exerciseKind: 'conjugation',
+      pastSimplePronouns: 'all',
+      inclusivePronouns: false,
+      includeComplements,
+      complementPlacement,
+      complementOptions: legacyComplementOptions(includeComplements, complementPlacement),
+    }
+  })
 }
 
 export function isChallengePresetId(value: string): value is ChallengePresetId {
@@ -150,6 +156,7 @@ export function challengeConfigFromLegacyTuple(tuple: LegacyChallengeTuple): Cha
     inclusivePronouns: false,
     includeComplements: false,
     complementPlacement: 'after',
+    complementOptions: [],
   }
 }
 

@@ -4,6 +4,7 @@ import type { CoachEvent, CoachMedia, CoachMessageContext, CoachProfile } from '
 import { getAlternativeCorrections, validateAnswer } from '~~/shared/utils/answer'
 import { createCoachDialogueState, createVariedCoachReaction } from '~~/shared/utils/coach-dialogue'
 import { answerTurnPlan, CHAT_BUBBLE_DELAY_MS } from '~~/shared/utils/coach-conversation'
+import { createCoachFeedback, createCoachFeedbackState, diagnoseCoachAnswer } from '~~/shared/utils/coach-feedback'
 
 const props = defineProps<{
   questions: ExerciseQuestion[]
@@ -41,6 +42,7 @@ let conversationVersion = 0
 let coachQueue: Promise<void> = Promise.resolve()
 let lastCoachBubbleAt = 0
 let dialogueState = createCoachDialogueState()
+let feedbackState = createCoachFeedbackState()
 
 useDialogFocus(dialog, () => emit('close'), input)
 
@@ -183,14 +185,14 @@ function addCoachText(text: string, tone?: ChatMessage['tone'], emphasis = false
   return enqueueCoachBubble(() => ({ text, ...(tone ? { tone } : {}), ...(emphasis ? { emphasis: true } : {}) }))
 }
 
-function addCoachReaction(eventType: CoachEvent, context: CoachMessageContext, tone?: ChatMessage['tone'], options: { randomizedCorrect?: boolean } = {}) {
+function addCoachReaction(eventType: CoachEvent, context: CoachMessageContext, tone?: ChatMessage['tone'], options: { randomizedCorrect?: boolean, overrideText?: string } = {}) {
   const rule = props.coach.rules.find(item => item.eventType === eventType)
   const cooledDown = currentIndex.value - lastMediaQuestion.value >= (rule?.cooldownQuestions || 0)
   const reaction = createVariedCoachReaction(props.coach, eventType, context, dialogueState, {
     allowMotion: allowMotion.value, mediaAllowed: options.randomizedCorrect || cooledDown, animatedOnly: options.randomizedCorrect,
   })
   let largeEmoji = false
-  if (options.randomizedCorrect && Math.random() < 0.4) {
+  if (!options.overrideText && options.randomizedCorrect && Math.random() < 0.4) {
     const emoticons = ['👏', '🎉', '✅', '🌟', '🥳']
     reaction.text = emoticons[Math.floor(Math.random() * emoticons.length)] || '👏'
     largeEmoji = true
@@ -198,7 +200,7 @@ function addCoachReaction(eventType: CoachEvent, context: CoachMessageContext, t
   if (reaction.media) {
     lastMediaQuestion.value = currentIndex.value
   }
-  return enqueueCoachBubble(() => ({ text: reaction.text, ...(tone ? { tone } : {}), ...(reaction.media ? { media: reaction.media } : {}), ...(largeEmoji ? { largeEmoji: true } : {}) }))
+  return enqueueCoachBubble(() => ({ text: options.overrideText || reaction.text, ...(tone ? { tone } : {}), ...(reaction.media ? { media: reaction.media } : {}), ...(largeEmoji ? { largeEmoji: true } : {}) }))
 }
 
 async function askCurrentQuestion() {
@@ -233,10 +235,11 @@ async function submit() {
   deliveringFeedback.value = true
 
   const alternatives = result.isCorrect ? getAlternativeCorrections(candidate, question.reponsesPourCorrige) : []
+  const diagnostic = diagnoseCoachAnswer(candidate, question, result.isCorrect)
+  const feedback = createCoachFeedback(diagnostic, question, feedbackState, { hasAlternative: alternatives.length > 0 })
   const plan = answerTurnPlan({
     correct: result.isCorrect,
     hasAlternative: alternatives.length > 0,
-    grammarEvent: question.agreementReminder?.kind,
     streak: result.isCorrect && correctCount.value > 0 && correctCount.value % 3 === 0,
     hasNext: currentIndex.value < props.questions.length - 1,
   })
@@ -244,7 +247,10 @@ async function submit() {
     if (step.kind === 'reaction') {
       const isAnswerReaction = step.eventType === 'correct' || step.eventType === 'correct-alternative' || step.eventType === 'incorrect'
       const tone = step.eventType === 'incorrect' ? 'error' : isAnswerReaction || step.eventType === 'streak' ? 'success' : undefined
-      await addCoachReaction(step.eventType, contextFor(question), tone, { randomizedCorrect: step.eventType === 'correct' || step.eventType === 'correct-alternative' })
+      await addCoachReaction(step.eventType, contextFor(question), tone, {
+        randomizedCorrect: step.eventType === 'correct' || step.eventType === 'correct-alternative',
+        ...(isAnswerReaction ? { overrideText: feedback.text } : {}),
+      })
     } else if (step.kind === 'alternative') {
       const alternativeText = alternatives.join(' ou ')
       const punctuation = /[.!?]$/u.test(alternativeText) ? '' : '.'
@@ -280,6 +286,7 @@ async function restart() {
   coachQueue = Promise.resolve()
   lastCoachBubbleAt = 0
   dialogueState = createCoachDialogueState()
+  feedbackState = createCoachFeedbackState()
   currentIndex.value = 0
   answer.value = ''
   attempts.value = []

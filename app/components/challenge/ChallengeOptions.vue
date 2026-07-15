@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import type { ClassicComplementChoice } from '~~/shared/types/conjugation'
-import type { ComplementPlacement, ExerciseKind, Verb } from '~/composables/useChallengeBuilder'
-import { classicComplementChoiceConfig } from '~~/shared/utils/classic-complement-choice'
+import type { ComplementOption, ExerciseKind, Verb } from '~/composables/useChallengeBuilder'
 
 const props = defineProps<{
   questionCount: number
   exerciseKind: ExerciseKind
   inclusivePronouns: boolean
-  includeComplements: boolean
-  complementPlacement: ComplementPlacement
+  complementOptions: ComplementOption[]
   complementVerbs?: Verb[]
   eyebrow?: string
   idPrefix?: string
@@ -27,33 +24,32 @@ const emit = defineEmits<{
   updateQuestionCount: [value: number]
   updateExerciseKind: [value: ExerciseKind]
   updateInclusivePronouns: [value: boolean]
-  updateIncludeComplements: [value: boolean]
-  updateComplementPlacement: [value: ComplementPlacement]
+  updateComplementOptions: [value: ComplementOption[]]
 }>()
 
 const complementsOpen = ref(Boolean(props.gridLayout))
 const selectedComplementVerbs = computed(() => (props.complementVerbs ?? []).filter(verb => Boolean(verb.complementExample)))
-const beforeComplementVerb = computed(() => (
-  selectedComplementVerbs.value.find(verb => Boolean(verb.complementExample?.before)) ?? null
-))
 const complementsAvailable = computed(() => (
   props.exerciseKind === 'conjugation' && selectedComplementVerbs.value.length > 0
 ))
-const beforeComplementsAvailable = computed(() => Boolean(beforeComplementVerb.value))
+const codAvailable = computed(() => selectedComplementVerbs.value.some(verb => verb.complementFunctions?.includes('cod') || verb.complementExample?.functionObject === 'cod'))
+const coiAvailable = computed(() => selectedComplementVerbs.value.some(verb => verb.complementFunctions?.includes('coi') || verb.complementExample?.functionObject === 'coi'))
+const codBeforeAvailable = computed(() => selectedComplementVerbs.value.some(verb => verb.anteposableComplementFunctions?.includes('cod') || Boolean(verb.complementExample?.before)))
+const coiBeforeAvailable = computed(() => selectedComplementVerbs.value.some(verb => verb.anteposableComplementFunctions?.includes('coi')))
 const idPrefix = computed(() => props.idPrefix ?? 'challenge-options')
 const optionsTitleId = computed(() => `${idPrefix.value}-title`)
 const questionCountId = computed(() => `${idPrefix.value}-question-count`)
 const questionCountHintId = computed(() => `${idPrefix.value}-question-count-hint`)
 const exerciseKindName = computed(() => `${idPrefix.value}-exercise-kind`)
-const complementChoiceName = computed(() => `${idPrefix.value}-complement-choice`)
 const complementPanelId = computed(() => `${idPrefix.value}-complement-panel`)
-const complementChoice = computed<ClassicComplementChoice>(() => (
-  props.includeComplements ? props.complementPlacement : 'none'
-))
 const hasConjugationExample = computed(() => Boolean(
   (props.conjugationInstruction || props.conjugationQuestionContext || props.conjugationQuestion)
   && props.conjugationExample,
 ))
+const identificationQuestion = computed(() => {
+  const question = props.conjugationQuestion?.trim() ?? ''
+  return question && !/[.!?]$/u.test(question) ? `${question}.` : question
+})
 const exampleRevealStage = ref(0)
 const exampleRevealTimers: ReturnType<typeof setTimeout>[] = []
 
@@ -90,11 +86,11 @@ function onExerciseKindChange(event: Event) {
   emit('updateExerciseKind', (event.target as HTMLInputElement).value as ExerciseKind)
 }
 
-function onComplementChoiceChange(event: Event) {
-  const choice = (event.target as HTMLInputElement).value as ClassicComplementChoice
-  const config = classicComplementChoiceConfig(choice)
-  emit('updateIncludeComplements', config.includeComplements)
-  emit('updateComplementPlacement', config.complementPlacement)
+function toggleComplementOption(option: ComplementOption, checked: boolean) {
+  const next = new Set(props.complementOptions)
+  if (checked) next.add(option)
+  else next.delete(option)
+  emit('updateComplementOptions', [...next])
 }
 
 watch(complementsAvailable, (available) => {
@@ -179,7 +175,8 @@ watch(complementsAvailable, (available) => {
         }"
         :aria-hidden="gridLayout && exerciseKind === 'tense-identification' ? 'true' : undefined"
       >
-      <h3 v-if="gridLayout" class="complement-options__title">Compléments d’objets</h3>
+      <h3 v-if="gridLayout" class="complement-options__title">Compléments d’objets&nbsp;:</h3>
+      <p v-if="gridLayout" class="complement-options__description">Ajoute des compléments d’objets directs ou indirects.</p>
       <button
         v-else
         class="complement-options__trigger"
@@ -189,7 +186,7 @@ watch(complementsAvailable, (available) => {
         :aria-controls="complementPanelId"
         @click="complementsOpen = !complementsOpen"
       >
-        <span>Compléments d’objets <small>nouveau</small></span>
+        <span>Compléments d’objets&nbsp;: <small>nouveau</small></span>
         <span aria-hidden="true">{{ complementsOpen ? '−' : '+' }}</span>
       </button>
       <p v-if="!complementsAvailable" class="complement-options__unavailable">
@@ -202,20 +199,20 @@ watch(complementsAvailable, (available) => {
         <fieldset v-if="gridLayout || complementsOpen" :id="complementPanelId" class="complement-options__panel">
           <legend class="sr-only">Présentation des compléments d’objets</legend>
           <label>
-            <input :name="complementChoiceName" type="radio" value="none" :disabled="!complementsAvailable" :checked="complementChoice === 'none'" @change="onComplementChoiceChange">
-            <span><strong>Sans complément</strong></span>
+            <input type="checkbox" :disabled="!complementsAvailable || !codAvailable" :checked="complementOptions.includes('cod-after')" @change="toggleComplementOption('cod-after', ($event.target as HTMLInputElement).checked)">
+            <span><strong>COD placé après</strong></span>
           </label>
           <label>
-            <input :name="complementChoiceName" type="radio" value="after" :disabled="!complementsAvailable" :checked="complementChoice === 'after'" @change="onComplementChoiceChange">
-            <span><strong>Après le verbe</strong></span>
+            <input type="checkbox" :disabled="!complementsAvailable || !codBeforeAvailable" :checked="complementOptions.includes('cod-before')" @change="toggleComplementOption('cod-before', ($event.target as HTMLInputElement).checked)">
+            <span><strong>COD placé avant</strong></span>
           </label>
           <label>
-            <input :name="complementChoiceName" type="radio" value="before" :disabled="!complementsAvailable || !beforeComplementsAvailable" :checked="complementChoice === 'before'" @change="onComplementChoiceChange">
-            <span><strong>Avant le verbe</strong></span>
+            <input type="checkbox" :disabled="!complementsAvailable || !coiAvailable" :checked="complementOptions.includes('coi-after')" @change="toggleComplementOption('coi-after', ($event.target as HTMLInputElement).checked)">
+            <span><strong>COI placé après</strong></span>
           </label>
           <label>
-            <input :name="complementChoiceName" type="radio" value="mixed" :disabled="!complementsAvailable || !beforeComplementsAvailable" :checked="complementChoice === 'mixed'" @change="onComplementChoiceChange">
-            <span><strong>Un mélange</strong></span>
+            <input type="checkbox" :disabled="!complementsAvailable || !coiBeforeAvailable" :checked="complementOptions.includes('coi-before')" @change="toggleComplementOption('coi-before', ($event.target as HTMLInputElement).checked)">
+            <span><strong>COI placé avant</strong></span>
           </label>
         </fieldset>
       </Transition>
@@ -257,13 +254,20 @@ watch(complementsAvailable, (available) => {
         <div v-else class="conjugation-example__body">
           <Transition name="example-item">
             <div v-if="exampleRevealStage >= 1" class="conjugation-example__question">
-              <p v-if="conjugationInstruction" class="conjugation-example__instruction">{{ conjugationInstruction }}</p>
-              <p v-if="conjugationQuestionContext" class="conjugation-example__question-line">
-                <span class="conjugation-example__context">{{ conjugationQuestionContext }}</span>
-                <span v-if="conjugationQuestion" class="conjugation-example__question-separator" aria-hidden="true">—</span>
-                <span v-if="conjugationQuestion" class="conjugation-example__prompt">{{ conjugationQuestion }}</span>
+              <p v-if="exerciseKind === 'tense-identification' && conjugationInstruction && conjugationQuestion" class="conjugation-example__question-line">
+                <span class="conjugation-example__context">{{ conjugationInstruction }}</span>
+                <span class="conjugation-example__question-separator" aria-hidden="true">—</span>
+                <span class="conjugation-example__prompt">{{ identificationQuestion }}</span>
               </p>
-              <p v-else-if="conjugationQuestion" class="conjugation-example__prompt">{{ conjugationQuestion }}</p>
+              <template v-else>
+                <p v-if="conjugationInstruction" class="conjugation-example__instruction">{{ conjugationInstruction }}</p>
+                <p v-if="conjugationQuestionContext" class="conjugation-example__question-line">
+                  <span class="conjugation-example__context">{{ conjugationQuestionContext }}</span>
+                  <span v-if="conjugationQuestion" class="conjugation-example__question-separator" aria-hidden="true">—</span>
+                  <span v-if="conjugationQuestion" class="conjugation-example__prompt">{{ conjugationQuestion }}</span>
+                </p>
+                <p v-else-if="conjugationQuestion" class="conjugation-example__prompt">{{ conjugationQuestion }}</p>
+              </template>
             </div>
           </Transition>
 
@@ -304,13 +308,13 @@ watch(complementsAvailable, (available) => {
 .options-main-column > .check-row { padding: 15px 4px; }
 .options-main-column > .option-fieldset { padding: 14px 0 0; }
 .field-hint { display: block; margin-top: 6px; color: var(--muted); font-size: .72rem; }
-.conjugation-example { margin: 10px 24px 28px; padding: 20px; overflow: hidden; border: 0; border-radius: 20px; background: linear-gradient(145deg, #123f52, #17394b 62%, #203346); box-shadow: 0 18px 42px rgb(22 53 66 / 24%); color: white; }
+.conjugation-example { margin: 10px 24px 28px; padding: 20px; overflow: hidden; border: 1px solid #c6d8d2; border-radius: 20px; background: linear-gradient(145deg, #eef5f2, #e8f0ed 62%, #e3ece9); box-shadow: 0 12px 30px rgb(35 73 68 / 12%); color: var(--brand-dark); }
 .conjugation-example__header { display: grid; min-height: 62px; margin-bottom: 17px; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 13px; }
-.conjugation-example__preview-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; color: #133e50; background: #bfeaf0; box-shadow: 0 0 0 6px rgb(191 234 240 / 10%); font-size: .88rem; }
+.conjugation-example__preview-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; color: #315f59; background: #d3e7e1; box-shadow: 0 0 0 6px rgb(79 126 117 / 7%); font-size: .88rem; }
 .conjugation-example__heading { display: grid; gap: 2px; }
-.conjugation-example__heading > span { color: #c6edf2; font-size: 1.08rem; font-weight: 850; letter-spacing: .025em; text-transform: uppercase; }
-.conjugation-example__heading > strong { color: white; font-size: 1.2rem; line-height: 1.2; }
-.conjugation-example__screen { overflow: hidden; border: 1px solid rgb(255 255 255 / 30%); border-radius: 14px; background: white; box-shadow: 0 10px 26px rgb(4 25 34 / 24%); color: var(--brand-dark); }
+.conjugation-example__heading > span { color: #55756f; font-size: 1.08rem; font-weight: 850; letter-spacing: .025em; text-transform: uppercase; }
+.conjugation-example__heading > strong { color: var(--brand-dark); font-size: 1.2rem; line-height: 1.2; }
+.conjugation-example__screen { overflow: hidden; border: 1px solid #cfddd9; border-radius: 14px; background: white; box-shadow: 0 8px 20px rgb(35 73 68 / 10%); color: var(--brand-dark); }
 .conjugation-example__screen-header { display: flex; min-height: 68px; padding: 13px 17px; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid #d9e5e1; background: #f5faf8; }
 .conjugation-example__screen-header > div:first-child { display: grid; gap: 1px; }
 .conjugation-example__screen-header span,
@@ -332,8 +336,9 @@ watch(complementsAvailable, (available) => {
 .conjugation-example__prompt { color: var(--ink); font-size: 1.25rem; font-weight: 800; letter-spacing: .025em; line-height: 1.45; }
 .conjugation-example__question-line .conjugation-example__prompt { font-size: 1.05rem; }
 .conjugation-example__answer { display: grid; gap: 7px; }
+.conjugation-example__answer > span { opacity: .5; }
 .conjugation-example__answer > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
-.conjugation-example__answer > div > span { min-height: 46px; border: 1px solid #bfcfca; border-radius: 11px; background: white; box-shadow: inset 0 0 0 1px rgb(52 95 88 / 3%); }
+.conjugation-example__answer > div > span { min-height: 46px; border: 1px solid #d5dfdc; border-radius: 11px; background: #f3f6f5; box-shadow: none; opacity: .72; }
 .conjugation-example__answer button { padding: 10px 16px; border: 0; border-radius: 10px; color: white; background: var(--brand); opacity: .55; }
 .conjugation-example__correction { display: grid; padding: 13px 15px; gap: 4px; border: 1px solid #acd1bb; border-radius: 11px; background: var(--success-pale); }
 .conjugation-example__correction p { margin: 0; color: var(--success); font-size: 1.05rem; font-weight: 400; line-height: 1.4; white-space: pre-wrap; }
@@ -344,6 +349,7 @@ watch(complementsAvailable, (available) => {
 @keyframes example-spinner { to { transform: rotate(360deg); } }
 .complement-options { margin-bottom: 18px; }
 .complement-options__title { margin: 0 0 12px; color: var(--brand-dark); font-size: 1rem; font-weight: 800; }
+.complement-options__description { margin: -5px 0 12px; color: var(--muted); font-size: .82rem; line-height: 1.4; }
 .complement-options__trigger { display: flex; width: 100%; min-height: 48px; padding: 10px 13px; align-items: center; justify-content: space-between; gap: 12px; color: var(--brand-dark); background: var(--brand-pale); border: 1px solid #a9c9bf; border-radius: 11px; font-weight: 850; text-align: left; }
 .complement-options__trigger:disabled { cursor: not-allowed; filter: grayscale(.65); opacity: .55; }
 .complement-options--disabled { background: #f3f5f4; }

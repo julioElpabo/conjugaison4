@@ -7,7 +7,7 @@ const configured = Boolean(process.env.DB_HOST && process.env.DB_NAME && process
 const excludedDirect = new Set(['douter', 'grandir', 'partir', 'pouvoir'])
 const additionalDirect = new Set(['cadrer', 'cesser', 'entrer', 'nager', 'naviguer', 'se brosser'])
 const expectedIndirect = new Set([
-  'assister', 'croire', 'discuter', 'douter', 'jouer', 'manquer', 'parler', 'penser',
+  'assister', 'croire', 'discuter', 'douter', 'écrire', 'jouer', 'manquer', 'parler', 'penser',
   'plaire', 'réfléchir', 'répondre', 'réussir', 'rire', 'servir', 'songer', 'sourire',
   'souffrir', 'suffire', 'surseoir', 'tenir', 'se moquer', 'se préparer', 'se souvenir',
 ])

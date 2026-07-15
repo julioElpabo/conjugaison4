@@ -4,6 +4,7 @@ import type { Verb } from '../../shared/types/conjugation'
 import { encodePronominalSelectionId } from '../../shared/utils/pronominal-selection'
 import { useDatabase } from '../utils/database'
 import { buildTenseExamples, type MangerFormForExample } from './tense-examples'
+import { indirectRelative } from './indirect-relative'
 
 interface VerbeRow extends RowDataPacket {
   id: number
@@ -35,6 +36,7 @@ interface SemanticRow extends RowDataPacket { verbe_id: number, slug: string, so
 interface ComplementExampleRow extends RowDataPacket {
   verbe_id: number
   fonction_objet: 'cod' | 'coi'
+  preposition: string | null
   texte: string
   texte_antepose: string | null
 }
@@ -110,7 +112,7 @@ export async function getCatalogue() {
       ORDER BY infinitif_pronominal, id
     `),
     database.execute<ComplementExampleRow[]>(`
-      SELECT vs.verbe_id, cv.fonction_objet, c.texte, c.texte_antepose
+      SELECT vs.verbe_id, cv.fonction_objet, cv.preposition, c.texte, c.texte_antepose
       FROM verbe_sens vs
       INNER JOIN constructions_verbales cv ON cv.sens_id=vs.id
       INNER JOIN complements_verbaux c ON c.construction_id=cv.id
@@ -151,8 +153,19 @@ export async function getCatalogue() {
     semanticsByVerb.set(Number(row.verbe_id), categories)
   }
   const complementByVerb = new Map<number, Verb['complementExample']>()
+  const complementFunctionsByVerb = new Map<number, Set<'cod' | 'coi'>>()
+  const anteposableComplementFunctionsByVerb = new Map<number, Set<'cod' | 'coi'>>()
   for (const row of complementResult[0]) {
     const verbId = Number(row.verbe_id)
+    const functions = complementFunctionsByVerb.get(verbId) ?? new Set<'cod' | 'coi'>()
+    functions.add(row.fonction_objet)
+    complementFunctionsByVerb.set(verbId, functions)
+    const anteposable = anteposableComplementFunctionsByVerb.get(verbId) ?? new Set<'cod' | 'coi'>()
+    if ((row.fonction_objet === 'cod' && row.texte_antepose)
+      || (row.fonction_objet === 'coi' && indirectRelative(row.texte, row.preposition))) {
+      anteposable.add(row.fonction_objet)
+    }
+    anteposableComplementFunctionsByVerb.set(verbId, anteposable)
     if (!complementByVerb.has(verbId)) {
       complementByVerb.set(verbId, {
         functionObject: row.fonction_objet,
@@ -195,6 +208,8 @@ export async function getCatalogue() {
       agreementRule: null,
       requiredPreposition: null,
       complementExample: complementByVerb.get(Number(row.id)) ?? null,
+      complementFunctions: [...(complementFunctionsByVerb.get(Number(row.id)) ?? [])],
+      anteposableComplementFunctions: [...(anteposableComplementFunctionsByVerb.get(Number(row.id)) ?? [])],
     }))
 
   const byId = new Map(verbs.map(verb => [verb.id, verb]))

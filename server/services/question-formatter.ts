@@ -22,6 +22,7 @@ export interface ConjugationSourceRow {
   complement_number?: string | null
   complement_function?: 'cod' | 'coi' | null
   complement_preposition?: string | null
+  complement_relative_pronoun?: string | null
 }
 
 function unique(values: string[]) {
@@ -160,11 +161,25 @@ function applyAnteposedCodAgreement(form: string, row: ConjugationSourceRow) {
   return `${form.slice(0, -row.participe_passe.length)}${agreed}`
 }
 
-function withAnteposedComplement(answer: string, pronoun: string, mode: string, complement: string) {
+function withoutSubjunctiveLink(value: string) {
+  return value.replace(/^que\s+/iu, '').replace(/^qu['’]/iu, '')
+}
+
+function withAnteposedComplement(answer: string, pronoun: string, mode: string, complement: string, relativePronoun?: string | null) {
+  if (relativePronoun) {
+    const clause = normalized(mode) === 'subjonctif' ? withoutSubjunctiveLink(answer) : answer
+    return `${complement.trim()} ${relativePronoun} ${clause}`
+  }
   const clause = normalized(mode) === 'subjonctif'
     ? answer
     : startsWithVowel(pronoun) ? `qu'${answer}` : `que ${answer}`
   return `${complement.trim()} ${clause}`
+}
+
+function relativeSubjectPrefix(pronoun: string, form: string, mode: string, infinitive: string) {
+  const formatted = formatAnswer(pronoun, form, mode, infinitive)
+  const prefix = formatted.endsWith(form) ? formatted.slice(0, -form.length).trimEnd() : pronoun
+  return normalized(mode) === 'subjonctif' ? withoutSubjunctiveLink(prefix) : prefix
 }
 
 function inputPrefix(
@@ -216,7 +231,7 @@ function answerVariants(row: ConjugationSourceRow, pronoun: string) {
         answers.push(withPronoun(pronoun, agreedForm, row.infinitif))
       }
       if (row.complement_position === 'before' && row.complement_anteposed) {
-        answers.push(withAnteposedComplement(canonical, pronoun, row.mode_name, row.complement_anteposed))
+        answers.push(withAnteposedComplement(canonical, pronoun, row.mode_name, row.complement_anteposed, row.complement_relative_pronoun))
       }
     }
   }
@@ -252,12 +267,14 @@ export function formatConjugationQuestion(
     .map(form => applyAnteposedCodAgreement(form, row))
     .map(form => formatAnswer(pronoun, form, row.mode_name, row.infinitif))
   const displayedCorrections = row.complement_position === 'before' && row.complement_anteposed
-    ? correctedForms.map(answer => withAnteposedComplement(answer, pronoun, row.mode_name, row.complement_anteposed!))
+    ? correctedForms.map(answer => withAnteposedComplement(answer, pronoun, row.mode_name, row.complement_anteposed!, row.complement_relative_pronoun))
     : row.complement_phrase
       ? correctedForms.map(answer => withComplement(answer, row.complement_phrase!))
     : correctedForms
   const prompt = row.complement_position === 'before' && row.complement_anteposed
-    ? `${row.complement_anteposed} ${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif, 'before')} … | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
+    ? row.complement_relative_pronoun
+      ? `${row.complement_anteposed} ${row.complement_relative_pronoun} ${relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif)} … | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
+      : `${row.complement_anteposed} ${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif, 'before')} … | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
     : row.complement_phrase
     ? `${normalized(row.mode_name) === 'impératif' ? '' : `${pronoun} `}… ${row.complement_phrase} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
     : `${pronoun} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
@@ -305,7 +322,11 @@ export function formatConjugationQuestion(
       ? row.complement_anteposed || undefined
       : row.complement_phrase || undefined,
     complementPosition: row.complement_position,
-    saisiePrefixe: inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif, row.complement_position),
+    complementFunction: row.complement_function || undefined,
+    relativePronoun: row.complement_relative_pronoun || undefined,
+    saisiePrefixe: row.complement_position === 'before' && row.complement_relative_pronoun
+      ? relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif)
+      : inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif, row.complement_position),
     ...(agreementReminder ? { agreementReminder } : {}),
   }
 }

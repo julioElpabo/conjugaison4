@@ -44,6 +44,8 @@ export interface Verb extends VerbSummary {
     after: string
     before: string | null
   } | null
+  complementFunctions?: ('cod' | 'coi')[]
+  anteposableComplementFunctions?: ('cod' | 'coi')[]
 }
 
 export interface ConjugationMode {
@@ -73,6 +75,7 @@ export type PastSimplePronouns = 'all' | 'third-person-only'
 export type ExerciseKind = 'conjugation' | 'tense-identification'
 export type ComplementPlacement = 'after' | 'mixed' | 'before'
 export type ClassicComplementChoice = 'none' | ComplementPlacement
+export type ComplementOption = 'cod-after' | 'cod-before' | 'coi-after' | 'coi-before'
 
 /**
  * Configuration moderne d'un exercice. Les listes sont en lecture seule afin
@@ -87,6 +90,7 @@ export interface ChallengeConfig {
   inclusivePronouns: boolean
   includeComplements: boolean
   complementPlacement: ComplementPlacement
+  complementOptions: ComplementOption[]
 }
 
 /** Format historique stocké dans la table `defis`. */
@@ -132,6 +136,8 @@ export interface ExerciseQuestion {
   conjugaison3?: string | null
   complement?: string
   complementPosition?: 'after' | 'before'
+  complementFunction?: 'cod' | 'coi'
+  relativePronoun?: string
   /** Préfixe grammatical affiché juste avant le champ de réponse (ex. « il », « j’ », « qu’elle »). */
   saisiePrefixe?: string
   agreementReminder?: {

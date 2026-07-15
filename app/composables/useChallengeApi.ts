@@ -12,6 +12,7 @@ export interface QuestionnaireRequest {
   inclusivePronouns: boolean
   includeComplements: boolean
   complementPlacement: ChallengeConfig['complementPlacement']
+  complementOptions: ChallengeConfig['complementOptions']
 }
 
 export function toQuestionnaireRequest(challenge: ChallengeConfig): QuestionnaireRequest {
@@ -23,7 +24,8 @@ export function toQuestionnaireRequest(challenge: ChallengeConfig): Questionnair
     pastSimplePronouns: challenge.pastSimplePronouns,
     inclusivePronouns: challenge.inclusivePronouns,
     includeComplements: challenge.includeComplements,
-    complementPlacement: challenge.complementPlacement
+    complementPlacement: challenge.complementPlacement,
+    complementOptions: [...challenge.complementOptions]
   }
 }
 
@@ -55,6 +57,7 @@ export function useChallengeApi() {
         inclusivePronouns: challenge.inclusivePronouns,
         includeComplements: challenge.includeComplements,
         complementPlacement: challenge.complementPlacement,
+        complementOptions: [...challenge.complementOptions],
         printOptions: { ...challenge.printOptions }
       }
     })

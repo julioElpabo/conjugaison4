@@ -44,14 +44,10 @@ describe('scénarios chronologiques du chat', () => {
     assert.deepEqual(plan.at(-1), { kind: 'next-question' })
   })
 
-  it('place l’explication du COD ou du COI après la correction', () => {
-    for (const grammarEvent of ['cod-before', 'cod-after', 'coi']) {
-      const plan = answerTurnPlan({ correct: false, grammarEvent, hasNext: true })
-      assert.deepEqual(plan.slice(0, 2), [
-        { kind: 'reaction', eventType: 'incorrect' },
-        { kind: 'reaction', eventType: grammarEvent },
-      ])
-    }
+  it('ne plaque pas une explication grammaticale indépendante après la correction', () => {
+    const plan = answerTurnPlan({ correct: false, hasNext: true })
+    assert.equal(plan.filter(step => step.kind === 'reaction').length, 1)
+    assert.equal(plan[0].eventType, 'incorrect')
   })
 
   it('félicite une série sans remplacer la question suivante', () => {

@@ -1,12 +1,13 @@
 import type {
   ChallengeConfig,
+  ComplementOption,
   ComplementPlacement,
   ExerciseKind,
   ExerciseQuestion as SharedExerciseQuestion,
   PastSimplePronouns
 } from '../../shared/types/conjugation'
 
-export type { ComplementPlacement, ExerciseKind, PastSimplePronouns }
+export type { ComplementOption, ComplementPlacement, ExerciseKind, PastSimplePronouns }
 
 export type QuestionnaireRequest = ChallengeConfig
 

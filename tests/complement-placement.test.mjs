@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-import { inferAnteposedComplement } from '../server/services/complement-placement.ts'
+import { inferAnteposedComplement, resolveAnteposedComplement } from '../server/services/complement-placement.ts'
 
 describe('préparation grammaticale des COD antéposés', () => {
   it('transforme les déterminants sans perdre le genre', () => {
@@ -35,5 +35,20 @@ describe('préparation grammaticale des COD antéposés', () => {
     assert.equal(inferAnteposedComplement('des objets inconnus'), null)
     assert.equal(inferAnteposedComplement('un héros'), null)
     assert.equal(inferAnteposedComplement('de l’eau'), null)
+  })
+
+  it('accepte une qualification explicite quand la déduction est impossible', () => {
+    assert.deepEqual(resolveAnteposedComplement('les rideaux bleus', 'masculin', 'pluriel'), {
+      text: 'les rideaux bleus', gender: 'masculin', number: 'pluriel'
+    })
+    assert.deepEqual(resolveAnteposedComplement('une mission délicate', 'feminin', 'singulier'), {
+      text: 'la mission délicate', gender: 'feminin', number: 'singulier'
+    })
+    assert.deepEqual(resolveAnteposedComplement('une terme technique', 'masculin', 'singulier'), {
+      text: 'le terme technique', gender: 'masculin', number: 'singulier'
+    })
+    assert.deepEqual(resolveAnteposedComplement('de l’eau', 'feminin', 'singulier'), {
+      text: 'l’eau', gender: 'feminin', number: 'singulier'
+    })
   })
 })

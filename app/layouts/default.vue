@@ -7,14 +7,10 @@ const isAdminRoute = computed(() => route.path === '/admin' || route.path.starts
   <div class="site-shell">
     <header class="site-header">
       <div class="site-header__inner">
-        <NuxtLink class="site-brand" to="/">
+        <a class="site-brand" href="/">
           <strong>TATITOTU</strong>
           <span>Défis de conjugaison</span>
-        </NuxtLink>
-
-        <nav aria-label="Navigation principale">
-          <NuxtLink to="/">Accueil</NuxtLink>
-        </nav>
+        </a>
       </div>
     </header>
 

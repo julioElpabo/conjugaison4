@@ -42,6 +42,13 @@ interface AdminConjugation {
 interface AdminComplement {
   id: number
   texte: string
+  genre: 'masculin' | 'feminin' | null
+  nombre: 'singulier' | 'pluriel' | null
+}
+
+interface ComplementGrammarDraft {
+  gender: '' | 'masculin' | 'feminin'
+  number: '' | 'singulier' | 'pluriel'
 }
 
 interface AdminConstruction {
@@ -131,7 +138,11 @@ const draft = reactive<VerbSavePayload>({
 const initialSnapshot = ref('')
 const complementGroups = ref<AdminConstruction[]>([])
 const complementDrafts = reactive<Record<number, string>>({})
+const complementGrammar = reactive<Record<number, ComplementGrammarDraft>>({})
+const complementGrammarOpen = reactive<Record<number, boolean>>({})
 const firstComplementDraft = ref('')
+const firstComplementGrammar = reactive<ComplementGrammarDraft>({ gender: '', number: '' })
+const firstComplementGrammarOpen = ref(false)
 const complementBusy = ref('')
 const complementError = ref('')
 const complementSuccess = ref('')
@@ -241,12 +252,29 @@ function resetComplements() {
   complementError.value = ''
   complementSuccess.value = ''
   firstComplementDraft.value = ''
+  firstComplementGrammar.gender = ''
+  firstComplementGrammar.number = ''
+  firstComplementGrammarOpen.value = false
+}
+
+function grammarDraft(constructionId: number) {
+  return complementGrammar[constructionId] ??= { gender: '', number: '' }
+}
+
+function grammarRequired(error: any) {
+  return error?.data?.data?.code === 'COMPLEMENT_GRAMMAR_REQUIRED'
+    || error?.data?.code === 'COMPLEMENT_GRAMMAR_REQUIRED'
+}
+
+function grammarComplete(grammar: ComplementGrammarDraft) {
+  return Boolean(grammar.gender && grammar.number)
 }
 
 async function addComplement(construction: AdminConstruction) {
   const texte = (complementDrafts[construction.id] ?? '').replace(/\s+/g, ' ').trim()
   if (!texte || complementBusy.value) return
 
+  const grammar = grammarDraft(construction.id)
   complementBusy.value = `add:${construction.id}`
   complementError.value = ''
   complementSuccess.value = ''
@@ -256,14 +284,26 @@ async function addComplement(construction: AdminConstruction) {
       {
         method: 'POST',
         credentials: 'same-origin',
-        body: { constructionId: construction.id, texte }
+        body: {
+          constructionId: construction.id,
+          texte,
+          ...(grammarComplete(grammar) ? grammar : {}),
+        }
       }
     )
     construction.complements.push(response.complement)
     complementDrafts[construction.id] = ''
+    grammar.gender = ''
+    grammar.number = ''
+    complementGrammarOpen[construction.id] = false
     complementSuccess.value = `Le complément « ${response.complement.texte} » a été ajouté.`
   } catch (error) {
-    complementError.value = getAdminErrorMessage(error, 'Impossible d’ajouter ce complément.')
+    if (grammarRequired(error)) {
+      complementGrammarOpen[construction.id] = true
+      complementError.value = 'Le genre et le nombre ne peuvent pas être déduits. Précise-les pour ajouter ce COD.'
+    } else {
+      complementError.value = getAdminErrorMessage(error, 'Impossible d’ajouter ce complément.')
+    }
   } finally {
     complementBusy.value = ''
   }
@@ -303,13 +343,24 @@ async function addFirstComplement() {
     }>(`/api/admin/verbes/${props.detail.verb.id}/complements`, {
       method: 'POST',
       credentials: 'same-origin',
-      body: { texte }
+      body: {
+        texte,
+        ...(grammarComplete(firstComplementGrammar) ? firstComplementGrammar : {}),
+      }
     })
     complementGroups.value.push({ ...response.construction, complements: [response.complement] })
     firstComplementDraft.value = ''
+    firstComplementGrammar.gender = ''
+    firstComplementGrammar.number = ''
+    firstComplementGrammarOpen.value = false
     complementSuccess.value = `La liste COD a été créée avec « ${response.complement.texte} ».`
   } catch (error) {
-    complementError.value = getAdminErrorMessage(error, 'Impossible de créer cette liste de compléments.')
+    if (grammarRequired(error)) {
+      firstComplementGrammarOpen.value = true
+      complementError.value = 'Le genre et le nombre ne peuvent pas être déduits. Précise-les pour ajouter ce COD.'
+    } else {
+      complementError.value = getAdminErrorMessage(error, 'Impossible de créer cette liste de compléments.')
+    }
   } finally {
     complementBusy.value = ''
   }
@@ -419,8 +470,11 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
           Exemple : il … {{ construction.complements[0]?.texte }}
         </p>
         <div class="verb-editor__complement-list">
-          <span v-for="complement in construction.complements" :key="complement.id">
-            {{ complement.texte }}
+          <span v-for="complement in construction.complements" :key="complement.id" class="verb-editor__complement-chip">
+            <span>{{ complement.texte }}</span>
+            <small v-if="complement.genre && complement.nombre">
+              {{ complement.genre === 'feminin' ? 'fém.' : 'masc.' }} · {{ complement.nombre === 'pluriel' ? 'plur.' : 'sing.' }}
+            </small>
             <button
               type="button"
               :disabled="Boolean(complementBusy)"
@@ -446,11 +500,37 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
             <button
               class="admin-button admin-button--small"
               type="button"
-              :disabled="Boolean(complementBusy) || !complementDrafts[construction.id]?.trim() || construction.complements.length >= 30"
+              :disabled="Boolean(complementBusy) || !complementDrafts[construction.id]?.trim() || construction.complements.length >= 30 || (complementGrammarOpen[construction.id] && !grammarComplete(grammarDraft(construction.id)))"
               @click="addComplement(construction)"
             >
               {{ complementBusy === `add:${construction.id}` ? 'Ajout…' : 'Ajouter' }}
             </button>
+          </div>
+          <button
+            class="verb-editor__grammar-toggle"
+            type="button"
+            :aria-expanded="Boolean(complementGrammarOpen[construction.id])"
+            @click="complementGrammarOpen[construction.id] = !complementGrammarOpen[construction.id]"
+          >
+            {{ complementGrammarOpen[construction.id] ? 'Masquer le genre et le nombre' : 'Préciser le genre et le nombre' }}
+          </button>
+          <div v-if="complementGrammarOpen[construction.id]" class="verb-editor__grammar-fields">
+            <label>
+              Genre
+              <select v-model="grammarDraft(construction.id).gender" :disabled="Boolean(complementBusy)">
+                <option value="" disabled>À choisir</option>
+                <option value="masculin">Masculin</option>
+                <option value="feminin">Féminin</option>
+              </select>
+            </label>
+            <label>
+              Nombre
+              <select v-model="grammarDraft(construction.id).number" :disabled="Boolean(complementBusy)">
+                <option value="" disabled>À choisir</option>
+                <option value="singulier">Singulier</option>
+                <option value="pluriel">Pluriel</option>
+              </select>
+            </label>
           </div>
         </div>
       </article>
@@ -470,11 +550,37 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
             <button
               class="admin-button admin-button--small"
               type="button"
-              :disabled="Boolean(complementBusy) || !firstComplementDraft.trim()"
+              :disabled="Boolean(complementBusy) || !firstComplementDraft.trim() || (firstComplementGrammarOpen && !grammarComplete(firstComplementGrammar))"
               @click="addFirstComplement"
             >
               {{ complementBusy === 'add:new' ? 'Création…' : 'Créer la liste COD' }}
             </button>
+          </div>
+          <button
+            class="verb-editor__grammar-toggle"
+            type="button"
+            :aria-expanded="firstComplementGrammarOpen"
+            @click="firstComplementGrammarOpen = !firstComplementGrammarOpen"
+          >
+            {{ firstComplementGrammarOpen ? 'Masquer le genre et le nombre' : 'Préciser le genre et le nombre' }}
+          </button>
+          <div v-if="firstComplementGrammarOpen" class="verb-editor__grammar-fields">
+            <label>
+              Genre
+              <select v-model="firstComplementGrammar.gender" :disabled="Boolean(complementBusy)">
+                <option value="" disabled>À choisir</option>
+                <option value="masculin">Masculin</option>
+                <option value="feminin">Féminin</option>
+              </select>
+            </label>
+            <label>
+              Nombre
+              <select v-model="firstComplementGrammar.number" :disabled="Boolean(complementBusy)">
+                <option value="" disabled>À choisir</option>
+                <option value="singulier">Singulier</option>
+                <option value="pluriel">Pluriel</option>
+              </select>
+            </label>
           </div>
         </div>
       </article>
@@ -754,6 +860,13 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
   font-weight: 700;
 }
 
+.verb-editor__complement-chip small {
+  padding-left: 2px;
+  color: #58717c;
+  font-size: .64rem;
+  font-weight: 650;
+}
+
 .verb-editor__complement-list button {
   display: inline-grid;
   width: 22px;
@@ -810,6 +923,46 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
 }
 
 .verb-editor__complement-add input:focus {
+  border-color: var(--admin-blue);
+  outline: 0;
+  box-shadow: 0 0 0 2px rgb(23 107 135 / 13%);
+}
+
+.verb-editor__grammar-toggle {
+  width: fit-content;
+  padding: 0;
+  color: var(--admin-blue-dark);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: .72rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.verb-editor__grammar-fields {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(130px, 1fr));
+  gap: 9px !important;
+}
+
+.verb-editor__grammar-fields label {
+  display: grid;
+  gap: 4px;
+}
+
+.verb-editor__grammar-fields select {
+  min-height: 38px;
+  padding: 7px 30px 7px 10px;
+  color: var(--admin-navy);
+  background: white;
+  border: 1px solid #becdd6;
+  border-radius: 7px;
+  font: inherit;
+}
+
+.verb-editor__grammar-fields select:focus {
   border-color: var(--admin-blue);
   outline: 0;
   box-shadow: 0 0 0 2px rgb(23 107 135 / 13%);

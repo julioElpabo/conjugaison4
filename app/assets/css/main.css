@@ -818,6 +818,36 @@ body.dialog-open {
   line-height: 1;
 }
 
+.selected-chips--adaptive {
+  gap: var(--selected-chip-gap, 7px);
+}
+
+.selected-chips--adaptive li {
+  max-width: 100%;
+  gap: var(--selected-chip-inner-gap, 6px);
+  padding:
+    var(--selected-chip-padding-block, 7px)
+    var(--selected-chip-padding-end, 8px)
+    var(--selected-chip-padding-block, 7px)
+    var(--selected-chip-padding-start, 11px);
+  font-size: var(--selected-chip-font-size, .87rem);
+  line-height: 1.15;
+  transition: gap 240ms ease, padding 240ms ease, font-size 240ms ease;
+}
+
+.selected-chips--adaptive li > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.selected-chips--adaptive button {
+  width: var(--selected-chip-button-size, 21px);
+  height: var(--selected-chip-button-size, 21px);
+  flex: 0 0 var(--selected-chip-button-size, 21px);
+  font-size: var(--selected-chip-button-font-size, 1rem);
+  transition: width 240ms ease, height 240ms ease, flex-basis 240ms ease, font-size 240ms ease;
+}
+
 .tense-picker > .selection-toolbar {
   justify-content: flex-end;
   border-bottom: 1px solid #edf1ef;
@@ -841,6 +871,26 @@ body.dialog-open {
   margin: 0;
   padding: 14px 10px;
   border: 0;
+}
+
+.tense-group {
+  position: relative;
+  padding: 22px 14px;
+}
+
+.tense-groups > .tense-group:nth-child(even) {
+  border-left: 1px solid #c9dbd5;
+}
+
+.tense-groups > .tense-group:nth-child(odd):not(:first-child)::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 1px;
+  background: #c9dbd5;
+  content: "";
+  pointer-events: none;
 }
 
 .tense-group legend,
@@ -1775,6 +1825,27 @@ body.dialog-open {
 }
 
 @media (max-width: 760px) {
+  .selected-chips--adaptive {
+    gap: var(--selected-chip-mobile-gap, 7px);
+  }
+
+  .selected-chips--adaptive li {
+    gap: var(--selected-chip-mobile-inner-gap, 6px);
+    padding:
+      var(--selected-chip-mobile-padding-block, 7px)
+      var(--selected-chip-mobile-padding-end, 8px)
+      var(--selected-chip-mobile-padding-block, 7px)
+      var(--selected-chip-mobile-padding-start, 11px);
+    font-size: var(--selected-chip-mobile-font-size, .87rem);
+  }
+
+  .selected-chips--adaptive button {
+    width: var(--selected-chip-mobile-button-size, 21px);
+    height: var(--selected-chip-mobile-button-size, 21px);
+    flex-basis: var(--selected-chip-mobile-button-size, 21px);
+    font-size: var(--selected-chip-mobile-button-font-size, 1rem);
+  }
+
   .challenge-hero {
     padding: 34px 14px 26px;
   }
@@ -1865,6 +1936,25 @@ body.dialog-open {
 
   .tense-groups {
     grid-template-columns: 1fr;
+  }
+
+  .tense-groups > .tense-group:nth-child(even) {
+    border-left: 0;
+  }
+
+  .tense-groups > .tense-group:nth-child(n + 2)::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: #c9dbd5;
+    content: "";
+    pointer-events: none;
+  }
+
+  .tense-groups > .tense-group:nth-child(odd):not(:first-child)::before {
+    width: 100%;
   }
 
   .app-dialog,

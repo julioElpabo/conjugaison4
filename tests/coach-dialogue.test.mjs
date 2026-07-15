@@ -65,6 +65,20 @@ describe('dialogue contextualisé des coaches', () => {
     assert.equal(reaction.media?.id, 6)
   })
 
+  it('tire les GIF uniformément sans tenir compte de leur ancien poids', () => {
+    const second = { ...coach().media[0], id: 6, filePath: '/autre-bravo.webp' }
+    const reaction = createCoachReaction(coach({
+      media: [coach().media[0], second],
+      assignments: [
+        { mediaId: 4, eventType: 'cod-before', weight: 100, isActive: true },
+        { mediaId: 6, eventType: 'cod-before', weight: 1, isActive: true },
+      ],
+    }), 'cod-before', {}, {
+      random: () => 0.75, mediaAllowed: true, allowMotion: true,
+    })
+    assert.equal(reaction.media?.id, 6)
+  })
+
   it('réutilise les médias de réussite pour une bonne réponse avec variante', () => {
     const reaction = createCoachReaction(coach({
       assignments: [{ mediaId: 4, eventType: 'correct', weight: 1, isActive: true }],

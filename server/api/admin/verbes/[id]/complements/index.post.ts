@@ -1,5 +1,10 @@
 import type { ResultSetHeader, RowDataPacket } from 'mysql2/promise'
-import { inferAnteposedComplement } from '../../../../../services/complement-placement'
+import {
+  inferAnteposedComplement,
+  resolveAnteposedComplement,
+  type ComplementGender,
+  type ComplementNumber,
+} from '../../../../../services/complement-placement'
 
 interface ConstructionRow extends RowDataPacket {
   id: number
@@ -20,10 +25,27 @@ function normalizeComplement(value: unknown): string {
 export default defineEventHandler(async (event) => {
   requireAdministrator(event)
   const verbId = Number.parseInt(getRouterParam(event, 'id') ?? '', 10)
-  const body = await readBody<{ constructionId?: unknown, texte?: unknown }>(event)
+  const body = await readBody<{
+    constructionId?: unknown
+    texte?: unknown
+    gender?: unknown
+    number?: unknown
+  }>(event)
   const requestedConstructionId = Number(body?.constructionId)
   const texte = normalizeComplement(body?.texte)
-  const anteposed = inferAnteposedComplement(texte)
+  const requestedGender = typeof body?.gender === 'string' ? body.gender : ''
+  const requestedNumber = typeof body?.number === 'string' ? body.number : ''
+  const gender = ['masculin', 'feminin'].includes(requestedGender)
+    ? requestedGender as ComplementGender
+    : null
+  const number = ['singulier', 'pluriel'].includes(requestedNumber)
+    ? requestedNumber as ComplementNumber
+    : null
+  const inferred = inferAnteposedComplement(texte)
+
+  if ((requestedGender && !gender) || (requestedNumber && !number) || Boolean(gender) !== Boolean(number)) {
+    throw createError({ statusCode: 400, statusMessage: 'Le genre et le nombre doivent être renseignés ensemble' })
+  }
 
   if (!Number.isInteger(verbId) || verbId < 1) {
     throw createError({ statusCode: 400, statusMessage: 'Verbe invalide' })
@@ -95,7 +117,16 @@ export default defineEventHandler(async (event) => {
     }
 
     const constructionId = Number(construction.id)
-    const placement = construction.fonction_objet === 'cod' ? anteposed : null
+    if (construction.fonction_objet === 'cod' && !inferred && (!gender || !number)) {
+      throw createError({
+        statusCode: 422,
+        statusMessage: 'Précise le genre et le nombre de ce COD',
+        data: { code: 'COMPLEMENT_GRAMMAR_REQUIRED' },
+      })
+    }
+    const placement = construction.fonction_objet === 'cod'
+      ? resolveAnteposedComplement(texte, gender, number)
+      : null
     const [[existing]] = await connection.execute<ComplementRow[]>(`
       SELECT id, actif FROM complements_verbaux
       WHERE construction_id=? AND texte=?
@@ -141,7 +172,12 @@ export default defineEventHandler(async (event) => {
         preposition: construction.preposition,
         patron: construction.patron
       },
-      complement: { id: complementId, texte }
+      complement: {
+        id: complementId,
+        texte,
+        genre: placement?.gender ?? null,
+        nombre: placement?.number ?? null,
+      }
     }
   } catch (error) {
     await connection.rollback()

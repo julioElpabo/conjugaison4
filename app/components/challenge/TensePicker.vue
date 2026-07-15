@@ -37,10 +37,17 @@ const exampleRequestKey = computed(() => (
   `${exampleVerbs.value.map(verb => verb.id).join(',')}|${props.tenses.map(tense => tense.id).join(',')}`
 ))
 const groups = computed(() => props.modes
-  .map(mode => ({
-    mode,
-    tenses: props.tenses.filter(tense => tense.modeId === mode.id)
-  }))
+  .map((mode) => {
+    const tenses = props.tenses.filter(tense => tense.modeId === mode.id)
+    return {
+      mode,
+      tenses,
+      columns: [
+        tenses.filter(tense => !tense.isCompound),
+        tenses.filter(tense => tense.isCompound)
+      ].filter(column => column.length > 0)
+    }
+  })
   .filter(group => group.tenses.length > 0))
 
 function isPastSimple(tense: Tense) {
@@ -100,73 +107,82 @@ watch(exampleRequestKey, () => void loadExamples())
     </div>
 
     <div class="tense-groups">
-      <fieldset v-for="group in groups" :key="group.mode.id" class="tense-group">
-        <legend>{{ group.mode.name }}</legend>
-        <div class="tense-group__items">
-          <template v-for="tense in group.tenses" :key="tense.id">
-            <div class="tense-row">
-              <span class="tense-info">
-                <button
-                  type="button"
-                  :aria-label="`Voir un exemple au ${tense.name}`"
-                  :aria-describedby="`tense-example-${tense.id}`"
-                >i</button>
-                <span :id="`tense-example-${tense.id}`" class="tense-tooltip" role="tooltip">
-                  <template v-if="examples[tense.id]">
-                    Exemple: <strong>{{ examples[tense.id]!.emphasis }}</strong><template v-if="examples[tense.id]!.rest"> {{ examples[tense.id]!.rest }}</template>
-                  </template>
-                  <template v-else>{{ examplesLoading ? 'Chargement…' : 'Exemple momentanément indisponible.' }}</template>
+      <section v-for="group in groups" :key="group.mode.id" class="tense-group" role="group" :aria-labelledby="`tense-mode-${group.mode.id}`">
+        <h3 :id="`tense-mode-${group.mode.id}`" class="tense-group__title">{{ group.mode.name }}</h3>
+        <div class="tense-group__columns" :class="{ 'tense-group__columns--single': group.columns.length === 1 }">
+          <div v-for="(column, columnIndex) in group.columns" :key="columnIndex" class="tense-group__column">
+            <div class="tense-group__items">
+              <template v-for="tense in column" :key="tense.id">
+                <div class="tense-entry">
+              <div class="tense-row">
+                <span class="tense-info">
+                  <button
+                    type="button"
+                    :aria-label="`Voir un exemple au ${tense.name}`"
+                    :aria-describedby="`tense-example-${tense.id}`"
+                  >i</button>
+                  <span :id="`tense-example-${tense.id}`" class="tense-tooltip" role="tooltip">
+                    <template v-if="examples[tense.id]">
+                      Exemple: <strong>{{ examples[tense.id]!.emphasis }}</strong><template v-if="examples[tense.id]!.rest"> {{ examples[tense.id]!.rest }}</template>
+                    </template>
+                    <template v-else>{{ examplesLoading ? 'Chargement…' : 'Exemple momentanément indisponible.' }}</template>
+                  </span>
                 </span>
-              </span>
-              <label class="switch-row">
-                <input
-                  type="checkbox"
-                  :checked="selectedSet.has(tense.id)"
-                  @change="emit('toggle', tense.id)"
-                >
-                <span class="switch-row__control" aria-hidden="true" />
-                <span>
-                  {{ tense.name }}
-                  <small v-if="tense.isCompound">temps composé</small>
-                </span>
-              </label>
-            </div>
-
-            <Transition name="past-simple-options">
-              <div v-if="isPastSimple(tense) && selectedSet.has(tense.id)" class="past-simple-options">
-                <fieldset class="inline-choice">
-                  <legend>Au passé simple et au passé antérieur</legend>
-                  <label>
-                    <input
-                      type="radio"
-                      name="past-simple-pronouns"
-                      value="all"
-                      :checked="pastSimplePronouns === 'all'"
-                      @change="onPastSimplePronounsChange"
-                    >
-                    Tous les pronoms
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="past-simple-pronouns"
-                      value="third-person-only"
-                      :checked="pastSimplePronouns === 'third-person-only'"
-                      @change="onPastSimplePronounsChange"
-                    >
-                    Seulement il / elle et ils / elles
-                  </label>
-                </fieldset>
+                <label class="switch-row">
+                  <input
+                    type="checkbox"
+                    :checked="selectedSet.has(tense.id)"
+                    @change="emit('toggle', tense.id)"
+                  >
+                  <span class="switch-row__control" aria-hidden="true" />
+                  <span>{{ tense.name }}</span>
+                </label>
               </div>
-            </Transition>
-          </template>
+
+              <Transition name="past-simple-options">
+                <div v-if="isPastSimple(tense) && selectedSet.has(tense.id)" class="past-simple-options">
+                  <fieldset class="inline-choice">
+                    <legend>Au passé simple et au passé antérieur</legend>
+                    <label>
+                      <input type="radio" name="past-simple-pronouns" value="all" :checked="pastSimplePronouns === 'all'" @change="onPastSimplePronounsChange">
+                      Tous les pronoms
+                    </label>
+                    <label>
+                      <input type="radio" name="past-simple-pronouns" value="third-person-only" :checked="pastSimplePronouns === 'third-person-only'" @change="onPastSimplePronounsChange">
+                      Seulement il / elle et ils / elles
+                    </label>
+                  </fieldset>
+                </div>
+              </Transition>
+                </div>
+              </template>
+            </div>
+          </div>
         </div>
-      </fieldset>
+      </section>
     </div>
   </section>
 </template>
 
 <style scoped>
+.tense-group__columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 14px;
+  align-items: start;
+}
+
+.tense-group__columns--single { grid-template-columns: 1fr; }
+
+.tense-group__title {
+  margin: 0 0 10px;
+  color: #526862;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
 .tense-row {
   display: flex;
   min-width: 0;
@@ -272,5 +288,10 @@ watch(exampleRequestKey, () => void loadExamples())
   .past-simple-options-leave-active {
     transition: none;
   }
+}
+
+@media (max-width: 520px) {
+  .tense-group__columns { grid-template-columns: 1fr; }
+  .tense-group__column + .tense-group__column { margin-top: 22px; }
 }
 </style>

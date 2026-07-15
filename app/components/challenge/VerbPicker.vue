@@ -23,7 +23,33 @@ const selectedVerbs = computed(() => {
     .map(id => byId.get(id))
     .filter((verb): verb is Verb => Boolean(verb))
 })
-
+const selectedChipScale = computed(() => {
+  const count = selectedVerbs.value.length
+  if (count <= 3) return 2
+  return Math.max(1, 2 - (count - 3) / 7)
+})
+const selectedChipStyle = computed<Record<string, string>>(() => {
+  const scale = selectedChipScale.value
+  const mobileScale = 1 + (scale - 1) * 0.55
+  return {
+    '--selected-chip-gap': `${7 * scale}px`,
+    '--selected-chip-inner-gap': `${6 * scale}px`,
+    '--selected-chip-padding-block': `${7 * scale}px`,
+    '--selected-chip-padding-end': `${8 * scale}px`,
+    '--selected-chip-padding-start': `${11 * scale}px`,
+    '--selected-chip-font-size': `${0.87 * scale}rem`,
+    '--selected-chip-button-size': `${21 * scale}px`,
+    '--selected-chip-button-font-size': `${scale}rem`,
+    '--selected-chip-mobile-gap': `${7 * mobileScale}px`,
+    '--selected-chip-mobile-inner-gap': `${6 * mobileScale}px`,
+    '--selected-chip-mobile-padding-block': `${7 * mobileScale}px`,
+    '--selected-chip-mobile-padding-end': `${8 * mobileScale}px`,
+    '--selected-chip-mobile-padding-start': `${11 * mobileScale}px`,
+    '--selected-chip-mobile-font-size': `${0.87 * mobileScale}rem`,
+    '--selected-chip-mobile-button-size': `${21 * mobileScale}px`,
+    '--selected-chip-mobile-button-font-size': `${mobileScale}rem`,
+  }
+})
 const suggestions = computed(() => {
   const needle = normalizeVerbSearch(query.value)
   if (!needle) {
@@ -121,16 +147,15 @@ function addFirstSuggestion() {
       </button>
     </div>
 
-    <ul v-if="selectedVerbs.length" class="selected-chips" aria-label="Verbes sélectionnés">
+    <ul
+      v-if="selectedVerbs.length"
+      class="selected-chips selected-chips--adaptive"
+      :style="selectedChipStyle"
+      aria-label="Verbes sélectionnés"
+    >
       <li v-for="verb in selectedVerbs" :key="verb.id">
         <span>{{ verb.infinitif }}</span>
-        <button
-          type="button"
-          :aria-label="`Retirer le verbe ${verb.infinitif}`"
-          @click="emit('remove', verb.id)"
-        >
-          ×
-        </button>
+        <button type="button" :aria-label="`Retirer le verbe ${verb.infinitif}`" @click="emit('remove', verb.id)">×</button>
       </li>
     </ul>
   </section>

@@ -16,6 +16,7 @@
     "data:migrate-pronominals": "node --env-file=.env scripts/migrate-pronominal-verbs.mjs",
     "data:migrate-complements": "node --env-file=.env scripts/migrate-verb-complements.mjs",
     "data:migrate-complement-placement": "node --env-file=.env --experimental-strip-types scripts/migrate-complement-placement.mjs",
+    "data:assign-cod-grammar": "node --env-file=.env scripts/assign-cod-grammar.mjs",
     "data:expand-complements": "node --env-file=.env --experimental-strip-types scripts/expand-verb-complements.mjs",
     "data:audit-academie-complements": "node --env-file=.env scripts/audit-academie-complements.mjs",
     "data:equip-all-complements": "node --env-file=.env scripts/equip-all-verb-complements.mjs",

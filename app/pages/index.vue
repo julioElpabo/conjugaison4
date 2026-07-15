@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import ChallengeWorkspace from '~/components/challenge/ChallengeWorkspace.vue'
+import WizardChallengeWorkspace from '~/components/challenge/WizardChallengeWorkspace.vue'
 
 useHead({
-  title: 'Défi de conjugaison',
+  title: 'Nouveau défi · Défi de conjugaison',
   meta: [
     {
       name: 'description',
-      content: 'Créez un exercice de conjugaison personnalisé, entraînez-vous en ligne ou imprimez une fiche avec son corrigé.'
+      content: 'Composez rapidement un défi de conjugaison en choisissant les verbes, les modes et les temps.'
     }
   ]
 })
 </script>
 
 <template>
-  <ChallengeWorkspace />
+  <WizardChallengeWorkspace />
 </template>

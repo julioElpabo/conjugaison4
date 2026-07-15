@@ -38,6 +38,11 @@ function weightedChoice<T extends { weight: number }>(items: T[], random: () => 
   return items.at(-1)
 }
 
+function uniformChoice<T>(items: T[], random: () => number): T | undefined {
+  if (!items.length) return undefined
+  return items[Math.min(items.length - 1, Math.floor(random() * items.length))]
+}
+
 export function createCoachReaction(
   coach: CoachProfile,
   eventType: CoachEvent,
@@ -71,7 +76,11 @@ export function createCoachReaction(
   })
   const excluded = new Set(options.excludeMediaIds || [])
   const freshCandidates = candidates.filter(item => !excluded.has(item.media.id))
-  const selected = weightedChoice(freshCandidates.length ? freshCandidates : candidates, random)
+  const selectable = freshCandidates.length ? freshCandidates : candidates
+  const animationsOnly = selectable.every(item => item.media.mediaType === 'animation' || item.media.mediaType === 'video')
+  const selected = animationsOnly
+    ? uniformChoice(selectable, random)
+    : weightedChoice(selectable, random)
   if (selected) result.media = selected.media
   return result
 }

@@ -31,6 +31,8 @@ interface ComplementRow extends RowDataPacket {
   preposition: string | null
   patron: string
   texte: string | null
+  genre: string | null
+  nombre: string | null
 }
 
 interface ConjugationRow extends RowDataPacket {
@@ -80,7 +82,7 @@ export default defineEventHandler(async (event) => {
     `, [id]),
     database.execute<ComplementRow[]>(`
       SELECT cv.id AS construction_id, c.id AS complement_id, cv.code, cv.fonction_objet, cv.preposition,
-             cv.patron, c.texte
+             cv.patron, c.texte, c.genre, c.nombre
       FROM verbe_sens vs
       INNER JOIN constructions_verbales cv ON cv.sens_id=vs.id AND cv.actif=1
       LEFT JOIN complements_verbaux c ON c.construction_id=cv.id AND c.actif=1
@@ -106,7 +108,12 @@ export default defineEventHandler(async (event) => {
     complements: complements
       .filter(item => Number(item.construction_id) === Number(row.construction_id))
       .filter(item => item.complement_id !== null && item.texte !== null)
-      .map(item => ({ id: Number(item.complement_id), texte: String(item.texte) })),
+      .map(item => ({
+        id: Number(item.complement_id),
+        texte: String(item.texte),
+        genre: item.genre ? (item.genre.toLocaleLowerCase('fr').startsWith('f') ? 'feminin' : 'masculin') : null,
+        nombre: item.nombre ? (item.nombre.toLocaleLowerCase('fr').startsWith('p') ? 'pluriel' : 'singulier') : null,
+      })),
   }])).values()]
 
   return {

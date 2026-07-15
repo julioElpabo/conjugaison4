@@ -80,3 +80,19 @@ push GitHub → webhook Plesk → récupération de main → npm ci → build Nu
 
 Les journaux du déploiement sont visibles dans la section Git de Plesk. Les
 journaux de l’application sont visibles dans **Sites Web & Domaines → Logs**.
+
+## 5. Appliquer une migration de données
+
+Lorsqu’une version ajoute un script de migration, déployer d’abord le nouveau
+commit, puis ouvrir **Node.js → Run Node.js Commands → Run script**. Choisir le
+script concerné et l’exécuter une seule fois. Pour les demandes issues des
+courriels de 2025–2026, choisir :
+
+```text
+data:migrate-mail-requests:apply
+```
+
+Le script utilise les variables `NUXT_DB_*` configurées dans Plesk. Il est
+transactionnel et réexécutable : une erreur annule la migration, et une seconde
+exécution valide les données déjà présentes. Terminer par `build`, puis cliquer
+sur **Restart App**.

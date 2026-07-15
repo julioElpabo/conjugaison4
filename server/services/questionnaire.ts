@@ -8,6 +8,7 @@ import { decodePronominalSelectionId } from '../../shared/utils/pronominal-selec
 import { TENSE_IDENTIFICATION_INSTRUCTION } from '../../shared/utils/exercise-instructions'
 import type { ComplementOption } from '../../shared/types/conjugation'
 import { indirectRelative } from './indirect-relative'
+import { resolveVariableAuxiliary } from './compound-auxiliary'
 
 interface IdRow extends RowDataPacket { id: number }
 
@@ -249,6 +250,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
       : ''
     const limit = Math.min(500, Math.max(request.questionCount * 4, request.questionCount))
     const rows: ConjugationRow[] = []
+    let etreAuxiliaryForms: AuxiliaryFormRow[] = []
     if (verbIds.length > 0) {
       const [storedRows] = await database.execute<ConjugationRow[]>(`
       SELECT vc.id, vc.verbe_id, vc.personne_id, vc.temp_id,
@@ -315,6 +317,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
           WHERE v.infinitif = 'être' AND t.isTempsCompose = 0 AND vc.conjugaison1 <> ''
         `),
       ])
+      etreAuxiliaryForms = auxiliaryForms[0]
       rows.push(...sourceRows[0]
         .filter((row) => {
           const persons = allowedPersons(row.personnes_autorisees)
@@ -322,6 +325,18 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
         })
         .map(row => generatePronominalRow(row, auxiliaryForms[0]))
         .filter(row => row.conjugaison1) as ConjugationRow[])
+    }
+
+    if (!etreAuxiliaryForms.length && rows.some(row => normalized(row.infinitif) === 'sortir' && Boolean(row.is_compound))) {
+      const [auxiliaryForms] = await database.execute<AuxiliaryFormRow[]>(`
+        SELECT vc.personne_id, m.name AS mode_name, t.name AS temps_name, vc.conjugaison1
+        FROM verbesconjugues vc
+        INNER JOIN verbes v ON v.id = vc.verbe_id
+        INNER JOIN temps t ON t.id = vc.temp_id
+        INNER JOIN modes m ON m.id = t.mode_id
+        WHERE v.infinitif = 'être' AND t.isTempsCompose = 0 AND vc.conjugaison1 <> ''
+      `)
+      etreAuxiliaryForms = auxiliaryForms
     }
 
     const complementsByVerb = new Map<number, ComplementRow[]>()
@@ -383,9 +398,10 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
             complement_preposition: complement.preposition,
           }
         : row
+      const semanticRow = resolveVariableAuxiliary(enrichedRow, etreAuxiliaryForms)
       return request.exerciseKind === 'conjugation'
-        ? formatConjugationQuestion(enrichedRow, choosePronoun(row.pronom, request.inclusivePronouns))
-        : identificationQuestion(row)
+        ? formatConjugationQuestion(semanticRow, choosePronoun(row.pronom, request.inclusivePronouns))
+        : identificationQuestion(semanticRow)
     }))
   }
 

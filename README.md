@@ -6,7 +6,7 @@ application accède exclusivement à la base MySQL définie dans son propre `.en
 
 ## Fonctions
 
-- catalogue de 486 verbes, modes et temps depuis MySQL ;
+- catalogue de 488 verbes, modes et temps depuis MySQL ;
 - défis prédéfinis par niveau, groupe ou difficulté ;
 - recherche et sélection libre des verbes et des temps ;
 - conjugaison classique ou exercice conversationnel ;

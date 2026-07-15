@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ExerciseAttempt, ExerciseQuestion } from '~~/shared/types/conjugation'
-import { getAlternativeCorrections, validateAnswer } from '~~/shared/utils/answer'
+import { getAlternativeCorrections } from '~~/shared/utils/answer'
+import { evaluateExerciseAnswer } from '~~/shared/utils/exercise-attempt'
 
 const props = defineProps<{
   questions: ExerciseQuestion[]
@@ -14,6 +15,8 @@ const emit = defineEmits<{
 const currentIndex = ref(0)
 const answer = ref('')
 const feedback = ref<'idle' | 'correct' | 'incorrect'>('idle')
+const retryAlreadyOffered = ref(false)
+const retryMessageVisible = ref(false)
 const attempts = ref<ExerciseAttempt[]>([])
 const isFinished = ref(false)
 const answerInput = useTemplateRef<HTMLInputElement>('answer-input')
@@ -55,12 +58,28 @@ function submitAnswer() {
     return
   }
 
-  const result = validateAnswer(answer.value, question.reponses)
+  const { result, shouldRetry } = evaluateExerciseAnswer(
+    answer.value,
+    question.reponses,
+    retryAlreadyOffered.value,
+  )
+  if (shouldRetry) {
+    retryAlreadyOffered.value = true
+    retryMessageVisible.value = true
+    nextTick(() => {
+      answerInput.value?.focus()
+      answerInput.value?.select()
+    })
+    return
+  }
+
+  retryMessageVisible.value = false
   feedback.value = result.isCorrect ? 'correct' : 'incorrect'
   attempts.value.push({
     question,
     answer: answer.value,
     status: result.isCorrect ? 'correct' : 'incorrect',
+    attemptNumber: retryAlreadyOffered.value ? 2 : 1,
     ...(result.matchedAnswer ? { matchedAnswer: result.matchedAnswer } : {})
   })
 }
@@ -79,6 +98,8 @@ function nextQuestion() {
   currentIndex.value += 1
   answer.value = ''
   feedback.value = 'idle'
+  retryAlreadyOffered.value = false
+  retryMessageVisible.value = false
   nextTick(() => answerInput.value?.focus())
 }
 
@@ -86,6 +107,8 @@ function restart() {
   currentIndex.value = 0
   answer.value = ''
   feedback.value = 'idle'
+  retryAlreadyOffered.value = false
+  retryMessageVisible.value = false
   attempts.value = []
   isFinished.value = false
   nextTick(() => answerInput.value?.focus())
@@ -137,7 +160,8 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
             :key="index"
             :class="{
               'is-current': !isFinished && index === currentIndex,
-              'is-correct': attempts[index]?.status === 'correct',
+              'is-correct': attempts[index]?.status === 'correct' && attempts[index]?.attemptNumber !== 2,
+              'is-correct-retry': attempts[index]?.status === 'correct' && attempts[index]?.attemptNumber === 2,
               'is-incorrect': attempts[index]?.status === 'incorrect'
             }"
           />
@@ -174,10 +198,10 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
                   :disabled="feedback !== 'idle'"
                   :class="{
                     'is-valid': feedback === 'correct',
-                    'is-invalid': feedback === 'incorrect'
+                    'is-invalid': feedback === 'incorrect' || retryMessageVisible
                   }"
-                  :aria-invalid="feedback === 'incorrect'"
-                  :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : undefined"
+                  :aria-invalid="feedback === 'incorrect' || retryMessageVisible"
+                  :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : retryMessageVisible ? 'answer-retry' : undefined"
                 >
                 <span v-if="currentQuestion.complementPosition !== 'before'">
                   {{ currentQuestion.complement }}{{ currentQuestion.mode?.toLocaleLowerCase('fr') === 'impératif' ? ' !' : '' }}
@@ -190,6 +214,9 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
                 {{ currentIndex === questions.length - 1 ? 'Voir mes résultats' : 'Question suivante' }}
               </button>
             </form>
+            <p v-if="retryMessageVisible" id="answer-retry" class="answer-retry" aria-live="polite">
+              Pas encore. Vérifie ta réponse et essaie une deuxième fois.
+            </p>
           </template>
 
           <p v-else class="question-text">{{ currentQuestion.consigne }}</p>
@@ -206,10 +233,10 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
                 :disabled="feedback !== 'idle'"
                 :class="{
                   'is-valid': feedback === 'correct',
-                  'is-invalid': feedback === 'incorrect'
+                  'is-invalid': feedback === 'incorrect' || retryMessageVisible
                 }"
-                :aria-invalid="feedback === 'incorrect'"
-                :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : undefined"
+                :aria-invalid="feedback === 'incorrect' || retryMessageVisible"
+                :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : retryMessageVisible ? 'answer-retry' : undefined"
               >
               <button v-if="feedback === 'idle'" class="primary-button" type="submit" :disabled="!answer.trim()">
                 Vérifier
@@ -219,6 +246,9 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
               </button>
             </div>
           </form>
+          <p v-if="retryMessageVisible && !(exerciseKind === 'conjugation' && currentQuestion.complement)" id="answer-retry" class="answer-retry" aria-live="polite">
+            Pas encore. Vérifie ta réponse et essaie une deuxième fois.
+          </p>
 
           <div
             v-if="feedback !== 'idle'"
@@ -320,7 +350,14 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
                   <td>{{ attempt.answer }}</td>
                   <td>{{ attempt.question.reponsesPourCorrige.join(' ou ') }}</td>
                   <td>
-                    <span :class="attempt.status === 'correct' ? 'result-good' : 'result-bad'">
+                    <span
+                      :class="{
+                        'result-good': attempt.status === 'correct' && attempt.attemptNumber !== 2,
+                        'result-good--retry': attempt.status === 'correct' && attempt.attemptNumber === 2,
+                        'result-bad': attempt.status === 'incorrect'
+                      }"
+                      :aria-label="attempt.status === 'correct' && attempt.attemptNumber === 2 ? 'Juste au deuxième essai' : undefined"
+                    >
                       {{ attempt.status === 'correct' ? 'Juste' : 'À revoir' }}
                     </span>
                   </td>

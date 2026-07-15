@@ -1,5 +1,6 @@
 import type { ConjugationSourceRow } from './question-formatter'
 import type { RowDataPacket } from 'mysql2/promise'
+import { findCompoundAuxiliaryForm, type CompoundAuxiliaryForm } from './compound-auxiliary'
 
 export interface PronominalSourceRow extends RowDataPacket, ConjugationSourceRow {
   pronominal_use_id: number
@@ -10,25 +11,6 @@ export interface PronominalSourceRow extends RowDataPacket, ConjugationSourceRow
   base_conjugaison2: string
   base_conjugaison3: string
   personnes_autorisees?: string | number[] | null
-}
-
-interface AuxiliaryForm {
-  personne_id: number
-  mode_name: string
-  temps_name: string
-  conjugaison1: string
-}
-
-const compoundAuxiliaryTense: Record<string, [string, string]> = {
-  'indicatif:passé composé': ['indicatif', 'présent'],
-  'indicatif:plus-que-parfait': ['indicatif', 'imparfait'],
-  'indicatif:passé antérieur': ['indicatif', 'passé simple'],
-  'indicatif:futur antérieur': ['indicatif', 'futur'],
-  'subjonctif:passé': ['subjonctif', 'présent'],
-  'subjonctif:plus-que-parfait': ['subjonctif', 'imparfait'],
-  'conditionnel:passé 1': ['conditionnel', 'présent'],
-  'conditionnel:passé 2': ['subjonctif', 'imparfait'],
-  'impératif:passé': ['impératif', 'présent'],
 }
 
 function normalized(value: string) {
@@ -68,17 +50,12 @@ function participleForPerson(participle: string, personId: number, agreementRule
   return `${form}s`
 }
 
-export function generatePronominalRow(row: PronominalSourceRow, auxiliaryForms: readonly AuxiliaryForm[]): ConjugationSourceRow {
+export function generatePronominalRow(row: PronominalSourceRow, auxiliaryForms: readonly CompoundAuxiliaryForm[]): ConjugationSourceRow {
   const forms = [row.base_conjugaison1, row.base_conjugaison2, row.base_conjugaison3]
   let generated: string[]
 
   if (Number(row.is_compound)) {
-    const target = compoundAuxiliaryTense[`${normalized(row.mode_name)}:${normalized(row.temps_name)}`]
-    const auxiliary = target && auxiliaryForms.find(form => (
-      Number(form.personne_id) === Number(row.personne_id)
-      && normalized(form.mode_name) === target[0]
-      && normalized(form.temps_name) === target[1]
-    ))
+    const auxiliary = findCompoundAuxiliaryForm(row, auxiliaryForms)
     const auxiliaryForm = auxiliary?.conjugaison1?.trim() ?? ''
     if (!auxiliaryForm) {
       generated = []

@@ -95,6 +95,17 @@ referenceCases('familles à modification orthographique', [
   { infinitive: 'haïr', mode: 'indicatif', tense: 'présent', pronoun: 'nous', expected: ['haïssons'] },
 ])
 
+referenceCases('doléances vérifiées des utilisateurs', [
+  { infinitive: 'naître', mode: 'indicatif', tense: 'présent', pronoun: 'il', expected: ['naît', 'nait'] },
+  { infinitive: 'naître', mode: 'indicatif', tense: 'futur', pronoun: 'je', expected: ['naîtrai', 'naitrai'] },
+  { infinitive: 'reconnaître', mode: 'indicatif', tense: 'présent', pronoun: 'il', expected: ['reconnaît', 'reconnait'] },
+  { infinitive: 'reconnaître', mode: 'indicatif', tense: 'passé simple', pronoun: 'nous', expected: ['reconnûmes'] },
+  { infinitive: 'reconnaître', mode: 'conditionnel', tense: 'présent', pronoun: 'je', expected: ['reconnaîtrais', 'reconnaitrais'] },
+  { infinitive: 'rougir', mode: 'indicatif', tense: 'présent', pronoun: 'nous', expected: ['rougissons'] },
+  { infinitive: 'rougir', mode: 'subjonctif', tense: 'présent', pronoun: 'ils', expected: ['rougissent'] },
+  { infinitive: 'rougir', mode: 'impératif', tense: 'passé', pronoun: 'vous', expected: ['ayez rougi'] },
+])
+
 referenceCases('verbes irréguliers fondamentaux', [
   { infinitive: 'être', mode: 'indicatif', tense: 'présent', pronoun: 'vous', expected: ['êtes'] },
   { infinitive: 'avoir', mode: 'subjonctif', tense: 'présent', pronoun: 'je', expected: ['aie'] },
@@ -127,7 +138,7 @@ describe('verbes défectifs et impersonnels', { skip: !databaseConfigured }, () 
   })
 })
 
-describe('intégrité des 486 verbes du catalogue', { skip: !databaseConfigured }, () => {
+describe('intégrité des 488 verbes du catalogue', { skip: !databaseConfigured }, () => {
   it('ne contient aucun infinitif en double', async () => {
     const [rows] = await database.query('SELECT id, infinitif FROM verbes ORDER BY infinitif, id')
     const seen = new Map()

@@ -157,6 +157,7 @@ export interface ExerciseAttempt {
   question: ExerciseQuestion
   answer: string
   status: ExerciseAttemptStatus
+  attemptNumber?: 1 | 2
   matchedAnswer?: string
 }
 

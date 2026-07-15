@@ -529,7 +529,7 @@ async function saveChallenge() {
   <div class="wizard-entry-page">
     <div class="challenge-page wizard-page">
       <header class="wizard-hero">
-        <h1>{{ currentStep === 0 ? 'Que veux-tu travailler ?' : 'Construire mon défi' }}</h1>
+        <h1>{{ currentStep === 0 ? 'Exercices de conjugaison française' : 'Construire mon défi' }}</h1>
       </header>
 
       <main class="wizard-shell">

@@ -46,7 +46,7 @@ const TEST_CATALOG: Record<string, { title: string, description: string, categor
     category: 'Conjugaison française',
   },
   'conjugation-database.test.mjs': {
-    title: 'Références et intégrité des 486 verbes',
+    title: 'Références et intégrité des 488 verbes',
     description: 'Compare les formes sensibles à des références explicites et audite toutes les données du catalogue.',
     category: 'Conjugaison française',
   },
@@ -104,7 +104,7 @@ const RESULT_GROUP_CATALOG: Record<string, { title: string, description: string 
   'familles à modification orthographique': { title: 'Modifications orthographiques', description: 'Verbes en -ger, -cer, changements de radical, tréma et futur irrégulier.' },
   'verbes irréguliers fondamentaux': { title: 'Verbes irréguliers', description: 'Être, avoir, aller, faire, dire, venir, tenir et prendre.' },
   'verbes défectifs et impersonnels': { title: 'Verbes défectifs', description: 'Falloir et pleuvoir sans génération de personnes inexistantes.' },
-  'intégrité des 486 verbes du catalogue': { title: 'Audit complet du catalogue', description: 'Doublons, métadonnées, variantes, relations, formes manquantes et auxiliaires.' },
+  'intégrité des 488 verbes du catalogue': { title: 'Audit complet du catalogue', description: 'Doublons, métadonnées, variantes, relations, formes manquantes et auxiliaires.' },
   'scénarios chronologiques du chat': { title: 'Déroulement des conversations', description: 'Ordre des bulles, consigne finale, correction, délai de trois secondes, grammaire et fin du questionnaire.' },
   'crédibilité des douze coaches': { title: 'Crédibilité des coaches', description: 'Diversité des formulations, absence de répétitions immédiates et variété des réactions visuelles.' },
 }

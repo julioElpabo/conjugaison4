@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import type { ExerciseAttempt, ExerciseQuestion } from '~~/shared/types/conjugation'
 import type { CoachEvent, CoachMedia, CoachMessageContext, CoachProfile } from '~~/shared/types/coach'
-import { getAlternativeCorrections, validateAnswer } from '~~/shared/utils/answer'
+import { getAlternativeCorrections } from '~~/shared/utils/answer'
 import { createCoachDialogueState, createVariedCoachReaction } from '~~/shared/utils/coach-dialogue'
 import { answerTurnPlan, CHAT_BUBBLE_DELAY_MS } from '~~/shared/utils/coach-conversation'
 import { createCoachFeedback, createCoachFeedbackState, diagnoseCoachAnswer } from '~~/shared/utils/coach-feedback'
+import { evaluateExerciseAnswer } from '~~/shared/utils/exercise-attempt'
 
 const props = defineProps<{
   questions: ExerciseQuestion[]
@@ -30,6 +31,7 @@ const messages = ref<ChatMessage[]>([])
 const waitingForNext = ref(false)
 const deliveringFeedback = ref(false)
 const posingQuestion = ref(false)
+const retryAlreadyOffered = ref(false)
 const finished = ref(false)
 const copyState = ref<'idle' | 'copied' | 'error'>('idle')
 const sequence = ref(0)
@@ -223,14 +225,32 @@ async function submit() {
 
   addMessage('learner', candidate)
   lastCoachBubbleAt = Date.now()
-  const result = validateAnswer(candidate, question.reponses)
+  const { result, shouldRetry } = evaluateExerciseAnswer(
+    candidate,
+    question.reponses,
+    retryAlreadyOffered.value,
+  )
+  answer.value = ''
+  if (shouldRetry) {
+    retryAlreadyOffered.value = true
+    waitingForNext.value = true
+    deliveringFeedback.value = true
+    await addCoachReaction('encouragement', contextFor(question), undefined, {
+      overrideText: 'Ce n’est pas encore ça. Vérifie ta réponse et essaie encore une fois.',
+    })
+    deliveringFeedback.value = false
+    waitingForNext.value = false
+    await nextTick()
+    input.value?.focus()
+    return
+  }
+
   attempts.value.push({
     question,
     answer: candidate,
     status: result.isCorrect ? 'correct' : 'incorrect',
     ...(result.matchedAnswer ? { matchedAnswer: result.matchedAnswer } : {})
   })
-  answer.value = ''
   waitingForNext.value = true
   deliveringFeedback.value = true
 
@@ -277,6 +297,7 @@ async function continueChat() {
   }
 
   currentIndex.value += 1
+  retryAlreadyOffered.value = false
   waitingForNext.value = false
   await askCurrentQuestion()
 }
@@ -294,6 +315,7 @@ async function restart() {
   waitingForNext.value = false
   deliveringFeedback.value = false
   posingQuestion.value = false
+  retryAlreadyOffered.value = false
   finished.value = false
   lastMediaQuestion.value = -100
   await addCoachReaction('restart', {})

@@ -1280,6 +1280,10 @@ body.dialog-open {
   background: #42a66f;
 }
 
+.exercise-progress .is-correct-retry {
+  background: #8bc9a6;
+}
+
 .exercise-progress .is-incorrect {
   background: #d26d64;
 }
@@ -1400,6 +1404,13 @@ body.dialog-open {
 .answer-form input.is-invalid {
   border-color: var(--danger);
   background: var(--danger-pale);
+}
+
+.answer-retry {
+  margin: 14px 0 0;
+  color: #8c5a21;
+  font-weight: 750;
+  text-align: center;
 }
 
 .answer-feedback {
@@ -1523,6 +1534,7 @@ body.dialog-open {
 }
 
 .result-good,
+.result-good--retry,
 .result-bad {
   display: inline-block;
   padding: 4px 7px;
@@ -1533,6 +1545,12 @@ body.dialog-open {
 .result-good {
   background: var(--success-pale);
   color: var(--success);
+}
+
+.result-good--retry {
+  border: 1px solid #d6ecdf;
+  background: #f1faf4;
+  color: #4f8068;
 }
 
 .result-bad {

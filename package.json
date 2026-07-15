@@ -23,6 +23,8 @@
     "data:equip-all-complements": "node --env-file=.env scripts/equip-all-verb-complements.mjs",
     "data:add-ecrire-coi": "node --env-file=.env scripts/add-ecrire-coi.mjs",
     "data:migrate-coaches": "node --env-file=.env scripts/migrate-coaches.mjs",
+    "data:migrate-mail-requests": "node --env-file-if-exists=.env scripts/migrate-mail-requests.mjs",
+    "data:migrate-mail-requests:apply": "node --env-file-if-exists=.env scripts/migrate-mail-requests.mjs --apply",
     "data:import-coach-media": "node --env-file=.env scripts/import-coach-media.mjs",
     "test": "node --env-file-if-exists=.env --import tsx --test tests/*.test.mjs",
     "test:conjugations": "node --env-file-if-exists=.env --import tsx --test tests/*conjugation*.test.mjs",

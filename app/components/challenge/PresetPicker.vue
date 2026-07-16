@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { challengePresetGroupLabels, challengePresetGroupOrder } from '~~/shared/data/challenge-presets'
 import type { ChallengePreset } from '~~/shared/types/conjugation'
 
 const props = defineProps<{
@@ -12,27 +13,16 @@ const emit = defineEmits<{
   stageChange: [stage: 'groups' | 'presets']
 }>()
 
-const groupLabels: Record<string, string> = {
-  school: 'Niveaux scolaires',
-  'verb-group': 'Groupes de verbes',
-  spelling: 'Difficultés particulières',
-  semantic: 'Sens des verbes',
-  agreement: 'COD et participes passés',
-  training: 'Entraînements'
-}
-
 const groupedPresets = computed(() => {
-  const groups = new Map<string, ChallengePreset[]>()
+  const groups = new Map<ChallengePreset['group'], ChallengePreset[]>()
   props.presets.forEach((preset) => {
     const current = groups.get(preset.group) ?? []
     current.push(preset)
     groups.set(preset.group, current)
   })
-  return [...groups.entries()].map(([id, presets]) => ({
-    id,
-    label: groupLabels[id] ?? id,
-    presets
-  }))
+  return [...groups.entries()]
+    .map(([id, presets]) => ({ id, label: challengePresetGroupLabels[id], presets }))
+    .sort((left, right) => challengePresetGroupOrder.indexOf(left.id) - challengePresetGroupOrder.indexOf(right.id))
 })
 
 const activeGroupId = ref('school')

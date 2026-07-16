@@ -14,7 +14,6 @@ export type CoachTurnStep =
 export function openingTurnPlan(): CoachTurnStep[] {
   return [
     { kind: 'reaction', eventType: 'introduction' },
-    { kind: 'reaction', eventType: 'question' },
     { kind: 'instruction' },
   ]
 }

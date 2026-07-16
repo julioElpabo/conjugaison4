@@ -90,7 +90,6 @@ describe('métadonnées grammaticales des verbes', () => {
     }
     assert.equal(presets.find(preset => preset.id === '5P').verbIds.length, 10)
     assert.ok(presets.find(preset => preset.id === 'groupe1').verbIds.length > 300)
-    assert.ok(presets.find(preset => preset.id === 'cod-avant-passe-compose').verbIds.length >= 290)
   })
 })
 

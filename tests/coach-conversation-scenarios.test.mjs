@@ -13,10 +13,9 @@ const config = {
 }
 
 describe('scénarios chronologiques du chat', () => {
-  it('présente le coach puis termine toujours par la consigne seule', () => {
+  it('présente le coach puis pose directement une question utile', () => {
     assert.deepEqual(openingTurnPlan(), [
       { kind: 'reaction', eventType: 'introduction' },
-      { kind: 'reaction', eventType: 'question' },
       { kind: 'instruction' },
     ])
     assert.equal(CHAT_BUBBLE_DELAY_MS, 1_000)

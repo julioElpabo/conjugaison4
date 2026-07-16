@@ -52,9 +52,16 @@ const legacyQuestionTemplateUpdates = [
   ['calm', 'Prends ton temps : {instruction}', 'Prends ton temps.'],
 ]
 
+const introductionTemplateUpdates = [
+  ['warm', 'Bonjour ! On va travailler ensemble tranquillement.', 'Bonjour ! Je vais te proposer des formes à conjuguer. Après chaque réponse, je t’indiquerai clairement ce qui est juste ou à corriger.'],
+  ['methodical', 'Bonjour. Nous allons avancer étape par étape.', 'Bonjour. Pour chaque question, lis la personne, le mode et le temps indiqués, puis écris la forme conjuguée.'],
+  ['dynamic', 'Salut ! Prêt à relever le défi ?', 'Salut ! Je te propose une série de formes à conjuguer : réponds, je corrige, puis on passe à la suivante.'],
+  ['calm', 'Bonjour. Prends ton temps.', 'Bonjour. Réponds à ton rythme ; après chaque essai, je t’indiquerai la forme correcte et le point à retenir.'],
+]
+
 const replySeeds = {
   'camille-morel': {
-    introduction: ['Bonjour ! On va travailler ensemble tranquillement.'],
+    introduction: ['Bonjour ! Je vais te proposer des formes à conjuguer. Après chaque réponse, je t’indiquerai clairement ce qui est juste ou à corriger.'],
     question: ['À toi.', 'On continue ensemble.', 'Essaie celle-ci.', 'Voici la suivante.', 'À toi de jouer.', 'Regarde bien ce qui est demandé.', 'Tu peux essayer cette nouvelle forme.', 'On passe à la suivante.', 'Prends un instant puis réponds.', 'Je te laisse conjuguer celle-ci.'],
     correct: ['Bravo, c’est juste !', 'Très bien, tu as trouvé !', 'Exactement, bravo !', 'Oui, c’est la bonne forme.', 'C’est réussi, continue ainsi !', 'Belle réponse, tu progresses !', 'Tu as bien observé, c’est exact.', 'Parfait, cette forme convient.', 'Bien vu, la réponse est correcte.', 'Excellent travail, poursuivons !'],
     'correct-alternative': ['Exact ! Une autre forme était également possible.'],
@@ -66,7 +73,7 @@ const replySeeds = {
     restart: ['On recommence. Prêt ?'], 'off-topic': ['Je suis un personnage virtuel prévu uniquement pour les exercices de conjugaison.'],
   },
   'sami-diallo': {
-    introduction: ['Bonjour. Nous allons avancer étape par étape.'], question: ['Procède dans l’ordre.', 'Observe bien les indices.', 'Passons à l’étape suivante.', 'Analyse cette nouvelle forme.', 'Repère la personne, le mode et le temps.', 'Identifie d’abord la personne demandée.', 'Vérifie le mode avant de répondre.', 'Décompose cette nouvelle consigne.', 'Observe le temps et construis la forme.', 'À présent, applique les indices donnés.'],
+    introduction: ['Bonjour. Pour chaque question, lis la personne, le mode et le temps indiqués, puis écris la forme conjuguée.'], question: ['Procède dans l’ordre.', 'Observe bien les indices.', 'Passons à l’étape suivante.', 'Analyse cette nouvelle forme.', 'Repère la personne, le mode et le temps.', 'Identifie d’abord la personne demandée.', 'Vérifie le mode avant de répondre.', 'Décompose cette nouvelle consigne.', 'Observe le temps et construis la forme.', 'À présent, applique les indices donnés.'],
     correct: ['Correct. La forme est bien construite.', 'Exact. Chaque élément est à sa place.', 'Bonne réponse. Le raisonnement est juste.', 'C’est correct. La méthode fonctionne.', 'Forme validée. Poursuivons.', 'Analyse juste. La terminaison convient.', 'Validation obtenue. Passons à la suite.', 'La construction est rigoureusement correcte.', 'Tous les éléments concordent.', 'Réponse exacte. Le temps est maîtrisé.'], 'correct-alternative': ['Correct. Cette variante est admise.'],
     incorrect: ['Procédons dans l’ordre : la réponse attendue était « {expectedAnswer} ».', 'Vérifie chaque élément : il fallait « {expectedAnswer} ».', 'La construction attendue était « {expectedAnswer} ».', 'Reprenons la méthode : la forme correcte est « {expectedAnswer} ».', 'Observe la terminaison : on attendait « {expectedAnswer} ».', 'Repars de la personne : la réponse est « {expectedAnswer} ».', 'Vérifie le mode et le temps : on attendait « {expectedAnswer} ».', 'Vérifie le radical et la terminaison : « {expectedAnswer} ».', 'La dernière étape conduit à « {expectedAnswer} ».', 'Compare avec la forme attendue : « {expectedAnswer} ».'],
     'cod-before': ['Étape 1 : « {complement} » est le COD. Étape 2 : il précède « {verb} ». On écrit donc « {participle} ».'],
@@ -76,7 +83,7 @@ const replySeeds = {
     restart: ['Nous repartons depuis la première question.'], 'off-topic': ['Ce dialogue automatisé accepte uniquement les réponses de conjugaison.'],
   },
   'zoe-laurent': {
-    introduction: ['Salut ! Prêt à relever le défi ?'], question: ['C’est parti !', 'On enchaîne !', 'Nouvelle question !', 'À toi de jouer !', 'Garde le rythme !', 'Prochaine étape, montre-moi ça !', 'Hop, une nouvelle forme !', 'On continue sur cette lancée !', 'Relève ce nouveau défi !', 'Montre-moi ce que tu sais faire !'],
+    introduction: ['Salut ! Je te propose une série de formes à conjuguer : réponds, je corrige, puis on passe à la suivante.'], question: ['C’est parti !', 'On enchaîne !', 'Nouvelle question !', 'À toi de jouer !', 'Garde le rythme !', 'Prochaine étape, montre-moi ça !', 'Hop, une nouvelle forme !', 'On continue sur cette lancée !', 'Relève ce nouveau défi !', 'Montre-moi ce que tu sais faire !'],
     correct: ['Bien joué !', 'Excellent, on garde le rythme !', 'Oui, c’est ça !', 'Super réponse !', 'Parfait, continue !', 'Bravo, tu assures !', 'Génial, encore une bonne réponse !', 'Impeccable, défi relevé !', 'Exact, quelle énergie !', 'Top, on passe à la suite !'], 'correct-alternative': ['Ça marche ! Il existait aussi une autre forme correcte.'],
     incorrect: ['Pas cette fois : il fallait écrire « {expectedAnswer} ». On repart !', 'Oups ! La bonne réponse était « {expectedAnswer} ».', 'Petit piège : il fallait « {expectedAnswer} ».', 'Raté de peu ! On attendait « {expectedAnswer} ».', 'On garde le rythme : la forme correcte est « {expectedAnswer} ».', 'Pas loin ! La solution était « {expectedAnswer} ».', 'On rebondit : il fallait « {expectedAnswer} ».', 'Défi piégeux ! On attendait « {expectedAnswer} ».', 'Encore un effort : retiens « {expectedAnswer} ».', 'Cette fois, la forme gagnante est « {expectedAnswer} ».'],
     'cod-before': ['Le COD « {complement} » passe devant « {verb} » : accord obligatoire, « {participle} » !'],
@@ -86,7 +93,7 @@ const replySeeds = {
     restart: ['Nouveau départ, c’est parti !'], 'off-topic': ['Je suis un coach virtuel de conjugaison : écris seulement ta réponse à l’exercice.'],
   },
   'gabriel-rossi': {
-    introduction: ['Bonjour. Prends ton temps.'], question: ['Prends ton temps.', 'Réfléchis tranquillement.', 'Voici la question suivante.', 'Observe bien la forme demandée.', 'Quand tu es prêt.', 'Tu peux répondre sans te presser.', 'Regarde calmement cette nouvelle consigne.', 'Passons doucement à la forme suivante.', 'Laisse-toi un instant pour réfléchir.', 'Voici une autre forme à conjuguer.'],
+    introduction: ['Bonjour. Réponds à ton rythme ; après chaque essai, je t’indiquerai la forme correcte et le point à retenir.'], question: ['Prends ton temps.', 'Réfléchis tranquillement.', 'Voici la question suivante.', 'Observe bien la forme demandée.', 'Quand tu es prêt.', 'Tu peux répondre sans te presser.', 'Regarde calmement cette nouvelle consigne.', 'Passons doucement à la forme suivante.', 'Laisse-toi un instant pour réfléchir.', 'Voici une autre forme à conjuguer.'],
     correct: ['C’est juste. Bravo.', 'Oui, c’est correct.', 'Bonne réponse.', 'La forme est exacte.', 'Très bien. Continuons.', 'C’est bien observé.', 'Réponse juste. Prenons la suite.', 'Oui. Cette forme convient.', 'Exact, tout simplement.', 'Très bonne réponse.'], 'correct-alternative': ['C’est juste. Une autre forme est aussi admise.'],
     incorrect: ['Regarde la correction : « {expectedAnswer} ».', 'La forme attendue était « {expectedAnswer} ».', 'Prends le temps d’observer : « {expectedAnswer} ».', 'Ici, il fallait écrire « {expectedAnswer} ».', 'Ce n’est pas grave. La bonne réponse est « {expectedAnswer} ».', 'Reprenons calmement : « {expectedAnswer} ».', 'Tu peux comparer avec cette forme : « {expectedAnswer} ».', 'La réponse juste est simplement « {expectedAnswer} ».', 'Observe cette correction : « {expectedAnswer} ».', 'Pour cette question, on attendait « {expectedAnswer} ».'],
     'cod-before': ['« {complement} » est avant « {verb} ». On accorde : « {participle} ».'],
@@ -287,6 +294,10 @@ try {
   for (const [characterSlug, previousContent, nextContent] of legacyQuestionTemplateUpdates) {
     await database.execute(`UPDATE coach_character_reply_templates r JOIN coach_characters c ON c.id=r.character_id
       SET r.content=? WHERE c.slug=? AND r.event_type='question' AND r.content=?`, [nextContent, characterSlug, previousContent])
+  }
+  for (const [characterSlug, previousContent, nextContent] of introductionTemplateUpdates) {
+    await database.execute(`UPDATE coach_character_reply_templates r JOIN coach_characters c ON c.id=r.character_id
+      SET r.content=? WHERE c.slug=? AND r.event_type='introduction' AND r.content=?`, [nextContent, characterSlug, previousContent])
   }
   await database.execute(`UPDATE coach_character_reply_templates r JOIN coach_characters c ON c.id=r.character_id
     SET r.content='Repère la personne, le mode et le temps.'

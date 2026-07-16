@@ -17,6 +17,13 @@ const complements = [
     gender: 'feminin',
     number: 'singulier',
   },
+  {
+    infinitive: 'abonner',
+    after: 'une lectrice',
+    before: 'la lectrice',
+    gender: 'feminin',
+    number: 'singulier',
+  },
 ]
 
 try {

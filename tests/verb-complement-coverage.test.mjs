@@ -65,6 +65,25 @@ describe('couverture exhaustive des compléments verbaux', { skip: !configured }
     }
   })
 
+  it('fournit à abonner un COD antéposé dont l’accord est visible', async () => {
+    const [rows] = await database.execute(`
+      SELECT c.id
+      FROM verbes v
+      INNER JOIN verbe_sens vs ON vs.verbe_id=v.id
+      INNER JOIN constructions_verbales cv ON cv.sens_id=vs.id
+        AND cv.actif=1 AND cv.statut_validation='valide' AND cv.fonction_objet='cod'
+      INNER JOIN complements_verbaux c ON c.construction_id=cv.id
+        AND c.actif=1 AND c.statut_validation='valide'
+      WHERE v.infinitif='abonner'
+        AND c.texte_antepose IS NOT NULL
+        AND c.genre IS NOT NULL
+        AND c.nombre IS NOT NULL
+        AND (LOWER(c.genre) IN ('féminin', 'feminin') OR LOWER(c.nombre)='pluriel')
+      LIMIT 1
+    `)
+    assert.equal(rows.length, 1)
+  })
+
   it('conserve la fonction et la préposition grammaticales sans ambiguïté', async () => {
     const [invalid] = await database.execute(`
       SELECT cv.id, cv.fonction_objet, cv.preposition, c.texte

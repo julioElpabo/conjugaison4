@@ -41,6 +41,22 @@ export interface ChallengePresetDefinition {
   readonly complementPlacement?: ComplementPlacement
 }
 
+export const challengePresetGroupLabels: Record<ChallengePresetGroup, string> = {
+  school: 'Niveaux scolaires suisses',
+  cif: 'CIF (FLE)',
+  'verb-group': 'Groupes -er, -ir, etc.',
+  spelling: 'Difficultés particulières',
+  semantic: 'Sens des verbes',
+}
+
+export const challengePresetGroupOrder: readonly ChallengePresetGroup[] = [
+  'school',
+  'cif',
+  'verb-group',
+  'spelling',
+  'semantic',
+]
+
 const personalPresent = [1] as const
 const coreTenses = [1, 2, 3, 4, 5, 6] as const
 const secondaryTenses = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15] as const
@@ -67,18 +83,13 @@ export const challengePresetDefinitions = [
   { id: 'sens-cognition', label: 'Pensée et connaissance', description: 'Penser, savoir, comprendre, apprendre et décider.', group: 'semantic', criteria: [{ field: 'categoriesSemantiques', operator: 'includes', value: 'cognition' }], tenseIds: coreTenses, questionCount: 20 },
   { id: 'sens-emotion', label: 'Émotions et appréciation', description: 'Aimer, préférer, craindre, rire et ressentir.', group: 'semantic', criteria: [{ field: 'categoriesSemantiques', operator: 'includes', value: 'emotion' }], tenseIds: coreTenses, questionCount: 20 },
   { id: 'sens-corps', label: 'Corps et besoins', description: 'Manger, boire, dormir et prendre soin de soi.', group: 'semantic', criteria: [{ field: 'categoriesSemantiques', operator: 'includes', value: 'corps' }], tenseIds: coreTenses, questionCount: 20 },
-  { id: 'cod-apres-passe-compose', label: '1. COD après le verbe', description: 'Reconnaître qu’un COD placé après ne commande pas l’accord du participe passé.', group: 'agreement', criteria: [{ field: 'complementExample', operator: 'has-anteposable-cod' }], tenseIds: [5], questionCount: 20, includeComplements: true, complementPlacement: 'after' },
-  { id: 'cod-avant-passe-compose', label: '2. COD avant le verbe', description: 'Accorder le participe passé avec un COD antéposé au passé composé.', group: 'agreement', criteria: [{ field: 'complementExample', operator: 'has-anteposable-cod' }], tenseIds: [5], questionCount: 20, includeComplements: true, complementPlacement: 'before' },
-  { id: 'cod-avant-indicatif-compose', label: '3. Tous les temps composés', description: 'Accorder le COD antéposé aux quatre temps composés de l’indicatif.', group: 'agreement', criteria: [{ field: 'complementExample', operator: 'has-anteposable-cod' }], tenseIds: [5, 6, 7, 8], questionCount: 30, includeComplements: true, complementPlacement: 'before' },
-  { id: 'cod-mixte-indicatif-compose', label: '4. Avant ou après ?', description: 'Décider s’il faut accorder selon la position du COD dans la phrase.', group: 'agreement', criteria: [{ field: 'complementExample', operator: 'has-anteposable-cod' }], tenseIds: [5, 6, 7, 8], questionCount: 30, includeComplements: true, complementPlacement: 'mixed' },
-  { id: 'cod-mixte-tous-modes', label: '5. Défi expert', description: 'COD avant ou après avec les temps composés de l’indicatif, du subjonctif et du conditionnel.', group: 'agreement', criteria: [{ field: 'complementExample', operator: 'has-anteposable-cod' }], tenseIds: [5, 6, 7, 8, 11, 17, 15, 19], questionCount: 40, includeComplements: true, complementPlacement: 'mixed' },
-  { id: 'rares', label: 'Verbes rares', description: 'Verbes marqués comme rares ou vieillis.', group: 'training', criteria: [{ field: 'registrePrincipal', operator: 'equals', value: 'rare' }], tenseIds: coreTenses, questionCount: 20 },
-  { id: 'difficiles', label: 'Verbes difficiles', description: 'Conjugaisons de difficulté élevée.', group: 'training', criteria: [{ field: 'niveauDifficulte', operator: 'gte', value: 3 }], tenseIds: coreTenses, questionCount: 20 },
-  { id: 'pronominaux', label: 'Verbes pronominaux', description: 'Tous les verbes pronominaux du catalogue.', group: 'training', criteria: [{ field: 'typePronominal', operator: 'not-equals', value: 'aucun' }], tenseIds: coreTenses, questionCount: 20 },
-  { id: 'CIF1', label: 'CIF 1', description: 'Premier parcours CIF historique.', group: 'training', criteria: [{ field: 'parcoursCif', operator: 'includes', value: 'CIF1' }], tenseIds: [1], questionCount: 10 },
-  { id: 'CIF2', label: 'CIF 2', description: 'Deuxième parcours CIF historique.', group: 'training', criteria: [{ field: 'parcoursCif', operator: 'includes', value: 'CIF2' }], tenseIds: [1], questionCount: 20 },
-  { id: 'CIF3', label: 'CIF 3', description: 'Troisième parcours CIF historique.', group: 'training', criteria: [{ field: 'parcoursCif', operator: 'includes', value: 'CIF3' }], tenseIds: [1, 2, 3, 4], questionCount: 20 },
-  { id: 'CIF4', label: 'CIF 4', description: 'Quatrième parcours CIF historique.', group: 'training', criteria: [{ field: 'parcoursCif', operator: 'includes', value: 'CIF4' }], tenseIds: coreTenses, questionCount: 20 },
+  { id: 'rares', label: 'Verbes rares', description: 'Verbes marqués comme rares ou vieillis.', group: 'spelling', criteria: [{ field: 'registrePrincipal', operator: 'equals', value: 'rare' }], tenseIds: coreTenses, questionCount: 20 },
+  { id: 'difficiles', label: 'Verbes difficiles', description: 'Conjugaisons de difficulté élevée.', group: 'spelling', criteria: [{ field: 'niveauDifficulte', operator: 'gte', value: 3 }], tenseIds: coreTenses, questionCount: 20 },
+  { id: 'pronominaux', label: 'Verbes pronominaux', description: 'Tous les verbes pronominaux du catalogue.', group: 'spelling', criteria: [{ field: 'typePronominal', operator: 'not-equals', value: 'aucun' }], tenseIds: coreTenses, questionCount: 20 },
+  { id: 'CIF1', label: 'CIF 1', description: 'Premier parcours CIF historique.', group: 'cif', criteria: [{ field: 'parcoursCif', operator: 'includes', value: 'CIF1' }], tenseIds: [1], questionCount: 10 },
+  { id: 'CIF2', label: 'CIF 2', description: 'Deuxième parcours CIF historique.', group: 'cif', criteria: [{ field: 'parcoursCif', operator: 'includes', value: 'CIF2' }], tenseIds: [1], questionCount: 20 },
+  { id: 'CIF3', label: 'CIF 3', description: 'Troisième parcours CIF historique.', group: 'cif', criteria: [{ field: 'parcoursCif', operator: 'includes', value: 'CIF3' }], tenseIds: [1, 2, 3, 4], questionCount: 20 },
+  { id: 'CIF4', label: 'CIF 4', description: 'Quatrième parcours CIF historique.', group: 'cif', criteria: [{ field: 'parcoursCif', operator: 'includes', value: 'CIF4' }], tenseIds: coreTenses, questionCount: 20 },
 ] as const satisfies readonly ChallengePresetDefinition[]
 
 export type ChallengePresetId = (typeof challengePresetDefinitions)[number]['id']
@@ -109,8 +120,9 @@ function verbsForDefinition(definition: ChallengePresetDefinition, verbs: readon
 
 export function resolveChallengePresets(verbs: readonly Verb[]): ChallengePreset[] {
   return challengePresetDefinitions.map((definition) => {
-    const includeComplements = 'includeComplements' in definition ? definition.includeComplements : false
-    const complementPlacement = 'complementPlacement' in definition ? definition.complementPlacement : 'after'
+    const configurableDefinition = definition as ChallengePresetDefinition
+    const includeComplements = configurableDefinition.includeComplements ?? false
+    const complementPlacement = configurableDefinition.complementPlacement ?? 'after'
     return {
       id: definition.id,
       label: definition.label,

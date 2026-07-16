@@ -209,7 +209,6 @@ async function askCurrentQuestion() {
   const question = currentQuestion.value
   if (!question) return
   posingQuestion.value = true
-  await addCoachReaction('question', contextFor(question))
   if (question.instruction) await addCoachText(question.instruction, undefined, true)
   await addCoachText(question.consigne, undefined, true)
   posingQuestion.value = false

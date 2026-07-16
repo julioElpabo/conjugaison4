@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ChallengePreset, ComplementOption, ExerciseQuestion } from '~~/shared/types/conjugation'
+import { challengePresetGroupLabels } from '~~/shared/data/challenge-presets'
 import { legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils/complement-options'
 import type { CoachProfile } from '~~/shared/types/coach'
 import { getChallengeErrorMessage, useChallengeBuilder } from '~/composables/useChallengeBuilder'
@@ -49,6 +50,7 @@ const actionError = ref('')
 const notice = ref('')
 const busyAction = ref<'exercise' | 'print' | 'save' | 'load' | null>(null)
 const activePresetId = ref<string>()
+const areAllLaunchVerbsVisible = ref(false)
 const questions = ref<ExerciseQuestion[]>([])
 const printQuestions = ref<ExerciseQuestion[]>([])
 const shareCode = ref('')
@@ -132,6 +134,16 @@ const stepStatus = computed(() => ({
   verbs: selectedVerbs.value.length,
   tenses: selectedTenses.value.length
 }))
+const activePreset = computed(() => catalogue.value.presets.find(preset => preset.id === activePresetId.value) ?? null)
+const activePresetGroupLabel = computed(() => activePreset.value
+  ? challengePresetGroupLabels[activePreset.value.group]
+  : '')
+const heroTitle = computed(() => {
+  if (currentStep.value === 0) return 'Exercices de conjugaison française'
+  return 'Construire mon défi'
+})
+const launchVerbPreview = computed(() => selectedVerbs.value.slice(0, 10))
+const remainingLaunchVerbs = computed(() => selectedVerbs.value.slice(10))
 try {
   await loadCatalogue()
   if (!wizardInitialized.value) {
@@ -185,6 +197,7 @@ function onChallengeCodeInput(event: Event) {
 
 function markAsCustom() {
   activePresetId.value = undefined
+  areAllLaunchVerbsVisible.value = false
   clearMessages()
 }
 
@@ -228,6 +241,7 @@ function restartChallenge() {
   challenge.value.complementPlacement = 'after'
   challenge.value.complementOptions = ['cod-after', 'coi-after']
   activePresetId.value = undefined
+  areAllLaunchVerbsVisible.value = false
   presetExpanded.value = false
   presetStage.value = 'groups'
   clearMessages()
@@ -256,9 +270,10 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   challenge.value.complementPlacement = preset.complementPlacement
   challenge.value.complementOptions = preset.complementOptions ?? legacyComplementOptions(preset.includeComplements, preset.complementPlacement)
   activePresetId.value = preset.id
+  areAllLaunchVerbsVisible.value = false
   notice.value = ''
   actionError.value = ''
-  currentStep.value = 4
+  goToStep(1)
 }
 
 async function restoreChallenge() {
@@ -276,6 +291,7 @@ async function restoreChallenge() {
     const restored = await api.loadChallenge(normalized)
     applySharedChallenge(restored)
     activePresetId.value = undefined
+    areAllLaunchVerbsVisible.value = false
     challengeCode.value = restored.code
     notice.value = `Le défi ${restored.code} est chargé. Tu peux le lancer ou le modifier.`
     currentStep.value = 4
@@ -529,7 +545,7 @@ async function saveChallenge() {
   <div class="wizard-entry-page">
     <div class="challenge-page wizard-page">
       <header class="wizard-hero">
-        <h1>{{ currentStep === 0 ? 'Exercices de conjugaison française' : 'Construire mon défi' }}</h1>
+        <h1>{{ heroTitle }}</h1>
       </header>
 
       <main class="wizard-shell">
@@ -602,20 +618,28 @@ async function saveChallenge() {
                 </div>
 
                 <div class="wizard-home__choices">
+                  <button
+                    v-if="!presetExpanded"
+                    class="wizard-home__choice wizard-home__choice--preset is-collapsed"
+                    type="button"
+                    @click="presetExpanded = true"
+                  >
+                    <span class="wizard-home__choice-icon" aria-hidden="true">★</span>
+                    <div>
+                      <h2>Tu veux travailler un défi tout fait&nbsp;?</h2>
+                    </div>
+                    <span class="secondary-button" aria-hidden="true">Voir</span>
+                  </button>
                   <article
+                    v-else
                     class="wizard-home__choice wizard-home__choice--preset"
-                    :class="{
-                      'is-collapsed': !presetExpanded,
-                      'is-preset-selection': presetExpanded && presetStage === 'presets'
-                    }"
+                    :class="{ 'is-preset-selection': presetStage === 'presets' }"
                   >
                     <span v-if="presetStage === 'groups'" class="wizard-home__choice-icon" aria-hidden="true">★</span>
                     <div v-if="presetStage === 'groups'">
                       <h2>Tu veux travailler un défi tout fait&nbsp;?</h2>
                     </div>
-                    <button v-if="!presetExpanded" class="secondary-button" type="button" @click="presetExpanded = true">Voir</button>
                     <PresetPicker
-                      v-else
                       class="wizard-home__inline-presets"
                       compact
                       :presets="catalogue.presets"
@@ -729,6 +753,36 @@ async function saveChallenge() {
                   <button class="secondary-button" type="button" @click="previousStep">← Options</button>
                 </div>
               </div>
+              <section class="launch-summary" aria-labelledby="launch-verbs-title">
+                <div class="launch-summary__heading">
+                  <div>
+                    <p v-if="activePreset" class="builder-card__eyebrow">{{ activePresetGroupLabel }}</p>
+                    <h2 id="launch-verbs-title">{{ activePreset?.label ?? 'Verbes choisis' }}</h2>
+                  </div>
+                  <span>{{ selectedVerbs.length }} verbe{{ selectedVerbs.length > 1 ? 's' : '' }}</span>
+                </div>
+                <p v-if="activePreset" class="launch-summary__description">{{ activePreset.description }}</p>
+                <ul class="launch-verb-list" aria-label="Aperçu des verbes choisis">
+                  <li v-for="verb in launchVerbPreview" :key="verb.id">{{ verb.infinitif }}</li>
+                </ul>
+                <Transition name="launch-verbs-expand">
+                  <div v-if="areAllLaunchVerbsVisible" class="launch-verbs-expand">
+                    <ul class="launch-verb-list launch-verb-list--remaining" aria-label="Autres verbes choisis">
+                      <li v-for="verb in remainingLaunchVerbs" :key="verb.id">{{ verb.infinitif }}</li>
+                    </ul>
+                  </div>
+                </Transition>
+                <button
+                  v-if="remainingLaunchVerbs.length"
+                  class="launch-summary__toggle"
+                  type="button"
+                  :aria-expanded="areAllLaunchVerbsVisible"
+                  @click="areAllLaunchVerbsVisible = !areAllLaunchVerbsVisible"
+                >
+                  {{ areAllLaunchVerbsVisible ? 'Réduire' : `Voir tout (${selectedVerbs.length})` }}
+                  <span aria-hidden="true">{{ areAllLaunchVerbsVisible ? '↑' : '↓' }}</span>
+                </button>
+              </section>
               <ChallengeActions
                 :ready="isReady"
                 :busy-action="busyAction"
@@ -788,13 +842,16 @@ async function saveChallenge() {
 .wizard-home { display: grid; max-width: 930px; margin: 0 auto; gap: 18px; }
 .wizard-home__choices { display: grid; grid-template-columns: 1fr; gap: 18px; }
 .wizard-home__choice { display: grid; min-height: 170px; padding: 24px; align-content: start; grid-template-columns: auto 1fr; gap: 18px; border: 1px solid #b8d3cb; border-radius: 18px; background: #f8fbfa; }
+.wizard-home__choice:is(button) { width: 100%; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.wizard-home__choice:is(button):hover { border-color: #83afa4; background: var(--brand-pale); }
+.wizard-home__choice:is(button):focus-visible { border-color: var(--brand); box-shadow: 0 0 0 4px rgb(52 95 88 / 14%); outline: 0; }
 .wizard-home__choice--custom { border-color: #8bb9c6; background: #eff9fb; }
 .wizard-home__choice-icon { display: grid; width: 48px; height: 48px; place-items: center; color: white; border-radius: 14px; background: var(--brand); font-size: 1.35rem; font-weight: 900; }
 .wizard-home__choice h2 { margin: 1px 0 8px; color: var(--brand-dark); font-size: clamp(1.2rem, 2.2vw, 1.55rem); line-height: 1.15; }
 .wizard-home__choice--preset .wizard-home__choice-icon { width: 38px; height: 38px; border-radius: 11px; font-size: 1.2rem; }
 .wizard-home__choice--preset h2 { margin-top: 6px; font-size: 1rem; letter-spacing: 0; line-height: 1.25; }
 .wizard-home__choice--preset.is-collapsed { min-height: 82px; align-content: center; align-items: center; grid-template-columns: auto 1fr auto; }
-.wizard-home__choice--preset.is-collapsed > button { grid-column: 3; align-self: center; margin: 0; }
+.wizard-home__choice--preset.is-collapsed > .secondary-button { grid-column: 3; align-self: center; justify-self: end; margin: 0; }
 .wizard-home__choice--preset.is-preset-selection { min-height: 0; padding-block: 16px; }
 .wizard-home__choice--custom { min-height: 130px; align-content: center; align-items: center; grid-template-columns: auto 1fr; }
 .wizard-home__choice.wizard-home__choice--custom > button { grid-column: 1 / -1; align-self: center; justify-self: center; margin: 0; }
@@ -820,6 +877,19 @@ async function saveChallenge() {
 .wizard-review :deep(.options-card) { margin: 0 0 18px; box-shadow: none; }
 .wizard-review :deep(.challenge-launch) { margin-top: 18px; box-shadow: none; }
 .wizard-launch-step :deep(.challenge-launch) { margin-top: 0; box-shadow: none; }
+.launch-summary { margin-bottom: 18px; padding: 22px; border: 1px solid var(--line); border-radius: 17px; background: #f8fbfa; }
+.launch-summary__heading { display: flex; align-items: start; justify-content: space-between; gap: 18px; }
+.launch-summary__heading h2 { margin: 2px 0 0; color: var(--brand-dark); font-size: clamp(1.35rem, 2.5vw, 1.8rem); }
+.launch-summary__heading > span { flex: 0 0 auto; padding: 6px 10px; border-radius: 999px; color: var(--brand-dark); background: var(--brand-pale); font-size: .82rem; font-weight: 800; }
+.launch-summary__description { margin: 9px 0 16px; color: var(--muted); line-height: 1.45; }
+.launch-verb-list { display: flex; margin: 0; padding: 0; flex-wrap: wrap; gap: 8px; list-style: none; }
+.launch-verb-list li { padding: 6px 11px; border: 1px solid #b8d3cb; border-radius: 999px; color: var(--ink); background: white; font-size: .9rem; }
+.launch-verbs-expand { display: grid; grid-template-rows: 1fr; }
+.launch-verb-list--remaining { min-height: 0; padding-top: 8px; overflow: hidden; }
+.launch-summary__toggle { display: inline-flex; margin-top: 15px; padding: 7px 11px; align-items: center; gap: 7px; border: 0; border-radius: 9px; color: var(--brand-dark); background: var(--brand-pale); font: inherit; font-size: .86rem; font-weight: 800; }
+.launch-summary__toggle:hover { background: #dcefe9; }
+.launch-verbs-expand-enter-active, .launch-verbs-expand-leave-active { transition: grid-template-rows 360ms cubic-bezier(.22, 1, .36, 1), opacity 220ms ease, transform 300ms ease; }
+.launch-verbs-expand-enter-from, .launch-verbs-expand-leave-to { grid-template-rows: 0fr; opacity: 0; transform: translateY(-8px); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 @keyframes wizard-next-pulse {
   0%, 6% {
@@ -840,6 +910,7 @@ async function saveChallenge() {
 
 @media (prefers-reduced-motion: reduce) {
   .wizard-next-pulse:not(:disabled) { animation: none; }
+  .launch-verbs-expand-enter-active, .launch-verbs-expand-leave-active { transition: none; }
 }
 
 @media (max-width: 820px) {
@@ -877,7 +948,7 @@ async function saveChallenge() {
   .wizard-home__choice-icon { width: 40px; height: 40px; border-radius: 11px; }
   .wizard-home__choice--preset.is-collapsed,
   .wizard-home__choice--custom { grid-template-columns: 40px 1fr; }
-  .wizard-home__choice--preset.is-collapsed > button { grid-column: 1 / -1; grid-row: 3; justify-self: center; }
+  .wizard-home__choice--preset.is-collapsed > .secondary-button { grid-column: 1 / -1; grid-row: 3; justify-self: center; }
   .wizard-step--selection,
   .wizard-review,
   .wizard-launch-step { padding-top: 0; }

@@ -37,12 +37,12 @@ const verbs = [
 ]
 
 describe('défis résolus par critères', () => {
-  it('expose les 33 défis avec des identifiants uniques et sans liste de verbes figée', () => {
-    assert.equal(challengePresetDefinitions.length, 33)
-    assert.equal(new Set(challengePresetDefinitions.map(preset => preset.id)).size, 33)
+  it('expose les 28 défis avec des identifiants uniques et sans liste de verbes figée', () => {
+    assert.equal(challengePresetDefinitions.length, 28)
+    assert.equal(new Set(challengePresetDefinitions.map(preset => preset.id)).size, 28)
     assert.ok(challengePresetDefinitions.every(preset => !Object.hasOwn(preset, 'verbIds')))
     assert.equal(isChallengePresetId('7H'), true)
-    assert.equal(isChallengePresetId('cod-avant-passe-compose'), true)
+    assert.equal(isChallengePresetId('cod-avant-passe-compose'), false)
     assert.equal(isChallengePresetId('inconnu'), false)
   })
 
@@ -56,21 +56,16 @@ describe('défis résolus par critères', () => {
     assert.deepEqual(resolved.difficiles.verbIds, [12])
     assert.deepEqual(resolved['sens-mouvement'].verbIds, [99])
     assert.deepEqual(resolved['sens-corps'].verbIds, [5])
-    assert.deepEqual(resolved['cod-apres-passe-compose'].verbIds, [41, 7])
-    assert.deepEqual(resolved['cod-avant-passe-compose'].verbIds, [41, 7])
-    assert.deepEqual(resolved['cod-mixte-tous-modes'].verbIds, [41, 7])
   })
 
-  it('configure la progression COD avec les compléments et les temps attendus', () => {
-    const resolved = Object.fromEntries(resolveChallengePresets(verbs).map(preset => [preset.id, preset]))
-    assert.deepEqual(resolved['cod-apres-passe-compose'].tenseIds, [5])
-    assert.equal(resolved['cod-apres-passe-compose'].includeComplements, true)
-    assert.equal(resolved['cod-apres-passe-compose'].complementPlacement, 'after')
-    assert.deepEqual(resolved['cod-avant-passe-compose'].tenseIds, [5])
-    assert.equal(resolved['cod-avant-passe-compose'].complementPlacement, 'before')
-    assert.deepEqual(resolved['cod-avant-indicatif-compose'].tenseIds, [5, 6, 7, 8])
-    assert.equal(resolved['cod-mixte-indicatif-compose'].complementPlacement, 'mixed')
-    assert.deepEqual(resolved['cod-mixte-tous-modes'].tenseIds, [5, 6, 7, 8, 11, 17, 15, 19])
+  it('classe les parcours CIF séparément et les autres difficultés ensemble', () => {
+    const definitions = Object.fromEntries(challengePresetDefinitions.map(preset => [preset.id, preset]))
+    assert.equal(definitions.CIF1.group, 'cif')
+    assert.equal(definitions.CIF4.group, 'cif')
+    assert.equal(definitions.rares.group, 'spelling')
+    assert.equal(definitions.difficiles.group, 'spelling')
+    assert.equal(definitions.pronominaux.group, 'spelling')
+    assert.equal(challengePresetDefinitions.some(preset => preset.group === 'training'), false)
   })
 
   it('produit des configurations valides', () => {

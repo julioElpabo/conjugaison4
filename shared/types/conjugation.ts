@@ -102,11 +102,10 @@ export type LegacyChallengeTuple = readonly [
 
 export type ChallengePresetGroup =
   | 'school'
+  | 'cif'
   | 'verb-group'
   | 'spelling'
   | 'semantic'
-  | 'agreement'
-  | 'training'
 
 export interface ChallengePreset extends ChallengeConfig {
   id: string

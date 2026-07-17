@@ -9,8 +9,9 @@ export default defineEventHandler(async (event) => {
   try {
     await connection.beginTransaction()
     const [result] = await connection.execute<ResultSetHeader>(`INSERT INTO coach_characters
-      (slug,name,description,pedagogical_style,status,sort_order) VALUES (?,?,?,?,?,?)`,
-    [profile.slug, profile.name, profile.description, profile.pedagogicalStyle, profile.status, profile.sortOrder])
+      (slug,name,masculine_name,feminine_name,emoticon,description,pedagogical_style,status,sort_order) VALUES (?,?,?,?,?,?,?,?,?)`,
+    [profile.slug, profile.masculineName, profile.masculineName, profile.feminineName, profile.emoticon, profile.description,
+      profile.pedagogicalStyle, profile.status, profile.sortOrder])
     await replaceCharacterChildren(connection, result.insertId, replies, assignments, rules)
     await connection.commit()
     return { ok: true, id: result.insertId }

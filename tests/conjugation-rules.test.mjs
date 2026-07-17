@@ -154,6 +154,94 @@ describe('compléments d’objet dans les questions', () => {
     assert.equal(question.reponses.includes('avez mangé'), false)
     assert.deepEqual(question.reponsesPourCorrige, ['les pommes que vous avez mangées'])
   })
+
+  it('laisse le complément de lieu après le verbe lorsque le COD est antéposé', () => {
+    const question = formatConjugationQuestion(row({
+      infinitif: 'envoyer',
+      conjugaison1: 'avions envoyés',
+      conjugaison2: '',
+      temps_name: 'plus-que-parfait',
+      is_compound: 1,
+      auxiliaire: 'avoir',
+      participe_passe: 'envoyé',
+      complement_phrase: 'des enfants à l’école',
+      complement_position: 'before',
+      complement_anteposed: 'les enfants à l’école',
+      complement_gender: 'masculin',
+      complement_number: 'pluriel',
+    }), 'nous')
+
+    assert.equal(
+      question.consigne,
+      'les enfants que nous … à l’école | envoyer | plus-que-parfait (indicatif)'
+    )
+    assert.deepEqual(
+      question.reponsesPourCorrige,
+      ['les enfants que nous avions envoyés à l’école']
+    )
+  })
+
+  for (const testCase of [
+    {
+      label: 'un complément de manière',
+      infinitive: 'ranger',
+      anteposed: 'les livres par ordre alphabétique d’auteurs',
+      expectedPrompt: 'les livres que nous … par ordre alphabétique d’auteurs | ranger | plus-que-parfait (indicatif)',
+    },
+    {
+      label: 'un complément de but',
+      infinitive: 'utiliser',
+      anteposed: 'les chutes de tissu pour confectionner une poupée',
+      expectedPrompt: 'les chutes de tissu que nous … pour confectionner une poupée | utiliser | plus-que-parfait (indicatif)',
+    },
+    {
+      label: 'un complément de moyen',
+      infinitive: 'croiser',
+      anteposed: 'les vergues avec le mât',
+      expectedPrompt: 'les vergues que nous … avec le mât | croiser | plus-que-parfait (indicatif)',
+    },
+  ]) {
+    it(`replace ${testCase.label} après la zone de réponse`, () => {
+      const question = formatConjugationQuestion(row({
+        infinitif: testCase.infinitive,
+        conjugaison1: 'avions rangés',
+        conjugaison2: '',
+        temps_name: 'plus-que-parfait',
+        is_compound: 1,
+        auxiliaire: 'avoir',
+        participe_passe: 'rangé',
+        complement_phrase: testCase.anteposed,
+        complement_position: 'before',
+        complement_anteposed: testCase.anteposed,
+        complement_gender: 'masculin',
+        complement_number: 'pluriel',
+      }), 'nous')
+
+      assert.equal(question.consigne, testCase.expectedPrompt)
+    })
+  }
+
+  it('conserve un adjectif composé commençant par « sous- » dans le COD', () => {
+    const question = formatConjugationQuestion(row({
+      infinitif: 'explorer',
+      conjugaison1: 'avions explorés',
+      conjugaison2: '',
+      temps_name: 'plus-que-parfait',
+      is_compound: 1,
+      auxiliaire: 'avoir',
+      participe_passe: 'exploré',
+      complement_phrase: 'les fonds sous-marins',
+      complement_position: 'before',
+      complement_anteposed: 'les fonds sous-marins',
+      complement_gender: 'masculin',
+      complement_number: 'pluriel',
+    }), 'nous')
+
+    assert.equal(
+      question.consigne,
+      'les fonds sous-marins que nous … | explorer | plus-que-parfait (indicatif)'
+    )
+  })
 })
 
 describe('accords du participe passé', () => {
@@ -245,4 +333,21 @@ describe('participe, infinitif et gérondif', () => {
       assert.deepEqual(question?.reponsesPourCorrige, [testCase.expected])
     })
   }
+
+  it('ne génère ni participe présent ni gérondif pour falloir', () => {
+    const falloir = {
+      id: 11,
+      infinitif: 'falloir',
+      participe_present: '-',
+      participe_passe: 'fallu',
+      auxiliaire_participe_present: 'ayant',
+    }
+    assert.equal(formatNonFiniteQuestion(falloir, { id: 20, name: 'présent', mode_name: 'participe' }), null)
+    assert.equal(formatNonFiniteQuestion(falloir, { id: 22, name: 'présent', mode_name: 'gérondif' }), null)
+    assert.equal(formatNonFiniteQuestion(falloir, { id: 23, name: 'passé', mode_name: 'gérondif' }), null)
+    assert.deepEqual(
+      formatNonFiniteQuestion(falloir, { id: 21, name: 'passé', mode_name: 'participe' })?.reponsesPourCorrige,
+      ['Fallu'],
+    )
+  })
 })

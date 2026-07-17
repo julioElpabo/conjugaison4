@@ -48,6 +48,31 @@ describe('couverture exhaustive des compléments verbaux', { skip: !configured }
     }
   })
 
+  it('limite les COD masculins singuliers à vingt pour cent pour chaque verbe', async () => {
+    const [rows] = await database.execute(`
+      SELECT v.infinitif, COUNT(c.id) AS total,
+        SUM(LOWER(COALESCE(c.genre, ''))='masculin'
+          AND LOWER(COALESCE(c.nombre, ''))='singulier') AS masculin_singulier
+      FROM verbes v
+      INNER JOIN verbe_sens vs ON vs.verbe_id=v.id
+      INNER JOIN constructions_verbales cv ON cv.sens_id=vs.id AND cv.actif=1
+        AND cv.statut_validation='valide' AND cv.fonction_objet='cod'
+      INNER JOIN complements_verbaux c ON c.construction_id=cv.id AND c.actif=1
+        AND c.statut_validation='valide'
+      WHERE v.est_archive=0
+      GROUP BY v.id, v.infinitif
+    `)
+    assert.deepEqual(rows.filter(row =>
+      Number(row.masculin_singulier) > Math.floor(Number(row.total) * 0.2)), [])
+    const [withoutNumber] = await database.execute(`
+      SELECT c.id, c.texte FROM complements_verbaux c
+      INNER JOIN constructions_verbales cv ON cv.id=c.construction_id
+        AND cv.actif=1 AND cv.statut_validation='valide' AND cv.fonction_objet='cod'
+      WHERE c.actif=1 AND c.statut_validation='valide' AND c.nombre IS NULL
+    `)
+    assert.deepEqual(withoutNumber, [])
+  })
+
   it('équipe les emplois indirects retenus avec au moins dix COI', async () => {
     const [rows] = await database.execute(`
       SELECT v.infinitif, COUNT(DISTINCT c.id) AS total
@@ -124,6 +149,24 @@ describe('couverture exhaustive des compléments verbaux', { skip: !configured }
     assert.deepEqual(invalid, [])
   })
 
+  it('emploie correctement les déterminants devant une voyelle ou un h muet', async () => {
+    const [rows] = await database.execute(`
+      SELECT id, texte FROM complements_verbaux
+      WHERE actif=1 AND statut_validation='valide'
+    `)
+    const malformed = /(?:^|\s)(?:le|la|ce|ma|ta|sa)\s+(?:[aeiouyàâäéèêëîïôöùûü]|habit\b|héritage\b|histoire\b|homme\b)/iu
+    assert.deepEqual(rows.filter(row => malformed.test(row.texte)), [])
+  })
+
+  it('emploie « de » devant un adjectif pluriel antéposé', async () => {
+    const [rows] = await database.execute(`
+      SELECT id, texte FROM complements_verbaux
+      WHERE actif=1 AND statut_validation='valide'
+    `)
+    const malformed = /^des (?:beaux|bons|grands|jeunes|nouveaux|petits|vieux) /iu
+    assert.deepEqual(rows.filter(row => malformed.test(row.texte)), [])
+  })
+
   it('ne propose aucun contenu sensible ou formulation déconseillée aux mineurs', async () => {
     const [rows] = await database.execute(`
       SELECT v.infinitif, c.texte, c.source
@@ -146,5 +189,20 @@ describe('couverture exhaustive des compléments verbaux', { skip: !configured }
     `)
     const malformed = /(?:^|\s)(?:de une|de un|à le|à les)(?:\s|$)/iu
     assert.deepEqual(rows.filter(row => malformed.test(row.texte)), [])
+  })
+
+  it('écarte les formulations pléonastiques du catalogue pédagogique', async () => {
+    const [rows] = await database.execute(`
+      SELECT v.infinitif, c.texte
+      FROM complements_verbaux c
+      INNER JOIN constructions_verbales cv ON cv.id=c.construction_id AND cv.actif=1
+      INNER JOIN verbe_sens vs ON vs.id=cv.sens_id
+      INNER JOIN verbes v ON v.id=vs.verbe_id AND v.est_archive=0
+      WHERE c.actif=1 AND c.statut_validation='valide'
+    `)
+    const pleonasms = rows.filter(row =>
+      (row.infinitif === 'jouer' && /(?:^|\s)jeux?$/iu.test(row.texte))
+      || (row.infinitif === 'courir' && /(?:^|\s)courses?(?:\s|$)/iu.test(row.texte)))
+    assert.deepEqual(pleonasms, [])
   })
 })

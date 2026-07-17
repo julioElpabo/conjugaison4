@@ -23,6 +23,8 @@ export interface Catalogue {
 
 export interface PrintOptions {
   title: string
+  questionSpacingMm: number
+  titleSpacingMm: number
   showGrade: boolean
   showVerbs: boolean
   showTenses: boolean
@@ -52,6 +54,8 @@ export interface SharedChallenge {
 
 const createDefaultPrintOptions = (): PrintOptions => ({
   title: 'Défi de conjugaison',
+  questionSpacingMm: 8,
+  titleSpacingMm: 30,
   showGrade: true,
   showVerbs: false,
   showTenses: false,
@@ -105,6 +109,15 @@ export function useChallengeBuilder() {
     && challenge.value.questionCount > 0
   ))
 
+  function defaultTenseIds() {
+    const indicative = catalogue.value.modes.find(mode => mode.name.toLocaleLowerCase('fr') === 'indicatif')
+    if (!indicative) return [1, 3, 4, 5]
+    const defaultNames = new Set(['présent', 'imparfait', 'passé composé', 'futur', 'futur simple'])
+    return catalogue.value.temps
+      .filter(tense => tense.modeId === indicative.id && defaultNames.has(tense.name.toLocaleLowerCase('fr')))
+      .map(tense => tense.id)
+  }
+
   async function loadCatalogue(force = false) {
     const hasTenseExamples = catalogue.value.temps.length > 0
       && catalogue.value.temps.every(tense => Boolean(tense.example?.trim()))
@@ -127,7 +140,7 @@ export function useChallengeBuilder() {
 
       const validVerbIds = new Set(catalogue.value.verbes.map(verb => verb.id))
       const validTenseIds = new Set(catalogue.value.temps.map(tense => tense.id))
-      const defaultSelectedTenses = catalogue.value.temps.filter(tense => tense.selected).map(tense => tense.id)
+      const defaultSelectedTenses = defaultTenseIds()
 
       challenge.value.verbIds = challenge.value.verbIds.filter(id => validVerbIds.has(id))
       challenge.value.tenseIds = challenge.value.tenseIds.filter(id => validTenseIds.has(id))
@@ -176,6 +189,10 @@ export function useChallengeBuilder() {
 
   function clearTenses() {
     challenge.value.tenseIds = []
+  }
+
+  function selectDefaultTenses() {
+    challenge.value.tenseIds = defaultTenseIds()
   }
 
   function applySelection(selection: Pick<ChallengeConfig, 'verbIds' | 'tenseIds' | 'questionCount'>) {
@@ -227,6 +244,7 @@ export function useChallengeBuilder() {
     toggleTense,
     selectAllTenses,
     clearTenses,
+    selectDefaultTenses,
     applySelection,
     applySharedChallenge
   }

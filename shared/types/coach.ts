@@ -11,10 +11,18 @@ export const COACH_EVENTS = [
   'streak',
   'finish',
   'restart',
-  'off-topic',
 ] as const
 
 export type CoachEvent = typeof COACH_EVENTS[number]
+
+export const REQUIRED_COACH_REPLY_EVENTS = [
+  'introduction',
+  'correct',
+  'correct-alternative',
+  'incorrect',
+  'finish',
+  'restart',
+] as const satisfies readonly CoachEvent[]
 export type CoachStatus = 'draft' | 'published' | 'disabled'
 export type CoachGender = 'female' | 'male'
 export type CoachMediaType = 'emoji' | 'animation' | 'video' | 'image'
@@ -56,7 +64,9 @@ export interface CoachReactionRule {
 export interface CoachCharacter {
   id: number
   slug: string
-  name: string
+  masculineName: string
+  feminineName: string
+  emoticon: string
   description: string
   pedagogicalStyle: string
   status: CoachStatus
@@ -101,6 +111,7 @@ export interface CoachMessageContext {
   score?: string | number
   correctCount?: string | number
   questionCount?: string | number
+  questionNumber?: string | number
 }
 
 export interface CoachReaction {

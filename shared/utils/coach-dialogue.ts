@@ -10,7 +10,7 @@ const PLACEHOLDER = /\{([a-zA-Z]+)\}/gu
 
 export const COACH_PLACEHOLDERS = [
   'instruction', 'verb', 'complement', 'participle', 'gender', 'number', 'mode', 'tense',
-  'expectedAnswer', 'score', 'correctCount', 'questionCount',
+  'expectedAnswer', 'score', 'correctCount', 'questionCount', 'questionNumber',
 ] as const
 
 export function renderCoachTemplate(template: string, context: CoachMessageContext): string {
@@ -52,12 +52,12 @@ export function createCoachReaction(
   const random = options.random ?? Math.random
   const allowedReplyIds = options.allowedReplyIds ? new Set(options.allowedReplyIds) : null
   const replies = coach.replies.filter(reply => reply.isActive && reply.eventType === eventType && (!allowedReplyIds || allowedReplyIds.has(reply.id)))
-  const fallback = coach.replies.filter(reply => reply.isActive && reply.eventType === 'encouragement')
-  const reply = weightedChoice(replies.length ? replies : fallback, random)
+  const reply = weightedChoice(replies, random)
   const result: CoachReaction = {
-    text: renderCoachTemplate(reply?.content || 'On continue ensemble.', context),
+    text: reply ? renderCoachTemplate(reply.content, context) : '',
     ...(reply ? { replyId: reply.id } : {}),
   }
+  if (!reply) return result
 
   const rule = coach.rules.find(item => item.eventType === eventType)
   if (!options.mediaAllowed || !rule || random() > rule.mediaProbability) return result

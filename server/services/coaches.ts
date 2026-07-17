@@ -1,5 +1,5 @@
 import type { Pool, PoolConnection, RowDataPacket } from 'mysql2/promise'
-import { COACH_EVENTS, type CoachCharacter, type CoachEvent, type CoachMedia, type CoachProfile } from '../../shared/types/coach'
+import { COACH_EVENTS, REQUIRED_COACH_REPLY_EVENTS, type CoachCharacter, type CoachEvent, type CoachMedia, type CoachProfile } from '../../shared/types/coach'
 import { unknownCoachPlaceholders } from '../../shared/utils/coach-dialogue'
 
 type Executor = Pool | PoolConnection
@@ -9,7 +9,10 @@ interface CoachRow extends RowDataPacket {
   description: string, characterId: number, characterName: string, personality: string, pedagogicalStyle: string, themeColor: string,
   status: CoachProfile['status'], sortOrder: number
 }
-interface CharacterRow extends RowDataPacket { id: number, slug: string, name: string, description: string, pedagogicalStyle: string, status: CoachCharacter['status'], sortOrder: number }
+interface CharacterRow extends RowDataPacket {
+  id: number, slug: string, masculineName: string, feminineName: string, emoticon: string, description: string,
+  pedagogicalStyle: string, status: CoachCharacter['status'], sortOrder: number
+}
 interface ReplyRow extends RowDataPacket { id: number, characterId: number, eventType: CoachEvent, content: string, weight: number, isActive: number }
 interface MediaRow extends RowDataPacket {
   id: number, name: string, filePath: string, mediaType: CoachMedia['mediaType'], category: CoachMedia['category'],
@@ -29,8 +32,10 @@ export async function listCoachMedia(database: Executor): Promise<CoachMedia[]> 
 
 export async function listCoaches(database: Executor, publishedOnly = false): Promise<CoachProfile[]> {
   const [coaches] = await database.execute<CoachRow[]>(`SELECT c.id, c.slug, c.first_name AS firstName, c.last_name AS lastName,
-    c.gender, c.avatar_path AS avatarPath, c.description, c.character_id AS characterId, cc.name AS characterName,
-    cc.name AS personality, cc.pedagogical_style AS pedagogicalStyle, c.theme_color AS themeColor,
+    c.gender, c.avatar_path AS avatarPath, c.description, c.character_id AS characterId,
+    CASE WHEN c.gender='female' THEN cc.feminine_name ELSE cc.masculine_name END AS characterName,
+    CASE WHEN c.gender='female' THEN cc.feminine_name ELSE cc.masculine_name END AS personality,
+    cc.pedagogical_style AS pedagogicalStyle, c.theme_color AS themeColor,
     c.status, c.sort_order AS sortOrder FROM coaches c JOIN coach_characters cc ON cc.id=c.character_id
     ${publishedOnly ? "WHERE c.status = 'published' AND cc.status = 'published'" : ''} ORDER BY c.sort_order, first_name, c.id`)
   if (!coaches.length) return []
@@ -64,9 +69,10 @@ export async function listCoaches(database: Executor, publishedOnly = false): Pr
 }
 
 export async function listCoachCharacters(database: Executor): Promise<CoachCharacter[]> {
-  const [characters] = await database.execute<CharacterRow[]>(`SELECT id, slug, name, description,
+  const [characters] = await database.execute<CharacterRow[]>(`SELECT id, slug, masculine_name AS masculineName,
+    feminine_name AS feminineName, emoticon, description,
     pedagogical_style AS pedagogicalStyle, status, sort_order AS sortOrder
-    FROM coach_characters ORDER BY sort_order, name, id`)
+    FROM coach_characters ORDER BY sort_order, masculine_name, id`)
   if (!characters.length) return []
   const ids = characters.map(item => item.id)
   const placeholders = ids.map(() => '?').join(',')
@@ -146,16 +152,18 @@ export function parseCharacterPayload(value: unknown) {
   const body = value && typeof value === 'object' ? value as Record<string, unknown> : {}
   const profile = {
     slug: string(body.slug, 80).toLocaleLowerCase('fr').replace(/[^a-z0-9-]+/gu, '-').replace(/^-|-$/gu, ''),
-    name: string(body.name, 80), description: string(body.description, 255),
+    masculineName: string(body.masculineName, 80), feminineName: string(body.feminineName, 80),
+    emoticon: string(body.emoticon, 32),
+    description: string(body.description, 255),
     pedagogicalStyle: string(body.pedagogicalStyle, 2000), status: string(body.status, 12), sortOrder: Number(body.sortOrder),
   }
   const children = parseCharacterChildren(body)
-  if (!profile.slug || !profile.name || !profile.pedagogicalStyle || !['draft', 'published', 'disabled'].includes(profile.status) || !Number.isInteger(profile.sortOrder)) {
+  if (!profile.slug || !profile.masculineName || !profile.feminineName || !profile.emoticon || !profile.pedagogicalStyle
+    || !['draft', 'published', 'disabled'].includes(profile.status) || !Number.isInteger(profile.sortOrder)) {
     throw createError({ statusCode: 400, statusMessage: 'Caractère invalide' })
   }
   if (profile.status === 'published') {
-    const required = ['introduction', 'correct', 'incorrect', 'finish', 'encouragement']
-    const missing = required.filter(event => !children.replies.some(reply => reply.eventType === event && reply.isActive))
+    const missing = REQUIRED_COACH_REPLY_EVENTS.filter(event => !children.replies.some(reply => reply.eventType === event && reply.isActive))
     if (missing.length) throw createError({ statusCode: 400, statusMessage: `Caractère incomplet : ${missing.join(', ')}` })
   }
   return { profile, ...children }

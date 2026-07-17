@@ -9,8 +9,10 @@ export default defineEventHandler(async (event) => {
   const connection = await useDatabase().getConnection()
   try {
     await connection.beginTransaction()
-    await connection.execute(`UPDATE coach_characters SET slug=?,name=?,description=?,pedagogical_style=?,status=?,sort_order=? WHERE id=?`,
-      [profile.slug, profile.name, profile.description, profile.pedagogicalStyle, profile.status, profile.sortOrder, id])
+    await connection.execute(`UPDATE coach_characters SET slug=?,name=?,masculine_name=?,feminine_name=?,emoticon=?,description=?,
+      pedagogical_style=?,status=?,sort_order=? WHERE id=?`,
+    [profile.slug, profile.masculineName, profile.masculineName, profile.feminineName, profile.emoticon, profile.description,
+      profile.pedagogicalStyle, profile.status, profile.sortOrder, id])
     await replaceCharacterChildren(connection, id, replies, assignments, rules)
     await connection.commit()
   } catch (error) {

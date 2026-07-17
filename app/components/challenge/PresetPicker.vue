@@ -32,45 +32,34 @@ const activeGroup = computed(() => (
 ))
 const mobilePresetId = ref('')
 const mobilePreset = computed(() => props.presets.find(preset => preset.id === mobilePresetId.value))
-const compactStage = ref<'groups' | 'presets'>('groups')
-const compactTransitionName = ref<'preset-slide-forward' | 'preset-slide-back'>('preset-slide-forward')
+const compactGroupId = ref<string | null>(null)
 const selectedCompactPresetId = ref<string | null>(null)
-let compactTouchStartX: number | null = null
+const compactGroup = computed(() => groupedPresets.value.find(group => group.id === compactGroupId.value))
+const selectedCompactPreset = computed(() => props.presets.find(preset => preset.id === selectedCompactPresetId.value))
+const compactBrowser = ref<HTMLElement | null>(null)
+
+function revealCompactColumn(column: number) {
+  nextTick(() => {
+    const element = compactBrowser.value?.querySelector<HTMLElement>(`[data-browser-column="${column}"]`)
+    element?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'end' })
+  })
+}
 
 function openCompactGroup(groupId: string) {
-  activeGroupId.value = groupId
+  compactGroupId.value = groupId
   selectedCompactPresetId.value = null
-  compactTransitionName.value = 'preset-slide-forward'
-  compactStage.value = 'presets'
   emit('stageChange', 'presets')
+  revealCompactColumn(2)
 }
 
-function showCompactGroups() {
-  selectedCompactPresetId.value = null
-  compactTransitionName.value = 'preset-slide-back'
-  compactStage.value = 'groups'
-  emit('stageChange', 'groups')
-}
-
-function toggleCompactPreset(presetId: string) {
-  selectedCompactPresetId.value = selectedCompactPresetId.value === presetId ? null : presetId
+function openCompactPreset(presetId: string) {
+  selectedCompactPresetId.value = presetId
+  revealCompactColumn(3)
 }
 
 function selectCompactPreset(preset: ChallengePreset, randomCount?: number) {
   selectedCompactPresetId.value = null
   emit('select', preset, randomCount)
-}
-
-function onCompactTouchStart(event: TouchEvent) {
-  compactTouchStartX = event.touches[0]?.clientX ?? null
-}
-
-function onCompactTouchEnd(event: TouchEvent) {
-  const endX = event.changedTouches[0]?.clientX
-  if (compactStage.value === 'presets' && compactTouchStartX !== null && endX !== undefined && endX - compactTouchStartX > 55) {
-    showCompactGroups()
-  }
-  compactTouchStartX = null
 }
 
 function selectMobilePreset(event: Event) {
@@ -107,48 +96,73 @@ function selectRandom(preset: ChallengePreset, count: number) {
     :aria-labelledby="compact ? undefined : 'presets-title'"
     :aria-label="compact ? 'Défis prêts à l’emploi' : undefined"
   >
-    <div v-if="compact" class="preset-story">
-      <div class="preset-story__viewport" :class="{ 'is-presets': compactStage === 'presets' }" @touchstart.passive="onCompactTouchStart" @touchend.passive="onCompactTouchEnd">
-        <Transition :name="compactTransitionName" mode="out-in">
-          <div v-if="compactStage === 'groups'" key="groups" class="preset-story__panel">
-            <div class="preset-story__groups">
-              <button v-for="group in groupedPresets" :key="group.id" type="button" @click="openCompactGroup(group.id)">
-                <span>{{ group.label }}</span><span aria-hidden="true">→</span>
+    <div v-if="compact" class="preset-browser">
+      <div ref="compactBrowser" class="preset-browser__scroll">
+        <div class="preset-browser__columns">
+          <section class="preset-browser__column" data-browser-column="1" aria-labelledby="preset-browser-groups">
+            <h3 id="preset-browser-groups">Catégories</h3>
+            <div class="preset-browser__list">
+              <button
+                v-for="group in groupedPresets"
+                :key="group.id"
+                type="button"
+                :class="{ 'is-selected': compactGroupId === group.id }"
+                :aria-pressed="compactGroupId === group.id"
+                @click="openCompactGroup(group.id)"
+              >
+                <span>{{ group.label }}</span><span class="preset-browser__chevron" aria-hidden="true">›</span>
               </button>
             </div>
-          </div>
+          </section>
 
-          <div v-else key="presets" class="preset-story__panel">
-            <header class="preset-story__header preset-story__header--presets">
-              <button type="button" @click="showCompactGroups">← Catégories</button>
-              <strong class="preset-story__category-badge">{{ activeGroup?.label }}</strong>
-            </header>
-            <div class="preset-story__presets">
-              <div
-                v-for="preset in activeGroup?.presets ?? []"
-                :key="preset.id"
-                class="preset-story__preset-choice"
-                :class="{ 'is-open': selectedCompactPresetId === preset.id }"
-              >
+          <Transition name="browser-column">
+            <section v-if="compactGroup" :key="compactGroup.id" class="preset-browser__column" data-browser-column="2" :aria-labelledby="`preset-browser-${compactGroup.id}`">
+              <h3 :id="`preset-browser-${compactGroup.id}`">{{ compactGroup.label }}</h3>
+              <div class="preset-browser__list">
                 <button
+                  v-for="preset in compactGroup.presets"
+                  :key="preset.id"
                   type="button"
-                  :class="{ 'is-active': activePresetId === preset.id || selectedCompactPresetId === preset.id }"
-                  :aria-expanded="selectedCompactPresetId === preset.id"
-                  @click="toggleCompactPreset(preset.id)"
+                  :class="{ 'is-selected': selectedCompactPresetId === preset.id || activePresetId === preset.id }"
+                  :aria-pressed="selectedCompactPresetId === preset.id"
+                  @click="openCompactPreset(preset.id)"
                 >
-                  {{ preset.label }} <span aria-hidden="true">⌄</span>
+                  <span><strong>{{ preset.label }}</strong></span>
+                  <span class="preset-browser__chevron" aria-hidden="true">›</span>
                 </button>
-                <div v-if="selectedCompactPresetId === preset.id" class="preset-story__preset-menu" role="menu">
-                  <button type="button" role="menuitem" @click="selectCompactPreset(preset)">Tous</button>
-                  <button v-if="preset.verbIds.length >= 3" type="button" role="menuitem" @click="selectCompactPreset(preset, 3)">3 au hasard</button>
-                  <button v-if="preset.verbIds.length >= 5" type="button" role="menuitem" @click="selectCompactPreset(preset, 5)">5 au hasard</button>
-                  <button v-if="preset.verbIds.length >= 10" type="button" role="menuitem" @click="selectCompactPreset(preset, 10)">10 au hasard</button>
-                </div>
               </div>
-            </div>
-            <p class="preset-story__gesture">Sur mobile, balaie vers la droite pour revenir.</p>
-          </div>
-        </Transition>
+            </section>
+          </Transition>
+
+          <Transition name="browser-column">
+            <section v-if="selectedCompactPreset" :key="selectedCompactPreset.id" class="preset-browser__column preset-browser__column--quantity" data-browser-column="3" aria-labelledby="preset-browser-quantity">
+              <h3 id="preset-browser-quantity">Nombre de verbes</h3>
+              <p>{{ selectedCompactPreset.label }}</p>
+              <div class="preset-browser__list">
+                <button type="button" @click="selectCompactPreset(selectedCompactPreset)">
+                  <span><strong>Tous les verbes</strong></span>
+                  <span class="preset-browser__count">{{ selectedCompactPreset.verbIds.length }}</span>
+                  <span class="preset-browser__launch" aria-hidden="true">→</span>
+                </button>
+                <button v-if="selectedCompactPreset.verbIds.length >= 3" type="button" @click="selectCompactPreset(selectedCompactPreset, 3)">
+                  <span><strong>3 au hasard</strong></span>
+                  <span class="preset-browser__count">3</span>
+                  <span class="preset-browser__launch" aria-hidden="true">→</span>
+                </button>
+                <button v-if="selectedCompactPreset.verbIds.length >= 5" type="button" @click="selectCompactPreset(selectedCompactPreset, 5)">
+                  <span><strong>5 au hasard</strong></span>
+                  <span class="preset-browser__count">5</span>
+                  <span class="preset-browser__launch" aria-hidden="true">→</span>
+                </button>
+                <button v-if="selectedCompactPreset.verbIds.length >= 10" type="button" @click="selectCompactPreset(selectedCompactPreset, 10)">
+                  <span><strong>10 au hasard</strong></span>
+                  <span class="preset-browser__count">10</span>
+                  <span class="preset-browser__launch" aria-hidden="true">→</span>
+                </button>
+              </div>
+            </section>
+          </Transition>
+        </div>
       </div>
     </div>
 
@@ -233,57 +247,37 @@ function selectRandom(preset: ChallengePreset, count: number) {
   backdrop-filter: none;
 }
 
-.preset-story { display: grid; }
-.preset-story__viewport { min-height: 113px; overflow: hidden; }
-.preset-story__viewport.is-presets { min-height: 150px; overflow: visible; }
-.preset-story__panel { display: grid; gap: 13px; }
-.preset-story__header { display: flex; min-height: 34px; align-items: center; justify-content: space-between; gap: 12px; }
-.preset-story__header strong { color: var(--brand-dark); font-size: 1rem; }
-.preset-story__header > span { color: var(--muted); font-size: .8rem; font-weight: 750; }
-.preset-story__header--presets { display: grid; grid-template-columns: auto 1fr; }
-.preset-story__header--presets strong { text-align: center; }
-.preset-story__header button { padding: 5px 9px; border: 0; border-radius: 8px; color: var(--brand-dark); background: var(--brand-pale); font-weight: 750; }
-.preset-story__category-badge { justify-self: center; padding: 9px 14px; border: 1px solid #83afa4; border-radius: 12px; background: var(--brand-pale); box-shadow: inset 0 0 0 1px rgb(52 95 88 / 8%); }
-.preset-story__groups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
-.preset-story__groups button { display: flex; min-height: 52px; padding: 10px 13px; align-items: center; justify-content: space-between; gap: 8px; border: 1px solid var(--line); border-radius: 12px; color: var(--brand-dark); background: white; font-size: .93rem; font-weight: 400; text-align: left; }
-.preset-story__groups button:hover { border-color: #83afa4; background: var(--brand-pale); }
-.preset-story__groups button span:last-child { color: var(--brand); font-size: 1.1rem; }
-.preset-story__presets { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 9px; }
-.preset-story__preset-choice { position: relative; }
-.preset-story__preset-choice.is-open { z-index: 4; }
-.preset-story__preset-choice > button { width: auto; min-height: 40px; padding: 7px 13px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); background: white; font-size: .93rem; font-weight: 400; white-space: nowrap; }
-.preset-story__preset-choice > button:hover, .preset-story__preset-choice > button.is-active { border-color: var(--brand); background: var(--brand-pale); }
-.preset-story__preset-choice > button span { margin-left: 4px; color: var(--brand); }
-.preset-story__preset-menu { position: absolute; z-index: 5; top: calc(100% + 5px); left: 50%; display: grid; width: max-content; min-width: 145px; padding: 6px; border: 1px solid #a9c4bc; border-radius: 11px; background: white; box-shadow: 0 12px 30px rgb(35 63 57 / 20%); transform: translateX(-50%); }
-.preset-story__preset-menu button { padding: 8px 10px; border: 0; border-radius: 7px; color: var(--ink); background: white; font-size: .86rem; text-align: left; }
-.preset-story__preset-menu button:hover, .preset-story__preset-menu button:focus-visible { background: var(--brand-pale); outline: 0; }
-.preset-story__gesture { display: none; margin: 0; color: var(--muted); font-size: .75rem; text-align: center; }
-
-.preset-slide-forward-enter-active,
-.preset-slide-forward-leave-active,
-.preset-slide-back-enter-active,
-.preset-slide-back-leave-active { transition: opacity 170ms ease, transform 220ms cubic-bezier(.22, 1, .36, 1); }
-.preset-slide-forward-enter-from { opacity: 0; transform: translateX(42px); }
-.preset-slide-forward-leave-to { opacity: 0; transform: translateX(-42px); }
-.preset-slide-back-enter-from { opacity: 0; transform: translateX(-42px); }
-.preset-slide-back-leave-to { opacity: 0; transform: translateX(42px); }
+.preset-browser { display: grid; gap: 10px; }
+.preset-browser__scroll { overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-color: #9ab8b0 transparent; scrollbar-width: thin; }
+.preset-browser__columns { display: grid; min-width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; border: 1px solid var(--line); border-radius: 15px; background: white; box-shadow: inset 0 1px rgb(255 255 255 / 70%); }
+.preset-browser__column { min-width: 0; min-height: 258px; padding: 11px; border-right: 1px solid var(--line); background: #fbfdfc; }
+.preset-browser__column:first-child { border-radius: 14px 0 0 14px; }
+.preset-browser__column:last-child { border-right: 0; border-radius: 0 14px 14px 0; }
+.preset-browser__column h3 { margin: 0; padding: 4px 8px 10px; color: var(--muted); font-size: .74rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.preset-browser__column--quantity > p { margin: -2px 8px 9px; color: var(--brand-dark); font-size: .9rem; font-weight: 800; }
+.preset-browser__list { display: grid; align-content: start; gap: 4px; }
+.preset-browser__list button { display: flex; width: 100%; min-height: 42px; padding: 8px 9px 8px 11px; align-items: center; justify-content: space-between; gap: 9px; border: 1px solid transparent; border-radius: 9px; color: var(--ink); background: transparent; font-size: .88rem; line-height: 1.15; text-align: left; }
+.preset-browser__list button > span:first-child { display: grid; min-width: 0; gap: 2px; }
+.preset-browser__list button strong { color: inherit; font-size: .9rem; line-height: 1.18; overflow-wrap: anywhere; white-space: normal; }
+.preset-browser__list button small { color: var(--muted); font-size: .72rem; }
+.preset-browser__list button:hover { border-color: #b8d3cb; background: #f0f7f4; }
+.preset-browser__list button.is-selected { color: white; border-color: var(--brand); background: var(--brand); box-shadow: 0 5px 13px rgb(52 95 88 / 18%); }
+.preset-browser__list button.is-selected small { color: #dbeae6; }
+.preset-browser__chevron { flex: 0 0 auto; color: var(--brand); font-size: 1.35rem; line-height: 1; }
+.preset-browser__list button.is-selected .preset-browser__chevron { color: white; }
+.preset-browser__count { display: grid; min-width: 28px; height: 24px; margin-left: auto; padding: 0 7px; place-items: center; border: 1px solid #d2ddda; border-radius: 999px; color: var(--muted); background: #edf2f0; font-size: .72rem; font-weight: 850; }
+.preset-browser__launch { display: grid; width: 25px; height: 25px; flex: 0 0 25px; place-items: center; border-radius: 8px; color: white; background: var(--brand); font-weight: 850; }
+.preset-browser__column--quantity .preset-browser__list button:hover { color: var(--brand-dark); border-color: #83afa4; background: var(--brand-pale); }
+.browser-column-enter-active { transition: opacity 180ms ease, transform 260ms cubic-bezier(.22, 1, .36, 1); }
+.browser-column-enter-from { opacity: 0; transform: translateX(24px); }
 
 @media (max-width: 700px) {
-  .preset-story__viewport { min-height: 174px; }
-  .preset-story__viewport.is-presets { min-height: 205px; }
-  .preset-story__groups { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .preset-story__gesture { display: block; }
-}
-
-@media (max-width: 430px) {
-  .preset-story__header--presets { grid-template-columns: 1fr auto; }
-  .preset-story__header--presets strong { grid-column: 1 / -1; grid-row: 2; text-align: left; }
+  .preset-browser__columns { width: max-content; min-width: 100%; grid-template-columns: repeat(3, minmax(245px, 78vw)); }
+  .preset-browser__column { min-height: 245px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .preset-slide-forward-enter-active,
-  .preset-slide-forward-leave-active,
-  .preset-slide-back-enter-active,
-  .preset-slide-back-leave-active { transition: none; }
+  .browser-column-enter-active { transition: none; }
+  .preset-browser__scroll { scroll-behavior: auto; }
 }
 </style>

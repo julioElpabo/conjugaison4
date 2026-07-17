@@ -44,6 +44,8 @@ describe('validation des défis partagés', () => {
       complementOptions: ['cod-after', 'coi-before'],
       printOptions: {
         title: 'Ma fiche',
+        questionSpacingMm: 8,
+        titleSpacingMm: 18,
         showGrade: false,
         showVerbs: true,
         showTenses: true,

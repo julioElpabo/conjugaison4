@@ -32,10 +32,10 @@ const replyProfileBySlug = {
 }
 
 const characterSeeds = [
-  ['warm', 'Chaleureux', 'Encourage et rassure avant d’expliquer.', 'Encourage avant d’expliquer la règle.', 1, 'camille-morel'],
-  ['methodical', 'Méthodique', 'Décompose les difficultés de façon structurée.', 'Décompose chaque difficulté en étapes.', 2, 'sami-diallo'],
-  ['dynamic', 'Dynamique', 'Donne du rythme et célèbre les progrès.', 'Relance rapidement et célèbre chaque progrès.', 3, 'zoe-laurent'],
-  ['calm', 'Calme', 'Laisse le temps de réfléchir sans pression.', 'Utilise des messages courts et sans pression.', 4, 'gabriel-rossi'],
+  ['warm', 'Chaleureux', 'Chaleureuse', '🤗', 'Encourage et rassure avant d’expliquer.', 'Encourage avant d’expliquer la règle.', 1, 'camille-morel'],
+  ['methodical', 'Méthodique', 'Méthodique', '🧭', 'Décompose les difficultés de façon structurée.', 'Décompose chaque difficulté en étapes.', 2, 'sami-diallo'],
+  ['dynamic', 'Dynamique', 'Dynamique', '⚡', 'Donne du rythme et célèbre les progrès.', 'Relance rapidement et célèbre chaque progrès.', 3, 'zoe-laurent'],
+  ['calm', 'Calme', 'Calme', '🌿', 'Laisse le temps de réfléchir sans pression.', 'Utilise des messages courts et sans pression.', 4, 'gabriel-rossi'],
 ]
 
 const characterSlugByCoach = {
@@ -70,7 +70,7 @@ const replySeeds = {
     'cod-after': ['Le COD « {complement} » est placé après « {verb} » : le participe reste « {participle} ».'],
     coi: ['« {complement} » est un COI : il ne commande pas l’accord du participe passé.'],
     encouragement: ['On continue ensemble.'], streak: ['Quelle belle série !'], finish: ['Défi terminé : {correctCount}/{questionCount}, soit {score} %.'],
-    restart: ['On recommence. Prêt ?'], 'off-topic': ['Je suis un personnage virtuel prévu uniquement pour les exercices de conjugaison.'],
+    restart: ['On recommence. Prêt ?'],
   },
   'sami-diallo': {
     introduction: ['Bonjour. Pour chaque question, lis la personne, le mode et le temps indiqués, puis écris la forme conjuguée.'], question: ['Procède dans l’ordre.', 'Observe bien les indices.', 'Passons à l’étape suivante.', 'Analyse cette nouvelle forme.', 'Repère la personne, le mode et le temps.', 'Identifie d’abord la personne demandée.', 'Vérifie le mode avant de répondre.', 'Décompose cette nouvelle consigne.', 'Observe le temps et construis la forme.', 'À présent, applique les indices donnés.'],
@@ -80,7 +80,7 @@ const replySeeds = {
     'cod-after': ['Le COD « {complement} » suit « {verb} ». Avec avoir, aucun accord : « {participle} ».'],
     coi: ['« {complement} » répond à une question avec préposition : c’est un COI, sans accord.'],
     encouragement: ['Reprenons méthodiquement.'], streak: ['Plusieurs réponses exactes : la méthode fonctionne.'], finish: ['Bilan : {correctCount}/{questionCount}, soit {score} %.'],
-    restart: ['Nous repartons depuis la première question.'], 'off-topic': ['Ce dialogue automatisé accepte uniquement les réponses de conjugaison.'],
+    restart: ['Nous repartons depuis la première question.'],
   },
   'zoe-laurent': {
     introduction: ['Salut ! Je te propose une série de formes à conjuguer : réponds, je corrige, puis on passe à la suivante.'], question: ['C’est parti !', 'On enchaîne !', 'Nouvelle question !', 'À toi de jouer !', 'Garde le rythme !', 'Prochaine étape, montre-moi ça !', 'Hop, une nouvelle forme !', 'On continue sur cette lancée !', 'Relève ce nouveau défi !', 'Montre-moi ce que tu sais faire !'],
@@ -90,7 +90,7 @@ const replySeeds = {
     'cod-after': ['« {complement} » arrive après « {verb} » : pas d’accord, « {participle} » !'],
     coi: ['Attention au piège : « {complement} » est un COI, donc aucun accord !'],
     encouragement: ['On ne lâche rien !'], streak: ['Super série !'], finish: ['Terminé ! {score} % avec {correctCount} bonnes réponses.'],
-    restart: ['Nouveau départ, c’est parti !'], 'off-topic': ['Je suis un coach virtuel de conjugaison : écris seulement ta réponse à l’exercice.'],
+    restart: ['Nouveau départ, c’est parti !'],
   },
   'gabriel-rossi': {
     introduction: ['Bonjour. Réponds à ton rythme ; après chaque essai, je t’indiquerai la forme correcte et le point à retenir.'], question: ['Prends ton temps.', 'Réfléchis tranquillement.', 'Voici la question suivante.', 'Observe bien la forme demandée.', 'Quand tu es prêt.', 'Tu peux répondre sans te presser.', 'Regarde calmement cette nouvelle consigne.', 'Passons doucement à la forme suivante.', 'Laisse-toi un instant pour réfléchir.', 'Voici une autre forme à conjuguer.'],
@@ -100,7 +100,7 @@ const replySeeds = {
     'cod-after': ['« {complement} » est après « {verb} ». On n’accorde pas : « {participle} ».'],
     coi: ['« {complement} » est un COI. Il n’entraîne pas d’accord.'],
     encouragement: ['Prends le temps de réfléchir.'], streak: ['Très bonne série.'], finish: ['Tu as obtenu {correctCount}/{questionCount}, soit {score} %.'],
-    restart: ['Recommençons calmement.'], 'off-topic': ['Je suis un personnage virtuel consacré aux exercices de conjugaison.'],
+    restart: ['Recommençons calmement.'],
   },
 }
 
@@ -178,6 +178,9 @@ try {
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     slug VARCHAR(80) NOT NULL UNIQUE,
     name VARCHAR(80) NOT NULL,
+    masculine_name VARCHAR(80) NOT NULL,
+    feminine_name VARCHAR(80) NOT NULL,
+    emoticon VARCHAR(32) NOT NULL DEFAULT '🙂',
     description VARCHAR(255) NOT NULL DEFAULT '',
     pedagogical_style TEXT NOT NULL,
     status ENUM('draft','published','disabled') NOT NULL DEFAULT 'draft',
@@ -185,6 +188,21 @@ try {
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
+
+  const [masculineNameColumns] = await database.query("SHOW COLUMNS FROM coach_characters LIKE 'masculine_name'")
+  if (masculineNameColumns.length === 0) {
+    await database.query("ALTER TABLE coach_characters ADD COLUMN masculine_name VARCHAR(80) NOT NULL DEFAULT '' AFTER name")
+  }
+  const [feminineNameColumns] = await database.query("SHOW COLUMNS FROM coach_characters LIKE 'feminine_name'")
+  if (feminineNameColumns.length === 0) {
+    await database.query("ALTER TABLE coach_characters ADD COLUMN feminine_name VARCHAR(80) NOT NULL DEFAULT '' AFTER masculine_name")
+  }
+  const [emoticonColumns] = await database.query("SHOW COLUMNS FROM coach_characters LIKE 'emoticon'")
+  if (emoticonColumns.length === 0) {
+    await database.query("ALTER TABLE coach_characters ADD COLUMN emoticon VARCHAR(32) NOT NULL DEFAULT '🙂' AFTER feminine_name")
+  }
+  await database.query(`UPDATE coach_characters SET masculine_name=name WHERE masculine_name=''`)
+  await database.query(`UPDATE coach_characters SET feminine_name=name WHERE feminine_name=''`)
 
   await database.query(`CREATE TABLE IF NOT EXISTS coach_character_reply_templates (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -221,10 +239,13 @@ try {
   const [characterColumns] = await database.query("SHOW COLUMNS FROM coaches LIKE 'character_id'")
   if (characterColumns.length === 0) await database.query('ALTER TABLE coaches ADD COLUMN character_id INT UNSIGNED NULL AFTER description')
 
-  for (const [slug, name, description, pedagogicalStyle, sortOrder] of characterSeeds) {
-    await database.execute(`INSERT INTO coach_characters (slug,name,description,pedagogical_style,status,sort_order)
-      VALUES (?,?,?,?,'published',?) ON DUPLICATE KEY UPDATE name=VALUES(name),description=VALUES(description),
-      pedagogical_style=VALUES(pedagogical_style),sort_order=VALUES(sort_order)`, [slug, name, description, pedagogicalStyle, sortOrder])
+  for (const [slug, masculineName, feminineName, emoticon, description, pedagogicalStyle, sortOrder] of characterSeeds) {
+    await database.execute(`INSERT INTO coach_characters
+      (slug,name,masculine_name,feminine_name,emoticon,description,pedagogical_style,status,sort_order)
+      VALUES (?,?,?,?,?,?,?,'published',?) ON DUPLICATE KEY UPDATE name=VALUES(name),
+      masculine_name=VALUES(masculine_name),feminine_name=VALUES(feminine_name),emoticon=VALUES(emoticon),description=VALUES(description),
+      pedagogical_style=VALUES(pedagogical_style),sort_order=VALUES(sort_order)`,
+    [slug, masculineName, masculineName, feminineName, emoticon, description, pedagogicalStyle, sortOrder])
   }
 
   for (const seed of coachSeeds) {
@@ -261,7 +282,7 @@ try {
   }
 
 
-  for (const [characterSlug, , , , , representativeSlug] of characterSeeds) {
+  for (const [characterSlug, , , , , , , representativeSlug] of characterSeeds) {
     const [[character]] = await database.execute('SELECT id FROM coach_characters WHERE slug=?', [characterSlug])
     const [[representative]] = await database.execute('SELECT id FROM coaches WHERE slug=?', [representativeSlug])
     const [[replyCount]] = await database.execute('SELECT COUNT(*) AS total FROM coach_character_reply_templates WHERE character_id=?', [character.id])
@@ -310,13 +331,15 @@ try {
     JOIN coach_character_reply_templates original
       ON original.character_id=duplicate.character_id AND original.event_type=duplicate.event_type
       AND original.content=duplicate.content AND original.id<duplicate.id`)
+  await database.execute("DELETE FROM coach_character_reply_templates WHERE event_type='off-topic'")
+  await database.execute("DELETE FROM coach_reply_templates WHERE event_type='off-topic'")
   const [[integrity]] = await database.query(`SELECT
     (SELECT COUNT(*) FROM coach_characters WHERE status='published') AS characters,
     (SELECT COUNT(*) FROM coaches WHERE status='published') AS coaches,
     (SELECT COUNT(*) FROM coaches WHERE character_id IS NULL) AS missing_character,
     (SELECT MIN(total) FROM (SELECT COUNT(*) AS total FROM coach_character_reply_templates GROUP BY character_id) reply_counts) AS minimum_replies`)
   if (Number(integrity.characters) !== 4 || Number(integrity.coaches) !== 12
-    || Number(integrity.missing_character) !== 0 || Number(integrity.minimum_replies) < 13) {
+    || Number(integrity.missing_character) !== 0 || Number(integrity.minimum_replies) < 12) {
     throw new Error(`Migration incomplète : ${JSON.stringify(integrity)}`)
   }
   console.log(`Migration terminée : ${integrity.characters} caractères partagés pour ${integrity.coaches} coaches.`)

@@ -13,6 +13,8 @@ export type QuestionnaireRequest = ChallengeConfig
 
 export interface ChallengePrintOptions {
   title: string
+  questionSpacingMm: number
+  titleSpacingMm: number
   showGrade: boolean
   showVerbs: boolean
   showTenses: boolean

@@ -39,7 +39,7 @@ function eventChecks(coach: CoachProfile, eventType: 'question' | 'correct' | 'i
   const random = seededRandom(seed)
   const context: CoachMessageContext = {
     verb: 'manger', mode: 'indicatif', tense: 'passé composé', expectedAnswer: 'nous avons mangé',
-    complement: 'les pommes', participle: 'mangées', score: 80, correctCount: 16, questionCount: 20,
+    complement: 'les pommes', participle: 'mangées', score: 80, correctCount: 16, questionCount: 20, questionNumber: 3,
   }
   const reactions = Array.from({ length: 20 }, () => createVariedCoachReaction(coach, eventType, context, state, {
     random,

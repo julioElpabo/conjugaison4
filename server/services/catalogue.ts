@@ -33,12 +33,21 @@ interface VerbeRow extends RowDataPacket {
 }
 
 interface SemanticRow extends RowDataPacket { verbe_id: number, slug: string, sort_order: number }
+interface MeaningRow extends RowDataPacket {
+  verbe_id: number
+  intitule: string
+  definition: string | null
+  est_principal: number
+  numero_sens: number
+}
 interface ComplementExampleRow extends RowDataPacket {
   verbe_id: number
   fonction_objet: 'cod' | 'coi'
   preposition: string | null
   texte: string
   texte_antepose: string | null
+  genre: string | null
+  nombre: string | null
 }
 interface PronominalUseRow extends RowDataPacket {
   id: number
@@ -69,7 +78,7 @@ interface MangerExampleRow extends RowDataPacket, MangerFormForExample {}
 
 export async function getCatalogue() {
   const database = useDatabase()
-  const [verbesResult, modesResult, tempsResult, semanticResult, pronominalResult, complementResult, mangerExamplesResult] = await Promise.all([
+  const [verbesResult, modesResult, tempsResult, semanticResult, meaningResult, pronominalResult, complementResult, mangerExamplesResult] = await Promise.all([
     database.execute<VerbeRow[]>(`
       SELECT v.id, v.infinitif,
              \`participe_présent\` AS participe_present,
@@ -104,6 +113,11 @@ export async function getCatalogue() {
       INNER JOIN categories_semantiques cs ON cs.id = vsc.categorie_id
       ORDER BY vs.verbe_id, cs.sort_order, cs.slug
     `),
+    database.execute<MeaningRow[]>(`
+      SELECT verbe_id, intitule, definition, est_principal, numero_sens
+      FROM verbe_sens
+      ORDER BY verbe_id, est_principal DESC, numero_sens, sort_order, id
+    `),
     database.execute<PronominalUseRow[]>(`
       SELECT id, verbe_id, infinitif_pronominal, type_emploi, fonction_pronom,
              regle_accord, preposition, statut_validation
@@ -112,7 +126,8 @@ export async function getCatalogue() {
       ORDER BY infinitif_pronominal, id
     `),
     database.execute<ComplementExampleRow[]>(`
-      SELECT vs.verbe_id, cv.fonction_objet, cv.preposition, c.texte, c.texte_antepose
+      SELECT vs.verbe_id, cv.fonction_objet, cv.preposition, c.texte, c.texte_antepose,
+             c.genre, c.nombre
       FROM verbe_sens vs
       INNER JOIN constructions_verbales cv ON cv.sens_id=vs.id
       INNER JOIN complements_verbaux c ON c.construction_id=cv.id
@@ -152,6 +167,15 @@ export async function getCatalogue() {
     categories.push(row.slug)
     semanticsByVerb.set(Number(row.verbe_id), categories)
   }
+  const meaningByVerb = new Map<number, string>()
+  for (const row of meaningResult[0]) {
+    const verbId = Number(row.verbe_id)
+    if (meaningByVerb.has(verbId)) continue
+    const definition = row.definition?.trim()
+    const genericTitle = /^sens principal de\s+[«"']?/iu.test(row.intitule.trim())
+    const meaning = definition || (genericTitle ? '' : row.intitule.trim())
+    if (meaning) meaningByVerb.set(verbId, meaning)
+  }
   const complementByVerb = new Map<number, Verb['complementExample']>()
   const complementFunctionsByVerb = new Map<number, Set<'cod' | 'coi'>>()
   const anteposableComplementFunctionsByVerb = new Map<number, Set<'cod' | 'coi'>>()
@@ -162,7 +186,8 @@ export async function getCatalogue() {
     complementFunctionsByVerb.set(verbId, functions)
     const anteposable = anteposableComplementFunctionsByVerb.get(verbId) ?? new Set<'cod' | 'coi'>()
     if ((row.fonction_objet === 'cod' && row.texte_antepose)
-      || (row.fonction_objet === 'coi' && indirectRelative(row.texte, row.preposition))) {
+      || (row.fonction_objet === 'coi'
+        && indirectRelative(row.texte, row.preposition, row.genre, row.nombre))) {
       anteposable.add(row.fonction_objet)
     }
     anteposableComplementFunctionsByVerb.set(verbId, anteposable)
@@ -178,6 +203,7 @@ export async function getCatalogue() {
   const verbs: Verb[] = verbesResult[0].map(row => ({
       id: Number(row.id),
       infinitif: row.infinitif,
+      meaning: meaningByVerb.get(Number(row.id)) ?? null,
       participePresent: row.participe_present,
       participePasse: row.participe_passe,
       auxiliaire: row.auxiliaire,

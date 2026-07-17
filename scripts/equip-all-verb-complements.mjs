@@ -54,7 +54,8 @@ const childSafeDirect = {
   protéger: 'un animal', répandre: 'une bonne nouvelle', reprendre: 'un exercice',
   requérir: 'une aide', résoudre: 'un problème', saluer: 'un ami', servir: 'un repas',
   sortir: 'une poubelle', souffrir: 'une attente', tenir: 'un objet', tomber: 'une quille',
-  tordre: 'un fil de fer', trouver: 'une solution', tuer: 'un microbe', vaincre: 'une difficulté',
+  tirer: 'un rideau', tordre: 'un fil de fer', trouver: 'une solution', tuer: 'un microbe',
+  vaincre: 'une difficulté',
   vivre: 'une aventure', vouloir: 'une réponse',
 }
 
@@ -62,13 +63,13 @@ const childSafeDirect = {
 // tandis que la construction conserve séparément sa valeur grammaticale.
 const indirectSeeds = {
   assister: ['à', 'une réunion'], croire: ['à', 'une histoire'], discuter: ['de', 'un projet'],
-  douter: ['de', 'une réponse'], écrire: ['à', 'une mère'], jouer: ['à', 'un jeu'], manquer: ['à', 'une obligation'],
+  douter: ['de', 'une réponse'], écrire: ['à', 'une mère'], jouer: ['à', 'une partie'], manquer: ['à', 'une obligation'],
   parler: ['à', 'un ami'], penser: ['à', 'une solution'], plaire: ['à', 'un public'],
   réfléchir: ['à', 'une question'], répondre: ['à', 'une demande'], réussir: ['à', 'un examen'],
   rire: ['de', 'une plaisanterie'], servir: ['à', 'un projet'], songer: ['à', 'un voyage'],
   sourire: ['à', 'un enfant'], souffrir: ['de', 'un manque'], suffire: ['à', 'une personne'],
   surseoir: ['à', 'une décision'], tenir: ['à', 'une tradition'],
-  'se moquer': ['de', 'une personne'], 'se préparer': ['à', 'une épreuve'],
+  'se moquer': ['de', 'un personnage fictif'], 'se préparer': ['à', 'une épreuve'],
   'se souvenir': ['de', 'une histoire'],
 }
 
@@ -79,10 +80,186 @@ const additionalDirect = {
   nager: 'une distance', naviguer: 'un voilier', 'se brosser': 'des dents',
 }
 
+// Relecture pédagogique 2026 : ces amorces remplacent les premiers exemples
+// dictionnairiques lorsqu'ils sont trop elliptiques, spécialisés, datés ou
+// difficiles à comprendre hors de leur phrase d'origine.
+const reviewedDirect = {
+  abandonner: 'un projet', abreuver: 'un animal', abriter: 'une famille',
+  absoudre: 'une personne', accabler: 'une personne', accaparer: 'des jouets',
+  accompagner: 'un ami', accueillir: 'un nouvel élève', acquitter: 'une facture',
+  adapter: 'un exercice', adresser: 'une lettre', agacer: 'une personne',
+  aggraver: 'un problème', aider: 'un camarade', ajourner: 'une réunion',
+  ajouter: 'un ingrédient', ajuster: 'une veste', allonger: 'une corde',
+  allouer: 'un budget',
+  allumer: 'une lampe', amarrer: 'un bateau', amuser: 'un enfant',
+  ancrer: 'une idée', approcher: 'une chaise', appuyer: 'une échelle contre un mur',
+  asseoir: 'un enfant',
+  assurer: 'un service', attirer: 'un public', attraper: 'une balle',
+  augmenter: 'un volume', avancer: 'un pion', baisser: 'une vitre',
+  balancer: 'des bras', bannir: 'une mauvaise habitude', blesser: 'une sensibilité',
+  bloquer: 'une porte', boucler: 'une ceinture', brancher: 'une lampe',
+  brasser: 'des cartes', braver: 'une difficulté', broyer: 'des céréales',
+  brûler: 'une étape', calmer: 'un enfant', calquer: 'un dessin',
+  camper: 'un personnage', capoter: 'une voiture', caricaturer: 'un personnage',
+  céder: 'une place', chahuter: 'un personnage', chatouiller: 'un personnage',
+  chercher: 'une clé', chiffrer: 'un document', cloner: 'une plante',
+  clore: 'une réunion', collecter: 'des informations', combiner: 'des idées',
+  colorier: 'un dessin',
+  commander: 'un repas', commenter: 'un texte', communiquer: 'une information',
+  comparer: 'un résultat à un autre', conclure: 'un accord',
+  consulter: 'un spécialiste', contester: 'une décision', continuer: 'un travail',
+  convaincre: 'une personne', copier: 'un texte', corriger: 'une erreur',
+  couler: 'une dalle', courir: 'une épreuve', craindre: 'un orage', cranter: 'une roue',
+  créer: 'une affiche', creuser: 'un trou', crier: 'une réponse',
+  critiquer: 'une décision', croiser: 'des bras', décider: 'une date',
+  découvrir: 'une surprise', deriver: 'un cours d’eau', devoir: 'une somme',
+  diminuer: 'un volume', discuter: 'une proposition', diviser: 'une quantité',
+  documenter: 'un dossier', élever: 'une construction', encourager: 'un camarade',
+  enfiler: 'une perle', enseigner: 'une règle', éteindre: 'une lampe',
+  étudier: 'une leçon', exercer: 'une compétence', explorer: 'une région',
+  exprimer: 'une idée', fatiguer: 'une personne', filer: 'un fil',
+  inventer: 'une histoire', joindre: 'des pièces', marier: 'des couleurs',
+  manger: ['une pomme', 'une orange'], menacer: 'un projet',
+  mouvoir: 'un objet', noter: 'une information', oindre: 'une surface',
+  ouïr: 'un bruit', parcourir: 'un chemin', penser: 'un projet',
+  peser: 'un colis', pincer: 'une corde', porter: 'un sac',
+  pourvoir: 'un poste', raconter: 'une histoire', répondre: 'une phrase courte',
+  retenir: 'une place', saisir: 'un objet', sentir: 'une odeur',
+  tourner: 'une page', trahir: 'un secret', travailler: 'un texte', vendre: 'un objet',
+}
+
 const determiners = {
   m: ['un', 'le', 'ce', 'mon', 'ton', 'son', 'notre', 'votre', 'leur', 'un autre'],
   f: ['une', 'la', 'cette', 'ma', 'ta', 'sa', 'notre', 'votre', 'leur', 'une autre'],
   p: ['des', 'les', 'ces', 'mes', 'tes', 'ses', 'nos', 'vos', 'leurs', 'd’autres'],
+}
+
+const masculinePluralDeterminers = ['des', 'les', 'ces', 'mes', 'tes', 'ses', 'nos', 'vos']
+const pluralExceptions = new Map([
+  ['animal', 'animaux'], ['bateau', 'bateaux'], ['camarade', 'camarades'],
+  ['château', 'châteaux'], ['cheveu', 'cheveux'], ['ciel', 'cieux'], ['cours', 'cours'],
+  ['enfant', 'enfants'], ['fil', 'fils'], ['nouvel', 'nouveaux'],
+  ['œil', 'yeux'], ['public', 'publics'], ['travail', 'travaux'],
+])
+const pluralInvariants = new Set(['bras', 'choix', 'cours', 'nez', 'prix', 'repas'])
+const phraseBoundary = /^(?:(?:à|au|aux|avec|chez|contre|dans|de|des|du|en|par|pour|sans|sous|sur|vers)$|d[’'])/iu
+const reviewedStoredReplacements = new Map([
+  ['manger|des gâteaux', { text: 'un gâteau', anteposed: 'le gâteau', gender: 'masculin', number: 'singulier' }],
+  ['manger|des petits pains', { text: 'de petits pains', anteposed: 'les petits pains', gender: 'masculin', number: 'pluriel' }],
+  ['montrer|son dessin', { text: 'des croquis', anteposed: 'les croquis', gender: 'masculin', number: 'pluriel' }],
+  ['regarder|des ciels', { text: 'les nuages', gender: 'masculin', number: 'pluriel' }],
+  ['tirer|des petits chariots', { text: 'de petits chariots', anteposed: 'les petits chariots', gender: 'masculin', number: 'pluriel' }],
+])
+
+function pluralizeWord(word) {
+  const match = word.match(/^([^A-Za-zÀ-ÖØ-öø-ÿŒœ]*)([A-Za-zÀ-ÖØ-öø-ÿŒœ-]+)(.*)$/u)
+  if (!match) return word
+  const [, prefix, lexical, suffix] = match
+  const lower = lexical.toLocaleLowerCase('fr')
+  if (pluralExceptions.has(lower)) return `${prefix}${pluralExceptions.get(lower)}${suffix}`
+  if (pluralInvariants.has(lower) || /[sxz]$/iu.test(lexical)) return word
+  if (/(?:eau|au|eu)$/iu.test(lexical)) return `${prefix}${lexical}x${suffix}`
+  if (/al$/iu.test(lexical)) return `${prefix}${lexical.slice(0, -2)}aux${suffix}`
+  return `${prefix}${lexical}s${suffix}`
+}
+
+function pluralizePhrase(value) {
+  const words = value.split(/\s+/u)
+  let inCore = true
+  return words.map((word) => {
+    if (phraseBoundary.test(word)) inCore = false
+    if (!inCore) return word
+    return word.split('-').map(pluralizeWord).join('-')
+  }).join(' ')
+}
+
+function pluralDeterminerPhrase(determiner, pluralRest) {
+  const adjectiveBeforeNoun = /^(?:beaux|bons|grands|jeunes|nouveaux|petits|vieux)\s+/iu.test(pluralRest)
+  return determiner === 'des' && adjectiveBeforeNoun
+    ? `de ${pluralRest}`
+    : `${determiner} ${pluralRest}`
+}
+
+function pluralCandidates(value) {
+  const text = String(value || '').replace(/\s+/gu, ' ').trim()
+  const match = text.match(/^(?:un autre|un|le|ce|cet|mon|ton|son|notre|votre|leur|du|l[’'])\s*(.+)$/iu)
+  if (!match?.[1]) return []
+  const pluralRest = pluralizePhrase(match[1])
+  return ['des', 'les', 'ces', 'mes', 'tes', 'ses', 'nos', 'vos', 'leurs', 'd’autres']
+    .map(determiner => pluralDeterminerPhrase(determiner, pluralRest))
+}
+
+function isMasculineSingular(row) {
+  if (String(row.nombre || '').toLocaleLowerCase('fr') === 'pluriel') return false
+  if (['feminin', 'féminin'].includes(String(row.genre || '').toLocaleLowerCase('fr'))) return false
+  if (String(row.genre || '').toLocaleLowerCase('fr') === 'masculin'
+      && String(row.nombre || '').toLocaleLowerCase('fr') === 'singulier') return true
+  return /^(?:un autre|un|le|ce|cet|mon|ton|son|du)\s+/iu.test(row.texte)
+}
+
+async function rebalanceMasculineSingularCod() {
+  const [rows] = await database.execute(`
+    SELECT c.id, c.construction_id, c.texte, c.genre, c.nombre, c.source,
+      v.id AS verbe_id, v.infinitif
+    FROM complements_verbaux c
+    INNER JOIN constructions_verbales cv ON cv.id=c.construction_id
+      AND cv.actif=1 AND cv.statut_validation='valide' AND cv.fonction_objet='cod'
+    INNER JOIN verbe_sens vs ON vs.id=cv.sens_id
+    INNER JOIN verbes v ON v.id=vs.verbe_id AND v.est_archive=0
+    WHERE c.actif=1 AND c.statut_validation='valide'
+    ORDER BY v.id, (c.source=?) DESC, c.id
+  `, [SOURCE])
+
+  for (const row of rows) {
+    const replacement = reviewedStoredReplacements.get(
+      `${row.infinitif}|${String(row.texte).toLocaleLowerCase('fr')}`,
+    )
+    if (!replacement) continue
+    await database.execute(`
+      UPDATE complements_verbaux
+      SET texte=?, texte_antepose=?, genre=?, nombre=?
+      WHERE id=?
+    `, [replacement.text, replacement.anteposed ?? replacement.text,
+      replacement.gender, replacement.number, row.id])
+    row.texte = replacement.text
+    row.genre = replacement.gender
+    row.nombre = replacement.number
+  }
+
+  const byVerb = new Map()
+  for (const row of rows) {
+    const entries = byVerb.get(row.verbe_id) || []
+    entries.push(row)
+    byVerb.set(row.verbe_id, entries)
+  }
+
+  for (const entries of byVerb.values()) {
+    const allowedMasculineSingular = Math.floor(entries.length * 0.2)
+    const masculineRows = entries.filter(isMasculineSingular)
+    const existingByConstruction = new Map()
+    for (const row of entries) {
+      const texts = existingByConstruction.get(row.construction_id) || new Set()
+      texts.add(String(row.texte).toLocaleLowerCase('fr'))
+      existingByConstruction.set(row.construction_id, texts)
+    }
+
+    for (const row of masculineRows.slice(allowedMasculineSingular)) {
+      const existing = existingByConstruction.get(row.construction_id)
+      const replacement = pluralCandidates(row.texte)
+        .find(candidate => !existing.has(candidate.toLocaleLowerCase('fr')))
+      if (!replacement) {
+        throw new Error(`Impossible de pluraliser sans doublon : ${row.infinitif} — ${row.texte}`)
+      }
+      const pluralCore = replacement.replace(/^\S+\s+/u, '')
+      await database.execute(`
+        UPDATE complements_verbaux
+        SET texte=?, texte_antepose=?, genre='masculin', nombre='pluriel'
+        WHERE id=?
+      `, [replacement, `les ${pluralCore}`, row.id])
+      existing.delete(String(row.texte).toLocaleLowerCase('fr'))
+      existing.add(replacement.toLocaleLowerCase('fr'))
+    }
+  }
 }
 
 function cleanSeed(value) {
@@ -107,8 +284,15 @@ function variants(seed, preposition = null) {
   const kind = seedKind(cleaned)
   if (!kind) throw new Error(`Amorce sans genre/nombre explicite : ${seed}`)
   const rest = cleaned.replace(/^\S+\s+/u, '')
-  return determiners[kind].map((determiner) => {
+  const selectedDeterminers = kind === 'm'
+    ? ['un', 'le', ...masculinePluralDeterminers]
+    : determiners[kind]
+  return selectedDeterminers.map((determiner, index) => {
+    const pluralizedMasculine = kind === 'm' && index >= 2
+    const variantRest = pluralizedMasculine ? pluralizePhrase(rest) : rest
+    const firstWord = rest.split(/\s+/u)[0].toLocaleLowerCase('fr')
     const beginsWithVowel = /^[aeiouyàâäéèêëîïôöùûü]/iu.test(rest)
+      || new Set(['habit', 'héritage', 'histoire', 'homme']).has(firstWord)
     if (kind === 'f' && beginsWithVowel) {
       if (determiner === 'ma') determiner = 'mon'
       if (determiner === 'ta') determiner = 'ton'
@@ -116,30 +300,40 @@ function variants(seed, preposition = null) {
     }
     if (beginsWithVowel && (determiner === 'le' || determiner === 'la')) determiner = 'l’'
     if (beginsWithVowel && determiner === 'ce') determiner = 'cet'
-    const phrase = determiner === 'l’' ? `l’${rest}` : `${determiner} ${rest}`
-    if (!preposition) return phrase
-    if (preposition === 'à' && determiner === 'le') return `au ${rest}`
-    if (preposition === 'à' && determiner === 'les') return `aux ${rest}`
-    if (preposition === 'de' && determiner === 'le') return `du ${rest}`
-    if (preposition === 'de' && determiner === 'les') return `des ${rest}`
-    if (preposition === 'de' && determiner === 'un') return `d’un ${rest}`
-    if (preposition === 'de' && determiner === 'une') return `d’une ${rest}`
-    if (preposition === 'de' && determiner === 'un autre') return `d’un autre ${rest}`
-    if (preposition === 'de' && determiner === 'une autre') return `d’une autre ${rest}`
-    if (preposition === 'de' && determiner === 'd’autres') return `d’autres ${rest}`
-    if (determiner === 'l’') return `${preposition} l’${rest}`
-    return `${preposition} ${phrase}`
+    const phrase = determiner === 'l’'
+      ? `l’${variantRest}`
+      : pluralizedMasculine
+        ? pluralDeterminerPhrase(determiner, variantRest)
+        : `${determiner} ${variantRest}`
+    let text = phrase
+    if (preposition === 'à' && determiner === 'le') text = `au ${variantRest}`
+    else if (preposition === 'à' && determiner === 'les') text = `aux ${variantRest}`
+    else if (preposition === 'de' && determiner === 'le') text = `du ${variantRest}`
+    else if (preposition === 'de' && determiner === 'les') text = `des ${variantRest}`
+    else if (preposition === 'de' && determiner === 'un') text = `d’un ${variantRest}`
+    else if (preposition === 'de' && determiner === 'une') text = `d’une ${variantRest}`
+    else if (preposition === 'de' && determiner === 'un autre') text = `d’un autre ${variantRest}`
+    else if (preposition === 'de' && determiner === 'une autre') text = `d’une autre ${variantRest}`
+    else if (preposition === 'de' && determiner === 'd’autres') text = `d’autres ${variantRest}`
+    else if (preposition && determiner === 'l’') text = `${preposition} l’${variantRest}`
+    else if (preposition) text = `${preposition} ${phrase}`
+    const inferred = !preposition ? inferAnteposedComplement(text) : null
+    return {
+      text,
+      gender: kind === 'f' ? 'feminin' : kind === 'm' ? 'masculin' : inferred?.gender ?? null,
+      number: kind === 'p' || pluralizedMasculine ? 'pluriel' : 'singulier',
+    }
   })
 }
 
-function catalogVariants(seeds, preposition = null) {
+function catalogVariants(seeds, preposition = null, limit = 10) {
   const choices = []
   const matrices = seeds.map(seed => variants(seed, preposition))
   for (let variantIndex = 0; variantIndex < 10; variantIndex += 1) {
     for (const values of matrices) {
-      const text = values[variantIndex]
-      if (!choices.includes(text)) choices.push(text)
-      if (choices.length === 10) return choices
+      const variant = values[variantIndex]
+      if (!choices.some(choice => choice.text === variant.text)) choices.push(variant)
+      if (choices.length === limit) return choices
     }
   }
   return choices
@@ -156,10 +350,16 @@ function extractedSeeds(article) {
 const directCatalog = new Map()
 for (const article of report.results) {
   if (article.error || !article.direct || excludedDirect.has(article.infinitive)) continue
-  const safeSeed = childSafeDirect[article.infinitive] || directSeeds[article.infinitive]
-  const seeds = safeSeed ? [safeSeed] : extractedSeeds(article)
+  const safeSeed = reviewedDirect[article.infinitive]
+    || childSafeDirect[article.infinitive]
+    || directSeeds[article.infinitive]
+  const seeds = safeSeed ? (Array.isArray(safeSeed) ? safeSeed : [safeSeed]) : extractedSeeds(article)
   if (!seeds.length) throw new Error(`Aucun COD sûr pour ${article.infinitive}`)
-  directCatalog.set(article.infinitive, { seeds, sourceUrl: article.url })
+  directCatalog.set(article.infinitive, {
+    seeds,
+    sourceUrl: article.url,
+    limit: article.infinitive === 'manger' ? 15 : 10,
+  })
 }
 for (const [infinitive, seed] of Object.entries(additionalDirect)) {
   const article = report.results.find(item => item.infinitive === infinitive)
@@ -192,7 +392,7 @@ async function ensureSense(verbId, type, preposition, label) {
   return Number(result.insertId)
 }
 
-async function equip(infinitive, type, seeds, preposition, sourceUrl) {
+async function equip(infinitive, type, seeds, preposition, sourceUrl, limit = 10) {
   const [verbs] = await database.execute(
     'SELECT id FROM verbes WHERE infinitif=? AND est_archive=0 LIMIT 1', [infinitive],
   )
@@ -214,8 +414,17 @@ async function equip(infinitive, type, seeds, preposition, sourceUrl) {
     'SELECT id FROM constructions_verbales WHERE sens_id=? AND code=? LIMIT 1', [senseId, code],
   )
   const constructionId = Number(constructions[0].id)
-  for (const text of catalogVariants(seeds, preposition)) {
-    const placement = type === 'cod' ? inferAnteposedComplement(text) : null
+  for (const variant of catalogVariants(seeds, preposition, limit)) {
+    const text = variant.text
+    const placement = type === 'cod' && variant.gender
+      ? {
+          text: variant.number === 'pluriel'
+            ? text.replace(/^(?:de|des|ces|mes|tes|ses|nos|vos|leurs)\s+/iu, 'les ')
+            : inferAnteposedComplement(text)?.text ?? null,
+          gender: variant.gender,
+          number: variant.number,
+        }
+      : null
     await database.execute(`
       INSERT INTO complements_verbaux
         (construction_id, texte, texte_antepose, genre, nombre, classe_semantique,
@@ -227,8 +436,10 @@ async function equip(infinitive, type, seeds, preposition, sourceUrl) {
         source_url=IF(source='Catalogue exhaustif contrôlé 2026', VALUES(source_url), source_url),
         source=IF(source='Catalogue exhaustif contrôlé 2026', VALUES(source), source),
         statut_validation='valide', actif=1
-    `, [constructionId, text, placement?.text ?? null, placement?.gender ?? null,
-      placement?.number ?? null, type === 'cod' ? 'objet-atteste' : 'complement-indirect-atteste',
+    `, [constructionId, text, placement?.text ?? null,
+      type === 'cod' ? variant.gender : null,
+      type === 'cod' ? variant.number : null,
+      type === 'cod' ? 'objet-atteste' : 'complement-indirect-atteste',
       SOURCE, sourceUrl])
   }
 }
@@ -237,12 +448,13 @@ await database.beginTransaction()
 try {
   await database.execute('UPDATE complements_verbaux SET actif=0 WHERE source IN (?, ?)', [OBSOLETE_SOURCE, SOURCE])
   for (const [infinitive, entry] of directCatalog) {
-    await equip(infinitive, 'cod', entry.seeds, null, entry.sourceUrl)
+    await equip(infinitive, 'cod', entry.seeds, null, entry.sourceUrl, entry.limit)
   }
   for (const [infinitive, [preposition, seed]] of Object.entries(indirectSeeds)) {
     const article = report.results.find(item => item.infinitive === infinitive)
     await equip(infinitive, 'coi', [seed], preposition, article?.url ?? null)
   }
+  await rebalanceMasculineSingularCod()
   await database.commit()
 } catch (error) {
   await database.rollback()

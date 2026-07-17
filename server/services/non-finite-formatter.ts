@@ -26,6 +26,10 @@ function variants(value: string) {
   return [...new Set(value.split('-').map(part => part.trim()).filter(part => part && part !== '-'))]
 }
 
+function hasPresentParticiple(verb: NonFiniteVerbSource) {
+  return variants(verb.participe_present).length > 0
+}
+
 export function formatNonFiniteQuestion(
   verb: NonFiniteVerbSource,
   tense: NonFiniteTenseSource,
@@ -42,10 +46,11 @@ export function formatNonFiniteQuestion(
   } else if (mode === 'participe' && tenseName === 'passé') {
     label = 'Le participe passé'
     answers = variants(verb.participe_passe).map(upperFirst)
-  } else if (mode === 'gérondif' && tenseName === 'présent') {
+  } else if (mode === 'gérondif' && tenseName === 'présent' && hasPresentParticiple(verb)) {
     label = 'Le gérondif présent'
     answers = variants(verb.participe_present).map(form => `En ${form}`)
-  } else if (mode === 'gérondif' && tenseName === 'passé' && verb.auxiliaire_participe_present) {
+  } else if (mode === 'gérondif' && tenseName === 'passé'
+      && hasPresentParticiple(verb) && verb.auxiliaire_participe_present) {
     label = 'Le gérondif passé'
     answers = variants(verb.participe_passe)
       .map(form => `En ${verb.auxiliaire_participe_present} ${form}`)

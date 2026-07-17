@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1876 186" role="img" aria-labelledby="title desc">
+  <title id="title">Emplacement pour recharger un défi</title>
+  <desc id="desc">Bloc de la page d’accueil dans lequel les élèves collent le code du défi.</desc>
+  <defs>
+    <filter id="field-glow" x="-20%" y="-70%" width="140%" height="240%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <style>
+    .code-field-glow {
+      animation: field-pulse 1.8s ease-in-out infinite;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+    @keyframes field-pulse {
+      0%, 100% { opacity: .16; transform: scale(1); }
+      50% { opacity: .82; transform: scale(1.012, 1.08); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .code-field-glow { animation: none; opacity: .42; }
+    }
+  </style>
+  <rect x="9" y="10" width="1858" height="167" rx="29" fill="#f8fbfa" stroke="#b8d3cb" stroke-width="2"/>
+  <rect x="47" y="55" width="77" height="77" rx="21" fill="#1b7895"/>
+  <path d="M85.5 77v34m-12-12 12 12 12-12m-22 21h20" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="144" y="86" fill="#24324a" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">Tu as reçu un défi ?</text>
+  <text x="144" y="126" fill="#66728b" font-family="Arial, Helvetica, sans-serif" font-size="29">Colle son code pour le reprendre immédiatement.</text>
+  <rect class="code-field-glow" x="1012" y="49" width="614" height="91" rx="19" fill="none" stroke="#36aeca" stroke-width="7" filter="url(#field-glow)"/>
+  <rect x="1012" y="49" width="614" height="91" rx="19" fill="#fff" stroke="#75b8ba" stroke-width="3"/>
+  <text x="1040" y="105" fill="#898e8c" font-family="Arial, Helvetica, sans-serif" font-size="33" font-weight="700" letter-spacing="2">AB-CD-EF-23</text>
+  <rect x="1643" y="49" width="189" height="92" rx="20" fill="#1b7895"/>
+  <text x="1680" y="105" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="33">Charger</text>
+</svg>

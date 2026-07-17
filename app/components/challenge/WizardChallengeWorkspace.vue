@@ -34,6 +34,7 @@ const {
   toggleTense,
   selectAllTenses,
   clearTenses,
+  selectDefaultTenses,
   applySelection,
   applySharedChallenge
 } = useChallengeBuilder()
@@ -42,6 +43,8 @@ const api = useChallengeApi()
 const requestUrl = useRequestURL()
 const wizardInitialized = useState('wizard-challenge-initialized', () => false)
 const currentStep = ref<WizardStep>(0)
+const isPreparingStep4 = ref(false)
+const highlightChallengeLoader = ref(false)
 const presetStage = ref<'groups' | 'presets'>('groups')
 const presetExpanded = ref(false)
 const challengeCode = ref('')
@@ -60,6 +63,10 @@ const isPrintOpen = ref(false)
 const isShareOpen = ref(false)
 const isCoachPickerOpen = ref(false)
 const selectedCoach = ref<CoachProfile | null>(null)
+const revealedPresetVerbIds = ref<number[]>([])
+const revealedPresetTenseIds = ref<number[]>([])
+const presetTenseRevealPending = ref(false)
+const showLaunchSummary = ref(false)
 const conjugationInstructionRaw = ref('')
 const conjugationQuestionContextRaw = ref('')
 const conjugationQuestionRaw = ref('')
@@ -69,6 +76,30 @@ const conjugationExampleEmphasisRaw = ref('')
 const conjugationExampleSuffixRaw = ref('')
 const conjugationExampleLoading = ref(false)
 let conjugationExampleRequest = 0
+let presetRevealTimers: ReturnType<typeof setTimeout>[] = []
+
+const displayedVerbIds = computed(() => activePresetId.value ? revealedPresetVerbIds.value : challenge.value.verbIds)
+const displayedTenseIds = computed(() => activePresetId.value ? revealedPresetTenseIds.value : challenge.value.tenseIds)
+
+function cancelPresetReveal() {
+  presetRevealTimers.forEach(timer => clearTimeout(timer))
+  presetRevealTimers = []
+}
+
+function revealIds(ids: number[], target: Ref<number[]>) {
+  target.value = []
+  if (!ids.length) return
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    target.value = [...ids]
+    return
+  }
+  const interval = 1_000 / ids.length
+  ids.forEach((id, index) => {
+    presetRevealTimers.push(setTimeout(() => {
+      target.value = [...target.value, id]
+    }, Math.round(index * interval)))
+  })
+}
 
 function withExampleSubject(value: string) {
   const subject = challenge.value.inclusivePronouns ? 'iel' : 'il'
@@ -162,6 +193,14 @@ function logUsage(event: 'homepage' | 'print' | 'challenge-save' | 'challenge-lo
 
 onMounted(() => {
   logUsage('homepage')
+  try {
+    if (sessionStorage.getItem('highlight-home-challenge-loader') === '1') {
+      sessionStorage.removeItem('highlight-home-challenge-loader')
+      highlightChallengeLoader.value = true
+    }
+  } catch {
+    // L'accueil fonctionne normalement si le stockage du navigateur est indisponible.
+  }
 })
 
 async function retryCatalogue() {
@@ -196,43 +235,68 @@ function onChallengeCodeInput(event: Event) {
 }
 
 function markAsCustom() {
+  cancelPresetReveal()
+  revealedPresetVerbIds.value = [...challenge.value.verbIds]
+  revealedPresetTenseIds.value = [...challenge.value.tenseIds]
+  presetTenseRevealPending.value = false
   activePresetId.value = undefined
   areAllLaunchVerbsVisible.value = false
   clearMessages()
 }
 
 function goToStep(step: WizardStep) {
+  if (isPreparingStep4.value) return
+  showLaunchSummary.value = false
   if (step === 0) {
     currentStep.value = 0
-    nextTick(() => document.querySelector<HTMLElement>('.wizard-panel')?.focus())
     return
   }
   if (step === 2 && selectedVerbs.value.length === 0) return
   if ((step === 3 || step === 4) && !isReady.value) return
   currentStep.value = step
+  if (step === 2 && activePresetId.value && presetTenseRevealPending.value) {
+    presetTenseRevealPending.value = false
+    nextTick(() => revealIds(challenge.value.tenseIds, revealedPresetTenseIds))
+  }
   if (step === 3) void refreshConjugationExample()
-  nextTick(() => document.querySelector<HTMLElement>('.wizard-panel')?.focus())
 }
 
 async function startCustomChallenge() {
   goToStep(1)
   await nextTick()
-  document.getElementById('verb-search-input')?.focus()
+  document.getElementById('verb-search-input')?.focus({ preventScroll: true })
 }
 
 function nextStep() {
   if (currentStep.value === 1 && selectedVerbs.value.length) goToStep(2)
   else if (currentStep.value === 2 && selectedTenses.value.length) goToStep(3)
-  else if (currentStep.value === 3) goToStep(4)
+  else if (currentStep.value === 3) void prepareStep4()
+}
+
+async function prepareStep4() {
+  if (!isReady.value || isPreparingStep4.value) return
+  if (currentStep.value !== 3) {
+    goToStep(4)
+    return
+  }
+  isPreparingStep4.value = true
+  await new Promise(resolve => setTimeout(resolve, 1_000))
+  isPreparingStep4.value = false
+  goToStep(4)
 }
 
 function previousStep() {
-  if (currentStep.value > 0) goToStep((currentStep.value - 1) as WizardStep)
+  if (currentStep.value === 1) {
+    restartChallenge()
+    return
+  }
+  if (currentStep.value > 1) goToStep((currentStep.value - 1) as WizardStep)
 }
 
 function restartChallenge() {
+  cancelPresetReveal()
   clearVerbs()
-  clearTenses()
+  selectDefaultTenses()
   challenge.value.questionCount = 20
   challenge.value.exerciseKind = 'conjugation'
   challenge.value.pastSimplePronouns = 'all'
@@ -244,6 +308,11 @@ function restartChallenge() {
   areAllLaunchVerbsVisible.value = false
   presetExpanded.value = false
   presetStage.value = 'groups'
+  challengeCode.value = ''
+  codeError.value = ''
+  notice.value = ''
+  actionError.value = ''
+  selectedCoach.value = null
   clearMessages()
   goToStep(0)
 }
@@ -258,6 +327,7 @@ function shuffledSample(ids: readonly number[], count: number) {
 }
 
 function selectPreset(preset: ChallengePreset, randomCount?: number) {
+  cancelPresetReveal()
   applySelection({
     verbIds: randomCount ? shuffledSample(preset.verbIds, randomCount) : [...preset.verbIds],
     tenseIds: [...preset.tenseIds],
@@ -270,10 +340,14 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   challenge.value.complementPlacement = preset.complementPlacement
   challenge.value.complementOptions = preset.complementOptions ?? legacyComplementOptions(preset.includeComplements, preset.complementPlacement)
   activePresetId.value = preset.id
+  revealedPresetVerbIds.value = []
+  revealedPresetTenseIds.value = []
+  presetTenseRevealPending.value = true
   areAllLaunchVerbsVisible.value = false
   notice.value = ''
   actionError.value = ''
   goToStep(1)
+  nextTick(() => revealIds(challenge.value.verbIds, revealedPresetVerbIds))
 }
 
 async function restoreChallenge() {
@@ -294,6 +368,7 @@ async function restoreChallenge() {
     areAllLaunchVerbsVisible.value = false
     challengeCode.value = restored.code
     notice.value = `Le défi ${restored.code} est chargé. Tu peux le lancer ou le modifier.`
+    showLaunchSummary.value = true
     currentStep.value = 4
     logUsage('challenge-load')
   } catch (error) {
@@ -468,6 +543,15 @@ watch(
   },
 )
 
+watch(currentStep, async () => {
+  if (import.meta.server) return
+  await nextTick()
+  document.querySelector<HTMLElement>('.wizard-panel')?.focus({ preventScroll: true })
+  window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+})
+
+onBeforeUnmount(cancelPresetReveal)
+
 async function prepareExercise(mode: 'classic' | 'chat') {
   if (!isReady.value) return
   if (mode === 'chat') {
@@ -573,11 +657,11 @@ async function saveChallenge() {
           <h2 id="wizard-title" class="sr-only">Composer un défi personnalisé</h2>
 
           <nav v-if="currentStep !== 0" class="wizard-steps" aria-label="Étapes de création du défi">
-            <button :class="{ 'is-active': currentStep === 1, 'is-complete': stepStatus.verbs > 0 }" type="button" @click="goToStep(1)">
+            <button class="wizard-step-tab wizard-step-tab--verbs" :class="{ 'is-active': currentStep === 1, 'is-complete': stepStatus.verbs > 0 }" type="button" @click="goToStep(1)">
               <span>1</span><span><strong>Verbes</strong><small>{{ stepStatus.verbs ? `${stepStatus.verbs} choisi${stepStatus.verbs > 1 ? 's' : ''}` : 'À choisir' }}</small></span>
             </button>
             <span class="wizard-steps__line" aria-hidden="true" />
-            <button :class="{ 'is-active': currentStep === 2, 'is-complete': stepStatus.tenses > 0 }" type="button" :disabled="stepStatus.verbs === 0" @click="goToStep(2)">
+            <button class="wizard-step-tab wizard-step-tab--tenses" :class="{ 'is-active': currentStep === 2, 'is-complete': stepStatus.tenses > 0 }" type="button" :disabled="stepStatus.verbs === 0" @click="goToStep(2)">
               <span>2</span><span><strong><span class="mobile-label-hidden">Modes et temps</span><span class="mobile-label-only">Temps</span></strong><small>{{ stepStatus.tenses ? `${stepStatus.tenses} choisi${stepStatus.tenses > 1 ? 's' : ''}` : 'À choisir' }}</small></span>
             </button>
             <span class="wizard-steps__line" aria-hidden="true" />
@@ -585,16 +669,33 @@ async function saveChallenge() {
               <span>3</span><span><strong>Options</strong><small>Finaliser le défi</small></span>
             </button>
             <span class="wizard-steps__line" aria-hidden="true" />
-            <button :class="{ 'is-active': currentStep === 4 }" type="button" :disabled="!isReady" @click="goToStep(4)">
-              <span>4</span><span><strong>Lancer</strong><small>Utiliser le défi</small></span>
+            <button :class="{ 'is-active': currentStep === 4 }" type="button" :disabled="!isReady || isPreparingStep4" @click="prepareStep4">
+              <span>4</span><span><strong>Créer</strong><small>Utiliser le défi</small></span>
             </button>
           </nav>
 
           <div class="wizard-content" :class="{ 'wizard-content--home': currentStep === 0 }">
-            <div v-if="currentStep === 0" class="wizard-home">
-                <div class="code-loader" role="search" aria-label="Charger un défi avec son code">
+            <div v-if="isPreparingStep4" class="wizard-step-preparing" role="status" aria-live="polite">
+              <span class="loader wizard-step-preparing__spinner" aria-hidden="true" />
+              <strong>Préparation de ton défi…</strong>
+            </div>
+
+            <div v-else-if="currentStep === 0" class="wizard-home">
+                <div
+                  class="code-loader"
+                  :class="{ 'is-arrival-highlighted': highlightChallengeLoader }"
+                  role="search"
+                  aria-label="Charger un défi avec son code"
+                  @pointerdown="highlightChallengeLoader = false"
+                >
                   <div class="code-loader__heading">
-                    <span class="code-loader__icon" aria-hidden="true">↗</span>
+                    <span class="code-loader__icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3v12" />
+                        <path d="m7 10 5 5 5-5" />
+                        <path d="M5 21h14" />
+                      </svg>
+                    </span>
                     <div><strong>Tu as reçu un défi&nbsp;?</strong><small>Colle son code pour le reprendre immédiatement.</small></div>
                   </div>
                   <div class="code-loader__control">
@@ -626,7 +727,7 @@ async function saveChallenge() {
                   >
                     <span class="wizard-home__choice-icon" aria-hidden="true">★</span>
                     <div>
-                      <h2>Tu veux travailler un défi tout fait&nbsp;?</h2>
+                      <h2>Tu veux travailler un de nos défis&nbsp;?</h2>
                     </div>
                     <span class="secondary-button" aria-hidden="true">Voir</span>
                   </button>
@@ -635,9 +736,9 @@ async function saveChallenge() {
                     class="wizard-home__choice wizard-home__choice--preset"
                     :class="{ 'is-preset-selection': presetStage === 'presets' }"
                   >
-                    <span v-if="presetStage === 'groups'" class="wizard-home__choice-icon" aria-hidden="true">★</span>
-                    <div v-if="presetStage === 'groups'">
-                      <h2>Tu veux travailler un défi tout fait&nbsp;?</h2>
+                    <span class="wizard-home__choice-icon" aria-hidden="true">★</span>
+                    <div>
+                      <h2>Tu veux travailler un de nos défis&nbsp;?</h2>
                     </div>
                     <PresetPicker
                       class="wizard-home__inline-presets"
@@ -655,17 +756,16 @@ async function saveChallenge() {
                       <h2>Tu veux construire ton propre défi&nbsp;?</h2>
                       <p>Choisis les verbes, les modes, les temps et les options.</p>
                     </div>
-                    <button class="primary-button wizard-next-pulse" type="button" @click="startCustomChallenge">Construire mon défi →</button>
+                    <button class="primary-button" :class="{ 'wizard-next-pulse': !highlightChallengeLoader }" type="button" @click="startCustomChallenge">Construire mon défi →</button>
                   </article>
                 </div>
             </div>
 
             <div v-else-if="currentStep === 1" class="wizard-step wizard-step--selection" aria-labelledby="verbs-title">
               <div class="wizard-step__actions wizard-step__actions--split">
-                <button class="secondary-button wizard-step__restart" type="button" @click="restartChallenge">Recommencer</button>
+                <button class="secondary-button" type="button" @click="previousStep">← Accueil</button>
                 <div class="wizard-step__controls">
-                  <button class="secondary-button" type="button" @click="previousStep">← Accueil</button>
-                  <button class="primary-button wizard-next-pulse" type="button" :disabled="!selectedVerbs.length" @click="nextStep">
+                  <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedVerbs.length" @click="nextStep">
                     Choisir les temps →
                   </button>
                 </div>
@@ -676,7 +776,7 @@ async function saveChallenge() {
               </div>
               <VerbPicker
                 :verbs="catalogue.verbes"
-                :selected-ids="challenge.verbIds"
+                :selected-ids="displayedVerbIds"
                 @add="onAddVerb"
                 @remove="onRemoveVerb"
                 @clear="markAsCustom(); clearVerbs()"
@@ -685,10 +785,9 @@ async function saveChallenge() {
 
             <div v-else-if="currentStep === 2" class="wizard-step wizard-step--selection" aria-labelledby="tenses-title">
               <div class="wizard-step__actions wizard-step__actions--split">
-                <button class="secondary-button wizard-step__restart" type="button" @click="restartChallenge">Recommencer</button>
+                <button class="secondary-button" type="button" @click="previousStep">← Verbes</button>
                 <div class="wizard-step__controls">
-                  <button class="secondary-button" type="button" @click="previousStep">← Verbes</button>
-                  <button class="primary-button wizard-next-pulse" type="button" :disabled="!selectedTenses.length" @click="nextStep">
+                  <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedTenses.length" @click="nextStep">
                     Choisir les options →
                   </button>
                 </div>
@@ -700,7 +799,7 @@ async function saveChallenge() {
                 :modes="catalogue.modes"
                 :tenses="catalogue.temps"
                 :verbs="selectedVerbs"
-                :selected-ids="challenge.tenseIds"
+                :selected-ids="displayedTenseIds"
                 @toggle="onToggleTense"
                 @select-all="markAsCustom(); selectAllTenses()"
                 @clear="markAsCustom(); clearTenses()"
@@ -709,12 +808,11 @@ async function saveChallenge() {
 
             <div v-else-if="currentStep === 3" class="wizard-step wizard-review">
               <div class="wizard-step__actions wizard-step__actions--split">
-                <button class="secondary-button wizard-step__restart" type="button" @click="restartChallenge">Recommencer</button>
+                <button class="secondary-button" type="button" @click="previousStep">
+                  ← <span class="mobile-label-hidden">Modes et temps</span><span class="mobile-label-only">Temps</span>
+                </button>
                 <div class="wizard-step__controls">
-                  <button class="secondary-button" type="button" @click="previousStep">
-                    ← <span class="mobile-label-hidden">Modes et temps</span><span class="mobile-label-only">Temps</span>
-                  </button>
-                  <button class="primary-button wizard-next-pulse" type="button" @click="nextStep">Lancer →</button>
+                  <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" @click="nextStep">Créer →</button>
                 </div>
               </div>
               <div class="wizard-step__intro">
@@ -748,12 +846,9 @@ async function saveChallenge() {
 
             <div v-else class="wizard-step wizard-launch-step">
               <div class="wizard-step__actions wizard-step__actions--split">
-                <button class="secondary-button wizard-step__restart" type="button" @click="restartChallenge">Recommencer</button>
-                <div class="wizard-step__controls">
-                  <button class="secondary-button" type="button" @click="previousStep">← Options</button>
-                </div>
+                <button class="secondary-button" type="button" @click="previousStep">← Options</button>
               </div>
-              <section class="launch-summary" aria-labelledby="launch-verbs-title">
+              <section v-if="showLaunchSummary" class="launch-summary" aria-labelledby="launch-verbs-title">
                 <div class="launch-summary__heading">
                   <div>
                     <p v-if="activePreset" class="builder-card__eyebrow">{{ activePresetGroupLabel }}</p>
@@ -799,7 +894,7 @@ async function saveChallenge() {
       </main>
 
       <ClassicExercise v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" @close="isExerciseOpen = false" />
-      <ChatExercise v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :coach="selectedCoach" @close="isExerciseOpen = false" />
+      <ChatExercise v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :coach="selectedCoach" :verbs="selectedVerbs" :tenses="selectedTenses" @close="isExerciseOpen = false" />
       <CoachPicker v-if="isCoachPickerOpen" @close="isCoachPickerOpen = false" @select="launchWithCoach" />
       <PrintPreview v-if="isPrintOpen" :questions="printQuestions" :verbs="selectedVerbs" :tenses="selectedTenses" :exercise-kind="challenge.exerciseKind" :options="challenge.printOptions" @update-options="challenge.printOptions = $event" @close="isPrintOpen = false" />
       <ShareChallengeDialog v-if="isShareOpen" :code="shareCode" :url="shareUrl" @close="isShareOpen = false" />
@@ -819,6 +914,7 @@ async function saveChallenge() {
 .code-loader__heading > div { display: grid; }
 .code-loader__heading small { color: var(--muted); }
 .code-loader__icon { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; color: white; background: var(--brand); border-radius: 11px; font-size: 1.2rem; font-weight: 900; }
+.code-loader__icon svg { width: 21px; height: 21px; }
 .code-loader__control { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
 .code-loader__code-entry { width: 100%; min-height: 46px; padding: 9px 13px; overflow: hidden; border: 1px solid #9ebdb4; border-radius: 10px; color: var(--ink); background: white; font-weight: 800; letter-spacing: .08em; line-height: 26px; text-transform: uppercase; white-space: nowrap; }
 .code-loader__code-entry:empty::before { color: #7f8583; content: attr(data-placeholder); pointer-events: none; }
@@ -835,6 +931,12 @@ async function saveChallenge() {
 .wizard-steps button.is-active { color: var(--brand-dark); }
 .wizard-steps button.is-active > span:first-child { color: white; border-color: var(--brand); background: var(--brand); box-shadow: 0 0 0 5px var(--brand-pale); }
 .wizard-steps button.is-complete:not(.is-active) > span:first-child { color: var(--success); border-color: #83b39b; background: var(--success-pale); }
+.wizard-steps button.wizard-step-tab--verbs:not(.is-active) > span:first-child { color: var(--verb-accent); border-color: color-mix(in srgb, var(--verb-accent) 58%, transparent); background: var(--verb-accent-soft); }
+.wizard-steps .wizard-step-tab--verbs.is-active > span:first-child { color: white; border-color: var(--verb-accent); background: var(--verb-accent); }
+.wizard-steps .wizard-step-tab--verbs.is-active > span:first-child { box-shadow: 0 0 0 5px color-mix(in srgb, var(--verb-accent) 18%, transparent); }
+.wizard-steps button.wizard-step-tab--tenses:not(.is-active) > span:first-child { color: var(--tense-accent); border-color: color-mix(in srgb, var(--tense-accent) 58%, transparent); background: var(--tense-accent-soft); }
+.wizard-steps .wizard-step-tab--tenses.is-active > span:first-child { color: #302711; border-color: var(--tense-accent); background: var(--tense-accent); }
+.wizard-steps .wizard-step-tab--tenses.is-active > span:first-child { box-shadow: 0 0 0 5px color-mix(in srgb, var(--tense-accent) 18%, transparent); }
 .wizard-steps button:disabled { cursor: default; opacity: .5; }
 .wizard-steps__line { height: 2px; background: #d6e0dd; }
 .wizard-content { position: relative; min-height: 480px; padding: 30px clamp(18px, 5vw, 58px) 34px; }
@@ -859,10 +961,15 @@ async function saveChallenge() {
 .wizard-home__choice button { grid-column: 1 / -1; align-self: end; justify-self: start; margin-top: auto; }
 .wizard-home__inline-presets { grid-column: 1 / -1; }
 .wizard-step { max-width: 930px; margin: 0 auto; }
-.wizard-step--selection { padding-top: 54px; }
-.wizard-step__actions { position: absolute; top: 30px; right: 30px; display: flex; align-items: flex-start; justify-content: flex-end; }
-.wizard-step__actions--split { left: 30px; align-items: center; justify-content: space-between; }
+.wizard-step-preparing { display: grid; min-height: 420px; place-content: center; justify-items: center; gap: 15px; color: var(--brand-dark); text-align: center; }
+.wizard-step-preparing__spinner { width: 42px; height: 42px; border-width: 5px; }
+.wizard-step-preparing strong { font-size: 1.15rem; }
+.wizard-step--selection { padding-top: 0; }
+.wizard-step__actions { display: flex; margin-bottom: 30px; align-items: flex-start; justify-content: flex-end; }
+.wizard-step__actions--split { align-items: center; justify-content: space-between; }
 .wizard-step__controls { display: flex; align-items: center; gap: 8px; }
+.wizard-step__cta { min-height: 54px; padding: 13px 25px; border-radius: 13px; font-size: 1.05rem; font-weight: 850; }
+.wizard-step__cta--launch { min-height: 70px; padding: 17px 33px; border-radius: 17px; font-size: 1.37rem; }
 .wizard-next-pulse:not(:disabled) { animation: wizard-next-pulse 2s infinite; transform-origin: center; }
 .wizard-step__intro { margin-bottom: 22px; text-align: center; }
 .wizard-step__intro--selection { text-align: left; }
@@ -872,7 +979,7 @@ async function saveChallenge() {
 .wizard-step :deep(.builder-card) { box-shadow: none; }
 .wizard-step :deep(.builder-card__header) { display: none; }
 .wizard-step :deep(.verb-search) { padding-top: 23px; }
-.wizard-review, .wizard-launch-step { padding-top: 54px; }
+.wizard-review, .wizard-launch-step { padding-top: 0; }
 .mobile-label-only { display: none; }
 .wizard-review :deep(.options-card) { margin: 0 0 18px; box-shadow: none; }
 .wizard-review :deep(.challenge-launch) { margin-top: 18px; box-shadow: none; }
@@ -908,8 +1015,34 @@ async function saveChallenge() {
   }
 }
 
+@keyframes challenge-loader-arrival-flash {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgb(31 123 145 / 0%);
+    filter: brightness(1);
+    transform: scale(1);
+  }
+  50% {
+    border-color: #42a8bd;
+    box-shadow: 0 0 0 7px rgb(31 123 145 / 23%), 0 12px 30px rgb(31 123 145 / 18%);
+    filter: brightness(1.14);
+    transform: scale(1.012);
+  }
+}
+
+.code-loader.is-arrival-highlighted {
+  transform-origin: center;
+  animation:
+    challenge-loader-arrival-flash 230ms ease-in-out 3,
+    wizard-next-pulse 2s 760ms infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .wizard-next-pulse:not(:disabled) { animation: none; }
+  .code-loader.is-arrival-highlighted {
+    border-color: #42a8bd;
+    box-shadow: 0 0 0 5px rgb(31 123 145 / 18%);
+    animation: none;
+  }
   .launch-verbs-expand-enter-active, .launch-verbs-expand-leave-active { transition: none; }
 }
 
@@ -929,10 +1062,9 @@ async function saveChallenge() {
   .wizard-steps button > span:first-child { width: 31px; height: 31px; flex-basis: 31px; }
   .wizard-steps button { flex-direction: column; gap: 4px; }
   .wizard-content { min-height: 430px; padding: 22px 12px 24px; }
-  .wizard-step--selection { padding-top: 58px; }
-  .wizard-review, .wizard-launch-step { padding-top: 58px; }
-  .wizard-step__actions { top: 22px; right: 22px; }
-  .wizard-step__actions--split { left: 22px; }
+  .wizard-step--selection { padding-top: 0; }
+  .wizard-review, .wizard-launch-step { padding-top: 0; }
+  .wizard-step__actions { margin-bottom: 22px; }
   .wizard-step__intro { padding: 0 8px; }
   .wizard-step__controls { justify-content: flex-end; flex-wrap: wrap; }
   .wizard-review :deep(.challenge-launch) { padding: 17px 12px; }
@@ -958,13 +1090,12 @@ async function saveChallenge() {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     gap: 9px;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
   }
   .wizard-step__actions--split > .secondary-button {
     grid-column: 1;
-    justify-self: center;
+    justify-self: start;
   }
-  .wizard-step__actions--split > .wizard-step__restart { display: none; }
   .wizard-step__controls { display: contents; }
   .wizard-step__controls > .secondary-button {
     grid-column: 1;
@@ -986,6 +1117,16 @@ async function saveChallenge() {
     padding-inline: 8px;
     font-size: .8rem;
     white-space: nowrap;
+  }
+  .wizard-step__controls .wizard-step__cta {
+    min-height: 48px;
+    padding-inline: 13px;
+    font-size: .88rem;
+  }
+  .wizard-step__controls .wizard-step__cta--launch {
+    min-height: 62px;
+    padding-inline: 17px;
+    font-size: 1.14rem;
   }
 }
 </style>

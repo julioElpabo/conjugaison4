@@ -372,7 +372,8 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
           .filter((candidate) => {
             if (position === 'after') return true
             if (functionObject === 'cod') return allowsAnteposedComplement(row) && hasVisibleAnteposedAgreement(candidate)
-            return normalized(row.mode_name) !== 'impératif' && Boolean(indirectRelative(candidate.texte, candidate.preposition))
+            return normalized(row.mode_name) !== 'impératif'
+              && Boolean(indirectRelative(candidate.texte, candidate.preposition, candidate.genre, candidate.nombre))
           })
         return matching.length ? [{ option, matching }] : []
       })
@@ -381,7 +382,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
       const option = selectedOption?.option as ComplementOption | undefined
       const useBefore = option?.endsWith('-before') || false
       const relative = complement && option === 'coi-before'
-        ? indirectRelative(complement.texte, complement.preposition)
+        ? indirectRelative(complement.texte, complement.preposition, complement.genre, complement.nombre)
         : null
       const canUseComplement = Boolean(complement) && (!useBefore
         || (option === 'cod-before' ? Boolean(complement?.texte_antepose) : Boolean(relative)))
@@ -408,6 +409,13 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
   if (nonFiniteTenses.length > 0 && request.exerciseKind === 'conjugation'
       && !onlyBeforeComplements) {
     const verbs: NonFiniteVerbRow[] = []
+    const selectedNonFiniteRequirePresentParticiple = nonFiniteTenses.every((tense) => {
+      const mode = normalized(tense.mode_name)
+      return mode === 'gérondif' || (mode === 'participe' && normalized(tense.name) === 'présent')
+    })
+    const presentParticipleClause = selectedNonFiniteRequirePresentParticiple
+      ? "AND NULLIF(NULLIF(TRIM(v.`participe_présent`), ''), '-') IS NOT NULL"
+      : ''
     if (verbIds.length > 0) {
       const [storedVerbs] = await database.execute<NonFiniteVerbRow[]>(`
       SELECT v.id, v.infinitif,
@@ -417,6 +425,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
       FROM verbes v
       LEFT JOIN verbes auxiliary ON auxiliary.infinitif = v.auxiliaire
       WHERE v.id IN (${placeholders(verbIds)})
+        ${presentParticipleClause}
       `, verbIds)
       verbs.push(...storedVerbs)
     }
@@ -431,6 +440,9 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
         INNER JOIN verbes base ON base.id = ep.verbe_id
         WHERE ep.id IN (${placeholders(pronominalUseIds)})
           AND ep.actif = 1 AND ep.verbe_id IS NOT NULL
+          ${selectedNonFiniteRequirePresentParticiple
+            ? "AND NULLIF(NULLIF(TRIM(base.`participe_présent`), ''), '-') IS NOT NULL"
+            : ''}
       `, pronominalUseIds)
       for (const use of uses) {
         const participles = use.participe_present.split('-').map(form => form.trim()).filter(Boolean)

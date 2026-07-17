@@ -19,10 +19,12 @@ const retryAlreadyOffered = ref(false)
 const retryMessageVisible = ref(false)
 const attempts = ref<ExerciseAttempt[]>([])
 const isFinished = ref(false)
+const closeConfirmationOpen = ref(false)
 const answerInput = useTemplateRef<HTMLInputElement>('answer-input')
+const keepExerciseButton = useTemplateRef<HTMLButtonElement>('keep-exercise-button')
 const dialog = useTemplateRef<HTMLElement>('exercise-dialog')
 
-useDialogFocus(dialog, () => emit('close'), answerInput)
+useDialogFocus(dialog, handleEscapeClose, answerInput)
 
 const currentQuestion = computed(() => props.questions[currentIndex.value])
 const correctCount = computed(() => attempts.value.filter(attempt => attempt.status === 'correct').length)
@@ -114,10 +116,31 @@ function restart() {
   nextTick(() => answerInput.value?.focus())
 }
 
+function requestClose() {
+  closeConfirmationOpen.value = true
+  nextTick(() => keepExerciseButton.value?.focus())
+}
+
+function handleEscapeClose() {
+  if (closeConfirmationOpen.value) cancelClose()
+  else requestClose()
+}
+
+function cancelClose() {
+  closeConfirmationOpen.value = false
+  nextTick(() => (isFinished.value ? dialog.value : answerInput.value)?.focus())
+}
+
+function confirmClose() {
+  closeConfirmationOpen.value = false
+  emit('close')
+}
+
 function onDocumentKeydown(event: KeyboardEvent) {
   if (event.key !== 'Enter'
     || event.isComposing
     || event.repeat
+    || closeConfirmationOpen.value
     || isFinished.value
     || feedback.value === 'idle') {
     return
@@ -135,7 +158,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
 
 <template>
   <Teleport to="body">
-    <div class="exercise-overlay">
+    <div class="exercise-overlay" @click.self="requestClose">
       <section
         ref="exercise-dialog"
         class="exercise-dialog"
@@ -151,7 +174,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
               {{ isFinished ? 'Résultats' : `Question ${currentIndex + 1} sur ${questions.length}` }}
             </h2>
           </div>
-          <button class="dialog-close" type="button" aria-label="Quitter l’exercice" @click="emit('close')">×</button>
+          <button class="dialog-close" type="button" aria-label="Quitter l’exercice" @click="requestClose">×</button>
         </header>
 
         <div class="exercise-progress" aria-label="Progression du questionnaire">
@@ -370,6 +393,18 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
             <button class="secondary-button" type="button" @click="emit('close')">Fermer</button>
             <button class="primary-button" type="button" @click="restart">Recommencer</button>
           </div>
+        </div>
+
+        <div v-if="closeConfirmationOpen" class="exercise-close-confirmation" @click.self="cancelClose">
+          <section role="alertdialog" aria-modal="true" aria-labelledby="close-confirmation-title" aria-describedby="close-confirmation-description">
+            <span class="exercise-close-confirmation__icon" aria-hidden="true">?</span>
+            <h3 id="close-confirmation-title">Quitter l’exercice ?</h3>
+            <p id="close-confirmation-description">Ta progression actuelle sera perdue.</p>
+            <div class="exercise-close-confirmation__actions">
+              <button ref="keep-exercise-button" class="secondary-button" type="button" @click="cancelClose">Continuer l’exercice</button>
+              <button class="primary-button exercise-close-confirmation__leave" type="button" @click="confirmClose">Quitter</button>
+            </div>
+          </section>
         </div>
       </section>
     </div>

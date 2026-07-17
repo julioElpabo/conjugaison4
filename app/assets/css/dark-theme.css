@@ -1,6 +1,10 @@
 /* Dark theme: calm blue-green surfaces with warm, restrained accents. */
 :root[data-theme='dark'] {
   background: #111b1c;
+  --verb-accent: #d2a7df;
+  --verb-accent-soft: rgb(210 167 223 / 16%);
+  --tense-accent: #efc45d;
+  --tense-accent-soft: rgb(239 196 93 / 16%);
 }
 
 :root[data-theme='dark'] input,
@@ -28,7 +32,7 @@
 
 :root[data-theme='dark'] :is(
   .page-state, .challenge-launch, .workspace-message, .builder-card, .wizard-panel,
-  .reference-state, .consultation-container, .rule-section, .learning-summary button
+  .reference-state, .consultation-container, .rule-section, .learning-summary button, .challenge-save
 ) {
   background: rgb(24 37 35 / 94%);
   border-color: var(--line);
@@ -53,6 +57,40 @@
   border-color: #40534f;
 }
 
+:root[data-theme='dark'] .preset-browser__columns {
+  background: #172321;
+  border-color: #40534f;
+  box-shadow: inset 0 1px rgb(255 255 255 / 4%);
+}
+
+:root[data-theme='dark'] .preset-browser__column {
+  background: #1b2927;
+  border-color: #40534f;
+}
+
+:root[data-theme='dark'] .preset-browser__list button { color: #d7e4e1; }
+:root[data-theme='dark'] .preset-browser__list button:hover {
+  color: #e6f0ed;
+  background: #263a36;
+  border-color: #58716b;
+}
+:root[data-theme='dark'] .preset-browser__list button.is-selected {
+  color: #fff;
+  background: #39786c;
+  border-color: #60a797;
+}
+:root[data-theme='dark'] .preset-browser__column--quantity .preset-browser__list button:hover {
+  color: #c9e9e2;
+  background: #29423c;
+  border-color: #60a797;
+}
+:root[data-theme='dark'] .preset-browser__count {
+  color: #b8c8c4;
+  background: #263532;
+  border-color: #49605b;
+}
+:root[data-theme='dark'] .preset-browser__launch { background: #39786c; }
+
 :root[data-theme='dark'] :is(.action-button--primary, .primary-button) {
   color: #fff;
   background: #39786c;
@@ -71,9 +109,14 @@
 }
 
 :root[data-theme='dark'] .action-button--print {
-  color: #f0dcc3;
-  background: #392e22;
-  border-color: #806345;
+  color: #d7edf4;
+  background: transparent;
+  border-color: #527f8d;
+}
+
+:root[data-theme='dark'] .action-button--print .action-button__icon {
+  color: #9ed7e4;
+  background: #294b55;
 }
 
 :root[data-theme='dark'] :is(.preset-panel, .preset-list, .wizard-steps, .options-card, .tense-groups > .tense-group:nth-child(even)) {
@@ -92,6 +135,30 @@
 :root[data-theme='dark'] :is(.wizard-steps button > span:first-child, .wizard-home__choice--custom) {
   background: #20353a;
   border-color: #4b7077;
+}
+
+:root[data-theme='dark'] .wizard-steps .wizard-step-tab--verbs.is-active > span:first-child {
+  color: #1a211f;
+  background: var(--verb-accent);
+  border-color: var(--verb-accent);
+}
+
+:root[data-theme='dark'] .wizard-steps button.wizard-step-tab--verbs:not(.is-active) > span:first-child {
+  color: var(--verb-accent);
+  background: var(--verb-accent-soft);
+  border-color: color-mix(in srgb, var(--verb-accent) 58%, transparent);
+}
+
+:root[data-theme='dark'] .wizard-steps .wizard-step-tab--tenses.is-active > span:first-child {
+  color: #282313;
+  background: var(--tense-accent);
+  border-color: var(--tense-accent);
+}
+
+:root[data-theme='dark'] .wizard-steps button.wizard-step-tab--tenses:not(.is-active) > span:first-child {
+  color: var(--tense-accent);
+  background: var(--tense-accent-soft);
+  border-color: color-mix(in srgb, var(--tense-accent) 58%, transparent);
 }
 
 :root[data-theme='dark'] .conjugation-example {
@@ -137,6 +204,25 @@
   background: #49786c;
 }
 
+:root[data-theme='dark'] .verb-picker .selected-chips li {
+  color: #1a211f;
+  background: var(--verb-accent);
+  border-color: var(--verb-accent);
+}
+
+:root[data-theme='dark'] .verb-picker .selected-chips button {
+  color: #1a211f;
+  background: rgb(26 33 31 / 14%);
+}
+
+:root[data-theme='dark'] .verb-picker .selected-chips button:hover {
+  color: #18211f;
+  background: rgb(26 33 31 / 26%);
+}
+
+:root[data-theme='dark'] .verb-picker .count-badge { color: #1a211f; }
+:root[data-theme='dark'] .tense-picker .count-badge { color: #282313; }
+
 :root[data-theme='dark'] .tense-picker > .selection-toolbar {
   border-color: var(--line);
 }
@@ -149,6 +235,7 @@
 :root[data-theme='dark'] .switch-row__control { background: #52635f; }
 :root[data-theme='dark'] .switch-row__control::after { background: #eef4f2; }
 :root[data-theme='dark'] .switch-row input:checked + .switch-row__control { background: #58a895; }
+:root[data-theme='dark'] .tense-picker .switch-row input:checked + .switch-row__control { background: var(--tense-accent); }
 :root[data-theme='dark'] .tense-groups > .tense-group:nth-child(even) { border-color: #49605a; }
 :root[data-theme='dark'] .tense-groups > .tense-group:nth-child(odd):not(:first-child)::before { background: #49605a; }
 
@@ -201,6 +288,14 @@
   border-color: #536a64;
 }
 
+:root[data-theme='dark'] .share-help .share-help__trigger { color: #9ed7e4; background: transparent; }
+:root[data-theme='dark'] .share-method { background: #1c2d29; border-color: #49605b; }
+:root[data-theme='dark'] .share-method__number { color: #fff; background: #39786c; }
+:root[data-theme='dark'] .share-method h3 { color: #c2e2dc; }
+:root[data-theme='dark'] .share-help__tooltip { background: #20302d; border-color: #58716b; }
+:root[data-theme='dark'] .share-help__tooltip p { color: #d6e5e1; }
+:root[data-theme='dark'] .share-help__tooltip a { color: #9ed7e4; }
+
 :root[data-theme='dark'] :is(.question-context, .grammar-reminder, .results-hero) {
   color: var(--ink);
   background: #20332e;
@@ -229,6 +324,14 @@
   background: #22332f;
   border-color: #566d67;
 }
+:root[data-theme='dark'] .exercise-close-confirmation { background: rgb(7 19 23 / 72%); }
+:root[data-theme='dark'] .exercise-close-confirmation > section {
+  color: #dce8e6;
+  background: #1b2c2f;
+  border-color: #60777a;
+}
+:root[data-theme='dark'] .exercise-close-confirmation h3 { color: #b7e2dc; }
+:root[data-theme='dark'] .exercise-close-confirmation p { color: #b8c9c7; }
 :root[data-theme='dark'] .primary-button:disabled { color: #aebdb9; background: #31584f; }
 
 :root[data-theme='dark'] .answer-feedback--correct { color: #9cddb8; background: #1d3829; border-color: #4f8a68; }

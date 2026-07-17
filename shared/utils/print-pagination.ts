@@ -4,13 +4,15 @@ export interface PaginatedItem<T> {
 }
 
 export function estimatedTextLines(value: string, charactersPerLine: number) {
-  const normalized = String(value || '').replace(/\s+/g, ' ').trim()
-  if (!normalized) return 1
-  return Math.max(1, Math.ceil(normalized.length / charactersPerLine))
+  const explicitLines = String(value || '').split(/\r?\n/u)
+  return Math.max(1, explicitLines.reduce((total, line) => {
+    const normalized = line.replace(/\s+/g, ' ').trim()
+    return total + Math.max(1, Math.ceil(normalized.length / charactersPerLine))
+  }, 0))
 }
 
-export function exerciseItemHeight(consigne: string) {
-  return 9.5 + (estimatedTextLines(consigne, 86) - 1) * 5
+export function exerciseItemHeight(consigne: string, questionSpacingMm = 8) {
+  return 5 + questionSpacingMm + (estimatedTextLines(consigne, 86) - 1) * 5
 }
 
 export function correctionItemHeight(consigne: string, answer: string) {

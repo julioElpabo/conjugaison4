@@ -39,6 +39,8 @@ const DEFI_KEYS = new Set([
 
 const PRINT_OPTION_KEYS = new Set([
   'title',
+  'questionSpacingMm',
+  'titleSpacingMm',
   'showGrade',
   'showVerbs',
   'showTenses',
@@ -47,9 +49,20 @@ const PRINT_OPTION_KEYS = new Set([
   'showDate',
   'showRandomNumber'
 ])
+const BOOLEAN_PRINT_OPTION_KEYS = [
+  'showGrade',
+  'showVerbs',
+  'showTenses',
+  'showFirstName',
+  'showLastName',
+  'showDate',
+  'showRandomNumber',
+] as const
 
 const DEFAULT_PRINT_OPTIONS: ChallengePrintOptions = {
   title: 'Défi de conjugaison',
+  questionSpacingMm: 8,
+  titleSpacingMm: 30,
   showGrade: true,
   showVerbs: false,
   showTenses: false,
@@ -144,12 +157,24 @@ function parsePrintOptions(value: unknown): ChallengePrintOptions {
   }
 
   const parsed = { ...DEFAULT_PRINT_OPTIONS, title: title.trim() }
-  for (const key of PRINT_OPTION_KEYS) {
-    if (key === 'title' || value[key] === undefined) continue
+  const numericOptions = {
+    questionSpacingMm: { minimum: 2, maximum: 15 },
+    titleSpacingMm: { minimum: 8, maximum: 30 },
+  } as const
+  for (const [key, limits] of Object.entries(numericOptions)) {
+    if (value[key] === undefined) continue
+    const number = Number(value[key])
+    if (!Number.isFinite(number) || number < limits.minimum || number > limits.maximum) {
+      throw new PublicInputError(`printOptions.${key} doit être compris entre ${limits.minimum} et ${limits.maximum}`)
+    }
+    parsed[key as keyof typeof numericOptions] = number
+  }
+  for (const key of BOOLEAN_PRINT_OPTION_KEYS) {
+    if (value[key] === undefined) continue
     if (typeof value[key] !== 'boolean') {
       throw new PublicInputError(`printOptions.${key} doit être un booléen`)
     }
-    parsed[key as Exclude<keyof ChallengePrintOptions, 'title'>] = value[key] as boolean
+    parsed[key] = value[key]
   }
   return parsed
 }

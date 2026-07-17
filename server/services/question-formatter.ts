@@ -165,15 +165,32 @@ function withoutSubjunctiveLink(value: string) {
   return value.replace(/^que\s+/iu, '').replace(/^qu['’]/iu, '')
 }
 
-function withAnteposedComplement(answer: string, pronoun: string, mode: string, complement: string, relativePronoun?: string | null) {
+function splitAnteposedCodComplement(complement: string, relativePronoun?: string | null) {
+  if (relativePronoun) return { antecedent: complement.trim(), postposed: '' }
+  const match = complement.trim().match(
+    /^(.+?)\s+((?:à\s+(?:l['’]|la\b|le\b|un\b|une\b|des\b)|au\b|aux\b|dans\b|sur\b|sous(?!-)\b|chez\b|vers\b|en\b|pour\b|par\b|avec\b|sans\b).*)$/iu
+  )
+  return match
+    ? { antecedent: match[1]!.trim(), postposed: match[2]!.trim() }
+    : { antecedent: complement.trim(), postposed: '' }
+}
+
+function withAnteposedComplement(
+  answer: string,
+  pronoun: string,
+  mode: string,
+  complement: string,
+  relativePronoun?: string | null,
+) {
+  const { antecedent, postposed } = splitAnteposedCodComplement(complement, relativePronoun)
   if (relativePronoun) {
     const clause = normalized(mode) === 'subjonctif' ? withoutSubjunctiveLink(answer) : answer
-    return `${complement.trim()} ${relativePronoun} ${clause}`
+    return `${antecedent} ${relativePronoun} ${clause}`
   }
   const clause = normalized(mode) === 'subjonctif'
     ? answer
     : startsWithVowel(pronoun) ? `qu'${answer}` : `que ${answer}`
-  return `${complement.trim()} ${clause}`
+  return [antecedent, clause, postposed].filter(Boolean).join(' ')
 }
 
 function relativeSubjectPrefix(pronoun: string, form: string, mode: string, infinitive: string) {
@@ -245,6 +262,9 @@ export function formatConjugationQuestion(
   row: ConjugationSourceRow,
   pronoun: string
 ): ExerciseQuestion {
+  const anteposedComplement = row.complement_position === 'before' && row.complement_anteposed
+    ? splitAnteposedCodComplement(row.complement_anteposed, row.complement_relative_pronoun)
+    : null
   const sourceForms = unique([row.conjugaison1, row.conjugaison2, row.conjugaison3])
   const correctedForms = (row.agreement_rule === 'selon_construction'
     ? sourceForms.flatMap(form => agreementVariants(
@@ -273,13 +293,13 @@ export function formatConjugationQuestion(
     : correctedForms
   const prompt = row.complement_position === 'before' && row.complement_anteposed
     ? row.complement_relative_pronoun
-      ? `${row.complement_anteposed} ${row.complement_relative_pronoun} ${relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif)} … | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
-      : `${row.complement_anteposed} ${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif, 'before')} … | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
+      ? `${anteposedComplement!.antecedent} ${row.complement_relative_pronoun} ${relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif)} … | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
+      : `${anteposedComplement!.antecedent} ${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif, 'before')} …${anteposedComplement!.postposed ? ` ${anteposedComplement!.postposed}` : ''} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
     : row.complement_phrase
     ? `${normalized(row.mode_name) === 'impératif' ? '' : `${pronoun} `}… ${row.complement_phrase} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
     : `${pronoun} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
   const displayedComplement = row.complement_position === 'before'
-    ? row.complement_anteposed
+    ? anteposedComplement?.antecedent
     : row.complement_phrase
   const hasAvoirParticipleRule = Boolean(row.is_compound)
     && normalized(row.auxiliaire) === 'avoir'
@@ -315,6 +335,7 @@ export function formatConjugationQuestion(
     pronom: pronoun,
     temps: row.temps_name,
     mode: row.mode_name,
+    isCompound: Boolean(row.is_compound),
     conjugaison1: row.conjugaison1,
     conjugaison2: row.conjugaison2 || '',
     conjugaison3: row.conjugaison3 || '',

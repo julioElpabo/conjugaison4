@@ -29,11 +29,11 @@ describe('pagination des fiches PDF', () => {
     assert.deepEqual(pages.map(page => page.map(entry => entry.item)), [['a'], ['b', 'c']])
   })
 
-  it('conserve vingt questions courtes sur une seule page avec un en-tête complet', () => {
-    const questions = Array.from({ length: 20 }, (_, index) => `Question ${index + 1}`)
+  it('conserve quinze questions avec l’espacement par défaut sur une seule page avec un en-tête complet', () => {
+    const questions = Array.from({ length: 15 }, (_, index) => `Question ${index + 1}`)
     // 226 mm moins les champs d'identité, les verbes et les temps.
     const pages = paginateByHeight(questions, 202, 220, exerciseItemHeight)
     assert.equal(pages.length, 1)
-    assert.equal(pages[0]?.length, 20)
+    assert.equal(pages[0]?.length, 15)
   })
 })

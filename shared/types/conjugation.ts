@@ -10,6 +10,8 @@ export interface VerbSummary {
 }
 
 export interface Verb extends VerbSummary {
+  /** Définition courte du sens principal, utilisée notamment par l’aide pédagogique. */
+  meaning?: string | null
   participePresent: string | null
   participePasse: string | null
   auxiliaire: string | null
@@ -130,6 +132,7 @@ export interface ExerciseQuestion {
   pronom?: string
   temps?: string
   mode?: string
+  isCompound?: boolean
   conjugaison1?: string
   conjugaison2?: string | null
   conjugaison3?: string | null

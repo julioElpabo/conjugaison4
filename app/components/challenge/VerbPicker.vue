@@ -25,8 +25,8 @@ const selectedVerbs = computed(() => {
 })
 const selectedChipScale = computed(() => {
   const count = selectedVerbs.value.length
-  if (count <= 3) return 2
-  return Math.max(1, 2 - (count - 3) / 7)
+  if (count <= 3) return 1.35
+  return Math.max(1, 1.35 - (count - 3) / 20)
 })
 const selectedChipStyle = computed<Record<string, string>>(() => {
   const scale = selectedChipScale.value
@@ -147,8 +147,10 @@ function addFirstSuggestion() {
       </button>
     </div>
 
-    <ul
+    <TransitionGroup
       v-if="selectedVerbs.length"
+      tag="ul"
+      name="verb-chip"
       class="selected-chips selected-chips--adaptive"
       :style="selectedChipStyle"
       aria-label="Verbes sélectionnés"
@@ -157,6 +159,23 @@ function addFirstSuggestion() {
         <span>{{ verb.infinitif }}</span>
         <button type="button" :aria-label="`Retirer le verbe ${verb.infinitif}`" @click="emit('remove', verb.id)">×</button>
       </li>
-    </ul>
+    </TransitionGroup>
   </section>
 </template>
+
+<style scoped>
+.verb-chip-enter-active {
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.verb-chip-enter-from {
+  opacity: 0;
+  transform: translateY(8px) scale(.88);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verb-chip-enter-active {
+    transition: none;
+  }
+}
+</style>

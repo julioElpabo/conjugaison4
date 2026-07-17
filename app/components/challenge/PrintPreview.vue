@@ -7,6 +7,13 @@ import {
   exerciseItemHeight,
   paginateByHeight,
 } from '~~/shared/utils/print-pagination'
+import {
+  printableCorrectionAnswers,
+  printableCorrectionLabel,
+  printableCorrectionText,
+  printableQuestion,
+  printableQuestionParts,
+} from '~~/shared/utils/print-question'
 
 const props = defineProps<{
   questions: ExerciseQuestion[]
@@ -25,12 +32,28 @@ const sheetNumber = Math.floor(Math.random() * 9000) + 1000
 const dialog = useTemplateRef<HTMLElement>('print-dialog')
 const isPdfBusy = ref(false)
 const isWordBusy = ref(false)
+const isPdfPreviewBusy = ref(true)
+const isPdfPreviewFrameReady = ref(false)
+const pdfPreviewUrl = ref('')
+const pdfPreviewError = ref('')
+let pdfPreviewGeneration = 0
+let pdfPreviewTimer: ReturnType<typeof setTimeout> | undefined
+
+function boundedOption(value: number | undefined, fallback: number, minimum: number, maximum: number) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? Math.min(maximum, Math.max(minimum, parsed)) : fallback
+}
+
+const questionSpacingMm = computed(() => boundedOption(props.options.questionSpacingMm, 8, 2, 15))
+const titleSpacingMm = computed(() => boundedOption(props.options.titleSpacingMm, 30, 8, 30))
 
 const exerciseFirstPageCapacity = computed(() => {
   // La zone utile commence après l'en-tête : 226 mm permet de conserver
   // vingt questions courtes sur la première page, même avec les métadonnées.
   let capacity = 226
-  if (props.options.showFirstName || props.options.showLastName || props.options.showDate) capacity -= 8
+  if (props.options.showFirstName || props.options.showLastName || props.options.showDate) {
+    capacity -= Math.max(0, titleSpacingMm.value - 1)
+  }
   if (props.options.showVerbs) capacity -= 8
   if (props.options.showTenses) capacity -= 8
   if (props.exerciseKind === 'tense-identification') capacity -= 13
@@ -40,13 +63,17 @@ const exercisePages = computed(() => paginateByHeight(
   props.questions,
   exerciseFirstPageCapacity.value,
   220,
-  question => exerciseItemHeight(question.consigne)
+  (question) => {
+    const printable = printableQuestionParts(question, props.exerciseKind)
+    return exerciseItemHeight(printableQuestion(question, props.exerciseKind), questionSpacingMm.value)
+      + (printable.suffixOnNextLine ? 6 : 0)
+  }
 ))
 const correctionPages = computed(() => paginateByHeight(
   props.questions,
-  218,
+  205,
   220,
-  question => correctionItemHeight(question.consigne, question.reponsesPourCorrige.join(' ou '))
+  question => correctionItemHeight(printableCorrectionLabel(question, props.exerciseKind), printableCorrectionText(question))
 ))
 
 useDialogFocus(dialog, () => emit('close'))
@@ -66,6 +93,20 @@ function pdfSafe(value: unknown) {
     .replace(/–|—/g, '-')
 }
 
+function capitalizePrintLine(value: unknown) {
+  return String(value ?? '').replace(
+    /^(\s*)(\p{L})/u,
+    (_match, spacing: string, letter: string) => `${spacing}${letter.toLocaleUpperCase('fr-CH')}`
+  )
+}
+
+function capitalizePrintText(value: unknown) {
+  return String(value ?? '')
+    .split('\n')
+    .map(capitalizePrintLine)
+    .join('\n')
+}
+
 function pdfFileName() {
   const title = props.options.title || 'Défi de conjugaison'
   const safeTitle = title.normalize('NFD')
@@ -75,10 +116,7 @@ function pdfFileName() {
   return `${safeTitle || 'defi-conjugaison'}.pdf`
 }
 
-async function downloadPdf() {
-  if (isPdfBusy.value) return
-  isPdfBusy.value = true
-  try {
+async function buildPdf() {
     const { jsPDF } = await import('jspdf')
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true })
     const pageWidth = 210
@@ -109,7 +147,7 @@ async function downloadPdf() {
         pdf.setTextColor(90, 90, 90)
         pdf.text(`${title}${identifier}`, pageWidth / 2, 12, { align: 'center' })
         pdf.setTextColor(20, 20, 20)
-        return 22
+        return 32
       }
       let y = 18
       const identity = [
@@ -121,7 +159,7 @@ async function downloadPdf() {
         pdf.setFont('helvetica', 'normal')
         pdf.setFontSize(8.5)
         pdf.text(pdfSafe(identity.join('     ')), left, y)
-        y += 9
+        y += titleSpacingMm.value
       }
       if (props.options.showGrade) {
         pdf.setDrawColor(40, 40, 40)
@@ -153,13 +191,20 @@ async function downloadPdf() {
       return y + 2
     }
 
-    function drawCorrectionHeader() {
-      pdf.setFont('helvetica', 'normal')
-      pdf.setFontSize(8.5)
-      pdf.setTextColor(90, 90, 90)
-      pdf.text(`${title} - corrigé${identifier}`, pageWidth / 2, 12, { align: 'center' })
+    function drawCorrectionHeader(continuation: boolean) {
+      if (continuation) {
+        pdf.setFont('helvetica', 'normal')
+        pdf.setFontSize(8.5)
+        pdf.setTextColor(90, 90, 90)
+        pdf.text(`${title} - corrigé${identifier}`, pageWidth / 2, 12, { align: 'center' })
+        pdf.setTextColor(20, 20, 20)
+        return 32
+      }
+      pdf.setFont('helvetica', 'bold')
+      pdf.setFontSize(17)
       pdf.setTextColor(20, 20, 20)
-      return 22
+      pdf.text(`CORRIGÉ${identifier}`, left, 26)
+      return 38
     }
 
     function drawExercisePage(page: typeof exercisePages.value[number], continuation: boolean) {
@@ -168,35 +213,90 @@ async function downloadPdf() {
       pdf.setFontSize(10.5)
       page.forEach(({ item: question, index }) => {
         const prefix = `${index + 1}. `
+        const printable = printableQuestionParts(question, props.exerciseKind)
         pdf.setFont('helvetica', 'normal')
-        const lines = pdf.splitTextToSize(pdfSafe(question.consigne), 116)
+        const labelLines = pdf.splitTextToSize(pdfSafe(capitalizePrintLine(printable.label)), 68)
+        const completionWidth = printable.label ? 96 : 169
+        const completionLines = printable.fillBlank
+          ? [pdfSafe(capitalizePrintLine(printable.completion))]
+          : pdf.splitTextToSize(pdfSafe(capitalizePrintLine(printable.completion)), completionWidth)
+        const completionX = printable.label ? 96 : left + 7
+        const before = pdfSafe(capitalizePrintLine(printable.completionPrefix))
+        const after = pdfSafe(printable.completionSuffix)
+        const lineStart = completionX + (before ? pdf.getTextWidth(before) + 2 : 0)
+        const availableLineEnd = right - (!printable.suffixOnNextLine && after ? pdf.getTextWidth(after) + 2 : 0)
+        const lineEnd = printable.suffixOnNextLine
+          ? completionX + completionWidth * (printable.blankWidthPercent / 100)
+          : availableLineEnd
+        let firstSuffixLine = ''
+        let remainingSuffixLines: string[] = []
+
+        if (printable.suffixOnNextLine && after) {
+          const suffixStart = lineEnd + 2
+          const firstLineWidth = Math.max(0, right - suffixStart)
+          const words = after.split(/\s+/u).filter(Boolean)
+          const firstLineWords: string[] = []
+
+          while (words.length) {
+            const candidate = [...firstLineWords, words[0]].join(' ')
+            if (firstLineWords.length && pdf.getTextWidth(candidate) > firstLineWidth) break
+            if (!firstLineWords.length && pdf.getTextWidth(candidate) > firstLineWidth) break
+            firstLineWords.push(words.shift()!)
+          }
+
+          firstSuffixLine = firstLineWords.join(' ')
+          remainingSuffixLines = words.length
+            ? pdf.splitTextToSize(words.join(' '), completionWidth)
+            : []
+        }
+
+        const completionLineCount = printable.suffixOnNextLine
+          ? 1 + remainingSuffixLines.length
+          : completionLines.length
+        const lineCount = Math.max(labelLines.length, completionLineCount)
         pdf.text(prefix, left, y)
-        pdf.text(lines, left + 7, y)
-        const lineY = y + Math.max(0, lines.length - 1) * 5
-        pdf.setLineDashPattern([1, 1], 0)
-        pdf.setDrawColor(80, 80, 80)
-        pdf.line(142, lineY, right, lineY)
-        pdf.setLineDashPattern([], 0)
-        y += Math.max(9.5, lines.length * 5 + 4.5)
+        if (printable.label) pdf.text(labelLines, left + 7, y)
+        if (printable.fillBlank) {
+          if (before) pdf.text(before, completionX, y)
+          if (after && !printable.suffixOnNextLine) pdf.text(after, right, y, { align: 'right' })
+          if (lineEnd > lineStart) {
+            pdf.setLineDashPattern([.7, .7], 0)
+            pdf.setDrawColor(55, 55, 55)
+            pdf.line(lineStart, y + .8, lineEnd, y + .8)
+            pdf.setLineDashPattern([], 0)
+          }
+          if (printable.suffixOnNextLine) {
+            if (firstSuffixLine) pdf.text(firstSuffixLine, lineEnd + 2, y)
+            remainingSuffixLines.forEach((line: string, lineIndex: number) => {
+              pdf.text(line, completionX, y + 5 + lineIndex * 5)
+            })
+          }
+        } else {
+          pdf.text(completionLines, completionX, y)
+        }
+        y += Math.max(5 + questionSpacingMm.value, lineCount * 5 + questionSpacingMm.value)
       })
       drawFooter()
     }
 
-    function drawCorrectionPage(page: typeof correctionPages.value[number]) {
+    function drawCorrectionPage(page: typeof correctionPages.value[number], continuation: boolean) {
       addPage()
-      let y = drawCorrectionHeader()
+      let y = drawCorrectionHeader(continuation)
       pdf.setFontSize(9.5)
       page.forEach(({ item: question, index }) => {
-        const prompt = pdf.splitTextToSize(`${index + 1}. ${pdfSafe(question.consigne)}`, 98)
-        const answer = pdf.splitTextToSize(pdfSafe(question.reponsesPourCorrige.join(' ou ')), 66)
+        const prompt = pdf.splitTextToSize(pdfSafe(capitalizePrintLine(printableCorrectionLabel(question, props.exerciseKind))), 79)
+        const answer = printableCorrectionAnswers(question)
+          .flatMap(value => pdf.splitTextToSize(pdfSafe(capitalizePrintText(value)), 82))
         const lineCount = Math.max(prompt.length, answer.length)
         const rowHeight = Math.max(8, lineCount * 5 + 3)
+        const numberY = y + Math.max(0, (rowHeight - 5) / 2)
         const promptY = y + Math.max(0, (rowHeight - prompt.length * 5) / 2)
         const answerY = y + Math.max(0, (rowHeight - answer.length * 5) / 2)
         pdf.setFont('helvetica', 'normal')
-        pdf.text(prompt, left, promptY, { baseline: 'top' })
+        pdf.text(`${index + 1}.`, left, numberY, { baseline: 'top' })
+        pdf.text(prompt, left + 7, promptY, { baseline: 'top' })
         pdf.setFont('helvetica', 'bold')
-        pdf.text(answer, 124, answerY, { baseline: 'top' })
+        pdf.text(answer, 106, answerY, { baseline: 'top' })
         pdf.setDrawColor(220, 220, 220)
         pdf.line(left, y + rowHeight, right, y + rowHeight)
         y += rowHeight
@@ -206,13 +306,79 @@ async function downloadPdf() {
 
     exercisePages.value.forEach((page, index) => drawExercisePage(page, index > 0))
     // Le premier corrigé commence toujours sur une nouvelle page PDF.
-    correctionPages.value.forEach(page => drawCorrectionPage(page))
+    correctionPages.value.forEach((page, index) => drawCorrectionPage(page, index > 0))
 
-    if (pageCount > 0) pdf.save(pdfFileName())
+    return pdf
+}
+
+async function downloadPdf() {
+  if (isPdfBusy.value) return
+  isPdfBusy.value = true
+  try {
+    const pdf = await buildPdf()
+    pdf.save(pdfFileName())
   } finally {
     isPdfBusy.value = false
   }
 }
+
+function revokePdfPreviewUrl() {
+  if (!pdfPreviewUrl.value) return
+  URL.revokeObjectURL(pdfPreviewUrl.value)
+  pdfPreviewUrl.value = ''
+}
+
+async function refreshPdfPreview() {
+  const generation = ++pdfPreviewGeneration
+  isPdfPreviewBusy.value = true
+  isPdfPreviewFrameReady.value = false
+  pdfPreviewError.value = ''
+
+  try {
+    const pdf = await buildPdf()
+    const blob = pdf.output('blob')
+    if (generation !== pdfPreviewGeneration) return
+
+    revokePdfPreviewUrl()
+    pdfPreviewUrl.value = URL.createObjectURL(blob)
+  } catch (error) {
+    if (generation !== pdfPreviewGeneration) return
+    console.error('Impossible de générer l’aperçu PDF.', error)
+    pdfPreviewError.value = 'L’aperçu PDF n’a pas pu être créé.'
+  } finally {
+    if (generation === pdfPreviewGeneration) isPdfPreviewBusy.value = false
+  }
+}
+
+function schedulePdfPreview() {
+  if (pdfPreviewTimer) clearTimeout(pdfPreviewTimer)
+  pdfPreviewTimer = setTimeout(() => {
+    pdfPreviewTimer = undefined
+    void refreshPdfPreview()
+  }, 250)
+}
+
+watch(
+  () => ({
+    questions: props.questions,
+    verbs: props.verbs,
+    tenses: props.tenses,
+    exerciseKind: props.exerciseKind,
+    options: props.options,
+  }),
+  schedulePdfPreview,
+  { deep: true }
+)
+
+onMounted(() => {
+  void refreshPdfPreview()
+})
+
+onBeforeUnmount(() => {
+  pdfPreviewGeneration += 1
+  if (pdfPreviewTimer) clearTimeout(pdfPreviewTimer)
+  revokePdfPreviewUrl()
+})
 
 async function downloadWord() {
   if (isWordBusy.value) return
@@ -225,9 +391,12 @@ async function downloadWord() {
       Footer,
       Header,
       HeightRule,
+      LeaderType,
       Packer,
       Paragraph,
       SectionType,
+      Tab,
+      TabStopType,
       Table,
       TableBorders,
       TableCell,
@@ -263,6 +432,30 @@ async function downloadWord() {
       spacing: noSpacing,
       children: [new TextRun({ text, bold: options.bold, size: options.size ?? 21, font: 'Arial' })]
     })
+    const completionParagraphs = (question: ExerciseQuestion) => {
+      const printable = printableQuestionParts(question, props.exerciseKind)
+      if (!printable.fillBlank) return [paragraph(capitalizePrintLine(printable.completion), { size: 21 })]
+
+      const prefix = capitalizePrintLine(printable.completionPrefix)
+      const suffix = printable.completionSuffix
+      return [new Paragraph({
+        spacing: noSpacing,
+        tabStops: [{
+          type: TabStopType.RIGHT,
+          position: 5300,
+          leader: LeaderType.DOT,
+        }],
+        children: [new TextRun({
+          size: 21,
+          font: 'Arial',
+          children: [
+            ...(prefix ? [prefix, ' '] : []),
+            new Tab(),
+            ...(suffix ? [` ${suffix}`] : []),
+          ],
+        })],
+      })]
+    }
     const cell = (children: InstanceType<typeof Paragraph>[], width: number, options: { borders?: Record<string, unknown>, margins?: Record<string, number> } = {}) => new TableCell({
       children,
       width: { size: width, type: WidthType.DXA },
@@ -309,7 +502,7 @@ async function downloadWord() {
       }))
     }
     exerciseChildren.push(new Paragraph({
-      spacing: { before: 380, after: 260 },
+      spacing: { before: Math.round(titleSpacingMm.value * 56.7), after: 260 },
       children: [
         new TextRun({ text: title.toUpperCase(), bold: true, size: 34, font: 'Arial' }),
         new TextRun({ text: identifier, size: 18, font: 'Arial' })
@@ -326,39 +519,47 @@ async function downloadWord() {
     }
     exerciseChildren.push(new Table({
       width: { size: contentWidth, type: WidthType.DXA },
-      columnWidths: [480, 5900, 3595],
+      columnWidths: [480, 3900, 5595],
       layout: TableLayoutType.FIXED,
       borders: TableBorders.NONE,
-      rows: props.questions.map((question, index) => new TableRow({
-        cantSplit: true,
-        height: { value: 540, rule: HeightRule.ATLEAST },
-        children: [
-          cell([paragraph(`${index + 1}.`, { size: 21 })], 480, { margins: { top: 70, bottom: 70, left: 0, right: 40 } }),
-          cell([paragraph(question.consigne, { size: 21 })], 5900),
-          cell([new Paragraph({
-            spacing: { before: 0, after: 0, line: 240 },
-            border: { bottom: { style: BorderStyle.DOTTED, size: 4, color: '555555', space: 1 } },
-            children: [new TextRun({ text: ' ', size: 21, font: 'Arial' })]
-          })], 3595)
-        ]
-      }))
+      rows: props.questions.map((question, index) => {
+        const printable = printableQuestionParts(question, props.exerciseKind)
+        return new TableRow({
+          cantSplit: true,
+          height: { value: Math.round((5 + questionSpacingMm.value) * 56.7), rule: HeightRule.ATLEAST },
+          children: [
+            cell([paragraph(`${index + 1}.`, { size: 21 })], 480, { margins: { top: 70, bottom: 70, left: 0, right: 40 } }),
+            cell([paragraph(capitalizePrintLine(printable.label), { size: 21 })], 3900),
+            cell(completionParagraphs(question), 5595),
+          ]
+        })
+      })
     }))
 
     const correctionChildren: Array<InstanceType<typeof Paragraph> | InstanceType<typeof Table>> = [
+      new Paragraph({
+        spacing: { before: 0, after: 260 },
+        children: [
+          new TextRun({ text: 'CORRIGÉ', bold: true, size: 34, font: 'Arial' }),
+          new TextRun({ text: identifier, size: 18, font: 'Arial' })
+        ]
+      }),
       new Table({
         width: { size: contentWidth, type: WidthType.DXA },
-        columnWidths: [480, 5900, 3595],
+        columnWidths: [480, 5100, 4395],
         layout: TableLayoutType.FIXED,
         borders: TableBorders.NONE,
-        rows: props.questions.map((question, index) => new TableRow({
-          cantSplit: true,
-          height: { value: 460, rule: HeightRule.ATLEAST },
-          children: [
-            cell([paragraph(`${index + 1}.`, { size: 19 })], 480, { borders: lightBottomBorder, margins: { top: 55, bottom: 55, left: 0, right: 40 } }),
-            cell([paragraph(question.consigne, { size: 19 })], 5900, { borders: lightBottomBorder, margins: { top: 55, bottom: 55, left: 70, right: 70 } }),
-            cell([paragraph(question.reponsesPourCorrige.join(' ou '), { bold: true, size: 19 })], 3595, { borders: lightBottomBorder, margins: { top: 55, bottom: 55, left: 70, right: 70 } })
-          ]
-        }))
+        rows: props.questions.map((question, index) => {
+          return new TableRow({
+            cantSplit: true,
+            height: { value: 460, rule: HeightRule.ATLEAST },
+            children: [
+              cell([paragraph(`${index + 1}.`, { size: 19 })], 480, { borders: lightBottomBorder, margins: { top: 55, bottom: 55, left: 0, right: 40 } }),
+              cell([paragraph(capitalizePrintLine(printableCorrectionLabel(question, props.exerciseKind)), { size: 19 })], 5100, { borders: lightBottomBorder, margins: { top: 55, bottom: 55, left: 70, right: 70 } }),
+              cell(printableCorrectionAnswers(question).map(answer => paragraph(capitalizePrintText(answer), { bold: true, size: 19 })), 4395, { borders: lightBottomBorder, margins: { top: 55, bottom: 55, left: 70, right: 70 } })
+            ]
+          })
+        })
       })
     ]
 
@@ -406,12 +607,11 @@ async function downloadWord() {
       <div class="print-toolbar no-print">
         <div>
           <strong id="print-preview-title">Aperçu avant impression</strong>
-          <span>La fiche et son corrigé seront imprimés sur des pages séparées.</span>
         </div>
         <div>
           <button class="secondary-button" type="button" @click="emit('close')">Fermer</button>
           <button class="secondary-button" type="button" :disabled="isWordBusy" @click="downloadWord">
-            {{ isWordBusy ? 'Création du fichier Word…' : 'Télécharger Word' }}
+            {{ isWordBusy ? 'Création du fichier Word…' : 'Télécharger au format Word' }}
           </button>
           <button class="primary-button" type="button" :disabled="isPdfBusy" @click="downloadPdf">
             {{ isPdfBusy ? 'Création du PDF…' : 'Télécharger le PDF' }}
@@ -436,6 +636,40 @@ async function downloadWord() {
               @input="setPrintOption('title', ($event.target as HTMLInputElement).value)"
             >
           </label>
+
+          <fieldset class="print-settings__group">
+            <legend>Mise en page</legend>
+            <label class="print-settings__number-field" for="preview-title-spacing">
+              <span>Espace avant le titre</span>
+              <span>
+                <input
+                  id="preview-title-spacing"
+                  type="number"
+                  min="8"
+                  max="30"
+                  step="1"
+                  :value="titleSpacingMm"
+                  @input="setPrintOption('titleSpacingMm', Number(($event.target as HTMLInputElement).value))"
+                >
+                mm
+              </span>
+            </label>
+            <label class="print-settings__number-field" for="preview-question-spacing">
+              <span>Espacement entre les questions</span>
+              <span>
+                <input
+                  id="preview-question-spacing"
+                  type="number"
+                  min="2"
+                  max="15"
+                  step="0.5"
+                  :value="questionSpacingMm"
+                  @input="setPrintOption('questionSpacingMm', Number(($event.target as HTMLInputElement).value))"
+                >
+                mm
+              </span>
+            </label>
+          </fieldset>
 
           <fieldset class="print-settings__group">
             <legend>Informations de l’élève</legend>
@@ -474,60 +708,28 @@ async function downloadWord() {
           </fieldset>
         </aside>
 
-        <main class="print-document">
-          <section
-            v-for="(page, pageIndex) in exercisePages"
-            :key="`exercise-page-${pageIndex}`"
-            class="print-sheet"
+        <main class="print-document print-document--pdf">
+          <iframe
+            v-if="pdfPreviewUrl"
+            class="pdf-preview-frame"
+            :src="`${pdfPreviewUrl}#view=FitH&toolbar=1&navpanes=0`"
+            title="Aperçu exact de la fiche PDF et de son corrigé"
+            @load="isPdfPreviewFrameReady = true"
+          />
+          <div
+            v-if="!pdfPreviewError && (isPdfPreviewBusy || !isPdfPreviewFrameReady)"
+            class="pdf-preview-state"
+            role="status"
+            aria-live="polite"
           >
-          <header class="print-sheet__header">
-            <div v-if="pageIndex === 0" class="student-fields">
-              <span v-if="options.showFirstName">Prénom : ____________________</span>
-              <span v-if="options.showLastName">Nom : ____________________</span>
-              <span v-if="options.showDate">Date : ______________</span>
-            </div>
-            <div v-if="pageIndex === 0 && options.showGrade" class="grade-box" aria-label="Espace pour la note" />
-            <h1 v-if="pageIndex === 0">
-              {{ options.title || 'Défi de conjugaison' }}
-              <small v-if="options.showRandomNumber">n° {{ sheetNumber }}</small>
-            </h1>
-            <p v-else class="print-running-header">
-              {{ options.title || 'Défi de conjugaison' }}<template v-if="options.showRandomNumber"> n° {{ sheetNumber }}</template>
-            </p>
-            <p v-if="pageIndex === 0 && options.showVerbs"><strong>Verbes :</strong> {{ verbs.map(verb => verb.infinitif).join(', ') }}</p>
-            <p v-if="pageIndex === 0 && options.showTenses"><strong>Temps :</strong> {{ tenses.map(tense => tense.name).join(', ') }}</p>
-            <p v-if="pageIndex === 0 && exerciseKind === 'tense-identification'" class="print-instruction">
-              {{ TENSE_IDENTIFICATION_INSTRUCTION }}
-            </p>
-          </header>
-
-          <ol class="print-questions" :start="(page[0]?.index ?? 0) + 1">
-            <li v-for="entry in page" :key="`${entry.index}-${entry.item.titre}-${entry.item.consigne}`">
-              <span>{{ entry.item.consigne }}</span>
-              <span class="answer-line" />
-            </li>
-          </ol>
-          <footer class="print-site-reference">conjugaison.tatitotu.ch</footer>
-          </section>
-
-          <section
-            v-for="(page, pageIndex) in correctionPages"
-            :key="`correction-page-${pageIndex}`"
-            class="print-sheet print-sheet--correction"
-          >
-          <header class="print-sheet__header">
-            <p class="print-running-header">
-              {{ options.title || 'Défi de conjugaison' }} — corrigé<template v-if="options.showRandomNumber"> n° {{ sheetNumber }}</template>
-            </p>
-          </header>
-          <ol class="print-questions print-questions--answers" :start="(page[0]?.index ?? 0) + 1">
-            <li v-for="entry in page" :key="`answer-${entry.index}-${entry.item.titre}-${entry.item.consigne}`">
-              <span>{{ entry.item.consigne }}</span>
-              <strong>{{ entry.item.reponsesPourCorrige.join(' ou ') }}</strong>
-            </li>
-          </ol>
-          <footer class="print-site-reference">conjugaison.tatitotu.ch</footer>
-          </section>
+            <span class="pdf-preview-spinner" aria-hidden="true" />
+            <strong>Création de l’aperçu PDF…</strong>
+            <span>La fiche et le corrigé sont mis en page.</span>
+          </div>
+          <div v-if="pdfPreviewError" class="pdf-preview-state pdf-preview-state--error" role="alert">
+            <strong>{{ pdfPreviewError }}</strong>
+            <button class="secondary-button" type="button" @click="refreshPdfPreview">Réessayer</button>
+          </div>
         </main>
       </div>
     </div>

@@ -36,8 +36,8 @@ onMounted(async () => {
         <p v-else-if="error" class="coach-picker__state coach-picker__state--error">{{ error }}</p>
         <div v-else class="coach-picker__grid">
           <button v-for="coach in coaches" :key="coach.id" type="button" class="coach-card" :style="{ '--coach-color': coach.themeColor }" @click="emit('select', coach)">
-            <img :src="coach.avatarPath" :alt="`Avatar de ${coach.firstName} ${coach.lastName}`">
-            <span><strong>{{ coach.firstName }} {{ coach.lastName }}</strong><small>Personnage virtuel</small></span>
+            <img :src="coach.avatarPath" :alt="`Avatar de ${coach.firstName}`">
+            <span><strong>{{ coach.firstName }}</strong><small>Personnage virtuel</small></span>
             <p>{{ coach.description }}</p>
             <em>{{ coach.pedagogicalStyle }}</em>
           </button>

@@ -14,6 +14,11 @@ const ALLOWED_TAGS = new Set([
   'strong',
   'sub',
   'sup',
+  'table',
+  'tbody',
+  'td',
+  'th',
+  'tr',
   'u',
   'ul',
 ])

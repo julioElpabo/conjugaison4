@@ -1,17 +1,18 @@
 import type { Pool, PoolConnection, RowDataPacket } from 'mysql2/promise'
 import { COACH_EVENTS, REQUIRED_COACH_REPLY_EVENTS, type CoachCharacter, type CoachEvent, type CoachMedia, type CoachProfile } from '../../shared/types/coach'
 import { unknownCoachPlaceholders } from '../../shared/utils/coach-dialogue'
+import { listCoachHelps } from './coach-helps'
 
 type Executor = Pool | PoolConnection
 interface CoachRow extends RowDataPacket {
   id: number, slug: string, firstName: string, lastName: string, avatarPath: string,
   gender: CoachProfile['gender'],
   description: string, characterId: number, characterName: string, personality: string, pedagogicalStyle: string, themeColor: string,
-  status: CoachProfile['status'], sortOrder: number
+  status: CoachProfile['status'], sortOrder: number, helpId: number | null
 }
 interface CharacterRow extends RowDataPacket {
   id: number, slug: string, masculineName: string, feminineName: string, emoticon: string, description: string,
-  pedagogicalStyle: string, status: CoachCharacter['status'], sortOrder: number
+  pedagogicalStyle: string, helpId: number | null, status: CoachCharacter['status'], sortOrder: number
 }
 interface ReplyRow extends RowDataPacket { id: number, characterId: number, eventType: CoachEvent, content: string, weight: number, isActive: number }
 interface MediaRow extends RowDataPacket {
@@ -35,13 +36,13 @@ export async function listCoaches(database: Executor, publishedOnly = false): Pr
     c.gender, c.avatar_path AS avatarPath, c.description, c.character_id AS characterId,
     CASE WHEN c.gender='female' THEN cc.feminine_name ELSE cc.masculine_name END AS characterName,
     CASE WHEN c.gender='female' THEN cc.feminine_name ELSE cc.masculine_name END AS personality,
-    cc.pedagogical_style AS pedagogicalStyle, c.theme_color AS themeColor,
+    cc.pedagogical_style AS pedagogicalStyle, cc.${publishedOnly ? 'published_help_id' : 'help_id'} AS helpId, c.theme_color AS themeColor,
     c.status, c.sort_order AS sortOrder FROM coaches c JOIN coach_characters cc ON cc.id=c.character_id
     ${publishedOnly ? "WHERE c.status = 'published' AND cc.status = 'published'" : ''} ORDER BY c.sort_order, first_name, c.id`)
   if (!coaches.length) return []
   const ids = [...new Set(coaches.map(item => item.characterId))]
   const placeholders = ids.map(() => '?').join(',')
-  const [[replies], [assignments], [rules], media] = await Promise.all([
+  const [[replies], [assignments], [rules], media, helps] = await Promise.all([
     database.execute<ReplyRow[]>(`SELECT id, character_id AS characterId, event_type AS eventType, content, weight,
       is_active AS isActive FROM coach_character_reply_templates WHERE character_id IN (${placeholders}) ORDER BY sort_order, id`, ids),
     database.execute<AssignmentRow[]>(`SELECT character_id AS characterId, media_id AS mediaId, event_type AS eventType,
@@ -50,9 +51,11 @@ export async function listCoaches(database: Executor, publishedOnly = false): Pr
       media_probability AS mediaProbability, cooldown_questions AS cooldownQuestions
       FROM coach_character_reaction_rules WHERE character_id IN (${placeholders})`, ids),
     listCoachMedia(database),
+    listCoachHelps(database, publishedOnly),
   ])
   return coaches.map(coach => ({
     ...coach,
+    help: helps.find(help => help.id === coach.helpId) || null,
     replies: replies.filter(item => item.characterId === coach.characterId).map(item => ({
       id: item.id, eventType: item.eventType, content: item.content, weight: item.weight, isActive: Boolean(item.isActive),
     })),
@@ -71,7 +74,7 @@ export async function listCoaches(database: Executor, publishedOnly = false): Pr
 export async function listCoachCharacters(database: Executor): Promise<CoachCharacter[]> {
   const [characters] = await database.execute<CharacterRow[]>(`SELECT id, slug, masculine_name AS masculineName,
     feminine_name AS feminineName, emoticon, description,
-    pedagogical_style AS pedagogicalStyle, status, sort_order AS sortOrder
+    pedagogical_style AS pedagogicalStyle, help_id AS helpId, status, sort_order AS sortOrder
     FROM coach_characters ORDER BY sort_order, masculine_name, id`)
   if (!characters.length) return []
   const ids = characters.map(item => item.id)
@@ -156,10 +159,12 @@ export function parseCharacterPayload(value: unknown) {
     emoticon: string(body.emoticon, 32),
     description: string(body.description, 255),
     pedagogicalStyle: string(body.pedagogicalStyle, 2000), status: string(body.status, 12), sortOrder: Number(body.sortOrder),
+    helpId: body.helpId === null || body.helpId === '' || body.helpId === undefined ? null : Number(body.helpId),
   }
   const children = parseCharacterChildren(body)
   if (!profile.slug || !profile.masculineName || !profile.feminineName || !profile.emoticon || !profile.pedagogicalStyle
-    || !['draft', 'published', 'disabled'].includes(profile.status) || !Number.isInteger(profile.sortOrder)) {
+    || !['draft', 'published', 'disabled'].includes(profile.status) || !Number.isInteger(profile.sortOrder)
+    || (profile.helpId !== null && (!Number.isInteger(profile.helpId) || profile.helpId < 1))) {
     throw createError({ statusCode: 400, statusMessage: 'Caractère invalide' })
   }
   if (profile.status === 'published') {

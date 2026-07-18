@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CoachCharacter, CoachEvent, CoachMedia, CoachProfile } from '~~/shared/types/coach'
+import type { CoachCharacter, CoachEvent, CoachHelpTemplate, CoachMedia, CoachProfile } from '~~/shared/types/coach'
 import { COACH_EVENTS, REQUIRED_COACH_REPLY_EVENTS } from '~~/shared/types/coach'
 import { formatCharacterNames } from '~~/shared/utils/coach-character'
 import { COACH_PLACEHOLDERS, unknownCoachPlaceholders } from '~~/shared/utils/coach-dialogue'
@@ -28,9 +28,11 @@ const REQUIRED_REPLY_EVENTS = new Set<CoachEvent>(REQUIRED_COACH_REPLY_EVENTS)
 const REACTION_EVENTS: CoachEvent[] = ['correct', 'incorrect', 'streak', 'finish']
 const placeholdersLabel = COACH_PLACEHOLDERS.map(item => `{${item}}`).join(' · ')
 const { user, handleUnauthorized } = useAdminAuth()
+const route = useRoute()
 const characters = ref<CoachCharacter[]>([])
 const coaches = ref<CoachProfile[]>([])
 const media = ref<CoachMedia[]>([])
+const helps = ref<CoachHelpTemplate[]>([])
 const draft = ref<CoachCharacter | null>(null)
 const selectedId = ref<number | null>(null)
 const tab = ref<'characters' | 'media'>('characters')
@@ -81,21 +83,26 @@ async function newCharacter() {
   const assignments = media.value
     .filter(item => item.isActive && (item.mediaType === 'emoji' || item.mediaType === 'animation'))
     .map(item => ({ mediaId: item.id, eventType: mediaDefaultEvent(item), weight: 1, isActive: true }))
-  setCharacterDraft({ id: 0, slug: '', masculineName: '', feminineName: '', emoticon: '🙂', description: '', pedagogicalStyle: '', status: 'draft', sortOrder: characters.value.length + 1, replies: [], media: clone(media.value), assignments, rules: [] })
+  setCharacterDraft({ id: 0, slug: '', masculineName: '', feminineName: '', emoticon: '🙂', description: '', pedagogicalStyle: '', helpId: helps.value.find(help => help.status === 'published')?.id || null, status: 'draft', sortOrder: characters.value.length + 1, replies: [], media: clone(media.value), assignments, rules: [] })
 }
 async function load() {
   loading.value = true
   try {
-    const [characterResponse, coachResponse, mediaResponse] = await Promise.all([
+    const [characterResponse, coachResponse, mediaResponse, helpResponse] = await Promise.all([
       $fetch<{ characters: CoachCharacter[] }>('/api/admin/coach-characters'),
       $fetch<{ coaches: CoachProfile[] }>('/api/admin/coaches'),
       $fetch<{ media: CoachMedia[] }>('/api/admin/coach-media'),
+      $fetch<{ helps: CoachHelpTemplate[] }>('/api/admin/coach-helps'),
     ])
-    characters.value = characterResponse.characters; coaches.value = coachResponse.coaches; media.value = mediaResponse.media
+    characters.value = characterResponse.characters; coaches.value = coachResponse.coaches; media.value = mediaResponse.media; helps.value = helpResponse.helps
     if (draft.value?.id) {
       const refreshed = characters.value.find(item => item.id === draft.value?.id)
       if (refreshed) setCharacterDraft(refreshed)
-    } else if (!draft.value && characters.value[0]) setCharacterDraft(characters.value[0])
+    } else if (!draft.value) {
+      const requestedId = Number(route.query.character)
+      const requested = Number.isInteger(requestedId) ? characters.value.find(item => item.id === requestedId) : undefined
+      if (requested || characters.value[0]) setCharacterDraft(requested || characters.value[0]!)
+    }
   } catch (caught) { if (!handleUnauthorized(caught)) error.value = getAdminErrorMessage(caught, 'Impossible de charger les caractères.') }
   finally { loading.value = false }
 }
@@ -273,7 +280,7 @@ onBeforeUnmount(cancelScheduledAutosave)
             </div>
             <p v-else>Aucun coach n’utilise encore ce caractère.</p>
           </div>
-          <div class="character-fields"><label class="admin-field"><span>Nom masculin *</span><input v-model="draft.masculineName" required></label><label class="admin-field"><span>Nom féminin *</span><input v-model="draft.feminineName" required></label><label class="admin-field"><span>Identifiant *</span><input v-model="draft.slug" required></label><label class="admin-field"><span>Ordre</span><input v-model.number="draft.sortOrder" type="number"></label><label class="admin-field wide"><span>Présentation</span><input v-model="draft.description"></label><label class="admin-field wide"><span>Manière d’aider *</span><textarea v-model="draft.pedagogicalStyle" rows="3" required /></label><label class="admin-field"><span>Statut</span><select v-model="draft.status"><option value="draft">Brouillon</option><option value="published">Publié</option><option value="disabled">Désactivé</option></select></label></div>
+          <div class="character-fields"><label class="admin-field"><span>Nom masculin *</span><input v-model="draft.masculineName" required></label><label class="admin-field"><span>Nom féminin *</span><input v-model="draft.feminineName" required></label><label class="admin-field"><span>Identifiant *</span><input v-model="draft.slug" required></label><label class="admin-field"><span>Ordre</span><input v-model.number="draft.sortOrder" type="number"></label><label class="admin-field wide"><span>Présentation</span><input v-model="draft.description"></label><label class="admin-field wide"><span>Manière d’aider *</span><textarea v-model="draft.pedagogicalStyle" rows="3" required /></label><label class="admin-field"><span>Aide attribuée</span><select v-model="draft.helpId"><option :value="null">Aide générale par défaut</option><option v-for="help in helps" :key="help.id" :value="help.id">{{ help.name }}{{ help.status === 'draft' ? ' (brouillon)' : '' }}</option></select><small>Le ton et les blocs du volet d’aide dépendront de ce choix.</small></label><label class="admin-field"><span>Statut</span><select v-model="draft.status"><option value="draft">Brouillon</option><option value="published">Publié</option><option value="disabled">Désactivé</option></select></label></div>
         </section>
         <section class="admin-card character-panel dialogue-panel">
           <div class="panel-title"><div><p class="admin-eyebrow">Dialogue partagé</p><h2>Textes du caractère</h2></div><strong>{{ draft.replies.length }} phrase(s)</strong></div>

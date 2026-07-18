@@ -23,6 +23,8 @@ interface VerbRow extends RowDataPacket {
 }
 
 interface CategoryRow extends RowDataPacket { slug: string, label: string, sort_order: number }
+interface FamilyRow extends RowDataPacket { slug: string, label: string }
+interface MeaningRow extends RowDataPacket { definition: string | null, intitule: string }
 interface ComplementRow extends RowDataPacket {
   construction_id: number
   complement_id: number | null
@@ -53,7 +55,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const database = useDatabase()
-  const [[verb], [conjugations], [categories], [complements]] = await Promise.all([
+  const [[verb], [conjugations], [categories], [complements], [families], [availableCategories], [meanings]] = await Promise.all([
     database.execute<VerbRow[]>(`
       SELECT v.id, v.infinitif,
         v.\`participe_présent\` AS participe_present,
@@ -78,7 +80,7 @@ export default defineEventHandler(async (event) => {
       SELECT DISTINCT cs.slug, cs.label, cs.sort_order FROM verbe_sens vs
       INNER JOIN verbe_sens_categories vsc ON vsc.sens_id=vs.id
       INNER JOIN categories_semantiques cs ON cs.id=vsc.categorie_id
-      WHERE vs.verbe_id=? ORDER BY cs.sort_order, cs.label
+      WHERE vs.verbe_id=? AND vs.est_principal=1 ORDER BY cs.sort_order, cs.label
     `, [id]),
     database.execute<ComplementRow[]>(`
       SELECT cv.id AS construction_id, c.id AS complement_id, cv.code, cv.fonction_objet, cv.preposition,
@@ -88,6 +90,16 @@ export default defineEventHandler(async (event) => {
       LEFT JOIN complements_verbaux c ON c.construction_id=cv.id AND c.actif=1
       WHERE vs.verbe_id=?
       ORDER BY cv.id, c.id
+    `, [id]),
+    database.execute<FamilyRow[]>(`
+      SELECT slug, label FROM familles_conjugaison ORDER BY label, slug
+    `),
+    database.execute<CategoryRow[]>(`
+      SELECT slug, label, sort_order FROM categories_semantiques ORDER BY sort_order, label
+    `),
+    database.execute<MeaningRow[]>(`
+      SELECT definition, intitule FROM verbe_sens
+      WHERE verbe_id=? ORDER BY est_principal DESC, numero_sens, sort_order, id LIMIT 1
     `, [id])
   ])
 
@@ -115,6 +127,10 @@ export default defineEventHandler(async (event) => {
         nombre: item.nombre ? (item.nombre.toLocaleLowerCase('fr').startsWith('p') ? 'pluriel' : 'singulier') : null,
       })),
   }])).values()]
+  const primaryMeaning = meanings[0]
+  const meaningTitle = primaryMeaning?.intitule?.trim() ?? ''
+  const isGenericMeaningTitle = /^sens principal de\s+[«"']?/iu.test(meaningTitle)
+  const meaning = primaryMeaning?.definition?.trim() || (isGenericMeaningTitle ? '' : meaningTitle)
 
   return {
     verb: {
@@ -134,6 +150,7 @@ export default defineEventHandler(async (event) => {
       registrePrincipal: verb[0].registre_principal,
       formeCanonique: verb[0].forme_canonique || verb[0].infinitif,
       statutValidation: verb[0].statut_validation,
+      meaning,
       particularites: array(verb[0].particularites),
       niveauxScolaires: array(verb[0].niveaux_scolaires),
       parcoursCif: array(verb[0].parcours_cif),
@@ -141,5 +158,9 @@ export default defineEventHandler(async (event) => {
     },
     conjugations,
     constructions,
+    classificationOptions: {
+      families,
+      semanticCategories: availableCategories,
+    },
   }
 })

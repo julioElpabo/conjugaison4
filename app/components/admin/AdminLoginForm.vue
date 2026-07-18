@@ -8,6 +8,20 @@ const email = ref('')
 const password = ref('')
 const submitting = ref(false)
 
+onMounted(async () => {
+  if (!import.meta.dev) return
+
+  try {
+    const credentials = await $fetch<{ email: string, password: string }>('/api/dev-login', {
+      credentials: 'same-origin',
+    })
+    email.value = credentials.email
+    password.value = credentials.password
+  } catch {
+    // Le formulaire reste vide si le fichier local est absent ou invalide.
+  }
+})
+
 async function submit() {
   if (submitting.value) {
     return

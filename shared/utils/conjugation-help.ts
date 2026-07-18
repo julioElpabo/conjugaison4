@@ -69,6 +69,48 @@ function groupLabel(verb?: Verb) {
   return `${verb.groupeConjugaison}${verb.groupeConjugaison === 1 ? 'er' : 'e'} groupe`
 }
 
+function escapedHtml(value: string) {
+  return value.replace(/&/gu, '&amp;').replace(/</gu, '&lt;').replace(/>/gu, '&gt;').replace(/"/gu, '&quot;').replace(/'/gu, '&#39;')
+}
+
+function verbGroupDescription(verb: Verb | undefined, infinitive: string) {
+  const group = verb?.groupeConjugaison
+  const bare = bareInfinitive(infinitive)
+  const ending = verb?.terminaison?.trim()
+    || bare.match(/(oir|re|ir|er)$/iu)?.[1]?.toLocaleLowerCase('fr')
+    || ''
+  const groupNames = { 1: 'premier groupe', 2: 'deuxième groupe', 3: 'troisième groupe' } as const
+  if (!group) return 'un verbe dont le groupe n’est pas renseigné'
+  return `un verbe${ending ? ` en <strong>-${escapedHtml(ending)}</strong>` : ''} (${groupNames[group]})`
+}
+
+function tenseContext(question: ExerciseQuestion, tense?: ConjugationTense) {
+  const rawMode = (question.mode || tense?.mode?.name || '').trim()
+  const rawTense = (question.temps || tense?.name || '').trim()
+  const mode = normalized(rawMode)
+  const time = rawTense.toLocaleLowerCase('fr')
+  const normalizedTime = normalized(rawTense)
+  const timeWithArticle = `${/^(imparfait|imperatif|infinitif)$/u.test(normalizedTime) ? "à l’" : 'au '}${time}`
+  if (!rawMode) return timeWithArticle
+  if (mode === 'participe') return `au participe ${time}`
+  if (mode === 'gerondif') return `au gérondif ${time}`
+  if (mode === 'infinitif') return `à l’infinitif ${time}`
+  const modeWithArticle = /^(indicatif|imperatif)$/u.test(mode)
+    ? `de l’${rawMode.toLocaleLowerCase('fr')}`
+    : `du ${rawMode.toLocaleLowerCase('fr')}`
+  return `${timeWithArticle} ${modeWithArticle}`
+}
+
+function endingPronouns(mode: string, count: number) {
+  const normalizedMode = normalized(mode)
+  const pronouns = normalizedMode === 'imperatif'
+    ? ['tu', 'nous', 'vous']
+    : normalizedMode === 'subjonctif'
+      ? ['que je', 'que tu', 'qu’il / elle / on', 'que nous', 'que vous', 'qu’ils / elles']
+      : ['je', 'tu', 'il / elle / on', 'nous', 'vous', 'ils / elles']
+  return pronouns.slice(0, count)
+}
+
 function subjectIndex(question: ExerciseQuestion) {
   const subject = normalized(question.pronom || question.saisiePrefixe).replace(/^que\s+/, '')
   if (/^(je|j')/.test(subject)) return 0
@@ -139,10 +181,14 @@ function tenseRule(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationT
   let rule = ''
   let endings: string[] | null = null
   let endingsText: string | null = null
+  let endingsKind: 'endings' | 'auxiliary' = 'endings'
+  let auxiliaryLabel = ''
   let exception: string | null = null
 
   if (question.isCompound || tense?.isCompound) {
-    const auxiliary = normalized(verb?.auxiliaire) || 'avoir ou être selon le verbe'
+    const auxiliaryLabelFromVerb = verb?.auxiliaire?.trim() || 'avoir ou être selon le verbe'
+    const auxiliary = normalized(auxiliaryLabelFromVerb)
+    auxiliaryLabel = auxiliaryLabelFromVerb
     const auxiliaryTime: Record<string, string> = {
       'passe compose': 'au présent', 'plus-que-parfait': 'à l’imparfait', 'futur anterieur': 'au futur',
       'passe anterieur': 'au passé simple', passe: mode === 'gerondif' ? 'au participe présent' : 'au temps simple correspondant',
@@ -150,7 +196,11 @@ function tenseRule(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationT
     }
     rule = `Conjugue l’auxiliaire ${auxiliary} ${auxiliaryTime[time] || 'au temps demandé'}, puis ajoute le participe passé.`
     const auxiliaryForms = compoundAuxiliaryForms(auxiliary, time, mode)
-    if (auxiliaryForms) endingsText = `Formes de l’auxiliaire : ${auxiliaryForms}.`
+    if (auxiliaryForms) {
+      endings = auxiliaryForms.split(',').map(form => form.trim())
+      endingsKind = 'auxiliary'
+      endingsText = `Formes de l’auxiliaire : ${auxiliaryForms}.`
+    }
   } else if (mode === 'indicatif' && time === 'present') {
     if (group === 1) endings = ['-e', '-es', '-e', '-ons', '-ez', '-ent']
     else if (group === 2) endings = ['-is', '-is', '-it', '-issons', '-issez', '-issent']
@@ -224,11 +274,39 @@ function tenseRule(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationT
 
   return {
     rule,
+    endingItems: endings || [],
+    endingsKind,
+    auxiliaryLabel,
     endings: endingsText || (endings
       ? `${endings.join(', ')}${person === null ? '' : ` — ici, la terminaison attendue est ${endings[person]}`}`
       : null),
     exception,
   }
+}
+
+export function buildConjugationEndingsHtml(
+  question: ExerciseQuestion,
+  verb?: Verb,
+  tense?: ConjugationTense,
+) {
+  const infinitive = question.infinitif || verb?.infinitif || 'ce verbe'
+  const rule = tenseRule(question, verb, tense)
+  const mode = normalized(question.mode || tense?.mode?.name)
+  const time = normalized(question.temps || tense?.name)
+  const group = verb?.groupeConjugaison
+  const endingsAreFamilyDependent = (mode === 'indicatif' && time === 'passe simple' && group !== 1 && group !== 2)
+    || (mode === 'subjonctif' && time === 'present' && group === 3)
+  const endingItems = endingsAreFamilyDependent ? [] : rule.endingItems
+  const introduction = `<p>Le verbe <strong>${escapedHtml(infinitive)}</strong> est ${verbGroupDescription(verb, infinitive)}.</p>`
+  if (!endingItems.length) {
+    return `${introduction}<p>Il n’existe pas de série unique de terminaisons ${tenseContext(question, tense)} pour ce verbe. Appuie-toi sur la forme demandée et sur sa famille de conjugaison.</p>`
+  }
+  const lead = rule.endingsKind === 'auxiliary'
+    ? `<p>${tenseContext(question, tense).replace(/^./u, character => character.toLocaleUpperCase('fr'))}, le verbe se construit avec l’auxiliaire <strong>${escapedHtml(rule.auxiliaryLabel)}</strong>. Les formes de cet auxiliaire sont :</p>`
+    : `<p>Ses terminaisons ${tenseContext(question, tense)} sont :</p>`
+  const pronouns = endingPronouns(question.mode || tense?.mode?.name || '', endingItems.length)
+  const rows = endingItems.map((ending, index) => `<tr><th>${escapedHtml(pronouns[index] || `forme ${index + 1}`)}</th><td>${escapedHtml(ending)}</td></tr>`).join('')
+  return `${introduction}${lead}<table><tbody>${rows}</tbody></table>`
 }
 
 function meaningFor(question: ExerciseQuestion, verb?: Verb) {

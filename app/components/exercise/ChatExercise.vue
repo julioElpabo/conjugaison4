@@ -15,6 +15,7 @@ import { diagnoseCoachAnswer } from '~~/shared/utils/coach-feedback'
 import { coachQuestionBubbles } from '~~/shared/utils/coach-question'
 import { evaluateExerciseAnswer } from '~~/shared/utils/exercise-attempt'
 import { buildTargetedConjugationHelp, isHelpCommand } from '~~/shared/utils/conjugation-help'
+import { coachHelpQuestionVariables, visibleCoachHelpBlocks } from '~~/shared/utils/coach-help'
 import { sanitizeCoachHtml } from '~~/shared/utils/safe-html'
 
 const props = defineProps<{
@@ -53,13 +54,13 @@ const lastMediaQuestion = ref(-100)
 const allowMotion = ref(true)
 const input = useTemplateRef<HTMLInputElement>('chat-answer')
 const keepChatButton = useTemplateRef<HTMLButtonElement>('keep-chat-button')
-const helpCloseButton = useTemplateRef<HTMLButtonElement>('help-close-button')
 const thread = useTemplateRef<HTMLElement>('chat-thread')
 const dialog = useTemplateRef<HTMLElement>('chat-dialogs')
 let conversationVersion = 0
 let coachQueue: Promise<void> = Promise.resolve()
 let lastCoachBubbleAt = 0
 let dialogueState = createCoachDialogueState()
+let automaticHelpTimer: number | undefined
 
 useDialogFocus(dialog, handleEscapeClose, input)
 
@@ -79,6 +80,7 @@ const currentTense = computed(() => {
 const targetedHelp = computed(() => currentQuestion.value
   ? buildTargetedConjugationHelp(currentQuestion.value, currentVerb.value, currentTense.value)
   : null)
+const helpBlocks = computed(() => visibleCoachHelpBlocks(props.coach.help))
 const correctCount = computed(() => attempts.value.filter(item => item.status === 'correct').length)
 const score = computed(() => attempts.value.length
   ? Math.round(correctCount.value / attempts.value.length * 100)
@@ -88,16 +90,45 @@ function normalizedInfinitive(value?: string | null) {
   return (value || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLocaleLowerCase('fr')
 }
 
+const helpValues = computed(() => currentQuestion.value ? {
+  coach: props.coach,
+  ...coachHelpQuestionVariables(currentQuestion.value, currentVerb.value, currentTense.value),
+  definition: currentVerb.value?.meaning?.trim() || targetedHelp.value?.meaning || '',
+  helpTitle: targetedHelp.value?.title || '',
+} : { coach: props.coach })
+
 function openHelp(candidate: string) {
+  cancelAutomaticHelp()
   addMessage('learner', candidate)
   answer.value = ''
   helpOpen.value = true
-  nextTick(() => helpCloseButton.value?.focus())
 }
 
 function closeHelp() {
+  cancelAutomaticHelp()
   helpOpen.value = false
-  nextTick(() => input.value?.focus())
+  focusAnswerInput()
+}
+
+function cancelAutomaticHelp() {
+  if (automaticHelpTimer === undefined) return
+  window.clearTimeout(automaticHelpTimer)
+  automaticHelpTimer = undefined
+}
+
+function scheduleAutomaticHelp() {
+  cancelAutomaticHelp()
+  const version = conversationVersion
+  automaticHelpTimer = window.setTimeout(() => {
+    automaticHelpTimer = undefined
+    if (version === conversationVersion && !finished.value) helpOpen.value = true
+  }, 2000)
+}
+
+function focusAnswerInput() {
+  void nextTick(() => {
+    window.requestAnimationFrame(() => input.value?.focus({ preventScroll: true }))
+  })
 }
 
 function scrollThreadToBottom() {
@@ -181,14 +212,13 @@ async function askCurrentQuestion() {
   await addCoachText(bubbles.formula, undefined, true)
   if (bubbles.sentence) await addCoachText(bubbles.sentence, undefined, true)
   posingQuestion.value = false
-  await nextTick()
-  input.value?.focus()
+  focusAnswerInput()
 }
 
 async function submit() {
   const question = currentQuestion.value
   const candidate = answer.value.trim()
-  if (!question || !candidate || waitingForNext.value || finished.value) return
+  if (!question || !candidate || waitingForNext.value || posingQuestion.value || finished.value) return
   if (isHelpCommand(candidate)) {
     openHelp(candidate)
     return
@@ -298,6 +328,7 @@ async function restart() {
   lastMediaQuestion.value = -100
   await addCoachReaction('restart', {})
   await askCurrentQuestion()
+  scheduleAutomaticHelp()
 }
 
 function requestClose() {
@@ -321,13 +352,18 @@ function confirmClose() {
   emit('close')
 }
 
-onMounted(() => {
+onMounted(async () => {
   allowMotion.value = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  void addCoachReaction('introduction', {})
-  void askCurrentQuestion()
+  focusAnswerInput()
+  await addCoachReaction('introduction', {})
+  await askCurrentQuestion()
+  scheduleAutomaticHelp()
 })
 
-onBeforeUnmount(() => { conversationVersion += 1 })
+onBeforeUnmount(() => {
+  cancelAutomaticHelp()
+  conversationVersion += 1
+})
 </script>
 
 <template>
@@ -338,7 +374,7 @@ onBeforeUnmount(() => { conversationVersion += 1 })
         <header class="chat-header">
           <img class="coach-avatar" :src="coach.avatarPath" alt="">
           <div>
-            <h2 id="chat-title">{{ coach.firstName }} {{ coach.lastName }}</h2>
+            <h2 id="chat-title">{{ coach.firstName }}</h2>
             <p v-if="coach.description">{{ coach.description }}</p>
           </div>
           <div class="chat-header__actions">
@@ -390,7 +426,7 @@ onBeforeUnmount(() => { conversationVersion += 1 })
             v-model="answer"
             type="text"
             autocomplete="off"
-            :disabled="waitingForNext || posingQuestion"
+            :disabled="waitingForNext"
             :placeholder="helpOpen ? 'Écris ta réponse…' : 'Écris ta réponse ou « Aide »…'"
           >
           <button type="submit" :disabled="waitingForNext || posingQuestion || deliveringFeedback || !answer.trim()">
@@ -416,69 +452,17 @@ onBeforeUnmount(() => { conversationVersion += 1 })
         </div>
       </section>
 
-      <Transition name="chat-help">
-        <aside
+      <Transition name="chat-help" appear>
+        <CoachHelpPanel
           v-if="helpOpen && targetedHelp"
-          class="chat-help-dialog"
-          role="region"
-          aria-labelledby="chat-help-title"
-          aria-describedby="chat-help-subtitle"
-        >
-          <header class="chat-help-header">
-            <div>
-              <span class="chat-help-kicker">Aide ciblée · question {{ currentIndex + 1 }}</span>
-              <h2 id="chat-help-title">{{ targetedHelp.title }}</h2>
-              <p id="chat-help-subtitle">{{ targetedHelp.subtitle }}</p>
-            </div>
-            <button ref="help-close-button" type="button" aria-label="Fermer l’aide" @click="closeHelp">×</button>
-          </header>
-
-          <div class="chat-help-content">
-            <section class="chat-help-card chat-help-card--verb">
-              <h3><span aria-hidden="true">1</span> Comprendre le verbe</h3>
-              <p class="chat-help-meaning">{{ targetedHelp.meaning }}</p>
-              <dl>
-                <div v-for="fact in targetedHelp.verbFacts" :key="fact.label">
-                  <dt>{{ fact.label }}</dt>
-                  <dd>{{ fact.value }}</dd>
-                </div>
-              </dl>
-            </section>
-
-            <section class="chat-help-card chat-help-card--tense">
-              <h3><span aria-hidden="true">2</span> Construire la forme</h3>
-              <p class="chat-help-requested-form">{{ targetedHelp.requestedForm }}</p>
-              <p v-for="line in targetedHelp.formation" :key="line">{{ line }}</p>
-              <div v-if="targetedHelp.endings" class="chat-help-endings">
-                <strong>Terminaisons</strong>
-                <span>{{ targetedHelp.endings }}</span>
-              </div>
-              <div v-if="targetedHelp.exception" class="chat-help-exception">
-                <strong>Exception</strong>
-                <span>{{ targetedHelp.exception }}</span>
-              </div>
-            </section>
-
-            <section v-if="targetedHelp.warnings.length" class="chat-help-card chat-help-card--warning">
-              <h3><span aria-hidden="true">!</span> À surveiller</h3>
-              <ul>
-                <li v-for="warning in targetedHelp.warnings" :key="warning">{{ warning }}</li>
-              </ul>
-            </section>
-
-            <section class="chat-help-card chat-help-card--method">
-              <h3><span aria-hidden="true">3</span> Ta méthode</h3>
-              <ol>
-                <li v-for="step in targetedHelp.method" :key="step">{{ step }}</li>
-              </ol>
-            </section>
-          </div>
-
-          <footer class="chat-help-footer">
-            <p>L’aide donne la méthode, mais te laisse construire la réponse.</p>
-            <button type="button" @click="closeHelp">Fermer</button>
-          </footer>
-        </aside>
+          :blocks="helpBlocks"
+          :values="helpValues"
+          :header-title="coach.help?.headerTitle"
+          :header-description="coach.help?.headerDescription"
+          :question-number="currentIndex + 1"
+          :coach-color="coach.themeColor"
+          @close="closeHelp"
+        />
       </Transition>
       </div>
     </div>
@@ -640,6 +624,18 @@ onBeforeUnmount(() => { conversationVersion += 1 })
   line-height: 1.52;
 }
 
+.chat-help-custom-content {
+  margin-bottom: 12px !important;
+  color: #405b63;
+  white-space: pre-line;
+}
+
+.chat-help-card--intro,
+.chat-help-card--custom {
+  border-color: color-mix(in srgb, var(--coach-color, #295f72) 28%, #cfe0dc);
+  background: color-mix(in srgb, var(--coach-color, #295f72) 5%, white);
+}
+
 .chat-help-requested-form {
   margin-bottom: 10px !important;
   color: #17566a;
@@ -773,15 +769,20 @@ onBeforeUnmount(() => { conversationVersion += 1 })
   font-weight: 800;
 }
 
-.chat-help-enter-active,
+.chat-help-enter-active {
+  transform-origin: right center;
+  transition: opacity .34s ease-out, transform .42s cubic-bezier(.22, 1, .36, 1);
+}
+
 .chat-help-leave-active {
-  transition: opacity .2s ease, transform .2s ease;
+  transform-origin: right center;
+  transition: opacity .18s ease-in, transform .2s ease-in;
 }
 
 .chat-help-enter-from,
 .chat-help-leave-to {
   opacity: 0;
-  transform: translateX(18px);
+  transform: translateX(32px) scale(.975);
 }
 
 :global(:root[data-theme='dark'] .chat-help-dialog) {

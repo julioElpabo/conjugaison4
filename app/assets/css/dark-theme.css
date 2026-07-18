@@ -464,6 +464,75 @@
 :root[data-theme='dark'] .admin-notice--error { color: #f2aaa4; background: #422725; border-color: #85504b; }
 :root[data-theme='dark'] .admin-notice--success { color: #9eddb9; background: #20382b; border-color: #4b7e61; }
 
+/* Éditeur des verbes : surfaces imbriquées lisibles sans éblouissement. */
+:root[data-theme='dark'] :is(
+  .verb-editor__metadata, .verb-editor__classification, .verb-editor__complements,
+  .verb-editor__non-finite, .admin-home__placeholder
+) {
+  color: #d9e5e8;
+  background: #1a2b30;
+  border-color: #455d66;
+}
+
+:root[data-theme='dark'] :is(
+  .verb-editor__classification dl > div, .verb-editor__semantic-fields,
+  .verb-editor__complements article, .verb-editor__non-finite article,
+  .tense-card, .tense-card > header, .tense-card thead th
+) {
+  color: #d9e5e8;
+  background: #22363c;
+  border-color: #455d66;
+}
+
+:root[data-theme='dark'] :is(
+  .verb-editor__classification h2, .verb-editor__classification dd,
+  .verb-editor__semantic-fields legend, .verb-editor__semantic-fields label,
+  .verb-editor__boolean-fields label, .verb-editor__complements article header,
+  .verb-editor__complement-add label, .verb-editor__non-finite article h3,
+  .verb-editor__grid-heading h2, .verb-editor__mode-heading,
+  .tense-card h3, .tense-card tbody th
+) { color: #cbe4eb; }
+
+:root[data-theme='dark'] :is(
+  .verb-editor__classification .admin-muted, .verb-editor__definition small,
+  .verb-editor__complements article header span, .verb-editor__complements article header small,
+  .verb-editor__complement-chip small, .verb-editor__mode-heading small,
+  .tense-card thead th
+) { color: #a8bbc2; }
+
+:root[data-theme='dark'] :is(.verb-editor__semantic-fields label, .verb-editor__complement-list > span) {
+  color: #a9dce7;
+  background: #294750;
+}
+
+:root[data-theme='dark'] .verb-editor__mode-heading {
+  background: #20363d;
+  border-color: #455d66;
+}
+
+:root[data-theme='dark'] .verb-editor__mode-nav {
+  background: rgb(22 36 41 / 94%);
+}
+
+:root[data-theme='dark'] .verb-editor__mode-nav a {
+  color: #a9dce7;
+  background: #223c44;
+  border-color: #46636d;
+}
+
+:root[data-theme='dark'] :is(.tense-card th, .tense-card td) { border-color: #3d555e; }
+:root[data-theme='dark'] .verb-editor__non-finite input[readonly] {
+  color: #afc1c7 !important;
+  background: #26373b !important;
+}
+:root[data-theme='dark'] .verb-editor__state { color: #a7dfbe; background: #203b2c; }
+:root[data-theme='dark'] .verb-editor__state.is-dirty { color: #f0c985; background: #40331f; }
+:root[data-theme='dark'] .verb-editor__grammar-fields select {
+  color: #dce7e9 !important;
+  background: #142226 !important;
+  border-color: #4a626c !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .theme-switch,
   .theme-switch__thumb,

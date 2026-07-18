@@ -2,6 +2,7 @@
 .output
 node_modules
 .env
+dev-login.local.json
 .DS_Store
 npm-debug.log*
 reports/academie-articles-cache.json

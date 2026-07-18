@@ -28,6 +28,7 @@ interface AdminVerb {
   niveauxScolaires?: string[]
   parcoursCif?: string[]
   categoriesSemantiques?: Array<{ slug: string, label: string }>
+  meaning?: string
 }
 
 interface AdminConjugation {
@@ -64,6 +65,10 @@ interface VerbDetail {
   verb: AdminVerb
   conjugations: AdminConjugation[]
   constructions?: AdminConstruction[]
+  classificationOptions?: {
+    families: Array<{ slug: string, label: string }>
+    semanticCategories: Array<{ slug: string, label: string }>
+  }
 }
 
 interface CatalogueMode {
@@ -85,6 +90,22 @@ interface VerbSavePayload {
   participePresent: string
   participePasse: string
   auxiliaire: string
+  meaning: string
+  groupeConjugaison: number | null
+  familleConjugaison: string
+  terminaison: string
+  typePronominal: string
+  estImpersonnel: boolean
+  estDefectif: boolean
+  niveauDifficulte: number | null
+  niveauCecrl: string
+  registrePrincipal: string
+  formeCanonique: string
+  statutValidation: string
+  particularites: string[]
+  niveauxScolaires: string[]
+  parcoursCif: string[]
+  categoriesSemantiques: string[]
   conjugations: Array<{
     personId: number
     tenseId: number
@@ -132,6 +153,22 @@ const draft = reactive<VerbSavePayload>({
   participePresent: '',
   participePasse: '',
   auxiliaire: 'avoir',
+  meaning: '',
+  groupeConjugaison: null,
+  familleConjugaison: '',
+  terminaison: '',
+  typePronominal: 'aucun',
+  estImpersonnel: false,
+  estDefectif: false,
+  niveauDifficulte: null,
+  niveauCecrl: '',
+  registrePrincipal: 'courant',
+  formeCanonique: '',
+  statutValidation: 'genere',
+  particularites: [],
+  niveauxScolaires: [],
+  parcoursCif: [],
+  categoriesSemantiques: [],
   conjugations: []
 })
 
@@ -180,6 +217,22 @@ function payload(): VerbSavePayload {
     participePresent: draft.participePresent.trim(),
     participePasse: draft.participePasse.trim(),
     auxiliaire: draft.auxiliaire.trim(),
+    meaning: draft.meaning.trim(),
+    groupeConjugaison: draft.groupeConjugaison,
+    familleConjugaison: draft.familleConjugaison,
+    terminaison: draft.terminaison.trim().replace(/^-+/u, ''),
+    typePronominal: draft.typePronominal,
+    estImpersonnel: draft.estImpersonnel,
+    estDefectif: draft.estDefectif,
+    niveauDifficulte: draft.niveauDifficulte,
+    niveauCecrl: draft.niveauCecrl,
+    registrePrincipal: draft.registrePrincipal.trim(),
+    formeCanonique: draft.formeCanonique.trim(),
+    statutValidation: draft.statutValidation,
+    particularites: [...draft.particularites],
+    niveauxScolaires: [...draft.niveauxScolaires],
+    parcoursCif: [...draft.parcoursCif],
+    categoriesSemantiques: [...draft.categoriesSemantiques].sort(),
     conjugations: draft.conjugations.map(item => ({
       personId: item.personId,
       tenseId: item.tenseId,
@@ -191,7 +244,18 @@ function payload(): VerbSavePayload {
 }
 
 const dirty = computed(() => JSON.stringify(payload()) !== initialSnapshot.value)
-const isValid = computed(() => Boolean(draft.infinitif.trim() && draft.auxiliaire.trim()))
+const isValid = computed(() => Boolean(
+  draft.infinitif.trim()
+  && draft.auxiliaire.trim()
+  && draft.groupeConjugaison
+  && draft.familleConjugaison
+  && draft.terminaison.trim()
+  && draft.formeCanonique.trim()
+))
+
+function splitTags(value: string): string[] {
+  return [...new Set(value.split(',').map(item => item.trim()).filter(Boolean))]
+}
 
 function resetDraft() {
   const existing = new Map(
@@ -234,6 +298,22 @@ function resetDraft() {
   draft.participePresent = props.detail.verb.participePresent
   draft.participePasse = props.detail.verb.participePasse
   draft.auxiliaire = props.detail.verb.auxiliaire || 'avoir'
+  draft.meaning = props.detail.verb.meaning ?? ''
+  draft.groupeConjugaison = props.detail.verb.groupeConjugaison ?? null
+  draft.familleConjugaison = props.detail.verb.familleConjugaison ?? ''
+  draft.terminaison = props.detail.verb.terminaison ?? ''
+  draft.typePronominal = props.detail.verb.typePronominal ?? 'aucun'
+  draft.estImpersonnel = Boolean(props.detail.verb.estImpersonnel)
+  draft.estDefectif = Boolean(props.detail.verb.estDefectif)
+  draft.niveauDifficulte = props.detail.verb.niveauDifficulte ?? null
+  draft.niveauCecrl = props.detail.verb.niveauCecrl ?? ''
+  draft.registrePrincipal = props.detail.verb.registrePrincipal ?? 'courant'
+  draft.formeCanonique = props.detail.verb.formeCanonique || props.detail.verb.infinitif
+  draft.statutValidation = props.detail.verb.statutValidation ?? 'genere'
+  draft.particularites = [...(props.detail.verb.particularites ?? [])]
+  draft.niveauxScolaires = [...(props.detail.verb.niveauxScolaires ?? [])]
+  draft.parcoursCif = [...(props.detail.verb.parcoursCif ?? [])]
+  draft.categoriesSemantiques = (props.detail.verb.categoriesSemantiques ?? []).map(category => category.slug)
   draft.conjugations.splice(0, draft.conjugations.length, ...rows)
   initialSnapshot.value = JSON.stringify(payload())
 }
@@ -423,28 +503,118 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
     <section class="verb-editor__classification" aria-labelledby="classification-title">
       <div>
         <h2 id="classification-title">Classement grammatical et sémantique</h2>
-        <p class="admin-muted">Ces critères sont recalculés lors de l’enregistrement et déterminent les défis prêts à l’emploi.</p>
+        <p class="admin-muted">Ces informations alimentent le catalogue, les exercices et les aides liées à ce verbe.</p>
       </div>
-      <dl>
-        <div><dt>Groupe</dt><dd>{{ detail.verb.groupeConjugaison || 'À déterminer' }}</dd></div>
-        <div><dt>Famille</dt><dd>{{ detail.verb.familleConjugaison || 'À déterminer' }}</dd></div>
-        <div><dt>Terminaison</dt><dd>{{ detail.verb.terminaison ? `-${detail.verb.terminaison}` : '—' }}</dd></div>
-        <div><dt>Pronominalité</dt><dd>{{ detail.verb.typePronominal || 'aucun' }}</dd></div>
-        <div><dt>Difficulté</dt><dd>{{ detail.verb.niveauDifficulte ? `${detail.verb.niveauDifficulte}/3` : '—' }}</dd></div>
-        <div><dt>Niveau CECRL</dt><dd>{{ detail.verb.niveauCecrl || 'Non renseigné' }}</dd></div>
-        <div><dt>Registre</dt><dd>{{ detail.verb.registrePrincipal || 'courant' }}</dd></div>
-        <div><dt>Forme canonique</dt><dd>{{ detail.verb.formeCanonique || detail.verb.infinitif }}</dd></div>
-      </dl>
-      <div class="verb-editor__tags">
-        <strong>Catégories de sens</strong>
-        <span v-for="category in detail.verb.categoriesSemantiques" :key="category.slug">{{ category.label }}</span>
-        <em v-if="!detail.verb.categoriesSemantiques?.length">À classer</em>
+      <div class="verb-editor__classification-grid">
+        <label class="admin-field verb-editor__definition">
+          <span>Définition du verbe</span>
+          <textarea v-model="draft.meaning" rows="3" maxlength="4000" placeholder="Décrivez le sens principal de ce verbe." />
+          <small>Cette définition est disponible dans le catalogue et via la variable <code>{definition}</code> des aides.</small>
+        </label>
+        <label class="admin-field">
+          <span>Groupe *</span>
+          <select v-model.number="draft.groupeConjugaison" required>
+            <option :value="null" disabled>À choisir</option>
+            <option :value="1">1er groupe</option>
+            <option :value="2">2e groupe</option>
+            <option :value="3">3e groupe</option>
+          </select>
+        </label>
+        <label class="admin-field">
+          <span>Famille *</span>
+          <select v-model="draft.familleConjugaison" required>
+            <option value="" disabled>À choisir</option>
+            <option v-for="family in detail.classificationOptions?.families" :key="family.slug" :value="family.slug">
+              {{ family.label }}
+            </option>
+          </select>
+        </label>
+        <label class="admin-field">
+          <span>Terminaison *</span>
+          <input v-model="draft.terminaison" maxlength="12" placeholder="er" required>
+        </label>
+        <label class="admin-field">
+          <span>Pronominalité</span>
+          <select v-model="draft.typePronominal">
+            <option value="aucun">Aucune</option>
+            <option value="occasionnel">Occasionnelle</option>
+            <option value="essentiel">Essentielle</option>
+          </select>
+        </label>
+        <label class="admin-field">
+          <span>Difficulté</span>
+          <select v-model.number="draft.niveauDifficulte">
+            <option :value="null">Non renseignée</option>
+            <option :value="1">1 / 3 — simple</option>
+            <option :value="2">2 / 3 — intermédiaire</option>
+            <option :value="3">3 / 3 — difficile</option>
+          </select>
+        </label>
+        <label class="admin-field">
+          <span>Niveau CECRL</span>
+          <select v-model="draft.niveauCecrl">
+            <option value="">Non renseigné</option>
+            <option v-for="level in ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']" :key="level" :value="level">{{ level }}</option>
+          </select>
+        </label>
+        <label class="admin-field">
+          <span>Registre *</span>
+          <select v-model="draft.registrePrincipal" required>
+            <option value="courant">Courant</option>
+            <option value="familier">Familier</option>
+            <option value="soutenu">Soutenu</option>
+            <option value="rare">Rare</option>
+          </select>
+        </label>
+        <label class="admin-field">
+          <span>Forme canonique *</span>
+          <input v-model="draft.formeCanonique" maxlength="255" required>
+        </label>
+        <label class="admin-field">
+          <span>Statut de validation</span>
+          <select v-model="draft.statutValidation">
+            <option value="genere">Généré</option>
+            <option value="a_verifier">À vérifier</option>
+            <option value="valide">Validé</option>
+          </select>
+        </label>
+        <label class="admin-field">
+          <span>Niveaux scolaires</span>
+          <input
+            :value="draft.niveauxScolaires.join(', ')"
+            placeholder="6P, 7H, 8H"
+            @change="draft.niveauxScolaires = splitTags(($event.target as HTMLInputElement).value)"
+          >
+        </label>
+        <label class="admin-field">
+          <span>Parcours CIF</span>
+          <input
+            :value="draft.parcoursCif.join(', ')"
+            placeholder="A1, A2"
+            @change="draft.parcoursCif = splitTags(($event.target as HTMLInputElement).value)"
+          >
+        </label>
+        <label class="admin-field verb-editor__definition">
+          <span>Particularités</span>
+          <input
+            :value="draft.particularites.join(', ')"
+            placeholder="ger, pronominal, formes-alternatives"
+            @change="draft.particularites = splitTags(($event.target as HTMLInputElement).value)"
+          >
+          <small>Séparez les étiquettes par des virgules.</small>
+        </label>
       </div>
-      <div class="verb-editor__tags">
-        <strong>Défis et particularités</strong>
-        <span v-for="tag in [...(detail.verb.niveauxScolaires || []), ...(detail.verb.parcoursCif || []), ...(detail.verb.particularites || [])]" :key="tag">{{ tag }}</span>
-        <em v-if="![...(detail.verb.niveauxScolaires || []), ...(detail.verb.parcoursCif || []), ...(detail.verb.particularites || [])].length">Aucune étiquette</em>
+      <div class="verb-editor__boolean-fields">
+        <label><input v-model="draft.estImpersonnel" type="checkbox"> Verbe impersonnel</label>
+        <label><input v-model="draft.estDefectif" type="checkbox"> Verbe défectif</label>
       </div>
+      <fieldset class="verb-editor__semantic-fields">
+        <legend>Catégories de sens</legend>
+        <label v-for="category in detail.classificationOptions?.semanticCategories" :key="category.slug">
+          <input v-model="draft.categoriesSemantiques" type="checkbox" :value="category.slug">
+          <span>{{ category.label }}</span>
+        </label>
+      </fieldset>
     </section>
 
     <section class="verb-editor__complements" aria-labelledby="complements-title">
@@ -795,6 +965,80 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
   margin: 4px 0 0;
   color: var(--admin-navy);
   font-weight: 750;
+}
+
+.verb-editor__classification-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.verb-editor__classification-grid .admin-field {
+  min-width: 0;
+}
+
+.verb-editor__definition {
+  grid-column: 1 / -1;
+}
+
+.verb-editor__definition small {
+  color: var(--admin-muted);
+  font-size: .72rem;
+  line-height: 1.4;
+}
+
+.verb-editor__definition code {
+  color: var(--admin-blue-dark);
+  font: inherit;
+  font-weight: 800;
+}
+
+.verb-editor__boolean-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+}
+
+.verb-editor__boolean-fields label,
+.verb-editor__semantic-fields label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--admin-navy);
+  font-size: .8rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.verb-editor__boolean-fields input,
+.verb-editor__semantic-fields input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--admin-blue-dark);
+}
+
+.verb-editor__semantic-fields {
+  display: flex;
+  margin: 0;
+  padding: 13px;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: white;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+}
+
+.verb-editor__semantic-fields legend {
+  padding: 0 6px;
+  color: var(--admin-navy);
+  font-size: .82rem;
+  font-weight: 850;
+}
+
+.verb-editor__semantic-fields label {
+  padding: 6px 9px;
+  background: #eaf5f7;
+  border-radius: 99px;
 }
 
 .verb-editor__complements {
@@ -1255,12 +1499,20 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .verb-editor__classification-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .verb-editor__state {
     align-self: flex-start;
   }
 }
 
 @media (max-width: 470px) {
+  .verb-editor__classification-grid {
+    grid-template-columns: 1fr;
+  }
+
   .verb-editor__actions .admin-button {
     flex: 1 1 150px;
   }

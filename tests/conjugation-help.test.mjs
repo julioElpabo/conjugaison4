@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildTargetedConjugationHelp, isHelpCommand } from '../shared/utils/conjugation-help.ts'
+import { buildConjugationEndingsHtml, buildTargetedConjugationHelp, isHelpCommand } from '../shared/utils/conjugation-help.ts'
 
 function verb(overrides = {}) {
   return {
@@ -87,6 +87,49 @@ test('l’aide distingue clairement la règle générale d’une exception', () 
   assert.match(help.endings, /-ais, -ais, -ait, -ions, -iez, -aient/)
   assert.match(help.exception, /radical ét-/)
   assert.match(help.exception, /seul verbe/)
+})
+
+test('le bloc terminaisons décrit grammaticalement le verbe et le contexte demandé', () => {
+  const html = buildConjugationEndingsHtml(question({
+    infinitif: 'manger',
+    temps: 'imparfait',
+  }), verb({
+    infinitif: 'manger',
+    terminaison: 'er',
+    particularites: ['ger'],
+  }))
+
+  assert.match(html, /Le verbe <strong>manger<\/strong> est un verbe en <strong>-er<\/strong> \(premier groupe\)/)
+  assert.match(html, /Ses terminaisons à l’imparfait de l’indicatif sont/)
+  assert.match(html, /<tr><th>je<\/th><td>-ais<\/td><\/tr>/)
+  assert.match(html, /<tr><th>ils \/ elles<\/th><td>-aient<\/td><\/tr>/)
+})
+
+test('le bloc terminaisons présente les formes de l’auxiliaire aux temps composés', () => {
+  const html = buildConjugationEndingsHtml(question({
+    temps: 'plus-que-parfait',
+    isCompound: true,
+  }), verb())
+
+  assert.match(html, /Au plus-que-parfait de l’indicatif, le verbe se construit avec l’auxiliaire <strong>avoir<\/strong>/)
+  assert.match(html, /<tr><th>je<\/th><td>avais<\/td><\/tr>/)
+  assert.match(html, /<tr><th>ils \/ elles<\/th><td>avaient<\/td><\/tr>/)
+})
+
+test('le bloc terminaisons ne donne pas de fausse série aux verbes irréguliers', () => {
+  const html = buildConjugationEndingsHtml(question({
+    infinitif: 'venir',
+    temps: 'passé simple',
+  }), verb({
+    infinitif: 'venir',
+    terminaison: 'ir',
+    groupeConjugaison: 3,
+    particularites: [],
+  }))
+
+  assert.match(html, /verbe en <strong>-ir<\/strong> \(troisième groupe\)/)
+  assert.match(html, /Il n’existe pas de série unique/)
+  assert.doesNotMatch(html, /<table>/)
 })
 
 test('l’aide d’un temps composé explique l’auxiliaire et l’accord du COD antéposé', () => {

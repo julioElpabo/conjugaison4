@@ -27,6 +27,35 @@ export type CoachStatus = 'draft' | 'published' | 'disabled'
 export type CoachGender = 'female' | 'male'
 export type CoachMediaType = 'emoji' | 'animation' | 'video' | 'image'
 
+export const COACH_HELP_BLOCK_TYPES = [
+  'normal',
+  'warning',
+  'danger',
+] as const
+
+export type CoachHelpBlockType = typeof COACH_HELP_BLOCK_TYPES[number]
+export type CoachHelpStatus = 'draft' | 'published'
+
+export interface CoachHelpBlock {
+  id: number
+  type: CoachHelpBlockType
+  title: string
+  content: string
+  isActive: boolean
+  sortOrder: number
+  children: CoachHelpBlock[]
+}
+
+export interface CoachHelpTemplate {
+  id: number
+  name: string
+  description: string
+  headerTitle: string
+  headerDescription: string
+  status: CoachHelpStatus
+  blocks: CoachHelpBlock[]
+}
+
 export interface CoachReplyTemplate {
   id: number
   eventType: CoachEvent
@@ -69,6 +98,7 @@ export interface CoachCharacter {
   emoticon: string
   description: string
   pedagogicalStyle: string
+  helpId: number | null
   status: CoachStatus
   sortOrder: number
   replies: CoachReplyTemplate[]
@@ -89,6 +119,7 @@ export interface CoachProfile {
   characterName: string
   personality: string
   pedagogicalStyle: string
+  help: CoachHelpTemplate | null
   themeColor: string
   status: CoachStatus
   sortOrder: number

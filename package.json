@@ -25,6 +25,7 @@
     "data:migrate-coaches": "node --env-file=.env scripts/migrate-coaches.mjs",
     "data:migrate-character-names": "node --env-file=.env scripts/migrate-character-gendered-names.mjs",
     "data:migrate-character-emoticons": "node --env-file=.env scripts/migrate-character-emoticons.mjs",
+    "data:migrate-coach-helps": "node --env-file=.env scripts/migrate-coach-helps.mjs",
     "data:remove-coach-off-topic": "node --env-file=.env scripts/remove-unused-coach-off-topic.mjs",
     "data:migrate-mail-requests": "node --env-file-if-exists=.env scripts/migrate-mail-requests.mjs",
     "data:migrate-mail-requests:apply": "node --env-file-if-exists=.env scripts/migrate-mail-requests.mjs --apply",

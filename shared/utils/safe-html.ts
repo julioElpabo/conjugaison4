@@ -9,6 +9,7 @@ const ALLOWED_TAGS = new Set([
   'figcaption',
   'figure',
   'i',
+  'kbd',
   'li',
   'mark',
   'ol',
@@ -20,6 +21,7 @@ const ALLOWED_TAGS = new Set([
   'summary',
   'sub',
   'sup',
+  'samp',
   'table',
   'tbody',
   'td',
@@ -27,6 +29,7 @@ const ALLOWED_TAGS = new Set([
   'tr',
   'u',
   'ul',
+  'var',
 ])
 
 const VOID_TAGS = new Set(['br'])

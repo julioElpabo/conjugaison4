@@ -52,12 +52,17 @@ export function useEtreForIntransitiveCompound<T extends ConjugationSourceRow>(
     throw new Error(`Forme de l’auxiliaire être introuvable pour ${row.mode_name} · ${row.temps_name} · personne ${row.personne_id}.`)
   }
   const conjugaison1 = `${auxiliary.conjugaison1.trim()} ${participleForPerson(row.participe_passe, row.personne_id)}`
+  const nousAuxiliary = findCompoundAuxiliaryForm({ ...row, personne_id: 7 }, auxiliaryForms)
+  const nousForm = nousAuxiliary?.conjugaison1?.trim()
+    ? `${nousAuxiliary.conjugaison1.trim()} ${participleForPerson(row.participe_passe, 7)}`
+    : row.nous_form
   return {
     ...row,
     auxiliaire: 'être',
     conjugaison1,
     conjugaison2: '',
     conjugaison3: '',
+    nous_form: nousForm,
   }
 }
 

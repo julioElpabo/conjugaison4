@@ -104,6 +104,23 @@ export function buildRadicalReference(
   const tense = normalized(request.tense)
   const infinitive = normalized(bareInfinitive(request.infinitive))
 
+  if (mode === 'indicatif' && tense === 'present') {
+    const source = referenceForm(forms, 'indicatif', 'présent', 'nous')
+    const sourceForm = conjugatedCore(source?.form || '')
+    const removableEnding = ['issons', 'ons'].find(ending => normalized(sourceForm).endsWith(ending)) || ''
+    if (sourceForm && removableEnding && sourceForm.length > removableEnding.length) {
+      const radical = sourceForm.slice(0, -removableEnding.length)
+      const targetForm = conjugatedCore(request.conjugation)
+      if (normalized(targetForm).startsWith(normalized(radical))) {
+        return {
+          kind: 'present-nous', label: 'nous au présent', form: sourceForm, removableEnding,
+          radical, targetEnding: targetForm.slice(radical.length), referenceMode: 'indicatif',
+          referenceTense: 'présent', referenceSubject: 'nous', strategy: 'remove-ending', validated: true,
+        }
+      }
+    }
+  }
+
   if (mode === 'indicatif' && tense === 'imparfait') {
     const target = targetStem(request, IMPERFECT_ENDINGS)
     if (!target) return undefined
@@ -121,6 +138,8 @@ export function buildRadicalReference(
   if ((mode === 'indicatif' && tense === 'futur') || (mode === 'conditionnel' && tense === 'present')) {
     const target = targetStem(request, mode === 'indicatif' ? FUTURE_ENDINGS : IMPERFECT_ENDINGS)
     if (!target) return undefined
+    const reference = fromRemovableForm(referenceForm(forms, 'indicatif', 'futur', 'je'), 'ai', target.stem, 'future-stem', 'je au futur', target.ending, request.infinitive)
+    if (reference) return reference
     const bare = bareInfinitive(request.infinitive)
     const regularStem = normalized(bare).endsWith('re') ? bare.slice(0, -1) : bare
     if (normalized(regularStem) === normalized(target.stem)) {
@@ -129,8 +148,6 @@ export function buildRadicalReference(
         targetEnding: target.ending, referenceMode: 'infinitif', referenceTense: 'présent', referenceSubject: '', strategy: 'remove-ending', validated: true,
       }
     }
-    const reference = fromRemovableForm(referenceForm(forms, 'indicatif', 'futur', 'je'), 'ai', target.stem, 'future-stem', 'je au futur', target.ending, request.infinitive)
-    if (reference) return reference
   }
 
   if (mode === 'indicatif' && tense === 'passe simple') {

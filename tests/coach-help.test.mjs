@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { automaticOrthographyHelpBlocks, coachHelpBlockUsesPedagogicalApproach, coachHelpQuestionVariables, defaultCoachHelpBlocks, renderCoachHelpContent, visibleCoachHelpBlocks } from '../shared/utils/coach-help.ts'
+import { automaticOrthographyHelpBlocks, buildContextualBaseTitle, buildDefinitionHelpHtml, buildReferenceFormHelpHtml, coachHelpBlockUsesPedagogicalApproach, coachHelpQuestionVariables, defaultCoachHelpBlocks, renderCoachHelpContent, visibleCoachHelpBlocks } from '../shared/utils/coach-help.ts'
+import { COACH_HELP_BLOCK_TYPES } from '../shared/types/coach.ts'
 import { formatCoachHtmlSource } from '../shared/utils/html-source-format.ts'
 import { sanitizeCoachHtml } from '../shared/utils/safe-html.ts'
 
@@ -23,6 +24,30 @@ describe('aides visuelles configurables', () => {
   it('rend la définition du verbe dans le HTML administré', () => {
     const rendered = renderCoachHelpContent(block.content, { verb: 'manger', definition: 'prendre un aliment' })
     assert.equal(rendered, '<p>manger : <strong>prendre un aliment</strong></p>')
+  })
+
+  it('construit le bloc Définition automatique avec les données FALC du verbe', () => {
+    const values = { verb: 'savoir', definition: 'Avoir une information dans sa mémoire ou savoir faire une action.' }
+    assert.equal(
+      buildDefinitionHelpHtml(values),
+      '<p><strong>savoir</strong> = Avoir une information dans sa mémoire ou savoir faire une action.</p>',
+    )
+    assert.equal(renderCoachHelpContent('{definitionHelp}', values), buildDefinitionHelpHtml(values))
+    assert.equal(
+      buildDefinitionHelpHtml({ verb: '<dire>', definition: 'Comprendre & répondre.' }),
+      '<p><strong>&lt;dire&gt;</strong> = Comprendre &amp; répondre.</p>',
+    )
+  })
+
+  it('propose les visuels info et success', () => {
+    assert.deepEqual(COACH_HELP_BLOCK_TYPES, ['normal', 'info', 'success', 'warning', 'danger'])
+  })
+
+  it('adapte le titre automatique du radical au verbe', () => {
+    assert.equal(buildContextualBaseTitle('manger'), 'Trouve le radical de manger')
+    assert.equal(buildContextualBaseTitle('aller'), 'Trouve le radical d’aller')
+    assert.equal(buildContextualBaseTitle('habiter', 'muet'), 'Trouve le radical d’habiter')
+    assert.equal(buildContextualBaseTitle('haïr', 'aspire'), 'Trouve le radical de haïr')
   })
 
   it('expose séparément la base contextuelle et la terminaison fiables', () => {
@@ -59,6 +84,58 @@ describe('aides visuelles configurables', () => {
     assert.equal(coachHelpBlockUsesPedagogicalApproach('<p>{endingsHelp}</p>'), true)
     assert.equal(coachHelpBlockUsesPedagogicalApproach('<p>{contextualBaseHelp}</p>'), true)
     assert.equal(coachHelpBlockUsesPedagogicalApproach('<p>{definition}</p>'), false)
+  })
+
+  it('emploie nous pour construire l’imparfait depuis le présent', () => {
+    const baseQuestion = {
+      titre: 'Question', consigne: '', reponses: ['mangeait'], reponsesPourCorrige: ['il mangeait'],
+      infinitif: 'manger', pronom: 'il', mode: 'indicatif', temps: 'imparfait', conjugaison1: 'mangeait',
+      radicalReference: {
+        kind: 'present-nous', label: 'nous au présent', form: 'mangeons', removableEnding: 'ons', radical: 'mange',
+        targetEnding: 'ait', referenceMode: 'indicatif', referenceTense: 'présent', referenceSubject: 'nous',
+        strategy: 'remove-ending', validated: true,
+      },
+    }
+    const html = buildReferenceFormHelpHtml(baseQuestion)
+    const values = coachHelpQuestionVariables(baseQuestion)
+    const indicativeOnlyBase = renderCoachHelpContent('{contextualBaseHelp}', { ...values, omitIndicativeMode: true }, 'cif-falc')
+    assert.match(html, /<strong>à l’imparfait<\/strong> <strong>de l’indicatif<\/strong>/)
+    assert.match(html, /apprends par cœur sa forme repère avec le pronom <strong>nous<\/strong> :/)
+    assert.doesNotMatch(html, /forme repère <strong>au présent<\/strong>/)
+    assert.match(html, /<p><mark><strong><i>♥<\/i> Nous mangeons<\/strong><\/mark><\/p>/)
+    assert.match(indicativeOnlyBase, /Terminaisons de l’imparfait<\/strong>/)
+    assert.doesNotMatch(indicativeOnlyBase, /Terminaisons de l’imparfait de l’indicatif/)
+  })
+
+  it('emploie il au passé simple dans tous les blocs automatiques', () => {
+    const question = {
+      titre: 'Question', consigne: '', reponses: ['mangeâmes'], reponsesPourCorrige: ['nous mangeâmes'],
+      infinitif: 'manger', pronom: 'nous', mode: 'indicatif', temps: 'passé simple', conjugaison1: 'mangeâmes',
+      radicalReference: {
+        kind: 'past-simple-il', label: 'il au passé simple', form: 'mangea', removableEnding: 'a', radical: 'mange',
+        targetEnding: 'âmes', referenceMode: 'indicatif', referenceTense: 'passé simple', referenceSubject: 'il',
+        strategy: 'remove-ending', validated: true,
+      },
+    }
+    const values = coachHelpQuestionVariables(question)
+    assert.match(values.referenceFormHelp, /pronom <strong>il<\/strong>/)
+    assert.match(values.referenceFormHelp, /<mark><strong><i>♥<\/i> Il mangea<\/strong><\/mark>/)
+    assert.match(values.contextualBaseHelp, /<mark><strong><i>♥<\/i> Il mangea<\/strong><\/mark>/)
+    assert.match(values.endingsHelp, /<i>♥<\/i> Il mangea/)
+    assert.equal(renderCoachHelpContent('{referenceFormHelp}', values), values.referenceFormHelp)
+    assert.equal(renderCoachHelpContent('{nousFormHelp}', values), values.referenceFormHelp)
+  })
+
+  it('retient la personne demandée quand aucune autre forme ne permet une déduction sûre', () => {
+    const html = buildReferenceFormHelpHtml({
+      titre: 'Question', consigne: '', reponses: ['a mangé'], reponsesPourCorrige: ['il a mangé'],
+      infinitif: 'manger', pronom: 'il', mode: 'indicatif', temps: 'passé composé',
+      conjugaison1: 'a mangé', isCompound: true,
+    })
+
+    assert.match(html, /pronom <strong>il<\/strong>/)
+    assert.match(html, /<mark><strong>il a mangé<\/strong><\/mark>/)
+    assert.doesNotMatch(html, /pronom <strong>nous<\/strong>/)
   })
 
   it('conserve les balises sûres et retire scripts et attributs', () => {

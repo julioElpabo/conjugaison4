@@ -5,6 +5,8 @@ import { encodePronominalSelectionId } from '../../shared/utils/pronominal-selec
 import { useDatabase } from '../utils/database'
 import { buildTenseExamples, type MangerFormForExample } from './tense-examples'
 import { indirectRelative } from './indirect-relative'
+import { grammarModeCode, grammarTenseCode, type GrammarModeCode, type GrammarTenseCode } from '../../shared/utils/grammar-codes'
+import { normalizeLocale, type AppLocale } from '../../shared/i18n/locales'
 
 interface VerbeRow extends RowDataPacket {
   id: number
@@ -62,6 +64,7 @@ interface PronominalUseRow extends RowDataPacket {
 
 interface ModeRow extends RowDataPacket {
   id: number
+  code: GrammarModeCode | null
   name: string
   sort_order: number
 }
@@ -69,6 +72,7 @@ interface ModeRow extends RowDataPacket {
 interface TempsRow extends RowDataPacket {
   id: number
   mode_id: number
+  code: GrammarTenseCode | null
   name: string
   is_compound: number
   selected: number
@@ -76,8 +80,9 @@ interface TempsRow extends RowDataPacket {
 
 interface MangerExampleRow extends RowDataPacket, MangerFormForExample {}
 
-export async function getCatalogue() {
+export async function getCatalogue(locale: AppLocale = 'fr') {
   const database = useDatabase()
+  const requestedLocale = normalizeLocale(locale, 'fr')
   const [verbesResult, modesResult, tempsResult, semanticResult, meaningResult, pronominalResult, complementResult, mangerExamplesResult] = await Promise.all([
     database.execute<VerbeRow[]>(`
       SELECT v.id, v.infinitif,
@@ -95,12 +100,12 @@ export async function getCatalogue() {
       ORDER BY COALESCE(v.forme_canonique, v.infinitif), v.id
     `),
     database.execute<ModeRow[]>(`
-      SELECT id, name, \`order\` AS sort_order
+      SELECT id, code, name, \`order\` AS sort_order
       FROM modes
       ORDER BY \`order\`, id
     `),
     database.execute<TempsRow[]>(`
-      SELECT id, mode_id, name,
+      SELECT id, mode_id, code, name,
              isTempsCompose AS is_compound,
              selected
       FROM temps
@@ -114,10 +119,19 @@ export async function getCatalogue() {
       ORDER BY vs.verbe_id, cs.sort_order, cs.slug
     `),
     database.execute<MeaningRow[]>(`
-      SELECT verbe_id, intitule, definition, est_principal, numero_sens
-      FROM verbe_sens
-      ORDER BY verbe_id, est_principal DESC, numero_sens, sort_order, id
-    `),
+      SELECT vs.verbe_id,
+             CASE WHEN ?='fr' THEN vs.intitule
+               ELSE COALESCE(requested.intitule, french.intitule, vs.intitule) END AS intitule,
+             CASE WHEN ?='fr' THEN vs.definition
+               ELSE COALESCE(requested.definition, french.definition, vs.definition) END AS definition,
+             vs.est_principal, vs.numero_sens
+      FROM verbe_sens vs
+      LEFT JOIN verbe_sens_translations requested
+        ON requested.sens_id=vs.id AND requested.locale=?
+      LEFT JOIN verbe_sens_translations french
+        ON french.sens_id=vs.id AND french.locale='fr'
+      ORDER BY vs.verbe_id, vs.est_principal DESC, vs.numero_sens, vs.sort_order, vs.id
+    `, [requestedLocale, requestedLocale, requestedLocale]),
     database.execute<PronominalUseRow[]>(`
       SELECT id, verbe_id, infinitif_pronominal, type_emploi, fonction_pronom,
              regle_accord, preposition, statut_validation
@@ -287,12 +301,14 @@ export async function getCatalogue() {
     verbes: catalogueVerbs,
     modes: modesResult[0].map(row => ({
       id: Number(row.id),
+      code: row.code || grammarModeCode(row.name) || 'indicative',
       name: row.name,
       order: Number(row.sort_order)
     })),
     temps: tempsResult[0].map(row => ({
       id: Number(row.id),
       modeId: Number(row.mode_id),
+      code: row.code || grammarTenseCode(row.name) || 'present',
       name: row.name,
       isCompound: Boolean(row.is_compound),
       selected: Boolean(row.selected),

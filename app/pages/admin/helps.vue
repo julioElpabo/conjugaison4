@@ -11,16 +11,22 @@ import { getAdminErrorMessage } from '~/composables/useAdminAuth'
 
 const BLOCK_LABELS: Record<CoachHelpBlockType, string> = {
   normal: 'Normal',
+  info: 'Info',
+  success: 'Success',
   warning: 'Warning',
   danger: 'Danger',
 }
 const BLOCK_DESCRIPTIONS: Record<CoachHelpBlockType, string> = {
   normal: 'Carte blanche pour le contenu principal.',
+  info: 'Encadré bleu pour une information utile.',
+  success: 'Encadré vert pour une règle acquise ou un résultat positif.',
   warning: 'Encadré jaune pour attirer l’attention.',
   danger: 'Encadré orange pour une exception importante.',
 }
+const DEFINITION_BLOCK_CONTENT = '{definitionHelp}'
 const ENDINGS_BLOCK_CONTENT = '{endingsHelp}'
 const CONTEXTUAL_BASE_BLOCK_CONTENT = '{contextualBaseHelp}'
+const REFERENCE_FORM_BLOCK_CONTENT = '{referenceFormHelp}'
 const { user, handleUnauthorized } = useAdminAuth()
 const route = useRoute()
 const helps = ref<CoachHelpTemplate[]>([])
@@ -114,6 +120,7 @@ const previewQuestion = computed<ExerciseQuestion>(() => ({
   mode: previewSelectedMode.value?.name || 'indicatif',
   isCompound: previewSelectedTense.value?.isCompound || false,
   conjugaison1: previewConjugation.value,
+  nousForm: previewConjugations.value.find(form => form.tenseId === previewTenseId.value && form.personId === 7)?.conjugaison1 || null,
   ...(previewRadicalReference.value ? { radicalReference: previewRadicalReference.value } : {}),
 }))
 const previewValues = computed<CoachHelpContentValues>(() => ({
@@ -388,13 +395,43 @@ function insertEndingsBlock() {
   draft.value.blocks.splice(selectedInsertionIndex.value, 0, block)
   selectedInsertionIndex.value += 1
 }
+function insertDefinitionBlock() {
+  if (!draft.value) return
+  const block: CoachHelpBlock = {
+    id: 0,
+    type: 'normal',
+    title: 'Définition',
+    content: DEFINITION_BLOCK_CONTENT,
+    explanationApproach: 'cif-falc',
+    isActive: true,
+    sortOrder: selectedInsertionIndex.value + 1,
+    children: [],
+  }
+  draft.value.blocks.splice(selectedInsertionIndex.value, 0, block)
+  selectedInsertionIndex.value += 1
+}
 function insertContextualBaseBlock() {
   if (!draft.value) return
   const block: CoachHelpBlock = {
     id: 0,
     type: 'normal',
-    title: 'Radical',
+    title: 'Trouve le radical de {verb}',
     content: CONTEXTUAL_BASE_BLOCK_CONTENT,
+    explanationApproach: 'cif-falc',
+    isActive: true,
+    sortOrder: selectedInsertionIndex.value + 1,
+    children: [],
+  }
+  draft.value.blocks.splice(selectedInsertionIndex.value, 0, block)
+  selectedInsertionIndex.value += 1
+}
+function insertReferenceFormBlock() {
+  if (!draft.value) return
+  const block: CoachHelpBlock = {
+    id: 0,
+    type: 'normal',
+    title: 'Forme repère',
+    content: REFERENCE_FORM_BLOCK_CONTENT,
     explanationApproach: 'cif-falc',
     isActive: true,
     sortOrder: selectedInsertionIndex.value + 1,
@@ -439,9 +476,17 @@ onBeforeUnmount(() => {
           <span class="library-block__sample" :class="`is-${type}`"><i /> <i /><i /></span>
           <strong>{{ BLOCK_LABELS[type] }}</strong><p>{{ BLOCK_DESCRIPTIONS[type] }}</p>
         </button>
+        <button class="library-block" type="button" :aria-label="`Insérer un bloc Définition à la position ${selectedInsertionIndex + 1}`" @click="insertDefinitionBlock">
+          <span class="library-block__sample is-definition"><i /><i /><i /></span>
+          <strong>Définition</strong><p>Affiche automatiquement le verbe de la question et sa définition FALC.</p>
+        </button>
         <button class="library-block" type="button" :aria-label="`Insérer un bloc Radical à la position ${selectedInsertionIndex + 1}`" @click="insertContextualBaseBlock">
           <span class="library-block__sample is-contextual-base"><i /><i /><i /></span>
           <strong>Radical</strong><p>Radical fiable, alternances et irrégularités adaptés à la forme demandée.</p>
+        </button>
+        <button class="library-block" type="button" :aria-label="`Insérer un bloc Forme repère à la position ${selectedInsertionIndex + 1}`" @click="insertReferenceFormBlock">
+          <span class="library-block__sample is-nous-form"><i /><i /><i /></span>
+          <strong>Forme repère</strong><p>Choisit automatiquement la personne et la forme les plus utiles à mémoriser pour le mode et le temps.</p>
         </button>
         <button class="library-block" type="button" :aria-label="`Insérer un bloc Terminaisons à la position ${selectedInsertionIndex + 1}`" @click="insertEndingsBlock">
           <span class="library-block__sample is-endings"><i /><i /><i /></span>
@@ -464,7 +509,7 @@ onBeforeUnmount(() => {
 
         <section class="admin-card help-panel block-editor">
           <p class="admin-eyebrow">Body</p>
-          <details class="help-variables"><summary>Variables et HTML utilisables</summary><p><strong>{helpTitle}</strong> · {coach} · {verb} · <strong>{definition}</strong> · {subject} · {mode} · {tense} · <strong>{contextualBaseHelp}</strong> · <strong>{endingsHelp}</strong> · <strong>{conjugationBase}</strong> · <strong>{conjugationEnding}</strong> · {referenceMode} · {referenceTense} · {referenceSubject} · {referenceForm} · {referenceRadical} · {removedEnding} · {correctAnswers} · {auxiliaryAnswer} · {pastParticipleAnswer} · {unagreedPastParticiple} · {COD} · {isCODplace_avant} · {COI} · {isCOIplace_avant}</p><dl><div><dt>{helpTitle}</dt><dd>Le titre automatique de l’aide, par exemple « manger à l’imparfait ».</dd></div><div><dt>{definition}</dt><dd>La définition du verbe de la question.</dd></div><div><dt>{contextualBaseHelp}</dt><dd>L’explication automatique du radical, adaptée à l’approche pédagogique du bloc.</dd></div><div><dt>{endingsHelp}</dt><dd>Le texte grammatical, le radical fiable et les terminaisons correspondant au verbe, au temps et au mode.</dd></div><div><dt>{conjugationBase} / {conjugationEnding}</dt><dd>Le radical et la terminaison de la forme demandée lorsqu’ils peuvent être déterminés sans ambiguïté.</dd></div><div><dt>{referenceMode} / {referenceTense} / {referenceSubject}</dt><dd>Le contexte grammatical de la forme repère utilisée pour construire le radical.</dd></div><div><dt>{referenceForm} / {referenceRadical} / {removedEnding}</dt><dd>La forme repère validée, son radical et la terminaison que la stratégie retire.</dd></div><div><dt>{correctAnswers}</dt><dd>Toutes les réponses complètes acceptées.</dd></div><div><dt>{auxiliaryAnswer}</dt><dd>La forme attendue de l’auxiliaire.</dd></div><div><dt>{pastParticipleAnswer}</dt><dd>Le participe passé avec l’accord attendu.</dd></div><div><dt>{unagreedPastParticiple}</dt><dd>Le participe passé masculin singulier, sans accord.</dd></div><div><dt>{COD} / {COI}</dt><dd>Le complément correspondant, s’il existe.</dd></div><div><dt>{isCODplace_avant} / {isCOIplace_avant}</dt><dd>« oui » lorsque le complément concerné est placé avant, sinon « non ».</dd></div></dl><p>Balises autorisées : p, br, strong, em, mark, small, ul, ol, li, blockquote, code, sub, sup… Les scripts et attributs HTML sont supprimés.</p></details>
+          <details class="help-variables"><summary>Variables et HTML utilisables</summary><p><strong>{helpTitle}</strong> · {coach} · {verb} · <strong>{definition}</strong> · {subject} · {mode} · {tense} · <strong>{contextualBaseHelp}</strong> · <strong>{referenceFormHelp}</strong> · <strong>{endingsHelp}</strong> · <strong>{conjugationBase}</strong> · <strong>{conjugationEnding}</strong> · {referenceMode} · {referenceTense} · {referenceSubject} · {referenceForm} · {referenceRadical} · {removedEnding} · {correctAnswers} · {auxiliaryAnswer} · {pastParticipleAnswer} · {unagreedPastParticiple} · {COD} · {isCODplace_avant} · {COI} · {isCOIplace_avant}</p><dl><div><dt>{helpTitle}</dt><dd>Le titre automatique de l’aide, par exemple « manger à l’imparfait ».</dd></div><div><dt>{definition}</dt><dd>La définition du verbe de la question.</dd></div><div><dt>{contextualBaseHelp}</dt><dd>L’explication automatique du radical, adaptée à l’approche pédagogique du bloc.</dd></div><div><dt>{referenceFormHelp}</dt><dd>La forme repère à mémoriser. La personne est choisie automatiquement selon le mode, le temps et le verbe.</dd></div><div><dt>{endingsHelp}</dt><dd>Le texte grammatical, le radical fiable et les terminaisons correspondant au verbe, au temps et au mode.</dd></div><div><dt>{conjugationBase} / {conjugationEnding}</dt><dd>Le radical et la terminaison de la forme demandée lorsqu’ils peuvent être déterminés sans ambiguïté.</dd></div><div><dt>{referenceMode} / {referenceTense} / {referenceSubject}</dt><dd>Le contexte grammatical de la forme repère utilisée pour construire le radical.</dd></div><div><dt>{referenceForm} / {referenceRadical} / {removedEnding}</dt><dd>La forme repère validée, son radical et la terminaison que la stratégie retire.</dd></div><div><dt>{correctAnswers}</dt><dd>Toutes les réponses complètes acceptées.</dd></div><div><dt>{auxiliaryAnswer}</dt><dd>La forme attendue de l’auxiliaire.</dd></div><div><dt>{pastParticipleAnswer}</dt><dd>Le participe passé avec l’accord attendu.</dd></div><div><dt>{unagreedPastParticiple}</dt><dd>Le participe passé masculin singulier, sans accord.</dd></div><div><dt>{COD} / {COI}</dt><dd>Le complément correspondant, s’il existe.</dd></div><div><dt>{isCODplace_avant} / {isCOIplace_avant}</dt><dd>« oui » lorsque le complément concerné est placé avant, sinon « non ».</dd></div></dl><p>Balises autorisées : p, br, strong, em, mark, small, ul, ol, li, blockquote, code, sub, sup… Les scripts et attributs HTML sont supprimés.</p></details>
 
           <div class="help-blocks">
             <template v-for="(block, index) in draft.blocks" :key="`${block.id}-${index}`">
@@ -545,4 +590,6 @@ onBeforeUnmount(() => {
 :global(:root[data-theme='dark'] .insertion-point::before){background:#435b63}:global(:root[data-theme='dark'] .insertion-point>span){color:#acc0c6;border-color:#4b646d;background:#192a2f}:global(:root[data-theme='dark'] .insertion-point:hover>span),:global(:root[data-theme='dark'] .insertion-point.selected>span){color:#f5fbfc;border-color:#58a8bd;background:#347f95}
 :global(:root[data-theme='dark'] .help-save-bar){border:1px solid #3f555d;background:rgb(24 40 45 / 94%);box-shadow:0 10px 32px rgb(0 0 0 / 30%);backdrop-filter:blur(10px)}:global(:root[data-theme='dark'] .help-autosave){color:#b4c5ca}:global(:root[data-theme='dark'] .help-autosave.is-error){color:#f0aaa4}:global(:root[data-theme='dark'] .preview-column__heading small){color:#e1c17a}:global(:root[data-theme='dark'] .preview-column__heading small.is-published){color:#9bd9b4}
 :global(:root[data-theme='dark'] .preview-verb-picker input),:global(:root[data-theme='dark'] .preview-verb-picker ul){color:#d8e7ea;border-color:#49616a;background:#192b30}:global(:root[data-theme='dark'] .preview-verb-picker li button){color:#d8e7ea}:global(:root[data-theme='dark'] .preview-verb-picker li button:hover),:global(:root[data-theme='dark'] .preview-verb-picker li button.is-active){background:#294149}:global(:root[data-theme='dark'] .preview-verb-picker li small){color:#aec0c5}
+.library-block__sample.is-info{border-left:5px solid #2d8fb7;background:#eef8fc}.library-block__sample.is-info i:first-child{background:#2d8fb7}.library-block__sample.is-success{border-left:5px solid #3b9877;background:#eef8f3}.library-block__sample.is-success i:first-child{background:#3b9877}.library-block__sample.is-definition{border-color:#cfe0dc;background:white}.library-block__sample.is-definition i:first-child{width:26%;height:7px;border-radius:999px;background:#267f8d}
+:global(:root[data-theme='dark'] .library-block__sample.is-info){border-color:#315f70;border-left-color:#58a9c8;background:#1b333c}:global(:root[data-theme='dark'] .library-block__sample.is-info i:first-child){background:#58a9c8}:global(:root[data-theme='dark'] .library-block__sample.is-success){border-color:#376354;border-left-color:#5db28f;background:#1b352e}:global(:root[data-theme='dark'] .library-block__sample.is-success i:first-child){background:#5db28f}:global(:root[data-theme='dark'] .library-block__sample.is-definition){border-color:#3e595d;background:#1b3035}:global(:root[data-theme='dark'] .library-block__sample.is-definition i:first-child){background:#84cad5}
 </style>

@@ -68,7 +68,7 @@ try {
   await database.query(`CREATE TABLE IF NOT EXISTS coach_help_blocks (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     help_id INT UNSIGNED NOT NULL,
-    block_type ENUM('normal','warning','danger') NOT NULL,
+    block_type ENUM('normal','info','success','warning','danger') NOT NULL,
     title VARCHAR(160) NOT NULL DEFAULT '',
     content TEXT NOT NULL,
     explanation_approach ENUM('cif-falc','concise','grammatical-technical','guided-discovery') NOT NULL DEFAULT 'cif-falc',
@@ -93,12 +93,12 @@ try {
       WHERE content=''`)
   }
   await database.query(`ALTER TABLE coach_help_blocks MODIFY block_type
-    ENUM('intro','verb-summary','formation','warnings','method','custom','normal','warning','danger','header') NOT NULL`)
+    ENUM('intro','verb-summary','formation','warnings','method','custom','normal','info','success','warning','danger','header') NOT NULL`)
   await database.query(`UPDATE coach_help_blocks SET block_type=CASE
     WHEN block_type='warnings' THEN 'warning'
     WHEN block_type IN ('intro','verb-summary','formation','method','custom','header') THEN 'normal'
     ELSE block_type END`)
-  await database.query("ALTER TABLE coach_help_blocks MODIFY block_type ENUM('normal','warning','danger') NOT NULL")
+  await database.query("ALTER TABLE coach_help_blocks MODIFY block_type ENUM('normal','info','success','warning','danger') NOT NULL")
   const [childrenColumns] = await database.query("SHOW COLUMNS FROM coach_help_blocks LIKE 'children_json'")
   if (!childrenColumns.length) await database.query('ALTER TABLE coach_help_blocks ADD COLUMN children_json LONGTEXT NULL AFTER sort_order')
   const [approachColumns] = await database.query("SHOW COLUMNS FROM coach_help_blocks LIKE 'explanation_approach'")

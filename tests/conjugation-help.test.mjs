@@ -61,6 +61,7 @@ test('la commande Aide tolère la casse, les accents et la ponctuation finale', 
 test('l’aide cible le groupe, le radical, la personne et la cédille', () => {
   const help = buildTargetedConjugationHelp(question(), verb())
 
+  assert.equal(help.title, 'nous | commencer | présent')
   assert.equal(help.meaning, 'Faire le début de quelque chose.')
   assert.equal(help.requestedForm, 'La question demande le présent de l’indicatif.')
   assert.deepEqual(help.verbFacts.slice(0, 2), [
@@ -72,6 +73,14 @@ test('l’aide cible le groupe, le radical, la personne et la cédille', () => {
   })
   assert.match(help.endings, /ici, la terminaison attendue est -ons/)
   assert.ok(help.warnings.some(item => item.includes('c devient ç')))
+})
+
+test('le header précise le mode seulement lorsqu’il n’est pas indicatif', () => {
+  const help = buildTargetedConjugationHelp(question({
+    infinitif: 'aller', pronom: 'il', temps: 'présent', mode: 'subjonctif',
+  }), verb({ infinitif: 'aller' }))
+
+  assert.equal(help.title, 'il | aller | présent (subjonctif)')
 })
 
 test('l’aide distingue clairement la règle générale d’une exception', () => {
@@ -105,7 +114,7 @@ test('le bloc terminaisons décrit grammaticalement le verbe et le contexte dema
   }))
 
   assert.match(html, /Le verbe <strong>manger<\/strong> est un verbe en <strong>-er<\/strong> \(premier groupe\)/)
-  assert.match(html, /Base pour cette forme<\/strong> : <code>mang-<\/code> \+ <code>-ions<\/code>/)
+  assert.match(html, /Base pour cette forme<\/strong> : <span><var>mang<\/var><samp>ions<\/samp><\/span>/)
   assert.match(html, /Ses terminaisons à l’imparfait de l’indicatif sont/)
   assert.match(html, /<tr><th>je<\/th><td>-ais<\/td><\/tr>/)
   assert.match(html, /<tr><th>ils \/ elles<\/th><td>-aient<\/td><\/tr>/)
@@ -208,17 +217,17 @@ test('le bloc Radical adapte les mêmes faits aux quatre approches', () => {
     particularites: [],
   })
 
-  assert.match(buildConjugationBaseHtml(currentQuestion, currentVerb, undefined, 'concise'), /radical <code>viendr-<\/code>/)
+  assert.match(buildConjugationBaseHtml(currentQuestion, currentVerb, undefined, 'concise'), /radical <var>viendr-<\/var>/)
   assert.equal((buildConjugationBaseHtml(currentQuestion, currentVerb, undefined, 'cif-falc').match(/<li>/gu) || []).length, 3)
   assert.match(buildConjugationBaseHtml(currentQuestion, currentVerb, undefined, 'guided-discovery'), /Indice 2 · Le radical/)
   assert.doesNotMatch(buildConjugationBaseHtml(currentQuestion, currentVerb, undefined, 'guided-discovery'), /Regarde la forme avec tu/)
   const technical = buildConjugationBaseHtml(currentQuestion, currentVerb, undefined, 'grammatical-technical')
   assert.match(technical, /radical contextuel/)
-  assert.match(technical, /radical lexical <code>ven-<\/code>/)
+  assert.match(technical, /radical lexical <var>ven-<\/var>/)
   assert.match(technical, /venir tenir/)
 })
 
-test('le radical de l’imparfait part de nous au présent et anime la construction', () => {
+test('le radical de l’imparfait part de nous au présent sans répéter la construction', () => {
   const currentQuestion = question({
     infinitif: 'manger',
     mode: 'indicatif',
@@ -240,13 +249,17 @@ test('le radical de l’imparfait part de nous au présent et anime la construct
   }), undefined, 'cif-falc')
 
   assert.match(html, /mangeons/)
-  assert.match(html, /toutes les personnes de l’imparfait/)
-  assert.match(html, /je mangeais/)
-  assert.match(html, /nous mangions/)
+  assert.doesNotMatch(html, /Une fois cette forme connue|toutes les personnes de l’imparfait/)
+  assert.match(html, /<figcaption>À savoir par cœur<\/figcaption>/)
+  assert.match(html, /<blockquote><strong>Forme repère<\/strong><p>Apprends par cœur la forme repère au présent de l’indicatif avec le pronom <strong>nous<\/strong> :<\/p>/)
+  assert.match(html, /<p><mark><strong><i>♥<\/i> Nous mangeons<\/strong><\/mark><\/p><\/blockquote>/)
+  assert.match(html, /<strong>Terminaisons de l’imparfait de l’indicatif<\/strong><table>/)
+  assert.match(html, /<figcaption>Trouve le radical<\/figcaption><ol><li>Prends la forme repère :<br><mark>/)
+  assert.match(html, /<figcaption>Réponse<\/figcaption><blockquote><p>Ajoute <samp>-ais<\/samp> au radical <var>mange-<\/var>/)
   assert.doesNotMatch(html, /<li>Mode :|<li>Temps :|<li>Personne :/)
-  assert.match(html, /Enlève <code>-ons<\/code>/)
-  assert.match(html, /<figure>/)
-  assert.match(html, /<strong>mange-<\/strong><span> \+ <\/span><mark>-ais<\/mark>/)
+  assert.match(html, /Enlève <kbd>-ons<\/kbd>/)
+  assert.match(html, /<span><var>mange<\/var><samp>ais<\/samp><\/span>/)
+  assert.doesNotMatch(html, /Construction du radical/)
   assert.doesNotMatch(html, /Regarde la forme avec je|Enlève la fin <code>-ais<\/code>/)
 })
 
@@ -260,10 +273,16 @@ test('le bloc radical laisse l’explication de la lettre g au bloc spécialisé
     },
   }), verb({ infinitif: 'manger', terminaison: 'er', groupeConjugaison: 1 }), undefined, 'cif-falc')
 
-  assert.match(html, /obtiens d’abord le radical <code>mange-<\/code>/)
+  assert.match(html, /obtiens d’abord le radical <var>mange-<\/var>/)
   assert.doesNotMatch(html, /Devant i|le e disparaît|son doux de g/)
-  assert.match(html, /Ajoute <code>-ions<\/code> pour former <strong>mangions<\/strong>/)
-  assert.doesNotMatch(html, /Enlève <code>-ons<\/code> : il reste le radical <code>mang-<\/code>/)
+  assert.match(html, /Ajoute <samp>-ions<\/samp> au radical <var>mange-<\/var>/)
+  assert.match(html, /<th><strong>nous<\/strong><\/th><td><samp>-ions<\/samp><\/td>/)
+  assert.match(html, /<span><var>mange<\/var><samp>ions<\/samp><\/span><small>/)
+  assert.match(html, /Si la lettre <strong>g<\/strong> est suivie de <strong>i<\/strong>, pas besoin de <strong>e<\/strong>.*explication plus bas/)
+  assert.match(html, /<\/small><span><var>mang<\/var><del>e<\/del><samp>ions<\/samp><\/span>/)
+  assert.match(html, /<\/span><strong>Résultat<\/strong><b><span><var>mang<\/var><samp>ions<\/samp><\/span><i>✓<\/i><\/b>/)
+  assert.match(html, /<span><var>mang<\/var><samp>ions<\/samp><\/span>/)
+  assert.doesNotMatch(html, /Enlève <kbd>-ons<\/kbd> : il reste le radical <var>mang-<\/var>/)
 })
 
 test('la base contextuelle explique le supplétisme sans inventer de découpage', () => {

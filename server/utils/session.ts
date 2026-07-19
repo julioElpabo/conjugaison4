@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import type { H3Event } from 'h3'
+import type { AppLocale } from '../../shared/i18n/locales'
 
 const COOKIE_NAME = 'conjugaison_session'
 const SESSION_DURATION_SECONDS = 8 * 60 * 60
@@ -11,6 +12,8 @@ export interface SessionUser {
   email: string
   username: string
   privilegeId: number
+  interfaceLocale?: AppLocale
+  explanationLocale?: AppLocale
 }
 
 interface SessionPayload extends SessionUser {
@@ -80,6 +83,12 @@ export function createAdminSession(event: H3Event, user: SessionUser): void {
     path: '/',
     maxAge: SESSION_DURATION_SECONDS
   })
+  if (user.interfaceLocale) {
+    setCookie(event, 'interface_locale', user.interfaceLocale, { sameSite: 'lax', path: '/', maxAge: 365 * 24 * 60 * 60 })
+  }
+  if (user.explanationLocale) {
+    setCookie(event, 'explanation_locale', user.explanationLocale, { sameSite: 'lax', path: '/', maxAge: 365 * 24 * 60 * 60 })
+  }
 }
 
 export function clearAdminSession(event: H3Event): void {

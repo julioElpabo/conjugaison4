@@ -25,6 +25,26 @@ test('l’imparfait utilise nous au présent et valide le radical', () => {
   })
 })
 
+test('le présent régulier choisit nous comme forme repère', () => {
+  const reference = buildRadicalReference({
+    infinitive: 'manger', mode: 'indicatif', tense: 'présent', personId: 4, conjugation: 'mange',
+  }, [form('indicatif', 'présent', 7, 'nous', 'mangeons')])
+
+  assert.equal(reference?.referenceSubject, 'nous')
+  assert.equal(reference?.form, 'mangeons')
+  assert.equal(reference?.radical, 'mange')
+})
+
+test('le futur choisit je plutôt que nous ou l’infinitif', () => {
+  const reference = buildRadicalReference({
+    infinitive: 'manger', mode: 'indicatif', tense: 'futur', personId: 7, conjugation: 'mangerons',
+  }, [form('indicatif', 'futur', 4, 'je', 'mangerai')])
+
+  assert.equal(reference?.referenceSubject, 'je')
+  assert.equal(reference?.form, 'mangerai')
+  assert.equal(reference?.radical, 'manger')
+})
+
 test('l’imparfait adapte le radical orthographique devant i', () => {
   const reference = buildRadicalReference({
     infinitive: 'manger', mode: 'indicatif', tense: 'imparfait', personId: 7, conjugation: 'mangions',

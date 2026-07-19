@@ -52,6 +52,7 @@ export interface Verb extends VerbSummary {
 
 export interface ConjugationMode {
   id: ModeId
+  code?: import('../utils/grammar-codes').GrammarModeCode
   name: string
   order: number
 }
@@ -59,11 +60,12 @@ export interface ConjugationMode {
 export interface ConjugationTense {
   id: TenseId
   modeId: ModeId
+  code?: import('../utils/grammar-codes').GrammarTenseCode
   name: string
   isCompound: boolean
   selected: boolean
   example?: string
-  mode?: Pick<ConjugationMode, 'id' | 'name' | 'order'>
+  mode?: Pick<ConjugationMode, 'id' | 'code' | 'name' | 'order'>
 }
 
 export interface GrammaticalPerson {
@@ -132,10 +134,14 @@ export interface ExerciseQuestion {
   pronom?: string
   temps?: string
   mode?: string
+  tenseCode?: import('../utils/grammar-codes').GrammarTenseCode
+  modeCode?: import('../utils/grammar-codes').GrammarModeCode
   isCompound?: boolean
   conjugaison1?: string
   conjugaison2?: string | null
   conjugaison3?: string | null
+  /** Forme du même verbe, au même mode et au même temps, correspondant à « nous ». */
+  nousForm?: string | null
   /** Forme déjà connue servant à construire le radical sans partir de la réponse attendue. */
   radicalReference?: {
     kind: 'present-nous' | 'present-ils' | 'present-same-person' | 'infinitive' | 'future-stem' | 'past-simple-il' | 'memorized-stem' | 'memorized-form'

@@ -2,6 +2,7 @@ import type { Pool, PoolConnection, RowDataPacket } from 'mysql2/promise'
 import { COACH_EVENTS, REQUIRED_COACH_REPLY_EVENTS, type CoachCharacter, type CoachEvent, type CoachMedia, type CoachProfile } from '../../shared/types/coach'
 import { unknownCoachPlaceholders } from '../../shared/utils/coach-dialogue'
 import { listCoachHelps } from './coach-helps'
+import { normalizeLocale, type AppLocale } from '../../shared/i18n/locales'
 
 type Executor = Pool | PoolConnection
 interface CoachRow extends RowDataPacket {
@@ -24,35 +25,68 @@ interface RuleRow extends RowDataPacket { characterId: number, eventType: CoachE
 
 const EVENT_SET = new Set<string>(COACH_EVENTS)
 
-export async function listCoachMedia(database: Executor): Promise<CoachMedia[]> {
-  const [rows] = await database.execute<MediaRow[]>(`SELECT id, name, file_path AS filePath, media_type AS mediaType,
-    category, alt_text AS altText, rights_status AS rightsStatus, safety_status AS safetyStatus,
-    is_active AS isActive, file_size AS fileSize FROM coach_media ORDER BY category, name, id`)
+export async function listCoachMedia(database: Executor, locale: AppLocale = 'fr'): Promise<CoachMedia[]> {
+  const requestedLocale = normalizeLocale(locale, 'fr')
+  const [rows] = await database.execute<MediaRow[]>(`SELECT cm.id,
+    CASE WHEN ?='fr' THEN cm.name ELSE COALESCE(requested.name, french.name, cm.name) END AS name,
+    cm.file_path AS filePath, cm.media_type AS mediaType, cm.category,
+    CASE WHEN ?='fr' THEN cm.alt_text ELSE COALESCE(requested.alt_text, french.alt_text, cm.alt_text) END AS altText,
+    cm.rights_status AS rightsStatus, cm.safety_status AS safetyStatus,
+    cm.is_active AS isActive, cm.file_size AS fileSize
+    FROM coach_media cm
+    LEFT JOIN coach_media_translations requested ON requested.media_id=cm.id AND requested.locale=?
+    LEFT JOIN coach_media_translations french ON french.media_id=cm.id AND french.locale='fr'
+    ORDER BY cm.category, name, cm.id`, [requestedLocale, requestedLocale, requestedLocale])
   return rows.map(row => ({ ...row, isActive: Boolean(row.isActive) }))
 }
 
-export async function listCoaches(database: Executor, publishedOnly = false): Promise<CoachProfile[]> {
+export async function listCoaches(
+  database: Executor,
+  publishedOnly = false,
+  locale: AppLocale = 'fr',
+): Promise<CoachProfile[]> {
+  const requestedLocale = normalizeLocale(locale, 'fr')
   const [coaches] = await database.execute<CoachRow[]>(`SELECT c.id, c.slug, c.first_name AS firstName, c.last_name AS lastName,
     c.gender, c.avatar_path AS avatarPath, c.description, c.character_id AS characterId,
-    CASE WHEN c.gender='female' THEN cc.feminine_name ELSE cc.masculine_name END AS characterName,
-    CASE WHEN c.gender='female' THEN cc.feminine_name ELSE cc.masculine_name END AS personality,
-    cc.pedagogical_style AS pedagogicalStyle, cc.${publishedOnly ? 'published_help_id' : 'help_id'} AS helpId, c.theme_color AS themeColor,
+    CASE WHEN ?='fr' AND c.gender='female' THEN cc.feminine_name
+      WHEN ?='fr' THEN cc.masculine_name
+      WHEN c.gender='female'
+      THEN COALESCE(requested.feminine_name, french.feminine_name, cc.feminine_name)
+      ELSE COALESCE(requested.masculine_name, french.masculine_name, cc.masculine_name) END AS characterName,
+    CASE WHEN ?='fr' AND c.gender='female' THEN cc.feminine_name
+      WHEN ?='fr' THEN cc.masculine_name
+      WHEN c.gender='female'
+      THEN COALESCE(requested.feminine_name, french.feminine_name, cc.feminine_name)
+      ELSE COALESCE(requested.masculine_name, french.masculine_name, cc.masculine_name) END AS personality,
+    CASE WHEN ?='fr' THEN cc.pedagogical_style
+      ELSE COALESCE(requested.pedagogical_style, french.pedagogical_style, cc.pedagogical_style) END AS pedagogicalStyle,
+    cc.${publishedOnly ? 'published_help_id' : 'help_id'} AS helpId, c.theme_color AS themeColor,
     c.status, c.sort_order AS sortOrder FROM coaches c JOIN coach_characters cc ON cc.id=c.character_id
+    LEFT JOIN coach_character_translations requested ON requested.character_id=cc.id AND requested.locale=?
+    LEFT JOIN coach_character_translations french ON french.character_id=cc.id AND french.locale='fr'
     ${publishedOnly ? "WHERE c.status = 'published' AND cc.status = 'published'" : ''}
-    ORDER BY cc.sort_order, cc.id, c.sort_order, first_name, c.id`)
+    ORDER BY cc.sort_order, cc.id, c.sort_order, first_name, c.id`, [
+      requestedLocale, requestedLocale, requestedLocale, requestedLocale, requestedLocale, requestedLocale,
+    ])
   if (!coaches.length) return []
   const ids = [...new Set(coaches.map(item => item.characterId))]
   const placeholders = ids.map(() => '?').join(',')
   const [[replies], [assignments], [rules], media, helps] = await Promise.all([
-    database.execute<ReplyRow[]>(`SELECT id, character_id AS characterId, event_type AS eventType, content, weight,
-      is_active AS isActive FROM coach_character_reply_templates WHERE character_id IN (${placeholders}) ORDER BY sort_order, id`, ids),
+    database.execute<ReplyRow[]>(`SELECT reply.id, reply.character_id AS characterId, reply.event_type AS eventType,
+      CASE WHEN ?='fr' THEN reply.content
+        ELSE COALESCE(requested.content, french.content, reply.content) END AS content,
+      reply.weight, reply.is_active AS isActive
+      FROM coach_character_reply_templates reply
+      LEFT JOIN coach_reply_translations requested ON requested.reply_id=reply.id AND requested.locale=?
+      LEFT JOIN coach_reply_translations french ON french.reply_id=reply.id AND french.locale='fr'
+      WHERE reply.character_id IN (${placeholders}) ORDER BY reply.sort_order, reply.id`, [requestedLocale, requestedLocale, ...ids]),
     database.execute<AssignmentRow[]>(`SELECT character_id AS characterId, media_id AS mediaId, event_type AS eventType,
       weight, is_active AS isActive FROM coach_character_media_assignments WHERE character_id IN (${placeholders})`, ids),
     database.execute<RuleRow[]>(`SELECT character_id AS characterId, event_type AS eventType,
       media_probability AS mediaProbability, cooldown_questions AS cooldownQuestions
       FROM coach_character_reaction_rules WHERE character_id IN (${placeholders})`, ids),
-    listCoachMedia(database),
-    listCoachHelps(database, publishedOnly),
+    listCoachMedia(database, requestedLocale),
+    listCoachHelps(database, publishedOnly, requestedLocale),
   ])
   return coaches.map(coach => ({
     ...coach,

@@ -492,6 +492,8 @@ onBeforeUnmount(() => {
 
 .chat-dialogs--with-help {
   width: min(1240px, calc(100vw - 40px));
+  transition-duration: .5s;
+  transition-timing-function: ease-out;
 }
 
 .chat-dialog {
@@ -769,7 +771,8 @@ onBeforeUnmount(() => {
 
 .chat-help-enter-active {
   transform-origin: right center;
-  transition: opacity .34s ease-out, transform .42s cubic-bezier(.22, 1, .36, 1);
+  transition: opacity .5s ease-out, transform .5s ease-out;
+  will-change: opacity, transform;
 }
 
 .chat-help-leave-active {

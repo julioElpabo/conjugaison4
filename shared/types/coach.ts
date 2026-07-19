@@ -38,6 +38,8 @@ export type CoachExplanationApproach = typeof COACH_EXPLANATION_APPROACHES[numbe
 
 export const COACH_HELP_BLOCK_TYPES = [
   'normal',
+  'info',
+  'success',
   'warning',
   'danger',
 ] as const

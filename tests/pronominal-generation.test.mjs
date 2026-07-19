@@ -23,6 +23,7 @@ function source(overrides = {}) {
     temps_name: 'présent',
     is_compound: 0,
     mode_name: 'indicatif',
+    nous_form: 'jouons',
     pronominal_use_id: 66,
     infinitif_pronominal: 'se jouer',
     type_h_initial: 'aucun',
@@ -41,7 +42,9 @@ const auxiliaries = [
 
 describe('génération des emplois pronominaux', () => {
   it('forme les clitiques simples et leur élision', () => {
-    assert.equal(generatePronominalRow(source(), auxiliaries).conjugaison1, 'me joue')
+    const row = generatePronominalRow(source(), auxiliaries)
+    assert.equal(row.conjugaison1, 'me joue')
+    assert.equal(formatConjugationQuestion(row, 'je').nousForm, 'nous jouons')
     assert.equal(generatePronominalRow(source({
       base_conjugaison1: 'amuse', conjugaison1: 'amuse', infinitif_pronominal: "s'amuser"
     }), auxiliaries).conjugaison1, "m'amuse")
@@ -60,6 +63,7 @@ describe('génération des emplois pronominaux', () => {
       mode_name: 'indicatif', is_compound: 1
     }), auxiliaries)
     assert.equal(row.conjugaison1, 'se sont joués')
+    assert.equal(formatConjugationQuestion(row, 'ils').nousForm, 'nous sommes joués')
     assert.deepEqual(formatConjugationQuestion(row, 'ils').reponsesPourCorrige, ['ils se sont joués'])
     const question = formatConjugationQuestion(row, 'elles')
     assert.deepEqual(question.reponsesPourCorrige, ['elles se sont jouées'])

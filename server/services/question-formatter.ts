@@ -12,8 +12,11 @@ export interface ConjugationSourceRow {
   auxiliaire: string
   participe_passe: string
   temps_name: string
+  tense_code?: ExerciseQuestion['tenseCode']
   is_compound: number
   mode_name: string
+  mode_code?: ExerciseQuestion['modeCode']
+  nous_form?: string | null
   radical_reference?: ExerciseQuestion['radicalReference']
   agreement_rule?: string | null
   complement_phrase?: string | null
@@ -336,10 +339,13 @@ export function formatConjugationQuestion(
     pronom: pronoun,
     temps: row.temps_name,
     mode: row.mode_name,
+    ...(row.tense_code ? { tenseCode: row.tense_code } : {}),
+    ...(row.mode_code ? { modeCode: row.mode_code } : {}),
     isCompound: Boolean(row.is_compound),
     conjugaison1: row.conjugaison1,
     conjugaison2: row.conjugaison2 || '',
     conjugaison3: row.conjugaison3 || '',
+    nousForm: row.nous_form || null,
     ...(row.radical_reference ? { radicalReference: row.radical_reference } : {}),
     complement: row.complement_position === 'before'
       ? row.complement_anteposed || undefined

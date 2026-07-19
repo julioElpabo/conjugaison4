@@ -69,6 +69,21 @@ export function generatePronominalRow(row: PronominalSourceRow, auxiliaryForms: 
     generated = forms.map(form => pronominalizeSimple(form, row.personne_id, row.mode_name, row.type_h_initial))
   }
 
+  let nousForm: string | null = null
+  if (row.nous_form?.trim()) {
+    if (Number(row.is_compound)) {
+      const auxiliary = findCompoundAuxiliaryForm({ ...row, personne_id: 7 }, auxiliaryForms)
+      const auxiliaryForm = auxiliary?.conjugaison1?.trim() ?? ''
+      if (auxiliaryForm) {
+        nousForm = normalized(row.mode_name) === 'impératif'
+          ? `${auxiliaryForm}-nous ${participleForPerson(row.participe_passe, 7, row.regle_accord)}`
+          : `${proclitic(7, auxiliaryForm, null)}${auxiliaryForm} ${participleForPerson(row.participe_passe, 7, row.regle_accord)}`
+      }
+    } else {
+      nousForm = pronominalizeSimple(row.nous_form, 7, row.mode_name, row.type_h_initial)
+    }
+  }
+
   return {
     ...row,
     id: -(Number(row.pronominal_use_id) * 100000 + Number(row.id)),
@@ -79,5 +94,6 @@ export function generatePronominalRow(row: PronominalSourceRow, auxiliaryForms: 
     conjugaison2: generated[1] ?? '',
     conjugaison3: generated[2] ?? '',
     agreement_rule: row.regle_accord,
+    nous_form: nousForm,
   }
 }

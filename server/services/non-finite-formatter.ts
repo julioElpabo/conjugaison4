@@ -13,7 +13,9 @@ export interface NonFiniteVerbSource {
 export interface NonFiniteTenseSource {
   id: number
   name: string
+  code?: ExerciseQuestion['tenseCode']
   mode_name: string
+  mode_code?: ExerciseQuestion['modeCode']
   is_compound?: number
 }
 
@@ -83,6 +85,8 @@ export function formatNonFiniteQuestion(
     infinitif: verb.infinitif,
     temps: tense.name,
     mode: tense.mode_name,
+    ...(tense.code ? { tenseCode: tense.code } : {}),
+    ...(tense.mode_code ? { modeCode: tense.mode_code } : {}),
     isCompound: Boolean(tense.is_compound),
     conjugaison1: answers[0]!,
     conjugaison2: answers[1] || '',

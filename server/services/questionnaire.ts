@@ -16,7 +16,10 @@ interface IdRow extends RowDataPacket { id: number }
 interface TenseSelectionRow extends RowDataPacket {
   id: number
   name: string
+  code: ExerciseQuestion['tenseCode']
   mode_name: string
+  mode_code: ExerciseQuestion['modeCode']
+  nous_form: string | null
   is_compound: number
 }
 
@@ -36,8 +39,10 @@ interface ConjugationRow extends RowDataPacket {
   auxiliaire_participe_present: string | null
   pronom: string
   temps_name: string
+  tense_code: ExerciseQuestion['tenseCode']
   is_compound: number
   mode_name: string
+  mode_code: ExerciseQuestion['modeCode']
   base_verbe_id?: number
 }
 
@@ -218,7 +223,8 @@ export function identificationQuestion(row: ConjugationRow): ExerciseQuestion {
     mode: row.mode_name,
     conjugaison1: row.conjugaison1,
     conjugaison2: row.conjugaison2 || '',
-    conjugaison3: row.conjugaison3 || ''
+    conjugaison3: row.conjugaison3 || '',
+    nousForm: row.nous_form || null,
   }
 }
 
@@ -244,7 +250,8 @@ async function validateSelections(request: QuestionnaireRequest) {
         )
       : Promise.resolve([[]] as unknown as Awaited<ReturnType<typeof database.execute<IdRow[]>>>),
     database.execute<TenseSelectionRow[]>(
-      `SELECT t.id, t.name, m.name AS mode_name, t.isTempsCompose AS is_compound
+      `SELECT t.id, t.name, t.code, m.name AS mode_name, m.code AS mode_code,
+              t.isTempsCompose AS is_compound
        FROM temps t
        INNER JOIN modes m ON m.id = t.mode_id
        WHERE t.id IN (${placeholders(request.tenseIds)})`,
@@ -296,9 +303,12 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
              v.\`participe_passé\` AS participe_passe,
              auxiliary.infinitif AS auxiliaire_infinitif,
              auxiliary.\`participe_présent\` AS auxiliaire_participe_present,
-             p.pronom, t.name AS temps_name,
+             p.pronom, t.name AS temps_name, t.code AS tense_code,
              t.isTempsCompose AS is_compound,
-             m.name AS mode_name
+             m.name AS mode_name, m.code AS mode_code,
+             (SELECT nous.conjugaison1 FROM verbesconjugues nous
+              WHERE nous.verbe_id=vc.verbe_id AND nous.temp_id=vc.temp_id
+                AND nous.personne_id=7 AND nous.conjugaison1<>'' LIMIT 1) AS nous_form
       FROM verbesconjugues vc
       INNER JOIN verbes v ON v.id = vc.verbe_id
       LEFT JOIN verbes auxiliary ON auxiliary.infinitif = v.auxiliaire
@@ -327,9 +337,12 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
                  ep.regle_accord, ep.personnes_autorisees, base.type_h_initial,
                  base.infinitif, base.auxiliaire,
                  base.\`participe_passé\` AS participe_passe,
-                 p.pronom, t.name AS temps_name,
+                 p.pronom, t.name AS temps_name, t.code AS tense_code,
                  t.isTempsCompose AS is_compound,
-                 m.name AS mode_name
+                 m.name AS mode_name, m.code AS mode_code,
+                 (SELECT nous.conjugaison1 FROM verbesconjugues nous
+                  WHERE nous.verbe_id=vc.verbe_id AND nous.temp_id=vc.temp_id
+                    AND nous.personne_id=7 AND nous.conjugaison1<>'' LIMIT 1) AS nous_form
           FROM emplois_pronominaux ep
           INNER JOIN verbes base ON base.id = ep.verbe_id
           INNER JOIN verbesconjugues vc ON vc.verbe_id = base.id

@@ -7,6 +7,7 @@ import {
   type CoachHelpBlockType,
   type CoachHelpTemplate,
 } from '../../shared/types/coach'
+import { normalizeLocale, type AppLocale } from '../../shared/i18n/locales'
 
 type Executor = Pool | PoolConnection
 type CoachHelpBlockInput = Omit<CoachHelpBlock, 'id' | 'children'> & { children: CoachHelpBlockInput[] }
@@ -41,6 +42,9 @@ interface CharacterHelpRow extends RowDataPacket {
 
 const BLOCK_TYPE_SET = new Set<string>(COACH_HELP_BLOCK_TYPES)
 const CONTEXTUAL_BASE_TOKEN = '{contextualBaseHelp}'
+const NOUS_FORM_TOKEN = '{nousFormHelp}'
+const REFERENCE_FORM_TOKEN = '{referenceFormHelp}'
+const DEFINITION_TOKEN = '{definitionHelp}'
 
 export async function createCoachHelpForCharacter(
   connection: PoolConnection,
@@ -97,18 +101,35 @@ export async function ensureCoachCharacterHelp(connection: PoolConnection, chara
 }
 
 function automaticBlockTitle(content: string, title: string) {
-  return content.trim() === CONTEXTUAL_BASE_TOKEN ? 'Radical' : title
+  if (content.trim() === DEFINITION_TOKEN) return 'Définition'
+  if (content.trim() === CONTEXTUAL_BASE_TOKEN) return 'Trouve le radical de {verb}'
+  if (content.trim() === NOUS_FORM_TOKEN || content.trim() === REFERENCE_FORM_TOKEN) return 'Forme repère'
+  return title
 }
 
 function text(value: unknown, maximum: number): string {
   return typeof value === 'string' ? value.trim().slice(0, maximum) : ''
 }
 
-export async function listCoachHelps(database: Executor, publishedOnly = false): Promise<CoachHelpTemplate[]> {
+export async function listCoachHelps(
+  database: Executor,
+  publishedOnly = false,
+  locale: AppLocale = 'fr',
+): Promise<CoachHelpTemplate[]> {
   if (publishedOnly) {
+    const requestedLocale = normalizeLocale(locale, 'fr')
     const [publications] = await database.execute<(RowDataPacket & { payload: string })[]>(
-      'SELECT payload FROM coach_help_publications WHERE id=1 LIMIT 1',
+      `SELECT payload FROM coach_help_publications_i18n
+       WHERE locale IN (?,'fr')
+       ORDER BY locale=? DESC, locale='fr' DESC LIMIT 1`,
+      [requestedLocale, requestedLocale],
     )
+    if (!publications[0]) {
+      const [legacy] = await database.execute<(RowDataPacket & { payload: string })[]>(
+        'SELECT payload FROM coach_help_publications WHERE id=1 LIMIT 1',
+      )
+      publications.push(...legacy)
+    }
     if (!publications[0]) return []
     try {
       const parsed = JSON.parse(publications[0].payload) as CoachHelpTemplate[]
@@ -222,6 +243,9 @@ export async function publishCoachHelps(connection: PoolConnection) {
     .filter(help => ownedHelpIds.has(help.id))
     .map(help => ({ ...help, status: 'published' as const }))
   await connection.execute(`INSERT INTO coach_help_publications (id,payload,published_at) VALUES (1,?,CURRENT_TIMESTAMP)
+    ON DUPLICATE KEY UPDATE payload=VALUES(payload),published_at=CURRENT_TIMESTAMP`, [JSON.stringify(published)])
+  await connection.execute(`INSERT INTO coach_help_publications_i18n (locale,payload,published_at)
+    VALUES ('fr',?,CURRENT_TIMESTAMP)
     ON DUPLICATE KEY UPDATE payload=VALUES(payload),published_at=CURRENT_TIMESTAMP`, [JSON.stringify(published)])
   await connection.execute("UPDATE coach_help_templates SET status='draft' WHERE deleted_at IS NULL")
   if (ownedHelpIds.size) {

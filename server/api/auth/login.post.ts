@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs'
 import type { RowDataPacket } from 'mysql2/promise'
+import { normalizeLocale } from '../../../shared/i18n/locales'
 
 interface UserRow extends RowDataPacket {
   id: number
@@ -9,6 +10,8 @@ interface UserRow extends RowDataPacket {
   username: string
   password: string
   privilege_id: number
+  interface_locale: string
+  explanation_locale: string
 }
 
 export default defineEventHandler(async (event) => {
@@ -21,7 +24,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const [rows] = await useDatabase().execute<UserRow[]>(`
-    SELECT id, prenom, nom, email, username, password, privilege_id
+    SELECT id, prenom, nom, email, username, password, privilege_id,
+           interface_locale, explanation_locale
     FROM users
     WHERE LOWER(email) = ?
     LIMIT 1
@@ -41,7 +45,9 @@ export default defineEventHandler(async (event) => {
     nom: row.nom,
     email: row.email,
     username: row.username,
-    privilegeId: row.privilege_id
+    privilegeId: row.privilege_id,
+    interfaceLocale: normalizeLocale(row.interface_locale),
+    explanationLocale: normalizeLocale(row.explanation_locale),
   }
 
   createAdminSession(event, user)

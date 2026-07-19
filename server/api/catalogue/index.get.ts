@@ -1,8 +1,9 @@
 import { getCatalogue } from '../../services/catalogue'
+import { explanationLocaleForEvent } from '../../utils/locale'
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
   try {
-    return await getCatalogue()
+    return await getCatalogue(explanationLocaleForEvent(event))
   } catch (error) {
     console.error('Impossible de charger le catalogue de conjugaison', error)
     throw createError({

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildConjugationEndingsHtml, buildTargetedConjugationHelp, isHelpCommand } from '../shared/utils/conjugation-help.ts'
+import { buildConjugationBaseHtml, buildConjugationEndingsHtml, buildTargetedConjugationHelp, decomposeConjugationForm, isHelpCommand } from '../shared/utils/conjugation-help.ts'
 
 function verb(overrides = {}) {
   return {
@@ -46,6 +46,7 @@ function question(overrides = {}) {
     temps: 'présent',
     mode: 'indicatif',
     isCompound: false,
+    conjugaison1: 'commençons',
     ...overrides,
   }
 }
@@ -64,8 +65,11 @@ test('l’aide cible le groupe, le radical, la personne et la cédille', () => {
   assert.equal(help.requestedForm, 'La question demande le présent de l’indicatif.')
   assert.deepEqual(help.verbFacts.slice(0, 2), [
     { label: 'Groupe', value: '1er groupe' },
-    { label: 'Radical de base', value: 'commenc-' },
+    { label: 'Base pour cette forme', value: 'commenç-' },
   ])
+  assert.deepEqual(help.decomposition, {
+    base: 'commenç', ending: 'ons', baseLabel: 'Base pour cette forme', confidence: 'high', source: 'stored-form',
+  })
   assert.match(help.endings, /ici, la terminaison attendue est -ons/)
   assert.ok(help.warnings.some(item => item.includes('c devient ç')))
 })
@@ -93,6 +97,7 @@ test('le bloc terminaisons décrit grammaticalement le verbe et le contexte dema
   const html = buildConjugationEndingsHtml(question({
     infinitif: 'manger',
     temps: 'imparfait',
+    conjugaison1: 'mangions',
   }), verb({
     infinitif: 'manger',
     terminaison: 'er',
@@ -100,9 +105,36 @@ test('le bloc terminaisons décrit grammaticalement le verbe et le contexte dema
   }))
 
   assert.match(html, /Le verbe <strong>manger<\/strong> est un verbe en <strong>-er<\/strong> \(premier groupe\)/)
+  assert.match(html, /Base pour cette forme<\/strong> : <code>mang-<\/code> \+ <code>-ions<\/code>/)
   assert.match(html, /Ses terminaisons à l’imparfait de l’indicatif sont/)
   assert.match(html, /<tr><th>je<\/th><td>-ais<\/td><\/tr>/)
   assert.match(html, /<tr><th>ils \/ elles<\/th><td>-aient<\/td><\/tr>/)
+})
+
+test('la base contextuelle vient de la forme stockée, y compris au futur irrégulier', () => {
+  const decomposition = decomposeConjugationForm(question({
+    infinitif: 'venir',
+    pronom: 'tu',
+    temps: 'futur',
+    conjugaison1: 'viendras',
+  }), verb({ infinitif: 'venir', groupeConjugaison: 3, terminaison: 'ir' }))
+
+  assert.deepEqual(decomposition, {
+    base: 'viendr', ending: 'as', baseLabel: 'Base pour cette forme', confidence: 'high', source: 'stored-form',
+  })
+})
+
+test('aucune fausse base n’est produite quand les terminaisons dépendent de la famille', () => {
+  assert.equal(decomposeConjugationForm(question({
+    infinitif: 'venir',
+    pronom: 'tu',
+    conjugaison1: 'viens',
+  }), verb({ infinitif: 'venir', groupeConjugaison: 3, terminaison: 'ir' })), null)
+  assert.equal(decomposeConjugationForm(question({
+    temps: 'plus-que-parfait',
+    conjugaison1: 'avais commencé',
+    isCompound: true,
+  }), verb()), null)
 })
 
 test('le bloc terminaisons présente les formes de l’auxiliaire aux temps composés', () => {
@@ -130,6 +162,127 @@ test('le bloc terminaisons ne donne pas de fausse série aux verbes irréguliers
   assert.match(html, /verbe en <strong>-ir<\/strong> \(troisième groupe\)/)
   assert.match(html, /Il n’existe pas de série unique/)
   assert.doesNotMatch(html, /<table>/)
+})
+
+test('les quatre approches transforment les mêmes faits en explications distinctes', () => {
+  const currentQuestion = question({
+    infinitif: 'manger',
+    temps: 'imparfait',
+    conjugaison1: 'mangions',
+  })
+  const currentVerb = verb({ infinitif: 'manger', terminaison: 'er', particularites: ['ger'] })
+
+  const falc = buildConjugationEndingsHtml(currentQuestion, currentVerb, undefined, 'cif-falc')
+  assert.equal((falc.match(/<li>/gu) || []).length, 3)
+  assert.match(falc, /Regarde le temps/)
+  assert.match(falc, /puis relis la phrase/)
+
+  const concise = buildConjugationEndingsHtml(currentQuestion, currentVerb, undefined, 'concise')
+  assert.equal((concise.match(/<p>/gu) || []).length, 1)
+  assert.match(concise, /<code>mang-<\/code>.*<code>-ions<\/code>/)
+  assert.doesNotMatch(concise, /radical|désinence|table/iu)
+
+  const technical = buildConjugationEndingsHtml(currentQuestion, currentVerb, undefined, 'grammatical-technical')
+  assert.match(technical, /radical contextuel/)
+  assert.match(technical, /désinence/)
+  assert.match(technical, /<table>/)
+
+  const guided = buildConjugationEndingsHtml(currentQuestion, currentVerb, undefined, 'guided-discovery')
+  assert.equal((guided.match(/<details>/gu) || []).length, 4)
+  assert.match(guided, /Indice 1 · Le temps/)
+  assert.match(guided, /Dernière vérification/)
+})
+
+test('le bloc Radical adapte les mêmes faits aux quatre approches', () => {
+  const currentQuestion = question({
+    infinitif: 'venir',
+    temps: 'futur',
+    pronom: 'tu',
+    conjugaison1: 'viendras',
+  })
+  const currentVerb = verb({
+    infinitif: 'venir',
+    terminaison: 'ir',
+    groupeConjugaison: 3,
+    familleConjugaison: 'venir-tenir',
+    particularites: [],
+  })
+
+  assert.match(buildConjugationBaseHtml(currentQuestion, currentVerb, undefined, 'concise'), /radical <code>viendr-<\/code>/)
+  assert.equal((buildConjugationBaseHtml(currentQuestion, currentVerb, undefined, 'cif-falc').match(/<li>/gu) || []).length, 3)
+  assert.match(buildConjugationBaseHtml(currentQuestion, currentVerb, undefined, 'guided-discovery'), /Indice 2 · Le radical/)
+  assert.doesNotMatch(buildConjugationBaseHtml(currentQuestion, currentVerb, undefined, 'guided-discovery'), /Regarde la forme avec tu/)
+  const technical = buildConjugationBaseHtml(currentQuestion, currentVerb, undefined, 'grammatical-technical')
+  assert.match(technical, /radical contextuel/)
+  assert.match(technical, /radical lexical <code>ven-<\/code>/)
+  assert.match(technical, /venir tenir/)
+})
+
+test('le radical de l’imparfait part de nous au présent et anime la construction', () => {
+  const currentQuestion = question({
+    infinitif: 'manger',
+    mode: 'indicatif',
+    temps: 'imparfait',
+    pronom: 'je',
+    conjugaison1: 'mangeais',
+    radicalReference: {
+      kind: 'present-nous',
+      label: 'nous au présent',
+      form: 'mangeons',
+      removableEnding: 'ons',
+      radical: 'mange',
+    },
+  })
+  const html = buildConjugationBaseHtml(currentQuestion, verb({
+    infinitif: 'manger',
+    terminaison: 'er',
+    groupeConjugaison: 1,
+  }), undefined, 'cif-falc')
+
+  assert.match(html, /mangeons/)
+  assert.match(html, /toutes les personnes de l’imparfait/)
+  assert.match(html, /je mangeais/)
+  assert.match(html, /nous mangions/)
+  assert.doesNotMatch(html, /<li>Mode :|<li>Temps :|<li>Personne :/)
+  assert.match(html, /Enlève <code>-ons<\/code>/)
+  assert.match(html, /<figure>/)
+  assert.match(html, /<strong>mange-<\/strong><span> \+ <\/span><mark>-ais<\/mark>/)
+  assert.doesNotMatch(html, /Regarde la forme avec je|Enlève la fin <code>-ais<\/code>/)
+})
+
+test('le bloc radical laisse l’explication de la lettre g au bloc spécialisé', () => {
+  const html = buildConjugationBaseHtml(question({
+    infinitif: 'manger', mode: 'indicatif', temps: 'imparfait', pronom: 'nous', conjugaison1: 'mangions',
+    radicalReference: {
+      kind: 'present-nous', label: 'nous au présent', form: 'mangeons', removableEnding: 'ons', radical: 'mang',
+      targetEnding: 'ions', referenceMode: 'indicatif', referenceTense: 'présent', referenceSubject: 'nous',
+      strategy: 'remove-ending', orthographicAdjustment: 'Devant i, le e disparaît.', validated: true,
+    },
+  }), verb({ infinitif: 'manger', terminaison: 'er', groupeConjugaison: 1 }), undefined, 'cif-falc')
+
+  assert.match(html, /obtiens d’abord le radical <code>mange-<\/code>/)
+  assert.doesNotMatch(html, /Devant i|le e disparaît|son doux de g/)
+  assert.match(html, /Ajoute <code>-ions<\/code> pour former <strong>mangions<\/strong>/)
+  assert.doesNotMatch(html, /Enlève <code>-ons<\/code> : il reste le radical <code>mang-<\/code>/)
+})
+
+test('la base contextuelle explique le supplétisme sans inventer de découpage', () => {
+  const html = buildConjugationBaseHtml(question({
+    infinitif: 'aller',
+    conjugaison1: 'vais',
+    pronom: 'je',
+  }), verb({
+    infinitif: 'aller',
+    terminaison: 'er',
+    groupeConjugaison: 3,
+    familleConjugaison: 'irregulier',
+    particularites: [],
+  }), undefined, 'grammatical-technical')
+
+  assert.match(html, /très irrégulier/)
+  assert.match(html, /supplétif/)
+  assert.match(html, /ne repose pas sur un radical unique/)
+  assert.doesNotMatch(html, /radical lexical indicatif/)
 })
 
 test('l’aide d’un temps composé explique l’auxiliaire et l’accord du COD antéposé', () => {

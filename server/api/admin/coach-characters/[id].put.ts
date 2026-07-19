@@ -1,5 +1,6 @@
 import { parseCharacterPayload } from '../../../services/coaches'
 import { replaceCharacterChildren } from '../../../services/coach-characters'
+import { ensureCoachCharacterHelp } from '../../../services/coach-helps'
 
 export default defineEventHandler(async (event) => {
   requireAdministrator(event)
@@ -10,9 +11,10 @@ export default defineEventHandler(async (event) => {
   try {
     await connection.beginTransaction()
     await connection.execute(`UPDATE coach_characters SET slug=?,name=?,masculine_name=?,feminine_name=?,emoticon=?,description=?,
-      pedagogical_style=?,help_id=?,status=?,sort_order=? WHERE id=?`,
+      pedagogical_style=?,status=?,sort_order=? WHERE id=?`,
     [profile.slug, profile.masculineName, profile.masculineName, profile.feminineName, profile.emoticon, profile.description,
-      profile.pedagogicalStyle, profile.helpId, profile.status, profile.sortOrder, id])
+      profile.pedagogicalStyle, profile.status, profile.sortOrder, id])
+    await ensureCoachCharacterHelp(connection, id)
     await replaceCharacterChildren(connection, id, replies, assignments, rules)
     await connection.commit()
   } catch (error) {

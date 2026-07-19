@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CoachHelpBlock } from '~~/shared/types/coach'
 import type { CoachHelpContentValues } from '~~/shared/utils/coach-help'
-import { renderCoachHelpContent } from '~~/shared/utils/coach-help'
+import { automaticOrthographyHelpBlocks, renderCoachHelpContent } from '~~/shared/utils/coach-help'
 import { sanitizeCoachHtml } from '~~/shared/utils/safe-html'
 
 const props = withDefaults(defineProps<{
@@ -22,10 +22,55 @@ const props = withDefaults(defineProps<{
   headerDescription: '',
 })
 
-const emit = defineEmits<{ close: [] }>()
-const renderedBlocks = computed(() => props.blocks.filter(block => block.isActive))
-const renderedHeaderTitle = computed(() => renderCoachHelpContent(props.headerTitle, props.values))
+interface PreviewScrollPosition {
+  blockIndex: number
+  progress: number
+}
+
+const emit = defineEmits<{
+  close: []
+  previewScroll: [position: PreviewScrollPosition]
+}>()
+const content = useTemplateRef<HTMLElement>('content')
+const renderedBlocks = computed(() => [
+  ...props.blocks
+    .map((block, blockIndex) => ({ block, blockIndex: blockIndex as number | null }))
+    .filter(item => item.block.isActive),
+  ...automaticOrthographyHelpBlocks(props.values)
+    .map(block => ({ block, blockIndex: null as number | null })),
+])
+const renderedHeaderTitle = computed(() => renderCoachHelpContent('{helpTitle}', props.values))
 const renderedHeaderDescription = computed(() => sanitizeCoachHtml(renderCoachHelpContent(props.headerDescription, props.values)))
+let previewScrollFrame: number | null = null
+
+function reportPreviewScroll() {
+  if (previewScrollFrame !== null) window.cancelAnimationFrame(previewScrollFrame)
+  previewScrollFrame = window.requestAnimationFrame(() => {
+    previewScrollFrame = null
+    const container = content.value
+    if (!container) return
+    const elements = [...container.querySelectorAll<HTMLElement>('[data-help-block-index]')]
+    if (!elements.length) return
+    const containerTop = container.getBoundingClientRect().top
+    const anchor = container.scrollTop + Math.min(36, container.clientHeight * 0.12)
+    let visible = elements[0]
+    for (const element of elements) {
+      const elementTop = element.getBoundingClientRect().top - containerTop + container.scrollTop
+      if (elementTop > anchor) break
+      visible = element
+    }
+    if (!visible) return
+    const blockIndex = Number(visible.dataset.helpBlockIndex)
+    if (!Number.isInteger(blockIndex)) return
+    const visibleTop = visible.getBoundingClientRect().top - containerTop + container.scrollTop
+    const progress = Math.min(1, Math.max(0, (anchor - visibleTop) / Math.max(1, visible.offsetHeight)))
+    emit('previewScroll', { blockIndex, progress })
+  })
+}
+
+onBeforeUnmount(() => {
+  if (previewScrollFrame !== null) window.cancelAnimationFrame(previewScrollFrame)
+})
 
 </script>
 
@@ -46,11 +91,12 @@ const renderedHeaderDescription = computed(() => sanitizeCoachHtml(renderCoachHe
       <button v-if="showClose" type="button" aria-label="Fermer l’aide" @click="emit('close')">×</button>
     </header>
 
-    <div class="coach-help-content">
+    <div ref="content" class="coach-help-content" @scroll.passive="reportPreviewScroll">
       <CoachHelpBlockView
-        v-for="(block, index) in renderedBlocks"
-        :key="`${block.id}-${index}`"
-        :block="block"
+        v-for="item in renderedBlocks"
+        :key="`${item.block.id}-${item.blockIndex ?? 'automatic'}`"
+        :data-help-block-index="item.blockIndex"
+        :block="item.block"
         :values="values"
       />
     </div>

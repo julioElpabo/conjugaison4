@@ -5,6 +5,13 @@ export const CHAT_CORRECT_DELAY_MS = 1_000
 export const CHAT_INCORRECT_DELAY_MS = 3_000
 export const COACH_STREAK_LENGTH = 3
 
+const INCORRECT_REACTION_EVENTS = new Set<CoachEvent>(['incorrect', 'cod-before', 'cod-after', 'coi', 'encouragement'])
+
+export function chatReactionAllowsMedia(eventType: CoachEvent, cooledDown: boolean, hasIncorrectMedia: boolean) {
+  if (!cooledDown || eventType === 'encouragement') return false
+  return !INCORRECT_REACTION_EVENTS.has(eventType) || hasIncorrectMedia
+}
+
 export type CoachTurnStep =
   | { kind: 'reaction', eventType: CoachEvent }
   | { kind: 'instruction' }
@@ -37,6 +44,7 @@ export function answerTurnPlan(options: {
       : options.incorrectEvent || 'incorrect',
   }]
   if (options.correct && options.streak) steps.push({ kind: 'reaction', eventType: 'streak' })
+  if (!options.correct) steps.push({ kind: 'reaction', eventType: 'encouragement' })
   steps.push({
     kind: 'delay',
     milliseconds: options.correct ? CHAT_CORRECT_DELAY_MS : CHAT_INCORRECT_DELAY_MS,

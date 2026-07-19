@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ConjugationTense, ExerciseAttempt, ExerciseQuestion, Verb } from '~~/shared/types/conjugation'
 import type { CoachEvent, CoachMedia, CoachMessageContext, CoachProfile } from '~~/shared/types/coach'
-import { getAlternativeCorrections } from '~~/shared/utils/answer'
+import { getAlternativeCorrections, validateAnswer } from '~~/shared/utils/answer'
 import { createCoachDialogueState, createVariedCoachReaction } from '~~/shared/utils/coach-dialogue'
 import {
   answerTurnPlan,
@@ -9,14 +9,15 @@ import {
   CHAT_CORRECT_DELAY_MS,
   CHAT_INCORRECT_DELAY_MS,
   COACH_STREAK_LENGTH,
+  chatReactionAllowsMedia,
   nextConsecutiveCorrectCount,
 } from '~~/shared/utils/coach-conversation'
 import { diagnoseCoachAnswer } from '~~/shared/utils/coach-feedback'
 import { coachQuestionBubbles } from '~~/shared/utils/coach-question'
-import { evaluateExerciseAnswer } from '~~/shared/utils/exercise-attempt'
 import { buildTargetedConjugationHelp, isHelpCommand } from '~~/shared/utils/conjugation-help'
 import { coachHelpQuestionVariables, visibleCoachHelpBlocks } from '~~/shared/utils/coach-help'
 import { sanitizeCoachHtml } from '~~/shared/utils/safe-html'
+import { areOnlyIndicativeTenses, withoutIndicativeMode } from '~~/shared/utils/chat-mode-display'
 
 const props = defineProps<{
   questions: ExerciseQuestion[]
@@ -44,7 +45,6 @@ const waitingForNext = ref(false)
 const nextQuestionDelay = ref(CHAT_INCORRECT_DELAY_MS)
 const deliveringFeedback = ref(false)
 const posingQuestion = ref(false)
-const retryAlreadyOffered = ref(false)
 const consecutiveCorrectCount = ref(0)
 const finished = ref(false)
 const closeConfirmationOpen = ref(false)
@@ -85,6 +85,13 @@ const correctCount = computed(() => attempts.value.filter(item => item.status ==
 const score = computed(() => attempts.value.length
   ? Math.round(correctCount.value / attempts.value.length * 100)
   : 0)
+const omitIndicativeMode = computed(() => areOnlyIndicativeTenses(props.tenses))
+const hasIncorrectMedia = computed(() => props.coach.assignments.some(assignment => assignment.isActive
+  && assignment.eventType === 'incorrect'
+  && props.coach.media.some(item => item.id === assignment.mediaId
+    && item.isActive
+    && item.category === 'encouragement'
+    && (item.mediaType === 'animation' || item.mediaType === 'emoji'))))
 
 function normalizedInfinitive(value?: string | null) {
   return (value || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLocaleLowerCase('fr')
@@ -95,6 +102,7 @@ const helpValues = computed(() => currentQuestion.value ? {
   ...coachHelpQuestionVariables(currentQuestion.value, currentVerb.value, currentTense.value),
   definition: currentVerb.value?.meaning?.trim() || targetedHelp.value?.meaning || '',
   helpTitle: targetedHelp.value?.title || '',
+  omitIndicativeMode: omitIndicativeMode.value,
 } : { coach: props.coach })
 
 function openHelp(candidate: string) {
@@ -152,8 +160,9 @@ function addMessage(author: ChatMessage['author'], text: string, tone?: ChatMess
 
 function contextFor(question?: ExerciseQuestion): CoachMessageContext {
   const reminder = question?.agreementReminder
+  const instruction = question ? [question.instruction, question.consigne].filter(Boolean).join('\n') : undefined
   return {
-    instruction: question ? [question.instruction, question.consigne].filter(Boolean).join('\n') : undefined,
+    instruction: instruction && omitIndicativeMode.value ? withoutIndicativeMode(instruction) : instruction,
     verb: question?.infinitif || reminder?.infinitive,
     complement: reminder?.complement || question?.complement,
     participle: reminder?.participle,
@@ -192,13 +201,14 @@ async function addCoachReaction(eventType: CoachEvent, context: CoachMessageCont
   const cooledDown = currentIndex.value - lastMediaQuestion.value >= (rule?.cooldownQuestions || 0)
   const reaction = createVariedCoachReaction(props.coach, eventType, context, dialogueState, {
     allowMotion: allowMotion.value,
-    mediaAllowed: cooledDown,
+    mediaAllowed: chatReactionAllowsMedia(eventType, cooledDown, hasIncorrectMedia.value),
   })
   if (!reaction.text.trim() && !reaction.media) return false
   if (reaction.media) {
     lastMediaQuestion.value = currentIndex.value
   }
-  await enqueueCoachBubble(() => ({ text: reaction.text, ...(tone ? { tone } : {}), ...(reaction.media ? { media: reaction.media } : {}) }))
+  const text = omitIndicativeMode.value ? withoutIndicativeMode(reaction.text) : reaction.text
+  await enqueueCoachBubble(() => ({ text, ...(tone ? { tone } : {}), ...(reaction.media ? { media: reaction.media } : {}) }))
   return true
 }
 
@@ -208,7 +218,7 @@ async function askCurrentQuestion() {
   posingQuestion.value = true
   if (currentIndex.value > 0) await addCoachReaction('question', contextFor(question))
   if (question.instruction) await addCoachText(question.instruction, undefined, true)
-  const bubbles = coachQuestionBubbles(question)
+  const bubbles = coachQuestionBubbles(question, { omitIndicativeMode: omitIndicativeMode.value })
   await addCoachText(bubbles.formula, undefined, true)
   if (bubbles.sentence) await addCoachText(bubbles.sentence, undefined, true)
   posingQuestion.value = false
@@ -227,26 +237,8 @@ async function submit() {
 
   addMessage('learner', candidate)
   lastCoachBubbleAt = Date.now()
-  const { result, shouldRetry } = evaluateExerciseAnswer(
-    candidate,
-    question.reponses,
-    retryAlreadyOffered.value,
-  )
+  const result = validateAnswer(candidate, question.reponses)
   answer.value = ''
-  if (shouldRetry) {
-    consecutiveCorrectCount.value = 0
-    retryAlreadyOffered.value = true
-    waitingForNext.value = true
-    deliveringFeedback.value = true
-    const retryDisplayed = await addCoachReaction('encouragement', contextFor(question))
-    deliveringFeedback.value = false
-    if (retryDisplayed) {
-      waitingForNext.value = false
-      await nextTick()
-      input.value?.focus()
-      return
-    }
-  }
 
   attempts.value.push({
     question,
@@ -304,7 +296,6 @@ async function continueChat() {
   }
 
   currentIndex.value += 1
-  retryAlreadyOffered.value = false
   waitingForNext.value = false
   await askCurrentQuestion()
 }
@@ -321,7 +312,6 @@ async function restart() {
   waitingForNext.value = false
   deliveringFeedback.value = false
   posingQuestion.value = false
-  retryAlreadyOffered.value = false
   consecutiveCorrectCount.value = 0
   finished.value = false
   helpOpen.value = false
@@ -490,6 +480,14 @@ onBeforeUnmount(() => {
   gap: 16px;
   outline: none;
   transition: width .24s ease;
+}
+
+.chat-dialogs :deep(:is(strong, b, h1, h2, h3, h4, h5, h6, button, dt, dd, summary)),
+.chat-dialogs :deep(.chat-message__text--emphasis),
+.chat-dialogs :deep(.chat-instruction > span),
+.chat-dialogs :deep(.chat-help-requested-form),
+.chat-dialogs :deep(.coach-help-block--header > .coach-help-block__content) {
+  letter-spacing: .03em;
 }
 
 .chat-dialogs--with-help {

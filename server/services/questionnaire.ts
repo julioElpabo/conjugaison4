@@ -9,6 +9,7 @@ import { TENSE_IDENTIFICATION_INSTRUCTION } from '../../shared/utils/exercise-in
 import type { ComplementOption } from '../../shared/types/conjugation'
 import { indirectRelative } from './indirect-relative'
 import { resolveVariableAuxiliary } from './compound-auxiliary'
+import { buildRadicalReference } from '../../shared/utils/radical-reference'
 
 interface IdRow extends RowDataPacket { id: number }
 
@@ -16,6 +17,7 @@ interface TenseSelectionRow extends RowDataPacket {
   id: number
   name: string
   mode_name: string
+  is_compound: number
 }
 
 interface ConjugationRow extends RowDataPacket {
@@ -36,6 +38,16 @@ interface ConjugationRow extends RowDataPacket {
   temps_name: string
   is_compound: number
   mode_name: string
+  base_verbe_id?: number
+}
+
+interface RadicalReferenceRow extends RowDataPacket {
+  verbe_id: number
+  personne_id: number
+  pronom: string
+  conjugaison1: string
+  mode_name: string
+  temps_name: string
 }
 
 interface NonFiniteVerbRow extends RowDataPacket {
@@ -44,6 +56,7 @@ interface NonFiniteVerbRow extends RowDataPacket {
   participe_present: string
   participe_passe: string
   auxiliaire_participe_present: string | null
+  present_nous: string | null
 }
 
 interface PronominalUseRow extends RowDataPacket {
@@ -52,6 +65,7 @@ interface PronominalUseRow extends RowDataPacket {
   participe_present: string
   participe_passe: string
   type_h_initial: string | null
+  present_nous: string | null
 }
 
 interface AuxiliaryFormRow extends RowDataPacket {
@@ -113,6 +127,27 @@ function randomComplement(rows: readonly ComplementRow[]) {
 
 function normalized(value: string) {
   return value.trim().toLocaleLowerCase('fr-CH')
+}
+
+function radicalReferenceFor(
+  row: ConjugationRow,
+  references: ReadonlyMap<number, readonly RadicalReferenceRow[]>,
+): ExerciseQuestion['radicalReference'] | undefined {
+  const forms = references.get(Number(row.base_verbe_id || row.verbe_id)) || []
+  return buildRadicalReference({
+    infinitive: row.infinitif,
+    mode: row.mode_name,
+    tense: row.temps_name,
+    personId: Number(row.personne_id),
+    conjugation: row.conjugaison1,
+    isCompound: Boolean(row.is_compound),
+  }, forms.map(form => ({
+    mode: form.mode_name,
+    tense: form.temps_name,
+    personId: Number(form.personne_id),
+    pronoun: form.pronom,
+    form: form.conjugaison1,
+  })))
 }
 
 export function allowsAnteposedComplement(row: Pick<ConjugationRow, 'is_compound' | 'mode_name'>) {
@@ -209,7 +244,7 @@ async function validateSelections(request: QuestionnaireRequest) {
         )
       : Promise.resolve([[]] as unknown as Awaited<ReturnType<typeof database.execute<IdRow[]>>>),
     database.execute<TenseSelectionRow[]>(
-      `SELECT t.id, t.name, m.name AS mode_name
+      `SELECT t.id, t.name, m.name AS mode_name, t.isTempsCompose AS is_compound
        FROM temps t
        INNER JOIN modes m ON m.id = t.mode_id
        WHERE t.id IN (${placeholders(request.tenseIds)})`,
@@ -250,6 +285,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
       : ''
     const limit = Math.min(500, Math.max(request.questionCount * 4, request.questionCount))
     const rows: ConjugationRow[] = []
+    let radicalReferences = new Map<number, RadicalReferenceRow[]>()
     let etreAuxiliaryForms: AuxiliaryFormRow[] = []
     if (verbIds.length > 0) {
       const [storedRows] = await database.execute<ConjugationRow[]>(`
@@ -282,7 +318,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
     if (pronominalUseIds.length > 0) {
       const [sourceRows, auxiliaryForms] = await Promise.all([
         database.execute<PronominalSourceRow[]>(`
-          SELECT vc.id, -ep.id AS verbe_id, vc.personne_id, vc.temp_id,
+          SELECT vc.id, -ep.id AS verbe_id, ep.verbe_id AS base_verbe_id, vc.personne_id, vc.temp_id,
                  vc.conjugaison1 AS base_conjugaison1,
                  vc.conjugaison2 AS base_conjugaison2,
                  vc.conjugaison3 AS base_conjugaison3,
@@ -325,6 +361,29 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
         })
         .map(row => generatePronominalRow(row, auxiliaryForms[0]))
         .filter(row => row.conjugaison1) as ConjugationRow[])
+    }
+
+    const radicalReferenceVerbIds = [...new Set([
+      ...verbIds,
+      ...rows.map(row => Number(row.base_verbe_id || row.verbe_id)).filter(id => id > 0),
+    ])]
+    if (radicalReferenceVerbIds.length > 0) {
+      const [referenceRows] = await database.execute<RadicalReferenceRow[]>(`
+        SELECT vc.verbe_id, vc.personne_id, p.pronom, vc.conjugaison1,
+               m.name AS mode_name, t.name AS temps_name
+        FROM verbesconjugues vc
+        INNER JOIN personnes p ON p.id = vc.personne_id
+        INNER JOIN temps t ON t.id = vc.temp_id
+        INNER JOIN modes m ON m.id = t.mode_id
+        WHERE vc.verbe_id IN (${placeholders(radicalReferenceVerbIds)})
+          AND m.name = 'indicatif' AND t.name IN ('présent', 'futur', 'passé simple')
+          AND vc.conjugaison1 <> ''
+      `, radicalReferenceVerbIds)
+      for (const reference of referenceRows) {
+        const candidates = radicalReferences.get(Number(reference.verbe_id)) || []
+        candidates.push(reference)
+        radicalReferences.set(Number(reference.verbe_id), candidates)
+      }
     }
 
     if (!etreAuxiliaryForms.length && rows.some(row => normalized(row.infinitif) === 'sortir' && Boolean(row.is_compound))) {
@@ -400,8 +459,9 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
           }
         : row
       const semanticRow = resolveVariableAuxiliary(enrichedRow, etreAuxiliaryForms)
+      const radicalReference = radicalReferenceFor(row, radicalReferences)
       return request.exerciseKind === 'conjugation'
-        ? formatConjugationQuestion(semanticRow, choosePronoun(row.pronom, request.inclusivePronouns))
+        ? formatConjugationQuestion({ ...semanticRow, radical_reference: radicalReference }, choosePronoun(row.pronom, request.inclusivePronouns))
         : identificationQuestion(semanticRow)
     }))
   }
@@ -421,7 +481,13 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
       SELECT v.id, v.infinitif,
              v.\`participe_présent\` AS participe_present,
              v.\`participe_passé\` AS participe_passe,
-             auxiliary.\`participe_présent\` AS auxiliaire_participe_present
+             auxiliary.\`participe_présent\` AS auxiliaire_participe_present,
+             (SELECT vc.conjugaison1 FROM verbesconjugues vc
+              INNER JOIN temps present_tense ON present_tense.id=vc.temp_id
+              INNER JOIN modes present_mode ON present_mode.id=present_tense.mode_id
+              INNER JOIN personnes present_person ON present_person.id=vc.personne_id
+              WHERE vc.verbe_id=v.id AND present_mode.name='indicatif' AND present_tense.name='présent'
+                AND present_person.pronom='nous' AND vc.conjugaison1<>'' LIMIT 1) AS present_nous
       FROM verbes v
       LEFT JOIN verbes auxiliary ON auxiliary.infinitif = v.auxiliaire
       WHERE v.id IN (${placeholders(verbIds)})
@@ -435,7 +501,13 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
         SELECT ep.id, ep.infinitif_pronominal,
                base.\`participe_présent\` AS participe_present,
                base.\`participe_passé\` AS participe_passe,
-               base.type_h_initial
+               base.type_h_initial,
+               (SELECT vc.conjugaison1 FROM verbesconjugues vc
+                INNER JOIN temps present_tense ON present_tense.id=vc.temp_id
+                INNER JOIN modes present_mode ON present_mode.id=present_tense.mode_id
+                INNER JOIN personnes present_person ON present_person.id=vc.personne_id
+                WHERE vc.verbe_id=base.id AND present_mode.name='indicatif' AND present_tense.name='présent'
+                  AND present_person.pronom='nous' AND vc.conjugaison1<>'' LIMIT 1) AS present_nous
         FROM emplois_pronominaux ep
         INNER JOIN verbes base ON base.id = ep.verbe_id
         WHERE ep.id IN (${placeholders(pronominalUseIds)})
@@ -457,6 +529,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
           participe_present: pronominalParticiples.join('-'),
           participe_passe: use.participe_passe,
           auxiliaire_participe_present: "s'étant",
+          present_nous: use.present_nous,
         } as NonFiniteVerbRow)
       }
     }

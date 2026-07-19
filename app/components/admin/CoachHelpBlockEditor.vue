@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { CoachHelpBlock, CoachHelpBlockType } from '~~/shared/types/coach'
 import { COACH_HELP_BLOCK_TYPES } from '~~/shared/types/coach'
+import { COACH_EXPLANATION_APPROACH_OPTIONS } from '~~/shared/data/coach-explanation-approaches'
+import { coachHelpBlockUsesPedagogicalApproach } from '~~/shared/utils/coach-help'
 
 const props = defineProps<{
   block: CoachHelpBlock
@@ -15,6 +17,9 @@ const LABELS: Record<CoachHelpBlockType, string> = {
   danger: 'Danger',
 }
 const childType = ref<CoachHelpBlockType>('normal')
+const isContextualBaseBlock = computed(() => props.block.content.trim() === '{contextualBaseHelp}')
+const usesPedagogicalApproach = computed(() => coachHelpBlockUsesPedagogicalApproach(props.block.content))
+const selectedApproach = computed(() => COACH_EXPLANATION_APPROACH_OPTIONS.find(option => option.value === props.block.explanationApproach))
 
 function move(direction: -1 | 1) {
   const target = props.index + direction
@@ -32,6 +37,7 @@ function addChild() {
     type: childType.value,
     title: '',
     content: '',
+    explanationApproach: 'cif-falc',
     isActive: true,
     sortOrder: props.block.children.length + 1,
     children: [],
@@ -52,7 +58,8 @@ function addChild() {
       <button type="button" class="is-delete" aria-label="Supprimer ce bloc" @click="remove">×</button>
     </header>
     <div class="block-editor-card__fields">
-      <label class="admin-field"><span>Titre (facultatif)</span><input v-model="block.title" maxlength="160"></label>
+      <label class="admin-field"><span>{{ isContextualBaseBlock ? 'Titre automatique' : 'Titre (facultatif)' }}</span><input v-model="block.title" maxlength="160" :disabled="isContextualBaseBlock"></label>
+      <label v-if="usesPedagogicalApproach" class="admin-field block-editor-card__approach"><span>Approche pédagogique du contenu automatique</span><select v-model="block.explanationApproach"><option v-for="option in COACH_EXPLANATION_APPROACH_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</option></select><small v-if="selectedApproach">{{ selectedApproach.objective }} {{ selectedApproach.length }} {{ selectedApproach.vocabulary }}</small></label>
       <AdminHtmlSourceEditor v-model="block.content" :rows="4" :maxlength="20000" />
     </div>
     <div class="block-editor-card__children">

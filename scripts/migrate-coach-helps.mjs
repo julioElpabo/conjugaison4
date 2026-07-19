@@ -71,6 +71,7 @@ try {
     block_type ENUM('normal','warning','danger') NOT NULL,
     title VARCHAR(160) NOT NULL DEFAULT '',
     content TEXT NOT NULL,
+    explanation_approach ENUM('cif-falc','concise','grammatical-technical','guided-discovery') NOT NULL DEFAULT 'cif-falc',
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     sort_order SMALLINT UNSIGNED NOT NULL DEFAULT 1,
     children_json LONGTEXT NULL,
@@ -100,6 +101,8 @@ try {
   await database.query("ALTER TABLE coach_help_blocks MODIFY block_type ENUM('normal','warning','danger') NOT NULL")
   const [childrenColumns] = await database.query("SHOW COLUMNS FROM coach_help_blocks LIKE 'children_json'")
   if (!childrenColumns.length) await database.query('ALTER TABLE coach_help_blocks ADD COLUMN children_json LONGTEXT NULL AFTER sort_order')
+  const [approachColumns] = await database.query("SHOW COLUMNS FROM coach_help_blocks LIKE 'explanation_approach'")
+  if (!approachColumns.length) await database.query("ALTER TABLE coach_help_blocks ADD COLUMN explanation_approach ENUM('cif-falc','concise','grammatical-technical','guided-discovery') NOT NULL DEFAULT 'cif-falc' AFTER content")
   await database.query(`CREATE TABLE IF NOT EXISTS coach_help_publications (
     id TINYINT UNSIGNED NOT NULL,
     payload LONGTEXT NOT NULL,
@@ -156,7 +159,7 @@ try {
     const [publishedHelps] = await database.query(`SELECT id,name,description,header_title AS headerTitle,
       header_description AS headerDescription,status FROM coach_help_templates WHERE status='published' AND deleted_at IS NULL ORDER BY name,id`)
     const [publishedBlocks] = await database.query(`SELECT id,help_id AS helpId,block_type AS type,title,content,
-      is_active AS isActive,sort_order AS sortOrder,children_json AS childrenJson FROM coach_help_blocks ORDER BY help_id,sort_order,id`)
+      explanation_approach AS explanationApproach,is_active AS isActive,sort_order AS sortOrder,children_json AS childrenJson FROM coach_help_blocks ORDER BY help_id,sort_order,id`)
     const payload = publishedHelps.map(help => ({
       ...help,
       blocks: publishedBlocks.filter(block => block.helpId === help.id).map(block => ({
@@ -164,6 +167,7 @@ try {
         type: block.type,
         title: block.title,
         content: block.content,
+        explanationApproach: block.explanationApproach,
         isActive: Boolean(block.isActive),
         sortOrder: block.sortOrder,
         children: block.childrenJson ? JSON.parse(block.childrenJson) : [],

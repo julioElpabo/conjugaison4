@@ -1,4 +1,5 @@
 import type { ConjugationTense, ExerciseQuestion, Verb } from '../types/conjugation'
+import type { CoachExplanationApproach } from '../types/coach'
 
 export interface TargetedConjugationHelp {
   title: string
@@ -11,6 +12,15 @@ export interface TargetedConjugationHelp {
   exception: string | null
   warnings: string[]
   method: string[]
+  decomposition: ConjugationDecomposition | null
+}
+
+export interface ConjugationDecomposition {
+  base: string
+  ending: string
+  baseLabel: string
+  confidence: 'high'
+  source: 'stored-form'
 }
 
 const semanticMeanings: Record<string, string> = {
@@ -120,6 +130,28 @@ function subjectIndex(question: ExerciseQuestion) {
   if (/^vous\b/.test(subject)) return 4
   if (/^(ils|elles)\b/.test(subject)) return 5
   return null
+}
+
+function hasFamilyIndependentEndings(
+  question: ExerciseQuestion,
+  verb?: Verb,
+  tense?: ConjugationTense,
+) {
+  const mode = normalized(question.mode || tense?.mode?.name)
+  const time = normalized(question.temps || tense?.name)
+  const group = verb?.groupeConjugaison
+  if (mode === 'indicatif' && time === 'passe simple' && group !== 1 && group !== 2) return false
+  if (mode === 'subjonctif' && time === 'present' && group === 3) return false
+  return true
+}
+
+function conjugatedCore(form: string) {
+  return form
+    .trim()
+    .replace(/[.!?…]+$/gu, '')
+    .replace(/^(?:me|te|se|nous|vous)\s+/iu, '')
+    .replace(/^[mts]['’]/iu, '')
+    .trim()
 }
 
 function futureStem(infinitive: string) {
@@ -284,29 +316,268 @@ function tenseRule(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationT
   }
 }
 
+/**
+ * Découpe uniquement les formes pour lesquelles la série de terminaisons est
+ * stable. La forme enregistrée reste la source de vérité : aucune base
+ * irrégulière n'est reconstruite à partir de l'infinitif.
+ */
+export function decomposeConjugationForm(
+  question: ExerciseQuestion,
+  verb?: Verb,
+  tense?: ConjugationTense,
+): ConjugationDecomposition | null {
+  if (question.isCompound || tense?.isCompound || !question.conjugaison1) return null
+
+  const rule = tenseRule(question, verb, tense)
+  if (rule.endingsKind !== 'endings' || !hasFamilyIndependentEndings(question, verb, tense)) return null
+  const person = subjectIndex(question)
+  const displayedEnding = person === null ? '' : rule.endingItems[person] || ''
+  if (!/^-[\p{L}]+$/u.test(displayedEnding)) return null
+
+  const ending = displayedEnding.slice(1)
+  const form = conjugatedCore(question.conjugaison1)
+  if (!form || form.length <= ending.length || !form.toLocaleLowerCase('fr').endsWith(ending.toLocaleLowerCase('fr'))) {
+    return null
+  }
+
+  const base = form.slice(0, -ending.length)
+  if (!base || /[\s-]/u.test(base)) return null
+  return {
+    base,
+    ending,
+    baseLabel: 'Base pour cette forme',
+    confidence: 'high',
+    source: 'stored-form',
+  }
+}
+
+/** Explique le radical réellement utile, y compris lorsqu'il alterne. */
+export function buildConjugationBaseHtml(
+  question: ExerciseQuestion,
+  verb?: Verb,
+  tense?: ConjugationTense,
+  approach: CoachExplanationApproach = 'grammatical-technical',
+) {
+  const infinitive = question.infinitif || verb?.infinitif || 'ce verbe'
+  const context = tenseContext(question, tense)
+  const subject = question.pronom || question.saisiePrefixe || 'la personne demandée'
+  const decomposition = decomposeConjugationForm(question, verb, tense)
+  const lexical = lexicalStem(infinitive, verb?.terminaison)
+  const actualForm = conjugatedCore(question.conjugaison1 || '')
+  const rule = tenseRule(question, verb, tense)
+  const family = verb?.familleConjugaison?.replaceAll('-', ' ').trim() || ''
+  const normalizedInfinitive = normalized(infinitive)
+  const isSuppletive = normalizedInfinitive === 'aller' || normalizedInfinitive === 'etre'
+  const isCompound = Boolean(question.isCompound || tense?.isCompound)
+  const reference = question.radicalReference?.validated === false ? undefined : question.radicalReference
+  const referenceSubject = reference?.referenceSubject?.trim() || (reference?.label.startsWith('nous') ? 'nous' : reference?.label.startsWith('ils') ? 'ils' : '')
+  const isImperfectNousReference = normalized(question.mode || tense?.mode?.name) === 'indicatif'
+    && normalized(question.temps || tense?.name) === 'imparfait'
+    && reference?.kind === 'present-nous'
+  const rawReferenceRadical = reference?.removableEnding && reference.form.endsWith(reference.removableEnding)
+    ? reference.form.slice(0, -reference.removableEnding.length)
+    : reference?.radical || ''
+  const imperfectExample = isImperfectNousReference && reference
+    ? (() => {
+        const bare = normalized(bareInfinitive(infinitive))
+        const beforeA = bare.endsWith('cer') && normalized(rawReferenceRadical).endsWith('c')
+          ? `${rawReferenceRadical.slice(0, -1)}ç`
+          : rawReferenceRadical
+        const beforeI = bare.endsWith('ger') && normalized(rawReferenceRadical).endsWith('ge')
+          ? rawReferenceRadical.slice(0, -1)
+          : bare.endsWith('cer') && normalized(rawReferenceRadical).endsWith('ç')
+            ? `${rawReferenceRadical.slice(0, -1)}c`
+            : rawReferenceRadical
+        const firstSubject = /^[aeiouyh]/u.test(normalized(beforeA)) && verb?.typeHInitial !== 'aspire' ? 'j’' : 'je '
+        return `<p>Une fois cette forme connue, tu peux construire toutes les personnes de l’imparfait. Par exemple : <strong>${escapedHtml(`${firstSubject}${beforeA}ais`)}</strong> et <strong>${escapedHtml(`nous ${beforeI}ions`)}</strong>.</p>`
+      })()
+    : ''
+  const referenceCard = reference
+    ? `<p>${isImperfectNousReference ? 'Pour pouvoir construire toutes les personnes de l’imparfait, apprends par cœur cette forme repère au présent :' : reference.kind === 'infinitive' ? 'Pars de cette forme repère :' : reference.kind === 'memorized-stem' ? 'Apprends ce radical particulier par cœur :' : reference.kind === 'memorized-form' ? 'Apprends cette forme particulière par cœur :' : 'Apprends cette forme repère par cœur :'}</p><p><strong>${escapedHtml(`${referenceSubject ? `${referenceSubject} ` : ''}${reference.form}`)}</strong></p>${imperfectExample}`
+    : ''
+  const normalizedMode = normalized(question.mode || tense?.mode?.name)
+  const normalizedTense = normalized(question.temps || tense?.name)
+  if (normalizedMode === 'participe' && normalizedTense === 'passe') {
+    const participle = verb?.participePasse?.trim() || actualForm
+    if (approach === 'concise') return `<p>Le participe passé est <strong>${escapedHtml(participle)}</strong> : apprends cette forme.</p>`
+    if (approach === 'guided-discovery') return `<details><summary>Indice 1 · La famille</summary><p>Observe la famille de <strong>${escapedHtml(infinitive)}</strong>.</p></details><details><summary>Indice 2 · La forme</summary><p>Le participe passé n’est pas toujours prévisible à partir de l’infinitif.</p></details><details><summary>Indice 3 · À retenir</summary><p>La forme repère est <strong>${escapedHtml(participle)}</strong>. Vérifie ensuite son accord.</p></details>`
+    if (approach === 'cif-falc') return `<ol><li>Repère le verbe <strong>${escapedHtml(infinitive)}</strong>.</li><li>Apprends son participe passé : <strong>${escapedHtml(participle)}</strong>.</li><li>Vérifie s’il faut l’accorder.</li></ol>`
+    return `<p>Le participe passé <strong>${escapedHtml(participle)}</strong> est une <strong>forme lexicale</strong> enregistrée avec le verbe <strong>${escapedHtml(infinitive)}</strong>.</p><p>Il ne faut pas lui inventer un radical productif : sa formation dépend de la famille et comporte de nombreuses irrégularités. L’étape suivante est la vérification de l’accord.</p>`
+  }
+
+  const animation = decomposition && reference?.removableEnding
+    && normalized(reference.radical) === normalized(decomposition.base)
+    ? `<figure><figcaption>Construction du radical</figcaption><p><small>Forme repère : ${escapedHtml(reference.label)}</small><span>${escapedHtml(referenceSubject ? `${referenceSubject} ` : '')}</span><strong>${escapedHtml(reference.form.slice(0, -reference.removableEnding.length))}</strong><del>${escapedHtml(reference.removableEnding)}</del></p><p><strong>${escapedHtml(reference.radical)}-</strong><small>radical</small></p><p><strong>${escapedHtml(reference.radical)}-</strong><span> + </span><mark>-${escapedHtml(decomposition.ending)}</mark><span> → </span><b>${escapedHtml(actualForm)}</b></p></figure>`
+    : ''
+
+  if (isCompound) {
+    const auxiliary = verb?.auxiliaire?.trim() || 'avoir ou être'
+    if (approach === 'concise') {
+      return `<p>Ici, construis la forme avec <strong>${escapedHtml(auxiliary)}</strong> et le participe passé : ne cherche pas un radical unique du verbe.</p>`
+    }
+    if (approach === 'guided-discovery') {
+      return `<details><summary>Indice 1 · La construction</summary><p>La forme ${escapedHtml(context)} contient-elle un ou deux mots ?</p></details><details><summary>Indice 2 · Le premier élément</summary><p>Quel auxiliaire convient à <strong>${escapedHtml(infinitive)}</strong> ?</p></details><details><summary>Indice 3 · La vérification</summary><p>Conjugue cet auxiliaire avec ${escapedHtml(subject)}, puis ajoute le participe passé et vérifie son accord.</p></details>`
+    }
+    if (approach === 'cif-falc') {
+      return `<ol><li>Cette forme est composée : elle a deux parties.</li><li>Conjugue <strong>${escapedHtml(auxiliary)}</strong> avec ${escapedHtml(subject)}.</li><li>Ajoute le participe passé, puis vérifie l’accord.</li></ol>`
+    }
+    return `<p>${context.replace(/^./u, letter => letter.toLocaleUpperCase('fr'))}, la forme est <strong>périphrastique</strong> : elle associe l’auxiliaire <strong>${escapedHtml(auxiliary)}</strong> et le participe passé.</p><p>On ne cherche donc pas ici le radical de <strong>${escapedHtml(infinitive)}</strong> : la flexion est portée par l’auxiliaire.</p>`
+  }
+
+  if (decomposition) {
+    const base = `<code>${escapedHtml(decomposition.base)}-</code>`
+    const ending = `<code>-${escapedHtml(decomposition.ending)}</code>`
+    const alternates = normalized(lexical) !== normalized(decomposition.base)
+    const alternation = alternates
+      ? ` Elle diffère du radical lexical <code>${escapedHtml(lexical)}-</code> : cette conjugaison commande une alternance.`
+      : ` Elle correspond ici au radical lexical <code>${escapedHtml(lexical)}-</code>.`
+    const exception = rule.exception ? `<p>${escapedHtml(rule.exception)}</p>` : ''
+
+    if (reference && normalized(reference.radical) === normalized(decomposition.base)) {
+      const referenceForm = `<code>${escapedHtml(reference.form)}</code>`
+      const referenceEnding = reference.removableEnding ? `<code>-${escapedHtml(reference.removableEnding)}</code>` : ''
+      const removeInstruction = referenceEnding
+        ? normalized(rawReferenceRadical) === normalized(reference.radical)
+          ? `Enlève ${referenceEnding} : il reste le radical ${base}.`
+          : `Enlève ${referenceEnding} : tu obtiens d’abord le radical <code>${escapedHtml(rawReferenceRadical)}-</code>.`
+        : `Garde le radical ${base}.`
+      if (approach === 'concise') {
+        return `${referenceCard}<p>${removeInstruction} Ajoute ${ending} : <strong>${escapedHtml(actualForm)}</strong>.</p>${animation}`
+      }
+      if (approach === 'guided-discovery') {
+        return `<details><summary>Indice 1 · La forme repère</summary>${referenceCard}</details><details><summary>Indice 2 · Le radical</summary><p>${removeInstruction}</p></details><details><summary>Indice 3 · La nouvelle forme</summary><p>Ajoute maintenant la terminaison ${ending} demandée avec ${escapedHtml(subject)}.</p></details>${animation}${exception}`
+      }
+      if (approach === 'cif-falc') {
+        return `${referenceCard}<ol><li>Pars de la forme repère que tu viens d’apprendre : ${referenceForm}.</li><li>${removeInstruction}</li><li>Ajoute ${ending} pour former <strong>${escapedHtml(actualForm)}</strong>.</li></ol>${animation}${exception}`
+      }
+      const familyFact = family ? `<p><strong>Famille de conjugaison :</strong> ${escapedHtml(family)}.</p>` : ''
+      return `${referenceCard}<p>Le radical se construit à partir d’une <strong>forme repère indépendante</strong> : ${referenceForm} (${escapedHtml(reference.label)}). ${removeInstruction}</p><p>On ajoute ensuite la désinence ${ending} exigée par ${escapedHtml(subject)} ${escapedHtml(context)} : <strong>${escapedHtml(actualForm)}</strong>.</p>${familyFact}${animation}${exception}`
+    }
+
+    if (approach === 'concise') {
+      return `<p>Avec <strong>${escapedHtml(subject)}</strong> ${escapedHtml(context)}, utilise le radical ${base}, puis ajoute ${ending}.</p>`
+    }
+    if (approach === 'guided-discovery') {
+      return `<details><summary>Indice 1 · L’infinitif</summary><p>Pars de l’infinitif <strong>${escapedHtml(infinitive)}</strong> et identifie sa famille.</p></details><details><summary>Indice 2 · Le radical</summary><p>Ici, cette famille utilise le radical ${base}. Il faut le connaître comme radical repère, sans partir de la réponse.</p></details><details><summary>Indice 3 · Assemble</summary><p>Ajoute la terminaison ${ending} demandée avec ${escapedHtml(subject)}.</p></details>${exception}`
+    }
+    if (approach === 'cif-falc') {
+      return `<ol><li>Pars de l’infinitif <strong>${escapedHtml(infinitive)}</strong>.</li><li>Pour ce temps, utilise le radical ${base}.</li><li>Ajoute la terminaison ${ending}.</li></ol>${exception}`
+    }
+    const familyFact = family ? `<p><strong>Famille de conjugaison :</strong> ${escapedHtml(family)}.</p>` : ''
+    const suppletism = isSuppletive
+      ? '<p>Le paradigme présente du <strong>supplétisme</strong> : plusieurs radicaux historiquement distincts coexistent.</p>'
+      : ''
+    return `<p>Pour <strong>${escapedHtml(infinitive)}</strong> avec <strong>${escapedHtml(subject)}</strong> ${escapedHtml(context)}, le paradigme fournit le <strong>radical contextuel</strong> ${base}; on lui ajoute la <strong>désinence</strong> ${ending}.</p><p>Ce radical est appris avec la famille du verbe, et non extrait de la réponse attendue.${alternation}</p>${familyFact}${suppletism}${exception}`
+  }
+
+  if (reference) {
+    const transformation = reference.kind === 'memorized-form'
+      ? `La forme à mémoriser est <strong>${escapedHtml(reference.form)}</strong>.`
+      : reference.removableEnding
+      ? `Retire <code>-${escapedHtml(reference.removableEnding)}</code> pour obtenir le radical <code>${escapedHtml(reference.radical)}-</code>.`
+      : `Le radical repère est <code>${escapedHtml(reference.radical)}-</code>.`
+    const assemble = reference.targetEnding
+      ? `Ajoute <code>-${escapedHtml(reference.targetEnding)}</code> pour former <strong>${escapedHtml(actualForm)}</strong>.`
+      : `Utilise cette forme avec ${escapedHtml(subject)}.`
+    if (approach === 'concise') return `<p>${transformation} ${assemble}</p>`
+    if (approach === 'guided-discovery') return `<details><summary>Indice 1 · La forme repère</summary>${referenceCard}</details><details><summary>Indice 2 · Le radical</summary><p>${transformation}</p></details><details><summary>Indice 3 · La forme demandée</summary><p>${assemble}</p></details>`
+    if (approach === 'cif-falc') return `${referenceCard}<ol><li>Observe la forme repère.</li><li>${transformation}</li><li>${assemble}</li></ol>`
+    return `${referenceCard}<p>${transformation}</p><p>Cette forme repère a été vérifiée contre le paradigme enregistré avant d’être proposée.</p>`
+  }
+
+  const strongIrregularity = isSuppletive
+    ? 'Ce verbe est très irrégulier : son paradigme est supplétif et ne repose pas sur un radical unique.'
+    : `Le radical varie avec la famille du verbe et parfois avec la personne ${escapedHtml(context)}.`
+  if (approach === 'concise') {
+    return `<p><strong>${escapedHtml(infinitive)}</strong> est très irrégulier ici : apprends cette forme avec son temps et sa personne.</p>`
+  }
+  if (approach === 'guided-discovery') {
+    return `<details><summary>Indice 1 · L’infinitif</summary><p>Pars de <strong>${escapedHtml(infinitive)}</strong> et identifie sa famille.</p></details><details><summary>Indice 2 · Les formes repères</summary><p>Ce verbe emploie plusieurs radicaux${family ? ` dans la famille « ${escapedHtml(family)} »` : ''}. Il n’existe pas de retrait mécanique fiable.</p></details><details><summary>Indice 3 · Conclusion</summary><p>Apprends la forme avec son temps et sa personne, puis réutilise-la comme modèle.</p></details>`
+  }
+  if (approach === 'cif-falc') {
+    return `<ol><li>Pars de l’infinitif <strong>${escapedHtml(infinitive)}</strong>.</li><li>Ce verbe change beaucoup : il n’a pas toujours le même radical.</li><li>Apprends la forme de ${escapedHtml(subject)} comme un modèle.</li></ol>`
+  }
+  const lexicalFact = isSuppletive ? '' : `<p>Le radical lexical indicatif est <code>${escapedHtml(lexical)}-</code>, mais il ne suffit pas à prédire sûrement cette forme.</p>`
+  const familyFact = family ? `<p><strong>Famille de conjugaison :</strong> ${escapedHtml(family)}.</p>` : ''
+  return `<p>${strongIrregularity}</p><p>Aucune règle de retrait fondée sur la réponse attendue n’est proposée : elle serait circulaire. Il faut rattacher cette forme à son paradigme ou à sa famille.</p>${lexicalFact}${familyFact}`
+}
+
 export function buildConjugationEndingsHtml(
   question: ExerciseQuestion,
   verb?: Verb,
   tense?: ConjugationTense,
+  approach: CoachExplanationApproach = 'grammatical-technical',
 ) {
   const infinitive = question.infinitif || verb?.infinitif || 'ce verbe'
   const rule = tenseRule(question, verb, tense)
-  const mode = normalized(question.mode || tense?.mode?.name)
-  const time = normalized(question.temps || tense?.name)
-  const group = verb?.groupeConjugaison
-  const endingsAreFamilyDependent = (mode === 'indicatif' && time === 'passe simple' && group !== 1 && group !== 2)
-    || (mode === 'subjonctif' && time === 'present' && group === 3)
+  const endingsAreFamilyDependent = !hasFamilyIndependentEndings(question, verb, tense)
   const endingItems = endingsAreFamilyDependent ? [] : rule.endingItems
+  const context = tenseContext(question, tense)
+  const decomposition = decomposeConjugationForm(question, verb, tense)
+  const requestedEnding = subjectIndex(question) === null ? '' : endingItems[subjectIndex(question)!] || ''
   const introduction = `<p>Le verbe <strong>${escapedHtml(infinitive)}</strong> est ${verbGroupDescription(verb, infinitive)}.</p>`
+
+  if (approach === 'concise') {
+    if (decomposition) {
+      return `<p><strong>${escapedHtml(infinitive)}</strong> : prends <code>${escapedHtml(decomposition.base)}-</code>, puis ajoute <code>-${escapedHtml(decomposition.ending)}</code>.</p>`
+    }
+    if (requestedEnding) {
+      return `<p><strong>${escapedHtml(infinitive)}</strong> ${escapedHtml(context)} : cherche la base de cette forme et ajoute <code>${escapedHtml(requestedEnding)}</code>.</p>`
+    }
+    return `<p><strong>${escapedHtml(infinitive)}</strong> change beaucoup ici : appuie-toi sur sa forme et sa famille.</p>`
+  }
+
+  if (approach === 'guided-discovery') {
+    const baseClue = decomposition
+      ? `Observe la forme demandée : quelle partie reste si tu retires <code>-${escapedHtml(decomposition.ending)}</code> ?`
+      : `Compare les formes de la famille de <strong>${escapedHtml(infinitive)}</strong>. Quelle partie retrouves-tu ?`
+    const endingClue = requestedEnding
+      ? `Pour ${escapedHtml(question.pronom || question.saisiePrefixe || 'cette personne')}, la terminaison attendue est <code>${escapedHtml(requestedEnding)}</code>.`
+      : `Quelle forme de cette famille correspond à ${escapedHtml(question.pronom || question.saisiePrefixe || 'la personne demandée')} ?`
+    return `<p>Ouvre les indices un par un et essaie de répondre avant de lire le suivant.</p><details><summary>Indice 1 · Le temps</summary><p>La forme est demandée ${escapedHtml(context)}. Quelle forme connue peux-tu utiliser comme point de départ ?</p></details><details><summary>Indice 2 · La base</summary><p>${baseClue}</p></details><details><summary>Indice 3 · La terminaison</summary><p>${endingClue}</p></details><details><summary>Dernière vérification</summary><p>Assemble les deux parties, puis relis la phrase avec son sujet.</p></details>`
+  }
+
+  if (approach === 'cif-falc') {
+    const baseStep = rule.endingsKind === 'auxiliary'
+      ? `Choisis l’auxiliaire <strong>${escapedHtml(rule.auxiliaryLabel)}</strong>.`
+      : decomposition
+      ? `Trouve la base : <code>${escapedHtml(decomposition.base)}-</code>.`
+      : `Trouve la base en regardant la famille du verbe <strong>${escapedHtml(infinitive)}</strong>.`
+    const endingStep = rule.endingsKind === 'auxiliary' && requestedEnding
+      ? `Conjugue-le : <code>${escapedHtml(requestedEnding)}</code>. Ajoute le participe passé, puis relis.`
+      : decomposition
+      ? `Ajoute <code>-${escapedHtml(decomposition.ending)}</code>, puis relis la phrase.`
+      : requestedEnding
+        ? `Ajoute <code>${escapedHtml(requestedEnding)}</code>, puis relis la phrase.`
+        : 'Choisis la forme qui va avec le sujet, puis relis la phrase.'
+    return `<ol><li>Regarde le temps : ${escapedHtml(context)}.</li><li>${baseStep}</li><li>${endingStep}</li></ol>`
+  }
+
+  // Approche grammatico-technique : elle explicite le système et ses écarts.
   if (!endingItems.length) {
-    return `${introduction}<p>Il n’existe pas de série unique de terminaisons ${tenseContext(question, tense)} pour ce verbe. Appuie-toi sur la forme demandée et sur sa famille de conjugaison.</p>`
+    const normalizedInfinitive = normalized(infinitive)
+    const supplétive = normalizedInfinitive === 'aller' || normalizedInfinitive === 'etre'
+      ? ' Son paradigme comporte du supplétisme : certaines formes proviennent de radicaux historiquement différents.'
+      : ''
+    return `${introduction}<p>Il n’existe pas de série unique de désinences ${escapedHtml(context)} pour ce verbe. Le radical dépend de sa famille et parfois de la personne.${supplétive}</p><p>Il faut donc partir de la forme attestée, puis identifier sa désinence.</p>`
   }
   const lead = rule.endingsKind === 'auxiliary'
-    ? `<p>${tenseContext(question, tense).replace(/^./u, character => character.toLocaleUpperCase('fr'))}, le verbe se construit avec l’auxiliaire <strong>${escapedHtml(rule.auxiliaryLabel)}</strong>. Les formes de cet auxiliaire sont :</p>`
-    : `<p>Ses terminaisons ${tenseContext(question, tense)} sont :</p>`
+    ? `<p>${context.replace(/^./u, character => character.toLocaleUpperCase('fr'))}, le verbe se construit avec l’auxiliaire <strong>${escapedHtml(rule.auxiliaryLabel)}</strong>. Les formes de cet auxiliaire sont :</p>`
+    : `<p>Ses terminaisons ${escapedHtml(context)} sont :</p>`
   const pronouns = endingPronouns(question.mode || tense?.mode?.name || '', endingItems.length)
   const rows = endingItems.map((ending, index) => `<tr><th>${escapedHtml(pronouns[index] || `forme ${index + 1}`)}</th><td>${escapedHtml(ending)}</td></tr>`).join('')
-  return `${introduction}${lead}<table><tbody>${rows}</tbody></table>`
+  const construction = decomposition
+    ? `<p><strong>${escapedHtml(decomposition.baseLabel)}</strong> : <code>${escapedHtml(decomposition.base)}-</code> + <code>-${escapedHtml(decomposition.ending)}</code>. Cette construction associe un <strong>radical contextuel</strong> et une <strong>désinence</strong>.</p>`
+    : ''
+  const stem = lexicalStem(infinitive, verb?.terminaison)
+  const alternation = decomposition && normalized(stem) !== normalized(decomposition.base)
+    ? `<p>Le radical contextuel diffère du radical lexical <code>${escapedHtml(stem)}-</code> : il s’agit d’une alternance commandée par cette conjugaison.</p>`
+    : ''
+  const normalizedInfinitive = normalized(infinitive)
+  const supplétism = (normalizedInfinitive === 'aller' || normalizedInfinitive === 'etre')
+    ? '<p>Ce paradigme présente aussi du <strong>supplétisme</strong> : plusieurs radicaux d’origines différentes coexistent.</p>'
+    : ''
+  return `${introduction}${construction}${alternation}${supplétism}${lead}<table><tbody>${rows}</tbody></table>`
 }
 
 function meaningFor(question: ExerciseQuestion, verb?: Verb) {
@@ -378,6 +649,7 @@ export function buildTargetedConjugationHelp(
     .filter(Boolean)
     .join(' · ')
   const rule = tenseRule(question, verb, tense)
+  const decomposition = decomposeConjugationForm(question, verb, tense)
   const warnings = targetedWarnings(question, verb)
   const subject = question.pronom || question.saisiePrefixe
   const method = [
@@ -397,7 +669,7 @@ export function buildTargetedConjugationHelp(
     meaning: meaningFor(question, verb),
     verbFacts: [
       { label: 'Groupe', value: groupLabel(verb) },
-      { label: 'Radical de base', value: `${stem}-` },
+      { label: decomposition?.baseLabel || 'Radical lexical', value: `${decomposition?.base || stem}-` },
       ...(verb?.familleConjugaison ? [{ label: 'Famille', value: verb.familleConjugaison.replaceAll('-', ' ') }] : []),
       ...(verb?.participePasse && (question.isCompound || tense?.isCompound)
         ? [{ label: 'Participe passé', value: verb.participePasse }]
@@ -408,5 +680,6 @@ export function buildTargetedConjugationHelp(
     exception: rule.exception,
     warnings,
     method,
+    decomposition,
   }
 }

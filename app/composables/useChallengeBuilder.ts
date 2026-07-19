@@ -98,9 +98,11 @@ export function useChallengeBuilder() {
 
   const selectedTenses = computed(() => {
     const byId = new Map(catalogue.value.temps.map(tense => [tense.id, tense]))
+    const modesById = new Map(catalogue.value.modes.map(mode => [mode.id, mode]))
     return challenge.value.tenseIds
       .map(id => byId.get(id))
       .filter((tense): tense is Tense => Boolean(tense))
+      .map(tense => ({ ...tense, mode: tense.mode || modesById.get(tense.modeId) }))
   })
 
   const isReady = computed(() => (

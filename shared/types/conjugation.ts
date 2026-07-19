@@ -136,6 +136,21 @@ export interface ExerciseQuestion {
   conjugaison1?: string
   conjugaison2?: string | null
   conjugaison3?: string | null
+  /** Forme déjà connue servant à construire le radical sans partir de la réponse attendue. */
+  radicalReference?: {
+    kind: 'present-nous' | 'present-ils' | 'present-same-person' | 'infinitive' | 'future-stem' | 'past-simple-il' | 'memorized-stem' | 'memorized-form'
+    label: string
+    form: string
+    removableEnding: string
+    radical: string
+    targetEnding?: string
+    referenceMode?: string
+    referenceTense?: string
+    referenceSubject?: string
+    strategy?: 'remove-ending' | 'reuse-form' | 'memorize-stem'
+    orthographicAdjustment?: string
+    validated?: boolean
+  }
   complement?: string
   complementPosition?: 'after' | 'before'
   complementFunction?: 'cod' | 'coi'

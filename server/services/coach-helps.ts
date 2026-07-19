@@ -1,6 +1,8 @@
 import type { Pool, PoolConnection, ResultSetHeader, RowDataPacket } from 'mysql2/promise'
 import {
+  COACH_EXPLANATION_APPROACHES,
   COACH_HELP_BLOCK_TYPES,
+  type CoachExplanationApproach,
   type CoachHelpBlock,
   type CoachHelpBlockType,
   type CoachHelpTemplate,
@@ -24,12 +26,79 @@ interface BlockRow extends RowDataPacket {
   type: CoachHelpBlockType
   title: string
   content: string
+  explanationApproach: CoachExplanationApproach
   isActive: number
   sortOrder: number
   childrenJson: string | null
 }
 
+interface CharacterHelpRow extends RowDataPacket {
+  id: number
+  masculineName: string
+  description: string
+  helpId: number | null
+}
+
 const BLOCK_TYPE_SET = new Set<string>(COACH_HELP_BLOCK_TYPES)
+const CONTEXTUAL_BASE_TOKEN = '{contextualBaseHelp}'
+
+export async function createCoachHelpForCharacter(
+  connection: PoolConnection,
+  characterName: string,
+  characterDescription = '',
+) {
+  const name = `Aide — ${characterName.trim() || 'Nouveau caractère'}`.slice(0, 120)
+  const [result] = await connection.execute<ResultSetHeader>(
+    `INSERT INTO coach_help_templates
+      (name,description,header_title,header_description,status) VALUES (?,?,?,'','draft')`,
+    [name, characterDescription.trim().slice(0, 500), '{helpTitle}'],
+  )
+  return result.insertId
+}
+
+/** Garantit une aide propre au caractère, y compris sur d’anciennes données partagées. */
+export async function ensureCoachCharacterHelp(connection: PoolConnection, characterId: number) {
+  const [characters] = await connection.execute<CharacterHelpRow[]>(
+    `SELECT id,masculine_name AS masculineName,description,help_id AS helpId
+     FROM coach_characters WHERE id=? AND status<>'disabled' LIMIT 1 FOR UPDATE`,
+    [characterId],
+  )
+  const character = characters[0]
+  if (!character) throw createError({ statusCode: 404, statusMessage: 'Caractère introuvable' })
+
+  if (character.helpId) {
+    const [otherOwners] = await connection.execute<RowDataPacket[]>(
+      'SELECT id FROM coach_characters WHERE help_id=? AND id<>? LIMIT 1',
+      [character.helpId, characterId],
+    )
+    if (!otherOwners.length) return character.helpId
+
+    const [cloned] = await connection.execute<ResultSetHeader>(
+      `INSERT INTO coach_help_templates (name,description,header_title,header_description,status)
+       SELECT CONCAT(LEFT(name,100),' — ',LEFT(?,15)),description,header_title,header_description,'draft'
+       FROM coach_help_templates WHERE id=? AND deleted_at IS NULL`,
+      [character.masculineName, character.helpId],
+    )
+    if (!cloned.insertId) throw createError({ statusCode: 404, statusMessage: 'Aide introuvable' })
+    await connection.execute(
+      `INSERT INTO coach_help_blocks
+        (help_id,block_type,title,content,explanation_approach,is_active,sort_order,children_json)
+       SELECT ?,block_type,title,content,explanation_approach,is_active,sort_order,children_json
+       FROM coach_help_blocks WHERE help_id=? ORDER BY sort_order,id`,
+      [cloned.insertId, character.helpId],
+    )
+    await connection.execute('UPDATE coach_characters SET help_id=? WHERE id=?', [cloned.insertId, characterId])
+    return cloned.insertId
+  }
+
+  const helpId = await createCoachHelpForCharacter(connection, character.masculineName, character.description)
+  await connection.execute('UPDATE coach_characters SET help_id=? WHERE id=?', [helpId, characterId])
+  return helpId
+}
+
+function automaticBlockTitle(content: string, title: string) {
+  return content.trim() === CONTEXTUAL_BASE_TOKEN ? 'Radical' : title
+}
 
 function text(value: unknown, maximum: number): string {
   return typeof value === 'string' ? value.trim().slice(0, maximum) : ''
@@ -55,15 +124,16 @@ export async function listCoachHelps(database: Executor, publishedOnly = false):
   const ids = helps.map(help => help.id)
   const placeholders = ids.map(() => '?').join(',')
   const [blocks] = await database.execute<BlockRow[]>(`SELECT id,help_id AS helpId,block_type AS type,title,content,
-    is_active AS isActive,sort_order AS sortOrder,children_json AS childrenJson FROM coach_help_blocks
+    explanation_approach AS explanationApproach,is_active AS isActive,sort_order AS sortOrder,children_json AS childrenJson FROM coach_help_blocks
     WHERE help_id IN (${placeholders}) ORDER BY help_id,sort_order,id`, ids)
   return helps.map(help => ({
     ...help,
     blocks: blocks.filter(block => block.helpId === help.id).map(block => ({
       id: block.id,
       type: block.type,
-      title: block.title,
+      title: automaticBlockTitle(block.content, block.title),
       content: block.content,
+      explanationApproach: block.explanationApproach,
       isActive: Boolean(block.isActive),
       sortOrder: block.sortOrder,
       children: parseStoredChildren(block.childrenJson),
@@ -76,7 +146,7 @@ export function parseCoachHelpPayload(value: unknown) {
   const profile = {
     name: text(body.name, 120),
     description: text(body.description, 500),
-    headerTitle: text(body.headerTitle, 300),
+    headerTitle: '{helpTitle}',
     headerDescription: text(body.headerDescription, 2000),
     status: 'draft' as const,
   }
@@ -85,11 +155,15 @@ export function parseCoachHelpPayload(value: unknown) {
     if (depth > 6 || ++blockCount > 200) throw createError({ statusCode: 400, statusMessage: 'Structure de l’aide trop complexe' })
     const item = raw && typeof raw === 'object' ? raw as Record<string, unknown> : {}
     const type = text(item.type, 30)
+    const content = text(item.content, 20000)
+    const explanationApproach = text(item.explanationApproach, 40) || 'cif-falc'
     if (!BLOCK_TYPE_SET.has(type)) throw createError({ statusCode: 400, statusMessage: 'Type de bloc d’aide invalide' })
+    if (!COACH_EXPLANATION_APPROACHES.includes(explanationApproach as CoachExplanationApproach)) throw createError({ statusCode: 400, statusMessage: 'Approche pédagogique invalide' })
     return {
       type: type as CoachHelpBlockType,
-      title: text(item.title, 160),
-      content: text(item.content, 20000),
+      title: automaticBlockTitle(content, text(item.title, 160)),
+      content,
+      explanationApproach: explanationApproach as CoachExplanationApproach,
       isActive: item.isActive !== false,
       sortOrder: index + 1,
       children: parseBlocks(item.children, depth + 1),
@@ -106,8 +180,8 @@ export async function replaceCoachHelpBlocks(connection: PoolConnection, helpId:
   await connection.execute('DELETE FROM coach_help_blocks WHERE help_id=?', [helpId])
   for (const block of blocks) {
     await connection.execute<ResultSetHeader>(`INSERT INTO coach_help_blocks
-      (help_id,block_type,title,content,is_active,sort_order,children_json) VALUES (?,?,?,?,?,?,?)`,
-      [helpId, block.type, block.title, block.content, block.isActive ? 1 : 0, block.sortOrder, JSON.stringify(block.children)])
+      (help_id,block_type,title,content,explanation_approach,is_active,sort_order,children_json) VALUES (?,?,?,?,?,?,?,?)`,
+      [helpId, block.type, block.title, block.content, block.explanationApproach, block.isActive ? 1 : 0, block.sortOrder, JSON.stringify(block.children)])
   }
 }
 
@@ -116,15 +190,21 @@ function parseStoredChildren(value: string | null): CoachHelpBlock[] {
   try {
     const children = JSON.parse(value) as Array<Partial<CoachHelpBlock>>
     if (!Array.isArray(children)) return []
-    const normalize = (items: Array<Partial<CoachHelpBlock>>): CoachHelpBlock[] => items.map((item, index) => ({
-      id: Number(item.id) || 0,
-      type: BLOCK_TYPE_SET.has(item.type || '') ? item.type as CoachHelpBlockType : 'normal',
-      title: typeof item.title === 'string' ? item.title : '',
-      content: typeof item.content === 'string' ? item.content : '',
-      isActive: item.isActive !== false,
-      sortOrder: Number(item.sortOrder) || index + 1,
-      children: Array.isArray(item.children) ? normalize(item.children) : [],
-    }))
+    const normalize = (items: Array<Partial<CoachHelpBlock>>): CoachHelpBlock[] => items.map((item, index) => {
+      const content = typeof item.content === 'string' ? item.content : ''
+      return {
+        id: Number(item.id) || 0,
+        type: BLOCK_TYPE_SET.has(item.type || '') ? item.type as CoachHelpBlockType : 'normal',
+        title: automaticBlockTitle(content, typeof item.title === 'string' ? item.title : ''),
+        content,
+        explanationApproach: COACH_EXPLANATION_APPROACHES.includes(item.explanationApproach as CoachExplanationApproach)
+          ? item.explanationApproach as CoachExplanationApproach
+          : 'cif-falc',
+        isActive: item.isActive !== false,
+        sortOrder: Number(item.sortOrder) || index + 1,
+        children: Array.isArray(item.children) ? normalize(item.children) : [],
+      }
+    })
     return normalize(children)
   } catch {
     return []
@@ -133,10 +213,24 @@ function parseStoredChildren(value: string | null): CoachHelpBlock[] {
 
 export async function publishCoachHelps(connection: PoolConnection) {
   const helps = await listCoachHelps(connection)
-  const published = helps.map(help => ({ ...help, status: 'published' as const }))
+  const [owners] = await connection.execute<(RowDataPacket & { helpId: number })[]>(
+    `SELECT help_id AS helpId FROM coach_characters
+     WHERE help_id IS NOT NULL AND status<>'disabled' ORDER BY sort_order,id`,
+  )
+  const ownedHelpIds = new Set(owners.map(owner => Number(owner.helpId)))
+  const published = helps
+    .filter(help => ownedHelpIds.has(help.id))
+    .map(help => ({ ...help, status: 'published' as const }))
   await connection.execute(`INSERT INTO coach_help_publications (id,payload,published_at) VALUES (1,?,CURRENT_TIMESTAMP)
     ON DUPLICATE KEY UPDATE payload=VALUES(payload),published_at=CURRENT_TIMESTAMP`, [JSON.stringify(published)])
-  await connection.execute("UPDATE coach_help_templates SET status='published' WHERE deleted_at IS NULL")
+  await connection.execute("UPDATE coach_help_templates SET status='draft' WHERE deleted_at IS NULL")
+  if (ownedHelpIds.size) {
+    const ids = [...ownedHelpIds]
+    await connection.execute(
+      `UPDATE coach_help_templates SET status='published' WHERE id IN (${ids.map(() => '?').join(',')}) AND deleted_at IS NULL`,
+      ids,
+    )
+  }
   await connection.execute('UPDATE coach_characters SET published_help_id=help_id')
   return published.length
 }

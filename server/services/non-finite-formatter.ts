@@ -1,4 +1,5 @@
 import type { ExerciseQuestion } from '../types/public-api'
+import { buildRadicalReference } from '../../shared/utils/radical-reference'
 
 export interface NonFiniteVerbSource {
   id: number
@@ -6,12 +7,14 @@ export interface NonFiniteVerbSource {
   participe_present: string
   participe_passe: string
   auxiliaire_participe_present: string | null
+  present_nous?: string | null
 }
 
 export interface NonFiniteTenseSource {
   id: number
   name: string
   mode_name: string
+  is_compound?: number
 }
 
 function normalized(value: string) {
@@ -59,6 +62,15 @@ export function formatNonFiniteQuestion(
   }
   if (answers.length === 0) return null
 
+  const radicalReference = buildRadicalReference({
+    infinitive: verb.infinitif,
+    mode: tense.mode_name,
+    tense: tense.name,
+    personId: null,
+    conjugation: answers[0]!,
+    isCompound: Boolean(tense.is_compound) && !(mode === 'participe' && tenseName === 'passé'),
+  }, verb.present_nous ? [{ mode: 'indicatif', tense: 'présent', personId: 7, pronoun: 'nous', form: verb.present_nous }] : [])
+
   return {
     id: `n-${verb.id}-${tense.id}`,
     verbeId: Number(verb.id),
@@ -71,8 +83,10 @@ export function formatNonFiniteQuestion(
     infinitif: verb.infinitif,
     temps: tense.name,
     mode: tense.mode_name,
+    isCompound: Boolean(tense.is_compound),
     conjugaison1: answers[0]!,
     conjugaison2: answers[1] || '',
     conjugaison3: answers[2] || '',
+    ...(radicalReference ? { radicalReference } : {}),
   }
 }

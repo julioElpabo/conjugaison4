@@ -14,6 +14,7 @@ export interface ConjugationSourceRow {
   temps_name: string
   is_compound: number
   mode_name: string
+  radical_reference?: ExerciseQuestion['radicalReference']
   agreement_rule?: string | null
   complement_phrase?: string | null
   complement_position?: 'after' | 'before'
@@ -339,6 +340,7 @@ export function formatConjugationQuestion(
     conjugaison1: row.conjugaison1,
     conjugaison2: row.conjugaison2 || '',
     conjugaison3: row.conjugaison3 || '',
+    ...(row.radical_reference ? { radicalReference: row.radical_reference } : {}),
     complement: row.complement_position === 'before'
       ? row.complement_anteposed || undefined
       : row.complement_phrase || undefined,

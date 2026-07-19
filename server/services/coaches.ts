@@ -38,7 +38,8 @@ export async function listCoaches(database: Executor, publishedOnly = false): Pr
     CASE WHEN c.gender='female' THEN cc.feminine_name ELSE cc.masculine_name END AS personality,
     cc.pedagogical_style AS pedagogicalStyle, cc.${publishedOnly ? 'published_help_id' : 'help_id'} AS helpId, c.theme_color AS themeColor,
     c.status, c.sort_order AS sortOrder FROM coaches c JOIN coach_characters cc ON cc.id=c.character_id
-    ${publishedOnly ? "WHERE c.status = 'published' AND cc.status = 'published'" : ''} ORDER BY c.sort_order, first_name, c.id`)
+    ${publishedOnly ? "WHERE c.status = 'published' AND cc.status = 'published'" : ''}
+    ORDER BY cc.sort_order, cc.id, c.sort_order, first_name, c.id`)
   if (!coaches.length) return []
   const ids = [...new Set(coaches.map(item => item.characterId))]
   const placeholders = ids.map(() => '?').join(',')

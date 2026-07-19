@@ -27,6 +27,15 @@ export type CoachStatus = 'draft' | 'published' | 'disabled'
 export type CoachGender = 'female' | 'male'
 export type CoachMediaType = 'emoji' | 'animation' | 'video' | 'image'
 
+export const COACH_EXPLANATION_APPROACHES = [
+  'cif-falc',
+  'concise',
+  'grammatical-technical',
+  'guided-discovery',
+] as const
+
+export type CoachExplanationApproach = typeof COACH_EXPLANATION_APPROACHES[number]
+
 export const COACH_HELP_BLOCK_TYPES = [
   'normal',
   'warning',
@@ -41,6 +50,7 @@ export interface CoachHelpBlock {
   type: CoachHelpBlockType
   title: string
   content: string
+  explanationApproach: CoachExplanationApproach
   isActive: boolean
   sortOrder: number
   children: CoachHelpBlock[]

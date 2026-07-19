@@ -44,6 +44,7 @@ interface ConjugationRow extends RowDataPacket {
   conjugaison1: string
   conjugaison2: string
   conjugaison3: string
+  pronom: string
 }
 
 export default defineEventHandler(async (event) => {
@@ -70,11 +71,12 @@ export default defineEventHandler(async (event) => {
       LIMIT 1
     `, [id]),
     database.execute<ConjugationRow[]>(`
-      SELECT id, personne_id AS personId, temp_id AS tenseId,
-        conjugaison1, conjugaison2, conjugaison3
-      FROM verbesconjugues
-      WHERE verbe_id = ?
-      ORDER BY temp_id, personne_id
+      SELECT vc.id, vc.personne_id AS personId, vc.temp_id AS tenseId,
+        vc.conjugaison1, vc.conjugaison2, vc.conjugaison3, p.pronom
+      FROM verbesconjugues vc
+      LEFT JOIN personnes p ON p.id=vc.personne_id
+      WHERE vc.verbe_id = ?
+      ORDER BY vc.temp_id, vc.personne_id
     `, [id]),
     database.execute<CategoryRow[]>(`
       SELECT DISTINCT cs.slug, cs.label, cs.sort_order FROM verbe_sens vs

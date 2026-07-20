@@ -59,7 +59,8 @@ onMounted(async () => {
               <button v-for="coach in group.coaches" :key="coach.id" type="button" class="coach-card" :style="{ '--coach-color': coach.themeColor }" @click="emit('select', coach)">
                 <img :src="coach.avatarPath" :alt="`Avatar de ${coach.firstName}`">
                 <span><strong>{{ coach.firstName }}</strong><small>Personnage virtuel</small></span>
-                <p>{{ coach.description }}</p>
+                <blockquote v-if="coach.description">« {{ coach.description }} »</blockquote>
+                <p v-if="coach.likes" class="coach-card__likes"><strong>Aime&nbsp;:</strong> {{ coach.likes }}</p>
                 <em>{{ coach.pedagogicalStyle }}</em>
               </button>
             </div>
@@ -96,7 +97,10 @@ onMounted(async () => {
 .coach-card > span { display: grid; align-content: center; }
 .coach-card strong { color: #173f55; font-size: 1.1rem; }
 .coach-card small { color: #5f7882; }
-.coach-card p, .coach-card em { grid-column: 1 / -1; margin: 5px 0 0; }
+.coach-card p, .coach-card blockquote, .coach-card em { grid-column: 1 / -1; margin: 5px 0 0; }
+.coach-card blockquote { padding-left: 12px; color: #38535d; border-left: 3px solid color-mix(in srgb, var(--coach-color) 58%, #c5dce2); font-size: .92rem; font-style: italic; line-height: 1.45; }
+.coach-card__likes { color: #405b63; font-size: .86rem; line-height: 1.35; }
+.coach-card__likes strong { color: #173f55; }
 .coach-card em { color: #59717a; font-size: .88rem; font-style: normal; }
 .coach-picker__state { padding: 30px; text-align: center; }
 .coach-picker__state--error { color: #913e38; }
@@ -104,5 +108,8 @@ onMounted(async () => {
 :global(:root[data-theme='dark'] .coach-character-group__header h3) { color: #d4e9ee; }
 :global(:root[data-theme='dark'] .coach-character-group__header span) { color: color-mix(in srgb, var(--character-accent) 78%, white); }
 :global(:root[data-theme='dark'] .coach-character-group__header > small) { color: #b8ced5; background: rgb(9 29 34 / 45%); }
+:global(:root[data-theme='dark'] .coach-card blockquote) { color: #cfe0e4; border-left-color: color-mix(in srgb, var(--coach-color) 70%, white); }
+:global(:root[data-theme='dark'] .coach-card__likes) { color: #b8ced5; }
+:global(:root[data-theme='dark'] .coach-card__likes strong) { color: #dff3f6; }
 @media (max-width: 650px) { .coach-picker__grid { grid-template-columns: 1fr; }.coach-character-group { padding: 12px; }.coach-character-group__header { align-items: flex-start; }.coach-character-group__header > small { margin-top: 2px; } }
 </style>

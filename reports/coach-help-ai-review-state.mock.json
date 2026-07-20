@@ -1,0 +1,1215 @@
+{
+  "schemaVersion": 1,
+  "reviewVersion": "semantic-ai-review-v2",
+  "queueFingerprint": "06976f271269c22eaedc30dc482d731da90a2eff37bfe667f083dab4c21e3165",
+  "help": {
+    "id": 1,
+    "name": "Pour allophones",
+    "updatedAt": "2026-07-19T13:26:28.000Z",
+    "fingerprint": "cded11672c6097d9ef008788e0f3576c6742a063d7e7b0ddca650f27a22209e9"
+  },
+  "startedAt": "2026-07-20T15:03:03.358Z",
+  "updatedAt": "2026-07-20T15:03:03.369Z",
+  "results": {
+    "category-form:167:9:5": {
+      "unitId": "category-form:167:9:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:27:18:7": {
+      "unitId": "category-form:27:18:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:204:16:8": {
+      "unitId": "category-form:204:16:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:246:10:6": {
+      "unitId": "category-form:246:10:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:52:14:4": {
+      "unitId": "category-form:52:14:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:82:2:7": {
+      "unitId": "category-form:82:2:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:48:3:9": {
+      "unitId": "category-form:48:3:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:101:1:6": {
+      "unitId": "category-form:101:1:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:255:16:9": {
+      "unitId": "category-form:255:16:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:58:10:8": {
+      "unitId": "category-form:58:10:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:90:9:8": {
+      "unitId": "category-form:90:9:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:14:4:9": {
+      "unitId": "category-form:14:4:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:230:14:5": {
+      "unitId": "category-form:230:14:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:7:14:4": {
+      "unitId": "category-form:7:14:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:36:9:7": {
+      "unitId": "category-form:36:9:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:71:1:6": {
+      "unitId": "category-form:71:1:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:45:14:5": {
+      "unitId": "category-form:45:14:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:43:16:7": {
+      "unitId": "category-form:43:16:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:255:16:6": {
+      "unitId": "category-form:255:16:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:150:4:6": {
+      "unitId": "category-form:150:4:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:120:16:6": {
+      "unitId": "category-form:120:16:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:411:2:6": {
+      "unitId": "category-form:411:2:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:391:1:9": {
+      "unitId": "category-form:391:1:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:523:10:7": {
+      "unitId": "category-form:523:10:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:98:9:8": {
+      "unitId": "category-form:98:9:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:203:14:4": {
+      "unitId": "category-form:203:14:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:510:16:4": {
+      "unitId": "category-form:510:16:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:38:3:4": {
+      "unitId": "category-form:38:3:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:3:9:7": {
+      "unitId": "category-form:3:9:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:149:1:9": {
+      "unitId": "category-form:149:1:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:239:3:7": {
+      "unitId": "category-form:239:3:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:9:14:7": {
+      "unitId": "category-form:9:14:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:390:1:6": {
+      "unitId": "category-form:390:1:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:449:1:6": {
+      "unitId": "category-form:449:1:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:549:1:7": {
+      "unitId": "category-form:549:1:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:264:14:6": {
+      "unitId": "category-form:264:14:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:538:2:4": {
+      "unitId": "category-form:538:2:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:280:1:5": {
+      "unitId": "category-form:280:1:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:523:16:4": {
+      "unitId": "category-form:523:16:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:227:10:7": {
+      "unitId": "category-form:227:10:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:120:2:5": {
+      "unitId": "category-form:120:2:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:46:4:5": {
+      "unitId": "category-form:46:4:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:80:9:8": {
+      "unitId": "category-form:80:9:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:531:3:6": {
+      "unitId": "category-form:531:3:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:167:14:4": {
+      "unitId": "category-form:167:14:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:274:10:7": {
+      "unitId": "category-form:274:10:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:422:16:7": {
+      "unitId": "category-form:422:16:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:481:1:9": {
+      "unitId": "category-form:481:1:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:462:16:5": {
+      "unitId": "category-form:462:16:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:267:9:8": {
+      "unitId": "category-form:267:9:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:464:4:5": {
+      "unitId": "category-form:464:4:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:438:10:4": {
+      "unitId": "category-form:438:10:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:195:2:4": {
+      "unitId": "category-form:195:2:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:222:14:8": {
+      "unitId": "category-form:222:14:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:189:16:5": {
+      "unitId": "category-form:189:16:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:399:2:4": {
+      "unitId": "category-form:399:2:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:40:2:5": {
+      "unitId": "category-form:40:2:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:557:1:9": {
+      "unitId": "category-form:557:1:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:69:4:7": {
+      "unitId": "category-form:69:4:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:442:9:7": {
+      "unitId": "category-form:442:9:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:105:2:5": {
+      "unitId": "category-form:105:2:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:422:4:4": {
+      "unitId": "category-form:422:4:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:238:16:5": {
+      "unitId": "category-form:238:16:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:471:10:8": {
+      "unitId": "category-form:471:10:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:226:1:5": {
+      "unitId": "category-form:226:1:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:235:14:4": {
+      "unitId": "category-form:235:14:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:446:16:8": {
+      "unitId": "category-form:446:16:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:115:1:8": {
+      "unitId": "category-form:115:1:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:102:9:7": {
+      "unitId": "category-form:102:9:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:456:10:6": {
+      "unitId": "category-form:456:10:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:560:2:7": {
+      "unitId": "category-form:560:2:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:44:10:9": {
+      "unitId": "category-form:44:10:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:93:4:5": {
+      "unitId": "category-form:93:4:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:511:16:9": {
+      "unitId": "category-form:511:16:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:257:4:9": {
+      "unitId": "category-form:257:4:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:255:10:4": {
+      "unitId": "category-form:255:10:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:53:4:7": {
+      "unitId": "category-form:53:4:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:148:14:4": {
+      "unitId": "category-form:148:14:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:191:16:9": {
+      "unitId": "category-form:191:16:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:526:16:9": {
+      "unitId": "category-form:526:16:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    }
+  }
+}

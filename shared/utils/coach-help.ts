@@ -15,15 +15,40 @@ export function coachHelpBlockTitle(block: CoachHelpBlock): string {
   return block.title.trim() || DEFAULT_TITLES[block.type]
 }
 
-export function defaultCoachHelpBlocks(): CoachHelpBlock[] {
-  return []
+export function automaticCoachHelpApproach(help?: CoachHelpTemplate | null): CoachExplanationApproach {
+  return help?.blocks.find(block => block.content.trim() === '{contextualBaseHelp}')?.explanationApproach
+    || help?.blocks.find(block => COACH_EXPLANATION_APPROACHES.includes(block.explanationApproach))?.explanationApproach
+    || 'cif-falc'
+}
+
+/** Structure entièrement pilotée par le moteur grammatical. */
+export function defaultCoachHelpBlocks(approach: CoachExplanationApproach = 'cif-falc'): CoachHelpBlock[] {
+  return [
+    {
+      id: -8_001,
+      type: 'normal',
+      title: 'Définition',
+      content: '{definitionHelp}',
+      explanationApproach: approach,
+      isActive: true,
+      sortOrder: 1,
+      children: [],
+    },
+    {
+      id: -8_002,
+      type: 'normal',
+      title: '',
+      content: '{contextualBaseHelp}',
+      explanationApproach: approach,
+      isActive: true,
+      sortOrder: 2,
+      children: [],
+    },
+  ]
 }
 
 export function visibleCoachHelpBlocks(help?: CoachHelpTemplate | null): CoachHelpBlock[] {
-  const configured = help?.status === 'published'
-    ? help.blocks.filter(block => block.isActive).sort((left, right) => left.sortOrder - right.sortOrder)
-    : []
-  return configured.length ? configured : defaultCoachHelpBlocks()
+  return defaultCoachHelpBlocks(automaticCoachHelpApproach(help))
 }
 
 const AUTOMATIC_LETTER_G_HELP_ID = -9_001
@@ -48,6 +73,46 @@ function bareHelpInfinitive(value = ''): string {
   return value.trim().toLocaleLowerCase('fr').replace(/^(?:se\s+|s[’']\s*)/u, '')
 }
 
+function helpSubjectKey(value: string) {
+  const subject = normalizedGrammar(value).replace(/^(?:que\s+|qu[’'])/u, '')
+  if (/^(?:je|j')/u.test(subject)) return 'je'
+  if (/^tu\b/u.test(subject)) return 'tu'
+  if (/^(?:il|elle|on|ils|elles)\b/u.test(subject)) return subject.match(/^(?:il|elle|on|ils|elles)/u)?.[0] || subject
+  if (/^nous\b/u.test(subject)) return 'nous'
+  if (/^vous\b/u.test(subject)) return 'vous'
+  return subject
+}
+
+function helpStartsWithVowelSound(value: string) {
+  const first = normalizedGrammar(value).charAt(0)
+  return 'aeiouy'.includes(first)
+}
+
+function displayedHelpConjugatedForm(subject: string, form: string, infinitive: string) {
+  const cleanSubject = subject.trim()
+  const cleanForm = form.trim()
+  if (!cleanSubject) return cleanForm.replace(/^./u, letter => letter.toLocaleUpperCase('fr'))
+  const pronominal = /^(?:se\s+|s['’])/iu.test(infinitive.trim())
+  if (pronominal) {
+    const key = helpSubjectKey(cleanSubject)
+    const reflexive = key === 'je'
+      ? helpStartsWithVowelSound(cleanForm) ? 'm’' : 'me'
+      : key === 'tu'
+        ? helpStartsWithVowelSound(cleanForm) ? 't’' : 'te'
+        : ['il', 'elle', 'on', 'ils', 'elles'].includes(key)
+          ? helpStartsWithVowelSound(cleanForm) ? 's’' : 'se'
+          : key === 'nous'
+            ? 'nous'
+            : key === 'vous'
+              ? 'vous'
+              : ''
+    const separator = reflexive.endsWith('’') ? '' : ' '
+    return `${cleanSubject} ${reflexive}${separator}${cleanForm}`.replace(/^./u, letter => letter.toLocaleUpperCase('fr'))
+  }
+  if (helpSubjectKey(cleanSubject) === 'je' && helpStartsWithVowelSound(cleanForm)) return `J’${cleanForm}`
+  return `${cleanSubject} ${cleanForm}`.replace(/^./u, letter => letter.toLocaleUpperCase('fr'))
+}
+
 function automaticLetterBlock(id: number, title: string, content: string): CoachHelpBlock {
   return {
     id,
@@ -61,37 +126,49 @@ function automaticLetterBlock(id: number, title: string, content: string): Coach
   }
 }
 
-function letterGHelp(verb: string): CoachHelpBlock {
+function visibleHelpText(value = '') {
+  return value
+    .replace(/<[^>]+>/gu, ' ')
+    .replace(/\s+/gu, ' ')
+    .trim()
+}
+
+function letterGHelp(verb: string, answerText = ''): CoachHelpBlock {
   const escapedVerb = escapedCoachText(verb)
-  const stem = verb.slice(0, -2)
   const contextualExample = verb.endsWith('ger')
-    ? `<p><strong>Avec ${escapedVerb} :</strong> on écrit <strong>nous ${escapedCoachText(`${stem}eons`)}</strong> et <strong>il ${escapedCoachText(`${stem}eait`)}</strong> pour garder le son « j ». Devant <strong>i</strong>, le g fait déjà le son « j » : <strong>nous ${escapedCoachText(`${stem}ions`)}</strong>.</p>`
-    : `<p><strong>Avec ${escapedVerb} :</strong> le <strong>u</strong> reste dans les formes du verbe : <strong>nous ${escapedCoachText(`${stem}ons`)}</strong>, <strong>je ${escapedCoachText(`${stem}ais`)}</strong>, <strong>nous ${escapedCoachText(`${stem}ions`)}</strong>.</p>`
+    ? /pas besoin de e|suivie de i/iu.test(visibleHelpText(answerText))
+      ? `<p><strong>Avec ${escapedVerb} :</strong> devant <strong>i</strong>, le <strong>g</strong> fait déjà le son « j ». Le <strong>e</strong> n’est donc pas utile dans cette réponse.</p>`
+      : `<p><strong>Avec ${escapedVerb} :</strong> on écrit <strong>ge</strong> devant <strong>a</strong> ou <strong>o</strong> pour garder le son « j ».</p>`
+    : `<p><strong>Avec ${escapedVerb} :</strong> le <strong>u</strong> après <strong>g</strong> garde le son « g ».</p>`
+  const rule = verb.endsWith('ger')
+    ? `<p>La lettre <strong>g</strong> fait le son « j » devant <strong>e</strong>, <strong>i</strong> ou <strong>y</strong>.</p>${contextualExample}`
+    : `<p>La lettre <strong>g</strong> peut faire le son « j » devant <strong>e</strong>, <strong>i</strong> ou <strong>y</strong>.</p><p>Pour garder le son « g », on ajoute souvent un <strong>u</strong> muet : <em>guitare</em>, <em>guerre</em>.</p>${contextualExample}`
 
   return automaticLetterBlock(
     AUTOMATIC_LETTER_G_HELP_ID,
     'La lettre G',
-    `<p><strong>La lettre g peut faire deux sons.</strong></p><table><tbody><tr><th>Le son « g »</th><td>gare · gomme · légume · grimper</td></tr><tr><th>Devant e, i ou y : le son « j »</th><td>rouge · girafe · gymnase</td></tr><tr><th>Pour garder le son « g » devant e, i ou y</th><td>Ajoute un u muet : bague · guerre · guitare</td></tr></tbody></table>${contextualExample}`,
+    rule,
   )
 }
 
 function letterCHelp(verb: string): CoachHelpBlock {
   const escapedVerb = escapedCoachText(verb)
-  const stem = verb.slice(0, -2)
-  const cedillaStem = stem.endsWith('c') ? `${stem.slice(0, -1)}ç` : stem
   return automaticLetterBlock(
     AUTOMATIC_LETTER_C_HELP_ID,
     'La lettre C et la cédille',
-    `<p><strong>La lettre c peut faire deux sons.</strong></p><table><tbody><tr><th>Le son « k »</th><td>café · colle · cube · courir</td></tr><tr><th>Devant e, i ou y : le son « s »</th><td>cerise · citron · cygne</td></tr><tr><th>Pour garder le son « s » devant a, o ou u</th><td>Ajoute une cédille : ça · garçon · reçu</td></tr></tbody></table><p><strong>Avec ${escapedVerb} :</strong> on écrit <strong>nous ${escapedCoachText(`${cedillaStem}ons`)}</strong> et <strong>il ${escapedCoachText(`${cedillaStem}ait`)}</strong>. Devant <strong>i</strong>, le c fait déjà le son « s » : <strong>nous ${escapedCoachText(`${stem}ions`)}</strong>.</p>`,
+    `<p><strong>La lettre c peut faire deux sons.</strong></p><table><tbody><tr><th>Le son « k »</th><td>café · colle · cube · courir</td></tr><tr><th>Devant e, i ou y : le son « s »</th><td>cerise · citron · cygne</td></tr><tr><th>Pour garder le son « s » devant a, o ou u</th><td>Ajoute une cédille : ça · garçon · reçu</td></tr></tbody></table><p><strong>Avec ${escapedVerb} :</strong> la cédille sert seulement devant <strong>a</strong>, <strong>o</strong> ou <strong>u</strong>.</p>`,
   )
 }
 
 /** Blocs de lecture ajoutés en fin d’aide seulement lorsque l’orthographe du verbe les rend utiles. */
-export function automaticOrthographyHelpBlocks(values: Pick<CoachHelpContentValues, 'verb'>): CoachHelpBlock[] {
+export function automaticOrthographyHelpBlocks(values: Pick<CoachHelpContentValues, 'verb'> & Partial<Pick<CoachHelpContentValues, 'correctAnswers' | 'contextualBaseHelp'>>): CoachHelpBlock[] {
   const verb = bareHelpInfinitive(values.verb)
+  const text = `${values.correctAnswers || ''} ${visibleHelpText(values.contextualBaseHelp || '')}`
+  const normalizedText = text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLocaleLowerCase('fr')
   if (!verb) return []
-  if (verb.endsWith('ger') || verb.endsWith('guer')) return [letterGHelp(verb)]
-  if (verb.endsWith('cer')) return [letterCHelp(verb)]
+  if (verb.endsWith('ger') && (/\b\p{L}*ge[ao]\p{L}*/iu.test(text) || /pas besoin de e|lettre g est suivie de i/u.test(normalizedText))) return [letterGHelp(verb, text)]
+  if (verb.endsWith('guer') && /\b\p{L}*gu\p{L}*/iu.test(text)) return [letterGHelp(verb, text)]
+  if (verb.endsWith('cer') && (/\b\p{L}*ç[ao]\p{L}*/iu.test(text) || /cedille ne sert pas|ç redevient c/u.test(normalizedText))) return [letterCHelp(verb)]
   return []
 }
 
@@ -238,7 +315,7 @@ export function buildReferenceFormHelpHtml(question: ExerciseQuestion, verb?: Ve
   const targetContext = strongContext(tenseName, modeName)
   if (reference?.kind === 'infinitive') {
     const displayedForm = reference.form.replace(/^./u, letter => letter.toLocaleUpperCase('fr'))
-    return `<p>Pour conjuguer le verbe <strong>${escapedCoachText(infinitive)}</strong> ${targetContext}, pars de son <strong>infinitif</strong>.</p><p>La forme repère est <mark><strong><i>♥</i> ${escapedCoachText(displayedForm)}</strong></mark>.</p>`
+    return `<p>Pour conjuguer le verbe <strong>${escapedCoachText(infinitive)}</strong> ${targetContext}, pars de son <strong>infinitif</strong>.</p><p>La forme repère est <mark><strong>${escapedCoachText(displayedForm)}</strong></mark>.</p>`
   }
   if (reference?.kind === 'memorized-stem') {
     return `<p>Pour conjuguer le verbe <strong>${escapedCoachText(infinitive)}</strong> ${targetContext}, apprends son <strong>radical particulier</strong>.</p><p>Le radical à retenir est <mark><strong>${escapedCoachText(reference.form)}</strong></mark>.</p>`
@@ -250,11 +327,12 @@ export function buildReferenceFormHelpHtml(question: ExerciseQuestion, verb?: Ve
   if (reference?.form && referenceSubject) {
     const sameContext = normalizedGrammar(referenceMode) === normalizedGrammar(modeName)
       && normalizedGrammar(referenceTense) === normalizedGrammar(tenseName)
+    const referenceContext = strongContext(referenceTense, referenceMode)
     const instruction = sameContext
-      ? `Apprends par cœur la forme du verbe <strong>${escapedCoachText(infinitive)}</strong> ${targetContext} avec le pronom <strong>${escapedCoachText(referenceSubject)}</strong> :`
-      : `Pour conjuguer le verbe <strong>${escapedCoachText(infinitive)}</strong> ${targetContext}, apprends par cœur sa forme repère avec le pronom <strong>${escapedCoachText(referenceSubject)}</strong> :`
-    const displayedForm = `${referenceSubject} ${reference.form}`.replace(/^./u, letter => letter.toLocaleUpperCase('fr'))
-    return `<p>${instruction}</p><p><mark><strong><i>♥</i> ${escapedCoachText(displayedForm)}</strong></mark></p>`
+      ? `Voici la forme repère du verbe <strong>${escapedCoachText(infinitive)}</strong> ${referenceContext}. Apprends-la par cœur, c’est très utile :`
+      : `Pour conjuguer le verbe <strong>${escapedCoachText(infinitive)}</strong> ${targetContext}, utilise sa forme repère ${referenceContext}. Apprends-la par cœur, c’est très utile :`
+    const displayedForm = displayedHelpConjugatedForm(referenceSubject, reference.form, infinitive)
+    return `<p>${instruction}</p><p><mark><strong>${escapedCoachText(displayedForm)}</strong></mark></p>`
   }
 
   const subject = (question.pronom || question.saisiePrefixe || '').trim()

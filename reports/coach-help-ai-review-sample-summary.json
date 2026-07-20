@@ -1,0 +1,2041 @@
+{
+  "schemaVersion": 1,
+  "sample": true,
+  "reviewVersion": "semantic-ai-review-v2",
+  "generatedAt": "2026-07-20T11:51:49.760Z",
+  "help": {
+    "id": 1,
+    "name": "Pour allophones",
+    "updatedAt": "2026-07-19T13:26:28.000Z",
+    "fingerprint": "cded11672c6097d9ef008788e0f3576c6742a063d7e7b0ddca650f27a22209e9"
+  },
+  "selection": {
+    "categoryForms": 60,
+    "seed": "2026-07-20",
+    "availableCases": 3505,
+    "availableCategories": 88,
+    "coveredCategories": 88,
+    "categories": [
+      "family:cer",
+      "family:dre-tre",
+      "family:eler-eter",
+      "family:er-alternance",
+      "family:er-regulier",
+      "family:ger",
+      "family:ir-issant",
+      "family:irregulier",
+      "family:mettre-battre",
+      "family:ouvrir-cueillir",
+      "family:prendre",
+      "family:troisieme-ir",
+      "family:troisieme-oir",
+      "family:venir-tenir",
+      "family:voir-recevoir",
+      "family:yer",
+      "form:compound",
+      "form:simple",
+      "layer:irregular",
+      "layer:sample",
+      "layer:suspicious",
+      "mode:conditionnel",
+      "mode:imperatif",
+      "mode:indicatif",
+      "mode:subjonctif",
+      "person:il",
+      "person:ils",
+      "person:je",
+      "person:nous",
+      "person:tu",
+      "person:vous",
+      "queue:sample",
+      "queue:suspicious",
+      "risk:auxiliary-choice",
+      "risk:cedilla",
+      "risk:cod-before",
+      "risk:compound-auxiliary",
+      "risk:conditional-future-stem",
+      "risk:e-accent-alternation",
+      "risk:elision-je",
+      "risk:empty-ending",
+      "risk:future-stem",
+      "risk:imperative",
+      "risk:imperative-no-subject-pronoun",
+      "risk:imperative-tu-s",
+      "risk:letter-c",
+      "risk:letter-g",
+      "risk:memorized",
+      "risk:past-participle-agreement",
+      "risk:past-simple-reference",
+      "risk:present-ils-reference",
+      "risk:present-nous-reference",
+      "risk:pronominal",
+      "risk:reflexive-pronoun",
+      "risk:subjunctive-imperfect",
+      "risk:subjunctive-present-two-stems",
+      "risk:target-cedilla",
+      "risk:target-ge",
+      "risk:third-group-ending",
+      "risk:venir-tenir",
+      "spelling:cer",
+      "spelling:ger",
+      "spelling:guer",
+      "strategy:compound-être",
+      "strategy:future-reference",
+      "strategy:future-stem-remove-ending",
+      "strategy:infinitive-remove-ending",
+      "strategy:memorized-paradigm",
+      "strategy:no-reference-none",
+      "strategy:nous-present-same-person",
+      "strategy:past-simple-il-remove-ending",
+      "strategy:present-ils-remove-ending",
+      "strategy:present-nous-remove-ending",
+      "strategy:regular-infinitive",
+      "strategy:regular-re",
+      "strategy:tu-present-same-person",
+      "strategy:two-stems-present-ils",
+      "strategy:two-stems-present-nous",
+      "strategy:vous-present-same-person",
+      "tense:conditionnel:present",
+      "tense:imperatif:passe",
+      "tense:imperatif:present",
+      "tense:indicatif:futur",
+      "tense:indicatif:imparfait",
+      "tense:indicatif:passe simple",
+      "tense:indicatif:present",
+      "tense:subjonctif:imparfait",
+      "tense:subjonctif:present"
+    ]
+  },
+  "units": {
+    "total": 60,
+    "reviewed": 60,
+    "remaining": 0,
+    "approved": 46,
+    "rejected": 14
+  },
+  "rejected": [
+    {
+      "unit": {
+        "id": "category-form:27:18:5",
+        "kind": "category-form",
+        "layers": [
+          "irregular",
+          "suspicious",
+          "category-form"
+        ],
+        "key": "27:18:5",
+        "verbId": 27,
+        "verb": "naître",
+        "mode": "impératif",
+        "tense": "passé",
+        "person": "tu",
+        "expected": "aie né",
+        "signature": "imperatif|passe|compound|p1|compound-être|none|dre-tre",
+        "categories": [
+          "family:dre-tre",
+          "form:compound",
+          "layer:irregular",
+          "layer:suspicious",
+          "mode:imperatif",
+          "person:tu",
+          "queue:suspicious",
+          "risk:auxiliary-choice",
+          "risk:cod-before",
+          "risk:compound-auxiliary",
+          "risk:imperative",
+          "risk:past-participle-agreement",
+          "risk:third-group-ending",
+          "strategy:compound-être",
+          "tense:imperatif:passe"
+        ],
+        "html": "<section><h3>Définition</h3><p><strong>naître</strong> = Commencer sa vie en sortant du ventre de sa mère ou d’un œuf.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Quel verbe auxiliaire pour naître ?</strong><p><mark><strong>Avoir</strong></mark></p><p><kbd>Être</kbd></p></blockquote><details><summary>présent du verbe avoir</summary><table><tbody><tr><th><strong>tu</strong></th><td><mark><strong>aie</strong></mark></td></tr><tr><th><strong>nous</strong></th><td><strong>ayons</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>ayez</strong></td></tr></tbody></table></details><blockquote><strong>Le participe passé de naître</strong><p><mark><strong>Né</strong></mark></p></blockquote></figure><figure><figcaption>Réponse</figcaption><ol><li>Conjugue le verbe auxiliaire <strong>avoir</strong> au présent de l’impératif avec <strong>tu</strong> :<br><mark><strong>aie</strong></mark></li><li>Ajoute le participe passé :<br><mark><strong>Né</strong></mark></li><li>Vérifie l’accord du participe passé. Regarde plus bas pour plus de détails.</li></ol><blockquote><strong>Résultat</strong><p><mark><strong>aie né</strong></mark></p></blockquote></figure><figure><figcaption>Accord du participe passé</figcaption><blockquote><strong>Cas général</strong><p>Avec l’auxiliaire <strong>être</strong>, le participe passé s’accorde avec le sujet.</p><p><em>Elle est arrivée. · Ils sont arrivés.</em></p><p>Avec l’auxiliaire <strong>avoir</strong>, le participe passé ne s’accorde pas avec le sujet.</p><p><em>Elle a mangé. · Ils ont mangé.</em></p></blockquote><blockquote><strong>Avec avoir : le COD est placé avant le verbe</strong><p>Le participe passé s’accorde avec le complément d’objet direct placé avant le verbe.</p><p><em>Les pommes qu’elle a mangées. · Les livres qu’il a lus.</em></p></blockquote></figure></section>"
+      },
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "wrong_auxiliary",
+          "severity": "error",
+          "detail": "Le verbe « naître » se conjugue avec l’auxiliaire « être », pas avec « avoir ». La forme « aie né » est donc fausse.",
+          "suggestion": "Remplacer par « sois né » pour un sujet masculin, ou « sois née » pour un sujet féminin, et expliquer que le participe passé s’accorde avec le sujet avec « être »."
+        }
+      ]
+    },
+    {
+      "unit": {
+        "id": "category-form:246:10:6",
+        "kind": "category-form",
+        "layers": [
+          "sample",
+          "category-form"
+        ],
+        "key": "246:10:6",
+        "verbId": 246,
+        "verb": "se souvenir",
+        "mode": "subjonctif",
+        "tense": "présent",
+        "person": "il",
+        "expected": "se souvienne",
+        "signature": "subjonctif|present|simple|p2|two-stems-present-ils|none|venir-tenir",
+        "categories": [
+          "family:venir-tenir",
+          "form:simple",
+          "layer:sample",
+          "mode:subjonctif",
+          "person:il",
+          "queue:sample",
+          "risk:present-ils-reference",
+          "risk:pronominal",
+          "risk:subjunctive-present-two-stems",
+          "risk:venir-tenir",
+          "strategy:two-stems-present-ils",
+          "tense:subjonctif:present"
+        ],
+        "html": "<section><h3>Définition</h3><p><strong>se souvenir</strong> = Garder ou retrouver une information dans sa mémoire.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Deux formes repères</strong><p>Apprends ces deux formes. Elles permettent de construire toutes les personnes du subjonctif présent.</p><p>Pour <strong>que je, que tu, qu’il / elle / on</strong> et <strong>qu’ils / elles</strong>, pars de la forme avec <strong>ils</strong> au présent de l’indicatif :</p><p><mark><strong>Ils souviennent</strong></mark></p><p>Pour <strong>que nous</strong> et <strong>que vous</strong>, pars de la forme avec <strong>nous</strong> au présent de l’indicatif :</p><p><mark><strong>Nous souvenons</strong></mark></p></blockquote><blockquote><strong>Terminaisons du subjonctif présent</strong><table><tbody><tr><th><strong>que je</strong></th><td><strong>-e</strong></td></tr><tr><th><strong>que tu</strong></th><td><strong>-es</strong></td></tr><tr><th><strong>qu’il / elle / on</strong></th><td><samp>-e</samp></td></tr><tr><th><strong>que nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>que vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>qu’ils / elles</strong></th><td><strong>-ent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Pars de la forme avec <strong>ils</strong> au présent de l’indicatif :<br><mark><strong>Ils souviennent</strong></mark></li><li>Enlève <kbd>-ent</kbd> : il reste le radical <var>souvienn-</var>.</li><li>Ajoute <samp>-e</samp>.</li></ol><blockquote><strong>Résultat</strong><p><span><var>souvienn</var><samp>e</samp></span></p></blockquote></figure></section>"
+      },
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "missing_reflexive_pronoun",
+          "severity": "error",
+          "detail": "La réponse construite est « souvienne », mais le verbe demandé est pronominal : « se souvenir ». Il faut inclure le pronom réfléchi adapté à « il ».",
+          "suggestion": "Afficher le résultat complet « qu’il se souvienne » ou, pour la forme verbale seule, « se souvienne ». Les formes repères devraient aussi être « ils se souviennent » et « nous nous souvenons »."
+        }
+      ]
+    },
+    {
+      "unit": {
+        "id": "category-form:396:4:6",
+        "kind": "category-form",
+        "layers": [
+          "irregular",
+          "suspicious",
+          "category-form"
+        ],
+        "key": "396:4:6",
+        "verbId": 396,
+        "verb": "présenter",
+        "mode": "indicatif",
+        "tense": "passé simple",
+        "person": "il",
+        "expected": "présentai",
+        "signature": "indicatif|passe simple|simple|p2|no-reference-none|none|er-alternance",
+        "categories": [
+          "family:er-alternance",
+          "form:simple",
+          "layer:irregular",
+          "layer:suspicious",
+          "mode:indicatif",
+          "person:il",
+          "queue:suspicious",
+          "risk:e-accent-alternation",
+          "strategy:no-reference-none",
+          "tense:indicatif:passe simple"
+        ],
+        "html": "<section><h3>Définition</h3><p><strong>présenter</strong> = Montrer une personne, une chose ou une idée à d’autres personnes.</p></section><section><ol><li>Pars de l’infinitif <strong>présenter</strong>.</li><li>Ce verbe change beaucoup : il n’a pas toujours le même radical.</li><li>Apprends cette forme comme un modèle :<br><mark><strong>Présentai</strong></mark></li></ol></section>"
+      },
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "person_form_mismatch",
+          "severity": "error",
+          "detail": "Pour « il » au passé simple de l’indicatif, la forme correcte est « présenta ». « Présentai » correspond à « je ».",
+          "suggestion": "Remplacer la forme attendue et le résultat par « présenta » : « il présenta »."
+        }
+      ]
+    },
+    {
+      "unit": {
+        "id": "category-form:408:10:6",
+        "kind": "category-form",
+        "layers": [
+          "irregular",
+          "suspicious",
+          "category-form"
+        ],
+        "key": "408:10:6",
+        "verbId": 408,
+        "verb": "s'habiller",
+        "mode": "subjonctif",
+        "tense": "présent",
+        "person": "il",
+        "expected": "s'habilles",
+        "signature": "subjonctif|present|simple|p2|memorized-paradigm|none|er-regulier",
+        "categories": [
+          "family:er-regulier",
+          "form:simple",
+          "layer:irregular",
+          "layer:suspicious",
+          "mode:subjonctif",
+          "person:il",
+          "queue:suspicious",
+          "risk:memorized",
+          "risk:pronominal",
+          "strategy:memorized-paradigm",
+          "tense:subjonctif:present"
+        ],
+        "html": "<section><h3>Définition</h3><p><strong>s&#39;habiller</strong> = Mettre ses vêtements.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Formes particulières du subjonctif présent</strong><p>Le verbe <strong>s&#39;habiller</strong> est irrégulier ici. Les formes avec <strong>ils</strong> et <strong>nous</strong> au présent de l’indicatif ne suffisent pas pour construire sûrement toutes les personnes.</p><table><tbody><tr><th><strong>qu’il / elle / on</strong></th><td><mark><strong>Habilles</strong></mark></td></tr></tbody></table></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Repère la personne demandée.</li><li>Choisis la forme du subjonctif présent dans le tableau et apprends-la par cœur.</li></ol><blockquote><strong>Résultat</strong><p><mark><strong>Habilles</strong></mark></p></blockquote></figure></section>"
+      },
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "wrong_subjunctive_form",
+          "severity": "error",
+          "detail": "« S’habiller » n’est pas irrégulier au subjonctif présent. Pour « qu’il », la forme correcte est « s’habille », sans s final, avec le pronom réfléchi.",
+          "suggestion": "Remplacer par « qu’il s’habille » ou, pour la forme verbale seule, « s’habille ». Expliquer la règle régulière : radical « habill- » + terminaison « -e »."
+        }
+      ]
+    },
+    {
+      "unit": {
+        "id": "category-form:407:10:7",
+        "kind": "category-form",
+        "layers": [
+          "sample",
+          "category-form"
+        ],
+        "key": "407:10:7",
+        "verbId": 407,
+        "verb": "s'endormir",
+        "mode": "subjonctif",
+        "tense": "présent",
+        "person": "nous",
+        "expected": "nous endormions",
+        "signature": "subjonctif|present|simple|p3|two-stems-present-nous|none|troisieme-ir",
+        "categories": [
+          "family:troisieme-ir",
+          "form:simple",
+          "layer:sample",
+          "mode:subjonctif",
+          "person:nous",
+          "queue:sample",
+          "risk:present-nous-reference",
+          "risk:pronominal",
+          "risk:subjunctive-present-two-stems",
+          "strategy:two-stems-present-nous",
+          "tense:subjonctif:present"
+        ],
+        "html": "<section><h3>Définition</h3><p><strong>s&#39;endormir</strong> = Commencer à dormir.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Deux formes repères</strong><p>Apprends ces deux formes. Elles permettent de construire toutes les personnes du subjonctif présent.</p><p>Pour <strong>que je, que tu, qu’il / elle / on</strong> et <strong>qu’ils / elles</strong>, pars de la forme avec <strong>ils</strong> au présent de l’indicatif :</p><p><mark><strong>Ils endorment</strong></mark></p><p>Pour <strong>que nous</strong> et <strong>que vous</strong>, pars de la forme avec <strong>nous</strong> au présent de l’indicatif :</p><p><mark><strong>Nous endormons</strong></mark></p></blockquote><blockquote><strong>Terminaisons du subjonctif présent</strong><table><tbody><tr><th><strong>que je</strong></th><td><strong>-e</strong></td></tr><tr><th><strong>que tu</strong></th><td><strong>-es</strong></td></tr><tr><th><strong>qu’il / elle / on</strong></th><td><strong>-e</strong></td></tr><tr><th><strong>que nous</strong></th><td><samp>-ions</samp></td></tr><tr><th><strong>que vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>qu’ils / elles</strong></th><td><strong>-ent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Pars de la forme avec <strong>nous</strong> au présent de l’indicatif :<br><mark><strong>Nous endormons</strong></mark></li><li>Enlève <kbd>-ons</kbd> : il reste le radical <var>endorm-</var>.</li><li>Ajoute <samp>-ions</samp>.</li></ol><blockquote><strong>Résultat</strong><p><span><var>endorm</var><samp>ions</samp></span></p></blockquote></figure></section>"
+      },
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "wrong_reflexive_pronoun",
+          "severity": "error",
+          "detail": "Avec le verbe pronominal « s’endormir », la personne « nous » exige le pronom réfléchi « nous ». La forme « nous endormions » n’est pas correcte pour « s’endormir ».",
+          "suggestion": "Remplacer par « nous nous endormions » et utiliser les formes repères « ils s’endorment » et « nous nous endormons »."
+        }
+      ]
+    },
+    {
+      "unit": {
+        "id": "category-form:119:14:5",
+        "kind": "category-form",
+        "layers": [
+          "sample",
+          "category-form"
+        ],
+        "key": "119:14:5",
+        "verbId": 119,
+        "verb": "déchoir",
+        "mode": "conditionnel",
+        "tense": "présent",
+        "person": "tu",
+        "expected": "déchoirais",
+        "signature": "conditionnel|present|simple|p1|regular-infinitive|none|troisieme-oir",
+        "categories": [
+          "family:troisieme-oir",
+          "form:simple",
+          "layer:sample",
+          "mode:conditionnel",
+          "person:tu",
+          "queue:sample",
+          "risk:conditional-future-stem",
+          "risk:e-accent-alternation",
+          "strategy:regular-infinitive",
+          "tense:conditionnel:present"
+        ],
+        "html": "<section><h3>Définition</h3><p><strong>déchoir</strong> = Perdre une position, un droit ou une qualité.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>La formule</strong><p><strong>Conditionnel présent</strong> = <var>radical du futur-</var> + <samp>terminaisons de l’imparfait</samp>.</p></blockquote><blockquote><strong>Terminaisons de l’imparfait</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>tu</strong></th><td><samp>-ais</samp></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-ait</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-aient</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical du futur</figcaption><ol><li>Pars de l’infinitif : <strong>déchoir</strong>.</li><li>Garde tout l’infinitif : le radical du futur est <var>déchoir-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute la terminaison de l’imparfait <samp>-ais</samp> au radical du futur <var>déchoir-</var> :</p><b><span><var>déchoir</var><samp>ais</samp></span><i>✓</i></b></blockquote></figure></section>"
+      },
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "wrong_future_stem_dechoir",
+          "severity": "error",
+          "detail": "Le conditionnel de « déchoir » ne se construit pas régulièrement sur l’infinitif « déchoir- » dans l’usage de référence. La forme attendue devrait être « tu décherrais », avec le radical du futur « décherr- ».",
+          "suggestion": "Remplacer la réponse par « décherrais » et enseigner ce verbe comme irrégulier : futur « je décherrai », conditionnel « tu décherrais »."
+        }
+      ]
+    },
+    {
+      "unit": {
+        "id": "category-form:545:9:7",
+        "kind": "category-form",
+        "layers": [
+          "sample",
+          "category-form"
+        ],
+        "key": "545:9:7",
+        "verbId": 545,
+        "verb": "denicher",
+        "mode": "impératif",
+        "tense": "présent",
+        "person": "nous",
+        "expected": "denichons",
+        "signature": "imperatif|present|simple|p3|nous-present-same-person|none|er-regulier",
+        "categories": [
+          "family:er-regulier",
+          "form:simple",
+          "layer:sample",
+          "mode:imperatif",
+          "person:nous",
+          "queue:sample",
+          "risk:imperative",
+          "risk:imperative-no-subject-pronoun",
+          "risk:imperative-tu-s",
+          "strategy:nous-present-same-person",
+          "tense:imperatif:present"
+        ],
+        "html": "<section><h3>Définition</h3><p><strong>denicher</strong> = Trouver une personne ou une chose difficile à trouver.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Présent de l’indicatif : tu, nous, vous</strong><p>Apprends par cœur ces trois formes. Elles servent de formes repères pour construire l’impératif.</p><details><summary>Consulter les formes avec tu, nous et vous</summary><table><tbody><tr><th><strong>tu</strong></th><td><mark><strong>Tu deniches</strong></mark></td></tr><tr><th><strong>nous</strong></th><td><mark><strong>Nous denichons</strong></mark></td></tr><tr><th><strong>vous</strong></th><td><mark><strong>Vous denichez</strong></mark></td></tr></tbody></table></details></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Avec <strong>nous</strong>, pars de la forme du présent de l’indicatif :<br><mark><strong>Nous denichons</strong></mark></li><li>Garde la forme verbale, mais n’écris pas le pronom sujet.</li></ol><blockquote><strong>Résultat</strong><p><mark><strong>Denichons</strong></mark></p></blockquote></figure><figure><figcaption>S ou pas s avec tu</figcaption><blockquote><strong>Verbes en -er</strong><p>En général, il n’y a pas de <strong>s</strong> : <em>tu manges → mange</em>.</p></blockquote><blockquote><strong>Autres verbes</strong><p>En général, le <strong>s</strong> reste : <em>tu finis → finis</em>, <em>tu prends → prends</em>.</p></blockquote><blockquote><strong>Exceptions</strong><p>Les verbes conjugués comme <strong>ouvrir</strong> ou <strong>cueillir</strong> n’ont pas de s : <em>ouvre</em>, <em>cueille</em>. <strong>Aller</strong> donne <em>va</em>.</p><p>Apprends aussi ces formes particulières : <strong>aie, ayons, ayez</strong> ; <strong>sois, soyons, soyez</strong> ; <strong>sache, sachons, sachez</strong> ; <strong>veuille, veuillons, veuillez</strong>.</p></blockquote><blockquote><strong>Devant en ou y</strong><p>Le <strong>s</strong> revient lorsque <strong>en</strong> ou <strong>y</strong> suit directement la forme : <em>manges-en</em>, <em>vas-y</em>, <em>cueilles-en</em>.</p></blockquote></figure></section>"
+      },
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "missing_required_accents",
+          "severity": "error",
+          "detail": "Le verbe français est « dénicher », pas « denicher ». Les formes « Tu deniches », « Nous denichons », « Vous denichez » et « Denichons » enseignent une orthographe sans accent incorrecte.",
+          "suggestion": "Corriger en « dénicher » : « Tu déniches », « Nous dénichons », « Vous dénichez », réponse « dénichons »."
+        }
+      ]
+    },
+    {
+      "unit": {
+        "id": "category-form:26:16:6",
+        "kind": "category-form",
+        "layers": [
+          "sample",
+          "category-form"
+        ],
+        "key": "26:16:6",
+        "verbId": 26,
+        "verb": "moudre",
+        "mode": "subjonctif",
+        "tense": "imparfait",
+        "person": "il",
+        "expected": "moulût",
+        "signature": "subjonctif|imparfait|simple|p2|past-simple-il-remove-ending|none|dre-tre",
+        "categories": [
+          "family:dre-tre",
+          "form:simple",
+          "layer:sample",
+          "mode:subjonctif",
+          "person:il",
+          "queue:sample",
+          "risk:past-simple-reference",
+          "risk:subjunctive-imperfect",
+          "risk:third-group-ending",
+          "strategy:past-simple-il-remove-ending",
+          "tense:subjonctif:imparfait"
+        ],
+        "html": "<section><h3>Définition</h3><p><strong>moudre</strong> = Réduire des grains ou un aliment en poudre.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>La forme demandée est justement la <strong>forme repère</strong> à l’imparfait du subjonctif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Il moulut</strong></mark></p></blockquote></figure></section>"
+      },
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "wrong_subjunctive_imperfect_reference",
+          "severity": "error",
+          "detail": "La forme affichée « Il moulut » est le passé simple de l’indicatif, pas l’imparfait du subjonctif. La forme attendue est « qu’il moulût » avec accent circonflexe.",
+          "suggestion": "Afficher « qu’il moulût » comme réponse, ou expliquer que l’imparfait du subjonctif se construit à partir du passé simple « il moulut » en remplaçant la finale par « -ût » pour cette forme."
+        }
+      ]
+    },
+    {
+      "unit": {
+        "id": "category-form:554:16:7",
+        "kind": "category-form",
+        "layers": [
+          "sample",
+          "category-form"
+        ],
+        "key": "554:16:7",
+        "verbId": 554,
+        "verb": "deverser",
+        "mode": "subjonctif",
+        "tense": "imparfait",
+        "person": "nous",
+        "expected": "deversassions",
+        "signature": "subjonctif|imparfait|simple|p3|past-simple-il-remove-ending|none|er-alternance",
+        "categories": [
+          "family:er-alternance",
+          "form:simple",
+          "layer:sample",
+          "mode:subjonctif",
+          "person:nous",
+          "queue:sample",
+          "risk:past-simple-reference",
+          "risk:subjunctive-imperfect",
+          "strategy:past-simple-il-remove-ending",
+          "tense:subjonctif:imparfait"
+        ],
+        "html": "<section><h3>Définition</h3><p><strong>deverser</strong> = Faire couler une grande quantité de liquide ou de choses.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au passé simple de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Il deversa</strong></mark></p></blockquote><blockquote><strong>Terminaisons de l’imparfait du subjonctif</strong><table><tbody><tr><th><strong>que je</strong></th><td><strong>-sse</strong></td></tr><tr><th><strong>que tu</strong></th><td><strong>-sses</strong></td></tr><tr><th><strong>qu’il / elle / on</strong></th><td><strong>-(voyelle accentuée)t</strong></td></tr><tr><th><strong>que nous</strong></th><td><samp>-ssions</samp></td></tr><tr><th><strong>que vous</strong></th><td><strong>-ssiez</strong></td></tr><tr><th><strong>qu’ils / elles</strong></th><td><strong>-ssent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Il deversa</strong></mark></li><li>Garde le radical <var>deversa-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-ssions</samp> au radical <var>deversa-</var> :</p><span><var>deversa</var><samp>ssions</samp></span></blockquote></figure></section>"
+      },
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "missing_accent_in_verb_form",
+          "severity": "error",
+          "detail": "Le verbe standard est « déverser » avec accent aigu. Les formes « Il deversa », « deversa- » et « deversassions » enseignent une orthographe fautive.",
+          "suggestion": "Corriger en « Il déversa », radical « déversa- », réponse « déversassions »."
+        }
+      ]
+    },
+    {
+      "unit": {
+        "id": "category-form:23:4:7",
+        "kind": "category-form",
+        "layers": [
+          "sample",
+          "category-form"
+        ],
+        "key": "23:4:7",
+        "verbId": 23,
+        "verb": "accroître",
+        "mode": "indicatif",
+        "tense": "passé simple",
+        "person": "nous",
+        "expected": "accrûmes",
+        "signature": "indicatif|passe simple|simple|p3|past-simple-il-remove-ending|none|dre-tre",
+        "categories": [
+          "family:dre-tre",
+          "form:simple",
+          "layer:sample",
+          "mode:indicatif",
+          "person:nous",
+          "queue:sample",
+          "risk:past-simple-reference",
+          "risk:third-group-ending",
+          "strategy:past-simple-il-remove-ending",
+          "tense:indicatif:passe simple"
+        ],
+        "html": "<section><h3>Définition</h3><p><strong>accroître</strong> = Rendre plus grand ou plus important.</p></section><section><ol><li>Pars de la forme repère :<br><mark><strong>Il accrut</strong></mark></li><li>Retire <kbd>-ut</kbd> pour obtenir le radical <var>accr-</var>.</li><li>Ajoute <code>-ûmes</code> pour former <strong>Accrûmes</strong>.</li></ol></section>"
+      },
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "incorrect_reference_form",
+          "severity": "error",
+          "detail": "La forme repère donnée est « Il accrut », mais pour « accroître » au passé simple, la forme correcte est « il accrut » sans accent circonflexe sur u seulement à la 3e personne; toutefois le radical obtenu « accr- » ne permet pas d'expliquer l'accent circonflexe de « nous accrûmes » par la simple terminaison.",
+          "suggestion": "Présenter ce passé simple comme une forme à apprendre : « j'accrus, tu accrus, il accrut, nous accrûmes, vous accrûtes, ils accrurent », ou expliquer que le circonflexe apparaît à nous/vous : accr- + -ûmes = accrûmes."
+        }
+      ]
+    },
+    {
+      "unit": {
+        "id": "category-form:554:14:4",
+        "kind": "category-form",
+        "layers": [
+          "sample",
+          "category-form"
+        ],
+        "key": "554:14:4",
+        "verbId": 554,
+        "verb": "deverser",
+        "mode": "conditionnel",
+        "tense": "présent",
+        "person": "je",
+        "expected": "deverserais",
+        "signature": "conditionnel|present|simple|p0|regular-infinitive|none|er-alternance",
+        "categories": [
+          "family:er-alternance",
+          "form:simple",
+          "layer:sample",
+          "mode:conditionnel",
+          "person:je",
+          "queue:sample",
+          "risk:conditional-future-stem",
+          "strategy:regular-infinitive",
+          "tense:conditionnel:present"
+        ],
+        "html": "<section><h3>Définition</h3><p><strong>deverser</strong> = Faire couler une grande quantité de liquide ou de choses.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>La formule</strong><p><strong>Conditionnel présent</strong> = <var>radical du futur-</var> + <samp>terminaisons de l’imparfait</samp>.</p></blockquote><blockquote><strong>Terminaisons de l’imparfait</strong><table><tbody><tr><th><strong>je</strong></th><td><samp>-ais</samp></td></tr><tr><th><strong>tu</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-ait</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-aient</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical du futur</figcaption><ol><li>Pars de l’infinitif : <strong>deverser</strong>.</li><li>Garde tout l’infinitif : le radical du futur est <var>deverser-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute la terminaison de l’imparfait <samp>-ais</samp> au radical du futur <var>deverser-</var> :</p><b><span><var>deverser</var><samp>ais</samp></span><i>✓</i></b></blockquote></figure></section>"
+      },
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "ORTH_ACCENT_MISSING",
+          "severity": "error",
+          "detail": "Le verbe standard est « déverser » et la forme correcte est « déverserais ». Le HTML écrit « deverserais » sans accent.",
+          "suggestion": "Écrire « déverser », radical « déverser- », réponse « déverserais »."
+        }
+      ]
+    },
+    {
+      "unit": {
+        "id": "category-form:431:16:6",
+        "kind": "category-form",
+        "layers": [
+          "sample",
+          "category-form"
+        ],
+        "key": "431:16:6",
+        "verbId": 431,
+        "verb": "chatouiller",
+        "mode": "subjonctif",
+        "tense": "imparfait",
+        "person": "il",
+        "expected": "chatouillât",
+        "signature": "subjonctif|imparfait|simple|p2|past-simple-il-remove-ending|none|er-regulier",
+        "categories": [
+          "family:er-regulier",
+          "form:simple",
+          "layer:sample",
+          "mode:subjonctif",
+          "person:il",
+          "queue:sample",
+          "risk:past-simple-reference",
+          "risk:subjunctive-imperfect",
+          "strategy:past-simple-il-remove-ending",
+          "tense:subjonctif:imparfait"
+        ],
+        "html": "<section><h3>Définition</h3><p><strong>chatouiller</strong> = Toucher légèrement pour provoquer le rire.</p></section><section><ol><li>Pars de la forme repère :<br><mark><strong>Il chatouilla</strong></mark></li><li>Le radical repère est <var>chatouilla-</var>.</li><li>Ajoute <code>-t</code> pour former <strong>Chatouillât</strong>.</li></ol></section>"
+      },
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "SUBJ_IMPARFAIT_ACCENT_PROCEDURE",
+          "severity": "error",
+          "detail": "La procédure dit seulement d’ajouter « -t » à « chatouilla- ». Cela donne « chatouillat », pas « chatouillât ». L’accent circonflexe n’est pas expliqué.",
+          "suggestion": "Dire : partir de « il chatouilla », garder « chatouilla- », transformer le a final en « â », puis ajouter « -t » : « qu’il chatouillât »."
+        }
+      ]
+    },
+    {
+      "unit": {
+        "id": "category-form:541:3:5",
+        "kind": "category-form",
+        "layers": [
+          "sample",
+          "category-form"
+        ],
+        "key": "541:3:5",
+        "verbId": 541,
+        "verb": "defier",
+        "mode": "indicatif",
+        "tense": "futur",
+        "person": "tu",
+        "expected": "defieras",
+        "signature": "indicatif|futur|simple|p1|future-stem-remove-ending|none|er-regulier",
+        "categories": [
+          "family:er-regulier",
+          "form:simple",
+          "layer:sample",
+          "mode:indicatif",
+          "person:tu",
+          "queue:sample",
+          "risk:future-stem",
+          "strategy:future-stem-remove-ending",
+          "tense:indicatif:futur"
+        ],
+        "html": "<section><h3>Définition</h3><p><strong>defier</strong> = Proposer à une personne de se mesurer à soi.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au futur de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Je defierai</strong></mark></p></blockquote><blockquote><strong>Terminaisons du futur de l’indicatif</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-ai</strong></td></tr><tr><th><strong>tu</strong></th><td><samp>-as</samp></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-a</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-ons</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-ez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-ont</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Je defierai</strong></mark></li><li>Enlève <kbd>-ai</kbd> : il reste le radical <var>defier-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-as</samp> au radical <var>defier-</var> :</p><span><var>defier</var><samp>as</samp></span></blockquote></figure></section>"
+      },
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "ORTH_ACCENT_MISSING",
+          "severity": "error",
+          "detail": "Le verbe standard est « défier » et la forme correcte est « défieras ». Le HTML écrit « defieras » sans accent.",
+          "suggestion": "Écrire « défier », forme repère « je défierai », radical « défier- », réponse « défieras »."
+        }
+      ]
+    },
+    {
+      "unit": {
+        "id": "category-form:546:1:7",
+        "kind": "category-form",
+        "layers": [
+          "sample",
+          "category-form"
+        ],
+        "key": "546:1:7",
+        "verbId": 546,
+        "verb": "denommer",
+        "mode": "indicatif",
+        "tense": "présent",
+        "person": "nous",
+        "expected": "denommons",
+        "signature": "indicatif|present|simple|p3|present-nous-remove-ending|none|er-regulier",
+        "categories": [
+          "family:er-regulier",
+          "form:simple",
+          "layer:sample",
+          "mode:indicatif",
+          "person:nous",
+          "queue:sample",
+          "risk:present-nous-reference",
+          "strategy:present-nous-remove-ending",
+          "tense:indicatif:present"
+        ],
+        "html": "<section><h3>Définition</h3><p><strong>denommer</strong> = Donner un nom à une personne ou à une chose.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>La forme demandée est justement la <strong>forme repère</strong> au présent de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Nous denommons</strong></mark></p></blockquote></figure></section>"
+      },
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "ORTH_ACCENT_MISSING",
+          "severity": "error",
+          "detail": "Le verbe standard est « dénommer » et la forme correcte est « dénommons ». Le HTML écrit « denommons » sans accent.",
+          "suggestion": "Écrire « dénommer » et « nous dénommons »."
+        }
+      ]
+    }
+  ],
+  "approved": [
+    {
+      "id": "category-form:103:9:8",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "103:9:8",
+      "verbId": 103,
+      "verb": "assiéger",
+      "mode": "impératif",
+      "tense": "présent",
+      "person": "vous",
+      "expected": "assiégez",
+      "signature": "imperatif|present|simple|p4|vous-present-same-person|ger|ger",
+      "categories": [
+        "family:ger",
+        "form:simple",
+        "layer:sample",
+        "mode:imperatif",
+        "person:vous",
+        "queue:sample",
+        "risk:e-accent-alternation",
+        "risk:imperative",
+        "risk:imperative-no-subject-pronoun",
+        "risk:imperative-tu-s",
+        "risk:letter-g",
+        "risk:target-ge",
+        "spelling:ger",
+        "strategy:vous-present-same-person",
+        "tense:imperatif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>assiéger</strong> = Entourer un lieu pour empêcher les personnes d’entrer ou de sortir.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Présent de l’indicatif : tu, nous, vous</strong><p>Apprends par cœur ces trois formes. Elles servent de formes repères pour construire l’impératif.</p><details><summary>Consulter les formes avec tu, nous et vous</summary><table><tbody><tr><th><strong>tu</strong></th><td><mark><strong>Tu assièges</strong></mark></td></tr><tr><th><strong>nous</strong></th><td><mark><strong>Nous assiégeons</strong></mark></td></tr><tr><th><strong>vous</strong></th><td><mark><strong>Vous assiégez</strong></mark></td></tr></tbody></table></details></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Avec <strong>vous</strong>, pars de la forme du présent de l’indicatif :<br><mark><strong>Vous assiégez</strong></mark></li><li>Garde la forme verbale, mais n’écris pas le pronom sujet.</li></ol><blockquote><strong>Résultat</strong><p><mark><strong>Assiégez</strong></mark></p></blockquote></figure><figure><figcaption>S ou pas s avec tu</figcaption><blockquote><strong>Verbes en -er</strong><p>En général, il n’y a pas de <strong>s</strong> : <em>tu manges → mange</em>.</p></blockquote><blockquote><strong>Autres verbes</strong><p>En général, le <strong>s</strong> reste : <em>tu finis → finis</em>, <em>tu prends → prends</em>.</p></blockquote><blockquote><strong>Exceptions</strong><p>Les verbes conjugués comme <strong>ouvrir</strong> ou <strong>cueillir</strong> n’ont pas de s : <em>ouvre</em>, <em>cueille</em>. <strong>Aller</strong> donne <em>va</em>.</p><p>Apprends aussi ces formes particulières : <strong>aie, ayons, ayez</strong> ; <strong>sois, soyons, soyez</strong> ; <strong>sache, sachons, sachez</strong> ; <strong>veuille, veuillons, veuillez</strong>.</p></blockquote><blockquote><strong>Devant en ou y</strong><p>Le <strong>s</strong> revient lorsque <strong>en</strong> ou <strong>y</strong> suit directement la forme : <em>manges-en</em>, <em>vas-y</em>, <em>cueilles-en</em>.</p></blockquote></figure></section><section><h3>La lettre G</h3><p><strong>La lettre g peut faire deux sons.</strong></p><table><tbody><tr><th>Le son « g »</th><td>gare · gomme · légume · grimper</td></tr><tr><th>Devant e, i ou y : le son « j »</th><td>rouge · girafe · gymnase</td></tr><tr><th>Pour garder le son « g » devant e, i ou y</th><td>Ajoute un u muet : bague · guerre · guitare</td></tr></tbody></table><p><strong>Avec assiéger :</strong> on écrit <strong>nous assiégeons</strong> et <strong>il assiégeait</strong> pour garder le son « j ». Devant <strong>i</strong>, le g fait déjà le son « j » : <strong>nous assiégions</strong>.</p></section>"
+    },
+    {
+      "id": "category-form:204:16:7",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "204:16:7",
+      "verbId": 204,
+      "verb": "déplacer",
+      "mode": "subjonctif",
+      "tense": "imparfait",
+      "person": "nous",
+      "expected": "déplaçassions",
+      "signature": "subjonctif|imparfait|simple|p3|past-simple-il-remove-ending|cer|cer",
+      "categories": [
+        "family:cer",
+        "form:simple",
+        "layer:sample",
+        "mode:subjonctif",
+        "person:nous",
+        "queue:sample",
+        "risk:cedilla",
+        "risk:e-accent-alternation",
+        "risk:letter-c",
+        "risk:past-simple-reference",
+        "risk:subjunctive-imperfect",
+        "risk:target-cedilla",
+        "spelling:cer",
+        "strategy:past-simple-il-remove-ending",
+        "tense:subjonctif:imparfait"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>déplacer</strong> = Faire passer une personne ou une chose à un autre endroit.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au passé simple de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Il déplaça</strong></mark></p></blockquote><blockquote><strong>Terminaisons de l’imparfait du subjonctif</strong><table><tbody><tr><th><strong>que je</strong></th><td><strong>-sse</strong></td></tr><tr><th><strong>que tu</strong></th><td><strong>-sses</strong></td></tr><tr><th><strong>qu’il / elle / on</strong></th><td><strong>-(voyelle accentuée)t</strong></td></tr><tr><th><strong>que nous</strong></th><td><samp>-ssions</samp></td></tr><tr><th><strong>que vous</strong></th><td><strong>-ssiez</strong></td></tr><tr><th><strong>qu’ils / elles</strong></th><td><strong>-ssent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Il déplaça</strong></mark></li><li>Garde le radical <var>déplaça-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-ssions</samp> au radical <var>déplaça-</var> :</p><span><var>déplaça</var><samp>ssions</samp></span></blockquote></figure></section><section><h3>La lettre C et la cédille</h3><p><strong>La lettre c peut faire deux sons.</strong></p><table><tbody><tr><th>Le son « k »</th><td>café · colle · cube · courir</td></tr><tr><th>Devant e, i ou y : le son « s »</th><td>cerise · citron · cygne</td></tr><tr><th>Pour garder le son « s » devant a, o ou u</th><td>Ajoute une cédille : ça · garçon · reçu</td></tr></tbody></table><p><strong>Avec déplacer :</strong> on écrit <strong>nous déplaçons</strong> et <strong>il déplaçait</strong>. Devant <strong>i</strong>, le c fait déjà le son « s » : <strong>nous déplacions</strong>.</p></section>"
+    },
+    {
+      "id": "category-form:174:3:6",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "174:3:6",
+      "verbId": 174,
+      "verb": "s'écrier",
+      "mode": "indicatif",
+      "tense": "futur",
+      "person": "il",
+      "expected": "s'écriera",
+      "signature": "indicatif|futur|simple|p2|future-stem-remove-ending|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:indicatif",
+        "person:il",
+        "queue:sample",
+        "risk:e-accent-alternation",
+        "risk:future-stem",
+        "risk:pronominal",
+        "risk:reflexive-pronoun",
+        "strategy:future-stem-remove-ending",
+        "tense:indicatif:futur"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>s&#39;écrier</strong> = Dire quelque chose soudainement et avec une voix forte.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au futur de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Je m’écrierai</strong></mark></p></blockquote><blockquote><strong>Terminaisons du futur de l’indicatif</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-ai</strong></td></tr><tr><th><strong>tu</strong></th><td><strong>-as</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><samp>-a</samp></td></tr><tr><th><strong>nous</strong></th><td><strong>-ons</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-ez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-ont</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Je m’écrierai</strong></mark></li><li>Enlève <kbd>-ai</kbd> : il reste le radical <var>écrier-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-a</samp> au radical <var>écrier-</var> :</p><span><var>écrier</var><samp>a</samp></span><p>Ajoute aussi le pronom réfléchi adapté :</p><b><mark><strong>Il s’écriera</strong></mark><i>✓</i></b></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:157:14:9",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "157:14:9",
+      "verbId": 157,
+      "verb": "essayer",
+      "mode": "conditionnel",
+      "tense": "présent",
+      "person": "ils",
+      "expected": "essaieraient",
+      "signature": "conditionnel|present|simple|p5|future-reference|none|yer",
+      "categories": [
+        "family:yer",
+        "form:simple",
+        "layer:sample",
+        "mode:conditionnel",
+        "person:ils",
+        "queue:sample",
+        "risk:conditional-future-stem",
+        "risk:elision-je",
+        "risk:future-stem",
+        "strategy:future-reference",
+        "tense:conditionnel:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>essayer</strong> = Faire une tentative pour voir si une chose fonctionne.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>La formule</strong><p><strong>Conditionnel présent</strong> = <var>radical du futur-</var> + <samp>terminaisons de l’imparfait</samp>.</p></blockquote><blockquote><strong>Terminaisons de l’imparfait</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>tu</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-ait</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><samp>-aient</samp></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical du futur</figcaption><ol><li>Pars de la forme repère au futur :<br><mark><strong>J’essaierai</strong></mark></li><li>Enlève <kbd>-ai</kbd> : tu obtiens <var>essaier-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute la terminaison de l’imparfait <samp>-aient</samp> au radical du futur <var>essaier-</var> :</p><b><span><var>essaier</var><samp>aient</samp></span><i>✓</i></b></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:233:1:4",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "233:1:4",
+      "verbId": 233,
+      "verb": "détruire",
+      "mode": "indicatif",
+      "tense": "présent",
+      "person": "je",
+      "expected": "détruis",
+      "signature": "indicatif|present|simple|p0|present-nous-remove-ending|none|irregulier",
+      "categories": [
+        "family:irregulier",
+        "form:simple",
+        "layer:sample",
+        "mode:indicatif",
+        "person:je",
+        "queue:sample",
+        "risk:e-accent-alternation",
+        "risk:empty-ending",
+        "risk:present-nous-reference",
+        "strategy:present-nous-remove-ending",
+        "tense:indicatif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>détruire</strong> = Abîmer complètement une chose pour qu’elle n’existe plus ou ne serve plus.</p></section><section><ol><li>Pars de la forme repère :<br><mark><strong>Nous détruisons</strong></mark></li><li>Retire <kbd>-ons</kbd> pour obtenir le radical <var>détruis-</var>.</li><li>Avec je, n’ajoute pas de terminaison : écris <strong>Détruis</strong>.</li></ol></section>"
+    },
+    {
+      "id": "category-form:82:9:5",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "82:9:5",
+      "verbId": 82,
+      "verb": "naviguer",
+      "mode": "impératif",
+      "tense": "présent",
+      "person": "tu",
+      "expected": "navigue",
+      "signature": "imperatif|present|simple|p1|tu-present-same-person|guer|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:imperatif",
+        "person:tu",
+        "queue:sample",
+        "risk:imperative",
+        "risk:imperative-no-subject-pronoun",
+        "risk:imperative-tu-s",
+        "risk:letter-g",
+        "spelling:guer",
+        "strategy:tu-present-same-person",
+        "tense:imperatif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>naviguer</strong> = Se déplacer sur l’eau avec un bateau ou parcourir des pages sur Internet.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Présent de l’indicatif : tu, nous, vous</strong><p>Apprends par cœur ces trois formes. Elles servent de formes repères pour construire l’impératif.</p><details><summary>Consulter les formes avec tu, nous et vous</summary><table><tbody><tr><th><strong>tu</strong></th><td><mark><strong>Tu navigues</strong></mark></td></tr><tr><th><strong>nous</strong></th><td><mark><strong>Nous naviguons</strong></mark></td></tr><tr><th><strong>vous</strong></th><td><mark><strong>Vous naviguez</strong></mark></td></tr></tbody></table></details></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Avec <strong>tu</strong>, pars de la forme du présent de l’indicatif :<br><mark><strong>Tu navigues</strong></mark></li><li>Garde la forme verbale, mais n’écris pas le pronom sujet.</li><li>Vérifie s’il faut garder ou enlever le <strong>s</strong>. Regarde le bloc « s ou pas s avec tu » plus bas.</li></ol><blockquote><strong>Résultat</strong><p><mark><strong>Navigue</strong></mark></p></blockquote></figure><figure><figcaption>S ou pas s avec tu</figcaption><blockquote><strong>Verbes en -er</strong><p>En général, il n’y a pas de <strong>s</strong> : <em>tu manges → mange</em>.</p></blockquote><blockquote><strong>Autres verbes</strong><p>En général, le <strong>s</strong> reste : <em>tu finis → finis</em>, <em>tu prends → prends</em>.</p></blockquote><blockquote><strong>Exceptions</strong><p>Les verbes conjugués comme <strong>ouvrir</strong> ou <strong>cueillir</strong> n’ont pas de s : <em>ouvre</em>, <em>cueille</em>. <strong>Aller</strong> donne <em>va</em>.</p><p>Apprends aussi ces formes particulières : <strong>aie, ayons, ayez</strong> ; <strong>sois, soyons, soyez</strong> ; <strong>sache, sachons, sachez</strong> ; <strong>veuille, veuillons, veuillez</strong>.</p></blockquote><blockquote><strong>Devant en ou y</strong><p>Le <strong>s</strong> revient lorsque <strong>en</strong> ou <strong>y</strong> suit directement la forme : <em>manges-en</em>, <em>vas-y</em>, <em>cueilles-en</em>.</p></blockquote></figure></section><section><h3>La lettre G</h3><p><strong>La lettre g peut faire deux sons.</strong></p><table><tbody><tr><th>Le son « g »</th><td>gare · gomme · légume · grimper</td></tr><tr><th>Devant e, i ou y : le son « j »</th><td>rouge · girafe · gymnase</td></tr><tr><th>Pour garder le son « g » devant e, i ou y</th><td>Ajoute un u muet : bague · guerre · guitare</td></tr></tbody></table><p><strong>Avec naviguer :</strong> le <strong>u</strong> reste dans les formes du verbe : <strong>nous naviguons</strong>, <strong>je naviguais</strong>, <strong>nous naviguions</strong>.</p></section>"
+    },
+    {
+      "id": "category-form:17:9:7",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "17:9:7",
+      "verbId": 17,
+      "verb": "recevoir",
+      "mode": "impératif",
+      "tense": "présent",
+      "person": "nous",
+      "expected": "recevons",
+      "signature": "imperatif|present|simple|p3|nous-present-same-person|none|voir-recevoir",
+      "categories": [
+        "family:voir-recevoir",
+        "form:simple",
+        "layer:sample",
+        "mode:imperatif",
+        "person:nous",
+        "queue:sample",
+        "risk:imperative",
+        "risk:imperative-no-subject-pronoun",
+        "risk:imperative-tu-s",
+        "strategy:nous-present-same-person",
+        "tense:imperatif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>recevoir</strong> = Prendre ce qu’une personne envoie ou donne.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Présent de l’indicatif : tu, nous, vous</strong><p>Apprends par cœur ces trois formes. Elles servent de formes repères pour construire l’impératif.</p><details><summary>Consulter les formes avec tu, nous et vous</summary><table><tbody><tr><th><strong>tu</strong></th><td><mark><strong>Tu reçois</strong></mark></td></tr><tr><th><strong>nous</strong></th><td><mark><strong>Nous recevons</strong></mark></td></tr><tr><th><strong>vous</strong></th><td><mark><strong>Vous recevez</strong></mark></td></tr></tbody></table></details></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Avec <strong>nous</strong>, pars de la forme du présent de l’indicatif :<br><mark><strong>Nous recevons</strong></mark></li><li>Garde la forme verbale, mais n’écris pas le pronom sujet.</li></ol><blockquote><strong>Résultat</strong><p><mark><strong>Recevons</strong></mark></p></blockquote></figure><figure><figcaption>S ou pas s avec tu</figcaption><blockquote><strong>Verbes en -er</strong><p>En général, il n’y a pas de <strong>s</strong> : <em>tu manges → mange</em>.</p></blockquote><blockquote><strong>Autres verbes</strong><p>En général, le <strong>s</strong> reste : <em>tu finis → finis</em>, <em>tu prends → prends</em>.</p></blockquote><blockquote><strong>Exceptions</strong><p>Les verbes conjugués comme <strong>ouvrir</strong> ou <strong>cueillir</strong> n’ont pas de s : <em>ouvre</em>, <em>cueille</em>. <strong>Aller</strong> donne <em>va</em>.</p><p>Apprends aussi ces formes particulières : <strong>aie, ayons, ayez</strong> ; <strong>sois, soyons, soyez</strong> ; <strong>sache, sachons, sachez</strong> ; <strong>veuille, veuillons, veuillez</strong>.</p></blockquote><blockquote><strong>Devant en ou y</strong><p>Le <strong>s</strong> revient lorsque <strong>en</strong> ou <strong>y</strong> suit directement la forme : <em>manges-en</em>, <em>vas-y</em>, <em>cueilles-en</em>.</p></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:108:2:4",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "108:2:4",
+      "verbId": 108,
+      "verb": "comprendre",
+      "mode": "indicatif",
+      "tense": "imparfait",
+      "person": "je",
+      "expected": "comprenais",
+      "signature": "indicatif|imparfait|simple|p0|present-nous-remove-ending|none|prendre",
+      "categories": [
+        "family:prendre",
+        "form:simple",
+        "layer:sample",
+        "mode:indicatif",
+        "person:je",
+        "queue:sample",
+        "risk:present-nous-reference",
+        "risk:third-group-ending",
+        "strategy:present-nous-remove-ending",
+        "tense:indicatif:imparfait"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>comprendre</strong> = Connaître le sens d’une information ou d’une situation.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au présent de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Nous comprenons</strong></mark></p></blockquote><blockquote><strong>Terminaisons de l’imparfait de l’indicatif</strong><table><tbody><tr><th><strong>je</strong></th><td><samp>-ais</samp></td></tr><tr><th><strong>tu</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-ait</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-aient</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Nous comprenons</strong></mark></li><li>Enlève <kbd>-ons</kbd> : il reste le radical <var>compren-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-ais</samp> au radical <var>compren-</var> :</p><span><var>compren</var><samp>ais</samp></span></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:58:14:5",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "58:14:5",
+      "verbId": 58,
+      "verb": "mettre",
+      "mode": "conditionnel",
+      "tense": "présent",
+      "person": "tu",
+      "expected": "mettrais",
+      "signature": "conditionnel|present|simple|p1|regular-re|none|mettre-battre",
+      "categories": [
+        "family:mettre-battre",
+        "form:simple",
+        "layer:sample",
+        "mode:conditionnel",
+        "person:tu",
+        "queue:sample",
+        "risk:conditional-future-stem",
+        "risk:third-group-ending",
+        "strategy:regular-re",
+        "tense:conditionnel:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>mettre</strong> = Placer une personne ou une chose quelque part.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>La formule</strong><p><strong>Conditionnel présent</strong> = <var>radical du futur-</var> + <samp>terminaisons de l’imparfait</samp>.</p></blockquote><blockquote><strong>Terminaisons de l’imparfait</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>tu</strong></th><td><samp>-ais</samp></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-ait</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-aient</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical du futur</figcaption><ol><li>Pars de l’infinitif : <strong>mettre</strong>.</li><li>Enlève le <strong>e</strong> final : tu obtiens <var>mettr-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute la terminaison de l’imparfait <samp>-ais</samp> au radical du futur <var>mettr-</var> :</p><b><span><var>mettr</var><samp>ais</samp></span><i>✓</i></b></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:32:1:5",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "32:1:5",
+      "verbId": 32,
+      "verb": "acheter",
+      "mode": "indicatif",
+      "tense": "présent",
+      "person": "tu",
+      "expected": "achètes",
+      "signature": "indicatif|present|simple|p1|present-ils-remove-ending|none|eler-eter",
+      "categories": [
+        "family:eler-eter",
+        "form:simple",
+        "layer:sample",
+        "mode:indicatif",
+        "person:tu",
+        "queue:sample",
+        "risk:present-ils-reference",
+        "strategy:present-ils-remove-ending",
+        "tense:indicatif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>acheter</strong> = Donner de l’argent pour recevoir quelque chose.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au présent de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Ils achètent</strong></mark></p></blockquote><blockquote><strong>Terminaisons du présent de l’indicatif</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-e</strong></td></tr><tr><th><strong>tu</strong></th><td><samp>-es</samp></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-e</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-ons</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-ez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-ent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Ils achètent</strong></mark></li><li>Enlève <kbd>-ent</kbd> : il reste le radical <var>achèt-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-es</samp> au radical <var>achèt-</var> :</p><span><var>achèt</var><samp>es</samp></span></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:90:9:8",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "90:9:8",
+      "verbId": 90,
+      "verb": "réussir",
+      "mode": "impératif",
+      "tense": "présent",
+      "person": "vous",
+      "expected": "réussissez",
+      "signature": "imperatif|present|simple|p4|vous-present-same-person|none|ir-issant",
+      "categories": [
+        "family:ir-issant",
+        "form:simple",
+        "layer:sample",
+        "mode:imperatif",
+        "person:vous",
+        "queue:sample",
+        "risk:e-accent-alternation",
+        "risk:imperative",
+        "risk:imperative-no-subject-pronoun",
+        "risk:imperative-tu-s",
+        "strategy:vous-present-same-person",
+        "tense:imperatif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>réussir</strong> = Obtenir le résultat que l’on voulait.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Présent de l’indicatif : tu, nous, vous</strong><p>Apprends par cœur ces trois formes. Elles servent de formes repères pour construire l’impératif.</p><details><summary>Consulter les formes avec tu, nous et vous</summary><table><tbody><tr><th><strong>tu</strong></th><td><mark><strong>Tu réussis</strong></mark></td></tr><tr><th><strong>nous</strong></th><td><mark><strong>Nous réussissons</strong></mark></td></tr><tr><th><strong>vous</strong></th><td><mark><strong>Vous réussissez</strong></mark></td></tr></tbody></table></details></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Avec <strong>vous</strong>, pars de la forme du présent de l’indicatif :<br><mark><strong>Vous réussissez</strong></mark></li><li>Garde la forme verbale, mais n’écris pas le pronom sujet.</li></ol><blockquote><strong>Résultat</strong><p><mark><strong>Réussissez</strong></mark></p></blockquote></figure><figure><figcaption>S ou pas s avec tu</figcaption><blockquote><strong>Verbes en -er</strong><p>En général, il n’y a pas de <strong>s</strong> : <em>tu manges → mange</em>.</p></blockquote><blockquote><strong>Autres verbes</strong><p>En général, le <strong>s</strong> reste : <em>tu finis → finis</em>, <em>tu prends → prends</em>.</p></blockquote><blockquote><strong>Exceptions</strong><p>Les verbes conjugués comme <strong>ouvrir</strong> ou <strong>cueillir</strong> n’ont pas de s : <em>ouvre</em>, <em>cueille</em>. <strong>Aller</strong> donne <em>va</em>.</p><p>Apprends aussi ces formes particulières : <strong>aie, ayons, ayez</strong> ; <strong>sois, soyons, soyez</strong> ; <strong>sache, sachons, sachez</strong> ; <strong>veuille, veuillons, veuillez</strong>.</p></blockquote><blockquote><strong>Devant en ou y</strong><p>Le <strong>s</strong> revient lorsque <strong>en</strong> ou <strong>y</strong> suit directement la forme : <em>manges-en</em>, <em>vas-y</em>, <em>cueilles-en</em>.</p></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:83:9:5",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "83:9:5",
+      "verbId": 83,
+      "verb": "offrir",
+      "mode": "impératif",
+      "tense": "présent",
+      "person": "tu",
+      "expected": "offre",
+      "signature": "imperatif|present|simple|p1|tu-present-same-person|none|ouvrir-cueillir",
+      "categories": [
+        "family:ouvrir-cueillir",
+        "form:simple",
+        "layer:sample",
+        "mode:imperatif",
+        "person:tu",
+        "queue:sample",
+        "risk:imperative",
+        "risk:imperative-no-subject-pronoun",
+        "risk:imperative-tu-s",
+        "strategy:tu-present-same-person",
+        "tense:imperatif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>offrir</strong> = Donner quelque chose pour faire plaisir.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Présent de l’indicatif : tu, nous, vous</strong><p>Apprends par cœur ces trois formes. Elles servent de formes repères pour construire l’impératif.</p><details><summary>Consulter les formes avec tu, nous et vous</summary><table><tbody><tr><th><strong>tu</strong></th><td><mark><strong>Tu offres</strong></mark></td></tr><tr><th><strong>nous</strong></th><td><mark><strong>Nous offrons</strong></mark></td></tr><tr><th><strong>vous</strong></th><td><mark><strong>Vous offrez</strong></mark></td></tr></tbody></table></details></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Avec <strong>tu</strong>, pars de la forme du présent de l’indicatif :<br><mark><strong>Tu offres</strong></mark></li><li>Garde la forme verbale, mais n’écris pas le pronom sujet.</li><li>Vérifie s’il faut garder ou enlever le <strong>s</strong>. Regarde le bloc « s ou pas s avec tu » plus bas.</li></ol><blockquote><strong>Résultat</strong><p><mark><strong>Offre</strong></mark></p></blockquote></figure><figure><figcaption>S ou pas s avec tu</figcaption><blockquote><strong>Verbes en -er</strong><p>En général, il n’y a pas de <strong>s</strong> : <em>tu manges → mange</em>.</p></blockquote><blockquote><strong>Autres verbes</strong><p>En général, le <strong>s</strong> reste : <em>tu finis → finis</em>, <em>tu prends → prends</em>.</p></blockquote><blockquote><strong>Exceptions</strong><p>Les verbes conjugués comme <strong>ouvrir</strong> ou <strong>cueillir</strong> n’ont pas de s : <em>ouvre</em>, <em>cueille</em>. <strong>Aller</strong> donne <em>va</em>.</p><p>Apprends aussi ces formes particulières : <strong>aie, ayons, ayez</strong> ; <strong>sois, soyons, soyez</strong> ; <strong>sache, sachons, sachez</strong> ; <strong>veuille, veuillons, veuillez</strong>.</p></blockquote><blockquote><strong>Devant en ou y</strong><p>Le <strong>s</strong> revient lorsque <strong>en</strong> ou <strong>y</strong> suit directement la forme : <em>manges-en</em>, <em>vas-y</em>, <em>cueilles-en</em>.</p></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:405:3:6",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "405:3:6",
+      "verbId": 405,
+      "verb": "se dépêcher",
+      "mode": "indicatif",
+      "tense": "futur",
+      "person": "il",
+      "expected": "se dépêchera",
+      "signature": "indicatif|futur|simple|p2|infinitive-remove-ending|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:indicatif",
+        "person:il",
+        "queue:sample",
+        "risk:e-accent-alternation",
+        "risk:pronominal",
+        "risk:reflexive-pronoun",
+        "strategy:infinitive-remove-ending",
+        "tense:indicatif:futur"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>se dépêcher</strong> = Faire une action plus vite.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au présent de l’infinitif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Dépêcher</strong></mark></p></blockquote><blockquote><strong>Terminaisons du futur de l’indicatif</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-ai</strong></td></tr><tr><th><strong>tu</strong></th><td><strong>-as</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><samp>-a</samp></td></tr><tr><th><strong>nous</strong></th><td><strong>-ons</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-ez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-ont</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Dépêcher</strong></mark></li><li>Garde le radical <var>dépêcher-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-a</samp> au radical <var>dépêcher-</var> :</p><span><var>dépêcher</var><samp>a</samp></span><p>Ajoute aussi le pronom réfléchi adapté :</p><b><mark><strong>Il se dépêchera</strong></mark><i>✓</i></b></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:226:16:9",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "226:16:9",
+      "verbId": 226,
+      "verb": "monter",
+      "mode": "subjonctif",
+      "tense": "imparfait",
+      "person": "ils",
+      "expected": "montassent",
+      "signature": "subjonctif|imparfait|simple|p5|past-simple-il-remove-ending|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:subjonctif",
+        "person:ils",
+        "queue:sample",
+        "risk:past-simple-reference",
+        "risk:subjunctive-imperfect",
+        "strategy:past-simple-il-remove-ending",
+        "tense:subjonctif:imparfait"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>monter</strong> = Aller d’un endroit bas vers un endroit plus haut.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au passé simple de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Il monta</strong></mark></p></blockquote><blockquote><strong>Terminaisons de l’imparfait du subjonctif</strong><table><tbody><tr><th><strong>que je</strong></th><td><strong>-sse</strong></td></tr><tr><th><strong>que tu</strong></th><td><strong>-sses</strong></td></tr><tr><th><strong>qu’il / elle / on</strong></th><td><strong>-(voyelle accentuée)t</strong></td></tr><tr><th><strong>que nous</strong></th><td><strong>-ssions</strong></td></tr><tr><th><strong>que vous</strong></th><td><strong>-ssiez</strong></td></tr><tr><th><strong>qu’ils / elles</strong></th><td><samp>-ssent</samp></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Il monta</strong></mark></li><li>Garde le radical <var>monta-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-ssent</samp> au radical <var>monta-</var> :</p><span><var>monta</var><samp>ssent</samp></span></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:280:16:8",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "280:16:8",
+      "verbId": 280,
+      "verb": "taire",
+      "mode": "subjonctif",
+      "tense": "imparfait",
+      "person": "vous",
+      "expected": "tussiez",
+      "signature": "subjonctif|imparfait|simple|p4|past-simple-il-remove-ending|none|irregulier",
+      "categories": [
+        "family:irregulier",
+        "form:simple",
+        "layer:sample",
+        "mode:subjonctif",
+        "person:vous",
+        "queue:sample",
+        "risk:past-simple-reference",
+        "risk:subjunctive-imperfect",
+        "strategy:past-simple-il-remove-ending",
+        "tense:subjonctif:imparfait"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>taire</strong> = Ne pas dire une information.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au passé simple de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Il tut</strong></mark></p></blockquote><blockquote><strong>Terminaisons de l’imparfait du subjonctif</strong><table><tbody><tr><th><strong>que je</strong></th><td><strong>-sse</strong></td></tr><tr><th><strong>que tu</strong></th><td><strong>-sses</strong></td></tr><tr><th><strong>qu’il / elle / on</strong></th><td><strong>-(voyelle accentuée)t</strong></td></tr><tr><th><strong>que nous</strong></th><td><strong>-ssions</strong></td></tr><tr><th><strong>que vous</strong></th><td><samp>-ssiez</samp></td></tr><tr><th><strong>qu’ils / elles</strong></th><td><strong>-ssent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Il tut</strong></mark></li><li>Enlève <kbd>-t</kbd> : il reste le radical <var>tu-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-ssiez</samp> au radical <var>tu-</var> :</p><span><var>tu</var><samp>ssiez</samp></span></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:419:10:6",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "419:10:6",
+      "verbId": 419,
+      "verb": "attacher",
+      "mode": "subjonctif",
+      "tense": "présent",
+      "person": "il",
+      "expected": "attache",
+      "signature": "subjonctif|present|simple|p2|two-stems-present-ils|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:subjonctif",
+        "person:il",
+        "queue:sample",
+        "risk:present-ils-reference",
+        "risk:subjunctive-present-two-stems",
+        "strategy:two-stems-present-ils",
+        "tense:subjonctif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>attacher</strong> = Fixer une chose à une autre avec un lien.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Deux formes repères</strong><p>Apprends ces deux formes. Elles permettent de construire toutes les personnes du subjonctif présent.</p><p>Pour <strong>que je, que tu, qu’il / elle / on</strong> et <strong>qu’ils / elles</strong>, pars de la forme avec <strong>ils</strong> au présent de l’indicatif :</p><p><mark><strong>Ils attachent</strong></mark></p><p>Pour <strong>que nous</strong> et <strong>que vous</strong>, pars de la forme avec <strong>nous</strong> au présent de l’indicatif :</p><p><mark><strong>Nous attachons</strong></mark></p></blockquote><blockquote><strong>Terminaisons du subjonctif présent</strong><table><tbody><tr><th><strong>que je</strong></th><td><strong>-e</strong></td></tr><tr><th><strong>que tu</strong></th><td><strong>-es</strong></td></tr><tr><th><strong>qu’il / elle / on</strong></th><td><samp>-e</samp></td></tr><tr><th><strong>que nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>que vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>qu’ils / elles</strong></th><td><strong>-ent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Pars de la forme avec <strong>ils</strong> au présent de l’indicatif :<br><mark><strong>Ils attachent</strong></mark></li><li>Enlève <kbd>-ent</kbd> : il reste le radical <var>attach-</var>.</li><li>Ajoute <samp>-e</samp>.</li></ol><blockquote><strong>Résultat</strong><p><span><var>attach</var><samp>e</samp></span></p></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:462:3:8",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "462:3:8",
+      "verbId": 462,
+      "verb": "accabler",
+      "mode": "indicatif",
+      "tense": "futur",
+      "person": "vous",
+      "expected": "accablerez",
+      "signature": "indicatif|futur|simple|p4|future-stem-remove-ending|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:indicatif",
+        "person:vous",
+        "queue:sample",
+        "risk:elision-je",
+        "risk:future-stem",
+        "strategy:future-stem-remove-ending",
+        "tense:indicatif:futur"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>accabler</strong> = Faire supporter trop de difficultés ou de reproches à une personne.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au futur de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>J’accablerai</strong></mark></p></blockquote><blockquote><strong>Terminaisons du futur de l’indicatif</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-ai</strong></td></tr><tr><th><strong>tu</strong></th><td><strong>-as</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-a</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-ons</strong></td></tr><tr><th><strong>vous</strong></th><td><samp>-ez</samp></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-ont</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>J’accablerai</strong></mark></li><li>Enlève <kbd>-ai</kbd> : il reste le radical <var>accabler-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-ez</samp> au radical <var>accabler-</var> :</p><span><var>accabler</var><samp>ez</samp></span></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:508:4:9",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "508:4:9",
+      "verbId": 508,
+      "verb": "cerner",
+      "mode": "indicatif",
+      "tense": "passé simple",
+      "person": "ils",
+      "expected": "cernèrent",
+      "signature": "indicatif|passe simple|simple|p5|past-simple-il-remove-ending|none|er-alternance",
+      "categories": [
+        "family:er-alternance",
+        "form:simple",
+        "layer:sample",
+        "mode:indicatif",
+        "person:ils",
+        "queue:sample",
+        "risk:past-simple-reference",
+        "strategy:past-simple-il-remove-ending",
+        "tense:indicatif:passe simple"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>cerner</strong> = Entourer une personne ou comprendre clairement un sujet.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au passé simple de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Il cerna</strong></mark></p></blockquote><blockquote><strong>Terminaisons du passé simple de l’indicatif</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-ai</strong></td></tr><tr><th><strong>tu</strong></th><td><strong>-as</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-a</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-âmes</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-âtes</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><samp>-èrent</samp></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Il cerna</strong></mark></li><li>Enlève <kbd>-a</kbd> : il reste le radical <var>cern-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-èrent</samp> au radical <var>cern-</var> :</p><span><var>cern</var><samp>èrent</samp></span></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:296:14:6",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "296:14:6",
+      "verbId": 296,
+      "verb": "exploiter",
+      "mode": "conditionnel",
+      "tense": "présent",
+      "person": "il",
+      "expected": "exploiterait",
+      "signature": "conditionnel|present|simple|p2|regular-infinitive|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:conditionnel",
+        "person:il",
+        "queue:sample",
+        "risk:conditional-future-stem",
+        "strategy:regular-infinitive",
+        "tense:conditionnel:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>exploiter</strong> = Utiliser une ressource pour en tirer un résultat.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>La formule</strong><p><strong>Conditionnel présent</strong> = <var>radical du futur-</var> + <samp>terminaisons de l’imparfait</samp>.</p></blockquote><blockquote><strong>Terminaisons de l’imparfait</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>tu</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><samp>-ait</samp></td></tr><tr><th><strong>nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-aient</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical du futur</figcaption><ol><li>Pars de l’infinitif : <strong>exploiter</strong>.</li><li>Garde tout l’infinitif : le radical du futur est <var>exploiter-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute la terminaison de l’imparfait <samp>-ait</samp> au radical du futur <var>exploiter-</var> :</p><b><span><var>exploiter</var><samp>ait</samp></span><i>✓</i></b></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:10:14:6",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "10:14:6",
+      "verbId": 10,
+      "verb": "savoir",
+      "mode": "conditionnel",
+      "tense": "présent",
+      "person": "il",
+      "expected": "saurait",
+      "signature": "conditionnel|present|simple|p2|future-reference|none|voir-recevoir",
+      "categories": [
+        "family:voir-recevoir",
+        "form:simple",
+        "layer:sample",
+        "mode:conditionnel",
+        "person:il",
+        "queue:sample",
+        "risk:conditional-future-stem",
+        "risk:future-stem",
+        "strategy:future-reference",
+        "tense:conditionnel:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>savoir</strong> = Avoir une information dans sa mémoire ou savoir faire une action.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>La formule</strong><p><strong>Conditionnel présent</strong> = <var>radical du futur-</var> + <samp>terminaisons de l’imparfait</samp>.</p></blockquote><blockquote><strong>Terminaisons de l’imparfait</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>tu</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><samp>-ait</samp></td></tr><tr><th><strong>nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-aient</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical du futur</figcaption><ol><li>Pars de la forme repère au futur :<br><mark><strong>Je saurai</strong></mark></li><li>Enlève <kbd>-ai</kbd> : tu obtiens <var>saur-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute la terminaison de l’imparfait <samp>-ait</samp> au radical du futur <var>saur-</var> :</p><b><span><var>saur</var><samp>ait</samp></span><i>✓</i></b></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:419:4:4",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "419:4:4",
+      "verbId": 419,
+      "verb": "attacher",
+      "mode": "indicatif",
+      "tense": "passé simple",
+      "person": "je",
+      "expected": "attachai",
+      "signature": "indicatif|passe simple|simple|p0|past-simple-il-remove-ending|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:indicatif",
+        "person:je",
+        "queue:sample",
+        "risk:past-simple-reference",
+        "strategy:past-simple-il-remove-ending",
+        "tense:indicatif:passe simple"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>attacher</strong> = Fixer une chose à une autre avec un lien.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au passé simple de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Il attacha</strong></mark></p></blockquote><blockquote><strong>Terminaisons du passé simple de l’indicatif</strong><table><tbody><tr><th><strong>je</strong></th><td><samp>-ai</samp></td></tr><tr><th><strong>tu</strong></th><td><strong>-as</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-a</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-âmes</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-âtes</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-èrent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Il attacha</strong></mark></li><li>Enlève <kbd>-a</kbd> : il reste le radical <var>attach-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-ai</samp> au radical <var>attach-</var> :</p><span><var>attach</var><samp>ai</samp></span></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:256:16:5",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "256:16:5",
+      "verbId": 256,
+      "verb": "additionner",
+      "mode": "subjonctif",
+      "tense": "imparfait",
+      "person": "tu",
+      "expected": "additionnasses",
+      "signature": "subjonctif|imparfait|simple|p1|past-simple-il-remove-ending|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:subjonctif",
+        "person:tu",
+        "queue:sample",
+        "risk:past-simple-reference",
+        "risk:subjunctive-imperfect",
+        "strategy:past-simple-il-remove-ending",
+        "tense:subjonctif:imparfait"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>additionner</strong> = Calculer le total de plusieurs nombres.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au passé simple de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Il additionna</strong></mark></p></blockquote><blockquote><strong>Terminaisons de l’imparfait du subjonctif</strong><table><tbody><tr><th><strong>que je</strong></th><td><strong>-sse</strong></td></tr><tr><th><strong>que tu</strong></th><td><samp>-sses</samp></td></tr><tr><th><strong>qu’il / elle / on</strong></th><td><strong>-(voyelle accentuée)t</strong></td></tr><tr><th><strong>que nous</strong></th><td><strong>-ssions</strong></td></tr><tr><th><strong>que vous</strong></th><td><strong>-ssiez</strong></td></tr><tr><th><strong>qu’ils / elles</strong></th><td><strong>-ssent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Il additionna</strong></mark></li><li>Garde le radical <var>additionna-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-sses</samp> au radical <var>additionna-</var> :</p><span><var>additionna</var><samp>sses</samp></span></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:256:9:8",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "256:9:8",
+      "verbId": 256,
+      "verb": "additionner",
+      "mode": "impératif",
+      "tense": "présent",
+      "person": "vous",
+      "expected": "additionnez",
+      "signature": "imperatif|present|simple|p4|vous-present-same-person|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:imperatif",
+        "person:vous",
+        "queue:sample",
+        "risk:imperative",
+        "risk:imperative-no-subject-pronoun",
+        "risk:imperative-tu-s",
+        "strategy:vous-present-same-person",
+        "tense:imperatif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>additionner</strong> = Calculer le total de plusieurs nombres.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Présent de l’indicatif : tu, nous, vous</strong><p>Apprends par cœur ces trois formes. Elles servent de formes repères pour construire l’impératif.</p><details><summary>Consulter les formes avec tu, nous et vous</summary><table><tbody><tr><th><strong>tu</strong></th><td><mark><strong>Tu additionnes</strong></mark></td></tr><tr><th><strong>nous</strong></th><td><mark><strong>Nous additionnons</strong></mark></td></tr><tr><th><strong>vous</strong></th><td><mark><strong>Vous additionnez</strong></mark></td></tr></tbody></table></details></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Avec <strong>vous</strong>, pars de la forme du présent de l’indicatif :<br><mark><strong>Vous additionnez</strong></mark></li><li>Garde la forme verbale, mais n’écris pas le pronom sujet.</li></ol><blockquote><strong>Résultat</strong><p><mark><strong>Additionnez</strong></mark></p></blockquote></figure><figure><figcaption>S ou pas s avec tu</figcaption><blockquote><strong>Verbes en -er</strong><p>En général, il n’y a pas de <strong>s</strong> : <em>tu manges → mange</em>.</p></blockquote><blockquote><strong>Autres verbes</strong><p>En général, le <strong>s</strong> reste : <em>tu finis → finis</em>, <em>tu prends → prends</em>.</p></blockquote><blockquote><strong>Exceptions</strong><p>Les verbes conjugués comme <strong>ouvrir</strong> ou <strong>cueillir</strong> n’ont pas de s : <em>ouvre</em>, <em>cueille</em>. <strong>Aller</strong> donne <em>va</em>.</p><p>Apprends aussi ces formes particulières : <strong>aie, ayons, ayez</strong> ; <strong>sois, soyons, soyez</strong> ; <strong>sache, sachons, sachez</strong> ; <strong>veuille, veuillons, veuillez</strong>.</p></blockquote><blockquote><strong>Devant en ou y</strong><p>Le <strong>s</strong> revient lorsque <strong>en</strong> ou <strong>y</strong> suit directement la forme : <em>manges-en</em>, <em>vas-y</em>, <em>cueilles-en</em>.</p></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:532:2:8",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "532:2:8",
+      "verbId": 532,
+      "verb": "cycler",
+      "mode": "indicatif",
+      "tense": "imparfait",
+      "person": "vous",
+      "expected": "cycliez",
+      "signature": "indicatif|imparfait|simple|p4|present-nous-remove-ending|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:indicatif",
+        "person:vous",
+        "queue:sample",
+        "risk:present-nous-reference",
+        "strategy:present-nous-remove-ending",
+        "tense:indicatif:imparfait"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>cycler</strong> = Répéter une suite d’étapes dans le même ordre.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au présent de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Nous cyclons</strong></mark></p></blockquote><blockquote><strong>Terminaisons de l’imparfait de l’indicatif</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>tu</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-ait</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>vous</strong></th><td><samp>-iez</samp></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-aient</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Nous cyclons</strong></mark></li><li>Enlève <kbd>-ons</kbd> : il reste le radical <var>cycl-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-iez</samp> au radical <var>cycl-</var> :</p><span><var>cycl</var><samp>iez</samp></span></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:344:1:6",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "344:1:6",
+      "verbId": 344,
+      "verb": "bannir",
+      "mode": "indicatif",
+      "tense": "présent",
+      "person": "il",
+      "expected": "bannit",
+      "signature": "indicatif|present|simple|p2|present-nous-remove-ending|none|ir-issant",
+      "categories": [
+        "family:ir-issant",
+        "form:simple",
+        "layer:sample",
+        "mode:indicatif",
+        "person:il",
+        "queue:sample",
+        "risk:present-nous-reference",
+        "strategy:present-nous-remove-ending",
+        "tense:indicatif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>bannir</strong> = Obliger une personne à quitter un lieu et à ne pas revenir.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au présent de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Nous bannissons</strong></mark></p></blockquote><blockquote><strong>Terminaisons du présent de l’indicatif</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-is</strong></td></tr><tr><th><strong>tu</strong></th><td><strong>-is</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><samp>-it</samp></td></tr><tr><th><strong>nous</strong></th><td><strong>-issons</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-issez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-issent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Nous bannissons</strong></mark></li><li>Enlève <kbd>-issons</kbd> : il reste le radical <var>bann-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-it</samp> au radical <var>bann-</var> :</p><span><var>bann</var><samp>it</samp></span></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:7:14:4",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "7:14:4",
+      "verbId": 7,
+      "verb": "apprendre",
+      "mode": "conditionnel",
+      "tense": "présent",
+      "person": "je",
+      "expected": "apprendrais",
+      "signature": "conditionnel|present|simple|p0|regular-re|none|prendre",
+      "categories": [
+        "family:prendre",
+        "form:simple",
+        "layer:sample",
+        "mode:conditionnel",
+        "person:je",
+        "queue:sample",
+        "risk:conditional-future-stem",
+        "risk:third-group-ending",
+        "strategy:regular-re",
+        "tense:conditionnel:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>apprendre</strong> = Découvrir et retenir une nouvelle information ou une nouvelle façon de faire.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>La formule</strong><p><strong>Conditionnel présent</strong> = <var>radical du futur-</var> + <samp>terminaisons de l’imparfait</samp>.</p></blockquote><blockquote><strong>Terminaisons de l’imparfait</strong><table><tbody><tr><th><strong>je</strong></th><td><samp>-ais</samp></td></tr><tr><th><strong>tu</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-ait</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-aient</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical du futur</figcaption><ol><li>Pars de l’infinitif : <strong>apprendre</strong>.</li><li>Enlève le <strong>e</strong> final : tu obtiens <var>apprendr-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute la terminaison de l’imparfait <samp>-ais</samp> au radical du futur <var>apprendr-</var> :</p><b><span><var>apprendr</var><samp>ais</samp></span><i>✓</i></b></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:531:14:8",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "531:14:8",
+      "verbId": 531,
+      "verb": "croiser",
+      "mode": "conditionnel",
+      "tense": "présent",
+      "person": "vous",
+      "expected": "croiseriez",
+      "signature": "conditionnel|present|simple|p4|regular-infinitive|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:conditionnel",
+        "person:vous",
+        "queue:sample",
+        "risk:conditional-future-stem",
+        "strategy:regular-infinitive",
+        "tense:conditionnel:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>croiser</strong> = Passer près d’une personne qui va dans l’autre direction.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>La formule</strong><p><strong>Conditionnel présent</strong> = <var>radical du futur-</var> + <samp>terminaisons de l’imparfait</samp>.</p></blockquote><blockquote><strong>Terminaisons de l’imparfait</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>tu</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-ait</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>vous</strong></th><td><samp>-iez</samp></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-aient</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical du futur</figcaption><ol><li>Pars de l’infinitif : <strong>croiser</strong>.</li><li>Garde tout l’infinitif : le radical du futur est <var>croiser-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute la terminaison de l’imparfait <samp>-iez</samp> au radical du futur <var>croiser-</var> :</p><b><span><var>croiser</var><samp>iez</samp></span><i>✓</i></b></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:169:10:9",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "169:10:9",
+      "verbId": 169,
+      "verb": "trouver",
+      "mode": "subjonctif",
+      "tense": "présent",
+      "person": "ils",
+      "expected": "trouvent",
+      "signature": "subjonctif|present|simple|p5|two-stems-present-ils|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:subjonctif",
+        "person:ils",
+        "queue:sample",
+        "risk:present-ils-reference",
+        "risk:subjunctive-present-two-stems",
+        "strategy:two-stems-present-ils",
+        "tense:subjonctif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>trouver</strong> = Découvrir une personne, une chose ou une réponse que l’on cherchait.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Deux formes repères</strong><p>Apprends ces deux formes. Elles permettent de construire toutes les personnes du subjonctif présent.</p><p>Pour <strong>que je, que tu, qu’il / elle / on</strong> et <strong>qu’ils / elles</strong>, pars de la forme avec <strong>ils</strong> au présent de l’indicatif :</p><p><mark><strong>Ils trouvent</strong></mark></p><p>Pour <strong>que nous</strong> et <strong>que vous</strong>, pars de la forme avec <strong>nous</strong> au présent de l’indicatif :</p><p><mark><strong>Nous trouvons</strong></mark></p></blockquote><blockquote><strong>Terminaisons du subjonctif présent</strong><table><tbody><tr><th><strong>que je</strong></th><td><strong>-e</strong></td></tr><tr><th><strong>que tu</strong></th><td><strong>-es</strong></td></tr><tr><th><strong>qu’il / elle / on</strong></th><td><strong>-e</strong></td></tr><tr><th><strong>que nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>que vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>qu’ils / elles</strong></th><td><samp>-ent</samp></td></tr></tbody></table></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Pars de la forme avec <strong>ils</strong> au présent de l’indicatif :<br><mark><strong>Ils trouvent</strong></mark></li><li>Enlève <kbd>-ent</kbd> : il reste le radical <var>trouv-</var>.</li><li>Ajoute <samp>-ent</samp>.</li></ol><blockquote><strong>Résultat</strong><p><span><var>trouv</var><samp>ent</samp></span></p></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:234:2:5",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "234:2:5",
+      "verbId": 234,
+      "verb": "voler",
+      "mode": "indicatif",
+      "tense": "imparfait",
+      "person": "tu",
+      "expected": "volais",
+      "signature": "indicatif|imparfait|simple|p1|present-nous-remove-ending|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:indicatif",
+        "person:tu",
+        "queue:sample",
+        "risk:present-nous-reference",
+        "strategy:present-nous-remove-ending",
+        "tense:indicatif:imparfait"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>voler</strong> = Se déplacer dans l’air avec des ailes ou un appareil.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au présent de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Nous volons</strong></mark></p></blockquote><blockquote><strong>Terminaisons de l’imparfait de l’indicatif</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>tu</strong></th><td><samp>-ais</samp></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-ait</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-aient</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Nous volons</strong></mark></li><li>Enlève <kbd>-ons</kbd> : il reste le radical <var>vol-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-ais</samp> au radical <var>vol-</var> :</p><span><var>vol</var><samp>ais</samp></span></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:557:2:9",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "557:2:9",
+      "verbId": 557,
+      "verb": "diviser",
+      "mode": "indicatif",
+      "tense": "imparfait",
+      "person": "ils",
+      "expected": "divisaient",
+      "signature": "indicatif|imparfait|simple|p5|present-nous-remove-ending|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:indicatif",
+        "person:ils",
+        "queue:sample",
+        "risk:present-nous-reference",
+        "strategy:present-nous-remove-ending",
+        "tense:indicatif:imparfait"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>diviser</strong> = Séparer en plusieurs parties.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au présent de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Nous divisons</strong></mark></p></blockquote><blockquote><strong>Terminaisons de l’imparfait de l’indicatif</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>tu</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-ait</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><samp>-aient</samp></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Nous divisons</strong></mark></li><li>Enlève <kbd>-ons</kbd> : il reste le radical <var>divis-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-aient</samp> au radical <var>divis-</var> :</p><span><var>divis</var><samp>aient</samp></span></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:407:2:6",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "407:2:6",
+      "verbId": 407,
+      "verb": "s'endormir",
+      "mode": "indicatif",
+      "tense": "imparfait",
+      "person": "il",
+      "expected": "s'endormait",
+      "signature": "indicatif|imparfait|simple|p2|present-nous-remove-ending|none|troisieme-ir",
+      "categories": [
+        "family:troisieme-ir",
+        "form:simple",
+        "layer:sample",
+        "mode:indicatif",
+        "person:il",
+        "queue:sample",
+        "risk:present-nous-reference",
+        "risk:pronominal",
+        "risk:reflexive-pronoun",
+        "strategy:present-nous-remove-ending",
+        "tense:indicatif:imparfait"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>s&#39;endormir</strong> = Commencer à dormir.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au présent de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Nous nous endormons</strong></mark></p></blockquote><blockquote><strong>Terminaisons de l’imparfait de l’indicatif</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>tu</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><samp>-ait</samp></td></tr><tr><th><strong>nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-aient</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Nous nous endormons</strong></mark></li><li>Enlève <kbd>-ons</kbd> : il reste le radical <var>endorm-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-ait</samp> au radical <var>endorm-</var> :</p><span><var>endorm</var><samp>ait</samp></span><p>Ajoute aussi le pronom réfléchi adapté :</p><b><mark><strong>Il s’endormait</strong></mark><i>✓</i></b></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:232:10:6",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "232:10:6",
+      "verbId": 232,
+      "verb": "manquer",
+      "mode": "subjonctif",
+      "tense": "présent",
+      "person": "il",
+      "expected": "manque",
+      "signature": "subjonctif|present|simple|p2|two-stems-present-ils|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:subjonctif",
+        "person:il",
+        "queue:sample",
+        "risk:present-ils-reference",
+        "risk:subjunctive-present-two-stems",
+        "strategy:two-stems-present-ils",
+        "tense:subjonctif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>manquer</strong> = Ne pas avoir assez d’une chose ou ne pas réussir à l’atteindre.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Deux formes repères</strong><p>Apprends ces deux formes. Elles permettent de construire toutes les personnes du subjonctif présent.</p><p>Pour <strong>que je, que tu, qu’il / elle / on</strong> et <strong>qu’ils / elles</strong>, pars de la forme avec <strong>ils</strong> au présent de l’indicatif :</p><p><mark><strong>Ils manquent</strong></mark></p><p>Pour <strong>que nous</strong> et <strong>que vous</strong>, pars de la forme avec <strong>nous</strong> au présent de l’indicatif :</p><p><mark><strong>Nous manquons</strong></mark></p></blockquote><blockquote><strong>Terminaisons du subjonctif présent</strong><table><tbody><tr><th><strong>que je</strong></th><td><strong>-e</strong></td></tr><tr><th><strong>que tu</strong></th><td><strong>-es</strong></td></tr><tr><th><strong>qu’il / elle / on</strong></th><td><samp>-e</samp></td></tr><tr><th><strong>que nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>que vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>qu’ils / elles</strong></th><td><strong>-ent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Pars de la forme avec <strong>ils</strong> au présent de l’indicatif :<br><mark><strong>Ils manquent</strong></mark></li><li>Enlève <kbd>-ent</kbd> : il reste le radical <var>manqu-</var>.</li><li>Ajoute <samp>-e</samp>.</li></ol><blockquote><strong>Résultat</strong><p><span><var>manqu</var><samp>e</samp></span></p></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:279:4:5",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "279:4:5",
+      "verbId": 279,
+      "verb": "émouvoir",
+      "mode": "indicatif",
+      "tense": "passé simple",
+      "person": "tu",
+      "expected": "émus",
+      "signature": "indicatif|passe simple|simple|p1|past-simple-il-remove-ending|none|voir-recevoir",
+      "categories": [
+        "family:voir-recevoir",
+        "form:simple",
+        "layer:sample",
+        "mode:indicatif",
+        "person:tu",
+        "queue:sample",
+        "risk:e-accent-alternation",
+        "risk:past-simple-reference",
+        "strategy:past-simple-il-remove-ending",
+        "tense:indicatif:passe simple"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>émouvoir</strong> = Faire ressentir une émotion forte.</p></section><section><ol><li>Pars de la forme repère :<br><mark><strong>Il émut</strong></mark></li><li>Retire <kbd>-ut</kbd> pour obtenir le radical <var>ém-</var>.</li><li>Ajoute <code>-us</code> pour former <strong>Émus</strong>.</li></ol></section>"
+    },
+    {
+      "id": "category-form:558:4:4",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "558:4:4",
+      "verbId": 558,
+      "verb": "documenter",
+      "mode": "indicatif",
+      "tense": "passé simple",
+      "person": "je",
+      "expected": "documentai",
+      "signature": "indicatif|passe simple|simple|p0|past-simple-il-remove-ending|none|er-alternance",
+      "categories": [
+        "family:er-alternance",
+        "form:simple",
+        "layer:sample",
+        "mode:indicatif",
+        "person:je",
+        "queue:sample",
+        "risk:past-simple-reference",
+        "strategy:past-simple-il-remove-ending",
+        "tense:indicatif:passe simple"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>documenter</strong> = Rassembler des informations et des documents sur un sujet.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au passé simple de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Il documenta</strong></mark></p></blockquote><blockquote><strong>Terminaisons du passé simple de l’indicatif</strong><table><tbody><tr><th><strong>je</strong></th><td><samp>-ai</samp></td></tr><tr><th><strong>tu</strong></th><td><strong>-as</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-a</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-âmes</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-âtes</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-èrent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Il documenta</strong></mark></li><li>Enlève <kbd>-a</kbd> : il reste le radical <var>document-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-ai</samp> au radical <var>document-</var> :</p><span><var>document</var><samp>ai</samp></span></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:197:10:8",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "197:10:8",
+      "verbId": 197,
+      "verb": "démolir",
+      "mode": "subjonctif",
+      "tense": "présent",
+      "person": "vous",
+      "expected": "démolissiez",
+      "signature": "subjonctif|present|simple|p4|two-stems-present-nous|none|ir-issant",
+      "categories": [
+        "family:ir-issant",
+        "form:simple",
+        "layer:sample",
+        "mode:subjonctif",
+        "person:vous",
+        "queue:sample",
+        "risk:e-accent-alternation",
+        "risk:present-nous-reference",
+        "risk:subjunctive-present-two-stems",
+        "strategy:two-stems-present-nous",
+        "tense:subjonctif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>démolir</strong> = Détruire un bâtiment ou une construction.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Deux formes repères</strong><p>Apprends ces deux formes. Elles permettent de construire toutes les personnes du subjonctif présent.</p><p>Pour <strong>que je, que tu, qu’il / elle / on</strong> et <strong>qu’ils / elles</strong>, pars de la forme avec <strong>ils</strong> au présent de l’indicatif :</p><p><mark><strong>Ils démolissent</strong></mark></p><p>Pour <strong>que nous</strong> et <strong>que vous</strong>, pars de la forme avec <strong>nous</strong> au présent de l’indicatif :</p><p><mark><strong>Nous démolissons</strong></mark></p></blockquote><blockquote><strong>Terminaisons du subjonctif présent</strong><table><tbody><tr><th><strong>que je</strong></th><td><strong>-e</strong></td></tr><tr><th><strong>que tu</strong></th><td><strong>-es</strong></td></tr><tr><th><strong>qu’il / elle / on</strong></th><td><strong>-e</strong></td></tr><tr><th><strong>que nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>que vous</strong></th><td><samp>-iez</samp></td></tr><tr><th><strong>qu’ils / elles</strong></th><td><strong>-ent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Pars de la forme avec <strong>nous</strong> au présent de l’indicatif :<br><mark><strong>Nous démolissons</strong></mark></li><li>Enlève <kbd>-ons</kbd> : il reste le radical <var>démoliss-</var>.</li><li>Ajoute <samp>-iez</samp>.</li></ol><blockquote><strong>Résultat</strong><p><span><var>démoliss</var><samp>iez</samp></span></p></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:158:14:4",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "158:14:4",
+      "verbId": 158,
+      "verb": "attendre",
+      "mode": "conditionnel",
+      "tense": "présent",
+      "person": "je",
+      "expected": "attendrais",
+      "signature": "conditionnel|present|simple|p0|regular-re|none|dre-tre",
+      "categories": [
+        "family:dre-tre",
+        "form:simple",
+        "layer:sample",
+        "mode:conditionnel",
+        "person:je",
+        "queue:sample",
+        "risk:conditional-future-stem",
+        "risk:third-group-ending",
+        "strategy:regular-re",
+        "tense:conditionnel:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>attendre</strong> = Rester jusqu’à l’arrivée d’une personne ou jusqu’à un moment prévu.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>La formule</strong><p><strong>Conditionnel présent</strong> = <var>radical du futur-</var> + <samp>terminaisons de l’imparfait</samp>.</p></blockquote><blockquote><strong>Terminaisons de l’imparfait</strong><table><tbody><tr><th><strong>je</strong></th><td><samp>-ais</samp></td></tr><tr><th><strong>tu</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-ait</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-aient</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical du futur</figcaption><ol><li>Pars de l’infinitif : <strong>attendre</strong>.</li><li>Enlève le <strong>e</strong> final : tu obtiens <var>attendr-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute la terminaison de l’imparfait <samp>-ais</samp> au radical du futur <var>attendr-</var> :</p><b><span><var>attendr</var><samp>ais</samp></span><i>✓</i></b></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:542:4:4",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "542:4:4",
+      "verbId": 542,
+      "verb": "defiler",
+      "mode": "indicatif",
+      "tense": "passé simple",
+      "person": "je",
+      "expected": "defilai",
+      "signature": "indicatif|passe simple|simple|p0|past-simple-il-remove-ending|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:indicatif",
+        "person:je",
+        "queue:sample",
+        "risk:past-simple-reference",
+        "strategy:past-simple-il-remove-ending",
+        "tense:indicatif:passe simple"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>defiler</strong> = Passer l’un après l’autre, souvent devant des personnes.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au passé simple de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Il defila</strong></mark></p></blockquote><blockquote><strong>Terminaisons du passé simple de l’indicatif</strong><table><tbody><tr><th><strong>je</strong></th><td><samp>-ai</samp></td></tr><tr><th><strong>tu</strong></th><td><strong>-as</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-a</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-âmes</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-âtes</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-èrent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Il defila</strong></mark></li><li>Enlève <kbd>-a</kbd> : il reste le radical <var>defil-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-ai</samp> au radical <var>defil-</var> :</p><span><var>defil</var><samp>ai</samp></span></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:516:9:8",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "516:9:8",
+      "verbId": 516,
+      "verb": "cloner",
+      "mode": "impératif",
+      "tense": "présent",
+      "person": "vous",
+      "expected": "clonez",
+      "signature": "imperatif|present|simple|p4|vous-present-same-person|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:imperatif",
+        "person:vous",
+        "queue:sample",
+        "risk:imperative",
+        "risk:imperative-no-subject-pronoun",
+        "risk:imperative-tu-s",
+        "strategy:vous-present-same-person",
+        "tense:imperatif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>cloner</strong> = Créer une copie exactement pareille.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Présent de l’indicatif : tu, nous, vous</strong><p>Apprends par cœur ces trois formes. Elles servent de formes repères pour construire l’impératif.</p><details><summary>Consulter les formes avec tu, nous et vous</summary><table><tbody><tr><th><strong>tu</strong></th><td><mark><strong>Tu clones</strong></mark></td></tr><tr><th><strong>nous</strong></th><td><mark><strong>Nous clonons</strong></mark></td></tr><tr><th><strong>vous</strong></th><td><mark><strong>Vous clonez</strong></mark></td></tr></tbody></table></details></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Avec <strong>vous</strong>, pars de la forme du présent de l’indicatif :<br><mark><strong>Vous clonez</strong></mark></li><li>Garde la forme verbale, mais n’écris pas le pronom sujet.</li></ol><blockquote><strong>Résultat</strong><p><mark><strong>Clonez</strong></mark></p></blockquote></figure><figure><figcaption>S ou pas s avec tu</figcaption><blockquote><strong>Verbes en -er</strong><p>En général, il n’y a pas de <strong>s</strong> : <em>tu manges → mange</em>.</p></blockquote><blockquote><strong>Autres verbes</strong><p>En général, le <strong>s</strong> reste : <em>tu finis → finis</em>, <em>tu prends → prends</em>.</p></blockquote><blockquote><strong>Exceptions</strong><p>Les verbes conjugués comme <strong>ouvrir</strong> ou <strong>cueillir</strong> n’ont pas de s : <em>ouvre</em>, <em>cueille</em>. <strong>Aller</strong> donne <em>va</em>.</p><p>Apprends aussi ces formes particulières : <strong>aie, ayons, ayez</strong> ; <strong>sois, soyons, soyez</strong> ; <strong>sache, sachons, sachez</strong> ; <strong>veuille, veuillons, veuillez</strong>.</p></blockquote><blockquote><strong>Devant en ou y</strong><p>Le <strong>s</strong> revient lorsque <strong>en</strong> ou <strong>y</strong> suit directement la forme : <em>manges-en</em>, <em>vas-y</em>, <em>cueilles-en</em>.</p></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:125:10:7",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "125:10:7",
+      "verbId": 125,
+      "verb": "suffire",
+      "mode": "subjonctif",
+      "tense": "présent",
+      "person": "nous",
+      "expected": "suffisions",
+      "signature": "subjonctif|present|simple|p3|two-stems-present-nous|none|irregulier",
+      "categories": [
+        "family:irregulier",
+        "form:simple",
+        "layer:sample",
+        "mode:subjonctif",
+        "person:nous",
+        "queue:sample",
+        "risk:present-nous-reference",
+        "risk:subjunctive-present-two-stems",
+        "strategy:two-stems-present-nous",
+        "tense:subjonctif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>suffire</strong> = Être assez pour ce qui est nécessaire.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Deux formes repères</strong><p>Apprends ces deux formes. Elles permettent de construire toutes les personnes du subjonctif présent.</p><p>Pour <strong>que je, que tu, qu’il / elle / on</strong> et <strong>qu’ils / elles</strong>, pars de la forme avec <strong>ils</strong> au présent de l’indicatif :</p><p><mark><strong>Ils suffisent</strong></mark></p><p>Pour <strong>que nous</strong> et <strong>que vous</strong>, pars de la forme avec <strong>nous</strong> au présent de l’indicatif :</p><p><mark><strong>Nous suffisons</strong></mark></p></blockquote><blockquote><strong>Terminaisons du subjonctif présent</strong><table><tbody><tr><th><strong>que je</strong></th><td><strong>-e</strong></td></tr><tr><th><strong>que tu</strong></th><td><strong>-es</strong></td></tr><tr><th><strong>qu’il / elle / on</strong></th><td><strong>-e</strong></td></tr><tr><th><strong>que nous</strong></th><td><samp>-ions</samp></td></tr><tr><th><strong>que vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>qu’ils / elles</strong></th><td><strong>-ent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Pars de la forme avec <strong>nous</strong> au présent de l’indicatif :<br><mark><strong>Nous suffisons</strong></mark></li><li>Enlève <kbd>-ons</kbd> : il reste le radical <var>suffis-</var>.</li><li>Ajoute <samp>-ions</samp>.</li></ol><blockquote><strong>Résultat</strong><p><span><var>suffis</var><samp>ions</samp></span></p></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:558:9:8",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "558:9:8",
+      "verbId": 558,
+      "verb": "documenter",
+      "mode": "impératif",
+      "tense": "présent",
+      "person": "vous",
+      "expected": "documentez",
+      "signature": "imperatif|present|simple|p4|vous-present-same-person|none|er-alternance",
+      "categories": [
+        "family:er-alternance",
+        "form:simple",
+        "layer:sample",
+        "mode:imperatif",
+        "person:vous",
+        "queue:sample",
+        "risk:imperative",
+        "risk:imperative-no-subject-pronoun",
+        "risk:imperative-tu-s",
+        "strategy:vous-present-same-person",
+        "tense:imperatif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>documenter</strong> = Rassembler des informations et des documents sur un sujet.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Présent de l’indicatif : tu, nous, vous</strong><p>Apprends par cœur ces trois formes. Elles servent de formes repères pour construire l’impératif.</p><details><summary>Consulter les formes avec tu, nous et vous</summary><table><tbody><tr><th><strong>tu</strong></th><td><mark><strong>Tu documentes</strong></mark></td></tr><tr><th><strong>nous</strong></th><td><mark><strong>Nous documentons</strong></mark></td></tr><tr><th><strong>vous</strong></th><td><mark><strong>Vous documentez</strong></mark></td></tr></tbody></table></details></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Avec <strong>vous</strong>, pars de la forme du présent de l’indicatif :<br><mark><strong>Vous documentez</strong></mark></li><li>Garde la forme verbale, mais n’écris pas le pronom sujet.</li></ol><blockquote><strong>Résultat</strong><p><mark><strong>Documentez</strong></mark></p></blockquote></figure><figure><figcaption>S ou pas s avec tu</figcaption><blockquote><strong>Verbes en -er</strong><p>En général, il n’y a pas de <strong>s</strong> : <em>tu manges → mange</em>.</p></blockquote><blockquote><strong>Autres verbes</strong><p>En général, le <strong>s</strong> reste : <em>tu finis → finis</em>, <em>tu prends → prends</em>.</p></blockquote><blockquote><strong>Exceptions</strong><p>Les verbes conjugués comme <strong>ouvrir</strong> ou <strong>cueillir</strong> n’ont pas de s : <em>ouvre</em>, <em>cueille</em>. <strong>Aller</strong> donne <em>va</em>.</p><p>Apprends aussi ces formes particulières : <strong>aie, ayons, ayez</strong> ; <strong>sois, soyons, soyez</strong> ; <strong>sache, sachons, sachez</strong> ; <strong>veuille, veuillons, veuillez</strong>.</p></blockquote><blockquote><strong>Devant en ou y</strong><p>Le <strong>s</strong> revient lorsque <strong>en</strong> ou <strong>y</strong> suit directement la forme : <em>manges-en</em>, <em>vas-y</em>, <em>cueilles-en</em>.</p></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:20:10:4",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "20:10:4",
+      "verbId": 20,
+      "verb": "connaître",
+      "mode": "subjonctif",
+      "tense": "présent",
+      "person": "je",
+      "expected": "connaisse",
+      "signature": "subjonctif|present|simple|p0|two-stems-present-ils|none|dre-tre",
+      "categories": [
+        "family:dre-tre",
+        "form:simple",
+        "layer:sample",
+        "mode:subjonctif",
+        "person:je",
+        "queue:sample",
+        "risk:present-ils-reference",
+        "risk:subjunctive-present-two-stems",
+        "risk:third-group-ending",
+        "strategy:two-stems-present-ils",
+        "tense:subjonctif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>connaître</strong> = Avoir des informations ou de l’expérience sur une personne ou une chose.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Deux formes repères</strong><p>Apprends ces deux formes. Elles permettent de construire toutes les personnes du subjonctif présent.</p><p>Pour <strong>que je, que tu, qu’il / elle / on</strong> et <strong>qu’ils / elles</strong>, pars de la forme avec <strong>ils</strong> au présent de l’indicatif :</p><p><mark><strong>Ils connaissent</strong></mark></p><p>Pour <strong>que nous</strong> et <strong>que vous</strong>, pars de la forme avec <strong>nous</strong> au présent de l’indicatif :</p><p><mark><strong>Nous connaissons</strong></mark></p></blockquote><blockquote><strong>Terminaisons du subjonctif présent</strong><table><tbody><tr><th><strong>que je</strong></th><td><samp>-e</samp></td></tr><tr><th><strong>que tu</strong></th><td><strong>-es</strong></td></tr><tr><th><strong>qu’il / elle / on</strong></th><td><strong>-e</strong></td></tr><tr><th><strong>que nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>que vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>qu’ils / elles</strong></th><td><strong>-ent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Pars de la forme avec <strong>ils</strong> au présent de l’indicatif :<br><mark><strong>Ils connaissent</strong></mark></li><li>Enlève <kbd>-ent</kbd> : il reste le radical <var>connaiss-</var>.</li><li>Ajoute <samp>-e</samp>.</li></ol><blockquote><strong>Résultat</strong><p><span><var>connaiss</var><samp>e</samp></span></p></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:118:16:4",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "118:16:4",
+      "verbId": 118,
+      "verb": "avertir",
+      "mode": "subjonctif",
+      "tense": "imparfait",
+      "person": "je",
+      "expected": "avertisse",
+      "signature": "subjonctif|imparfait|simple|p0|past-simple-il-remove-ending|none|ir-issant",
+      "categories": [
+        "family:ir-issant",
+        "form:simple",
+        "layer:sample",
+        "mode:subjonctif",
+        "person:je",
+        "queue:sample",
+        "risk:past-simple-reference",
+        "risk:subjunctive-imperfect",
+        "strategy:past-simple-il-remove-ending",
+        "tense:subjonctif:imparfait"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>avertir</strong> = Prévenir une personne de ce qui va arriver ou d’un danger.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au passé simple de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Il avertit</strong></mark></p></blockquote><blockquote><strong>Terminaisons de l’imparfait du subjonctif</strong><table><tbody><tr><th><strong>que je</strong></th><td><samp>-sse</samp></td></tr><tr><th><strong>que tu</strong></th><td><strong>-sses</strong></td></tr><tr><th><strong>qu’il / elle / on</strong></th><td><strong>-(voyelle accentuée)t</strong></td></tr><tr><th><strong>que nous</strong></th><td><strong>-ssions</strong></td></tr><tr><th><strong>que vous</strong></th><td><strong>-ssiez</strong></td></tr><tr><th><strong>qu’ils / elles</strong></th><td><strong>-ssent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Il avertit</strong></mark></li><li>Enlève <kbd>-t</kbd> : il reste le radical <var>averti-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-sse</samp> au radical <var>averti-</var> :</p><span><var>averti</var><samp>sse</samp></span></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:176:10:6",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "176:10:6",
+      "verbId": 176,
+      "verb": "baisser",
+      "mode": "subjonctif",
+      "tense": "présent",
+      "person": "il",
+      "expected": "baisse",
+      "signature": "subjonctif|present|simple|p2|two-stems-present-ils|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:subjonctif",
+        "person:il",
+        "queue:sample",
+        "risk:present-ils-reference",
+        "risk:subjunctive-present-two-stems",
+        "strategy:two-stems-present-ils",
+        "tense:subjonctif:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>baisser</strong> = Mettre plus bas ou rendre moins fort.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Deux formes repères</strong><p>Apprends ces deux formes. Elles permettent de construire toutes les personnes du subjonctif présent.</p><p>Pour <strong>que je, que tu, qu’il / elle / on</strong> et <strong>qu’ils / elles</strong>, pars de la forme avec <strong>ils</strong> au présent de l’indicatif :</p><p><mark><strong>Ils baissent</strong></mark></p><p>Pour <strong>que nous</strong> et <strong>que vous</strong>, pars de la forme avec <strong>nous</strong> au présent de l’indicatif :</p><p><mark><strong>Nous baissons</strong></mark></p></blockquote><blockquote><strong>Terminaisons du subjonctif présent</strong><table><tbody><tr><th><strong>que je</strong></th><td><strong>-e</strong></td></tr><tr><th><strong>que tu</strong></th><td><strong>-es</strong></td></tr><tr><th><strong>qu’il / elle / on</strong></th><td><samp>-e</samp></td></tr><tr><th><strong>que nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>que vous</strong></th><td><strong>-iez</strong></td></tr><tr><th><strong>qu’ils / elles</strong></th><td><strong>-ent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Pars de la forme avec <strong>ils</strong> au présent de l’indicatif :<br><mark><strong>Ils baissent</strong></mark></li><li>Enlève <kbd>-ent</kbd> : il reste le radical <var>baiss-</var>.</li><li>Ajoute <samp>-e</samp>.</li></ol><blockquote><strong>Résultat</strong><p><span><var>baiss</var><samp>e</samp></span></p></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:472:3:5",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "472:3:5",
+      "verbId": 472,
+      "verb": "aggraver",
+      "mode": "indicatif",
+      "tense": "futur",
+      "person": "tu",
+      "expected": "aggraveras",
+      "signature": "indicatif|futur|simple|p1|future-stem-remove-ending|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:indicatif",
+        "person:tu",
+        "queue:sample",
+        "risk:elision-je",
+        "risk:future-stem",
+        "strategy:future-stem-remove-ending",
+        "tense:indicatif:futur"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>aggraver</strong> = Rendre une situation plus difficile ou plus grave.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au futur de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>J’aggraverai</strong></mark></p></blockquote><blockquote><strong>Terminaisons du futur de l’indicatif</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-ai</strong></td></tr><tr><th><strong>tu</strong></th><td><samp>-as</samp></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-a</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-ons</strong></td></tr><tr><th><strong>vous</strong></th><td><strong>-ez</strong></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-ont</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>J’aggraverai</strong></mark></li><li>Enlève <kbd>-ai</kbd> : il reste le radical <var>aggraver-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-as</samp> au radical <var>aggraver-</var> :</p><span><var>aggraver</var><samp>as</samp></span></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:83:14:8",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "83:14:8",
+      "verbId": 83,
+      "verb": "offrir",
+      "mode": "conditionnel",
+      "tense": "présent",
+      "person": "vous",
+      "expected": "offririez",
+      "signature": "conditionnel|present|simple|p4|regular-infinitive|none|ouvrir-cueillir",
+      "categories": [
+        "family:ouvrir-cueillir",
+        "form:simple",
+        "layer:sample",
+        "mode:conditionnel",
+        "person:vous",
+        "queue:sample",
+        "risk:conditional-future-stem",
+        "strategy:regular-infinitive",
+        "tense:conditionnel:present"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>offrir</strong> = Donner quelque chose pour faire plaisir.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>La formule</strong><p><strong>Conditionnel présent</strong> = <var>radical du futur-</var> + <samp>terminaisons de l’imparfait</samp>.</p></blockquote><blockquote><strong>Terminaisons de l’imparfait</strong><table><tbody><tr><th><strong>je</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>tu</strong></th><td><strong>-ais</strong></td></tr><tr><th><strong>il / elle / on</strong></th><td><strong>-ait</strong></td></tr><tr><th><strong>nous</strong></th><td><strong>-ions</strong></td></tr><tr><th><strong>vous</strong></th><td><samp>-iez</samp></td></tr><tr><th><strong>ils / elles</strong></th><td><strong>-aient</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical du futur</figcaption><ol><li>Pars de l’infinitif : <strong>offrir</strong>.</li><li>Garde tout l’infinitif : le radical du futur est <var>offrir-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute la terminaison de l’imparfait <samp>-iez</samp> au radical du futur <var>offrir-</var> :</p><b><span><var>offrir</var><samp>iez</samp></span><i>✓</i></b></blockquote></figure></section>"
+    },
+    {
+      "id": "category-form:224:16:4",
+      "kind": "category-form",
+      "layers": [
+        "sample",
+        "category-form"
+      ],
+      "key": "224:16:4",
+      "verbId": 224,
+      "verb": "tirer",
+      "mode": "subjonctif",
+      "tense": "imparfait",
+      "person": "je",
+      "expected": "tirasse",
+      "signature": "subjonctif|imparfait|simple|p0|past-simple-il-remove-ending|none|er-regulier",
+      "categories": [
+        "family:er-regulier",
+        "form:simple",
+        "layer:sample",
+        "mode:subjonctif",
+        "person:je",
+        "queue:sample",
+        "risk:past-simple-reference",
+        "risk:subjunctive-imperfect",
+        "strategy:past-simple-il-remove-ending",
+        "tense:subjonctif:imparfait"
+      ],
+      "html": "<section><h3>Définition</h3><p><strong>tirer</strong> = Faire venir une chose vers soi en la tenant.</p></section><section><figure><figcaption>À savoir par cœur<i>♥</i></figcaption><blockquote><strong>Forme repère</strong><p>Voici la forme repère au passé simple de l’indicatif. Apprends-la par cœur, c’est très utile :</p><p><mark><strong>Il tira</strong></mark></p></blockquote><blockquote><strong>Terminaisons de l’imparfait du subjonctif</strong><table><tbody><tr><th><strong>que je</strong></th><td><samp>-sse</samp></td></tr><tr><th><strong>que tu</strong></th><td><strong>-sses</strong></td></tr><tr><th><strong>qu’il / elle / on</strong></th><td><strong>-(voyelle accentuée)t</strong></td></tr><tr><th><strong>que nous</strong></th><td><strong>-ssions</strong></td></tr><tr><th><strong>que vous</strong></th><td><strong>-ssiez</strong></td></tr><tr><th><strong>qu’ils / elles</strong></th><td><strong>-ssent</strong></td></tr></tbody></table></blockquote></figure><figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br><mark><strong>Il tira</strong></mark></li><li>Garde le radical <var>tira-</var>.</li></ol></figure><figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute <samp>-sse</samp> au radical <var>tira-</var> :</p><span><var>tira</var><samp>sse</samp></span></blockquote></figure></section>"
+    }
+  ]
+}

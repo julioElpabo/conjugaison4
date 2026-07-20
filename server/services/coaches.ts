@@ -8,7 +8,7 @@ type Executor = Pool | PoolConnection
 interface CoachRow extends RowDataPacket {
   id: number, slug: string, firstName: string, lastName: string, avatarPath: string,
   gender: CoachProfile['gender'],
-  description: string, characterId: number, characterName: string, personality: string, pedagogicalStyle: string, themeColor: string,
+  description: string, likes: string, characterId: number, characterName: string, personality: string, pedagogicalStyle: string, themeColor: string,
   status: CoachProfile['status'], sortOrder: number, helpId: number | null
 }
 interface CharacterRow extends RowDataPacket {
@@ -47,7 +47,7 @@ export async function listCoaches(
 ): Promise<CoachProfile[]> {
   const requestedLocale = normalizeLocale(locale, 'fr')
   const [coaches] = await database.execute<CoachRow[]>(`SELECT c.id, c.slug, c.first_name AS firstName, c.last_name AS lastName,
-    c.gender, c.avatar_path AS avatarPath, c.description, c.character_id AS characterId,
+    c.gender, c.avatar_path AS avatarPath, c.description, COALESCE(c.likes, '') AS likes, c.character_id AS characterId,
     CASE WHEN ?='fr' AND c.gender='female' THEN cc.feminine_name
       WHEN ?='fr' THEN cc.masculine_name
       WHEN c.gender='female'
@@ -145,7 +145,7 @@ export function parseCoachPayload(value: unknown) {
     firstName: string(body.firstName, 80), lastName: string(body.lastName, 80),
     gender: string(body.gender, 8),
     characterId: Number(body.characterId),
-    avatarPath: string(body.avatarPath, 255), description: string(body.description, 255),
+    avatarPath: string(body.avatarPath, 255), description: string(body.description, 255), likes: string(body.likes, 255),
     themeColor: string(body.themeColor, 7), status: string(body.status, 12),
     sortOrder: Number(body.sortOrder),
   }

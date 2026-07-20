@@ -89,7 +89,7 @@ async function selectCoach(coach: CoachProfile) {
 function blankCoach(): CoachProfile {
   const character = characters.value[0]
   const characterName = character ? characterNameForGender(character, 'female') : ''
-  return { id: 0, slug: '', firstName: '', lastName: '', gender: 'female', avatarPath: '', description: '', characterId: character?.id || 0, characterName, personality: characterName, pedagogicalStyle: character?.pedagogicalStyle || '', help: null, themeColor: '#295f72', status: 'draft', sortOrder: coaches.value.length + 1, replies: [], media: clone(media.value), assignments: [], rules: [] }
+  return { id: 0, slug: '', firstName: '', lastName: '', gender: 'female', avatarPath: '', description: '', likes: '', characterId: character?.id || 0, characterName, personality: characterName, pedagogicalStyle: character?.pedagogicalStyle || '', help: null, themeColor: '#295f72', status: 'draft', sortOrder: coaches.value.length + 1, replies: [], media: clone(media.value), assignments: [], rules: [] }
 }
 async function newCoach() {
   await autosaveCoach()
@@ -340,7 +340,8 @@ onBeforeUnmount(cancelScheduledAutosave)
                 <label class="admin-field"><span>Ordre d’affichage</span><input v-model.number="draft.sortOrder" type="number"></label>
               </div>
               <div class="coach-description-fields">
-                <label class="admin-field"><span>Présentation personnelle</span><input v-model="draft.description"></label>
+                <label class="admin-field"><span>Citation</span><input v-model="draft.description"></label>
+                <label class="admin-field"><span>J’aime</span><input v-model="draft.likes" placeholder="Ex. les phrases courtes, les exemples concrets…"></label>
               </div>
             </div>
 

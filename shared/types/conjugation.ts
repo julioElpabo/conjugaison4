@@ -155,6 +155,21 @@ export interface ExerciseQuestion {
     referenceSubject?: string
     strategy?: 'remove-ending' | 'reuse-form' | 'memorize-stem'
     orthographicAdjustment?: string
+    /** Formes repères réelles du présent de l’indicatif utilisées pour l’impératif. */
+    imperativePresentReferences?: Array<{
+      subject: 'tu' | 'nous' | 'vous'
+      form: string
+    }>
+    /** Repères de l’indicatif et paradigme réel nécessaires au subjonctif présent. */
+    subjunctivePresentReferences?: Array<{
+      subject: 'ils' | 'nous'
+      form: string
+    }>
+    subjunctivePresentForms?: Array<{
+      subject: string
+      form: string
+      personId: number
+    }>
     validated?: boolean
   }
   complement?: string

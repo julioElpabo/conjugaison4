@@ -37,6 +37,7 @@ async function signOut() {
         <NuxtLink to="/admin/tests">Tests</NuxtLink>
         <NuxtLink to="/admin/users">Utilisateurs</NuxtLink>
         <NuxtLink to="/charts">Statistiques</NuxtLink>
+        <NuxtLink to="/admin/feedbacks">Feedbacks</NuxtLink>
         <NuxtLink to="/mon-compte">Mon compte</NuxtLink>
       </nav>
 

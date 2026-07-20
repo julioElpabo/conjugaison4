@@ -113,6 +113,7 @@ try {
     gender ENUM('female','male') NOT NULL,
     avatar_path VARCHAR(255) NOT NULL DEFAULT '',
     description VARCHAR(255) NOT NULL DEFAULT '',
+    likes VARCHAR(255) NOT NULL DEFAULT '',
     personality VARCHAR(100) NOT NULL DEFAULT '',
     pedagogical_style TEXT NOT NULL,
     theme_color CHAR(7) NOT NULL DEFAULT '#295f72',
@@ -125,6 +126,10 @@ try {
   const [genderColumns] = await database.query("SHOW COLUMNS FROM coaches LIKE 'gender'")
   if (genderColumns.length === 0) {
     await database.query("ALTER TABLE coaches ADD COLUMN gender ENUM('female','male') NOT NULL DEFAULT 'female' AFTER last_name")
+  }
+  const [likesColumns] = await database.query("SHOW COLUMNS FROM coaches LIKE 'likes'")
+  if (likesColumns.length === 0) {
+    await database.query("ALTER TABLE coaches ADD COLUMN likes VARCHAR(255) NOT NULL DEFAULT '' AFTER description")
   }
 
   await database.query(`CREATE TABLE IF NOT EXISTS coach_reply_templates (
@@ -242,9 +247,7 @@ try {
   for (const [slug, masculineName, feminineName, emoticon, description, pedagogicalStyle, sortOrder] of characterSeeds) {
     await database.execute(`INSERT INTO coach_characters
       (slug,name,masculine_name,feminine_name,emoticon,description,pedagogical_style,status,sort_order)
-      VALUES (?,?,?,?,?,?,?,'published',?) ON DUPLICATE KEY UPDATE name=VALUES(name),
-      masculine_name=VALUES(masculine_name),feminine_name=VALUES(feminine_name),emoticon=VALUES(emoticon),description=VALUES(description),
-      pedagogical_style=VALUES(pedagogical_style),sort_order=VALUES(sort_order)`,
+      VALUES (?,?,?,?,?,?,?,'published',?) ON DUPLICATE KEY UPDATE slug=slug`,
     [slug, masculineName, masculineName, feminineName, emoticon, description, pedagogicalStyle, sortOrder])
   }
 
@@ -252,13 +255,11 @@ try {
     await database.execute(`INSERT INTO coaches
       (slug, first_name, last_name, gender, avatar_path, description, personality, pedagogical_style, theme_color, sort_order, status)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'published')
-      ON DUPLICATE KEY UPDATE first_name=VALUES(first_name), last_name=VALUES(last_name), gender=VALUES(gender), avatar_path=VALUES(avatar_path),
-        description=VALUES(description), personality=VALUES(personality), pedagogical_style=VALUES(pedagogical_style),
-        theme_color=VALUES(theme_color), sort_order=VALUES(sort_order)`, seed)
+      ON DUPLICATE KEY UPDATE slug=slug`, seed)
   }
 
   for (const [coachSlug, characterSlug] of Object.entries(characterSlugByCoach)) {
-    await database.execute(`UPDATE coaches c JOIN coach_characters cc ON cc.slug=? SET c.character_id=cc.id WHERE c.slug=?`, [characterSlug, coachSlug])
+    await database.execute(`UPDATE coaches c JOIN coach_characters cc ON cc.slug=? SET c.character_id=cc.id WHERE c.slug=? AND c.character_id IS NULL`, [characterSlug, coachSlug])
   }
 
   for (const [slug, replyProfile] of Object.entries(replyProfileBySlug)) {
@@ -338,7 +339,7 @@ try {
     (SELECT COUNT(*) FROM coaches WHERE status='published') AS coaches,
     (SELECT COUNT(*) FROM coaches WHERE character_id IS NULL) AS missing_character,
     (SELECT MIN(total) FROM (SELECT COUNT(*) AS total FROM coach_character_reply_templates GROUP BY character_id) reply_counts) AS minimum_replies`)
-  if (Number(integrity.characters) !== 4 || Number(integrity.coaches) !== 12
+  if (Number(integrity.characters) < characterSeeds.length || Number(integrity.coaches) < 1
     || Number(integrity.missing_character) !== 0 || Number(integrity.minimum_replies) < 12) {
     throw new Error(`Migration incomplète : ${JSON.stringify(integrity)}`)
   }

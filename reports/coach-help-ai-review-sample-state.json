@@ -1,0 +1,473 @@
+{
+  "schemaVersion": 1,
+  "reviewVersion": "semantic-ai-review-v2",
+  "queueFingerprint": "0c7ee519d9bb0aab0a1408225d1368876dc1942a5747ec4893e94a0bde9625c3",
+  "help": {
+    "id": 1,
+    "name": "Pour allophones",
+    "updatedAt": "2026-07-19T13:26:28.000Z",
+    "fingerprint": "cded11672c6097d9ef008788e0f3576c6742a063d7e7b0ddca650f27a22209e9"
+  },
+  "startedAt": "2026-07-20T11:49:39.886Z",
+  "updatedAt": "2026-07-20T11:51:49.757Z",
+  "results": {
+    "category-form:103:9:8": {
+      "unitId": "category-form:103:9:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:27:18:5": {
+      "unitId": "category-form:27:18:5",
+      "verdict": "rejected",
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "wrong_auxiliary",
+          "severity": "error",
+          "detail": "Le verbe « naître » se conjugue avec l’auxiliaire « être », pas avec « avoir ». La forme « aie né » est donc fausse.",
+          "suggestion": "Remplacer par « sois né » pour un sujet masculin, ou « sois née » pour un sujet féminin, et expliquer que le participe passé s’accorde avec le sujet avec « être »."
+        }
+      ]
+    },
+    "category-form:204:16:7": {
+      "unitId": "category-form:204:16:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:174:3:6": {
+      "unitId": "category-form:174:3:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:157:14:9": {
+      "unitId": "category-form:157:14:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:246:10:6": {
+      "unitId": "category-form:246:10:6",
+      "verdict": "rejected",
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "missing_reflexive_pronoun",
+          "severity": "error",
+          "detail": "La réponse construite est « souvienne », mais le verbe demandé est pronominal : « se souvenir ». Il faut inclure le pronom réfléchi adapté à « il ».",
+          "suggestion": "Afficher le résultat complet « qu’il se souvienne » ou, pour la forme verbale seule, « se souvienne ». Les formes repères devraient aussi être « ils se souviennent » et « nous nous souvenons »."
+        }
+      ]
+    },
+    "category-form:233:1:4": {
+      "unitId": "category-form:233:1:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:396:4:6": {
+      "unitId": "category-form:396:4:6",
+      "verdict": "rejected",
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "person_form_mismatch",
+          "severity": "error",
+          "detail": "Pour « il » au passé simple de l’indicatif, la forme correcte est « présenta ». « Présentai » correspond à « je ».",
+          "suggestion": "Remplacer la forme attendue et le résultat par « présenta » : « il présenta »."
+        }
+      ]
+    },
+    "category-form:82:9:5": {
+      "unitId": "category-form:82:9:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:408:10:6": {
+      "unitId": "category-form:408:10:6",
+      "verdict": "rejected",
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "wrong_subjunctive_form",
+          "severity": "error",
+          "detail": "« S’habiller » n’est pas irrégulier au subjonctif présent. Pour « qu’il », la forme correcte est « s’habille », sans s final, avec le pronom réfléchi.",
+          "suggestion": "Remplacer par « qu’il s’habille » ou, pour la forme verbale seule, « s’habille ». Expliquer la règle régulière : radical « habill- » + terminaison « -e »."
+        }
+      ]
+    },
+    "category-form:407:10:7": {
+      "unitId": "category-form:407:10:7",
+      "verdict": "rejected",
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "wrong_reflexive_pronoun",
+          "severity": "error",
+          "detail": "Avec le verbe pronominal « s’endormir », la personne « nous » exige le pronom réfléchi « nous ». La forme « nous endormions » n’est pas correcte pour « s’endormir ».",
+          "suggestion": "Remplacer par « nous nous endormions » et utiliser les formes repères « ils s’endorment » et « nous nous endormons »."
+        }
+      ]
+    },
+    "category-form:17:9:7": {
+      "unitId": "category-form:17:9:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:119:14:5": {
+      "unitId": "category-form:119:14:5",
+      "verdict": "rejected",
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "wrong_future_stem_dechoir",
+          "severity": "error",
+          "detail": "Le conditionnel de « déchoir » ne se construit pas régulièrement sur l’infinitif « déchoir- » dans l’usage de référence. La forme attendue devrait être « tu décherrais », avec le radical du futur « décherr- ».",
+          "suggestion": "Remplacer la réponse par « décherrais » et enseigner ce verbe comme irrégulier : futur « je décherrai », conditionnel « tu décherrais »."
+        }
+      ]
+    },
+    "category-form:108:2:4": {
+      "unitId": "category-form:108:2:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:58:14:5": {
+      "unitId": "category-form:58:14:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:32:1:5": {
+      "unitId": "category-form:32:1:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:90:9:8": {
+      "unitId": "category-form:90:9:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:83:9:5": {
+      "unitId": "category-form:83:9:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:405:3:6": {
+      "unitId": "category-form:405:3:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:545:9:7": {
+      "unitId": "category-form:545:9:7",
+      "verdict": "rejected",
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "missing_required_accents",
+          "severity": "error",
+          "detail": "Le verbe français est « dénicher », pas « denicher ». Les formes « Tu deniches », « Nous denichons », « Vous denichez » et « Denichons » enseignent une orthographe sans accent incorrecte.",
+          "suggestion": "Corriger en « dénicher » : « Tu déniches », « Nous dénichons », « Vous dénichez », réponse « dénichons »."
+        }
+      ]
+    },
+    "category-form:226:16:9": {
+      "unitId": "category-form:226:16:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:280:16:8": {
+      "unitId": "category-form:280:16:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:419:10:6": {
+      "unitId": "category-form:419:10:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:462:3:8": {
+      "unitId": "category-form:462:3:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:508:4:9": {
+      "unitId": "category-form:508:4:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:296:14:6": {
+      "unitId": "category-form:296:14:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:26:16:6": {
+      "unitId": "category-form:26:16:6",
+      "verdict": "rejected",
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "wrong_subjunctive_imperfect_reference",
+          "severity": "error",
+          "detail": "La forme affichée « Il moulut » est le passé simple de l’indicatif, pas l’imparfait du subjonctif. La forme attendue est « qu’il moulût » avec accent circonflexe.",
+          "suggestion": "Afficher « qu’il moulût » comme réponse, ou expliquer que l’imparfait du subjonctif se construit à partir du passé simple « il moulut » en remplaçant la finale par « -ût » pour cette forme."
+        }
+      ]
+    },
+    "category-form:10:14:6": {
+      "unitId": "category-form:10:14:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:419:4:4": {
+      "unitId": "category-form:419:4:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:256:16:5": {
+      "unitId": "category-form:256:16:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:554:16:7": {
+      "unitId": "category-form:554:16:7",
+      "verdict": "rejected",
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "missing_accent_in_verb_form",
+          "severity": "error",
+          "detail": "Le verbe standard est « déverser » avec accent aigu. Les formes « Il deversa », « deversa- » et « deversassions » enseignent une orthographe fautive.",
+          "suggestion": "Corriger en « Il déversa », radical « déversa- », réponse « déversassions »."
+        }
+      ]
+    },
+    "category-form:256:9:8": {
+      "unitId": "category-form:256:9:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:532:2:8": {
+      "unitId": "category-form:532:2:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:344:1:6": {
+      "unitId": "category-form:344:1:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:7:14:4": {
+      "unitId": "category-form:7:14:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:531:14:8": {
+      "unitId": "category-form:531:14:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:169:10:9": {
+      "unitId": "category-form:169:10:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:234:2:5": {
+      "unitId": "category-form:234:2:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:557:2:9": {
+      "unitId": "category-form:557:2:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:407:2:6": {
+      "unitId": "category-form:407:2:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:232:10:6": {
+      "unitId": "category-form:232:10:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:279:4:5": {
+      "unitId": "category-form:279:4:5",
+      "verdict": "approved",
+      "confidence": "medium",
+      "issues": []
+    },
+    "category-form:558:4:4": {
+      "unitId": "category-form:558:4:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:197:10:8": {
+      "unitId": "category-form:197:10:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:158:14:4": {
+      "unitId": "category-form:158:14:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:542:4:4": {
+      "unitId": "category-form:542:4:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:23:4:7": {
+      "unitId": "category-form:23:4:7",
+      "verdict": "rejected",
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "incorrect_reference_form",
+          "severity": "error",
+          "detail": "La forme repère donnée est « Il accrut », mais pour « accroître » au passé simple, la forme correcte est « il accrut » sans accent circonflexe sur u seulement à la 3e personne; toutefois le radical obtenu « accr- » ne permet pas d'expliquer l'accent circonflexe de « nous accrûmes » par la simple terminaison.",
+          "suggestion": "Présenter ce passé simple comme une forme à apprendre : « j'accrus, tu accrus, il accrut, nous accrûmes, vous accrûtes, ils accrurent », ou expliquer que le circonflexe apparaît à nous/vous : accr- + -ûmes = accrûmes."
+        }
+      ]
+    },
+    "category-form:516:9:8": {
+      "unitId": "category-form:516:9:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:554:14:4": {
+      "unitId": "category-form:554:14:4",
+      "verdict": "rejected",
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "ORTH_ACCENT_MISSING",
+          "severity": "error",
+          "detail": "Le verbe standard est « déverser » et la forme correcte est « déverserais ». Le HTML écrit « deverserais » sans accent.",
+          "suggestion": "Écrire « déverser », radical « déverser- », réponse « déverserais »."
+        }
+      ]
+    },
+    "category-form:431:16:6": {
+      "unitId": "category-form:431:16:6",
+      "verdict": "rejected",
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "SUBJ_IMPARFAIT_ACCENT_PROCEDURE",
+          "severity": "error",
+          "detail": "La procédure dit seulement d’ajouter « -t » à « chatouilla- ». Cela donne « chatouillat », pas « chatouillât ». L’accent circonflexe n’est pas expliqué.",
+          "suggestion": "Dire : partir de « il chatouilla », garder « chatouilla- », transformer le a final en « â », puis ajouter « -t » : « qu’il chatouillât »."
+        }
+      ]
+    },
+    "category-form:125:10:7": {
+      "unitId": "category-form:125:10:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:558:9:8": {
+      "unitId": "category-form:558:9:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:20:10:4": {
+      "unitId": "category-form:20:10:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:541:3:5": {
+      "unitId": "category-form:541:3:5",
+      "verdict": "rejected",
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "ORTH_ACCENT_MISSING",
+          "severity": "error",
+          "detail": "Le verbe standard est « défier » et la forme correcte est « défieras ». Le HTML écrit « defieras » sans accent.",
+          "suggestion": "Écrire « défier », forme repère « je défierai », radical « défier- », réponse « défieras »."
+        }
+      ]
+    },
+    "category-form:118:16:4": {
+      "unitId": "category-form:118:16:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:176:10:6": {
+      "unitId": "category-form:176:10:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:546:1:7": {
+      "unitId": "category-form:546:1:7",
+      "verdict": "rejected",
+      "confidence": "high",
+      "issues": [
+        {
+          "code": "ORTH_ACCENT_MISSING",
+          "severity": "error",
+          "detail": "Le verbe standard est « dénommer » et la forme correcte est « dénommons ». Le HTML écrit « denommons » sans accent.",
+          "suggestion": "Écrire « dénommer » et « nous dénommons »."
+        }
+      ]
+    },
+    "category-form:472:3:5": {
+      "unitId": "category-form:472:3:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:83:14:8": {
+      "unitId": "category-form:83:14:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    },
+    "category-form:224:16:4": {
+      "unitId": "category-form:224:16:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "issues": []
+    }
+  }
+}

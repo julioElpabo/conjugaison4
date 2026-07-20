@@ -10,6 +10,7 @@ interface CatalogueVerb {
   participePresent: string
   participePasse: string
   auxiliaire: string
+  helpReviewStatus?: 'approved' | 'rejected' | null
 }
 
 interface CatalogueMode {
@@ -85,11 +86,16 @@ async function fetchCatalogue(loadSelection = true) {
   catalogueError.value = ''
 
   try {
-    const response = await $fetch<Catalogue>('/api/catalogue', {
-      credentials: 'same-origin'
-    })
+    const [response, reviewResponse] = await Promise.all([
+      $fetch<Catalogue>('/api/catalogue', { credentials: 'same-origin' }),
+      $fetch<{ reviews: Array<{ verbId: number, status: 'approved' | 'rejected' }> }>('/api/admin/coach-help-verb-reviews', { credentials: 'same-origin' }),
+    ])
+    const reviewByVerb = new Map(reviewResponse.reviews.map(review => [review.verbId, review.status]))
     catalogue.value = {
-      verbes: response.verbes.filter(verb => verb.id > 0).sort((a, b) => a.infinitif.localeCompare(b.infinitif, 'fr')),
+      verbes: response.verbes.filter(verb => verb.id > 0).map(verb => ({
+        ...verb,
+        helpReviewStatus: reviewByVerb.get(verb.id) || null,
+      })).sort((a, b) => a.infinitif.localeCompare(b.infinitif, 'fr')),
       modes: [...response.modes].sort((a, b) => a.order - b.order || a.id - b.id),
       temps: [...response.temps]
     }

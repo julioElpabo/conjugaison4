@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verdicts"],
+  "properties": {
+    "verdicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["unitId", "verdict", "confidence", "pedagogy", "issues"],
+        "properties": {
+          "unitId": { "type": "string" },
+          "verdict": { "type": "string", "enum": ["approved", "rejected"] },
+          "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+          "pedagogy": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["clarity", "actionable", "learnerLevelFit", "cognitiveLoad", "redundancy", "mainPedagogicalRisk", "suggestedRewrite"],
+            "properties": {
+              "clarity": { "type": "string", "enum": ["good", "medium", "poor"] },
+              "actionable": { "type": "boolean" },
+              "learnerLevelFit": { "type": "string", "enum": ["good", "medium", "poor"] },
+              "cognitiveLoad": { "type": "string", "enum": ["low", "medium", "high"] },
+              "redundancy": { "type": "string", "enum": ["none", "minor", "problematic"] },
+              "mainPedagogicalRisk": { "type": "string" },
+              "suggestedRewrite": { "type": "string" }
+            }
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "severity", "detail", "suggestion"],
+              "properties": {
+                "code": { "type": "string" },
+                "severity": { "type": "string", "enum": ["error", "warning"] },
+                "detail": { "type": "string" },
+                "suggestion": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

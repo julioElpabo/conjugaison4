@@ -214,6 +214,8 @@ export default defineEventHandler(async (event) => {
         }
       }
     }
+    await connection.execute('DELETE FROM coach_help_verb_reviews WHERE verb_id=?', [id])
+    await connection.execute('DELETE FROM coach_help_automatic_reviews WHERE verb_id=?', [id])
     await connection.commit()
     return { ok: true, id }
   } catch (error) {

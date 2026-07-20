@@ -26,14 +26,55 @@ function bareInfinitive(value: string) {
 }
 
 function conjugatedCore(value: string) {
-  return value.trim().replace(/[.!?…]+$/gu, '').replace(/^(?:me|te|se|nous|vous)\s+/iu, '').replace(/^[mts]['’]/iu, '').trim()
+  return value
+    .trim()
+    .replace(/[.!?…]+$/gu, '')
+    .replace(/^(?:je|j['’]|tu|il|elle|on|nous|vous|ils|elles)\s+/iu, '')
+    .replace(/^(?:me|te|se|nous|vous)\s+/iu, '')
+    .replace(/^[mts]['’]/iu, '')
+    .trim()
 }
 
 const PERSON_INDEX = new Map([[4, 0], [5, 1], [6, 2], [7, 3], [8, 4], [9, 5]])
 const IMPERFECT_ENDINGS = ['ais', 'ais', 'ait', 'ions', 'iez', 'aient']
 const FUTURE_ENDINGS = ['ai', 'as', 'a', 'ons', 'ez', 'ont']
+const ER_PRESENT_ENDINGS = ['e', 'es', 'e', 'ons', 'ez', 'ent']
 const SUBJUNCTIVE_PRESENT_ENDINGS = ['e', 'es', 'e', 'ions', 'iez', 'ent']
 const SUBJUNCTIVE_IMPERFECT_ENDINGS = ['sse', 'sses', 't', 'ssions', 'ssiez', 'ssent']
+const SUBJUNCTIVE_IMPERFECT_A_ENDINGS = ['asse', 'asses', 'ât', 'assions', 'assiez', 'assent']
+
+function subjunctiveImperfectThirdPersonReference(
+  source: RadicalPrincipalForm | undefined,
+  request: RadicalReferenceRequest,
+): ExerciseQuestion['radicalReference'] | undefined {
+  const form = conjugatedCore(source?.form || '')
+  const target = conjugatedCore(request.conjugation)
+  const series = normalized(form).endsWith('int')
+    ? { sourceEnding: 'int', targetEnding: 'înt' }
+    : normalized(form).endsWith('ut')
+      ? { sourceEnding: 'ut', targetEnding: 'ût' }
+      : normalized(form).endsWith('it')
+        ? { sourceEnding: 'it', targetEnding: 'ît' }
+        : normalized(form).endsWith('a')
+          ? { sourceEnding: 'a', targetEnding: 'ât' }
+          : null
+  if (!form || !target || !series || form.length <= series.sourceEnding.length) return undefined
+  const radical = form.slice(0, -series.sourceEnding.length)
+  if (normalized(`${radical}${series.targetEnding}`) !== normalized(target)) return undefined
+  return {
+    kind: 'past-simple-il',
+    label: 'il au passé simple',
+    form,
+    removableEnding: series.sourceEnding,
+    radical,
+    targetEnding: series.targetEnding,
+    referenceMode: 'indicatif',
+    referenceTense: 'passé simple',
+    referenceSubject: 'il',
+    strategy: 'remove-ending',
+    validated: true,
+  }
+}
 
 function targetStem(request: RadicalReferenceRequest, endings: readonly string[]) {
   const index = request.personId === null ? undefined : PERSON_INDEX.get(request.personId)
@@ -48,6 +89,30 @@ function referenceForm(forms: readonly RadicalPrincipalForm[], mode: string, ten
     && normalized(item.tense) === normalized(tense)
     && normalized(item.pronoun) === normalized(pronoun)
     && item.form.trim())
+}
+
+function imperativePresentReferences(forms: readonly RadicalPrincipalForm[]) {
+  return (['tu', 'nous', 'vous'] as const).flatMap((subject) => {
+    const source = referenceForm(forms, 'indicatif', 'présent', subject)
+    const form = conjugatedCore(source?.form || '')
+    return form ? [{ subject, form }] : []
+  })
+}
+
+function subjunctivePresentProfile(forms: readonly RadicalPrincipalForm[]) {
+  const references = (['ils', 'nous'] as const).flatMap((subject) => {
+    const source = referenceForm(forms, 'indicatif', 'présent', subject)
+    const form = conjugatedCore(source?.form || '')
+    return form ? [{ subject, form }] : []
+  })
+  const conjugations = forms
+    .filter(item => normalized(item.mode) === 'subjonctif'
+      && normalized(item.tense) === 'present'
+      && PERSON_INDEX.has(item.personId)
+      && conjugatedCore(item.form))
+    .sort((left, right) => (PERSON_INDEX.get(left.personId) || 0) - (PERSON_INDEX.get(right.personId) || 0))
+    .map(item => ({ subject: item.pronoun, form: conjugatedCore(item.form), personId: item.personId }))
+  return { references, conjugations }
 }
 
 function adjustPresentNousStem(stem: string, infinitive: string, targetEnding: string) {
@@ -105,6 +170,23 @@ export function buildRadicalReference(
   const infinitive = normalized(bareInfinitive(request.infinitive))
 
   if (mode === 'indicatif' && tense === 'present') {
+    const erTarget = infinitive.endsWith('er') && infinitive !== 'aller'
+      ? targetStem(request, ER_PRESENT_ENDINGS)
+      : null
+    const index = request.personId === null ? undefined : PERSON_INDEX.get(request.personId)
+    if (erTarget && index !== undefined) {
+      const useNous = index === 3
+      const reference = fromRemovableForm(
+        referenceForm(forms, 'indicatif', 'présent', useNous ? 'nous' : 'ils'),
+        useNous ? 'ons' : 'ent',
+        erTarget.stem,
+        useNous ? 'present-nous' : 'present-ils',
+        `${useNous ? 'nous' : 'ils'} au présent`,
+        erTarget.ending,
+        request.infinitive,
+      )
+      if (reference) return reference
+    }
     const source = referenceForm(forms, 'indicatif', 'présent', 'nous')
     const sourceForm = conjugatedCore(source?.form || '')
     const removableEnding = ['issons', 'ons'].find(ending => normalized(sourceForm).endsWith(ending)) || ''
@@ -183,6 +265,7 @@ export function buildRadicalReference(
   }
 
   if (mode === 'subjonctif' && tense === 'present') {
+    const profile = subjunctivePresentProfile(forms)
     const target = targetStem(request, SUBJUNCTIVE_PRESENT_ENDINGS)
     if (!target || request.personId === null) {
       if (['etre', 'avoir', 'aller', 'faire', 'pouvoir', 'savoir', 'vouloir', 'valoir', 'falloir'].includes(infinitive)) {
@@ -192,6 +275,8 @@ export function buildRadicalReference(
           kind: 'memorized-form', label: `forme particulière de ${bareInfinitive(request.infinitive)}`,
           form: wholeForm, removableEnding: '', radical: wholeForm,
           referenceMode: request.mode, referenceTense: request.tense, referenceSubject: '', strategy: 'memorize-stem', validated: true,
+          subjunctivePresentReferences: profile.references,
+          subjunctivePresentForms: profile.conjugations,
         }
       }
       return undefined
@@ -201,20 +286,41 @@ export function buildRadicalReference(
       referenceForm(forms, 'indicatif', 'présent', useNous ? 'nous' : 'ils'),
       useNous ? 'ons' : 'ent', target.stem, useNous ? 'present-nous' : 'present-ils', `${useNous ? 'nous' : 'ils'} au présent`, target.ending, request.infinitive,
     )
-    if (reference) return reference
+    if (reference) {
+      return {
+        ...reference,
+        subjunctivePresentReferences: profile.references,
+        subjunctivePresentForms: profile.conjugations,
+      }
+    }
+    return {
+      kind: 'memorized-stem', label: `radical particulier de ${bareInfinitive(request.infinitive)}`,
+      form: `${target.stem}-`, removableEnding: '', radical: target.stem, targetEnding: target.ending,
+      referenceMode: request.mode, referenceTense: request.tense, referenceSubject: '', strategy: 'memorize-stem', validated: true,
+      subjunctivePresentReferences: profile.references,
+      subjunctivePresentForms: profile.conjugations,
+    }
   }
 
   if (mode === 'subjonctif' && tense === 'imparfait') {
-    const target = targetStem(request, SUBJUNCTIVE_IMPERFECT_ENDINGS)
     const source = referenceForm(forms, 'indicatif', 'passé simple', 'il')
+    if (request.personId === 6) {
+      return subjunctiveImperfectThirdPersonReference(source, request)
+    }
     const form = conjugatedCore(source?.form || '')
-    if (!target) return undefined
     if (form) {
-      const radical = normalized(form).endsWith('a') ? form : form.slice(0, -1)
+      const index = request.personId === null ? undefined : PERSON_INDEX.get(request.personId)
+      const aSeries = normalized(form).endsWith('a')
+      const target = aSeries
+        ? targetStem(request, SUBJUNCTIVE_IMPERFECT_A_ENDINGS)
+        : targetStem(request, SUBJUNCTIVE_IMPERFECT_ENDINGS)
+      if (!target || index === undefined) return undefined
+      const radical = aSeries ? form.slice(0, -1) : form.slice(0, -1)
+      const targetEnding = aSeries ? SUBJUNCTIVE_IMPERFECT_A_ENDINGS[index] : target.ending
       if (normalized(radical) === normalized(target.stem)) {
         return {
-          kind: 'past-simple-il', label: 'il au passé simple', form, removableEnding: normalized(form).endsWith('a') ? '' : form.slice(-1), radical,
-          targetEnding: target.ending, referenceMode: 'indicatif', referenceTense: 'passé simple', referenceSubject: 'il', strategy: 'remove-ending', validated: true,
+          kind: 'past-simple-il', label: 'il au passé simple', form, removableEnding: aSeries ? 'a' : form.slice(-1), radical,
+          targetEnding, referenceMode: 'indicatif', referenceTense: 'passé simple', referenceSubject: 'il', strategy: 'remove-ending', validated: true,
         }
       }
     }
@@ -228,6 +334,7 @@ export function buildRadicalReference(
   }
 
   if (mode === 'imperatif' && tense === 'present' && request.personId !== null) {
+    const presentReferences = imperativePresentReferences(forms)
     const source = forms.find(item => normalized(item.mode) === 'indicatif' && normalized(item.tense) === 'present' && item.personId === request.personId)
     const sourceCore = conjugatedCore(source?.form || '')
     const targetCore = conjugatedCore(request.conjugation)
@@ -238,7 +345,8 @@ export function buildRadicalReference(
         return {
           kind: 'present-same-person', label: `${source?.pronoun || ''} à l’indicatif présent`.trim(), form: sourceCore,
           removableEnding: sourceCore.slice(expected.length), radical: expected, referenceMode: 'indicatif', referenceTense: 'présent',
-          referenceSubject: source?.pronoun || '', strategy: sourceCore === expected ? 'reuse-form' : 'remove-ending', validated: true,
+          referenceSubject: source?.pronoun || '', strategy: sourceCore === expected ? 'reuse-form' : 'remove-ending',
+          imperativePresentReferences: presentReferences, validated: true,
         }
       }
     }
@@ -269,6 +377,7 @@ export function buildRadicalReference(
       kind: 'memorized-form', label: `forme particulière de ${bareInfinitive(request.infinitive)}`,
       form: wholeForm, removableEnding: '', radical: wholeForm,
       referenceMode: request.mode, referenceTense: request.tense, referenceSubject: '', strategy: 'memorize-stem', validated: true,
+      imperativePresentReferences: imperativePresentReferences(forms),
     }
   }
 

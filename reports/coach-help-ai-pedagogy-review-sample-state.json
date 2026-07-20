@@ -1,0 +1,1542 @@
+{
+  "schemaVersion": 1,
+  "reviewVersion": "semantic-ai-review-v2",
+  "queueFingerprint": "5de0397cec8bd8aefa233537af8966ed993194c390c722edda29ffe1fac50c9c",
+  "help": {
+    "id": 1,
+    "name": "Pour allophones",
+    "updatedAt": "2026-07-19T13:26:28.000Z",
+    "fingerprint": "cded11672c6097d9ef008788e0f3576c6742a063d7e7b0ddca650f27a22209e9"
+  },
+  "startedAt": "2026-07-20T18:13:05.498Z",
+  "updatedAt": "2026-07-20T18:18:54.516Z",
+  "results": {
+    "category-form:204:9:5": {
+      "unitId": "category-form:204:9:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:167:16:8": {
+      "unitId": "category-form:167:16:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:27:18:7": {
+      "unitId": "category-form:27:18:7",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "Le choix entre avoir et être pourrait être plus explicite visuellement.",
+        "suggestedRewrite": "Pour naître, l’auxiliaire est être : on dit « je suis né », pas « j’ai né »."
+      },
+      "issues": []
+    },
+    "category-form:246:10:6": {
+      "unitId": "category-form:246:10:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:52:14:4": {
+      "unitId": "category-form:52:14:4",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "Erreur grammaticale sur le radical du futur, qui donne une mauvaise réponse.",
+        "suggestedRewrite": "Apprends la forme repère : « j’acquerrai ». Enlève « -ai » : il reste « acquer- ». Ajoute « -ais » : « j’acquerrais »."
+      },
+      "issues": [
+        {
+          "code": "wrong_future_stem",
+          "severity": "error",
+          "detail": "La forme repère « J’acquerrai » donne le radical « acquer- », pas « acquerr- ». L’aide construit donc « acquerrrais » implicitement alors que la réponse attendue est « acquerrais » avec deux r au total.",
+          "suggestion": "Corriger le découpage en « acquer » + « rais » ou « acquer- » + « -rais », et afficher le résultat « j’acquerrais »."
+        }
+      ]
+    },
+    "category-form:204:2:9": {
+      "unitId": "category-form:204:2:9",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "problematic",
+        "mainPedagogicalRisk": "Le tableau final enseigne des formes fautives à nous et vous.",
+        "suggestedRewrite": "À l’imparfait, pars de « nous déplaçons », enlève « -ons » : « déplaç- ». Ajoute « -aient » : « ils déplaçaient ». Rappel : ici, ç reste utile devant « a »."
+      },
+      "issues": [
+        {
+          "code": "wrong_full_paradigm",
+          "severity": "error",
+          "detail": "Le tableau « En effet » contient « nous déplaçions » et « vous déplaçiez », qui sont faux. Les formes correctes sont « nous déplacions » et « vous déplaciez » car le c est devant i.",
+          "suggestion": "Corriger ou supprimer le tableau complet. Si le tableau reste, écrire « nous déplacions » et « vous déplaciez »."
+        }
+      ]
+    },
+    "category-form:449:1:9": {
+      "unitId": "category-form:449:1:9",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "La réponse est donnée comme forme repère avant la construction, mais c’est acceptable car elle est explicitement à mémoriser.",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:81:3:6": {
+      "unitId": "category-form:81:3:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:7:14:4": {
+      "unitId": "category-form:7:14:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:255:16:7": {
+      "unitId": "category-form:255:16:7",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "poor",
+        "actionable": false,
+        "learnerLevelFit": "poor",
+        "cognitiveLoad": "high",
+        "redundancy": "problematic",
+        "mainPedagogicalRisk": "La terminaison et le tableau affichent une pseudo-forme incompréhensible et une forme fausse.",
+        "suggestedRewrite": "Apprends la base « accusa- ». Pour « que nous », ajoute « -ssions » : « que nous accusassions ». On peut vérifier avec : que je accusasse, que tu accusasses, qu’il accusât, que nous accusassions."
+      },
+      "issues": [
+        {
+          "code": "wrong_subjunctive_table",
+          "severity": "error",
+          "detail": "Le tableau donne « accusa(voyelle accentuée)t » au lieu de « accusât » pour « qu’il / elle / on ». C’est grammaticalement faux et très déroutant.",
+          "suggestion": "Remplacer « -(voyelle accentuée)t » par « -ât » et « accusa(voyelle accentuée)t » par « accusât »."
+        },
+        {
+          "code": "not_falc_accessible",
+          "severity": "error",
+          "detail": "L’expression « (voyelle accentuée) » dans une terminaison n’est pas une action claire pour un élève fragile.",
+          "suggestion": "Écrire directement les formes utiles : « -asse, -asses, -ât, -assions, -assiez, -assent »."
+        }
+      ]
+    },
+    "category-form:90:10:7": {
+      "unitId": "category-form:90:10:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:280:9:7": {
+      "unitId": "category-form:280:9:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:84:14:5": {
+      "unitId": "category-form:84:14:5",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "La forme repère du futur et le départ par l’infinitif peuvent sembler être deux méthodes différentes.",
+        "suggestedRewrite": "Après « J’ouvrirai », ajouter : « Enlève -ai : tu retrouves ouvrir-. Pour ouvrir, c’est aussi l’infinitif entier. »"
+      },
+      "issues": []
+    },
+    "category-form:54:4:7": {
+      "unitId": "category-form:54:4:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:33:9:8": {
+      "unitId": "category-form:33:9:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:279:14:6": {
+      "unitId": "category-form:279:14:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:119:16:4": {
+      "unitId": "category-form:119:16:4",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "poor",
+        "actionable": false,
+        "learnerLevelFit": "poor",
+        "cognitiveLoad": "high",
+        "redundancy": "problematic",
+        "mainPedagogicalRisk": "L’élève reçoit deux découpages contradictoires et l’étape de construction produit une forme fausse.",
+        "suggestedRewrite": "Pars de « il déchut ». Enlève seulement le -t : il reste déchu-. Pour « que je », ajoute -sse : que je déchusse. Ou bien : enlève -ut, il reste déch-, puis ajoute -usse."
+      },
+      "issues": [
+        {
+          "code": "incorrect_radical_construction",
+          "severity": "error",
+          "detail": "L’aide dit d’enlever -ut dans « il déchut » pour obtenir « déch- », puis d’ajouter -sse. Cela donne logiquement « déchsse », pas « déchusse ».",
+          "suggestion": "Choisir un seul découpage correct : « déchu- + -sse » ou « déch- + -usse »."
+        },
+        {
+          "code": "contradictory_reference_explanation",
+          "severity": "error",
+          "detail": "Le dernier bloc dit que la forme repère donne « déchu- », alors que le bloc précédent disait que le point de départ était « déch- ».",
+          "suggestion": "Harmoniser tous les blocs autour du même point de départ et supprimer le bloc redondant s’il ne sert qu’à répéter le tableau."
+        }
+      ]
+    },
+    "category-form:36:14:6": {
+      "unitId": "category-form:36:14:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:255:16:6": {
+      "unitId": "category-form:255:16:6",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "poor",
+        "actionable": false,
+        "learnerLevelFit": "poor",
+        "cognitiveLoad": "medium",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "L’aide donne la réponse à mémoriser sans expliquer la construction et ajoute une information fausse sur le radical.",
+        "suggestedRewrite": "Pour l’imparfait du subjonctif, pars du passé simple : « il accusa ». Enlève -a : accus-. Pour « qu’il », ajoute -ât : qu’il accusât."
+      },
+      "issues": [
+        {
+          "code": "false_irregularity_claim",
+          "severity": "error",
+          "detail": "« Ce verbe change beaucoup » est faux pour « accuser » dans cette forme : le radical « accus- » reste régulier.",
+          "suggestion": "Remplacer par une explication régulière à partir de « il accusa »."
+        },
+        {
+          "code": "answer_used_as_model_without_procedure",
+          "severity": "error",
+          "detail": "L’aide demande d’apprendre directement « Accusât » comme modèle, sans montrer comment trouver « accus- » et « -ât ».",
+          "suggestion": "Présenter la forme repère au passé simple, puis les étapes : radical + terminaison de « qu’il »."
+        }
+      ]
+    },
+    "category-form:19:1:7": {
+      "unitId": "category-form:19:1:7",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "La réponse est aussi la forme repère, donc l’élève doit comprendre qu’ici il faut surtout mémoriser.",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:100:4:6": {
+      "unitId": "category-form:100:4:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:405:1:7": {
+      "unitId": "category-form:405:1:7",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "poor",
+        "actionable": false,
+        "learnerLevelFit": "poor",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "Le pronom réfléchi nous est confondu avec le sujet nous.",
+        "suggestedRewrite": "Avec le sujet nous, écris le pronom réfléchi nous avant le verbe : nous + dépêchons = nous dépêchons. Si on garde le sujet complet : Nous nous dépêchons."
+      },
+      "issues": [
+        {
+          "code": "reflexive-pronoun-confusion",
+          "severity": "error",
+          "detail": "Le bloc explique que le pronom réfléchi est « nous », puis affiche « Nous dépêchons » avec majuscule, ce qui ressemble au sujet et fait disparaître le pronom réfléchi dans la réponse complète.",
+          "suggestion": "Distinguer clairement le sujet et la réponse attendue : « sujet : nous ; pronom réfléchi : nous ; verbe : dépêchons ; réponse sans sujet : nous dépêchons ; phrase complète : Nous nous dépêchons. »"
+        }
+      ]
+    },
+    "category-form:75:16:5": {
+      "unitId": "category-form:75:16:5",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "La leçon sur la cédille ajoute une information utile mais lourde après une forme déjà complexe.",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:205:1:6": {
+      "unitId": "category-form:205:1:6",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "Le tableau final donne une forme incorrecte à nous.",
+        "suggestedRewrite": "Dans le tableau, écrire : nous exerçons. Ajouter : devant o, c devient ç pour garder le son s."
+      },
+      "issues": [
+        {
+          "code": "incorrect-conjugation-table",
+          "severity": "error",
+          "detail": "Le tableau final indique « nous exercons », alors que la forme correcte est « nous exerçons ».",
+          "suggestion": "Corriger la ligne « nous » en « nous exerçons » et rappeler brièvement la règle c/ç devant o."
+        }
+      ]
+    },
+    "category-form:31:14:4": {
+      "unitId": "category-form:31:14:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:547:16:4": {
+      "unitId": "category-form:547:16:4",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "L’aide normalise une graphie sans accent qui peut être une erreur lexicale.",
+        "suggestedRewrite": "Utiliser « déposer » : forme repère « il déposa », radical « dépos- », réponse « déposasse », sauf si l’exercice travaille volontairement le verbe sans accent « deposer »."
+      },
+      "issues": [
+        {
+          "code": "accent-missing-lexical-form",
+          "severity": "error",
+          "detail": "Le verbe français courant est « déposer » avec accent aigu ; l’aide affiche « deposer », « deposa » et « deposasse » sans accent, ce qui est grammaticalement douteux pour un apprentissage FLE.",
+          "suggestion": "Corriger toutes les formes en « déposer », « il déposa », « dépos- », « déposasse », ou expliciter qu’il s’agit volontairement d’une graphie sans accent si c’est le cas."
+        }
+      ]
+    },
+    "category-form:214:4:6": {
+      "unitId": "category-form:214:4:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:402:2:4": {
+      "unitId": "category-form:402:2:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:495:1:7": {
+      "unitId": "category-form:495:1:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:179:2:8": {
+      "unitId": "category-form:179:2:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:44:1:7": {
+      "unitId": "category-form:44:1:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:543:14:7": {
+      "unitId": "category-form:543:14:7",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "L'élève mémorise une forme sans accent qui est incorrecte en français standard.",
+        "suggestedRewrite": "Utiliser les formes accentuées : « déjeuner », « je déjeunerai », « déjeuner- », « nous déjeunerions ». Puis : radical du futur « déjeuner- » + terminaison « -ions » = « déjeunerions »."
+      },
+      "issues": [
+        {
+          "code": "orthography_missing_accent",
+          "severity": "error",
+          "detail": "Les formes affichées « dejeuner », « Je dejeunerai » et « dejeunerions » oublient l'accent de « déjeuner ». L'aide fait apprendre une graphie incorrecte.",
+          "suggestion": "Corriger toutes les occurrences en « déjeuner », « je déjeunerai », « déjeunerions »."
+        }
+      ]
+    },
+    "category-form:13:3:5": {
+      "unitId": "category-form:13:3:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:38:3:7": {
+      "unitId": "category-form:38:3:7",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:189:10:6": {
+      "unitId": "category-form:189:10:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:416:9:8": {
+      "unitId": "category-form:416:9:8",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:337:16:8": {
+      "unitId": "category-form:337:16:8",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:265:2:7": {
+      "unitId": "category-form:265:2:7",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "poor",
+        "actionable": false,
+        "learnerLevelFit": "poor",
+        "cognitiveLoad": "high",
+        "redundancy": "problematic",
+        "mainPedagogicalRisk": "L'aide donne deux réponses contradictoires et fait apprendre une forme fausse.",
+        "suggestedRewrite": "Partir de « nous pinçons », enlever « -ons » donne « pinç- ». Pour « nous » à l'imparfait, devant « i », on enlève la cédille : « pinc- » + « -ions » = « pincions ». Ajouter une vérification courte : la cédille sert devant a, o, u, pas devant i."
+      },
+      "issues": [
+        {
+          "code": "incorrect_answer_table",
+          "severity": "error",
+          "detail": "Le tableau final marque « pinçions » comme réponse, alors que la réponse attendue et correcte est « pincions ». Il donne aussi « pinçiez », qui devrait être « pinciez ».",
+          "suggestion": "Remplacer « pinçions » par « pincions » et « pinçiez » par « pinciez » dans le tableau."
+        },
+        {
+          "code": "radical_contradiction",
+          "severity": "error",
+          "detail": "La construction dit que le radical est « pinc- », puis le bloc « En effet » dit que le point de départ est « pinç- ». Pour un élève fragile, cela rend la procédure confuse.",
+          "suggestion": "Expliquer explicitement : on garde le son [s], mais devant « i » on écrit « c » sans cédille."
+        }
+      ]
+    },
+    "category-form:549:16:4": {
+      "unitId": "category-form:549:16:4",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "L'élève mémorise une forme sans accent qui est incorrecte en français standard.",
+        "suggestedRewrite": "Utiliser les formes accentuées : « désactiver », « il désactiva », « désactiv- », « que je désactivasse »."
+      },
+      "issues": [
+        {
+          "code": "orthography_missing_accent",
+          "severity": "error",
+          "detail": "Les formes affichées « desactiver », « Il desactiva » et « desactivasse » oublient l'accent de « désactiver ». L'aide fait apprendre une graphie incorrecte.",
+          "suggestion": "Corriger toutes les occurrences en « désactiver », « il désactiva », « désactiv- », « désactivasse »."
+        }
+      ]
+    },
+    "category-form:337:16:7": {
+      "unitId": "category-form:337:16:7",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:554:3:7": {
+      "unitId": "category-form:554:3:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:228:14:7": {
+      "unitId": "category-form:228:14:7",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "La forme repère annoncée est ensuite peu utilisée, ce qui peut créer une petite hésitation.",
+        "suggestedRewrite": "Après « Je déciderai », ajouter : « Enlève -ai : il reste décider-. Pour ce verbe, c’est aussi l’infinitif entier. »"
+      },
+      "issues": []
+    },
+    "category-form:36:1:9": {
+      "unitId": "category-form:36:1:9",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "La transformation y -> i n’est pas explicitée dans la reconstruction.",
+        "suggestedRewrite": "Pour essuyer, à ils au présent, il faut apprendre la forme repère : ils essuient. Retiens que le y devient i : essui- + -ent."
+      },
+      "issues": []
+    },
+    "category-form:278:16:9": {
+      "unitId": "category-form:278:16:9",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "poor",
+        "cognitiveLoad": "high",
+        "redundancy": "problematic",
+        "mainPedagogicalRisk": "Le bloc sur la lettre G ajoute beaucoup d’informations et contient une règle inutile ici.",
+        "suggestedRewrite": "Garder seulement : « Dans songea, on garde ge devant a pour faire le son j. Enlève -a : songe-. Puis ajoute -assent : songeassent. »"
+      },
+      "issues": [
+        {
+          "code": "overload_irrelevant_spelling_block",
+          "severity": "error",
+          "detail": "Le tableau général sur la lettre g parle aussi de gu devant e/i/y, information non nécessaire pour construire songeassent.",
+          "suggestion": "Remplacer ce bloc par une courte vérification ciblée : « songe + assent garde gea, donc le son de changer/songer reste correct. »"
+        }
+      ]
+    },
+    "category-form:524:16:7": {
+      "unitId": "category-form:524:16:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:458:2:9": {
+      "unitId": "category-form:458:2:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:514:3:4": {
+      "unitId": "category-form:514:3:4",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "La réponse étant aussi la forme repère, l’aide donne directement la forme à mémoriser.",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:73:4:7": {
+      "unitId": "category-form:73:4:7",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "poor",
+        "cognitiveLoad": "high",
+        "redundancy": "problematic",
+        "mainPedagogicalRisk": "Le bloc sur la lettre G surcharge et peut brouiller la règle utile pour changer.",
+        "suggestedRewrite": "Après la réponse, ajouter seulement : « Vérifie l’orthographe : avec changer, on garde e après g devant a : changeâmes. »"
+      },
+      "issues": [
+        {
+          "code": "overload_irrelevant_spelling_block",
+          "severity": "error",
+          "detail": "Le bloc visuel sur la lettre G donne plusieurs règles générales, dont gu devant e/i/y, alors que l’élève doit seulement retenir ge devant a dans changeâmes.",
+          "suggestion": "Supprimer le tableau général et garder une vérification courte centrée sur ge + âmes."
+        }
+      ]
+    },
+    "category-form:237:3:4": {
+      "unitId": "category-form:237:3:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "La réponse étant aussi la forme repère, l’aide donne directement la forme à mémoriser.",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:484:16:7": {
+      "unitId": "category-form:484:16:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:513:4:9": {
+      "unitId": "category-form:513:4:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:479:3:7": {
+      "unitId": "category-form:479:3:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:41:2:7": {
+      "unitId": "category-form:41:2:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:343:3:7": {
+      "unitId": "category-form:343:3:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:452:4:9": {
+      "unitId": "category-form:452:4:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:2:16:8": {
+      "unitId": "category-form:2:16:8",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "Temps très rare qui peut rester abstrait pour un élève fragile, malgré une procédure claire.",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:18:16:8": {
+      "unitId": "category-form:18:16:8",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "Temps très rare qui peut rester abstrait pour un élève fragile, malgré une procédure claire.",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:548:1:6": {
+      "unitId": "category-form:548:1:6",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "L’élève apprend une forme mal orthographiée, sans accent.",
+        "suggestedRewrite": "Écrire le verbe et les formes avec accent : dériver, ils dérivent, il dérive. Puis garder la même procédure : enlève -ent à « ils dérivent » pour obtenir « dériv- », puis ajoute -e : « il dérive »."
+      },
+      "issues": [
+        {
+          "code": "orthographe-verbe-sans-accent",
+          "severity": "error",
+          "detail": "Le verbe est présenté comme « deriver » et les formes comme « derive/derivent », alors que l’orthographe française attend « dériver », « il dérive », « ils dérivent ».",
+          "suggestion": "Corriger tous les affichages : « dériver », « Ils dérivent », radical « dériv- », réponse « dérive », tableau avec formes accentuées."
+        }
+      ]
+    },
+    "category-form:511:16:8": {
+      "unitId": "category-form:511:16:8",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "Temps très rare qui peut rester abstrait pour un élève fragile, malgré une procédure claire.",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:445:4:9": {
+      "unitId": "category-form:445:4:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:217:1:9": {
+      "unitId": "category-form:217:1:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:466:3:5": {
+      "unitId": "category-form:466:3:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:84:4:6": {
+      "unitId": "category-form:84:4:6",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "low",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:549:16:5": {
+      "unitId": "category-form:549:16:5",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:58:3:5": {
+      "unitId": "category-form:58:3:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:518:14:5": {
+      "unitId": "category-form:518:14:5",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "Deux méthodes pour trouver le radical du futur sont données sans lien clair.",
+        "suggestedRewrite": "Forme repère à apprendre : je combinerai. Pour trouver le radical du futur, enlève -ai : combiner-. Pour tu, ajoute la terminaison -ais : tu combinerais."
+      },
+      "issues": [
+        {
+          "code": "INCOHERENT_RADICAL_METHOD",
+          "severity": "error",
+          "detail": "Le bloc fait apprendre la forme repère « Je combinerai », puis le bloc suivant dit de partir de l’infinitif et de le garder. Pour un élève fragile, cela brouille la procédure : forme repère ou infinitif ?",
+          "suggestion": "Choisir une seule procédure, de préférence celle annoncée par la forme repère : partir de « je combinerai », enlever « -ai », garder « combiner- », puis ajouter « -ais »."
+        }
+      ]
+    },
+    "category-form:4:4:6": {
+      "unitId": "category-form:4:4:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "none",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:241:1:7": {
+      "unitId": "category-form:241:1:7",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "high",
+        "redundancy": "problematic",
+        "mainPedagogicalRisk": "Le bloc sur la lettre G ajoute une règle longue et partiellement hors cible après la réponse.",
+        "suggestedRewrite": "À retenir : avec corriger, à nous, on écrit geons pour garder le son « j ». Radical corrige- + terminaison -ons : nous corrigeons."
+      },
+      "issues": [
+        {
+          "code": "OFF_TARGET_SPELLING_BLOCK",
+          "severity": "error",
+          "detail": "Après avoir construit « nous corrigeons », le bloc « La lettre G » explique aussi le son dur de g et l’ajout de u devant e, i, y. Ces informations ne servent pas à répondre ici et augmentent fortement la charge cognitive.",
+          "suggestion": "Limiter l’aide orthographique à la difficulté utile : « Devant o, on garde le son j en écrivant ge : nous corrigeons. »"
+        }
+      ]
+    },
+    "category-form:448:16:4": {
+      "unitId": "category-form:448:16:4",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:36:16:9": {
+      "unitId": "category-form:36:16:9",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:193:16:9": {
+      "unitId": "category-form:193:16:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:78:14:7": {
+      "unitId": "category-form:78:14:7",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:525:1:7": {
+      "unitId": "category-form:525:1:7",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": false,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "low",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "L’aide donne la forme demandée comme forme repère avant de montrer une vraie procédure.",
+        "suggestedRewrite": "Pour conjuguer au présent avec nous : prends l’infinitif contester, enlève -er : contest-. Ajoute la terminaison -ons pour nous : nous contestons. Cette forme peut ensuite servir de forme repère pour d’autres temps ou modes."
+      },
+      "issues": [
+        {
+          "code": "starts_from_target_form",
+          "severity": "error",
+          "detail": "Le premier bloc présente directement « Nous contestons », qui est la réponse attendue, comme élément à apprendre par cœur.",
+          "suggestion": "Commencer par la construction depuis l’infinitif : contester -> contest- + -ons, puis seulement signaler que « nous contestons » est une forme repère utile."
+        }
+      ]
+    },
+    "category-form:159:3:4": {
+      "unitId": "category-form:159:3:4",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": false,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "low",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "L’élève voit la réponse avant la méthode et peut seulement la copier.",
+        "suggestedRewrite": "Pour le futur de je : prends l’infinitif crier. Au futur, on garde l’infinitif comme radical : crier-. Ajoute la terminaison -ai : je crierai. Cette forme est aussi une forme repère du futur à retenir."
+      },
+      "issues": [
+        {
+          "code": "starts_from_target_form",
+          "severity": "error",
+          "detail": "L’aide commence par « Je crierai », exactement la forme demandée, au lieu de partir d’un repère indépendant ou de l’infinitif.",
+          "suggestion": "Présenter d’abord la règle du futur des verbes réguliers en -er : infinitif + terminaison, puis identifier la forme obtenue comme forme repère."
+        }
+      ]
+    },
+    "category-form:455:1:9": {
+      "unitId": "category-form:455:1:9",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": false,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "low",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "La procédure dépend de la réponse déjà affichée.",
+        "suggestedRewrite": "Pour ils au présent : prends l’infinitif noter, enlève -er : not-. Ajoute la terminaison écrite -ent : ils notent. Attention : -ent se voit à l’écrit mais ne se prononce généralement pas."
+      },
+      "issues": [
+        {
+          "code": "starts_from_target_form",
+          "severity": "error",
+          "detail": "Le bloc « À savoir par cœur » donne directement « Ils notent », qui est la réponse attendue.",
+          "suggestion": "Faire construire la forme depuis l’infinitif et la terminaison -ent avant de présenter « ils notent » comme forme utile à mémoriser."
+        }
+      ]
+    },
+    "category-form:391:14:7": {
+      "unitId": "category-form:391:14:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:473:10:5": {
+      "unitId": "category-form:473:10:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:278:3:9": {
+      "unitId": "category-form:278:3:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:459:16:7": {
+      "unitId": "category-form:459:16:7",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:453:16:5": {
+      "unitId": "category-form:453:16:5",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:169:4:6": {
+      "unitId": "category-form:169:4:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:551:1:9": {
+      "unitId": "category-form:551:1:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "low",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:451:1:6": {
+      "unitId": "category-form:451:1:6",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:445:14:9": {
+      "unitId": "category-form:445:14:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:463:16:4": {
+      "unitId": "category-form:463:16:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:174:3:9": {
+      "unitId": "category-form:174:3:9",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "Le tableau final omet le sujet devant les formes pronominales et peut faire croire que la réponse est seulement « s’écrieront ».",
+        "suggestedRewrite": "Dans le tableau final, écrire les formes complètes : « je m’écrierai », « tu t’écrieras », « il s’écriera », « nous nous écrierons », « vous vous écrierez », « ils s’écrieront ». Dans la réponse, garder clairement : sujet + pronom réfléchi + verbe = « Ils s’écrieront »."
+      },
+      "issues": [
+        {
+          "code": "pronominal-table-incomplete",
+          "severity": "error",
+          "detail": "Le tableau final donne « s’écrieront » dans la ligne « ils / elles » sans sujet, alors qu’un élève fragile doit voir que la réponse complète garde le sujet et le pronom réfléchi : « Ils s’écrieront ».",
+          "suggestion": "Afficher les formes pronominales complètes avec leur sujet dans le tableau, ou ajouter une note explicite : « Dans la case réponse, écris aussi le sujet : Ils s’écrieront. »"
+        }
+      ]
+    },
+    "category-form:161:4:6": {
+      "unitId": "category-form:161:4:6",
+      "verdict": "approved",
+      "confidence": "medium",
+      "pedagogy": {
+        "clarity": "medium",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "low",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:268:2:7": {
+      "unitId": "category-form:268:2:7",
+      "verdict": "rejected",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "poor",
+        "actionable": false,
+        "learnerLevelFit": "poor",
+        "cognitiveLoad": "high",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "L’aide donne une réponse et un tableau grammaticalement faux à cause de la cédille devant i.",
+        "suggestedRewrite": "Prends « nous prononçons » au présent. Enlève « -ons » : tu gardes « prononc- » pour l’imparfait. Avec « nous », ajoute « -ions » : « nous prononcions ». Pas de cédille devant i, car c devant i se prononce déjà [s]."
+      },
+      "issues": [
+        {
+          "code": "wrong-cedilla-form",
+          "severity": "error",
+          "detail": "La réponse attendue est « prononcions », mais le tableau final met en évidence « prononçions » et donne aussi « prononçiez », formes fautives : on n’écrit pas ç devant i.",
+          "suggestion": "Corriger le tableau : « nous prononcions », « vous prononciez ». Garder l’explication : la cédille sert seulement devant a, o ou u."
+        },
+        {
+          "code": "internal-contradiction",
+          "severity": "error",
+          "detail": "Le bloc Réponse construit correctement « prononcions », puis le bloc En effet met en évidence « prononçions ». L’élève reçoit deux réponses différentes.",
+          "suggestion": "Aligner tous les blocs sur la forme correcte « prononcions » et expliquer explicitement pourquoi il n’y a pas de cédille devant i."
+        }
+      ]
+    },
+    "category-form:213:4:9": {
+      "unitId": "category-form:213:4:9",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "good",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    },
+    "category-form:430:16:4": {
+      "unitId": "category-form:430:16:4",
+      "verdict": "approved",
+      "confidence": "high",
+      "pedagogy": {
+        "clarity": "good",
+        "actionable": true,
+        "learnerLevelFit": "medium",
+        "cognitiveLoad": "medium",
+        "redundancy": "minor",
+        "mainPedagogicalRisk": "",
+        "suggestedRewrite": ""
+      },
+      "issues": []
+    }
+  }
+}

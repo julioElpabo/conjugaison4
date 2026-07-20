@@ -7,6 +7,7 @@ interface CatalogueVerb {
   participePresent: string
   participePasse: string
   auxiliaire: string
+  helpReviewStatus?: 'approved' | 'rejected' | null
 }
 
 const props = defineProps<{
@@ -170,7 +171,10 @@ watch(suggestions, (items) => {
           @click="selectCatalogueVerb(verb.id)"
         >
           <span>{{ verb.infinitif }}</span>
-          <small>{{ verb.auxiliaire || 'sans auxiliaire' }}</small>
+          <span class="verb-catalogue__meta">
+            <small v-if="verb.helpReviewStatus === 'approved'" class="verb-catalogue__approved">✓ Approuvé</small>
+            <small>{{ verb.auxiliaire || 'sans auxiliaire' }}</small>
+          </span>
         </button>
       </li>
     </ul>
@@ -346,6 +350,27 @@ watch(suggestions, (items) => {
   color: var(--admin-muted);
   font-size: .7rem;
   font-weight: 500;
+}
+
+.verb-catalogue__meta {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  flex-direction: column;
+}
+
+.verb-catalogue__list .verb-catalogue__approved {
+  padding: 2px 6px;
+  color: #17684d;
+  background: #dff3e8;
+  border-radius: 999px;
+  font-size: .62rem;
+  font-weight: 850;
+}
+
+:global(:root[data-theme='dark']) .verb-catalogue__list .verb-catalogue__approved {
+  color: #b9efd6;
+  background: #245540;
 }
 
 .verb-catalogue__empty {

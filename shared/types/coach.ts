@@ -127,6 +127,7 @@ export interface CoachProfile {
   gender: CoachGender
   avatarPath: string
   description: string
+  likes: string
   characterId: number
   characterName: string
   personality: string

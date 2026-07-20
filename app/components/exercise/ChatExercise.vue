@@ -52,6 +52,8 @@ const helpOpen = ref(false)
 const sequence = ref(0)
 const lastMediaQuestion = ref(-100)
 const allowMotion = ref(true)
+const chatSessionId = ref('')
+const exerciseRunId = ref('')
 const input = useTemplateRef<HTMLInputElement>('chat-answer')
 const keepChatButton = useTemplateRef<HTMLButtonElement>('keep-chat-button')
 const thread = useTemplateRef<HTMLElement>('chat-thread')
@@ -61,6 +63,7 @@ let coachQueue: Promise<void> = Promise.resolve()
 let lastCoachBubbleAt = 0
 let dialogueState = createCoachDialogueState()
 let automaticHelpTimer: number | undefined
+let questionScrollFrame: number | null = null
 
 useDialogFocus(dialog, handleEscapeClose, input)
 
@@ -97,6 +100,40 @@ function normalizedInfinitive(value?: string | null) {
   return (value || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLocaleLowerCase('fr')
 }
 
+function randomIdentifier(prefix: string) {
+  const cryptoId = globalThis.crypto?.randomUUID?.()
+  return `${prefix}-${cryptoId || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`}`
+}
+
+function resetExerciseRunId() {
+  exerciseRunId.value = randomIdentifier('exercise')
+}
+
+function compactVerb(verb: Verb) {
+  return {
+    id: verb.id,
+    infinitif: verb.infinitif,
+    meaning: verb.meaning,
+    auxiliaire: verb.auxiliaire,
+    participePasse: verb.participePasse,
+    groupeConjugaison: verb.groupeConjugaison,
+    familleConjugaison: verb.familleConjugaison,
+    particularites: verb.particularites,
+  }
+}
+
+function compactTense(tense: ConjugationTense) {
+  return {
+    id: tense.id,
+    name: tense.name,
+    code: tense.code,
+    modeId: tense.modeId,
+    mode: tense.mode,
+    isCompound: tense.isCompound,
+    selected: tense.selected,
+  }
+}
+
 const helpValues = computed(() => currentQuestion.value ? {
   coach: props.coach,
   ...coachHelpQuestionVariables(currentQuestion.value, currentVerb.value, currentTense.value),
@@ -104,6 +141,58 @@ const helpValues = computed(() => currentQuestion.value ? {
   helpTitle: targetedHelp.value?.title || '',
   omitIndicativeMode: omitIndicativeMode.value,
 } : { coach: props.coach })
+const helpFeedbackContext = computed(() => {
+  const question = currentQuestion.value
+  return {
+    sessionId: chatSessionId.value,
+    exerciseRunId: exerciseRunId.value,
+    capturedAt: new Date().toISOString(),
+    coachId: props.coach.id,
+    coachName: props.coach.firstName,
+    coach: {
+      id: props.coach.id,
+      slug: props.coach.slug,
+      firstName: props.coach.firstName,
+      characterId: props.coach.characterId,
+      characterName: props.coach.characterName,
+      pedagogicalStyle: props.coach.pedagogicalStyle,
+      helpId: props.coach.help?.id,
+      helpName: props.coach.help?.name,
+      themeColor: props.coach.themeColor,
+    },
+    helpId: props.coach.help?.id,
+    helpName: props.coach.help?.name,
+    questionNumber: question ? currentIndex.value + 1 : undefined,
+    questionIndex: currentIndex.value,
+    questionCount: props.questions.length,
+    verbId: question?.verbeId,
+    verb: question?.infinitif,
+    tenseId: question?.tenseId,
+    tense: question?.temps,
+    mode: question?.mode,
+    person: question?.pronom || question?.saisiePrefixe,
+    expectedAnswer: question?.reponsesPourCorrige.join(' ou '),
+    currentAnswerDraft: answer.value,
+    currentQuestion: question || null,
+    currentVerb: currentVerb.value || null,
+    currentTense: currentTense.value || null,
+    exerciseContext: {
+      currentIndex: currentIndex.value,
+      questionCount: props.questions.length,
+      questions: props.questions,
+      selectedVerbs: props.verbs.map(compactVerb),
+      selectedTenses: props.tenses.map(compactTense),
+      omitIndicativeMode: omitIndicativeMode.value,
+      score: score.value,
+      correctCount: correctCount.value,
+      consecutiveCorrectCount: consecutiveCorrectCount.value,
+      waitingForNext: waitingForNext.value,
+      finished: finished.value,
+    },
+    attempts: attempts.value,
+    messages: messages.value,
+  }
+})
 
 function openHelp(candidate: string) {
   cancelAutomaticHelp()
@@ -144,6 +233,25 @@ function scrollThreadToBottom() {
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
         if (thread.value) thread.value.scrollTop = thread.value.scrollHeight
+      })
+    })
+  })
+}
+
+function scrollThreadToMessage(messageId: number) {
+  if (questionScrollFrame !== null) window.cancelAnimationFrame(questionScrollFrame)
+  void nextTick(() => {
+    questionScrollFrame = window.requestAnimationFrame(() => {
+      questionScrollFrame = window.requestAnimationFrame(() => {
+        questionScrollFrame = null
+        const container = thread.value
+        const target = container?.querySelector<HTMLElement>(`[data-chat-message-id="${messageId}"]`)
+        if (!container || !target) return
+        const top = target.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop - 4
+        container.scrollTo({
+          top: Math.max(0, top),
+          behavior: allowMotion.value ? 'smooth' : 'auto',
+        })
       })
     })
   })
@@ -216,12 +324,14 @@ async function askCurrentQuestion() {
   const question = currentQuestion.value
   if (!question) return
   posingQuestion.value = true
+  const firstQuestionMessageId = sequence.value + 1
   if (currentIndex.value > 0) await addCoachReaction('question', contextFor(question))
   if (question.instruction) await addCoachText(question.instruction, undefined, true)
   const bubbles = coachQuestionBubbles(question, { omitIndicativeMode: omitIndicativeMode.value })
   await addCoachText(bubbles.formula, undefined, true)
   if (bubbles.sentence) await addCoachText(bubbles.sentence, undefined, true)
   posingQuestion.value = false
+  scrollThreadToMessage(firstQuestionMessageId)
   focusAnswerInput()
 }
 
@@ -302,6 +412,7 @@ async function continueChat() {
 
 async function restart() {
   conversationVersion += 1
+  resetExerciseRunId()
   coachQueue = Promise.resolve()
   lastCoachBubbleAt = 0
   dialogueState = createCoachDialogueState()
@@ -343,6 +454,8 @@ function confirmClose() {
 }
 
 onMounted(async () => {
+  chatSessionId.value = randomIdentifier('chat')
+  resetExerciseRunId()
   allowMotion.value = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
   focusAnswerInput()
   await addCoachReaction('introduction', {})
@@ -352,6 +465,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   cancelAutomaticHelp()
+  if (questionScrollFrame !== null) window.cancelAnimationFrame(questionScrollFrame)
   conversationVersion += 1
 })
 </script>
@@ -365,7 +479,8 @@ onBeforeUnmount(() => {
           <img class="coach-avatar" :src="coach.avatarPath" alt="">
           <div>
             <h2 id="chat-title">{{ coach.firstName }}</h2>
-            <p v-if="coach.description">{{ coach.description }}</p>
+            <blockquote v-if="coach.description" class="chat-header__quote">« {{ coach.description }} »</blockquote>
+            <p v-if="coach.likes" class="chat-header__likes"><strong>Aime&nbsp;:</strong> {{ coach.likes }}</p>
           </div>
           <div class="chat-header__actions">
             <button type="button" class="chat-close" aria-label="Quitter le chat" @click="requestClose">×</button>
@@ -385,6 +500,7 @@ onBeforeUnmount(() => {
             v-for="message in messages"
             :key="message.id"
             class="chat-message"
+            :data-chat-message-id="message.id"
             :class="[
               `chat-message--${message.author}`,
               message.tone ? `chat-message--${message.tone}` : '',
@@ -447,10 +563,11 @@ onBeforeUnmount(() => {
           v-if="helpOpen && targetedHelp"
           :blocks="helpBlocks"
           :values="helpValues"
-          :header-title="coach.help?.headerTitle"
-          :header-description="coach.help?.headerDescription"
+          header-title="{helpTitle}"
+          header-description=""
           :question-number="currentIndex + 1"
           :coach-color="coach.themeColor"
+          :feedback-context="helpFeedbackContext"
           @close="closeHelp"
         />
       </Transition>
@@ -950,7 +1067,8 @@ onBeforeUnmount(() => {
 }
 
 .chat-header h2,
-.chat-header p {
+.chat-header p,
+.chat-header blockquote {
   margin: 0;
 }
 
@@ -958,10 +1076,22 @@ onBeforeUnmount(() => {
   font-size: 1rem;
 }
 
-.chat-header p {
-  margin-top: 3px;
+.chat-header__quote {
+  margin-top: 4px;
+  color: #e1f4f7;
+  font-size: .8rem;
+  font-style: italic;
+  line-height: 1.35;
+}
+
+.chat-header__likes {
+  margin-top: 5px !important;
   color: #cfe8ef;
   font-size: .78rem;
+}
+
+.chat-header__likes strong {
+  color: white;
 }
 
 .chat-header p span {

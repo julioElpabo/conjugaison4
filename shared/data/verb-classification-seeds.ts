@@ -28,6 +28,7 @@ export const canonicalInfinitives: Record<string, string> = {
   deborder: 'déborder', deboucher: 'déboucher', debuter: 'débuter', decaler: 'décaler', decoller: 'décoller',
   decouper: 'découper', decoupler: 'découpler', dedier: 'dédier', defier: 'défier', defiler: 'défiler',
   dejeuner: 'déjeuner', demarrer: 'démarrer', denicher: 'dénicher', denommer: 'dénommer',
+  deposer: 'déposer', deriver: 'dériver', desactiver: 'désactiver',
 }
 
 export const semanticDomains = [

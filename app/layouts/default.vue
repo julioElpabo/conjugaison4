@@ -35,6 +35,12 @@ const activeSection = computed(() => {
           <span>Défis de conjugaison</span>
         </a>
         <nav class="site-navigation" aria-label="Navigation principale">
+          <NuxtLink class="site-navigation__home" to="/" aria-label="Accueil" title="Accueil">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M3 11.2 12 4l9 7.2" />
+              <path d="M5.5 10.7V20h4.8v-5.4h3.4V20h4.8v-9.3" />
+            </svg>
+          </NuxtLink>
           <NuxtLink to="/" :class="{ 'is-active': activeSection === 'exercer' }" :aria-current="activeSection === 'exercer' ? 'page' : undefined">
             S’exercer
           </NuxtLink>
@@ -206,6 +212,9 @@ a {
 }
 
 .site-navigation a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 9px 14px;
   border: 1px solid transparent;
   border-radius: 999px;
@@ -214,6 +223,21 @@ a {
   font-size: .92rem;
   font-weight: 700;
   transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.site-navigation__home {
+  width: 42px;
+  padding-inline: 0 !important;
+}
+
+.site-navigation__home svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.2;
 }
 
 .site-navigation a:hover {
@@ -353,7 +377,7 @@ a {
     display: grid;
     width: 100%;
     flex: 1 1 100%;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    grid-template-columns: auto repeat(3, minmax(0, 1fr)) auto;
     justify-content: center;
     order: 2;
   }
@@ -363,6 +387,10 @@ a {
     padding: 8px 5px;
     text-align: center;
     font-size: .84rem;
+  }
+
+  .site-navigation__home {
+    width: 38px;
   }
 
   .theme-switch { margin-left: 2px; }

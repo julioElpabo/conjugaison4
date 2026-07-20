@@ -47,6 +47,8 @@ const deliveringFeedback = ref(false)
 const posingQuestion = ref(false)
 const consecutiveCorrectCount = ref(0)
 const finished = ref(false)
+const finalSummaryPreparing = ref(false)
+const finalSummaryVisible = ref(false)
 const closeConfirmationOpen = ref(false)
 const helpOpen = ref(false)
 const sequence = ref(0)
@@ -89,6 +91,17 @@ const score = computed(() => attempts.value.length
   ? Math.round(correctCount.value / attempts.value.length * 100)
   : 0)
 const omitIndicativeMode = computed(() => areOnlyIndicativeTenses(props.tenses))
+const attemptSummaries = computed(() => attempts.value.map((attempt, index) => {
+  const bubbles = coachQuestionBubbles(attempt.question, { omitIndicativeMode: omitIndicativeMode.value })
+  const formula = omitIndicativeMode.value ? withoutIndicativeMode(bubbles.formula) : bubbles.formula
+  return {
+    index: index + 1,
+    status: attempt.status,
+    questionLabel: formula,
+    learnerAnswer: attempt.answer,
+    expectedAnswer: attempt.question.reponsesPourCorrige.join(' ou ') || attempt.question.reponses.join(' ou '),
+  }
+}))
 const hasIncorrectMedia = computed(() => props.coach.assignments.some(assignment => assignment.isActive
   && assignment.eventType === 'incorrect'
   && props.coach.media.some(item => item.id === assignment.mediaId
@@ -395,6 +408,7 @@ async function submit() {
 async function continueChat() {
   if (!waitingForNext.value || deliveringFeedback.value) return
   if (currentIndex.value >= props.questions.length - 1) {
+    const version = conversationVersion
     finished.value = true
     waitingForNext.value = false
     await addCoachReaction('finish', {
@@ -402,6 +416,13 @@ async function continueChat() {
       correctCount: correctCount.value,
       questionCount: attempts.value.length,
     })
+    finalSummaryPreparing.value = true
+    scrollThreadToBottom()
+    await wait(2000)
+    if (version !== conversationVersion) return
+    finalSummaryPreparing.value = false
+    finalSummaryVisible.value = true
+    scrollThreadToBottom()
     return
   }
 
@@ -425,6 +446,8 @@ async function restart() {
   posingQuestion.value = false
   consecutiveCorrectCount.value = 0
   finished.value = false
+  finalSummaryPreparing.value = false
+  finalSummaryVisible.value = false
   helpOpen.value = false
   lastMediaQuestion.value = -100
   await addCoachReaction('restart', {})
@@ -518,10 +541,59 @@ onBeforeUnmount(() => {
             <img v-else-if="message.media" :class="{ 'chat-media--emoji': message.media.mediaType === 'emoji' }" :src="message.media.filePath" :alt="message.media.altText" @load="mediaLoaded">
           </div>
 
-          <section v-if="finished" class="chat-score">
-            <strong>{{ score }} %</strong>
-            <span>{{ correctCount }} réponse{{ correctCount > 1 ? 's' : '' }} juste{{ correctCount > 1 ? 's' : '' }} sur {{ attempts.length }}</span>
+          <div v-if="finalSummaryPreparing" class="chat-summary-loading" role="status" aria-live="polite">
+            <span aria-hidden="true" />
+            <strong>Création du bilan</strong>
+          </div>
+
+          <section v-if="finalSummaryVisible" class="chat-summary-tool" aria-labelledby="chat-summary-title">
+            <header>
+              <span aria-hidden="true">✓</span>
+              <div>
+                <p>Compte rendu automatique</p>
+                <h3 id="chat-summary-title">Bilan du défi</h3>
+              </div>
+              <strong>{{ score }} %</strong>
+            </header>
+            <ol class="chat-summary-list">
+              <li
+                v-for="item in attemptSummaries"
+                :key="item.index"
+                :class="`is-${item.status}`"
+                :style="{ '--summary-item-index': `${item.index - 1}` }"
+              >
+                <span class="chat-summary-list__status" aria-hidden="true">{{ item.status === 'correct' ? '✓' : '×' }}</span>
+                <div>
+                  <strong class="chat-summary-list__question">
+                    <span>Question {{ item.index }}</span>
+                    <span>{{ item.questionLabel }}</span>
+                  </strong>
+                  <dl>
+                    <div>
+                      <dt>Réponse donnée</dt>
+                      <dd>{{ item.learnerAnswer }}</dd>
+                    </div>
+                    <div>
+                      <dt>Bonne réponse</dt>
+                      <dd>{{ item.expectedAnswer }}</dd>
+                    </div>
+                  </dl>
+                </div>
+              </li>
+            </ol>
+            <footer>
+              <strong>{{ correctCount }} / {{ attempts.length }}</strong>
+              <span>réponse{{ correctCount > 1 ? 's' : '' }} juste{{ correctCount > 1 ? 's' : '' }}</span>
+            </footer>
           </section>
+
+          <div v-if="finalSummaryVisible" class="chat-message chat-message--coach chat-restart-prompt">
+            <span>Tu veux refaire ce défi&nbsp;?</span>
+            <div class="chat-restart-prompt__actions">
+              <button type="button" @click="restart">Oui</button>
+              <button type="button" @click="emit('close')">Non</button>
+            </div>
+          </div>
         </div>
 
         <form v-if="!finished" class="chat-composer" @submit.prevent="submit">
@@ -539,11 +611,6 @@ onBeforeUnmount(() => {
             {{ posingQuestion ? 'Question…' : deliveringFeedback ? 'Réponse…' : waitingForNext ? `Suite dans ${nextQuestionDelay / 1000} s…` : 'Envoyer' }}
           </button>
         </form>
-
-        <div v-else class="chat-actions">
-          <button type="button" class="secondary-button" @click="emit('close')">Fermer</button>
-          <button type="button" class="primary-button" @click="restart">Recommencer</button>
-        </div>
 
         <div v-if="closeConfirmationOpen" class="chat-close-confirmation" @click.self="cancelClose">
           <section role="alertdialog" aria-modal="true" aria-labelledby="chat-close-title" aria-describedby="chat-close-description">
@@ -1234,21 +1301,335 @@ onBeforeUnmount(() => {
   background: #ffebe9;
 }
 
-.chat-score {
-  display: flex;
-  margin: 16px auto;
+.chat-summary-loading {
+  display: inline-flex;
+  margin: 16px auto 8px;
+  padding: 12px 16px;
   align-items: center;
-  flex-direction: column;
-  gap: 4px;
+  gap: 10px;
+  border: 1px solid #bed8df;
+  border-radius: 999px;
+  color: #2e6271;
+  background: rgb(255 255 255 / 82%);
+  box-shadow: 0 6px 18px rgb(30 74 88 / 9%);
 }
 
-.chat-score strong {
+.chat-summary-loading > span {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #cfe2e7;
+  border-top-color: #176b87;
+  border-radius: 50%;
+  animation: chat-summary-spinner .7s linear infinite;
+}
+
+.chat-summary-loading > strong {
+  font-size: .9rem;
+}
+
+.chat-summary-tool {
+  display: grid;
+  width: calc(100% - 20px);
+  margin: 16px auto 8px;
+  padding: 16px;
+  gap: 13px;
+  align-self: stretch;
+  border: 1px solid #bed8df;
+  border-radius: 18px;
+  color: #254550;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 88%), rgb(241 249 250 / 94%)),
+    #f4fbfc;
+  box-shadow: 0 8px 26px rgb(30 74 88 / 10%);
+  animation: chat-summary-card-in .42s ease-out both;
+}
+
+.chat-summary-tool > header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chat-summary-tool > header > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 13px;
+  color: white;
+  background: #45aa7b;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.chat-summary-tool > header > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.chat-summary-tool > header p {
+  margin: 0 0 2px;
+  color: #2c7a8e;
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.chat-summary-tool h3 {
+  margin: 0;
+  color: #173f55;
+  font-size: 1.25rem;
+}
+
+.chat-summary-tool > header > strong {
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #185f3c;
+  background: #dff5e9;
+  font-size: .95rem;
+}
+
+.chat-summary-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 9px;
+  list-style: none;
+}
+
+.chat-summary-list li {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #d2e2e6;
+  border-radius: 14px;
+  background: white;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: chat-summary-item-in .34s ease-out both;
+  animation-delay: calc(.16s + var(--summary-item-index, 0) * .11s);
+}
+
+.chat-summary-list li.is-correct {
+  border-color: #bde4cf;
+}
+
+.chat-summary-list li.is-incorrect {
+  border-color: #f0c1bd;
+}
+
+.chat-summary-list__status {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.chat-summary-list li.is-correct .chat-summary-list__status {
+  background: #43aa73;
+}
+
+.chat-summary-list li.is-incorrect .chat-summary-list__status {
+  background: #d75b52;
+}
+
+.chat-summary-list__question {
+  display: block;
+  color: #173f55;
+  font-size: .94rem;
+}
+
+.chat-summary-list__question span + span {
+  margin-left: .45em;
+  color: #2d7083;
+  font-weight: 800;
+}
+
+.chat-summary-list dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.chat-summary-list dl > div {
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #eef6f8;
+}
+
+.chat-summary-list dt {
+  color: #6a7e84;
+  font-size: .64rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.chat-summary-list dd {
+  margin: 2px 0 0;
+  color: #173f55;
+  font-weight: 850;
+  overflow-wrap: anywhere;
+}
+
+.chat-summary-tool > footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 6px;
+  color: #526b73;
+}
+
+.chat-summary-tool > footer strong {
   color: #176b87;
-  font-size: 2.8rem;
+  font-size: 1.35rem;
 }
 
-.chat-composer,
-.chat-actions {
+@keyframes chat-summary-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes chat-summary-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes chat-summary-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.chat-restart-prompt {
+  margin-inline: auto;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.chat-restart-prompt__actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chat-restart-prompt__actions button {
+  padding: 8px 14px;
+  border: 1px solid #bfd4da;
+  border-radius: 999px;
+  color: #174253;
+  background: white;
+  cursor: pointer;
+  font-weight: 850;
+}
+
+.chat-restart-prompt__actions button:first-child {
+  color: white;
+  border-color: #176b87;
+  background: #176b87;
+}
+
+:global(:root[data-theme='dark']) .chat-summary-tool {
+  color: #dbe8ea;
+  border-color: #3f5e65;
+  background:
+    linear-gradient(180deg, rgb(27 48 53 / 92%), rgb(20 38 43 / 96%)),
+    #172b30;
+  box-shadow: 0 8px 26px rgb(0 0 0 / 18%);
+}
+
+:global(:root[data-theme='dark']) .chat-summary-loading {
+  color: #d9eef1;
+  border-color: #3f5e65;
+  background: rgb(27 48 53 / 86%);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 20%);
+}
+
+:global(:root[data-theme='dark']) .chat-summary-loading > span {
+  border-color: #39575f;
+  border-top-color: #87d6df;
+}
+
+:global(:root[data-theme='dark']) .chat-summary-tool > header p {
+  color: #87d6df;
+}
+
+:global(:root[data-theme='dark']) .chat-summary-tool h3,
+:global(:root[data-theme='dark']) .chat-summary-list__question,
+:global(:root[data-theme='dark']) .chat-summary-list dd {
+  color: #e8f5f6;
+}
+
+:global(:root[data-theme='dark']) .chat-summary-tool > footer,
+:global(:root[data-theme='dark']) .chat-summary-list__question span + span {
+  color: #b9ccd0;
+}
+
+:global(:root[data-theme='dark']) .chat-summary-tool > header > strong {
+  color: #b9f2d1;
+  background: #173c2c;
+}
+
+:global(:root[data-theme='dark']) .chat-summary-list li {
+  border-color: #3c5960;
+  background: #1e363b;
+}
+
+:global(:root[data-theme='dark']) .chat-summary-list li.is-correct {
+  border-color: #326f50;
+}
+
+:global(:root[data-theme='dark']) .chat-summary-list li.is-incorrect {
+  border-color: #7b443f;
+}
+
+:global(:root[data-theme='dark']) .chat-summary-list dl > div {
+  background: #162a2f;
+}
+
+:global(:root[data-theme='dark']) .chat-summary-list dt {
+  color: #9db5ba;
+}
+
+:global(:root[data-theme='dark']) .chat-restart-prompt__actions button {
+  color: #dff3f6;
+  border-color: #4a6870;
+  background: #162a2f;
+}
+
+:global(:root[data-theme='dark']) .chat-restart-prompt__actions button:first-child {
+  color: white;
+  border-color: #2c839d;
+  background: #176b87;
+}
+
+.chat-composer {
   display: flex;
   gap: 10px;
   padding: 16px;
@@ -1276,10 +1657,6 @@ onBeforeUnmount(() => {
 .chat-composer button:disabled {
   cursor: not-allowed;
   opacity: .5;
-}
-
-.chat-actions {
-  justify-content: flex-end;
 }
 
 .sr-only {
@@ -1329,6 +1706,20 @@ onBeforeUnmount(() => {
     padding: 16px;
   }
 
+  .chat-summary-tool {
+    width: 100%;
+    margin-inline: 0;
+    padding: 13px;
+  }
+
+  .chat-summary-list li {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .chat-summary-list dl {
+    grid-template-columns: 1fr;
+  }
+
   .coach-avatar {
     width: 94px;
     height: 94px;
@@ -1357,8 +1748,14 @@ onBeforeUnmount(() => {
 @media (prefers-reduced-motion: reduce) {
   .chat-dialogs,
   .chat-help-enter-active,
-  .chat-help-leave-active {
+  .chat-help-leave-active,
+  .chat-summary-tool,
+  .chat-summary-list li,
+  .chat-summary-loading > span {
     transition: none;
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
 }
 </style>

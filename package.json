@@ -30,7 +30,7 @@
     "data:equip-all-complements": "node --env-file=.env scripts/equip-all-verb-complements.mjs",
     "data:add-ecrire-coi": "node --env-file=.env scripts/add-ecrire-coi.mjs",
     "data:migrate-coaches": "node --env-file=.env scripts/migrate-coaches.mjs",
-    "data:migrate-coach-media-frequencies": "node --env-file=.env scripts/migrate-coach-media-frequencies.mjs",
+    "data:migrate-coach-media-frequencies": "node --env-file-if-exists=.env scripts/migrate-coach-media-frequencies.mjs",
     "data:migrate-character-names": "node --env-file=.env scripts/migrate-character-gendered-names.mjs",
     "data:migrate-character-emoticons": "node --env-file=.env scripts/migrate-character-emoticons.mjs",
     "data:migrate-coach-helps": "node --env-file=.env scripts/migrate-coach-helps.mjs",

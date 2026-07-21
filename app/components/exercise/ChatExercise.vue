@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { ConjugationTense, ExerciseAttempt, ExerciseQuestion, Verb } from '~~/shared/types/conjugation'
 import type { CoachEvent, CoachMedia, CoachMessageContext, CoachProfile } from '~~/shared/types/coach'
+import type { AnswerComparison } from '~~/shared/utils/answer-difference'
 import { getAlternativeCorrections, validateAnswer } from '~~/shared/utils/answer'
+import { buildAnswerComparison } from '~~/shared/utils/answer-difference'
 import { createCoachDialogueState, createVariedCoachReaction } from '~~/shared/utils/coach-dialogue'
 import {
   answerTurnPlan,
@@ -37,6 +39,7 @@ interface ChatMessage {
   media?: CoachMedia
   emphasis?: boolean
   questionIndex?: number
+  answerComparison?: AnswerComparison
 }
 
 const currentIndex = ref(0)
@@ -343,6 +346,16 @@ function addCoachText(text: string, tone?: ChatMessage['tone'], emphasis = false
   return enqueueCoachBubble(() => ({ text, ...(tone ? { tone } : {}), ...(emphasis ? { emphasis: true } : {}) }))
 }
 
+function addAnswerComparison(
+  learnerAnswer: string,
+  expectedAnswers: readonly string[],
+  displayExpectedAnswers: readonly string[],
+) {
+  const answerComparison = buildAnswerComparison(learnerAnswer, expectedAnswers, displayExpectedAnswers)
+  if (!answerComparison) return Promise.resolve()
+  return enqueueCoachBubble(() => ({ text: '', tone: 'error', answerComparison }))
+}
+
 async function addCoachReaction(eventType: CoachEvent, context: CoachMessageContext, tone?: ChatMessage['tone']) {
   const rule = props.coach.rules.find(item => item.eventType === eventType)
   const cooledDown = currentIndex.value - lastMediaQuestion.value >= (rule?.cooldownQuestions || 0)
@@ -429,6 +442,7 @@ async function submit() {
     incorrectEvent,
   })
   nextQuestionDelay.value = result.isCorrect ? CHAT_CORRECT_DELAY_MS : CHAT_INCORRECT_DELAY_MS
+  let comparisonDisplayed = false
   for (const step of plan) {
     if (step.kind === 'reaction') {
       const isIncorrectReaction = step.eventType === 'incorrect' || step.eventType === 'cod-before'
@@ -437,6 +451,14 @@ async function submit() {
       const displayed = await addCoachReaction(step.eventType, contextFor(question), isIncorrectReaction ? 'error' : isCorrectReaction ? 'success' : undefined)
       if (!displayed && isIncorrectReaction && step.eventType !== 'incorrect') {
         await addCoachReaction('incorrect', contextFor(question), 'error')
+      }
+      if (isIncorrectReaction && !comparisonDisplayed) {
+        // Le texte de correction peut contenir tout le contexte de la phrase
+        // (« Ce sont… que j’… »), alors que l'élève ne saisit que les blancs.
+        // On compare donc en priorité avec les formes réellement validées.
+        const officialAnswers = question.reponses.length ? question.reponses : question.reponsesPourCorrige
+        await addAnswerComparison(candidate, officialAnswers, question.reponsesPourCorrige)
+        comparisonDisplayed = true
       }
       if (step.eventType === 'streak') consecutiveCorrectCount.value = 0
     }
@@ -576,6 +598,7 @@ onBeforeUnmount(() => {
             :class="[
               `chat-message--${message.author}`,
               message.tone ? `chat-message--${message.tone}` : '',
+              { 'chat-message--comparison': !!message.answerComparison },
               { 'chat-message--help-link': message.author === 'learner' && message.questionIndex !== undefined },
               { 'is-help-selected': helpOpen && message.questionIndex !== undefined && message.questionIndex === helpQuestionIndex },
             ]"
@@ -586,8 +609,34 @@ onBeforeUnmount(() => {
             @keydown.enter.prevent="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
             @keydown.space.prevent="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
           >
+            <div v-if="message.answerComparison" class="answer-comparison">
+              <strong>{{ message.answerComparison.mode === 'focused' ? 'Regarde où ça change :' : 'Repars de la correction complète :' }}</strong>
+              <div class="answer-comparison__line answer-comparison__line--learner">
+                <small>Ta réponse</small>
+                <p>
+                  <span
+                    v-for="(part, partIndex) in message.answerComparison.learnerParts"
+                    :key="`learner-${partIndex}`"
+                    :class="`answer-comparison__part--${part.kind}`"
+                  >{{ part.text }}</span>
+                </p>
+              </div>
+              <div class="answer-comparison__line answer-comparison__line--expected">
+                <small>Correction</small>
+                <p>
+                  <span
+                    v-for="(part, partIndex) in message.answerComparison.expectedParts"
+                    :key="`expected-${partIndex}`"
+                    :class="`answer-comparison__part--${part.kind}`"
+                  >{{ part.text }}</span>
+                </p>
+              </div>
+              <small v-if="message.answerComparison.mode === 'full'" class="answer-comparison__guidance">
+                Les deux réponses sont très différentes : observe d’abord la construction complète.
+              </small>
+            </div>
             <span
-              v-if="message.text && message.author === 'coach'"
+              v-else-if="message.text && message.author === 'coach'"
               class="chat-message__text"
               :class="{ 'chat-message__text--emphasis': message.emphasis }"
               v-html="sanitizeCoachHtml(message.text)"
@@ -1438,6 +1487,123 @@ onBeforeUnmount(() => {
 .chat-message--error {
   color: #8b312b;
   background: #ffebe9;
+}
+
+.chat-message--comparison {
+  width: min(92%, 560px);
+}
+
+.answer-comparison {
+  display: grid;
+  gap: 9px;
+}
+
+.answer-comparison > strong {
+  color: inherit;
+  font-size: .9rem;
+}
+
+.answer-comparison__line {
+  display: grid;
+  padding: 9px 11px;
+  gap: 3px;
+  border: 1px solid rgb(139 49 43 / 16%);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 72%);
+}
+
+.answer-comparison__line > small {
+  color: #795d59;
+  font-size: .65rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.answer-comparison__line p {
+  margin: 0;
+  color: #3e3533;
+  font-size: 1.04rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.answer-comparison__part--changed,
+.answer-comparison__part--extra {
+  padding: 1px 2px;
+  border-radius: 4px;
+  font-weight: 900;
+}
+
+.answer-comparison__line--learner .answer-comparison__part--changed {
+  color: #872f29;
+  background: #ffd2ce;
+  text-decoration: underline 2px;
+  text-underline-offset: 3px;
+}
+
+.answer-comparison__line--learner .answer-comparison__part--extra {
+  color: #493600;
+  background: #f6d85d;
+  box-shadow: 0 0 0 2px rgb(230 185 54 / 20%);
+  text-decoration: line-through 2px;
+}
+
+.answer-comparison__line--expected {
+  border-color: #d5b13e;
+  background: #fffdf4;
+}
+
+.answer-comparison__line--expected .answer-comparison__part--changed {
+  color: #493600;
+  background: #f6d85d;
+  box-shadow: 0 0 0 2px rgb(230 185 54 / 20%);
+}
+
+.answer-comparison__guidance {
+  color: inherit;
+  font-size: .76rem;
+  line-height: 1.4;
+  opacity: .88;
+}
+
+:global(:root[data-theme='dark']) .answer-comparison > strong {
+  color: #ffd3cf;
+}
+
+:global(:root[data-theme='dark']) .answer-comparison__line {
+  border-color: #714b48;
+  background: rgb(20 35 39 / 68%);
+}
+
+:global(:root[data-theme='dark']) .answer-comparison__line > small,
+:global(:root[data-theme='dark']) .answer-comparison__guidance {
+  color: #d2b7b3;
+}
+
+:global(:root[data-theme='dark']) .answer-comparison__line p {
+  color: #f1e8e6;
+}
+
+:global(:root[data-theme='dark']) .answer-comparison__line--learner .answer-comparison__part--changed {
+  color: #ffe4e1;
+  background: #783f3a;
+}
+
+:global(:root[data-theme='dark']) .answer-comparison__line--learner .answer-comparison__part--extra {
+  color: #211900;
+  background: #e8c84f;
+}
+
+:global(:root[data-theme='dark']) .answer-comparison__line--expected {
+  border-color: #aa8a31;
+  background: #302d21;
+}
+
+:global(:root[data-theme='dark']) .answer-comparison__line--expected .answer-comparison__part--changed {
+  color: #211900;
+  background: #e8c84f;
 }
 
 .chat-summary-loading {

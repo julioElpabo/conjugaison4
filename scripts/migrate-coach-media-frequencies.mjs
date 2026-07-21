@@ -1,12 +1,27 @@
 import mysql from 'mysql2/promise'
 
-const database = await mysql.createConnection({
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT || 3306),
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+const databaseConfig = {
+  host: process.env.NUXT_DB_HOST || process.env.DB_HOST,
+  port: Number(process.env.NUXT_DB_PORT || process.env.DB_PORT || 3306),
+  database: process.env.NUXT_DB_NAME || process.env.DB_NAME,
+  user: process.env.NUXT_DB_USER || process.env.DB_USER,
+  password: process.env.NUXT_DB_PASSWORD || process.env.DB_PASSWORD,
   charset: 'utf8mb4',
+}
+
+const missingVariables = [
+  ['NUXT_DB_HOST', databaseConfig.host],
+  ['NUXT_DB_NAME', databaseConfig.database],
+  ['NUXT_DB_USER', databaseConfig.user],
+  ['NUXT_DB_PASSWORD', databaseConfig.password],
+].filter(([, value]) => !value).map(([name]) => name)
+
+if (missingVariables.length) {
+  throw new Error(`Variables de base de données absentes : ${missingVariables.join(', ')}`)
+}
+
+const database = await mysql.createConnection({
+  ...databaseConfig,
 })
 
 try {

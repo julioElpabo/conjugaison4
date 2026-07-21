@@ -60,7 +60,7 @@ export function createCoachReaction(
   if (!reply) return result
 
   const rule = coach.rules.find(item => item.eventType === eventType)
-  if (!options.mediaAllowed || !rule || random() > rule.mediaProbability) return result
+  if (!options.mediaAllowed || !rule) return result
 
   const mediaEvent = eventType === 'correct-alternative' || eventType === 'streak' ? 'correct' : eventType
   const exactAssignments = coach.assignments.filter(item => item.isActive && item.eventType === eventType)
@@ -77,10 +77,30 @@ export function createCoachReaction(
   const excluded = new Set(options.excludeMediaIds || [])
   const freshCandidates = candidates.filter(item => !excluded.has(item.media.id))
   const selectable = freshCandidates.length ? freshCandidates : candidates
-  const animationsOnly = selectable.every(item => item.media.mediaType === 'animation' || item.media.mediaType === 'video')
-  const selected = animationsOnly
-    ? uniformChoice(selectable, random)
-    : weightedChoice(selectable, random)
+  const mediaGroups = [
+    {
+      type: 'animation',
+      probability: rule.animationProbability ?? rule.mediaProbability,
+      candidates: selectable.filter(item => item.media.mediaType === 'animation' || item.media.mediaType === 'video'),
+    },
+    {
+      type: 'emoji',
+      probability: rule.emojiProbability ?? rule.mediaProbability,
+      candidates: selectable.filter(item => item.media.mediaType === 'emoji'),
+    },
+    {
+      type: 'other',
+      probability: rule.mediaProbability,
+      candidates: selectable.filter(item => item.media.mediaType !== 'animation' && item.media.mediaType !== 'video' && item.media.mediaType !== 'emoji'),
+    },
+  ].filter(group => group.candidates.length && Math.max(0, group.probability) > 0 && random() <= Math.min(1, group.probability))
+
+  const selectedGroup = weightedChoice(mediaGroups.map(group => ({ ...group, weight: Math.max(1, Math.round(group.probability * 100)) })), random)
+  const selected = selectedGroup?.type === 'animation'
+    ? uniformChoice(selectedGroup.candidates, random)
+    : selectedGroup
+      ? weightedChoice(selectedGroup.candidates, random)
+      : undefined
   if (selected) result.media = selected.media
   return result
 }

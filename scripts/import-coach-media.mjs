@@ -62,9 +62,9 @@ try {
         VALUES (?,?,?,1,1)`, [character.id, media.id, eventType])
     }
     for (const [eventType, probability] of [['correct', 1], ['correct-alternative', 1], ['incorrect', 1], ['streak', 0.8], ['finish', 1]]) {
-      await database.execute(`INSERT INTO coach_character_reaction_rules (character_id,event_type,media_probability,cooldown_questions)
-        VALUES (?,?,?,2) ON DUPLICATE KEY UPDATE media_probability=VALUES(media_probability),cooldown_questions=VALUES(cooldown_questions)`,
-      [character.id, eventType, probability])
+      await database.execute(`INSERT INTO coach_character_reaction_rules (character_id,event_type,media_probability,animation_probability,emoji_probability,cooldown_questions)
+        VALUES (?,?,?,?,?,2) ON DUPLICATE KEY UPDATE event_type=event_type`,
+      [character.id, eventType, probability, probability, probability])
     }
   }
   const [[integrity]] = await database.query(`SELECT

@@ -1,6 +1,6 @@
 # Audit sémantique des aides de conjugaison
 
-Généré le 2026-07-20T19:20:44.260Z.
+Généré le 2026-07-21T07:42:33.510Z.
 
 - 41185 formes contrôlées
 - 434 verbes

@@ -67,6 +67,11 @@ const coachGroups = computed(() => {
     .sort((left, right) => (characterOrder.get(left.characterId) ?? 999) - (characterOrder.get(right.characterId) ?? 999)
       || left.name.localeCompare(right.name, 'fr'))
 })
+const availableCharactersForDraft = computed(() => characters.value
+  .filter(character => character.status !== 'disabled' || character.id === draft.value?.characterId)
+  .sort((left, right) => left.sortOrder - right.sortOrder
+    || formatCharacterNames(left).localeCompare(formatCharacterNames(right), 'fr')
+    || left.id - right.id))
 
 function clone<T>(value: T): T { return JSON.parse(JSON.stringify(value)) as T }
 function cancelScheduledAutosave() {
@@ -87,7 +92,7 @@ async function selectCoach(coach: CoachProfile) {
   setCoachDraft(coach)
 }
 function blankCoach(): CoachProfile {
-  const character = characters.value[0]
+  const character = availableCharactersForDraft.value.find(item => item.status !== 'disabled') || null
   const characterName = character ? characterNameForGender(character, 'female') : ''
   return { id: 0, slug: '', firstName: '', lastName: '', gender: 'female', avatarPath: '', description: '', likes: '', characterId: character?.id || 0, characterName, personality: characterName, pedagogicalStyle: character?.pedagogicalStyle || '', help: null, themeColor: '#295f72', status: 'draft', sortOrder: coaches.value.length + 1, replies: [], media: clone(media.value), assignments: [], rules: [] }
 }
@@ -233,7 +238,9 @@ async function uploadAvatar(event: Event) {
 function addReply() { draft.value?.replies.push({ id: 0, eventType: 'correct', content: '', weight: 1, isActive: true }) }
 function ensureRule(eventType: CoachEvent) {
   if (!draft.value) return
-  if (!draft.value.rules.some(item => item.eventType === eventType)) draft.value.rules.push({ eventType, mediaProbability: 0.2, cooldownQuestions: 2 })
+  if (!draft.value.rules.some(item => item.eventType === eventType)) {
+    draft.value.rules.push({ eventType, mediaProbability: 0.2, animationProbability: 0.2, emojiProbability: 0.2, cooldownQuestions: 2 })
+  }
 }
 function toggleMedia(item: CoachMedia) {
   if (!draft.value) return
@@ -334,7 +341,7 @@ onBeforeUnmount(cancelScheduledAutosave)
                 <label class="admin-field"><span>Nom fictif *</span><input v-model="draft.lastName" required></label>
                 <label class="admin-field"><span>Genre du personnage *</span><select v-model="draft.gender"><option value="female">Femme</option><option value="male">Homme</option></select></label>
                 <label class="admin-field"><span>Identifiant *</span><input v-model="draft.slug" required></label>
-                <label class="admin-field"><span>Caractère partagé *</span><select v-model.number="draft.characterId" required><option v-for="character in characters" :key="character.id" :value="character.id">{{ character.emoticon }} {{ formatCharacterNames(character) }}</option></select></label>
+                <label class="admin-field"><span>Caractère partagé *</span><select v-model.number="draft.characterId" required><option v-for="character in availableCharactersForDraft" :key="character.id" :value="character.id" :disabled="character.status === 'disabled'">{{ character.emoticon }} {{ formatCharacterNames(character) }}{{ character.status === 'disabled' ? ' — désactivé' : '' }}</option></select></label>
                 <label class="admin-field admin-field--color"><span>Couleur</span><input v-model="draft.themeColor" type="color"></label>
                 <label class="admin-field"><span>Statut</span><select v-model="draft.status"><option value="draft">Brouillon</option><option value="published">Publié</option><option value="disabled">Désactivé</option></select></label>
                 <label class="admin-field"><span>Ordre d’affichage</span><input v-model.number="draft.sortOrder" type="number"></label>

@@ -21,7 +21,14 @@ interface MediaRow extends RowDataPacket {
   altText: string, rightsStatus: CoachMedia['rightsStatus'], safetyStatus: CoachMedia['safetyStatus'], isActive: number, fileSize: number | null
 }
 interface AssignmentRow extends RowDataPacket { characterId: number, mediaId: number, eventType: CoachEvent, weight: number, isActive: number }
-interface RuleRow extends RowDataPacket { characterId: number, eventType: CoachEvent, mediaProbability: string | number, cooldownQuestions: number }
+interface RuleRow extends RowDataPacket {
+  characterId: number
+  eventType: CoachEvent
+  mediaProbability: string | number
+  animationProbability: string | number | null
+  emojiProbability: string | number | null
+  cooldownQuestions: number
+}
 
 const EVENT_SET = new Set<string>(COACH_EVENTS)
 
@@ -83,7 +90,8 @@ export async function listCoaches(
     database.execute<AssignmentRow[]>(`SELECT character_id AS characterId, media_id AS mediaId, event_type AS eventType,
       weight, is_active AS isActive FROM coach_character_media_assignments WHERE character_id IN (${placeholders})`, ids),
     database.execute<RuleRow[]>(`SELECT character_id AS characterId, event_type AS eventType,
-      media_probability AS mediaProbability, cooldown_questions AS cooldownQuestions
+      media_probability AS mediaProbability, animation_probability AS animationProbability,
+      emoji_probability AS emojiProbability, cooldown_questions AS cooldownQuestions
       FROM coach_character_reaction_rules WHERE character_id IN (${placeholders})`, ids),
     listCoachMedia(database, requestedLocale),
     listCoachHelps(database, publishedOnly, requestedLocale),
@@ -101,7 +109,11 @@ export async function listCoaches(
       mediaId: item.mediaId, eventType: item.eventType, weight: item.weight, isActive: Boolean(item.isActive),
     })),
     rules: rules.filter(item => item.characterId === coach.characterId).map(item => ({
-      eventType: item.eventType, mediaProbability: Number(item.mediaProbability), cooldownQuestions: item.cooldownQuestions,
+      eventType: item.eventType,
+      mediaProbability: Number(item.mediaProbability),
+      animationProbability: item.animationProbability === null ? Number(item.mediaProbability) : Number(item.animationProbability),
+      emojiProbability: item.emojiProbability === null ? Number(item.mediaProbability) : Number(item.emojiProbability),
+      cooldownQuestions: item.cooldownQuestions,
     })),
   }))
 }
@@ -120,7 +132,8 @@ export async function listCoachCharacters(database: Executor): Promise<CoachChar
     database.execute<AssignmentRow[]>(`SELECT character_id AS characterId, media_id AS mediaId, event_type AS eventType,
       weight, is_active AS isActive FROM coach_character_media_assignments WHERE character_id IN (${placeholders})`, ids),
     database.execute<RuleRow[]>(`SELECT character_id AS characterId, event_type AS eventType,
-      media_probability AS mediaProbability, cooldown_questions AS cooldownQuestions
+      media_probability AS mediaProbability, animation_probability AS animationProbability,
+      emoji_probability AS emojiProbability, cooldown_questions AS cooldownQuestions
       FROM coach_character_reaction_rules WHERE character_id IN (${placeholders})`, ids),
     listCoachMedia(database),
   ])
@@ -129,7 +142,13 @@ export async function listCoachCharacters(database: Executor): Promise<CoachChar
     replies: replies.filter(item => item.characterId === character.id).map(item => ({ id: item.id, eventType: item.eventType, content: item.content, weight: item.weight, isActive: Boolean(item.isActive) })),
     media,
     assignments: assignments.filter(item => item.characterId === character.id).map(item => ({ mediaId: item.mediaId, eventType: item.eventType, weight: item.weight, isActive: Boolean(item.isActive) })),
-    rules: rules.filter(item => item.characterId === character.id).map(item => ({ eventType: item.eventType, mediaProbability: Number(item.mediaProbability), cooldownQuestions: item.cooldownQuestions })),
+    rules: rules.filter(item => item.characterId === character.id).map(item => ({
+      eventType: item.eventType,
+      mediaProbability: Number(item.mediaProbability),
+      animationProbability: item.animationProbability === null ? Number(item.mediaProbability) : Number(item.animationProbability),
+      emojiProbability: item.emojiProbability === null ? Number(item.mediaProbability) : Number(item.emojiProbability),
+      cooldownQuestions: item.cooldownQuestions,
+    })),
   }))
 }
 
@@ -181,7 +200,14 @@ function parseCharacterChildren(body: Record<string, unknown>) {
     const item = raw && typeof raw === 'object' ? raw as Record<string, unknown> : {}
     const eventType = string(item.eventType, 40)
     if (!EVENT_SET.has(eventType)) throw createError({ statusCode: 400, statusMessage: 'Règle de réaction invalide' })
-    return { eventType, mediaProbability: Math.max(0, Math.min(1, Number(item.mediaProbability) || 0)), cooldownQuestions: Math.max(0, Math.min(50, Number(item.cooldownQuestions) || 0)) }
+    const mediaProbability = Math.max(0, Math.min(1, Number(item.mediaProbability) || 0))
+    return {
+      eventType,
+      mediaProbability,
+      animationProbability: Math.max(0, Math.min(1, Number(item.animationProbability ?? mediaProbability) || 0)),
+      emojiProbability: Math.max(0, Math.min(1, Number(item.emojiProbability ?? mediaProbability) || 0)),
+      cooldownQuestions: Math.max(0, Math.min(50, Number(item.cooldownQuestions) || 0)),
+    }
   }) : []
   return { replies, assignments, rules }
 }

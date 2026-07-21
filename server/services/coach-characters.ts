@@ -12,5 +12,12 @@ export async function replaceCharacterChildren(connection: PoolConnection, id: n
     (character_id,media_id,event_type,weight,is_active) VALUES (?,?,?,?,?)`, [id, item.mediaId, item.eventType, item.weight, item.isActive ? 1 : 0])
   await connection.execute('DELETE FROM coach_character_reaction_rules WHERE character_id=?', [id])
   for (const item of rules) await connection.execute(`INSERT INTO coach_character_reaction_rules
-    (character_id,event_type,media_probability,cooldown_questions) VALUES (?,?,?,?)`, [id, item.eventType, item.mediaProbability, item.cooldownQuestions])
+    (character_id,event_type,media_probability,animation_probability,emoji_probability,cooldown_questions) VALUES (?,?,?,?,?,?)`, [
+      id,
+      item.eventType,
+      item.mediaProbability,
+      item.animationProbability,
+      item.emojiProbability,
+      item.cooldownQuestions,
+    ])
 }

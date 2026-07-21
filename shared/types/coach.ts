@@ -99,6 +99,8 @@ export interface CoachMediaAssignment {
 export interface CoachReactionRule {
   eventType: CoachEvent
   mediaProbability: number
+  animationProbability: number
+  emojiProbability: number
   cooldownQuestions: number
 }
 

@@ -236,10 +236,23 @@ try {
     character_id INT UNSIGNED NOT NULL,
     event_type VARCHAR(40) NOT NULL,
     media_probability DECIMAL(4,3) NOT NULL DEFAULT 0,
+    animation_probability DECIMAL(4,3) NOT NULL DEFAULT 0,
+    emoji_probability DECIMAL(4,3) NOT NULL DEFAULT 0,
     cooldown_questions SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     PRIMARY KEY (character_id,event_type),
     CONSTRAINT fk_character_rule_character FOREIGN KEY (character_id) REFERENCES coach_characters(id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
+
+  const [ruleColumns] = await database.query('SHOW COLUMNS FROM coach_character_reaction_rules')
+  const ruleColumnNames = new Set(ruleColumns.map(column => column.Field))
+  if (!ruleColumnNames.has('animation_probability')) {
+    await database.query('ALTER TABLE coach_character_reaction_rules ADD COLUMN animation_probability DECIMAL(4,3) NOT NULL DEFAULT 0 AFTER media_probability')
+    await database.query('UPDATE coach_character_reaction_rules SET animation_probability=media_probability')
+  }
+  if (!ruleColumnNames.has('emoji_probability')) {
+    await database.query('ALTER TABLE coach_character_reaction_rules ADD COLUMN emoji_probability DECIMAL(4,3) NOT NULL DEFAULT 0 AFTER animation_probability')
+    await database.query('UPDATE coach_character_reaction_rules SET emoji_probability=media_probability')
+  }
 
   const [characterColumns] = await database.query("SHOW COLUMNS FROM coaches LIKE 'character_id'")
   if (characterColumns.length === 0) await database.query('ALTER TABLE coaches ADD COLUMN character_id INT UNSIGNED NULL AFTER description')
@@ -298,8 +311,8 @@ try {
     }
     const [[ruleCount]] = await database.execute('SELECT COUNT(*) AS total FROM coach_character_reaction_rules WHERE character_id=?', [character.id])
     if (Number(ruleCount.total) === 0) {
-      await database.execute(`INSERT INTO coach_character_reaction_rules (character_id,event_type,media_probability,cooldown_questions)
-        SELECT ?,event_type,media_probability,cooldown_questions FROM coach_reaction_rules WHERE coach_id=?`, [character.id, representative.id])
+      await database.execute(`INSERT INTO coach_character_reaction_rules (character_id,event_type,media_probability,animation_probability,emoji_probability,cooldown_questions)
+        SELECT ?,event_type,media_probability,media_probability,media_probability,cooldown_questions FROM coach_reaction_rules WHERE coach_id=?`, [character.id, representative.id])
     }
 
     const recurringEvents = replySeeds[representativeSlug]

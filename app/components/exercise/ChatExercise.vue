@@ -24,6 +24,7 @@ const props = defineProps<{
   coach: CoachProfile
   verbs: Verb[]
   tenses: ConjugationTense[]
+  regenerateQuestions: () => Promise<void>
 }>()
 
 const emit = defineEmits<{ close: [] }>()
@@ -35,6 +36,7 @@ interface ChatMessage {
   tone?: 'success' | 'error'
   media?: CoachMedia
   emphasis?: boolean
+  questionIndex?: number
 }
 
 const currentIndex = ref(0)
@@ -49,8 +51,12 @@ const consecutiveCorrectCount = ref(0)
 const finished = ref(false)
 const finalSummaryPreparing = ref(false)
 const finalSummaryVisible = ref(false)
+const regeneratingQuestions = ref(false)
+const restartError = ref('')
+const printSummaryOpen = ref(false)
 const closeConfirmationOpen = ref(false)
 const helpOpen = ref(false)
+const helpQuestionIndex = ref<number | null>(null)
 const sequence = ref(0)
 const lastMediaQuestion = ref(-100)
 const allowMotion = ref(true)
@@ -59,31 +65,34 @@ const exerciseRunId = ref('')
 const input = useTemplateRef<HTMLInputElement>('chat-answer')
 const keepChatButton = useTemplateRef<HTMLButtonElement>('keep-chat-button')
 const thread = useTemplateRef<HTMLElement>('chat-thread')
+const summary = useTemplateRef<HTMLElement>('chat-summary')
 const dialog = useTemplateRef<HTMLElement>('chat-dialogs')
 let conversationVersion = 0
 let coachQueue: Promise<void> = Promise.resolve()
 let lastCoachBubbleAt = 0
 let dialogueState = createCoachDialogueState()
-let automaticHelpTimer: number | undefined
 let questionScrollFrame: number | null = null
+const CHAT_HELP_OPEN_DELAY_MS = 500
+const CHAT_MESSAGES_AFTER_HELP_DELAY_MS = 1000
 
 useDialogFocus(dialog, handleEscapeClose, input)
 
 const currentQuestion = computed(() => props.questions[currentIndex.value])
-const currentVerb = computed(() => {
-  const question = currentQuestion.value
+const helpQuestion = computed(() => props.questions[helpQuestionIndex.value ?? currentIndex.value])
+const helpVerb = computed(() => {
+  const question = helpQuestion.value
   if (!question) return undefined
   return props.verbs.find(verb => verb.id === question.verbeId)
     || props.verbs.find(verb => normalizedInfinitive(verb.infinitif) === normalizedInfinitive(question.infinitif))
 })
-const currentTense = computed(() => {
-  const question = currentQuestion.value
+const helpTense = computed(() => {
+  const question = helpQuestion.value
   if (!question) return undefined
   return props.tenses.find(tense => tense.id === question.tenseId)
     || props.tenses.find(tense => normalizedInfinitive(tense.name) === normalizedInfinitive(question.temps))
 })
-const targetedHelp = computed(() => currentQuestion.value
-  ? buildTargetedConjugationHelp(currentQuestion.value, currentVerb.value, currentTense.value)
+const targetedHelp = computed(() => helpQuestion.value
+  ? buildTargetedConjugationHelp(helpQuestion.value, helpVerb.value, helpTense.value)
   : null)
 const helpBlocks = computed(() => visibleCoachHelpBlocks(props.coach.help))
 const correctCount = computed(() => attempts.value.filter(item => item.status === 'correct').length)
@@ -96,6 +105,7 @@ const attemptSummaries = computed(() => attempts.value.map((attempt, index) => {
   const formula = omitIndicativeMode.value ? withoutIndicativeMode(bubbles.formula) : bubbles.formula
   return {
     index: index + 1,
+    questionIndex: index,
     status: attempt.status,
     questionLabel: formula,
     learnerAnswer: attempt.answer,
@@ -147,15 +157,16 @@ function compactTense(tense: ConjugationTense) {
   }
 }
 
-const helpValues = computed(() => currentQuestion.value ? {
+const helpValues = computed(() => helpQuestion.value ? {
   coach: props.coach,
-  ...coachHelpQuestionVariables(currentQuestion.value, currentVerb.value, currentTense.value),
-  definition: currentVerb.value?.meaning?.trim() || targetedHelp.value?.meaning || '',
+  ...coachHelpQuestionVariables(helpQuestion.value, helpVerb.value, helpTense.value),
+  definition: helpVerb.value?.meaning?.trim() || targetedHelp.value?.meaning || '',
   helpTitle: targetedHelp.value?.title || '',
   omitIndicativeMode: omitIndicativeMode.value,
 } : { coach: props.coach })
 const helpFeedbackContext = computed(() => {
-  const question = currentQuestion.value
+  const questionIndex = helpQuestionIndex.value ?? currentIndex.value
+  const question = helpQuestion.value
   return {
     sessionId: chatSessionId.value,
     exerciseRunId: exerciseRunId.value,
@@ -175,8 +186,8 @@ const helpFeedbackContext = computed(() => {
     },
     helpId: props.coach.help?.id,
     helpName: props.coach.help?.name,
-    questionNumber: question ? currentIndex.value + 1 : undefined,
-    questionIndex: currentIndex.value,
+    questionNumber: question ? questionIndex + 1 : undefined,
+    questionIndex,
     questionCount: props.questions.length,
     verbId: question?.verbeId,
     verb: question?.infinitif,
@@ -187,8 +198,8 @@ const helpFeedbackContext = computed(() => {
     expectedAnswer: question?.reponsesPourCorrige.join(' ou '),
     currentAnswerDraft: answer.value,
     currentQuestion: question || null,
-    currentVerb: currentVerb.value || null,
-    currentTense: currentTense.value || null,
+    currentVerb: helpVerb.value || null,
+    currentTense: helpTense.value || null,
     exerciseContext: {
       currentIndex: currentIndex.value,
       questionCount: props.questions.length,
@@ -208,31 +219,28 @@ const helpFeedbackContext = computed(() => {
 })
 
 function openHelp(candidate: string) {
-  cancelAutomaticHelp()
   addMessage('learner', candidate)
   answer.value = ''
+  helpQuestionIndex.value = null
   helpOpen.value = true
 }
 
+function openHelpForQuestion(questionIndex: number) {
+  if (!Number.isInteger(questionIndex) || !props.questions[questionIndex]) return
+  helpQuestionIndex.value = questionIndex
+  helpOpen.value = true
+}
+
+function showLatestHelp() {
+  helpQuestionIndex.value = null
+  helpOpen.value = true
+  scrollThreadToBottom()
+}
+
 function closeHelp() {
-  cancelAutomaticHelp()
   helpOpen.value = false
+  helpQuestionIndex.value = null
   focusAnswerInput()
-}
-
-function cancelAutomaticHelp() {
-  if (automaticHelpTimer === undefined) return
-  window.clearTimeout(automaticHelpTimer)
-  automaticHelpTimer = undefined
-}
-
-function scheduleAutomaticHelp() {
-  cancelAutomaticHelp()
-  const version = conversationVersion
-  automaticHelpTimer = window.setTimeout(() => {
-    automaticHelpTimer = undefined
-    if (version === conversationVersion && !finished.value) helpOpen.value = true
-  }, 2000)
 }
 
 function focusAnswerInput() {
@@ -245,7 +253,25 @@ function scrollThreadToBottom() {
   void nextTick(() => {
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
-        if (thread.value) thread.value.scrollTop = thread.value.scrollHeight
+        const container = thread.value
+        container?.scrollTo({
+          top: container.scrollHeight,
+          behavior: allowMotion.value ? 'smooth' : 'auto',
+        })
+      })
+    })
+  })
+}
+
+function scrollThreadToSummary() {
+  void nextTick(() => {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        const container = thread.value
+        const target = summary.value
+        if (!container || !target) return
+        const top = container.scrollTop + target.getBoundingClientRect().top - container.getBoundingClientRect().top - 8
+        container.scrollTo({ top, behavior: allowMotion.value ? 'smooth' : 'auto' })
       })
     })
   })
@@ -274,8 +300,8 @@ function mediaLoaded() {
   scrollThreadToBottom()
 }
 
-function addMessage(author: ChatMessage['author'], text: string, tone?: ChatMessage['tone']) {
-  messages.value.push({ id: ++sequence.value, author, text, ...(tone ? { tone } : {}) })
+function addMessage(author: ChatMessage['author'], text: string, tone?: ChatMessage['tone'], questionIndex?: number) {
+  messages.value.push({ id: ++sequence.value, author, text, ...(tone ? { tone } : {}), ...(questionIndex === undefined ? {} : { questionIndex }) })
   scrollThreadToBottom()
 }
 
@@ -348,6 +374,22 @@ async function askCurrentQuestion() {
   focusAnswerInput()
 }
 
+async function runChatOpening(eventType: Extract<CoachEvent, 'introduction' | 'restart'>) {
+  const version = conversationVersion
+  posingQuestion.value = true
+
+  await wait(CHAT_HELP_OPEN_DELAY_MS)
+  if (version !== conversationVersion) return
+  helpQuestionIndex.value = null
+  helpOpen.value = true
+
+  await wait(CHAT_MESSAGES_AFTER_HELP_DELAY_MS)
+  if (version !== conversationVersion) return
+  await addCoachReaction(eventType, {})
+  if (version !== conversationVersion) return
+  await askCurrentQuestion()
+}
+
 async function submit() {
   const question = currentQuestion.value
   const candidate = answer.value.trim()
@@ -358,7 +400,7 @@ async function submit() {
   }
   const version = conversationVersion
 
-  addMessage('learner', candidate)
+  addMessage('learner', candidate, undefined, currentIndex.value)
   lastCoachBubbleAt = Date.now()
   const result = validateAnswer(candidate, question.reponses)
   answer.value = ''
@@ -411,18 +453,13 @@ async function continueChat() {
     const version = conversationVersion
     finished.value = true
     waitingForNext.value = false
-    await addCoachReaction('finish', {
-      score: score.value,
-      correctCount: correctCount.value,
-      questionCount: attempts.value.length,
-    })
     finalSummaryPreparing.value = true
     scrollThreadToBottom()
     await wait(2000)
     if (version !== conversationVersion) return
     finalSummaryPreparing.value = false
     finalSummaryVisible.value = true
-    scrollThreadToBottom()
+    scrollThreadToSummary()
     return
   }
 
@@ -433,6 +470,7 @@ async function continueChat() {
 
 async function restart() {
   conversationVersion += 1
+  restartError.value = ''
   resetExerciseRunId()
   coachQueue = Promise.resolve()
   lastCoachBubbleAt = 0
@@ -448,11 +486,26 @@ async function restart() {
   finished.value = false
   finalSummaryPreparing.value = false
   finalSummaryVisible.value = false
+  printSummaryOpen.value = false
   helpOpen.value = false
+  helpQuestionIndex.value = null
   lastMediaQuestion.value = -100
-  await addCoachReaction('restart', {})
-  await askCurrentQuestion()
-  scheduleAutomaticHelp()
+  await runChatOpening('restart')
+}
+
+async function restartWithNewQuestions() {
+  if (regeneratingQuestions.value) return
+  regeneratingQuestions.value = true
+  restartError.value = ''
+  try {
+    await props.regenerateQuestions()
+    await nextTick()
+    await restart()
+  } catch {
+    restartError.value = 'Impossible de préparer de nouvelles questions. Le défi actuel reste disponible.'
+  } finally {
+    regeneratingQuestions.value = false
+  }
 }
 
 function requestClose() {
@@ -461,7 +514,8 @@ function requestClose() {
 }
 
 function handleEscapeClose() {
-  if (closeConfirmationOpen.value) cancelClose()
+  if (printSummaryOpen.value) printSummaryOpen.value = false
+  else if (closeConfirmationOpen.value) cancelClose()
   else if (helpOpen.value) closeHelp()
   else requestClose()
 }
@@ -480,14 +534,10 @@ onMounted(async () => {
   chatSessionId.value = randomIdentifier('chat')
   resetExerciseRunId()
   allowMotion.value = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  focusAnswerInput()
-  await addCoachReaction('introduction', {})
-  await askCurrentQuestion()
-  scheduleAutomaticHelp()
+  await runChatOpening('introduction')
 })
 
 onBeforeUnmount(() => {
-  cancelAutomaticHelp()
   if (questionScrollFrame !== null) window.cancelAnimationFrame(questionScrollFrame)
   conversationVersion += 1
 })
@@ -496,13 +546,12 @@ onBeforeUnmount(() => {
 <template>
   <Teleport to="body">
     <div class="chat-overlay" @click.self="requestClose">
-      <div ref="chat-dialogs" class="chat-dialogs" :class="{ 'chat-dialogs--with-help': helpOpen }" :style="{ '--coach-color': coach.themeColor }" role="dialog" aria-modal="true" aria-labelledby="chat-title" tabindex="-1" @click.self="requestClose">
+      <div ref="chat-dialogs" class="chat-dialogs" :class="{ 'chat-dialogs--with-help': helpOpen, 'chat-dialogs--confirming': closeConfirmationOpen }" :style="{ '--coach-color': coach.themeColor }" role="dialog" aria-modal="true" aria-labelledby="chat-title" tabindex="-1" @click.self="requestClose">
       <section class="chat-dialog" role="region" aria-labelledby="chat-title">
         <header class="chat-header">
           <img class="coach-avatar" :src="coach.avatarPath" alt="">
-          <div>
+          <div class="chat-header__identity">
             <h2 id="chat-title">{{ coach.firstName }}</h2>
-            <blockquote v-if="coach.description" class="chat-header__quote">« {{ coach.description }} »</blockquote>
             <p v-if="coach.likes" class="chat-header__likes"><strong>Aime&nbsp;:</strong> {{ coach.likes }}</p>
           </div>
           <div class="chat-header__actions">
@@ -527,7 +576,15 @@ onBeforeUnmount(() => {
             :class="[
               `chat-message--${message.author}`,
               message.tone ? `chat-message--${message.tone}` : '',
+              { 'chat-message--help-link': message.author === 'learner' && message.questionIndex !== undefined },
+              { 'is-help-selected': helpOpen && message.questionIndex !== undefined && message.questionIndex === helpQuestionIndex },
             ]"
+            :role="message.author === 'learner' && message.questionIndex !== undefined ? 'button' : undefined"
+            :tabindex="message.author === 'learner' && message.questionIndex !== undefined ? 0 : undefined"
+            :aria-label="message.author === 'learner' && message.questionIndex !== undefined ? `Voir l’aide de la question ${message.questionIndex + 1} pour la réponse ${message.text}` : undefined"
+            @click="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
+            @keydown.enter.prevent="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
+            @keydown.space.prevent="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
           >
             <span
               v-if="message.text && message.author === 'coach'"
@@ -546,11 +603,9 @@ onBeforeUnmount(() => {
             <strong>Création du bilan</strong>
           </div>
 
-          <section v-if="finalSummaryVisible" class="chat-summary-tool" aria-labelledby="chat-summary-title">
+          <section v-if="finalSummaryVisible" ref="chat-summary" class="chat-summary-tool" aria-labelledby="chat-summary-title">
             <header>
-              <span aria-hidden="true">✓</span>
               <div>
-                <p>Compte rendu automatique</p>
                 <h3 id="chat-summary-title">Bilan du défi</h3>
               </div>
               <strong>{{ score }} %</strong>
@@ -559,8 +614,14 @@ onBeforeUnmount(() => {
               <li
                 v-for="item in attemptSummaries"
                 :key="item.index"
-                :class="`is-${item.status}`"
+                :class="[`is-${item.status}`, { 'is-help-selected': helpOpen && item.questionIndex === helpQuestionIndex }]"
                 :style="{ '--summary-item-index': `${item.index - 1}` }"
+                role="button"
+                tabindex="0"
+                :aria-label="`Voir l’aide de la question ${item.index} : ${item.questionLabel}`"
+                @click="openHelpForQuestion(item.questionIndex)"
+                @keydown.enter.prevent="openHelpForQuestion(item.questionIndex)"
+                @keydown.space.prevent="openHelpForQuestion(item.questionIndex)"
               >
                 <span class="chat-summary-list__status" aria-hidden="true">{{ item.status === 'correct' ? '✓' : '×' }}</span>
                 <div>
@@ -590,9 +651,14 @@ onBeforeUnmount(() => {
           <div v-if="finalSummaryVisible" class="chat-message chat-message--coach chat-restart-prompt">
             <span>Tu veux refaire ce défi&nbsp;?</span>
             <div class="chat-restart-prompt__actions">
-              <button type="button" @click="restart">Oui</button>
-              <button type="button" @click="emit('close')">Non</button>
+              <button type="button" class="chat-restart-prompt__same" :disabled="regeneratingQuestions" @click="restart">Avec les mêmes questions</button>
+              <button type="button" class="chat-restart-prompt__new" :disabled="regeneratingQuestions" @click="restartWithNewQuestions">
+                {{ regeneratingQuestions ? 'Préparation…' : 'Avec d’autres questions' }}
+              </button>
+              <button type="button" class="chat-restart-prompt__quit" :disabled="regeneratingQuestions" @click="emit('close')">Quitter le chat</button>
+              <button type="button" class="chat-restart-prompt__print" :disabled="regeneratingQuestions" @click="printSummaryOpen = true">Imprimer le bilan</button>
             </div>
+            <small v-if="restartError" class="chat-restart-prompt__error" role="alert">{{ restartError }}</small>
           </div>
         </div>
 
@@ -608,9 +674,21 @@ onBeforeUnmount(() => {
             :placeholder="helpOpen ? 'Écris ta réponse…' : 'Écris ta réponse ou « Aide »…'"
           >
           <button type="submit" :disabled="waitingForNext || posingQuestion || deliveringFeedback || !answer.trim()">
-            {{ posingQuestion ? 'Question…' : deliveringFeedback ? 'Réponse…' : waitingForNext ? `Suite dans ${nextQuestionDelay / 1000} s…` : 'Envoyer' }}
+            {{ posingQuestion ? 'Question…' : deliveringFeedback ? 'Réponse…' : waitingForNext ? 'Suite…' : 'Envoyer' }}
           </button>
         </form>
+
+        <button
+          v-if="helpOpen && helpQuestionIndex !== null"
+          type="button"
+          class="chat-latest-help"
+          :class="{ 'chat-latest-help--above-composer': !finished }"
+          :aria-label="finished ? 'Revenir à l’aide de la dernière question' : 'Revenir à l’aide de la question actuelle'"
+          :title="finished ? 'Voir l’aide de la dernière question' : 'Voir l’aide de la question actuelle'"
+          @click="showLatestHelp"
+        >
+          <span aria-hidden="true">↓</span>
+        </button>
 
         <div v-if="closeConfirmationOpen" class="chat-close-confirmation" @click.self="cancelClose">
           <section role="alertdialog" aria-modal="true" aria-labelledby="chat-close-title" aria-describedby="chat-close-description">
@@ -632,13 +710,22 @@ onBeforeUnmount(() => {
           :values="helpValues"
           header-title="{helpTitle}"
           header-description=""
-          :question-number="currentIndex + 1"
+          :question-number="(helpQuestionIndex ?? currentIndex) + 1"
           :coach-color="coach.themeColor"
           :feedback-context="helpFeedbackContext"
           @close="closeHelp"
         />
       </Transition>
       </div>
+      <ExerciseSummaryPrintPreview
+        v-if="printSummaryOpen"
+        :items="attemptSummaries"
+        :score="score"
+        :correct-count="correctCount"
+        :verbs="verbs.map(verb => verb.infinitif)"
+        :tenses="tenses.map(tense => ({ name: tense.name, mode: tense.mode?.name }))"
+        @close="printSummaryOpen = false"
+      />
     </div>
   </Teleport>
 </template>
@@ -678,6 +765,15 @@ onBeforeUnmount(() => {
   width: min(1240px, calc(100vw - 40px));
   transition-duration: .5s;
   transition-timing-function: ease-out;
+}
+
+.chat-dialogs :deep(.coach-help-badge) {
+  transition: opacity .15s ease, visibility .15s ease;
+}
+
+.chat-dialogs--confirming :deep(.coach-help-badge) {
+  visibility: hidden;
+  opacity: 0;
 }
 
 .chat-dialog {
@@ -720,16 +816,6 @@ onBeforeUnmount(() => {
 .chat-help-header > div {
   min-width: 0;
   flex: 1;
-}
-
-.chat-help-kicker {
-  display: block;
-  margin-bottom: 7px;
-  color: rgb(255 255 255 / 78%);
-  font-size: .7rem;
-  font-weight: 850;
-  letter-spacing: .07em;
-  text-transform: uppercase;
 }
 
 .chat-help-header h2,
@@ -1134,39 +1220,36 @@ onBeforeUnmount(() => {
 }
 
 .chat-header h2,
-.chat-header p,
-.chat-header blockquote {
+.chat-header p {
   margin: 0;
 }
 
 .chat-header h2 {
-  font-size: 1rem;
+  color: white;
+  font-size: clamp(1.15rem, 2vw, 1.4rem);
+  line-height: 1.15;
+  letter-spacing: .015em;
 }
 
-.chat-header__quote {
-  margin-top: 4px;
-  color: #e1f4f7;
-  font-size: .8rem;
-  font-style: italic;
-  line-height: 1.35;
+.chat-header__identity {
+  display: grid;
+  min-width: 0;
+  max-width: 560px;
+  gap: 7px;
 }
 
 .chat-header__likes {
-  margin-top: 5px !important;
-  color: #cfe8ef;
-  font-size: .78rem;
+  width: fit-content;
+  padding: 4px 9px;
+  color: #e2f2f5;
+  background: rgb(255 255 255 / 11%);
+  border-radius: 999px;
+  font-size: .82rem;
+  line-height: 1.35;
 }
 
 .chat-header__likes strong {
   color: white;
-}
-
-.chat-header p span {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #69d695;
 }
 
 .chat-header__actions {
@@ -1291,6 +1374,62 @@ onBeforeUnmount(() => {
   background: #27758e;
 }
 
+.chat-message--help-link {
+  cursor: pointer;
+  transition: transform .16s ease, box-shadow .16s ease, outline-color .16s ease;
+}
+
+.chat-message--help-link:hover,
+.chat-message--help-link:focus-visible {
+  transform: translateY(-1px);
+  outline: 3px solid rgb(111 203 224 / 72%);
+  outline-offset: 2px;
+  box-shadow: 0 7px 18px rgb(25 80 99 / 22%);
+}
+
+.chat-message--help-link.is-help-selected {
+  outline: 3px solid #f0c64d;
+  outline-offset: 2px;
+}
+
+.chat-latest-help {
+  position: absolute;
+  z-index: 4;
+  right: 18px;
+  bottom: 18px;
+  display: grid;
+  width: 64px;
+  height: 58px;
+  padding: 0;
+  place-items: center;
+  border: 5px solid #f0c64d;
+  border-radius: 20px 20px 7px 20px;
+  color: white;
+  background: #27758e;
+  box-shadow: 0 6px 18px rgb(25 80 99 / 25%);
+  cursor: pointer;
+  transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease;
+}
+
+.chat-latest-help--above-composer {
+  bottom: 84px;
+}
+
+.chat-latest-help > span {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.chat-latest-help:hover,
+.chat-latest-help:focus-visible {
+  outline: none;
+  background: #1f657d;
+  box-shadow: 0 9px 22px rgb(25 80 99 / 34%);
+  transform: translateY(-2px);
+}
+
 .chat-message--success {
   color: #185f3c;
   background: #dcf5e7;
@@ -1345,49 +1484,49 @@ onBeforeUnmount(() => {
 }
 
 .chat-summary-tool > header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.chat-summary-tool > header > span {
   display: grid;
-  width: 38px;
-  height: 38px;
-  flex: 0 0 auto;
+  margin: -16px -16px 2px;
+  padding: 17px 16px 15px;
   place-items: center;
-  border-radius: 13px;
-  color: white;
-  background: #45aa7b;
-  font-size: 1.25rem;
-  font-weight: 900;
+  gap: 9px;
+  text-align: center;
+  border-bottom: 1px solid #176b87;
+  border-radius: 17px 17px 0 0;
+  background: linear-gradient(135deg, #176b87, #2f8791);
 }
 
 .chat-summary-tool > header > div {
-  min-width: 0;
-  flex: 1;
+  display: grid;
+  gap: 3px;
+  justify-items: center;
 }
 
 .chat-summary-tool > header p {
-  margin: 0 0 2px;
-  color: #2c7a8e;
-  font-size: .68rem;
+  margin: 0;
+  color: rgb(255 255 255 / 78%);
+  font-size: .7rem;
   font-weight: 900;
-  letter-spacing: .08em;
+  letter-spacing: .1em;
   text-transform: uppercase;
 }
 
 .chat-summary-tool h3 {
   margin: 0;
   color: #173f55;
-  font-size: 1.25rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  line-height: 1.1;
+}
+
+.chat-summary-tool > header h3 {
+  color: white;
 }
 
 .chat-summary-tool > header > strong {
-  padding: 7px 10px;
+  padding: 6px 12px;
   border-radius: 999px;
-  color: #185f3c;
-  background: #dff5e9;
+  color: #174f61;
+  background: rgb(255 255 255 / 92%);
+  border: 1px solid rgb(255 255 255 / 72%);
   font-size: .95rem;
 }
 
@@ -1411,6 +1550,21 @@ onBeforeUnmount(() => {
   transform: translateY(10px);
   animation: chat-summary-item-in .34s ease-out both;
   animation-delay: calc(.16s + var(--summary-item-index, 0) * .11s);
+  cursor: pointer;
+  transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+
+.chat-summary-list li:hover,
+.chat-summary-list li:focus-visible {
+  outline: none;
+  border-color: #65aabd;
+  box-shadow: 0 5px 16px rgb(30 91 109 / 16%);
+  transform: translateY(-1px);
+}
+
+.chat-summary-list li.is-help-selected {
+  outline: 3px solid #e6b936;
+  outline-offset: 2px;
 }
 
 .chat-summary-list li.is-correct {
@@ -1526,6 +1680,8 @@ onBeforeUnmount(() => {
 }
 
 .chat-restart-prompt {
+  width: min(100%, 620px);
+  max-width: min(96%, 620px);
   margin-inline: auto;
   align-items: center;
   gap: 10px;
@@ -1533,26 +1689,92 @@ onBeforeUnmount(() => {
 }
 
 .chat-restart-prompt__actions {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  flex-wrap: wrap;
 }
 
 .chat-restart-prompt__actions button {
-  padding: 8px 14px;
+  min-height: 42px;
+  padding: 8px 12px;
   border: 1px solid #bfd4da;
-  border-radius: 999px;
+  border-radius: 12px;
   color: #174253;
   background: white;
   cursor: pointer;
   font-weight: 850;
+  line-height: 1.25;
+  transition: transform .16s ease, border-color .16s ease, background-color .16s ease, box-shadow .16s ease;
 }
 
-.chat-restart-prompt__actions button:first-child {
+.chat-restart-prompt__actions button:hover:not(:disabled),
+.chat-restart-prompt__actions button:focus-visible {
+  transform: translateY(-2px);
+  border-color: #367e8e;
+  box-shadow: 0 6px 14px rgb(25 79 94 / 14%);
+  outline: none;
+}
+
+.chat-restart-prompt__actions button:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.chat-restart-prompt__same {
   color: white;
   border-color: #176b87;
   background: #176b87;
+}
+
+.chat-restart-prompt__same:hover:not(:disabled),
+.chat-restart-prompt__same:focus-visible {
+  border-color: #10556c;
+  background: #105f78;
+}
+
+.chat-restart-prompt__new {
+  color: #174f5f;
+  border-color: #82b9c5;
+  background: #e8f6f8;
+}
+
+.chat-restart-prompt__new:hover:not(:disabled),
+.chat-restart-prompt__new:focus-visible {
+  background: #d9f0f3;
+}
+
+.chat-restart-prompt__actions .chat-restart-prompt__quit {
+  min-height: 36px;
+  grid-column: 1 / -1;
+  color: #667b82;
+  background: transparent;
+}
+
+.chat-restart-prompt__actions .chat-restart-prompt__quit:hover:not(:disabled),
+.chat-restart-prompt__actions .chat-restart-prompt__quit:focus-visible {
+  color: #3e5d66;
+  background: #f3f7f8;
+}
+
+.chat-restart-prompt__actions .chat-restart-prompt__print {
+  min-height: 38px;
+  grid-column: 1 / -1;
+  color: #174f61;
+  border-style: dashed;
+  background: #f5fafb;
+}
+
+.chat-restart-prompt__actions .chat-restart-prompt__print:hover:not(:disabled),
+.chat-restart-prompt__actions .chat-restart-prompt__print:focus-visible {
+  border-style: solid;
+  background: #e8f4f6;
+}
+
+.chat-restart-prompt__error {
+  color: #9a403a;
+  font-size: .78rem;
+  line-height: 1.35;
 }
 
 :global(:root[data-theme='dark']) .chat-summary-tool {
@@ -1577,7 +1799,12 @@ onBeforeUnmount(() => {
 }
 
 :global(:root[data-theme='dark']) .chat-summary-tool > header p {
-  color: #87d6df;
+  color: rgb(255 255 255 / 76%);
+}
+
+:global(:root[data-theme='dark']) .chat-summary-tool > header {
+  border-bottom-color: #347b87;
+  background: linear-gradient(135deg, #1d6175, #2a6f76);
 }
 
 :global(:root[data-theme='dark']) .chat-summary-tool h3,
@@ -1592,8 +1819,9 @@ onBeforeUnmount(() => {
 }
 
 :global(:root[data-theme='dark']) .chat-summary-tool > header > strong {
-  color: #b9f2d1;
-  background: #173c2c;
+  color: white;
+  border-color: rgb(255 255 255 / 36%);
+  background: rgb(11 35 42 / 34%);
 }
 
 :global(:root[data-theme='dark']) .chat-summary-list li {
@@ -1623,10 +1851,52 @@ onBeforeUnmount(() => {
   background: #162a2f;
 }
 
-:global(:root[data-theme='dark']) .chat-restart-prompt__actions button:first-child {
+:global(:root[data-theme='dark']) .chat-restart-prompt__same {
   color: white;
   border-color: #2c839d;
   background: #176b87;
+}
+
+:global(:root[data-theme='dark']) .chat-restart-prompt__new {
+  color: #dff3f6;
+  border-color: #497f89;
+  background: #23434a;
+}
+
+:global(:root[data-theme='dark']) .chat-restart-prompt__same:hover:not(:disabled),
+:global(:root[data-theme='dark']) .chat-restart-prompt__same:focus-visible {
+  background: #105f78;
+}
+
+:global(:root[data-theme='dark']) .chat-restart-prompt__new:hover:not(:disabled),
+:global(:root[data-theme='dark']) .chat-restart-prompt__new:focus-visible {
+  background: #2b5058;
+}
+
+:global(:root[data-theme='dark']) .chat-restart-prompt__actions .chat-restart-prompt__quit {
+  color: #b5c8cc;
+  background: transparent;
+}
+
+:global(:root[data-theme='dark']) .chat-restart-prompt__actions .chat-restart-prompt__quit:hover:not(:disabled),
+:global(:root[data-theme='dark']) .chat-restart-prompt__actions .chat-restart-prompt__quit:focus-visible {
+  color: #d7e8eb;
+  background: #203a40;
+}
+
+:global(:root[data-theme='dark']) .chat-restart-prompt__actions .chat-restart-prompt__print {
+  color: #cce9ed;
+  border-color: #52737a;
+  background: #1b3439;
+}
+
+:global(:root[data-theme='dark']) .chat-restart-prompt__actions .chat-restart-prompt__print:hover:not(:disabled),
+:global(:root[data-theme='dark']) .chat-restart-prompt__actions .chat-restart-prompt__print:focus-visible {
+  background: #27474e;
+}
+
+:global(:root[data-theme='dark']) .chat-restart-prompt__error {
+  color: #efaaa4;
 }
 
 .chat-composer {
@@ -1706,6 +1976,15 @@ onBeforeUnmount(() => {
     padding: 16px;
   }
 
+  .chat-latest-help {
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .chat-latest-help--above-composer {
+    bottom: 80px;
+  }
+
   .chat-summary-tool {
     width: 100%;
     margin-inline: 0;
@@ -1718,6 +1997,18 @@ onBeforeUnmount(() => {
 
   .chat-summary-list dl {
     grid-template-columns: 1fr;
+  }
+
+  .chat-restart-prompt__actions {
+    grid-template-columns: 1fr;
+  }
+
+  .chat-restart-prompt__actions .chat-restart-prompt__quit {
+    grid-column: auto;
+  }
+
+  .chat-restart-prompt__actions .chat-restart-prompt__print {
+    grid-column: auto;
   }
 
   .coach-avatar {

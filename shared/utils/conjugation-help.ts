@@ -866,6 +866,14 @@ function agreedParticipleFromCompound(form: string, baseParticiple: string) {
   return match?.[1] || baseParticiple
 }
 
+function officialCompoundForm(question: ExerciseQuestion, baseParticiple: string) {
+  const source = question.conjugaison1?.trim() || ''
+  const expectedParticiple = question.agreementReminder?.participle?.trim()
+  if (!source || !baseParticiple || !expectedParticiple) return source
+  const escaped = baseParticiple.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')
+  return source.replace(new RegExp(`${escaped}(?:e|s|es)?(?=$|[\\s.,!?;:’'])`, 'iu'), expectedParticiple)
+}
+
 function compoundAgreementHtml(auxiliary: 'avoir' | 'être', subject: string, baseParticiple = '', answer = '') {
   if (auxiliary === 'être') {
     const tuNote = subjectKey(subject) === 'tu'
@@ -891,6 +899,7 @@ function buildCompoundConjugationHtml(question: ExerciseQuestion, verb?: Verb, t
   const person = auxiliaryPersonIndex(question, simpleTense)
   const subject = question.pronom || question.saisiePrefixe || 'la personne demandée'
   const auxiliaryForm = compoundAuxiliaryPart(question.conjugaison1 || '', participle)
+  const officialForm = officialCompoundForm(question, participle)
   const auxiliaryContext = simpleTense
     ? `${withAArticle(simpleTense.tense)} ${withDeArticle(simpleTense.mode)}`
     : 'au temps simple correspondant'
@@ -902,11 +911,11 @@ function buildCompoundConjugationHtml(question: ExerciseQuestion, verb?: Verb, t
   const auxiliaryInstruction = nonPersonal
     ? `Utilise le verbe auxiliaire <strong>${escapedHtml(auxiliary)}</strong> ${escapedHtml(auxiliaryContext)} :${conjugatedAuxiliary}`
     : `Conjugue le verbe auxiliaire <strong>${escapedHtml(auxiliary)}</strong> ${escapedHtml(auxiliaryContext)} avec <strong>${escapedHtml(subject)}</strong> :${conjugatedAuxiliary}`
-  const result = question.conjugaison1?.trim()
-    ? `<blockquote><strong>Résultat</strong><p><mark><strong>${escapedHtml(question.conjugaison1.trim())}</strong></mark></p></blockquote>`
+  const result = officialForm
+    ? `<blockquote><strong>Résultat</strong><p><mark><strong>${escapedHtml(officialForm)}</strong></mark></p></blockquote>`
     : ''
   const answer = `<figure><figcaption>Réponse</figcaption><ol><li>${auxiliaryInstruction}</li><li>Ajoute le participe passé :<br>${rememberedFormMarkup(participle)}</li><li>Vérifie l’accord du participe passé. Regarde plus bas pour plus de détails.</li></ol>${result}</figure>`
-  return `${knowledge}${answer}${compoundAgreementHtml(auxiliary, subject, participle, question.conjugaison1 || '')}`
+  return `${knowledge}${answer}${compoundAgreementHtml(auxiliary, subject, participle, officialForm)}`
 }
 
 function tenseRule(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationTense) {

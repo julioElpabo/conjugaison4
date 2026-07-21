@@ -6,6 +6,10 @@ import {
   conjugationTenseOrder,
   isFiniteConjugationMode,
 } from '~~/shared/data/conjugation-display'
+import {
+  normalizeComplementPreposition,
+  withComplementPreposition,
+} from '~~/shared/utils/complement-preposition'
 
 interface AdminVerb {
   id: number
@@ -51,6 +55,8 @@ interface ComplementGrammarDraft {
   gender: '' | 'masculin' | 'feminin'
   number: '' | 'singulier' | 'pluriel'
 }
+
+type ComplementNature = 'nominal' | 'infinitif' | 'expression'
 
 interface AdminConstruction {
   id: number
@@ -177,12 +183,20 @@ const complementGroups = ref<AdminConstruction[]>([])
 const complementDrafts = reactive<Record<number, string>>({})
 const complementGrammar = reactive<Record<number, ComplementGrammarDraft>>({})
 const complementGrammarOpen = reactive<Record<number, boolean>>({})
+const complementNatures = reactive<Record<number, ComplementNature>>({})
 const firstComplementDraft = ref('')
 const firstComplementGrammar = reactive<ComplementGrammarDraft>({ gender: '', number: '' })
 const firstComplementGrammarOpen = ref(false)
+const newCoiDraft = ref('')
+const newCoiPreposition = ref<'à' | 'de'>('à')
+const newCoiNature = ref<ComplementNature>('nominal')
+const newCoiGrammar = reactive<ComplementGrammarDraft>({ gender: '', number: '' })
 const complementBusy = ref('')
 const complementError = ref('')
 const complementSuccess = ref('')
+
+const hasCodConstruction = computed(() => complementGroups.value.some(construction => !isCoi(construction)))
+const newCoiPreview = computed(() => withComplementPreposition(newCoiDraft.value, newCoiPreposition.value))
 
 const groups = computed(() => [...props.modes]
   .filter(mode => isFiniteConjugationMode(mode.name))
@@ -335,6 +349,14 @@ function resetComplements() {
   firstComplementGrammar.gender = ''
   firstComplementGrammar.number = ''
   firstComplementGrammarOpen.value = false
+  newCoiDraft.value = ''
+  newCoiPreposition.value = 'à'
+  newCoiNature.value = 'nominal'
+  newCoiGrammar.gender = ''
+  newCoiGrammar.number = ''
+  for (const construction of complementGroups.value) {
+    complementNatures[construction.id] = 'nominal'
+  }
 }
 
 function grammarDraft(constructionId: number) {
@@ -350,11 +372,83 @@ function grammarComplete(grammar: ComplementGrammarDraft) {
   return Boolean(grammar.gender && grammar.number)
 }
 
+function isCoi(construction: AdminConstruction) {
+  return construction.fonctionObjet.trim().toLocaleLowerCase('fr-CH') === 'coi'
+}
+
+function complementNature(constructionId: number): ComplementNature {
+  return complementNatures[constructionId] ??= 'nominal'
+}
+
+function complementPreposition(construction: AdminConstruction) {
+  return normalizeComplementPreposition(construction.preposition) ?? 'à'
+}
+
+function complementPreview(construction: AdminConstruction) {
+  const value = complementDrafts[construction.id] ?? ''
+  return value.trim() && isCoi(construction)
+    ? withComplementPreposition(value, complementPreposition(construction))
+    : value.trim()
+}
+
+function complementPlaceholder(construction: AdminConstruction) {
+  if (construction.fonctionObjet.trim().toLocaleLowerCase('fr-CH') !== 'coi') return 'Ex. une pomme'
+  if (complementNature(construction.id) === 'infinitif') return 'Ex. résoudre ce problème'
+  if (complementNature(construction.id) === 'expression') return 'Ex. cache-cache'
+  return construction.preposition?.trim().toLocaleLowerCase('fr-CH') === 'de'
+    ? 'Ex. son projet'
+    : 'Ex. un ami'
+}
+
+async function changeConstructionPreposition(construction: AdminConstruction, event: Event) {
+  const select = event.target as HTMLSelectElement
+  const previous = complementPreposition(construction)
+  const next = normalizeComplementPreposition(select.value)
+  if (!next || next === previous || complementBusy.value) {
+    select.value = previous
+    return
+  }
+  if (construction.complements.length && !window.confirm(
+    `Remplacer « ${previous} » par « ${next} » pour les ${construction.complements.length} compléments de cette construction ?`,
+  )) {
+    select.value = previous
+    return
+  }
+
+  complementBusy.value = `preposition:${construction.id}`
+  complementError.value = ''
+  complementSuccess.value = ''
+  try {
+    const response = await $fetch<{
+      preposition: 'à' | 'de'
+      patron: string
+      complements: Array<{ id: number, texte: string }>
+    }>(`/api/admin/verbes/${props.detail.verb.id}/constructions/${construction.id}`, {
+      method: 'PATCH',
+      credentials: 'same-origin',
+      body: { preposition: next },
+    })
+    construction.preposition = response.preposition
+    construction.patron = response.patron
+    const rewritten = new Map(response.complements.map(item => [item.id, item.texte]))
+    construction.complements.forEach((complement) => {
+      complement.texte = rewritten.get(complement.id) ?? complement.texte
+    })
+    complementSuccess.value = `La construction utilise maintenant la préposition « ${response.preposition} ».`
+  } catch (error) {
+    select.value = previous
+    complementError.value = getAdminErrorMessage(error, 'Impossible de modifier la préposition de cette construction.')
+  } finally {
+    complementBusy.value = ''
+  }
+}
+
 async function addComplement(construction: AdminConstruction) {
   const texte = (complementDrafts[construction.id] ?? '').replace(/\s+/g, ' ').trim()
   if (!texte || complementBusy.value) return
 
   const grammar = grammarDraft(construction.id)
+  const nature = complementNature(construction.id)
   complementBusy.value = `add:${construction.id}`
   complementError.value = ''
   complementSuccess.value = ''
@@ -367,7 +461,8 @@ async function addComplement(construction: AdminConstruction) {
         body: {
           constructionId: construction.id,
           texte,
-          ...(grammarComplete(grammar) ? grammar : {}),
+          nature,
+          ...(nature === 'nominal' && grammarComplete(grammar) ? grammar : {}),
         }
       }
     )
@@ -380,7 +475,9 @@ async function addComplement(construction: AdminConstruction) {
   } catch (error) {
     if (grammarRequired(error)) {
       complementGrammarOpen[construction.id] = true
-      complementError.value = 'Le genre et le nombre ne peuvent pas être déduits. Précise-les pour ajouter ce COD.'
+      complementError.value = isCoi(construction)
+        ? 'Précise le genre et le nombre de ce complément nominal.'
+        : 'Le genre et le nombre ne peuvent pas être déduits. Précise-les pour ajouter ce COD.'
     } else {
       complementError.value = getAdminErrorMessage(error, 'Impossible d’ajouter ce complément.')
     }
@@ -404,6 +501,40 @@ async function deleteComplement(construction: AdminConstruction, complement: Adm
     complementSuccess.value = `Le complément « ${complement.texte} » a été supprimé.`
   } catch (error) {
     complementError.value = getAdminErrorMessage(error, 'Impossible de supprimer ce complément.')
+  } finally {
+    complementBusy.value = ''
+  }
+}
+
+async function toggleComplementGrammar(
+  construction: AdminConstruction,
+  complement: AdminComplement,
+  field: 'genre' | 'nombre',
+) {
+  if (complementBusy.value || isCoi(construction) || !complement.genre || !complement.nombre) return
+
+  const genre = field === 'genre'
+    ? (complement.genre === 'feminin' ? 'masculin' : 'feminin')
+    : complement.genre
+  const nombre = field === 'nombre'
+    ? (complement.nombre === 'pluriel' ? 'singulier' : 'pluriel')
+    : complement.nombre
+  complementBusy.value = `grammar:${complement.id}:${field}`
+  complementError.value = ''
+  complementSuccess.value = ''
+  try {
+    const response = await $fetch<{ complement: AdminComplement }>(
+      `/api/admin/verbes/${props.detail.verb.id}/complements/${complement.id}`,
+      {
+        method: 'PATCH',
+        credentials: 'same-origin',
+        body: { genre, nombre },
+      },
+    )
+    complement.genre = response.complement.genre
+    complement.nombre = response.complement.nombre
+  } catch (error) {
+    complementError.value = getAdminErrorMessage(error, 'Impossible de modifier le genre ou le nombre de ce COD.')
   } finally {
     complementBusy.value = ''
   }
@@ -441,6 +572,50 @@ async function addFirstComplement() {
     } else {
       complementError.value = getAdminErrorMessage(error, 'Impossible de créer cette liste de compléments.')
     }
+  } finally {
+    complementBusy.value = ''
+  }
+}
+
+async function addCoiComplement() {
+  const texte = newCoiDraft.value.replace(/\s+/g, ' ').trim()
+  if (!texte || complementBusy.value) return
+  if (newCoiNature.value === 'nominal' && !grammarComplete(newCoiGrammar)) {
+    complementError.value = 'Précise le genre et le nombre de ce complément nominal.'
+    return
+  }
+
+  complementBusy.value = 'add:new-coi'
+  complementError.value = ''
+  complementSuccess.value = ''
+  try {
+    const response = await $fetch<{
+      construction: Omit<AdminConstruction, 'complements'>
+      complement: AdminComplement
+    }>(`/api/admin/verbes/${props.detail.verb.id}/complements`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      body: {
+        fonctionObjet: 'coi',
+        preposition: newCoiPreposition.value,
+        nature: newCoiNature.value,
+        texte,
+        ...(newCoiNature.value === 'nominal' ? newCoiGrammar : {}),
+      },
+    })
+    const existing = complementGroups.value.find(item => item.id === response.construction.id)
+    if (existing) {
+      existing.complements.push(response.complement)
+    } else {
+      complementGroups.value.push({ ...response.construction, complements: [response.complement] })
+      complementNatures[response.construction.id] = newCoiNature.value
+    }
+    newCoiDraft.value = ''
+    newCoiGrammar.gender = ''
+    newCoiGrammar.number = ''
+    complementSuccess.value = `Le COI « ${response.complement.texte} » a été ajouté.`
+  } catch (error) {
+    complementError.value = getAdminErrorMessage(error, 'Impossible d’ajouter ce COI.')
   } finally {
     complementBusy.value = ''
   }
@@ -636,16 +811,54 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
           <span>{{ construction.patron }}</span>
           <small>{{ construction.complements.length }} / 30 compléments</small>
         </header>
+        <div v-if="isCoi(construction)" class="verb-editor__construction-settings">
+          <label>
+            Préposition
+            <select
+              :value="complementPreposition(construction)"
+              :disabled="Boolean(complementBusy)"
+              @change="changeConstructionPreposition(construction, $event)"
+            >
+              <option value="à">à</option>
+              <option value="de">de</option>
+            </select>
+          </label>
+          <small>Cette préposition s’applique à toute la construction.</small>
+        </div>
         <p v-if="construction.complements.length" class="verb-editor__sentence-preview">
           Exemple : il … {{ construction.complements[0]?.texte }}
         </p>
         <div class="verb-editor__complement-list">
           <span v-for="complement in construction.complements" :key="complement.id" class="verb-editor__complement-chip">
             <span>{{ complement.texte }}</span>
-            <small v-if="complement.genre && complement.nombre">
-              {{ complement.genre === 'feminin' ? 'fém.' : 'masc.' }} · {{ complement.nombre === 'pluriel' ? 'plur.' : 'sing.' }}
+            <span
+              v-if="!isCoi(construction) && complement.genre && complement.nombre"
+              class="verb-editor__complement-grammar"
+            >
+              <button
+                type="button"
+                :disabled="Boolean(complementBusy)"
+                :title="complement.genre === 'feminin' ? 'Passer au masculin' : 'Passer au féminin'"
+                :aria-label="`${complement.texte} : ${complement.genre === 'feminin' ? 'féminin, passer au masculin' : 'masculin, passer au féminin'}`"
+                @click="toggleComplementGrammar(construction, complement, 'genre')"
+              >
+                {{ complement.genre === 'feminin' ? 'fém.' : 'mas.' }}
+              </button>
+              <button
+                type="button"
+                :disabled="Boolean(complementBusy)"
+                :title="complement.nombre === 'pluriel' ? 'Passer au singulier' : 'Passer au pluriel'"
+                :aria-label="`${complement.texte} : ${complement.nombre === 'pluriel' ? 'pluriel, passer au singulier' : 'singulier, passer au pluriel'}`"
+                @click="toggleComplementGrammar(construction, complement, 'nombre')"
+              >
+                {{ complement.nombre === 'pluriel' ? 'plur.' : 'sing.' }}
+              </button>
+            </span>
+            <small v-else-if="complement.genre && complement.nombre">
+              {{ complement.genre === 'feminin' ? 'fém.' : 'mas.' }} · {{ complement.nombre === 'pluriel' ? 'plur.' : 'sing.' }}
             </small>
             <button
+              class="verb-editor__complement-delete"
               type="button"
               :disabled="Boolean(complementBusy)"
               :title="`Supprimer « ${complement.texte} »`"
@@ -657,26 +870,40 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
           </span>
         </div>
         <div class="verb-editor__complement-add">
-          <label :for="`complement-${construction.id}`">Ajouter un complément</label>
+          <label v-if="isCoi(construction)" class="verb-editor__nature-field">
+            Nature du complément
+            <select v-model="complementNatures[construction.id]" :disabled="Boolean(complementBusy)">
+              <option value="nominal">Groupe nominal</option>
+              <option value="infinitif">Infinitif</option>
+              <option value="expression">Expression figée</option>
+            </select>
+          </label>
+          <label :for="`complement-${construction.id}`">
+            {{ isCoi(construction) ? 'Complément sans préposition' : 'Ajouter un complément' }}
+          </label>
           <div>
             <input
               :id="`complement-${construction.id}`"
               v-model="complementDrafts[construction.id]"
               maxlength="180"
-              placeholder="Ex. une pomme"
+              :placeholder="complementPlaceholder(construction)"
               :disabled="Boolean(complementBusy) || construction.complements.length >= 30"
               @keydown.enter.prevent="addComplement(construction)"
             >
             <button
               class="admin-button admin-button--small"
               type="button"
-              :disabled="Boolean(complementBusy) || !complementDrafts[construction.id]?.trim() || construction.complements.length >= 30 || (complementGrammarOpen[construction.id] && !grammarComplete(grammarDraft(construction.id)))"
+              :disabled="Boolean(complementBusy) || !complementDrafts[construction.id]?.trim() || construction.complements.length >= 30 || (isCoi(construction) && complementNature(construction.id) === 'nominal' && !grammarComplete(grammarDraft(construction.id))) || (!isCoi(construction) && complementGrammarOpen[construction.id] && !grammarComplete(grammarDraft(construction.id)))"
               @click="addComplement(construction)"
             >
               {{ complementBusy === `add:${construction.id}` ? 'Ajout…' : 'Ajouter' }}
             </button>
           </div>
+          <small v-if="complementPreview(construction)" class="verb-editor__complement-preview">
+            Aperçu : <strong>{{ complementPreview(construction) }}</strong>
+          </small>
           <button
+            v-if="!isCoi(construction)"
             class="verb-editor__grammar-toggle"
             type="button"
             :aria-expanded="Boolean(complementGrammarOpen[construction.id])"
@@ -684,7 +911,10 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
           >
             {{ complementGrammarOpen[construction.id] ? 'Masquer le genre et le nombre' : 'Préciser le genre et le nombre' }}
           </button>
-          <div v-if="complementGrammarOpen[construction.id]" class="verb-editor__grammar-fields">
+          <div
+            v-if="(isCoi(construction) && complementNature(construction.id) === 'nominal') || (!isCoi(construction) && complementGrammarOpen[construction.id])"
+            class="verb-editor__grammar-fields"
+          >
             <label>
               Genre
               <select v-model="grammarDraft(construction.id).gender" :disabled="Boolean(complementBusy)">
@@ -702,10 +932,13 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
               </select>
             </label>
           </div>
+          <small v-if="isCoi(construction) && complementNature(construction.id) === 'nominal'" class="admin-muted">
+            Le genre et le nombre permettent de construire correctement « auquel », « à laquelle », « auxquels » ou « auxquelles ».
+          </small>
         </div>
       </article>
-      <article v-if="!complementGroups.length" class="verb-editor__empty-complements">
-        <p class="admin-muted">Aucun complément validé pour ce verbe.</p>
+      <article v-if="!hasCodConstruction" class="verb-editor__empty-complements">
+        <p class="admin-muted">Aucun COD validé pour ce verbe.</p>
         <div class="verb-editor__complement-add">
           <label :for="`first-complement-${detail.verb.id}`">Ajouter un premier complément COD</label>
           <div>
@@ -752,6 +985,74 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
               </select>
             </label>
           </div>
+        </div>
+      </article>
+      <article class="verb-editor__new-coi">
+        <header>
+          <strong>Ajouter des COI</strong>
+          <span>Une construction avec « à » ou « de » sera créée si nécessaire.</span>
+        </header>
+        <div class="verb-editor__complement-add">
+          <div class="verb-editor__new-coi-settings">
+            <label>
+              Préposition
+              <select v-model="newCoiPreposition" :disabled="Boolean(complementBusy)">
+                <option value="à">à</option>
+                <option value="de">de</option>
+              </select>
+            </label>
+            <label>
+              Nature du complément
+              <select v-model="newCoiNature" :disabled="Boolean(complementBusy)">
+                <option value="nominal">Groupe nominal</option>
+                <option value="infinitif">Infinitif</option>
+                <option value="expression">Expression figée</option>
+              </select>
+            </label>
+          </div>
+          <label :for="`new-coi-${detail.verb.id}`">Complément sans préposition</label>
+          <div>
+            <input
+              :id="`new-coi-${detail.verb.id}`"
+              v-model="newCoiDraft"
+              maxlength="180"
+              :placeholder="newCoiNature === 'infinitif' ? 'Ex. réussir cet exercice' : newCoiNature === 'expression' ? 'Ex. cache-cache' : 'Ex. ses amis'"
+              :disabled="Boolean(complementBusy)"
+              @keydown.enter.prevent="addCoiComplement"
+            >
+            <button
+              class="admin-button admin-button--small"
+              type="button"
+              :disabled="Boolean(complementBusy) || !newCoiDraft.trim() || (newCoiNature === 'nominal' && !grammarComplete(newCoiGrammar))"
+              @click="addCoiComplement"
+            >
+              {{ complementBusy === 'add:new-coi' ? 'Ajout…' : 'Ajouter le COI' }}
+            </button>
+          </div>
+          <small v-if="newCoiPreview" class="verb-editor__complement-preview">
+            Aperçu : <strong>{{ newCoiPreview }}</strong>
+          </small>
+          <div v-if="newCoiNature === 'nominal'" class="verb-editor__grammar-fields">
+            <label>
+              Genre
+              <select v-model="newCoiGrammar.gender" :disabled="Boolean(complementBusy)">
+                <option value="" disabled>À choisir</option>
+                <option value="masculin">Masculin</option>
+                <option value="feminin">Féminin</option>
+              </select>
+            </label>
+            <label>
+              Nombre
+              <select v-model="newCoiGrammar.number" :disabled="Boolean(complementBusy)">
+                <option value="" disabled>À choisir</option>
+                <option value="singulier">Singulier</option>
+                <option value="pluriel">Pluriel</option>
+              </select>
+            </label>
+          </div>
+          <small v-if="newCoiNature === 'nominal'" class="admin-muted">
+            Ces informations permettent notamment de produire « auquel », « à laquelle », « auxquels » ou « auxquelles ».
+          </small>
         </div>
       </article>
     </section>
@@ -1086,6 +1387,39 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
   font-weight: 750;
 }
 
+.verb-editor__construction-settings {
+  display: flex;
+  max-width: 560px;
+  align-items: end;
+  gap: 10px;
+}
+
+.verb-editor__construction-settings label,
+.verb-editor__nature-field {
+  display: grid;
+  gap: 4px;
+  color: var(--admin-navy);
+  font-size: .76rem;
+  font-weight: 800;
+}
+
+.verb-editor__construction-settings select,
+.verb-editor__nature-field select {
+  min-height: 38px;
+  padding: 7px 34px 7px 10px;
+  color: var(--admin-navy);
+  background: white;
+  border: 1px solid #becdd6;
+  border-radius: 7px;
+  font: inherit;
+}
+
+.verb-editor__construction-settings small {
+  padding-bottom: 9px;
+  color: var(--admin-muted);
+  font-size: .7rem;
+}
+
 .verb-editor__complement-list {
   display: flex;
   flex-wrap: wrap;
@@ -1111,7 +1445,7 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
   font-weight: 650;
 }
 
-.verb-editor__complement-list button {
+.verb-editor__complement-delete {
   display: inline-grid;
   width: 22px;
   height: 22px;
@@ -1127,15 +1461,47 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
   line-height: 1;
 }
 
-.verb-editor__complement-list button:hover,
-.verb-editor__complement-list button:focus-visible {
+.verb-editor__complement-delete:hover,
+.verb-editor__complement-delete:focus-visible {
   color: white;
   background: #a83d32;
   outline: 0;
 }
 
-.verb-editor__complement-list button:disabled {
+.verb-editor__complement-delete:disabled {
   opacity: .45;
+  cursor: wait;
+}
+
+.verb-editor__complement-grammar {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.verb-editor__complement-grammar button {
+  min-height: 20px;
+  padding: 2px 6px;
+  color: #4f6974;
+  background: rgb(255 255 255 / 58%);
+  border: 1px solid #bdd5dc;
+  border-radius: 99px;
+  cursor: pointer;
+  font: inherit;
+  font-size: .61rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.verb-editor__complement-grammar button:hover,
+.verb-editor__complement-grammar button:focus-visible {
+  color: var(--admin-blue-dark);
+  background: white;
+  border-color: var(--admin-blue);
+  outline: 0;
+}
+
+.verb-editor__complement-grammar button:disabled {
+  opacity: .48;
   cursor: wait;
 }
 
@@ -1149,6 +1515,52 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
   color: var(--admin-navy);
   font-size: .76rem;
   font-weight: 800;
+}
+
+.verb-editor__nature-field {
+  width: min(100%, 280px);
+  margin-bottom: 3px;
+}
+
+.verb-editor__new-coi {
+  border-style: dashed !important;
+}
+
+.verb-editor__new-coi-settings {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(130px, 1fr));
+  align-items: end !important;
+  gap: 9px !important;
+}
+
+.verb-editor__new-coi-settings label {
+  display: grid;
+  gap: 4px;
+}
+
+.verb-editor__new-coi-settings select {
+  min-height: 38px;
+  padding: 7px 34px 7px 10px;
+  color: var(--admin-navy);
+  background: white;
+  border: 1px solid #becdd6;
+  border-radius: 7px;
+  font: inherit;
+}
+
+.verb-editor__new-coi-settings select:focus {
+  border-color: var(--admin-blue);
+  outline: 0;
+  box-shadow: 0 0 0 2px rgb(23 107 135 / 13%);
+}
+
+.verb-editor__complement-preview {
+  color: var(--admin-muted);
+  font-size: .72rem;
+}
+
+.verb-editor__complement-preview strong {
+  color: var(--admin-blue-dark);
 }
 
 .verb-editor__complement-add > div {
@@ -1520,6 +1932,10 @@ watch(dirty, value => emit('dirtyChange', value), { immediate: true })
   .verb-editor__footer {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .verb-editor__new-coi-settings {
+    grid-template-columns: 1fr;
   }
 }
 </style>

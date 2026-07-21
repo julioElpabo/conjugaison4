@@ -129,11 +129,11 @@ export async function availableAdminTests() {
 }
 
 function summaryValue(output: string, label: string) {
-  const match = output.match(new RegExp(`^# ${label} (\\d+)$`, 'mu'))
-  return Number(match?.[1] || 0)
+  return [...output.matchAll(new RegExp(`^# ${label} (\\d+)$`, 'gmu'))]
+    .reduce((total, match) => total + Number(match[1] || 0), 0)
 }
 
-function structuredTestGroups(output: string) {
+function structuredTestGroups(output: string, category: string) {
   const pendingTitles = new Map<number, string>()
   const groups = new Map<string, Array<{ title: string, passed: boolean, skipped: boolean }>>()
 
@@ -161,6 +161,7 @@ function structuredTestGroups(output: string) {
   return [...groups].map(([sourceTitle, cases]) => ({
     title: RESULT_GROUP_CATALOG[sourceTitle]?.title || sourceTitle,
     description: RESULT_GROUP_CATALOG[sourceTitle]?.description || 'Contrôles automatisés de cette partie du site.',
+    category,
     kind: sourceTitle.startsWith('collection Postman') ? 'conjugation' : 'general',
     passed: cases.every(testCase => testCase.passed || testCase.skipped),
     cases,
@@ -224,43 +225,73 @@ export async function runAdminTests(requestedFiles: string[]) {
   }
 
   const startedAt = Date.now()
-  const execution = await new Promise<{ exitCode: number, stdout: string, stderr: string, timedOut: boolean }>((resolveExecution) => {
-    execFile(
-      process.execPath,
-      ['--env-file-if-exists=.env', '--import', 'tsx', '--test', '--test-concurrency=1', '--test-reporter=tap', ...files.map(file => join(TEST_DIRECTORY, file))],
-      { cwd: process.cwd(), timeout: 60_000, maxBuffer: 2_000_000 },
-      (error, stdout, stderr) => {
-        const exitCode = error && typeof error.code === 'number' ? error.code : (error ? 1 : 0)
-        resolveExecution({
-          exitCode,
-          stdout: String(stdout || ''),
-          stderr: String(stderr || ''),
-          timedOut: Boolean(error && 'killed' in error && error.killed),
-        })
-      }
-    )
-  })
-  const output = `${execution.stdout}${execution.stderr ? `\n${execution.stderr}` : ''}`.slice(-MAX_OUTPUT_LENGTH)
+  const testsById = new Map(available.map(test => [test.id, test]))
+  const filesByCategory = new Map<string, string[]>()
+  for (const file of files) {
+    const category = testsById.get(file)?.category || 'Technique'
+    filesByCategory.set(category, [...(filesByCategory.get(category) || []), file])
+  }
+
+  const executions: Array<{ category: string, files: string[], exitCode: number, output: string, timedOut: boolean }> = []
+  for (const [category, categoryFiles] of filesByCategory) {
+    const execution = await new Promise<{ exitCode: number, stdout: string, stderr: string, timedOut: boolean }>((resolveExecution) => {
+      execFile(
+        process.execPath,
+        ['--env-file-if-exists=.env', '--import', 'tsx', '--test', '--test-concurrency=1', '--test-reporter=tap', ...categoryFiles.map(file => join(TEST_DIRECTORY, file))],
+        { cwd: process.cwd(), timeout: 60_000, maxBuffer: 2_000_000 },
+        (error, stdout, stderr) => {
+          const exitCode = error && typeof error.code === 'number' ? error.code : (error ? 1 : 0)
+          resolveExecution({
+            exitCode,
+            stdout: String(stdout || ''),
+            stderr: String(stderr || ''),
+            timedOut: Boolean(error && 'killed' in error && error.killed),
+          })
+        }
+      )
+    })
+    executions.push({
+      category,
+      files: categoryFiles,
+      exitCode: execution.exitCode,
+      output: `${execution.stdout}${execution.stderr ? `\n${execution.stderr}` : ''}`,
+      timedOut: execution.timedOut,
+    })
+  }
+
+  const output = executions
+    .map(execution => `# Suite : ${execution.category}\n${execution.output}`)
+    .join('\n\n')
+    .slice(-MAX_OUTPUT_LENGTH)
+  const totalFor = (label: string) => executions.reduce((total, execution) => total + summaryValue(execution.output, label), 0)
   const conjugationScenarios = files.includes('postman-conjugation.test.mjs')
     ? await conjugationScenarioResults()
     : []
   const coachCredibility = files.includes('coach-conversation-scenarios.test.mjs')
     ? await coachCredibilityResults()
     : []
-  const groups = structuredTestGroups(output)
+  const groups = executions.flatMap(execution => structuredTestGroups(execution.output, execution.category))
+  const suiteResults = executions.map(execution => ({
+    title: execution.category,
+    passed: execution.exitCode === 0,
+    files: execution.files.length,
+    tests: summaryValue(execution.output, 'tests'),
+    failed: summaryValue(execution.output, 'fail'),
+  }))
   return {
-    success: execution.exitCode === 0,
-    exitCode: execution.exitCode,
-    timedOut: execution.timedOut,
+    success: executions.every(execution => execution.exitCode === 0),
+    exitCode: executions.find(execution => execution.exitCode !== 0)?.exitCode || 0,
+    timedOut: executions.some(execution => execution.timedOut),
     durationMs: Date.now() - startedAt,
     files,
     summary: {
-      tests: summaryValue(output, 'tests'),
-      suites: summaryValue(output, 'suites'),
-      passed: summaryValue(output, 'pass'),
-      failed: summaryValue(output, 'fail'),
-      skipped: summaryValue(output, 'skipped'),
+      tests: totalFor('tests'),
+      suites: totalFor('suites'),
+      passed: totalFor('pass'),
+      failed: totalFor('fail'),
+      skipped: totalFor('skipped'),
     },
+    suiteResults,
     groups,
     conjugationScenarios,
     coachCredibility,

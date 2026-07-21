@@ -155,6 +155,48 @@ describe('compléments d’objet dans les questions', () => {
     assert.deepEqual(question.reponsesPourCorrige, ['les pommes que vous avez mangées'])
   })
 
+  it('donne au COD antéposé un contexte qui justifie le subjonctif', () => {
+    const question = formatConjugationQuestion(row({
+      infinitif: 'démolir',
+      conjugaison1: 'aies démoli',
+      conjugaison2: '',
+      temps_name: 'passé',
+      mode_name: 'subjonctif',
+      is_compound: 1,
+      auxiliaire: 'avoir',
+      participe_passe: 'démoli',
+      complement_position: 'before',
+      complement_anteposed: "l'autre maison",
+      complement_gender: 'feminin',
+      complement_number: 'singulier',
+      complement_function: 'cod',
+    }), 'tu')
+
+    assert.equal(question.consigne, "C'est la seule autre maison que tu … | démolir | passé (subjonctif)")
+    assert.deepEqual(question.reponsesPourCorrige, ["C'est la seule autre maison que tu aies démolie"])
+    assert.ok(question.reponses.includes("C'est la seule autre maison que tu aies démolie"))
+  })
+
+  it('donne aussi au COI antéposé un contexte qui justifie le subjonctif', () => {
+    const question = formatConjugationQuestion(row({
+      infinitif: 'participer',
+      conjugaison1: 'ait participé',
+      conjugaison2: '',
+      temps_name: 'passé',
+      mode_name: 'subjonctif',
+      is_compound: 1,
+      auxiliaire: 'avoir',
+      participe_passe: 'participé',
+      complement_position: 'before',
+      complement_anteposed: 'la réunion',
+      complement_relative_pronoun: 'à laquelle',
+      complement_function: 'coi',
+    }), 'il')
+
+    assert.equal(question.consigne, "C'est la seule réunion à laquelle il … | participer | passé (subjonctif)")
+    assert.deepEqual(question.reponsesPourCorrige, ["C'est la seule réunion à laquelle il ait participé"])
+  })
+
   it('laisse le complément de lieu après le verbe lorsque le COD est antéposé', () => {
     const question = formatConjugationQuestion(row({
       infinitif: 'envoyer',

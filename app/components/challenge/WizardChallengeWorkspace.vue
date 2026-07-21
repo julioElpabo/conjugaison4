@@ -34,7 +34,6 @@ const {
   toggleTense,
   selectAllTenses,
   clearTenses,
-  selectDefaultTenses,
   applySelection,
   applySharedChallenge
 } = useChallengeBuilder()
@@ -42,6 +41,7 @@ const {
 const api = useChallengeApi()
 const requestUrl = useRequestURL()
 const wizardInitialized = useState('wizard-challenge-initialized', () => false)
+const homeResetRequested = useState('home-reset-requested', () => false)
 const currentStep = ref<WizardStep>(0)
 const isPreparingStep4 = ref(false)
 const highlightChallengeLoader = ref(false)
@@ -53,6 +53,7 @@ const actionError = ref('')
 const notice = ref('')
 const busyAction = ref<'exercise' | 'print' | 'save' | 'load' | null>(null)
 const activePresetId = ref<string>()
+const isPresetVerbEditing = ref(false)
 const areAllLaunchVerbsVisible = ref(false)
 const questions = ref<ExerciseQuestion[]>([])
 const printQuestions = ref<ExerciseQuestion[]>([])
@@ -169,8 +170,17 @@ const activePreset = computed(() => catalogue.value.presets.find(preset => prese
 const activePresetGroupLabel = computed(() => activePreset.value
   ? challengePresetGroupLabels[activePreset.value.group]
   : '')
+const activePresetTitleGroupLabel = computed(() => activePreset.value?.group === 'school'
+  ? 'Niveau scolaire suisse'
+  : activePresetGroupLabel.value)
+const activePresetDisplayTitle = computed(() => activePreset.value
+  ? [activePresetTitleGroupLabel.value, activePreset.value.label]
+      .filter(Boolean)
+      .join(' | ')
+  : '')
 const heroTitle = computed(() => {
-  if (currentStep.value === 0) return 'Exercices de conjugaison française'
+  if (currentStep.value === 0) return 'TATITOTU'
+  if (activePreset.value) return 'Défi déjà préparé'
   return 'Construire mon défi'
 })
 const launchVerbPreview = computed(() => selectedVerbs.value.slice(0, 10))
@@ -296,7 +306,7 @@ function previousStep() {
 function restartChallenge() {
   cancelPresetReveal()
   clearVerbs()
-  selectDefaultTenses()
+  clearTenses()
   challenge.value.questionCount = 20
   challenge.value.exerciseKind = 'conjugation'
   challenge.value.pastSimplePronouns = 'all'
@@ -305,6 +315,7 @@ function restartChallenge() {
   challenge.value.complementPlacement = 'after'
   challenge.value.complementOptions = ['cod-after', 'coi-after']
   activePresetId.value = undefined
+  isPresetVerbEditing.value = false
   areAllLaunchVerbsVisible.value = false
   presetExpanded.value = false
   presetStage.value = 'groups'
@@ -313,9 +324,23 @@ function restartChallenge() {
   notice.value = ''
   actionError.value = ''
   selectedCoach.value = null
+  questions.value = []
+  printQuestions.value = []
+  shareCode.value = ''
+  isExerciseOpen.value = false
+  isPrintOpen.value = false
+  isShareOpen.value = false
+  isCoachPickerOpen.value = false
+  showLaunchSummary.value = false
   clearMessages()
   goToStep(0)
 }
+
+watch(homeResetRequested, (requested) => {
+  if (!requested) return
+  restartChallenge()
+  homeResetRequested.value = false
+}, { immediate: true })
 
 function shuffledSample(ids: readonly number[], count: number) {
   const result = [...ids]
@@ -340,6 +365,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   challenge.value.complementPlacement = preset.complementPlacement
   challenge.value.complementOptions = preset.complementOptions ?? legacyComplementOptions(preset.includeComplements, preset.complementPlacement)
   activePresetId.value = preset.id
+  isPresetVerbEditing.value = false
   revealedPresetVerbIds.value = []
   revealedPresetTenseIds.value = []
   presetTenseRevealPending.value = true
@@ -365,6 +391,7 @@ async function restoreChallenge() {
     const restored = await api.loadChallenge(normalized)
     applySharedChallenge(restored)
     activePresetId.value = undefined
+    isPresetVerbEditing.value = false
     areAllLaunchVerbsVisible.value = false
     challengeCode.value = restored.code
     notice.value = `Le défi ${restored.code} est chargé. Tu peux le lancer ou le modifier.`
@@ -592,6 +619,12 @@ async function launchWithCoach(coach: CoachProfile) {
   }
 }
 
+async function regenerateChatQuestions() {
+  const generated = await api.generateQuestions(challenge.value)
+  if (!generated.length) throw new Error('Aucune nouvelle question ne correspond à cette sélection.')
+  questions.value = generated
+}
+
 async function preparePrint() {
   if (!isReady.value) return
   busyAction.value = 'print'
@@ -629,7 +662,8 @@ async function saveChallenge() {
   <div class="wizard-entry-page">
     <div class="challenge-page wizard-page">
       <header class="wizard-hero">
-        <h1>{{ heroTitle }}</h1>
+        <h1 :class="{ 'wizard-hero__brand': currentStep === 0, 'wizard-hero__preset': currentStep !== 0 && activePreset }">{{ heroTitle }}</h1>
+        <p v-if="currentStep === 0" class="wizard-hero__subtitle">Exercices de conjugaison française, gratuits et sans publicité</p>
       </header>
 
       <main class="wizard-shell">
@@ -770,17 +804,36 @@ async function saveChallenge() {
                   </button>
                 </div>
               </div>
-              <div class="wizard-step__intro wizard-step__intro--selection">
-                <h2>Choisis les verbes</h2>
-                <p>Écris un infinitif, puis sélectionne-le dans la liste.</p>
+              <section v-if="activePreset && !isPresetVerbEditing" class="preset-verb-overview">
+                <header>
+                  <div>
+                    <h2 id="verbs-title">{{ activePresetDisplayTitle }}</h2>
+                    <p>{{ selectedVerbs.length }} verbe{{ selectedVerbs.length > 1 ? 's' : '' }} sélectionné{{ selectedVerbs.length > 1 ? 's' : '' }}</p>
+                    <button class="preset-verb-overview__edit" type="button" @click="isPresetVerbEditing = true">Modifier la liste</button>
+                  </div>
+                </header>
+                <ul>
+                  <li v-for="verb in selectedVerbs" :key="verb.id">{{ verb.infinitif }}</li>
+                </ul>
+              </section>
+              <template v-else>
+                <div class="wizard-step__intro wizard-step__intro--selection">
+                  <h2 id="verbs-title">Choisis les verbes</h2>
+                  <p>Écris un infinitif, puis sélectionne-le dans la liste.</p>
+                </div>
+                <VerbPicker
+                  :verbs="catalogue.verbes"
+                  :selected-ids="displayedVerbIds"
+                  @add="onAddVerb"
+                  @remove="onRemoveVerb"
+                  @clear="markAsCustom(); clearVerbs()"
+                />
+              </template>
+              <div class="wizard-step__bottom-actions">
+                <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedVerbs.length" @click="nextStep">
+                  Choisir les temps →
+                </button>
               </div>
-              <VerbPicker
-                :verbs="catalogue.verbes"
-                :selected-ids="displayedVerbIds"
-                @add="onAddVerb"
-                @remove="onRemoveVerb"
-                @clear="markAsCustom(); clearVerbs()"
-              />
             </div>
 
             <div v-else-if="currentStep === 2" class="wizard-step wizard-step--selection" aria-labelledby="tenses-title">
@@ -804,6 +857,11 @@ async function saveChallenge() {
                 @select-all="markAsCustom(); selectAllTenses()"
                 @clear="markAsCustom(); clearTenses()"
               />
+              <div class="wizard-step__bottom-actions">
+                <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedTenses.length" @click="nextStep">
+                  Choisir les options →
+                </button>
+              </div>
             </div>
 
             <div v-else-if="currentStep === 3" class="wizard-step wizard-review">
@@ -841,6 +899,10 @@ async function saveChallenge() {
                 @update-inclusive-pronouns="challenge.inclusivePronouns = $event; markAsCustom()"
                 @update-complement-options="updateComplementOptions"
               />
+
+              <div class="wizard-step__bottom-actions">
+                <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" @click="nextStep">Créer →</button>
+              </div>
 
             </div>
 
@@ -894,7 +956,7 @@ async function saveChallenge() {
       </main>
 
       <ClassicExercise v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" @close="isExerciseOpen = false" />
-      <ChatExercise v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :coach="selectedCoach" :verbs="selectedVerbs" :tenses="selectedTenses" @close="isExerciseOpen = false" />
+      <ChatExercise v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :coach="selectedCoach" :verbs="selectedVerbs" :tenses="selectedTenses" :regenerate-questions="regenerateChatQuestions" @close="isExerciseOpen = false" />
       <CoachPicker v-if="isCoachPickerOpen" @close="isCoachPickerOpen = false" @select="launchWithCoach" />
       <PrintPreview v-if="isPrintOpen" :questions="printQuestions" :verbs="selectedVerbs" :tenses="selectedTenses" :exercise-kind="challenge.exerciseKind" :options="challenge.printOptions" @update-options="challenge.printOptions = $event" @close="isPrintOpen = false" />
       <ShareChallengeDialog v-if="isShareOpen" :code="shareCode" :url="shareUrl" @close="isShareOpen = false" />
@@ -907,7 +969,9 @@ async function saveChallenge() {
 .wizard-page { overflow: hidden; padding-bottom: 70px; border-radius: 26px; }
 .wizard-hero { max-width: 820px; margin: 0 auto; padding: 42px 24px 24px; text-align: center; }
 .wizard-hero h1 { margin: 0; color: #294c4b; font-size: clamp(2.2rem, 5vw, 4rem); letter-spacing: -.05em; line-height: 1; }
-.wizard-hero > p:last-child { max-width: 650px; margin: 15px auto 0; color: var(--muted); font-size: 1.08rem; line-height: 1.5; }
+.wizard-hero h1.wizard-hero__brand { letter-spacing: .18em; text-indent: .18em; }
+.wizard-hero h1.wizard-hero__preset { font-size: clamp(1.75rem, 4vw, 3.15rem); line-height: 1.1; }
+.wizard-hero__subtitle { max-width: 650px; margin: 12px auto 0; color: var(--muted); font-size: 1.08rem; font-weight: 650; line-height: 1.5; }
 .wizard-shell { position: relative; width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
 .code-loader { display: grid; width: 100%; grid-template-columns: minmax(230px, 1fr) minmax(330px, .9fr); align-items: center; gap: 12px 28px; margin: 0; padding: 18px; border: 1px solid #b8d3cb; border-radius: 16px; background: white; box-shadow: 0 9px 25px rgb(42 65 61 / 7%); }
 .code-loader__heading { display: flex; align-items: center; gap: 11px; }
@@ -968,6 +1032,7 @@ async function saveChallenge() {
 .wizard-step__actions { display: flex; margin-bottom: 30px; align-items: flex-start; justify-content: flex-end; }
 .wizard-step__actions--split { align-items: center; justify-content: space-between; }
 .wizard-step__controls { display: flex; align-items: center; gap: 8px; }
+.wizard-step__bottom-actions { display: flex; margin-top: 30px; padding-top: 24px; justify-content: flex-end; border-top: 1px solid var(--line); }
 .wizard-step__cta { min-height: 54px; padding: 13px 25px; border-radius: 13px; font-size: 1.05rem; font-weight: 850; }
 .wizard-step__cta--launch { min-height: 70px; padding: 17px 33px; border-radius: 17px; font-size: 1.37rem; }
 .wizard-next-pulse:not(:disabled) { animation: wizard-next-pulse 2s infinite; transform-origin: center; }
@@ -979,6 +1044,15 @@ async function saveChallenge() {
 .wizard-step :deep(.builder-card) { box-shadow: none; }
 .wizard-step :deep(.builder-card__header) { display: none; }
 .wizard-step :deep(.verb-search) { padding-top: 23px; }
+.preset-verb-overview { display: grid; padding: clamp(20px, 4vw, 30px); border: 1px solid var(--line); border-radius: 18px; gap: 22px; background: color-mix(in srgb, var(--surface) 92%, var(--verb-accent-soft)); }
+.preset-verb-overview > header { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.preset-verb-overview h2 { margin: 0; color: var(--brand-dark); font-size: clamp(1.55rem, 3vw, 2.2rem); letter-spacing: -.03em; }
+.preset-verb-overview p { margin: 5px 0 0; color: var(--muted); }
+.preset-verb-overview__edit { margin: 7px 0 0; padding: 0; color: var(--brand-dark); border: 0; background: transparent; cursor: pointer; font: inherit; font-size: .9rem; font-weight: 800; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.preset-verb-overview__edit:hover { color: var(--brand); }
+.preset-verb-overview__edit:focus-visible { border-radius: 3px; outline: 3px solid color-mix(in srgb, var(--brand) 28%, transparent); outline-offset: 3px; }
+.preset-verb-overview ul { display: flex; margin: 0; padding: 0; flex-wrap: wrap; gap: 10px; list-style: none; }
+.preset-verb-overview li { padding: 9px 14px; border: 1px solid color-mix(in srgb, var(--verb-accent) 45%, var(--line)); border-radius: 999px; color: var(--ink); background: var(--surface); font-weight: 750; }
 .wizard-review, .wizard-launch-step { padding-top: 0; }
 .mobile-label-only { display: none; }
 .wizard-review :deep(.options-card) { margin: 0 0 18px; box-shadow: none; }
@@ -1048,7 +1122,7 @@ async function saveChallenge() {
 
 @media (max-width: 820px) {
   .wizard-hero { padding: 28px 16px 18px; }
-  .wizard-hero > p:last-child { font-size: .98rem; }
+  .wizard-hero__subtitle { margin-top: 9px; font-size: .98rem; }
   .wizard-shell { width: min(100% - 20px, 650px); }
   .code-loader { grid-template-columns: 1fr; gap: 10px; }
   .code-loader__error { grid-column: 1; }
@@ -1063,6 +1137,7 @@ async function saveChallenge() {
   .wizard-steps button { flex-direction: column; gap: 4px; }
   .wizard-content { min-height: 430px; padding: 22px 12px 24px; }
   .wizard-step--selection { padding-top: 0; }
+  .preset-verb-overview > header { align-items: stretch; flex-direction: column; }
   .wizard-review, .wizard-launch-step { padding-top: 0; }
   .wizard-step__actions { margin-bottom: 22px; }
   .wizard-step__intro { padding: 0 8px; }

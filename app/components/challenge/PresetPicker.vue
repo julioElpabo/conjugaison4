@@ -116,8 +116,7 @@ function selectRandom(preset: ChallengePreset, count: number) {
           </section>
 
           <Transition name="browser-column">
-            <section v-if="compactGroup" :key="compactGroup.id" class="preset-browser__column" data-browser-column="2" :aria-labelledby="`preset-browser-${compactGroup.id}`">
-              <h3 :id="`preset-browser-${compactGroup.id}`">{{ compactGroup.label }}</h3>
+            <section v-if="compactGroup" :key="compactGroup.id" class="preset-browser__column" data-browser-column="2" :aria-label="`Défis de ${compactGroup.label}`">
               <div class="preset-browser__list">
                 <button
                   v-for="preset in compactGroup.presets"
@@ -135,15 +134,14 @@ function selectRandom(preset: ChallengePreset, count: number) {
           </Transition>
 
           <Transition name="browser-column">
-            <section v-if="selectedCompactPreset" :key="selectedCompactPreset.id" class="preset-browser__column preset-browser__column--quantity" data-browser-column="3" aria-labelledby="preset-browser-quantity">
-              <h3 id="preset-browser-quantity">Nombre de verbes</h3>
-              <p>{{ selectedCompactPreset.label }}</p>
+            <section v-if="selectedCompactPreset" :key="selectedCompactPreset.id" class="preset-browser__column preset-browser__column--quantity" data-browser-column="3" aria-label="Choisir le nombre de verbes">
               <div class="preset-browser__list">
                 <button type="button" @click="selectCompactPreset(selectedCompactPreset)">
                   <span><strong>Tous les verbes</strong></span>
                   <span class="preset-browser__count">{{ selectedCompactPreset.verbIds.length }}</span>
                   <span class="preset-browser__launch" aria-hidden="true">→</span>
                 </button>
+                <span class="preset-browser__quantity-separator" aria-hidden="true" />
                 <button v-if="selectedCompactPreset.verbIds.length >= 3" type="button" @click="selectCompactPreset(selectedCompactPreset, 3)">
                   <span><strong>3 au hasard</strong></span>
                   <span class="preset-browser__count">3</span>
@@ -254,7 +252,6 @@ function selectRandom(preset: ChallengePreset, count: number) {
 .preset-browser__column:first-child { border-radius: 14px 0 0 14px; }
 .preset-browser__column:last-child { border-right: 0; border-radius: 0 14px 14px 0; }
 .preset-browser__column h3 { margin: 0; padding: 4px 8px 10px; color: var(--muted); font-size: .74rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
-.preset-browser__column--quantity > p { margin: -2px 8px 9px; color: var(--brand-dark); font-size: .9rem; font-weight: 800; }
 .preset-browser__list { display: grid; align-content: start; gap: 4px; }
 .preset-browser__list button { display: flex; width: 100%; min-height: 42px; padding: 8px 9px 8px 11px; align-items: center; justify-content: space-between; gap: 9px; border: 1px solid transparent; border-radius: 9px; color: var(--ink); background: transparent; font-size: .88rem; line-height: 1.15; text-align: left; }
 .preset-browser__list button > span:first-child { display: grid; min-width: 0; gap: 2px; }
@@ -267,6 +264,7 @@ function selectRandom(preset: ChallengePreset, count: number) {
 .preset-browser__list button.is-selected .preset-browser__chevron { color: white; }
 .preset-browser__count { display: grid; min-width: 28px; height: 24px; margin-left: auto; padding: 0 7px; place-items: center; border: 1px solid #d2ddda; border-radius: 999px; color: var(--muted); background: #edf2f0; font-size: .72rem; font-weight: 850; }
 .preset-browser__launch { display: grid; width: 25px; height: 25px; flex: 0 0 25px; place-items: center; border-radius: 8px; color: white; background: var(--brand); font-weight: 850; }
+.preset-browser__quantity-separator { height: 1px; margin: 7px 8px; background: var(--line); }
 .preset-browser__column--quantity .preset-browser__list button:hover { color: var(--brand-dark); border-color: #83afa4; background: var(--brand-pale); }
 .browser-column-enter-active { transition: opacity 180ms ease, transform 260ms cubic-bezier(.22, 1, .36, 1); }
 .browser-column-enter-from { opacity: 0; transform: translateX(24px); }

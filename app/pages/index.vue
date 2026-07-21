@@ -2,7 +2,7 @@
 import WizardChallengeWorkspace from '~/components/challenge/WizardChallengeWorkspace.vue'
 
 useHead({
-  title: 'Nouveau défi · Défi de conjugaison',
+  title: 'TATITOTU · Exercices de conjugaison française gratuits et sans publicité',
   meta: [
     {
       name: 'description',

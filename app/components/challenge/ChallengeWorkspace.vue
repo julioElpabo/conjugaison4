@@ -183,6 +183,12 @@ async function launchWithCoach(coach: CoachProfile) {
   }
 }
 
+async function regenerateChatQuestions() {
+  const generated = await api.generateQuestions(challenge.value)
+  if (!generated.length) throw new Error('Aucune nouvelle question ne correspond à cette sélection.')
+  questions.value = generated
+}
+
 async function preparePrint() {
   if (!isReady.value) return
   busyAction.value = 'print'
@@ -371,6 +377,7 @@ function onToggleTense(id: number) {
       :coach="selectedCoach"
       :verbs="selectedVerbs"
       :tenses="selectedTenses"
+      :regenerate-questions="regenerateChatQuestions"
       @close="isExerciseOpen = false"
     />
 

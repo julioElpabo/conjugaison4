@@ -148,7 +148,8 @@ describe('COD avec les temps simples et l’impératif', () => {
 
     assert.equal(question.saisiePrefixe, 'que vous')
     assert.ok(question.reponses.includes('mangiez'))
-    assert.deepEqual(question.reponsesPourCorrige, ['les pommes que vous mangiez'])
+    assert.deepEqual(question.reponsesPourCorrige, ["Ce sont les seules pommes que vous mangiez"])
+    assert.equal(question.consigne, "Ce sont les seules pommes que vous … | manger | imparfait (subjonctif)")
     assert.equal(question.agreementReminder, undefined)
   })
 

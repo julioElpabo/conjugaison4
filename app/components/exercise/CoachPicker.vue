@@ -38,30 +38,32 @@ onMounted(async () => {
     <div class="coach-picker-overlay" @click.self="emit('close')">
       <section class="coach-picker" role="dialog" aria-modal="true" aria-labelledby="coach-picker-title">
         <header>
-          <div><p>Exercice dialogué</p><h2 id="coach-picker-title">Choisis ton coach</h2></div>
+          <div><h2 id="coach-picker-title">Choisis ton coach</h2></div>
           <button type="button" aria-label="Fermer" @click="emit('close')">×</button>
         </header>
 
         <div class="coach-safety">
-          <strong>Les coaches sont des personnages virtuels automatisés.</strong>
+          <strong>Ces coaches sont des personnages virtuels automatisés.</strong>
           <p>Un avatar, un prénom ou un âge ne prouvent jamais l’identité d’une personne sur Internet. </p>
         </div>
 
         <p v-if="loading" class="coach-picker__state">Chargement des coaches…</p>
         <p v-else-if="error" class="coach-picker__state coach-picker__state--error">{{ error }}</p>
         <div v-else class="coach-picker__groups">
-          <section v-for="(group, index) in coachGroups" :key="group.characterId" class="coach-character-group">
+          <section v-for="group in coachGroups" :key="group.characterId" class="coach-character-group">
             <header class="coach-character-group__header">
-              <div><span>Caractère {{ index + 1 }}</span><h3>{{ group.name }}</h3></div>
+              <div><h3>{{ group.name }}</h3></div>
               <small>{{ group.coaches.length }} coach{{ group.coaches.length > 1 ? 'es' : '' }}</small>
             </header>
             <div class="coach-picker__grid">
               <button v-for="coach in group.coaches" :key="coach.id" type="button" class="coach-card" :style="{ '--coach-color': coach.themeColor }" @click="emit('select', coach)">
                 <img :src="coach.avatarPath" :alt="`Avatar de ${coach.firstName}`">
-                <span><strong>{{ coach.firstName }}</strong><small>Personnage virtuel</small></span>
+                <span>
+                  <strong>{{ coach.firstName }}</strong>
+                  <small class="coach-card__character-description">{{ coach.pedagogicalStyle }}</small>
+                </span>
                 <blockquote v-if="coach.description">« {{ coach.description }} »</blockquote>
-                <p v-if="coach.likes" class="coach-card__likes"><strong>Aime&nbsp;:</strong> {{ coach.likes }}</p>
-                <em>{{ coach.pedagogicalStyle }}</em>
+                <p v-if="coach.likes" class="coach-card__likes"><b>Aime&nbsp;:</b> {{ coach.likes }}</p>
               </button>
             </div>
           </section>
@@ -97,19 +99,20 @@ onMounted(async () => {
 .coach-card > span { display: grid; align-content: center; }
 .coach-card strong { color: #173f55; font-size: 1.1rem; }
 .coach-card small { color: #5f7882; }
-.coach-card p, .coach-card blockquote, .coach-card em { grid-column: 1 / -1; margin: 5px 0 0; }
+.coach-card__character-description { margin-top: 3px; line-height: 1.35; }
+.coach-card p, .coach-card blockquote { grid-column: 1 / -1; margin: 5px 0 0; }
 .coach-card blockquote { padding-left: 12px; color: #38535d; border-left: 3px solid color-mix(in srgb, var(--coach-color) 58%, #c5dce2); font-size: .92rem; font-style: italic; line-height: 1.45; }
 .coach-card__likes { color: #405b63; font-size: .86rem; line-height: 1.35; }
-.coach-card__likes strong { color: #173f55; }
-.coach-card em { color: #59717a; font-size: .88rem; font-style: normal; }
+.coach-card__likes b { color: #173f55; }
 .coach-picker__state { padding: 30px; text-align: center; }
 .coach-picker__state--error { color: #913e38; }
 :global(:root[data-theme='dark'] .coach-character-group) { border-color: #405963; border-left-color: var(--character-accent); background: color-mix(in srgb, var(--character-accent) 14%, #17262a); }
 :global(:root[data-theme='dark'] .coach-character-group__header h3) { color: #d4e9ee; }
 :global(:root[data-theme='dark'] .coach-character-group__header span) { color: color-mix(in srgb, var(--character-accent) 78%, white); }
 :global(:root[data-theme='dark'] .coach-character-group__header > small) { color: #b8ced5; background: rgb(9 29 34 / 45%); }
+:global(:root[data-theme='dark'] .coach-card__character-description) { color: #b8ced5; }
 :global(:root[data-theme='dark'] .coach-card blockquote) { color: #cfe0e4; border-left-color: color-mix(in srgb, var(--coach-color) 70%, white); }
 :global(:root[data-theme='dark'] .coach-card__likes) { color: #b8ced5; }
-:global(:root[data-theme='dark'] .coach-card__likes strong) { color: #dff3f6; }
+:global(:root[data-theme='dark'] .coach-card__likes b) { color: #dff3f6; }
 @media (max-width: 650px) { .coach-picker__grid { grid-template-columns: 1fr; }.coach-character-group { padding: 12px; }.coach-character-group__header { align-items: flex-start; }.coach-character-group__header > small { margin-top: 2px; } }
 </style>

@@ -4,6 +4,7 @@ const { applyTheme } = useColorTheme()
 const isDark = ref(false)
 const isAdminRoute = computed(() => route.path === '/admin' || route.path.startsWith('/admin/'))
 const themeSwitchTitle = computed(() => isDark.value ? 'Activer le mode clair' : 'Activer le mode sombre')
+const homeResetRequested = useState('home-reset-requested', () => false)
 
 onMounted(() => {
   const activeTheme = document.documentElement.dataset.theme
@@ -17,6 +18,10 @@ function toggleTheme() {
   const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
   isDark.value = nextTheme === 'dark'
   applyTheme(nextTheme)
+}
+
+function requestHomeReset() {
+  homeResetRequested.value = true
 }
 const activeSection = computed(() => {
   if (route.path === '/consulter' || route.path.startsWith('/consulter/')) return 'consulter'
@@ -35,7 +40,7 @@ const activeSection = computed(() => {
           <span>Défis de conjugaison</span>
         </a>
         <nav class="site-navigation" aria-label="Navigation principale">
-          <NuxtLink class="site-navigation__home" to="/" aria-label="Accueil" title="Accueil">
+          <NuxtLink class="site-navigation__home" to="/" aria-label="Accueil" title="Accueil" @click="requestHomeReset">
             <svg aria-hidden="true" viewBox="0 0 24 24">
               <path d="M3 11.2 12 4l9 7.2" />
               <path d="M5.5 10.7V20h4.8v-5.4h3.4V20h4.8v-9.3" />
@@ -170,6 +175,9 @@ a {
 }
 
 .site-header {
+  position: sticky;
+  z-index: 100;
+  top: 0;
   color: white;
   background: #344758;
   box-shadow: 0 2px 10px rgb(26 42 56 / 18%);

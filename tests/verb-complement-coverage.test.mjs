@@ -149,6 +149,20 @@ describe('couverture exhaustive des compléments verbaux', { skip: !configured }
     assert.deepEqual(invalid, [])
   })
 
+  it('permet de contextualiser tous les COD antéposés au subjonctif', async () => {
+    const [rows] = await database.execute(`
+      SELECT c.id, c.texte_antepose, c.genre, c.nombre
+      FROM complements_verbaux c
+      INNER JOIN constructions_verbales cv ON cv.id=c.construction_id
+      WHERE c.actif=1 AND c.statut_validation='valide'
+        AND cv.actif=1 AND cv.statut_validation='valide' AND cv.fonction_objet='cod'
+        AND c.texte_antepose IS NOT NULL AND TRIM(c.texte_antepose)<>''
+    `)
+    const supportedDeterminer = /^(?:l['’]|le |la |les |un |une |des |ce |cet |cette |ces )/iu
+    assert.deepEqual(rows.filter(row => !row.genre || !row.nombre
+      || !supportedDeterminer.test(row.texte_antepose.trim())), [])
+  })
+
   it('emploie correctement les déterminants devant une voyelle ou un h muet', async () => {
     const [rows] = await database.execute(`
       SELECT id, texte FROM complements_verbaux

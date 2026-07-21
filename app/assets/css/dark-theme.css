@@ -488,7 +488,9 @@
   .verb-editor__classification h2, .verb-editor__classification dd,
   .verb-editor__semantic-fields legend, .verb-editor__semantic-fields label,
   .verb-editor__boolean-fields label, .verb-editor__complements article header,
-  .verb-editor__complement-add label, .verb-editor__non-finite article h3,
+  .verb-editor__complement-add label, .verb-editor__construction-settings label,
+  .verb-editor__nature-field, .verb-editor__new-coi-settings label,
+  .verb-editor__non-finite article h3,
   .verb-editor__grid-heading h2, .verb-editor__mode-heading,
   .tense-card h3, .tense-card tbody th
 ) { color: #cbe4eb; }
@@ -496,7 +498,8 @@
 :root[data-theme='dark'] :is(
   .verb-editor__classification .admin-muted, .verb-editor__definition small,
   .verb-editor__complements article header span, .verb-editor__complements article header small,
-  .verb-editor__complement-chip small, .verb-editor__mode-heading small,
+  .verb-editor__complement-chip small, .verb-editor__construction-settings small,
+  .verb-editor__complement-preview, .verb-editor__mode-heading small,
   .tense-card thead th
 ) { color: #a8bbc2; }
 
@@ -527,10 +530,25 @@
 }
 :root[data-theme='dark'] .verb-editor__state { color: #a7dfbe; background: #203b2c; }
 :root[data-theme='dark'] .verb-editor__state.is-dirty { color: #f0c985; background: #40331f; }
-:root[data-theme='dark'] .verb-editor__grammar-fields select {
+:root[data-theme='dark'] :is(.verb-editor__grammar-fields select, .verb-editor__new-coi-settings select) {
   color: #dce7e9 !important;
   background: #142226 !important;
   border-color: #4a626c !important;
+}
+
+:root[data-theme='dark'] .verb-editor__complement-preview strong { color: #a9dce7; }
+
+:root[data-theme='dark'] .verb-editor__complement-grammar button {
+  color: #b6d1d7;
+  background: #203a42;
+  border-color: #496973;
+}
+
+:root[data-theme='dark'] .verb-editor__complement-grammar button:hover,
+:root[data-theme='dark'] .verb-editor__complement-grammar button:focus-visible {
+  color: #e4f2f4;
+  background: #2a4b55;
+  border-color: #77aab7;
 }
 
 @media (prefers-reduced-motion: reduce) {

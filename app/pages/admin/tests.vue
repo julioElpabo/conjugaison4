@@ -28,10 +28,12 @@ interface ConjugationScenario {
 interface TestResultGroup {
   title: string
   description: string
+  category: string
   kind: 'general' | 'conjugation'
   passed: boolean
   cases: Array<{ title: string, passed: boolean, skipped: boolean }>
 }
+interface TestSuiteResult { title: string, passed: boolean, files: number, tests: number, failed: number }
 interface CoachCredibilityCheck { id: string, label: string, passed: boolean, expected: string, actual: string }
 interface CoachCredibilityReport {
   coachId: number
@@ -48,6 +50,7 @@ interface TestRun {
   durationMs: number
   files: string[]
   summary: { tests: number, suites: number, passed: number, failed: number, skipped: number }
+  suiteResults: TestSuiteResult[]
   groups: TestResultGroup[]
   conjugationScenarios: ConjugationScenario[]
   coachCredibility: CoachCredibilityReport[]
@@ -116,6 +119,17 @@ const scenariosByMode = computed(() => {
     .map(([mode, scenarios]) => ({ mode, scenarios }))
 })
 const generalResultGroups = computed(() => result.value?.groups.filter(group => group.kind === 'general') || [])
+const resultSuites = computed(() => (result.value?.suiteResults || []).map((suite, index) => ({
+  ...suite,
+  id: resultSuiteId(index),
+  groups: generalResultGroups.value.filter(group => group.category === suite.title),
+})))
+const passedResultSuites = computed(() => resultSuites.value.filter(suite => suite.passed))
+const failedResultSuites = computed(() => resultSuites.value.filter(suite => !suite.passed))
+
+function resultSuiteId(index: number) {
+  return `test-results-suite-${index + 1}`
+}
 
 const assertionLabels: Record<ConjugationAssertion['property'], string> = {
   titre: 'Infinitif',
@@ -203,6 +217,21 @@ watch(user, (current) => {
           </button>
         </header>
 
+        <nav v-if="result && !running" class="admin-tests__summary" aria-label="Résumé de la dernière exécution">
+          <section v-if="passedResultSuites.length" class="is-passed">
+            <strong><span aria-hidden="true">✓</span> Suites réussies</strong>
+            <div>
+              <a v-for="suite in passedResultSuites" :key="suite.id" :href="`#${suite.id}`">{{ suite.title }}</a>
+            </div>
+          </section>
+          <section v-if="failedResultSuites.length" class="is-failed">
+            <strong><span aria-hidden="true">×</span> Suites échouées</strong>
+            <div>
+              <a v-for="suite in failedResultSuites" :key="suite.id" :href="`#${suite.id}`">{{ suite.title }}</a>
+            </div>
+          </section>
+        </nav>
+
         <p v-if="error" class="admin-notice admin-notice--error" role="alert">{{ error }}</p>
 
         <section class="admin-tests__selection admin-card" aria-labelledby="test-selection-title">
@@ -257,20 +286,23 @@ watch(user, (current) => {
               <p class="admin-eyebrow">Détail des tests</p>
               <h3>Ce qui a été vérifié</h3>
             </header>
-            <details v-for="group in generalResultGroups" :key="group.title" :open="!group.passed">
-              <summary>
-                <span :class="['postman-status', group.passed ? 'is-passed' : 'is-failed']" aria-hidden="true">{{ group.passed ? '✓' : '×' }}</span>
-                <span><strong>{{ group.title }}</strong><small>{{ group.description }}</small></span>
-                <b>{{ group.cases.filter(testCase => testCase.passed).length }}/{{ group.cases.length }}</b>
-              </summary>
-              <ul>
-                <li v-for="testCase in group.cases" :key="testCase.title">
-                  <span :class="['postman-status', testCase.passed ? 'is-passed' : 'is-failed']" aria-hidden="true">{{ testCase.passed ? '✓' : '×' }}</span>
-                  <span>{{ testCase.title }}</span>
-                  <small v-if="testCase.skipped">Ignoré</small>
-                </li>
-              </ul>
-            </details>
+            <section v-for="suite in resultSuites" :id="suite.id" :key="suite.id" class="test-groups__suite">
+              <h4>{{ suite.title }}</h4>
+              <details v-for="group in suite.groups" :key="group.title" :open="!group.passed">
+                <summary>
+                  <span :class="['postman-status', group.passed ? 'is-passed' : 'is-failed']" aria-hidden="true">{{ group.passed ? '✓' : '×' }}</span>
+                  <span><strong>{{ group.title }}</strong><small>{{ group.description }}</small></span>
+                  <b>{{ group.cases.filter(testCase => testCase.passed).length }}/{{ group.cases.length }}</b>
+                </summary>
+                <ul>
+                  <li v-for="testCase in group.cases" :key="testCase.title">
+                    <span :class="['postman-status', testCase.passed ? 'is-passed' : 'is-failed']" aria-hidden="true">{{ testCase.passed ? '✓' : '×' }}</span>
+                    <span>{{ testCase.title }}</span>
+                    <small v-if="testCase.skipped">Ignoré</small>
+                  </li>
+                </ul>
+              </details>
+            </section>
           </div>
 
           <section v-if="result.coachCredibility.length" class="credibility-report" aria-labelledby="credibility-title">
@@ -295,7 +327,7 @@ watch(user, (current) => {
             </div>
           </section>
 
-          <div v-if="result.conjugationScenarios.length" class="postman-report">
+          <div v-if="result.conjugationScenarios.length" id="test-results-conjugation" class="postman-report">
             <header class="postman-report__header">
               <div>
                 <p class="admin-eyebrow">Collection Postman</p>
@@ -404,6 +436,15 @@ watch(user, (current) => {
 .admin-tests { display: grid; width: 100%; max-width: 100%; min-width: 0; gap: 24px; }
 .admin-tests .admin-section-heading { align-items: center; }
 .admin-tests .admin-section-heading p { max-width: 720px; margin: 7px 0 0; }
+.admin-tests .admin-section-heading > .admin-button { flex: 0 0 auto; white-space: nowrap; }
+.admin-tests__summary { display: grid; width: min(900px, 100%); margin-top: 14px; gap: 7px; }
+.admin-tests__summary section { display: flex; min-width: 0; align-items: center; flex-wrap: wrap; gap: 8px 12px; }
+.admin-tests__summary section > strong { display: flex; align-items: center; gap: 7px; color: var(--admin-navy); font-size: .86rem; }
+.admin-tests__summary section > strong span { display: inline-grid; width: 21px; height: 21px; flex: 0 0 21px; place-items: center; color: white; background: var(--admin-green); border-radius: 50%; line-height: 1; }
+.admin-tests__summary section.is-failed > strong span { background: var(--admin-red); }
+.admin-tests__summary section > div { display: flex; min-width: 0; flex-wrap: wrap; gap: 6px; }
+.admin-tests__summary a { display: inline-flex; min-width: 0; padding: 4px 8px; align-items: center; color: #24546a; background: white; border: 1px solid var(--admin-border); border-radius: 999px; font-size: .75rem; font-weight: 800; line-height: 1.2; text-decoration: none; }
+.admin-tests__summary a:hover, .admin-tests__summary a:focus-visible { color: var(--admin-navy); border-color: var(--admin-cyan); background: #edf8fb; }
 .admin-tests__selection, .admin-tests__result { width: 100%; max-width: 100%; min-width: 0; padding: clamp(18px, 3vw, 28px); box-shadow: none; }
 .admin-tests__selection-heading, .admin-tests__result > header { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
 .admin-tests h2, .admin-tests__selection-heading p { margin: 0; }
@@ -433,7 +474,12 @@ watch(user, (current) => {
 .test-groups { display: grid; margin: 24px 0; gap: 8px; }
 .test-groups > header { margin-bottom: 5px; }
 .test-groups > header h3 { margin: 2px 0 0; color: var(--admin-navy); }
+.test-groups__suite { display: grid; gap: 8px; scroll-margin-top: 110px; }
+.test-groups__suite + .test-groups__suite { margin-top: 12px; }
+.test-groups__suite > h4 { margin: 0 0 2px; color: var(--admin-navy); font-size: .86rem; letter-spacing: .04em; text-transform: uppercase; }
 .test-groups details { overflow: hidden; border: 1px solid var(--admin-border); border-radius: 9px; }
+.postman-report { scroll-margin-top: 110px; }
+.test-groups__suite:target, .postman-report:target { outline: 3px solid color-mix(in srgb, var(--admin-cyan) 55%, transparent); outline-offset: 5px; border-radius: 4px; }
 .test-groups summary { display: grid; padding: 12px 14px; grid-template-columns: 24px 1fr auto; align-items: center; gap: 10px; background: #f7f9fa; list-style: none; }
 .test-groups summary::-webkit-details-marker { display: none; }
 .test-groups summary > span:nth-child(2) { display: grid; }
@@ -508,4 +554,9 @@ watch(user, (current) => {
 .postman-values code.is-match { color: #12643a; background: #dff4e9; box-shadow: inset 0 0 0 1px #8dceb0; }
 @media (max-width: 900px) { .postman-report__workspace { grid-template-columns: 1fr; } .postman-report__scenarios { max-height: 280px; border-right: 0; border-bottom: 1px solid var(--admin-border); } }
 @media (max-width: 700px) { .admin-tests .admin-section-heading, .admin-tests__selection-heading, .postman-report__header, .repair-prompt > header { align-items: stretch; flex-direction: column; } .admin-tests__list { grid-template-columns: 1fr; } .admin-tests__result dl, .postman-report__assertions dl { grid-template-columns: 1fr; } .postman-report__filters { overflow-x: auto; } }
+:global(:root[data-theme='dark']) .admin-tests__summary section > strong { color: #d8e7ea; }
+:global(:root[data-theme='dark']) .test-groups__suite > h4 { color: #bcdce4; }
+:global(:root[data-theme='dark']) .admin-tests__summary a { color: #b9dce5; background: #17272c; border-color: #49616a; }
+:global(:root[data-theme='dark']) .admin-tests__summary a:hover,
+:global(:root[data-theme='dark']) .admin-tests__summary a:focus-visible { color: #d9f1f5; background: #244049; border-color: #5a9cac; }
 </style>

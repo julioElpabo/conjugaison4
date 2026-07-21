@@ -290,7 +290,7 @@ function previewDiagnostic(state: PreviewState) {
     calculatedVariables: values,
     renderedHelp: {
       header: {
-        kicker: `Aide ciblée · question ${state.id}`,
+        kicker: 'Aide',
         title: renderCoachHelpContent('{helpTitle}', values),
         descriptionHtml: '',
       },

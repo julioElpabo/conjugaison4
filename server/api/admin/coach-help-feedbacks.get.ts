@@ -3,6 +3,13 @@ import type { RowDataPacket } from 'mysql2/promise'
 interface FeedbackRow extends RowDataPacket {
   id: number
   feedbackType: 'useful' | 'unclear' | 'error' | 'remark'
+  origin: 'user' | 'automatic'
+  errorCode: string | null
+  severity: 'warning' | 'error' | null
+  fingerprint: string | null
+  occurrenceCount: number
+  firstSeenAt: Date | string | null
+  lastSeenAt: Date | string | null
   comment: string | null
   sessionId: string | null
   exerciseRunId: string | null
@@ -49,11 +56,20 @@ function parseJson(value: string | null) {
 export default defineEventHandler(async (event) => {
   requireAdministrator(event)
   const database = useDatabase()
-  const limit = Math.min(500, Math.max(1, Number.parseInt(String(getQuery(event).limit || '250'), 10) || 250))
+  const query = getQuery(event)
+  const limit = Math.min(500, Math.max(1, Number.parseInt(String(query.limit || '250'), 10) || 250))
+  const origin = query.origin === 'automatic' ? 'automatic' : 'user'
   const [rows] = await database.execute<FeedbackRow[]>(`
     SELECT
       id,
       feedback_type AS feedbackType,
+      origin,
+      error_code AS errorCode,
+      severity,
+      fingerprint,
+      occurrence_count AS occurrenceCount,
+      first_seen_at AS firstSeenAt,
+      last_seen_at AS lastSeenAt,
       comment,
       session_id AS sessionId,
       exercise_run_id AS exerciseRunId,
@@ -86,14 +102,22 @@ export default defineEventHandler(async (event) => {
       deleted_at AS deletedAt,
       created_at AS createdAt
     FROM coach_help_feedback
+    WHERE origin=?
     ORDER BY created_at ASC, id ASC
     LIMIT ${limit}
-  `)
+  `, [origin])
 
   return {
     feedbacks: rows.map(row => ({
       id: Number(row.id),
       feedbackType: row.feedbackType,
+      origin: row.origin,
+      errorCode: row.errorCode,
+      severity: row.severity,
+      fingerprint: row.fingerprint,
+      occurrenceCount: Number(row.occurrenceCount || 1),
+      firstSeenAt: row.firstSeenAt,
+      lastSeenAt: row.lastSeenAt,
       comment: row.comment,
       sessionId: row.sessionId,
       exerciseRunId: row.exerciseRunId,

@@ -153,6 +153,7 @@ function agreedParticiple(participle: string, gender?: string | null, number?: s
 
 function applyAnteposedCodAgreement(form: string, row: ConjugationSourceRow) {
   if (row.complement_position !== 'before'
+      || row.complement_function === 'coi'
       || !row.is_compound
       || normalized(row.auxiliaire) !== 'avoir'
       || !row.participe_passe
@@ -179,21 +180,68 @@ function splitAnteposedCodComplement(complement: string, relativePronoun?: strin
     : { antecedent: complement.trim(), postposed: '' }
 }
 
+function anteposedComplementGrammar(
+  antecedent: string,
+  relativePronoun?: string | null,
+  gender?: string | null,
+  number?: string | null,
+) {
+  const normalizedGender = normalized(gender || '').normalize('NFD').replace(/\p{Diacritic}/gu, '')
+  const normalizedNumber = normalized(number || '')
+  if ((normalizedGender === 'masculin' || normalizedGender === 'feminin')
+      && (normalizedNumber === 'singulier' || normalizedNumber === 'pluriel')) {
+    return { gender: normalizedGender, number: normalizedNumber }
+  }
+
+  const relative = normalized(relativePronoun || '').normalize('NFD').replace(/\p{Diacritic}/gu, '')
+  if (['auxquelles', 'desquelles'].includes(relative)) return { gender: 'feminin', number: 'pluriel' }
+  if (['auxquels', 'desquels'].includes(relative)) return { gender: 'masculin', number: 'pluriel' }
+  if (['a laquelle', 'de laquelle'].includes(relative)) return { gender: 'feminin', number: 'singulier' }
+  if (['auquel', 'duquel'].includes(relative)) return { gender: 'masculin', number: 'singulier' }
+
+  const determiner = normalized(antecedent).match(/^(l['’]|le(?=\s)|la(?=\s)|les(?=\s)|un(?=\s)|une(?=\s)|des(?=\s)|ce(?=\s)|cet(?=\s)|cette(?=\s)|ces(?=\s))/u)?.[1]
+  if (['les', 'des', 'ces'].includes(determiner || '')) return { gender: 'masculin', number: 'pluriel' }
+  if (['la', 'une', 'cette'].includes(determiner || '')) return { gender: 'feminin', number: 'singulier' }
+  return { gender: 'masculin', number: 'singulier' }
+}
+
+function subjunctiveRelativeAntecedent(
+  antecedent: string,
+  relativePronoun?: string | null,
+  gender?: string | null,
+  number?: string | null,
+) {
+  const grammar = anteposedComplementGrammar(antecedent, relativePronoun, gender, number)
+  const nounPhrase = antecedent.trim().replace(
+    /^(?:l['’]|le\s+|la\s+|les\s+|un\s+|une\s+|des\s+|ce\s+|cet\s+|cette\s+|ces\s+)/iu,
+    '',
+  )
+  const plural = grammar.number === 'pluriel'
+  const feminine = grammar.gender === 'feminin'
+  const article = plural ? 'les' : feminine ? 'la' : 'le'
+  const only = plural ? (feminine ? 'seules' : 'seuls') : (feminine ? 'seule' : 'seul')
+  return `${plural ? 'Ce sont' : "C'est"} ${article} ${only} ${nounPhrase}`
+}
+
 function withAnteposedComplement(
   answer: string,
   pronoun: string,
   mode: string,
   complement: string,
   relativePronoun?: string | null,
+  gender?: string | null,
+  number?: string | null,
 ) {
   const { antecedent, postposed } = splitAnteposedCodComplement(complement, relativePronoun)
-  if (relativePronoun) {
-    const clause = normalized(mode) === 'subjonctif' ? withoutSubjunctiveLink(answer) : answer
-    return `${antecedent} ${relativePronoun} ${clause}`
+  if (normalized(mode) === 'subjonctif') {
+    const framedAntecedent = subjunctiveRelativeAntecedent(antecedent, relativePronoun, gender, number)
+    const clause = withoutSubjunctiveLink(answer)
+    return [framedAntecedent, relativePronoun || 'que', clause, postposed].filter(Boolean).join(' ')
   }
-  const clause = normalized(mode) === 'subjonctif'
-    ? answer
-    : startsWithVowel(pronoun) ? `qu'${answer}` : `que ${answer}`
+  if (relativePronoun) {
+    return `${antecedent} ${relativePronoun} ${answer}`
+  }
+  const clause = startsWithVowel(pronoun) ? `qu'${answer}` : `que ${answer}`
   return [antecedent, clause, postposed].filter(Boolean).join(' ')
 }
 
@@ -252,7 +300,7 @@ function answerVariants(row: ConjugationSourceRow, pronoun: string) {
         answers.push(withPronoun(pronoun, agreedForm, row.infinitif))
       }
       if (row.complement_position === 'before' && row.complement_anteposed) {
-        answers.push(withAnteposedComplement(canonical, pronoun, row.mode_name, row.complement_anteposed, row.complement_relative_pronoun))
+        answers.push(withAnteposedComplement(canonical, pronoun, row.mode_name, row.complement_anteposed, row.complement_relative_pronoun, row.complement_gender, row.complement_number))
       }
     }
   }
@@ -291,17 +339,19 @@ export function formatConjugationQuestion(
     .map(form => applyAnteposedCodAgreement(form, row))
     .map(form => formatAnswer(pronoun, form, row.mode_name, row.infinitif))
   const displayedCorrections = row.complement_position === 'before' && row.complement_anteposed
-    ? correctedForms.map(answer => withAnteposedComplement(answer, pronoun, row.mode_name, row.complement_anteposed!, row.complement_relative_pronoun))
+    ? correctedForms.map(answer => withAnteposedComplement(answer, pronoun, row.mode_name, row.complement_anteposed!, row.complement_relative_pronoun, row.complement_gender, row.complement_number))
     : row.complement_phrase
       ? correctedForms.map(answer => withComplement(answer, row.complement_phrase!))
     : correctedForms
   const prompt = row.complement_position === 'before' && row.complement_anteposed
-    ? row.complement_relative_pronoun
-      ? `${anteposedComplement!.antecedent} ${row.complement_relative_pronoun} ${relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif)} … | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
-      : `${anteposedComplement!.antecedent} ${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif, 'before')} …${anteposedComplement!.postposed ? ` ${anteposedComplement!.postposed}` : ''} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
+    ? normalized(row.mode_name) === 'subjonctif'
+      ? `${subjunctiveRelativeAntecedent(anteposedComplement!.antecedent, row.complement_relative_pronoun, row.complement_gender, row.complement_number)} ${row.complement_relative_pronoun || 'que'} ${relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif)} …${anteposedComplement!.postposed ? ` ${anteposedComplement!.postposed}` : ''} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
+      : row.complement_relative_pronoun
+        ? `${anteposedComplement!.antecedent} ${row.complement_relative_pronoun} ${relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif)} … | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
+        : `${anteposedComplement!.antecedent} ${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif, 'before')} …${anteposedComplement!.postposed ? ` ${anteposedComplement!.postposed}` : ''} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
     : row.complement_phrase
     ? `${normalized(row.mode_name) === 'impératif' ? '' : `${pronoun} `}… ${row.complement_phrase} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
-    : `${pronoun} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
+    : `${normalized(row.mode_name) === 'impératif' ? '' : `${pronoun} | `}${row.infinitif} | ${row.temps_name} (${row.mode_name})`
   const displayedComplement = row.complement_position === 'before'
     ? anteposedComplement?.antecedent
     : row.complement_phrase

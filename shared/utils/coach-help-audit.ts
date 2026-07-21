@@ -16,6 +16,42 @@ export interface CoachHelpAuditResult {
   issues: CoachHelpAuditIssue[]
 }
 
+function reportedAuditErrors(value: unknown): CoachHelpAuditIssue[] {
+  if (!value || typeof value !== 'object') return []
+  const issues = (value as { issues?: unknown }).issues
+  if (!Array.isArray(issues)) return []
+  return issues.flatMap((candidate) => {
+    if (!candidate || typeof candidate !== 'object') return []
+    const item = candidate as Record<string, unknown>
+    if (item.severity !== 'error' || typeof item.code !== 'string') return []
+    return [{
+      code: item.code.slice(0, 120),
+      severity: 'error' as const,
+      title: typeof item.title === 'string' ? item.title.slice(0, 200) : 'Erreur détectée dans le navigateur',
+      detail: typeof item.detail === 'string' ? item.detail.slice(0, 500) : 'Le navigateur a remplacé l’aide par son affichage sécurisé.',
+    }]
+  })
+}
+
+/** Garantit qu’un affichage sécurisé côté navigateur laisse une trace, même si les audits client et serveur divergent. */
+export function automaticHelpErrorsForRecording(
+  serverAudit: CoachHelpAuditResult,
+  clientAudit?: unknown,
+): CoachHelpAuditIssue[] {
+  const serverErrors = serverAudit.issues.filter(item => item.severity === 'error')
+  if (serverErrors.length) return serverErrors
+
+  const clientErrors = reportedAuditErrors(clientAudit)
+  if (!clientErrors.length) return []
+  const codes = [...new Set(clientErrors.map(item => item.code))].join(', ')
+  return [issue(
+    'client-server-audit-mismatch',
+    'error',
+    'Audits client et serveur différents',
+    `Le navigateur a affiché l’aide sécurisée pour « ${codes} », mais le serveur n’a pas reproduit cette erreur.`,
+  )]
+}
+
 function normalized(value?: string | null) {
   return (value || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').replace(/[’]/gu, "'").replace(/\s+/gu, ' ').trim().toLocaleLowerCase('fr')
 }
@@ -47,6 +83,23 @@ function conjugatedCore(value?: string | null) {
     .trim()
 }
 
+function expectedCompoundCore(question: ExerciseQuestion, verb: Verb) {
+  const source = question.conjugaison1?.trim() || ''
+  const baseParticiple = verb.participePasse?.trim() || ''
+  const expectedParticiple = question.agreementReminder?.participle?.trim() || ''
+  if (!source || !baseParticiple || !expectedParticiple) return ''
+  const escaped = baseParticiple.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')
+  return source.replace(new RegExp(`${escaped}(?:e|s|es)?(?=$|[\\s.,!?;:’'])`, 'iu'), expectedParticiple)
+}
+
+function deniesAnteposedCodAgreement(value: string) {
+  const statement = String.raw`[^.!?]{0,160}`
+  const denial = String.raw`(?:ne s['’]accorde pas|pas d['’]accord)`
+  const anteposedCod = String.raw`cod[^.!?]{0,90}place avant`
+  return new RegExp(`${anteposedCod}${statement}${denial}`, 'u').test(value)
+    || new RegExp(`${denial}${statement}${anteposedCod}`, 'u').test(value)
+}
+
 function blockContents(blocks: readonly CoachHelpBlock[]): string {
   return blocks.map(block => `${block.isActive ? block.content : ''}\n${blockContents(block.children || [])}`).join('\n')
 }
@@ -66,6 +119,7 @@ export function auditRenderedCoachHelp(input: {
   const issues: CoachHelpAuditIssue[] = []
   const configuredContent = blockContents(blocks)
   const visibleText = decodeHtmlEntities(renderedHtml).replace(/<[^>]+>/gu, ' ').replace(/\s+/gu, ' ').trim()
+  const normalizedVisibleText = normalized(visibleText)
   const usesContextualBase = configuredContent.includes('{contextualBaseHelp}')
   const usesEndings = configuredContent.includes('{endingsHelp}') || usesContextualBase
   const usesDefinition = configuredContent.includes('{definitionHelp}') || configuredContent.includes('{definition}')
@@ -132,6 +186,28 @@ export function auditRenderedCoachHelp(input: {
   const target = conjugatedCore(question.conjugaison1)
   if (target && usesContextualBase && !renderedContainsForm(renderedHtml, target)) {
     issues.push(issue('target-form-missing', 'warning', 'Forme attendue absente', `La forme « ${target} » n’apparaît pas dans l’explication automatique.`))
+  }
+
+  if (question.agreementReminder) {
+    const officialForm = expectedCompoundCore(question, verb)
+    if (officialForm && !renderedContainsForm(renderedHtml, officialForm)) {
+      issues.push(issue(
+        'official-compound-answer-missing',
+        'error',
+        'Réponse officielle absente de l’aide',
+        `L’aide n’affiche pas la forme officielle « ${officialForm} » alors que l’accord attendu porte sur « ${question.agreementReminder.participle} ».`,
+      ))
+    }
+    if (question.agreementReminder.kind === 'cod-before') {
+      if (deniesAnteposedCodAgreement(normalizedVisibleText)) {
+        issues.push(issue(
+          'cod-before-agreement-contradiction',
+          'error',
+          'Règle d’accord contradictoire',
+          'Le COD est placé avant le verbe, mais l’aide affirme qu’il ne commande pas l’accord.',
+        ))
+      }
+    }
   }
 
   const status = issues.some(item => item.severity === 'error')

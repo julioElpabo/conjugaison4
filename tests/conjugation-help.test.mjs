@@ -808,6 +808,20 @@ test('le bloc composé emploie être quand la forme réelle le demande', () => {
   assert.match(html, /Conjugue le verbe auxiliaire <strong>être<\/strong> au présent de l’indicatif avec <strong>elle<\/strong>/)
 })
 
+test('le bloc composé affiche la réponse officielle accordée avec un COD placé avant', () => {
+  const html = buildConjugationBaseHtml(question({
+    infinitif: 'manger', temps: 'passé composé', pronom: 'elle', personId: 3,
+    isCompound: true, conjugaison1: 'a mangé', reponses: ['a mangée'], reponsesPourCorrige: ['elle a mangée'],
+    agreementReminder: {
+      kind: 'cod-before', infinitive: 'manger', complement: 'la pomme', participle: 'mangée',
+      gender: 'feminin', number: 'singulier',
+    },
+  }), verb({ infinitif: 'manger', participePasse: 'mangé', auxiliaire: 'avoir', particularites: [] }), undefined, 'cif-falc')
+
+  assert.match(html, /<strong>a mangée<\/strong>/)
+  assert.doesNotMatch(html, /<strong>a mangé<\/strong><\/mark><\/p><\/blockquote>/)
+})
+
 test('l’accord avec vous aux temps composés ne suppose pas un pluriel automatique', () => {
   const html = buildConjugationBaseHtml(question({
     infinitif: 'naître', mode: 'impératif', temps: 'passé', pronom: 'vous', personId: 8,

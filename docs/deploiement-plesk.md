@@ -92,7 +92,13 @@ courriels de 2025–2026, choisir :
 data:migrate-mail-requests:apply
 ```
 
-Le script utilise les variables `NUXT_DB_*` configurées dans Plesk. Il est
-transactionnel et réexécutable : une erreur annule la migration, et une seconde
-exécution valide les données déjà présentes. Terminer par `build`, puis cliquer
-sur **Restart App**.
+Le script utilise les variables `NUXT_DB_*` configurées dans Plesk. Selon la
+version de Node.js Toolkit, ces variables peuvent être réservées au processus
+Passenger et ne pas être transmises au bouton **Run script**. Les migrations
+requises au démarrage de l’application doivent donc aussi être idempotentes et
+être exécutées depuis un plugin serveur, où la configuration de l’application
+est disponible.
+
+La migration est transactionnelle et réexécutable : une erreur annule la
+migration, et une seconde exécution valide les données déjà présentes. Terminer
+par `build`, puis cliquer sur **Restart App**.

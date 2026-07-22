@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { ui, uiLabel, interfaceLocale } = useLanguagePreferences()
 interface SummaryItem {
   index: number
   status: 'correct' | 'incorrect'
@@ -31,12 +32,12 @@ let previewGeneration = 0
 
 useDialogFocus(dialog, () => emit('close'))
 
-const formattedDate = new Intl.DateTimeFormat('fr-CH', {
+const formattedDate = computed(() => new Intl.DateTimeFormat(`${interfaceLocale.value}-CH`, {
   weekday: 'long',
   day: 'numeric',
   month: 'long',
   year: 'numeric',
-}).format(new Date()).replace(',', '')
+}).format(new Date()).replace(',', ''))
 
 function pdfSafe(value: unknown) {
   return String(value ?? '')
@@ -67,6 +68,7 @@ function groupedTenses() {
       return (leftIndex < 0 ? order.length : leftIndex) - (rightIndex < 0 ? order.length : rightIndex)
         || left.localeCompare(right, 'fr')
     })
+    .map(([mode, names]) => [uiLabel(mode), names.map(uiLabel)] as const)
 }
 
 async function buildPdf() {
@@ -90,9 +92,9 @@ async function buildPdf() {
     pdf.setTextColor(35, 35, 35)
     pdf.setFont('helvetica', 'normal')
     pdf.setFontSize(8.5)
-    pdf.text('Prénom : ..................................................', left, 14)
-    pdf.text('Nom : ..................................................', 78, 14)
-    pdf.text(pdfSafe(formattedDate), right, 14, { align: 'right' })
+    pdf.text(`${ui('Prénom')} : ..................................................`, left, 14)
+    pdf.text(`${ui('Nom')} : ..................................................`, 78, 14)
+    pdf.text(pdfSafe(formattedDate.value), right, 14, { align: 'right' })
     pdf.setDrawColor(165, 165, 165)
     pdf.setLineWidth(.25)
     pdf.line(left, 19, right, 19)
@@ -100,7 +102,7 @@ async function buildPdf() {
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(18)
     pdf.setTextColor(20, 62, 78)
-    pdf.text('BILAN DU DÉFI', pageWidth / 2, 29, { align: 'center' })
+    pdf.text(ui('BILAN DU DÉFI'), pageWidth / 2, 29, { align: 'center' })
     pdf.setFontSize(9)
     pdf.setTextColor(65, 65, 65)
     pdf.text(`${props.correctCount} / ${props.items.length} réponses justes  ·  ${props.score} %`, pageWidth / 2, 36, { align: 'center' })
@@ -133,7 +135,7 @@ async function buildPdf() {
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(11)
     pdf.setTextColor(20, 62, 78)
-    pdf.text('BILAN DU DÉFI — SUITE', left, 16)
+    pdf.text(ui('BILAN DU DÉFI — SUITE'), left, 16)
     pdf.setDrawColor(165, 165, 165)
     pdf.setLineWidth(.25)
     pdf.line(left, 20, right, 20)
@@ -166,8 +168,8 @@ async function buildPdf() {
     pdf.setFontSize(6.7)
     pdf.setTextColor(95, 103, 106)
     pdf.text('QUESTION', questionX, y)
-    pdf.text('RÉPONSE DONNÉE', learnerX, y)
-    pdf.text('BONNE RÉPONSE', expectedX, y)
+    pdf.text(ui('RÉPONSE DONNÉE'), learnerX, y)
+    pdf.text(ui('BONNE RÉPONSE'), expectedX, y)
     pdf.setDrawColor(155, 165, 168)
     pdf.setLineWidth(.3)
     pdf.line(left, y + 2.5, right, y + 2.5)
@@ -231,7 +233,7 @@ async function buildPdf() {
     pdf.setFont('helvetica', 'normal')
     pdf.setFontSize(7.5)
     pdf.setTextColor(110, 110, 110)
-    pdf.text('TATITOTU · Exercices de conjugaison française', left, pageHeight - 8)
+    pdf.text(`TATITOTU · ${ui('Exercices de conjugaison française')}`, left, pageHeight - 8)
     pdf.text('tatitotu.ch', pageWidth / 2, pageHeight - 8, { align: 'center' })
     pdf.text(`${page} / ${totalPages}`, right, pageHeight - 8, { align: 'right' })
   }
@@ -257,8 +259,8 @@ async function refreshPreview() {
     pdfPreviewUrl.value = URL.createObjectURL(blob)
   } catch (error) {
     if (generation !== previewGeneration) return
-    console.error('Impossible de générer le bilan PDF.', error)
-    previewError.value = 'L’aperçu du bilan n’a pas pu être créé.'
+    console.error(ui('Impossible de générer le bilan PDF.'), error)
+    previewError.value = ui('L’aperçu du bilan n’a pas pu être créé.')
   } finally {
     if (generation === previewGeneration) isPreviewBusy.value = false
   }
@@ -288,9 +290,9 @@ onBeforeUnmount(() => {
     <div ref="summary-print-dialog" class="summary-print-overlay" role="dialog" aria-modal="true" aria-labelledby="summary-print-title">
       <section class="summary-print-modal">
         <header class="summary-print-toolbar">
-          <h2 id="summary-print-title">Aperçu du bilan</h2>
+          <h2 id="summary-print-title">{{ ui('Aperçu du bilan') }}</h2>
           <div>
-            <button type="button" class="secondary-button" @click="emit('close')">Fermer</button>
+            <button type="button" class="secondary-button" @click="emit('close')">{{ ui('Fermer') }}</button>
             <button type="button" class="primary-button" :disabled="isPdfBusy" @click="downloadPdf">
               {{ isPdfBusy ? 'Création…' : 'PDF' }}
             </button>
@@ -301,16 +303,16 @@ onBeforeUnmount(() => {
           <iframe
             v-if="pdfPreviewUrl"
             :src="`${pdfPreviewUrl}#view=FitH&toolbar=0&navpanes=0`"
-            title="Aperçu du bilan au format PDF"
+            :title="ui('Aperçu du bilan au format PDF')"
             @load="isFrameReady = true"
           />
           <div v-if="!previewError && (isPreviewBusy || !isFrameReady)" class="summary-print-state" role="status" aria-live="polite">
             <span aria-hidden="true" />
-            <strong>Création de l’aperçu PDF…</strong>
+            <strong>{{ ui('Création de l’aperçu PDF…') }}</strong>
           </div>
           <div v-if="previewError" class="summary-print-state summary-print-state--error" role="alert">
             <strong>{{ previewError }}</strong>
-            <button type="button" class="secondary-button" @click="refreshPreview">Réessayer</button>
+            <button type="button" class="secondary-button" @click="refreshPreview">{{ ui('Réessayer') }}</button>
           </div>
         </main>
       </section>

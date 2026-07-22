@@ -1,7 +1,8 @@
 <script setup lang="ts">
+const { ui } = useLanguagePreferences()
 const { user } = useAdminAuth()
 
-useHead({ title: 'Mon compte' })
+useHead(() => ({ title: ui('Mon compte') }))
 
 const displayName = computed(() => {
   if (!user.value) {
@@ -17,9 +18,9 @@ const displayName = computed(() => {
       <div v-if="user" class="account-page">
         <header class="admin-section-heading">
           <div>
-            <p class="admin-eyebrow">Profil</p>
-            <h1>Mon compte</h1>
-            <p class="admin-muted">Informations associées à votre session administrateur.</p>
+            <p class="admin-eyebrow">{{ ui('Profil') }}</p>
+            <h1>{{ ui('Mon compte') }}</h1>
+            <p class="admin-muted">{{ ui('Informations associées à votre session administrateur.') }}</p>
           </div>
         </header>
 
@@ -30,42 +31,40 @@ const displayName = computed(() => {
 
           <div class="account-card__heading">
             <h2 id="account-identity-title">{{ displayName || user.username }}</h2>
-            <p>Administrateur</p>
+            <p>{{ ui('Administrateur') }}</p>
           </div>
 
           <dl>
             <div>
-              <dt>Prénom</dt>
+              <dt>{{ ui('Prénom') }}</dt>
               <dd>{{ user.prenom || '—' }}</dd>
             </div>
             <div>
-              <dt>Nom</dt>
+              <dt>{{ ui('Nom') }}</dt>
               <dd>{{ user.nom || '—' }}</dd>
             </div>
             <div>
-              <dt>Nom d’utilisateur</dt>
+              <dt>{{ ui('Nom d’utilisateur') }}</dt>
               <dd>{{ user.username || '—' }}</dd>
             </div>
             <div>
-              <dt>Adresse e-mail</dt>
+              <dt>{{ ui('Adresse e-mail') }}</dt>
               <dd><a :href="`mailto:${user.email}`">{{ user.email }}</a></dd>
             </div>
             <div>
-              <dt>Identifiant</dt>
+              <dt>{{ ui('Identifiant') }}</dt>
               <dd>{{ user.id }}</dd>
             </div>
             <div>
-              <dt>Niveau d’accès</dt>
-              <dd>Administration</dd>
+              <dt>{{ ui('Niveau d’accès') }}</dt>
+              <dd>{{ ui('Administration') }}</dd>
             </div>
           </dl>
         </section>
 
         <aside class="account-note">
-          <strong>Modification du profil</strong>
-          <p>
-            Cette version permet de consulter le compte. Aucune API de modification du profil ou du mot de passe n’est disponible.
-          </p>
+          <strong>{{ ui('Modification du profil') }}</strong>
+          <p> {{ ui('Cette version permet de consulter le compte. Aucune API de modification du profil ou du mot de passe n’est disponible.') }} </p>
         </aside>
       </div>
     </AdminShell>

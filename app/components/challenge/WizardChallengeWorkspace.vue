@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { ui } = useLanguagePreferences()
 import type { ChallengePreset, ComplementOption, ExerciseQuestion } from '~~/shared/types/conjugation'
 import { challengePresetGroupLabels } from '~~/shared/data/challenge-presets'
 import { legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils/complement-options'
@@ -173,7 +174,7 @@ const activePresetGroupLabel = computed(() => activePreset.value
   ? activePreset.value.groupLabel ?? challengePresetGroupLabels[activePreset.value.group] ?? activePreset.value.group
   : '')
 const activePresetTitleGroupLabel = computed(() => activePreset.value?.group === 'school'
-  ? 'Niveau scolaire suisse'
+  ? ui('Niveau scolaire suisse')
   : activePresetGroupLabel.value)
 const activePresetDisplayTitle = computed(() => activePreset.value
   ? [activePresetTitleGroupLabel.value, activePreset.value.label]
@@ -184,7 +185,7 @@ const heroTitle = computed(() => {
   if (currentStep.value === 0) return 'TATITOTU'
   if (activePreset.value) return activePresetDisplayTitle.value
   if (isPrefilledChallenge.value && challengeCode.value) return `Défi ${challengeCode.value}`
-  return 'Construire mon défi'
+  return ui('Construire mon défi')
 })
 const launchVerbPreview = computed(() => selectedVerbs.value.slice(0, 10))
 const remainingLaunchVerbs = computed(() => selectedVerbs.value.slice(10))
@@ -389,7 +390,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
 async function restoreChallenge() {
   const normalized = normalizeChallengeCode(challengeCode.value)
   if (!/^[A-Z0-9]{2}(?:-[A-Z0-9]{2}){3}$/.test(normalized)) {
-    codeError.value = 'Le code doit ressembler à AB-CD-EF-23.'
+    codeError.value = ui('Le code doit ressembler à AB-CD-EF-23.')
     return
   }
 
@@ -411,7 +412,7 @@ async function restoreChallenge() {
     currentStep.value = 4
     logUsage('challenge-load')
   } catch (error) {
-    codeError.value = getChallengeErrorMessage(error, 'Ce code ne correspond à aucun défi.')
+    codeError.value = getChallengeErrorMessage(error, ui('Ce code ne correspond à aucun défi.'))
   } finally {
     busyAction.value = null
   }
@@ -615,12 +616,12 @@ async function prepareExercise(mode: 'classic' | 'chat') {
   clearMessages()
   try {
     questions.value = await api.generateQuestions(challenge.value)
-    if (!questions.value.length) throw new Error('Aucune question ne correspond à cette sélection.')
+    if (!questions.value.length) throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     exercisePresentation.value = 'classic'
     isExerciseOpen.value = true
     logUsage('exercise')
   } catch (error) {
-    actionError.value = getChallengeErrorMessage(error, 'Impossible de préparer le questionnaire.')
+    actionError.value = getChallengeErrorMessage(error, ui('Impossible de préparer le questionnaire.'))
   } finally {
     busyAction.value = null
   }
@@ -634,12 +635,12 @@ async function launchWithCoach(coach: CoachProfile) {
   clearMessages()
   try {
     questions.value = await api.generateQuestions(challenge.value)
-    if (!questions.value.length) throw new Error('Aucune question ne correspond à cette sélection.')
+    if (!questions.value.length) throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     exercisePresentation.value = 'chat'
     isExerciseOpen.value = true
     logUsage('exercise')
   } catch (error) {
-    actionError.value = getChallengeErrorMessage(error, 'Impossible de préparer le questionnaire.')
+    actionError.value = getChallengeErrorMessage(error, ui('Impossible de préparer le questionnaire.'))
   } finally {
     busyAction.value = null
   }
@@ -647,7 +648,7 @@ async function launchWithCoach(coach: CoachProfile) {
 
 async function regenerateChatQuestions() {
   const generated = await api.generateQuestions(challenge.value)
-  if (!generated.length) throw new Error('Aucune nouvelle question ne correspond à cette sélection.')
+  if (!generated.length) throw new Error(ui('Aucune nouvelle question ne correspond à cette sélection.'))
   questions.value = generated
 }
 
@@ -657,11 +658,11 @@ async function preparePrint() {
   clearMessages()
   try {
     printQuestions.value = await api.generateQuestions(challenge.value)
-    if (!printQuestions.value.length) throw new Error('Aucune question ne correspond à cette sélection.')
+    if (!printQuestions.value.length) throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     isPrintOpen.value = true
     logUsage('print')
   } catch (error) {
-    actionError.value = getChallengeErrorMessage(error, 'Impossible de préparer la fiche à imprimer.')
+    actionError.value = getChallengeErrorMessage(error, ui('Impossible de préparer la fiche à imprimer.'))
   } finally {
     busyAction.value = null
   }
@@ -677,7 +678,7 @@ async function saveChallenge() {
     isShareOpen.value = true
     logUsage('challenge-save')
   } catch (error) {
-    actionError.value = getChallengeErrorMessage(error, 'Impossible de sauvegarder ce défi.')
+    actionError.value = getChallengeErrorMessage(error, ui('Impossible de sauvegarder ce défi.'))
   } finally {
     busyAction.value = null
   }
@@ -689,19 +690,17 @@ async function saveChallenge() {
     <div class="challenge-page wizard-page">
       <header class="wizard-hero">
         <h1 :class="{ 'wizard-hero__brand': currentStep === 0, 'wizard-hero__preset': currentStep !== 0 && isPrefilledChallenge }">{{ heroTitle }}</h1>
-        <p v-if="currentStep === 0" class="wizard-hero__subtitle">Exercices de conjugaison française, gratuits et sans publicité</p>
+        <p v-if="currentStep === 0" class="wizard-hero__subtitle">{{ ui('Exercices de conjugaison française, gratuits et sans publicité') }}</p>
       </header>
 
       <main class="wizard-shell">
       <div v-if="catalogueStatus === 'loading'" class="page-state" role="status">
-        <span class="loader" aria-hidden="true" />
-        Chargement du catalogue de conjugaison…
-      </div>
+        <span class="loader" aria-hidden="true" /> {{ ui('Chargement du catalogue de conjugaison…') }} </div>
 
       <div v-else-if="catalogueStatus === 'error'" class="page-state page-state--error" role="alert">
-        <strong>Le catalogue n’a pas pu être chargé.</strong>
+        <strong>{{ ui('Le catalogue n’a pas pu être chargé.') }}</strong>
         <span>{{ catalogueError }}</span>
-        <button class="primary-button" type="button" @click="retryCatalogue">Réessayer</button>
+        <button class="primary-button" type="button" @click="retryCatalogue">{{ ui('Réessayer') }}</button>
       </div>
 
       <template v-else>
@@ -714,30 +713,30 @@ async function saveChallenge() {
           tabindex="-1"
           aria-labelledby="wizard-title"
         >
-          <h2 id="wizard-title" class="sr-only">Composer un défi personnalisé</h2>
+          <h2 id="wizard-title" class="sr-only">{{ ui('Composer un défi personnalisé') }}</h2>
 
-          <nav v-if="currentStep !== 0" class="wizard-steps" aria-label="Étapes de création du défi">
+          <nav v-if="currentStep !== 0" class="wizard-steps" :aria-label="ui('Étapes de création du défi')">
             <button class="wizard-step-tab wizard-step-tab--verbs" :class="{ 'is-active': currentStep === 1, 'is-complete': stepStatus.verbs > 0 }" type="button" @click="goToStep(1)">
-              <span>1</span><span><strong>Verbes</strong><small>{{ stepStatus.verbs ? `${stepStatus.verbs} choisi${stepStatus.verbs > 1 ? 's' : ''}` : 'À choisir' }}</small></span>
+              <span>1</span><span><strong>{{ ui('Verbes') }}</strong><small>{{ stepStatus.verbs ? ui(stepStatus.verbs > 1 ? '{count} choisis' : '{count} choisi', { count: stepStatus.verbs }) : ui('À choisir') }}</small></span>
             </button>
             <span class="wizard-steps__line" aria-hidden="true" />
             <button class="wizard-step-tab wizard-step-tab--tenses" :class="{ 'is-active': currentStep === 2, 'is-complete': stepStatus.tenses > 0 }" type="button" :disabled="stepStatus.verbs === 0" @click="goToStep(2)">
-              <span>2</span><span><strong><span class="mobile-label-hidden">Modes et temps</span><span class="mobile-label-only">Temps</span></strong><small>{{ stepStatus.tenses ? `${stepStatus.tenses} choisi${stepStatus.tenses > 1 ? 's' : ''}` : 'À choisir' }}</small></span>
+              <span>2</span><span><strong><span class="mobile-label-hidden">{{ ui('Modes et temps') }}</span><span class="mobile-label-only">{{ ui('Temps') }}</span></strong><small>{{ stepStatus.tenses ? ui(stepStatus.tenses > 1 ? '{count} choisis' : '{count} choisi', { count: stepStatus.tenses }) : ui('À choisir') }}</small></span>
             </button>
             <span class="wizard-steps__line" aria-hidden="true" />
             <button :class="{ 'is-active': currentStep === 3, 'is-complete': currentStep === 4 }" type="button" :disabled="!isReady" @click="goToStep(3)">
-              <span>3</span><span><strong>Options</strong><small>Finaliser le défi</small></span>
+              <span>3</span><span><strong>{{ ui('Options') }}</strong><small>{{ ui('Finaliser le défi') }}</small></span>
             </button>
             <span class="wizard-steps__line" aria-hidden="true" />
             <button :class="{ 'is-active': currentStep === 4 }" type="button" :disabled="!isReady || isPreparingStep4" @click="prepareStep4">
-              <span>4</span><span><strong>Créer</strong><small>Utiliser le défi</small></span>
+              <span>4</span><span><strong>{{ ui('Créer') }}</strong><small>{{ ui('Utiliser le défi') }}</small></span>
             </button>
           </nav>
 
           <div class="wizard-content" :class="{ 'wizard-content--home': currentStep === 0 }">
             <div v-if="isPreparingStep4" class="wizard-step-preparing" role="status" aria-live="polite">
               <span class="loader wizard-step-preparing__spinner" aria-hidden="true" />
-              <strong>Préparation de ton défi…</strong>
+              <strong>{{ ui('Préparation de ton défi…') }}</strong>
             </div>
 
             <div v-else-if="currentStep === 0" class="wizard-home">
@@ -745,7 +744,7 @@ async function saveChallenge() {
                   class="code-loader"
                   :class="{ 'is-arrival-highlighted': highlightChallengeLoader }"
                   role="search"
-                  aria-label="Charger un défi avec son code"
+                  :aria-label="ui('Charger un défi avec son code')"
                   @pointerdown="highlightChallengeLoader = false"
                 >
                   <div class="code-loader__heading">
@@ -756,10 +755,10 @@ async function saveChallenge() {
                         <path d="M5 21h14" />
                       </svg>
                     </span>
-                    <div><strong>Tu as reçu un défi&nbsp;?</strong><small>Colle son code pour le reprendre immédiatement.</small></div>
+                    <div><strong>{{ ui('Tu as reçu un défi ?') }}</strong><small>{{ ui('Colle son code pour le reprendre immédiatement.') }}</small></div>
                   </div>
                   <div class="code-loader__control">
-                    <span id="wizard-challenge-code-label" class="sr-only">Code du défi</span>
+                    <span id="wizard-challenge-code-label" class="sr-only">{{ ui('Code du défi') }}</span>
                     <div
                       id="wizard-challenge-code"
                       class="code-loader__code-entry"
@@ -772,7 +771,7 @@ async function saveChallenge() {
                       @keydown.enter.prevent="restoreChallenge"
                     ></div>
                     <button class="primary-button" type="button" :disabled="catalogueStatus !== 'success' || busyAction === 'load'" @click="restoreChallenge">
-                      {{ busyAction === 'load' ? 'Chargement…' : 'Charger' }}
+                      {{ busyAction === 'load' ? ui('Chargement…') : ui('Charger') }}
                     </button>
                   </div>
                   <p v-if="codeError" class="code-loader__error" role="alert">{{ codeError }}</p>
@@ -787,9 +786,9 @@ async function saveChallenge() {
                   >
                     <span class="wizard-home__choice-icon" aria-hidden="true">★</span>
                     <div>
-                      <h2>Tu veux travailler un de nos défis&nbsp;?</h2>
+                      <h2>{{ ui('Tu veux travailler un de nos défis ?') }}</h2>
                     </div>
-                    <span class="secondary-button" aria-hidden="true">Voir</span>
+                    <span class="secondary-button" aria-hidden="true">{{ ui('Voir') }}</span>
                   </button>
                   <article
                     v-else
@@ -798,7 +797,7 @@ async function saveChallenge() {
                   >
                     <span class="wizard-home__choice-icon" aria-hidden="true">★</span>
                     <div>
-                      <h2>Tu veux travailler un de nos défis&nbsp;?</h2>
+                      <h2>{{ ui('Tu veux travailler un de nos défis ?') }}</h2>
                     </div>
                     <PresetPicker
                       class="wizard-home__inline-presets"
@@ -816,31 +815,29 @@ async function saveChallenge() {
                   <article class="wizard-home__choice wizard-home__choice--custom">
                     <span class="wizard-home__choice-icon" aria-hidden="true">✎</span>
                     <div>
-                      <h2>Tu veux construire ton propre défi&nbsp;?</h2>
-                      <p>Choisis les verbes, les modes, les temps et les options.</p>
+                      <h2>{{ ui('Tu veux construire ton propre défi ?') }}</h2>
+                      <p>{{ ui('Choisis les verbes, les modes, les temps et les options.') }}</p>
                     </div>
-                    <button class="primary-button" :class="{ 'wizard-next-pulse': !highlightChallengeLoader }" type="button" @click="startCustomChallenge">Construire un nouveau défi →</button>
+                    <button class="primary-button" :class="{ 'wizard-next-pulse': !highlightChallengeLoader }" type="button" @click="startCustomChallenge">{{ ui('Construire un nouveau défi →') }}</button>
                   </article>
                 </div>
             </div>
 
             <div v-else-if="currentStep === 1" class="wizard-step wizard-step--selection" aria-labelledby="verbs-title">
               <div class="wizard-step__actions wizard-step__actions--split">
-                <button class="secondary-button" type="button" @click="previousStep">← Accueil</button>
+                <button class="secondary-button" type="button" @click="previousStep">{{ ui('← Accueil') }}</button>
                 <div class="wizard-step__controls">
-                  <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedVerbs.length" @click="nextStep">
-                    Choisir les temps →
-                  </button>
+                  <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedVerbs.length" @click="nextStep"> {{ ui('Choisir les temps →') }} </button>
                 </div>
               </div>
               <div v-if="activePreset && !isPresetVerbEditing" class="wizard-step__intro wizard-step__intro--selection">
-                <h2 id="verbs-title">Verbes du défi</h2>
+                <h2 id="verbs-title">{{ ui('Verbes du défi') }}</h2>
               </div>
               <section v-if="activePreset && !isPresetVerbEditing" class="preset-verb-overview">
                 <header>
                   <div>
-                    <p>{{ selectedVerbs.length }} verbe{{ selectedVerbs.length > 1 ? 's' : '' }} sélectionné{{ selectedVerbs.length > 1 ? 's' : '' }}</p>
-                    <button class="preset-verb-overview__edit" type="button" @click="isPresetVerbEditing = true">Modifier la liste</button>
+                    <p>{{ selectedVerbs.length }} {{ selectedVerbs.length === 1 ? ui('verbe') : ui('verbes') }} {{ selectedVerbs.length === 1 ? ui('sélectionné') : ui('sélectionnés') }}</p>
+                    <button class="preset-verb-overview__edit" type="button" @click="isPresetVerbEditing = true">{{ ui('Modifier la liste') }}</button>
                   </div>
                 </header>
                 <ul>
@@ -849,7 +846,7 @@ async function saveChallenge() {
               </section>
               <template v-else>
                 <div class="wizard-step__intro wizard-step__intro--selection">
-                  <h2 id="verbs-title">{{ isPrefilledChallenge ? 'Verbes du défi' : 'Choisis les verbes' }}</h2>
+                  <h2 id="verbs-title">{{ isPrefilledChallenge ? ui('Verbes du défi') : ui('Choisis les verbes') }}</h2>
                 </div>
                 <VerbPicker
                   :verbs="catalogue.verbes"
@@ -860,23 +857,19 @@ async function saveChallenge() {
                 />
               </template>
               <div class="wizard-step__bottom-actions">
-                <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedVerbs.length" @click="nextStep">
-                  Choisir les temps →
-                </button>
+                <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedVerbs.length" @click="nextStep"> {{ ui('Choisir les temps →') }} </button>
               </div>
             </div>
 
             <div v-else-if="currentStep === 2" class="wizard-step wizard-step--selection" aria-labelledby="tenses-title">
               <div class="wizard-step__actions wizard-step__actions--split">
-                <button class="secondary-button" type="button" @click="previousStep">← Verbes</button>
+                <button class="secondary-button" type="button" @click="previousStep">{{ ui('← Verbes') }}</button>
                 <div class="wizard-step__controls">
-                  <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedTenses.length" @click="nextStep">
-                    Choisir les options →
-                  </button>
+                  <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedTenses.length" @click="nextStep"> {{ ui('Choisir les options →') }} </button>
                 </div>
               </div>
               <div class="wizard-step__intro wizard-step__intro--selection">
-                <h2>{{ isPrefilledChallenge ? 'Modes et temps' : 'Choisis les modes et les temps' }}</h2>
+                <h2>{{ isPrefilledChallenge ? ui('Modes et temps') : ui('Choisis les modes et les temps') }}</h2>
               </div>
               <TensePicker
                 :modes="catalogue.modes"
@@ -888,23 +881,21 @@ async function saveChallenge() {
                 @clear="markAsCustom(); clearTenses()"
               />
               <div class="wizard-step__bottom-actions">
-                <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedTenses.length" @click="nextStep">
-                  Choisir les options →
-                </button>
+                <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedTenses.length" @click="nextStep"> {{ ui('Choisir les options →') }} </button>
               </div>
             </div>
 
             <div v-else-if="currentStep === 3" class="wizard-step wizard-review">
               <div class="wizard-step__actions wizard-step__actions--split">
                 <button class="secondary-button" type="button" @click="previousStep">
-                  ← <span class="mobile-label-hidden">Modes et temps</span><span class="mobile-label-only">Temps</span>
+                  ← <span class="mobile-label-hidden">{{ ui('Modes et temps') }}</span><span class="mobile-label-only">{{ ui('Temps') }}</span>
                 </button>
                 <div class="wizard-step__controls">
-                  <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" @click="nextStep">Créer le défi</button>
+                  <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" @click="nextStep">{{ ui('Créer le défi') }}</button>
                 </div>
               </div>
               <div class="wizard-step__intro wizard-step__intro--selection">
-                <h2>Options du défi</h2>
+                <h2>{{ ui('Options du défi') }}</h2>
               </div>
 
               <ChallengeOptions
@@ -932,30 +923,30 @@ async function saveChallenge() {
               />
 
               <div class="wizard-step__bottom-actions">
-                <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" @click="nextStep">Créer le défi</button>
+                <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" @click="nextStep">{{ ui('Créer le défi') }}</button>
               </div>
 
             </div>
 
             <div v-else class="wizard-step wizard-launch-step">
               <div class="wizard-step__actions wizard-step__actions--split">
-                <button class="secondary-button" type="button" @click="previousStep">← Options</button>
+                <button class="secondary-button" type="button" @click="previousStep">{{ ui('← Options') }}</button>
               </div>
               <section v-if="showLaunchSummary" class="launch-summary" aria-labelledby="launch-verbs-title">
                 <div class="launch-summary__heading">
                   <div>
                     <p v-if="activePreset" class="builder-card__eyebrow">{{ activePresetGroupLabel }}</p>
-                    <h2 id="launch-verbs-title">{{ activePreset?.label ?? 'Verbes choisis' }}</h2>
+                    <h2 id="launch-verbs-title">{{ activePreset?.label ?? ui('Verbes choisis') }}</h2>
                   </div>
-                  <span>{{ selectedVerbs.length }} verbe{{ selectedVerbs.length > 1 ? 's' : '' }}</span>
+                  <span>{{ ui(selectedVerbs.length > 1 ? '{count} verbes' : '{count} verbe', { count: selectedVerbs.length }) }}</span>
                 </div>
                 <p v-if="activePreset" class="launch-summary__description">{{ activePreset.description }}</p>
-                <ul class="launch-verb-list" aria-label="Aperçu des verbes choisis">
+                <ul class="launch-verb-list" :aria-label="ui('Aperçu des verbes choisis')">
                   <li v-for="verb in launchVerbPreview" :key="verb.id">{{ verb.infinitif }}</li>
                 </ul>
                 <Transition name="launch-verbs-expand">
                   <div v-if="areAllLaunchVerbsVisible" class="launch-verbs-expand">
-                    <ul class="launch-verb-list launch-verb-list--remaining" aria-label="Autres verbes choisis">
+                    <ul class="launch-verb-list launch-verb-list--remaining" :aria-label="ui('Autres verbes choisis')">
                       <li v-for="verb in remainingLaunchVerbs" :key="verb.id">{{ verb.infinitif }}</li>
                     </ul>
                   </div>
@@ -967,7 +958,7 @@ async function saveChallenge() {
                   :aria-expanded="areAllLaunchVerbsVisible"
                   @click="areAllLaunchVerbsVisible = !areAllLaunchVerbsVisible"
                 >
-                  {{ areAllLaunchVerbsVisible ? 'Réduire' : `Voir tout (${selectedVerbs.length})` }}
+                  {{ areAllLaunchVerbsVisible ? ui('Réduire') : ui('Voir tout ({count})', { count: selectedVerbs.length }) }}
                   <span aria-hidden="true">{{ areAllLaunchVerbsVisible ? '↑' : '↓' }}</span>
                 </button>
               </section>

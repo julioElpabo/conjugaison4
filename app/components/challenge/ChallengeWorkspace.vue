@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { ui } = useLanguagePreferences()
 import type { ChallengePreset, ComplementOption, ExerciseQuestion } from '~~/shared/types/conjugation'
 import { legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils/complement-options'
 import ChallengeActions from './ChallengeActions.vue'
@@ -58,9 +59,9 @@ const isLoadOpen = ref(false)
 const isCoachPickerOpen = ref(false)
 const selectedCoach = ref<CoachProfile | null>(null)
 const complementPlacementLabel = computed(() => ({
-  after: 'toujours après',
-  mixed: 'parfois avant',
-  before: 'avant si possible'
+  after: ui('toujours après'),
+  mixed: ui('parfois avant'),
+  before: ui('avant si possible')
 }[challenge.value.complementPlacement]))
 function updateComplementOptions(options: ComplementOption[]) {
   const legacy = legacyComplementConfig(options)
@@ -152,13 +153,13 @@ async function prepareExercise(mode: 'classic' | 'chat') {
   try {
     questions.value = await api.generateQuestions(challenge.value)
     if (questions.value.length === 0) {
-      throw new Error('Aucune question ne correspond à cette sélection.')
+      throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     }
     exercisePresentation.value = mode
     isExerciseOpen.value = true
     logUsage('exercise')
   } catch (error) {
-    actionError.value = getChallengeErrorMessage(error, 'Impossible de préparer le questionnaire.')
+    actionError.value = getChallengeErrorMessage(error, ui('Impossible de préparer le questionnaire.'))
   } finally {
     busyAction.value = null
   }
@@ -172,12 +173,12 @@ async function launchWithCoach(coach: CoachProfile) {
   clearMessages()
   try {
     questions.value = await api.generateQuestions(challenge.value)
-    if (!questions.value.length) throw new Error('Aucune question ne correspond à cette sélection.')
+    if (!questions.value.length) throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     exercisePresentation.value = 'chat'
     isExerciseOpen.value = true
     logUsage('exercise')
   } catch (error) {
-    actionError.value = getChallengeErrorMessage(error, 'Impossible de préparer le questionnaire.')
+    actionError.value = getChallengeErrorMessage(error, ui('Impossible de préparer le questionnaire.'))
   } finally {
     busyAction.value = null
   }
@@ -185,7 +186,7 @@ async function launchWithCoach(coach: CoachProfile) {
 
 async function regenerateChatQuestions() {
   const generated = await api.generateQuestions(challenge.value)
-  if (!generated.length) throw new Error('Aucune nouvelle question ne correspond à cette sélection.')
+  if (!generated.length) throw new Error(ui('Aucune nouvelle question ne correspond à cette sélection.'))
   questions.value = generated
 }
 
@@ -196,12 +197,12 @@ async function preparePrint() {
   try {
     printQuestions.value = await api.generateQuestions(challenge.value)
     if (printQuestions.value.length === 0) {
-      throw new Error('Aucune question ne correspond à cette sélection.')
+      throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     }
     isPrintOpen.value = true
     logUsage('print')
   } catch (error) {
-    actionError.value = getChallengeErrorMessage(error, 'Impossible de préparer la fiche à imprimer.')
+    actionError.value = getChallengeErrorMessage(error, ui('Impossible de préparer la fiche à imprimer.'))
   } finally {
     busyAction.value = null
   }
@@ -217,7 +218,7 @@ async function saveChallenge() {
     isShareOpen.value = true
     logUsage('challenge-save')
   } catch (error) {
-    actionError.value = getChallengeErrorMessage(error, 'Impossible de sauvegarder ce défi.')
+    actionError.value = getChallengeErrorMessage(error, ui('Impossible de sauvegarder ce défi.'))
   } finally {
     busyAction.value = null
   }
@@ -236,7 +237,7 @@ async function restoreChallenge(code: string, closeDialog = true) {
     logUsage('challenge-load')
     if (closeDialog) isLoadOpen.value = false
   } catch (error) {
-    const message = getChallengeErrorMessage(error, 'Ce code ne correspond à aucun défi.')
+    const message = getChallengeErrorMessage(error, ui('Ce code ne correspond à aucun défi.'))
     if (closeDialog) loadError.value = message
     else actionError.value = message
   } finally {
@@ -263,21 +264,19 @@ function onToggleTense(id: number) {
 <template>
   <div class="challenge-page">
     <section class="challenge-hero">
-      <p class="challenge-hero__eyebrow">Gratuit · sans publicité · personnalisable</p>
-      <h1>Crée ton défi de conjugaison</h1>
-      <p>Choisis les verbes et les temps à travailler, puis exerce-toi en ligne ou imprime une fiche avec son corrigé.</p>
+      <p class="challenge-hero__eyebrow">{{ ui('Gratuit · sans publicité · personnalisable') }}</p>
+      <h1>{{ ui('Crée ton défi de conjugaison') }}</h1>
+      <p>{{ ui('Choisis les verbes et les temps à travailler, puis exerce-toi en ligne ou imprime une fiche avec son corrigé.') }}</p>
     </section>
 
     <div class="challenge-shell">
       <div v-if="catalogueStatus === 'loading'" class="page-state" role="status">
-        <span class="loader" aria-hidden="true" />
-        Chargement du catalogue de conjugaison…
-      </div>
+        <span class="loader" aria-hidden="true" /> {{ ui('Chargement du catalogue de conjugaison…') }} </div>
 
       <div v-else-if="catalogueStatus === 'error'" class="page-state page-state--error" role="alert">
-        <strong>Le catalogue n’a pas pu être chargé.</strong>
+        <strong>{{ ui('Le catalogue n’a pas pu être chargé.') }}</strong>
         <span>{{ catalogueError }}</span>
-        <button class="primary-button" type="button" @click="retryCatalogue">Réessayer</button>
+        <button class="primary-button" type="button" @click="retryCatalogue">{{ ui('Réessayer') }}</button>
       </div>
 
       <template v-else>
@@ -285,15 +284,13 @@ function onToggleTense(id: number) {
         <p v-else-if="notice" class="workspace-message workspace-message--success" aria-live="polite">{{ notice }}</p>
 
         <div class="challenge-restore">
-          <span>Tu as reçu ou enregistré un défi&nbsp;?</span>
+          <span>{{ ui('Tu as reçu ou enregistré un défi ?') }}</span>
           <button class="text-button" type="button" :disabled="Boolean(busyAction)" @click="isLoadOpen = true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M12 3v12" />
               <path d="m7 10 5 5 5-5" />
               <path d="M5 21h14" />
-            </svg>
-            Charger un défi avec son code
-          </button>
+            </svg> {{ ui('Charger un défi avec son code') }} </button>
         </div>
 
         <PresetPicker
@@ -339,19 +336,18 @@ function onToggleTense(id: number) {
 
         <div class="challenge-summary" :class="{ 'challenge-summary--incomplete': !isReady }" aria-live="polite">
           <div>
-            <p class="builder-card__eyebrow">Résumé de ton défi</p>
+            <p class="builder-card__eyebrow">{{ ui('Résumé de ton défi') }}</p>
             <strong v-if="isReady">
-              {{ selectedVerbs.length }} verbe{{ selectedVerbs.length > 1 ? 's' : '' }} ·
-              {{ selectedTenses.length }} temps ·
-              {{ challenge.questionCount }} questions
-            </strong>
-            <strong v-else>Ton défi n’est pas encore complet</strong>
+              {{ selectedVerbs.length }} {{ selectedVerbs.length === 1 ? ui('verbe') : ui('verbes') }} ·
+              {{ selectedTenses.length }} {{ ui('temps') }} ·
+              {{ challenge.questionCount }} {{ challenge.questionCount === 1 ? ui('question') : ui('questions') }} </strong>
+            <strong v-else>{{ ui('Ton défi n’est pas encore complet') }}</strong>
           </div>
-          <p v-if="!isReady">Sélectionne au moins un verbe et un temps pour pouvoir le lancer.</p>
+          <p v-if="!isReady">{{ ui('Sélectionne au moins un verbe et un temps pour pouvoir le lancer.') }}</p>
           <p v-else>
-            {{ challenge.exerciseKind === 'conjugation' ? 'Conjuguer les formes demandées' : 'Trouver le mode et le temps' }}
+            {{ challenge.exerciseKind === 'conjugation' ? ui('Conjuguer les formes demandées') : ui('Trouver le mode et le temps') }}
             <template v-if="challenge.exerciseKind === 'conjugation' && challenge.includeComplements">
-              · avec compléments, {{ complementPlacementLabel }}
+              · {{ ui('avec compléments,') }} {{ complementPlacementLabel }}
             </template>
           </p>
         </div>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { ui } = useLanguagePreferences()
 import type { Verb } from '~/composables/useChallengeBuilder'
 import { matchingVerbs, normalizeVerbSearch } from '~~/shared/utils/verb-search'
 
@@ -81,8 +82,8 @@ function addFirstSuggestion() {
   <section class="builder-card verb-picker" aria-labelledby="verbs-title">
     <div class="builder-card__header">
       <div>
-        <p class="builder-card__eyebrow">Étape 1</p>
-        <h2 id="verbs-title">Mes verbes</h2>
+        <p class="builder-card__eyebrow">{{ ui('Étape 1') }}</p>
+        <h2 id="verbs-title">{{ ui('Mes verbes') }}</h2>
       </div>
       <span class="count-badge" :aria-label="`${selectedIds.length} verbes sélectionnés`">
         {{ selectedIds.length }}
@@ -90,7 +91,7 @@ function addFirstSuggestion() {
     </div>
 
     <div class="verb-search">
-      <label for="verb-search-input">Ajouter un verbe</label>
+      <label for="verb-search-input">{{ ui('Ajouter un verbe') }}</label>
       <div class="verb-search__control">
         <input
           id="verb-search-input"
@@ -98,7 +99,7 @@ function addFirstSuggestion() {
           v-model="query"
           type="search"
           autocomplete="off"
-          placeholder="Ex. aller, être, finir…"
+          :placeholder="ui('Ex. aller, être, finir…')"
           :aria-expanded="suggestions.length > 0"
           aria-controls="verb-suggestions"
           @keydown.enter.prevent="addFirstSuggestion"
@@ -107,7 +108,7 @@ function addFirstSuggestion() {
           class="icon-button icon-button--add"
           type="button"
           :disabled="suggestions.length === 0"
-          aria-label="Ajouter le premier verbe proposé"
+          :aria-label="ui('Ajouter le premier verbe proposé')"
           @click="addFirstSuggestion"
         >
           +
@@ -119,13 +120,13 @@ function addFirstSuggestion() {
         id="verb-suggestions"
         class="verb-suggestions"
         role="listbox"
-        aria-label="Verbes proposés"
+        :aria-label="ui('Verbes proposés')"
       >
         <li v-for="verb in suggestions" :key="verb.id" role="option">
           <button type="button" @click="addVerb(verb)">
             <strong>{{ verb.infinitif }}</strong>
-            <span v-if="verb.isPronominalForm && verb.baseVerbId">forme pronominale générée</span>
-            <span v-else-if="verb.auxiliaire">auxiliaire {{ verb.auxiliaire }}</span>
+            <span v-if="verb.isPronominalForm && verb.baseVerbId">{{ ui('forme pronominale générée') }}</span>
+            <span v-else-if="verb.auxiliaire">{{ ui('auxiliaire') }} {{ verb.auxiliaire }}</span>
           </button>
         </li>
       </ul>
@@ -136,15 +137,13 @@ function addFirstSuggestion() {
     </div>
 
     <div class="selection-toolbar">
-      <p>{{ selectedVerbs.length ? 'Verbes retenus' : 'Aucun verbe sélectionné' }}</p>
+      <p>{{ selectedVerbs.length ? ui('Verbes retenus') : ui('Aucun verbe sélectionné') }}</p>
       <button
         v-if="selectedVerbs.length"
         class="text-button text-button--danger"
         type="button"
         @click="emit('clear')"
-      >
-        Tout supprimer
-      </button>
+      > {{ ui('Tout supprimer') }} </button>
     </div>
 
     <TransitionGroup
@@ -153,11 +152,11 @@ function addFirstSuggestion() {
       name="verb-chip"
       class="selected-chips selected-chips--adaptive"
       :style="selectedChipStyle"
-      aria-label="Verbes sélectionnés"
+      :aria-label="ui('Verbes sélectionnés')"
     >
       <li v-for="verb in selectedVerbs" :key="verb.id">
         <span>{{ verb.infinitif }}</span>
-        <button type="button" :aria-label="`Retirer le verbe ${verb.infinitif}`" @click="emit('remove', verb.id)">×</button>
+        <button type="button" :aria-label="ui('Retirer le verbe {verb}', { verb: verb.infinitif })" @click="emit('remove', verb.id)">×</button>
       </li>
     </TransitionGroup>
   </section>

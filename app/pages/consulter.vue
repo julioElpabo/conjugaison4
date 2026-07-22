@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { ui, uiLabel } = useLanguagePreferences()
 import type { ConjugationMode, ConjugationTense, Verb } from '~~/shared/types/conjugation'
 import type { ConsultedConjugation, VerbConsultation } from '~~/shared/types/verb-consultation'
 import { conjugationModeOrder, conjugationTenseLabel, conjugationTenseOrder, isFiniteConjugationMode } from '~~/shared/data/conjugation-display'
@@ -26,10 +27,10 @@ const detailLoading = ref(false)
 const detailError = ref('')
 let detailRequest = 0
 
-useHead({
-  title: 'Consulter un verbe',
-  meta: [{ name: 'description', content: 'Recherchez un verbe et consultez sa conjugaison à tous les modes et à tous les temps.' }],
-})
+useHead(() => ({
+  title: ui('Consulter un verbe'),
+  meta: [{ name: 'description', content: ui('Recherchez un verbe et consultez sa conjugaison à tous les modes et à tous les temps.') }],
+}))
 
 const { data: catalogue, status, error, refresh } = await useFetch<Catalogue>('/api/catalogue', {
   key: 'public-conjugation-catalogue',
@@ -104,8 +105,10 @@ function displayedForm(row: ConsultedConjugation, form: string, mode: string) {
 }
 
 function groupLabel(group: number | null) {
-  if (!group) return 'groupe irrégulier'
-  return `${group}${group === 1 ? 'er' : 'e'} groupe`
+  if (!group) return ui('groupe irrégulier')
+  if (group === 1) return ui('1er groupe')
+  if (group === 2) return ui('2e groupe')
+  return ui('3e groupe')
 }
 
 async function loadVerb(id: number) {
@@ -119,7 +122,7 @@ async function loadVerb(id: number) {
   } catch {
     if (request === detailRequest) {
       detail.value = null
-      detailError.value = 'Impossible de charger la conjugaison de ce verbe.'
+      detailError.value = ui('Impossible de charger la conjugaison de ce verbe.')
     }
   } finally {
     if (request === detailRequest) detailLoading.value = false
@@ -204,21 +207,21 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
 <template>
   <div class="reference-page">
     <header class="reference-hero">
-      <p class="reference-eyebrow">Le conjugueur</p>
-      <h1>Consulter un verbe</h1>
-      <p>Écris un infinitif ou parcours le catalogue de A à Z pour afficher toute sa conjugaison.</p>
+      <p class="reference-eyebrow">{{ ui('Le conjugueur') }}</p>
+      <h1>{{ ui('Consulter un verbe') }}</h1>
+      <p>{{ ui('Écris un infinitif ou parcours le catalogue de A à Z pour afficher toute sa conjugaison.') }}</p>
     </header>
 
-    <div v-if="status === 'pending'" class="reference-state" role="status">Chargement du catalogue…</div>
+    <div v-if="status === 'pending'" class="reference-state" role="status">{{ ui('Chargement du catalogue…') }}</div>
     <div v-else-if="error" class="reference-state reference-state--error" role="alert">
-      <p>Le catalogue n’a pas pu être chargé.</p>
-      <button type="button" @click="refresh()">Réessayer</button>
+      <p>{{ ui('Le catalogue n’a pas pu être chargé.') }}</p>
+      <button type="button" @click="refresh()">{{ ui('Réessayer') }}</button>
     </div>
 
     <section v-else ref="consultation-container" class="consultation-container" aria-live="polite">
       <Transition :name="transitionDirection === 'forward' ? 'slide-forward' : 'slide-back'" mode="out-in">
         <div v-if="!showingDetail" key="selection" class="consultation-panel selection-panel">
-          <div class="consultation-tabs" role="tablist" aria-label="Méthode de recherche du verbe">
+          <div class="consultation-tabs" role="tablist" :aria-label="ui('Méthode de recherche du verbe')">
             <button
               id="search-tab"
               type="button"
@@ -227,9 +230,7 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
               aria-controls="search-panel"
               :class="{ 'is-active': activeTab === 'search' }"
               @click="selectTab('search')"
-            >
-              Rechercher un verbe
-            </button>
+            > {{ ui('Rechercher un verbe') }} </button>
             <button
               id="list-tab"
               type="button"
@@ -238,16 +239,14 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
               aria-controls="list-panel"
               :class="{ 'is-active': activeTab === 'list' }"
               @click="selectTab('list')"
-            >
-              Liste de A à Z
-            </button>
+            > {{ ui('Liste de A à Z') }} </button>
           </div>
 
           <div v-if="activeTab === 'search'" id="search-panel" class="tab-panel search-tab-panel" role="tabpanel" aria-labelledby="search-tab">
             <div>
-              <p class="reference-eyebrow">Recherche rapide</p>
-              <h2>Quel verbe cherches-tu ?</h2>
-              <p>Commence à écrire son infinitif, puis choisis-le dans les propositions.</p>
+              <p class="reference-eyebrow">{{ ui('Recherche rapide') }}</p>
+              <h2>{{ ui('Quel verbe cherches-tu ?') }}</h2>
+              <p>{{ ui('Commence à écrire son infinitif, puis choisis-le dans les propositions.') }}</p>
             </div>
             <div class="verb-combobox">
               <input
@@ -257,8 +256,8 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
                 role="combobox"
                 autocomplete="off"
                 spellcheck="false"
-                placeholder="Par exemple : venir"
-                aria-label="Rechercher un verbe"
+                :placeholder="ui('Par exemple : venir')"
+                :aria-label="ui('Rechercher un verbe')"
                 aria-autocomplete="list"
                 aria-controls="public-verb-suggestions"
                 :aria-expanded="suggestionsOpen"
@@ -282,12 +281,12 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
           <div v-else id="list-panel" class="tab-panel list-tab-panel" role="tabpanel" aria-labelledby="list-tab">
             <div class="alphabet-heading">
               <div>
-                <p class="reference-eyebrow">Catalogue complet</p>
-                <h2>Tous les verbes de A à Z</h2>
+                <p class="reference-eyebrow">{{ ui('Catalogue complet') }}</p>
+                <h2>{{ ui('Tous les verbes de A à Z') }}</h2>
               </div>
-              <span>{{ verbs.length }} verbes</span>
+              <span>{{ verbs.length }} {{ verbs.length === 1 ? ui('verbe') : ui('verbes') }}</span>
             </div>
-            <nav class="letter-nav" aria-label="Accès aux lettres">
+            <nav class="letter-nav" :aria-label="ui('Accès aux lettres')">
               <button v-for="group in alphabetGroups" :key="group.letter" type="button" @click="scrollToLetter(group.letter)">
                 {{ group.letter }}
               </button>
@@ -309,43 +308,41 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
 
         <div v-else key="detail" class="consultation-panel detail-panel">
           <button class="back-button" type="button" @click="returnToSelection">
-            <span aria-hidden="true">←</span>
-            Retour au choix du verbe
-          </button>
+            <span aria-hidden="true">←</span> {{ ui('Retour au choix du verbe') }} </button>
 
-          <div v-if="detailLoading" class="reference-state" role="status">Chargement de la conjugaison…</div>
+          <div v-if="detailLoading" class="reference-state" role="status">{{ ui('Chargement de la conjugaison…') }}</div>
           <div v-else-if="detailError" class="reference-state reference-state--error" role="alert">
             <p>{{ detailError }}</p>
-            <button type="button" @click="returnToSelection">Retour à la liste</button>
+            <button type="button" @click="returnToSelection">{{ ui('Retour à la liste') }}</button>
           </div>
           <template v-else-if="detail">
             <header class="conjugation-heading">
               <div>
-                <p class="reference-eyebrow">Conjugaison du verbe</p>
+                <p class="reference-eyebrow">{{ ui('Conjugaison du verbe') }}</p>
                 <h2>{{ detail.verb.infinitif }}</h2>
               </div>
               <dl>
-                <div><dt>Groupe</dt><dd>{{ groupLabel(detail.verb.groupeConjugaison) }}</dd></div>
-                <div><dt>Auxiliaire</dt><dd>{{ detail.verb.auxiliaire }}</dd></div>
+                <div><dt>{{ ui('Groupe') }}</dt><dd>{{ groupLabel(detail.verb.groupeConjugaison) }}</dd></div>
+                <div><dt>{{ ui('Auxiliaire') }}</dt><dd>{{ detail.verb.auxiliaire }}</dd></div>
               </dl>
             </header>
 
-            <nav class="mode-nav" aria-label="Accès aux modes">
+            <nav class="mode-nav" :aria-label="ui('Accès aux modes')">
               <button v-for="group in groups" :key="group.mode.id" type="button" @click="scrollToMode(`consult-mode-${group.mode.id}`)">
-                {{ group.mode.name }}
+                {{ uiLabel(group.mode.name) }}
               </button>
-              <button type="button" @click="scrollToMode('consult-non-finite')">Formes non personnelles</button>
+              <button type="button" @click="scrollToMode('consult-non-finite')">{{ ui('Formes non personnelles') }}</button>
             </nav>
 
             <section v-for="group in groups" :id="`consult-mode-${group.mode.id}`" :key="group.mode.id" class="mode-section">
-              <h2>{{ group.mode.name }}</h2>
+              <h2>{{ uiLabel(group.mode.name) }}</h2>
               <div class="tense-grid">
                 <article v-for="tense in group.tenses" :key="tense.id" class="tense-consult-card">
-                  <h3>{{ conjugationTenseLabel(group.mode.name, tense.name) }}</h3>
+                  <h3>{{ uiLabel(conjugationTenseLabel(group.mode.name, tense.name)) }}</h3>
                   <ul>
                     <li v-for="row in tense.rows" :key="row.id">
                       <span v-for="(form, index) in row.forms" :key="form">
-                        {{ displayedForm(row, form, group.mode.name) }}<small v-if="index < row.forms.length - 1"> ou </small>
+                        {{ displayedForm(row, form, group.mode.name) }}<small v-if="index < row.forms.length - 1"> {{ ui('ou') }} </small>
                       </span>
                     </li>
                   </ul>
@@ -354,10 +351,10 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
             </section>
 
             <section id="consult-non-finite" class="mode-section">
-              <h2>Formes non personnelles</h2>
+              <h2>{{ ui('Formes non personnelles') }}</h2>
               <div class="non-finite-grid">
                 <article v-for="item in nonFiniteForms" :key="`${item.mode}-${item.tense}`">
-                  <p>{{ item.mode }} · {{ item.tense }}</p>
+                  <p>{{ uiLabel(item.mode) }} · {{ uiLabel(item.tense) }}</p>
                   <strong>{{ item.form }}</strong>
                 </article>
               </div>

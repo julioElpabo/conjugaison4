@@ -1,16 +1,17 @@
 <script setup lang="ts">
-useHead({
-  title: 'Apprendre la conjugaison',
-  meta: [{ name: 'description', content: 'Une synthèse claire des règles essentielles de la conjugaison française.' }],
-})
+const { ui } = useLanguagePreferences()
+useHead(() => ({
+  title: ui('Apprendre la conjugaison'),
+  meta: [{ name: 'description', content: ui('Une synthèse claire des règles essentielles de la conjugaison française.') }],
+}))
 
-const sections = [
-  { id: 'bases', number: '01', title: 'Comprendre le verbe', description: 'Radical, terminaison, groupes et auxiliaires.' },
-  { id: 'temps', number: '02', title: 'Former les temps', description: 'Les repères pour construire les temps simples et composés.' },
-  { id: 'modes', number: '03', title: 'Choisir le bon mode', description: 'Indicatif, subjonctif, conditionnel et impératif.' },
-  { id: 'accords', number: '04', title: 'Réussir les accords', description: 'Sujet, auxiliaires et participe passé.' },
-  { id: 'orthographe', number: '05', title: 'Éviter les pièges', description: 'Modifications du radical et terminaisons à surveiller.' },
-]
+const sections = computed(() => [
+  { id: 'bases', number: '01', title: ui('Comprendre le verbe'), description: ui('Radical, terminaison, groupes et auxiliaires.') },
+  { id: 'temps', number: '02', title: ui('Former les temps'), description: ui('Les repères pour construire les temps simples et composés.') },
+  { id: 'modes', number: '03', title: ui('Choisir le bon mode'), description: ui('Indicatif, subjonctif, conditionnel et impératif.') },
+  { id: 'accords', number: '04', title: ui('Réussir les accords'), description: ui('Sujet, auxiliaires et participe passé.') },
+  { id: 'orthographe', number: '05', title: ui('Éviter les pièges'), description: ui('Modifications du radical et terminaisons à surveiller.') },
+])
 
 function scrollToSection(sectionId: string) {
   const behavior: ScrollBehavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
@@ -21,12 +22,12 @@ function scrollToSection(sectionId: string) {
 <template>
   <div class="learning-page">
     <header class="learning-hero">
-      <p class="learning-eyebrow">Les règles essentielles</p>
-      <h1>Apprendre la conjugaison française</h1>
-      <p>Une carte simple pour comprendre comment les verbes se construisent, choisir le bon temps et éviter les erreurs les plus fréquentes.</p>
+      <p class="learning-eyebrow">{{ ui('Les règles essentielles') }}</p>
+      <h1>{{ ui('Apprendre la conjugaison française') }}</h1>
+      <p>{{ ui('Une carte simple pour comprendre comment les verbes se construisent, choisir le bon temps et éviter les erreurs les plus fréquentes.') }}</p>
     </header>
 
-    <nav class="learning-summary" aria-label="Sommaire des règles">
+    <nav class="learning-summary" :aria-label="ui('Sommaire des règles')">
       <button v-for="section in sections" :key="section.id" type="button" @click="scrollToSection(section.id)">
         <span>{{ section.number }}</span>
         <strong>{{ section.title }}</strong>
@@ -36,77 +37,77 @@ function scrollToSection(sectionId: string) {
 
     <main class="learning-content">
       <section id="bases" class="rule-section">
-        <header><span>01</span><div><p class="learning-eyebrow">Les fondations</p><h2>Comprendre le verbe</h2></div></header>
+        <header><span>01</span><div><p class="learning-eyebrow">{{ ui('Les fondations') }}</p><h2>{{ ui('Comprendre le verbe') }}</h2></div></header>
         <div class="rule-grid rule-grid--three">
           <article>
-            <h3>Radical + terminaison</h3>
-            <p>Une forme conjuguée associe généralement un radical, qui porte le sens, et une terminaison, qui indique la personne, le mode et le temps.</p>
+            <h3>{{ ui('Radical + terminaison') }}</h3>
+            <p>{{ ui('Une forme conjuguée associe généralement un radical, qui porte le sens, et une terminaison, qui indique la personne, le mode et le temps.') }}</p>
             <p class="rule-example"><strong>nous chantions</strong><span>chant- + -ions</span></p>
           </article>
           <article>
-            <h3>Les trois groupes</h3>
+            <h3>{{ ui('Les trois groupes') }}</h3>
             <ul>
-              <li><strong>1er groupe :</strong> verbes en <em>-er</em>, sauf aller.</li>
-              <li><strong>2e groupe :</strong> verbes en <em>-ir</em> faisant <em>-issons</em>.</li>
-              <li><strong>3e groupe :</strong> tous les autres verbes, souvent irréguliers.</li>
+              <li><strong>{{ ui('1er groupe :') }}</strong> {{ ui('verbes en -er, sauf aller.') }}</li>
+              <li><strong>{{ ui('2e groupe :') }}</strong> {{ ui('verbes en -ir faisant -issons.') }}</li>
+              <li><strong>{{ ui('3e groupe :') }}</strong> {{ ui('tous les autres verbes, souvent irréguliers.') }}</li>
             </ul>
           </article>
           <article>
-            <h3>Être et avoir</h3>
-            <p>Ces deux verbes ont leurs propres conjugaisons et servent aussi d’auxiliaires pour former les temps composés.</p>
-            <p class="rule-example"><strong>elle a fini</strong><span>auxiliaire + participe passé</span></p>
+            <h3>{{ ui('Être et avoir') }}</h3>
+            <p>{{ ui('Ces deux verbes ont leurs propres conjugaisons et servent aussi d’auxiliaires pour former les temps composés.') }}</p>
+            <p class="rule-example"><strong>elle a fini</strong><span>{{ ui('auxiliaire + participe passé') }}</span></p>
           </article>
         </div>
       </section>
 
       <section id="temps" class="rule-section">
-        <header><span>02</span><div><p class="learning-eyebrow">La construction</p><h2>Former les temps</h2></div></header>
-        <div class="formation-table" role="table" aria-label="Formation des principaux temps">
-          <div class="formation-row formation-row--head" role="row"><span>Temps</span><span>Construction</span><span>Exemple</span></div>
-          <div class="formation-row" role="row"><strong>Présent</strong><span>radical + terminaisons du présent</span><em>je parle, nous finissons</em></div>
-          <div class="formation-row" role="row"><strong>Imparfait</strong><span>radical de « nous » au présent + -ais, -ais, -ait, -ions, -iez, -aient</span><em>nous parlions</em></div>
-          <div class="formation-row" role="row"><strong>Futur simple</strong><span>infinitif, ou radical irrégulier, + -ai, -as, -a, -ons, -ez, -ont</span><em>tu viendras</em></div>
-          <div class="formation-row" role="row"><strong>Conditionnel présent</strong><span>radical du futur + terminaisons de l’imparfait</span><em>vous pourriez</em></div>
-          <div class="formation-row" role="row"><strong>Temps composé</strong><span>auxiliaire conjugué + participe passé</span><em>ils avaient compris</em></div>
+        <header><span>02</span><div><p class="learning-eyebrow">{{ ui('La construction') }}</p><h2>{{ ui('Former les temps') }}</h2></div></header>
+        <div class="formation-table" role="table" :aria-label="ui('Formation des principaux temps')">
+          <div class="formation-row formation-row--head" role="row"><span>{{ ui('Temps') }}</span><span>{{ ui('Construction') }}</span><span>{{ ui('Exemple') }}</span></div>
+          <div class="formation-row" role="row"><strong>{{ ui('Présent') }}</strong><span>{{ ui('radical + terminaisons du présent') }}</span><em>je parle, nous finissons</em></div>
+          <div class="formation-row" role="row"><strong>{{ ui('Imparfait') }}</strong><span>{{ ui('radical de « nous » au présent + -ais, -ais, -ait, -ions, -iez, -aient') }}</span><em>nous parlions</em></div>
+          <div class="formation-row" role="row"><strong>{{ ui('Futur simple') }}</strong><span>{{ ui('infinitif, ou radical irrégulier, + -ai, -as, -a, -ons, -ez, -ont') }}</span><em>tu viendras</em></div>
+          <div class="formation-row" role="row"><strong>{{ ui('Conditionnel présent') }}</strong><span>{{ ui('radical du futur + terminaisons de l’imparfait') }}</span><em>vous pourriez</em></div>
+          <div class="formation-row" role="row"><strong>{{ ui('Temps composé') }}</strong><span>{{ ui('auxiliaire conjugué + participe passé') }}</span><em>ils avaient compris</em></div>
         </div>
-        <aside class="rule-note"><strong>Le bon réflexe</strong><p>Pour reconnaître un temps composé, cherche d’abord une forme de <em>avoir</em> ou d’<em>être</em>, puis le participe passé.</p></aside>
+        <aside class="rule-note"><strong>{{ ui('Le bon réflexe') }}</strong><p>{{ ui('Pour reconnaître un temps composé, cherche d’abord une forme de avoir ou d’être, puis le participe passé.') }}</p></aside>
       </section>
 
       <section id="modes" class="rule-section">
-        <header><span>03</span><div><p class="learning-eyebrow">Le sens</p><h2>Choisir le bon mode</h2></div></header>
+        <header><span>03</span><div><p class="learning-eyebrow">{{ ui('Le sens') }}</p><h2>{{ ui('Choisir le bon mode') }}</h2></div></header>
         <div class="mode-cards">
-          <article><span>Fait</span><h3>Indicatif</h3><p>Présente un fait, une action certaine ou située dans le temps.</p><em>Demain, nous partirons.</em></article>
-          <article><span>Doute</span><h3>Subjonctif</h3><p>Exprime notamment le souhait, la nécessité, le sentiment ou l’incertitude.</p><em>Il faut que tu viennes.</em></article>
-          <article><span>Hypothèse</span><h3>Conditionnel</h3><p>Présente une possibilité, une information incertaine ou une action soumise à une condition.</p><em>Je viendrais si je pouvais.</em></article>
-          <article><span>Consigne</span><h3>Impératif</h3><p>Exprime un ordre, un conseil ou une invitation, sans sujet exprimé.</p><em>Écoutez attentivement !</em></article>
+          <article><span>{{ ui('Fait') }}</span><h3>{{ ui('Indicatif') }}</h3><p>{{ ui('Présente un fait, une action certaine ou située dans le temps.') }}</p><em>Demain, nous partirons.</em></article>
+          <article><span>{{ ui('Doute') }}</span><h3>{{ ui('Subjonctif') }}</h3><p>{{ ui('Exprime notamment le souhait, la nécessité, le sentiment ou l’incertitude.') }}</p><em>Il faut que tu viennes.</em></article>
+          <article><span>{{ ui('Hypothèse') }}</span><h3>{{ ui('Conditionnel') }}</h3><p>{{ ui('Présente une possibilité, une information incertaine ou une action soumise à une condition.') }}</p><em>Je viendrais si je pouvais.</em></article>
+          <article><span>{{ ui('Consigne') }}</span><h3>{{ ui('Impératif') }}</h3><p>{{ ui('Exprime un ordre, un conseil ou une invitation, sans sujet exprimé.') }}</p><em>Écoutez attentivement !</em></article>
         </div>
       </section>
 
       <section id="accords" class="rule-section">
-        <header><span>04</span><div><p class="learning-eyebrow">Les correspondances</p><h2>Réussir les accords</h2></div></header>
+        <header><span>04</span><div><p class="learning-eyebrow">{{ ui('Les correspondances') }}</p><h2>{{ ui('Réussir les accords') }}</h2></div></header>
         <div class="agreement-flow">
-          <article><span>1</span><div><h3>Trouver le sujet</h3><p>Le verbe s’accorde en personne et en nombre avec son sujet, même lorsque celui-ci est éloigné.</p><em>Les élèves de cette classe réussissent.</em></div></article>
-          <article><span>2</span><div><h3>Identifier l’auxiliaire</h3><p>Avec <strong>être</strong>, le participe passé s’accorde généralement avec le sujet.</p><em>Elles sont arrivées.</em></div></article>
-          <article><span>3</span><div><h3>Repérer le COD avec avoir</h3><p>Avec <strong>avoir</strong>, le participe passé s’accorde avec le COD seulement si celui-ci est placé avant.</p><em>Les lettres qu’il a écrites.</em></div></article>
+          <article><span>1</span><div><h3>{{ ui('Trouver le sujet') }}</h3><p>{{ ui('Le verbe s’accorde en personne et en nombre avec son sujet, même lorsque celui-ci est éloigné.') }}</p><em>Les élèves de cette classe réussissent.</em></div></article>
+          <article><span>2</span><div><h3>{{ ui('Identifier l’auxiliaire') }}</h3><p>{{ ui('Avec être, le participe passé s’accorde généralement avec le sujet.') }}</p><em>Elles sont arrivées.</em></div></article>
+          <article><span>3</span><div><h3>{{ ui('Repérer le COD avec avoir') }}</h3><p>{{ ui('Avec avoir, le participe passé s’accorde avec le COD seulement si celui-ci est placé avant.') }}</p><em>Les lettres qu’il a écrites.</em></div></article>
         </div>
-        <aside class="rule-note rule-note--warning"><strong>Verbes pronominaux</strong><p>Leur accord dépend de la fonction du pronom. Il faut déterminer si celui-ci est COD, COI ou fait partie du verbe.</p></aside>
+        <aside class="rule-note rule-note--warning"><strong>{{ ui('Verbes pronominaux') }}</strong><p>{{ ui('Leur accord dépend de la fonction du pronom. Il faut déterminer si celui-ci est COD, COI ou fait partie du verbe.') }}</p></aside>
       </section>
 
       <section id="orthographe" class="rule-section">
-        <header><span>05</span><div><p class="learning-eyebrow">Les pièges fréquents</p><h2>Préserver le son et l’orthographe</h2></div></header>
+        <header><span>05</span><div><p class="learning-eyebrow">{{ ui('Les pièges fréquents') }}</p><h2>{{ ui('Préserver le son et l’orthographe') }}</h2></div></header>
         <div class="trap-grid">
-          <article><h3>-ger et -cer</h3><p>On ajoute parfois un <strong>e</strong> après g ou une cédille pour conserver le son.</p><em>nous mangeons · nous plaçons</em></article>
-          <article><h3>-yer</h3><p>Le y peut devenir i devant un e muet. Pour certains verbes, les deux graphies sont admises.</p><em>j’emploie · nous employons</em></article>
-          <article><h3>e / è</h3><p>Certains verbes changent l’accent lorsque la syllabe suivante contient un e muet.</p><em>je lève · nous levons</em></article>
-          <article><h3>Consonne doublée</h3><p>Certains verbes en -eler et -eter doublent la consonne ; d’autres prennent un accent grave.</p><em>j’appelle · j’achète</em></article>
-          <article><h3>-é ou -er ?</h3><p>Remplace le verbe par « vendre » : si « vendu » convient, écris le participe passé ; si « vendre » convient, écris l’infinitif.</p><em>j’ai mangé · je vais manger</em></article>
-          <article><h3>-rai ou -rais ?</h3><p>Le futur exprime ce qui arrivera ; le conditionnel dépend d’une condition ou atténue une demande.</p><em>je viendrai · je viendrais si…</em></article>
+          <article><h3>-ger et -cer</h3><p>{{ ui('On ajoute parfois un e après g ou une cédille pour conserver le son.') }}</p><em>nous mangeons · nous plaçons</em></article>
+          <article><h3>-yer</h3><p>{{ ui('Le y peut devenir i devant un e muet. Pour certains verbes, les deux graphies sont admises.') }}</p><em>j’emploie · nous employons</em></article>
+          <article><h3>e / è</h3><p>{{ ui('Certains verbes changent l’accent lorsque la syllabe suivante contient un e muet.') }}</p><em>je lève · nous levons</em></article>
+          <article><h3>{{ ui('Consonne doublée') }}</h3><p>{{ ui('Certains verbes en -eler et -eter doublent la consonne ; d’autres prennent un accent grave.') }}</p><em>j’appelle · j’achète</em></article>
+          <article><h3>-é ou -er ?</h3><p>{{ ui('Remplace le verbe par « vendre » : si « vendu » convient, écris le participe passé ; si « vendre » convient, écris l’infinitif.') }}</p><em>j’ai mangé · je vais manger</em></article>
+          <article><h3>-rai ou -rais ?</h3><p>{{ ui('Le futur exprime ce qui arrivera ; le conditionnel dépend d’une condition ou atténue une demande.') }}</p><em>je viendrai · je viendrais si…</em></article>
         </div>
       </section>
 
       <section class="learning-actions" aria-labelledby="continue-title">
-        <div><p class="learning-eyebrow">À toi de jouer</p><h2 id="continue-title">Passe de la règle à la pratique</h2><p>Consulte un modèle complet ou crée un exercice ciblé pour vérifier ce que tu viens d’apprendre.</p></div>
-        <div><NuxtLink to="/consulter">Consulter un verbe</NuxtLink><NuxtLink class="is-primary" to="/">S’exercer</NuxtLink></div>
+        <div><p class="learning-eyebrow">{{ ui('À toi de jouer') }}</p><h2 id="continue-title">{{ ui('Passe de la règle à la pratique') }}</h2><p>{{ ui('Consulte un modèle complet ou crée un exercice ciblé pour vérifier ce que tu viens d’apprendre.') }}</p></div>
+        <div><NuxtLink to="/consulter">{{ ui('Consulter un verbe') }}</NuxtLink><NuxtLink class="is-primary" to="/">{{ ui('S’exercer') }}</NuxtLink></div>
       </section>
     </main>
   </div>

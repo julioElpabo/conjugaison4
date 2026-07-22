@@ -1,5 +1,7 @@
 <script setup lang="ts">
+const { interfaceLocale, ui } = useLanguagePreferences()
 import type { CoachProfile } from '~~/shared/types/coach'
+import { localizeCoachProfile, translateCoachUiText } from '~~/shared/i18n/coach-ui'
 import { coachPickerGroups } from '~~/shared/utils/coach-picker-groups'
 
 const emit = defineEmits<{ close: [], select: [coach: CoachProfile] }>()
@@ -7,14 +9,19 @@ const coaches = ref<CoachProfile[]>([])
 const loading = ref(true)
 const error = ref('')
 
-const coachGroups = computed(() => coachPickerGroups(coaches.value))
+const coachGroups = computed(() => coachPickerGroups(coaches.value.map(coach => localizeCoachProfile(interfaceLocale.value, coach)))
+  .map(group => ({
+    ...group,
+    label: translateCoachUiText(interfaceLocale.value, group.label),
+    description: translateCoachUiText(interfaceLocale.value, group.description),
+  })))
 
 onMounted(async () => {
   try {
     const response = await $fetch<{ coaches: CoachProfile[] }>('/api/coaches')
     coaches.value = response.coaches
   } catch {
-    error.value = 'Impossible de charger les coaches.'
+    error.value = ui('Impossible de charger les coaches.')
   } finally {
     loading.value = false
   }
@@ -26,32 +33,32 @@ onMounted(async () => {
     <div class="coach-picker-overlay" @click.self="emit('close')">
       <section class="coach-picker" role="dialog" aria-modal="true" aria-labelledby="coach-picker-title">
         <header>
-          <div><h2 id="coach-picker-title">Choisis ton coach</h2></div>
-          <button type="button" aria-label="Fermer" @click="emit('close')">×</button>
+          <div><h2 id="coach-picker-title">{{ ui('Choisis ton coach') }}</h2></div>
+          <button type="button" :aria-label="ui('Fermer')" @click="emit('close')">×</button>
         </header>
 
         <div class="coach-safety">
-          <strong>Ces coaches sont des personnages virtuels automatisés.</strong>
-          <p>Un avatar, un prénom ou un âge ne prouvent jamais l’identité d’une personne sur Internet. </p>
+          <strong>{{ ui('Ces coaches sont des personnages virtuels automatisés.') }}</strong>
+          <p>{{ ui('Un avatar, un prénom ou un âge ne prouvent jamais l’identité d’une personne sur Internet.') }} </p>
         </div>
 
-        <p v-if="loading" class="coach-picker__state">Chargement des coaches…</p>
+        <p v-if="loading" class="coach-picker__state">{{ ui('Chargement des coaches…') }}</p>
         <p v-else-if="error" class="coach-picker__state coach-picker__state--error">{{ error }}</p>
         <div v-else class="coach-picker__groups">
           <section v-for="group in coachGroups" :key="group.id" class="coach-caractere-group">
             <header class="coach-caractere-group__header">
-              <div><span>Type d’aide</span><h3>{{ group.label }}</h3><p>{{ group.description }}</p></div>
-              <small>{{ group.coaches.length }} coach{{ group.coaches.length > 1 ? 'es' : '' }}</small>
+              <div><span>{{ ui('Type d’aide') }}</span><h3>{{ group.label }}</h3><p>{{ group.description }}</p></div>
+              <small>{{ ui(group.coaches.length > 1 ? '{count} coaches' : '{count} coach', { count: group.coaches.length }) }}</small>
             </header>
             <div class="coach-picker__grid">
               <button v-for="coach in group.coaches" :key="coach.id" type="button" class="coach-card" :style="{ '--coach-color': coach.themeColor }" @click="emit('select', coach)">
-                <img :src="coach.avatarPath" :alt="`Avatar de ${coach.firstName}`">
+                <img :src="coach.avatarPath" :alt="ui('Avatar de {name}', { name: coach.firstName })">
                 <span>
                   <strong>{{ coach.firstName }}</strong>
                   <small class="coach-card__caractere-description">{{ coach.pedagogicalStyle }}</small>
                 </span>
                 <blockquote v-if="coach.description">« {{ coach.description }} »</blockquote>
-                <p v-if="coach.likes" class="coach-card__likes"><b>Aime&nbsp;:</b> {{ coach.likes }}</p>
+                <p v-if="coach.likes" class="coach-card__likes"><b>{{ ui('Aime :') }}</b> {{ coach.likes }}</p>
               </button>
             </div>
           </section>

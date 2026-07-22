@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { ui, uiLabel } = useLanguagePreferences()
 import { challengePresetGroupLabels, challengePresetGroupOrder } from '~~/shared/data/challenge-presets'
 import type { ChallengePreset, ConjugationMode, ConjugationTense, Verb } from '~~/shared/types/conjugation'
 
@@ -67,11 +68,11 @@ function infoTenseGroups(preset: ChallengePreset) {
     if (!tense) continue
     const mode = modeById.value.get(tense.modeId)
     const group = groups.get(tense.modeId) ?? {
-      mode: mode?.name ?? tense.mode?.name ?? 'Autres temps',
+      mode: uiLabel(mode?.name ?? tense.mode?.name ?? ui('Autres temps')),
       order: mode?.order ?? tense.mode?.order ?? Number.MAX_SAFE_INTEGER,
       tenses: [],
     }
-    group.tenses.push(tense.name)
+    group.tenses.push(uiLabel(tense.name))
     groups.set(tense.modeId, group)
   }
   return [...groups.values()].sort((left, right) => left.order - right.order || left.mode.localeCompare(right.mode, 'fr'))
@@ -155,7 +156,7 @@ function selectRandom(preset: ChallengePreset, count: number) {
       <div ref="compactBrowser" class="preset-browser__scroll">
         <div class="preset-browser__columns">
           <section class="preset-browser__column" data-browser-column="1" aria-labelledby="preset-browser-groups">
-            <h3 id="preset-browser-groups">Catégories</h3>
+            <h3 id="preset-browser-groups">{{ ui('Catégories') }}</h3>
             <div class="preset-browser__list">
               <button
                 v-for="group in groupedPresets"
@@ -181,14 +182,14 @@ function selectRandom(preset: ChallengePreset, count: number) {
                   <div class="preset-browser__info" data-preset-info>
                     <button class="preset-browser__info-button" type="button" :aria-expanded="infoIsOpen(preset.id)" :aria-controls="`preset-info-${preset.id}`" :aria-label="`Informations sur ${preset.label}`" @mouseenter="hoveredInfoPresetId = preset.id" @mouseleave="hoveredInfoPresetId = null" @click.stop="toggleInfo(preset.id)">i</button>
                     <section v-if="infoIsOpen(preset.id)" :id="`preset-info-${preset.id}`" class="preset-browser__tooltip" aria-live="polite">
-                      <header><strong>{{ preset.label }}</strong><span>{{ preset.questionCount }} questions</span></header>
+                      <header><strong>{{ preset.label }}</strong><span>{{ preset.questionCount }} {{ ui('questions') }}</span></header>
                       <div class="preset-browser__tooltip-section">
-                        <h4>Verbes</h4>
+                        <h4>{{ ui('Verbes') }}</h4>
                         <div class="preset-browser__verb-badges"><span v-for="verb in infoVerbNames(preset)" :key="verb">{{ verb }}</span></div>
-                        <p v-if="preset.verbIds.length > 12" class="preset-browser__other-verbs">+ {{ preset.verbIds.length - 12 }} autres verbes</p>
+                        <p v-if="preset.verbIds.length > 12" class="preset-browser__other-verbs">+ {{ preset.verbIds.length - 12 }} {{ ui('autres verbes') }}</p>
                       </div>
                       <div class="preset-browser__tooltip-section">
-                        <h4>Temps</h4>
+                        <h4>{{ ui('Temps') }}</h4>
                         <dl><div v-for="group in infoTenseGroups(preset)" :key="group.mode"><dt>{{ group.mode }}</dt><dd>{{ group.tenses.join(', ') }}</dd></div></dl>
                       </div>
                     </section>
@@ -202,36 +203,36 @@ function selectRandom(preset: ChallengePreset, count: number) {
           </Transition>
 
           <Transition name="browser-column">
-            <section v-if="selectedCompactPreset" :key="selectedCompactPreset.id" class="preset-browser__column preset-browser__column--quantity" data-browser-column="3" aria-label="Choisir le nombre de verbes">
+            <section v-if="selectedCompactPreset" :key="selectedCompactPreset.id" class="preset-browser__column preset-browser__column--quantity" data-browser-column="3" :aria-label="ui('Choisir le nombre de verbes')">
               <div class="preset-browser__list">
                 <button type="button" @click="selectCompactPreset(selectedCompactPreset)">
-                  <span><strong>Tous les verbes</strong></span>
+                  <span><strong>{{ ui('Tous les verbes') }}</strong></span>
                   <span class="preset-browser__count">{{ selectedCompactPreset.verbIds.length }}</span>
                   <span class="preset-browser__launch" aria-hidden="true">→</span>
                 </button>
                 <span class="preset-browser__quantity-separator" aria-hidden="true" />
                 <button v-if="selectedCompactPreset.verbIds.length >= 1 && selectedCompactPreset.verbIds.length < 5" type="button" @click="selectCompactPreset(selectedCompactPreset, 1)">
-                  <span><strong>1 au hasard</strong></span>
+                  <span><strong>{{ ui('1 au hasard') }}</strong></span>
                   <span class="preset-browser__count">1</span>
                   <span class="preset-browser__launch" aria-hidden="true">→</span>
                 </button>
                 <button v-if="selectedCompactPreset.verbIds.length >= 2 && selectedCompactPreset.verbIds.length < 5" type="button" @click="selectCompactPreset(selectedCompactPreset, 2)">
-                  <span><strong>2 au hasard</strong></span>
+                  <span><strong>{{ ui('2 au hasard') }}</strong></span>
                   <span class="preset-browser__count">2</span>
                   <span class="preset-browser__launch" aria-hidden="true">→</span>
                 </button>
                 <button v-if="selectedCompactPreset.verbIds.length >= 3" type="button" @click="selectCompactPreset(selectedCompactPreset, 3)">
-                  <span><strong>3 au hasard</strong></span>
+                  <span><strong>{{ ui('3 au hasard') }}</strong></span>
                   <span class="preset-browser__count">3</span>
                   <span class="preset-browser__launch" aria-hidden="true">→</span>
                 </button>
                 <button v-if="selectedCompactPreset.verbIds.length >= 5" type="button" @click="selectCompactPreset(selectedCompactPreset, 5)">
-                  <span><strong>5 au hasard</strong></span>
+                  <span><strong>{{ ui('5 au hasard') }}</strong></span>
                   <span class="preset-browser__count">5</span>
                   <span class="preset-browser__launch" aria-hidden="true">→</span>
                 </button>
                 <button v-if="selectedCompactPreset.verbIds.length >= 10" type="button" @click="selectCompactPreset(selectedCompactPreset, 10)">
-                  <span><strong>10 au hasard</strong></span>
+                  <span><strong>{{ ui('10 au hasard') }}</strong></span>
                   <span class="preset-browser__count">10</span>
                   <span class="preset-browser__launch" aria-hidden="true">→</span>
                 </button>
@@ -245,25 +246,24 @@ function selectRandom(preset: ChallengePreset, count: number) {
     <template v-else>
       <div class="preset-panel__intro">
         <div>
-          <p class="builder-card__eyebrow">Pour démarrer rapidement</p>
-          <h2 id="presets-title">Défis prêts à l’emploi</h2>
+          <p class="builder-card__eyebrow">{{ ui('Pour démarrer rapidement') }}</p>
+          <h2 id="presets-title">{{ ui('Défis prêts à l’emploi') }}</h2>
         </div>
-        <p>Choisissez un niveau ou une famille de verbes, puis ajustez librement la sélection.</p>
+        <p>{{ ui('Choisissez un niveau ou une famille de verbes, puis ajustez librement la sélection.') }}</p>
       </div>
 
       <label class="preset-mobile-select">
-        <span>Choisir un défi prêt à l’emploi</span>
+        <span>{{ ui('Choisir un défi prêt à l’emploi') }}</span>
         <select :value="activePresetId ?? mobilePresetId" @change="selectMobilePreset">
-          <option value="">Choisir un niveau ou un entraînement…</option>
+          <option value="">{{ ui('Choisir un niveau ou un entraînement…') }}</option>
           <optgroup v-for="group in groupedPresets" :key="group.id" :label="group.label">
             <option v-for="preset in group.presets" :key="preset.id" :value="preset.id">
-              {{ preset.label }} — {{ preset.verbIds.length }} verbes
-            </option>
+              {{ preset.label }} — {{ preset.verbIds.length }} {{ ui('verbes') }} </option>
           </optgroup>
         </select>
       </label>
 
-      <div class="preset-groups" role="tablist" aria-label="Catégories de défis">
+      <div class="preset-groups" role="tablist" :aria-label="ui('Catégories de défis')">
         <button
           v-for="(group, index) in groupedPresets"
           :id="`preset-tab-${group.id}`"
@@ -298,11 +298,9 @@ function selectRandom(preset: ChallengePreset, count: number) {
           <button type="button" @click="emit('select', preset)">
             <strong>{{ preset.label }}</strong>
             <span>{{ preset.description }}</span>
-            <small>{{ preset.verbIds.length }} verbes · {{ preset.questionCount }} questions</small>
+            <small>{{ preset.verbIds.length }} verbes · {{ preset.questionCount }} {{ ui('questions') }}</small>
           </button>
-          <div v-if="preset.verbIds.length > 5" class="preset-card__random">
-            Au hasard :
-            <button type="button" @click="selectRandom(preset, 1)">1</button>
+          <div v-if="preset.verbIds.length > 5" class="preset-card__random"> {{ ui('Au hasard :') }} <button type="button" @click="selectRandom(preset, 1)">1</button>
             <button type="button" @click="selectRandom(preset, 5)">5</button>
             <button type="button" @click="selectRandom(preset, 10)">10</button>
           </div>

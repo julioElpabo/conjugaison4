@@ -14,9 +14,12 @@ describe('fondation multilingue', () => {
     assert.equal(normalizeLocale('nl'), 'fr')
   })
 
-  it('retombe toujours sur le français tant qu’une traduction manque', () => {
+  it('conserve le français en repli et traduit les messages communs', () => {
     assert.deepEqual(localeFallbacks('it'), ['it', 'fr'])
-    assert.equal(translateAppMessage('de', 'common.close'), 'Fermer')
+    assert.equal(translateAppMessage('de', 'common.close'), 'Schließen')
+    assert.equal(translateAppMessage('en', 'common.close'), 'Close')
+    assert.equal(translateAppMessage('it', 'common.close'), 'Chiudi')
+    assert.equal(translateAppMessage('es', 'common.close'), 'Cerrar')
   })
 
   it('dissocie les identifiants grammaticaux des libellés français', () => {

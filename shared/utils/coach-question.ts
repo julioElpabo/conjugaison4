@@ -67,11 +67,11 @@ function answerBlank(wordCount: number) {
   )).join(COMPOUND_TENSE_GAP)
 }
 
-export function coachQuestionBubbles(question: ExerciseQuestion, options: { omitIndicativeMode?: boolean } = {}): CoachQuestionBubbles {
+export function coachQuestionBubbles(question: ExerciseQuestion, options: { omitIndicativeMode?: boolean, modeLabel?: string, tenseLabel?: string } = {}): CoachQuestionBubbles {
   const sentenceTemplate = question.consigne.split('|')[0]?.trim() || ''
   const formulaPronoun = question.pronom
   const answerPronoun = normalized(question.mode) === 'imperatif' ? '' : question.pronom
-  const modeAndTense = [options.omitIndicativeMode ? '' : question.mode, question.temps].filter(Boolean).join(' ')
+  const modeAndTense = [options.omitIndicativeMode ? '' : options.modeLabel || question.mode, options.tenseLabel || question.temps].filter(Boolean).join(' ')
   const formula = [formulaPronoun, question.infinitif, modeAndTense].filter(Boolean).join(' | ')
   if (!formula) return { formula: question.consigne }
 

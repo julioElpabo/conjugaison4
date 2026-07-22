@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { ui, uiLabel } = useLanguagePreferences()
 import type { ExerciseQuestion } from '~~/shared/types/conjugation'
 import type { ExerciseKind, PrintOptions, Tense, Verb } from '~/composables/useChallengeBuilder'
 import { TENSE_IDENTIFICATION_INSTRUCTION } from '~~/shared/utils/exercise-instructions'
@@ -108,7 +109,7 @@ function capitalizePrintText(value: unknown) {
 }
 
 function pdfFileName() {
-  const title = props.options.title || 'Défi de conjugaison'
+  const title = props.options.title || ui('Défi de conjugaison')
   const safeTitle = title.normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-zA-Z0-9_-]+/g, '-')
@@ -123,7 +124,7 @@ async function buildPdf() {
     const pageHeight = 297
     const left = 17
     const right = 193
-    const title = pdfSafe(props.options.title || 'Défi de conjugaison')
+    const title = pdfSafe(props.options.title || ui('Défi de conjugaison'))
     const identifier = props.options.showRandomNumber ? ` n° ${sheetNumber}` : ''
     let pageCount = 0
 
@@ -151,9 +152,9 @@ async function buildPdf() {
       }
       let y = 18
       const identity = [
-        props.options.showFirstName ? 'Prénom : ____________________' : '',
-        props.options.showLastName ? 'Nom : ____________________' : '',
-        props.options.showDate ? 'Date : ______________' : '',
+        props.options.showFirstName ? `${ui('Prénom')} : ____________________` : '',
+        props.options.showLastName ? `${ui('Nom')} : ____________________` : '',
+        props.options.showDate ? `${ui('Date')} : ______________` : '',
       ].filter(Boolean)
       if (identity.length) {
         pdf.setFont('helvetica', 'normal')
@@ -178,7 +179,7 @@ async function buildPdf() {
         y += lines.length * 4.5 + 2
       }
       if (props.options.showTenses) {
-        const lines = pdf.splitTextToSize(`Temps : ${pdfSafe(props.tenses.map(tense => tense.name).join(', '))}`, 176)
+        const lines = pdf.splitTextToSize(`${ui('Temps :')} ${pdfSafe(props.tenses.map(tense => uiLabel(tense.name)).join(', '))}`, 176)
         pdf.text(lines, left, y)
         y += lines.length * 4.5 + 2
       }
@@ -203,7 +204,7 @@ async function buildPdf() {
       pdf.setFont('helvetica', 'bold')
       pdf.setFontSize(17)
       pdf.setTextColor(20, 20, 20)
-      pdf.text(`CORRIGÉ${identifier}`, left, 26)
+      pdf.text(`${ui('CORRIGÉ')}${identifier}`, left, 26)
       return 38
     }
 
@@ -343,8 +344,8 @@ async function refreshPdfPreview() {
     pdfPreviewUrl.value = URL.createObjectURL(blob)
   } catch (error) {
     if (generation !== pdfPreviewGeneration) return
-    console.error('Impossible de générer l’aperçu PDF.', error)
-    pdfPreviewError.value = 'L’aperçu PDF n’a pas pu être créé.'
+    console.error(ui('Impossible de générer l’aperçu PDF.'), error)
+    pdfPreviewError.value = ui('L’aperçu PDF n’a pas pu être créé.')
   } finally {
     if (generation === pdfPreviewGeneration) isPdfPreviewBusy.value = false
   }
@@ -407,7 +408,7 @@ async function downloadWord() {
       WidthType,
     } = await import('docx')
 
-    const title = props.options.title || 'Défi de conjugaison'
+    const title = props.options.title || ui('Défi de conjugaison')
     const identifier = props.options.showRandomNumber ? ` n° ${sheetNumber}` : ''
     const contentWidth = 9975
     const pageMargins = { top: 1020, right: 965, bottom: 850, left: 965, header: 360, footer: 360, gutter: 0 }
@@ -469,9 +470,9 @@ async function downloadWord() {
 
     const identityCells: InstanceType<typeof TableCell>[] = []
     const identityValues = [
-      props.options.showFirstName ? 'Prénom : ____________________' : '',
-      props.options.showLastName ? 'Nom : ____________________' : '',
-      props.options.showDate ? 'Date : ______________' : '',
+      props.options.showFirstName ? `${ui('Prénom')} : ____________________` : '',
+      props.options.showLastName ? `${ui('Nom')} : ____________________` : '',
+      props.options.showDate ? `${ui('Date')} : ______________` : '',
     ].filter(Boolean)
     const gradeWidth = props.options.showGrade ? 965 : 0
     const identityWidth = identityValues.length > 0 ? Math.floor((contentWidth - gradeWidth) / identityValues.length) : contentWidth - gradeWidth
@@ -509,7 +510,7 @@ async function downloadWord() {
       ]
     }))
     if (props.options.showVerbs) exerciseChildren.push(paragraph(`Verbes : ${props.verbs.map(verb => verb.infinitif).join(', ')}`, { bold: true, size: 19 }))
-    if (props.options.showTenses) exerciseChildren.push(paragraph(`Temps : ${props.tenses.map(tense => tense.name).join(', ')}`, { bold: true, size: 19 }))
+    if (props.options.showTenses) exerciseChildren.push(paragraph(`${ui('Temps :')} ${props.tenses.map(tense => uiLabel(tense.name)).join(', ')}`, { bold: true, size: 19 }))
     if (props.exerciseKind === 'tense-identification') {
       exerciseChildren.push(new Paragraph({
         spacing: { before: 160, after: 160 },
@@ -540,7 +541,7 @@ async function downloadWord() {
       new Paragraph({
         spacing: { before: 0, after: 260 },
         children: [
-          new TextRun({ text: 'CORRIGÉ', bold: true, size: 34, font: 'Arial' }),
+          new TextRun({ text: ui('CORRIGÉ'), bold: true, size: 34, font: 'Arial' }),
           new TextRun({ text: identifier, size: 18, font: 'Arial' })
         ]
       }),
@@ -606,10 +607,10 @@ async function downloadWord() {
     <div ref="print-dialog" class="print-overlay" role="dialog" aria-modal="true" aria-labelledby="print-preview-title" tabindex="-1">
       <div class="print-toolbar no-print">
         <div>
-          <strong id="print-preview-title">Aperçu avant impression</strong>
+          <strong id="print-preview-title">{{ ui('Aperçu avant impression') }}</strong>
         </div>
         <div>
-          <button class="secondary-button" type="button" @click="emit('close')">Fermer</button>
+          <button class="secondary-button" type="button" @click="emit('close')">{{ ui('Fermer') }}</button>
           <button class="secondary-button" type="button" :disabled="isWordBusy" @click="downloadWord">
             {{ isWordBusy ? 'Création du fichier Word…' : 'Télécharger au format Word' }}
           </button>
@@ -622,13 +623,13 @@ async function downloadWord() {
       <div class="print-preview-layout">
         <aside class="print-settings no-print" aria-labelledby="print-settings-title">
           <div class="print-settings__heading">
-            <p>Personnalisation</p>
-            <h2 id="print-settings-title">Options de la fiche</h2>
-            <span>Les changements apparaissent immédiatement dans l’aperçu.</span>
+            <p>{{ ui('Personnalisation') }}</p>
+            <h2 id="print-settings-title">{{ ui('Options de la fiche') }}</h2>
+            <span>{{ ui('Les changements apparaissent immédiatement dans l’aperçu.') }}</span>
           </div>
 
           <label class="print-settings__field" for="preview-print-title">
-            <span>Titre de la fiche</span>
+            <span>{{ ui('Titre de la fiche') }}</span>
             <input
               id="preview-print-title"
               type="text"
@@ -638,9 +639,9 @@ async function downloadWord() {
           </label>
 
           <fieldset class="print-settings__group">
-            <legend>Mise en page</legend>
+            <legend>{{ ui('Mise en page') }}</legend>
             <label class="print-settings__number-field" for="preview-title-spacing">
-              <span>Espace avant le titre</span>
+              <span>{{ ui('Espace avant le titre') }}</span>
               <span>
                 <input
                   id="preview-title-spacing"
@@ -655,7 +656,7 @@ async function downloadWord() {
               </span>
             </label>
             <label class="print-settings__number-field" for="preview-question-spacing">
-              <span>Espacement entre les questions</span>
+              <span>{{ ui('Espacement entre les questions') }}</span>
               <span>
                 <input
                   id="preview-question-spacing"
@@ -672,38 +673,38 @@ async function downloadWord() {
           </fieldset>
 
           <fieldset class="print-settings__group">
-            <legend>Informations de l’élève</legend>
+            <legend>{{ ui('Informations de l’élève') }}</legend>
             <label>
               <input type="checkbox" :checked="options.showFirstName" @change="setPrintOption('showFirstName', ($event.target as HTMLInputElement).checked)">
-              <span>Prénom</span>
+              <span>{{ ui('Prénom') }}</span>
             </label>
             <label>
               <input type="checkbox" :checked="options.showLastName" @change="setPrintOption('showLastName', ($event.target as HTMLInputElement).checked)">
-              <span>Nom</span>
+              <span>{{ ui('Nom') }}</span>
             </label>
             <label>
               <input type="checkbox" :checked="options.showDate" @change="setPrintOption('showDate', ($event.target as HTMLInputElement).checked)">
-              <span>Date</span>
+              <span>{{ ui('Date') }}</span>
             </label>
             <label>
               <input type="checkbox" :checked="options.showGrade" @change="setPrintOption('showGrade', ($event.target as HTMLInputElement).checked)">
-              <span>Espace pour la note</span>
+              <span>{{ ui('Espace pour la note') }}</span>
             </label>
           </fieldset>
 
           <fieldset class="print-settings__group">
-            <legend>Contenu affiché</legend>
+            <legend>{{ ui('Contenu affiché') }}</legend>
             <label>
               <input type="checkbox" :checked="options.showVerbs" @change="setPrintOption('showVerbs', ($event.target as HTMLInputElement).checked)">
-              <span>Liste des verbes</span>
+              <span>{{ ui('Liste des verbes') }}</span>
             </label>
             <label>
               <input type="checkbox" :checked="options.showTenses" @change="setPrintOption('showTenses', ($event.target as HTMLInputElement).checked)">
-              <span>Liste des temps</span>
+              <span>{{ ui('Liste des temps') }}</span>
             </label>
             <label>
               <input type="checkbox" :checked="options.showRandomNumber" @change="setPrintOption('showRandomNumber', ($event.target as HTMLInputElement).checked)">
-              <span>Numéro questionnaire/corrigé</span>
+              <span>{{ ui('Numéro questionnaire/corrigé') }}</span>
             </label>
           </fieldset>
         </aside>
@@ -713,7 +714,7 @@ async function downloadWord() {
             v-if="pdfPreviewUrl"
             class="pdf-preview-frame"
             :src="`${pdfPreviewUrl}#view=FitH&toolbar=1&navpanes=0`"
-            title="Aperçu exact de la fiche PDF et de son corrigé"
+            :title="ui('Aperçu exact de la fiche PDF et de son corrigé')"
             @load="isPdfPreviewFrameReady = true"
           />
           <div
@@ -723,12 +724,12 @@ async function downloadWord() {
             aria-live="polite"
           >
             <span class="pdf-preview-spinner" aria-hidden="true" />
-            <strong>Création de l’aperçu PDF…</strong>
-            <span>La fiche et le corrigé sont mis en page.</span>
+            <strong>{{ ui('Création de l’aperçu PDF…') }}</strong>
+            <span>{{ ui('La fiche et le corrigé sont mis en page.') }}</span>
           </div>
           <div v-if="pdfPreviewError" class="pdf-preview-state pdf-preview-state--error" role="alert">
             <strong>{{ pdfPreviewError }}</strong>
-            <button class="secondary-button" type="button" @click="refreshPdfPreview">Réessayer</button>
+            <button class="secondary-button" type="button" @click="refreshPdfPreview">{{ ui('Réessayer') }}</button>
           </div>
         </main>
       </div>

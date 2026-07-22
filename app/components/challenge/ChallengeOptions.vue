@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { ui } = useLanguagePreferences()
 import type { ComplementOption, ExerciseKind, Verb } from '~/composables/useChallengeBuilder'
 
 const props = defineProps<{
@@ -184,7 +185,7 @@ watch(complementsAvailable, (available) => {
     <div class="builder-card__header">
       <div>
         <p class="builder-card__eyebrow">{{ eyebrow ?? 'Étape 3' }}</p>
-        <h2 :id="optionsTitleId">Mes options</h2>
+        <h2 :id="optionsTitleId">{{ ui('Mes options') }}</h2>
       </div>
     </div>
 
@@ -192,7 +193,7 @@ watch(complementsAvailable, (available) => {
     <div class="options-fields" :class="{ 'options-fields--columns': gridLayout }">
       <div class="options-main-column">
         <label class="field-stack question-count-field" :for="questionCountId">
-          <span>Nombre de questions</span>
+          <span>{{ ui('Nombre de questions') }}</span>
           <input
             :id="questionCountId"
             type="number"
@@ -211,14 +212,13 @@ watch(complementsAvailable, (available) => {
             :checked="inclusivePronouns"
             @change="emit('updateInclusivePronouns', ($event.target as HTMLInputElement).checked)"
           >
-          <span>
-            Inclure les pronoms <strong>iel / iels</strong>
-            <small>Ils apparaîtront ponctuellement dans les questions.</small>
+          <span> {{ ui('Inclure les pronoms') }} <strong>iel / iels</strong>
+            <small>{{ ui('Ils apparaîtront ponctuellement dans les questions.') }}</small>
           </span>
         </label>
 
         <fieldset class="option-fieldset">
-          <legend>Type d’exercice</legend>
+          <legend>{{ ui('Type d’exercice') }}</legend>
           <div class="segmented-control">
             <label>
               <input
@@ -228,7 +228,7 @@ watch(complementsAvailable, (available) => {
                 :checked="exerciseKind === 'conjugation'"
                 @change="onExerciseKindChange"
               >
-              <span>Conjuguer</span>
+              <span>{{ ui('Conjuguer') }}</span>
             </label>
             <label>
               <input
@@ -238,7 +238,7 @@ watch(complementsAvailable, (available) => {
                 :checked="exerciseKind === 'tense-identification'"
                 @change="onExerciseKindChange"
               >
-              <span>Trouver le mode et le temps</span>
+              <span>{{ ui('Trouver le mode et le temps') }}</span>
             </label>
           </div>
         </fieldset>
@@ -253,8 +253,8 @@ watch(complementsAvailable, (available) => {
         }"
         :aria-hidden="gridLayout && exerciseKind === 'tense-identification' ? 'true' : undefined"
       >
-      <h3 v-if="gridLayout" class="complement-options__title">Compléments d’objets&nbsp;:</h3>
-      <p v-if="gridLayout" class="complement-options__description">Ajoute des compléments d’objets directs ou indirects.</p>
+      <h3 v-if="gridLayout" class="complement-options__title">{{ ui('Compléments d’objets :') }}</h3>
+      <p v-if="gridLayout" class="complement-options__description">{{ ui('Ajoute des compléments d’objets directs ou indirects.') }}</p>
       <button
         v-else
         class="complement-options__trigger"
@@ -264,7 +264,7 @@ watch(complementsAvailable, (available) => {
         :aria-controls="complementPanelId"
         @click="complementsOpen = !complementsOpen"
       >
-        <span>Compléments d’objets&nbsp;: <small>nouveau</small></span>
+        <span>{{ ui('Compléments d’objets :') }} <small>{{ ui('nouveau') }}</small></span>
         <span aria-hidden="true">{{ complementsOpen ? '−' : '+' }}</span>
       </button>
       <p v-if="!complementsAvailable" class="complement-options__unavailable">
@@ -275,22 +275,22 @@ watch(complementsAvailable, (available) => {
 
       <Transition name="complement-panel">
         <fieldset v-if="gridLayout || complementsOpen" :id="complementPanelId" class="complement-options__panel">
-          <legend class="sr-only">Présentation des compléments d’objets</legend>
+          <legend class="sr-only">{{ ui('Présentation des compléments d’objets') }}</legend>
           <label>
             <input type="checkbox" :disabled="!complementsAvailable || !codAvailable" :checked="displayedComplementOptions.includes('cod-after')" @change="toggleComplementOption('cod-after', ($event.target as HTMLInputElement).checked)">
-            <span><strong>COD placé après</strong></span>
+            <span><strong>{{ ui('COD placé après') }}</strong></span>
           </label>
           <label>
             <input type="checkbox" :disabled="!complementsAvailable || !codBeforeAvailable" :checked="displayedComplementOptions.includes('cod-before')" @change="toggleComplementOption('cod-before', ($event.target as HTMLInputElement).checked)">
-            <span><strong>COD placé avant</strong></span>
+            <span><strong>{{ ui('COD placé avant') }}</strong></span>
           </label>
           <label>
             <input type="checkbox" :disabled="!complementsAvailable || !coiAvailable" :checked="displayedComplementOptions.includes('coi-after')" @change="toggleComplementOption('coi-after', ($event.target as HTMLInputElement).checked)">
-            <span><strong>COI placé après</strong></span>
+            <span><strong>{{ ui('COI placé après') }}</strong></span>
           </label>
           <label>
             <input type="checkbox" :disabled="!complementsAvailable || !coiBeforeAvailable" :checked="displayedComplementOptions.includes('coi-before')" @change="toggleComplementOption('coi-before', ($event.target as HTMLInputElement).checked)">
-            <span><strong>COI placé avant</strong></span>
+            <span><strong>{{ ui('COI placé avant') }}</strong></span>
           </label>
         </fieldset>
       </Transition>
@@ -312,20 +312,20 @@ watch(complementsAvailable, (available) => {
           </svg>
         </span>
         <div class="conjugation-example__heading">
-          <span>Aperçu d’une question</span>
+          <span>{{ ui('Aperçu d’une question') }}</span>
         </div>
       </div>
 
       <div class="conjugation-example__screen">
         <div v-if="conjugationExampleLoading" class="conjugation-example__loading" role="status">
           <span class="conjugation-example__spinner" aria-hidden="true" />
-          <span class="sr-only">Préparation de l’aperçu</span>
+          <span class="sr-only">{{ ui('Préparation de l’aperçu') }}</span>
         </div>
 
         <div v-else class="conjugation-example__body">
           <Transition name="example-item">
             <div v-if="exampleRevealStage >= 1" class="conjugation-example__question">
-              <span class="conjugation-example__block-label">Exemple de question</span>
+              <span class="conjugation-example__block-label">{{ ui('Exemple de question') }}</span>
               <p v-if="exerciseKind === 'tense-identification' && conjugationInstruction && conjugationQuestion" class="conjugation-example__question-line">
                 <span class="conjugation-example__context">{{ conjugationInstruction }}</span>
                 <span class="conjugation-example__question-separator" aria-hidden="true">—</span>
@@ -342,7 +342,7 @@ watch(complementsAvailable, (available) => {
 
           <Transition name="example-item">
             <div v-if="exampleRevealStage >= 2" class="conjugation-example__correction">
-              <span>Réponse attendue</span>
+              <span>{{ ui('Réponse attendue') }}</span>
               <p>
                 <template v-if="conjugationExampleEmphasis">
                   <span>{{ conjugationExamplePrefix }}</span><strong>{{ conjugationExampleEmphasis }}</strong><span>{{ conjugationExampleSuffix }}</span>

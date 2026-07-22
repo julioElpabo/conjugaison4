@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { ui } = useLanguagePreferences()
 const props = defineProps<{
   code: string
   url: string
@@ -37,37 +38,37 @@ function highlightChallengeLoaderOnHome() {
   <Teleport to="body">
     <div class="dialog-backdrop" @click.self="emit('close')">
       <section ref="share-dialog" class="app-dialog share-dialog" role="dialog" aria-modal="true" aria-labelledby="share-title" tabindex="-1">
-        <button ref="close-button" class="dialog-close" type="button" aria-label="Fermer" @click="emit('close')">
+        <button ref="close-button" class="dialog-close" type="button" :aria-label="ui('Fermer')" @click="emit('close')">
           ×
         </button>
-        <p class="dialog-kicker">Défi sauvegardé</p>
-        <h2 id="share-title">Votre défi est prêt à être partagé</h2>
-        <p>Deux possibilités permettent à vos élèves de retrouver ce défi.</p>
+        <p class="dialog-kicker">{{ ui('Défi sauvegardé') }}</p>
+        <h2 id="share-title">{{ ui('Votre défi est prêt à être partagé') }}</h2>
+        <p>{{ ui('Deux possibilités permettent à vos élèves de retrouver ce défi.') }}</p>
 
         <div class="share-methods">
           <section class="share-method" aria-labelledby="share-code-title">
             <header>
               <span class="share-method__number" aria-hidden="true">1</span>
               <div>
-                <h3 id="share-code-title">Sauvegarder le code</h3>
-                <p>L’élève conserve ce code. Plus tard, il le copie sur la page d’accueil pour retrouver ce défi.</p>
-                <p class="share-method__tip">Idéal pour transmettre le défi par écrit</p>
+                <h3 id="share-code-title">{{ ui('Sauvegarder le code') }}</h3>
+                <p>{{ ui('L’élève conserve ce code. Plus tard, il le copie sur la page d’accueil pour retrouver ce défi.') }}</p>
+                <p class="share-method__tip">{{ ui('Idéal pour transmettre le défi par écrit') }}</p>
               </div>
             </header>
             <div class="share-value">
-              <label for="share-code">Code à conserver</label>
+              <label for="share-code">{{ ui('Code à conserver') }}</label>
               <div>
                 <input id="share-code" :value="code" readonly @focus="($event.target as HTMLInputElement).select()">
-                <button type="button" @click="copy(code, 'Code')">Copier</button>
+                <button type="button" @click="copy(code, 'Code')">{{ ui('Copier') }}</button>
               </div>
               <div class="share-help">
-                <button type="button" class="share-help__trigger" aria-describedby="reload-help-tooltip">Comment le recharger plus tard&nbsp;?</button>
+                <button type="button" class="share-help__trigger" aria-describedby="reload-help-tooltip">{{ ui('Comment le recharger plus tard ?') }}</button>
                 <div id="reload-help-tooltip" class="share-help__tooltip" role="tooltip">
                   <div class="share-help__preview">
-                    <img src="/images/recharger-defi.svg?v=dynamic-code" alt="Emplacement du code reçu sur la page d’accueil">
+                    <img src="/images/recharger-defi.svg?v=dynamic-code" :alt="ui('Emplacement du code reçu sur la page d’accueil')">
                     <span aria-hidden="true">{{ code }}</span>
                   </div>
-                  <p>Tes élèves colleront le code à cet endroit dans la <a href="/" @click="highlightChallengeLoaderOnHome">page d’accueil</a></p>
+                  <p>Tes élèves colleront le code à cet endroit dans la <a href="/" @click="highlightChallengeLoaderOnHome">{{ ui('page d’accueil') }}</a></p>
                 </div>
               </div>
             </div>
@@ -77,23 +78,23 @@ function highlightChallengeLoaderOnHome() {
             <header>
               <span class="share-method__number" aria-hidden="true">2</span>
               <div>
-                <h3 id="share-link-title">Envoyer le lien direct</h3>
-                <p>L’élève clique simplement sur ce lien&nbsp;: il arrive directement sur le défi, sans saisir le code.</p>
-                <p class="share-method__tip">Idéal pour transmettre le défi par email</p>
+                <h3 id="share-link-title">{{ ui('Envoyer le lien direct') }}</h3>
+                <p>{{ ui('L’élève clique simplement sur ce lien : il arrive directement sur le défi, sans saisir le code.') }}</p>
+                <p class="share-method__tip">{{ ui('Idéal pour transmettre le défi par email') }}</p>
               </div>
             </header>
             <div class="share-value">
-              <label for="share-url">Lien à envoyer</label>
+              <label for="share-url">{{ ui('Lien à envoyer') }}</label>
               <div>
                 <input id="share-url" :value="url" readonly @focus="($event.target as HTMLInputElement).select()">
-                <button type="button" @click="copy(url, 'Lien')">Copier</button>
+                <button type="button" @click="copy(url, 'Lien')">{{ ui('Copier') }}</button>
               </div>
             </div>
           </section>
         </div>
 
         <p class="copy-status" aria-live="polite">{{ copyStatus }}</p>
-        <button class="primary-button" type="button" @click="emit('close')">Terminé</button>
+        <button class="primary-button" type="button" @click="emit('close')">{{ ui('Terminé') }}</button>
       </section>
     </div>
   </Teleport>

@@ -1,9 +1,19 @@
 <script setup lang="ts">
+import type { AppLocale } from '~~/shared/i18n/locales'
+
+const { ui, interfaceLocale, setInterfaceLocale } = useLanguagePreferences()
 const route = useRoute()
 const { applyTheme } = useColorTheme()
 const isDark = ref(false)
 const isAdminRoute = computed(() => route.path === '/admin' || route.path.startsWith('/admin/'))
-const themeSwitchTitle = computed(() => isDark.value ? 'Activer le mode clair' : 'Activer le mode sombre')
+const themeSwitchTitle = computed(() => isDark.value ? ui('Activer le mode clair') : ui('Activer le mode sombre'))
+const languageOptions = computed<{ value: AppLocale, label: string, flag: string }[]>(() => [
+  { value: 'fr', label: ui('Français'), flag: '🇫🇷' },
+  { value: 'de', label: ui('Allemand'), flag: '🇩🇪' },
+  { value: 'en', label: ui('Anglais'), flag: '🇬🇧' },
+  { value: 'it', label: ui('Italien'), flag: '🇮🇹' },
+  { value: 'es', label: ui('Espagnol'), flag: '🇪🇸' },
+])
 const homeResetRequested = useState('home-reset-requested', () => false)
 
 onMounted(() => {
@@ -37,24 +47,32 @@ const activeSection = computed(() => {
       <div class="site-header__inner">
         <a class="site-brand" href="/">
           <strong>TATITOTU</strong>
-          <span>Défis de conjugaison</span>
+          <span>{{ ui('Défis de conjugaison') }}</span>
         </a>
-        <nav class="site-navigation" aria-label="Navigation principale">
-          <NuxtLink class="site-navigation__home" to="/" aria-label="Accueil" title="Accueil" @click="requestHomeReset">
+        <nav class="site-navigation" :aria-label="ui('Navigation principale')">
+          <NuxtLink class="site-navigation__home" to="/" :aria-label="ui('Accueil')" :title="ui('Accueil')" @click="requestHomeReset">
             <svg aria-hidden="true" viewBox="0 0 24 24">
               <path d="M3 11.2 12 4l9 7.2" />
               <path d="M5.5 10.7V20h4.8v-5.4h3.4V20h4.8v-9.3" />
             </svg>
           </NuxtLink>
-          <NuxtLink to="/" :class="{ 'is-active': activeSection === 'exercer' }" :aria-current="activeSection === 'exercer' ? 'page' : undefined">
-            S’exercer
-          </NuxtLink>
-          <NuxtLink to="/consulter" :class="{ 'is-active': activeSection === 'consulter' }" :aria-current="activeSection === 'consulter' ? 'page' : undefined">
-            Consulter
-          </NuxtLink>
-          <NuxtLink to="/apprendre" :class="{ 'is-active': activeSection === 'apprendre' }" :aria-current="activeSection === 'apprendre' ? 'page' : undefined">
-            Apprendre
-          </NuxtLink>
+          <NuxtLink to="/" :class="{ 'is-active': activeSection === 'exercer' }" :aria-current="activeSection === 'exercer' ? 'page' : undefined"> {{ ui('S’exercer') }} </NuxtLink>
+          <NuxtLink to="/consulter" :class="{ 'is-active': activeSection === 'consulter' }" :aria-current="activeSection === 'consulter' ? 'page' : undefined"> {{ ui('Consulter') }} </NuxtLink>
+          <NuxtLink to="/apprendre" :class="{ 'is-active': activeSection === 'apprendre' }" :aria-current="activeSection === 'apprendre' ? 'page' : undefined"> {{ ui('Apprendre') }} </NuxtLink>
+          <div class="language-selector" role="group" :aria-label="ui('Langue de l’interface')">
+            <button
+              v-for="option in languageOptions"
+              :key="option.value"
+              type="button"
+              :class="{ 'is-active': interfaceLocale === option.value }"
+              :aria-label="option.label"
+              :aria-pressed="interfaceLocale === option.value"
+              :title="option.label"
+              @click="setInterfaceLocale(option.value)"
+            >
+              <span aria-hidden="true">{{ option.flag }}</span>
+            </button>
+          </div>
           <button
             class="theme-switch"
             :class="{ 'is-dark': isDark }"
@@ -82,10 +100,10 @@ const activeSection = computed(() => {
     </main>
 
     <footer class="site-footer">
-      <p>Un outil gratuit pour travailler la conjugaison française.</p>
+      <p>{{ ui('Un outil gratuit pour travailler la conjugaison française.') }}</p>
       <div class="site-footer__links">
-        <a href="mailto:christophe.roulet@edu-vd.ch">Contact</a>
-        <NuxtLink to="/admin">Administration</NuxtLink>
+        <a href="mailto:christophe.roulet@edu-vd.ch">{{ ui('Contact') }}</a>
+        <NuxtLink to="/admin">{{ ui('Administration') }}</NuxtLink>
       </div>
     </footer>
   </div>
@@ -258,6 +276,68 @@ a {
   background: rgb(112 210 232 / 17%);
 }
 
+.language-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  color: #eaf4f7;
+  background: #455b6c;
+  border: 1px solid rgb(255 255 255 / 22%);
+  border-radius: 999px;
+}
+
+.language-selector button {
+  display: grid;
+  width: 1.85rem;
+  height: 1.65rem;
+  padding: 0;
+  place-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  filter: saturate(.78);
+  opacity: .68;
+  transition: background-color 150ms ease, filter 150ms ease, opacity 150ms ease, transform 150ms ease;
+}
+
+.language-selector button:hover {
+  background: rgb(255 255 255 / 10%);
+  filter: saturate(1);
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.language-selector button.is-active {
+  background: rgb(255 255 255 / 18%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 30%);
+  filter: saturate(1.08);
+  opacity: 1;
+}
+
+.language-selector button:focus-visible {
+  outline: 3px solid rgb(112 210 232 / 55%);
+  outline-offset: 2px;
+}
+
+.language-selector button span {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  padding: 0;
+  margin: -1px;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
 .theme-switch {
   position: relative;
   width: 3.9rem;
@@ -385,7 +465,7 @@ a {
     display: grid;
     width: 100%;
     flex: 1 1 100%;
-    grid-template-columns: auto repeat(3, minmax(0, 1fr)) auto;
+    grid-template-columns: auto repeat(3, minmax(0, 1fr));
     justify-content: center;
     order: 2;
   }
@@ -401,7 +481,21 @@ a {
     width: 38px;
   }
 
-  .theme-switch { margin-left: 2px; }
+  .language-selector {
+    width: max-content;
+    grid-column: 1 / 4;
+    justify-self: end;
+  }
+
+  .language-selector button {
+    width: 1.7rem;
+  }
+
+  .theme-switch {
+    grid-column: 4;
+    justify-self: end;
+    margin-left: 2px;
+  }
 
   .site-main {
     width: min(100% - 20px, 1180px);

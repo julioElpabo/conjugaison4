@@ -1542,7 +1542,8 @@ function targetedWarnings(question: ExerciseQuestion, verb?: Verb) {
 }
 
 export function isHelpCommand(value: string) {
-  return normalized(value).replace(/[\s.!?…,:;]+$/g, '') === 'aide'
+  return new Set(['aide', 'hilfe', 'help', 'aiuto', 'ayuda'])
+    .has(normalized(value).replace(/[\s.!?…,:;]+$/g, ''))
 }
 
 export function buildTargetedConjugationHelp(

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { ui } = useLanguagePreferences()
 import type { CoachProfile } from '~~/shared/types/coach'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faArrowUpFromBracket } from '@fortawesome/free-solid-svg-icons'
@@ -33,12 +34,12 @@ onMounted(async () => {
   <section class="challenge-launch" aria-labelledby="launch-title">
     <div class="challenge-launch__heading">
       <div>
-        <p class="builder-card__eyebrow">Ton défi est prêt</p>
-        <h2 id="launch-title">Comment veux-tu l’utiliser&nbsp;?</h2>
+        <p class="builder-card__eyebrow">{{ ui('Ton défi est prêt') }}</p>
+        <h2 id="launch-title">{{ ui('Comment veux-tu l’utiliser ?') }}</h2>
       </div>
     </div>
 
-    <div class="challenge-actions" aria-label="Lancer le défi">
+    <div class="challenge-actions" :aria-label="ui('Lancer le défi')">
       <button
         class="action-button action-button--primary"
         type="button"
@@ -47,8 +48,8 @@ onMounted(async () => {
       >
         <span class="action-button__icon" aria-hidden="true">●</span>
         <span>
-          <strong>{{ busyAction === 'exercise' ? 'Préparation…' : 'Classique' }}</strong>
-          <small>Questions et correction immédiate</small>
+          <strong>{{ busyAction === 'exercise' ? ui('Préparation…') : ui('Classique') }}</strong>
+          <small>{{ ui('Questions et correction immédiate') }}</small>
         </span>
       </button>
 
@@ -66,8 +67,8 @@ onMounted(async () => {
           </svg>
         </span>
         <span>
-          <strong>{{ busyAction === 'exercise' ? 'Préparation…' : 'Avec un coach' }}</strong>
-          <small>Dialogue virtuel avec une aide pas à pas</small>
+          <strong>{{ busyAction === 'exercise' ? ui('Préparation…') : ui('Avec un coach') }}</strong>
+          <small>{{ ui('Dialogue virtuel avec une aide pas à pas') }}</small>
         </span>
       </button>
 
@@ -86,8 +87,8 @@ onMounted(async () => {
           </svg>
         </span>
         <span>
-          <strong>{{ busyAction === 'print' ? 'Préparation…' : 'Imprimer' }}</strong>
-          <small>Les questions et le corrigé</small>
+          <strong>{{ busyAction === 'print' ? ui('Préparation…') : ui('Imprimer') }}</strong>
+          <small>{{ ui('Les questions et le corrigé') }}</small>
         </span>
       </button>
 
@@ -101,8 +102,8 @@ onMounted(async () => {
           <FontAwesomeIcon :icon="faArrowUpFromBracket" />
         </span>
         <span>
-          <strong>{{ busyAction === 'save' ? 'Sauvegarde…' : 'Partager' }}</strong>
-          <small>Partager ce défi avec d’autres personnes</small>
+          <strong>{{ busyAction === 'save' ? ui('Sauvegarde…') : ui('Partager') }}</strong>
+          <small>{{ ui('Partager ce défi avec d’autres personnes') }}</small>
         </span>
       </button>
     </div>

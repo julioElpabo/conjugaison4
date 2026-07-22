@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { ui } = useLanguagePreferences()
 import { getAdminErrorMessage } from '~/composables/useAdminAuth'
 
 interface StatsDay {
@@ -19,7 +20,7 @@ const loading = ref(false)
 const error = ref('')
 let loadedForUserId: number | null = null
 
-useHead({ title: 'Statistiques' })
+useHead(() => ({ title: ui('Statistiques') }))
 
 async function loadStats() {
   loading.value = true
@@ -42,7 +43,7 @@ async function loadStats() {
     }))
   } catch (caught) {
     if (!handleUnauthorized(caught)) {
-      error.value = getAdminErrorMessage(caught, 'Impossible de charger les statistiques.')
+      error.value = getAdminErrorMessage(caught, ui('Impossible de charger les statistiques.'))
     }
   } finally {
     loading.value = false
@@ -68,9 +69,9 @@ watch(user, (currentUser) => {
       <div class="charts-page">
         <header class="admin-section-heading charts-page__heading">
           <div>
-            <p class="admin-eyebrow">Mesure d’activité</p>
-            <h1>Statistiques</h1>
-            <p class="admin-muted">Vue quotidienne des 30 derniers jours enregistrés.</p>
+            <p class="admin-eyebrow">{{ ui('Mesure d’activité') }}</p>
+            <h1>{{ ui('Statistiques') }}</h1>
+            <p class="admin-muted">{{ ui('Vue quotidienne des 30 derniers jours enregistrés.') }}</p>
           </div>
           <button class="admin-button" type="button" :disabled="loading" @click="loadStats">
             {{ loading ? 'Actualisation…' : 'Actualiser' }}
@@ -79,12 +80,12 @@ watch(user, (currentUser) => {
 
         <div v-if="loading && !days.length" class="charts-page__loading" role="status">
           <span class="admin-spinner" aria-hidden="true" />
-          <p>Chargement des statistiques…</p>
+          <p>{{ ui('Chargement des statistiques…') }}</p>
         </div>
 
         <div v-else-if="error && !days.length" class="charts-page__loading">
           <p class="admin-notice admin-notice--error" role="alert">{{ error }}</p>
-          <button class="admin-button" type="button" @click="loadStats">Réessayer</button>
+          <button class="admin-button" type="button" @click="loadStats">{{ ui('Réessayer') }}</button>
         </div>
 
         <template v-else>

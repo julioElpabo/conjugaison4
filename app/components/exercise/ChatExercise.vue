@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { ui, uiLabel } = useLanguagePreferences()
 import type { ConjugationTense, ExerciseAttempt, ExerciseQuestion, Verb } from '~~/shared/types/conjugation'
 import type { CoachEvent, CoachMedia, CoachMessageContext, CoachProfile } from '~~/shared/types/coach'
 import type { AnswerComparison } from '~~/shared/utils/answer-difference'
@@ -18,12 +19,7 @@ import { diagnoseCoachAnswer } from '~~/shared/utils/coach-feedback'
 import { coachQuestionBubbles } from '~~/shared/utils/coach-question'
 import { buildTargetedConjugationHelp, isHelpCommand } from '~~/shared/utils/conjugation-help'
 import { coachHelpQuestionVariables, visibleCoachHelpBlocks } from '~~/shared/utils/coach-help'
-import {
-  CHAT_HELP_REMINDER_DELAY_MS,
-  CHAT_HELP_REMINDER_INCORRECT_COUNT,
-  coachHelpReminderMessage,
-  nextConsecutiveIncorrectCount,
-} from '~~/shared/utils/coach-help-reminder'
+import { CHAT_HELP_REMINDER_DELAY_MS, CHAT_HELP_REMINDER_INCORRECT_COUNT, nextConsecutiveIncorrectCount } from '~~/shared/utils/coach-help-reminder'
 import { sanitizeCoachHtml } from '~~/shared/utils/safe-html'
 import { areOnlyIndicativeTenses, withoutIndicativeMode } from '~~/shared/utils/chat-mode-display'
 
@@ -114,7 +110,11 @@ const score = computed(() => attempts.value.length
   : 0)
 const omitIndicativeMode = computed(() => areOnlyIndicativeTenses(props.tenses))
 const attemptSummaries = computed(() => attempts.value.map((attempt, index) => {
-  const bubbles = coachQuestionBubbles(attempt.question, { omitIndicativeMode: omitIndicativeMode.value })
+  const bubbles = coachQuestionBubbles(attempt.question, {
+    omitIndicativeMode: omitIndicativeMode.value,
+    modeLabel: uiLabel(attempt.question.mode),
+    tenseLabel: uiLabel(attempt.question.temps),
+  })
   const formula = omitIndicativeMode.value ? withoutIndicativeMode(bubbles.formula) : bubbles.formula
   return {
     index: index + 1,
@@ -122,7 +122,7 @@ const attemptSummaries = computed(() => attempts.value.map((attempt, index) => {
     status: attempt.status,
     questionLabel: formula,
     learnerAnswer: attempt.answer,
-    expectedAnswer: attempt.question.reponsesPourCorrige.join(' ou ') || attempt.question.reponses.join(' ou '),
+    expectedAnswer: attempt.question.reponsesPourCorrige.join(` ${ui('ou')} `) || attempt.question.reponses.join(` ${ui('ou')} `),
   }
 }))
 const hasIncorrectMedia = computed(() => props.coach.assignments.some(assignment => assignment.isActive
@@ -209,7 +209,7 @@ const helpFeedbackContext = computed(() => {
     tense: question?.temps,
     mode: question?.mode,
     person: question?.pronom || question?.saisiePrefixe,
-    expectedAnswer: question?.reponsesPourCorrige.join(' ou '),
+    expectedAnswer: question?.reponsesPourCorrige.join(` ${ui('ou')} `),
     currentAnswerDraft: answer.value,
     currentQuestion: question || null,
     currentVerb: helpVerb.value || null,
@@ -349,8 +349,8 @@ function contextFor(question?: ExerciseQuestion): CoachMessageContext {
     participle: reminder?.participle,
     gender: reminder?.gender === 'feminin' ? 'féminin' : reminder?.gender === 'masculin' ? 'masculin' : undefined,
     number: reminder?.number || undefined,
-    mode: question?.mode,
-    tense: question?.temps,
+    mode: uiLabel(question?.mode),
+    tense: uiLabel(question?.temps),
     expectedAnswer: question?.reponsesPourCorrige.join(' ou '),
     questionNumber: question ? currentIndex.value + 1 : undefined,
   }
@@ -398,7 +398,9 @@ function addCoachText(text: string, tone?: ChatMessage['tone'], emphasis = false
 
 async function addHelpReminderCard() {
   await enqueueCoachBubble(() => ({
-    text: coachHelpReminderMessage(helpOpen.value),
+    text: helpOpen.value
+      ? ui('Tu peux regarder l’aide à droite pour trouver un indice.')
+      : ui('Si tu veux un indice, tape « Aide » dans le champ de réponse'),
     kind: 'help-reminder',
     helpAlreadyOpen: helpOpen.value,
   }))
@@ -445,8 +447,12 @@ async function askCurrentQuestion() {
   posingQuestion.value = true
   const firstQuestionMessageId = sequence.value + 1
   if (currentIndex.value > 0) await addCoachReaction('question', contextFor(question))
-  if (question.instruction) await addCoachText(question.instruction, undefined, true)
-  const bubbles = coachQuestionBubbles(question, { omitIndicativeMode: omitIndicativeMode.value })
+  if (question.instruction) await addCoachText(uiLabel(question.instruction), undefined, true)
+  const bubbles = coachQuestionBubbles(question, {
+    omitIndicativeMode: omitIndicativeMode.value,
+    modeLabel: uiLabel(question.mode),
+    tenseLabel: uiLabel(question.temps),
+  })
   await addCoachText(bubbles.formula, undefined, true)
   if (bubbles.sentence) await addCoachText(bubbles.sentence, undefined, true)
   posingQuestion.value = false
@@ -600,7 +606,7 @@ async function restartWithNewQuestions() {
     await nextTick()
     await restart()
   } catch {
-    restartError.value = 'Impossible de préparer de nouvelles questions. Le défi actuel reste disponible.'
+    restartError.value = ui('Impossible de préparer de nouvelles questions. Le défi actuel reste disponible.')
   } finally {
     regeneratingQuestions.value = false
   }
@@ -651,19 +657,19 @@ onBeforeUnmount(() => {
           <img class="coach-avatar" :src="coach.avatarPath" alt="">
           <div class="chat-header__identity">
             <h2 id="chat-title">{{ coach.firstName }}</h2>
-            <p v-if="coach.likes" class="chat-header__likes"><strong>Aime&nbsp;:</strong> {{ coach.likes }}</p>
+            <p v-if="coach.likes" class="chat-header__likes"><strong>{{ ui('Aime :') }}</strong> {{ coach.likes }}</p>
           </div>
           <div class="chat-header__actions">
-            <button type="button" class="chat-close" aria-label="Quitter le chat" @click="requestClose">×</button>
+            <button type="button" class="chat-close" :aria-label="ui('Quitter le chat')" @click="requestClose">×</button>
           </div>
         </header>
 
-        <div class="chat-progress" aria-label="Progression">
+        <div class="chat-progress" :aria-label="ui('Progression')">
           <span :style="{ width: `${finished ? 100 : (currentIndex / questions.length) * 100}%` }" />
         </div>
 
         <div v-if="!finished && currentQuestion" class="chat-instruction">
-          <span>Question {{ currentIndex + 1 }}/{{ questions.length }}</span>
+          <span>{{ ui('Question {current} sur {total}', { current: currentIndex + 1, total: questions.length }) }}</span>
         </div>
 
         <div ref="chat-thread" class="chat-thread" aria-live="polite">
@@ -682,7 +688,7 @@ onBeforeUnmount(() => {
             ]"
             :role="message.author === 'learner' && message.questionIndex !== undefined ? 'button' : undefined"
             :tabindex="message.author === 'learner' && message.questionIndex !== undefined ? 0 : undefined"
-            :aria-label="message.author === 'learner' && message.questionIndex !== undefined ? `Voir l’aide de la question ${message.questionIndex + 1} pour la réponse ${message.text}` : undefined"
+            :aria-label="message.author === 'learner' && message.questionIndex !== undefined ? ui('Voir l’aide de la question {number} pour la réponse {answer}', { number: message.questionIndex + 1, answer: message.text }) : undefined"
             @click="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
             @keydown.enter.prevent="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
             @keydown.space.prevent="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
@@ -690,17 +696,15 @@ onBeforeUnmount(() => {
             <div v-if="message.kind === 'help-reminder'" class="chat-help-reminder">
               <span class="chat-help-reminder__icon" aria-hidden="true">?</span>
               <span class="chat-help-reminder__content">
-                <strong>Besoin d’un coup de pouce&nbsp;?</strong>
-                <span>{{ message.text }}<template v-if="!message.helpAlreadyOpen">, ou clique sur ce bouton&nbsp;:</template></span>
-                <button v-if="!message.helpAlreadyOpen" type="button" class="chat-help-reminder__button" @click="showLatestHelp">
-                  Ouvrir l’aide
-                </button>
+                <strong>{{ ui('Besoin d’un coup de pouce ?') }}</strong>
+                <span>{{ message.text }}<template v-if="!message.helpAlreadyOpen">{{ ui(', ou clique sur ce bouton :') }}</template></span>
+                <button v-if="!message.helpAlreadyOpen" type="button" class="chat-help-reminder__button" @click="showLatestHelp"> {{ ui('Ouvrir l’aide') }} </button>
               </span>
             </div>
             <div v-else-if="message.answerComparison" class="answer-comparison">
-              <strong>{{ message.answerComparison.mode === 'focused' ? 'Regarde où ça change :' : 'Repars de la correction complète :' }}</strong>
+              <strong>{{ message.answerComparison.mode === 'focused' ? ui('Regarde où ça change :') : ui('Repars de la correction complète :') }}</strong>
               <div class="answer-comparison__line answer-comparison__line--learner">
-                <small>Ta réponse</small>
+                <small>{{ ui('Ta réponse') }}</small>
                 <p>
                   <span
                     v-for="(part, partIndex) in message.answerComparison.learnerParts"
@@ -710,7 +714,7 @@ onBeforeUnmount(() => {
                 </p>
               </div>
               <div class="answer-comparison__line answer-comparison__line--expected">
-                <small>Correction</small>
+                <small>{{ ui('Correction') }}</small>
                 <p>
                   <span
                     v-for="(part, partIndex) in message.answerComparison.expectedParts"
@@ -719,9 +723,7 @@ onBeforeUnmount(() => {
                   >{{ part.text }}</span>
                 </p>
               </div>
-              <small v-if="message.answerComparison.mode === 'full'" class="answer-comparison__guidance">
-                Les deux réponses sont très différentes : observe d’abord la construction complète.
-              </small>
+              <small v-if="message.answerComparison.mode === 'full'" class="answer-comparison__guidance"> {{ ui('Les deux réponses sont très différentes : observe d’abord la construction complète.') }} </small>
             </div>
             <span
               v-else-if="message.text && message.author === 'coach'"
@@ -737,13 +739,13 @@ onBeforeUnmount(() => {
 
           <div v-if="finalSummaryPreparing" class="chat-summary-loading" role="status" aria-live="polite">
             <span aria-hidden="true" />
-            <strong>Création du bilan</strong>
+            <strong>{{ ui('Création du bilan') }}</strong>
           </div>
 
           <section v-if="finalSummaryVisible" ref="chat-summary" class="chat-summary-tool" aria-labelledby="chat-summary-title">
             <header>
               <div>
-                <h3 id="chat-summary-title">Bilan du défi</h3>
+                <h3 id="chat-summary-title">{{ ui('Bilan du défi') }}</h3>
               </div>
               <strong>{{ score }} %</strong>
             </header>
@@ -755,7 +757,7 @@ onBeforeUnmount(() => {
                 :style="{ '--summary-item-index': `${item.index - 1}` }"
                 role="button"
                 tabindex="0"
-                :aria-label="`Voir l’aide de la question ${item.index} : ${item.questionLabel}`"
+                :aria-label="ui('Voir l’aide de la question {number} : {question}', { number: item.index, question: item.questionLabel })"
                 @click="openHelpForQuestion(item.questionIndex)"
                 @keydown.enter.prevent="openHelpForQuestion(item.questionIndex)"
                 @keydown.space.prevent="openHelpForQuestion(item.questionIndex)"
@@ -763,16 +765,16 @@ onBeforeUnmount(() => {
                 <span class="chat-summary-list__status" aria-hidden="true">{{ item.status === 'correct' ? '✓' : '×' }}</span>
                 <div>
                   <strong class="chat-summary-list__question">
-                    <span>Question {{ item.index }}</span>
+                    <span>{{ ui('Question') }} {{ item.index }}</span>
                     <span>{{ item.questionLabel }}</span>
                   </strong>
                   <dl>
                     <div>
-                      <dt>Réponse donnée</dt>
+                      <dt>{{ ui('Réponse donnée') }}</dt>
                       <dd>{{ item.learnerAnswer }}</dd>
                     </div>
                     <div>
-                      <dt>Bonne réponse</dt>
+                      <dt>{{ ui('Bonne réponse') }}</dt>
                       <dd>{{ item.expectedAnswer }}</dd>
                     </div>
                   </dl>
@@ -781,26 +783,26 @@ onBeforeUnmount(() => {
             </ol>
             <footer>
               <strong>{{ correctCount }} / {{ attempts.length }}</strong>
-              <span>réponse{{ correctCount > 1 ? 's' : '' }} juste{{ correctCount > 1 ? 's' : '' }}</span>
+              <span>{{ correctCount === 1 ? ui('réponse juste') : ui('réponses justes') }}</span>
             </footer>
           </section>
 
           <div v-if="finalSummaryVisible" class="chat-message chat-message--coach chat-restart-prompt">
-            <span>Tu veux refaire ce défi&nbsp;?</span>
+            <span>{{ ui('Tu veux refaire ce défi ?') }}</span>
             <div class="chat-restart-prompt__actions">
-              <button type="button" class="chat-restart-prompt__same" :disabled="regeneratingQuestions" @click="restart">Avec les mêmes questions</button>
+              <button type="button" class="chat-restart-prompt__same" :disabled="regeneratingQuestions" @click="restart">{{ ui('Avec les mêmes questions') }}</button>
               <button type="button" class="chat-restart-prompt__new" :disabled="regeneratingQuestions" @click="restartWithNewQuestions">
-                {{ regeneratingQuestions ? 'Préparation…' : 'Avec d’autres questions' }}
+                {{ regeneratingQuestions ? ui('Préparation…') : ui('Avec d’autres questions') }}
               </button>
-              <button type="button" class="chat-restart-prompt__quit" :disabled="regeneratingQuestions" @click="emit('close')">Quitter le chat</button>
-              <button type="button" class="chat-restart-prompt__print" :disabled="regeneratingQuestions" @click="printSummaryOpen = true">Imprimer le bilan</button>
+              <button type="button" class="chat-restart-prompt__quit" :disabled="regeneratingQuestions" @click="emit('close')">{{ ui('Quitter le chat') }}</button>
+              <button type="button" class="chat-restart-prompt__print" :disabled="regeneratingQuestions" @click="printSummaryOpen = true">{{ ui('Imprimer le bilan') }}</button>
             </div>
             <small v-if="restartError" class="chat-restart-prompt__error" role="alert">{{ restartError }}</small>
           </div>
         </div>
 
         <form v-if="!finished" class="chat-composer" @submit.prevent="submit">
-          <label class="sr-only" for="chat-answer">Ta réponse</label>
+          <label class="sr-only" for="chat-answer">{{ ui('Ta réponse') }}</label>
           <input
             id="chat-answer"
             ref="chat-answer"
@@ -808,10 +810,10 @@ onBeforeUnmount(() => {
             type="text"
             autocomplete="off"
             :disabled="waitingForNext"
-            :placeholder="helpOpen ? 'Écris ta réponse…' : 'Écris ta réponse ou « Aide »…'"
+            :placeholder="helpOpen ? ui('Écris ta réponse…') : ui('Écris ta réponse ou « Aide »…')"
           >
           <button type="submit" :disabled="waitingForNext || posingQuestion || deliveringFeedback || !answer.trim()">
-            {{ posingQuestion ? 'Question…' : deliveringFeedback ? 'Réponse…' : waitingForNext ? 'Suite…' : 'Envoyer' }}
+            {{ posingQuestion ? ui('Question…') : deliveringFeedback ? ui('Réponse…') : waitingForNext ? ui('Suite…') : ui('Envoyer') }}
           </button>
         </form>
 
@@ -820,8 +822,8 @@ onBeforeUnmount(() => {
           type="button"
           class="chat-latest-help"
           :class="{ 'chat-latest-help--above-composer': !finished }"
-          :aria-label="finished ? 'Revenir à l’aide de la dernière question' : 'Revenir à l’aide de la question actuelle'"
-          :title="finished ? 'Voir l’aide de la dernière question' : 'Voir l’aide de la question actuelle'"
+          :aria-label="finished ? ui('Revenir à l’aide de la dernière question') : ui('Revenir à l’aide de la question actuelle')"
+          :title="finished ? ui('Voir l’aide de la dernière question') : ui('Voir l’aide de la question actuelle')"
           @click="showLatestHelp"
         >
           <span aria-hidden="true">↓</span>
@@ -830,11 +832,11 @@ onBeforeUnmount(() => {
         <div v-if="closeConfirmationOpen" class="chat-close-confirmation" @click.self="cancelClose">
           <section role="alertdialog" aria-modal="true" aria-labelledby="chat-close-title" aria-describedby="chat-close-description">
             <span class="chat-close-confirmation__icon" aria-hidden="true">?</span>
-            <h3 id="chat-close-title">Quitter le chat ?</h3>
-            <p id="chat-close-description">Ta progression actuelle sera perdue.</p>
+            <h3 id="chat-close-title">{{ ui('Quitter le chat ?') }}</h3>
+            <p id="chat-close-description">{{ ui('Ta progression actuelle sera perdue.') }}</p>
             <div class="chat-close-confirmation__actions">
-              <button ref="keep-chat-button" class="secondary-button" type="button" @click="cancelClose">Continuer l’exercice</button>
-              <button class="primary-button chat-close-confirmation__leave" type="button" @click="confirmClose">Quitter</button>
+              <button ref="keep-chat-button" class="secondary-button" type="button" @click="cancelClose">{{ ui('Continuer l’exercice') }}</button>
+              <button class="primary-button chat-close-confirmation__leave" type="button" @click="confirmClose">{{ ui('Quitter') }}</button>
             </div>
           </section>
         </div>

@@ -55,6 +55,10 @@ function question(overrides = {}) {
 test('la commande Aide tolère la casse, les accents et la ponctuation finale', () => {
   assert.equal(isHelpCommand('Aide'), true)
   assert.equal(isHelpCommand('  AIDE !  '), true)
+  assert.equal(isHelpCommand('Hilfe'), true)
+  assert.equal(isHelpCommand('Help'), true)
+  assert.equal(isHelpCommand('Aiuto'), true)
+  assert.equal(isHelpCommand('Ayuda'), true)
   assert.equal(isHelpCommand('aider'), false)
   assert.equal(isHelpCommand('j’ai besoin d’aide'), false)
 })

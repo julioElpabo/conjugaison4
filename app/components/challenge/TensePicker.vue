@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { ui, uiLabel } = useLanguagePreferences()
 import type {
   ConjugationMode,
   Tense,
@@ -77,8 +78,8 @@ watch(exampleRequestKey, () => void loadExamples())
   <section class="builder-card tense-picker" aria-labelledby="tenses-title">
     <div class="builder-card__header">
       <div>
-        <p class="builder-card__eyebrow">Étape 2</p>
-        <h2 id="tenses-title">Mes temps</h2>
+        <p class="builder-card__eyebrow">{{ ui('Étape 2') }}</p>
+        <h2 id="tenses-title">{{ ui('Mes temps') }}</h2>
       </div>
       <span class="count-badge" :aria-label="`${selectedIds.length} temps sélectionnés`">
         {{ selectedIds.length }}
@@ -86,17 +87,13 @@ watch(exampleRequestKey, () => void loadExamples())
     </div>
 
     <div class="selection-toolbar">
-      <button class="text-button" type="button" @click="emit('selectAll')">
-        Tout cocher
-      </button>
-      <button class="text-button text-button--danger" type="button" @click="emit('clear')">
-        Tout décocher
-      </button>
+      <button class="text-button" type="button" @click="emit('selectAll')"> {{ ui('Tout cocher') }} </button>
+      <button class="text-button text-button--danger" type="button" @click="emit('clear')"> {{ ui('Tout décocher') }} </button>
     </div>
 
     <div class="tense-groups">
       <section v-for="group in groups" :key="group.mode.id" class="tense-group" role="group" :aria-labelledby="`tense-mode-${group.mode.id}`">
-        <h3 :id="`tense-mode-${group.mode.id}`" class="tense-group__title">{{ group.mode.name }}</h3>
+        <h3 :id="`tense-mode-${group.mode.id}`" class="tense-group__title">{{ uiLabel(group.mode.name) }}</h3>
         <div class="tense-group__columns" :class="{ 'tense-group__columns--single': group.columns.length === 1 }">
           <div v-for="(column, columnIndex) in group.columns" :key="columnIndex" class="tense-group__column">
             <div class="tense-group__items">
@@ -106,14 +103,13 @@ watch(exampleRequestKey, () => void loadExamples())
                 <span class="tense-info">
                   <button
                     type="button"
-                    :aria-label="`Voir un exemple au ${tense.name}`"
+                    :aria-label="`${ui('Voir un exemple :')} ${uiLabel(tense.name)}`"
                     :aria-describedby="`tense-example-${tense.id}`"
                   >i</button>
                   <span :id="`tense-example-${tense.id}`" class="tense-tooltip" role="tooltip">
-                    <template v-if="examples[tense.id]">
-                      Exemple: <strong>{{ examples[tense.id]!.emphasis }}</strong><template v-if="examples[tense.id]!.rest"> {{ examples[tense.id]!.rest }}</template>
+                    <template v-if="examples[tense.id]"> {{ ui('Exemple:') }} <strong>{{ examples[tense.id]!.emphasis }}</strong><template v-if="examples[tense.id]!.rest"> {{ examples[tense.id]!.rest }}</template>
                     </template>
-                    <template v-else>{{ examplesLoading ? 'Chargement…' : 'Exemple momentanément indisponible.' }}</template>
+                    <template v-else>{{ examplesLoading ? ui('Chargement…') : ui('Exemple momentanément indisponible.') }}</template>
                   </span>
                 </span>
                 <label class="switch-row">
@@ -123,7 +119,7 @@ watch(exampleRequestKey, () => void loadExamples())
                     @change="emit('toggle', tense.id)"
                   >
                   <span class="switch-row__control" aria-hidden="true" />
-                  <span>{{ tense.name }}</span>
+                  <span>{{ uiLabel(tense.name) }}</span>
                 </label>
               </div>
 

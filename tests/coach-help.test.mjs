@@ -112,6 +112,27 @@ describe('aides visuelles configurables', () => {
     assert.doesNotMatch(indicativeOnlyBase, /Terminaisons de l’imparfait de l’indicatif/)
   })
 
+  it('précise le mode dans le tableau des personnes sauf pour un questionnaire uniquement indicatif', () => {
+    const compoundQuestion = {
+      titre: 'Question', consigne: '', reponses: ['a mangé'], reponsesPourCorrige: ['il a mangé'],
+      infinitif: 'manger', pronom: 'il', mode: 'indicatif', temps: 'passé composé',
+      isCompound: true, conjugaison1: 'a mangé',
+    }
+    const values = coachHelpQuestionVariables(compoundQuestion, {
+      infinitif: 'manger',
+      groupeConjugaison: 1,
+      terminaison: 'er',
+      participePasse: 'mangé',
+      auxiliaire: 'avoir',
+    })
+
+    const mixedModes = renderCoachHelpContent('{contextualBaseHelp}', { ...values, omitIndicativeMode: false }, 'cif-falc')
+    const indicativeOnly = renderCoachHelpContent('{contextualBaseHelp}', { ...values, omitIndicativeMode: true }, 'cif-falc')
+
+    assert.match(mixedModes, /<summary>présent de l’indicatif du verbe avoir<\/summary>/)
+    assert.match(indicativeOnly, /<summary>présent du verbe avoir<\/summary>/)
+  })
+
   it('emploie il au passé simple dans tous les blocs automatiques', () => {
     const question = {
       titre: 'Question', consigne: '', reponses: ['mangeâmes'], reponsesPourCorrige: ['nous mangeâmes'],

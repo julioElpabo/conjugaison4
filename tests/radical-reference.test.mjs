@@ -125,8 +125,43 @@ test('le subjonctif imparfait utilise le passé simple comme forme repère', () 
   }, [form('indicatif', 'passé simple', 6, 'il', 'vint')])
 
   assert.equal(reference?.kind, 'past-simple-il')
-  assert.equal(reference?.radical, 'vin')
-  assert.equal(reference?.removableEnding, 't')
+  assert.equal(reference?.radical, 'v')
+  assert.equal(reference?.removableEnding, 'int')
+  assert.equal(reference?.targetEnding, 'insse')
+})
+
+test('le subjonctif imparfait de avertir conserve le i de la série en -it', () => {
+  const reference = buildRadicalReference({
+    infinitive: 'avertir', mode: 'subjonctif', tense: 'imparfait', personId: 4, conjugation: 'avertisse',
+  }, [form('indicatif', 'passé simple', 6, 'il', 'avertit')])
+
+  assert.equal(reference?.radical, 'avert')
+  assert.equal(reference?.removableEnding, 'it')
+  assert.equal(reference?.targetEnding, 'isse')
+})
+
+test('le subjonctif imparfait traite les six personnes des quatre séries du passé simple', () => {
+  const series = [
+    { infinitive: 'manger', source: 'mangea', forms: ['mangeasse', 'mangeasses', 'mangeât', 'mangeassions', 'mangeassiez', 'mangeassent'] },
+    { infinitive: 'avertir', source: 'avertit', forms: ['avertisse', 'avertisses', 'avertît', 'avertissions', 'avertissiez', 'avertissent'] },
+    { infinitive: 'courir', source: 'courut', forms: ['courusse', 'courusses', 'courût', 'courussions', 'courussiez', 'courussent'] },
+    { infinitive: 'venir', source: 'vint', forms: ['vinsse', 'vinsses', 'vînt', 'vinssions', 'vinssiez', 'vinssent'] },
+  ]
+
+  for (const item of series) {
+    item.forms.forEach((conjugation, index) => {
+      const reference = buildRadicalReference({
+        infinitive: item.infinitive,
+        mode: 'subjonctif',
+        tense: 'imparfait',
+        personId: index + 4,
+        conjugation,
+      }, [form('indicatif', 'passé simple', 6, 'il', item.source)])
+
+      assert.ok(reference, `${item.infinitive} doit construire ${conjugation}`)
+      assert.equal(`${reference.radical}${reference.targetEnding}`, conjugation)
+    })
+  }
 })
 
 test('le subjonctif imparfait à il utilise une terminaison accentuée explicite', () => {

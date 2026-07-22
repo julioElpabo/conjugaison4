@@ -986,7 +986,7 @@ async function saveChallenge() {
 .code-loader__error { grid-column: 2; margin: -4px 0 0; color: var(--danger); font-size: .82rem; }
 .wizard-panel { overflow: hidden; border: 1px solid rgba(174, 199, 191, .95); border-radius: 24px; background: rgb(255 255 255 / 94%); box-shadow: var(--shadow); outline: 0; }
 .wizard-panel--autocomplete-open { overflow: visible; }
-.wizard-steps { display: grid; grid-template-columns: minmax(125px, 1fr) 30px minmax(165px, 1.15fr) 30px minmax(120px, 1fr) 30px minmax(115px, .9fr); align-items: center; padding: 17px 24px; border-bottom: 1px solid var(--line); background: #f6faf8; }
+.wizard-steps { display: grid; grid-template-columns: minmax(125px, 1fr) 50px minmax(165px, 1.15fr) 50px minmax(120px, 1fr) 50px minmax(115px, .9fr); align-items: center; padding: 17px 24px; border-bottom: 1px solid var(--line); background: #f6faf8; }
 .wizard-steps button { display: flex; min-width: 0; padding: 7px; align-items: center; gap: 10px; text-align: left; color: #71817d; background: transparent; border: 0; }
 .wizard-steps button > span:first-child { display: grid; width: 35px; height: 35px; flex: 0 0 35px; place-items: center; border: 2px solid #b8c7c3; border-radius: 50%; background: white; font-weight: 850; }
 .wizard-steps button > span:last-child { display: grid; min-width: 0; }
@@ -1002,7 +1002,8 @@ async function saveChallenge() {
 .wizard-steps .wizard-step-tab--tenses.is-active > span:first-child { color: #302711; border-color: var(--tense-accent); background: var(--tense-accent); }
 .wizard-steps .wizard-step-tab--tenses.is-active > span:first-child { box-shadow: 0 0 0 5px color-mix(in srgb, var(--tense-accent) 18%, transparent); }
 .wizard-steps button:disabled { cursor: default; opacity: .5; }
-.wizard-steps__line { height: 2px; background: #d6e0dd; }
+.wizard-steps__line { position: relative; width: 18px; height: 1px; margin: 0; justify-self: center; color: #b9c9c5; background: currentColor; }
+.wizard-steps__line::after { position: absolute; top: 50%; right: -1px; width: 5px; height: 5px; border-top: 1px solid currentColor; border-right: 1px solid currentColor; content: ''; transform: translateY(-50%) rotate(45deg); transform-origin: center; }
 .wizard-content { position: relative; min-height: 480px; padding: 30px clamp(18px, 5vw, 58px) 34px; }
 .wizard-content--home { padding: clamp(20px, 4vw, 42px); }
 .wizard-home { display: grid; max-width: 930px; margin: 0 auto; gap: 18px; }
@@ -1130,6 +1131,8 @@ async function saveChallenge() {
   .wizard-home__choice--preset.is-collapsed,
   .wizard-home__choice--custom { min-height: 0; }
   .wizard-steps { grid-template-columns: 1fr 10px 1fr 10px 1fr 10px 1fr; padding: 13px 6px; }
+  .wizard-steps__line { width: 8px; margin: 0; }
+  .wizard-steps__line::after { width: 5px; height: 5px; }
   .wizard-steps button { justify-content: center; padding: 5px 2px; }
   .wizard-steps button > span:last-child small { display: none; }
   .wizard-steps button strong { font-size: .75rem; text-align: center; }

@@ -177,6 +177,43 @@ describe('compléments d’objet dans les questions', () => {
     assert.ok(question.reponses.includes("C'est la seule autre maison que tu aies démolie"))
   })
 
+  for (const { pronoun, form } of [
+    { pronoun: 'il', form: 'eût apaisé' },
+    { pronoun: 'ils', form: 'eussent apaisé' },
+    { pronoun: 'elle', form: 'eût apaisé' },
+    { pronoun: 'elles', form: 'eussent apaisé' },
+    { pronoun: 'on', form: 'eût apaisé' },
+    { pronoun: 'iel', form: 'eût apaisé' },
+    { pronoun: 'iels', form: 'eussent apaisé' },
+  ]) {
+    it(`élide que devant ${pronoun} dans une relative au subjonctif`, () => {
+      const question = formatConjugationQuestion(row({
+        infinitif: 'apaiser',
+        conjugaison1: form,
+        conjugaison2: '',
+        temps_name: 'plus-que-parfait',
+        mode_name: 'subjonctif',
+        is_compound: 1,
+        auxiliaire: 'avoir',
+        participe_passe: 'apaisé',
+        complement_position: 'before',
+        complement_anteposed: 'les enfants inquiets',
+        complement_gender: 'masculin',
+        complement_number: 'pluriel',
+        complement_function: 'cod',
+      }), pronoun)
+
+      assert.equal(
+        question.consigne,
+        `Ce sont les seuls enfants inquiets qu'${pronoun} … | apaiser | plus-que-parfait (subjonctif)`,
+      )
+      assert.deepEqual(
+        question.reponsesPourCorrige,
+        [`Ce sont les seuls enfants inquiets qu'${pronoun} ${form.replace(/apaisé$/u, 'apaisés')}`],
+      )
+    })
+  }
+
   it('donne aussi au COI antéposé un contexte qui justifie le subjonctif', () => {
     const question = formatConjugationQuestion(row({
       infinitif: 'participer',

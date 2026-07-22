@@ -543,7 +543,8 @@ test('le subjonctif présent affiche les pronoms réfléchis des verbes pronomin
 
   assert.match(html, /Ils se souviennent/)
   assert.match(html, /Nous nous souvenons/)
-  assert.match(html, /<mark><strong>Se souvienne<\/strong><\/mark>/)
+  assert.match(html, /<strong>Résultat<\/strong>.*<strong>Se souvienne<\/strong>/)
+  assert.doesNotMatch(html, /<strong>Résultat<\/strong>.*<mark><strong>Se souvienne/)
   assert.doesNotMatch(html, /Ils souviennent|Nous souvenons|se se/)
 })
 
@@ -592,7 +593,8 @@ test('le futur régulier ne présente pas la réponse comme forme repère', () =
 
   assert.doesNotMatch(html, /La forme demandée est justement la <strong>forme repère<\/strong>/)
   assert.match(html, /Pars de l’infinitif <strong>crier<\/strong>/)
-  assert.match(html, /<mark><strong>Crierai<\/strong><\/mark>/)
+  assert.match(html, /<strong>Résultat<\/strong><br><strong>Crierai<\/strong>/)
+  assert.doesNotMatch(html, /<strong>Résultat<\/strong><br><mark>/)
 })
 
 test('le conditionnel présent enlève le e des verbes réguliers en re', () => {
@@ -660,6 +662,21 @@ test('le subjonctif imparfait construit les séries en -ît et -înt sans contra
   assert.match(devenir, /Ajoute <samp>-înt<\/samp> au point de départ <var>dev-<\/var>/)
   assert.match(devenir, /<span><var>dev<\/var><samp>înt<\/samp><\/span><i>✓<\/i>/)
   assert.doesNotMatch(devenir, /devin-.*dev-/)
+})
+
+test('le subjonctif imparfait de avertir affiche avert- plus -isse', () => {
+  const reference = buildRadicalReference({
+    infinitive: 'avertir', mode: 'subjonctif', tense: 'imparfait', personId: 4, conjugation: 'avertisse',
+  }, [{ mode: 'indicatif', tense: 'passé simple', personId: 6, pronoun: 'il', form: 'avertit' }])
+  const html = buildConjugationBaseHtml(question({
+    infinitif: 'avertir', mode: 'subjonctif', temps: 'imparfait', personId: 4, pronom: 'je', conjugaison1: 'avertisse',
+    radicalReference: reference,
+  }), verb({ infinitif: 'avertir', terminaison: 'ir', groupeConjugaison: 2, familleConjugaison: 'deuxieme-ir' }), undefined, 'cif-falc')
+
+  assert.match(html, /Enlève <kbd>-it<\/kbd> : tu obtiens le point de départ <var>avert-<\/var>/)
+  assert.match(html, /Ajoute <samp>-isse<\/samp> au point de départ <var>avert-<\/var>/)
+  assert.match(html, /<span><var>avert<\/var><samp>isse<\/samp><\/span><i>✓<\/i>/)
+  assert.doesNotMatch(html, /<var>avert<\/var><samp>sse<\/samp>/)
 })
 
 test('le subjonctif imparfait en -u garde un point de départ cohérent', () => {
@@ -778,8 +795,8 @@ test('le bloc automatique d’un temps composé sépare mémorisation, réponse 
   assert.match(html, /<figcaption>À savoir par cœur<i>♥<\/i><\/figcaption>/)
   assert.match(html, /Quel verbe auxiliaire pour manger \?<\/strong><p><mark><strong>Avoir<\/strong><\/mark><\/p><p><kbd>Être<\/kbd><\/p>/)
   assert.doesNotMatch(html, /Conjugaison du verbe avoir/)
-  assert.match(html, /<summary>imparfait du verbe avoir<\/summary>/)
-  assert.match(html, /<\/blockquote><details><summary>imparfait du verbe avoir<\/summary><table>/)
+  assert.match(html, /<summary>imparfait de l’indicatif du verbe avoir<\/summary>/)
+  assert.match(html, /<\/blockquote><details><summary>imparfait de l’indicatif du verbe avoir<\/summary><table>/)
   assert.doesNotMatch(html, /<blockquote><details><summary>imparfait du verbe avoir/)
   assert.doesNotMatch(html, /Temps simples du verbe avoir/)
   assert.doesNotMatch(html, /Voir tous les temps simples/)
@@ -788,6 +805,8 @@ test('le bloc automatique d’un temps composé sépare mémorisation, réponse 
   assert.match(html, /Le participe passé de manger<\/strong><p><mark><strong>Mangé/)
   assert.match(html, /<figcaption>Réponse<\/figcaption>/)
   assert.match(html, /Conjugue le verbe auxiliaire <strong>avoir<\/strong> à l’imparfait de l’indicatif avec <strong>nous<\/strong>/)
+  assert.match(html, /<strong>Résultat<\/strong><p><strong>avions mangé<\/strong><\/p>/)
+  assert.doesNotMatch(html, /<strong>Résultat<\/strong><p><mark>/)
   assert.match(html, /<figcaption>Accord du participe passé<\/figcaption>/)
   assert.match(html, /Cas général avec avoir/)
   assert.doesNotMatch(html, /Avec l’auxiliaire <strong>être<\/strong>/)
@@ -802,7 +821,7 @@ test('le bloc composé emploie être quand la forme réelle le demande', () => {
   }), verb({ infinitif: 'venir', participePasse: 'venu', auxiliaire: 'être', particularites: [] }), undefined, 'cif-falc')
 
   assert.match(html, /Quel verbe auxiliaire pour venir \?<\/strong><p><kbd>Avoir<\/kbd><\/p><p><mark><strong>Être<\/strong><\/mark><\/p>/)
-  assert.match(html, /<summary>présent du verbe être<\/summary><table>/)
+  assert.match(html, /<summary>présent de l’indicatif du verbe être<\/summary><table>/)
   assert.doesNotMatch(html, /Temps utilisé ici|<summary>indicatif ·/)
   assert.match(html, /<th><strong>il \/ elle \/ on<\/strong><\/th><td><mark><strong>est<\/strong><\/mark><\/td>/)
   assert.match(html, /Conjugue le verbe auxiliaire <strong>être<\/strong> au présent de l’indicatif avec <strong>elle<\/strong>/)

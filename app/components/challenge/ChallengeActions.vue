@@ -85,7 +85,7 @@ onMounted(async () => {
         </span>
         <span>
           <strong>{{ busyAction === 'print' ? 'Préparation…' : 'Imprimer' }}</strong>
-          <small>Exporter un PDF ou un fichier Word</small>
+          <small>Les questions et le corrigé</small>
         </span>
       </button>
     </div>

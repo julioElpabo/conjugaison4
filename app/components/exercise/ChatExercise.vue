@@ -18,6 +18,12 @@ import { diagnoseCoachAnswer } from '~~/shared/utils/coach-feedback'
 import { coachQuestionBubbles } from '~~/shared/utils/coach-question'
 import { buildTargetedConjugationHelp, isHelpCommand } from '~~/shared/utils/conjugation-help'
 import { coachHelpQuestionVariables, visibleCoachHelpBlocks } from '~~/shared/utils/coach-help'
+import {
+  CHAT_HELP_REMINDER_DELAY_MS,
+  CHAT_HELP_REMINDER_INCORRECT_COUNT,
+  coachHelpReminderMessage,
+  nextConsecutiveIncorrectCount,
+} from '~~/shared/utils/coach-help-reminder'
 import { sanitizeCoachHtml } from '~~/shared/utils/safe-html'
 import { areOnlyIndicativeTenses, withoutIndicativeMode } from '~~/shared/utils/chat-mode-display'
 
@@ -51,6 +57,7 @@ const nextQuestionDelay = ref(CHAT_INCORRECT_DELAY_MS)
 const deliveringFeedback = ref(false)
 const posingQuestion = ref(false)
 const consecutiveCorrectCount = ref(0)
+const consecutiveIncorrectCount = ref(0)
 const finished = ref(false)
 const finalSummaryPreparing = ref(false)
 const finalSummaryVisible = ref(false)
@@ -75,6 +82,7 @@ let coachQueue: Promise<void> = Promise.resolve()
 let lastCoachBubbleAt = 0
 let dialogueState = createCoachDialogueState()
 let questionScrollFrame: number | null = null
+let helpReminderTimer: number | null = null
 const CHAT_HELP_OPEN_DELAY_MS = 500
 const CHAT_MESSAGES_AFTER_HELP_DELAY_MS = 1000
 
@@ -226,17 +234,20 @@ function openHelp(candidate: string) {
   answer.value = ''
   helpQuestionIndex.value = null
   helpOpen.value = true
+  restartHelpReminderTimer()
 }
 
 function openHelpForQuestion(questionIndex: number) {
   if (!Number.isInteger(questionIndex) || !props.questions[questionIndex]) return
   helpQuestionIndex.value = questionIndex
   helpOpen.value = true
+  restartHelpReminderTimer()
 }
 
 function showLatestHelp() {
   helpQuestionIndex.value = null
   helpOpen.value = true
+  restartHelpReminderTimer()
   scrollThreadToBottom()
 }
 
@@ -329,6 +340,25 @@ function wait(milliseconds: number) {
   return new Promise(resolve => window.setTimeout(resolve, milliseconds))
 }
 
+function clearHelpReminderTimer() {
+  if (helpReminderTimer === null) return
+  window.clearTimeout(helpReminderTimer)
+  helpReminderTimer = null
+}
+
+function restartHelpReminderTimer() {
+  clearHelpReminderTimer()
+  if (waitingForNext.value || posingQuestion.value || finished.value || !currentQuestion.value) return
+  const version = conversationVersion
+  const questionIndex = currentIndex.value
+  helpReminderTimer = window.setTimeout(() => {
+    helpReminderTimer = null
+    if (version !== conversationVersion || questionIndex !== currentIndex.value
+      || waitingForNext.value || posingQuestion.value || finished.value) return
+    void addCoachText(coachHelpReminderMessage(helpOpen.value))
+  }, CHAT_HELP_REMINDER_DELAY_MS)
+}
+
 function enqueueCoachBubble(createMessage: () => Omit<ChatMessage, 'id' | 'author'>) {
   const version = conversationVersion
   coachQueue = coachQueue.then(async () => {
@@ -383,6 +413,7 @@ async function askCurrentQuestion() {
   await addCoachText(bubbles.formula, undefined, true)
   if (bubbles.sentence) await addCoachText(bubbles.sentence, undefined, true)
   posingQuestion.value = false
+  restartHelpReminderTimer()
   scrollThreadToMessage(firstQuestionMessageId)
   focusAnswerInput()
 }
@@ -407,6 +438,7 @@ async function submit() {
   const question = currentQuestion.value
   const candidate = answer.value.trim()
   if (!question || !candidate || waitingForNext.value || posingQuestion.value || finished.value) return
+  clearHelpReminderTimer()
   if (isHelpCommand(candidate)) {
     openHelp(candidate)
     return
@@ -425,6 +457,8 @@ async function submit() {
     ...(result.matchedAnswer ? { matchedAnswer: result.matchedAnswer } : {})
   })
   consecutiveCorrectCount.value = nextConsecutiveCorrectCount(consecutiveCorrectCount.value, result.isCorrect)
+  consecutiveIncorrectCount.value = nextConsecutiveIncorrectCount(consecutiveIncorrectCount.value, result.isCorrect)
+  const shouldSuggestHelp = consecutiveIncorrectCount.value >= CHAT_HELP_REMINDER_INCORRECT_COUNT
   const reachedStreak = consecutiveCorrectCount.value === COACH_STREAK_LENGTH
   waitingForNext.value = true
   deliveringFeedback.value = true
@@ -462,6 +496,10 @@ async function submit() {
       }
       if (step.eventType === 'streak') consecutiveCorrectCount.value = 0
     }
+  }
+  if (shouldSuggestHelp) {
+    await addCoachText(coachHelpReminderMessage(helpOpen.value))
+    consecutiveIncorrectCount.value = 0
   }
   deliveringFeedback.value = false
   const delay = plan.find(step => step.kind === 'delay')
@@ -505,6 +543,7 @@ async function restart() {
   deliveringFeedback.value = false
   posingQuestion.value = false
   consecutiveCorrectCount.value = 0
+  consecutiveIncorrectCount.value = 0
   finished.value = false
   finalSummaryPreparing.value = false
   finalSummaryVisible.value = false
@@ -560,6 +599,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  clearHelpReminderTimer()
   if (questionScrollFrame !== null) window.cancelAnimationFrame(questionScrollFrame)
   conversationVersion += 1
 })
@@ -762,6 +802,7 @@ onBeforeUnmount(() => {
           :question-number="(helpQuestionIndex ?? currentIndex) + 1"
           :coach-color="coach.themeColor"
           :feedback-context="helpFeedbackContext"
+          @content-scroll="restartHelpReminderTimer"
           @close="closeHelp"
         />
       </Transition>

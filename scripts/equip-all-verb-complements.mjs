@@ -73,6 +73,23 @@ const indirectSeeds = {
   'se souvenir': ['de', 'une histoire'],
 }
 
+// « Réussir à » sélectionne ici un infinitif, et non un groupe nominal :
+// réussir un examen / réussir à faire quelque chose.
+const reviewedIndirectComplements = {
+  réussir: [
+    'à ouvrir la porte',
+    'à terminer le jeu',
+    'à payer la facture',
+    'à résoudre le problème',
+    'à apprendre la leçon',
+    'à retrouver son chemin',
+    'à comprendre la consigne',
+    'à finir son exercice',
+    'à construire une maquette',
+    'à écrire son prénom',
+  ],
+}
+
 // Emplois usuels que la structure HTML de l'article ne fait pas remonter comme
 // « transitifs directs », ou dont l'article n'a pas été retrouvé automatiquement.
 const additionalDirect = {
@@ -107,12 +124,15 @@ const reviewedDirect = {
   colorier: 'un dessin',
   commander: 'un repas', commenter: 'un texte', communiquer: 'une information',
   comparer: 'un résultat à un autre', conclure: 'un accord',
-  consulter: 'un spécialiste', contester: 'une décision', continuer: 'un travail',
+  considérer: 'une situation', consulter: 'un spécialiste', contester: 'une décision', continuer: 'un travail',
   convaincre: 'une personne', copier: 'un texte', corriger: 'une erreur',
   couler: 'une dalle', courir: 'une épreuve', craindre: 'un orage', cranter: 'une roue',
   créer: 'une affiche', creuser: 'un trou', crier: 'une réponse',
   critiquer: 'une décision', croiser: 'des bras', décider: 'une date',
-  découvrir: 'une surprise', dériver: 'un cours d’eau', devoir: 'une somme',
+  déboucher: 'une bouteille', décaler: 'une date', découper: 'une feuille',
+  découpler: 'des éléments', défier: 'un adversaire', démarrer: 'une machine',
+  dénicher: 'une solution', dénommer: 'une figure', détacher: 'une feuille',
+  déverser: 'un contenu', découvrir: 'une surprise', dériver: 'un cours d’eau', devoir: 'une somme',
   diminuer: 'un volume', discuter: 'une proposition', diviser: 'une quantité',
   documenter: 'un dossier', élever: 'une construction', encourager: 'un camarade',
   enfiler: 'une perle', enseigner: 'une règle', éteindre: 'une lampe',
@@ -348,18 +368,25 @@ function extractedSeeds(article) {
 }
 
 const directCatalog = new Map()
+const missingDirectSeeds = []
 for (const article of report.results) {
   if (article.error || !article.direct || excludedDirect.has(article.infinitive)) continue
   const safeSeed = reviewedDirect[article.infinitive]
     || childSafeDirect[article.infinitive]
     || directSeeds[article.infinitive]
   const seeds = safeSeed ? (Array.isArray(safeSeed) ? safeSeed : [safeSeed]) : extractedSeeds(article)
-  if (!seeds.length) throw new Error(`Aucun COD sûr pour ${article.infinitive}`)
+  if (!seeds.length) {
+    missingDirectSeeds.push(article.infinitive)
+    continue
+  }
   directCatalog.set(article.infinitive, {
     seeds,
     sourceUrl: article.url,
     limit: article.infinitive === 'manger' ? 15 : 10,
   })
+}
+if (missingDirectSeeds.length) {
+  throw new Error(`Aucun COD sûr pour : ${missingDirectSeeds.join(', ')}`)
 }
 for (const [infinitive, seed] of Object.entries(additionalDirect)) {
   const article = report.results.find(item => item.infinitive === infinitive)
@@ -392,7 +419,7 @@ async function ensureSense(verbId, type, preposition, label) {
   return Number(result.insertId)
 }
 
-async function equip(infinitive, type, seeds, preposition, sourceUrl, limit = 10) {
+async function equip(infinitive, type, seeds, preposition, sourceUrl, limit = 10, reviewedComplements = null) {
   const [verbs] = await database.execute(
     'SELECT id FROM verbes WHERE infinitif=? AND est_archive=0 LIMIT 1', [infinitive],
   )
@@ -414,7 +441,13 @@ async function equip(infinitive, type, seeds, preposition, sourceUrl, limit = 10
     'SELECT id FROM constructions_verbales WHERE sens_id=? AND code=? LIMIT 1', [senseId, code],
   )
   const constructionId = Number(constructions[0].id)
-  for (const variant of catalogVariants(seeds, preposition, limit)) {
+  const complementVariants = reviewedComplements
+    ? reviewedComplements.map(text => ({ text, gender: null, number: null }))
+    : catalogVariants(seeds, preposition, limit)
+  if (complementVariants.length < limit) {
+    throw new Error(`${infinitive} : ${complementVariants.length} compléments valides sur ${limit} attendus`)
+  }
+  for (const variant of complementVariants.slice(0, limit)) {
     const text = variant.text
     const placement = type === 'cod' && variant.gender
       ? {
@@ -452,7 +485,8 @@ try {
   }
   for (const [infinitive, [preposition, seed]] of Object.entries(indirectSeeds)) {
     const article = report.results.find(item => item.infinitive === infinitive)
-    await equip(infinitive, 'coi', [seed], preposition, article?.url ?? null)
+    await equip(infinitive, 'coi', [seed], preposition, article?.url ?? null, 10,
+      reviewedIndirectComplements[infinitive] ?? null)
   }
   await rebalanceMasculineSingularCod()
   await database.commit()

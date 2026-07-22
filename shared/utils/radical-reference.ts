@@ -43,31 +43,34 @@ const SUBJUNCTIVE_PRESENT_ENDINGS = ['e', 'es', 'e', 'ions', 'iez', 'ent']
 const SUBJUNCTIVE_IMPERFECT_ENDINGS = ['sse', 'sses', 't', 'ssions', 'ssiez', 'ssent']
 const SUBJUNCTIVE_IMPERFECT_A_ENDINGS = ['asse', 'asses', 'ât', 'assions', 'assiez', 'assent']
 
-function subjunctiveImperfectThirdPersonReference(
+function subjunctiveImperfectSeries(form: string) {
+  const value = normalized(form)
+  if (value.endsWith('int')) return { sourceEnding: 'int', endings: ['insse', 'insses', 'înt', 'inssions', 'inssiez', 'inssent'] }
+  if (value.endsWith('ut')) return { sourceEnding: 'ut', endings: ['usse', 'usses', 'ût', 'ussions', 'ussiez', 'ussent'] }
+  if (value.endsWith('it')) return { sourceEnding: 'it', endings: ['isse', 'isses', 'ît', 'issions', 'issiez', 'issent'] }
+  if (value.endsWith('a')) return { sourceEnding: 'a', endings: SUBJUNCTIVE_IMPERFECT_A_ENDINGS }
+  return null
+}
+
+function subjunctiveImperfectReference(
   source: RadicalPrincipalForm | undefined,
   request: RadicalReferenceRequest,
 ): ExerciseQuestion['radicalReference'] | undefined {
   const form = conjugatedCore(source?.form || '')
   const target = conjugatedCore(request.conjugation)
-  const series = normalized(form).endsWith('int')
-    ? { sourceEnding: 'int', targetEnding: 'înt' }
-    : normalized(form).endsWith('ut')
-      ? { sourceEnding: 'ut', targetEnding: 'ût' }
-      : normalized(form).endsWith('it')
-        ? { sourceEnding: 'it', targetEnding: 'ît' }
-        : normalized(form).endsWith('a')
-          ? { sourceEnding: 'a', targetEnding: 'ât' }
-          : null
-  if (!form || !target || !series || form.length <= series.sourceEnding.length) return undefined
+  const series = subjunctiveImperfectSeries(form)
+  const index = request.personId === null ? undefined : PERSON_INDEX.get(request.personId)
+  if (!form || !target || !series || index === undefined || form.length <= series.sourceEnding.length) return undefined
   const radical = form.slice(0, -series.sourceEnding.length)
-  if (normalized(`${radical}${series.targetEnding}`) !== normalized(target)) return undefined
+  const targetEnding = series.endings[index]!
+  if (normalized(`${radical}${targetEnding}`) !== normalized(target)) return undefined
   return {
     kind: 'past-simple-il',
     label: 'il au passé simple',
     form,
     removableEnding: series.sourceEnding,
     radical,
-    targetEnding: series.targetEnding,
+    targetEnding,
     referenceMode: 'indicatif',
     referenceTense: 'passé simple',
     referenceSubject: 'il',
@@ -304,26 +307,8 @@ export function buildRadicalReference(
 
   if (mode === 'subjonctif' && tense === 'imparfait') {
     const source = referenceForm(forms, 'indicatif', 'passé simple', 'il')
-    if (request.personId === 6) {
-      return subjunctiveImperfectThirdPersonReference(source, request)
-    }
-    const form = conjugatedCore(source?.form || '')
-    if (form) {
-      const index = request.personId === null ? undefined : PERSON_INDEX.get(request.personId)
-      const aSeries = normalized(form).endsWith('a')
-      const target = aSeries
-        ? targetStem(request, SUBJUNCTIVE_IMPERFECT_A_ENDINGS)
-        : targetStem(request, SUBJUNCTIVE_IMPERFECT_ENDINGS)
-      if (!target || index === undefined) return undefined
-      const radical = aSeries ? form.slice(0, -1) : form.slice(0, -1)
-      const targetEnding = aSeries ? SUBJUNCTIVE_IMPERFECT_A_ENDINGS[index] : target.ending
-      if (normalized(radical) === normalized(target.stem)) {
-        return {
-          kind: 'past-simple-il', label: 'il au passé simple', form, removableEnding: aSeries ? 'a' : form.slice(-1), radical,
-          targetEnding, referenceMode: 'indicatif', referenceTense: 'passé simple', referenceSubject: 'il', strategy: 'remove-ending', validated: true,
-        }
-      }
-    }
+    const reference = subjunctiveImperfectReference(source, request)
+    if (reference) return reference
   }
 
   if ((mode === 'participe' && tense === 'present') || (mode === 'gerondif' && tense === 'present')) {

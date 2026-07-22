@@ -12,6 +12,7 @@ const props = defineProps<{
 const activeChildren = computed(() => (props.block.children || []).filter(child => child.isActive))
 const isRadicalBlock = computed(() => props.block.content.trim() === '{contextualBaseHelp}')
 const isDefinitionBlock = computed(() => props.block.content.trim() === '{definitionHelp}')
+const isResultBlock = computed(() => props.block.title.trim().normalize('NFD').replace(/\p{Diacritic}/gu, '').toLocaleLowerCase('fr') === 'resultat')
 const orthographyKind = computed(() => automaticOrthographyHelpKind(props.block))
 const renderedTitle = computed(() => isDefinitionBlock.value
   ? 'Définition'
@@ -22,7 +23,7 @@ const renderedContent = computed(() => sanitizeCoachHtml(renderCoachHelpContent(
 </script>
 
 <template>
-  <section class="coach-help-block" :class="[`coach-help-block--${block.type}`, { 'coach-help-block--orthography': orthographyKind, 'coach-help-block--radical': isRadicalBlock, 'coach-help-block--definition': isDefinitionBlock }]">
+  <section class="coach-help-block" :class="[`coach-help-block--${block.type}`, { 'coach-help-block--orthography': orthographyKind, 'coach-help-block--radical': isRadicalBlock, 'coach-help-block--definition': isDefinitionBlock, 'coach-help-block--result': isResultBlock }]">
     <h3 v-if="renderedTitle">
       <span v-if="orthographyKind" class="coach-help-block__letter" aria-hidden="true">{{ orthographyKind.toUpperCase() }}</span>
       <span v-else-if="isDefinitionBlock" class="coach-help-block__info-icon" aria-hidden="true">i</span>
@@ -58,6 +59,7 @@ const renderedContent = computed(() => sanitizeCoachHtml(renderCoachHelpContent(
 :global(:root[data-theme='dark'] .coach-help-block--info){--help-list-accent:#77c8e6;--help-list-marker:#254956;--help-list-surface:#203d48;--help-list-border:#315f70;--help-list-text:#d8edf4;color:#d8edf4;border-color:#58a9c8;background:#18323d}:global(:root[data-theme='dark'] .coach-help-block--info>h3){color:#9bdcf1}:global(:root[data-theme='dark'] .coach-help-block--success){--help-list-accent:#7ed0ad;--help-list-marker:#285044;--help-list-surface:#214139;--help-list-border:#376354;--help-list-text:#d9eee5;color:#d9eee5;border-color:#5db28f;background:#19352d}:global(:root[data-theme='dark'] .coach-help-block--success>h3){color:#a5e2c7}
 .coach-help-block__content :deep(mark){padding:2px 6px;border-radius:5px;color:#302706;background:#ffe15c;box-decoration-break:clone;-webkit-box-decoration-break:clone}.coach-help-block__content :deep(br+mark){display:inline-block;margin-top:6px}:global(:root[data-theme='dark'] .coach-help-block__content mark){color:#241e08;background:#f3d557}
 .coach-help-block__content :deep(mark i){color:#c92f35;font-style:normal;text-shadow:none}:global(:root[data-theme='dark'] .coach-help-block__content mark i){color:#d9343b}
+.coach-help-block--result .coach-help-block__content :deep(mark){padding:0;color:inherit;background:transparent}
 .coach-help-block__content :deep(var),.coach-help-block__content :deep(samp){display:inline-flex;min-height:30px;padding:3px 8px;align-items:center;border:1px solid;border-radius:8px;font:850 .9em/1.35 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;white-space:nowrap}.coach-help-block__content :deep(var){color:#176b82;border-color:#a9d6df;background:#dff2f5;font-style:normal}.coach-help-block__content :deep(samp){color:#7a4b13;border-color:#e3c17b;background:#fff0c4}.coach-help-block__content :deep(span:has(>var+samp)){display:inline-flex;margin-top:6px;vertical-align:middle}.coach-help-block__content :deep(span>var+samp){margin-left:-1px;border-left-style:dashed;border-radius:0 8px 8px 0}.coach-help-block__content :deep(span>var:has(+samp)){border-radius:8px 0 0 8px}:global(:root[data-theme='dark'] .coach-help-block__content var){color:#9edce8;border-color:#426e78;background:#294952}:global(:root[data-theme='dark'] .coach-help-block__content samp){color:#f2cf86;border-color:#735f37;background:#493d25}
 .coach-help-block__content :deep(span:has(>var+del+samp)){display:inline-flex;margin-top:6px;align-items:stretch;vertical-align:middle}.coach-help-block__content :deep(span>del){display:inline-flex;min-height:42px;margin-left:-1px;padding:2px 9px;align-items:center;color:#b3262d;border:1px solid #df8f93;border-radius:0;background:#fde0e1;font:900 2em/.8 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;text-decoration-color:#c5222b;text-decoration-line:line-through;text-decoration-thickness:4px}.coach-help-block__content :deep(span>del+samp){min-height:42px;margin-left:-1px;border-left-style:dashed;border-radius:0 8px 8px 0}.coach-help-block__content :deep(span>var:has(+del)){min-height:42px;border-radius:8px 0 0 8px}:global(:root[data-theme='dark'] .coach-help-block__content span>del){color:#ffadb1;border-color:#9a565a;background:#522d30;text-decoration-color:#ff6269}
 .coach-help-block__content :deep(span:has(>del)+strong){display:block;margin:12px 0 5px;color:var(--help-list-text);font-size:.78rem}

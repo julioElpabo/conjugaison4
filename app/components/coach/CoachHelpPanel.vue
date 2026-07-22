@@ -39,6 +39,7 @@ type FeedbackStatus = 'idle' | 'sending' | 'sent' | 'error'
 
 const emit = defineEmits<{
   close: []
+  contentScroll: []
   previewScroll: [position: PreviewScrollPosition]
 }>()
 const content = useTemplateRef<HTMLElement>('content')
@@ -236,6 +237,7 @@ function currentUiContext() {
 }
 
 function reportPreviewScroll() {
+  emit('contentScroll')
   if (previewScrollFrame !== null) window.cancelAnimationFrame(previewScrollFrame)
   previewScrollFrame = window.requestAnimationFrame(() => {
     previewScrollFrame = null

@@ -223,6 +223,11 @@ function subjunctiveRelativeAntecedent(
   return `${plural ? 'Ce sont' : "C'est"} ${article} ${only} ${nounPhrase}`
 }
 
+function withRelativeLink(relativePronoun: string | null | undefined, pronoun: string, clause: string) {
+  if (relativePronoun) return `${relativePronoun} ${clause}`
+  return startsWithVowel(pronoun) ? `qu'${clause}` : `que ${clause}`
+}
+
 function withAnteposedComplement(
   answer: string,
   pronoun: string,
@@ -236,7 +241,7 @@ function withAnteposedComplement(
   if (normalized(mode) === 'subjonctif') {
     const framedAntecedent = subjunctiveRelativeAntecedent(antecedent, relativePronoun, gender, number)
     const clause = withoutSubjunctiveLink(answer)
-    return [framedAntecedent, relativePronoun || 'que', clause, postposed].filter(Boolean).join(' ')
+    return [framedAntecedent, withRelativeLink(relativePronoun, pronoun, clause), postposed].filter(Boolean).join(' ')
   }
   if (relativePronoun) {
     return `${antecedent} ${relativePronoun} ${answer}`
@@ -345,7 +350,7 @@ export function formatConjugationQuestion(
     : correctedForms
   const prompt = row.complement_position === 'before' && row.complement_anteposed
     ? normalized(row.mode_name) === 'subjonctif'
-      ? `${subjunctiveRelativeAntecedent(anteposedComplement!.antecedent, row.complement_relative_pronoun, row.complement_gender, row.complement_number)} ${row.complement_relative_pronoun || 'que'} ${relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif)} …${anteposedComplement!.postposed ? ` ${anteposedComplement!.postposed}` : ''} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
+      ? `${subjunctiveRelativeAntecedent(anteposedComplement!.antecedent, row.complement_relative_pronoun, row.complement_gender, row.complement_number)} ${withRelativeLink(row.complement_relative_pronoun, pronoun, relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif))} …${anteposedComplement!.postposed ? ` ${anteposedComplement!.postposed}` : ''} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
       : row.complement_relative_pronoun
         ? `${anteposedComplement!.antecedent} ${row.complement_relative_pronoun} ${relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif)} … | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
         : `${anteposedComplement!.antecedent} ${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif, 'before')} …${anteposedComplement!.postposed ? ` ${anteposedComplement!.postposed}` : ''} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`

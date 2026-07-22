@@ -9,7 +9,8 @@ import type {
   PastSimplePronouns,
   Verb
 } from '~~/shared/types/conjugation'
-import { DEFAULT_COMPLEMENT_OPTIONS, legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils/complement-options'
+import { legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils/complement-options'
+import { DEFAULT_SHARED_CHALLENGE_OPTIONS } from '~~/shared/utils/challenge-defaults'
 
 export type { ComplementOption, ComplementPlacement, ConjugationMode, ExerciseKind, PastSimplePronouns, Verb }
 export type Tense = ConjugationTense
@@ -52,7 +53,7 @@ export interface SharedChallenge {
   printOptions?: Partial<PrintOptions>
 }
 
-const createDefaultPrintOptions = (): PrintOptions => ({
+export const createDefaultPrintOptions = (): PrintOptions => ({
   title: 'Défi de conjugaison',
   questionSpacingMm: 8,
   titleSpacingMm: 30,
@@ -65,16 +66,12 @@ const createDefaultPrintOptions = (): PrintOptions => ({
   showRandomNumber: true
 })
 
-const createDefaultChallenge = (): ChallengeConfig => ({
+export const createDefaultChallenge = (): ChallengeConfig => ({
   verbIds: [1, 2, 3, 4],
   tenseIds: [1, 3, 4, 5],
   questionCount: 20,
-  exerciseKind: 'conjugation',
-  pastSimplePronouns: 'all',
-  inclusivePronouns: false,
-  includeComplements: true,
-  complementPlacement: 'after',
-  complementOptions: [...DEFAULT_COMPLEMENT_OPTIONS],
+  ...DEFAULT_SHARED_CHALLENGE_OPTIONS,
+  complementOptions: [...DEFAULT_SHARED_CHALLENGE_OPTIONS.complementOptions],
   printOptions: createDefaultPrintOptions()
 })
 
@@ -210,22 +207,23 @@ export function useChallengeBuilder() {
   }
 
   function applySharedChallenge(shared: SharedChallenge) {
+    const defaults = createDefaultChallenge()
     applySelection(shared)
     const complementOptions = shared.complementOptions
       ?? (shared.includeComplements === undefined
-        ? [...DEFAULT_COMPLEMENT_OPTIONS]
+        ? [...defaults.complementOptions]
         : legacyComplementOptions(shared.includeComplements, shared.complementPlacement ?? 'after'))
     const legacy = legacyComplementConfig(complementOptions)
     challenge.value = {
       ...challenge.value,
-      exerciseKind: shared.exerciseKind ?? challenge.value.exerciseKind,
-      pastSimplePronouns: shared.pastSimplePronouns ?? challenge.value.pastSimplePronouns,
-      inclusivePronouns: shared.inclusivePronouns ?? challenge.value.inclusivePronouns,
+      exerciseKind: shared.exerciseKind ?? defaults.exerciseKind,
+      pastSimplePronouns: shared.pastSimplePronouns ?? defaults.pastSimplePronouns,
+      inclusivePronouns: shared.inclusivePronouns ?? defaults.inclusivePronouns,
       includeComplements: legacy.includeComplements,
       complementPlacement: legacy.complementPlacement,
       complementOptions,
       printOptions: {
-        ...challenge.value.printOptions,
+        ...defaults.printOptions,
         ...(shared.printOptions ?? {})
       }
     }

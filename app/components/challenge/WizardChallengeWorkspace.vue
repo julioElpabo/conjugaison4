@@ -168,7 +168,7 @@ const stepStatus = computed(() => ({
 }))
 const activePreset = computed(() => catalogue.value.presets.find(preset => preset.id === activePresetId.value) ?? null)
 const activePresetGroupLabel = computed(() => activePreset.value
-  ? challengePresetGroupLabels[activePreset.value.group]
+  ? activePreset.value.groupLabel ?? challengePresetGroupLabels[activePreset.value.group] ?? activePreset.value.group
   : '')
 const activePresetTitleGroupLabel = computed(() => activePreset.value?.group === 'school'
   ? 'Niveau scolaire suisse'
@@ -778,6 +778,9 @@ async function saveChallenge() {
                       class="wizard-home__inline-presets"
                       compact
                       :presets="catalogue.presets"
+                      :verbs="catalogue.verbes"
+                      :modes="catalogue.modes"
+                      :tenses="catalogue.temps"
                       :active-preset-id="activePresetId"
                       @select="selectPreset"
                       @stage-change="presetStage = $event"
@@ -870,7 +873,7 @@ async function saveChallenge() {
                   ← <span class="mobile-label-hidden">Modes et temps</span><span class="mobile-label-only">Temps</span>
                 </button>
                 <div class="wizard-step__controls">
-                  <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" @click="nextStep">Créer →</button>
+                  <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" @click="nextStep"><span aria-hidden="true">▶</span> Commencer le défi</button>
                 </div>
               </div>
               <div class="wizard-step__intro">
@@ -901,7 +904,7 @@ async function saveChallenge() {
               />
 
               <div class="wizard-step__bottom-actions">
-                <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" @click="nextStep">Créer →</button>
+                <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" @click="nextStep"><span aria-hidden="true">▶</span> Commencer le défi</button>
               </div>
 
             </div>
@@ -1033,9 +1036,10 @@ async function saveChallenge() {
 .wizard-step__actions { display: flex; margin-bottom: 30px; align-items: flex-start; justify-content: flex-end; }
 .wizard-step__actions--split { align-items: center; justify-content: space-between; }
 .wizard-step__controls { display: flex; align-items: center; gap: 8px; }
-.wizard-step__bottom-actions { display: flex; margin-top: 30px; padding-top: 24px; justify-content: flex-end; border-top: 1px solid var(--line); }
+.wizard-step__bottom-actions { display: flex; margin: 30px -18px -4px; padding: 24px 18px 4px; justify-content: flex-end; border-top: 1px solid var(--line); background: linear-gradient(180deg, color-mix(in srgb, var(--brand-pale) 32%, transparent), transparent); }
 .wizard-step__cta { min-height: 54px; padding: 13px 25px; border-radius: 13px; font-size: 1.05rem; font-weight: 850; }
-.wizard-step__cta--launch { min-height: 70px; padding: 17px 33px; border-radius: 17px; font-size: 1.37rem; }
+.wizard-step__cta--launch { display: inline-flex; min-height: 70px; padding: 17px 33px; align-items: center; justify-content: center; gap: 11px; border-radius: 17px; font-size: 1.37rem; }
+.wizard-step__cta--launch > span { display: grid; width: 31px; height: 31px; place-items: center; border-radius: 50%; background: rgb(255 255 255 / 20%); font-size: .75em; line-height: 1; }
 .wizard-next-pulse:not(:disabled) { animation: wizard-next-pulse 2s infinite; transform-origin: center; }
 .wizard-step__intro { margin-bottom: 22px; text-align: center; }
 .wizard-step__intro--selection { text-align: left; }

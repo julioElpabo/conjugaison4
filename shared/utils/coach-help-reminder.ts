@@ -8,5 +8,5 @@ export function nextConsecutiveIncorrectCount(current: number, isCorrect: boolea
 export function coachHelpReminderMessage(helpOpen: boolean) {
   return helpOpen
     ? 'Tu peux regarder l’aide à droite pour trouver un indice.'
-    : 'Si tu veux un indice, tape « Aide » dans le champ de réponse.'
+    : 'Si tu veux un indice, tape « Aide » dans le champ de réponse'
 }

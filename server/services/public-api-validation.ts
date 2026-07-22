@@ -8,6 +8,7 @@ import type {
   QuestionnaireRequest
 } from '../types/public-api'
 import { legacyComplementConfig, legacyComplementOptions, normalizeComplementOptions } from '../../shared/utils/complement-options'
+import { DEFAULT_SHARED_CHALLENGE_OPTIONS } from '../../shared/utils/challenge-defaults'
 
 export class PublicInputError extends Error {}
 
@@ -241,25 +242,25 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
   }
 
   const exerciseKind = modernValue.exerciseKind === undefined
-    ? 'conjugation'
+    ? DEFAULT_SHARED_CHALLENGE_OPTIONS.exerciseKind
     : parseExerciseKind(modernValue.exerciseKind)
   const pastSimplePronouns = modernValue.pastSimplePronouns === undefined
-    ? (legacyPastSimple === undefined ? 'all' : parsePastSimplePronouns(legacyPastSimple))
+    ? (legacyPastSimple === undefined ? DEFAULT_SHARED_CHALLENGE_OPTIONS.pastSimplePronouns : parsePastSimplePronouns(legacyPastSimple))
     : parsePastSimplePronouns(modernValue.pastSimplePronouns)
   const inclusivePronouns = modernValue.inclusivePronouns === undefined
-    ? legacyInclusive === 'afficherIel'
+    ? (legacyInclusive === undefined ? DEFAULT_SHARED_CHALLENGE_OPTIONS.inclusivePronouns : legacyInclusive === 'afficherIel')
     : modernValue.inclusivePronouns
 
   if (typeof inclusivePronouns !== 'boolean') {
     throw new PublicInputError('inclusivePronouns doit être un booléen')
   }
-  const includeComplements = modernValue.includeComplements ?? false
+  const includeComplements = modernValue.includeComplements ?? DEFAULT_SHARED_CHALLENGE_OPTIONS.includeComplements
   if (typeof includeComplements !== 'boolean') {
     throw new PublicInputError('includeComplements doit être un booléen')
   }
 
   const complementPlacement = modernValue.complementPlacement === undefined
-    ? 'after'
+    ? DEFAULT_SHARED_CHALLENGE_OPTIONS.complementPlacement
     : parseComplementPlacement(modernValue.complementPlacement)
   const complementOptions = modernValue.complementOptions === undefined
     ? legacyComplementOptions(includeComplements, complementPlacement)

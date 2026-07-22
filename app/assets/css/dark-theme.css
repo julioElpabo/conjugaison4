@@ -89,6 +89,31 @@
   background: #263532;
   border-color: #49605b;
 }
+:root[data-theme='dark'] .preset-browser__info-button {
+  color: #9bd3c7;
+  background: #243834;
+  border-color: #58766f;
+}
+:root[data-theme='dark'] .preset-browser__info-button:hover,
+:root[data-theme='dark'] .preset-browser__info-button[aria-expanded='true'] {
+  color: #fff;
+  background: #39786c;
+  border-color: #72b6a7;
+}
+:root[data-theme='dark'] .preset-browser__tooltip {
+  color: #d7e4e1;
+  background: #172321;
+  border-color: #5b7b73;
+  box-shadow: 0 18px 40px rgb(0 0 0 / 38%);
+}
+:root[data-theme='dark'] .preset-browser__tooltip header strong,
+:root[data-theme='dark'] .preset-browser__tooltip dt { color: #a9ded2; }
+:root[data-theme='dark'] .preset-browser__tooltip dd { color: #d7e4e1; }
+:root[data-theme='dark'] .preset-browser__verb-badges span {
+  color: #d7e4e1;
+  background: #243834;
+  border-color: #49675f;
+}
 :root[data-theme='dark'] .preset-browser__launch { background: #39786c; }
 
 :root[data-theme='dark'] :is(.action-button--primary, .primary-button) {
@@ -167,10 +192,16 @@
   border-color: #405651;
 }
 
-:root[data-theme='dark'] :is(.conjugation-example__screen, .conjugation-example__screen-header, .conjugation-example__question-line, .conjugation-example__answer > div > span) {
+:root[data-theme='dark'] :is(.conjugation-example__screen, .conjugation-example__question, .conjugation-example__question-line) {
   color: var(--ink);
   background: #172321;
   border-color: #3c504b;
+}
+
+:root[data-theme='dark'] .conjugation-example__notice {
+  color: #f4dda0;
+  background: #3b341f;
+  border-color: #806d35;
 }
 
 :root[data-theme='dark'] :is(.consultation-tabs, .mode-nav) { background: rgb(30 45 42 / 96%); }
@@ -272,7 +303,6 @@
 }
 
 :root[data-theme='dark'] .conjugation-example__preview-icon { background: #29423c; }
-:root[data-theme='dark'] .conjugation-example__progress i { background: #52645f; }
 :root[data-theme='dark'] .conjugation-example__question-separator { color: #82958f; }
 
 /* Exercises and modal surfaces */

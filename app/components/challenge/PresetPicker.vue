@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { challengePresetGroupLabels, challengePresetGroupOrder } from '~~/shared/data/challenge-presets'
-import type { ChallengePreset } from '~~/shared/types/conjugation'
+import type { ChallengePreset, ConjugationMode, ConjugationTense, Verb } from '~~/shared/types/conjugation'
 
 const props = defineProps<{
   presets: ChallengePreset[]
   activePresetId?: string
   compact?: boolean
+  verbs?: readonly Verb[]
+  modes?: readonly ConjugationMode[]
+  tenses?: readonly ConjugationTense[]
 }>()
 
 const emit = defineEmits<{
@@ -21,8 +24,13 @@ const groupedPresets = computed(() => {
     groups.set(preset.group, current)
   })
   return [...groups.entries()]
-    .map(([id, presets]) => ({ id, label: challengePresetGroupLabels[id], presets }))
-    .sort((left, right) => challengePresetGroupOrder.indexOf(left.id) - challengePresetGroupOrder.indexOf(right.id))
+    .map(([id, presets]) => ({
+      id,
+      label: presets[0]?.groupLabel ?? challengePresetGroupLabels[id] ?? id,
+      order: presets[0]?.groupOrder ?? challengePresetGroupOrder.indexOf(id),
+      presets,
+    }))
+    .sort((left, right) => left.order - right.order || left.label.localeCompare(right.label, 'fr'))
 })
 
 const activeGroupId = ref('school')
@@ -37,10 +45,55 @@ const selectedCompactPresetId = ref<string | null>(null)
 const compactGroup = computed(() => groupedPresets.value.find(group => group.id === compactGroupId.value))
 const selectedCompactPreset = computed(() => props.presets.find(preset => preset.id === selectedCompactPresetId.value))
 const compactBrowser = ref<HTMLElement | null>(null)
+const hoveredInfoPresetId = ref<string | null>(null)
+const pinnedInfoPresetId = ref<string | null>(null)
+
+const verbNameById = computed(() => new Map((props.verbs ?? []).map(verb => [verb.id, verb.infinitif])))
+const tenseById = computed(() => new Map((props.tenses ?? []).map(tense => [tense.id, tense])))
+const modeById = computed(() => new Map((props.modes ?? []).map(mode => [mode.id, mode])))
+
+function infoIsOpen(presetId: string) {
+  return hoveredInfoPresetId.value === presetId || pinnedInfoPresetId.value === presetId
+}
+
+function infoVerbNames(preset: ChallengePreset) {
+  return preset.verbIds.slice(0, 12).map(id => verbNameById.value.get(id) ?? `Verbe ${id}`)
+}
+
+function infoTenseGroups(preset: ChallengePreset) {
+  const groups = new Map<number, { mode: string, order: number, tenses: string[] }>()
+  for (const id of preset.tenseIds) {
+    const tense = tenseById.value.get(id)
+    if (!tense) continue
+    const mode = modeById.value.get(tense.modeId)
+    const group = groups.get(tense.modeId) ?? {
+      mode: mode?.name ?? tense.mode?.name ?? 'Autres temps',
+      order: mode?.order ?? tense.mode?.order ?? Number.MAX_SAFE_INTEGER,
+      tenses: [],
+    }
+    group.tenses.push(tense.name)
+    groups.set(tense.modeId, group)
+  }
+  return [...groups.values()].sort((left, right) => left.order - right.order || left.mode.localeCompare(right.mode, 'fr'))
+}
+
+function toggleInfo(presetId: string) {
+  pinnedInfoPresetId.value = pinnedInfoPresetId.value === presetId ? null : presetId
+}
+
+function closePinnedInfo(event: PointerEvent) {
+  const target = event.target as HTMLElement | null
+  if (!target?.closest('[data-preset-info]')) pinnedInfoPresetId.value = null
+}
+
+onMounted(() => document.addEventListener('pointerdown', closePinnedInfo))
+onBeforeUnmount(() => document.removeEventListener('pointerdown', closePinnedInfo))
 
 function revealCompactColumn(column: number) {
   nextTick(() => {
-    const element = compactBrowser.value?.querySelector<HTMLElement>(`[data-browser-column="${column}"]`)
+    const browser = compactBrowser.value
+    if (!browser || browser.scrollWidth <= browser.clientWidth + 1) return
+    const element = browser.querySelector<HTMLElement>(`[data-browser-column="${column}"]`)
     element?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'end' })
   })
 }
@@ -48,6 +101,8 @@ function revealCompactColumn(column: number) {
 function openCompactGroup(groupId: string) {
   compactGroupId.value = groupId
   selectedCompactPresetId.value = null
+  pinnedInfoPresetId.value = null
+  hoveredInfoPresetId.value = null
   emit('stageChange', 'presets')
   revealCompactColumn(2)
 }
@@ -118,17 +173,30 @@ function selectRandom(preset: ChallengePreset, count: number) {
           <Transition name="browser-column">
             <section v-if="compactGroup" :key="compactGroup.id" class="preset-browser__column" data-browser-column="2" :aria-label="`Défis de ${compactGroup.label}`">
               <div class="preset-browser__list">
-                <button
+                <div
                   v-for="preset in compactGroup.presets"
                   :key="preset.id"
-                  type="button"
-                  :class="{ 'is-selected': selectedCompactPresetId === preset.id || activePresetId === preset.id }"
-                  :aria-pressed="selectedCompactPresetId === preset.id"
-                  @click="openCompactPreset(preset.id)"
+                  class="preset-browser__preset-row"
                 >
-                  <span><strong>{{ preset.label }}</strong></span>
-                  <span class="preset-browser__chevron" aria-hidden="true">›</span>
-                </button>
+                  <div class="preset-browser__info" data-preset-info>
+                    <button class="preset-browser__info-button" type="button" :aria-expanded="infoIsOpen(preset.id)" :aria-controls="`preset-info-${preset.id}`" :aria-label="`Informations sur ${preset.label}`" @mouseenter="hoveredInfoPresetId = preset.id" @mouseleave="hoveredInfoPresetId = null" @click.stop="toggleInfo(preset.id)">i</button>
+                    <section v-if="infoIsOpen(preset.id)" :id="`preset-info-${preset.id}`" class="preset-browser__tooltip" aria-live="polite">
+                      <header><strong>{{ preset.label }}</strong><span>{{ preset.questionCount }} questions</span></header>
+                      <div class="preset-browser__tooltip-section">
+                        <h4>Verbes</h4>
+                        <div class="preset-browser__verb-badges"><span v-for="verb in infoVerbNames(preset)" :key="verb">{{ verb }}</span></div>
+                        <p v-if="preset.verbIds.length > 12" class="preset-browser__other-verbs">+ {{ preset.verbIds.length - 12 }} autres verbes</p>
+                      </div>
+                      <div class="preset-browser__tooltip-section">
+                        <h4>Temps</h4>
+                        <dl><div v-for="group in infoTenseGroups(preset)" :key="group.mode"><dt>{{ group.mode }}</dt><dd>{{ group.tenses.join(', ') }}</dd></div></dl>
+                      </div>
+                    </section>
+                  </div>
+                  <button class="preset-browser__preset-button" type="button" :class="{ 'is-selected': selectedCompactPresetId === preset.id || activePresetId === preset.id }" :aria-pressed="selectedCompactPresetId === preset.id" @click="openCompactPreset(preset.id)">
+                    <span><strong>{{ preset.label }}</strong></span><span class="preset-browser__chevron" aria-hidden="true">›</span>
+                  </button>
+                </div>
               </div>
             </section>
           </Transition>
@@ -142,6 +210,16 @@ function selectRandom(preset: ChallengePreset, count: number) {
                   <span class="preset-browser__launch" aria-hidden="true">→</span>
                 </button>
                 <span class="preset-browser__quantity-separator" aria-hidden="true" />
+                <button v-if="selectedCompactPreset.verbIds.length >= 1 && selectedCompactPreset.verbIds.length < 5" type="button" @click="selectCompactPreset(selectedCompactPreset, 1)">
+                  <span><strong>1 au hasard</strong></span>
+                  <span class="preset-browser__count">1</span>
+                  <span class="preset-browser__launch" aria-hidden="true">→</span>
+                </button>
+                <button v-if="selectedCompactPreset.verbIds.length >= 2 && selectedCompactPreset.verbIds.length < 5" type="button" @click="selectCompactPreset(selectedCompactPreset, 2)">
+                  <span><strong>2 au hasard</strong></span>
+                  <span class="preset-browser__count">2</span>
+                  <span class="preset-browser__launch" aria-hidden="true">→</span>
+                </button>
                 <button v-if="selectedCompactPreset.verbIds.length >= 3" type="button" @click="selectCompactPreset(selectedCompactPreset, 3)">
                   <span><strong>3 au hasard</strong></span>
                   <span class="preset-browser__count">3</span>
@@ -246,14 +324,14 @@ function selectRandom(preset: ChallengePreset, count: number) {
 }
 
 .preset-browser { display: grid; gap: 10px; }
-.preset-browser__scroll { overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-color: #9ab8b0 transparent; scrollbar-width: thin; }
+.preset-browser__scroll { overflow: visible; overscroll-behavior-inline: contain; }
 .preset-browser__columns { display: grid; min-width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; border: 1px solid var(--line); border-radius: 15px; background: white; box-shadow: inset 0 1px rgb(255 255 255 / 70%); }
-.preset-browser__column { min-width: 0; min-height: 258px; padding: 11px; border-right: 1px solid var(--line); background: #fbfdfc; }
+.preset-browser__column { position: relative; min-width: 0; min-height: 258px; padding: 11px; border-right: 1px solid var(--line); background: #fbfdfc; }
 .preset-browser__column:first-child { border-radius: 14px 0 0 14px; }
 .preset-browser__column:last-child { border-right: 0; border-radius: 0 14px 14px 0; }
 .preset-browser__column h3 { margin: 0; padding: 4px 8px 10px; color: var(--muted); font-size: .74rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
 .preset-browser__list { display: grid; align-content: start; gap: 4px; }
-.preset-browser__list button { display: flex; width: 100%; min-height: 42px; padding: 8px 9px 8px 11px; align-items: center; justify-content: space-between; gap: 9px; border: 1px solid transparent; border-radius: 9px; color: var(--ink); background: transparent; font-size: .88rem; line-height: 1.15; text-align: left; }
+.preset-browser__list > button, .preset-browser__preset-button { display: flex; width: 100%; min-height: 42px; padding: 8px 9px 8px 11px; align-items: center; justify-content: space-between; gap: 9px; border: 1px solid transparent; border-radius: 9px; color: var(--ink); background: transparent; font-size: .88rem; line-height: 1.15; text-align: left; }
 .preset-browser__list button > span:first-child { display: grid; min-width: 0; gap: 2px; }
 .preset-browser__list button strong { color: inherit; font-size: .9rem; line-height: 1.18; overflow-wrap: anywhere; white-space: normal; }
 .preset-browser__list button small { color: var(--muted); font-size: .72rem; }
@@ -266,12 +344,33 @@ function selectRandom(preset: ChallengePreset, count: number) {
 .preset-browser__launch { display: grid; width: 25px; height: 25px; flex: 0 0 25px; place-items: center; border-radius: 8px; color: white; background: var(--brand); font-weight: 850; }
 .preset-browser__quantity-separator { height: 1px; margin: 7px 8px; background: var(--line); }
 .preset-browser__column--quantity .preset-browser__list button:hover { color: var(--brand-dark); border-color: #83afa4; background: var(--brand-pale); }
-.browser-column-enter-active { transition: opacity 180ms ease, transform 260ms cubic-bezier(.22, 1, .36, 1); }
-.browser-column-enter-from { opacity: 0; transform: translateX(24px); }
+.preset-browser__preset-row { display: grid; grid-template-columns: minmax(0, 1fr) 23px; align-items: center; gap: 4px; }
+.preset-browser__preset-button { grid-column: 1; grid-row: 1; }
+.preset-browser__info { position: relative; display: grid; grid-column: 2; grid-row: 1; place-items: center; }
+.preset-browser__info-button { display: grid; width: 21px; height: 21px; min-height: 0; padding: 0; place-items: center; color: var(--brand); border: 1px solid #9cc2b8; border-radius: 50%; background: #eef6f3; font-family: Georgia, serif; font-size: .68rem; font-weight: 900; line-height: 1; cursor: help; }
+.preset-browser__info-button:hover, .preset-browser__info-button[aria-expanded='true'] { color: white; border-color: var(--brand); background: var(--brand); }
+.preset-browser__tooltip { position: absolute; z-index: 20; right: 0; bottom: calc(100% + 7px); display: grid; width: min(520px, calc(100vw - 48px)); max-height: min(420px, calc(100vh - 48px)); padding: 14px; border: 1px solid #91b9af; border-radius: 13px; gap: 12px; color: var(--ink); background: white; box-shadow: 0 18px 40px rgb(34 67 62 / 24%); overflow-y: auto; text-align: left; }
+.preset-browser__tooltip header { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 9px; border-bottom: 1px solid var(--line); }
+.preset-browser__tooltip header strong { color: var(--brand-dark); font-size: .95rem; }
+.preset-browser__tooltip header span { color: var(--muted); font-size: .72rem; font-weight: 850; white-space: nowrap; }
+.preset-browser__tooltip-section { display: grid; gap: 7px; }
+.preset-browser__tooltip h4 { margin: 0; color: var(--muted); font-size: .68rem; letter-spacing: .07em; text-transform: uppercase; }
+.preset-browser__verb-badges { display: flex; flex-wrap: wrap; gap: 5px; }
+.preset-browser__verb-badges span { padding: 4px 7px; border: 1px solid #c5d9d4; border-radius: 999px; background: #f1f7f5; font-size: .7rem; font-weight: 400; }
+.preset-browser__other-verbs { justify-self: start; margin: 0; color: var(--muted); font-size: .72rem; font-weight: 700; }
+.preset-browser__tooltip dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); margin: 0; gap: 4px 12px; }
+.preset-browser__tooltip dl div { display: contents; }
+.preset-browser__tooltip dt { justify-self: start; color: var(--brand-dark); font-size: .7rem; font-weight: 850; text-align: left; }
+.preset-browser__tooltip dd { justify-self: start; margin: 0; color: var(--ink); font-size: .7rem; line-height: 1.3; text-align: left; }
+.browser-column-enter-active { transition: opacity 140ms ease; }
+.browser-column-enter-from { opacity: 0; }
 
 @media (max-width: 700px) {
+  .preset-browser__scroll { overflow-x: auto; scrollbar-width: none; }
+  .preset-browser__scroll::-webkit-scrollbar { display: none; }
   .preset-browser__columns { width: max-content; min-width: 100%; grid-template-columns: repeat(3, minmax(245px, 78vw)); }
   .preset-browser__column { min-height: 245px; }
+  .preset-browser__tooltip { position: fixed; z-index: 1000; top: 50%; right: auto; bottom: auto; left: 50%; width: min(360px, calc(100vw - 24px)); max-height: min(520px, calc(100vh - 32px)); transform: translate(-50%, -50%); }
 }
 
 @media (prefers-reduced-motion: reduce) {

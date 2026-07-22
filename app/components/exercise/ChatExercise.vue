@@ -46,6 +46,8 @@ interface ChatMessage {
   emphasis?: boolean
   questionIndex?: number
   answerComparison?: AnswerComparison
+  kind?: 'help-reminder'
+  helpAlreadyOpen?: boolean
 }
 
 const currentIndex = ref(0)
@@ -355,7 +357,7 @@ function restartHelpReminderTimer() {
     helpReminderTimer = null
     if (version !== conversationVersion || questionIndex !== currentIndex.value
       || waitingForNext.value || posingQuestion.value || finished.value) return
-    void addCoachText(coachHelpReminderMessage(helpOpen.value))
+    void suggestHelp()
   }, CHAT_HELP_REMINDER_DELAY_MS)
 }
 
@@ -374,6 +376,21 @@ function enqueueCoachBubble(createMessage: () => Omit<ChatMessage, 'id' | 'autho
 
 function addCoachText(text: string, tone?: ChatMessage['tone'], emphasis = false) {
   return enqueueCoachBubble(() => ({ text, ...(tone ? { tone } : {}), ...(emphasis ? { emphasis: true } : {}) }))
+}
+
+function addHelpReminderCard() {
+  return enqueueCoachBubble(() => ({
+    text: coachHelpReminderMessage(helpOpen.value),
+    kind: 'help-reminder',
+    helpAlreadyOpen: helpOpen.value,
+  }))
+}
+
+async function suggestHelp() {
+  const question = currentQuestion.value
+  if (!question || finished.value) return
+  await addCoachReaction('help-announcement', contextFor(question))
+  await addHelpReminderCard()
 }
 
 function addAnswerComparison(
@@ -498,7 +515,7 @@ async function submit() {
     }
   }
   if (shouldSuggestHelp) {
-    await addCoachText(coachHelpReminderMessage(helpOpen.value))
+    await suggestHelp()
     consecutiveIncorrectCount.value = 0
   }
   deliveringFeedback.value = false
@@ -639,6 +656,7 @@ onBeforeUnmount(() => {
               `chat-message--${message.author}`,
               message.tone ? `chat-message--${message.tone}` : '',
               { 'chat-message--comparison': !!message.answerComparison },
+              { 'chat-message--help-reminder': message.kind === 'help-reminder' },
               { 'chat-message--help-link': message.author === 'learner' && message.questionIndex !== undefined },
               { 'is-help-selected': helpOpen && message.questionIndex !== undefined && message.questionIndex === helpQuestionIndex },
             ]"
@@ -649,7 +667,17 @@ onBeforeUnmount(() => {
             @keydown.enter.prevent="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
             @keydown.space.prevent="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
           >
-            <div v-if="message.answerComparison" class="answer-comparison">
+            <div v-if="message.kind === 'help-reminder'" class="chat-help-reminder">
+              <span class="chat-help-reminder__icon" aria-hidden="true">?</span>
+              <span class="chat-help-reminder__content">
+                <strong>Besoin d’un coup de pouce&nbsp;?</strong>
+                <span>{{ message.text }}<template v-if="!message.helpAlreadyOpen">, ou clique sur ce bouton&nbsp;:</template></span>
+                <button v-if="!message.helpAlreadyOpen" type="button" class="chat-help-reminder__button" @click="showLatestHelp">
+                  Ouvrir l’aide
+                </button>
+              </span>
+            </div>
+            <div v-else-if="message.answerComparison" class="answer-comparison">
               <strong>{{ message.answerComparison.mode === 'focused' ? 'Regarde où ça change :' : 'Repars de la correction complète :' }}</strong>
               <div class="answer-comparison__line answer-comparison__line--learner">
                 <small>Ta réponse</small>
@@ -1528,6 +1556,101 @@ onBeforeUnmount(() => {
 .chat-message--error {
   color: #8b312b;
   background: #ffebe9;
+}
+
+.chat-message--help-reminder {
+  width: min(92%, 600px);
+  max-width: 600px;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid #f0c64d;
+  color: #173e49;
+  background: linear-gradient(135deg, #fff9dc, #f6f0c8);
+  box-shadow: 0 8px 24px rgb(111 85 15 / 20%);
+}
+
+.chat-help-reminder {
+  display: flex;
+  align-items: center;
+  padding: 15px 17px;
+  gap: 13px;
+}
+
+.chat-help-reminder__icon {
+  display: grid;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 50%;
+  color: #173e49;
+  background: #f0c64d;
+  font-size: 1.4rem;
+  font-weight: 950;
+  box-shadow: inset 0 0 0 3px rgb(255 255 255 / 48%);
+}
+
+.chat-help-reminder__content {
+  display: grid;
+  gap: 4px;
+}
+
+.chat-help-reminder__content > strong {
+  font-size: .95rem;
+  font-weight: 900;
+}
+
+.chat-help-reminder__content > span {
+  line-height: 1.35;
+}
+
+.chat-help-reminder__button {
+  width: fit-content;
+  margin-top: 2px;
+  padding: 9px 15px;
+  border: 2px solid #173e49;
+  border-radius: 10px;
+  color: white;
+  background: #27758e;
+  font: inherit;
+  font-weight: 850;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #173e49;
+  transition: transform .14s ease, box-shadow .14s ease, background-color .14s ease;
+}
+
+.chat-help-reminder__button:hover,
+.chat-help-reminder__button:focus-visible {
+  outline: 3px solid rgb(39 117 142 / 28%);
+  outline-offset: 2px;
+  background: #1f657d;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #173e49;
+}
+
+.chat-help-reminder__button:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #173e49;
+}
+
+:global(:root[data-theme='dark']) .chat-message--help-reminder {
+  border-color: #f0c64d;
+  color: #f5f0d4;
+  background: linear-gradient(135deg, #3f3923, #302f25);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 30%);
+}
+
+:global(:root[data-theme='dark']) .chat-help-reminder__button {
+  border-color: #f0c64d;
+  color: #102b33;
+  background: #f0c64d;
+  box-shadow: 0 3px 0 #9c7b1f;
+}
+
+:global(:root[data-theme='dark']) .chat-help-reminder__button:hover,
+:global(:root[data-theme='dark']) .chat-help-reminder__button:focus-visible {
+  background: #ffda62;
+  box-shadow: 0 4px 0 #9c7b1f;
 }
 
 .chat-message--comparison {

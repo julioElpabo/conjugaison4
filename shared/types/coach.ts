@@ -8,6 +8,7 @@ export const COACH_EVENTS = [
   'cod-after',
   'coi',
   'encouragement',
+  'help-announcement',
   'streak',
   'finish',
   'restart',
@@ -20,6 +21,7 @@ export const REQUIRED_COACH_REPLY_EVENTS = [
   'correct',
   'correct-alternative',
   'incorrect',
+  'help-announcement',
   'finish',
   'restart',
 ] as const satisfies readonly CoachEvent[]

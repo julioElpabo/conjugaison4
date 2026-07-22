@@ -9,7 +9,7 @@ import { getAdminErrorMessage } from '~/composables/useAdminAuth'
 const EVENT_LABELS: Record<CoachEvent, string> = {
   introduction: 'Présentation', question: 'Question', correct: 'Bonne réponse', 'correct-alternative': 'Bonne réponse avec variante',
   incorrect: 'Mauvaise réponse', 'cod-before': 'COD avant', 'cod-after': 'COD après', coi: 'COI',
-  encouragement: 'Encouragement', streak: 'Série réussie', finish: 'Fin', restart: 'Recommencer',
+  encouragement: 'Encouragement', 'help-announcement': 'Annonce d’aide', streak: 'Série réussie', finish: 'Fin', restart: 'Recommencer',
 }
 const EVENT_DESCRIPTIONS: Record<CoachEvent, string> = {
   introduction: 'Premières phrases affichées à l’ouverture du chat.',
@@ -21,6 +21,7 @@ const EVENT_DESCRIPTIONS: Record<CoachEvent, string> = {
   'cod-after': 'Phrases liées aux compléments d’objet placés après le verbe.',
   coi: 'Phrases liées aux compléments d’objet indirects.',
   encouragement: 'Relances positives pour aider l’élève à continuer.',
+  'help-announcement': 'Phrase affichée avant de proposer l’aide après une attente ou plusieurs erreurs.',
   streak: 'Réactions après plusieurs bonnes réponses consécutives.',
   finish: 'Phrases affichées à la fin de l’exercice.',
   restart: 'Phrases affichées lorsque l’élève recommence.',

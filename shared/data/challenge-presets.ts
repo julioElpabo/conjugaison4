@@ -41,7 +41,7 @@ export interface ChallengePresetDefinition {
   readonly complementPlacement?: ComplementPlacement
 }
 
-export const challengePresetGroupLabels: Record<ChallengePresetGroup, string> = {
+export const challengePresetGroupLabels: Record<string, string> = {
   school: 'Niveaux scolaires suisses',
   cif: 'CIF (FLE)',
   'verb-group': 'Groupes -er, -ir, etc.',
@@ -107,7 +107,7 @@ function matchesCriterion(verb: Verb, criterion: VerbCriterion) {
   return value === criterion.value
 }
 
-function verbsForDefinition(definition: ChallengePresetDefinition, verbs: readonly Verb[]) {
+export function verbsForChallengePresetDefinition(definition: ChallengePresetDefinition, verbs: readonly Verb[]) {
   if (definition.id === 'pronominaux') {
     return verbs.filter(verb => verb.isPronominalForm || verb.typePronominal !== 'aucun')
   }
@@ -119,7 +119,14 @@ function verbsForDefinition(definition: ChallengePresetDefinition, verbs: readon
 }
 
 export function resolveChallengePresets(verbs: readonly Verb[]): ChallengePreset[] {
-  return challengePresetDefinitions.map((definition) => {
+  return resolveChallengePresetDefinitions(challengePresetDefinitions, verbs)
+}
+
+export function resolveChallengePresetDefinitions(
+  definitions: readonly ChallengePresetDefinition[],
+  verbs: readonly Verb[],
+): ChallengePreset[] {
+  return definitions.map((definition) => {
     const configurableDefinition = definition as ChallengePresetDefinition
     const includeComplements = configurableDefinition.includeComplements ?? false
     const complementPlacement = configurableDefinition.complementPlacement ?? 'after'
@@ -129,7 +136,7 @@ export function resolveChallengePresets(verbs: readonly Verb[]): ChallengePreset
       description: definition.description,
       group: definition.group,
       criteria: definition.criteria.map(criterion => ({ ...criterion })),
-      verbIds: verbsForDefinition(definition, verbs).map(verb => verb.id),
+      verbIds: verbsForChallengePresetDefinition(definition, verbs).map(verb => verb.id),
       tenseIds: [...definition.tenseIds],
       questionCount: definition.questionCount,
       exerciseKind: 'conjugation',

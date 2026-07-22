@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
 import { classicComplementChoiceConfig } from '../shared/utils/classic-complement-choice.ts'
+import { toSharedChallengeRequest } from '../app/composables/useChallengeApi.ts'
 
 import {
   parseDefiDefinition,
@@ -24,9 +25,9 @@ describe('validation des défis partagés', () => {
     assert.equal(challenge.exerciseKind, 'conjugation')
     assert.equal(challenge.pastSimplePronouns, 'third-person-only')
     assert.equal(challenge.inclusivePronouns, true)
-    assert.equal(challenge.includeComplements, false)
+    assert.equal(challenge.includeComplements, true)
     assert.equal(challenge.complementPlacement, 'after')
-    assert.deepEqual(challenge.complementOptions, [])
+    assert.deepEqual(challenge.complementOptions, ['cod-after', 'coi-after'])
     assert.equal(challenge.printOptions.title, 'Défi de conjugaison')
   })
 
@@ -58,6 +59,44 @@ describe('validation des défis partagés', () => {
 
     const parsed = parseDefiDefinition(input)
     assert.deepEqual(JSON.parse(serializeDefi(parsed)), parsed)
+  })
+
+  it('envoie toutes les options lors de l’enregistrement', () => {
+    const challenge = {
+      verbIds: [4, 8], tenseIds: [2, 7], questionCount: 42,
+      exerciseKind: 'tense-identification', pastSimplePronouns: 'third-person-only',
+      inclusivePronouns: true, includeComplements: true, complementPlacement: 'mixed',
+      complementOptions: ['cod-before', 'coi-after'],
+      printOptions: {
+        title: 'Défi complet', questionSpacingMm: 6, titleSpacingMm: 20,
+        showGrade: false, showVerbs: true, showTenses: true, showFirstName: false,
+        showLastName: true, showDate: false, showRandomNumber: false,
+      },
+    }
+
+    assert.deepEqual(toSharedChallengeRequest(challenge), { version: 1, ...challenge })
+  })
+
+  it('complète un ancien code avec les valeurs par défaut actuelles', () => {
+    const challenge = parseDefiDefinition({ verbIds: [1], tenseIds: [3], questionCount: 12 })
+
+    assert.deepEqual({
+      exerciseKind: challenge.exerciseKind,
+      pastSimplePronouns: challenge.pastSimplePronouns,
+      inclusivePronouns: challenge.inclusivePronouns,
+      includeComplements: challenge.includeComplements,
+      complementPlacement: challenge.complementPlacement,
+      complementOptions: challenge.complementOptions,
+    }, {
+      exerciseKind: 'conjugation',
+      pastSimplePronouns: 'all',
+      inclusivePronouns: false,
+      includeComplements: true,
+      complementPlacement: 'after',
+      complementOptions: ['cod-after', 'coi-after'],
+    })
+    assert.equal(challenge.printOptions.title, 'Défi de conjugaison')
+    assert.equal(challenge.printOptions.showGrade, true)
   })
 
   it('rejette les champs inattendus', () => {

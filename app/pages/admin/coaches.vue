@@ -8,7 +8,7 @@ import { getAdminErrorMessage } from '~/composables/useAdminAuth'
 const EVENT_LABELS: Record<CoachEvent, string> = {
   introduction: 'Présentation', question: 'Question', correct: 'Bonne réponse', 'correct-alternative': 'Bonne réponse avec variante',
   incorrect: 'Mauvaise réponse', 'cod-before': 'COD avant', 'cod-after': 'COD après', coi: 'COI',
-  encouragement: 'Encouragement', streak: 'Série réussie', finish: 'Fin', restart: 'Recommencer',
+  encouragement: 'Encouragement', 'help-announcement': 'Annonce d’aide', streak: 'Série réussie', finish: 'Fin', restart: 'Recommencer',
 }
 const REACTION_EVENTS: CoachEvent[] = ['correct', 'incorrect', 'streak', 'finish']
 const placeholdersLabel = COACH_PLACEHOLDERS.map(item => `{${item}}`).join(' · ')

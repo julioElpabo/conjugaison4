@@ -37,6 +37,22 @@ export function normalizeChallengeCode(value: string) {
   return value.trim().toUpperCase()
 }
 
+export function toSharedChallengeRequest(challenge: ChallengeConfig) {
+  return {
+    version: 1 as const,
+    verbIds: [...challenge.verbIds],
+    tenseIds: [...challenge.tenseIds],
+    questionCount: challenge.questionCount,
+    exerciseKind: challenge.exerciseKind,
+    pastSimplePronouns: challenge.pastSimplePronouns,
+    inclusivePronouns: challenge.inclusivePronouns,
+    includeComplements: challenge.includeComplements,
+    complementPlacement: challenge.complementPlacement,
+    complementOptions: [...challenge.complementOptions],
+    printOptions: { ...challenge.printOptions },
+  }
+}
+
 export function useChallengeApi() {
   async function generateQuestions(challenge: ChallengeConfig) {
     return await $fetch<ExerciseQuestion[]>('/api/questionnaires', {
@@ -48,18 +64,7 @@ export function useChallengeApi() {
   async function saveChallenge(challenge: ChallengeConfig) {
     return await $fetch<{ code: string }>('/api/defis', {
       method: 'POST',
-      body: {
-        verbIds: [...challenge.verbIds],
-        tenseIds: [...challenge.tenseIds],
-        questionCount: challenge.questionCount,
-        exerciseKind: challenge.exerciseKind,
-        pastSimplePronouns: challenge.pastSimplePronouns,
-        inclusivePronouns: challenge.inclusivePronouns,
-        includeComplements: challenge.includeComplements,
-        complementPlacement: challenge.complementPlacement,
-        complementOptions: [...challenge.complementOptions],
-        printOptions: { ...challenge.printOptions }
-      }
+      body: toSharedChallengeRequest(challenge)
     })
   }
 

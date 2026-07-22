@@ -69,6 +69,7 @@ const replySeeds = {
     'cod-before': ['Le COD « {complement} » est placé avant « {verb} » : le participe s’accorde et devient « {participle} ».'],
     'cod-after': ['Le COD « {complement} » est placé après « {verb} » : le participe reste « {participle} ».'],
     coi: ['« {complement} » est un COI : il ne commande pas l’accord du participe passé.'],
+    'help-announcement': ['Je vois que c’est un peu difficile.'],
     encouragement: ['On continue ensemble.'], streak: ['Quelle belle série !'], finish: ['Défi terminé : {correctCount}/{questionCount}, soit {score} %.'],
     restart: ['On recommence. Prêt ?'],
   },
@@ -79,6 +80,7 @@ const replySeeds = {
     'cod-before': ['Étape 1 : « {complement} » est le COD. Étape 2 : il précède « {verb} ». On écrit donc « {participle} ».'],
     'cod-after': ['Le COD « {complement} » suit « {verb} ». Avec avoir, aucun accord : « {participle} ».'],
     coi: ['« {complement} » répond à une question avec préposition : c’est un COI, sans accord.'],
+    'help-announcement': ['Cette question semble demander un peu plus de méthode.'],
     encouragement: ['Reprenons méthodiquement.'], streak: ['Plusieurs réponses exactes : la méthode fonctionne.'], finish: ['Bilan : {correctCount}/{questionCount}, soit {score} %.'],
     restart: ['Nous repartons depuis la première question.'],
   },
@@ -89,6 +91,7 @@ const replySeeds = {
     'cod-before': ['Le COD « {complement} » passe devant « {verb} » : accord obligatoire, « {participle} » !'],
     'cod-after': ['« {complement} » arrive après « {verb} » : pas d’accord, « {participle} » !'],
     coi: ['Attention au piège : « {complement} » est un COI, donc aucun accord !'],
+    'help-announcement': ['Je vois que ce défi te résiste un peu !'],
     encouragement: ['On ne lâche rien !'], streak: ['Super série !'], finish: ['Terminé ! {score} % avec {correctCount} bonnes réponses.'],
     restart: ['Nouveau départ, c’est parti !'],
   },
@@ -99,6 +102,7 @@ const replySeeds = {
     'cod-before': ['« {complement} » est avant « {verb} ». On accorde : « {participle} ».'],
     'cod-after': ['« {complement} » est après « {verb} ». On n’accorde pas : « {participle} ».'],
     coi: ['« {complement} » est un COI. Il n’entraîne pas d’accord.'],
+    'help-announcement': ['Cette question semble un peu difficile.'],
     encouragement: ['Prends le temps de réfléchir.'], streak: ['Très bonne série.'], finish: ['Tu as obtenu {correctCount}/{questionCount}, soit {score} %.'],
     restart: ['Recommençons calmement.'],
   },
@@ -316,7 +320,7 @@ try {
     }
 
     const recurringEvents = replySeeds[representativeSlug]
-    for (const eventType of ['question', 'correct', 'incorrect']) {
+    for (const eventType of ['question', 'correct', 'incorrect', 'help-announcement']) {
       for (const [index, content] of recurringEvents[eventType].entries()) {
         await database.execute(`INSERT INTO coach_character_reply_templates (character_id,event_type,content,weight,is_active,sort_order)
           SELECT ?,?,?,1,1,? WHERE NOT EXISTS (SELECT 1 FROM coach_character_reply_templates
@@ -325,6 +329,15 @@ try {
       }
     }
   }
+
+  // Les caractères créés depuis l’administration ne figurent pas dans les
+  // amorces ci-dessus. Ils reçoivent aussi une annonce, sans écraser leur texte.
+  await database.execute(`INSERT INTO coach_character_reply_templates
+    (character_id,event_type,content,weight,is_active,sort_order)
+    SELECT c.id,'help-announcement','Je vois que c’est un peu difficile.',1,1,999
+    FROM coach_characters c
+    WHERE NOT EXISTS (SELECT 1 FROM coach_character_reply_templates announcement
+      WHERE announcement.character_id=c.id AND announcement.event_type='help-announcement')`)
 
   for (const [characterSlug, previousContent, nextContent] of legacyQuestionTemplateUpdates) {
     await database.execute(`UPDATE coach_character_reply_templates r JOIN coach_characters c ON c.id=r.character_id
@@ -348,12 +361,16 @@ try {
   await database.execute("DELETE FROM coach_character_reply_templates WHERE event_type='off-topic'")
   await database.execute("DELETE FROM coach_reply_templates WHERE event_type='off-topic'")
   const [[integrity]] = await database.query(`SELECT
-    (SELECT COUNT(*) FROM coach_characters WHERE status='published') AS characters,
-    (SELECT COUNT(*) FROM coaches WHERE status='published') AS coaches,
+    (SELECT COUNT(*) FROM coach_characters) AS characters,
+    (SELECT COUNT(*) FROM coaches) AS coaches,
     (SELECT COUNT(*) FROM coaches WHERE character_id IS NULL) AS missing_character,
+    (SELECT COUNT(*) FROM coach_characters c WHERE c.status='published' AND NOT EXISTS
+      (SELECT 1 FROM coach_character_reply_templates r WHERE r.character_id=c.id
+        AND r.event_type='help-announcement' AND r.is_active=1)) AS missing_help_announcement,
     (SELECT MIN(total) FROM (SELECT COUNT(*) AS total FROM coach_character_reply_templates GROUP BY character_id) reply_counts) AS minimum_replies`)
   if (Number(integrity.characters) < characterSeeds.length || Number(integrity.coaches) < 1
-    || Number(integrity.missing_character) !== 0 || Number(integrity.minimum_replies) < 12) {
+    || Number(integrity.missing_character) !== 0 || Number(integrity.missing_help_announcement) !== 0
+    || Number(integrity.minimum_replies) < 12) {
     throw new Error(`Migration incomplète : ${JSON.stringify(integrity)}`)
   }
   console.log(`Migration terminée : ${integrity.characters} caractères partagés pour ${integrity.coaches} coaches.`)

@@ -66,7 +66,6 @@ watch(
     exampleRevealTimers.push(
       setTimeout(() => { exampleRevealStage.value = 1 }, 80),
       setTimeout(() => { exampleRevealStage.value = 2 }, 280),
-      setTimeout(() => { exampleRevealStage.value = 3 }, 480),
     )
   },
   { immediate: true },
@@ -226,26 +225,23 @@ watch(complementsAvailable, (available) => {
       aria-atomic="true"
     >
       <div class="conjugation-example__header">
-        <span class="conjugation-example__preview-icon" aria-hidden="true">▶</span>
+        <span class="conjugation-example__preview-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1.5 12s3.8-7 10.5-7 10.5 7 10.5 7-3.8 7-10.5 7S1.5 12 1.5 12Z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </span>
         <div class="conjugation-example__heading">
-          <span>Exemple</span>
+          <span>Aperçu d’une question</span>
         </div>
       </div>
 
-      <div class="conjugation-example__screen">
-        <div class="conjugation-example__screen-header">
-          <div>
-            <span>Exercice classique</span>
-            <strong>Question 1</strong>
-          </div>
-          <div class="conjugation-example__progress" aria-hidden="true">
-            <i class="is-current" />
-            <i />
-            <i />
-            <i />
-          </div>
-        </div>
+      <p class="conjugation-example__notice">
+        <strong>Ceci est un exemple.</strong>
+        <span>Tu n’as rien à écrire ici. Regarde simplement comment une question sera présentée.</span>
+      </p>
 
+      <div class="conjugation-example__screen">
         <div v-if="conjugationExampleLoading" class="conjugation-example__loading" role="status">
           <span class="conjugation-example__spinner" aria-hidden="true" />
           <span class="sr-only">Préparation de l’aperçu</span>
@@ -254,6 +250,7 @@ watch(complementsAvailable, (available) => {
         <div v-else class="conjugation-example__body">
           <Transition name="example-item">
             <div v-if="exampleRevealStage >= 1" class="conjugation-example__question">
+              <span class="conjugation-example__block-label">Exemple de question</span>
               <p v-if="exerciseKind === 'tense-identification' && conjugationInstruction && conjugationQuestion" class="conjugation-example__question-line">
                 <span class="conjugation-example__context">{{ conjugationInstruction }}</span>
                 <span class="conjugation-example__question-separator" aria-hidden="true">—</span>
@@ -272,17 +269,7 @@ watch(complementsAvailable, (available) => {
           </Transition>
 
           <Transition name="example-item">
-            <div v-if="exampleRevealStage >= 2" class="conjugation-example__answer">
-              <span>Ta réponse</span>
-              <div>
-                <span aria-hidden="true" />
-                <button type="button" disabled>Vérifier</button>
-              </div>
-            </div>
-          </Transition>
-
-          <Transition name="example-item">
-            <div v-if="exampleRevealStage >= 3" class="conjugation-example__correction">
+            <div v-if="exampleRevealStage >= 2" class="conjugation-example__correction">
               <span>Réponse attendue</span>
               <p>
                 <template v-if="conjugationExampleEmphasis">
@@ -308,26 +295,22 @@ watch(complementsAvailable, (available) => {
 .options-main-column > .check-row { padding: 15px 4px; }
 .options-main-column > .option-fieldset { padding: 14px 0 0; }
 .field-hint { display: block; margin-top: 6px; color: var(--muted); font-size: .72rem; }
-.conjugation-example { margin: 10px 24px 28px; padding: 20px; overflow: hidden; border: 1px solid #c6d8d2; border-radius: 20px; background: linear-gradient(145deg, #eef5f2, #e8f0ed 62%, #e3ece9); box-shadow: 0 12px 30px rgb(35 73 68 / 12%); color: var(--brand-dark); }
+.conjugation-example { margin: 10px 24px 28px; padding: 20px; overflow: hidden; border: 2px dashed #91b5ab; border-radius: 20px; background: linear-gradient(145deg, #eef5f2, #e8f0ed 62%, #e3ece9); box-shadow: 0 12px 30px rgb(35 73 68 / 12%); color: var(--brand-dark); }
 .conjugation-example__header { display: grid; min-height: 62px; margin-bottom: 17px; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 13px; }
-.conjugation-example__preview-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; color: #315f59; background: #d3e7e1; box-shadow: 0 0 0 6px rgb(79 126 117 / 7%); font-size: .88rem; }
+.conjugation-example__preview-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; color: #315f59; background: #d3e7e1; box-shadow: 0 0 0 6px rgb(79 126 117 / 7%); font-size: 1.05rem; }
+.conjugation-example__preview-icon svg { width: 23px; height: 23px; }
 .conjugation-example__heading { display: grid; gap: 2px; }
 .conjugation-example__heading > span { color: #55756f; font-size: 1.08rem; font-weight: 850; letter-spacing: .025em; text-transform: uppercase; }
-.conjugation-example__heading > strong { color: var(--brand-dark); font-size: 1.2rem; line-height: 1.2; }
+.conjugation-example__notice { display: grid; margin: 0 0 17px; padding: 12px 15px; border: 1px solid #e1bd55; border-radius: 12px; background: #fff6d8; color: #55430e; gap: 2px; line-height: 1.4; }
+.conjugation-example__notice strong { font-size: 1rem; }
+.conjugation-example__notice span { font-size: .9rem; }
 .conjugation-example__screen { overflow: hidden; border: 1px solid #cfddd9; border-radius: 14px; background: white; box-shadow: 0 8px 20px rgb(35 73 68 / 10%); color: var(--brand-dark); }
-.conjugation-example__screen-header { display: flex; min-height: 68px; padding: 13px 17px; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid #d9e5e1; background: #f5faf8; }
-.conjugation-example__screen-header > div:first-child { display: grid; gap: 1px; }
-.conjugation-example__screen-header span,
-.conjugation-example__answer > span,
+.conjugation-example__block-label,
 .conjugation-example__correction > span { color: var(--muted); font-size: .7rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
-.conjugation-example__screen-header strong { font-size: 1.08rem; }
-.conjugation-example__progress { display: flex; align-items: center; gap: 5px; }
-.conjugation-example__progress i { width: 24px; height: 5px; border-radius: 999px; background: #d6e2de; }
-.conjugation-example__progress i.is-current { background: var(--brand); }
-.conjugation-example__loading { display: grid; min-height: 280px; padding: 30px; place-content: center; place-items: center; gap: 14px; color: var(--muted); text-align: center; }
+.conjugation-example__loading { display: grid; min-height: 220px; padding: 30px; place-content: center; place-items: center; gap: 14px; color: var(--muted); text-align: center; }
 .conjugation-example__spinner { width: 38px; height: 38px; border: 4px solid #d5e4df; border-top-color: var(--brand); border-radius: 50%; animation: example-spinner 700ms linear infinite; }
-.conjugation-example__body { display: grid; min-height: 280px; padding: 24px; align-content: start; gap: 18px; }
-.conjugation-example__question { display: grid; gap: 10px; }
+.conjugation-example__body { display: grid; min-height: 220px; padding: 24px; align-content: start; gap: 18px; }
+.conjugation-example__question { display: grid; padding: 13px 15px; gap: 7px; border: 1px solid #c9d9d5; border-radius: 11px; background: #f5faf8; }
 .conjugation-example__question p { margin: 0; }
 .conjugation-example__instruction { color: var(--brand-dark); font-size: 1.08rem; font-weight: 850; }
 .conjugation-example__question-line { display: flex; min-height: 48px; padding: 10px 13px; align-items: center; flex-wrap: wrap; gap: 7px 10px; border-radius: 9px; background: #f2f7f5; }
@@ -335,11 +318,6 @@ watch(complementsAvailable, (available) => {
 .conjugation-example__question-separator { color: #9bb0aa; font-weight: 700; }
 .conjugation-example__prompt { color: var(--ink); font-size: 1.25rem; font-weight: 800; letter-spacing: .025em; line-height: 1.45; }
 .conjugation-example__question-line .conjugation-example__prompt { font-size: 1.05rem; }
-.conjugation-example__answer { display: grid; gap: 7px; }
-.conjugation-example__answer > span { opacity: .5; }
-.conjugation-example__answer > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
-.conjugation-example__answer > div > span { min-height: 46px; border: 1px solid #d5dfdc; border-radius: 11px; background: #f3f6f5; box-shadow: none; opacity: .72; }
-.conjugation-example__answer button { padding: 10px 16px; border: 0; border-radius: 10px; color: white; background: var(--brand); opacity: .55; }
 .conjugation-example__correction { display: grid; padding: 13px 15px; gap: 4px; border: 1px solid #acd1bb; border-radius: 11px; background: var(--success-pale); }
 .conjugation-example__correction p { margin: 0; color: var(--success); font-size: 1.05rem; font-weight: 400; line-height: 1.4; white-space: pre-wrap; }
 .conjugation-example__correction p > span { color: inherit; font: inherit; font-weight: 400; letter-spacing: normal; text-transform: none; }
@@ -373,11 +351,8 @@ watch(complementsAvailable, (available) => {
 @media (max-width: 620px) {
   .options-fields--columns { padding: 19px 14px; grid-template-columns: 1fr; }
   .conjugation-example { margin: 8px 14px 19px; padding: 15px; }
-  .conjugation-example__heading > strong { font-size: 1.05rem; }
-  .conjugation-example__screen-header { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .conjugation-example__notice { padding: 11px 13px; }
   .conjugation-example__body { padding: 18px 14px; }
-  .conjugation-example__answer > div { grid-template-columns: 1fr; }
-  .conjugation-example__answer button { justify-self: end; }
 }
 @media (max-width: 520px) { .complement-options__panel { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) {

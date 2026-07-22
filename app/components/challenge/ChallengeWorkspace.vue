@@ -298,6 +298,9 @@ function onToggleTense(id: number) {
 
         <PresetPicker
           :presets="catalogue.presets"
+          :verbs="catalogue.verbes"
+          :modes="catalogue.modes"
+          :tenses="catalogue.temps"
           :active-preset-id="activePresetId"
           @select="selectPreset"
         />

@@ -7,6 +7,7 @@ import { buildTenseExamples, type MangerFormForExample } from './tense-examples'
 import { indirectRelative } from './indirect-relative'
 import { grammarModeCode, grammarTenseCode, type GrammarModeCode, type GrammarTenseCode } from '../../shared/utils/grammar-codes'
 import { normalizeLocale, type AppLocale } from '../../shared/i18n/locales'
+import { listStoredChallengePresets } from './challenge-presets'
 
 interface VerbeRow extends RowDataPacket {
   id: number
@@ -297,6 +298,15 @@ export async function getCatalogue(locale: AppLocale = 'fr') {
     mangerExamplesResult[0],
   )
 
+  let presets
+  try {
+    presets = await listStoredChallengePresets(database, catalogueVerbs, true)
+  } catch (error) {
+    const code = error && typeof error === 'object' && 'code' in error ? error.code : null
+    if (code !== 'ER_NO_SUCH_TABLE') throw error
+    presets = resolveChallengePresets(catalogueVerbs)
+  }
+
   return {
     verbes: catalogueVerbs,
     modes: modesResult[0].map(row => ({
@@ -314,6 +324,6 @@ export async function getCatalogue(locale: AppLocale = 'fr') {
       selected: Boolean(row.selected),
       example: tenseExamples.get(Number(row.id))
     })),
-    presets: resolveChallengePresets(catalogueVerbs),
+    presets,
   }
 }

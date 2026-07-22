@@ -15,7 +15,7 @@ function blankGroups(sentence) {
 }
 
 describe('questions affichées dans le chat', () => {
-  it('retire toujours le pronom de l’impératif entre le moteur et le chat', () => {
+  it('affiche la personne de l’impératif dans la question sans l’ajouter devant la réponse', () => {
     const cases = [
       { pronoun: 'tu', personId: 5, tense: 'présent', form: 'mange', compound: 0, blank: SIMPLE_TENSE_BLANK },
       { pronoun: 'nous', personId: 9, tense: 'présent', form: 'mangeons', compound: 0, blank: SIMPLE_TENSE_BLANK },
@@ -45,9 +45,25 @@ describe('questions affichées dans le chat', () => {
 
       assert.equal(question.saisiePrefixe, '')
       assert.equal(question.consigne, `manger | ${testCase.tense} (impératif)`)
-      assert.equal(result.formula, `manger | impératif ${testCase.tense}`)
+      assert.equal(result.formula, `${testCase.pronoun} | manger | impératif ${testCase.tense}`)
       assert.equal(result.sentence, testCase.blank)
     }
+  })
+
+  it('affiche explicitement la personne pour voir à l’impératif présent', () => {
+    const result = coachQuestionBubbles({
+      consigne: 'voir | présent (impératif)',
+      pronom: 'vous',
+      saisiePrefixe: '',
+      infinitif: 'voir',
+      mode: 'impératif',
+      temps: 'présent',
+      conjugaison1: 'voyez',
+      isCompound: false,
+    })
+
+    assert.equal(result.formula, 'vous | voir | impératif présent')
+    assert.equal(result.sentence, SIMPLE_TENSE_BLANK)
   })
 
   it('réserve deux emplacements nettement séparés pour un temps composé', () => {

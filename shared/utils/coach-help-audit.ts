@@ -1,6 +1,7 @@
 import type { CoachHelpBlock } from '../types/coach'
 import type { ConjugationTense, ExerciseQuestion, Verb } from '../types/conjugation'
 import { decomposeConjugationForm } from './conjugation-help'
+import { coachHelpProfile } from '../data/coach-help-profiles'
 
 export type CoachHelpAuditSeverity = 'error' | 'warning'
 
@@ -120,6 +121,7 @@ export function auditRenderedCoachHelp(input: {
   const configuredContent = blockContents(blocks)
   const visibleText = decodeHtmlEntities(renderedHtml).replace(/<[^>]+>/gu, ' ').replace(/\s+/gu, ' ').trim()
   const normalizedVisibleText = normalized(visibleText)
+  const profile = coachHelpProfile(blocks.find(block => block.profileId)?.profileId)
   const usesContextualBase = configuredContent.includes('{contextualBaseHelp}')
   const usesEndings = configuredContent.includes('{endingsHelp}') || usesContextualBase
   const usesDefinition = configuredContent.includes('{definitionHelp}') || configuredContent.includes('{definition}')
@@ -178,19 +180,19 @@ export function auditRenderedCoachHelp(input: {
       && normalized(reference.referenceTense) === normalized(question.temps)
       && normalized(reference.referenceSubject) === normalized(question.pronom || question.saisiePrefixe)
       && normalized(reference.form) === normalized(conjugatedCore(question.conjugaison1))
-    if (usesEndings && reference?.kind !== 'memorized-stem' && !requestedFormIsReference && !renderedHtml.includes(`<samp>-${decomposition.ending}</samp>`)) {
+    if (profile.highlightsTarget && usesEndings && reference?.kind !== 'memorized-stem' && !requestedFormIsReference && !renderedHtml.includes(`<samp>-${decomposition.ending}</samp>`)) {
       issues.push(issue('target-ending-not-highlighted', 'warning', 'Terminaison demandée non mise en évidence', `La terminaison « -${decomposition.ending} » n’est pas identifiable dans le rendu.`))
     }
   }
 
   const target = conjugatedCore(question.conjugaison1)
-  if (target && usesContextualBase && !renderedContainsForm(renderedHtml, target)) {
+  if (profile.revealsAnswers && target && usesContextualBase && !renderedContainsForm(renderedHtml, target)) {
     issues.push(issue('target-form-missing', 'warning', 'Forme attendue absente', `La forme « ${target} » n’apparaît pas dans l’explication automatique.`))
   }
 
   if (question.agreementReminder) {
     const officialForm = expectedCompoundCore(question, verb)
-    if (officialForm && !renderedContainsForm(renderedHtml, officialForm)) {
+    if (profile.revealsAnswers && officialForm && !renderedContainsForm(renderedHtml, officialForm)) {
       issues.push(issue(
         'official-compound-answer-missing',
         'error',

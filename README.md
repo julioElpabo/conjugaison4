@@ -64,6 +64,8 @@ npm run dev -- --port 3001
 npm run dev        # développement
 npm run test       # tests métier
 npm run test:conjugations # règles françaises, catalogue MySQL et collection Postman
+npm run test:help:condensed # audit grammatical et pédagogique de l’aide très condensée
+npm run test:help:complete # audit grammatical et pédagogique de l’aide complète sans réponses
 npm run typecheck  # vérification TypeScript/Vue
 npm run build      # compilation de production
 npm run preview    # aperçu de la compilation

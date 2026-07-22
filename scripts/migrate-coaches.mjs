@@ -32,10 +32,10 @@ const replyProfileBySlug = {
 }
 
 const characterSeeds = [
-  ['warm', 'Chaleureux', '🤗', 'Encourage avant d’expliquer la règle.', 1, 'camille-morel', 'cif-falc'],
-  ['methodical', 'Méthodique', '🧭', 'Décompose chaque difficulté en étapes.', 2, 'sami-diallo', 'grammatical-technical'],
-  ['dynamic', 'Dynamique', '⚡', 'Relance rapidement et célèbre chaque progrès.', 3, 'zoe-laurent', 'guided-discovery'],
-  ['calm', 'Calme', '🌿', 'Utilise des messages courts et sans pression.', 4, 'gabriel-rossi', 'concise'],
+  ['warm', 'Chaleureux', '🤗', 'Encourage avant d’expliquer la règle.', 1, 'camille-morel', 'complete-avec-reponses'],
+  ['methodical', 'Méthodique', '🧭', 'Décompose chaque difficulté en étapes.', 2, 'sami-diallo', 'complete'],
+  ['dynamic', 'Dynamique', '⚡', 'Relance rapidement et célèbre chaque progrès.', 3, 'zoe-laurent', 'complete'],
+  ['calm', 'Calme', '🌿', 'Utilise des messages courts et sans pression.', 4, 'gabriel-rossi', 'tres-condensee'],
 ]
 
 const characterSlugByCoach = {
@@ -187,12 +187,12 @@ try {
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     slug VARCHAR(80) NOT NULL UNIQUE,
     name VARCHAR(80) NOT NULL,
-    engine_key ENUM('cif-falc','concise','grammatical-technical','guided-discovery') NOT NULL DEFAULT 'cif-falc',
+    engine_key ENUM('complete-avec-reponses','complete','tres-condensee','allophone') NOT NULL DEFAULT 'complete-avec-reponses',
     sort_order SMALLINT NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
-  for (const seed of [['cif-falc','CIF · FALC','cif-falc',1],['concise','Très condensée','concise',2],['grammatical-technical','Grammatico-technique','grammatical-technical',3],['guided-discovery','Découverte guidée','guided-discovery',4]]) {
+  for (const seed of [['complete-avec-reponses','Complète avec réponses','complete-avec-reponses',1],['complete','Complète sans réponses','complete',2],['tres-condensee','Très condensée','tres-condensee',3],['allophone','Allophone','allophone',4]]) {
     await database.execute(`INSERT INTO coach_help_approaches (slug,name,engine_key,sort_order) VALUES (?,?,?,?)
       ON DUPLICATE KEY UPDATE slug=VALUES(slug)`, seed)
   }
@@ -223,7 +223,7 @@ try {
     await database.query(`UPDATE coach_characters c JOIN coach_help_approaches a ON a.slug=c.help_approach
       SET c.help_approach_id=a.id WHERE c.help_approach_id IS NULL`)
   }
-  await database.query(`UPDATE coach_characters c JOIN coach_help_approaches a ON a.slug='cif-falc'
+  await database.query(`UPDATE coach_characters c JOIN coach_help_approaches a ON a.slug='complete-avec-reponses'
     SET c.help_approach_id=a.id WHERE c.help_approach_id IS NULL`)
   const [emoticonColumns] = await database.query("SHOW COLUMNS FROM coach_characters LIKE 'emoticon'")
   if (emoticonColumns.length === 0) {

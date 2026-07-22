@@ -1,0 +1,127 @@
+Audit de l’aide très condensée
+Date : 2026-07-22T16:09:26.282Z
+Commande : /usr/local/bin/node --env-file-if-exists=.env --import tsx --test --test-concurrency=1 --test-reporter=spec tests/coach-condensed-help.test.mjs tests/coach-condensed-help-audit.mjs
+Code de sortie : 0
+▶ audit pédagogique de l’aide très condensée
+  ✔ couvre plusieurs groupes, niveaux et difficultés grammaticales (1.0625ms)
+  ▶ chanter — 1er groupe — présent — débutant
+    ✔ structure l’aide en blocs courts et lisibles (0.33675ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.080458ms)
+    ✔ aide sans révéler la réponse demandée (0.118916ms)
+  ✔ chanter — 1er groupe — présent — débutant (0.650917ms)
+  ▶ manger — 1er groupe — imparfait — difficulté orthographique
+    ✔ structure l’aide en blocs courts et lisibles (0.196125ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.087458ms)
+    ✔ aide sans révéler la réponse demandée (0.065708ms)
+  ✔ manger — 1er groupe — imparfait — difficulté orthographique (0.46375ms)
+  ▶ commencer — 1er groupe — présent — cédille
+    ✔ structure l’aide en blocs courts et lisibles (0.0705ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.053084ms)
+    ✔ aide sans révéler la réponse demandée (0.088167ms)
+  ✔ commencer — 1er groupe — présent — cédille (0.304917ms)
+  ▶ finir — 2e groupe — présent — intermédiaire
+    ✔ structure l’aide en blocs courts et lisibles (0.184625ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.047833ms)
+    ✔ aide sans révéler la réponse demandée (0.045875ms)
+  ✔ finir — 2e groupe — présent — intermédiaire (0.3465ms)
+  ▶ choisir — 2e groupe — imparfait — radical en -iss-
+    ✔ structure l’aide en blocs courts et lisibles (0.065667ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.04275ms)
+    ✔ aide sans révéler la réponse demandée (0.037833ms)
+  ✔ choisir — 2e groupe — imparfait — radical en -iss- (0.205375ms)
+  ▶ venir — 3e groupe — futur — radical irrégulier
+    ✔ structure l’aide en blocs courts et lisibles (0.128ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.041333ms)
+    ✔ aide sans révéler la réponse demandée (0.043541ms)
+  ✔ venir — 3e groupe — futur — radical irrégulier (0.255834ms)
+  ▶ écrire — 3e groupe en -re — futur — retrait du e final
+    ✔ structure l’aide en blocs courts et lisibles (0.059625ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.04725ms)
+    ✔ aide sans révéler la réponse demandée (0.049166ms)
+  ✔ écrire — 3e groupe en -re — futur — retrait du e final (0.201125ms)
+  ▶ prendre — 3e groupe — passé simple — série irrégulière
+    ✔ structure l’aide en blocs courts et lisibles (0.049708ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.056084ms)
+    ✔ aide sans révéler la réponse demandée (0.040334ms)
+  ✔ prendre — 3e groupe — passé simple — série irrégulière (0.195625ms)
+  ▶ être — 3e groupe — imparfait — exception explicite
+    ✔ structure l’aide en blocs courts et lisibles (0.068208ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.022125ms)
+    ✔ aide sans révéler la réponse demandée (0.046792ms)
+  ✔ être — 3e groupe — imparfait — exception explicite (0.181541ms)
+  ▶ avoir — 3e groupe — impératif — forme exceptionnelle
+    ✔ structure l’aide en blocs courts et lisibles (0.062208ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.045625ms)
+    ✔ aide sans révéler la réponse demandée (0.047125ms)
+  ✔ avoir — 3e groupe — impératif — forme exceptionnelle (0.205125ms)
+  ▶ savoir — 3e groupe — impératif — forme exceptionnelle
+    ✔ structure l’aide en blocs courts et lisibles (0.045416ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.046583ms)
+    ✔ aide sans révéler la réponse demandée (0.057083ms)
+  ✔ savoir — 3e groupe — impératif — forme exceptionnelle (0.196416ms)
+  ▶ aller — 3e groupe — subjonctif — double radical
+    ✔ structure l’aide en blocs courts et lisibles (0.062375ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.076083ms)
+    ✔ aide sans révéler la réponse demandée (0.041167ms)
+  ✔ aller — 3e groupe — subjonctif — double radical (0.230791ms)
+  ▶ partir — 3e groupe — passé composé avec être
+    ✔ structure l’aide en blocs courts et lisibles (0.049167ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.036625ms)
+    ✔ aide sans révéler la réponse demandée (0.039625ms)
+  ✔ partir — 3e groupe — passé composé avec être (0.165791ms)
+  ▶ se lever — pronominal — passé composé avec être
+    ✔ structure l’aide en blocs courts et lisibles (0.057833ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.060458ms)
+    ✔ aide sans révéler la réponse demandée (0.044ms)
+  ✔ se lever — pronominal — passé composé avec être (0.202125ms)
+  ▶ naître — 3e groupe — plus-que-parfait avec être
+    ✔ structure l’aide en blocs courts et lisibles (0.052875ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.090792ms)
+    ✔ aide sans révéler la réponse demandée (0.041792ms)
+  ✔ naître — 3e groupe — plus-que-parfait avec être (0.221208ms)
+  ▶ se souvenir — pronominal — impératif passé avec être
+    ✔ structure l’aide en blocs courts et lisibles (0.042958ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.079333ms)
+    ✔ aide sans révéler la réponse demandée (0.052375ms)
+  ✔ se souvenir — pronominal — impératif passé avec être (0.213083ms)
+  ▶ être — participe présent — exception étant
+    ✔ structure l’aide en blocs courts et lisibles (0.045166ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.034542ms)
+    ✔ aide sans révéler la réponse demandée (0.036125ms)
+  ✔ être — participe présent — exception étant (0.152458ms)
+  ▶ avoir — gérondif présent — exception ayant
+    ✔ structure l’aide en blocs courts et lisibles (0.049041ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.047083ms)
+    ✔ aide sans révéler la réponse demandée (0.035458ms)
+  ✔ avoir — gérondif présent — exception ayant (0.167125ms)
+  ▶ falloir — impersonnel — conditionnel présent
+    ✔ structure l’aide en blocs courts et lisibles (0.038417ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.060625ms)
+    ✔ aide sans révéler la réponse demandée (0.035459ms)
+  ✔ falloir — impersonnel — conditionnel présent (0.171667ms)
+  ▶ pleuvoir — impersonnel — futur
+    ✔ structure l’aide en blocs courts et lisibles (0.038708ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.033958ms)
+    ✔ aide sans révéler la réponse demandée (0.031542ms)
+  ✔ pleuvoir — impersonnel — futur (0.172875ms)
+  ▶ payer — 1er groupe — futur — deux graphies admises
+    ✔ structure l’aide en blocs courts et lisibles (0.037125ms)
+    ✔ donne une règle grammaticalement pertinente pour ce cas (0.037708ms)
+    ✔ aide sans révéler la réponse demandée (0.031875ms)
+  ✔ payer — 1er groupe — futur — deux graphies admises (0.142416ms)
+✔ audit pédagogique de l’aide très condensée (6.977875ms)
+▶ aide très condensée par mode et temps
+  ✔ couvre tous les 21 couples proposés dans les exercices (0.77125ms)
+  ✔ explique le conditionnel présent avec le radical du futur et les terminaisons de l’imparfait (0.591667ms)
+  ✔ normalise les accents et produit un exemple fixe indépendant de la question (0.3125ms)
+  ✔ sépare chaque notion et les remarques particulières dans des paragraphes (0.242ms)
+  ✔ décompose clairement la formation du subjonctif imparfait (0.083292ms)
+✔ aide très condensée par mode et temps (2.633ms)
+ℹ tests 69
+ℹ suites 23
+ℹ pass 69
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 227.02275

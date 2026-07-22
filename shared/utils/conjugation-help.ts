@@ -559,7 +559,7 @@ function imperativePresentHelpHtml(
   const verificationItem = verificationStep ? `<li>${verificationStep}</li>` : ''
   const construction = `<figure><figcaption>Construis la réponse</figcaption><ol><li>${referenceStep}</li><li>Garde la forme verbale, mais n’écris pas le pronom sujet.</li>${verificationItem}</ol>${result}</figure>`
 
-  const sRule = subject === 'tu'
+  const sRule = subject === 'tu' && sourceForm
     ? normalized(sourceForm) !== normalized(actualForm)
       ? `<figure><figcaption>S ou pas s avec tu</figcaption><blockquote><strong>Ici : pas de s final</strong><p>La forme au présent est <strong>${escapedHtml(sourceForm)}</strong>. À l’impératif avec <strong>tu</strong>, on enlève le <strong>s</strong> final : <strong>${escapedHtml(actualForm)}</strong>.</p><p>Si <strong>en</strong> ou <strong>y</strong> vient juste après, le <strong>s</strong> revient : <em>manges-en</em>, <em>vas-y</em>.</p></blockquote></figure>`
       : `<figure><figcaption>S ou pas s avec tu</figcaption><blockquote><strong>Ici : garde le s final</strong><p>La forme au présent est <strong>${escapedHtml(sourceForm)}</strong>. Pour ce verbe, l’impératif avec <strong>tu</strong> garde cette forme sans le pronom sujet.</p></blockquote></figure>`
@@ -686,6 +686,7 @@ function conditionalPresentHelpHtml(
   question: ExerciseQuestion,
   verb?: Verb,
   reference?: ExerciseQuestion['radicalReference'],
+  revealAnswers = true,
 ) {
   const infinitive = question.infinitif || verb?.infinitif || 'ce verbe'
   const bare = bareInfinitive(infinitive)
@@ -708,14 +709,23 @@ function conditionalPresentHelpHtml(
   )
   const referenceSubject = reference?.referenceSubject || 'je'
   const referenceDisplay = reference?.form ? displayedConjugatedForm(referenceSubject, reference.form, infinitive, verb) : ''
-  const endingRows = endings.map((item, index) => `<tr><th><strong>${escapedHtml(endingPronouns('conditionnel', endings.length)[index] || '')}</strong></th><td>${index === requestedPerson ? endingBadge(item) : `<strong>-${escapedHtml(item)}</strong>`}</td></tr>`).join('')
+  const endingRows = endings.map((item, index) => `<tr><th><strong>${escapedHtml(endingPronouns('conditionnel', endings.length)[index] || '')}</strong></th><td>${revealAnswers && index === requestedPerson ? endingBadge(item) : `<strong>-${escapedHtml(item)}</strong>`}</td></tr>`).join('')
+  const exampleIndex = requestedPerson ?? 0
+  const exampleSubject = (question.pronom || question.saisiePrefixe || endingPronouns('conditionnel', endings.length)[exampleIndex] || 'je').trim()
+  const exampleVerb = normalized(bare) === 'prendre'
+    ? { infinitive: 'chanter', radical: 'chanter' }
+    : { infinitive: 'prendre', radical: 'prendr' }
+  const exampleEnding = endings[exampleIndex] || endings[0]!
+  const answerFreeExample = `<p><strong>Exemple :</strong><br><strong>${escapedHtml(exampleSubject)}</strong> ${assembledFormBadges(exampleVerb.radical, exampleEnding)}</p>`
 
   const referenceKnowledge = referenceDisplay && !isRegularRadical
     ? `<blockquote><strong>Forme repère du futur</strong><p>Apprends par cœur cette forme repère. Elle donne le radical du futur :</p><p>${rememberedFormMarkup(referenceDisplay)}</p></blockquote>`
     : ''
   const knowledge = `<figure>${knowledgeCaption()}<blockquote><strong>La formule</strong><p><strong>Conditionnel présent</strong> = ${radicalBadge('radical du futur')} + ${endingBadge('terminaisons de l’imparfait', false)}.</p></blockquote>${referenceKnowledge}<blockquote><strong>Terminaisons de l’imparfait</strong><table><tbody>${endingRows}</tbody></table></blockquote></figure>`
 
-  const radicalConstruction = isRegularRadical
+  const radicalConstruction = !revealAnswers
+    ? `<ol><li>Pars de l’infinitif : <strong>${escapedHtml(bare)}</strong>.</li></ol>`
+    : isRegularRadical
     ? normalized(bare).endsWith('re')
       ? `<ol><li>Pars de l’infinitif : <strong>${escapedHtml(bare)}</strong>.</li><li>Enlève le <strong>e</strong> final : tu obtiens ${radicalBadge(futureRadical)}.</li></ol>`
       : `<ol><li>Pars de l’infinitif : <strong>${escapedHtml(bare)}</strong>.</li><li>Garde tout l’infinitif : le radical du futur est ${radicalBadge(futureRadical)}.</li></ol>`
@@ -727,7 +737,9 @@ function conditionalPresentHelpHtml(
   const radicalBlock = `<figure><figcaption>Trouve le radical du futur</figcaption>${radicalConstruction}</figure>`
 
   const assembly = futureRadical && ending ? assembledFormBadges(futureRadical, ending) : rememberedFormMarkup(actualForm)
-  const answer = `<figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute la terminaison de l’imparfait ${endingBadge(ending)} au radical du futur ${radicalBadge(futureRadical)} :</p><b>${assembly}<i>✓</i></b></blockquote></figure>`
+  const answer = revealAnswers
+    ? `<figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute la terminaison de l’imparfait ${endingBadge(ending)} au radical du futur ${radicalBadge(futureRadical)} :</p><b>${assembly}<i>✓</i></b></blockquote></figure>`
+    : `<figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute au radical du futur la terminaison de l’imparfait qui correspond à la personne demandée.</p>${answerFreeExample}</blockquote></figure>`
   return `${knowledge}${radicalBlock}${answer}`
 }
 
@@ -831,14 +843,14 @@ function inferCompoundAuxiliary(question: ExerciseQuestion, verb?: Verb): 'avoir
   return normalized(verb?.auxiliaire) === 'etre' ? 'être' : 'avoir'
 }
 
-function auxiliaryConjugationHtml(auxiliary: 'avoir' | 'être', target: { mode: string, tense: string } | null, requestedPerson: number | null) {
+function auxiliaryConjugationHtml(auxiliary: 'avoir' | 'être', target: { mode: string, tense: string } | null, requestedPerson: number | null, highlightRequested = true) {
   const selected = target
     ? AUXILIARY_SIMPLE_TENSES.find(item => normalized(item.mode) === normalized(target.mode) && normalized(item.tense) === normalized(target.tense))
     : undefined
   if (!selected) return '<p>La conjugaison de l’auxiliaire n’est pas disponible pour cette forme.</p>'
   const rows = selected.forms[auxiliary].map((form, index) => {
     const isRequested = index === requestedPerson || (requestedPerson === null && selected.forms[auxiliary].length === 1)
-    return `<tr><th><strong>${escapedHtml(selected.pronouns[index] || `personne ${index + 1}`)}</strong></th><td>${isRequested ? `<mark><strong>${escapedHtml(form)}</strong></mark>` : `<strong>${escapedHtml(form)}</strong>`}</td></tr>`
+    return `<tr><th><strong>${escapedHtml(selected.pronouns[index] || `personne ${index + 1}`)}</strong></th><td>${highlightRequested && isRequested ? `<mark><strong>${escapedHtml(form)}</strong></mark>` : `<strong>${escapedHtml(form)}</strong>`}</td></tr>`
   }).join('')
   const summary = target?.tense
     ? `${target.tense} ${withDeArticle(target.mode)} du verbe ${auxiliary}`
@@ -881,8 +893,11 @@ function officialCompoundForm(question: ExerciseQuestion, baseParticiple: string
   return source.replace(new RegExp(`${escaped}(?:e|s|es)?(?=$|[\\s.,!?;:’'])`, 'iu'), expectedParticiple)
 }
 
-function compoundAgreementHtml(auxiliary: 'avoir' | 'être', subject: string, baseParticiple = '', answer = '') {
+function compoundAgreementHtml(auxiliary: 'avoir' | 'être', subject: string, baseParticiple = '', answer = '', question?: ExerciseQuestion, verb?: Verb) {
   if (auxiliary === 'être') {
+    if (isPronominalInfinitive(question?.infinitif || verb?.infinitif || '', verb)) {
+      return '<figure><figcaption>Accord du participe passé</figcaption><blockquote><strong>Avec un verbe pronominal</strong><p>L’accord dépend de la fonction du pronom réfléchi et de la présence éventuelle d’un COD.</p><p>Si le pronom réfléchi est COD placé avant, le participe passé s’accorde avec ce qu’il représente. S’il est COI, il ne commande pas l’accord.</p></blockquote></figure>'
+    }
     const tuNote = subjectKey(subject) === 'tu'
       ? '<p>Avec <strong>tu</strong>, la forme peut changer selon la personne à qui l’on parle : <em>sois né</em> ou <em>sois née</em>. L’exercice attend ici la forme enregistrée dans la réponse.</p>'
       : ''
@@ -895,10 +910,15 @@ function compoundAgreementHtml(auxiliary: 'avoir' | 'être', subject: string, ba
       : ''
     return `<figure><figcaption>Accord du participe passé</figcaption><blockquote><strong>Avec être</strong><p>Le participe passé s’accorde avec le sujet.</p><p><em>Elle est arrivée. · Ils sont arrivés.</em></p>${pluralNote}${tuNote}</blockquote></figure>`
   }
-  return `<figure><figcaption>Accord du participe passé</figcaption><blockquote><strong>Cas général avec avoir</strong><p>Le participe passé ne s’accorde pas avec le sujet.</p><p><em>Elle a mangé. · Ils ont mangé.</em></p></blockquote><blockquote><strong>Si le COD est placé avant</strong><p>Le participe passé s’accorde avec le complément d’objet direct placé avant le verbe.</p><p><em>Les pommes qu’elle a mangées. · Les livres qu’il a lus.</em></p></blockquote></figure>`
+  const contextualReminder = question?.agreementReminder?.kind === 'coi'
+    ? `<blockquote><strong>Dans cette question : COI</strong><p>« ${escapedHtml(question.agreementReminder.complement)} » est un complément d’objet indirect. Un COI ne commande pas l’accord du participe passé.</p></blockquote>`
+    : question?.agreementReminder?.kind === 'cod-after'
+      ? `<blockquote><strong>Dans cette question : COD placé après</strong><p>« ${escapedHtml(question.agreementReminder.complement)} » est placé après le verbe : il ne commande pas l’accord du participe passé.</p></blockquote>`
+      : ''
+  return `<figure><figcaption>Accord du participe passé</figcaption><blockquote><strong>Cas général avec avoir</strong><p>Le participe passé ne s’accorde pas avec le sujet.</p><p><em>Elle a mangé. · Ils ont mangé.</em></p></blockquote><blockquote><strong>Si le COD est placé avant</strong><p>Le participe passé s’accorde avec le complément d’objet direct placé avant le verbe.</p><p><em>Les pommes qu’elle a mangées. · Les livres qu’il a lus.</em></p></blockquote>${contextualReminder}</figure>`
 }
 
-function buildCompoundConjugationHtml(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationTense) {
+function buildCompoundConjugationHtml(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationTense, revealAnswers = true) {
   const infinitive = question.infinitif || verb?.infinitif || 'ce verbe'
   const auxiliary = inferCompoundAuxiliary(question, verb)
   const participle = verb?.participePasse?.trim() || question.agreementReminder?.participle?.trim() || 'participe passé à vérifier'
@@ -910,7 +930,14 @@ function buildCompoundConjugationHtml(question: ExerciseQuestion, verb?: Verb, t
   const auxiliaryContext = simpleTense
     ? `${withAArticle(simpleTense.tense)} ${withDeArticle(simpleTense.mode)}`
     : 'au temps simple correspondant'
-  const knowledge = `<figure>${knowledgeCaption()}<blockquote><strong>Quel verbe auxiliaire pour ${escapedHtml(infinitive)} ?</strong>${auxiliaryChoicesMarkup(auxiliary)}</blockquote>${auxiliaryConjugationHtml(auxiliary, simpleTense, person)}<blockquote><strong>Le participe passé de ${escapedHtml(infinitive)}</strong><p>${rememberedFormMarkup(participle)}</p></blockquote></figure>`
+  const auxiliaryKnowledge = revealAnswers
+    ? auxiliaryConjugationHtml(auxiliary, simpleTense, person)
+    : `${auxiliaryConjugationHtml('avoir', simpleTense, person, false)}${auxiliaryConjugationHtml('être', simpleTense, person, false)}`
+  const participleKnowledge = revealAnswers ? rememberedFormMarkup(participle) : `<strong>${escapedHtml(participle)}</strong>`
+  const auxiliaryChoice = revealAnswers
+    ? `<blockquote><strong>Quel verbe auxiliaire pour ${escapedHtml(infinitive)} ?</strong>${auxiliaryChoicesMarkup(auxiliary)}</blockquote>`
+    : `<blockquote><strong>Auxiliaire à utiliser</strong><p>Pour <strong>${escapedHtml(infinitive)}</strong>, utilise l’auxiliaire <strong>${escapedHtml(auxiliary)}</strong>.</p></blockquote>`
+  const knowledge = `<figure>${knowledgeCaption()}${auxiliaryChoice}${auxiliaryKnowledge}<blockquote><strong>Le participe passé de ${escapedHtml(infinitive)}</strong><p>${participleKnowledge}</p></blockquote></figure>`
   const conjugatedAuxiliary = auxiliaryForm
     ? `<br><mark><strong>${escapedHtml(auxiliaryForm)}</strong></mark>`
     : ''
@@ -921,8 +948,11 @@ function buildCompoundConjugationHtml(question: ExerciseQuestion, verb?: Verb, t
   const result = officialForm
     ? `<blockquote><strong>Résultat</strong><p>${resultFormMarkup(officialForm, false)}</p></blockquote>`
     : ''
-  const answer = `<figure><figcaption>Réponse</figcaption><ol><li>${auxiliaryInstruction}</li><li>Ajoute le participe passé :<br>${rememberedFormMarkup(participle)}</li><li>Vérifie l’accord du participe passé. Regarde plus bas pour plus de détails.</li></ol>${result}</figure>`
-  return `${knowledge}${answer}${compoundAgreementHtml(auxiliary, subject, participle, officialForm)}`
+  const answer = revealAnswers
+    ? `<figure><figcaption>Réponse</figcaption><ol><li>${auxiliaryInstruction}</li><li>Ajoute le participe passé :<br>${rememberedFormMarkup(participle)}</li><li>Vérifie l’accord du participe passé. Regarde plus bas pour plus de détails.</li></ol>${result}</figure>`
+    : `<figure><figcaption>Réponse</figcaption><ol><li>Conjugue le verbe auxiliaire ${escapedHtml(auxiliaryContext)} avec <strong>${escapedHtml(subject)}</strong>.</li><li>Ajoute le participe passé.</li><li>Vérifie l’accord du participe passé. Regarde plus bas pour plus de détails.</li></ol></figure>`
+  const pronominalReminder = !revealAnswers ? pronominalIntroHtml(question, infinitive, verb) : ''
+  return `${knowledge}${pronominalReminder}${answer}${compoundAgreementHtml(auxiliary, subject, participle, officialForm, question, verb)}`
 }
 
 function tenseRule(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationTense) {
@@ -1227,7 +1257,7 @@ export function buildConjugationBaseHtml(
 
   if (reference) {
     const referenceKnowledge = highlightedReference
-      ? `<figure>${knowledgeCaption()}<blockquote><strong>Forme repère</strong><p>Apprends par cœur cette forme repère :</p><p>${highlightedReference}</p></blockquote></figure>`
+      ? `<figure>${knowledgeCaption()}<blockquote><strong>Forme repère</strong><p>Apprends par cœur cette forme repère ${escapedHtml(tenseContext(question, tense))} :</p><p>${highlightedReference}</p></blockquote></figure>`
       : ''
     const answerDisplay = displayedAnswerForm(question, infinitive, verb)
     const displayedAnswerCore = conjugatedCore(answerDisplay || actualForm)
@@ -1252,7 +1282,7 @@ export function buildConjugationBaseHtml(
       ? pastSimpleUSeries && uSeriesEndingInAnswer
         ? `Ajoute ${endingBadge(uSeriesEndingInAnswer)} pour former <strong>${escapedHtml(displayedAnswerCore)}</strong>.`
         : reference.targetEnding
-        ? `Ajoute <code>-${escapedHtml(reference.targetEnding)}</code> pour former <strong>${escapedHtml(displayedAnswerCore || actualForm)}</strong>.`
+        ? `Ajoute la terminaison <code>-${escapedHtml(reference.targetEnding)}</code> pour former <strong>${escapedHtml(displayedAnswerCore || actualForm)}</strong>.`
         : `Avec <strong>${escapedHtml(subject)}</strong>, garde cette forme : elle s’écrit <strong>${escapedHtml(displayedAnswerCore || actualForm)}</strong>.`
       : `Utilise cette forme avec ${escapedHtml(subject)} pour obtenir <strong>${escapedHtml(displayedAnswerCore || actualForm)}</strong>.`
     if (approach === 'concise') return `${referenceKnowledge}<p>${transformation} ${assemble}</p>`
@@ -1367,6 +1397,94 @@ export function buildConjugationEndingsHtml(
     ? '<p>Ce paradigme présente aussi du <strong>supplétisme</strong> : plusieurs radicaux d’origines différentes coexistent.</p>'
     : ''
   return `${introduction}${referenceReminder}${construction}${alternation}${supplétism}${lead}<table><tbody>${rows}</tbody></table>`
+}
+
+function hideConstructionAnswerBadges(html: string) {
+  return html.replace(
+    /<figure><figcaption>(Construis la réponse|Trouve le radical|Trouve le radical du futur|Réponse)<\/figcaption>([\s\S]*?)<\/figure>/gu,
+    (_figure, caption: string, rawBody: string) => {
+      const body = rawBody
+        .replace(/<span>[\s\S]*?<\/span>/gu, '')
+        .replace(/pour former\s*<strong>[\s\S]*?<\/strong>/gu, 'pour former la réponse')
+        .replace(/Ajoute\s+<samp>[\s\S]*?<\/samp>/gu, 'Ajoute la terminaison qui correspond à la personne demandée')
+        .replace(/il reste le radical\s*<var>[\s\S]*?<\/var>/gu, 'il reste le radical')
+        .replace(/tu obtiens(?: d’abord)? le radical\s*<var>[\s\S]*?<\/var>/gu, 'tu obtiens le radical à utiliser')
+        .replace(/tu obtiens\s*<var>[\s\S]*?<\/var>/gu, 'tu obtiens le radical à utiliser')
+        .replace(/point de départ\s*<var>[\s\S]*?<\/var>/gu, 'point de départ à trouver')
+        .replace(/radical du futur\s*<var>[\s\S]*?<\/var>/gu, 'radical du futur à trouver')
+        .replace(/au radical\s*<var>[\s\S]*?<\/var>/gu, 'au radical que tu as trouvé')
+        .replace(/le radical\s*<var>[\s\S]*?<\/var>/gu, 'le radical à trouver')
+        .replace(/<var>[\s\S]*?<\/var>/gu, 'le radical à trouver')
+        .replace(/<samp>[\s\S]*?<\/samp>/gu, 'la terminaison à trouver')
+        .replace(/\s*:\s*<\/p>/gu, '.</p>')
+      return `<figure><figcaption>${caption}</figcaption>${body}</figure>`
+    },
+  )
+}
+
+function answerFreeNonPersonalHelpHtml(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationTense) {
+  const mode = normalized(question.mode || tense?.mode?.name)
+  const time = normalized(question.temps || tense?.name)
+  const infinitive = question.infinitif || verb?.infinitif || 'ce verbe'
+  const irregularPresentParticiple = ['avoir', 'etre', 'savoir'].includes(normalized(bareInfinitive(infinitive)))
+
+  if (mode === 'participe' && time === 'present') {
+    const method = irregularPresentParticiple
+      ? '<li>Ce verbe a un participe présent irrégulier : retrouve la forme apprise par cœur.</li><li>Vérifie qu’elle se termine bien par <strong>-ant</strong>.</li>'
+      : '<li>Prends la forme avec <strong>nous</strong> au présent.</li><li>Enlève <strong>-ons</strong>, puis ajoute <strong>-ant</strong>.</li>'
+    return `<figure><figcaption>Participe présent</figcaption><ol><li>Repère le verbe <strong>${escapedHtml(infinitive)}</strong>.</li>${method}</ol></figure>`
+  }
+  if (mode === 'participe' && time === 'passe') {
+    return `<figure><figcaption>Participe passé</figcaption><ol><li>Repère le verbe <strong>${escapedHtml(infinitive)}</strong>.</li><li>Retrouve son participe passé dans les formes apprises : il n’est pas toujours prévisible à partir de l’infinitif.</li><li>Vérifie ensuite s’il faut l’accorder.</li></ol></figure>`
+  }
+  if (mode === 'gerondif' && time === 'present') {
+    const participle = irregularPresentParticiple
+      ? 'Retrouve le participe présent irrégulier de ce verbe dans les formes apprises.'
+      : 'Construis le participe présent : forme avec « nous » au présent, sans <strong>-ons</strong>, puis <strong>-ant</strong>.'
+    return `<figure><figcaption>Gérondif présent</figcaption><ol><li>${participle}</li><li>Place <strong>en</strong> devant le participe présent.</li><li>Relis l’ensemble dans la phrase.</li></ol></figure>`
+  }
+  if (mode === 'gerondif' && time === 'passe') {
+    return `<figure><figcaption>Gérondif passé</figcaption><ol><li>Choisis l’auxiliaire <strong>avoir</strong> ou <strong>être</strong> qui convient au verbe.</li><li>Mets cet auxiliaire au participe présent.</li><li>Ajoute le participe passé du verbe et vérifie son accord.</li><li>Place <strong>en</strong> devant l’ensemble.</li></ol></figure>`
+  }
+  return ''
+}
+
+/**
+ * Reprend exactement l’aide complète, puis masque seulement ce qui termine la
+ * réponse à la place de l’élève et retire les mises en évidence ciblées.
+ */
+export function buildCompleteConjugationAdviceHtml(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationTense) {
+  if (question.isCompound || tense?.isCompound) {
+    return buildCompoundConjugationHtml(question, verb, tense, false)
+  }
+  const mode = normalized(question.mode || tense?.mode?.name)
+  const time = normalized(question.temps || tense?.name)
+  const nonPersonalHelp = answerFreeNonPersonalHelpHtml(question, verb, tense)
+  if (nonPersonalHelp) return nonPersonalHelp
+  const reference = question.radicalReference?.validated === false ? undefined : question.radicalReference
+  if (mode === 'conditionnel' && time === 'present') {
+    return conditionalPresentHelpHtml(question, verb, reference, false)
+  }
+
+  let html = buildConjugationBaseHtml(question, verb, tense, 'cif-falc')
+
+  // Les explications restent en place, mais un encadré qui ne contenait que la
+  // réponse finale est retiré entièrement.
+  html = html
+    .replace(/<blockquote><strong>Résultat<\/strong>[\s\S]*?<\/blockquote>/gu, '')
+    .replace(/<p><strong>Résultat<\/strong><br>[\s\S]*?<\/p>/gu, '')
+    .replace(/<strong>Résultat<\/strong><b>[\s\S]*?<i>✓<\/i><\/b>/gu, '')
+    .replace(/<b>[\s\S]*?<i>✓<\/i><\/b>/gu, '')
+    .replace(/<mark>([\s\S]*?)<\/mark>/gu, '$1')
+    .replace(/<td><samp>([\s\S]*?)<\/samp><\/td>/gu, '<td><strong>$1</strong></td>')
+
+  html = hideConstructionAnswerBadges(html)
+
+  return html
+    .replace(/<p>\s*…?\s*<\/p>/gu, '')
+    .replace(/<b>\s*…?\s*<\/b>/gu, '')
+    .replace(/<blockquote>\s*<\/blockquote>/gu, '')
+    .replace(/<figure><figcaption>(?:Réponse|Résultat)<\/figcaption>\s*<\/figure>/gu, '')
 }
 
 function meaningFor(question: ExerciseQuestion, verb?: Verb) {

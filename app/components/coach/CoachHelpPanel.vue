@@ -3,8 +3,9 @@ import type { CoachHelpBlock } from '~~/shared/types/coach'
 import type { ConjugationTense, ExerciseQuestion, Verb } from '~~/shared/types/conjugation'
 import { auditRenderedCoachHelp } from '~~/shared/utils/coach-help-audit'
 import type { CoachHelpContentValues } from '~~/shared/utils/coach-help'
-import { automaticOrthographyHelpBlocks, renderCoachHelpContent } from '~~/shared/utils/coach-help'
+import { conditionalCoachHelpBlocks, renderCoachHelpContent } from '~~/shared/utils/coach-help'
 import { sanitizeCoachHtml } from '~~/shared/utils/safe-html'
+import { coachHelpProfile } from '~~/shared/data/coach-help-profiles'
 
 const props = withDefaults(defineProps<{
   blocks: CoachHelpBlock[]
@@ -54,12 +55,13 @@ const feedbackOptions: Array<{ type: HelpFeedbackType, label: string, icon: stri
   { type: 'error', label: 'Erreur', icon: '!' },
   { type: 'remark', label: 'Remarque', icon: '✎' },
 ]
+const activeProfile = computed(() => coachHelpProfile(props.blocks.find(block => block.profileId)?.profileId))
 const renderedBlocks = computed(() => [
   ...props.blocks
     .map((block, blockIndex) => ({ block, blockIndex: blockIndex as number | null }))
     .filter(item => item.block.isActive),
   ...(props.includeAutomaticOrthography
-    ? automaticOrthographyHelpBlocks(props.values).map(block => ({ block, blockIndex: null as number | null }))
+    ? conditionalCoachHelpBlocks(activeProfile.value.id, props.values).map(block => ({ block, blockIndex: null as number | null }))
     : []),
 ])
 const sourceRenderedHtml = computed(() => renderedBlocks.value
@@ -92,8 +94,19 @@ const safeFallbackBlock: CoachHelpBlock = {
   sortOrder: 1,
   children: [],
 }
+const safeAdviceFallbackBlock: CoachHelpBlock = {
+  id: -990_002,
+  type: 'warning',
+  title: 'Aide sécurisée',
+  content: '<p>Une incohérence a été détectée dans cette explication. Repère le temps et la personne, cherche le radical, puis choisis la terminaison correspondante.</p>',
+  explanationApproach: 'cif-falc',
+  profileId: 'complete',
+  isActive: true,
+  sortOrder: 1,
+  children: [],
+}
 const displayedBlocks = computed(() => automaticAudit.value?.status === 'failed'
-  ? [{ block: safeFallbackBlock, blockIndex: null as number | null }]
+  ? [{ block: activeProfile.value.revealsAnswers ? safeFallbackBlock : safeAdviceFallbackBlock, blockIndex: null as number | null }]
   : renderedBlocks.value)
 const renderedHeaderTitle = computed(() => renderCoachHelpContent('{helpTitle}', props.values))
 const renderedHeaderDescription = computed(() => sanitizeCoachHtml(renderCoachHelpContent(props.headerDescription, props.values)))

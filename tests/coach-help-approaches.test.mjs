@@ -11,11 +11,11 @@ describe('approches d’aide administrables', () => {
   it('conserve séparément le nom affiché et le comportement moteur', () => {
     assert.deepEqual(parseCoachHelpApproachPayload({
       name: 'Mon approche personnalisée',
-      engineKey: 'guided-discovery',
+      engineKey: 'allophone',
       sortOrder: 7,
     }), {
       name: 'Mon approche personnalisée',
-      engineKey: 'guided-discovery',
+      engineKey: 'allophone',
       sortOrder: 7,
     })
   })

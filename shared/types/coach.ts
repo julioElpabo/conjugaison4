@@ -38,10 +38,19 @@ export const COACH_EXPLANATION_APPROACHES = [
 
 export type CoachExplanationApproach = typeof COACH_EXPLANATION_APPROACHES[number]
 
+export const COACH_HELP_ENGINE_KEYS = [
+  'complete-avec-reponses',
+  'complete',
+  'tres-condensee',
+  'allophone',
+] as const
+
+export type CoachHelpEngineKey = typeof COACH_HELP_ENGINE_KEYS[number]
+
 export interface CoachHelpApproachDefinition {
   id: number
   name: string
-  engineKey: CoachExplanationApproach
+  engineKey: CoachHelpEngineKey
   sortOrder: number
   characterCount: number
 }
@@ -63,6 +72,8 @@ export interface CoachHelpBlock {
   title: string
   content: string
   explanationApproach: CoachExplanationApproach
+  /** Profil moteur des blocs automatiques. Absent sur les anciens blocs administrés. */
+  profileId?: CoachHelpEngineKey
   isActive: boolean
   sortOrder: number
   children: CoachHelpBlock[]
@@ -122,7 +133,7 @@ export interface CoachCaractere {
   pedagogicalStyle: string
   helpApproachId: number
   helpApproachName: string
-  helpApproach: CoachExplanationApproach
+  helpApproach: CoachHelpEngineKey
   status: CoachStatus
   sortOrder: number
   replies: CoachReplyTemplate[]
@@ -144,7 +155,7 @@ export interface CoachProfile {
   caractereName: string
   personality: string
   pedagogicalStyle: string
-  helpApproach: CoachExplanationApproach
+  helpApproach: CoachHelpEngineKey
   themeColor: string
   status: CoachStatus
   sortOrder: number

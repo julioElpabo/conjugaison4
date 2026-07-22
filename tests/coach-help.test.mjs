@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { automaticOrthographyHelpBlocks, buildContextualBaseTitle, buildDefinitionHelpHtml, buildReferenceFormHelpHtml, coachHelpBlockUsesPedagogicalApproach, coachHelpQuestionVariables, defaultCoachHelpBlocks, renderCoachHelpContent, visibleCoachHelpBlocks } from '../shared/utils/coach-help.ts'
+import { automaticOrthographyHelpBlocks, buildCondensedVerbGroupHtml, buildContextualBaseTitle, buildDefinitionHelpHtml, buildReferenceFormHelpHtml, coachHelpBlockUsesPedagogicalApproach, coachHelpQuestionVariables, conditionalCoachHelpBlocks, defaultCoachHelpBlocks, renderCoachHelpContent, visibleCoachHelpBlocks } from '../shared/utils/coach-help.ts'
 import { COACH_HELP_BLOCK_TYPES } from '../shared/types/coach.ts'
 import { formatCoachHtmlSource } from '../shared/utils/html-source-format.ts'
 import { sanitizeCoachHtml } from '../shared/utils/safe-html.ts'
@@ -195,18 +195,177 @@ describe('aides visuelles configurables', () => {
     )
   })
 
-  it('utilise directement l’approche du caractère avec le moteur unique', () => {
-    const configured = visibleCoachHelpBlocks('concise')
-    assert.deepEqual(configured.map(item => item.content), ['{definitionHelp}', '{contextualBaseHelp}'])
+  it('compose les blocs selon le profil moteur du caractère', () => {
+    const configured = visibleCoachHelpBlocks('tres-condensee')
+    assert.deepEqual(configured.map(item => item.content), [
+      '{definitionHelp}',
+      '{condensedVerbGroupHelp}',
+      '{condensedTenseRuleHelp}',
+    ])
+    assert.equal(configured[1].type, 'normal')
     assert.ok(configured.every(item => item.explanationApproach === 'concise'))
+    assert.ok(configured.every(item => item.profileId === 'tres-condensee'))
 
     // Compatibilité de lecture avec les anciennes aides pendant la transition des historiques.
     const configuredBlock = { ...block, explanationApproach: 'concise' }
     const draft = visibleCoachHelpBlocks({ id: 1, name: 'A', description: '', headerTitle: '{helpTitle}', headerDescription: '', status: 'draft', blocks: [configuredBlock] })
     const published = visibleCoachHelpBlocks({ id: 1, name: 'A', description: '', headerTitle: '{helpTitle}', headerDescription: '', status: 'published', blocks: [configuredBlock] })
     assert.deepEqual(draft, published)
-    assert.deepEqual(draft.map(item => item.content), ['{definitionHelp}', '{contextualBaseHelp}'])
+    assert.deepEqual(draft.map(item => item.content), configured.map(item => item.content))
     assert.ok(draft.every(item => item.explanationApproach === 'concise'))
+  })
+
+  it('ne transmet aucune réponse cible aux profils sans réponses', () => {
+    const question = {
+      titre: 'Question', consigne: '', reponses: ['mangions'], reponsesPourCorrige: ['nous mangions'],
+      infinitif: 'manger', pronom: 'nous', mode: 'indicatif', temps: 'imparfait', conjugaison1: 'mangions',
+    }
+    const verb = { infinitif: 'manger', groupeConjugaison: 1, terminaison: 'er', auxiliaire: 'avoir', participePasse: 'mangé' }
+    const values = coachHelpQuestionVariables(question, verb)
+    for (const profile of ['complete', 'tres-condensee']) {
+      const rendered = visibleCoachHelpBlocks(profile)
+        .map(item => renderCoachHelpContent(item.content, values, item.explanationApproach))
+        .join(' ')
+      assert.doesNotMatch(rendered, /mangions|<mark>/u)
+    }
+    const completeWithAnswers = renderCoachHelpContent('{contextualBaseHelp}', values)
+    const completeAdvice = renderCoachHelpContent('{completeAdviceHelp}', values)
+    const instructions = '<ol><li>Pars de l’infinitif <strong>manger</strong>.</li><li>Pour ce temps, utilise le radical <var>mang-</var>.</li><li>Ajoute la terminaison <samp>-ions</samp>.</li></ol>'
+    assert.ok(completeWithAnswers.startsWith(instructions))
+    assert.equal(completeAdvice, instructions)
+    assert.match(completeAdvice, /mang-|<samp>|<var>/u)
+    assert.doesNotMatch(completeAdvice, /mangions|<mark>/u)
+    assert.match(renderCoachHelpContent('{condensedTenseRuleHelp}', values), /Indicatif imparfait/u)
+    assert.match(renderCoachHelpContent('{condensedTenseRuleHelp}', values), /nous chantons/u)
+    assert.match(renderCoachHelpContent('{condensedVerbGroupHelp}', values), /1er groupe/u)
+    assert.doesNotMatch(renderCoachHelpContent('{condensedTenseRuleHelp}', values), /<details>|<table>/u)
+  })
+
+  it('garde les ressources des temps composés sans révéler leur construction', () => {
+    const values = coachHelpQuestionVariables({
+      titre: 'Question', consigne: '', reponses: ['eussiez calqué'], reponsesPourCorrige: ['vous eussiez calqué'],
+      infinitif: 'calquer', pronom: 'vous', mode: 'subjonctif', temps: 'plus-que-parfait', conjugaison1: 'eussiez calqué', isCompound: true,
+    }, {
+      infinitif: 'calquer', groupeConjugaison: 1, terminaison: 'er', auxiliaire: 'avoir', participePasse: 'calqué',
+    })
+    const advice = renderCoachHelpContent('{completeAdviceHelp}', values)
+    assert.match(advice, /imparfait du subjonctif du verbe avoir/u)
+    assert.match(advice, /imparfait du subjonctif du verbe être/u)
+    assert.match(advice, /Le participe passé de calquer[\s\S]*<strong>calqué<\/strong>/u)
+    assert.match(advice, /Conjugue le verbe auxiliaire à l’imparfait du subjonctif avec <strong>vous<\/strong>\./u)
+    assert.match(advice, /<li>Ajoute le participe passé\.<\/li>/u)
+    assert.match(advice, /Vérifie l’accord du participe passé\. Regarde plus bas pour plus de détails\./u)
+    assert.match(advice, /<figcaption>Accord du participe passé<\/figcaption>/u)
+    assert.doesNotMatch(advice, /Quel verbe auxiliaire|<kbd>Avoir<\/kbd>|<kbd>Être<\/kbd>|<mark>|eussiez calqué|Résultat|…/u)
+  })
+
+  it('ne donne ni radical ni terminaison ciblée au conditionnel sans réponses', () => {
+    const values = coachHelpQuestionVariables({
+      titre: 'Question', consigne: '', reponses: ['calquerions'], reponsesPourCorrige: ['nous calquerions'],
+      infinitif: 'calquer', pronom: 'nous', mode: 'conditionnel', temps: 'présent', conjugaison1: 'calquerions',
+    }, {
+      infinitif: 'calquer', groupeConjugaison: 1, terminaison: 'er', auxiliaire: 'avoir', participePasse: 'calqué',
+    })
+    const advice = renderCoachHelpContent('{completeAdviceHelp}', values)
+    assert.match(advice, /<figcaption>Trouve le radical du futur<\/figcaption><ol><li>Pars de l’infinitif : <strong>calquer<\/strong>\.<\/li><\/ol>/u)
+    assert.match(advice, /Ajoute au radical du futur la terminaison de l’imparfait qui correspond à la personne demandée\./u)
+    assert.match(advice, /<strong>Exemple :<\/strong><br><strong>nous<\/strong> <span><var>prendr<\/var><samp>ions<\/samp><\/span>/u)
+    assert.doesNotMatch(advice, /calquer-|<samp>-ions<\/samp>|calquerions|Résultat|…/u)
+  })
+
+  it('change le verbe de l’exemple lorsque la question porte déjà sur prendre', () => {
+    const values = coachHelpQuestionVariables({
+      titre: 'Question', consigne: '', reponses: ['prendraient'], reponsesPourCorrige: ['ils prendraient'],
+      infinitif: 'prendre', pronom: 'ils', mode: 'conditionnel', temps: 'présent', conjugaison1: 'prendraient',
+    }, {
+      infinitif: 'prendre', groupeConjugaison: 3, terminaison: 're', auxiliaire: 'avoir', participePasse: 'pris',
+    })
+    const advice = renderCoachHelpContent('{completeAdviceHelp}', values)
+    assert.match(advice, /<strong>Exemple :<\/strong><br><strong>ils<\/strong> <span><var>chanter<\/var><samp>aient<\/samp><\/span>/u)
+    assert.doesNotMatch(advice, /prendraient/u)
+  })
+
+  it('supprime les résultats vides au lieu d’afficher des points de suspension', () => {
+    const values = coachHelpQuestionVariables({
+      titre: 'Question', consigne: '', reponses: ['mange'], reponsesPourCorrige: ['mange'],
+      infinitif: 'manger', pronom: 'tu', mode: 'impératif', temps: 'présent', conjugaison1: 'mange',
+    }, {
+      infinitif: 'manger', groupeConjugaison: 1, terminaison: 'er', auxiliaire: 'avoir', participePasse: 'mangé',
+    })
+    const advice = renderCoachHelpContent('{completeAdviceHelp}', values)
+    assert.match(advice, /<figcaption>Construis la réponse<\/figcaption>/u)
+    assert.doesNotMatch(advice, /Résultat|…|<p>\s*<\/p>/u)
+  })
+
+  it('conserve les trois formes repères de l’impératif, y compris vous', () => {
+    const values = coachHelpQuestionVariables({
+      titre: 'Question', consigne: '', reponses: ['prenez'], reponsesPourCorrige: ['prenez'],
+      infinitif: 'prendre', pronom: 'vous', mode: 'impératif', temps: 'présent', conjugaison1: 'prenez',
+      radicalReference: {
+        kind: 'present-same-person', label: 'vous au présent', form: 'prenez', radical: 'pren', targetEnding: 'ez',
+        referenceMode: 'indicatif', referenceTense: 'présent', referenceSubject: 'vous', strategy: 'memorize', validated: true,
+        imperativePresentReferences: [
+          { subject: 'tu', form: 'prends' },
+          { subject: 'nous', form: 'prenons' },
+          { subject: 'vous', form: 'prenez' },
+        ],
+      },
+    }, {
+      infinitif: 'prendre', groupeConjugaison: 3, terminaison: 're', auxiliaire: 'avoir', participePasse: 'pris',
+    })
+    const advice = renderCoachHelpContent('{completeAdviceHelp}', values)
+    assert.match(advice, /<th><strong>tu<\/strong><\/th><td><strong>Tu prends<\/strong><\/td>/u)
+    assert.match(advice, /<th><strong>nous<\/strong><\/th><td><strong>Nous prenons<\/strong><\/td>/u)
+    assert.match(advice, /<th><strong>vous<\/strong><\/th><td><strong>Vous prenez<\/strong><\/td>/u)
+    assert.doesNotMatch(advice, /<mark>|Résultat|…/u)
+  })
+
+  it('conserve la forme repère mais masque le radical et la terminaison pendant la construction', () => {
+    const values = coachHelpQuestionVariables({
+      titre: 'Question', consigne: '', reponses: ['brave'], reponsesPourCorrige: ['qu’il brave'],
+      infinitif: 'braver', pronom: 'il', mode: 'subjonctif', temps: 'présent', conjugaison1: 'brave',
+      radicalReference: {
+        kind: 'present-ils', label: 'ils au présent', form: 'bravent', removableEnding: 'ent', radical: 'brav', targetEnding: 'e',
+        referenceMode: 'indicatif', referenceTense: 'présent', referenceSubject: 'ils', strategy: 'remove-ending', validated: true,
+        subjunctivePresentReferences: [
+          { subject: 'ils', form: 'bravent' },
+          { subject: 'nous', form: 'bravons' },
+        ],
+      },
+    }, {
+      infinitif: 'braver', groupeConjugaison: 1, terminaison: 'er', auxiliaire: 'avoir', participePasse: 'bravé',
+    })
+    const advice = renderCoachHelpContent('{completeAdviceHelp}', values)
+    assert.match(advice, /Ils bravent/u)
+    assert.match(advice, /Enlève <kbd>-ent<\/kbd> : il reste le radical\./u)
+    assert.match(advice, /Ajoute la terminaison qui correspond à la personne demandée\./u)
+    const construction = advice.match(/<figure><figcaption>Construis la réponse<\/figcaption>([\s\S]*?)<\/figure>/u)?.[1] || ''
+    assert.doesNotMatch(construction, /<var>|<samp>|brav-|>-e</u)
+    assert.doesNotMatch(advice, /qu’il brave|Résultat|…/u)
+  })
+
+  it('résume les facilités et les pièges propres à chaque groupe', () => {
+    const firstGroup = buildCondensedVerbGroupHtml({ infinitif: 'manger', groupeConjugaison: 1 })
+    const secondGroup = buildCondensedVerbGroupHtml({ infinitif: 'finir', groupeConjugaison: 2 })
+    const thirdGroup = buildCondensedVerbGroupHtml({ infinitif: 'venir', groupeConjugaison: 3 }, { mode: 'conditionnel', tense: 'présent', subject: 'nous' })
+    assert.match(firstGroup, /<p>Conjugaison généralement régulière\.<\/p><p>Attention : le radical ne s’écrit pas toujours de la même façon\.<\/p>/u)
+    assert.match(secondGroup, /modèle de « finir »[^<]+-iss-/u)
+    assert.match(thirdGroup, /souvent irrégulière[^<]+formes repères/u)
+    assert.match(thirdGroup, /<details><summary>Qu’est-ce que c’est \?<\/summary>/u)
+    assert.match(thirdGroup, /forme du verbe que tu as apprise par cœur/u)
+    assert.match(thirdGroup, /<p><strong>Exemple :<\/strong><\/p>/u)
+    assert.doesNotMatch(thirdGroup, /Exemple avec/u)
+    assert.match(thirdGroup, /chanterons[^<]+<code>chanter-<\/code>/u)
+    assert.match(thirdGroup, /<p>Trouve le radical\. Forme repère au futur/u)
+    assert.doesNotMatch(thirdGroup, /Utilise la terminaison|Construis la réponse|<p>[123]\./u)
+    assert.doesNotMatch(firstGroup + secondGroup, /<details>/u)
+  })
+
+  it('garde allophone indépendant tout en réutilisant actuellement le rendu complet', () => {
+    const complete = visibleCoachHelpBlocks('complete-avec-reponses')
+    const allophone = visibleCoachHelpBlocks('allophone')
+    assert.deepEqual(allophone.map(item => item.content), complete.map(item => item.content))
+    assert.ok(allophone.every(item => item.profileId === 'allophone'))
   })
 
   it('ajoute le bloc G uniquement aux verbes concernés', () => {
@@ -248,6 +407,68 @@ describe('aides visuelles configurables', () => {
     assert.deepEqual(automaticOrthographyHelpBlocks({ verb: 'ranger', correctAnswers: 'ils rangent' }), [])
     assert.deepEqual(automaticOrthographyHelpBlocks({ verb: 'mélanger', correctAnswers: 'tu mélangerais' }), [])
     assert.deepEqual(automaticOrthographyHelpBlocks({ verb: 'avancer', correctAnswers: 'nous avancions' }), [])
+  })
+
+  it('ajoute le bloc COD placé avant uniquement à l’aide complète sans réponses', () => {
+    const values = {
+      verb: 'manger',
+      COD: 'la pomme',
+      isCODplace_avant: 'oui',
+    }
+    const [codBlock] = conditionalCoachHelpBlocks('complete', values)
+    assert.equal(codBlock.title, 'Le COD placé avant')
+    assert.equal(codBlock.type, 'info')
+    assert.match(codBlock.content, /<strong>« la pomme »<\/strong> est le complément d’objet direct \(COD\)/u)
+    assert.match(codBlock.content, /Ne le confonds pas avec le sujet/u)
+    assert.match(codBlock.content, /temps composé avec <strong>avoir<\/strong>/u)
+    assert.doesNotMatch(codBlock.content, /mange|mangée/u)
+
+    assert.deepEqual(conditionalCoachHelpBlocks('complete', { ...values, isCODplace_avant: 'non' }), [])
+    assert.deepEqual(conditionalCoachHelpBlocks('complete-avec-reponses', values), [])
+    assert.deepEqual(conditionalCoachHelpBlocks('tres-condensee', values), [])
+  })
+
+  it('affiche la règle d’accord avec un COD ou un COI dans tous les modes d’aide', () => {
+    const compoundQuestion = {
+      titre: 'Question', consigne: '', reponses: ['a mangée'], reponsesPourCorrige: ['elle a mangée'],
+      infinitif: 'manger', pronom: 'elle', mode: 'indicatif', temps: 'passé composé', conjugaison1: 'a mangé',
+      isCompound: true, complement: 'la pomme', complementFunction: 'cod', complementPosition: 'before',
+      agreementReminder: {
+        kind: 'cod-before', infinitive: 'manger', complement: 'la pomme', participle: 'mangée',
+        gender: 'feminin', number: 'singulier',
+      },
+    }
+    const currentVerb = {
+      infinitif: 'manger', groupeConjugaison: 1, terminaison: 'er', auxiliaire: 'avoir', participePasse: 'mangé',
+    }
+    const values = coachHelpQuestionVariables(compoundQuestion, currentVerb)
+    for (const profile of ['complete-avec-reponses', 'complete', 'tres-condensee', 'allophone']) {
+      const rendered = [
+        ...visibleCoachHelpBlocks(profile),
+        ...conditionalCoachHelpBlocks(profile, values),
+      ].map(block => `${block.title} ${renderCoachHelpContent(block.content, values, block.explanationApproach)}`).join(' ')
+      assert.match(rendered, /Accord du participe passé/u, profile)
+      assert.match(rendered, /COD[^<]*placé avant|COD placé avant/iu, profile)
+    }
+
+    const coiValues = coachHelpQuestionVariables({
+      ...compoundQuestion,
+      reponses: ['a parlé'], reponsesPourCorrige: ['elle a parlé'], infinitif: 'parler', conjugaison1: 'a parlé',
+      complement: 'à ses amis', complementFunction: 'coi', complementPosition: 'before',
+      agreementReminder: { ...compoundQuestion.agreementReminder, kind: 'coi', infinitive: 'parler', complement: 'à ses amis', participle: 'parlé' },
+    }, { ...currentVerb, infinitif: 'parler', participePasse: 'parlé' })
+    for (const profile of ['complete-avec-reponses', 'complete', 'tres-condensee', 'allophone']) {
+      const rendered = [
+        ...visibleCoachHelpBlocks(profile),
+        ...conditionalCoachHelpBlocks(profile, coiValues),
+      ].map(block => `${block.title} ${renderCoachHelpContent(block.content, coiValues, block.explanationApproach)}`).join(' ')
+      assert.match(rendered, /Accord du participe passé/u, profile)
+      assert.match(rendered, /COI/iu, profile)
+      assert.match(rendered, /ne commande pas l’accord|ne s’accorde pas/iu, profile)
+    }
+
+    const simpleValues = { ...values, isCompound: false }
+    assert.deepEqual(conditionalCoachHelpBlocks('tres-condensee', simpleValues), [])
   })
 
   it('construit le subjonctif imparfait en -a sans radical artificiel', () => {

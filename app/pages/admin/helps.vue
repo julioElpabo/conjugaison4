@@ -2,10 +2,12 @@
 import type { CoachCaractere, CoachHelpBlock, CoachHelpBlockType } from '~~/shared/types/coach'
 import type { ConjugationMode, ConjugationTense, ExerciseQuestion, Verb } from '~~/shared/types/conjugation'
 import type { CoachHelpContentValues } from '~~/shared/utils/coach-help'
-import { automaticCoachHelpApproach, automaticOrthographyHelpBlocks, coachHelpQuestionVariables, renderCoachHelpContent, visibleCoachHelpBlocks } from '~~/shared/utils/coach-help'
+import { automaticCoachHelpApproach, coachHelpQuestionVariables, conditionalCoachHelpBlocks, renderCoachHelpContent, visibleCoachHelpBlocks } from '~~/shared/utils/coach-help'
 import { sanitizeCoachHtml } from '~~/shared/utils/safe-html'
 import { matchingVerbs, normalizeVerbSearch } from '~~/shared/utils/verb-search'
 import { buildRadicalReference } from '~~/shared/utils/radical-reference'
+import { randomConjugationPreviews } from '~~/shared/utils/random-conjugation-previews'
+import { coachHelpProfile } from '~~/shared/data/coach-help-profiles'
 import { getAdminErrorMessage } from '~/composables/useAdminAuth'
 
 interface PreviewConjugation {
@@ -72,12 +74,7 @@ const requestedCaractereId = computed(() => Number(route.query.caractere))
 const currentCaractere = computed(() => caracteres.value.find(caractere => caractere.id === requestedCaractereId.value) || null)
 const automaticBlocks = computed(() => visibleCoachHelpBlocks(currentCaractere.value?.helpApproach))
 const approach = computed(() => automaticCoachHelpApproach(currentCaractere.value?.helpApproach))
-const approachLabel = computed(() => ({
-  'cif-falc': 'CIF · FALC',
-  concise: 'Très condensée',
-  'grammatical-technical': 'Grammatico-technique',
-  'guided-discovery': 'Découverte guidée',
-}[approach.value]))
+const approachLabel = computed(() => coachHelpProfile(approach.value).label)
 
 function normalized(value?: string | null) {
   return normalizeVerbSearch(value || '')
@@ -263,7 +260,7 @@ function previewDiagnostic(state: PreviewState) {
   const values = previewValues(state)
   const blocks = [
     ...automaticBlocks.value.filter(block => block.isActive),
-    ...automaticOrthographyHelpBlocks(values),
+    ...conditionalCoachHelpBlocks(approach.value, values),
   ]
   return {
     schemaVersion: 1,
@@ -326,6 +323,36 @@ async function openVerification() {
   await navigateTo({ path: '/admin/help-verification', query: { caractere: requestedCaractereId.value } })
 }
 
+async function prepareRandomPreviews() {
+  if (!verbs.value.length) throw new Error('Aucun verbe disponible')
+  const firstVerbIndex = Math.floor(Math.random() * verbs.value.length)
+  let selectedVerb: Verb | undefined
+  let randomForms: ReturnType<typeof randomConjugationPreviews> = []
+  for (let offset = 0; offset < verbs.value.length; offset += 1) {
+    const candidate = verbs.value[(firstVerbIndex + offset) % verbs.value.length]!
+    const detail = await verbDetail(candidate.id)
+    const candidateForms = randomConjugationPreviews(modes.value, tenses.value, detail.conjugations, previews.value.length)
+    if (candidateForms.length < previews.value.length) continue
+    selectedVerb = candidate
+    randomForms = candidateForms
+    break
+  }
+  if (!selectedVerb) throw new Error('Aucun verbe ne possède au moins quatre modes disponibles.')
+  await Promise.all(previews.value.map((state, index) => chooseVerb(state, selectedVerb, randomForms[index]!)))
+}
+
+async function reloadPreviews() {
+  loading.value = true
+  error.value = ''
+  try {
+    await prepareRandomPreviews()
+  } catch (caught) {
+    if (!handleUnauthorized(caught)) error.value = getAdminErrorMessage(caught, 'Impossible de tirer quatre nouvelles formes.')
+  } finally {
+    loading.value = false
+  }
+}
+
 async function load() {
   loading.value = true
   error.value = ''
@@ -343,15 +370,7 @@ async function load() {
     modes.value = catalogue.modes
     tenses.value = catalogue.temps
     if (!currentCaractere.value) throw new Error('Caractère introuvable')
-    const manger = verbs.value.find(verb => normalized(verb.infinitif) === 'manger') || verbs.value[0]
-    if (!manger) throw new Error('Aucun verbe disponible')
-    const defaults = [
-      { modeName: 'conditionnel', tenseName: 'présent', compound: false, pronoun: 'je' },
-      { modeName: 'conditionnel', tenseName: 'présent', compound: false, pronoun: 'ils' },
-      { modeName: 'conditionnel', tenseName: 'présent', compound: false, pronoun: 'tu' },
-      { modeName: 'conditionnel', tenseName: 'présent', compound: false, pronoun: 'vous' },
-    ]
-    await Promise.all(previews.value.map((state, index) => chooseVerb(state, manger, defaults[index])))
+    await prepareRandomPreviews()
   } catch (caught) {
     if (!handleUnauthorized(caught)) error.value = getAdminErrorMessage(caught, 'Impossible de préparer les aperçus automatiques.')
   } finally {
@@ -376,6 +395,7 @@ watch(user, (current) => {
       <div class="automatic-help-heading__actions">
         <span class="automatic-help-approach">{{ approachLabel }}</span>
         <NuxtLink v-if="currentCaractere" class="admin-button admin-button--small" :to="{ path: '/admin/caracteres', query: { caractere: currentCaractere.id } }">Retour au caractère</NuxtLink>
+        <button class="admin-button admin-button--small automatic-help-reload" type="button" :disabled="loading || !currentCaractere" @click="reloadPreviews">Recharger</button>
         <button class="admin-button automatic-help-verify" type="button" :disabled="loading || !currentCaractere" @click="openVerification">Vérifier cette aide</button>
       </div>
     </header>
@@ -419,7 +439,7 @@ watch(user, (current) => {
 </template>
 
 <style scoped>
-.automatic-help-admin{display:grid;min-width:0;gap:18px}.automatic-help-heading p{max-width:760px;margin:5px 0 0;color:var(--admin-muted)}.automatic-help-heading__actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-wrap:wrap}.automatic-help-approach{padding:7px 10px;border-radius:9px;color:#176783;background:#e5f3f6;font-size:.76rem;font-weight:850}.automatic-help-verify{color:#176783;border-color:#7db8c8;background:#e8f5f8}.automatic-help-loading{padding:24px;color:var(--admin-muted)}.automatic-preview-scroll{width:100%;padding-bottom:12px;overflow-x:auto}.automatic-preview-grid{display:grid;width:100%;min-width:1380px;grid-template-columns:repeat(4,minmax(330px,1fr));align-items:start;gap:14px}.automatic-preview-column{display:grid;min-width:0;padding:12px;border:1px solid var(--admin-border);border-radius:17px;gap:12px;background:color-mix(in srgb,var(--admin-surface,#fff) 94%,#dceff1)}.automatic-preview-column>header{display:flex;align-items:center;justify-content:space-between;gap:8px}.automatic-preview-column>header>div{display:flex;align-items:center;justify-content:flex-end;gap:6px}.automatic-preview-column>header span{color:var(--admin-blue);font-size:.72rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase}.automatic-preview-column>header strong{padding:4px 7px;border-radius:999px;color:var(--admin-muted);background:#edf3f4;font-size:.66rem}.automatic-preview-column>header button{padding:6px 8px;border:1px solid #87b8c3;border-radius:8px;color:#176783;background:#e7f4f6;cursor:pointer;font-size:.66rem;font-weight:850}.automatic-preview-column>header button:hover:not(:disabled),.automatic-preview-column>header button:focus-visible{background:#d7edf1}.automatic-preview-column>header button:disabled{cursor:not-allowed;opacity:.5}.automatic-preview-column>header button.is-copied{color:#176246;border-color:#81bea5;background:#e1f4eb}.automatic-preview-column>header button.is-error{color:#9c302a;border-color:#dfa19c;background:#fbe9e7}.automatic-preview-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}.automatic-verb-picker{position:relative;display:grid;grid-column:1/-1;gap:5px;color:var(--admin-muted);font-size:.72rem;font-weight:800}.automatic-verb-picker>div{position:relative}.automatic-verb-picker input{width:100%;padding:10px 11px;border:1px solid var(--admin-border);border-radius:9px;color:var(--admin-navy);background:white;font:inherit}.automatic-verb-picker ul{position:absolute;z-index:20;top:calc(100% + 4px);right:0;left:0;max-height:260px;margin:0;padding:5px;overflow:auto;border:1px solid var(--admin-border);border-radius:10px;background:white;box-shadow:0 12px 28px rgb(18 56 70 / 18%);list-style:none}.automatic-verb-picker li button{display:grid;width:100%;padding:8px 9px;border:0;border-radius:7px;gap:2px;color:var(--admin-navy);background:transparent;text-align:left;cursor:pointer}.automatic-verb-picker li button:hover{background:#e6f3f5}.automatic-verb-picker li small{color:var(--admin-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.automatic-preview-wait{display:grid;min-height:720px;place-items:center;color:var(--admin-muted)}
+.automatic-help-admin{display:grid;min-width:0;gap:18px}.automatic-help-heading p{max-width:760px;margin:5px 0 0;color:var(--admin-muted)}.automatic-help-heading__actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-wrap:wrap}.automatic-help-approach{padding:7px 10px;border-radius:9px;color:#176783;background:#e5f3f6;font-size:.76rem;font-weight:850}.automatic-help-reload{color:var(--admin-blue);border-color:var(--admin-border);background:var(--admin-surface,#fff)}.automatic-help-reload:disabled{cursor:not-allowed;opacity:.55}.automatic-help-verify{color:#176783;border-color:#7db8c8;background:#e8f5f8}.automatic-help-loading{padding:24px;color:var(--admin-muted)}.automatic-preview-scroll{width:100%;padding-bottom:12px;overflow-x:auto}.automatic-preview-grid{display:grid;width:100%;min-width:1380px;grid-template-columns:repeat(4,minmax(330px,1fr));align-items:start;gap:14px}.automatic-preview-column{display:grid;min-width:0;padding:12px;border:1px solid var(--admin-border);border-radius:17px;gap:12px;background:color-mix(in srgb,var(--admin-surface,#fff) 94%,#dceff1)}.automatic-preview-column>header{display:flex;align-items:center;justify-content:space-between;gap:8px}.automatic-preview-column>header>div{display:flex;align-items:center;justify-content:flex-end;gap:6px}.automatic-preview-column>header span{color:var(--admin-blue);font-size:.72rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase}.automatic-preview-column>header strong{padding:4px 7px;border-radius:999px;color:var(--admin-muted);background:#edf3f4;font-size:.66rem}.automatic-preview-column>header button{padding:6px 8px;border:1px solid #87b8c3;border-radius:8px;color:#176783;background:#e7f4f6;cursor:pointer;font-size:.66rem;font-weight:850}.automatic-preview-column>header button:hover:not(:disabled),.automatic-preview-column>header button:focus-visible{background:#d7edf1}.automatic-preview-column>header button:disabled{cursor:not-allowed;opacity:.5}.automatic-preview-column>header button.is-copied{color:#176246;border-color:#81bea5;background:#e1f4eb}.automatic-preview-column>header button.is-error{color:#9c302a;border-color:#dfa19c;background:#fbe9e7}.automatic-preview-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}.automatic-verb-picker{position:relative;display:grid;grid-column:1/-1;gap:5px;color:var(--admin-muted);font-size:.72rem;font-weight:800}.automatic-verb-picker>div{position:relative}.automatic-verb-picker input{width:100%;padding:10px 11px;border:1px solid var(--admin-border);border-radius:9px;color:var(--admin-navy);background:white;font:inherit}.automatic-verb-picker ul{position:absolute;z-index:20;top:calc(100% + 4px);right:0;left:0;max-height:260px;margin:0;padding:5px;overflow:auto;border:1px solid var(--admin-border);border-radius:10px;background:white;box-shadow:0 12px 28px rgb(18 56 70 / 18%);list-style:none}.automatic-verb-picker li button{display:grid;width:100%;padding:8px 9px;border:0;border-radius:7px;gap:2px;color:var(--admin-navy);background:transparent;text-align:left;cursor:pointer}.automatic-verb-picker li button:hover{background:#e6f3f5}.automatic-verb-picker li small{color:var(--admin-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.automatic-preview-wait{display:grid;min-height:720px;place-items:center;color:var(--admin-muted)}
 :global(:root[data-theme='dark'] .automatic-help-approach){color:#aee0eb;background:#203d45}:global(:root[data-theme='dark'] .automatic-help-verify){color:#bce8f0;border-color:#4d8290;background:#203b43}:global(:root[data-theme='dark'] .automatic-preview-column){border-color:#40575f;background:#17292e}:global(:root[data-theme='dark'] .automatic-preview-column>header strong){color:#bdd0d4;background:#22373c}:global(:root[data-theme='dark'] .automatic-preview-column>header button){color:#b9e2e9;border-color:#497884;background:#213b42}:global(:root[data-theme='dark'] .automatic-preview-column>header button:hover:not(:disabled)),:global(:root[data-theme='dark'] .automatic-preview-column>header button:focus-visible){background:#2a4a52}:global(:root[data-theme='dark'] .automatic-preview-column>header button.is-copied){color:#b9ead5;border-color:#467c67;background:#204438}:global(:root[data-theme='dark'] .automatic-preview-column>header button.is-error){color:#ffc2bc;border-color:#875552;background:#4b2d2c}:global(:root[data-theme='dark'] .automatic-verb-picker input),:global(:root[data-theme='dark'] .automatic-verb-picker ul){color:#d8e7ea;border-color:#49616a;background:#192b30}:global(:root[data-theme='dark'] .automatic-verb-picker li button){color:#d8e7ea}:global(:root[data-theme='dark'] .automatic-verb-picker li button:hover){background:#294149}:global(:root[data-theme='dark'] .automatic-verb-picker li small){color:#aec0c5}
 @media(max-width:760px){.automatic-help-heading{align-items:stretch;flex-direction:column}.automatic-help-heading__actions{justify-content:flex-start}.automatic-preview-grid{min-width:1320px}.automatic-preview-controls{grid-template-columns:1fr}}
 </style>

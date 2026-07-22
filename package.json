@@ -47,6 +47,8 @@
     "data:import-coach-media": "node --env-file=.env scripts/import-coach-media.mjs",
     "test": "node --env-file-if-exists=.env --import tsx --test tests/*.test.mjs",
     "test:conjugations": "node --env-file-if-exists=.env --import tsx --test tests/*conjugation*.test.mjs",
+    "test:help:condensed": "node scripts/run-condensed-help-tests.mjs",
+    "test:help:complete": "node scripts/run-complete-help-tests.mjs",
     "typecheck": "nuxt typecheck",
     "postinstall": "nuxt prepare"
   },

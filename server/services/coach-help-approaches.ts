@@ -1,12 +1,12 @@
 import type { Pool, PoolConnection, RowDataPacket } from 'mysql2/promise'
-import { COACH_EXPLANATION_APPROACHES, type CoachExplanationApproach, type CoachHelpApproachDefinition } from '../../shared/types/coach'
+import { COACH_HELP_ENGINE_KEYS, type CoachHelpApproachDefinition, type CoachHelpEngineKey } from '../../shared/types/coach'
 
 type Executor = Pool | PoolConnection
 
 interface ApproachRow extends RowDataPacket {
   id: number
   name: string
-  engineKey: CoachExplanationApproach
+  engineKey: CoachHelpEngineKey
   sortOrder: number
   characterCount: number
 }
@@ -28,9 +28,9 @@ function text(value: unknown, maximum: number) {
 export function parseCoachHelpApproachPayload(value: unknown) {
   const body = value && typeof value === 'object' ? value as Record<string, unknown> : {}
   const name = text(body.name, 80)
-  const engineKey = text(body.engineKey, 40) as CoachExplanationApproach
+  const engineKey = text(body.engineKey, 40) as CoachHelpEngineKey
   const sortOrder = Number(body.sortOrder)
-  if (!name || !COACH_EXPLANATION_APPROACHES.includes(engineKey) || !Number.isInteger(sortOrder)) {
+  if (!name || !COACH_HELP_ENGINE_KEYS.includes(engineKey) || !Number.isInteger(sortOrder)) {
     throw createError({ statusCode: 400, statusMessage: 'Approche d’aide invalide' })
   }
   return { name, engineKey, sortOrder }

@@ -1,25 +1,13 @@
 <script setup lang="ts">
 import type { CoachProfile } from '~~/shared/types/coach'
+import { coachPickerGroups } from '~~/shared/utils/coach-picker-groups'
 
 const emit = defineEmits<{ close: [], select: [coach: CoachProfile] }>()
 const coaches = ref<CoachProfile[]>([])
 const loading = ref(true)
 const error = ref('')
 
-const coachGroups = computed(() => {
-  const groups = new Map<number, CoachProfile[]>()
-  for (const coach of coaches.value) {
-    const group = groups.get(coach.caractereId)
-    if (group) group.push(coach)
-    else groups.set(coach.caractereId, [coach])
-  }
-
-  return [...groups.entries()].map(([caractereId, caractereCoaches]) => ({
-    caractereId,
-    name: [...new Set(caractereCoaches.map(coach => coach.caractereName).filter(Boolean))].join(' / ') || 'Caractère',
-    coaches: caractereCoaches,
-  }))
-})
+const coachGroups = computed(() => coachPickerGroups(coaches.value))
 
 onMounted(async () => {
   try {
@@ -50,9 +38,9 @@ onMounted(async () => {
         <p v-if="loading" class="coach-picker__state">Chargement des coaches…</p>
         <p v-else-if="error" class="coach-picker__state coach-picker__state--error">{{ error }}</p>
         <div v-else class="coach-picker__groups">
-          <section v-for="group in coachGroups" :key="group.caractereId" class="coach-caractere-group">
+          <section v-for="group in coachGroups" :key="group.approach" class="coach-caractere-group">
             <header class="coach-caractere-group__header">
-              <div><h3>{{ group.name }}</h3></div>
+              <div><span>Type d’aide</span><h3>{{ group.label }}</h3><p>{{ group.description }}</p></div>
               <small>{{ group.coaches.length }} coach{{ group.coaches.length > 1 ? 'es' : '' }}</small>
             </header>
             <div class="coach-picker__grid">
@@ -91,6 +79,7 @@ onMounted(async () => {
 .coach-caractere-group__header > div { display: grid; gap: 2px; }
 .coach-caractere-group__header span { color: var(--caractere-accent); font-size: .68rem; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
 .coach-caractere-group__header h3 { margin: 0; color: #173f55; font-size: 1.12rem; }
+.coach-picker .coach-caractere-group__header p { margin: 2px 0 0; color: #49636d; font-size: .78rem; font-weight: 500; letter-spacing: normal; line-height: 1.35; text-transform: none; }
 .coach-caractere-group__header > small { padding: 5px 9px; color: #49636d; background: rgb(255 255 255 / 68%); border-radius: 999px; font-size: .7rem; font-weight: 800; white-space: nowrap; }
 .coach-picker__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .coach-card { display: grid; padding: 17px; grid-template-columns: 66px 1fr; gap: 7px 14px; color: #284650; text-align: left; background: white; border: 2px solid transparent; border-radius: 16px; cursor: pointer; box-shadow: 0 6px 20px rgb(24 61 73 / 8%); }
@@ -108,6 +97,7 @@ onMounted(async () => {
 .coach-picker__state--error { color: #913e38; }
 :global(:root[data-theme='dark'] .coach-caractere-group) { border-color: #405963; border-left-color: var(--caractere-accent); background: color-mix(in srgb, var(--caractere-accent) 14%, #17262a); }
 :global(:root[data-theme='dark'] .coach-caractere-group__header h3) { color: #d4e9ee; }
+:global(:root[data-theme='dark'] .coach-caractere-group__header p) { color: #b8ced5; }
 :global(:root[data-theme='dark'] .coach-caractere-group__header span) { color: color-mix(in srgb, var(--caractere-accent) 78%, white); }
 :global(:root[data-theme='dark'] .coach-caractere-group__header > small) { color: #b8ced5; background: rgb(9 29 34 / 45%); }
 :global(:root[data-theme='dark'] .coach-card__caractere-description) { color: #b8ced5; }

@@ -26,7 +26,7 @@ try {
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     slug VARCHAR(80) NOT NULL,
     name VARCHAR(80) NOT NULL,
-    engine_key ENUM('cif-falc','concise','grammatical-technical','guided-discovery') NOT NULL DEFAULT 'cif-falc',
+    engine_key ENUM('complete-avec-reponses','complete','tres-condensee','allophone') NOT NULL DEFAULT 'complete-avec-reponses',
     sort_order SMALLINT NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -34,25 +34,44 @@ try {
     UNIQUE KEY uq_coach_help_approach_slug (slug)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
 
+  await database.query(`ALTER TABLE coach_help_approaches MODIFY engine_key
+    ENUM('cif-falc','concise','grammatical-technical','guided-discovery','complete-avec-reponses','complete','tres-condensee','allophone')
+    NOT NULL DEFAULT 'complete-avec-reponses'`)
+  await database.query(`UPDATE coach_help_approaches SET engine_key=CASE engine_key
+    WHEN 'cif-falc' THEN 'complete-avec-reponses'
+    WHEN 'concise' THEN 'tres-condensee'
+    WHEN 'grammatical-technical' THEN 'complete'
+    WHEN 'guided-discovery' THEN 'allophone'
+    ELSE engine_key END`)
+  await database.query("UPDATE coach_help_approaches SET slug='complete-avec-reponses',name='Complète avec réponses' WHERE slug='cif-falc'")
+  await database.query("UPDATE coach_help_approaches SET slug='tres-condensee',name='Très condensée' WHERE slug='concise'")
+  await database.query("UPDATE coach_help_approaches SET slug='complete',name='Complète sans réponses' WHERE slug='grammatical-technical'")
   const seeds = [
-    ['cif-falc', 'CIF · FALC', 'cif-falc', 1],
-    ['concise', 'Très condensée', 'concise', 2],
-    ['grammatical-technical', 'Grammatico-technique', 'grammatical-technical', 3],
-    ['guided-discovery', 'Découverte guidée', 'guided-discovery', 4],
+    ['complete-avec-reponses', 'Complète avec réponses', 'complete-avec-reponses', 1],
+    ['complete', 'Complète sans réponses', 'complete', 2],
+    ['tres-condensee', 'Très condensée', 'tres-condensee', 3],
+    ['allophone', 'Allophone', 'allophone', 4],
   ]
   for (const seed of seeds) {
     await database.execute(`INSERT INTO coach_help_approaches (slug,name,engine_key,sort_order)
       VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE slug=VALUES(slug)`, seed)
   }
+  await database.query(`UPDATE coach_characters c
+    JOIN coach_help_approaches legacy ON legacy.id=c.help_approach_id AND legacy.slug='guided-discovery'
+    JOIN coach_help_approaches target ON target.slug='allophone'
+    SET c.help_approach_id=target.id`)
+  await database.query("DELETE FROM coach_help_approaches WHERE slug='guided-discovery'")
 
   if (!await hasColumn('help_approach_id')) {
     await database.query('ALTER TABLE coach_characters ADD COLUMN help_approach_id INT UNSIGNED NULL AFTER pedagogical_style')
   }
   if (await hasColumn('help_approach')) {
-    await database.query(`UPDATE coach_characters c JOIN coach_help_approaches a ON a.slug=c.help_approach
+    await database.query(`UPDATE coach_characters c JOIN coach_help_approaches a ON a.slug=CASE c.help_approach
+        WHEN 'cif-falc' THEN 'complete-avec-reponses' WHEN 'concise' THEN 'tres-condensee'
+        WHEN 'grammatical-technical' THEN 'complete' WHEN 'guided-discovery' THEN 'allophone' ELSE c.help_approach END
       SET c.help_approach_id=a.id WHERE c.help_approach_id IS NULL`)
   }
-  await database.query(`UPDATE coach_characters c JOIN coach_help_approaches a ON a.slug='cif-falc'
+  await database.query(`UPDATE coach_characters c JOIN coach_help_approaches a ON a.slug='complete-avec-reponses'
     SET c.help_approach_id=a.id WHERE c.help_approach_id IS NULL`)
 
   const [foreignKeys] = await database.execute(`SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE
@@ -67,6 +86,8 @@ try {
   }
   await database.query('ALTER TABLE coach_characters MODIFY help_approach_id INT UNSIGNED NOT NULL')
   if (await hasColumn('help_approach')) await database.query('ALTER TABLE coach_characters DROP COLUMN help_approach')
+  await database.query(`ALTER TABLE coach_help_approaches MODIFY engine_key
+    ENUM('complete-avec-reponses','complete','tres-condensee','allophone') NOT NULL DEFAULT 'complete-avec-reponses'`)
 
   const [[audit]] = await database.query(`SELECT COUNT(*) AS total,
     SUM(a.id IS NULL) AS invalid FROM coach_characters c

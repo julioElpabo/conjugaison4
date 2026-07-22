@@ -1,0 +1,152 @@
+Audit de l’aide complète sans réponses
+Date : 2026-07-22T16:09:26.327Z
+Commande : /usr/local/bin/node --env-file-if-exists=.env --import tsx --test --test-concurrency=1 --test-reporter=spec tests/coach-help.test.mjs tests/coach-complete-help-audit.mjs
+Code de sortie : 0
+
+▶ audit pédagogique de l’aide complète sans réponses
+  ✔ couvre vingt cas de groupes, temps et difficultés différents (1.167166ms)
+  ▶ chanter — présent régulier
+    ✔ présente une démarche structurée et lisible (0.431042ms)
+    ✔ donne des indications grammaticalement pertinentes (0.107542ms)
+    ✔ ne montre pas la réponse finale (0.188292ms)
+  ✔ chanter — présent régulier (0.861084ms)
+  ▶ manger — imparfait — maintien du e
+    ✔ présente une démarche structurée et lisible (0.271167ms)
+    ✔ donne des indications grammaticalement pertinentes (0.083709ms)
+    ✔ ne montre pas la réponse finale (0.129166ms)
+  ✔ manger — imparfait — maintien du e (0.600167ms)
+  ▶ commencer — présent — cédille
+    ✔ présente une démarche structurée et lisible (0.076417ms)
+    ✔ donne des indications grammaticalement pertinentes (0.039583ms)
+    ✔ ne montre pas la réponse finale (0.144167ms)
+  ✔ commencer — présent — cédille (0.353542ms)
+  ▶ finir — présent — deuxième groupe
+    ✔ présente une démarche structurée et lisible (0.057083ms)
+    ✔ donne des indications grammaticalement pertinentes (0.043166ms)
+    ✔ ne montre pas la réponse finale (0.089583ms)
+  ✔ finir — présent — deuxième groupe (0.256417ms)
+  ▶ choisir — imparfait — radical en iss
+    ✔ présente une démarche structurée et lisible (0.040916ms)
+    ✔ donne des indications grammaticalement pertinentes (0.031667ms)
+    ✔ ne montre pas la réponse finale (0.075875ms)
+  ✔ choisir — imparfait — radical en iss (0.201333ms)
+  ▶ venir — futur — radical irrégulier
+    ✔ présente une démarche structurée et lisible (0.04925ms)
+    ✔ donne des indications grammaticalement pertinentes (0.023792ms)
+    ✔ ne montre pas la réponse finale (0.072791ms)
+  ✔ venir — futur — radical irrégulier (0.185917ms)
+  ▶ être — imparfait — radical exceptionnel
+    ✔ présente une démarche structurée et lisible (0.040875ms)
+    ✔ donne des indications grammaticalement pertinentes (0.101083ms)
+    ✔ ne montre pas la réponse finale (0.078875ms)
+  ✔ être — imparfait — radical exceptionnel (0.260333ms)
+  ▶ avoir — impératif présent — forme irrégulière
+    ✔ présente une démarche structurée et lisible (0.046125ms)
+    ✔ donne des indications grammaticalement pertinentes (0.087ms)
+    ✔ ne montre pas la réponse finale (0.078625ms)
+  ✔ avoir — impératif présent — forme irrégulière (0.257333ms)
+  ▶ savoir — impératif présent — forme irrégulière
+    ✔ présente une démarche structurée et lisible (0.042ms)
+    ✔ donne des indications grammaticalement pertinentes (0.110583ms)
+    ✔ ne montre pas la réponse finale (0.081541ms)
+  ✔ savoir — impératif présent — forme irrégulière (0.279291ms)
+  ▶ aller — subjonctif présent — deux radicaux
+    ✔ présente une démarche structurée et lisible (0.058667ms)
+    ✔ donne des indications grammaticalement pertinentes (0.119333ms)
+    ✔ ne montre pas la réponse finale (0.084542ms)
+  ✔ aller — subjonctif présent — deux radicaux (0.313667ms)
+  ▶ prendre — passé simple — série en i
+    ✔ présente une démarche structurée et lisible (0.04225ms)
+    ✔ donne des indications grammaticalement pertinentes (0.100375ms)
+    ✔ ne montre pas la réponse finale (0.079791ms)
+  ✔ prendre — passé simple — série en i (0.265417ms)
+  ▶ prendre — conditionnel présent
+    ✔ présente une démarche structurée et lisible (0.062833ms)
+    ✔ donne des indications grammaticalement pertinentes (0.067ms)
+    ✔ ne montre pas la réponse finale (0.089375ms)
+  ✔ prendre — conditionnel présent (0.256833ms)
+  ▶ partir — passé composé avec être
+    ✔ présente une démarche structurée et lisible (0.050208ms)
+    ✔ donne des indications grammaticalement pertinentes (0.068792ms)
+    ✔ ne montre pas la réponse finale (0.127292ms)
+  ✔ partir — passé composé avec être (0.28625ms)
+  ▶ se lever — passé composé pronominal
+    ✔ présente une démarche structurée et lisible (0.046958ms)
+    ✔ donne des indications grammaticalement pertinentes (0.090417ms)
+    ✔ ne montre pas la réponse finale (0.176208ms)
+  ✔ se lever — passé composé pronominal (0.356083ms)
+  ▶ manger — passé composé — COD placé avant
+    ✔ présente une démarche structurée et lisible (0.066292ms)
+    ✔ donne des indications grammaticalement pertinentes (0.066375ms)
+    ✔ ne montre pas la réponse finale (0.140042ms)
+  ✔ manger — passé composé — COD placé avant (0.306709ms)
+  ▶ parler — passé composé — COI sans accord
+    ✔ présente une démarche structurée et lisible (0.044875ms)
+    ✔ donne des indications grammaticalement pertinentes (0.14075ms)
+    ✔ ne montre pas la réponse finale (0.131ms)
+  ✔ parler — passé composé — COI sans accord (0.353625ms)
+  ▶ être — participe présent
+    ✔ présente une démarche structurée et lisible (0.034167ms)
+    ✔ donne des indications grammaticalement pertinentes (0.078792ms)
+    ✔ ne montre pas la réponse finale (0.06025ms)
+  ✔ être — participe présent (0.212292ms)
+  ▶ avoir — gérondif présent
+    ✔ présente une démarche structurée et lisible (0.043333ms)
+    ✔ donne des indications grammaticalement pertinentes (0.109208ms)
+    ✔ ne montre pas la réponse finale (0.090792ms)
+  ✔ avoir — gérondif présent (0.281833ms)
+  ▶ falloir — conditionnel — impersonnel
+    ✔ présente une démarche structurée et lisible (0.043542ms)
+    ✔ donne des indications grammaticalement pertinentes (0.05275ms)
+    ✔ ne montre pas la réponse finale (0.063167ms)
+  ✔ falloir — conditionnel — impersonnel (0.197292ms)
+  ▶ payer — futur — variantes admises
+    ✔ présente une démarche structurée et lisible (0.03575ms)
+    ✔ donne des indications grammaticalement pertinentes (0.017833ms)
+    ✔ ne montre pas la réponse finale (0.078125ms)
+  ✔ payer — futur — variantes admises (0.171208ms)
+✔ audit pédagogique de l’aide complète sans réponses (8.309666ms)
+▶ aides visuelles configurables
+  ✔ impose la structure automatique minimale à toutes les aides (0.633709ms)
+  ✔ rend la définition du verbe dans le HTML administré (0.311666ms)
+  ✔ construit le bloc Définition automatique avec les données FALC du verbe (0.092333ms)
+  ✔ propose les visuels info et success (0.633375ms)
+  ✔ adapte le titre automatique du radical au verbe (0.730167ms)
+  ✔ expose séparément la base contextuelle et la terminaison fiables (3.277667ms)
+  ✔ applique l’approche pédagogique bloc par bloc au contenu automatique (0.645417ms)
+  ✔ emploie nous pour construire l’imparfait depuis le présent (2.442209ms)
+  ✔ précise le mode dans le tableau des personnes sauf pour un questionnaire uniquement indicatif (1.565792ms)
+  ✔ emploie il au passé simple dans tous les blocs automatiques (0.6965ms)
+  ✔ retient la personne demandée quand aucune autre forme ne permet une déduction sûre (0.136375ms)
+  ✔ conserve les balises sûres et retire scripts et attributs (0.32375ms)
+  ✔ présente les listes HTML avec une indentation lisible dans l’éditeur (0.608334ms)
+  ✔ conserve la structure sûre du tableau des terminaisons (0.056583ms)
+  ✔ compose les blocs selon le profil moteur du caractère (0.233417ms)
+  ✔ ne transmet aucune réponse cible aux profils sans réponses (0.4225ms)
+  ✔ garde les ressources des temps composés sans révéler leur construction (0.9385ms)
+  ✔ ne donne ni radical ni terminaison ciblée au conditionnel sans réponses (0.559958ms)
+  ✔ change le verbe de l’exemple lorsque la question porte déjà sur prendre (0.412916ms)
+  ✔ supprime les résultats vides au lieu d’afficher des points de suspension (0.413542ms)
+  ✔ conserve les trois formes repères de l’impératif, y compris vous (0.675708ms)
+  ✔ conserve la forme repère mais masque le radical et la terminaison pendant la construction (0.824625ms)
+  ✔ résume les facilités et les pièges propres à chaque groupe (0.203708ms)
+  ✔ garde allophone indépendant tout en réutilisant actuellement le rendu complet (0.07675ms)
+  ✔ ajoute le bloc G uniquement aux verbes concernés (1.028042ms)
+  ✔ ajoute un bloc C court et contextualisé aux verbes en -cer (0.581167ms)
+  ✔ garde le bloc G pour expliquer la disparition du e devant i (0.111167ms)
+  ✔ évite les blocs orthographiques hors contexte (0.079917ms)
+  ✔ ajoute le bloc COD placé avant uniquement à l’aide complète sans réponses (0.29125ms)
+  ✔ affiche la règle d’accord avec un COD ou un COI dans tous les modes d’aide (2.457958ms)
+  ✔ construit le subjonctif imparfait en -a sans radical artificiel (0.676916ms)
+  ✔ traite qu’ils au subjonctif présent comme la forme repère ils (0.561208ms)
+  ✔ explicite l’accord pluriel avec être aux temps composés (0.747ms)
+  ✔ assimile elle à il quand la troisième personne est la forme repère (0.645083ms)
+✔ aides visuelles configurables (25.7165ms)
+ℹ tests 95
+ℹ suites 22
+ℹ pass 95
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 271.788833

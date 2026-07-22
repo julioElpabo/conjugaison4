@@ -69,21 +69,22 @@ function answerBlank(wordCount: number) {
 
 export function coachQuestionBubbles(question: ExerciseQuestion, options: { omitIndicativeMode?: boolean } = {}): CoachQuestionBubbles {
   const sentenceTemplate = question.consigne.split('|')[0]?.trim() || ''
-  const displayedPronoun = normalized(question.mode) === 'imperatif' ? '' : question.pronom
+  const formulaPronoun = question.pronom
+  const answerPronoun = normalized(question.mode) === 'imperatif' ? '' : question.pronom
   const modeAndTense = [options.omitIndicativeMode ? '' : question.mode, question.temps].filter(Boolean).join(' ')
-  const formula = [displayedPronoun, question.infinitif, modeAndTense].filter(Boolean).join(' | ')
+  const formula = [formulaPronoun, question.infinitif, modeAndTense].filter(Boolean).join(' | ')
   if (!formula) return { formula: question.consigne }
 
   const answerWordCount = expectedAnswerWordCount(question)
   const blank = answerBlank(answerWordCount)
   const hasBlank = /(?:…|\.{3,})/u.test(sentenceTemplate)
   const normalizedSentenceTemplate = sentenceTemplate.replace(/\s+/gu, ' ').trim()
-  const blankPrefix = displayedPronoun
+  const blankPrefix = answerPronoun
     ? answerWordCount > 1 ? COMPOUND_TENSE_GAP : ' '
     : ''
   let sentence = hasBlank
     ? normalizedSentenceTemplate.replace(/\s*(?:…|\.{3,})/gu, `${blankPrefix}${blank}`).trimStart()
-    : `${displayedPronoun || ''}${blankPrefix}${blank}`.trimStart()
+    : `${answerPronoun || ''}${blankPrefix}${blank}`.trimStart()
   if (normalized(question.mode) === 'subjonctif') {
     const alreadyContextualizedRelative = question.complementPosition === 'before'
       && /^(?:c['’]est|ce sont)\b/iu.test(sentence)

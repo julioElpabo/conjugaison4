@@ -94,7 +94,7 @@ async function selectCoach(coach: CoachProfile) {
 function blankCoach(): CoachProfile {
   const caractere = availableCaracteresForDraft.value.find(item => item.status !== 'disabled') || null
   const caractereName = caractere?.masculineName || ''
-  return { id: 0, slug: '', firstName: '', lastName: '', gender: 'female', avatarPath: '', description: '', likes: '', caractereId: caractere?.id || 0, caractereName, personality: caractereName, pedagogicalStyle: caractere?.pedagogicalStyle || '', helpApproach: caractere?.helpApproach || 'cif-falc', themeColor: '#295f72', status: 'draft', sortOrder: coaches.value.length + 1, replies: [], media: clone(media.value), assignments: [], rules: [] }
+  return { id: 0, slug: '', firstName: '', lastName: '', gender: 'female', avatarPath: '', description: '', likes: '', caractereId: caractere?.id || 0, caractereName, personality: caractereName, pedagogicalStyle: caractere?.pedagogicalStyle || '', helpApproach: caractere?.helpApproach || 'complete-avec-reponses', themeColor: '#295f72', status: 'draft', sortOrder: coaches.value.length + 1, replies: [], media: clone(media.value), assignments: [], rules: [] }
 }
 async function newCoach() {
   await autosaveCoach()

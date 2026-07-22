@@ -313,6 +313,23 @@ function scrollThreadToMessage(messageId: number) {
   })
 }
 
+function revealChatMessageEnd(messageId: number) {
+  void nextTick(() => {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        const container = thread.value
+        const target = container?.querySelector<HTMLElement>(`[data-chat-message-id="${messageId}"]`)
+        if (!container || !target) return
+        const overflow = target.getBoundingClientRect().bottom - container.getBoundingClientRect().bottom
+        if (overflow <= 0) return
+        // Le rappel doit être visible immédiatement : un second défilement fluide peut
+        // interrompre celui de l'annonce précédente et ne laisser voir que la bordure.
+        container.scrollTo({ top: container.scrollTop + overflow + 12, behavior: 'auto' })
+      })
+    })
+  })
+}
+
 function mediaLoaded() {
   scrollThreadToBottom()
 }
@@ -379,12 +396,14 @@ function addCoachText(text: string, tone?: ChatMessage['tone'], emphasis = false
   return enqueueCoachBubble(() => ({ text, ...(tone ? { tone } : {}), ...(emphasis ? { emphasis: true } : {}) }))
 }
 
-function addHelpReminderCard() {
-  return enqueueCoachBubble(() => ({
+async function addHelpReminderCard() {
+  await enqueueCoachBubble(() => ({
     text: coachHelpReminderMessage(helpOpen.value),
     kind: 'help-reminder',
     helpAlreadyOpen: helpOpen.value,
   }))
+  const reminder = messages.value.at(-1)
+  if (reminder?.kind === 'help-reminder') revealChatMessageEnd(reminder.id)
 }
 
 async function suggestHelp() {

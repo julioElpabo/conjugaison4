@@ -8,8 +8,8 @@ export default defineEventHandler(async (event) => {
   const profile = parseCoachHelpApproachPayload(await readBody(event))
   const database = useDatabase()
   const [result] = await database.execute<ResultSetHeader>(
-    'UPDATE coach_help_approaches SET name=?,engine_key=?,sort_order=? WHERE id=?',
-    [profile.name, profile.engineKey, profile.sortOrder, id],
+    'UPDATE coach_help_approaches SET name=?,engine_key=?,status=?,sort_order=? WHERE id=?',
+    [profile.name, profile.engineKey, profile.status, profile.sortOrder, id],
   )
   if (!result.affectedRows) {
     const [existing] = await database.execute<RowDataPacket[]>('SELECT id FROM coach_help_approaches WHERE id=? LIMIT 1', [id])

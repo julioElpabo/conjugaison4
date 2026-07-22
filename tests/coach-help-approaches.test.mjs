@@ -12,10 +12,12 @@ describe('approches d’aide administrables', () => {
     assert.deepEqual(parseCoachHelpApproachPayload({
       name: 'Mon approche personnalisée',
       engineKey: 'allophone',
+      status: 'published',
       sortOrder: 7,
     }), {
       name: 'Mon approche personnalisée',
       engineKey: 'allophone',
+      status: 'published',
       sortOrder: 7,
     })
   })

@@ -189,6 +189,7 @@ try {
     name VARCHAR(80) NOT NULL,
     engine_key ENUM('complete-avec-reponses','complete','tres-condensee','allophone') NOT NULL DEFAULT 'complete-avec-reponses',
     sort_order SMALLINT NOT NULL DEFAULT 0,
+    status ENUM('draft','published','disabled') NOT NULL DEFAULT 'published',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)

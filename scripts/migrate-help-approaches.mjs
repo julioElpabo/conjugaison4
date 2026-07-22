@@ -15,6 +15,12 @@ async function hasColumn(column) {
   return rows.length > 0
 }
 
+async function hasApproachColumn(column) {
+  const [rows] = await database.execute(`SELECT COLUMN_NAME FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='coach_help_approaches' AND COLUMN_NAME=?`, [column])
+  return rows.length > 0
+}
+
 async function hasIndex(index) {
   const [rows] = await database.execute(`SELECT INDEX_NAME FROM information_schema.STATISTICS
     WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='coach_characters' AND INDEX_NAME=?`, [index])
@@ -28,11 +34,16 @@ try {
     name VARCHAR(80) NOT NULL,
     engine_key ENUM('complete-avec-reponses','complete','tres-condensee','allophone') NOT NULL DEFAULT 'complete-avec-reponses',
     sort_order SMALLINT NOT NULL DEFAULT 0,
+    status ENUM('draft','published','disabled') NOT NULL DEFAULT 'published',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE KEY uq_coach_help_approach_slug (slug)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
+
+  if (!await hasApproachColumn('status')) {
+    await database.query("ALTER TABLE coach_help_approaches ADD COLUMN status ENUM('draft','published','disabled') NOT NULL DEFAULT 'published' AFTER sort_order")
+  }
 
   await database.query(`ALTER TABLE coach_help_approaches MODIFY engine_key
     ENUM('cif-falc','concise','grammatical-technical','guided-discovery','complete-avec-reponses','complete','tres-condensee','allophone')

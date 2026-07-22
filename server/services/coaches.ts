@@ -7,8 +7,9 @@ type Executor = Pool | PoolConnection
 interface CoachRow extends RowDataPacket {
   id: number, slug: string, firstName: string, lastName: string, avatarPath: string,
   gender: CoachProfile['gender'],
-  description: string, likes: string, caractereId: number, caractereName: string, personality: string, pedagogicalStyle: string, themeColor: string,
-  status: CoachProfile['status'], sortOrder: number, helpApproach: CoachProfile['helpApproach']
+  description: string, likes: string, caractereId: number, caractereSortOrder: number, caractereName: string, personality: string, pedagogicalStyle: string, themeColor: string,
+  status: CoachProfile['status'], sortOrder: number, helpApproachId: number, helpApproachName: string,
+  helpApproach: CoachProfile['helpApproach'], helpApproachSortOrder: number
 }
 interface CaractereRow extends RowDataPacket {
   id: number, slug: string, masculineName: string, emoticon: string,
@@ -55,19 +56,21 @@ export async function listCoaches(
   const requestedLocale = normalizeLocale(locale, 'fr')
   const [coaches] = await database.execute<CoachRow[]>(`SELECT c.id, c.slug, c.first_name AS firstName, c.last_name AS lastName,
     c.gender, c.avatar_path AS avatarPath, c.description, COALESCE(c.likes, '') AS likes, c.character_id AS caractereId,
+    cc.sort_order AS caractereSortOrder,
     CASE WHEN ?='fr' THEN cc.masculine_name
       ELSE COALESCE(requested.masculine_name, french.masculine_name, cc.masculine_name) END AS caractereName,
     CASE WHEN ?='fr' THEN cc.masculine_name
       ELSE COALESCE(requested.masculine_name, french.masculine_name, cc.masculine_name) END AS personality,
     CASE WHEN ?='fr' THEN cc.pedagogical_style
       ELSE COALESCE(requested.pedagogical_style, french.pedagogical_style, cc.pedagogical_style) END AS pedagogicalStyle,
-    approach.engine_key AS helpApproach, c.theme_color AS themeColor,
+    approach.id AS helpApproachId, approach.name AS helpApproachName, approach.engine_key AS helpApproach,
+    approach.sort_order AS helpApproachSortOrder, c.theme_color AS themeColor,
     c.status, c.sort_order AS sortOrder FROM coaches c JOIN coach_characters cc ON cc.id=c.character_id
     JOIN coach_help_approaches approach ON approach.id=cc.help_approach_id
     LEFT JOIN coach_character_translations requested ON requested.character_id=cc.id AND requested.locale=?
     LEFT JOIN coach_character_translations french ON french.character_id=cc.id AND french.locale='fr'
-    ${publishedOnly ? "WHERE c.status = 'published' AND cc.status = 'published'" : ''}
-    ORDER BY cc.sort_order, cc.id, c.sort_order, first_name, c.id`, [
+    ${publishedOnly ? "WHERE c.status = 'published' AND cc.status = 'published' AND approach.status = 'published'" : ''}
+    ORDER BY approach.sort_order, approach.id, cc.sort_order, cc.id, c.sort_order, first_name, c.id`, [
       requestedLocale, requestedLocale, requestedLocale, requestedLocale,
     ])
   if (!coaches.length) return []

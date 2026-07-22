@@ -165,7 +165,7 @@ async function createHelpApproach() {
   approachError.value = ''
   try {
     await $fetch('/api/admin/coach-help-approaches', { method: 'POST', body: {
-      name, engineKey: 'complete-avec-reponses', sortOrder: Math.max(0, ...helpApproaches.value.map(item => item.sortOrder)) + 1,
+      name, engineKey: 'complete-avec-reponses', status: 'draft', sortOrder: Math.max(0, ...helpApproaches.value.map(item => item.sortOrder)) + 1,
     } })
     newApproachName.value = ''
     await reloadHelpApproaches()
@@ -644,6 +644,7 @@ watch([iconPickerOpen, approachManagerOpen], ([iconOpen, approachOpen]) => {
             <article v-for="approach in approachDrafts" :key="approach.id">
               <label class="admin-field"><span>Nom</span><input v-model="approach.name" maxlength="80"></label>
               <label class="admin-field"><span>Comportement moteur</span><select v-model="approach.engineKey"><option value="complete-avec-reponses">Complète avec réponses</option><option value="complete">Complète sans réponses</option><option value="tres-condensee">Très condensée</option><option value="allophone">Allophone</option></select></label>
+              <label class="admin-field"><span>Statut</span><select v-model="approach.status"><option value="draft">Brouillon</option><option value="published">Publié</option><option value="disabled">Désactivé</option></select></label>
               <span class="approach-manager__usage">{{ approach.characterCount }} caractère{{ approach.characterCount > 1 ? 's' : '' }}</span>
               <button type="button" class="admin-button admin-button--small" :disabled="Boolean(approachSaving) || !approach.name.trim()" @click="saveHelpApproach(approach)">{{ approachSaving === approach.id ? 'Enregistrement…' : 'Enregistrer' }}</button>
               <button type="button" class="admin-button admin-button--danger admin-button--small" :disabled="Boolean(approachSaving) || approach.characterCount > 0" :title="approach.characterCount ? 'Cette approche est encore utilisée' : 'Supprimer cette approche'" @click="deleteHelpApproach(approach)">Supprimer</button>

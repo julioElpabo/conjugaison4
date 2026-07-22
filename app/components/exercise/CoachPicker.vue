@@ -38,7 +38,7 @@ onMounted(async () => {
         <p v-if="loading" class="coach-picker__state">Chargement des coaches…</p>
         <p v-else-if="error" class="coach-picker__state coach-picker__state--error">{{ error }}</p>
         <div v-else class="coach-picker__groups">
-          <section v-for="group in coachGroups" :key="group.approach" class="coach-caractere-group">
+          <section v-for="group in coachGroups" :key="group.id" class="coach-caractere-group">
             <header class="coach-caractere-group__header">
               <div><span>Type d’aide</span><h3>{{ group.label }}</h3><p>{{ group.description }}</p></div>
               <small>{{ group.coaches.length }} coach{{ group.coaches.length > 1 ? 'es' : '' }}</small>

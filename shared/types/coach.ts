@@ -51,6 +51,7 @@ export interface CoachHelpApproachDefinition {
   id: number
   name: string
   engineKey: CoachHelpEngineKey
+  status: CoachStatus
   sortOrder: number
   characterCount: number
 }
@@ -152,10 +153,14 @@ export interface CoachProfile {
   description: string
   likes: string
   caractereId: number
+  caractereSortOrder?: number
   caractereName: string
   personality: string
   pedagogicalStyle: string
+  helpApproachId?: number
+  helpApproachName?: string
   helpApproach: CoachHelpEngineKey
+  helpApproachSortOrder?: number
   themeColor: string
   status: CoachStatus
   sortOrder: number

@@ -14,8 +14,8 @@ export default defineEventHandler(async (event) => {
     slug = `${root.slice(0, 80 - suffix.length)}${suffix}`
   }
   const [result] = await database.execute<ResultSetHeader>(
-    'INSERT INTO coach_help_approaches (slug,name,engine_key,sort_order) VALUES (?,?,?,?)',
-    [slug, profile.name, profile.engineKey, profile.sortOrder],
+    'INSERT INTO coach_help_approaches (slug,name,engine_key,status,sort_order) VALUES (?,?,?,?,?)',
+    [slug, profile.name, profile.engineKey, profile.status, profile.sortOrder],
   )
   return { ok: true, id: result.insertId }
 })

@@ -110,19 +110,6 @@ try {
     PRIMARY KEY (id)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
 
-  const [columns] = await database.query("SHOW COLUMNS FROM coach_characters LIKE 'help_id'")
-  if (!columns.length) {
-    await database.query('ALTER TABLE coach_characters ADD COLUMN help_id INT UNSIGNED NULL AFTER pedagogical_style')
-    await database.query('ALTER TABLE coach_characters ADD KEY idx_coach_character_help (help_id)')
-    await database.query('ALTER TABLE coach_characters ADD CONSTRAINT fk_coach_character_help FOREIGN KEY (help_id) REFERENCES coach_help_templates(id) ON DELETE SET NULL')
-  }
-  const [publishedHelpColumns] = await database.query("SHOW COLUMNS FROM coach_characters LIKE 'published_help_id'")
-  if (!publishedHelpColumns.length) {
-    await database.query('ALTER TABLE coach_characters ADD COLUMN published_help_id INT UNSIGNED NULL AFTER help_id')
-    await database.query('UPDATE coach_characters SET published_help_id=help_id')
-    await database.query('ALTER TABLE coach_characters ADD KEY idx_coach_character_published_help (published_help_id)')
-  }
-
   for (const template of templates) {
     const [existing] = await database.execute('SELECT id FROM coach_help_templates WHERE name=? LIMIT 1', [template.name])
     let helpId = existing[0]?.id
@@ -140,7 +127,6 @@ try {
         [helpId, block[0], block[1], block[2], index + 1])
       }
     }
-    await database.execute('UPDATE coach_characters SET help_id=? WHERE slug=? AND help_id IS NULL', [helpId, template.character])
   }
 
   await database.query(`UPDATE coach_help_blocks b
@@ -177,10 +163,8 @@ try {
       ON DUPLICATE KEY UPDATE payload=VALUES(payload),published_at=CURRENT_TIMESTAMP`, [JSON.stringify(payload)])
   }
 
-  const [helps] = await database.query(`SELECT h.id,h.name,h.status,COUNT(DISTINCT b.id) AS blocks,
-    COUNT(DISTINCT c.id) AS characters FROM coach_help_templates h
+  const [helps] = await database.query(`SELECT h.id,h.name,h.status,COUNT(DISTINCT b.id) AS blocks FROM coach_help_templates h
     LEFT JOIN coach_help_blocks b ON b.help_id=h.id
-    LEFT JOIN coach_characters c ON c.help_id=h.id
     GROUP BY h.id,h.name,h.status ORDER BY h.name`)
   console.table(helps)
 } finally {

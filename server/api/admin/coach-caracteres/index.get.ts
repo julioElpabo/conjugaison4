@@ -2,5 +2,5 @@ import { listCoachCaracteres } from '../../../services/coaches'
 
 export default defineEventHandler(async (event) => {
   requireAdministrator(event)
-  return { characters: await listCoachCaracteres(useDatabase()) }
+  return { caracteres: await listCoachCaracteres(useDatabase()) }
 })

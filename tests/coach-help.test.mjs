@@ -195,7 +195,12 @@ describe('aides visuelles configurables', () => {
     )
   })
 
-  it('ignore la composition administrée mais conserve son approche pédagogique', () => {
+  it('utilise directement l’approche du caractère avec le moteur unique', () => {
+    const configured = visibleCoachHelpBlocks('concise')
+    assert.deepEqual(configured.map(item => item.content), ['{definitionHelp}', '{contextualBaseHelp}'])
+    assert.ok(configured.every(item => item.explanationApproach === 'concise'))
+
+    // Compatibilité de lecture avec les anciennes aides pendant la transition des historiques.
     const configuredBlock = { ...block, explanationApproach: 'concise' }
     const draft = visibleCoachHelpBlocks({ id: 1, name: 'A', description: '', headerTitle: '{helpTitle}', headerDescription: '', status: 'draft', blocks: [configuredBlock] })
     const published = visibleCoachHelpBlocks({ id: 1, name: 'A', description: '', headerTitle: '{helpTitle}', headerDescription: '', status: 'published', blocks: [configuredBlock] })

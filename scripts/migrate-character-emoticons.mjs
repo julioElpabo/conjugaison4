@@ -19,7 +19,7 @@ const emoticons = new Map([
 try {
   const [columns] = await database.query("SHOW COLUMNS FROM coach_characters LIKE 'emoticon'")
   if (columns.length === 0) {
-    await database.query("ALTER TABLE coach_characters ADD COLUMN emoticon VARCHAR(32) NOT NULL DEFAULT '🙂' AFTER feminine_name")
+    await database.query("ALTER TABLE coach_characters ADD COLUMN emoticon VARCHAR(32) NOT NULL DEFAULT '🙂' AFTER masculine_name")
   }
 
   for (const [slug, emoticon] of emoticons) {

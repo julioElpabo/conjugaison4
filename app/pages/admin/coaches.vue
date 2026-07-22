@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { CoachCharacter, CoachEvent, CoachMedia, CoachProfile } from '~~/shared/types/coach'
+import type { CoachCaractere, CoachEvent, CoachMedia, CoachProfile } from '~~/shared/types/coach'
 import { COACH_EVENTS } from '~~/shared/types/coach'
-import { characterNameForGender, formatCharacterNames } from '~~/shared/utils/coach-character'
+import { formatCaractereName } from '~~/shared/utils/coach-caractere'
 import { COACH_PLACEHOLDERS, createCoachReaction } from '~~/shared/utils/coach-dialogue'
 import { getAdminErrorMessage } from '~/composables/useAdminAuth'
 
@@ -15,7 +15,7 @@ const placeholdersLabel = COACH_PLACEHOLDERS.map(item => `{${item}}`).join(' · 
 const { user, handleUnauthorized } = useAdminAuth()
 const route = useRoute()
 const coaches = ref<CoachProfile[]>([])
-const characters = ref<CoachCharacter[]>([])
+const caracteres = ref<CoachCaractere[]>([])
 const media = ref<CoachMedia[]>([])
 const selectedId = ref<number | null>(null)
 const draft = ref<CoachProfile | null>(null)
@@ -48,29 +48,29 @@ const autosaveLabel = computed(() => {
   return 'Toutes les modifications sont enregistrées'
 })
 const coachGroups = computed(() => {
-  const characterOrder = new Map(characters.value.map((character, index) => [character.id, index]))
-  const groups = new Map<number, { characterId: number, name: string, emoticon: string, coaches: CoachProfile[] }>()
+  const caractereOrder = new Map(caracteres.value.map((caractere, index) => [caractere.id, index]))
+  const groups = new Map<number, { caractereId: number, name: string, emoticon: string, coaches: CoachProfile[] }>()
   for (const coach of coaches.value) {
-    const group = groups.get(coach.characterId)
+    const group = groups.get(coach.caractereId)
     if (group) group.coaches.push(coach)
     else {
-      const character = characters.value.find(item => item.id === coach.characterId)
-      groups.set(coach.characterId, {
-        characterId: coach.characterId,
-        name: character ? formatCharacterNames(character) : coach.characterName || 'Caractère non renseigné',
-        emoticon: character?.emoticon || '🙂',
+      const caractere = caracteres.value.find(item => item.id === coach.caractereId)
+      groups.set(coach.caractereId, {
+        caractereId: coach.caractereId,
+        name: caractere ? formatCaractereName(caractere) : coach.caractereName || 'Caractère non renseigné',
+        emoticon: caractere?.emoticon || '🙂',
         coaches: [coach],
       })
     }
   }
   return [...groups.values()]
-    .sort((left, right) => (characterOrder.get(left.characterId) ?? 999) - (characterOrder.get(right.characterId) ?? 999)
+    .sort((left, right) => (caractereOrder.get(left.caractereId) ?? 999) - (caractereOrder.get(right.caractereId) ?? 999)
       || left.name.localeCompare(right.name, 'fr'))
 })
-const availableCharactersForDraft = computed(() => characters.value
-  .filter(character => character.status !== 'disabled' || character.id === draft.value?.characterId)
+const availableCaracteresForDraft = computed(() => caracteres.value
+  .filter(caractere => caractere.status !== 'disabled' || caractere.id === draft.value?.caractereId)
   .sort((left, right) => left.sortOrder - right.sortOrder
-    || formatCharacterNames(left).localeCompare(formatCharacterNames(right), 'fr')
+    || formatCaractereName(left).localeCompare(formatCaractereName(right), 'fr')
     || left.id - right.id))
 
 function clone<T>(value: T): T { return JSON.parse(JSON.stringify(value)) as T }
@@ -92,9 +92,9 @@ async function selectCoach(coach: CoachProfile) {
   setCoachDraft(coach)
 }
 function blankCoach(): CoachProfile {
-  const character = availableCharactersForDraft.value.find(item => item.status !== 'disabled') || null
-  const characterName = character ? characterNameForGender(character, 'female') : ''
-  return { id: 0, slug: '', firstName: '', lastName: '', gender: 'female', avatarPath: '', description: '', likes: '', characterId: character?.id || 0, characterName, personality: characterName, pedagogicalStyle: character?.pedagogicalStyle || '', help: null, themeColor: '#295f72', status: 'draft', sortOrder: coaches.value.length + 1, replies: [], media: clone(media.value), assignments: [], rules: [] }
+  const caractere = availableCaracteresForDraft.value.find(item => item.status !== 'disabled') || null
+  const caractereName = caractere?.masculineName || ''
+  return { id: 0, slug: '', firstName: '', lastName: '', gender: 'female', avatarPath: '', description: '', likes: '', caractereId: caractere?.id || 0, caractereName, personality: caractereName, pedagogicalStyle: caractere?.pedagogicalStyle || '', helpApproach: caractere?.helpApproach || 'cif-falc', themeColor: '#295f72', status: 'draft', sortOrder: coaches.value.length + 1, replies: [], media: clone(media.value), assignments: [], rules: [] }
 }
 async function newCoach() {
   await autosaveCoach()
@@ -104,12 +104,12 @@ async function newCoach() {
 async function load() {
   loading.value = true; error.value = ''
   try {
-    const [coachResponse, characterResponse, mediaResponse] = await Promise.all([
+    const [coachResponse, caractereResponse, mediaResponse] = await Promise.all([
       $fetch<{ coaches: CoachProfile[] }>('/api/admin/coaches'),
-      $fetch<{ characters: CoachCharacter[] }>('/api/admin/coach-characters'),
+      $fetch<{ caracteres: CoachCaractere[] }>('/api/admin/coach-caracteres'),
       $fetch<{ media: CoachMedia[] }>('/api/admin/coach-media'),
     ])
-    coaches.value = coachResponse.coaches; characters.value = characterResponse.characters; media.value = mediaResponse.media
+    coaches.value = coachResponse.coaches; caracteres.value = caractereResponse.caracteres; media.value = mediaResponse.media
     const requestedCoachId = Number(route.query.coach)
     const requestedCoach = Number.isInteger(requestedCoachId)
       ? coaches.value.find(item => item.id === requestedCoachId)
@@ -149,7 +149,7 @@ function coachCanBeSaved(coach: CoachProfile) {
     && coach.lastName.trim()
     && /^#[0-9a-f]{6}$/iu.test(coach.themeColor)
     && ['female', 'male'].includes(coach.gender)
-    && Number.isInteger(coach.characterId) && coach.characterId > 0
+    && Number.isInteger(coach.caractereId) && coach.caractereId > 0
     && ['draft', 'published', 'disabled'].includes(coach.status)
     && Number.isInteger(coach.sortOrder)
     && (coach.status !== 'published' || coach.avatarPath.trim()),
@@ -159,12 +159,12 @@ function coachCanBeSaved(coach: CoachProfile) {
 function refreshCoachInList(saved: CoachProfile) {
   const item = coaches.value.find(coach => coach.id === saved.id)
   if (!item) return
-  const character = characters.value.find(candidate => candidate.id === saved.characterId)
-  const characterName = character ? characterNameForGender(character, saved.gender) : item.characterName
+  const caractere = caracteres.value.find(candidate => candidate.id === saved.caractereId)
+  const caractereName = caractere?.masculineName || item.caractereName
   Object.assign(item, clone(saved), {
-    characterName,
-    personality: characterName,
-    pedagogicalStyle: character?.pedagogicalStyle || item.pedagogicalStyle,
+    caractereName,
+    personality: caractereName,
+    pedagogicalStyle: caractere?.pedagogicalStyle || item.pedagogicalStyle,
   })
 }
 
@@ -290,13 +290,13 @@ async function saveMedia() {
 
 watch(draft, (current) => {
   if (loading.value || saving.value || !current) return
-  const character = characters.value.find(item => item.id === current.characterId)
-  if (character) {
-    const characterName = characterNameForGender(character, current.gender)
-    if (current.characterName !== characterName || current.personality !== characterName || current.pedagogicalStyle !== character.pedagogicalStyle) {
-      current.characterName = characterName
-      current.personality = characterName
-      current.pedagogicalStyle = character.pedagogicalStyle
+  const caractere = caracteres.value.find(item => item.id === current.caractereId)
+  if (caractere) {
+    const caractereName = caractere.masculineName
+    if (current.caractereName !== caractereName || current.personality !== caractereName || current.pedagogicalStyle !== caractere.pedagogicalStyle) {
+      current.caractereName = caractereName
+      current.personality = caractereName
+      current.pedagogicalStyle = caractere.pedagogicalStyle
       return
     }
   }
@@ -317,7 +317,7 @@ onBeforeUnmount(cancelScheduledAutosave)
 
     <div class="coach-admin__workspace">
       <aside class="coach-admin__list admin-card">
-        <section v-for="group in coachGroups" :key="group.characterId" class="coach-list-group">
+        <section v-for="group in coachGroups" :key="group.caractereId" class="coach-list-group">
           <header><strong><span aria-hidden="true">{{ group.emoticon }}</span> {{ group.name }}</strong><span>{{ group.coaches.length }}</span></header>
           <button v-for="coach in group.coaches" :key="coach.id" :class="{ selected: coach.id === selectedId }" @click="selectCoach(coach)">
             <img :src="coach.avatarPath" alt="">
@@ -341,7 +341,7 @@ onBeforeUnmount(cancelScheduledAutosave)
                 <label class="admin-field"><span>Nom fictif *</span><input v-model="draft.lastName" required></label>
                 <label class="admin-field"><span>Genre du personnage *</span><select v-model="draft.gender"><option value="female">Femme</option><option value="male">Homme</option></select></label>
                 <label class="admin-field"><span>Identifiant *</span><input v-model="draft.slug" required></label>
-                <label class="admin-field"><span>Caractère partagé *</span><select v-model.number="draft.characterId" required><option v-for="character in availableCharactersForDraft" :key="character.id" :value="character.id" :disabled="character.status === 'disabled'">{{ character.emoticon }} {{ formatCharacterNames(character) }}{{ character.status === 'disabled' ? ' — désactivé' : '' }}</option></select></label>
+                <label class="admin-field"><span>Caractère partagé *</span><select v-model.number="draft.caractereId" required><option v-for="caractere in availableCaracteresForDraft" :key="caractere.id" :value="caractere.id" :disabled="caractere.status === 'disabled'">{{ caractere.emoticon }} {{ formatCaractereName(caractere) }}{{ caractere.status === 'disabled' ? ' — désactivé' : '' }}</option></select></label>
                 <label class="admin-field admin-field--color"><span>Couleur</span><input v-model="draft.themeColor" type="color"></label>
                 <label class="admin-field"><span>Statut</span><select v-model="draft.status"><option value="draft">Brouillon</option><option value="published">Publié</option><option value="disabled">Désactivé</option></select></label>
                 <label class="admin-field"><span>Ordre d’affichage</span><input v-model.number="draft.sortOrder" type="number"></label>

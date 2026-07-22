@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import type { CoachCharacter, CoachHelpBlock, CoachHelpBlockType, CoachHelpTemplate } from '~~/shared/types/coach'
+import type { CoachCaractere, CoachHelpBlock, CoachHelpBlockType } from '~~/shared/types/coach'
 import type { ConjugationMode, ConjugationTense, ExerciseQuestion, Verb } from '~~/shared/types/conjugation'
 import type { CoachHelpContentValues } from '~~/shared/utils/coach-help'
 import { automaticCoachHelpApproach, automaticOrthographyHelpBlocks, coachHelpQuestionVariables, renderCoachHelpContent, visibleCoachHelpBlocks } from '~~/shared/utils/coach-help'
-import { formatCharacterNames } from '~~/shared/utils/coach-character'
 import { sanitizeCoachHtml } from '~~/shared/utils/safe-html'
 import { matchingVerbs, normalizeVerbSearch } from '~~/shared/utils/verb-search'
 import { buildRadicalReference } from '~~/shared/utils/radical-reference'
@@ -49,8 +48,7 @@ const route = useRoute()
 const { user, handleUnauthorized } = useAdminAuth()
 const loading = ref(false)
 const error = ref('')
-const help = ref<CoachHelpTemplate | null>(null)
-const characters = ref<CoachCharacter[]>([])
+const caracteres = ref<CoachCaractere[]>([])
 const verbs = ref<Verb[]>([])
 const modes = ref<ConjugationMode[]>([])
 const tenses = ref<ConjugationTense[]>([])
@@ -70,10 +68,10 @@ let loaded = false
 
 useHead({ title: 'Aides automatiques — Administration' })
 
-const requestedCharacterId = computed(() => Number(route.query.character))
-const currentCharacter = computed(() => characters.value.find(character => character.id === requestedCharacterId.value) || null)
-const automaticBlocks = computed(() => visibleCoachHelpBlocks(help.value))
-const approach = computed(() => automaticCoachHelpApproach(help.value))
+const requestedCaractereId = computed(() => Number(route.query.caractere))
+const currentCaractere = computed(() => caracteres.value.find(caractere => caractere.id === requestedCaractereId.value) || null)
+const automaticBlocks = computed(() => visibleCoachHelpBlocks(currentCaractere.value?.helpApproach))
+const approach = computed(() => automaticCoachHelpApproach(currentCaractere.value?.helpApproach))
 const approachLabel = computed(() => ({
   'cif-falc': 'CIF · FALC',
   concise: 'Très condensée',
@@ -269,14 +267,12 @@ function previewDiagnostic(state: PreviewState) {
   ]
   return {
     schemaVersion: 1,
-    character: currentCharacter.value ? {
-      id: currentCharacter.value.id,
-      name: formatCharacterNames(currentCharacter.value),
-      icon: currentCharacter.value.emoticon,
+    caractere: currentCaractere.value ? {
+      id: currentCaractere.value.id,
+      name: currentCaractere.value.masculineName,
+      icon: currentCaractere.value.emoticon,
     } : null,
     help: {
-      id: help.value?.id || null,
-      name: help.value?.name || null,
       pedagogicalApproach: approach.value,
       structure: 'fully-automatic',
     },
@@ -326,30 +322,27 @@ async function copyPreviewJson(state: PreviewState) {
 }
 
 async function openVerification() {
-  if (!help.value?.id) return
-  await navigateTo({ path: '/admin/help-verification', query: { help: help.value.id, character: requestedCharacterId.value } })
+  if (!currentCaractere.value) return
+  await navigateTo({ path: '/admin/help-verification', query: { caractere: requestedCaractereId.value } })
 }
 
 async function load() {
   loading.value = true
   error.value = ''
   try {
-    if (!Number.isInteger(requestedCharacterId.value) || requestedCharacterId.value < 1) {
-      await navigateTo('/admin/characters')
+    if (!Number.isInteger(requestedCaractereId.value) || requestedCaractereId.value < 1) {
+      await navigateTo('/admin/caracteres')
       return
     }
-    const ensured = await $fetch<{ helpId: number }>(`/api/admin/coach-characters/${requestedCharacterId.value}/help`, { method: 'POST' })
-    const [helpResponse, characterResponse, catalogue] = await Promise.all([
-      $fetch<{ helps: CoachHelpTemplate[] }>('/api/admin/coach-helps'),
-      $fetch<{ characters: CoachCharacter[] }>('/api/admin/coach-characters'),
+    const [caractereResponse, catalogue] = await Promise.all([
+      $fetch<{ caracteres: CoachCaractere[] }>('/api/admin/coach-caracteres'),
       $fetch<{ verbes: Verb[], modes: ConjugationMode[], temps: ConjugationTense[] }>('/api/catalogue'),
     ])
-    help.value = helpResponse.helps.find(item => item.id === ensured.helpId) || null
-    characters.value = characterResponse.characters
+    caracteres.value = caractereResponse.caracteres
     verbs.value = catalogue.verbes.filter(verb => verb.id > 0)
     modes.value = catalogue.modes
     tenses.value = catalogue.temps
-    if (!help.value) throw new Error('Aide associée introuvable')
+    if (!currentCaractere.value) throw new Error('Caractère introuvable')
     const manger = verbs.value.find(verb => normalized(verb.infinitif) === 'manger') || verbs.value[0]
     if (!manger) throw new Error('Aucun verbe disponible')
     const defaults = [
@@ -377,13 +370,13 @@ watch(user, (current) => {
     <header class="admin-section-heading automatic-help-heading">
       <div>
         <p class="admin-eyebrow">Aide entièrement automatique</p>
-        <h1>{{ currentCharacter ? `${currentCharacter.emoticon} ${formatCharacterNames(currentCharacter)}` : 'Aides' }}</h1>
+        <h1>{{ currentCaractere ? `${currentCaractere.emoticon} ${currentCaractere.masculineName}` : 'Aides' }}</h1>
         <p>Le script choisit les blocs et leur contenu selon le verbe, le temps et la personne.</p>
       </div>
       <div class="automatic-help-heading__actions">
         <span class="automatic-help-approach">{{ approachLabel }}</span>
-        <NuxtLink v-if="currentCharacter" class="admin-button admin-button--small" :to="{ path: '/admin/characters', query: { character: currentCharacter.id } }">Retour au caractère</NuxtLink>
-        <button class="admin-button automatic-help-verify" type="button" :disabled="loading || !help" @click="openVerification">Vérifier cette aide</button>
+        <NuxtLink v-if="currentCaractere" class="admin-button admin-button--small" :to="{ path: '/admin/caracteres', query: { caractere: currentCaractere.id } }">Retour au caractère</NuxtLink>
+        <button class="admin-button automatic-help-verify" type="button" :disabled="loading || !currentCaractere" @click="openVerification">Vérifier cette aide</button>
       </div>
     </header>
 

@@ -471,8 +471,8 @@
 ) { color: var(--ink); background: #1d2d32; }
 
 :root[data-theme='dark'] :is(
-  .character-tabs button, .coach-admin__tabs button, .reaction-rules button, .rule-list button,
-  .character-list button, .media-library button, .coach-admin__list button,
+  .caractere-tabs button, .coach-admin__tabs button, .reaction-rules button, .rule-list button,
+  .caractere-list button, .media-library button, .coach-admin__list button,
   .media-assign-grid article > button, .media-grid article > button
 ) { color: var(--ink); background: #1c2c31; }
 
@@ -488,7 +488,7 @@
   border-color: #7c4c49;
 }
 
-:root[data-theme='dark'] :is(.character-list button.selected, .media-library button.selected, .coach-admin__list button.selected) {
+:root[data-theme='dark'] :is(.caractere-list button.selected, .media-library button.selected, .coach-admin__list button.selected) {
   background: var(--admin-cyan);
   border-color: #568797;
 }

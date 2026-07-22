@@ -12,7 +12,7 @@ export interface CoachCredibilityCheck {
 export interface CoachCredibilityReport {
   coachId: number
   coachName: string
-  characterName: string
+  caractereName: string
   score: number
   passed: boolean
   checks: CoachCredibilityCheck[]
@@ -93,10 +93,10 @@ export function auditCoachCredibility(coach: CoachProfile, seed = 1): CoachCredi
     ...eventChecks(coach, 'correct', seed + 23),
     ...eventChecks(coach, 'incorrect', seed + 37),
     {
-      id: 'character-profile', label: 'Caractère identifiable',
-      passed: Boolean(coach.characterName.trim() && coach.pedagogicalStyle.trim()),
+      id: 'caractere-profile', label: 'Caractère identifiable',
+      passed: Boolean(coach.caractereName.trim() && coach.pedagogicalStyle.trim()),
       expected: 'un caractère et une manière d’aider renseignés',
-      actual: coach.characterName && coach.pedagogicalStyle ? `${coach.characterName} — ${coach.pedagogicalStyle}` : 'profil incomplet',
+      actual: coach.caractereName && coach.pedagogicalStyle ? `${coach.caractereName} — ${coach.pedagogicalStyle}` : 'profil incomplet',
     },
     {
       id: 'verifiable-feedback', label: 'Corrections crédibles',
@@ -109,7 +109,7 @@ export function auditCoachCredibility(coach: CoachProfile, seed = 1): CoachCredi
   return {
     coachId: coach.id,
     coachName: `${coach.firstName} ${coach.lastName}`,
-    characterName: coach.characterName,
+    caractereName: coach.caractereName,
     score,
     passed: checks.every(check => check.passed),
     checks,

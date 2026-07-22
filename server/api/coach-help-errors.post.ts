@@ -66,7 +66,8 @@ export default defineEventHandler(async (event) => {
   for (const issue of errors) {
     const issueFingerprint = fingerprint([
       issue.code,
-      numericId(context.helpId),
+      numericId(context.caractereId),
+      shortText(context.helpApproach, 40),
       numericId(question.verbeId || context.verbId),
       numericId(question.tenseId || context.tenseId),
       numericId(question.personId),

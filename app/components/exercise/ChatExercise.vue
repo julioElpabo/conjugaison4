@@ -107,7 +107,7 @@ const helpTense = computed(() => {
 const targetedHelp = computed(() => helpQuestion.value
   ? buildTargetedConjugationHelp(helpQuestion.value, helpVerb.value, helpTense.value)
   : null)
-const helpBlocks = computed(() => visibleCoachHelpBlocks(props.coach.help))
+const helpBlocks = computed(() => visibleCoachHelpBlocks(props.coach.helpApproach))
 const correctCount = computed(() => attempts.value.filter(item => item.status === 'correct').length)
 const score = computed(() => attempts.value.length
   ? Math.round(correctCount.value / attempts.value.length * 100)
@@ -190,15 +190,16 @@ const helpFeedbackContext = computed(() => {
       id: props.coach.id,
       slug: props.coach.slug,
       firstName: props.coach.firstName,
-      characterId: props.coach.characterId,
-      characterName: props.coach.characterName,
+      caractereId: props.coach.caractereId,
+      caractereName: props.coach.caractereName,
       pedagogicalStyle: props.coach.pedagogicalStyle,
-      helpId: props.coach.help?.id,
-      helpName: props.coach.help?.name,
+      helpApproach: props.coach.helpApproach,
       themeColor: props.coach.themeColor,
     },
-    helpId: props.coach.help?.id,
-    helpName: props.coach.help?.name,
+    caractereId: props.coach.caractereId,
+    caractereName: props.coach.caractereName,
+    helpApproach: props.coach.helpApproach,
+    helpName: `Aide automatique — ${props.coach.caractereName}`,
     questionNumber: question ? questionIndex + 1 : undefined,
     questionIndex,
     questionCount: props.questions.length,

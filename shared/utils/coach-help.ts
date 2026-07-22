@@ -15,7 +15,8 @@ export function coachHelpBlockTitle(block: CoachHelpBlock): string {
   return block.title.trim() || DEFAULT_TITLES[block.type]
 }
 
-export function automaticCoachHelpApproach(help?: CoachHelpTemplate | null): CoachExplanationApproach {
+export function automaticCoachHelpApproach(help?: CoachHelpTemplate | CoachExplanationApproach | null): CoachExplanationApproach {
+  if (typeof help === 'string') return help
   return help?.blocks.find(block => block.content.trim() === '{contextualBaseHelp}')?.explanationApproach
     || help?.blocks.find(block => COACH_EXPLANATION_APPROACHES.includes(block.explanationApproach))?.explanationApproach
     || 'cif-falc'
@@ -47,7 +48,7 @@ export function defaultCoachHelpBlocks(approach: CoachExplanationApproach = 'cif
   ]
 }
 
-export function visibleCoachHelpBlocks(help?: CoachHelpTemplate | null): CoachHelpBlock[] {
+export function visibleCoachHelpBlocks(help?: CoachHelpTemplate | CoachExplanationApproach | null): CoachHelpBlock[] {
   return defaultCoachHelpBlocks(automaticCoachHelpApproach(help))
 }
 

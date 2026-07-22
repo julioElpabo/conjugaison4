@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CoachHelpTemplate } from '~~/shared/types/coach'
+import type { CoachCaractere, CoachHelpTemplate } from '~~/shared/types/coach'
 import type { ConjugationTense, ExerciseQuestion, Verb } from '~~/shared/types/conjugation'
 import type { CoachHelpContentValues } from '~~/shared/utils/coach-help'
 import { coachHelpQuestionVariables, visibleCoachHelpBlocks } from '~~/shared/utils/coach-help'
@@ -56,10 +56,18 @@ interface SavedAuditSummary {
 
 const route = useRoute()
 const { handleUnauthorized } = useAdminAuth()
-const helpId = computed(() => Number(route.query.help))
-const characterId = computed(() => Number(route.query.character))
-const help = ref<CoachHelpTemplate | null>(null)
-const characterName = ref('')
+const caractereId = computed(() => Number(route.query.caractere))
+const caractere = ref<CoachCaractere | null>(null)
+const help = computed<CoachHelpTemplate | null>(() => caractere.value ? {
+  id: caractere.value.id,
+  name: `Aide automatique — ${caractere.value.masculineName}`,
+  description: '',
+  headerTitle: '{helpTitle}',
+  headerDescription: '',
+  status: 'draft',
+  blocks: visibleCoachHelpBlocks(caractere.value.helpApproach),
+} : null)
+const caractereName = computed(() => caractere.value ? `${caractere.value.emoticon} ${caractere.value.masculineName}` : '')
 const loading = ref(true)
 const running = ref(false)
 const stopping = ref(false)
@@ -101,7 +109,7 @@ const visibleResults = computed(() => recentResults.value
     || (resultFilter.value === 'problems' && result.status !== 'passed')
     || (resultFilter.value === 'failed' && result.status === 'failed'))
   .slice().reverse().slice(0, 250))
-const storageKey = computed(() => `coach-help-audit:${helpId.value}`)
+const storageKey = computed(() => `coach-help-audit:caractere:${caractereId.value}`)
 const auditState = computed(() => {
   if (stopping.value) return { kind: 'running', title: 'Interruption en cours…', detail: 'Le cas en cours se termine avant l’arrêt.' }
   if (running.value) return { kind: 'running', title: 'Vérification en cours', detail: currentCase.value ? `Test de ${currentCase.value.verb.infinitif} · ${currentCase.value.form.tense} · ${currentCase.value.form.pronoun}` : 'Préparation du premier cas…' }
@@ -233,7 +241,7 @@ function makeCase(entry: AuditVerb, form: AuditForm): AuditCase {
 async function fetchBatch() {
   activeRequest = new AbortController()
   try {
-    const batch = await $fetch<AuditBatch>(`/api/admin/coach-helps/${helpId.value}/audit-cases`, {
+    const batch = await $fetch<AuditBatch>(`/api/admin/coach-caracteres/${caractereId.value}/audit-cases`, {
       query: { after: nextAfter.value, limit: 8 },
       signal: activeRequest.signal,
       credentials: 'same-origin',
@@ -370,7 +378,7 @@ function exportReport() {
   const url = URL.createObjectURL(new Blob([payload], { type: 'application/json' }))
   const anchor = document.createElement('a')
   anchor.href = url
-  anchor.download = `audit-aide-${helpId.value}.json`
+  anchor.download = `audit-aide-caractere-${caractereId.value}.json`
   anchor.click()
   URL.revokeObjectURL(url)
 }
@@ -379,15 +387,10 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    if (!Number.isInteger(helpId.value) || helpId.value < 1) throw new Error('Aide invalide')
-    const [helpResponse, characterResponse] = await Promise.all([
-      $fetch<{ helps: CoachHelpTemplate[] }>('/api/admin/coach-helps', { credentials: 'same-origin' }),
-      $fetch<{ characters: Array<{ id: number, masculineName: string, feminineName: string, emoticon: string }> }>('/api/admin/coach-characters', { credentials: 'same-origin' }),
-    ])
-    help.value = helpResponse.helps.find(item => item.id === helpId.value) || null
-    if (!help.value) throw new Error('Aide introuvable')
-    const character = characterResponse.characters.find(item => item.id === characterId.value)
-    characterName.value = character ? `${character.emoticon} ${character.masculineName}` : ''
+    if (!Number.isInteger(caractereId.value) || caractereId.value < 1) throw new Error('Caractère invalide')
+    const caractereResponse = await $fetch<{ caracteres: CoachCaractere[] }>('/api/admin/coach-caracteres', { credentials: 'same-origin' })
+    caractere.value = caractereResponse.caracteres.find(item => item.id === caractereId.value) || null
+    if (!caractere.value) throw new Error('Caractère introuvable')
     const saved = loadAuditSummary()
     const canResume = saved
       && saved.fingerprint === auditFingerprint()
@@ -435,9 +438,9 @@ onBeforeUnmount(() => {
   <AdminAuthBoundary><AdminShell>
     <main class="help-audit">
       <header class="admin-section-heading audit-heading">
-        <div><p class="admin-eyebrow">Vérification exhaustive</p><h1>{{ help?.name || 'Aide' }}</h1><p v-if="characterName">{{ characterName }}</p></div>
+        <div><p class="admin-eyebrow">Vérification exhaustive</p><h1>{{ help?.name || 'Aide' }}</h1><p v-if="caractereName">{{ caractereName }}</p></div>
         <div class="audit-heading__actions">
-          <NuxtLink class="admin-button admin-button--small" :to="{ path: '/admin/helps', query: { character: characterId } }">Retour à l’aide</NuxtLink>
+          <NuxtLink class="admin-button admin-button--small" :to="{ path: '/admin/helps', query: { caractere: caractereId } }">Retour à l’aide</NuxtLink>
           <button class="admin-button admin-button--small" type="button" :disabled="!results.length" @click="exportReport">Exporter le rapport</button>
         </div>
       </header>

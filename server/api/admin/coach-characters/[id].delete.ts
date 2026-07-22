@@ -1,7 +1,1 @@
-export default defineEventHandler(async (event) => {
-  requireAdministrator(event)
-  const id = Number(getRouterParam(event, 'id'))
-  if (!Number.isInteger(id) || id < 1) throw createError({ statusCode: 400, statusMessage: 'Caractère invalide' })
-  await useDatabase().execute("UPDATE coach_characters SET status='disabled' WHERE id=?", [id])
-  return { ok: true }
-})
+export { default } from '../coach-caracteres/[id].delete'

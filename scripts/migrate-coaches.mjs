@@ -32,10 +32,10 @@ const replyProfileBySlug = {
 }
 
 const characterSeeds = [
-  ['warm', 'Chaleureux', 'Chaleureuse', '🤗', 'Encourage et rassure avant d’expliquer.', 'Encourage avant d’expliquer la règle.', 1, 'camille-morel'],
-  ['methodical', 'Méthodique', 'Méthodique', '🧭', 'Décompose les difficultés de façon structurée.', 'Décompose chaque difficulté en étapes.', 2, 'sami-diallo'],
-  ['dynamic', 'Dynamique', 'Dynamique', '⚡', 'Donne du rythme et célèbre les progrès.', 'Relance rapidement et célèbre chaque progrès.', 3, 'zoe-laurent'],
-  ['calm', 'Calme', 'Calme', '🌿', 'Laisse le temps de réfléchir sans pression.', 'Utilise des messages courts et sans pression.', 4, 'gabriel-rossi'],
+  ['warm', 'Chaleureux', '🤗', 'Encourage avant d’expliquer la règle.', 1, 'camille-morel', 'cif-falc'],
+  ['methodical', 'Méthodique', '🧭', 'Décompose chaque difficulté en étapes.', 2, 'sami-diallo', 'grammatical-technical'],
+  ['dynamic', 'Dynamique', '⚡', 'Relance rapidement et célèbre chaque progrès.', 3, 'zoe-laurent', 'guided-discovery'],
+  ['calm', 'Calme', '🌿', 'Utilise des messages courts et sans pression.', 4, 'gabriel-rossi', 'concise'],
 ]
 
 const characterSlugByCoach = {
@@ -183,35 +183,53 @@ try {
     CONSTRAINT fk_rule_coach FOREIGN KEY (coach_id) REFERENCES coaches(id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
 
+  await database.query(`CREATE TABLE IF NOT EXISTS coach_help_approaches (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    slug VARCHAR(80) NOT NULL UNIQUE,
+    name VARCHAR(80) NOT NULL,
+    engine_key ENUM('cif-falc','concise','grammatical-technical','guided-discovery') NOT NULL DEFAULT 'cif-falc',
+    sort_order SMALLINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
+  for (const seed of [['cif-falc','CIF · FALC','cif-falc',1],['concise','Très condensée','concise',2],['grammatical-technical','Grammatico-technique','grammatical-technical',3],['guided-discovery','Découverte guidée','guided-discovery',4]]) {
+    await database.execute(`INSERT INTO coach_help_approaches (slug,name,engine_key,sort_order) VALUES (?,?,?,?)
+      ON DUPLICATE KEY UPDATE slug=VALUES(slug)`, seed)
+  }
+
   await database.query(`CREATE TABLE IF NOT EXISTS coach_characters (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     slug VARCHAR(80) NOT NULL UNIQUE,
     name VARCHAR(80) NOT NULL,
     masculine_name VARCHAR(80) NOT NULL,
-    feminine_name VARCHAR(80) NOT NULL,
     emoticon VARCHAR(32) NOT NULL DEFAULT '🙂',
-    description VARCHAR(255) NOT NULL DEFAULT '',
     pedagogical_style TEXT NOT NULL,
+    help_approach_id INT UNSIGNED NOT NULL,
     status ENUM('draft','published','disabled') NOT NULL DEFAULT 'draft',
     sort_order SMALLINT NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_coach_character_help_approach FOREIGN KEY (help_approach_id) REFERENCES coach_help_approaches(id) ON DELETE RESTRICT
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
 
   const [masculineNameColumns] = await database.query("SHOW COLUMNS FROM coach_characters LIKE 'masculine_name'")
   if (masculineNameColumns.length === 0) {
     await database.query("ALTER TABLE coach_characters ADD COLUMN masculine_name VARCHAR(80) NOT NULL DEFAULT '' AFTER name")
   }
-  const [feminineNameColumns] = await database.query("SHOW COLUMNS FROM coach_characters LIKE 'feminine_name'")
-  if (feminineNameColumns.length === 0) {
-    await database.query("ALTER TABLE coach_characters ADD COLUMN feminine_name VARCHAR(80) NOT NULL DEFAULT '' AFTER masculine_name")
+  const [helpApproachColumns] = await database.query("SHOW COLUMNS FROM coach_characters LIKE 'help_approach_id'")
+  if (!helpApproachColumns.length) await database.query('ALTER TABLE coach_characters ADD COLUMN help_approach_id INT UNSIGNED NULL AFTER pedagogical_style')
+  const [legacyHelpApproachColumns] = await database.query("SHOW COLUMNS FROM coach_characters LIKE 'help_approach'")
+  if (legacyHelpApproachColumns.length) {
+    await database.query(`UPDATE coach_characters c JOIN coach_help_approaches a ON a.slug=c.help_approach
+      SET c.help_approach_id=a.id WHERE c.help_approach_id IS NULL`)
   }
+  await database.query(`UPDATE coach_characters c JOIN coach_help_approaches a ON a.slug='cif-falc'
+    SET c.help_approach_id=a.id WHERE c.help_approach_id IS NULL`)
   const [emoticonColumns] = await database.query("SHOW COLUMNS FROM coach_characters LIKE 'emoticon'")
   if (emoticonColumns.length === 0) {
-    await database.query("ALTER TABLE coach_characters ADD COLUMN emoticon VARCHAR(32) NOT NULL DEFAULT '🙂' AFTER feminine_name")
+    await database.query("ALTER TABLE coach_characters ADD COLUMN emoticon VARCHAR(32) NOT NULL DEFAULT '🙂' AFTER masculine_name")
   }
   await database.query(`UPDATE coach_characters SET masculine_name=name WHERE masculine_name=''`)
-  await database.query(`UPDATE coach_characters SET feminine_name=name WHERE feminine_name=''`)
 
   await database.query(`CREATE TABLE IF NOT EXISTS coach_character_reply_templates (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -261,11 +279,12 @@ try {
   const [characterColumns] = await database.query("SHOW COLUMNS FROM coaches LIKE 'character_id'")
   if (characterColumns.length === 0) await database.query('ALTER TABLE coaches ADD COLUMN character_id INT UNSIGNED NULL AFTER description')
 
-  for (const [slug, masculineName, feminineName, emoticon, description, pedagogicalStyle, sortOrder] of characterSeeds) {
+  for (const [slug, masculineName, emoticon, pedagogicalStyle, sortOrder, , approachSlug] of characterSeeds) {
     await database.execute(`INSERT INTO coach_characters
-      (slug,name,masculine_name,feminine_name,emoticon,description,pedagogical_style,status,sort_order)
-      VALUES (?,?,?,?,?,?,?,'published',?) ON DUPLICATE KEY UPDATE slug=slug`,
-    [slug, masculineName, masculineName, feminineName, emoticon, description, pedagogicalStyle, sortOrder])
+      (slug,name,masculine_name,emoticon,pedagogical_style,help_approach_id,status,sort_order)
+      SELECT ?,?,?,?,?,id,'published',? FROM coach_help_approaches WHERE slug=?
+      ON DUPLICATE KEY UPDATE help_approach_id=COALESCE(help_approach_id,VALUES(help_approach_id))`,
+    [slug, masculineName, masculineName, emoticon, pedagogicalStyle, sortOrder, approachSlug])
   }
 
   for (const seed of coachSeeds) {
@@ -300,7 +319,7 @@ try {
   }
 
 
-  for (const [characterSlug, , , , , , , representativeSlug] of characterSeeds) {
+  for (const [characterSlug, , , , , representativeSlug] of characterSeeds) {
     const [[character]] = await database.execute('SELECT id FROM coach_characters WHERE slug=?', [characterSlug])
     const [[representative]] = await database.execute('SELECT id FROM coaches WHERE slug=?', [representativeSlug])
     const [[replyCount]] = await database.execute('SELECT COUNT(*) AS total FROM coach_character_reply_templates WHERE character_id=?', [character.id])

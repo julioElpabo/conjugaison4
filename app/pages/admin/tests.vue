@@ -38,7 +38,7 @@ interface CoachCredibilityCheck { id: string, label: string, passed: boolean, ex
 interface CoachCredibilityReport {
   coachId: number
   coachName: string
-  characterName: string
+  caractereName: string
   score: number
   passed: boolean
   checks: CoachCredibilityCheck[]
@@ -314,7 +314,7 @@ watch(user, (current) => {
               <details v-for="report in result.coachCredibility" :key="report.coachId" :open="!report.passed">
                 <summary>
                   <span :class="['credibility-score', report.passed ? 'is-passed' : 'is-failed']">{{ report.score }} %</span>
-                  <span><strong>{{ report.coachName }}</strong><small>{{ report.characterName }}</small></span>
+                  <span><strong>{{ report.coachName }}</strong><small>{{ report.caractereName }}</small></span>
                   <b>{{ report.passed ? 'Crédible' : 'À améliorer' }}</b>
                 </summary>
                 <ul>

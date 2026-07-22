@@ -1,14 +1,14 @@
-export interface CoachCharacterIcon {
+export interface CoachCaractereIcon {
   value: string
   label: string
 }
 
-export interface CoachCharacterIconGroup {
+export interface CoachCaractereIconGroup {
   label: string
-  icons: readonly CoachCharacterIcon[]
+  icons: readonly CoachCaractereIcon[]
 }
 
-export const COACH_CHARACTER_ICON_GROUPS: readonly CoachCharacterIconGroup[] = [
+export const COACH_CARACTERE_ICON_GROUPS: readonly CoachCaractereIconGroup[] = [
   {
     label: 'Attitude',
     icons: [

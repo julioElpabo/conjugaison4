@@ -38,6 +38,14 @@ export const COACH_EXPLANATION_APPROACHES = [
 
 export type CoachExplanationApproach = typeof COACH_EXPLANATION_APPROACHES[number]
 
+export interface CoachHelpApproachDefinition {
+  id: number
+  name: string
+  engineKey: CoachExplanationApproach
+  sortOrder: number
+  characterCount: number
+}
+
 export const COACH_HELP_BLOCK_TYPES = [
   'normal',
   'info',
@@ -106,15 +114,15 @@ export interface CoachReactionRule {
   cooldownQuestions: number
 }
 
-export interface CoachCharacter {
+export interface CoachCaractere {
   id: number
   slug: string
   masculineName: string
-  feminineName: string
   emoticon: string
-  description: string
   pedagogicalStyle: string
-  helpId: number | null
+  helpApproachId: number
+  helpApproachName: string
+  helpApproach: CoachExplanationApproach
   status: CoachStatus
   sortOrder: number
   replies: CoachReplyTemplate[]
@@ -132,11 +140,11 @@ export interface CoachProfile {
   avatarPath: string
   description: string
   likes: string
-  characterId: number
-  characterName: string
+  caractereId: number
+  caractereName: string
   personality: string
   pedagogicalStyle: string
-  help: CoachHelpTemplate | null
+  helpApproach: CoachExplanationApproach
   themeColor: string
   status: CoachStatus
   sortOrder: number

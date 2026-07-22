@@ -47,18 +47,18 @@ function parsedArray<T>(value: string | T[] | null): T[] {
 
 export default defineEventHandler(async (event) => {
   requireAdministrator(event)
-  const helpId = Number.parseInt(getRouterParam(event, 'id') || '', 10)
+  const caractereId = Number.parseInt(getRouterParam(event, 'id') || '', 10)
   const query = getQuery(event)
   const after = Math.max(0, Number.parseInt(String(query.after || '0'), 10) || 0)
   const limit = Math.min(20, Math.max(1, Number.parseInt(String(query.limit || '8'), 10) || 8))
-  if (!Number.isInteger(helpId) || helpId < 1) throw createError({ statusCode: 400, statusMessage: 'Aide invalide' })
+  if (!Number.isInteger(caractereId) || caractereId < 1) throw createError({ statusCode: 400, statusMessage: 'Caractère invalide' })
 
   const database = useDatabase()
-  const [helpRows] = await database.execute<RowDataPacket[]>(
-    'SELECT id FROM coach_help_templates WHERE id=? AND deleted_at IS NULL LIMIT 1',
-    [helpId],
+  const [caractereRows] = await database.execute<RowDataPacket[]>(
+    "SELECT id FROM coach_characters WHERE id=? AND status<>'disabled' LIMIT 1",
+    [caractereId],
   )
-  if (!helpRows.length) throw createError({ statusCode: 404, statusMessage: 'Aide introuvable' })
+  if (!caractereRows.length) throw createError({ statusCode: 404, statusMessage: 'Caractère introuvable' })
 
   const [totalsResult, verbsResult] = await Promise.all([
     database.execute<CountRow[]>(`SELECT COUNT(*) AS totalCases,COUNT(DISTINCT vc.verbe_id) AS totalVerbs

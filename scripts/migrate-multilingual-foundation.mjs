@@ -58,8 +58,8 @@ try {
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
   await database.query(`CREATE TABLE IF NOT EXISTS coach_character_translations (
     character_id INT UNSIGNED NOT NULL, locale VARCHAR(5) NOT NULL,
-    masculine_name VARCHAR(120) NOT NULL, feminine_name VARCHAR(120) NOT NULL,
-    description VARCHAR(500) NOT NULL DEFAULT '', pedagogical_style TEXT NOT NULL,
+    masculine_name VARCHAR(120) NOT NULL,
+    pedagogical_style TEXT NOT NULL,
     PRIMARY KEY (character_id,locale),
     CONSTRAINT fk_cct_character FOREIGN KEY (character_id) REFERENCES coach_characters(id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
@@ -99,10 +99,10 @@ try {
     SELECT id,'fr',label,description FROM familles_conjugaison
     ON DUPLICATE KEY UPDATE label=VALUES(label),description=VALUES(description)`)
   await database.query(`INSERT INTO coach_character_translations
-    (character_id,locale,masculine_name,feminine_name,description,pedagogical_style)
-    SELECT id,'fr',masculine_name,feminine_name,description,pedagogical_style FROM coach_characters
-    ON DUPLICATE KEY UPDATE masculine_name=VALUES(masculine_name),feminine_name=VALUES(feminine_name),
-      description=VALUES(description),pedagogical_style=VALUES(pedagogical_style)`)
+    (character_id,locale,masculine_name,pedagogical_style)
+    SELECT id,'fr',masculine_name,pedagogical_style FROM coach_characters
+    ON DUPLICATE KEY UPDATE masculine_name=VALUES(masculine_name),
+      pedagogical_style=VALUES(pedagogical_style)`)
   await database.query(`INSERT INTO coach_reply_translations (reply_id,locale,content)
     SELECT id,'fr',content FROM coach_character_reply_templates ON DUPLICATE KEY UPDATE content=VALUES(content)`)
   await database.query(`INSERT INTO coach_help_template_translations (help_id,locale,name,description,header_description)

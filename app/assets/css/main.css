@@ -168,7 +168,7 @@ body.dialog-open {
   margin: 0;
   color: var(--brand-dark);
   font-size: clamp(1.45rem, 3vw, 2rem);
-  letter-spacing: -0.035em;
+  letter-spacing: 0.035em;
 }
 
 .challenge-launch__heading > p {
@@ -181,7 +181,7 @@ body.dialog-open {
 
 .challenge-actions {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -230,6 +230,17 @@ body.dialog-open {
 .action-button--print .action-button__icon {
   color: #27647a;
   background: #c9e9f1;
+}
+
+.action-button--share {
+  border: 2px dashed rgb(105 82 132 / 42%);
+  background: rgb(246 242 251 / 58%);
+  color: var(--ink);
+}
+
+.action-button--share .action-button__icon {
+  color: #695284;
+  background: #e3d9f0;
 }
 
 .action-button__icon {
@@ -374,47 +385,6 @@ body.dialog-open {
 
 .classic-complement-menu > button b {
   color: var(--brand);
-}
-
-.challenge-save {
-  display: flex;
-  width: 100%;
-  max-width: 1080px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  margin: 16px auto 0;
-  padding: 18px 20px;
-  border: 1px solid #b8d3cb;
-  border-radius: 16px;
-  background: #f8fbfa;
-  box-shadow: 0 9px 25px rgb(42 65 61 / 7%);
-}
-
-.challenge-save > div {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.challenge-save span {
-  color: var(--muted);
-  font-size: 0.82rem;
-}
-
-.challenge-save button {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 15px;
-  border-radius: 10px;
-}
-
-.challenge-save__icon {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 18px;
 }
 
 .workspace-message {
@@ -846,6 +816,7 @@ body.dialog-open {
   background: var(--brand-pale);
   color: #2c5b4f;
   font-size: 0.87rem;
+  font-weight: 400;
 }
 
 .selected-chips button {
@@ -1269,6 +1240,14 @@ body.dialog-open {
   line-height: 1.42;
 }
 
+.share-method > header .share-method__tip {
+  margin-top: 5px;
+  color: var(--brand-dark);
+  font-weight: 750;
+}
+
+.share-method__tip::before { content: '— '; }
+
 .share-value {
   margin-top: 17px;
 }
@@ -1292,6 +1271,8 @@ body.dialog-open {
   min-width: 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
+
+#share-code { letter-spacing: .14em; }
 
 .share-value button {
   padding: 0 14px;
@@ -1355,11 +1336,29 @@ body.dialog-open {
   pointer-events: auto;
 }
 
-.share-help__tooltip img {
+.share-help__preview {
+  position: relative;
+}
+
+.share-help__preview img {
   display: block;
   width: 100%;
   height: auto;
   border-radius: 10px;
+}
+
+.share-help__preview > span {
+  position: absolute;
+  top: 50%;
+  left: 55.45%;
+  color: #505957;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(.72rem, 1.75vw, .95rem);
+  font-weight: 700;
+  letter-spacing: .08em;
+  line-height: 1;
+  transform: translateY(-50%);
+  white-space: nowrap;
 }
 
 .share-help__tooltip p {
@@ -2223,6 +2222,10 @@ body.dialog-open {
 }
 
 @media (max-width: 1180px) {
+  .challenge-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .builder-grid {
     grid-template-columns: minmax(250px, 0.8fr) minmax(430px, 1.2fr);
   }
@@ -2430,8 +2433,7 @@ body.dialog-open {
   }
 
   .challenge-summary,
-  .challenge-launch__heading,
-  .challenge-save {
+  .challenge-launch__heading {
     align-items: flex-start;
     flex-direction: column;
     gap: 9px;
@@ -2445,9 +2447,6 @@ body.dialog-open {
     padding: 19px 14px;
   }
 
-  .challenge-save button {
-    width: 100%;
-  }
 }
 
 @media (max-width: 440px) {

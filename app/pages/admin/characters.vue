@@ -49,6 +49,7 @@ const saving = ref(false)
 const autosaveState = ref<'idle' | 'dirty' | 'saving' | 'saved' | 'error'>('idle')
 const uploading = ref(false)
 const openingHelp = ref(false)
+const deletingCharacter = ref(false)
 const error = ref('')
 const success = ref('')
 const selectedMediaId = ref<number | null>(null)
@@ -255,6 +256,32 @@ async function disableCharacter() {
   }
   catch (caught) { error.value = getAdminErrorMessage(caught, 'Impossible de désactiver ce caractère.') }
 }
+async function deleteCharacter() {
+  const character = draft.value
+  if (!character?.id) return
+  const coachWarning = characterCoaches.value.length
+    ? `\n\n${characterCoaches.value.length} coach${characterCoaches.value.length > 1 ? 'es' : ''} utilisant ce caractère ${characterCoaches.value.length > 1 ? 'seront détachés' : 'sera détaché'}.`
+    : ''
+  if (!window.confirm(`Supprimer définitivement le caractère « ${formatCharacterNames(character)} » ?\n\nSes textes, règles et associations seront supprimés.${coachWarning}\n\nCette action est irréversible.`)) return
+
+  cancelScheduledAutosave()
+  deletingCharacter.value = true
+  error.value = ''
+  success.value = ''
+  try {
+    if (autosavePromise) await autosavePromise
+    await $fetch(`/api/admin/coach-characters/${character.id}/permanent`, { method: 'DELETE' })
+    draft.value = null
+    selectedId.value = null
+    lastSavedSnapshot = ''
+    await load()
+    success.value = 'Caractère supprimé définitivement.'
+  } catch (caught) {
+    error.value = getAdminErrorMessage(caught, 'Impossible de supprimer définitivement ce caractère.')
+  } finally {
+    deletingCharacter.value = false
+  }
+}
 function repliesFor(eventType: CoachEvent) { return draft.value?.replies.filter(reply => reply.eventType === eventType) || [] }
 function activeReplyCount(eventType: CoachEvent) { return repliesFor(eventType).filter(reply => reply.isActive).length }
 function addReply(eventType: CoachEvent) { draft.value?.replies.push({ id: 0, eventType, content: '', weight: 1, isActive: true }) }
@@ -404,7 +431,7 @@ watch(iconPickerOpen, (open) => {
           <div class="panel-title character-profile-title">
             <div><p class="admin-eyebrow">Profil partagé</p><h2>{{ draft.masculineName || draft.feminineName ? formatCharacterNames(draft) : 'Nouveau caractère' }}</h2></div>
             <div class="admin-field emoticon-field"><span>Icône *</span><button type="button" class="emoticon-trigger" aria-haspopup="dialog" @click="openIconPicker"><span aria-hidden="true">{{ draft.emoticon }}</span><small>Modifier</small></button></div>
-            <div class="character-profile-actions"><button type="button" class="admin-button admin-button--primary character-help-button" :disabled="openingHelp" @click="openCharacterHelp">{{ openingHelp ? 'Ouverture de l’aide…' : 'Aide associée à ce caractère' }}</button><button v-if="draft.id" type="button" class="admin-button admin-button--danger admin-button--small" @click="disableCharacter">Désactiver</button></div>
+            <div class="character-profile-actions"><button type="button" class="admin-button admin-button--primary character-help-button" :disabled="openingHelp || deletingCharacter" @click="openCharacterHelp">{{ openingHelp ? 'Ouverture de l’aide…' : 'Aide associée à ce caractère' }}</button><button v-if="draft.id" type="button" class="admin-button admin-button--danger admin-button--small" :disabled="deletingCharacter" @click="disableCharacter">Désactiver</button><button v-if="draft.id" type="button" class="admin-button admin-button--danger admin-button--small character-delete-button" :disabled="deletingCharacter" @click="deleteCharacter">{{ deletingCharacter ? 'Suppression…' : 'Supprimer' }}</button></div>
           </div>
           <div v-if="draft.id" class="character-coaches">
             <div><strong>Coaches utilisant ce caractère</strong><small>{{ characterCoaches.length }} coach{{ characterCoaches.length > 1 ? 'es' : '' }}</small></div>
@@ -524,6 +551,7 @@ watch(iconPickerOpen, (open) => {
 :global(:root[data-theme='dark'] .media-grid article.assigned){border-color:rgb(132 202 213 / 50%);background:rgb(42 91 100 / 34%)}:global(:root[data-theme='dark'] .media-grid article>button){background:rgb(18 41 46 / 48%)}:global(:root[data-theme='dark'] .rule-list button){color:#c6e4e7;background:rgb(47 79 85 / 34%)}:global(:root[data-theme='dark'] .rule-list select){color:#dce8e9;border-color:rgb(128 181 190 / 34%);background:rgb(18 41 46 / 58%)}
 :global(:root[data-theme='dark'] .save-bar){background:rgb(25 46 51 / 76%);box-shadow:0 8px 30px rgb(0 0 0 / 25%);backdrop-filter:blur(10px)}
 .character-list__mark{color:initial;background:#e8f2f5;font-size:1.65rem;font-weight:400;line-height:1}.character-profile-title{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}.character-profile-title>.emoticon-field{justify-self:center;align-self:center;gap:3px;text-align:center}.character-profile-actions{display:flex;justify-self:end;align-items:center;gap:8px}.character-help-button{min-height:48px;padding:12px 19px;color:white;border-color:var(--admin-blue);border-radius:13px;background:var(--admin-blue);font-size:.92rem;font-weight:900;box-shadow:none;white-space:nowrap}.character-help-button:hover{border-color:var(--admin-blue);background:color-mix(in srgb,var(--admin-blue) 88%,black);transform:translateY(-1px);box-shadow:none}.character-help-button:focus-visible{outline:4px solid color-mix(in srgb,var(--admin-blue) 32%,transparent);outline-offset:3px}:global(:root[data-theme='dark'] .character-help-button.admin-button--primary){color:#102d35;border-color:#72c4d7;background:#58abc1;box-shadow:none}:global(:root[data-theme='dark'] .character-help-button.admin-button--primary:hover:not(:disabled)){color:#0d2931;border-color:#83cede;background:#68b8cc;box-shadow:none}.emoticon-trigger{display:grid;min-width:84px;padding:7px 12px;place-items:center;gap:2px;border:1px solid var(--admin-border);border-radius:13px;color:var(--admin-navy);background:#f4f9fa;cursor:pointer}.emoticon-trigger>span{font-size:1.9rem;line-height:1.2}.emoticon-trigger>small{color:var(--admin-blue);font-size:.66rem;font-weight:800}.emoticon-trigger:hover{border-color:#72b3c4;background:#e8f5f7}.emoticon-trigger:focus-visible{outline:3px solid rgb(64 159 181 / 28%);outline-offset:2px}
+.character-delete-button{border-width:2px;background:#9c342f;color:white}.character-delete-button:hover:not(:disabled){background:#7f2723}
 .character-list button.is-disabled{opacity:.52;background:#f2f4f4}.character-list button.is-disabled .character-list__mark{filter:grayscale(1);opacity:.72}.character-list button.is-disabled strong{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:#9aa8ad}.character-list button.is-disabled small{color:#8a9aa0}
 :global(:root[data-theme='dark'] .character-list button.is-disabled){background:rgb(20 36 40 / 34%);opacity:.5}:global(:root[data-theme='dark'] .character-list button.is-disabled strong){text-decoration-color:#70858b}:global(:root[data-theme='dark'] .character-list button.is-disabled small){color:#8fa4a9}
 .media-grid article{position:relative}.media-grid article>.media-delete-button{position:absolute;z-index:2;right:7px;bottom:7px;display:grid;width:28px;height:28px;min-height:0;padding:0;place-items:center;color:#9c342f;border:1px solid #e5b2ac;border-radius:50%;background:rgb(255 247 246 / 94%);font-size:1.15rem;font-weight:950;line-height:1;box-shadow:0 2px 9px rgb(18 56 70 / 16%)}.media-grid article>.media-delete-button:hover{color:white;border-color:#9c342f;background:#b94a42}.media-grid article>.media-delete-button:focus-visible{outline:3px solid rgb(185 74 66 / 30%);outline-offset:2px}

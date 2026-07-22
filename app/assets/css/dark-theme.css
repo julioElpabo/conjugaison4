@@ -32,7 +32,7 @@
 
 :root[data-theme='dark'] :is(
   .page-state, .challenge-launch, .workspace-message, .builder-card, .wizard-panel,
-  .reference-state, .consultation-container, .rule-section, .learning-summary button, .challenge-save
+  .reference-state, .consultation-container, .rule-section, .learning-summary button
 ) {
   background: rgb(24 37 35 / 94%);
   border-color: var(--line);
@@ -144,6 +144,17 @@
   background: #294b55;
 }
 
+:root[data-theme='dark'] .action-button--share {
+  color: #e4d9f1;
+  background: rgb(64 51 79 / 38%);
+  border-color: rgb(203 183 227 / 42%);
+}
+
+:root[data-theme='dark'] .action-button--share .action-button__icon {
+  color: #d7c4ed;
+  background: #40334f;
+}
+
 :root[data-theme='dark'] :is(.preset-panel, .preset-list, .wizard-steps, .options-card, .tense-groups > .tense-group:nth-child(even)) {
   background: #1b2927;
 }
@@ -188,20 +199,13 @@
 
 :root[data-theme='dark'] .conjugation-example {
   color: var(--brand-dark);
-  background: linear-gradient(145deg, #20312e, #1b2927 62%, #172421);
-  border-color: #405651;
+  background: linear-gradient(145deg, #2c2637, #272130 62%, #221c2b);
+  border-color: #68577d;
 }
 
-:root[data-theme='dark'] :is(.conjugation-example__screen, .conjugation-example__question, .conjugation-example__question-line) {
-  color: var(--ink);
-  background: #172321;
+:root[data-theme='dark'] :is(.conjugation-example__question, .conjugation-example__correction) {
+  background: rgb(23 35 33 / 72%);
   border-color: #3c504b;
-}
-
-:root[data-theme='dark'] .conjugation-example__notice {
-  color: #f4dda0;
-  background: #3b341f;
-  border-color: #806d35;
 }
 
 :root[data-theme='dark'] :is(.consultation-tabs, .mode-nav) { background: rgb(30 45 42 / 96%); }
@@ -299,10 +303,10 @@
 :root[data-theme='dark'] .complement-options__panel label:has(input:disabled) strong { color: #8ba29d; }
 
 :root[data-theme='dark'] :is(.conjugation-example__heading > span, .conjugation-example__preview-icon) {
-  color: #9dc8be;
+  color: #cbb7e3;
 }
 
-:root[data-theme='dark'] .conjugation-example__preview-icon { background: #29423c; }
+:root[data-theme='dark'] .conjugation-example__preview-icon { background: #40334f; }
 :root[data-theme='dark'] .conjugation-example__question-separator { color: #82958f; }
 
 /* Exercises and modal surfaces */

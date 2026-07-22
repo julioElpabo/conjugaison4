@@ -51,6 +51,7 @@ function highlightChallengeLoaderOnHome() {
               <div>
                 <h3 id="share-code-title">Sauvegarder le code</h3>
                 <p>L’élève conserve ce code. Plus tard, il le copie sur la page d’accueil pour retrouver ce défi.</p>
+                <p class="share-method__tip">Idéal pour transmettre le défi par écrit</p>
               </div>
             </header>
             <div class="share-value">
@@ -62,8 +63,11 @@ function highlightChallengeLoaderOnHome() {
               <div class="share-help">
                 <button type="button" class="share-help__trigger" aria-describedby="reload-help-tooltip">Comment le recharger plus tard&nbsp;?</button>
                 <div id="reload-help-tooltip" class="share-help__tooltip" role="tooltip">
-                  <img src="/images/recharger-defi.svg" alt="Emplacement du code reçu sur la page d’accueil">
-                  <p>Tes élèves copieront le code à cet endroit dans la <a href="/" @click="highlightChallengeLoaderOnHome">page d’accueil</a></p>
+                  <div class="share-help__preview">
+                    <img src="/images/recharger-defi.svg?v=dynamic-code" alt="Emplacement du code reçu sur la page d’accueil">
+                    <span aria-hidden="true">{{ code }}</span>
+                  </div>
+                  <p>Tes élèves colleront le code à cet endroit dans la <a href="/" @click="highlightChallengeLoaderOnHome">page d’accueil</a></p>
                 </div>
               </div>
             </div>
@@ -75,6 +79,7 @@ function highlightChallengeLoaderOnHome() {
               <div>
                 <h3 id="share-link-title">Envoyer le lien direct</h3>
                 <p>L’élève clique simplement sur ce lien&nbsp;: il arrive directement sur le défi, sans saisir le code.</p>
+                <p class="share-method__tip">Idéal pour transmettre le défi par email</p>
               </div>
             </header>
             <div class="share-value">

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { CoachProfile } from '~~/shared/types/coach'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { faArrowUpFromBracket } from '@fortawesome/free-solid-svg-icons'
 
 defineProps<{
   ready: boolean
@@ -45,7 +47,7 @@ onMounted(async () => {
       >
         <span class="action-button__icon" aria-hidden="true">●</span>
         <span>
-          <strong>{{ busyAction === 'exercise' ? 'Préparation…' : 'Exercice classique' }}</strong>
+          <strong>{{ busyAction === 'exercise' ? 'Préparation…' : 'Classique' }}</strong>
           <small>Questions et correction immédiate</small>
         </span>
       </button>
@@ -65,7 +67,7 @@ onMounted(async () => {
         </span>
         <span>
           <strong>{{ busyAction === 'exercise' ? 'Préparation…' : 'Avec un coach' }}</strong>
-          <small>Un exercice sous forme de dialogue virtuel</small>
+          <small>Dialogue virtuel avec une aide pas à pas</small>
         </span>
       </button>
 
@@ -88,26 +90,21 @@ onMounted(async () => {
           <small>Les questions et le corrigé</small>
         </span>
       </button>
-    </div>
-  </section>
 
-  <section class="challenge-save" aria-labelledby="challenge-save-title">
-      <div>
-        <strong id="challenge-save-title">Reprendre ou partager ce défi</strong>
-        <span>Crée un code que tu pourras conserver ou envoyer.</span>
-      </div>
       <button
-        class="secondary-button"
+        class="action-button action-button--share"
         type="button"
         :disabled="!ready || Boolean(busyAction)"
         @click="emit('save')"
       >
-        <svg class="challenge-save__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 16V4" />
-          <path d="m7 9 5-5 5 5" />
-          <path d="M5 21h14" />
-        </svg>
-        {{ busyAction === 'save' ? 'Sauvegarde…' : 'Sauvegarder et partager' }}
+        <span class="action-button__icon" aria-hidden="true">
+          <FontAwesomeIcon :icon="faArrowUpFromBracket" />
+        </span>
+        <span>
+          <strong>{{ busyAction === 'save' ? 'Sauvegarde…' : 'Partager' }}</strong>
+          <small>Partager ce défi avec d’autres personnes</small>
+        </span>
       </button>
+    </div>
   </section>
 </template>

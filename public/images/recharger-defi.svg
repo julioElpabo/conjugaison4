@@ -28,7 +28,6 @@
   <text x="144" y="126" fill="#66728b" font-family="Arial, Helvetica, sans-serif" font-size="29">Colle son code pour le reprendre immédiatement.</text>
   <rect class="code-field-glow" x="1012" y="49" width="614" height="91" rx="19" fill="none" stroke="#36aeca" stroke-width="7" filter="url(#field-glow)"/>
   <rect x="1012" y="49" width="614" height="91" rx="19" fill="#fff" stroke="#75b8ba" stroke-width="3"/>
-  <text x="1040" y="105" fill="#898e8c" font-family="Arial, Helvetica, sans-serif" font-size="33" font-weight="700" letter-spacing="2">AB-CD-EF-23</text>
   <rect x="1643" y="49" width="189" height="92" rx="20" fill="#1b7895"/>
   <text x="1680" y="105" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="33">Charger</text>
 </svg>

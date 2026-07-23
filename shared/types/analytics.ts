@@ -18,7 +18,7 @@ export const ANALYTICS_EVENTS = [
 ] as const
 
 export type AnalyticsEventName = typeof ANALYTICS_EVENTS[number]
-export type AnalyticsWindow = 'now' | '5m' | '30m' | 'range'
+export type AnalyticsWindow = 'now' | '3m' | '5m' | '30m' | 'range'
 
 export interface AnalyticsBreakdownItem {
   label: string

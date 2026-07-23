@@ -82,7 +82,7 @@ export async function googleAnalyticsOverview(options: {
   const token = await accessToken(email, privateKey)
   const endpoint = `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:${realtime ? 'runRealtimeReport' : 'runReport'}`
   const range = realtime
-    ? { minuteRanges: [{ name: options.window, startMinutesAgo: options.window === 'now' ? 0 : options.window === '5m' ? 4 : 29, endMinutesAgo: 0 }] }
+    ? { minuteRanges: [{ name: options.window, startMinutesAgo: options.window === 'now' ? 0 : options.window === '3m' ? 2 : options.window === '5m' ? 4 : 29, endMinutesAgo: 0 }] }
     : { dateRanges: [{ startDate: options.startDate, endDate: options.endDate }] }
   const request = async (dimensions: string[], metrics: string[], limit = 10) => {
     const body = JSON.stringify({ ...range, dimensions: dimensions.map(name => ({ name })), metrics: metrics.map(name => ({ name })), limit, orderBys: [{ metric: { metricName: metrics[0] }, desc: true }] })

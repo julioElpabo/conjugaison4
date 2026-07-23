@@ -5,13 +5,7 @@ import AdminTrendChart from './AdminTrendChart.vue'
 
 const props = defineProps<{ stats: AnalyticsResponse }>()
 type ProgressionTheme = 'summary' | 'audience' | 'pedagogy' | 'usage'
-const activeTheme = ref<ProgressionTheme>('summary')
-const progressionThemes: Array<{ id: ProgressionTheme, label: string, short: string }> = [
-  { id: 'summary', label: 'Synthèse générale', short: 'Synthèse' },
-  { id: 'audience', label: 'Audience et géographie', short: 'Audience' },
-  { id: 'pedagogy', label: 'Analyse pédagogique', short: 'Pédagogie' },
-  { id: 'usage', label: 'Usage des fonctionnalités', short: 'Fonctionnalités' },
-]
+const activeTheme = defineModel<ProgressionTheme>('theme', { default: 'summary' })
 const audience = computed<AnalyticsOverview>(() => {
   const ga4 = props.stats.ga4
   const hasCachedGa4Data = Boolean(ga4?.countries.length || ga4?.activity.length || ga4?.activeUsers)
@@ -83,31 +77,12 @@ const periodLabel = computed(() => {
       <p>Survole les points ou les barres pour obtenir la valeur d’une date précise.</p>
     </header>
 
-    <nav class="theme-tabs" role="tablist" aria-label="Thème des progressions">
-      <button
-        v-for="theme in progressionThemes"
-        :id="`progression-theme-tab-${theme.id}`"
-        :key="theme.id"
-        type="button"
-        role="tab"
-        :aria-selected="activeTheme === theme.id"
-        :aria-controls="`progression-theme-panel-${theme.id}`"
-        :class="{ active: activeTheme === theme.id }"
-        @click="activeTheme = theme.id"
-      >
-        <span class="theme-tabs__long">{{ theme.label }}</span>
-        <span class="theme-tabs__short">{{ theme.short }}</span>
-      </button>
-    </nav>
-
     <section
       v-show="activeTheme === 'summary'"
       id="progression-theme-panel-summary"
-      class="progression-theme progression-theme--summary"
+      class="progression-theme"
       role="tabpanel"
-      aria-labelledby="progression-theme-tab-summary"
     >
-      <header class="progression-theme__heading"><span>01</span><div><h2>Synthèse générale</h2><p>Le rythme général de fréquentation et d’utilisation.</p></div></header>
       <div class="progression-grid">
         <AdminTrendChart
           eyebrow="Audience"
@@ -138,11 +113,9 @@ const periodLabel = computed(() => {
     <section
       v-show="activeTheme === 'audience'"
       id="progression-theme-panel-audience"
-      class="progression-theme progression-theme--audience"
+      class="progression-theme"
       role="tabpanel"
-      aria-labelledby="progression-theme-tab-audience"
     >
-      <header class="progression-theme__heading"><span>02</span><div><h2>Audience et géographie</h2><p>Évolution de l’audience et poids des principaux pays.</p></div></header>
       <div class="progression-grid">
         <AdminTrendChart
           title="Acquisition des visiteurs"
@@ -171,11 +144,9 @@ const periodLabel = computed(() => {
     <section
       v-show="activeTheme === 'pedagogy'"
       id="progression-theme-panel-pedagogy"
-      class="progression-theme progression-theme--pedagogy"
+      class="progression-theme"
       role="tabpanel"
-      aria-labelledby="progression-theme-tab-pedagogy"
     >
-      <header class="progression-theme__heading"><span>03</span><div><h2>Analyse pédagogique</h2><p>Volumes d’apprentissage et évolution des taux de réussite.</p></div></header>
       <div class="progression-grid">
         <AdminTrendChart
           title="Exercices lancés et terminés"
@@ -216,11 +187,9 @@ const periodLabel = computed(() => {
     <section
       v-show="activeTheme === 'usage'"
       id="progression-theme-panel-usage"
-      class="progression-theme progression-theme--usage"
+      class="progression-theme"
       role="tabpanel"
-      aria-labelledby="progression-theme-tab-usage"
     >
-      <header class="progression-theme__heading"><span>04</span><div><h2>Usage des fonctionnalités</h2><p>Évolution des aides, défis et documents produits.</p></div></header>
       <AdminFeatureUsageChart
         :items="local.featureUsage || []"
         insight="Donne la préférence globale des utilisateurs sur la période ; les graphiques suivants indiquent ensuite quand ces usages ont eu lieu."
@@ -267,5 +236,5 @@ const periodLabel = computed(() => {
 </template>
 
 <style scoped>
-.progression-dashboard{display:grid;gap:18px}.progression-intro{display:flex;align-items:end;justify-content:space-between;gap:20px;padding:5px 2px}.progression-intro h2,.progression-intro p{margin:0}.progression-intro h2{color:var(--admin-navy);font-size:1.35rem}.progression-intro>p{max-width:520px;color:var(--admin-muted);font-size:.8rem;text-align:right}.progression-theme{display:grid;padding:18px;gap:15px;border:1px solid #cbdde2;border-radius:18px;background:rgb(240 248 250 / 58%)}.progression-theme__heading{display:flex;align-items:center;gap:12px}.progression-theme__heading>span{display:grid;width:36px;height:36px;flex:0 0 auto;place-items:center;border-radius:11px;color:#fff;background:#08758b;font-size:.72rem;font-weight:900}.progression-theme__heading h2,.progression-theme__heading p{margin:0}.progression-theme__heading h2{color:var(--admin-navy);font-size:1.25rem}.progression-theme__heading p{margin-top:2px;color:var(--admin-muted);font-size:.78rem}.progression-theme--pedagogy{border-color:#c9ddd3;background:rgb(241 249 244 / 72%)}.progression-theme--pedagogy .progression-theme__heading>span{background:#34895f}.progression-theme--usage{border-color:#e4d5bf;background:rgb(252 248 240 / 72%)}.progression-theme--usage .progression-theme__heading>span{background:#b87323}.progression-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:13px}.country-ranking{display:grid;padding:16px;align-content:start;gap:10px;box-shadow:none}.country-ranking h3{margin:3px 0 0;color:var(--admin-navy);font-size:.96rem}.country-ranking__insight{min-height:2.7em;margin:0;color:#4e6972;font-size:.72rem;line-height:1.35}.country-ranking ol{display:grid;margin:0;padding:0;gap:8px;list-style:none}.country-ranking li{display:grid;gap:4px}.country-ranking li>span{display:flex;justify-content:space-between;gap:12px;color:var(--admin-navy);font-size:.74rem}.country-ranking small{color:var(--admin-muted)}.country-ranking li>i{height:8px;overflow:hidden;border-radius:99px;background:#e3eef1}.country-ranking em{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#23a2bb,#08758b)}.theme-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:5px;gap:5px;border:1px solid #cbdde2;border-radius:15px;background:#edf5f6}.theme-tabs button{min-height:47px;padding:9px 12px;border:0;border-radius:11px;color:#49636c;background:transparent;font:inherit;font-size:.78rem;font-weight:850;cursor:pointer;transition:background .15s,color .15s,box-shadow .15s}.theme-tabs button:hover{color:var(--admin-navy);background:rgb(255 255 255 / 65%)}.theme-tabs button.active{color:#fff;background:#08758b;box-shadow:0 5px 14px rgb(8 117 139 / 20%)}.theme-tabs__short{display:none}.empty{color:var(--admin-muted)}:global(:root[data-theme='dark']) .progression-theme{border-color:#3c555d;background:rgb(24 43 48 / 72%)}:global(:root[data-theme='dark']) .country-ranking li>i{background:#314950}:global(:root[data-theme='dark']) .country-ranking__insight{color:#b7ccd1}:global(:root[data-theme='dark']) .theme-tabs{border-color:#3c555d;background:#182c31}:global(:root[data-theme='dark']) .theme-tabs button:hover{background:#263e45}@media(max-width:1050px){.theme-tabs__long{display:none}.theme-tabs__short{display:inline}}@media(max-width:760px){.progression-intro{display:grid}.progression-intro>p{text-align:left}.theme-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:650px){.progression-theme{padding:12px}}
+.progression-dashboard{display:grid;gap:18px}.progression-intro{display:flex;align-items:end;justify-content:space-between;gap:20px;padding:5px 2px}.progression-intro h2,.progression-intro p{margin:0}.progression-intro h2{color:var(--admin-navy);font-size:1.35rem}.progression-intro>p{max-width:520px;color:var(--admin-muted);font-size:.8rem;text-align:right}.progression-theme{display:grid;gap:15px}.progression-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:13px}.country-ranking{display:grid;padding:16px;align-content:start;gap:10px;box-shadow:none}.country-ranking h3{margin:3px 0 0;color:var(--admin-navy);font-size:.96rem}.country-ranking__insight{min-height:2.7em;margin:0;color:#4e6972;font-size:.72rem;line-height:1.35}.country-ranking ol{display:grid;margin:0;padding:0;gap:8px;list-style:none}.country-ranking li{display:grid;gap:4px}.country-ranking li>span{display:flex;justify-content:space-between;gap:12px;color:var(--admin-navy);font-size:.74rem}.country-ranking small{color:var(--admin-muted)}.country-ranking li>i{height:8px;overflow:hidden;border-radius:99px;background:#e3eef1}.country-ranking em{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#23a2bb,#08758b)}.empty{color:var(--admin-muted)}:global(:root[data-theme='dark']) .country-ranking li>i{background:#314950}:global(:root[data-theme='dark']) .country-ranking__insight{color:#b7ccd1}@media(max-width:760px){.progression-intro{display:grid}.progression-intro>p{text-align:left}}
 </style>

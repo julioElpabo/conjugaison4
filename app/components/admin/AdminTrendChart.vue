@@ -23,12 +23,26 @@ const normalizedDate = (value: string) => /^\d{8}$/u.test(value)
   : value.slice(0, 10)
 const dates = computed(() => [...new Set(props.series.flatMap(item => item.points.map(point => normalizedDate(point.date))))].sort())
 const values = computed(() => props.series.flatMap(item => item.points.map(point => point.value)))
-const maximum = computed(() => props.percent ? 100 : Math.max(1, ...values.value))
+const rawMaximum = computed(() => Math.max(1, ...values.value))
+const axisScale = computed(() => {
+  if (props.percent) return { maximum: 100, ticks: [0, 25, 50, 75, 100] }
+
+  const maximum = rawMaximum.value
+  const roughStep = maximum / 4
+  const magnitude = 10 ** Math.floor(Math.log10(Math.max(1, roughStep)))
+  const candidates = [1, 2, 2.5, 5, 10].map(factor => Math.max(1, factor * magnitude))
+  const step = candidates.find(candidate => Math.ceil(maximum / candidate) <= 6) || candidates.at(-1) || 1
+  const roundedMaximum = Math.ceil(maximum / step) * step
+  const ticks = Array.from({ length: Math.round(roundedMaximum / step) + 1 }, (_, index) => index * step)
+  return { maximum: roundedMaximum, ticks }
+})
+const maximum = computed(() => axisScale.value.maximum)
+const axisTicks = computed(() => [...axisScale.value.ticks].reverse())
 const hasValues = computed(() => values.value.some(value => value > 0))
-const plotLeft = 54
-const plotRight = 480
-const plotTop = 18
-const plotBottom = 220
+const plotLeft = 68
+const plotRight = 700
+const plotTop = 20
+const plotBottom = 242
 const plotWidth = plotRight - plotLeft
 const plotHeight = plotBottom - plotTop
 
@@ -97,10 +111,10 @@ const axisLabels = computed(() => {
     </header>
     <p class="trend-chart__insight">{{ insight }}</p>
     <div v-if="dates.length && hasValues" class="trend-chart__canvas">
-      <svg viewBox="0 0 500 282" preserveAspectRatio="none" role="img" :aria-label="`${title}. Axe horizontal : ${xUnit}. Axe vertical : ${yUnit}.`">
+      <svg viewBox="0 0 720 310" preserveAspectRatio="xMidYMid meet" role="img" :aria-label="`${title}. Axe horizontal : ${xUnit}. Axe vertical : ${yUnit}.`">
         <g class="trend-chart__grid">
-          <line v-for="step in [0, 1, 2, 3, 4]" :key="step" :x1="plotLeft" :x2="plotRight" :y1="plotTop + step * plotHeight / 4" :y2="plotTop + step * plotHeight / 4" />
-          <text v-for="step in [0, 1, 2, 3, 4]" :key="`label-${step}`" x="46" :y="plotTop + step * plotHeight / 4 + 4" text-anchor="end">{{ formatValue(maximum * (4 - step) / 4) }}</text>
+          <line v-for="tick in axisTicks" :key="tick" :x1="plotLeft" :x2="plotRight" :y1="y(tick)" :y2="y(tick)" />
+          <text v-for="tick in axisTicks" :key="`label-${tick}`" x="60" :y="y(tick) + 4" text-anchor="end">{{ formatValue(tick) }}</text>
         </g>
         <template v-if="kind === 'line'">
           <g v-for="item in series" :key="item.label">
@@ -136,9 +150,9 @@ const axisLabels = computed(() => {
           </g>
         </template>
         <g class="trend-chart__axis">
-          <text v-for="label in axisLabels" :key="label.date" :x="x(label.index)" y="252" :text-anchor="label.index === 0 ? 'start' : label.index === dates.length - 1 ? 'end' : 'middle'">{{ formatDate(label.date) }}</text>
-          <text class="trend-chart__unit trend-chart__unit--y" x="14" y="119" text-anchor="middle" transform="rotate(-90 14 119)">{{ yUnit }}</text>
-          <text class="trend-chart__unit" :x="plotRight" y="278" text-anchor="end">{{ xUnit }}</text>
+          <text v-for="label in axisLabels" :key="label.date" :x="x(label.index)" y="275" :text-anchor="label.index === 0 ? 'start' : label.index === dates.length - 1 ? 'end' : 'middle'">{{ formatDate(label.date) }}</text>
+          <text class="trend-chart__unit trend-chart__unit--y" x="16" y="131" text-anchor="middle" transform="rotate(-90 16 131)">{{ yUnit }}</text>
+          <text class="trend-chart__unit" :x="plotRight" y="304" text-anchor="end">{{ xUnit }}</text>
         </g>
       </svg>
     </div>
@@ -147,5 +161,5 @@ const axisLabels = computed(() => {
 </template>
 
 <style scoped>
-.trend-chart{display:grid;min-width:0;padding:16px;gap:9px;box-shadow:none}.trend-chart header{display:grid;align-items:start;gap:8px}.trend-chart h3{margin:3px 0 0;color:var(--admin-navy);font-size:.96rem}.trend-chart__legend{display:flex;margin:0;padding:0;flex-wrap:wrap;justify-content:flex-start;gap:6px 11px;list-style:none;color:var(--admin-muted);font-size:.66rem;font-weight:750}.trend-chart__legend li{display:flex;align-items:center;gap:5px}.trend-chart__legend i{width:8px;height:8px;border-radius:3px}.trend-chart__insight{min-height:2.7em;margin:0;color:#4e6972;font-size:.72rem;line-height:1.35}.trend-chart__canvas{height:205px;min-width:0}.trend-chart svg{display:block;width:100%;height:100%;overflow:visible}.trend-chart__grid line{stroke:#dce8eb;stroke-width:1;vector-effect:non-scaling-stroke}.trend-chart__grid text,.trend-chart__axis text{fill:var(--admin-muted);font-size:10px}.trend-chart__axis .trend-chart__unit{fill:var(--admin-navy);font-size:11px;font-weight:800}.trend-chart__line{fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}.trend-chart__point{stroke:#fff;stroke-width:2;vector-effect:non-scaling-stroke;cursor:help}.trend-chart__bar{opacity:.88;cursor:help}.trend-chart__bar:hover{opacity:1}.trend-chart__empty{display:grid;min-height:150px;margin:0;place-items:center;color:var(--admin-muted);text-align:center}:global(:root[data-theme='dark']) .trend-chart__grid line{stroke:#3d555d}:global(:root[data-theme='dark']) .trend-chart__point{stroke:#20353b}:global(:root[data-theme='dark']) .trend-chart__insight{color:#b7ccd1}@media(max-width:650px){.trend-chart__canvas{height:210px}}
+.trend-chart{display:grid;min-width:0;padding:16px;gap:9px;box-shadow:none}.trend-chart header{display:grid;align-items:start;gap:8px}.trend-chart h3{margin:3px 0 0;color:var(--admin-navy);font-size:.96rem}.trend-chart__legend{display:flex;margin:0;padding:0;flex-wrap:wrap;justify-content:flex-start;gap:6px 11px;list-style:none;color:var(--admin-muted);font-size:.66rem;font-weight:750}.trend-chart__legend li{display:flex;align-items:center;gap:5px}.trend-chart__legend i{width:8px;height:8px;border-radius:3px}.trend-chart__insight{min-height:2.7em;margin:0;color:#4e6972;font-size:.72rem;line-height:1.35}.trend-chart__canvas{width:100%;min-width:0;aspect-ratio:720/310}.trend-chart svg{display:block;width:100%;height:auto;aspect-ratio:720/310;overflow:visible}.trend-chart__grid line{stroke:#dce8eb;stroke-width:1;vector-effect:non-scaling-stroke}.trend-chart__grid text,.trend-chart__axis text{fill:var(--admin-muted);font-size:10px}.trend-chart__axis .trend-chart__unit{fill:var(--admin-navy);font-size:11px;font-weight:800}.trend-chart__line{fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}.trend-chart__point{stroke:#fff;stroke-width:2;vector-effect:non-scaling-stroke;cursor:help}.trend-chart__bar{opacity:.88;cursor:help}.trend-chart__bar:hover{opacity:1}.trend-chart__empty{display:grid;min-height:150px;margin:0;place-items:center;color:var(--admin-muted);text-align:center}:global(:root[data-theme='dark']) .trend-chart__grid line{stroke:#3d555d}:global(:root[data-theme='dark']) .trend-chart__point{stroke:#20353b}:global(:root[data-theme='dark']) .trend-chart__insight{color:#b7ccd1}@media(max-width:650px){.trend-chart__canvas{aspect-ratio:auto;overflow-x:auto}.trend-chart svg{width:620px;max-width:none}}
 </style>

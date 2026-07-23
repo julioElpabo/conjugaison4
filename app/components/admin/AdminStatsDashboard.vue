@@ -5,13 +5,7 @@ import AdminTrendChart from './AdminTrendChart.vue'
 
 const props = defineProps<{ stats: AnalyticsResponse }>()
 type DashboardTheme = 'summary' | 'audience' | 'pedagogy' | 'usage'
-const activeTheme = ref<DashboardTheme>('summary')
-const dashboardThemes: Array<{ id: DashboardTheme, label: string, short: string }> = [
-  { id: 'summary', label: 'Synthèse générale', short: 'Synthèse' },
-  { id: 'audience', label: 'Audience et géographie', short: 'Audience' },
-  { id: 'pedagogy', label: 'Analyse pédagogique', short: 'Pédagogie' },
-  { id: 'usage', label: 'Usage des fonctionnalités', short: 'Fonctionnalités' },
-]
+const activeTheme = defineModel<DashboardTheme>('theme', { default: 'summary' })
 const audience = computed<AnalyticsOverview>(() => {
   const ga4 = props.stats.ga4
   const hasCachedGa4Data = Boolean(ga4?.countries.length || ga4?.activity.length || ga4?.activeUsers)
@@ -158,34 +152,12 @@ function showActivityLabel(index: number) {
     <p v-if="pedagogy.notice" class="admin-notice">{{ pedagogy.notice }}</p>
     <p v-if="stats.ga4?.notice" class="admin-notice admin-notice--warning">{{ stats.ga4.notice }}</p>
 
-    <nav class="theme-tabs" role="tablist" aria-label="Thème des statistiques">
-      <button
-        v-for="theme in dashboardThemes"
-        :id="`summary-theme-tab-${theme.id}`"
-        :key="theme.id"
-        type="button"
-        role="tab"
-        :aria-selected="activeTheme === theme.id"
-        :aria-controls="`summary-theme-panel-${theme.id}`"
-        :class="{ active: activeTheme === theme.id }"
-        @click="activeTheme = theme.id"
-      >
-        <span class="theme-tabs__long">{{ theme.label }}</span>
-        <span class="theme-tabs__short">{{ theme.short }}</span>
-      </button>
-    </nav>
-
     <section
       v-show="activeTheme === 'summary'"
       id="summary-theme-panel-summary"
-      class="dashboard-theme dashboard-theme--summary"
+      class="dashboard-theme"
       role="tabpanel"
-      aria-labelledby="summary-theme-tab-summary"
     >
-      <header class="dashboard-theme__heading">
-        <span>01</span>
-        <div><h2>Synthèse générale</h2><p>Les indicateurs essentiels de la sélection.</p></div>
-      </header>
       <div class="kpi-grid" aria-label="Indicateurs principaux">
         <article v-for="card in cards" :key="card.label" class="kpi admin-card">
           <span>{{ card.label }}</span>
@@ -198,28 +170,16 @@ function showActivityLabel(index: number) {
     <section
       v-show="activeTheme === 'audience'"
       id="summary-theme-panel-audience"
-      class="dashboard-theme dashboard-theme--audience"
+      class="dashboard-theme"
       role="tabpanel"
-      aria-labelledby="summary-theme-tab-audience"
     >
-      <header class="dashboard-theme__heading">
-        <span>02</span>
-        <div><h2>Audience et géographie</h2><p>Fréquentation, provenance et profils des visiteurs.</p></div>
-      </header>
-
-      <section class="admin-card panel geography">
-        <div class="section-heading">
-          <div><p class="admin-eyebrow">Lieux</p><h2>{{ isRealtime ? 'Où sont les visiteurs actifs ?' : 'D’où sont venus les visiteurs ?' }}</h2></div>
-          <span class="source-badge">GA4</span>
-        </div>
-        <AdminGeoActivityMap
-          :countries="stats.ga4?.countries || []"
-          :regions="stats.ga4?.regions || []"
-          :cities="stats.ga4?.cities || []"
-          :realtime="isRealtime"
-          :notice="stats.ga4?.notice"
-        />
-      </section>
+      <AdminGeoActivityMap
+        :countries="stats.ga4?.countries || []"
+        :regions="stats.ga4?.regions || []"
+        :cities="stats.ga4?.cities || []"
+        :realtime="isRealtime"
+        :notice="stats.ga4?.notice"
+      />
 
       <section class="admin-card dashboard-context">
         <div class="section-heading">
@@ -299,14 +259,9 @@ function showActivityLabel(index: number) {
     <section
       v-show="activeTheme === 'pedagogy'"
       id="summary-theme-panel-pedagogy"
-      class="dashboard-theme dashboard-theme--pedagogy"
+      class="dashboard-theme"
       role="tabpanel"
-      aria-labelledby="summary-theme-tab-pedagogy"
     >
-      <header class="dashboard-theme__heading">
-        <span>03</span>
-        <div><h2>Analyse pédagogique</h2><p>Progression dans les exercices et qualité des réponses.</p></div>
-      </header>
       <div class="dashboard-row dashboard-row--two">
         <section class="admin-card panel metric-panel">
           <div class="section-heading"><div><p class="admin-eyebrow">Apprentissage</p><h2>Progression pédagogique</h2></div></div>
@@ -330,14 +285,9 @@ function showActivityLabel(index: number) {
     <section
       v-show="activeTheme === 'usage'"
       id="summary-theme-panel-usage"
-      class="dashboard-theme dashboard-theme--usage"
+      class="dashboard-theme"
       role="tabpanel"
-      aria-labelledby="summary-theme-tab-usage"
     >
-      <header class="dashboard-theme__heading">
-        <span>04</span>
-        <div><h2>Usage des fonctionnalités</h2><p>Défis, aides, impressions, téléchargements et autres outils.</p></div>
-      </header>
       <AdminFeatureUsageChart
         :items="pedagogy.featureUsage || []"
         insight="Compare la part des exercices classiques, des conversations avec un coach et des ouvertures de l’impression sur toute la sélection."
@@ -365,10 +315,9 @@ function showActivityLabel(index: number) {
 </template>
 
 <style scoped>
-.stats-dashboard{display:grid;gap:18px}.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.kpi{position:relative;display:grid;min-height:118px;padding:17px 19px;align-content:center;gap:3px;overflow:hidden;box-shadow:none}.kpi::after{position:absolute;content:'';right:-24px;bottom:-34px;width:92px;height:92px;border-radius:50%;background:rgb(39 158 181 / 8%)}.kpi span,.kpi small{position:relative;z-index:1;color:var(--admin-muted)}.kpi span{font-size:.72rem;font-weight:850;text-transform:uppercase;letter-spacing:.055em}.kpi strong{position:relative;z-index:1;color:var(--admin-navy);font-size:clamp(1.65rem,3vw,2.35rem);line-height:1.12}.dashboard-context,.activity,.panel{min-width:0;padding:clamp(17px,2vw,23px);box-shadow:none}.section-heading{display:flex;align-items:start;justify-content:space-between;gap:15px}.section-heading h2{margin:3px 0 16px;color:var(--admin-navy);font-size:1.12rem}.source-badge{padding:5px 9px;border-radius:999px;background:#e8f5f7;color:#176b7e;font-size:.72rem;font-weight:900}.fact-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.fact-grid article{display:grid;min-height:76px;padding:11px 13px;align-content:center;gap:2px;border:1px solid #dce9ec;border-radius:11px;background:#f6fafb}.fact-grid span{color:var(--admin-muted);font-size:.68rem;font-weight:800;text-transform:uppercase}.fact-grid strong{overflow:hidden;color:var(--admin-navy);font-size:1.05rem;text-overflow:ellipsis;white-space:nowrap}.fact-grid small{color:var(--admin-muted);font-size:.7rem}.geography{padding-bottom:18px}.dashboard-row{display:grid;gap:18px}.dashboard-row--activity{grid-template-columns:minmax(0,2fr) minmax(280px,1fr)}.dashboard-row--details{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}.activity__plot{height:238px;display:flex;gap:clamp(3px,1vw,12px);align-items:end;overflow-x:auto;padding:28px 4px 8px;margin-top:8px;border-bottom:1px solid #d8e3e7}.activity__column{height:100%;min-width:28px;flex:1;display:grid;grid-template-rows:20px 1fr 39px;align-items:end;text-align:center;color:var(--admin-muted);font-size:.65rem}.activity__column b{font-size:.68rem}.activity__column i{display:block;width:min(100%,30px);min-height:3px;margin:auto;background:linear-gradient(#32a9bf,#08758b);border-radius:6px 6px 0 0}.activity__column time{align-self:center;white-space:nowrap;transform:rotate(-35deg);transform-origin:center;font-size:.61rem}.activity__column time.hidden{visibility:hidden}.activity__axes{display:flex;justify-content:space-between;gap:12px;padding-top:7px;color:var(--admin-muted);font-size:.64rem;font-weight:800}.metric-list{display:grid;margin:0;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.metric-list>div{display:grid;min-height:70px;padding:10px 12px;align-content:center;gap:3px;border-radius:10px;background:#f2f8f9}.metric-list dt{color:var(--admin-muted);font-size:.7rem;font-weight:750}.metric-list dd{margin:0;color:var(--admin-navy);font-size:1.2rem;font-weight:900}.metric-list--compact>div{min-height:60px}.ranking{display:grid;margin:0;padding:0;list-style:none}.ranking li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #e7eef0}.ranking li:last-child{border:0}.ranking span{overflow-wrap:anywhere;color:#344d58}.ranking strong{color:var(--admin-navy)}.ranking--compact li{padding:5px 0;font-size:.82rem}.audience-panel h3{margin:14px 0 5px;color:var(--admin-muted);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase}.empty{color:var(--admin-muted);margin:14px 0 0}.audience-split{display:grid;grid-template-columns:1fr 1fr;gap:8px}.audience-split div{display:grid;padding:11px;border-radius:10px;background:#f2f8f9}.audience-split strong{font-size:1.3rem;color:var(--admin-navy)}.audience-split span{color:var(--admin-muted);font-size:.72rem}
-.dashboard-theme{display:grid;padding:18px;gap:15px;border:1px solid #cbdde2;border-radius:18px;background:rgb(240 248 250 / 58%)}.dashboard-theme__heading{display:flex;align-items:center;gap:12px}.dashboard-theme__heading>span{display:grid;width:36px;height:36px;flex:0 0 auto;place-items:center;border-radius:11px;color:#fff;background:#08758b;font-size:.72rem;font-weight:900}.dashboard-theme__heading h2,.dashboard-theme__heading p{margin:0}.dashboard-theme__heading h2{color:var(--admin-navy);font-size:1.25rem}.dashboard-theme__heading p{margin-top:2px;color:var(--admin-muted);font-size:.78rem}.dashboard-theme--summary{border-color:#c9dbe0;background:rgb(247 251 252 / 72%)}.dashboard-theme--audience .dashboard-theme__heading>span{background:#167d98}.dashboard-theme--pedagogy{border-color:#c9ddd3;background:rgb(241 249 244 / 72%)}.dashboard-theme--pedagogy .dashboard-theme__heading>span{background:#34895f}.dashboard-theme--usage{border-color:#e4d5bf;background:rgb(252 248 240 / 72%)}.dashboard-theme--usage .dashboard-theme__heading>span{background:#b87323}.dashboard-row--two{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.stats-dashboard{display:grid;gap:18px}.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.kpi{position:relative;display:grid;min-height:118px;padding:17px 19px;align-content:center;gap:3px;overflow:hidden;box-shadow:none}.kpi::after{position:absolute;content:'';right:-24px;bottom:-34px;width:92px;height:92px;border-radius:50%;background:rgb(39 158 181 / 8%)}.kpi span,.kpi small{position:relative;z-index:1;color:var(--admin-muted)}.kpi span{font-size:.72rem;font-weight:850;text-transform:uppercase;letter-spacing:.055em}.kpi strong{position:relative;z-index:1;color:var(--admin-navy);font-size:clamp(1.65rem,3vw,2.35rem);line-height:1.12}.dashboard-context,.activity,.panel{min-width:0;padding:clamp(17px,2vw,23px);box-shadow:none}.section-heading{display:flex;align-items:start;justify-content:space-between;gap:15px}.section-heading h2{margin:3px 0 16px;color:var(--admin-navy);font-size:1.12rem}.source-badge{padding:5px 9px;border-radius:999px;background:#e8f5f7;color:#176b7e;font-size:.72rem;font-weight:900}.fact-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.fact-grid article{display:grid;min-height:76px;padding:11px 13px;align-content:center;gap:2px;border:1px solid #dce9ec;border-radius:11px;background:#f6fafb}.fact-grid span{color:var(--admin-muted);font-size:.68rem;font-weight:800;text-transform:uppercase}.fact-grid strong{overflow:hidden;color:var(--admin-navy);font-size:1.05rem;text-overflow:ellipsis;white-space:nowrap}.fact-grid small{color:var(--admin-muted);font-size:.7rem}.dashboard-row{display:grid;gap:18px}.dashboard-row--activity{grid-template-columns:minmax(0,2fr) minmax(280px,1fr)}.dashboard-row--details{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}.activity__plot{height:238px;display:flex;gap:clamp(3px,1vw,12px);align-items:end;overflow-x:auto;padding:28px 4px 8px;margin-top:8px;border-bottom:1px solid #d8e3e7}.activity__column{height:100%;min-width:28px;flex:1;display:grid;grid-template-rows:20px 1fr 39px;align-items:end;text-align:center;color:var(--admin-muted);font-size:.65rem}.activity__column b{font-size:.68rem}.activity__column i{display:block;width:min(100%,30px);min-height:3px;margin:auto;background:linear-gradient(#32a9bf,#08758b);border-radius:6px 6px 0 0}.activity__column time{align-self:center;white-space:nowrap;transform:rotate(-35deg);transform-origin:center;font-size:.61rem}.activity__column time.hidden{visibility:hidden}.activity__axes{display:flex;justify-content:space-between;gap:12px;padding-top:7px;color:var(--admin-muted);font-size:.64rem;font-weight:800}.metric-list{display:grid;margin:0;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.metric-list>div{display:grid;min-height:70px;padding:10px 12px;align-content:center;gap:3px;border-radius:10px;background:#f2f8f9}.metric-list dt{color:var(--admin-muted);font-size:.7rem;font-weight:750}.metric-list dd{margin:0;color:var(--admin-navy);font-size:1.2rem;font-weight:900}.metric-list--compact>div{min-height:60px}.ranking{display:grid;margin:0;padding:0;list-style:none}.ranking li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #e7eef0}.ranking li:last-child{border:0}.ranking span{overflow-wrap:anywhere;color:#344d58}.ranking strong{color:var(--admin-navy)}.ranking--compact li{padding:5px 0;font-size:.82rem}.audience-panel h3{margin:14px 0 5px;color:var(--admin-muted);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase}.empty{color:var(--admin-muted);margin:14px 0 0}.audience-split{display:grid;grid-template-columns:1fr 1fr;gap:8px}.audience-split div{display:grid;padding:11px;border-radius:10px;background:#f2f8f9}.audience-split strong{font-size:1.3rem;color:var(--admin-navy)}.audience-split span{color:var(--admin-muted);font-size:.72rem}
+.dashboard-theme{display:grid;gap:15px}.dashboard-row--two{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
 .audience-donuts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:15px}
-.theme-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:5px;gap:5px;border:1px solid #cbdde2;border-radius:15px;background:#edf5f6}.theme-tabs button{min-height:47px;padding:9px 12px;border:0;border-radius:11px;color:#49636c;background:transparent;font:inherit;font-size:.78rem;font-weight:850;cursor:pointer;transition:background .15s,color .15s,box-shadow .15s}.theme-tabs button:hover{color:var(--admin-navy);background:rgb(255 255 255 / 65%)}.theme-tabs button.active{color:#fff;background:#08758b;box-shadow:0 5px 14px rgb(8 117 139 / 20%)}.theme-tabs__short{display:none}
 :global(:root[data-theme='dark']) .fact-grid article,:global(:root[data-theme='dark']) .metric-list>div,:global(:root[data-theme='dark']) .audience-split div{border-color:#3f5961;background:#20373d}
-:global(:root[data-theme='dark']) .dashboard-theme{border-color:#3c555d;background:rgb(24 43 48 / 72%)}:global(:root[data-theme='dark']) .theme-tabs{border-color:#3c555d;background:#182c31}:global(:root[data-theme='dark']) .theme-tabs button:hover{background:#263e45}@media(max-width:1050px){.kpi-grid,.fact-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.theme-tabs__long{display:none}.theme-tabs__short{display:inline}}@media(max-width:780px){.dashboard-row--activity,.dashboard-row--two{grid-template-columns:1fr}.theme-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:650px){.dashboard-theme{padding:12px}.kpi-grid,.fact-grid{grid-template-columns:1fr}.activity__plot{height:190px}.metric-list{grid-template-columns:1fr 1fr}}
+@media(max-width:1050px){.kpi-grid,.fact-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:780px){.dashboard-row--activity,.dashboard-row--two{grid-template-columns:1fr}}@media(max-width:650px){.kpi-grid,.fact-grid{grid-template-columns:1fr}.activity__plot{height:190px}.metric-list{grid-template-columns:1fr 1fr}}
 </style>

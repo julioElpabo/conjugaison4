@@ -214,6 +214,51 @@ describe('compléments d’objet dans les questions', () => {
     })
   }
 
+  it("élide aussi un pronom relatif « que » fourni explicitement", () => {
+    const subjunctive = formatConjugationQuestion(row({
+      infinitif: 'apaiser',
+      conjugaison1: 'eussent apaisé',
+      conjugaison2: '',
+      temps_name: 'plus-que-parfait',
+      mode_name: 'subjonctif',
+      is_compound: 1,
+      auxiliaire: 'avoir',
+      participe_passe: 'apaisé',
+      complement_position: 'before',
+      complement_anteposed: 'les enfants inquiets',
+      complement_relative_pronoun: 'que',
+      complement_gender: 'masculin',
+      complement_number: 'pluriel',
+      complement_function: 'cod',
+    }), 'elles')
+    const indicative = formatConjugationQuestion(row({
+      infinitif: 'lire',
+      conjugaison1: 'ont lu',
+      conjugaison2: '',
+      temps_name: 'passé composé',
+      is_compound: 1,
+      auxiliaire: 'avoir',
+      participe_passe: 'lu',
+      complement_position: 'before',
+      complement_anteposed: 'les lettres',
+      complement_relative_pronoun: 'que',
+      complement_gender: 'feminin',
+      complement_number: 'pluriel',
+      complement_function: 'cod',
+    }), 'elles')
+
+    assert.equal(
+      subjunctive.consigne,
+      "Ce sont les seuls enfants inquiets qu'elles … | apaiser | plus-que-parfait (subjonctif)",
+    )
+    assert.deepEqual(
+      subjunctive.reponsesPourCorrige,
+      ["Ce sont les seuls enfants inquiets qu'elles eussent apaisés"],
+    )
+    assert.equal(indicative.consigne, "les lettres qu'elles … | lire | passé composé (indicatif)")
+    assert.deepEqual(indicative.reponsesPourCorrige, ["les lettres qu'elles ont lues"])
+  })
+
   it('donne aussi au COI antéposé un contexte qui justifie le subjonctif', () => {
     const question = formatConjugationQuestion(row({
       infinitif: 'participer',

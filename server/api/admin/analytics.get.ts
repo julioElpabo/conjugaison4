@@ -15,7 +15,7 @@ interface LegacyRow extends RowDataPacket {
   exercer: number, exercersimple: number, resultat: number, resultatsimple: number
 }
 
-const windows: AnalyticsWindow[] = ['now', '5m', '30m', 'range']
+const windows: AnalyticsWindow[] = ['now', '3m', '5m', '30m', 'range']
 
 function isoDate(value: unknown, fallback: Date) {
   const text = String(value || '')
@@ -51,7 +51,7 @@ export default defineEventHandler(async (event) => {
   const endDate = isoDate(query.end, today)
   if (startDate > endDate) throw createError({ statusCode: 400, statusMessage: 'La date de début doit précéder la date de fin.' })
 
-  const liveMinutes = window === 'now' ? 1 : window === '5m' ? 5 : 30
+  const liveMinutes = window === 'now' ? 1 : window === '3m' ? 3 : window === '5m' ? 5 : 30
   const eventWhere = window === 'range'
     ? 'created_at >= ? AND created_at < DATE_ADD(?, INTERVAL 1 DAY)'
     : 'created_at >= DATE_SUB(NOW(), INTERVAL ? MINUTE)'

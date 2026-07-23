@@ -8,6 +8,7 @@ const props = defineProps<{
   questions: ExerciseQuestion[]
   exerciseKind: 'conjugation' | 'tense-identification'
 }>()
+const { track } = useSiteAnalytics()
 
 const emit = defineEmits<{
   close: []
@@ -92,7 +93,9 @@ function submitAnswer() {
     question.reponses,
     retryAlreadyOffered.value,
   )
+  track('answer_submitted', { presentation: 'classic', exerciseKind: props.exerciseKind })
   if (shouldRetry) {
+    track('answer_retry', { presentation: 'classic', exerciseKind: props.exerciseKind })
     retryAlreadyOffered.value = true
     retryMessageVisible.value = true
     nextTick(() => {
@@ -104,6 +107,7 @@ function submitAnswer() {
 
   retryMessageVisible.value = false
   feedback.value = result.isCorrect ? 'correct' : 'incorrect'
+  if (result.isCorrect) track('answer_correct', { presentation: 'classic', exerciseKind: props.exerciseKind })
   attempts.value.push({
     question,
     answer: answer.value,
@@ -120,6 +124,7 @@ function nextQuestion() {
 
   if (currentIndex.value >= props.questions.length - 1) {
     isFinished.value = true
+    track('exercise_completed', { presentation: 'classic', exerciseKind: props.exerciseKind })
     nextTick(() => dialog.value?.focus())
     return
   }
@@ -140,6 +145,7 @@ function restart() {
   retryMessageVisible.value = false
   attempts.value = []
   isFinished.value = false
+  track('exercise_started', { presentation: 'classic', exerciseKind: props.exerciseKind })
   nextTick(() => answerInput.value?.focus())
 }
 

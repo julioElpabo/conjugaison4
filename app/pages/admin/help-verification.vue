@@ -56,6 +56,7 @@ interface SavedAuditSummary {
 
 const route = useRoute()
 const { handleUnauthorized } = useAdminAuth()
+const { localePath } = useLanguagePreferences()
 const caractereId = computed(() => Number(route.query.caractere))
 const caractere = ref<CoachCaractere | null>(null)
 const help = computed<CoachHelpTemplate | null>(() => caractere.value ? {
@@ -440,7 +441,7 @@ onBeforeUnmount(() => {
       <header class="admin-section-heading audit-heading">
         <div><p class="admin-eyebrow">Vérification exhaustive</p><h1>{{ help?.name || 'Aide' }}</h1><p v-if="caractereName">{{ caractereName }}</p></div>
         <div class="audit-heading__actions">
-          <NuxtLink class="admin-button admin-button--small" :to="{ path: '/admin/helps', query: { caractere: caractereId } }">Retour à l’aide</NuxtLink>
+          <NuxtLink class="admin-button admin-button--small" :to="{ path: localePath('/admin/helps'), query: { caractere: caractereId } }">Retour à l’aide</NuxtLink>
           <button class="admin-button admin-button--small" type="button" :disabled="!results.length" @click="exportReport">Exporter le rapport</button>
         </div>
       </header>

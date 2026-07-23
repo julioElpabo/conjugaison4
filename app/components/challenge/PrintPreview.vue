@@ -28,6 +28,7 @@ const emit = defineEmits<{
   close: []
   updateOptions: [value: PrintOptions]
 }>()
+const { track } = useSiteAnalytics()
 
 const sheetNumber = Math.floor(Math.random() * 9000) + 1000
 const dialog = useTemplateRef<HTMLElement>('print-dialog')
@@ -318,6 +319,7 @@ async function downloadPdf() {
   try {
     const pdf = await buildPdf()
     pdf.save(pdfFileName())
+    track('pdf_downloaded', { exerciseKind: props.exerciseKind })
   } finally {
     isPdfBusy.value = false
   }
@@ -594,6 +596,7 @@ async function downloadWord() {
     link.download = `${safeTitle || 'defi-conjugaison'}.docx`
     document.body.appendChild(link)
     link.click()
+    track('word_downloaded', { exerciseKind: props.exerciseKind })
     link.remove()
     URL.revokeObjectURL(url)
   } finally {

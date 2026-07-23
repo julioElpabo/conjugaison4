@@ -37,6 +37,7 @@ const MEDIA_FREQUENCY_OPTIONS = [
 ]
 const placeholdersLabel = COACH_PLACEHOLDERS.map(item => `{${item}}`).join(' · ')
 const { user, handleUnauthorized } = useAdminAuth()
+const { localePath } = useLanguagePreferences()
 const route = useRoute()
 const caracteres = ref<CoachCaractere[]>([])
 const coaches = ref<CoachProfile[]>([])
@@ -356,7 +357,7 @@ async function openCaractereHelp() {
   openingHelp.value = true
   error.value = ''
   try {
-    await navigateTo({ path: '/admin/helps', query: { caractere: caractere.id } })
+    await navigateTo({ path: localePath('/admin/helps'), query: { caractere: caractere.id } })
   } catch (caught) {
     if (!handleUnauthorized(caught)) error.value = getAdminErrorMessage(caught, 'Impossible d’ouvrir l’aide de ce caractère.')
   } finally {
@@ -554,7 +555,7 @@ watch([iconPickerOpen, approachManagerOpen], ([iconOpen, approachOpen]) => {
           <div v-if="draft.id" class="caractere-coaches">
             <div><strong>Coaches utilisant ce caractère</strong><small>{{ caractereCoaches.length }} coach{{ caractereCoaches.length > 1 ? 'es' : '' }}</small></div>
             <div v-if="caractereCoaches.length" class="caractere-coaches__portraits">
-              <NuxtLink v-for="coach in caractereCoaches" :key="coach.id" :to="{ path: '/admin/coaches', query: { coach: coach.id } }" :title="`Modifier ${coach.firstName} ${coach.lastName}`" :aria-label="`Ouvrir la fiche de ${coach.firstName} ${coach.lastName}`">
+              <NuxtLink v-for="coach in caractereCoaches" :key="coach.id" :to="{ path: localePath('/admin/coaches'), query: { coach: coach.id } }" :title="`Modifier ${coach.firstName} ${coach.lastName}`" :aria-label="`Ouvrir la fiche de ${coach.firstName} ${coach.lastName}`">
                 <img :src="coach.avatarPath" alt="">
                 <span>{{ coach.firstName }}</span>
               </NuxtLink>

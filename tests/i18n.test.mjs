@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { SUPPORTED_LOCALES } from '../shared/i18n/locales.ts'
+import {
+  localeFromPath,
+  localizePath,
+  stripLocaleFromPath,
+  SUPPORTED_LOCALES,
+} from '../shared/i18n/locales.ts'
 import { translateUiMessage, uiMessages } from '../shared/i18n/ui-messages.ts'
 import { translateCoachUiText } from '../shared/i18n/coach-ui.ts'
 
@@ -28,4 +33,13 @@ test('les textes administrés des coaches sont localisés sans modifier le fran�
   assert.equal(translateCoachUiText('it', 'La musique et voir mes amis'), 'La musica e vedere i miei amici')
   assert.equal(translateCoachUiText('es', 'Jouer au basket'), 'Jugar al baloncesto')
   assert.equal(translateCoachUiText('fr', 'Salut ! On commence !'), 'Salut ! On commence !')
+})
+
+test('les URL conservent la page lorsqu’on change de langue', () => {
+  assert.equal(localizePath('/', 'fr'), '/fr/')
+  assert.equal(localizePath('/admin/charts', 'de'), '/de/admin/charts')
+  assert.equal(localizePath('/fr/defi/AB-CD', 'it'), '/it/defi/AB-CD')
+  assert.equal(localeFromPath('/es/apprendre'), 'es')
+  assert.equal(localeFromPath('/admin'), null)
+  assert.equal(stripLocaleFromPath('/en/consulter'), '/consulter')
 })

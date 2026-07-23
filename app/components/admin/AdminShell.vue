@@ -1,6 +1,26 @@
 <script setup lang="ts">
 const { user, logout, authError } = useAdminAuth()
+const { localePath } = useLanguagePreferences()
 const loggingOut = ref(false)
+const siteHeaderHeight = ref(68)
+let siteHeaderObserver: ResizeObserver | undefined
+
+const stickyHeaderStyle = computed(() => ({
+  '--admin-sticky-top': `${siteHeaderHeight.value}px`,
+}))
+
+onMounted(() => {
+  const siteHeader = document.querySelector<HTMLElement>('.site-header')
+  if (!siteHeader) return
+  const updateHeight = () => {
+    siteHeaderHeight.value = Math.ceil(siteHeader.getBoundingClientRect().height)
+  }
+  updateHeight()
+  siteHeaderObserver = new ResizeObserver(updateHeight)
+  siteHeaderObserver.observe(siteHeader)
+})
+
+onBeforeUnmount(() => siteHeaderObserver?.disconnect())
 
 async function signOut() {
   if (loggingOut.value) {
@@ -10,7 +30,7 @@ async function signOut() {
   loggingOut.value = true
   try {
     await logout()
-    await navigateTo('/admin')
+    await navigateTo(localePath('/admin'))
   } catch {
     // Le message est exposé par le composable et affiché ci-dessous.
   } finally {
@@ -21,7 +41,7 @@ async function signOut() {
 
 <template>
   <div class="admin-shell admin-card">
-    <header class="admin-shell__header">
+    <header class="admin-shell__header" :style="stickyHeaderStyle">
       <div class="admin-shell__identity">
         <span class="admin-shell__mark" aria-hidden="true">A</span>
         <div>
@@ -31,16 +51,16 @@ async function signOut() {
       </div>
 
       <nav class="admin-shell__nav" aria-label="Navigation d’administration">
-        <NuxtLink to="/admin">Verbes</NuxtLink>
-        <NuxtLink to="/admin/challenges">Défis</NuxtLink>
-        <NuxtLink to="/admin/caracteres">Caractères</NuxtLink>
-        <NuxtLink to="/admin/coaches">Coaches</NuxtLink>
-        <NuxtLink to="/admin/tests">Tests</NuxtLink>
-        <NuxtLink to="/admin/users">Utilisateurs</NuxtLink>
-        <NuxtLink to="/charts">Statistiques</NuxtLink>
-        <NuxtLink to="/admin/feedbacks">Feedbacks</NuxtLink>
-        <NuxtLink to="/admin/errors">Erreurs</NuxtLink>
-        <NuxtLink to="/mon-compte">Mon compte</NuxtLink>
+        <NuxtLink :to="localePath('/admin')">Verbes</NuxtLink>
+        <NuxtLink :to="localePath('/admin/challenges')">Défis</NuxtLink>
+        <NuxtLink :to="localePath('/admin/caracteres')">Caractères</NuxtLink>
+        <NuxtLink :to="localePath('/admin/coaches')">Coaches</NuxtLink>
+        <NuxtLink :to="localePath('/admin/tests')">Tests</NuxtLink>
+        <NuxtLink :to="localePath('/admin/users')">Utilisateurs</NuxtLink>
+        <NuxtLink :to="localePath('/admin/charts')">Statistiques</NuxtLink>
+        <NuxtLink :to="localePath('/admin/feedbacks')">Feedbacks</NuxtLink>
+        <NuxtLink :to="localePath('/admin/errors')">Erreurs</NuxtLink>
+        <NuxtLink :to="localePath('/mon-compte')">Mon compte</NuxtLink>
       </nav>
 
       <button
@@ -73,19 +93,25 @@ async function signOut() {
 }
 
 .admin-shell__header {
+  position: sticky;
+  z-index: 90;
+  top: var(--admin-sticky-top, 68px);
   display: grid;
   grid-template-columns: auto 1fr auto;
-  min-height: 72px;
-  padding: 12px 18px;
+  min-height: 64px;
+  padding: 9px 14px;
   align-items: center;
-  gap: 20px;
+  gap: 14px;
   color: white;
   background: var(--admin-navy);
-  border-radius: 18px 18px 0 0;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgb(13 41 54 / 22%);
 }
 
 .admin-shell__identity {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 10px;
 }
@@ -112,11 +138,17 @@ async function signOut() {
 
 .admin-shell__nav {
   display: flex;
-  justify-content: center;
+  min-width: 0;
+  padding: 2px;
+  justify-content: flex-start;
   gap: 5px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
 }
 
 .admin-shell__nav a {
+  flex: 0 0 auto;
   padding: 8px 11px;
   color: #d8e9f1;
   border-radius: 8px;
@@ -132,6 +164,7 @@ async function signOut() {
 }
 
 .admin-shell__header .admin-button {
+  flex: 0 0 auto;
   color: white;
   background: transparent;
   border-color: rgb(255 255 255 / 35%);
@@ -154,6 +187,7 @@ async function signOut() {
 @media (max-width: 780px) {
   .admin-shell__header {
     grid-template-columns: 1fr auto;
+    border-radius: 11px;
   }
 
   .admin-shell__nav {

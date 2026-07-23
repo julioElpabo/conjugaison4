@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import type { AppLocale } from '~~/shared/i18n/locales'
 
-const { ui, interfaceLocale, setInterfaceLocale } = useLanguagePreferences()
+const { ui, interfaceLocale, setInterfaceLocale, localePath } = useLanguagePreferences()
 const route = useRoute()
 const { applyTheme } = useColorTheme()
 const isDark = ref(false)
-const isAdminRoute = computed(() => route.path === '/admin' || route.path.startsWith('/admin/'))
+const localizedSectionPath = computed(() => route.path.replace(/^\/(?:fr|de|en|it|es)(?=\/|$)/u, '') || '/')
+const isAdminRoute = computed(() => localizedSectionPath.value === '/admin' || localizedSectionPath.value.startsWith('/admin/'))
 const themeSwitchTitle = computed(() => isDark.value ? ui('Activer le mode clair') : ui('Activer le mode sombre'))
 const languageOptions = computed<{ value: AppLocale, label: string, flag: string }[]>(() => [
   { value: 'fr', label: ui('Français'), flag: '🇫🇷' },
@@ -34,8 +35,8 @@ function requestHomeReset() {
   homeResetRequested.value = true
 }
 const activeSection = computed(() => {
-  if (route.path === '/consulter' || route.path.startsWith('/consulter/')) return 'consulter'
-  if (route.path === '/apprendre' || route.path.startsWith('/apprendre/')) return 'apprendre'
+  if (localizedSectionPath.value === '/consulter' || localizedSectionPath.value.startsWith('/consulter/')) return 'consulter'
+  if (localizedSectionPath.value === '/apprendre' || localizedSectionPath.value.startsWith('/apprendre/')) return 'apprendre'
   if (!isAdminRoute.value) return 'exercer'
   return ''
 })
@@ -45,20 +46,20 @@ const activeSection = computed(() => {
   <div class="site-shell">
     <header class="site-header">
       <div class="site-header__inner">
-        <a class="site-brand" href="/">
+        <NuxtLink class="site-brand" :to="localePath('/')">
           <strong>TATITOTU</strong>
           <span>{{ ui('Défis de conjugaison') }}</span>
-        </a>
+        </NuxtLink>
         <nav class="site-navigation" :aria-label="ui('Navigation principale')">
-          <NuxtLink class="site-navigation__home" to="/" :aria-label="ui('Accueil')" :title="ui('Accueil')" @click="requestHomeReset">
+          <NuxtLink class="site-navigation__home" :to="localePath('/')" :aria-label="ui('Accueil')" :title="ui('Accueil')" @click="requestHomeReset">
             <svg aria-hidden="true" viewBox="0 0 24 24">
               <path d="M3 11.2 12 4l9 7.2" />
               <path d="M5.5 10.7V20h4.8v-5.4h3.4V20h4.8v-9.3" />
             </svg>
           </NuxtLink>
-          <NuxtLink to="/" :class="{ 'is-active': activeSection === 'exercer' }" :aria-current="activeSection === 'exercer' ? 'page' : undefined"> {{ ui('S’exercer') }} </NuxtLink>
-          <NuxtLink to="/consulter" :class="{ 'is-active': activeSection === 'consulter' }" :aria-current="activeSection === 'consulter' ? 'page' : undefined"> {{ ui('Consulter') }} </NuxtLink>
-          <NuxtLink to="/apprendre" :class="{ 'is-active': activeSection === 'apprendre' }" :aria-current="activeSection === 'apprendre' ? 'page' : undefined"> {{ ui('Apprendre') }} </NuxtLink>
+          <NuxtLink :to="localePath('/')" :class="{ 'is-active': activeSection === 'exercer' }" :aria-current="activeSection === 'exercer' ? 'page' : undefined"> {{ ui('S’exercer') }} </NuxtLink>
+          <NuxtLink :to="localePath('/consulter')" :class="{ 'is-active': activeSection === 'consulter' }" :aria-current="activeSection === 'consulter' ? 'page' : undefined"> {{ ui('Consulter') }} </NuxtLink>
+          <NuxtLink :to="localePath('/apprendre')" :class="{ 'is-active': activeSection === 'apprendre' }" :aria-current="activeSection === 'apprendre' ? 'page' : undefined"> {{ ui('Apprendre') }} </NuxtLink>
           <div class="language-selector" role="group" :aria-label="ui('Langue de l’interface')">
             <button
               v-for="option in languageOptions"
@@ -103,7 +104,7 @@ const activeSection = computed(() => {
       <p>{{ ui('Un outil gratuit pour travailler la conjugaison française.') }}</p>
       <div class="site-footer__links">
         <a href="mailto:christophe.roulet@edu-vd.ch">{{ ui('Contact') }}</a>
-        <NuxtLink to="/admin">{{ ui('Administration') }}</NuxtLink>
+        <NuxtLink :to="localePath('/admin')">{{ ui('Administration') }}</NuxtLink>
       </div>
     </footer>
   </div>

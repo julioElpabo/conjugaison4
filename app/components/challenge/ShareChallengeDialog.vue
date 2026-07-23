@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { ui } = useLanguagePreferences()
+const { ui, localePath } = useLanguagePreferences()
 const props = defineProps<{
   code: string
   url: string
@@ -68,7 +68,7 @@ function highlightChallengeLoaderOnHome() {
                     <img src="/images/recharger-defi.svg?v=dynamic-code" :alt="ui('Emplacement du code reçu sur la page d’accueil')">
                     <span aria-hidden="true">{{ code }}</span>
                   </div>
-                  <p>Tes élèves colleront le code à cet endroit dans la <a href="/" @click="highlightChallengeLoaderOnHome">{{ ui('page d’accueil') }}</a></p>
+                  <p>Tes élèves colleront le code à cet endroit dans la <NuxtLink :to="localePath('/')" @click="highlightChallengeLoaderOnHome">{{ ui('page d’accueil') }}</NuxtLink></p>
                 </div>
               </div>
             </div>

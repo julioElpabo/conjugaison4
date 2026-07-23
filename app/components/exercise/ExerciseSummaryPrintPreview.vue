@@ -22,6 +22,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{ close: [] }>()
+const { track } = useSiteAnalytics()
 const dialog = useTemplateRef<HTMLElement>('summary-print-dialog')
 const pdfPreviewUrl = ref('')
 const previewError = ref('')
@@ -272,6 +273,7 @@ async function downloadPdf() {
   try {
     const pdf = await buildPdf()
     pdf.save(pdfFileName())
+    track('pdf_downloaded', { presentation: 'chat' })
   } finally {
     isPdfBusy.value = false
   }

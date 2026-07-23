@@ -48,6 +48,7 @@ interface PreviewState {
 
 const route = useRoute()
 const { user, handleUnauthorized } = useAdminAuth()
+const { localePath } = useLanguagePreferences()
 const loading = ref(false)
 const error = ref('')
 const caracteres = ref<CoachCaractere[]>([])
@@ -320,7 +321,7 @@ async function copyPreviewJson(state: PreviewState) {
 
 async function openVerification() {
   if (!currentCaractere.value) return
-  await navigateTo({ path: '/admin/help-verification', query: { caractere: requestedCaractereId.value } })
+  await navigateTo({ path: localePath('/admin/help-verification'), query: { caractere: requestedCaractereId.value } })
 }
 
 async function prepareRandomPreviews() {
@@ -358,7 +359,7 @@ async function load() {
   error.value = ''
   try {
     if (!Number.isInteger(requestedCaractereId.value) || requestedCaractereId.value < 1) {
-      await navigateTo('/admin/caracteres')
+      await navigateTo(localePath('/admin/caracteres'))
       return
     }
     const [caractereResponse, catalogue] = await Promise.all([
@@ -394,7 +395,7 @@ watch(user, (current) => {
       </div>
       <div class="automatic-help-heading__actions">
         <span class="automatic-help-approach">{{ approachLabel }}</span>
-        <NuxtLink v-if="currentCaractere" class="admin-button admin-button--small" :to="{ path: '/admin/caracteres', query: { caractere: currentCaractere.id } }">Retour au caractère</NuxtLink>
+        <NuxtLink v-if="currentCaractere" class="admin-button admin-button--small" :to="{ path: localePath('/admin/caracteres'), query: { caractere: currentCaractere.id } }">Retour au caractère</NuxtLink>
         <button class="admin-button admin-button--small automatic-help-reload" type="button" :disabled="loading || !currentCaractere" @click="reloadPreviews">Recharger</button>
         <button class="admin-button automatic-help-verify" type="button" :disabled="loading || !currentCaractere" @click="openVerification">Vérifier cette aide</button>
       </div>

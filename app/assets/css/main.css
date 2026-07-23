@@ -2009,9 +2009,12 @@ body.dialog-open {
 }
 
 .pdf-preview-frame {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
-  height: 100%;
+  height: 100% !important;
+  min-height: 0;
   border: 0;
   background: #66716d;
 }
@@ -2474,6 +2477,25 @@ body.dialog-open {
 
   .print-document {
     width: min(210mm, 100%);
+  }
+
+  .print-document--pdf {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 210 / 297;
+    contain: layout paint;
+  }
+}
+
+/* Sur iPad portrait, la hauteur du viewport est nettement supérieure à la
+   largeur disponible après le panneau d’options. Le cadre doit suivre le
+   papier A4, et non la hauteur de l’écran ou celle du PDF multipage de Safari. */
+@media (max-width: 1100px) and (orientation: portrait) {
+  .print-document--pdf {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 210 / 297;
+    contain: layout paint;
   }
 }
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { ui } = useLanguagePreferences()
+const { ui, localePath } = useLanguagePreferences()
 useHead(() => ({
   title: ui('Apprendre la conjugaison'),
   meta: [{ name: 'description', content: ui('Une synthèse claire des règles essentielles de la conjugaison française.') }],
@@ -107,7 +107,7 @@ function scrollToSection(sectionId: string) {
 
       <section class="learning-actions" aria-labelledby="continue-title">
         <div><p class="learning-eyebrow">{{ ui('À toi de jouer') }}</p><h2 id="continue-title">{{ ui('Passe de la règle à la pratique') }}</h2><p>{{ ui('Consulte un modèle complet ou crée un exercice ciblé pour vérifier ce que tu viens d’apprendre.') }}</p></div>
-        <div><NuxtLink to="/consulter">{{ ui('Consulter un verbe') }}</NuxtLink><NuxtLink class="is-primary" to="/">{{ ui('S’exercer') }}</NuxtLink></div>
+        <div><NuxtLink :to="localePath('/consulter')">{{ ui('Consulter un verbe') }}</NuxtLink><NuxtLink class="is-primary" :to="localePath('/')">{{ ui('S’exercer') }}</NuxtLink></div>
       </section>
     </main>
   </div>

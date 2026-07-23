@@ -32,6 +32,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{ close: [] }>()
+const { track } = useSiteAnalytics()
 
 interface ChatMessage {
   id: number
@@ -237,6 +238,7 @@ function openHelp(candidate: string) {
   answer.value = ''
   helpQuestionIndex.value = null
   helpOpen.value = true
+  track('help_opened', { presentation: 'chat', coach: props.coach.id })
   restartHelpReminderTimer()
 }
 
@@ -244,12 +246,14 @@ function openHelpForQuestion(questionIndex: number) {
   if (!Number.isInteger(questionIndex) || !props.questions[questionIndex]) return
   helpQuestionIndex.value = questionIndex
   helpOpen.value = true
+  track('help_opened', { presentation: 'chat', coach: props.coach.id })
   restartHelpReminderTimer()
 }
 
 function showLatestHelp() {
   helpQuestionIndex.value = null
   helpOpen.value = true
+  track('help_opened', { presentation: 'chat', coach: props.coach.id })
   restartHelpReminderTimer()
   scrollThreadToBottom()
 }
@@ -491,6 +495,8 @@ async function submit() {
   addMessage('learner', candidate, undefined, currentIndex.value)
   lastCoachBubbleAt = Date.now()
   const result = validateAnswer(candidate, question.reponses)
+  track('answer_submitted', { presentation: 'chat', coach: props.coach.id })
+  track(result.isCorrect ? 'answer_correct' : 'answer_retry', { presentation: 'chat', coach: props.coach.id })
   answer.value = ''
 
   attempts.value.push({
@@ -555,6 +561,7 @@ async function continueChat() {
   if (currentIndex.value >= props.questions.length - 1) {
     const version = conversationVersion
     finished.value = true
+    track('exercise_completed', { presentation: 'chat', coach: props.coach.id })
     waitingForNext.value = false
     finalSummaryPreparing.value = true
     scrollThreadToBottom()
@@ -588,6 +595,7 @@ async function restart() {
   consecutiveCorrectCount.value = 0
   consecutiveIncorrectCount.value = 0
   finished.value = false
+  track('exercise_started', { presentation: 'chat', coach: props.coach.id })
   finalSummaryPreparing.value = false
   finalSummaryVisible.value = false
   printSummaryOpen.value = false

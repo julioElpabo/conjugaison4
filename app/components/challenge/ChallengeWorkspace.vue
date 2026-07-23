@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { ui } = useLanguagePreferences()
+const { ui, localePath } = useLanguagePreferences()
 import type { ChallengePreset, ComplementOption, ExerciseQuestion } from '~~/shared/types/conjugation'
 import { legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils/complement-options'
 import ChallengeActions from './ChallengeActions.vue'
@@ -41,6 +41,7 @@ const {
   applySharedChallenge
 } = useChallengeBuilder()
 const api = useChallengeApi()
+const { track } = useSiteAnalytics()
 const requestUrl = useRequestURL()
 
 const busyAction = ref<'exercise' | 'print' | 'save' | 'load' | null>(null)
@@ -71,17 +72,13 @@ function updateComplementOptions(options: ComplementOption[]) {
   markAsCustom()
 }
 const shareUrl = computed(() => shareCode.value
-  ? new URL(`/defi/${encodeURIComponent(shareCode.value)}`, requestUrl.origin).toString()
+  ? new URL(localePath(`/defi/${encodeURIComponent(shareCode.value)}`), requestUrl.origin).toString()
   : '')
 
 function logUsage(event: 'homepage' | 'print' | 'challenge-save' | 'challenge-load' | 'exercise') {
   if (import.meta.server) return
-  void $fetch('/api/logs', {
-    method: 'POST',
-    body: { event }
-  }).catch(() => {
-    // Les statistiques ne doivent jamais interrompre le parcours principal.
-  })
+  const detailedEvent = { homepage: 'homepage', print: 'print_opened', 'challenge-save': 'challenge_save', 'challenge-load': 'challenge_load', exercise: 'exercise_started' } as const
+  track(detailedEvent[event], event === 'exercise' ? { presentation: exercisePresentation.value, exerciseKind: challenge.value.exerciseKind } : undefined)
 }
 
 onMounted(() => logUsage('homepage'))
@@ -140,6 +137,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
     ? `${randomCount} verbes ont été tirés au hasard dans « ${preset.label} ».`
     : `Le défi « ${preset.label} » est chargé.`
   actionError.value = ''
+  track('challenge_preset_selected', { preset: preset.id, exerciseKind: preset.exerciseKind })
 }
 
 async function prepareExercise(mode: 'classic' | 'chat') {
@@ -168,6 +166,7 @@ async function prepareExercise(mode: 'classic' | 'chat') {
 async function launchWithCoach(coach: CoachProfile) {
   if (!isReady.value) return
   selectedCoach.value = coach
+  track('coach_selected', { coach: coach.id })
   isCoachPickerOpen.value = false
   busyAction.value = 'exercise'
   clearMessages()

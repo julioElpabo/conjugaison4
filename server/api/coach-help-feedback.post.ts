@@ -34,7 +34,8 @@ function jsonText(value: unknown) {
 }
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody<CoachHelpFeedbackBody>(event)
+  await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.feedback)
+  const body = await readLimitedJsonBody<CoachHelpFeedbackBody>(event, 256 * 1024)
   const feedbackType = typeof body?.feedbackType === 'string' && FEEDBACK_TYPES.has(body.feedbackType as CoachHelpFeedbackType)
     ? body.feedbackType as CoachHelpFeedbackType
     : null
@@ -47,7 +48,7 @@ export default defineEventHandler(async (event) => {
   const comment = shortText(body?.comment, 2000)
   const userAgent = shortText(getHeader(event, 'user-agent'), 500)
   const displayedHelp = body?.displayedHelp ?? null
-  const displayedHelpHtml = typeof body?.displayedHelpHtml === 'string' ? body.displayedHelpHtml : null
+  const displayedHelpHtml = shortText(body?.displayedHelpHtml, 120_000)
   const uiContext = contextRecord(body?.uiContext)
 
   await useDatabase().execute(
@@ -87,3 +88,5 @@ export default defineEventHandler(async (event) => {
 
   return { ok: true }
 })
+import { assertPublicApiRateLimit, PUBLIC_RATE_LIMITS } from '../services/public-api-rate-limit'
+import { readLimitedJsonBody } from '../utils/limited-json-body'

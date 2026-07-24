@@ -6,6 +6,9 @@ interface DatabaseStatus extends RowDataPacket {
 }
 
 export default defineEventHandler(async () => {
+  if (!import.meta.dev) {
+    throw createError({ statusCode: 404, statusMessage: 'Page introuvable' })
+  }
   try {
     const [rows] = await useDatabase().execute<DatabaseStatus[]>(`
       SELECT DATABASE() AS database_name, NOW() AS server_time

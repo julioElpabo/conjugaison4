@@ -1,6 +1,13 @@
 import bcrypt from 'bcryptjs'
 import type { RowDataPacket } from 'mysql2/promise'
 import { normalizeLocale } from '../../../shared/i18n/locales'
+import {
+  assertAdminLoginAllowed,
+  clearAdminLoginFailures,
+  recordAdminLoginFailure,
+} from '../../services/admin-login-rate-limit'
+
+const DUMMY_PASSWORD_HASH = '$2b$12$ty1Uz4EKY7VWSotpC21BLenXpmauqgEttD16EEzo2wp8oeuu2aawq'
 
 interface UserRow extends RowDataPacket {
   id: number
@@ -23,6 +30,8 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Identifiants invalides' })
   }
 
+  await assertAdminLoginAllowed(event, email)
+
   const [rows] = await useDatabase().execute<UserRow[]>(`
     SELECT id, prenom, nom, email, username, password, privilege_id,
            interface_locale, explanation_locale
@@ -32,13 +41,15 @@ export default defineEventHandler(async (event) => {
   `, [email])
 
   const row = rows[0]
-  const compatibleHash = row?.password.replace(/^\$2y\$/, '$2b$') ?? ''
-  const passwordIsValid = row ? await bcrypt.compare(password, compatibleHash) : false
+  const compatibleHash = row?.password.replace(/^\$2y\$/, '$2b$') ?? DUMMY_PASSWORD_HASH
+  const passwordIsValid = await bcrypt.compare(password, compatibleHash)
 
   if (!row || !passwordIsValid || row.privilege_id !== 1) {
+    await recordAdminLoginFailure(event, email)
     throw createError({ statusCode: 401, statusMessage: 'Email ou mot de passe incorrect' })
   }
 
+  await clearAdminLoginFailures(event, email)
   const user = {
     id: row.id,
     prenom: row.prenom,

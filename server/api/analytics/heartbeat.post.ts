@@ -1,7 +1,10 @@
 import { analyticsDeviceCategory, analyticsSessionId, safeAnalyticsPath } from '../../utils/analytics-session'
+import { assertPublicApiRateLimit, PUBLIC_RATE_LIMITS } from '../../services/public-api-rate-limit'
+import { readLimitedJsonBody } from '../../utils/limited-json-body'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody<{ path?: unknown, locale?: unknown, pageView?: unknown }>(event)
+  await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.telemetry)
+  const body = await readLimitedJsonBody<{ path?: unknown, locale?: unknown, pageView?: unknown }>(event, 8 * 1024)
   const sessionId = analyticsSessionId(event)
   const path = safeAnalyticsPath(body?.path)
   const locale = typeof body?.locale === 'string' && /^[a-z]{2}$/u.test(body.locale) ? body.locale : 'fr'

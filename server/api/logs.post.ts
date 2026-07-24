@@ -8,7 +8,8 @@ const EVENT_COLUMNS = {
 } as const
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody<{ event?: unknown }>(event)
+  await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.telemetry)
+  const body = await readLimitedJsonBody<{ event?: unknown }>(event, 8 * 1024)
   const eventName = typeof body?.event === 'string' ? body.event : ''
   const column = EVENT_COLUMNS[eventName as keyof typeof EVENT_COLUMNS]
 
@@ -20,3 +21,5 @@ export default defineEventHandler(async (event) => {
   await useDatabase().execute(`INSERT INTO logs (\`${column}\`) VALUES (1)`)
   return { ok: true }
 })
+import { assertPublicApiRateLimit, PUBLIC_RATE_LIMITS } from '../services/public-api-rate-limit'
+import { readLimitedJsonBody } from '../utils/limited-json-body'

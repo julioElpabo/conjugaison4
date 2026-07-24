@@ -2,6 +2,8 @@ import { createHash } from 'node:crypto'
 import type { CoachHelpBlock } from '../../shared/types/coach'
 import type { ConjugationTense, ExerciseQuestion, Verb } from '../../shared/types/conjugation'
 import { auditRenderedCoachHelp, automaticHelpErrorsForRecording } from '../../shared/utils/coach-help-audit'
+import { assertPublicApiRateLimit, PUBLIC_RATE_LIMITS } from '../services/public-api-rate-limit'
+import { readLimitedJsonBody } from '../utils/limited-json-body'
 
 interface AutomaticHelpErrorBody {
   context?: unknown
@@ -41,7 +43,8 @@ function fingerprint(parts: unknown[]) {
 }
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody<AutomaticHelpErrorBody>(event)
+  await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.automaticHelpError)
+  const body = await readLimitedJsonBody<AutomaticHelpErrorBody>(event, 768 * 1024)
   const context = record(body?.context)
   const question = record(body?.question) as unknown as ExerciseQuestion
   const verb = record(body?.verb) as unknown as Verb

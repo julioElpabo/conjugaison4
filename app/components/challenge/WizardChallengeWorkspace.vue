@@ -128,8 +128,12 @@ let tourSnapshot: TourSnapshot | null = null
 let tourCompleted = false
 let tourPromptTimer: ReturnType<typeof setTimeout> | undefined
 
-const displayedVerbIds = computed(() => tourActive.value || activePresetId.value ? revealedPresetVerbIds.value : challenge.value.verbIds)
-const displayedTenseIds = computed(() => tourActive.value || activePresetId.value ? revealedPresetTenseIds.value : challenge.value.tenseIds)
+const displayedVerbIds = computed(() => tourActive.value || isPrefilledChallenge.value ? revealedPresetVerbIds.value : challenge.value.verbIds)
+const displayedTenseIds = computed(() => tourActive.value || isPrefilledChallenge.value ? revealedPresetTenseIds.value : challenge.value.tenseIds)
+const displayedSelectedVerbs = computed(() => {
+  const displayedIds = new Set(displayedVerbIds.value)
+  return selectedVerbs.value.filter(verb => displayedIds.has(verb.id))
+})
 
 function cancelPresetReveal() {
   presetRevealTimers.forEach(timer => clearTimeout(timer))
@@ -340,8 +344,15 @@ function goToStep(step: WizardStep) {
   if (step === 2 && selectedVerbs.value.length === 0) return
   if ((step === 3 || step === 4) && !isReady.value) return
   currentStep.value = step
-  if (step === 2 && activePresetId.value && presetTenseRevealPending.value) {
+  if (step === 1 && isPrefilledChallenge.value) {
+    cancelPresetReveal()
+    revealedPresetVerbIds.value = []
+    nextTick(() => revealIds(challenge.value.verbIds, revealedPresetVerbIds))
+  }
+  if (step === 2 && isPrefilledChallenge.value) {
+    cancelPresetReveal()
     presetTenseRevealPending.value = false
+    revealedPresetTenseIds.value = []
     nextTick(() => revealIds(challenge.value.tenseIds, revealedPresetTenseIds))
   }
   if (step === 3) void refreshConjugationExample()
@@ -1024,7 +1035,6 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   actionError.value = ''
   track('challenge_preset_selected', { preset: preset.id, exerciseKind: preset.exerciseKind })
   goToStep(1)
-  nextTick(() => revealIds(challenge.value.verbIds, revealedPresetVerbIds))
 }
 
 async function restoreChallenge() {
@@ -1539,9 +1549,9 @@ async function saveChallenge() {
                     <button class="preset-verb-overview__edit" type="button" @click="isPresetVerbEditing = true">{{ ui('Modifier la liste') }}</button>
                   </div>
                 </header>
-                <ul>
-                  <li v-for="verb in selectedVerbs" :key="verb.id">{{ verb.infinitif }}</li>
-                </ul>
+                <TransitionGroup tag="ul" name="preset-verb">
+                  <li v-for="verb in displayedSelectedVerbs" :key="verb.id">{{ verb.infinitif }}</li>
+                </TransitionGroup>
               </section>
               <template v-else>
                 <div class="wizard-step__intro wizard-step__intro--selection">
@@ -1888,6 +1898,8 @@ async function saveChallenge() {
 .preset-verb-overview__edit:focus-visible { border-radius: 3px; outline: 3px solid color-mix(in srgb, var(--brand) 28%, transparent); outline-offset: 3px; }
 .preset-verb-overview ul { display: flex; margin: 0; padding: 0; flex-wrap: wrap; gap: 10px; list-style: none; }
 .preset-verb-overview li { padding: 9px 14px; border: 1px solid color-mix(in srgb, var(--verb-accent) 45%, var(--line)); border-radius: 999px; color: var(--ink); background: var(--surface); font-weight: 400; }
+.preset-verb-enter-active { transition: opacity 240ms ease, transform 240ms ease; }
+.preset-verb-enter-from { opacity: 0; transform: translateY(9px) scale(.88); }
 .wizard-review, .wizard-launch-step { padding-top: 0; }
 .mobile-label-only { display: none; }
 .wizard-review :deep(.options-card) { margin: 0 0 18px; box-shadow: none; }
@@ -1954,6 +1966,7 @@ async function saveChallenge() {
     animation: none;
   }
   .launch-verbs-expand-enter-active, .launch-verbs-expand-leave-active { transition: none; }
+  .preset-verb-enter-active { transition: none; }
 }
 
 @media (max-width: 820px) {

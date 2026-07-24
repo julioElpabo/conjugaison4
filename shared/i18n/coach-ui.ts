@@ -1,5 +1,5 @@
 import type { AppLocale } from './locales'
-import type { CoachProfile } from '../types/coach'
+import type { CoachHelpEngineKey, CoachProfile } from '../types/coach'
 
 type CoachTranslations = Record<Exclude<AppLocale, 'fr'>, string>
 
@@ -58,6 +58,41 @@ const coachUiTexts: Record<string, CoachTranslations> = {
   '« {complement} » arrive après « {verb} » : pas d’accord, « {participle} » !': { de: '„{complement}“ steht nach „{verb}“: keine Angleichung, „{participle}“!', en: '“{complement}” comes after “{verb}”: no agreement, “{participle}”!', it: '«{complement}» viene dopo «{verb}»: nessuna concordanza, «{participle}»!', es: '«{complement}» aparece después de «{verb}»: no hay concordancia, «{participle}».' },
   'Le COD « {complement} » est devant « {verb} » : accord obligatoire avec  {complement} . Le participe est :  « {participle} » !': { de: 'Das direkte Objekt „{complement}“ steht vor „{verb}“: Die Angleichung an {complement} ist erforderlich. Das Partizip lautet „{participle}“!', en: 'The direct object “{complement}” comes before “{verb}”: agreement with {complement} is required. The participle is “{participle}”!', it: 'Il complemento oggetto «{complement}» precede «{verb}»: la concordanza con {complement} è obbligatoria. Il participio è «{participle}»!', es: 'El complemento directo «{complement}» va antes de «{verb}»: la concordancia con {complement} es obligatoria. El participio es «{participle}».' },
   'Attention au piège : « {complement} » est un COI, donc aucun accord !': { de: 'Vorsicht: „{complement}“ ist ein indirektes Objekt, daher gibt es keine Angleichung!', en: 'Watch out: “{complement}” is an indirect object, so there is no agreement!', it: 'Attenzione: «{complement}» è un complemento indiretto, quindi nessuna concordanza!', es: 'Atención: «{complement}» es un complemento indirecto, así que no hay concordancia.' },
+}
+
+const coachHelpApproachTitles: Record<CoachHelpEngineKey, Record<AppLocale, string>> = {
+  'complete-avec-reponses': {
+    fr: 'Aide complète avec réponses',
+    de: 'Ausführliche Hilfe mit Antworten',
+    en: 'Detailed help with answers',
+    it: 'Aiuto completo con risposte',
+    es: 'Ayuda completa con respuestas',
+  },
+  complete: {
+    fr: 'Aide complète sans réponses',
+    de: 'Ausführliche Hilfe ohne Antworten',
+    en: 'Detailed help without answers',
+    it: 'Aiuto completo senza risposte',
+    es: 'Ayuda completa sin respuestas',
+  },
+  'tres-condensee': {
+    fr: 'Aide très condensée',
+    de: 'Sehr kompakte Hilfe',
+    en: 'Very concise help',
+    it: 'Aiuto molto sintetico',
+    es: 'Ayuda muy concisa',
+  },
+  allophone: {
+    fr: 'Aide allophone',
+    de: 'Hilfe für Anderssprachige',
+    en: 'Help for non-native speakers',
+    it: 'Aiuto per allofoni',
+    es: 'Ayuda para hablantes de otras lenguas',
+  },
+}
+
+export function coachHelpApproachTitle(locale: AppLocale, approach: CoachHelpEngineKey): string {
+  return coachHelpApproachTitles[approach][locale]
 }
 
 export function translateCoachUiText(locale: AppLocale, value?: string | null): string {

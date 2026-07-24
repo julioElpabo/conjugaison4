@@ -32,8 +32,18 @@ onMounted(() => {
 
 function toggleTheme() {
   const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
-  isDark.value = nextTheme === 'dark'
-  applyTheme(nextTheme)
+  const updateTheme = () => {
+    isDark.value = nextTheme === 'dark'
+    applyTheme(nextTheme)
+  }
+  const viewTransitionDocument = document as Document & {
+    startViewTransition?: (update: () => void) => unknown
+  }
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && viewTransitionDocument.startViewTransition) {
+    viewTransitionDocument.startViewTransition(updateTheme)
+    return
+  }
+  updateTheme()
 }
 
 function requestHomeReset() {
@@ -183,16 +193,54 @@ html {
 }
 
 body {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
   margin: 0;
   color: var(--ink);
-  background: linear-gradient(180deg, #d7f3fa 0%, #f9f8e8 72%, #f6f3e7 100%);
+  background-color: #dcecf3;
 }
 
-:root[data-theme='dark'] body {
-  background:
-    radial-gradient(circle at 12% 0%, rgb(35 70 71 / 55%), transparent 32rem),
-    linear-gradient(180deg, #111b1c 0%, #182321 65%, #151d1c 100%);
+body::before,
+body::after {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background-color: #dcecf3;
+  background-image:
+    linear-gradient(180deg, rgb(247 252 251 / 52%), rgb(239 247 245 / 62%)),
+    url('/images/site-mountains.svg');
+  background-blend-mode: normal;
+  background-position: center bottom;
+  background-size: cover;
+}
+
+body::after {
+  background-color: #081a31;
+  background-image:
+    linear-gradient(180deg, rgb(3 14 31 / 88%) 0%, rgb(5 24 38 / 78%) 42%, rgb(4 22 30 / 26%) 70%, transparent 100%),
+    url('/images/site-mountains.svg');
+  background-blend-mode: normal;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+:root[data-theme='dark'] body::after {
+  opacity: 1;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 1s;
+  animation-timing-function: ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after {
+    transition: none;
+  }
 }
 
 button,

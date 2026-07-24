@@ -33,9 +33,7 @@ body.dialog-open {
 .challenge-page {
   min-height: 100vh;
   color: var(--ink);
-  background:
-    radial-gradient(circle at 10% 4%, rgba(183, 225, 230, 0.68), transparent 31rem),
-    linear-gradient(180deg, #eaf8fb 0, #f8f8eb 48rem, #f7f8f5 100%);
+  background: transparent;
   font-family: "Funnel Sans", "Avenir Next", Avenir, system-ui, sans-serif;
 }
 

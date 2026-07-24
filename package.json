@@ -12,7 +12,7 @@
     "data:audit-variants": "node --env-file=.env scripts/audit-academie-variants.mjs",
     "data:add-visible-anteposed-complements": "node --env-file=.env scripts/add-visible-anteposed-complements.mjs",
     "data:apply-variants": "node --env-file=.env scripts/apply-academie-variants.mjs",
-    "data:repair-integrity": "node --env-file=.env scripts/repair-conjugation-integrity.mjs",
+    "data:repair-integrity": "node --env-file-if-exists=.env scripts/repair-conjugation-integrity.mjs",
     "data:migrate-verb-metadata": "node --env-file=.env --experimental-strip-types scripts/migrate-verb-metadata.mjs",
     "data:audit-verb-definitions-falc": "node --env-file=.env scripts/migrate-verb-definitions-falc.mjs",
     "data:audit-coach-help-semantics": "node --env-file=.env --import tsx scripts/audit-coach-help-semantics.mjs",

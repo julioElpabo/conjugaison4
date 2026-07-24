@@ -2,11 +2,11 @@ import mysql from 'mysql2/promise'
 
 const apply = process.argv.includes('--apply')
 const database = await mysql.createConnection({
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT || 3306),
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+  host: process.env.NUXT_DB_HOST || process.env.DB_HOST,
+  port: Number(process.env.NUXT_DB_PORT || process.env.DB_PORT || 3306),
+  database: process.env.NUXT_DB_NAME || process.env.DB_NAME,
+  user: process.env.NUXT_DB_USER || process.env.DB_USER,
+  password: process.env.NUXT_DB_PASSWORD || process.env.DB_PASSWORD,
 })
 
 const report = {

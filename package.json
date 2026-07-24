@@ -60,6 +60,7 @@
     "all-the-cities": "^3.1.0",
     "bcryptjs": "^3.0.3",
     "docx": "^9.7.1",
+    "driver.js": "^1.8.0",
     "i18n-iso-countries": "^7.14.0",
     "jspdf": "^4.2.1",
     "mysql2": "^3.22.6",

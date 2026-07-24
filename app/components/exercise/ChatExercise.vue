@@ -29,6 +29,7 @@ const props = defineProps<{
   verbs: Verb[]
   tenses: ConjugationTense[]
   regenerateQuestions: () => Promise<void>
+  tourDemo?: boolean
 }>()
 
 const emit = defineEmits<{ close: [] }>()
@@ -64,8 +65,9 @@ const regeneratingQuestions = ref(false)
 const restartError = ref('')
 const printSummaryOpen = ref(false)
 const closeConfirmationOpen = ref(false)
-const helpOpen = ref(false)
+const helpOpen = ref(Boolean(props.tourDemo))
 const helpQuestionIndex = ref<number | null>(null)
+const tourDemoReady = ref(!props.tourDemo)
 const sequence = ref(0)
 const lastMediaQuestion = ref(-100)
 const allowMotion = ref(true)
@@ -258,6 +260,30 @@ function showLatestHelp() {
   scrollThreadToBottom()
 }
 
+function showDemoHelp() {
+  helpQuestionIndex.value = currentIndex.value
+  helpOpen.value = true
+  scrollThreadToBottom()
+}
+
+function waitUntilTourReady() {
+  if (tourDemoReady.value) return Promise.resolve()
+  return new Promise<void>((resolve) => {
+    const stop = watch(tourDemoReady, (ready) => {
+      if (!ready) return
+      stop()
+      resolve()
+    })
+  })
+}
+
+function hideDemoHelp() {
+  helpOpen.value = false
+  helpQuestionIndex.value = null
+}
+
+defineExpose({ showDemoHelp, hideDemoHelp, waitUntilTourReady })
+
 function closeHelp() {
   helpOpen.value = false
   helpQuestionIndex.value = null
@@ -386,7 +412,9 @@ function restartHelpReminderTimer() {
 function enqueueCoachBubble(createMessage: () => Omit<ChatMessage, 'id' | 'author'>) {
   const version = conversationVersion
   coachQueue = coachQueue.then(async () => {
-    const remainingDelay = Math.max(0, CHAT_BUBBLE_DELAY_MS - (Date.now() - lastCoachBubbleAt))
+    const remainingDelay = props.tourDemo
+      ? 0
+      : Math.max(0, CHAT_BUBBLE_DELAY_MS - (Date.now() - lastCoachBubbleAt))
     if (remainingDelay) await wait(remainingDelay)
     if (version !== conversationVersion) return
     messages.value.push({ id: ++sequence.value, author: 'coach', ...createMessage() })
@@ -451,7 +479,7 @@ async function askCurrentQuestion() {
   posingQuestion.value = true
   const firstQuestionMessageId = sequence.value + 1
   if (currentIndex.value > 0) await addCoachReaction('question', contextFor(question))
-  if (question.instruction) await addCoachText(uiLabel(question.instruction), undefined, true)
+  if (question.instruction) await addCoachText(uiLabel(question.instruction))
   const bubbles = coachQuestionBubbles(question, {
     omitIndicativeMode: omitIndicativeMode.value,
     modeLabel: uiLabel(question.mode),
@@ -469,12 +497,12 @@ async function runChatOpening(eventType: Extract<CoachEvent, 'introduction' | 'r
   const version = conversationVersion
   posingQuestion.value = true
 
-  await wait(CHAT_HELP_OPEN_DELAY_MS)
+  if (!props.tourDemo) await wait(CHAT_HELP_OPEN_DELAY_MS)
   if (version !== conversationVersion) return
   helpQuestionIndex.value = null
   helpOpen.value = true
 
-  await wait(CHAT_MESSAGES_AFTER_HELP_DELAY_MS)
+  if (!props.tourDemo) await wait(CHAT_MESSAGES_AFTER_HELP_DELAY_MS)
   if (version !== conversationVersion) return
   await addCoachReaction(eventType, {})
   if (version !== conversationVersion) return
@@ -645,8 +673,9 @@ function confirmClose() {
 onMounted(async () => {
   chatSessionId.value = randomIdentifier('chat')
   resetExerciseRunId()
-  allowMotion.value = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  allowMotion.value = !props.tourDemo && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
   await runChatOpening('introduction')
+  tourDemoReady.value = true
 })
 
 onBeforeUnmount(() => {
@@ -658,9 +687,9 @@ onBeforeUnmount(() => {
 
 <template>
   <Teleport to="body">
-    <div class="chat-overlay" @click.self="requestClose">
+    <div v-show="tourDemoReady" class="chat-overlay" data-tour="chat-exercise" @click.self="requestClose">
       <div ref="chat-dialogs" class="chat-dialogs" :class="{ 'chat-dialogs--with-help': helpOpen, 'chat-dialogs--confirming': closeConfirmationOpen }" :style="{ '--coach-color': coach.themeColor }" role="dialog" aria-modal="true" aria-labelledby="chat-title" tabindex="-1" @click.self="requestClose">
-      <section class="chat-dialog" role="region" aria-labelledby="chat-title">
+      <section class="chat-dialog" data-tour="chat-dialog" role="region" aria-labelledby="chat-title">
         <header class="chat-header">
           <img class="coach-avatar" :src="coach.avatarPath" alt="">
           <div class="chat-header__identity">

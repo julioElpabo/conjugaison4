@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { AppLocale } from '~~/shared/i18n/locales'
+import { guidedTourCopy } from '~~/shared/i18n/guided-tour'
 
 const { ui, interfaceLocale, setInterfaceLocale, localePath } = useLanguagePreferences()
 const route = useRoute()
@@ -16,6 +17,10 @@ const languageOptions = computed<{ value: AppLocale, label: string, flag: string
   { value: 'es', label: ui('Espagnol'), flag: '🇪🇸' },
 ])
 const homeResetRequested = useState('home-reset-requested', () => false)
+const guidedTourRequested = useState('guided-tour-requested', () => false)
+const wizardAtHome = useState('wizard-at-home', () => true)
+const tourCopy = computed(() => guidedTourCopy(interfaceLocale.value))
+const isActualHomePage = computed(() => localizedSectionPath.value === '/' && wizardAtHome.value)
 
 onMounted(() => {
   const activeTheme = document.documentElement.dataset.theme
@@ -34,6 +39,13 @@ function toggleTheme() {
 function requestHomeReset() {
   homeResetRequested.value = true
 }
+
+async function requestGuidedTour() {
+  guidedTourRequested.value = true
+  if (localizedSectionPath.value !== '/') {
+    await navigateTo(localePath('/'))
+  }
+}
 const activeSection = computed(() => {
   if (localizedSectionPath.value === '/consulter' || localizedSectionPath.value.startsWith('/consulter/')) return 'consulter'
   if (localizedSectionPath.value === '/apprendre' || localizedSectionPath.value.startsWith('/apprendre/')) return 'apprendre'
@@ -46,10 +58,22 @@ const activeSection = computed(() => {
   <div class="site-shell">
     <header class="site-header">
       <div class="site-header__inner">
-        <NuxtLink class="site-brand" :to="localePath('/')">
-          <strong>TATITOTU</strong>
-          <span>{{ ui('Défis de conjugaison') }}</span>
-        </NuxtLink>
+        <div class="site-header__identity">
+          <NuxtLink class="site-brand" :to="localePath('/')">
+            <strong>TATITOTU</strong>
+            <span>{{ ui('Défis de conjugaison') }}</span>
+          </NuxtLink>
+          <button
+            v-if="!isActualHomePage"
+            class="site-tour-button"
+            type="button"
+            :title="tourCopy.navLabel"
+            @click="requestGuidedTour"
+          >
+            <span aria-hidden="true">?</span>
+            <span>{{ tourCopy.navLabel }}</span>
+          </button>
+        </div>
         <nav class="site-navigation" :aria-label="ui('Navigation principale')">
           <NuxtLink class="site-navigation__home" :to="localePath('/')" :aria-label="ui('Accueil')" :title="ui('Accueil')" @click="requestHomeReset">
             <svg aria-hidden="true" viewBox="0 0 24 24">
@@ -222,6 +246,13 @@ a {
   letter-spacing: .06em;
 }
 
+.site-header__identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 16px;
+}
+
 .site-brand strong {
   letter-spacing: .18em;
 }
@@ -250,6 +281,49 @@ a {
   font-size: .92rem;
   font-weight: 700;
   transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.site-tour-button {
+  display: inline-flex;
+  min-height: 32px;
+  padding: 4px 9px 4px 5px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  color: #0b4f69;
+  border: 2px solid #e4ad00;
+  border-radius: 999px;
+  background: #fff3a8;
+  box-shadow: 0 4px 13px rgb(0 0 0 / 16%), 0 0 0 3px rgb(255 215 43 / 10%);
+  cursor: pointer;
+  font-size: .76rem;
+  font-weight: 750;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.site-tour-button > span:first-child {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  color: #493a08;
+  border: 1px solid #c99500;
+  border-radius: 50%;
+  background: #ffd943;
+  font-size: .66rem;
+  font-weight: 900;
+}
+
+.site-tour-button:hover {
+  color: #083f54;
+  border-color: #c99500;
+  background: #ffe978;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 20%), 0 0 0 4px rgb(255 215 43 / 20%);
+}
+
+.site-tour-button:focus-visible {
+  outline: 3px solid rgb(255 215 43 / 72%);
+  outline-offset: 2px;
 }
 
 .site-navigation__home {

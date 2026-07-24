@@ -97,6 +97,11 @@ function rememberedFormMarkup(value: string, capitalize = true) {
   return `<mark><strong>${escapedHtml(displayed)}</strong></mark>`
 }
 
+function rememberedFormBadgeMarkup(value: string) {
+  const displayed = value.trim().replace(/^./u, letter => letter.toLocaleUpperCase('fr'))
+  return `<samp><strong>${escapedHtml(displayed)}</strong></samp>`
+}
+
 function resultFormMarkup(value: string, capitalize = true) {
   const trimmed = value.trim()
   const displayed = capitalize ? trimmed.replace(/^./u, letter => letter.toLocaleUpperCase('fr')) : trimmed
@@ -408,13 +413,32 @@ function referenceDerivedRows(
   let fixedForms: Array<string | null> = []
   let lead = ''
 
+  if (reference.paradigmForms?.length) {
+    const rows = reference.paradigmForms.map(({ subject, form, personId }) => {
+      const displayForm = isPronominalInfinitive(infinitive, verb)
+        ? displayedConjugatedForm(subject, form, infinitive, verb)
+        : form
+      const formMarkup = personId === question.personId
+        ? rememberedFormMarkup(displayForm, false)
+        : `<strong>${escapedHtml(displayForm)}</strong>`
+      return `<tr><th><strong>${escapedHtml(subject)}</strong></th><td>${formMarkup}</td></tr>`
+    }).join('')
+    return rows
+      ? {
+          stem: '',
+          rows,
+          lead: `Cette forme repère te permettra de conjuguer le verbe <strong>${escapedHtml(infinitive || 'demandé')}</strong> au même temps à toutes les personnes :`,
+        }
+      : null
+  }
+
   if (mode === 'indicatif' && time === 'passe simple' && reference.kind === 'past-simple-il') {
     const series = pastSimpleSeriesFromReference(reference.form)
     if (!series) return null
     stem = series.stem
     endings = series.endings
     if (normalized(reference.form).endsWith('ut') || normalized(reference.form).endsWith('int')) {
-      lead = `Cette forme repère est utile parce qu’elle montre la série du passé simple de <strong>${escapedHtml(question.infinitif || verb?.infinitif || 'ce verbe')}</strong>. Avec elle, tu peux retenir les autres formes ${escapedHtml(tenseContext(question, tense))} :`
+      lead = 'Cette forme repère est utile car elle te permet de construire toutes les autres formes conjuguées du passé simple de l’indicatif :'
     }
   } else if (mode === 'subjonctif' && time === 'imparfait' && reference.kind === 'past-simple-il') {
     const series = subjunctiveImperfectSeriesFromReference(reference.form)
@@ -456,8 +480,7 @@ function referenceUsefulnessHtml(
   const derived = referenceDerivedRows(question, reference, verb, tense, rule)
   if (!derived) return ''
   const context = tenseContext(question, tense)
-  const displayedStem = radicalBadge(derived.stem)
-  const lead = derived.lead || `Cette forme repère est utile parce qu’elle donne le point de départ ${displayedStem}. Avec les terminaisons, tu peux construire les formes ${escapedHtml(context)} :`
+  const lead = derived.lead || `Cette forme repère est utile parce qu’elle donne le point de départ ${radicalBadge(derived.stem)}. Avec les terminaisons, tu peux construire les formes ${escapedHtml(context)} :`
   return `<figure><figcaption>En effet</figcaption><blockquote><p>${lead}</p><table><tbody>${derived.rows}</tbody></table></blockquote></figure>`
 }
 
@@ -496,7 +519,7 @@ function requestedReferenceHelpHtml(
   const construction = decomposition
     ? `<figure><figcaption>Construis la réponse</figcaption><blockquote><p>Tu peux aussi la reconstruire : radical ${radicalBadge(decomposition.base)} + terminaison ${endingBadge(decomposition.ending)}.</p><b>${assembledFormBadges(decomposition.base, decomposition.ending)}<i>✓</i></b>${pronominalAnswerHelp(requestedSubject, conjugatedCore(question.conjugaison1 || ''), question.infinitif || verb?.infinitif || '', verb, question.conjugaison1 || '')}</blockquote></figure>`
     : requestedReferenceVerificationHtml(question, reference, tense)
-  return `<figure>${knowledgeCaption()}<blockquote><strong>Forme repère</strong><p>${intro} Apprends-la par cœur, c’est très utile :</p><p>${rememberedFormMarkup(display)}</p></blockquote></figure>${construction}${referenceUsefulnessHtml(question, tense, reference, verb)}`
+  return `<figure>${knowledgeCaption()}<blockquote><strong>Forme repère</strong><p>${intro} Apprends-la par cœur, c’est très utile :</p><p>${rememberedFormBadgeMarkup(display)}</p></blockquote></figure>${construction}${referenceUsefulnessHtml(question, tense, reference, verb)}`
 }
 
 function shouldUseReferenceMethodForRegularForm(
@@ -611,7 +634,7 @@ function subjunctiveImperfectHelpHtml(
   const pronominalResult = isPronominalInfinitive(infinitive, verb) && answerDisplay
     ? pronominalAnswerHelp(question.pronom || question.saisiePrefixe || '', conjugatedCore(question.conjugaison1 || ''), infinitive, verb, question.conjugaison1 || '')
     : ''
-  const answerBlock = `<figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute ${endingBadge(targetEnding)} au point de départ ${radicalBadge(radical)} :</p>${answerMarkup}${pronominalResult}</blockquote></figure>`
+  const answerBlock = `<figure><figcaption>Construis la réponse</figcaption><blockquote><p>Ajoute ${endingBadge(targetEnding)} au point de départ ${radicalBadge(radical)} :</p>${answerMarkup}${pronominalResult}</blockquote></figure>`
   return `${knowledgeBlock}${radicalBlock}${answerBlock}${usefulnessBlock}`
 }
 
@@ -738,8 +761,8 @@ function conditionalPresentHelpHtml(
 
   const assembly = futureRadical && ending ? assembledFormBadges(futureRadical, ending) : rememberedFormMarkup(actualForm)
   const answer = revealAnswers
-    ? `<figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute la terminaison de l’imparfait ${endingBadge(ending)} au radical du futur ${radicalBadge(futureRadical)} :</p><b>${assembly}<i>✓</i></b></blockquote></figure>`
-    : `<figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute au radical du futur la terminaison de l’imparfait qui correspond à la personne demandée.</p>${answerFreeExample}</blockquote></figure>`
+    ? `<figure><figcaption>Construis la réponse</figcaption><blockquote><p>Ajoute la terminaison de l’imparfait ${endingBadge(ending)} au radical du futur ${radicalBadge(futureRadical)} :</p><b>${assembly}<i>✓</i></b></blockquote></figure>`
+    : `<figure><figcaption>Construis la réponse</figcaption><blockquote><p>Ajoute au radical du futur la terminaison de l’imparfait qui correspond à la personne demandée.</p>${answerFreeExample}</blockquote></figure>`
   return `${knowledge}${radicalBlock}${answer}`
 }
 
@@ -949,8 +972,8 @@ function buildCompoundConjugationHtml(question: ExerciseQuestion, verb?: Verb, t
     ? `<blockquote><strong>Résultat</strong><p>${resultFormMarkup(officialForm, false)}</p></blockquote>`
     : ''
   const answer = revealAnswers
-    ? `<figure><figcaption>Réponse</figcaption><ol><li>${auxiliaryInstruction}</li><li>Ajoute le participe passé :<br>${rememberedFormMarkup(participle)}</li><li>Vérifie l’accord du participe passé. Regarde plus bas pour plus de détails.</li></ol>${result}</figure>`
-    : `<figure><figcaption>Réponse</figcaption><ol><li>Conjugue le verbe auxiliaire ${escapedHtml(auxiliaryContext)} avec <strong>${escapedHtml(subject)}</strong>.</li><li>Ajoute le participe passé.</li><li>Vérifie l’accord du participe passé. Regarde plus bas pour plus de détails.</li></ol></figure>`
+    ? `<figure><figcaption>Construis la réponse</figcaption><ol><li>${auxiliaryInstruction}</li><li>Ajoute le participe passé :<br>${rememberedFormMarkup(participle)}</li><li>Vérifie l’accord du participe passé. Regarde plus bas pour plus de détails.</li></ol>${result}</figure>`
+    : `<figure><figcaption>Construis la réponse</figcaption><ol><li>Conjugue le verbe auxiliaire ${escapedHtml(auxiliaryContext)} avec <strong>${escapedHtml(subject)}</strong>.</li><li>Ajoute le participe passé.</li><li>Vérifie l’accord du participe passé. Regarde plus bas pour plus de détails.</li></ol></figure>`
   const pronominalReminder = !revealAnswers ? pronominalIntroHtml(question, infinitive, verb) : ''
   return `${knowledge}${pronominalReminder}${answer}${compoundAgreementHtml(auxiliary, subject, participle, officialForm, question, verb)}`
 }
@@ -1224,7 +1247,7 @@ export function buildConjugationBaseHtml(
       const pronominalResult = isPronominalInfinitive(infinitive, verb) && answerDisplay && normalized(answerDisplay) !== normalized(actualForm)
         ? `<p>Ajoute aussi le pronom réfléchi adapté :</p><b>${rememberedFormMarkup(answerDisplay)}<i>✓</i></b>`
         : ''
-      const answerBlock = `<figure><figcaption>Réponse</figcaption><blockquote><p>Ajoute ${ending} au radical ${changesBeforeEnding ? radicalBadge(rawReferenceRadical) : base} :</p>${assembly}${pronominalResult}</blockquote></figure>`
+      const answerBlock = `<figure><figcaption>Construis la réponse</figcaption><blockquote><p>Ajoute ${ending} au radical ${changesBeforeEnding ? radicalBadge(rawReferenceRadical) : base} :</p>${assembly}${pronominalResult}</blockquote></figure>`
       if (approach === 'concise') {
         return `${knowledgeBlock}${pronominalIntro}${radicalBlock}${answerBlock}${usefulnessBlock}`
       }

@@ -42,6 +42,7 @@ onMounted(async () => {
     <div class="challenge-actions" :aria-label="ui('Lancer le défi')">
       <button
         class="action-button action-button--primary"
+        data-tour="action-classic"
         type="button"
         :disabled="!ready || Boolean(busyAction)"
         @click="emit('exercise', 'classic')"
@@ -55,6 +56,7 @@ onMounted(async () => {
 
       <button
         class="action-button action-button--chat"
+        data-tour="action-coach"
         type="button"
         :disabled="!ready || Boolean(busyAction)"
         @click="emit('exercise', 'chat')"
@@ -74,6 +76,7 @@ onMounted(async () => {
 
       <button
         class="action-button action-button--print"
+        data-tour="action-print"
         type="button"
         :disabled="!ready || Boolean(busyAction)"
         @click="emit('print')"
@@ -94,6 +97,7 @@ onMounted(async () => {
 
       <button
         class="action-button action-button--share"
+        data-tour="action-share"
         type="button"
         :disabled="!ready || Boolean(busyAction)"
         @click="emit('save')"

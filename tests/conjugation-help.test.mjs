@@ -260,7 +260,7 @@ test('le radical de l’imparfait part de nous au présent sans répéter la con
   assert.match(html, /<p><mark><strong>Nous mangeons<\/strong><\/mark><\/p><\/blockquote>/)
   assert.match(html, /<strong>Terminaisons de l’imparfait de l’indicatif<\/strong><table>/)
   assert.match(html, /<figcaption>Trouve le radical<\/figcaption><ol><li>Prends la forme repère :<br><mark>/)
-  assert.match(html, /<figcaption>Réponse<\/figcaption><blockquote><p>Ajoute <samp>-ais<\/samp> au radical <var>mange-<\/var>/)
+  assert.match(html, /<figcaption>Construis la réponse<\/figcaption><blockquote><p>Ajoute <samp>-ais<\/samp> au radical <var>mange-<\/var>/)
   assert.doesNotMatch(html, /<li>Mode :|<li>Temps :|<li>Personne :/)
   assert.match(html, /Enlève <kbd>-ons<\/kbd>/)
   assert.match(html, /<span><var>mange<\/var><samp>ais<\/samp><\/span>/)
@@ -395,12 +395,44 @@ test('il elle on partagent la même forme repère à la troisième personne du s
   }), verb({ infinitif: 'être', terminaison: 're', groupeConjugaison: 3 }), undefined, 'cif-falc')
 
   assert.match(html, /La forme demandée est justement la <strong>forme repère<\/strong>/)
-  assert.match(html, /<mark><strong>Il fut<\/strong><\/mark>/)
+  assert.match(html, /<samp><strong>Il fut<\/strong><\/samp>/)
   assert.match(html, /<figcaption>En effet<\/figcaption>/)
-  assert.match(html, /Cette forme repère est utile parce qu’elle montre la série du passé simple de <strong>être<\/strong>/)
+  assert.match(html, /Cette forme repère est utile car elle te permet de construire toutes les autres formes conjuguées du passé simple de l’indicatif/)
   assert.match(html, /<strong>fus<\/strong>/)
   assert.match(html, /<mark><strong>fut<\/strong><\/mark>/)
   assert.doesNotMatch(html, /Construis la réponse/)
+})
+
+test('une forme demandée qui est le repère affiche le paradigme réel complet', () => {
+  const html = buildConjugationBaseHtml(question({
+    infinitif: 'être',
+    mode: 'indicatif',
+    temps: 'présent',
+    personId: 4,
+    pronom: 'je',
+    conjugaison1: 'suis',
+    radicalReference: {
+      kind: 'memorized-form', label: 'je au présent', form: 'suis', removableEnding: '', radical: 'suis',
+      referenceMode: 'indicatif', referenceTense: 'présent', referenceSubject: 'je',
+      strategy: 'reuse-form', validated: true,
+      paradigmForms: [
+        { subject: 'je', form: 'suis', personId: 4 },
+        { subject: 'tu', form: 'es', personId: 5 },
+        { subject: 'il', form: 'est', personId: 6 },
+        { subject: 'nous', form: 'sommes', personId: 7 },
+        { subject: 'vous', form: 'êtes', personId: 8 },
+        { subject: 'ils', form: 'sont', personId: 9 },
+      ],
+    },
+  }), verb({ infinitif: 'être', terminaison: 're', groupeConjugaison: 3 }), undefined, 'cif-falc')
+
+  assert.match(html, /La forme demandée est justement la <strong>forme repère<\/strong>/)
+  assert.match(html, /<figcaption>En effet<\/figcaption>/)
+  assert.match(html, /te permettra de conjuguer le verbe <strong>être<\/strong> au même temps à toutes les personnes/)
+  assert.match(html, /<samp><strong>Je suis<\/strong><\/samp>/)
+  assert.match(html, /<th><strong>je<\/strong><\/th><td><mark><strong>suis<\/strong><\/mark><\/td>/)
+  assert.match(html, /<th><strong>nous<\/strong><\/th><td><strong>sommes<\/strong><\/td>/)
+  assert.match(html, /<th><strong>ils<\/strong><\/th><td><strong>sont<\/strong><\/td>/)
 })
 
 test('l’impératif présent mémorise tu, nous et vous puis renvoie à la règle du s', () => {
@@ -564,7 +596,7 @@ test('les formes repères pronominales font l’élision devant h muet', () => {
     typePronominal: 'essentiel', isPronominalForm: true, typeHInitial: 'muet',
   }), undefined, 'cif-falc')
 
-  assert.match(html, /<mark><strong>Ils s’habillent<\/strong><\/mark>/)
+  assert.match(html, /<samp><strong>Ils s’habillent<\/strong><\/samp>/)
   assert.match(html, /Avec <strong>ils<\/strong>, le pronom réfléchi est <strong>s’<\/strong>/)
   assert.match(html, /<mark><strong>S’habillent<\/strong><\/mark>/)
   assert.doesNotMatch(html, /se habillent|Ils se habillent/)
@@ -807,7 +839,7 @@ test('le bloc automatique d’un temps composé sépare mémorisation, réponse 
   assert.doesNotMatch(html, /Temps utilisé ici|<summary>indicatif ·/)
   assert.match(html, /<th><strong>nous<\/strong><\/th><td><mark><strong>avions<\/strong><\/mark><\/td>/)
   assert.match(html, /Le participe passé de manger<\/strong><p><mark><strong>Mangé/)
-  assert.match(html, /<figcaption>Réponse<\/figcaption>/)
+  assert.match(html, /<figcaption>Construis la réponse<\/figcaption>/)
   assert.match(html, /Conjugue le verbe auxiliaire <strong>avoir<\/strong> à l’imparfait de l’indicatif avec <strong>nous<\/strong>/)
   assert.match(html, /<strong>Résultat<\/strong><p><strong>avions mangé<\/strong><\/p>/)
   assert.doesNotMatch(html, /<strong>Résultat<\/strong><p><mark>/)

@@ -338,6 +338,7 @@ onBeforeUnmount(() => {
 
 <template>
   <aside
+    data-tour="chat-help"
     class="coach-help-panel"
     :class="{ 'coach-help-panel--embedded': embedded }"
     :style="{ '--coach-color': coachColor }"

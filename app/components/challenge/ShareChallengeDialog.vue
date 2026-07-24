@@ -37,7 +37,7 @@ function highlightChallengeLoaderOnHome() {
 <template>
   <Teleport to="body">
     <div class="dialog-backdrop" @click.self="emit('close')">
-      <section ref="share-dialog" class="app-dialog share-dialog" role="dialog" aria-modal="true" aria-labelledby="share-title" tabindex="-1">
+      <section ref="share-dialog" class="app-dialog share-dialog" data-tour="share-dialog" role="dialog" aria-modal="true" aria-labelledby="share-title" tabindex="-1">
         <button ref="close-button" class="dialog-close" type="button" :aria-label="ui('Fermer')" @click="emit('close')">
           ×
         </button>

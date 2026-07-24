@@ -117,6 +117,32 @@ function submitAnswer() {
   })
 }
 
+function showDemoCorrection() {
+  if (feedback.value !== 'idle') return
+  answer.value = currentQuestion.value?.reponses[0] ?? currentQuestion.value?.reponsesPourCorrige[0] ?? ''
+  submitAnswer()
+}
+
+function showTourProgress() {
+  if (props.questions.length < 6) return
+  currentIndex.value = 5
+  answer.value = ''
+  feedback.value = 'idle'
+  retryAlreadyOffered.value = false
+  retryMessageVisible.value = false
+  attempts.value = props.questions.slice(0, 5).map((question, index) => ({
+    question,
+    answer: index === 1 || index === 4
+      ? 'réponse à revoir'
+      : question.reponsesPourCorrige[0] ?? question.reponses[0] ?? '',
+    status: index === 1 || index === 4 ? 'incorrect' : 'correct',
+    attemptNumber: index === 3 ? 2 : 1,
+  }))
+  nextTick(() => answerInput.value?.focus({ preventScroll: true }))
+}
+
+defineExpose({ showDemoCorrection, showTourProgress })
+
 function nextQuestion() {
   if (feedback.value === 'idle') {
     return
@@ -191,7 +217,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
 
 <template>
   <Teleport to="body">
-    <div class="exercise-overlay" @click.self="requestClose">
+    <div class="exercise-overlay" data-tour="classic-exercise" @click.self="requestClose">
       <section
         ref="exercise-dialog"
         class="exercise-dialog"
@@ -301,6 +327,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
           <div
             v-if="feedback !== 'idle'"
             id="answer-feedback"
+            data-tour="classic-correction"
             class="answer-feedback"
             :class="`answer-feedback--${feedback}`"
             aria-live="polite"

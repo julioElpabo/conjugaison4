@@ -24,6 +24,11 @@ export function useDialogFocus(
   }
 
   function onKeydown(event: KeyboardEvent) {
+    // Driver.js possède son propre cycle clavier pendant la visite guidée.
+    // Laisser les deux pièges à focus actifs empêcherait d'atteindre les
+    // boutons Suivant / Précédent placés hors de la fenêtre téléportée.
+    if (document.body.classList.contains('guided-tour-active')) return
+
     if (event.key === 'Escape') {
       event.preventDefault()
       close()

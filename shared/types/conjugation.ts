@@ -167,6 +167,12 @@ export interface ExerciseQuestion {
       form: string
       personId: number
     }>
+    /** Paradigme réel du verbe au mode et au temps de la question. */
+    paradigmForms?: Array<{
+      subject: string
+      form: string
+      personId: number
+    }>
     validated?: boolean
   }
   complement?: string

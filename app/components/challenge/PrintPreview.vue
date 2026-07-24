@@ -607,7 +607,7 @@ async function downloadWord() {
 
 <template>
   <Teleport to="body">
-    <div ref="print-dialog" class="print-overlay" role="dialog" aria-modal="true" aria-labelledby="print-preview-title" tabindex="-1">
+    <div ref="print-dialog" class="print-overlay" data-tour="print-preview" role="dialog" aria-modal="true" aria-labelledby="print-preview-title" tabindex="-1">
       <div class="print-toolbar no-print">
         <div>
           <strong id="print-preview-title">{{ ui('Aperçu avant impression') }}</strong>
@@ -624,7 +624,7 @@ async function downloadWord() {
       </div>
 
       <div class="print-preview-layout">
-        <aside class="print-settings no-print" aria-labelledby="print-settings-title">
+        <aside class="print-settings no-print" data-tour="print-settings" aria-labelledby="print-settings-title">
           <div class="print-settings__heading">
             <p>{{ ui('Personnalisation') }}</p>
             <h2 id="print-settings-title">{{ ui('Options de la fiche') }}</h2>

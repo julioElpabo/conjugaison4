@@ -247,6 +247,7 @@ watch(complementsAvailable, (available) => {
 
       <div
         class="complement-options"
+        data-tour="options-complements"
         :class="{
           'complement-options--disabled': !complementsAvailable,
           'complement-options--hidden': gridLayout && exerciseKind === 'tense-identification',
@@ -300,6 +301,7 @@ watch(complementsAvailable, (available) => {
     <div
       v-if="gridLayout && (conjugationExampleLoading || hasConjugationExample)"
       class="conjugation-example"
+      data-tour="options-preview"
       :class="{ 'conjugation-example--wide': exerciseKind === 'tense-identification' }"
       aria-live="polite"
       aria-atomic="true"

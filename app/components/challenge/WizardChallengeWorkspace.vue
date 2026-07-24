@@ -1,10 +1,13 @@
 <script setup lang="ts">
-const { ui, localePath } = useLanguagePreferences()
+const { ui, localePath, interfaceLocale, setInterfaceLocale } = useLanguagePreferences()
 import type { ChallengePreset, ComplementOption, ExerciseQuestion } from '~~/shared/types/conjugation'
 import { challengePresetGroupLabels } from '~~/shared/data/challenge-presets'
 import { legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils/complement-options'
+import { guidedTourCopy } from '~~/shared/i18n/guided-tour'
+import type { AppLocale } from '~~/shared/i18n/locales'
 import type { CoachProfile } from '~~/shared/types/coach'
-import { getChallengeErrorMessage, useChallengeBuilder } from '~/composables/useChallengeBuilder'
+import type { DriveStep, Driver } from 'driver.js'
+import { getChallengeErrorMessage, useChallengeBuilder, type ChallengeConfig as BuilderChallengeConfig } from '~/composables/useChallengeBuilder'
 import { normalizeChallengeCode, useChallengeApi } from '~/composables/useChallengeApi'
 import ChallengeActions from './ChallengeActions.vue'
 import ChallengeOptions from './ChallengeOptions.vue'
@@ -17,8 +20,29 @@ import ChatExercise from '../exercise/ChatExercise.vue'
 import ClassicExercise from '../exercise/ClassicExercise.vue'
 import CoachPicker from '../exercise/CoachPicker.vue'
 import '~/assets/css/main.css'
+import 'driver.js/dist/driver.css'
 
 type WizardStep = 0 | 1 | 2 | 3 | 4
+type TourFormat = 'quick' | 'complete'
+type ClassicExerciseExposed = {
+  showDemoCorrection: () => void
+  showTourProgress: () => void
+}
+type ChatExerciseExposed = {
+  showDemoHelp: () => void
+  hideDemoHelp: () => void
+  waitUntilTourReady: () => Promise<void>
+}
+interface TourSnapshot {
+  challenge: BuilderChallengeConfig
+  currentStep: WizardStep
+  presetExpanded: boolean
+  presetStage: 'groups' | 'presets'
+  activePresetId?: string
+  isPrefilledChallenge: boolean
+  isPresetVerbEditing: boolean
+  showLaunchSummary: boolean
+}
 
 const {
   catalogue,
@@ -44,6 +68,8 @@ const { track } = useSiteAnalytics()
 const requestUrl = useRequestURL()
 const wizardInitialized = useState('wizard-challenge-initialized', () => false)
 const homeResetRequested = useState('home-reset-requested', () => false)
+const guidedTourRequested = useState('guided-tour-requested', () => false)
+const wizardAtHome = useState('wizard-at-home', () => true)
 const currentStep = ref<WizardStep>(0)
 const isPreparingStep4 = ref(false)
 const highlightChallengeLoader = ref(false)
@@ -67,6 +93,21 @@ const isPrintOpen = ref(false)
 const isShareOpen = ref(false)
 const isCoachPickerOpen = ref(false)
 const selectedCoach = ref<CoachProfile | null>(null)
+const classicExerciseRef = useTemplateRef<ClassicExerciseExposed>('classic-exercise')
+const chatExerciseRef = useTemplateRef<ChatExerciseExposed>('chat-exercise')
+// Cet état doit survivre au changement d’URL effectué par le sélecteur de langue.
+const isTourWelcomeOpen = useState('guided-tour-welcome-open', () => false)
+const tourActive = ref(false)
+const tourSecondaryWizardStep = ref<WizardStep | null>(null)
+const tourWizardIndicatorStyle = ref<Record<string, string>>({})
+const tourCopy = computed(() => guidedTourCopy(interfaceLocale.value))
+const tourLanguageOptions = computed<{ value: AppLocale, label: string, flag: string }[]>(() => [
+  { value: 'fr', label: ui('Français'), flag: '🇫🇷' },
+  { value: 'de', label: ui('Allemand'), flag: '🇩🇪' },
+  { value: 'en', label: ui('Anglais'), flag: '🇬🇧' },
+  { value: 'it', label: ui('Italien'), flag: '🇮🇹' },
+  { value: 'es', label: ui('Espagnol'), flag: '🇪🇸' },
+])
 const revealedPresetVerbIds = ref<number[]>([])
 const revealedPresetTenseIds = ref<number[]>([])
 const presetTenseRevealPending = ref(false)
@@ -82,26 +123,41 @@ const conjugationExampleSuffixRaw = ref('')
 const conjugationExampleLoading = ref(false)
 let conjugationExampleRequest = 0
 let presetRevealTimers: ReturnType<typeof setTimeout>[] = []
+let tourDriver: Driver | null = null
+let tourSnapshot: TourSnapshot | null = null
+let tourCompleted = false
+let tourPromptTimer: ReturnType<typeof setTimeout> | undefined
 
-const displayedVerbIds = computed(() => activePresetId.value ? revealedPresetVerbIds.value : challenge.value.verbIds)
-const displayedTenseIds = computed(() => activePresetId.value ? revealedPresetTenseIds.value : challenge.value.tenseIds)
+const displayedVerbIds = computed(() => tourActive.value || activePresetId.value ? revealedPresetVerbIds.value : challenge.value.verbIds)
+const displayedTenseIds = computed(() => tourActive.value || activePresetId.value ? revealedPresetTenseIds.value : challenge.value.tenseIds)
 
 function cancelPresetReveal() {
   presetRevealTimers.forEach(timer => clearTimeout(timer))
   presetRevealTimers = []
 }
 
-function revealIds(ids: number[], target: Ref<number[]>) {
+function refreshTourHighlight() {
+  if (!tourActive.value) return
+  void nextTick().then(() => {
+    requestAnimationFrame(() => {
+      if (tourActive.value) tourDriver?.refresh()
+    })
+  })
+}
+
+function revealIds(ids: number[], target: Ref<number[]>, duration = 1_000) {
   target.value = []
   if (!ids.length) return
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     target.value = [...ids]
+    refreshTourHighlight()
     return
   }
-  const interval = 1_000 / ids.length
+  const interval = duration / ids.length
   ids.forEach((id, index) => {
     presetRevealTimers.push(setTimeout(() => {
       target.value = [...target.value, id]
+      refreshTourHighlight()
     }, Math.round(index * interval)))
   })
 }
@@ -208,6 +264,7 @@ function logUsage(event: 'homepage' | 'print' | 'challenge-save' | 'challenge-lo
 }
 
 onMounted(() => {
+  wizardAtHome.value = currentStep.value === 0
   logUsage('homepage')
   try {
     if (sessionStorage.getItem('highlight-home-challenge-loader') === '1') {
@@ -216,6 +273,17 @@ onMounted(() => {
     }
   } catch {
     // L'accueil fonctionne normalement si le stockage du navigateur est indisponible.
+  }
+  try {
+    const completed = localStorage.getItem('tatitotu-guided-tour-v1') === 'completed'
+    const postponed = sessionStorage.getItem('tatitotu-guided-tour-postponed') === '1'
+    if (!completed && !postponed) {
+      tourPromptTimer = setTimeout(() => {
+        if (currentStep.value === 0 && !tourActive.value) isTourWelcomeOpen.value = true
+      }, 900)
+    }
+  } catch {
+    // La visite reste accessible manuellement si le stockage est indisponible.
   }
 })
 
@@ -346,6 +414,575 @@ function restartChallenge() {
   clearMessages()
   goToStep(0)
 }
+
+function tourQuestions(): ExerciseQuestion[] {
+  const demoVerb = catalogue.value.verbes.find(verb => verb.infinitif.toLocaleLowerCase('fr') === 'être')
+  const compoundTenses = catalogue.value.temps.filter(tense => tense.isCompound)
+  const demoTense = catalogue.value.temps.find(tense => (
+    tense.name.toLocaleLowerCase('fr') === 'passé composé'
+    && (tense.mode?.name.toLocaleLowerCase('fr') === 'indicatif'
+      || catalogue.value.modes.find(mode => mode.id === tense.modeId)?.name.toLocaleLowerCase('fr') === 'indicatif')
+  )) ?? compoundTenses[0]
+  const mode = demoTense?.mode?.name
+    ?? catalogue.value.modes.find(item => item.id === demoTense?.modeId)?.name
+    ?? 'indicatif'
+  const infinitive = 'être'
+  const tenseName = demoTense?.name ?? 'passé composé'
+  const forms = [
+    { subject: 'tu', answer: 'as été', personId: 5 },
+    { subject: 'il', answer: 'a été', personId: 6 },
+    { subject: 'nous', answer: 'avons été', personId: 7 },
+    { subject: 'vous', answer: 'avez été', personId: 8 },
+    { subject: 'ils', answer: 'ont été', personId: 9 },
+    { subject: 'je', answer: 'ai été', personId: 4 },
+  ]
+
+  return Array.from({ length: 20 }, (_, index) => {
+    const { subject, answer, personId } = forms[index % forms.length]!
+    return {
+    id: `guided-tour-${index + 1}`,
+    titre: `${infinitive} · ${tenseName}`,
+    instruction: 'Conjugue le verbe à la forme demandée.',
+    consigne: `${subject} | ${infinitive} | ${tenseName}`,
+    reponses: [answer],
+    reponsesPourCorrige: [answer],
+    verbeId: demoVerb?.id,
+    tenseId: demoTense?.id,
+    personId,
+    infinitif: infinitive,
+    pronom: subject,
+    temps: tenseName,
+    mode,
+    tenseCode: demoTense?.code,
+    modeCode: demoTense?.mode?.code,
+    isCompound: true,
+    conjugaison1: answer,
+    }
+  })
+}
+
+function fallbackTourCoach(): CoachProfile {
+  const reply = (id: number, eventType: CoachProfile['replies'][number]['eventType'], content: string) => ({
+    id,
+    eventType,
+    content,
+    weight: 1,
+    isActive: true,
+  })
+  return {
+    id: -1,
+    slug: 'guide-demo',
+    firstName: 'Camille',
+    lastName: '',
+    gender: 'female',
+    avatarPath: '/coach-media/people/portrait1.jpg',
+    description: 'Je t’aide à avancer étape par étape.',
+    likes: 'les mots et les défis',
+    caractereId: -1,
+    caractereName: 'Guide',
+    personality: 'calme et encourageante',
+    pedagogicalStyle: 'aide progressive',
+    helpApproach: 'complete',
+    themeColor: '#397b75',
+    status: 'published',
+    sortOrder: 0,
+    replies: [
+      reply(-1, 'introduction', 'Bonjour ! Nous allons essayer ce défi ensemble.'),
+      reply(-2, 'question', 'À toi pour la question {questionNumber}.'),
+      reply(-3, 'help-announcement', 'Regardons ensemble comment construire la réponse.'),
+      reply(-4, 'correct', 'Bravo, c’est juste !'),
+      reply(-5, 'incorrect', 'Ce n’est pas encore cela. Observe bien la forme demandée.'),
+      reply(-6, 'finish', 'Le défi est terminé. Bravo pour ton travail !'),
+      reply(-7, 'restart', 'C’est reparti !'),
+      reply(-8, 'correct-alternative', 'Cette réponse est également correcte.'),
+    ],
+    media: [],
+    assignments: [],
+    rules: [],
+  }
+}
+
+async function loadTourCoach() {
+  try {
+    const response = await $fetch<{ coaches: CoachProfile[] }>('/api/coaches')
+    return response.coaches.find(coach => coach.status === 'published' && coach.helpApproach === 'complete')
+      ?? response.coaches.find(coach => coach.status === 'published')
+      ?? response.coaches[0]
+      ?? fallbackTourCoach()
+  } catch {
+    return fallbackTourCoach()
+  }
+}
+
+function prepareTourChallenge() {
+  const complementVerb = catalogue.value.verbes.find(verb => (
+    verb.infinitif.toLocaleLowerCase('fr') === 'manger'
+    && (verb.complementFunctions?.includes('cod') || verb.complementExample?.functionObject === 'cod')
+  )) ?? catalogue.value.verbes.find(verb => (
+    verb.complementFunctions?.includes('cod') || verb.complementExample?.functionObject === 'cod'
+  ))
+  const preferredVerbs = [
+    complementVerb?.id,
+    ...['être', 'avoir'].map(name => catalogue.value.verbes.find(verb => verb.infinitif.toLocaleLowerCase('fr') === name)?.id),
+  ]
+    .filter((id): id is number => id !== undefined)
+  const verbIds = [...new Set([
+    ...preferredVerbs,
+    ...catalogue.value.verbes.map(verb => verb.id),
+  ])].slice(0, 20)
+  const preferredTenseNames = ['présent', 'imparfait', 'futur simple', 'passé composé', 'plus-que-parfait', 'conditionnel présent']
+  const tenseIds = [...new Set([
+    ...preferredTenseNames.map(name => catalogue.value.temps.find(tense => tense.name.toLocaleLowerCase('fr') === name)?.id),
+    ...catalogue.value.temps.map(tense => tense.id),
+  ].filter((id): id is number => id !== undefined))].slice(0, 6)
+
+  challenge.value = {
+    ...challenge.value,
+    verbIds,
+    tenseIds,
+    questionCount: 20,
+    exerciseKind: 'conjugation',
+    pastSimplePronouns: 'all',
+    inclusivePronouns: false,
+    includeComplements: true,
+    complementPlacement: 'after',
+    complementOptions: ['cod-after'],
+    printOptions: {
+      ...challenge.value.printOptions,
+      title: 'Défi de démonstration',
+      showVerbs: true,
+      showTenses: true,
+    },
+  }
+  questions.value = tourQuestions()
+  printQuestions.value = [...questions.value]
+  activePresetId.value = undefined
+  isPrefilledChallenge.value = false
+  isPresetVerbEditing.value = false
+  showLaunchSummary.value = false
+  presetStage.value = 'groups'
+  presetExpanded.value = false
+  revealedPresetVerbIds.value = []
+  revealedPresetTenseIds.value = []
+  currentStep.value = 0
+}
+
+function closeTourWindows() {
+  isExerciseOpen.value = false
+  isCoachPickerOpen.value = false
+  isPrintOpen.value = false
+  isShareOpen.value = false
+}
+
+function setTourOptionsExample() {
+  conjugationExampleRequest += 1
+  conjugationExampleLoading.value = false
+  conjugationInstructionRaw.value = 'Conjugue le verbe au présent.'
+  conjugationQuestionContextRaw.value = 'il | manger | présent'
+  conjugationQuestionRaw.value = ''
+  conjugationExampleRaw.value = 'Il mange une pomme.'
+  conjugationExamplePrefixRaw.value = 'Il mange '
+  conjugationExampleEmphasisRaw.value = 'une pomme'
+  conjugationExampleSuffixRaw.value = '.'
+}
+
+async function showTourBuilderStep(step: WizardStep, secondaryFocus: WizardStep | null = null) {
+  closeTourWindows()
+  currentStep.value = step
+  presetExpanded.value = false
+  revealedPresetVerbIds.value = step >= 2 ? [...challenge.value.verbIds] : revealedPresetVerbIds.value
+  revealedPresetTenseIds.value = step >= 3 ? [...challenge.value.tenseIds] : revealedPresetTenseIds.value
+  if (step === 3) setTourOptionsExample()
+  await nextTick()
+  tourSecondaryWizardStep.value = secondaryFocus
+  if (secondaryFocus === null) return
+  await nextTick()
+  const stepElement = document.querySelector<HTMLElement>(`[data-tour-wizard-step="${secondaryFocus}"]`)
+  if (!stepElement) return
+  tourWizardIndicatorStyle.value = {
+    left: `${stepElement.offsetLeft - 5}px`,
+    top: `${stepElement.offsetTop - 5}px`,
+    width: `${stepElement.offsetWidth + 10}px`,
+    height: `${stepElement.offsetHeight + 10}px`,
+  }
+}
+
+async function openTourChat(showHelp: boolean) {
+  closeTourWindows()
+  currentStep.value = 4
+  selectedCoach.value ??= await loadTourCoach()
+  if (!tourActive.value) return
+  exercisePresentation.value = 'chat'
+  isExerciseOpen.value = true
+  await nextTick()
+  await chatExerciseRef.value?.waitUntilTourReady()
+  if (!tourActive.value) return
+  if (showHelp) chatExerciseRef.value?.showDemoHelp()
+  await nextTick()
+  await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+}
+
+function tourSteps(format: TourFormat): DriveStep[] {
+  const copy = tourCopy.value
+  type TourScene = {
+    element?: string
+    secondaryWizardStep?: WizardStep
+    title: string
+    description: string
+    activate: () => void | Promise<void>
+  }
+
+  const homeScene = (element: string, title: string, description: string): TourScene => ({
+    element,
+    title,
+    description,
+    activate: async () => {
+      closeTourWindows()
+      cancelPresetReveal()
+      currentStep.value = 0
+      presetExpanded.value = false
+      challengeCode.value = ''
+      await nextTick()
+      const codeElement = document.getElementById('wizard-challenge-code')
+      if (codeElement) codeElement.textContent = ''
+    },
+  })
+
+  const scenes: TourScene[] = [
+    homeScene('[data-tour="build-custom"]', copy.buildTitle, copy.buildDescription),
+    {
+      element: '[data-tour="wizard-steps"]',
+      title: copy.stepsTitle,
+      description: copy.stepsDescription,
+      activate: () => showTourBuilderStep(1),
+    },
+    {
+      element: '[data-tour="verbs"]',
+      secondaryWizardStep: 1,
+      title: copy.verbsTitle,
+      description: copy.verbsDescription,
+      activate: async () => {
+        cancelPresetReveal()
+        revealedPresetVerbIds.value = []
+        await showTourBuilderStep(1, 1)
+        revealIds(challenge.value.verbIds, revealedPresetVerbIds, 2_000)
+      },
+    },
+    {
+      element: '[data-tour="tenses"]',
+      secondaryWizardStep: 2,
+      title: copy.tensesTitle,
+      description: copy.tensesDescription,
+      activate: async () => {
+        cancelPresetReveal()
+        revealedPresetVerbIds.value = [...challenge.value.verbIds]
+        revealedPresetTenseIds.value = []
+        await showTourBuilderStep(2, 2)
+        revealIds(challenge.value.tenseIds, revealedPresetTenseIds, 2_000)
+      },
+    },
+    {
+      element: '[data-tour="options"]',
+      secondaryWizardStep: 3,
+      title: copy.optionsTitle,
+      description: copy.optionsDescription,
+      activate: () => showTourBuilderStep(3, 3),
+    },
+    {
+      element: '[data-tour="options-complements"]',
+      secondaryWizardStep: 3,
+      title: copy.complementsTitle,
+      description: copy.complementsDescription,
+      activate: () => showTourBuilderStep(3, 3),
+    },
+    {
+      element: '[data-tour="options-preview"]',
+      secondaryWizardStep: 3,
+      title: copy.previewTitle,
+      description: copy.previewDescription,
+      activate: () => showTourBuilderStep(3, 3),
+    },
+    {
+      element: '[data-tour="actions"]',
+      secondaryWizardStep: 4,
+      title: copy.createTitle,
+      description: copy.createDescription,
+      activate: () => showTourBuilderStep(4, 4),
+    },
+    {
+      element: '[data-tour="classic-exercise"]',
+      title: copy.classicTitle,
+      description: copy.classicDescription,
+      activate: async () => {
+        closeTourWindows()
+        currentStep.value = 4
+        exercisePresentation.value = 'classic'
+        isExerciseOpen.value = true
+        await nextTick()
+        classicExerciseRef.value?.showTourProgress()
+      },
+    },
+    {
+      element: '[data-tour="coach-complete-group"]',
+      title: copy.coachTitle,
+      description: copy.coachDescription,
+      activate: async () => {
+        closeTourWindows()
+        currentStep.value = 4
+        isCoachPickerOpen.value = true
+        await nextTick()
+      },
+    },
+    {
+      element: '[data-tour="chat-dialog"]',
+      title: copy.chatTitle,
+      description: copy.chatDescription,
+      activate: () => openTourChat(false),
+    },
+    {
+      element: '[data-tour="chat-help"]',
+      title: copy.helpTitle,
+      description: copy.helpDescription,
+      activate: () => openTourChat(true),
+    },
+    {
+      element: '[data-tour="print-preview"]',
+      title: copy.printTitle,
+      description: copy.printDescription,
+      activate: async () => {
+        closeTourWindows()
+        currentStep.value = 4
+        printQuestions.value = [...questions.value]
+        isPrintOpen.value = true
+        await nextTick()
+      },
+    },
+    {
+      element: '[data-tour="share-dialog"]',
+      title: copy.shareTitle,
+      description: copy.shareDescription,
+      activate: async () => {
+        closeTourWindows()
+        currentStep.value = 4
+        shareCode.value = 'DE-MO-20-26'
+        isShareOpen.value = true
+        await nextTick()
+      },
+    },
+    {
+      element: '[data-tour="code-loader"]',
+      title: copy.resumeTitle,
+      description: copy.resumeDescription,
+      activate: async () => {
+        closeTourWindows()
+        currentStep.value = 0
+        presetExpanded.value = false
+        challengeCode.value = 'DE-MO-20-26'
+        await nextTick()
+        const codeElement = document.getElementById('wizard-challenge-code')
+        if (codeElement) codeElement.textContent = challengeCode.value
+      },
+    },
+    {
+      title: copy.completedTitle,
+      description: copy.completedDescription,
+      activate: async () => {
+        closeTourWindows()
+        currentStep.value = 0
+        await nextTick()
+      },
+    },
+  ]
+
+  const quickSceneIndexes = [0, 1, 2, 3, 4, 7,8,9,11, 13,14,15]
+  const activeScenes = format === 'quick'
+    ? quickSceneIndexes.map(index => scenes[index]!)
+    : scenes
+  let moving = false
+
+  const waitForScenePlacement = async (index: number, scene: TourScene, activeDriver: Driver) => {
+    const startedAt = Date.now()
+    while (tourActive.value && Date.now() - startedAt < 8_000) {
+      const expectedElement = scene.element ? document.querySelector(scene.element) : undefined
+      const activeElement = document.querySelector('.driver-active-element')
+      const isPlaced = activeDriver.getActiveIndex() === index
+        && (!scene.element || (expectedElement && activeElement === expectedElement))
+      if (isPlaced) {
+        await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+        return
+      }
+      await new Promise(resolve => setTimeout(resolve, 16))
+    }
+  }
+
+  const moveToScene = async (index: number, activeDriver: Driver) => {
+    if (moving || !tourActive.value || !activeScenes[index]) return
+    moving = true
+    document.body.classList.add('guided-tour-transitioning')
+    try {
+      const scene = activeScenes[index]
+      if (scene.secondaryWizardStep === undefined) tourSecondaryWizardStep.value = null
+      await scene.activate()
+      if (!tourActive.value) return
+      await nextTick()
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+      if (!tourActive.value) return
+      const targetElement = scene.element
+        ? document.querySelector<HTMLElement>(scene.element)
+        : null
+      const originalScrollIntoView = targetElement?.scrollIntoView
+      if (targetElement) targetElement.scrollIntoView = () => {}
+      try {
+        activeDriver.moveTo(index)
+      } finally {
+        if (targetElement && originalScrollIntoView) targetElement.scrollIntoView = originalScrollIntoView
+      }
+      await waitForScenePlacement(index, scene, activeDriver)
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+      await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+      activeDriver.refresh()
+    } finally {
+      document.body.classList.remove('guided-tour-transitioning')
+      moving = false
+    }
+  }
+
+  return activeScenes.map((scene, index) => ({
+    ...(scene.element ? { element: scene.element, waitForElement: 8_000 } : {}),
+    disableActiveInteraction: true,
+    popover: {
+      title: scene.title,
+      description: scene.description,
+      side: 'bottom',
+      align: 'center',
+      showButtons: [
+        ...(index > 0 ? ['previous' as const] : []),
+        'next' as const,
+        'close' as const,
+      ],
+      ...(index < activeScenes.length - 1
+        ? { onNextClick: (_element, _step, { driver: activeDriver }) => void moveToScene(index + 1, activeDriver) }
+        : {}),
+      ...(index > 0
+        ? { onPrevClick: (_element, _step, { driver: activeDriver }) => void moveToScene(index - 1, activeDriver) }
+        : {}),
+    },
+  }))
+}
+
+function restoreAfterTour() {
+  cancelPresetReveal()
+  closeTourWindows()
+  tourSecondaryWizardStep.value = null
+  document.body.classList.remove('guided-tour-active')
+  document.body.classList.remove('guided-tour-transitioning')
+  const snapshot = tourSnapshot
+  if (snapshot) {
+    challenge.value = snapshot.challenge
+    currentStep.value = snapshot.currentStep
+    presetExpanded.value = snapshot.presetExpanded
+    presetStage.value = snapshot.presetStage
+    activePresetId.value = snapshot.activePresetId
+    isPrefilledChallenge.value = snapshot.isPrefilledChallenge
+    isPresetVerbEditing.value = snapshot.isPresetVerbEditing
+    showLaunchSummary.value = snapshot.showLaunchSummary
+  }
+  challengeCode.value = ''
+  const codeElement = document.getElementById('wizard-challenge-code')
+  if (codeElement) codeElement.textContent = ''
+  questions.value = []
+  printQuestions.value = []
+  shareCode.value = ''
+  selectedCoach.value = null
+  tourSnapshot = null
+  tourDriver = null
+  tourActive.value = false
+  if (currentStep.value === 3) void refreshConjugationExample()
+  if (tourCompleted) {
+    try {
+      localStorage.setItem('tatitotu-guided-tour-v1', 'completed')
+    } catch {
+      // La visite fonctionne même sans stockage persistant.
+    }
+  }
+  tourCompleted = false
+}
+
+async function startGuidedTour(format: TourFormat) {
+  if (tourActive.value || catalogueStatus.value !== 'success') return
+  isTourWelcomeOpen.value = false
+  tourSnapshot = {
+    challenge: JSON.parse(JSON.stringify(challenge.value)) as BuilderChallengeConfig,
+    currentStep: currentStep.value,
+    presetExpanded: presetExpanded.value,
+    presetStage: presetStage.value,
+    activePresetId: activePresetId.value,
+    isPrefilledChallenge: isPrefilledChallenge.value,
+    isPresetVerbEditing: isPresetVerbEditing.value,
+    showLaunchSummary: showLaunchSummary.value,
+  }
+  closeTourWindows()
+  prepareTourChallenge()
+  tourActive.value = true
+  tourCompleted = false
+  document.body.classList.add('guided-tour-active')
+  await nextTick()
+
+  try {
+    const { driver } = await import('driver.js')
+    const copy = tourCopy.value
+    tourDriver = driver({
+      animate: false,
+      smoothScroll: false,
+      allowClose: true,
+      allowScroll: true,
+      overlayOpacity: .68,
+      stagePadding: 12,
+      stageRadius: 14,
+      popoverClass: 'tatitotu-tour-popover',
+      showProgress: true,
+      nextBtnText: copy.next,
+      prevBtnText: copy.previous,
+      doneBtnText: copy.finish,
+      progressText: copy.progress,
+      steps: tourSteps(format),
+      onPopoverRender: (popover) => {
+        popover.closeButton.setAttribute('aria-label', copy.close)
+        popover.closeButton.title = copy.close
+      },
+      onDoneClick: (_element, _step, { driver: activeDriver }) => {
+        tourCompleted = true
+        activeDriver.destroy()
+      },
+      onDestroyed: restoreAfterTour,
+    })
+    tourDriver.drive()
+  } catch {
+    restoreAfterTour()
+    isTourWelcomeOpen.value = true
+  }
+}
+
+function postponeTour() {
+  isTourWelcomeOpen.value = false
+  try {
+    sessionStorage.setItem('tatitotu-guided-tour-postponed', '1')
+  } catch {
+    // Le bouton reste fonctionnel sans stockage.
+  }
+}
+
+function openTourMenu() {
+  if (tourActive.value) return
+  isTourWelcomeOpen.value = true
+}
+
+watch(guidedTourRequested, (requested) => {
+  if (!requested) return
+  openTourMenu()
+  guidedTourRequested.value = false
+}, { immediate: true })
 
 watch(homeResetRequested, (requested) => {
   if (!requested) return
@@ -602,12 +1239,18 @@ watch(
 
 watch(currentStep, async () => {
   if (import.meta.server) return
+  wizardAtHome.value = currentStep.value === 0
   await nextTick()
   document.querySelector<HTMLElement>('.wizard-panel')?.focus({ preventScroll: true })
   window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
 })
 
-onBeforeUnmount(cancelPresetReveal)
+onBeforeUnmount(() => {
+  cancelPresetReveal()
+  if (tourPromptTimer) clearTimeout(tourPromptTimer)
+  tourDriver?.destroy()
+  document.body.classList.remove('guided-tour-active')
+})
 
 async function prepareExercise(mode: 'classic' | 'chat') {
   if (!isReady.value) return
@@ -695,6 +1338,9 @@ async function saveChallenge() {
       <header class="wizard-hero">
         <h1 :class="{ 'wizard-hero__brand': currentStep === 0, 'wizard-hero__preset': currentStep !== 0 && isPrefilledChallenge }">{{ heroTitle }}</h1>
         <p v-if="currentStep === 0" class="wizard-hero__subtitle">{{ ui('Exercices de conjugaison française, gratuits et sans publicité') }}</p>
+        <button v-if="currentStep === 0" class="tour-entry-button" type="button" @click="openTourMenu">
+          <span aria-hidden="true">?</span>{{ tourCopy.discover }}
+        </button>
       </header>
 
       <main class="wizard-shell">
@@ -719,22 +1365,68 @@ async function saveChallenge() {
         >
           <h2 id="wizard-title" class="sr-only">{{ ui('Composer un défi personnalisé') }}</h2>
 
-          <nav v-if="currentStep !== 0" class="wizard-steps" :aria-label="ui('Étapes de création du défi')">
-            <button class="wizard-step-tab wizard-step-tab--verbs" :class="{ 'is-active': currentStep === 1, 'is-complete': stepStatus.verbs > 0 }" type="button" @click="goToStep(1)">
+          <nav v-if="currentStep !== 0" class="wizard-steps" data-tour="wizard-steps" :aria-label="ui('Étapes de création du défi')">
+            <button
+              class="wizard-step-tab wizard-step-tab--verbs"
+              data-tour-wizard-step="1"
+              :class="{
+                'is-active': currentStep === 1,
+                'is-complete': stepStatus.verbs > 0,
+                'tour-secondary-focus': tourSecondaryWizardStep === 1,
+              }"
+              type="button"
+              @click="goToStep(1)"
+            >
               <span>1</span><span><strong>{{ ui('Verbes') }}</strong><small>{{ stepStatus.verbs ? ui(stepStatus.verbs > 1 ? '{count} choisis' : '{count} choisi', { count: stepStatus.verbs }) : ui('À choisir') }}</small></span>
             </button>
             <span class="wizard-steps__line" aria-hidden="true" />
-            <button class="wizard-step-tab wizard-step-tab--tenses" :class="{ 'is-active': currentStep === 2, 'is-complete': stepStatus.tenses > 0 }" type="button" :disabled="stepStatus.verbs === 0" @click="goToStep(2)">
+            <button
+              class="wizard-step-tab wizard-step-tab--tenses"
+              data-tour-wizard-step="2"
+              :class="{
+                'is-active': currentStep === 2,
+                'is-complete': stepStatus.tenses > 0,
+                'tour-secondary-focus': tourSecondaryWizardStep === 2,
+              }"
+              type="button"
+              :disabled="stepStatus.verbs === 0"
+              @click="goToStep(2)"
+            >
               <span>2</span><span><strong><span class="mobile-label-hidden">{{ ui('Modes et temps') }}</span><span class="mobile-label-only">{{ ui('Temps') }}</span></strong><small>{{ stepStatus.tenses ? ui(stepStatus.tenses > 1 ? '{count} choisis' : '{count} choisi', { count: stepStatus.tenses }) : ui('À choisir') }}</small></span>
             </button>
             <span class="wizard-steps__line" aria-hidden="true" />
-            <button :class="{ 'is-active': currentStep === 3, 'is-complete': currentStep === 4 }" type="button" :disabled="!isReady" @click="goToStep(3)">
+            <button
+              data-tour-wizard-step="3"
+              :class="{
+                'is-active': currentStep === 3,
+                'is-complete': currentStep === 4,
+                'tour-secondary-focus': tourSecondaryWizardStep === 3,
+              }"
+              type="button"
+              :disabled="!isReady"
+              @click="goToStep(3)"
+            >
               <span>3</span><span><strong>{{ ui('Options') }}</strong><small>{{ ui('Finaliser le défi') }}</small></span>
             </button>
             <span class="wizard-steps__line" aria-hidden="true" />
-            <button :class="{ 'is-active': currentStep === 4 }" type="button" :disabled="!isReady || isPreparingStep4" @click="prepareStep4">
+            <button
+              data-tour-wizard-step="4"
+              :class="{
+                'is-active': currentStep === 4,
+                'tour-secondary-focus': tourSecondaryWizardStep === 4,
+              }"
+              type="button"
+              :disabled="!isReady || isPreparingStep4"
+              @click="prepareStep4"
+            >
               <span>4</span><span><strong>{{ ui('Créer') }}</strong><small>{{ ui('Utiliser le défi') }}</small></span>
             </button>
+            <span
+              v-if="tourSecondaryWizardStep !== null"
+              class="tour-wizard-step-indicator"
+              :style="tourWizardIndicatorStyle"
+              aria-hidden="true"
+            />
           </nav>
 
           <div class="wizard-content" :class="{ 'wizard-content--home': currentStep === 0 }">
@@ -743,9 +1435,10 @@ async function saveChallenge() {
               <strong>{{ ui('Préparation de ton défi…') }}</strong>
             </div>
 
-            <div v-else-if="currentStep === 0" class="wizard-home">
+            <div v-else-if="currentStep === 0" class="wizard-home" data-tour="home">
                 <div
                   class="code-loader"
+                  data-tour="code-loader"
                   :class="{ 'is-arrival-highlighted': highlightChallengeLoader }"
                   role="search"
                   :aria-label="ui('Charger un défi avec son code')"
@@ -785,6 +1478,7 @@ async function saveChallenge() {
                   <button
                     v-if="!presetExpanded"
                     class="wizard-home__choice wizard-home__choice--preset is-collapsed"
+                    data-tour="presets"
                     type="button"
                     @click="presetExpanded = true"
                   >
@@ -797,6 +1491,7 @@ async function saveChallenge() {
                   <article
                     v-else
                     class="wizard-home__choice wizard-home__choice--preset"
+                    data-tour="presets"
                     :class="{ 'is-preset-selection': presetStage === 'presets' }"
                   >
                     <span class="wizard-home__choice-icon" aria-hidden="true">★</span>
@@ -816,7 +1511,7 @@ async function saveChallenge() {
                     />
                   </article>
 
-                  <article class="wizard-home__choice wizard-home__choice--custom">
+                  <article class="wizard-home__choice wizard-home__choice--custom" data-tour="build-custom">
                     <span class="wizard-home__choice-icon" aria-hidden="true">✎</span>
                     <div>
                       <h2>{{ ui('Tu veux construire ton propre défi ?') }}</h2>
@@ -853,6 +1548,7 @@ async function saveChallenge() {
                   <h2 id="verbs-title">{{ isPrefilledChallenge ? ui('Verbes du défi') : ui('Choisis les verbes') }}</h2>
                 </div>
                 <VerbPicker
+                  data-tour="verbs"
                   :verbs="catalogue.verbes"
                   :selected-ids="displayedVerbIds"
                   @add="onAddVerb"
@@ -876,6 +1572,7 @@ async function saveChallenge() {
                 <h2>{{ isPrefilledChallenge ? ui('Modes et temps') : ui('Choisis les modes et les temps') }}</h2>
               </div>
               <TensePicker
+                data-tour="tenses"
                 :modes="catalogue.modes"
                 :tenses="catalogue.temps"
                 :verbs="selectedVerbs"
@@ -903,6 +1600,7 @@ async function saveChallenge() {
               </div>
 
               <ChallengeOptions
+                data-tour="options"
                 :question-count="challenge.questionCount"
                 :exercise-kind="challenge.exerciseKind"
                 :inclusive-pronouns="challenge.inclusivePronouns"
@@ -967,6 +1665,7 @@ async function saveChallenge() {
                 </button>
               </section>
               <ChallengeActions
+                data-tour="actions"
                 :ready="isReady"
                 :busy-action="busyAction"
                 @exercise="prepareExercise"
@@ -981,11 +1680,46 @@ async function saveChallenge() {
       </template>
       </main>
 
-      <ClassicExercise v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" @close="isExerciseOpen = false" />
-      <ChatExercise v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :coach="selectedCoach" :verbs="selectedVerbs" :tenses="selectedTenses" :regenerate-questions="regenerateChatQuestions" @close="isExerciseOpen = false" />
-      <CoachPicker v-if="isCoachPickerOpen" @close="isCoachPickerOpen = false" @select="launchWithCoach" />
+      <ClassicExercise ref="classic-exercise" v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" @close="isExerciseOpen = false" />
+      <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :coach="selectedCoach" :verbs="selectedVerbs" :tenses="selectedTenses" :regenerate-questions="regenerateChatQuestions" :tour-demo="tourActive" @close="isExerciseOpen = false" />
+      <CoachPicker v-if="isCoachPickerOpen" :tour-demo="tourActive" @close="isCoachPickerOpen = false" @select="launchWithCoach" />
       <PrintPreview v-if="isPrintOpen" :questions="printQuestions" :verbs="selectedVerbs" :tenses="selectedTenses" :exercise-kind="challenge.exerciseKind" :options="challenge.printOptions" @update-options="challenge.printOptions = $event" @close="isPrintOpen = false" />
       <ShareChallengeDialog v-if="isShareOpen" :code="shareCode" :url="shareUrl" @close="isShareOpen = false" />
+      <Teleport to="body">
+        <div v-if="isTourWelcomeOpen" class="tour-welcome-backdrop" @click.self="postponeTour">
+          <section class="tour-welcome-dialog" role="dialog" aria-modal="true" aria-labelledby="tour-welcome-title">
+            <div class="tour-welcome-dialog__languages" role="group" :aria-label="ui('Langue de l’interface')">
+              <button
+                v-for="option in tourLanguageOptions"
+                :key="option.value"
+                type="button"
+                :class="{ 'is-active': interfaceLocale === option.value }"
+                :aria-label="option.label"
+                :aria-pressed="interfaceLocale === option.value"
+                :title="option.label"
+                @click="setInterfaceLocale(option.value)"
+              >
+                <span aria-hidden="true">{{ option.flag }}</span>
+              </button>
+            </div>
+            <button class="tour-welcome-dialog__close" type="button" :aria-label="tourCopy.later" @click="postponeTour">×</button>
+            <span class="tour-welcome-dialog__icon" aria-hidden="true">?</span>
+            <h2 id="tour-welcome-title">{{ tourCopy.welcomeTitle }}</h2>
+            <p>{{ tourCopy.welcomeBody }}</p>
+            <div class="tour-welcome-dialog__choices">
+              <button type="button" @click="startGuidedTour('quick')">
+                <strong>{{ tourCopy.quickTitle }}</strong>
+                <small>{{ tourCopy.quickMeta }}</small>
+              </button>
+              <button type="button" @click="startGuidedTour('complete')">
+                <strong>{{ tourCopy.fullTitle }}</strong>
+                <small>{{ tourCopy.fullMeta }}</small>
+              </button>
+            </div>
+            <button class="tour-welcome-dialog__later" type="button" @click="postponeTour">{{ tourCopy.later }}</button>
+          </section>
+        </div>
+      </Teleport>
     </div>
   </div>
 </template>
@@ -999,7 +1733,79 @@ async function saveChallenge() {
 .wizard-hero h1:not(.wizard-hero__brand) { letter-spacing: .035em; opacity: .62; }
 .wizard-hero h1.wizard-hero__preset { font-size: clamp(1.75rem, 4vw, 3.15rem); line-height: 1.1; }
 .wizard-hero__subtitle { max-width: 650px; margin: 12px auto 0; color: var(--muted); font-size: 1.08rem; font-weight: 650; line-height: 1.5; }
+.tour-entry-button { display: inline-flex; margin-top: 13px; padding: 7px 13px 7px 8px; align-items: center; gap: 8px; color: #0b4f69; border: 2px solid #e4ad00; border-radius: 999px; background: #fff3a8; box-shadow: 0 5px 15px rgb(70 52 0 / 14%), 0 0 0 4px rgb(255 215 43 / 12%); cursor: pointer; font-size: .84rem; font-weight: 800; }
+.tour-entry-button span { display: grid; width: 22px; height: 22px; place-items: center; color: #493a08; border: 1px solid #c99500; border-radius: 50%; background: #ffd943; font-size: .75rem; font-weight: 900; }
+.tour-entry-button:hover, .tour-entry-button:focus-visible { color: #083f54; border-color: #c99500; background: #ffe978; outline: 0; box-shadow: 0 7px 20px rgb(70 52 0 / 20%), 0 0 0 5px rgb(255 215 43 / 24%); }
 .wizard-shell { position: relative; width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+.tour-welcome-backdrop { position: fixed; z-index: 3000; inset: 0; display: grid; padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)); place-items: start; background: rgb(14 32 41 / 70%); backdrop-filter: blur(6px); }
+.tour-welcome-dialog { position: relative; width: min(620px, 100%); padding: clamp(66px, 9vw, 76px) clamp(24px, 5vw, 40px) clamp(24px, 5vw, 40px); color: #263b43; border: 3px solid #e4ad00; border-radius: 24px; background: white; box-shadow: 0 30px 90px rgb(70 52 0 / 42%), 0 0 0 8px rgb(255 215 43 / 20%); text-align: center; }
+.tour-welcome-dialog__close { position: absolute; top: 14px; right: 14px; width: 38px; height: 38px; color: #5c4908; border: 1px solid #c99a08; border-radius: 50%; background: rgb(255 255 255 / 58%); cursor: pointer; font-size: 1.4rem; }
+.tour-welcome-dialog__languages { position: absolute; top: 14px; left: 50%; display: inline-flex; min-height: 38px; padding: 3px 5px; align-items: center; gap: 2px; border: 1px solid #d5e1e4; border-radius: 999px; background: #f6f9f9; transform: translateX(-50%); }
+.tour-welcome-dialog__languages button { display: grid; width: 31px; height: 30px; padding: 0; place-items: center; border: 0; border-radius: 50%; background: transparent; cursor: pointer; font-size: 1.05rem; line-height: 1; }
+.tour-welcome-dialog__languages button:hover, .tour-welcome-dialog__languages button:focus-visible { background: #e5eff1; outline: 2px solid #126d8a; outline-offset: 0; }
+.tour-welcome-dialog__languages button.is-active { background: #fff3a8; box-shadow: inset 0 0 0 2px #e4ad00; }
+.tour-welcome-dialog__icon { display: grid; width: 54px; height: 54px; margin: 0 auto 14px; place-items: center; color: white; border-radius: 17px; background: #126d8a; font-size: 1.55rem; font-weight: 900; box-shadow: 0 10px 26px rgb(18 109 138 / 28%); }
+.tour-welcome-dialog h2 { margin: 0; color: #0b4f69; font-size: clamp(1.55rem, 4vw, 2.15rem); }
+.tour-welcome-dialog > p { max-width: 500px; margin: 10px auto 24px; color: #344e57; line-height: 1.55; }
+.tour-welcome-dialog__choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tour-welcome-dialog__choices button { display: grid; min-height: 112px; padding: 18px; align-content: center; gap: 7px; color: #263b43; border: 1px solid #c99a08; border-radius: 16px; background: rgb(255 255 255 / 78%); cursor: pointer; text-align: left; }
+.tour-welcome-dialog__choices button:last-child { border-color: #b28200; background: rgb(238 246 247 / 88%); }
+.tour-welcome-dialog__choices button:hover, .tour-welcome-dialog__choices button:focus-visible { border-color: #126d8a; background: rgb(255 255 255 / 76%); outline: 0; box-shadow: 0 0 0 4px rgb(18 109 138 / 16%); }
+.tour-welcome-dialog__choices strong { color: #0b4f69; font-size: 1.08rem; }
+.tour-welcome-dialog__choices small { color: #46616a; line-height: 1.35; }
+.tour-welcome-dialog__later { margin-top: 20px; padding: 8px 12px; color: #46616a; border: 0; background: transparent; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+:global(body.guided-tour-active .driver-active-element) {
+  outline: 3px solid #f2bd16 !important;
+  outline-offset: 5px;
+  box-shadow:
+    0 0 0 7px rgb(255 221 64 / 24%),
+    0 18px 48px rgb(81 61 0 / 28%) !important;
+  transition: box-shadow 120ms ease, outline-color 120ms ease;
+}
+.wizard-steps button.tour-secondary-focus {
+  position: relative;
+  z-index: 10001;
+  border-radius: 12px;
+  background: #f6faf8;
+}
+.tour-wizard-step-indicator {
+  position: absolute;
+  z-index: 10002;
+  box-sizing: border-box;
+  pointer-events: none;
+  border: 3px solid #f2bd16;
+  border-radius: 17px;
+  box-shadow:
+    0 0 0 7px rgb(255 221 64 / 24%),
+    0 18px 48px rgb(81 61 0 / 28%);
+  transition:
+    left 420ms cubic-bezier(.22, 1, .36, 1),
+    top 420ms cubic-bezier(.22, 1, .36, 1),
+    width 420ms cubic-bezier(.22, 1, .36, 1),
+    height 420ms cubic-bezier(.22, 1, .36, 1);
+}
+:global(body.guided-tour-transitioning .driver-popover) {
+  visibility: hidden !important;
+}
+:global(body.guided-tour-active .chat-dialogs),
+:global(body.guided-tour-active .chat-help-enter-active),
+:global(body.guided-tour-active .chat-help-leave-active) {
+  transition: none !important;
+}
+:global(.tatitotu-tour-popover) { top: max(14px, env(safe-area-inset-top)) !important; right: auto !important; bottom: auto !important; left: max(14px, env(safe-area-inset-left)) !important; min-width: min(330px, calc(100vw - 28px)); max-width: min(390px, calc(100vw - 28px)); padding: 20px; transform: none !important; color: #263b43; border: 3px solid #e4ad00; border-radius: 16px; background: white; box-shadow: 0 20px 55px rgb(70 52 0 / 36%), 0 0 0 6px rgb(255 215 43 / 20%); }
+:global(.tatitotu-tour-popover .driver-popover-title) { padding-right: 24px; color: #0b4f69; font-family: inherit; font-size: 1.12rem; line-height: 1.3; }
+:global(.tatitotu-tour-popover .driver-popover-description) { color: #344e57; font-family: inherit; font-size: .93rem; line-height: 1.5; }
+:global(.tatitotu-tour-popover .driver-popover-description ol) { margin: 9px 0 0; padding-left: 1.5rem; }
+:global(.tatitotu-tour-popover .driver-popover-description li) { padding-left: 3px; font-weight: 700; }
+:global(.tatitotu-tour-popover .driver-popover-description li + li) { margin-top: 4px; }
+:global(.tatitotu-tour-popover .driver-popover-description mark) { padding: 1px 4px; color: #3f3100; border-radius: 4px; background: #ffd43b; font-weight: 850; }
+:global(.tatitotu-tour-popover .driver-popover-close-btn) { color: #536a72; }
+:global(.tatitotu-tour-popover .driver-popover-progress-text) { color: #536a72; }
+:global(.tatitotu-tour-popover .driver-popover-footer-btn) { padding: 8px 13px; color: #263b43; border-color: #c99a08; border-radius: 9px; background: #f6f8f8; font-family: inherit; font-size: .86rem; font-weight: 760; text-shadow: none; }
+:global(.tatitotu-tour-popover .driver-popover-next-btn) { color: #3f3100; border-color: #e4ad00; background: #e4ad00; }
+:global(.tatitotu-tour-popover .driver-popover-next-btn:hover),
+:global(.tatitotu-tour-popover .driver-popover-next-btn:focus-visible) { color: #302500; border-color: #c99500; background: #f2bd13; outline: 0; box-shadow: 0 0 0 3px rgb(228 173 0 / 24%); }
+:global(.tatitotu-tour-popover .driver-popover-arrow) { display: none !important; }
 .code-loader { display: grid; width: 100%; grid-template-columns: minmax(230px, 1fr) minmax(330px, .9fr); align-items: center; gap: 12px 28px; margin: 0; padding: 18px; border: 1px solid #b8d3cb; border-radius: 16px; background: white; box-shadow: 0 9px 25px rgb(42 65 61 / 7%); }
 .code-loader__heading { display: flex; align-items: center; gap: 11px; }
 .code-loader__heading > div { display: grid; }
@@ -1013,7 +1819,7 @@ async function saveChallenge() {
 .code-loader__error { grid-column: 2; margin: -4px 0 0; color: var(--danger); font-size: .82rem; }
 .wizard-panel { overflow: hidden; border: 1px solid rgba(174, 199, 191, .95); border-radius: 24px; background: rgb(255 255 255 / 94%); box-shadow: var(--shadow); outline: 0; }
 .wizard-panel--autocomplete-open { overflow: visible; }
-.wizard-steps { display: grid; grid-template-columns: minmax(125px, 1fr) 50px minmax(165px, 1.15fr) 50px minmax(120px, 1fr) 50px minmax(115px, .9fr); align-items: center; padding: 17px 24px; border-bottom: 1px solid var(--line); background: #f6faf8; }
+.wizard-steps { position: relative; display: grid; grid-template-columns: minmax(125px, 1fr) 50px minmax(165px, 1.15fr) 50px minmax(120px, 1fr) 50px minmax(115px, .9fr); align-items: center; padding: 17px 24px; border-bottom: 1px solid var(--line); background: #f6faf8; }
 .wizard-steps button { display: flex; min-width: 0; padding: 7px; align-items: center; gap: 10px; text-align: left; color: #71817d; background: transparent; border: 0; }
 .wizard-steps button > span:first-child { display: grid; width: 35px; height: 35px; flex: 0 0 35px; place-items: center; border: 2px solid #b8c7c3; border-radius: 50%; background: white; font-weight: 850; }
 .wizard-steps button > span:last-child { display: grid; min-width: 0; }
@@ -1141,6 +1947,7 @@ async function saveChallenge() {
 
 @media (prefers-reduced-motion: reduce) {
   .wizard-next-pulse:not(:disabled) { animation: none; }
+  .tour-wizard-step-indicator { transition: none; }
   .code-loader.is-arrival-highlighted {
     border-color: #42a8bd;
     box-shadow: 0 0 0 5px rgb(31 123 145 / 18%);
@@ -1174,6 +1981,8 @@ async function saveChallenge() {
   .wizard-step__intro { padding: 0 8px; }
   .wizard-step__controls { justify-content: flex-end; flex-wrap: wrap; }
   .wizard-review :deep(.challenge-launch) { padding: 17px 12px; }
+  .tour-welcome-dialog__choices { grid-template-columns: 1fr; }
+  .tour-welcome-dialog__choices button { min-height: 88px; }
 }
 
 @media (max-width: 470px) {

@@ -139,7 +139,7 @@ function radicalReferenceFor(
   references: ReadonlyMap<number, readonly RadicalReferenceRow[]>,
 ): ExerciseQuestion['radicalReference'] | undefined {
   const forms = references.get(Number(row.base_verbe_id || row.verbe_id)) || []
-  return buildRadicalReference({
+  const reference = buildRadicalReference({
     infinitive: row.infinitif,
     mode: row.mode_name,
     tense: row.temps_name,
@@ -153,6 +153,20 @@ function radicalReferenceFor(
     pronoun: form.pronom,
     form: form.conjugaison1,
   })))
+  if (!reference) return undefined
+  const paradigmForms = forms
+    .filter(form => normalized(form.mode_name) === normalized(row.mode_name)
+      && normalized(form.temps_name) === normalized(row.temps_name))
+    .sort((left, right) => Number(left.personne_id) - Number(right.personne_id))
+    .map(form => ({
+      subject: form.pronom,
+      form: form.conjugaison1,
+      personId: Number(form.personne_id),
+    }))
+  return {
+    ...reference,
+    ...(paradigmForms.length ? { paradigmForms } : {}),
+  }
 }
 
 export function allowsAnteposedComplement(row: Pick<ConjugationRow, 'is_compound' | 'mode_name'>) {
@@ -389,9 +403,12 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
         INNER JOIN temps t ON t.id = vc.temp_id
         INNER JOIN modes m ON m.id = t.mode_id
         WHERE vc.verbe_id IN (${placeholders(radicalReferenceVerbIds)})
-          AND m.name = 'indicatif' AND t.name IN ('présent', 'futur', 'passé simple')
+          AND (
+            (m.name = 'indicatif' AND t.name IN ('présent', 'futur', 'passé simple'))
+            OR t.id IN (${placeholders(finiteIds)})
+          )
           AND vc.conjugaison1 <> ''
-      `, radicalReferenceVerbIds)
+      `, [...radicalReferenceVerbIds, ...finiteIds])
       for (const reference of referenceRows) {
         const candidates = radicalReferences.get(Number(reference.verbe_id)) || []
         candidates.push(reference)

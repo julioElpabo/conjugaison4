@@ -4,6 +4,7 @@ import type { CoachProfile } from '~~/shared/types/coach'
 import { localizeCoachProfile, translateCoachUiText } from '~~/shared/i18n/coach-ui'
 import { coachPickerGroups } from '~~/shared/utils/coach-picker-groups'
 
+const props = defineProps<{ tourDemo?: boolean }>()
 const emit = defineEmits<{ close: [], select: [coach: CoachProfile] }>()
 const coaches = ref<CoachProfile[]>([])
 const loading = ref(true)
@@ -14,6 +15,9 @@ const coachGroups = computed(() => coachPickerGroups(coaches.value.map(coach => 
     ...group,
     label: translateCoachUiText(interfaceLocale.value, group.label),
     description: translateCoachUiText(interfaceLocale.value, group.description),
+    coaches: props.tourDemo && group.approach === 'complete'
+      ? group.coaches.slice(0, 2)
+      : group.coaches,
   })))
 
 onMounted(async () => {
@@ -30,7 +34,7 @@ onMounted(async () => {
 
 <template>
   <Teleport to="body">
-    <div class="coach-picker-overlay" @click.self="emit('close')">
+    <div class="coach-picker-overlay" data-tour="coach-picker" @click.self="emit('close')">
       <section class="coach-picker" role="dialog" aria-modal="true" aria-labelledby="coach-picker-title">
         <header>
           <div><h2 id="coach-picker-title">{{ ui('Choisis ton coach') }}</h2></div>
@@ -45,7 +49,12 @@ onMounted(async () => {
         <p v-if="loading" class="coach-picker__state">{{ ui('Chargement des coaches…') }}</p>
         <p v-else-if="error" class="coach-picker__state coach-picker__state--error">{{ error }}</p>
         <div v-else class="coach-picker__groups">
-          <section v-for="group in coachGroups" :key="group.id" class="coach-caractere-group">
+          <section
+            v-for="group in coachGroups"
+            :key="group.id"
+            class="coach-caractere-group"
+            :data-tour="group.approach === 'complete' ? 'coach-complete-group' : undefined"
+          >
             <header class="coach-caractere-group__header">
               <div><span>{{ ui('Type d’aide') }}</span><h3>{{ group.label }}</h3><p>{{ group.description }}</p></div>
               <small>{{ ui(group.coaches.length > 1 ? '{count} coaches' : '{count} coach', { count: group.coaches.length }) }}</small>

@@ -81,6 +81,18 @@ interface TempsRow extends RowDataPacket {
 
 interface MangerExampleRow extends RowDataPacket, MangerFormForExample {}
 
+const CATALOGUE_CACHE_TTL_MS = 10 * 60 * 1000
+type Catalogue = Awaited<ReturnType<typeof getCatalogue>>
+type CatalogueLoader = (locale: AppLocale) => Promise<Catalogue>
+interface CatalogueCacheEntry {
+  value: Catalogue
+  expiresAt: number
+}
+
+const catalogueCache = new Map<AppLocale, CatalogueCacheEntry>()
+const catalogueLoads = new Map<AppLocale, Promise<Catalogue>>()
+let catalogueCacheVersion = 0
+
 export async function getCatalogue(locale: AppLocale = 'fr') {
   const database = useDatabase()
   const requestedLocale = normalizeLocale(locale, 'fr')
@@ -326,4 +338,45 @@ export async function getCatalogue(locale: AppLocale = 'fr') {
     })),
     presets,
   }
+}
+
+export async function getCachedCatalogue(
+  locale: AppLocale = 'fr',
+  loader: CatalogueLoader = getCatalogue,
+): Promise<{ catalogue: Catalogue, status: 'HIT' | 'MISS' | 'COALESCED' }> {
+  const requestedLocale = normalizeLocale(locale, 'fr')
+  const cached = catalogueCache.get(requestedLocale)
+  if (cached && cached.expiresAt > Date.now()) {
+    return { catalogue: cached.value, status: 'HIT' }
+  }
+  if (cached) catalogueCache.delete(requestedLocale)
+
+  const activeLoad = catalogueLoads.get(requestedLocale)
+  if (activeLoad) {
+    return { catalogue: await activeLoad, status: 'COALESCED' }
+  }
+
+  const version = catalogueCacheVersion
+  const load = loader(requestedLocale)
+  catalogueLoads.set(requestedLocale, load)
+  try {
+    const catalogue = await load
+    if (version === catalogueCacheVersion) {
+      catalogueCache.set(requestedLocale, {
+        value: catalogue,
+        expiresAt: Date.now() + CATALOGUE_CACHE_TTL_MS,
+      })
+    }
+    return { catalogue, status: 'MISS' }
+  } finally {
+    if (catalogueLoads.get(requestedLocale) === load) {
+      catalogueLoads.delete(requestedLocale)
+    }
+  }
+}
+
+export function invalidateCatalogueCache() {
+  catalogueCacheVersion += 1
+  catalogueCache.clear()
+  catalogueLoads.clear()
 }

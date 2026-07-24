@@ -16,6 +16,7 @@ const report = {
   variantsAdded: 0,
   presentFormsAdded: 0,
   presentFormsFilled: 0,
+  produireFormsAdded: 0,
 }
 
 function forms(row) {
@@ -129,6 +130,56 @@ try {
     }
   }
 
+  // « produire » suit exactement le modèle de « conduire ». Une ancienne
+  // création de sa fiche a enregistré ses métadonnées sans ses conjugaisons.
+  const [uireVerbs] = await database.execute(`
+    SELECT id, infinitif
+    FROM verbes
+    WHERE infinitif IN ('conduire', 'produire')
+    ORDER BY infinitif
+  `)
+  const conduire = uireVerbs.find(row => row.infinitif === 'conduire')
+  const produire = uireVerbs.find(row => row.infinitif === 'produire')
+  if (!conduire || !produire) {
+    throw new Error('Les verbes modèles « conduire » et « produire » doivent tous deux exister.')
+  }
+  const [conduireForms] = await database.execute(`
+    SELECT personne_id, temp_id, conjugaison1, conjugaison2, conjugaison3
+    FROM verbesconjugues
+    WHERE verbe_id = ?
+    ORDER BY temp_id, personne_id
+  `, [conduire.id])
+  const [produireForms] = await database.execute(`
+    SELECT personne_id, temp_id, conjugaison1, conjugaison2, conjugaison3
+    FROM verbesconjugues
+    WHERE verbe_id = ?
+    ORDER BY temp_id, personne_id
+  `, [produire.id])
+  if (!conduireForms.length) throw new Error('Le verbe modèle « conduire » ne possède aucune conjugaison.')
+
+  const produireForm = value => String(value || '').replaceAll('condu', 'produ')
+  const expectedProduireForms = conduireForms.map(row => ({
+    personne_id: Number(row.personne_id),
+    temp_id: Number(row.temp_id),
+    conjugaison1: produireForm(row.conjugaison1),
+    conjugaison2: produireForm(row.conjugaison2),
+    conjugaison3: produireForm(row.conjugaison3),
+  }))
+  if (produireForms.length) {
+    const actualByKey = new Map(produireForms.map(row => [
+      `${row.temp_id}:${row.personne_id}`,
+      forms(row),
+    ]))
+    const invalid = expectedProduireForms.find(row => (
+      forms(row).join('\u0000') !== (actualByKey.get(`${row.temp_id}:${row.personne_id}`) || []).join('\u0000')
+    ))
+    if (produireForms.length !== expectedProduireForms.length || invalid) {
+      throw new Error('Les conjugaisons existantes de « produire » sont incomplètes ou ne correspondent pas au modèle « conduire ».')
+    }
+  } else {
+    report.produireFormsAdded = expectedProduireForms.length
+  }
+
   if (apply) {
     if (obsoleteTenseRows.length) {
       await database.query('DELETE vc FROM verbesconjugues vc LEFT JOIN temps t ON t.id = vc.temp_id WHERE t.id IS NULL')
@@ -150,6 +201,20 @@ try {
       } else {
         await database.execute('UPDATE verbesconjugues SET conjugaison1 = ? WHERE id = ?', [change.expected, change.id])
       }
+    }
+    for (const form of produireForms.length ? [] : expectedProduireForms) {
+      await database.execute(`
+        INSERT INTO verbesconjugues
+          (verbe_id, verbe_infinitif, personne_id, temp_id, conjugaison1, conjugaison2, conjugaison3)
+        VALUES (?, 'produire', ?, ?, ?, ?, ?)
+      `, [
+        produire.id,
+        form.personne_id,
+        form.temp_id,
+        form.conjugaison1,
+        form.conjugaison2,
+        form.conjugaison3,
+      ])
     }
   }
 

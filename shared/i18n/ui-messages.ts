@@ -238,6 +238,7 @@ export const uiMessages = {
   'Choisis les verbes, les modes, les temps et les options.': { de: 'Wähle Verben, Modi, Zeitformen und Optionen.', en: 'Choose the verbs, moods, tenses and options.', it: 'Scegli verbi, modi, tempi e opzioni.', es: 'Elige los verbos, modos, tiempos y opciones.' },
   'Construire un nouveau défi →': { de: 'Neue Übung erstellen →', en: 'Build a new challenge →', it: 'Crea un nuovo esercizio →', es: 'Crear un nuevo ejercicio →' },
   '← Accueil': { de: '← Startseite', en: '← Home', it: '← Home', es: '← Inicio' },
+  '← Nouveau défi': { de: '← Neue Herausforderung', en: '← New challenge', it: '← Nuova sfida', es: '← Nuevo desafío' },
   'Choisir les temps →': { de: 'Zeitformen wählen →', en: 'Choose tenses →', it: 'Scegli i tempi →', es: 'Elegir tiempos →' },
   'Modifier la liste': { de: 'Liste ändern', en: 'Edit the list', it: 'Modifica l’elenco', es: 'Modificar la lista' },
   '← Verbes': { de: '← Verben', en: '← Verbs', it: '← Verbi', es: '← Verbos' },

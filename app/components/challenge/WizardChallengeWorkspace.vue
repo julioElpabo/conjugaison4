@@ -1534,7 +1534,7 @@ async function saveChallenge() {
 
             <div v-else-if="currentStep === 1" class="wizard-step wizard-step--selection" aria-labelledby="verbs-title">
               <div class="wizard-step__actions wizard-step__actions--split">
-                <button class="secondary-button" type="button" @click="previousStep">{{ ui('← Accueil') }}</button>
+                <button class="secondary-button" type="button" @click="previousStep">{{ ui('← Nouveau défi') }}</button>
                 <div class="wizard-step__controls">
                   <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedVerbs.length" @click="nextStep"> {{ ui('Choisir les temps →') }} </button>
                 </div>

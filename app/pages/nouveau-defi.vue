@@ -7,7 +7,7 @@ useHead(() => ({
   meta: [
     {
       name: 'description',
-      content: ui('Composez rapidement un défi de conjugaison en choisissant les verbes, les modes et les temps.')
+      content: ui('Composez un défi de conjugaison en choisissant les verbes, les modes et les temps.')
     }
   ]
 }))

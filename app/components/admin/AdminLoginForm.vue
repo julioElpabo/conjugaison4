@@ -44,9 +44,6 @@ async function submit() {
   <section class="admin-login admin-card" aria-labelledby="admin-login-title">
     <p class="admin-eyebrow">Espace protégé</p>
     <h1 id="admin-login-title">Administration</h1>
-    <p class="admin-muted">
-      Connectez-vous avec un compte administrateur pour gérer les verbes et consulter les statistiques.
-    </p>
 
     <form class="admin-form" @submit.prevent="submit">
       <label class="admin-field">

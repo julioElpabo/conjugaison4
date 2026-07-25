@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { automaticOrthographyHelpBlocks, buildCondensedVerbGroupHtml, buildContextualBaseTitle, buildDefinitionHelpHtml, buildNearFutureAllerHelpHtml, buildNearFutureCoachHelpHtml, buildReferenceFormHelpHtml, coachHelpBlockUsesPedagogicalApproach, coachHelpQuestionVariables, conditionalCoachHelpBlocks, defaultCoachHelpBlocks, renderCoachHelpContent, visibleCoachHelpBlocks } from '../shared/utils/coach-help.ts'
+import { automaticOrthographyHelpBlocks, buildCondensedVerbGroupHtml, buildContextualBaseTitle, buildDefinitionHelpHtml, buildNearFutureAllerHelpHtml, buildNearFutureCoachHelpHtml, buildPronominalCoachHelpHtml, buildReferenceFormHelpHtml, coachHelpBlockUsesPedagogicalApproach, coachHelpQuestionVariables, conditionalCoachHelpBlocks, defaultCoachHelpBlocks, renderCoachHelpContent, visibleCoachHelpBlocks } from '../shared/utils/coach-help.ts'
 import { COACH_HELP_BLOCK_TYPES } from '../shared/types/coach.ts'
 import { formatCoachHtmlSource } from '../shared/utils/html-source-format.ts'
 import { sanitizeCoachHtml } from '../shared/utils/safe-html.ts'
@@ -234,6 +234,55 @@ describe('aides visuelles configurables', () => {
     const aller = buildNearFutureAllerHelpHtml()
     assert.match(aller, /<details><summary>Aller au présent<\/summary>/u)
     assert.match(aller, /<th>nous<\/th><td>allons<\/td>/u)
+  })
+
+  it('ajoute un bloc pédagogique avec le menu des pronoms réfléchis', () => {
+    const currentVerb = {
+      infinitif: 'se laver', groupeConjugaison: 1, terminaison: 'er',
+      auxiliaire: 'être', participePasse: 'lavé', typePronominal: 'occasionnel',
+      isPronominalForm: true,
+    }
+    const values = coachHelpQuestionVariables({
+      titre: 'Question', consigne: '', reponses: ['me lave'], reponsesPourCorrige: ['je me lave'],
+      infinitif: 'se laver', pronom: 'je', mode: 'indicatif', temps: 'présent', conjugaison1: 'me lave',
+    }, currentVerb)
+
+    assert.match(values.pronominalHelp, /fait l’action sur lui-même/u)
+    assert.match(values.pronominalHelp, /<strong>Exemple :<\/strong><br><em>Je me lave\.<\/em>/u)
+    assert.match(values.pronominalHelp, /<details><summary>Choisir le pronom : me, te, se…<\/summary>/u)
+    assert.match(values.pronominalHelp, /<th>je<\/th><td>me ou m’<\/td>/u)
+    assert.match(values.pronominalHelp, /avec <strong>je<\/strong>, écris <strong>me<\/strong> sans apostrophe/u)
+
+    for (const profile of ['complete-avec-reponses', 'complete', 'tres-condensee', 'allophone']) {
+      const blocks = conditionalCoachHelpBlocks(profile, values)
+      const pronominal = blocks.find(block => block.title === 'Verbe pronominal')
+      assert.ok(pronominal, profile)
+      assert.match(renderCoachHelpContent(pronominal.content, values), /Je me lave/u)
+    }
+    assert.deepEqual(conditionalCoachHelpBlocks('complete', { ...values, pronominalHelp: '' }), [])
+  })
+
+  it('précise l’élision imposée par le verbe ou par le temps', () => {
+    const present = buildPronominalCoachHelpHtml({
+      infinitif: "s'habiller", pronom: 'je', mode: 'indicatif', temps: 'présent', conjugaison1: "m'habille",
+    }, {
+      infinitif: "s'habiller", typeHInitial: 'muet', typePronominal: 'occasionnel', isPronominalForm: true,
+    })
+    assert.match(present, /écris <strong>m’<\/strong> avec une apostrophe/u)
+
+    const compound = buildPronominalCoachHelpHtml({
+      infinitif: 'se laver', pronom: 'tu', mode: 'indicatif', temps: 'passé composé', conjugaison1: "t'es lavé",
+    }, {
+      infinitif: 'se laver', typePronominal: 'occasionnel', isPronominalForm: true,
+    })
+    assert.match(compound, /écris <strong>t’<\/strong> avec une apostrophe/u)
+
+    const nearFuture = buildPronominalCoachHelpHtml({
+      infinitif: "s'habiller", pronom: 'je', mode: 'indicatif', temps: 'futur proche', conjugaison1: "vais m'habiller",
+    }, {
+      infinitif: "s'habiller", typeHInitial: 'muet', typePronominal: 'occasionnel', isPronominalForm: true,
+    })
+    assert.match(nearFuture, /écris <strong>m’<\/strong> avec une apostrophe/u)
   })
 
   it('ne transmet aucune réponse cible aux profils sans réponses', () => {

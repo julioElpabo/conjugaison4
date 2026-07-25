@@ -10,6 +10,8 @@ const verbs = [
   { id: 4, infinitif: 'mettre' },
   { id: 449, infinitif: 'fatiguer' },
   { id: -199, infinitif: 'se fatiguer', baseVerbId: 449, isPronominalForm: true },
+  { id: -200, infinitif: 'se lancer', baseVerbId: 110, isPronominalForm: true },
+  { id: -201, infinitif: 'se laver', baseVerbId: 164, isPronominalForm: true },
 ]
 
 describe('autocomplétion des verbes administrés', () => {
@@ -34,6 +36,13 @@ describe('autocomplétion des verbes administrés', () => {
     assert.deepEqual(
       matchingVerbs(verbs, 'fatiguer').map(verb => verb.infinitif),
       ['fatiguer', 'se fatiguer'],
+    )
+  })
+
+  it('propose notamment « se lancer » dès la saisie de « se la »', () => {
+    assert.deepEqual(
+      matchingVerbs(verbs, 'se la').map(verb => verb.infinitif),
+      ['se lancer', 'se laver'],
     )
   })
 })

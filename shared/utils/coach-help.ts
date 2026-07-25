@@ -94,6 +94,7 @@ const AUTOMATIC_LETTER_G_HELP_ID = -9_001
 const AUTOMATIC_LETTER_C_HELP_ID = -9_002
 const AUTOMATIC_COD_BEFORE_HELP_ID = -9_003
 const AUTOMATIC_PARTICIPLE_AGREEMENT_HELP_ID = -9_004
+const AUTOMATIC_PRONOMINAL_HELP_ID = -9_005
 
 export function automaticOrthographyHelpKind(block: Pick<CoachHelpBlock, 'id'>): 'g' | 'c' | null {
   if (block.id === AUTOMATIC_LETTER_G_HELP_ID) return 'g'
@@ -258,10 +259,26 @@ function automaticParticipleAgreementHelpBlock(values: CoachHelpContentValues): 
   }]
 }
 
+function automaticPronominalHelpBlock(values: CoachHelpContentValues): CoachHelpBlock[] {
+  if (!values.pronominalHelp?.trim()) return []
+  return [{
+    id: AUTOMATIC_PRONOMINAL_HELP_ID,
+    type: 'info',
+    title: 'Verbe pronominal',
+    content: '{pronominalHelp}',
+    explanationApproach: 'concise',
+    profileId: 'tres-condensee',
+    isActive: true,
+    sortOrder: Number.MAX_SAFE_INTEGER - 1,
+    children: [],
+  }]
+}
+
 /** Résout les blocs exceptionnels déclarés par le profil avec les données de la question. */
 export function conditionalCoachHelpBlocks(profileId: CoachHelpEngineKey | undefined, values: CoachHelpContentValues): CoachHelpBlock[] {
   const profile = coachHelpProfile(profileId)
   return profile.conditionalBlocks.flatMap((blockId) => {
+    if (blockId === 'pronominal') return automaticPronominalHelpBlock(values)
     if (blockId === 'orthography') return automaticOrthographyHelpBlocks(values)
     if (blockId === 'cod-before') return automaticCodBeforeHelpBlock(values)
     if (blockId === 'participle-agreement') return automaticParticipleAgreementHelpBlock(values)
@@ -297,6 +314,7 @@ export interface CoachHelpContentValues {
   condensedTenseRuleHelp?: string
   nearFutureHelp?: string
   nearFutureAllerHelp?: string
+  pronominalHelp?: string
   contextualBaseTitle?: string
   referenceFormHelp?: string
   /** Ancien nom conservé pour les blocs déjà enregistrés. */
@@ -339,6 +357,72 @@ type CondensedVerb = Pick<Verb, 'infinitif'> & Partial<Pick<Verb, 'groupeConjuga
 function isCondensedPronominalVerb(verb?: CondensedVerb) {
   const infinitive = verb?.infinitif?.trim() || ''
   return /^(?:se\s+|s[’'])/iu.test(infinitive) || Boolean(verb?.typePronominal && verb.typePronominal !== 'aucun')
+}
+
+function reflexivePronounInAnswer(subject: string, answer: string) {
+  const key = helpSubjectKey(subject)
+  const source = answer.trim()
+  if (key === 'tu') {
+    const imperative = source.match(/-toi\b/iu)
+    if (imperative) return 'toi'
+  }
+  if (key === 'nous' && /-nous\b/iu.test(source)) return 'nous'
+  if (key === 'vous' && /-vous\b/iu.test(source)) return 'vous'
+
+  const alternatives = key === 'je'
+    ? ['m’', "m'", 'me']
+    : key === 'tu'
+      ? ['t’', "t'", 'te']
+      : ['il', 'elle', 'on', 'ils', 'elles'].includes(key)
+        ? ['s’', "s'", 'se']
+        : key === 'nous'
+          ? ['nous']
+          : key === 'vous'
+            ? ['vous']
+            : []
+  return alternatives.find((candidate) => {
+    const escaped = candidate.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')
+    const lookahead = candidate.endsWith('’') || candidate.endsWith("'") ? '(?=\\p{L})' : '(?=\\s|$)'
+    return new RegExp(`(?:^|\\s)${escaped}${lookahead}`, 'iu').test(source)
+  })?.replace("'", '’') || ''
+}
+
+function fallbackReflexivePronoun(subject: string, infinitive: string, verb?: Verb) {
+  const key = helpSubjectKey(subject)
+  const lexical = bareHelpInfinitive(infinitive)
+  const first = normalizedGrammar(lexical).charAt(0)
+  const elides = 'aeiouy'.includes(first) || (first === 'h' && verb?.typeHInitial !== 'aspire')
+  if (key === 'je') return elides ? 'm’' : 'me'
+  if (key === 'tu') return elides ? 't’' : 'te'
+  if (['il', 'elle', 'on', 'ils', 'elles'].includes(key)) return elides ? 's’' : 'se'
+  if (key === 'nous') return 'nous'
+  if (key === 'vous') return 'vous'
+  return ''
+}
+
+export function buildPronominalCoachHelpHtml(
+  question: Pick<ExerciseQuestion, 'infinitif' | 'pronom' | 'saisiePrefixe' | 'conjugaison1' | 'mode' | 'temps'>,
+  verb?: Verb,
+) {
+  const infinitive = question.infinitif || verb?.infinitif || ''
+  if (!isCondensedPronominalVerb(verb || { infinitif: infinitive })) return ''
+
+  const subject = question.pronom || question.saisiePrefixe || ''
+  const subjectLabel = helpSubjectKey(subject)
+  const contextualPronoun = reflexivePronounInAnswer(subject, question.conjugaison1 || '')
+    || fallbackReflexivePronoun(subject, infinitive, verb)
+  const contextualHelp = subjectLabel && contextualPronoun
+    ? ['m’', 't’', 's’'].includes(contextualPronoun)
+      ? `<p><strong>Dans cette question :</strong> avec <strong>${escapedCoachText(subjectLabel)}</strong>, écris <strong>${escapedCoachText(contextualPronoun)}</strong> avec une apostrophe, car la forme suivante commence par un son voyelle.</p>`
+      : ['me', 'te', 'se'].includes(contextualPronoun)
+        ? `<p><strong>Dans cette question :</strong> avec <strong>${escapedCoachText(subjectLabel)}</strong>, écris <strong>${escapedCoachText(contextualPronoun)}</strong> sans apostrophe.</p>`
+        : `<p><strong>Dans cette question :</strong> avec <strong>${escapedCoachText(subjectLabel)}</strong>, utilise <strong>${escapedCoachText(contextualPronoun)}</strong>.</p>`
+    : ''
+  const imperative = normalizedGrammar(question.mode || '') === 'imperatif'
+    ? '<p><strong>À l’impératif affirmatif :</strong> le pronom passe après le verbe : <em>lave-toi, lavons-nous, lavez-vous</em>.</p>'
+    : ''
+
+  return `<p>Un verbe pronominal sert souvent à montrer que le sujet fait l’action sur lui-même.</p><p><strong>Exemple :</strong><br><em>Je me lave.</em> Je fais l’action de laver sur moi-même.</p><details><summary>Choisir le pronom : me, te, se…</summary><table><tbody><tr><th>je</th><td>me ou m’</td></tr><tr><th>tu</th><td>te ou t’</td></tr><tr><th>il, elle, on</th><td>se ou s’</td></tr><tr><th>nous</th><td>nous</td></tr><tr><th>vous</th><td>vous</td></tr><tr><th>ils, elles</th><td>se ou s’</td></tr></tbody></table><p>Devant une voyelle ou un <strong>h muet</strong>, <strong>me</strong>, <strong>te</strong> et <strong>se</strong> deviennent <strong>m’</strong>, <strong>t’</strong> et <strong>s’</strong>.</p>${contextualHelp}${imperative}</details>`
 }
 
 function condensedVerbAuxiliary(verb?: CondensedVerb) {
@@ -527,6 +611,7 @@ export function renderCoachHelpContent(content: string, values: CoachHelpContent
     condensedTenseRuleHelp: values.condensedTenseRuleHelp || '',
     nearFutureHelp: values.nearFutureHelp || '',
     nearFutureAllerHelp: values.nearFutureAllerHelp || '',
+    pronominalHelp: values.pronominalHelp || '',
     referenceFormHelp: values.referenceFormHelp || values.nousFormHelp || '',
     nousFormHelp: values.nousFormHelp || '',
     conjugationBase: values.conjugationBase || '',
@@ -538,7 +623,7 @@ export function renderCoachHelpContent(content: string, values: CoachHelpContent
     referenceRadical: values.referenceRadical || '',
     removedEnding: values.removedEnding || '',
   }
-  const rendered = content.replace(/\{(coach|verb|definition|definitionHelp|helpTitle|mode|tense|subject|correctAnswers|auxiliaryAnswer|pastParticipleAnswer|unagreedPastParticiple|COD|isCODplace_avant|COI|isCOIplace_avant|endingsHelp|contextualBaseHelp|completeAdviceHelp|condensedVerbGroupHelp|condensedTenseRuleHelp|nearFutureHelp|nearFutureAllerHelp|referenceFormHelp|nousFormHelp|conjugationBase|conjugationEnding|referenceMode|referenceTense|referenceSubject|referenceForm|referenceRadical|removedEnding)\}/gu, (_match, key: string) => replacements[key] || '')
+  const rendered = content.replace(/\{(coach|verb|definition|definitionHelp|helpTitle|mode|tense|subject|correctAnswers|auxiliaryAnswer|pastParticipleAnswer|unagreedPastParticiple|COD|isCODplace_avant|COI|isCOIplace_avant|endingsHelp|contextualBaseHelp|completeAdviceHelp|condensedVerbGroupHelp|condensedTenseRuleHelp|nearFutureHelp|nearFutureAllerHelp|pronominalHelp|referenceFormHelp|nousFormHelp|conjugationBase|conjugationEnding|referenceMode|referenceTense|referenceSubject|referenceForm|referenceRadical|removedEnding)\}/gu, (_match, key: string) => replacements[key] || '')
   return values.omitIndicativeMode ? withoutIndicativeMode(rendered) : rendered
 }
 
@@ -706,6 +791,7 @@ export function coachHelpQuestionVariables(question: ExerciseQuestion, verb?: Ve
     condensedTenseRuleHelp: buildCondensedTenseRuleHtml(question.mode || tense?.mode?.name, question.temps || tense?.name, verb),
     nearFutureHelp: buildNearFutureCoachHelpHtml(verb),
     nearFutureAllerHelp: buildNearFutureAllerHelpHtml(),
+    pronominalHelp: buildPronominalCoachHelpHtml(question, verb),
     contextualBaseTitle: buildContextualBaseTitle(infinitive, verb?.typeHInitial),
     referenceFormHelp,
     nousFormHelp: referenceFormHelp,

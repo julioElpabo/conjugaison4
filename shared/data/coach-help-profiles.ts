@@ -7,7 +7,7 @@ export type CoachAutomaticHelpBlockId =
   | 'condensed-verb-group'
   | 'condensed-tense-rule'
 
-export type CoachConditionalHelpBlockId = 'orthography' | 'cod-before' | 'participle-agreement'
+export type CoachConditionalHelpBlockId = 'pronominal' | 'orthography' | 'cod-before' | 'participle-agreement'
 
 export interface CoachHelpProfile {
   id: CoachHelpEngineKey
@@ -28,7 +28,7 @@ export const COACH_HELP_PROFILES: Record<CoachHelpEngineKey, CoachHelpProfile> =
     blocks: ['definition', 'complete-with-answers'],
     revealsAnswers: true,
     highlightsTarget: true,
-    conditionalBlocks: ['orthography'],
+    conditionalBlocks: ['pronominal', 'orthography'],
     legacyPresentation: 'cif-falc',
   },
   complete: {
@@ -38,7 +38,7 @@ export const COACH_HELP_PROFILES: Record<CoachHelpEngineKey, CoachHelpProfile> =
     blocks: ['definition', 'complete-advice'],
     revealsAnswers: false,
     highlightsTarget: false,
-    conditionalBlocks: ['orthography', 'cod-before'],
+    conditionalBlocks: ['pronominal', 'orthography', 'cod-before'],
     legacyPresentation: 'cif-falc',
   },
   'tres-condensee': {
@@ -48,7 +48,7 @@ export const COACH_HELP_PROFILES: Record<CoachHelpEngineKey, CoachHelpProfile> =
     blocks: ['definition', 'condensed-verb-group', 'condensed-tense-rule'],
     revealsAnswers: false,
     highlightsTarget: false,
-    conditionalBlocks: ['participle-agreement'],
+    conditionalBlocks: ['pronominal', 'participle-agreement'],
     legacyPresentation: 'concise',
   },
   allophone: {
@@ -58,7 +58,7 @@ export const COACH_HELP_PROFILES: Record<CoachHelpEngineKey, CoachHelpProfile> =
     blocks: ['definition', 'complete-with-answers'],
     revealsAnswers: true,
     highlightsTarget: true,
-    conditionalBlocks: ['orthography'],
+    conditionalBlocks: ['pronominal', 'orthography'],
     legacyPresentation: 'cif-falc',
   },
 }

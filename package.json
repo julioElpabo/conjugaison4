@@ -22,6 +22,8 @@
     "data:apply-verb-definitions-falc": "node --env-file=.env scripts/migrate-verb-definitions-falc.mjs --apply",
     "data:migrate-multilingual-foundation": "node --env-file=.env scripts/migrate-multilingual-foundation.mjs",
     "data:migrate-pronominals": "node --env-file=.env scripts/migrate-pronominal-verbs.mjs",
+    "data:migrate-pronominal-catalogue": "node --env-file-if-exists=.env --import tsx scripts/migrate-pronominal-catalogue.mjs",
+    "data:migrate-pronominal-catalogue:apply": "node --env-file-if-exists=.env --import tsx scripts/migrate-pronominal-catalogue.mjs --apply",
     "data:migrate-complements": "node --env-file=.env scripts/migrate-verb-complements.mjs",
     "data:migrate-complement-placement": "node --env-file=.env --experimental-strip-types scripts/migrate-complement-placement.mjs",
     "data:assign-cod-grammar": "node --env-file=.env scripts/assign-cod-grammar.mjs",

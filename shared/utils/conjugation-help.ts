@@ -548,15 +548,6 @@ function shouldUseReferenceMethodForRegularForm(
   return true
 }
 
-function pronominalIntroHtml(question: ExerciseQuestion, infinitive: string, verb?: Verb) {
-  if (!isPronominalInfinitive(infinitive, verb)) return ''
-  const subject = question.pronom || question.saisiePrefixe || ''
-  const core = conjugatedCore(question.conjugaison1 || '')
-  const reflexive = reflexivePronounForVerb(subject, core, verb)
-  if (!subject || !reflexive) return ''
-  return `<figure><figcaption>Verbe pronominal</figcaption><blockquote><p><strong>${escapedHtml(infinitive)}</strong> est un verbe pronominal.</p><p>Avec <strong>${escapedHtml(subjectKey(subject) || subject)}</strong>, le pronom réfléchi est <strong>${escapedHtml(reflexive)}</strong>. Garde-le dès le début de la réponse.</p></blockquote></figure>`
-}
-
 function nearFutureHelpHtml(question: ExerciseQuestion, revealAnswers = true) {
   const infinitive = question.infinitif?.trim() || 'ce verbe'
   const lexicalInfinitive = bareNearFutureInfinitive(infinitive)
@@ -1006,8 +997,7 @@ function buildCompoundConjugationHtml(question: ExerciseQuestion, verb?: Verb, t
   const answer = revealAnswers
     ? `<figure><figcaption>Construis la réponse</figcaption><ol><li>${auxiliaryInstruction}</li><li>Ajoute le participe passé :<br>${rememberedFormMarkup(participle)}</li><li>Vérifie l’accord du participe passé. Regarde plus bas pour plus de détails.</li></ol>${result}</figure>`
     : `<figure><figcaption>Construis la réponse</figcaption><ol><li>Conjugue le verbe auxiliaire ${escapedHtml(auxiliaryContext)} avec <strong>${escapedHtml(subject)}</strong>.</li><li>Ajoute le participe passé.</li><li>Vérifie l’accord du participe passé. Regarde plus bas pour plus de détails.</li></ol></figure>`
-  const pronominalReminder = !revealAnswers ? pronominalIntroHtml(question, infinitive, verb) : ''
-  return `${knowledge}${pronominalReminder}${answer}${compoundAgreementHtml(auxiliary, subject, participle, officialForm, question, verb)}`
+  return `${knowledge}${answer}${compoundAgreementHtml(auxiliary, subject, participle, officialForm, question, verb)}`
 }
 
 function tenseRule(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationTense) {
@@ -1280,7 +1270,6 @@ export function buildConjugationBaseHtml(
       const referenceInstruction = `Voici la forme repère${referenceContext ? ` ${escapedHtml(referenceContext)}` : ''}. Apprends-la par cœur, c’est très utile :`
       const knowledgeBlock = `<figure>${knowledgeCaption()}<blockquote><strong>Forme repère</strong><p>${referenceInstruction}</p><p>${highlightedReference}</p></blockquote><blockquote><strong>${escapedHtml(endingsKnowledgeTitle(question, tense))}</strong>${endingsContent}</blockquote></figure>`
       const usefulnessBlock = referenceUsefulnessHtml(question, tense, reference, verb)
-      const pronominalIntro = pronominalIntroHtml(question, infinitive, verb)
       const radicalBlock = approach === 'guided-discovery'
         ? `<figure><figcaption>Trouve le radical</figcaption><details><summary>Indice 1 · La forme repère</summary><p>Prends la forme repère :<br>${highlightedReference}</p></details><details><summary>Indice 2 · Le radical</summary><p>${removeInstruction}</p></details></figure>`
         : `<figure><figcaption>Trouve le radical</figcaption><ol><li>Prends la forme repère :<br>${highlightedReference}</li><li>${removeInstruction}</li></ol></figure>`
@@ -1290,16 +1279,16 @@ export function buildConjugationBaseHtml(
         : ''
       const answerBlock = `<figure><figcaption>Construis la réponse</figcaption><blockquote><p>Ajoute ${ending} au radical ${changesBeforeEnding ? radicalBadge(rawReferenceRadical) : base} :</p>${assembly}${pronominalResult}</blockquote></figure>`
       if (approach === 'concise') {
-        return `${knowledgeBlock}${pronominalIntro}${radicalBlock}${answerBlock}${usefulnessBlock}`
+        return `${knowledgeBlock}${radicalBlock}${answerBlock}${usefulnessBlock}`
       }
       if (approach === 'guided-discovery') {
-        return `${knowledgeBlock}${pronominalIntro}${radicalBlock}${answerBlock}${usefulnessBlock}${exception}`
+        return `${knowledgeBlock}${radicalBlock}${answerBlock}${usefulnessBlock}${exception}`
       }
       if (approach === 'cif-falc') {
-        return `${knowledgeBlock}${pronominalIntro}${radicalBlock}${answerBlock}${usefulnessBlock}${exception}`
+        return `${knowledgeBlock}${radicalBlock}${answerBlock}${usefulnessBlock}${exception}`
       }
       const familyFact = family ? `<p><strong>Famille de conjugaison :</strong> ${escapedHtml(family)}.</p>` : ''
-      return `${knowledgeBlock}${pronominalIntro}${radicalBlock}${answerBlock}${usefulnessBlock}${familyFact}${exception}`
+      return `${knowledgeBlock}${radicalBlock}${answerBlock}${usefulnessBlock}${familyFact}${exception}`
     }
 
     if (approach === 'concise') {

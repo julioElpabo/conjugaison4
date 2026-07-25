@@ -50,6 +50,19 @@ describe('génération des emplois pronominaux', () => {
     }), auxiliaries).conjugaison1, "m'amuse")
   })
 
+  it('conjugue la forme générée « se lancer »', () => {
+    const row = generatePronominalRow(source({
+      verbe_id: 110,
+      base_conjugaison1: 'lance',
+      conjugaison1: 'lance',
+      infinitif: 'lancer',
+      infinitif_pronominal: 'se lancer',
+      participe_passe: 'lancé',
+    }), auxiliaries)
+    assert.equal(row.conjugaison1, 'me lance')
+    assert.deepEqual(formatConjugationQuestion(row, 'je').reponsesPourCorrige, ['je me lance'])
+  })
+
   it("forme l'impératif affirmatif avec trait d’union", () => {
     const row = generatePronominalRow(source({
       personne_id: 5, pronom: 'tu', mode_name: 'impératif', base_conjugaison1: 'joue', conjugaison1: 'joue'

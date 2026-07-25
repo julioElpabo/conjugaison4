@@ -3,6 +3,7 @@ import { after, before, describe, it } from 'node:test'
 
 import mysql from 'mysql2/promise'
 import { generatePronominalRow } from '../server/services/pronominal-formatter.ts'
+import { pronominalUseSeeds } from '../shared/data/pronominal-use-seeds.ts'
 
 const databaseConfigured = Boolean(process.env.DB_HOST && process.env.DB_NAME && process.env.DB_USER)
 let database
@@ -34,7 +35,12 @@ describe('migration non destructive des verbes pronominaux', { skip: !databaseCo
       derivables: Number(rows[0].derivables),
       autonomes: Number(rows[0].autonomes),
       historiques: Number(rows[0].historiques),
-    }, { emplois: 68, derivables: 56, autonomes: 12, historiques: 65 })
+    }, {
+      emplois: 68 + pronominalUseSeeds.length,
+      derivables: 56 + pronominalUseSeeds.length,
+      autonomes: 12,
+      historiques: 65,
+    })
 
     const [invalid] = await database.execute(`
       SELECT ep.id
@@ -125,6 +131,34 @@ describe('migration non destructive des verbes pronominaux', { skip: !databaseCo
       regle_accord: 'avec_sujet',
       statut_validation: 'valide',
       infinitif: 'placer',
+      pronominalisable: true,
+    })
+  })
+
+  it('expose se lancer comme emploi validé et utilisable par les six personnes', async () => {
+    const [rows] = await database.execute(`
+      SELECT ep.infinitif_pronominal, ep.personnes_autorisees, ep.statut_validation,
+             ep.source_url, base.infinitif, base.pronominalisable
+      FROM emplois_pronominaux ep
+      INNER JOIN verbes base ON base.id=ep.verbe_id
+      WHERE ep.infinitif_pronominal='se lancer' AND ep.actif=1
+    `)
+    assert.equal(rows.length, 1)
+    assert.deepEqual({
+      infinitif_pronominal: rows[0].infinitif_pronominal,
+      personnes_autorisees: Array.isArray(rows[0].personnes_autorisees)
+        ? rows[0].personnes_autorisees
+        : JSON.parse(rows[0].personnes_autorisees),
+      statut_validation: rows[0].statut_validation,
+      source_url: rows[0].source_url,
+      infinitif: rows[0].infinitif,
+      pronominalisable: Boolean(rows[0].pronominalisable),
+    }, {
+      infinitif_pronominal: 'se lancer',
+      personnes_autorisees: [4, 5, 6, 7, 8, 9],
+      statut_validation: 'valide',
+      source_url: 'https://www.dictionnaire-academie.fr/article/A9L0235',
+      infinitif: 'lancer',
       pronominalisable: true,
     })
   })

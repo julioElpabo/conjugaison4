@@ -10,7 +10,11 @@ const databaseConfig = {
 }
 
 if (!databaseConfig.host || !databaseConfig.database || !databaseConfig.user) {
-  throw new Error('Configuration MySQL absente (DB_* ou NUXT_DB_*).')
+  throw new Error(
+    'Configuration MySQL absente (DB_* ou NUXT_DB_*). '
+    + 'Dans Plesk, si « Run script » ne transmet pas ces variables, déployez le code puis redémarrez l’application : '
+    + 'le plugin serveur near-future-migration appliquera cette migration automatiquement.'
+  )
 }
 
 const connection = await mysql.createConnection(databaseConfig)

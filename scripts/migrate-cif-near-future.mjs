@@ -1,13 +1,23 @@
 import mysql from 'mysql2/promise'
 
 const apply = process.argv.includes('--apply')
-const database = await mysql.createConnection({
-  host: process.env.DB_HOST || '127.0.0.1',
-  port: Number(process.env.DB_PORT || 3306),
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-})
+const databaseConfig = {
+  host: process.env.DB_HOST || process.env.NUXT_DB_HOST,
+  port: Number(process.env.DB_PORT || process.env.NUXT_DB_PORT || 3306),
+  database: process.env.DB_NAME || process.env.NUXT_DB_NAME,
+  user: process.env.DB_USER || process.env.NUXT_DB_USER,
+  password: process.env.DB_PASSWORD || process.env.NUXT_DB_PASSWORD,
+}
+
+if (!databaseConfig.host || !databaseConfig.database || !databaseConfig.user) {
+  throw new Error(
+    'Configuration MySQL absente (DB_* ou NUXT_DB_*). '
+    + 'Dans Plesk, si « Run script » ne transmet pas ces variables, déployez le code puis redémarrez l’application : '
+    + 'le plugin serveur near-future-migration appliquera cette migration automatiquement.'
+  )
+}
+
+const database = await mysql.createConnection(databaseConfig)
 
 try {
   await database.beginTransaction()

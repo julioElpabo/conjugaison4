@@ -99,6 +99,13 @@ requises au démarrage de l’application doivent donc aussi être idempotentes 
 être exécutées depuis un plugin serveur, où la configuration de l’application
 est disponible.
 
+Le futur proche suit ce mécanisme : après déploiement, un redémarrage de
+l’application exécute automatiquement le plugin
+`server/plugins/near-future-migration.ts`. Il crée le temps s’il manque et
+l’ajoute aux défis CIF stockés. Il n’est donc pas nécessaire d’exécuter
+`data:migrate-near-future:apply` depuis **Run script** lorsque Plesk n’y transmet
+pas les variables d’environnement.
+
 La migration est transactionnelle et réexécutable : une erreur annule la
 migration, et une seconde exécution valide les données déjà présentes. Terminer
 par `build`, puis cliquer sur **Restart App**.

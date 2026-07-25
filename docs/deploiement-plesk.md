@@ -1,8 +1,8 @@
 # Déploiement automatique GitHub → Plesk
 
-Le déploiement utilise l’extension Git de Plesk. Un push sur `main` déclenche un
-webhook GitHub, puis Plesk récupère le commit, construit Nuxt et redémarre
-l’application Node.js.
+Le déploiement utilise l’extension Git de Plesk. Les fichiers nécessaires sont
+envoyés par `git push`, puis Plesk récupère le commit. Ce serveur n’accepte
+aucune action ni aucun script après déploiement.
 
 ## 1. Préparer le domaine dans Plesk
 
@@ -17,8 +17,8 @@ Dans **Sites Web & Domaines → Node.js** :
 - définir le fichier de démarrage sur `app.mjs` ;
 - ne pas encore activer l’application avant le premier build réussi.
 
-Ajouter les variables d’environnement suivantes dans la configuration Node.js
-de Plesk :
+La configuration d’exécution de l’application contient notamment les valeurs
+suivantes :
 
 ```text
 NUXT_DB_HOST=127.0.0.1
@@ -30,7 +30,8 @@ NUXT_SESSION_SECRET=une_valeur_aleatoire_d_au_moins_32_caracteres
 NODE_ENV=production
 ```
 
-Ces valeurs ne doivent jamais être ajoutées au dépôt Git.
+Ces valeurs ne doivent jamais être ajoutées au dépôt Git. Elles ne sont pas
+accessibles depuis « Run script » ni depuis une action de déploiement Plesk.
 
 ## 2. Relier le dépôt GitHub
 
@@ -40,27 +41,24 @@ Dans **Sites Web & Domaines → Git → Ajouter un dépôt** :
 2. saisir `git@github.com:julioElpabo/conjugaison4.git` ;
 3. sélectionner la branche `main` ;
 4. choisir le dossier défini comme racine de l’application Node.js ;
-5. activer le mode de déploiement automatique.
+5. laisser les « Actions de déploiement supplémentaires » vides.
 
 Si le dépôt GitHub est privé, copier la clé publique affichée par Plesk dans
 **GitHub → Settings → Deploy keys → Add deploy key**. L’accès en écriture n’est
 pas nécessaire.
 
-## 3. Configurer l’action après déploiement
+## 3. Déployer sans action supplémentaire
 
-Dans les paramètres du dépôt Git de Plesk, activer **Actions de déploiement
-supplémentaires** et ajouter :
+Ne configurer aucune commande après déploiement. En particulier, ne pas
+utiliser :
 
 ```bash
 bash scripts/deploy-plesk.sh ../tmp/restart.txt
 ```
 
-Le chemin `../tmp/restart.txt` convient quand la racine de l’application est le
-dossier `httpdocs` du domaine. Si l’application est dans un sous-dossier,
-adapter ce chemin pour viser le dossier `tmp` du domaine Plesk.
-
-Effectuer une première récupération et un premier déploiement manuellement.
-Quand le build est terminé, activer Node.js et vérifier l’URL de l’application.
+Cette commande n’est pas acceptée par ce serveur. Effectuer la récupération et
+le déploiement avec les fonctions normales de l’extension Git de Plesk, puis
+redémarrer l’application depuis l’interface Node.js si nécessaire.
 
 ## 4. Ajouter le webhook GitHub
 
@@ -75,7 +73,7 @@ Dans **GitHub → Settings → Webhooks → Add webhook** :
 Dès lors, chaque push sur `main` suit ce flux :
 
 ```text
-push GitHub → webhook Plesk → récupération de main → npm ci → build Nuxt → redémarrage
+push GitHub → récupération/déploiement Plesk → redémarrage normal de l’application
 ```
 
 Les journaux du déploiement sont visibles dans la section Git de Plesk. Les
@@ -83,29 +81,25 @@ journaux de l’application sont visibles dans **Sites Web & Domaines → Logs**
 
 ## 5. Appliquer une migration de données
 
-Lorsqu’une version ajoute un script de migration, déployer d’abord le nouveau
-commit, puis ouvrir **Node.js → Run Node.js Commands → Run script**. Choisir le
-script concerné et l’exécuter une seule fois. Pour les demandes issues des
-courriels de 2025–2026, choisir :
-
-```text
-data:migrate-mail-requests:apply
-```
-
-Le script utilise les variables `NUXT_DB_*` configurées dans Plesk. Selon la
-version de Node.js Toolkit, ces variables peuvent être réservées au processus
-Passenger et ne pas être transmises au bouton **Run script**. Les migrations
-requises au démarrage de l’application doivent donc aussi être idempotentes et
-être exécutées depuis un plugin serveur, où la configuration de l’application
-est disponible.
+Ne lancer aucune migration depuis **Run script** : les variables de connexion
+MySQL de Plesk n’y sont pas accessibles. Toute évolution de la base doit fournir
+une variante dans les fichiers envoyés par `git push`, de préférence une
+migration idempotente exécutée au démarrage de l’application, où la connexion
+MySQL du site est disponible.
 
 Le futur proche suit ce mécanisme : après déploiement, un redémarrage de
 l’application exécute automatiquement le plugin
 `server/plugins/near-future-migration.ts`. Il crée le temps s’il manque et
-l’ajoute aux défis CIF stockés. Il n’est donc pas nécessaire d’exécuter
-`data:migrate-near-future:apply` depuis **Run script** lorsque Plesk n’y transmet
-pas les variables d’environnement.
+l’ajoute aux défis CIF stockés. Il ne faut donc jamais exécuter
+`data:migrate-near-future:apply` depuis **Run script**.
 
-La migration est transactionnelle et réexécutable : une erreur annule la
-migration, et une seconde exécution valide les données déjà présentes. Terminer
-par `build`, puis cliquer sur **Restart App**.
+Le lot pilote de 100 verbes et la conversion dynamique des défis de groupes
+suivent la même règle grâce aux fichiers
+`server/plugins/verb-pilot-migration.ts` et
+`server/plugins/challenge-group-criteria-migration.ts`, tous deux livrés par
+`git push`.
+
+Chaque migration automatique doit être transactionnelle et réexécutable : une
+erreur annule la migration et un redémarrage ultérieur contrôle les données déjà
+présentes. Après le déploiement, cliquer sur **Restart App**, puis vérifier les
+journaux de l’application.

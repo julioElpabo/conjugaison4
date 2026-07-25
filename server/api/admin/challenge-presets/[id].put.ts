@@ -19,11 +19,12 @@ export default defineEventHandler(async (event) => {
     const [result] = await connection.execute<ResultSetHeader>(`UPDATE challenge_presets SET
       preset_key=?,category_id=?,name=?,description=?,question_count=?,exercise_kind=?,
       past_simple_pronouns=?,inclusive_pronouns=?,complement_options=?,
-      verb_selection_mode='explicit',criteria_json=JSON_ARRAY(),sort_order=?,is_active=?
+      verb_selection_mode=?,criteria_json=?,sort_order=?,is_active=?
       WHERE id=?`, [
       payload.presetKey, payload.categoryId, payload.name, payload.description,
       payload.questionCount, payload.exerciseKind, payload.pastSimplePronouns,
       payload.inclusivePronouns ? 1 : 0, JSON.stringify(payload.complementOptions),
+      payload.verbSelectionMode, JSON.stringify(payload.criteria),
       payload.sortOrder, payload.isActive ? 1 : 0, id,
     ])
     if (result.affectedRows === 0) {

@@ -341,6 +341,7 @@ function toggleId(ids: number[], id: number) {
 
 function toggleVerb(id: number) {
   if (!presetDraft.value) return
+  presetDraft.value.verbSelectionMode = 'explicit'
   const wasSelected = presetDraft.value.verbIds.includes(id)
   toggleId(presetDraft.value.verbIds, id)
   if (!wasSelected) verbSearch.value = ''
@@ -359,6 +360,7 @@ function setComplementOption(option: ComplementOption, checked: boolean) {
 
 function setAllVisibleVerbs(selected: boolean) {
   if (!presetDraft.value) return
+  presetDraft.value.verbSelectionMode = 'explicit'
   const visibleIds = new Set(filteredVerbs.value.map(verb => verb.id))
   presetDraft.value.verbIds = selected
     ? [...new Set([...presetDraft.value.verbIds, ...visibleIds])]
@@ -467,7 +469,7 @@ async function savePreset() {
       const changedDuringSave = JSON.stringify(draft) !== JSON.stringify(submitted)
       const orderChangedDuringSave = draft.sortOrder !== submitted.sortOrder
       draft.databaseId = id
-      draft.verbSelectionMode = 'explicit'
+      draft.verbSelectionMode = submitted.verbSelectionMode
       for (const order of response.orders ?? []) {
         const listed = presets.value.find(item => item.databaseId === order.id)
         if (listed) listed.sortOrder = order.sortOrder
@@ -484,7 +486,7 @@ async function savePreset() {
       else presets.value.push(saved)
       const stored = clone(submitted)
       stored.databaseId = id
-      stored.verbSelectionMode = 'explicit'
+      stored.verbSelectionMode = submitted.verbSelectionMode
       if (appliedOrder) stored.sortOrder = appliedOrder
       const storedCategory = categories.value.find(item => item.id === stored.categoryId)
       stored.group = storedCategory?.slug ?? stored.group
@@ -658,7 +660,7 @@ watch(user, (currentUser) => {
                 </div>
                 <p v-if="!selectedVerbs.length">Aucun verbe sélectionné.</p>
                 <div v-else class="selected-verbs__badges">
-                  <button v-for="verb in selectedVerbs" :key="verb.id" type="button" :aria-label="`Retirer ${verb.infinitif}`" :title="`Retirer ${verb.infinitif}`" @click="toggleId(presetDraft.verbIds, verb.id)">
+                  <button v-for="verb in selectedVerbs" :key="verb.id" type="button" :aria-label="`Retirer ${verb.infinitif}`" :title="`Retirer ${verb.infinitif}`" @click="toggleVerb(verb.id)">
                     <span>{{ verb.infinitif }}</span><i aria-hidden="true">×</i>
                   </button>
                 </div>

@@ -55,6 +55,7 @@
     "data:verbs:pilot:check": "node --env-file-if-exists=.env scripts/check-verb-pilot-import.mjs",
     "data:verbs:pilot:apply": "node --env-file-if-exists=.env scripts/check-verb-pilot-import.mjs --apply",
     "data:verbs:pilot:restore": "node --env-file-if-exists=.env scripts/check-verb-pilot-import.mjs --restore",
+    "data:migrate-challenge-groups": "node --env-file-if-exists=.env scripts/migrate-challenge-group-criteria.mjs",
     "data:migrate-cif-near-future": "node --env-file-if-exists=.env scripts/migrate-cif-near-future.mjs",
     "data:migrate-cif-near-future:apply": "node --env-file-if-exists=.env scripts/migrate-cif-near-future.mjs --apply",
     "data:import-coach-media": "node --env-file=.env scripts/import-coach-media.mjs",

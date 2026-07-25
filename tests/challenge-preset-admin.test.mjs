@@ -33,6 +33,33 @@ describe('administration des défis pré-enregistrés', () => {
     assert.equal(parsed.pastSimplePronouns, 'third-person-only')
     assert.equal(parsed.inclusivePronouns, true)
     assert.equal(parsed.isActive, false)
+    assert.equal(parsed.verbSelectionMode, 'explicit')
+    assert.deepEqual(parsed.criteria, [])
+  })
+
+  it('conserve une sélection dynamique lors d’une modification administrative', () => {
+    const parsed = parseChallengePresetPayload({
+      id: 'groupe2',
+      label: 'Deuxième groupe',
+      description: 'Tous les verbes du deuxième groupe.',
+      categoryId: 3,
+      questionCount: 20,
+      exerciseKind: 'conjugation',
+      pastSimplePronouns: 'all',
+      inclusivePronouns: false,
+      complementOptions: [],
+      verbIds: [12, 13],
+      tenseIds: [1],
+      sortOrder: 2,
+      isActive: true,
+      verbSelectionMode: 'criteria',
+      criteria: [{ field: 'groupeConjugaison', operator: 'equals', value: 2 }],
+    })
+
+    assert.equal(parsed.verbSelectionMode, 'criteria')
+    assert.deepEqual(parsed.criteria, [
+      { field: 'groupeConjugaison', operator: 'equals', value: 2 },
+    ])
   })
 
   it('normalise l’identifiant d’une nouvelle catégorie', () => {

@@ -177,6 +177,27 @@ function uniqueIds(value: unknown, allowNegative = false) {
   return [...new Set(ids)]
 }
 
+const criterionFields = new Set([
+  'groupeConjugaison', 'terminaison', 'typePronominal', 'niveauDifficulte',
+  'registrePrincipal', 'particularites', 'niveauxScolaires', 'parcoursCif',
+  'categoriesSemantiques', 'complementExample',
+])
+const criterionOperators = new Set([
+  'equals', 'not-equals', 'includes', 'not-in', 'gte', 'has-anteposable-cod',
+])
+
+function parseCriteria(value: unknown): VerbCriterion[] | null {
+  if (!Array.isArray(value)) return null
+  const criteria = value.filter((criterion): criterion is Record<string, unknown> =>
+    Boolean(criterion) && typeof criterion === 'object' && !Array.isArray(criterion))
+  if (criteria.length !== value.length || criteria.some(criterion =>
+    !criterionFields.has(String(criterion.field))
+    || !criterionOperators.has(String(criterion.operator)))) {
+    return null
+  }
+  return criteria as VerbCriterion[]
+}
+
 export function parseChallengePresetPayload(value: unknown) {
   const body = value && typeof value === 'object' && !Array.isArray(value)
     ? value as Record<string, unknown>
@@ -192,8 +213,11 @@ export function parseChallengePresetPayload(value: unknown) {
   const exerciseKind = body.exerciseKind
   const pastSimplePronouns = body.pastSimplePronouns
   const complementOptions = normalizeComplementOptions(body.complementOptions)
+  const verbSelectionMode = body.verbSelectionMode === 'criteria' ? 'criteria' : 'explicit'
+  const criteria = parseCriteria(body.criteria ?? [])
   if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/u.test(presetKey) || !name || !categoryId
     || !questionCount || sortOrder === null || !verbIds?.length || !tenseIds?.length
+    || criteria === null
     || !['conjugation', 'tense-identification'].includes(String(exerciseKind))
     || !['all', 'third-person-only'].includes(String(pastSimplePronouns))
     || !Array.isArray(body.complementOptions) || complementOptions.length !== body.complementOptions.length
@@ -214,6 +238,8 @@ export function parseChallengePresetPayload(value: unknown) {
     tenseIds,
     sortOrder,
     isActive: body.isActive,
+    verbSelectionMode,
+    criteria,
   }
 }
 

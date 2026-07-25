@@ -63,9 +63,9 @@ async function classifiedVerbs() {
 }
 
 describe('métadonnées grammaticales des verbes', () => {
-  it('classe chacun des 488 verbes sans dépendre de son identifiant', async () => {
+  it('classe chacun des 588 verbes sans dépendre de son identifiant', async () => {
     const verbs = await classifiedVerbs()
-    assert.equal(verbs.length, 488)
+    assert.equal(verbs.length, 588)
     assert.ok(verbs.every(verb => [1, 2, 3].includes(verb.groupeConjugaison)))
     assert.ok(verbs.every(verb => verb.familleConjugaison && verb.terminaison && verb.formeCanonique))
     assert.ok(verbs.every(verb => verb.categoriesSemantiques.length > 0))

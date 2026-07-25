@@ -1,0 +1,3145 @@
+{
+  "generatedAt": "2026-07-25T11:32:48.473Z",
+  "source": {
+    "file": "Lexique4.tsv",
+    "sha256": "b43e9c11e22af07f602e0adf2182b1dd59b1ec50e274ccb0022159582ec5285a",
+    "lexiqueVerbLemmaCount": 5014
+  },
+  "catalogue": {
+    "total": 488,
+    "active": 435,
+    "archived": 53,
+    "validated": 2,
+    "toReview": 433,
+    "withFrequency": 0
+  },
+  "missingCount": 4832,
+  "candidates": [
+    {
+      "lemma": "revenir",
+      "frequency": 579.816,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "désoler",
+      "frequency": 490.905,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "importer",
+      "frequency": 336.826,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "prier",
+      "frequency": 228.595,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "mentir",
+      "frequency": 215.013,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "supposer",
+      "frequency": 188.782,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "revoir",
+      "frequency": 136.759,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "voir-recevoir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "maintenir",
+      "frequency": 127.13,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "pleurer",
+      "frequency": 126.576,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "ficher",
+      "frequency": 99.035,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "prévoir",
+      "frequency": 96.737,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "voir-recevoir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "dégager",
+      "frequency": 96.475,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "ger",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "signifier",
+      "frequency": 94.44,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "ravir",
+      "frequency": 87.646,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "appartenir",
+      "frequency": 82.304,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "parier",
+      "frequency": 81.905,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "deviner",
+      "frequency": 80.155,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "rater",
+      "frequency": 78.968,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "respirer",
+      "frequency": 78.231,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "fonctionner",
+      "frequency": 76.858,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "parfaire",
+      "frequency": 75.633,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "irrégulier ou à déterminer",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "bosser",
+      "frequency": 75.399,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "enfuir",
+      "frequency": 73.329,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "remplir",
+      "frequency": 64.424,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "durer",
+      "frequency": 62.759,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "rechercher",
+      "frequency": 56.658,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "refaire",
+      "frequency": 55.63,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "irrégulier ou à déterminer",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "dépendre",
+      "frequency": 54.418,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "dre-tre",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "soutenir",
+      "frequency": 49.576,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "repartir",
+      "frequency": 48.269,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "guérir",
+      "frequency": 41.44,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "autoriser",
+      "frequency": 40.661,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "correspondre",
+      "frequency": 39.092,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "dre-tre",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "voter",
+      "frequency": 38.987,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "réunir",
+      "frequency": 38.851,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "déménager",
+      "frequency": 38.551,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "ger",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "insister",
+      "frequency": 38.313,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "décevoir",
+      "frequency": 36.263,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "voir-recevoir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "viser",
+      "frequency": 35.18,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "réagir",
+      "frequency": 34.168,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "piger",
+      "frequency": 33.972,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "ger",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "enquêter",
+      "frequency": 33.959,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "contenir",
+      "frequency": 33.203,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "fêter",
+      "frequency": 33.165,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "fournir",
+      "frequency": 32.75,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "veiller",
+      "frequency": 32.108,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "visiter",
+      "frequency": 32.054,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "bénir",
+      "frequency": 31.921,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "échanger",
+      "frequency": 31.778,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "ger",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "convenir",
+      "frequency": 31.614,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "renoncer",
+      "frequency": 31.601,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "cer",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "obéir",
+      "frequency": 31.415,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "ordonner",
+      "frequency": 30.161,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "douer",
+      "frequency": 30.152,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "mentionner",
+      "frequency": 29.028,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "repérer",
+      "frequency": 28.402,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "hésiter",
+      "frequency": 27.285,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "hurler",
+      "frequency": 26.864,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "établir",
+      "frequency": 26.354,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "vomir",
+      "frequency": 25.899,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "parer",
+      "frequency": 25.541,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "déclencher",
+      "frequency": 25.278,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "avérer",
+      "frequency": 25.256,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "foncer",
+      "frequency": 25.108,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "cer",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "embarquer",
+      "frequency": 24.75,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "flipper",
+      "frequency": 24.646,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "chérir",
+      "frequency": 24.538,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "exiger",
+      "frequency": 24.253,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "ger",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "boiter",
+      "frequency": 24.047,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "transporter",
+      "frequency": 23.93,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "navrer",
+      "frequency": 23.095,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "entourer",
+      "frequency": 22.962,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "foirer",
+      "frequency": 22.772,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "lutter",
+      "frequency": 22.68,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "ralentir",
+      "frequency": 22.57,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "dater",
+      "frequency": 22.532,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "intervenir",
+      "frequency": 22.484,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "déterminer",
+      "frequency": 22.44,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "puer",
+      "frequency": 22.411,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "garantir",
+      "frequency": 22.12,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "emménager",
+      "frequency": 21.617,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "ger",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "rassurer",
+      "frequency": 21.589,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "concevoir",
+      "frequency": 21.225,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "voir-recevoir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "adopter",
+      "frequency": 20.75,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "kidnapper",
+      "frequency": 20.434,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "sécuriser",
+      "frequency": 20.364,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "parvenir",
+      "frequency": 19.972,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "grimper",
+      "frequency": 19.854,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "évacuer",
+      "frequency": 19.845,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "reparler",
+      "frequency": 19.687,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "redevenir",
+      "frequency": 19.646,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "analyser",
+      "frequency": 19.351,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "choper",
+      "frequency": 19.339,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "larguer",
+      "frequency": 19.253,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "bourrer",
+      "frequency": 19.228,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "pourrir",
+      "frequency": 19.212,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "embaucher",
+      "frequency": 19.187,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "évanouir",
+      "frequency": 19.07,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "effondrer",
+      "frequency": 19.066,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "investir",
+      "frequency": 19.032,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    }
+  ],
+  "candidatePool": [
+    {
+      "lemma": "revenir",
+      "frequency": 579.816,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "désoler",
+      "frequency": 490.905,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "importer",
+      "frequency": 336.826,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "prier",
+      "frequency": 228.595,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "mentir",
+      "frequency": 215.013,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "supposer",
+      "frequency": 188.782,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "revoir",
+      "frequency": 136.759,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "voir-recevoir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "maintenir",
+      "frequency": 127.13,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "pleurer",
+      "frequency": 126.576,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "ficher",
+      "frequency": 99.035,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "prévoir",
+      "frequency": 96.737,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "voir-recevoir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "dégager",
+      "frequency": 96.475,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "ger",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "signifier",
+      "frequency": 94.44,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "ravir",
+      "frequency": 87.646,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "appartenir",
+      "frequency": 82.304,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "parier",
+      "frequency": 81.905,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "deviner",
+      "frequency": 80.155,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "rater",
+      "frequency": 78.968,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "respirer",
+      "frequency": 78.231,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "fonctionner",
+      "frequency": 76.858,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "parfaire",
+      "frequency": 75.633,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "irrégulier ou à déterminer",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "bosser",
+      "frequency": 75.399,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "enfuir",
+      "frequency": 73.329,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "remplir",
+      "frequency": 64.424,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "durer",
+      "frequency": 62.759,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "rechercher",
+      "frequency": 56.658,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "refaire",
+      "frequency": 55.63,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "irrégulier ou à déterminer",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "dépendre",
+      "frequency": 54.418,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "dre-tre",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "soutenir",
+      "frequency": 49.576,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "repartir",
+      "frequency": 48.269,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "guérir",
+      "frequency": 41.44,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "autoriser",
+      "frequency": 40.661,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "correspondre",
+      "frequency": 39.092,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "dre-tre",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "voter",
+      "frequency": 38.987,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "réunir",
+      "frequency": 38.851,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "déménager",
+      "frequency": 38.551,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "ger",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "insister",
+      "frequency": 38.313,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "décevoir",
+      "frequency": 36.263,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "voir-recevoir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "viser",
+      "frequency": 35.18,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "réagir",
+      "frequency": 34.168,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "piger",
+      "frequency": 33.972,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "ger",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "enquêter",
+      "frequency": 33.959,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "contenir",
+      "frequency": 33.203,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "fêter",
+      "frequency": 33.165,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "fournir",
+      "frequency": 32.75,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "veiller",
+      "frequency": 32.108,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "visiter",
+      "frequency": 32.054,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "bénir",
+      "frequency": 31.921,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "échanger",
+      "frequency": 31.778,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "ger",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "convenir",
+      "frequency": 31.614,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "renoncer",
+      "frequency": 31.601,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "cer",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "obéir",
+      "frequency": 31.415,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "ordonner",
+      "frequency": 30.161,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "douer",
+      "frequency": 30.152,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "mentionner",
+      "frequency": 29.028,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "repérer",
+      "frequency": 28.402,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "hésiter",
+      "frequency": 27.285,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "hurler",
+      "frequency": 26.864,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "établir",
+      "frequency": 26.354,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "vomir",
+      "frequency": 25.899,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "parer",
+      "frequency": 25.541,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "déclencher",
+      "frequency": 25.278,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "avérer",
+      "frequency": 25.256,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "foncer",
+      "frequency": 25.108,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "cer",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "embarquer",
+      "frequency": 24.75,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "flipper",
+      "frequency": 24.646,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "chérir",
+      "frequency": 24.538,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "exiger",
+      "frequency": 24.253,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "ger",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "boiter",
+      "frequency": 24.047,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "transporter",
+      "frequency": 23.93,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "navrer",
+      "frequency": 23.095,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "entourer",
+      "frequency": 22.962,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "foirer",
+      "frequency": 22.772,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "lutter",
+      "frequency": 22.68,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "ralentir",
+      "frequency": 22.57,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "dater",
+      "frequency": 22.532,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "intervenir",
+      "frequency": 22.484,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "déterminer",
+      "frequency": 22.44,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "puer",
+      "frequency": 22.411,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "garantir",
+      "frequency": 22.12,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "emménager",
+      "frequency": 21.617,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "ger",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "rassurer",
+      "frequency": 21.589,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "concevoir",
+      "frequency": 21.225,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "voir-recevoir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "adopter",
+      "frequency": 20.75,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "kidnapper",
+      "frequency": 20.434,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "sécuriser",
+      "frequency": 20.364,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "parvenir",
+      "frequency": 19.972,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "grimper",
+      "frequency": 19.854,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "évacuer",
+      "frequency": 19.845,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "reparler",
+      "frequency": 19.687,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "redevenir",
+      "frequency": 19.646,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "analyser",
+      "frequency": 19.351,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "choper",
+      "frequency": 19.339,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "larguer",
+      "frequency": 19.253,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "bourrer",
+      "frequency": 19.228,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "pourrir",
+      "frequency": 19.212,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "embaucher",
+      "frequency": 19.187,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "évanouir",
+      "frequency": 19.07,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "effondrer",
+      "frequency": 19.066,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "investir",
+      "frequency": 19.032,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "tarder",
+      "frequency": 19.006,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "franchir",
+      "frequency": 18.949,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "fréquenter",
+      "frequency": 18.937,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "sacrer",
+      "frequency": 18.924,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "ressortir",
+      "frequency": 18.443,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "provenir",
+      "frequency": 18.31,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "merder",
+      "frequency": 18.101,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "sécher",
+      "frequency": 17.734,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "empirer",
+      "frequency": 17.582,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "doubler",
+      "frequency": 17.478,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "draguer",
+      "frequency": 17.275,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "activer",
+      "frequency": 17.06,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "contrer",
+      "frequency": 17.051,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "unir",
+      "frequency": 17.038,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "reproduire",
+      "frequency": 17.009,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "irrégulier ou à déterminer",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "griller",
+      "frequency": 16.816,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "accélérer",
+      "frequency": 16.642,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "méfier",
+      "frequency": 16.491,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "accéder",
+      "frequency": 16.484,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "détenir",
+      "frequency": 16.07,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "fiancer",
+      "frequency": 16.051,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "cer",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "soupçonner",
+      "frequency": 16.041,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "mater",
+      "frequency": 16.025,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "modifier",
+      "frequency": 15.918,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "détecter",
+      "frequency": 15.62,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "vieillir",
+      "frequency": 15.592,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "pénétrer",
+      "frequency": 15.585,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "traduire",
+      "frequency": 15.389,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "irrégulier ou à déterminer",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "lover",
+      "frequency": 15.373,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "pêcher",
+      "frequency": 15.301,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "fonder",
+      "frequency": 15.294,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "contrarier",
+      "frequency": 15.133,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "limiter",
+      "frequency": 15.044,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "plaider",
+      "frequency": 15.019,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "réjouir",
+      "frequency": 14.959,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "remuer",
+      "frequency": 14.753,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "obséder",
+      "frequency": 14.75,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "stopper",
+      "frequency": 14.674,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "semer",
+      "frequency": 14.62,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "anéantir",
+      "frequency": 14.547,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "stresser",
+      "frequency": 14.516,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "planquer",
+      "frequency": 14.25,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "économiser",
+      "frequency": 14.047,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "distribuer",
+      "frequency": 14.025,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "mouiller",
+      "frequency": 13.845,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "destiner",
+      "frequency": 13.649,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "ouvrer",
+      "frequency": 13.639,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "percer",
+      "frequency": 13.595,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "cer",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "claquer",
+      "frequency": 13.551,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "grouiller",
+      "frequency": 13.13,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "accoucher",
+      "frequency": 13.123,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "rétablir",
+      "frequency": 13.104,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "diffuser",
+      "frequency": 13.038,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "surmonter",
+      "frequency": 12.978,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "éprouver",
+      "frequency": 12.902,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "clocher",
+      "frequency": 12.832,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "exclure",
+      "frequency": 12.816,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "irrégulier ou à déterminer",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "repenser",
+      "frequency": 12.791,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "dérouler",
+      "frequency": 12.585,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "gaspiller",
+      "frequency": 12.579,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "bâtir",
+      "frequency": 12.573,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "cingler",
+      "frequency": 12.573,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "enchanter",
+      "frequency": 12.516,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "déguiser",
+      "frequency": 12.484,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "évoluer",
+      "frequency": 12.472,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "régner",
+      "frequency": 12.411,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "présumer",
+      "frequency": 12.402,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "circuler",
+      "frequency": 12.37,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "entretenir",
+      "frequency": 12.228,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "venir-tenir",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "gratter",
+      "frequency": 12.203,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "pirater",
+      "frequency": 12.199,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "décéder",
+      "frequency": 12.127,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "endurer",
+      "frequency": 12.028,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "rajouter",
+      "frequency": 12,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "dresser",
+      "frequency": 11.896,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "désespérer",
+      "frequency": 11.842,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "financer",
+      "frequency": 11.829,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "cer",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "gonfler",
+      "frequency": 11.816,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "braquer",
+      "frequency": 11.769,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "remporter",
+      "frequency": 11.715,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "salir",
+      "frequency": 11.655,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "abîmer",
+      "frequency": 11.652,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "hériter",
+      "frequency": 11.639,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "émettre",
+      "frequency": 11.37,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "mettre-battre",
+      "difficulty": "moyenne",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "piloter",
+      "frequency": 11.364,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "damer",
+      "frequency": 11.358,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "flotter",
+      "frequency": 11.32,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "infecter",
+      "frequency": 11.294,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "dominer",
+      "frequency": 11.272,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "défaire",
+      "frequency": 11.266,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "irrégulier ou à déterminer",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "fourrer",
+      "frequency": 11.212,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "imprimer",
+      "frequency": 11.184,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "capter",
+      "frequency": 11.158,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "programmer",
+      "frequency": 11.095,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "confesser",
+      "frequency": 11.035,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "définir",
+      "frequency": 11.025,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "2e groupe ou 3e groupe en -ir",
+      "difficulty": "à contrôler",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "imiter",
+      "frequency": 10.956,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "encaisser",
+      "frequency": 10.877,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "insinuer",
+      "frequency": 10.801,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "interpréter",
+      "frequency": 10.797,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    }
+  ],
+  "pedagogicallyExcluded": [
+    {
+      "lemma": "chier",
+      "frequency": 53.566,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": "registre vulgaire"
+    },
+    {
+      "lemma": "emmerder",
+      "frequency": 31.392,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": "registre vulgaire"
+    },
+    {
+      "lemma": "pisser",
+      "frequency": 30.94,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": "registre vulgaire"
+    },
+    {
+      "lemma": "déconner",
+      "frequency": 29.623,
+      "status": "absent",
+      "existingId": null,
+      "existingInfinitive": "",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": "registre vulgaire"
+    }
+  ],
+  "spellingConflicts": [
+    {
+      "lemma": "développer",
+      "frequency": 25.392,
+      "status": "présent — graphie à vérifier",
+      "existingId": 553,
+      "existingInfinitive": "developper",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "célébrer",
+      "frequency": 19.782,
+      "status": "présent — graphie à vérifier",
+      "existingId": 507,
+      "existingInfinitive": "celebrer",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "décoller",
+      "frequency": 18.032,
+      "status": "présent — graphie à vérifier",
+      "existingId": 537,
+      "existingInfinitive": "decoller",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "déborder",
+      "frequency": 13.554,
+      "status": "présent — graphie à vérifier",
+      "existingId": 533,
+      "existingInfinitive": "deborder",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "débuter",
+      "frequency": 13.085,
+      "status": "présent — graphie à vérifier",
+      "existingId": 535,
+      "existingInfinitive": "debuter",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "désigner",
+      "frequency": 10.212,
+      "status": "présent — graphie à vérifier",
+      "existingId": 550,
+      "existingInfinitive": "designer",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "différer",
+      "frequency": 2.579,
+      "status": "présent — graphie à vérifier",
+      "existingId": 555,
+      "existingInfinitive": "differer",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    },
+    {
+      "lemma": "caractériser",
+      "frequency": 1.158,
+      "status": "présent — graphie à vérifier",
+      "existingId": 505,
+      "existingInfinitive": "caracteriser",
+      "family": "er-regulier ou alternance",
+      "difficulty": "faible",
+      "exclusionReason": ""
+    }
+  ]
+}

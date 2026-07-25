@@ -30,14 +30,21 @@ describe('migration non destructive des verbes pronominaux', { skip: !databaseCo
              SUM(legacy_verbe_id IS NOT NULL) AS historiques
       FROM emplois_pronominaux WHERE actif = 1
     `)
+    const [pilotRows] = await database.execute(`
+      SELECT COUNT(*) AS count
+      FROM emplois_pronominaux
+      WHERE actif=1 AND source='pilot-2026-01'
+    `)
+    const pilotUses = Number(pilotRows[0].count)
+    assert.equal(pilotUses, 20)
     assert.deepEqual({
       emplois: Number(rows[0].emplois),
       derivables: Number(rows[0].derivables),
       autonomes: Number(rows[0].autonomes),
       historiques: Number(rows[0].historiques),
     }, {
-      emplois: 68 + pronominalUseSeeds.length,
-      derivables: 56 + pronominalUseSeeds.length,
+      emplois: 68 + pronominalUseSeeds.length + pilotUses,
+      derivables: 56 + pronominalUseSeeds.length + pilotUses,
       autonomes: 12,
       historiques: 65,
     })

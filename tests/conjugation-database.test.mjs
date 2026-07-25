@@ -138,7 +138,7 @@ describe('verbes défectifs et impersonnels', { skip: !databaseConfigured }, () 
   })
 })
 
-describe('intégrité des 488 verbes du catalogue', { skip: !databaseConfigured }, () => {
+describe('intégrité des 588 verbes du catalogue', { skip: !databaseConfigured }, () => {
   it('ne contient aucun infinitif en double', async () => {
     const [rows] = await database.query('SELECT id, infinitif FROM verbes ORDER BY infinitif, id')
     const seen = new Map()

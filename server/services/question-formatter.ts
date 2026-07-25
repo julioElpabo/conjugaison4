@@ -18,6 +18,7 @@ export interface ConjugationSourceRow {
   mode_code?: ExerciseQuestion['modeCode']
   nous_form?: string | null
   radical_reference?: ExerciseQuestion['radicalReference']
+  future_simple_forms?: string[]
   agreement_rule?: string | null
   complement_phrase?: string | null
   complement_position?: 'after' | 'before'
@@ -383,6 +384,17 @@ export function formatConjugationQuestion(
         number: (row.complement_number as 'singulier' | 'pluriel' | null | undefined) ?? null,
       }
     : undefined
+  const futureSimpleAnswers = row.future_simple_forms?.length
+    ? answerVariants({
+        ...row,
+        conjugaison1: row.future_simple_forms[0] || '',
+        conjugaison2: row.future_simple_forms[1] || '',
+        conjugaison3: row.future_simple_forms[2] || '',
+        temps_name: 'futur',
+        tense_code: 'future',
+        is_compound: 0,
+      }, pronoun)
+    : []
 
   return {
     id: `c-${row.id}`,
@@ -393,6 +405,7 @@ export function formatConjugationQuestion(
     consigne: prompt,
     reponses: answerVariants(row, pronoun),
     reponsesPourCorrige: unique(displayedCorrections),
+    ...(futureSimpleAnswers.length ? { futureSimpleAnswers } : {}),
     infinitif: row.infinitif,
     pronom: pronoun,
     temps: row.temps_name,

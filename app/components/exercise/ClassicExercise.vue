@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const { ui, uiLabel } = useLanguagePreferences()
 import type { ExerciseAttempt, ExerciseQuestion } from '~~/shared/types/conjugation'
-import { getAlternativeCorrections } from '~~/shared/utils/answer'
+import { getAlternativeCorrections, isFutureSimpleInsteadOfNearFuture } from '~~/shared/utils/answer'
 import { evaluateExerciseAnswer } from '~~/shared/utils/exercise-attempt'
 
 const props = defineProps<{
@@ -19,6 +19,7 @@ const answer = ref('')
 const feedback = ref<'idle' | 'correct' | 'incorrect'>('idle')
 const retryAlreadyOffered = ref(false)
 const retryMessageVisible = ref(false)
+const futureSimpleConfusion = ref(false)
 const attempts = ref<ExerciseAttempt[]>([])
 const isFinished = ref(false)
 const closeConfirmationOpen = ref(false)
@@ -93,11 +94,13 @@ function submitAnswer() {
     question.reponses,
     retryAlreadyOffered.value,
   )
+  const usedFutureSimple = !result.isCorrect && isFutureSimpleInsteadOfNearFuture(answer.value, question)
   track('answer_submitted', { presentation: 'classic', exerciseKind: props.exerciseKind })
   if (shouldRetry) {
     track('answer_retry', { presentation: 'classic', exerciseKind: props.exerciseKind })
     retryAlreadyOffered.value = true
     retryMessageVisible.value = true
+    futureSimpleConfusion.value = usedFutureSimple
     nextTick(() => {
       answerInput.value?.focus()
       answerInput.value?.select()
@@ -106,6 +109,7 @@ function submitAnswer() {
   }
 
   retryMessageVisible.value = false
+  futureSimpleConfusion.value = usedFutureSimple
   feedback.value = result.isCorrect ? 'correct' : 'incorrect'
   if (result.isCorrect) track('answer_correct', { presentation: 'classic', exerciseKind: props.exerciseKind })
   attempts.value.push({
@@ -130,6 +134,7 @@ function showTourProgress() {
   feedback.value = 'idle'
   retryAlreadyOffered.value = false
   retryMessageVisible.value = false
+  futureSimpleConfusion.value = false
   attempts.value = props.questions.slice(0, 5).map((question, index) => ({
     question,
     answer: index === 1 || index === 4
@@ -160,6 +165,7 @@ function nextQuestion() {
   feedback.value = 'idle'
   retryAlreadyOffered.value = false
   retryMessageVisible.value = false
+  futureSimpleConfusion.value = false
   nextTick(() => answerInput.value?.focus())
 }
 
@@ -169,6 +175,7 @@ function restart() {
   feedback.value = 'idle'
   retryAlreadyOffered.value = false
   retryMessageVisible.value = false
+  futureSimpleConfusion.value = false
   attempts.value = []
   isFinished.value = false
   track('exercise_started', { presentation: 'classic', exerciseKind: props.exerciseKind })
@@ -294,7 +301,11 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
                 {{ currentIndex === questions.length - 1 ? ui('Voir mes résultats') : ui('Question suivante') }}
               </button>
             </form>
-            <p v-if="retryMessageVisible" id="answer-retry" class="answer-retry" aria-live="polite"> {{ ui('Pas encore. Vérifie ta réponse et essaie une deuxième fois.') }} </p>
+            <p v-if="retryMessageVisible" id="answer-retry" class="answer-retry" aria-live="polite">
+              {{ futureSimpleConfusion
+                ? ui('Ta conjugaison est correcte au futur simple, mais la question demande le futur proche. Au futur simple, le verbe est conjugué en un seul mot (« tu mangeras »). Au futur proche, on utilise « aller » au présent suivi de l’infinitif (« tu vas manger »).')
+                : ui('Pas encore. Vérifie ta réponse et essaie une deuxième fois.') }}
+            </p>
           </template>
 
           <p v-else class="question-text">{{ currentQuestion.consigne }}</p>
@@ -322,7 +333,11 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
               </button>
             </div>
           </form>
-          <p v-if="retryMessageVisible && !(exerciseKind === 'conjugation' && currentQuestion.complement)" id="answer-retry" class="answer-retry" aria-live="polite"> {{ ui('Pas encore. Vérifie ta réponse et essaie une deuxième fois.') }} </p>
+          <p v-if="retryMessageVisible && !(exerciseKind === 'conjugation' && currentQuestion.complement)" id="answer-retry" class="answer-retry" aria-live="polite">
+            {{ futureSimpleConfusion
+              ? ui('Ta conjugaison est correcte au futur simple, mais la question demande le futur proche. Au futur simple, le verbe est conjugué en un seul mot (« tu mangeras »). Au futur proche, on utilise « aller » au présent suivi de l’infinitif (« tu vas manger »).')
+              : ui('Pas encore. Vérifie ta réponse et essaie une deuxième fois.') }}
+          </p>
 
           <div
             v-if="feedback !== 'idle'"
@@ -337,6 +352,11 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
             <p v-else-if="alternativeCorrections.length"> {{ ui('On peut aussi répondre :') }} <strong>{{ alternativeText }}</strong>{{ alternativePunctuation }}
             </p>
             <p v-else>{{ ui('Tu peux passer à la question suivante.') }}</p>
+
+            <aside v-if="futureSimpleConfusion" class="grammar-reminder">
+              <strong>{{ ui('Futur proche ou futur simple ?') }}</strong>
+              <p>{{ ui('Ta conjugaison est correcte au futur simple, mais la question demande le futur proche. Au futur simple, le verbe est conjugué en un seul mot (« tu mangeras »). Au futur proche, on utilise « aller » au présent suivi de l’infinitif (« tu vas manger »).') }}</p>
+            </aside>
 
             <aside v-if="agreementReminder" class="grammar-reminder">
               <strong>{{ ui('Rappel de la règle') }}</strong>

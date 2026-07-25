@@ -198,12 +198,16 @@ const complementSuccess = ref('')
 const hasCodConstruction = computed(() => complementGroups.value.some(construction => !isCoi(construction)))
 const newCoiPreview = computed(() => withComplementPreposition(newCoiDraft.value, newCoiPreposition.value))
 
+const editableTenses = computed(() => props.tenses.filter(tense => (
+  tense.name.trim().toLocaleLowerCase('fr-CH') !== 'futur proche'
+)))
+
 const groups = computed(() => [...props.modes]
   .filter(mode => isFiniteConjugationMode(mode.name))
   .sort((left, right) => conjugationModeOrder(left.name) - conjugationModeOrder(right.name) || left.id - right.id)
   .map(mode => ({
     mode,
-    tenses: props.tenses
+    tenses: editableTenses.value
       .filter(tense => tense.modeId === mode.id)
       .sort((left, right) => conjugationTenseOrder(mode.name, left.name) - conjugationTenseOrder(mode.name, right.name) || left.id - right.id)
       .map(tense => ({
@@ -278,7 +282,7 @@ function resetDraft() {
   const expectedKeys = new Set<string>()
   const rows: VerbSavePayload['conjugations'] = []
 
-  for (const tense of props.tenses) {
+  for (const tense of editableTenses.value) {
     for (const person of people) {
       const key = `${tense.id}:${person.id}`
       const item = existing.get(key)

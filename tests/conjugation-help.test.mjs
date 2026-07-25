@@ -63,6 +63,28 @@ test('la commande Aide tolère la casse, les accents et la ponctuation finale', 
   assert.equal(isHelpCommand('j’ai besoin d’aide'), false)
 })
 
+test('l’aide du futur proche explique aller, l’infinitif et l’ordre pronominal', () => {
+  const futureQuestion = question({
+    infinitif: 'se réveiller',
+    pronom: 'je',
+    temps: 'futur proche',
+    tenseCode: 'near-future',
+    conjugaison1: 'vais me réveiller',
+    reponsesPourCorrige: ['je vais me réveiller'],
+  })
+  const futureVerb = verb({
+    infinitif: 'se réveiller',
+    typePronominal: 'essentiel',
+    isPronominalForm: true,
+  })
+  const html = buildConjugationBaseHtml(futureQuestion, futureVerb, undefined, 'cif-falc')
+
+  assert.match(html, /aller au présent \+ infinitif/iu)
+  assert.match(html, /me, te, se, nous, vous, se/iu)
+  assert.match(html, /je vais me réveiller/iu)
+  assert.match(html, /non <em>je me vais lever<\/em>/u)
+})
+
 test('l’aide cible le groupe, le radical, la personne et la cédille', () => {
   const help = buildTargetedConjugationHelp(question(), verb())
 

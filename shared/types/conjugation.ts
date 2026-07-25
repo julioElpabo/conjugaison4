@@ -124,6 +124,8 @@ export interface ExerciseQuestion {
   consigne: string
   reponses: readonly string[]
   reponsesPourCorrige: readonly string[]
+  /** Formes admises au futur simple, utilisées pour expliquer cette confusion dans une question au futur proche. */
+  futureSimpleAnswers?: readonly string[]
   verbeId?: VerbId
   tenseId?: TenseId
   personId?: PersonId | null

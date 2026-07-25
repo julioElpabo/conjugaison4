@@ -10,6 +10,7 @@ const MODE_ORDER = new Map([
 
 const TENSE_ORDER = new Map([
   ['indicatif:présent', 10],
+  ['indicatif:futur proche', 15],
   ['indicatif:passé composé', 20],
   ['indicatif:imparfait', 30],
   ['indicatif:plus-que-parfait', 40],

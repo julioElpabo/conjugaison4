@@ -17,9 +17,9 @@ describe('ordre d’affichage des conjugaisons', () => {
   })
 
   it('alterne les temps simples et composés de l’indicatif', () => {
-    const tenses = ['futur antérieur', 'passé simple', 'présent', 'plus-que-parfait', 'futur', 'imparfait', 'passé composé', 'passé antérieur']
+    const tenses = ['futur antérieur', 'passé simple', 'présent', 'futur proche', 'plus-que-parfait', 'futur', 'imparfait', 'passé composé', 'passé antérieur']
     assert.deepEqual(tenses.sort((left, right) => conjugationTenseOrder('indicatif', left) - conjugationTenseOrder('indicatif', right)), [
-      'présent', 'passé composé', 'imparfait', 'plus-que-parfait', 'passé simple', 'passé antérieur', 'futur', 'futur antérieur',
+      'présent', 'futur proche', 'passé composé', 'imparfait', 'plus-que-parfait', 'passé simple', 'passé antérieur', 'futur', 'futur antérieur',
     ])
   })
 

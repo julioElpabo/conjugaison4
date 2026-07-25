@@ -4,6 +4,7 @@ import { describe, it } from 'node:test'
 import {
   getAlternativeCorrections,
   isAnswerCorrect,
+  isFutureSimpleInsteadOfNearFuture,
   normalizeAnswer,
   validateAnswer,
 } from '../shared/utils/answer.ts'
@@ -111,5 +112,16 @@ describe('validateAnswer', () => {
     assert.equal(validateAnswer(' ', ['aime']).reason, 'empty-answer')
     assert.equal(validateAnswer('aime', []).reason, 'no-expected-answer')
     assert.equal(validateAnswer('aimes', ['aime']).reason, 'no-match')
+  })
+})
+
+describe('confusion entre futur simple et futur proche', () => {
+  it('reconnaît une forme correcte au futur simple sans l’accepter comme futur proche', () => {
+    const question = {
+      futureSimpleAnswers: ['mangeras', 'tu mangeras'],
+    }
+    assert.equal(isFutureSimpleInsteadOfNearFuture('tu mangeras', question), true)
+    assert.equal(isFutureSimpleInsteadOfNearFuture('tu vas manger', question), false)
+    assert.equal(isFutureSimpleInsteadOfNearFuture('tu mangera', question), false)
   })
 })

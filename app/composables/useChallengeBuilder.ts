@@ -111,7 +111,7 @@ export function useChallengeBuilder() {
   function defaultTenseIds() {
     const indicative = catalogue.value.modes.find(mode => mode.name.toLocaleLowerCase('fr') === 'indicatif')
     if (!indicative) return [1, 3, 4, 5]
-    const defaultNames = new Set(['présent', 'imparfait', 'passé composé', 'futur', 'futur simple'])
+    const defaultNames = new Set(['présent', 'futur proche', 'imparfait', 'passé composé', 'futur', 'futur simple'])
     return catalogue.value.temps
       .filter(tense => tense.modeId === indicative.id && defaultNames.has(tense.name.toLocaleLowerCase('fr')))
       .map(tense => tense.id)

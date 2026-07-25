@@ -4,7 +4,7 @@ export const GRAMMAR_MODE_CODES = [
 export type GrammarModeCode = typeof GRAMMAR_MODE_CODES[number]
 
 export const GRAMMAR_TENSE_CODES = [
-  'present', 'imperfect', 'future', 'simple-past', 'compound-past', 'future-perfect',
+  'present', 'near-future', 'imperfect', 'future', 'simple-past', 'compound-past', 'future-perfect',
   'pluperfect', 'past-anterior', 'past', 'past-first-form', 'past-second-form',
 ] as const
 export type GrammarTenseCode = typeof GRAMMAR_TENSE_CODES[number]
@@ -18,7 +18,7 @@ const MODE_BY_FRENCH_NAME: Record<string, GrammarModeCode> = {
   participe: 'participle', gerondif: 'gerund', infinitif: 'infinitive',
 }
 const TENSE_BY_FRENCH_NAME: Record<string, GrammarTenseCode> = {
-  present: 'present', imparfait: 'imperfect', futur: 'future', 'passe simple': 'simple-past',
+  present: 'present', 'futur proche': 'near-future', imparfait: 'imperfect', futur: 'future', 'passe simple': 'simple-past',
   'passe compose': 'compound-past', 'futur anterieur': 'future-perfect', 'plus-que-parfait': 'pluperfect',
   'passe anterieur': 'past-anterior', passe: 'past',
   'passe 1': 'past-first-form', 'passe 1re forme': 'past-first-form',

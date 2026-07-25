@@ -11,6 +11,12 @@ export const COACH_CONDENSED_TENSE_RULES = {
     rule: 'Radical du présent, parfois variable + terminaison de la personne.',
     example: 'chant- + -ons = chantons',
   },
+  'indicatif:futur proche': {
+    label: 'Futur proche',
+    rule: 'Verbe « aller » au présent + infinitif du verbe.',
+    notes: ["Ce n'est pas un temps comme les autres. Il est utilisé pour une action proche."],
+    example: 'je vais + chanter = je vais chanter',
+  },
   'indicatif:imparfait': {
     label: 'Indicatif imparfait',
     rule: 'Forme avec « nous » au présent, sans « -ons » + terminaison de l’imparfait.',

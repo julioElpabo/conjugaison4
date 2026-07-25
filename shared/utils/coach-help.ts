@@ -4,6 +4,7 @@ import { coachCondensedTenseRule } from '../data/coach-condensed-tense-rules'
 import type { ConjugationTense, ExerciseQuestion, Verb } from '../types/conjugation'
 import { withoutIndicativeMode } from './chat-mode-display'
 import { buildCompleteConjugationAdviceHtml, buildConjugationBaseHtml, buildConjugationEndingsHtml, decomposeConjugationForm } from './conjugation-help'
+import { bareNearFutureInfinitive, isNearFutureTense, isPronominalNearFutureInfinitive, nearFutureReflexivePronoun } from './near-future'
 
 const DEFAULT_TITLES: Record<CoachHelpBlockType, string> = {
   normal: '',
@@ -48,8 +49,45 @@ export function defaultCoachHelpBlocks(approach: CoachHelpEngineKey | CoachExpla
   }))
 }
 
-export function visibleCoachHelpBlocks(help?: CoachHelpTemplate | CoachHelpEngineKey | CoachExplanationApproach | null): CoachHelpBlock[] {
-  return defaultCoachHelpBlocks(automaticCoachHelpApproach(help))
+const NEAR_FUTURE_CORE_TOKENS = new Set([
+  '{contextualBaseHelp}',
+  '{completeAdviceHelp}',
+  '{condensedVerbGroupHelp}',
+  '{condensedTenseRuleHelp}',
+])
+
+export function visibleCoachHelpBlocks(
+  help?: CoachHelpTemplate | CoachHelpEngineKey | CoachExplanationApproach | null,
+  context?: Pick<ExerciseQuestion, 'tenseCode' | 'temps'>,
+): CoachHelpBlock[] {
+  const blocks = defaultCoachHelpBlocks(automaticCoachHelpApproach(help))
+  if (!context || !isNearFutureTense({ code: context.tenseCode, name: context.temps })) return blocks
+  const profile = coachHelpProfile(automaticCoachHelpApproach(help))
+  return [
+    ...blocks.filter(block => !NEAR_FUTURE_CORE_TOKENS.has(block.content.trim())),
+    {
+      id: -8_101,
+      type: 'normal',
+      title: 'Futur proche',
+      content: '{nearFutureHelp}',
+      explanationApproach: profile.legacyPresentation,
+      profileId: profile.id,
+      isActive: true,
+      sortOrder: blocks.length + 1,
+      children: [],
+    },
+    {
+      id: -8_102,
+      type: 'normal',
+      title: 'Verbe aller',
+      content: '{nearFutureAllerHelp}',
+      explanationApproach: profile.legacyPresentation,
+      profileId: profile.id,
+      isActive: true,
+      sortOrder: blocks.length + 2,
+      children: [],
+    },
+  ]
 }
 
 const AUTOMATIC_LETTER_G_HELP_ID = -9_001
@@ -257,6 +295,8 @@ export interface CoachHelpContentValues {
   completeAdviceHelp?: string
   condensedVerbGroupHelp?: string
   condensedTenseRuleHelp?: string
+  nearFutureHelp?: string
+  nearFutureAllerHelp?: string
   contextualBaseTitle?: string
   referenceFormHelp?: string
   /** Ancien nom conservé pour les blocs déjà enregistrés. */
@@ -329,6 +369,11 @@ function contextualCondensedTenseRule(mode?: string, tense?: string, verb?: Cond
   if (key === 'gerondif:present' && ['avoir', 'etre', 'savoir'].includes(normalizedGrammar(infinitive))) {
     rule = '« en » + participe présent.'
     notes.push('Exception : le participe présent de ce verbe est irrégulier et doit être appris par cœur.')
+  }
+
+  if (key === 'indicatif:futur proche' && isCondensedPronominalVerb(verb)) {
+    notes.push('Avec un verbe pronominal, place « me, te, se, nous, vous, se » devant l’infinitif.')
+    example = 'je vais + me lever = je vais me lever'
   }
 
   const compoundKeys = new Set([
@@ -480,6 +525,8 @@ export function renderCoachHelpContent(content: string, values: CoachHelpContent
     completeAdviceHelp: values.completeAdviceHelp || '',
     condensedVerbGroupHelp: values.condensedVerbGroupHelp || '',
     condensedTenseRuleHelp: values.condensedTenseRuleHelp || '',
+    nearFutureHelp: values.nearFutureHelp || '',
+    nearFutureAllerHelp: values.nearFutureAllerHelp || '',
     referenceFormHelp: values.referenceFormHelp || values.nousFormHelp || '',
     nousFormHelp: values.nousFormHelp || '',
     conjugationBase: values.conjugationBase || '',
@@ -491,7 +538,7 @@ export function renderCoachHelpContent(content: string, values: CoachHelpContent
     referenceRadical: values.referenceRadical || '',
     removedEnding: values.removedEnding || '',
   }
-  const rendered = content.replace(/\{(coach|verb|definition|definitionHelp|helpTitle|mode|tense|subject|correctAnswers|auxiliaryAnswer|pastParticipleAnswer|unagreedPastParticiple|COD|isCODplace_avant|COI|isCOIplace_avant|endingsHelp|contextualBaseHelp|completeAdviceHelp|condensedVerbGroupHelp|condensedTenseRuleHelp|referenceFormHelp|nousFormHelp|conjugationBase|conjugationEnding|referenceMode|referenceTense|referenceSubject|referenceForm|referenceRadical|removedEnding)\}/gu, (_match, key: string) => replacements[key] || '')
+  const rendered = content.replace(/\{(coach|verb|definition|definitionHelp|helpTitle|mode|tense|subject|correctAnswers|auxiliaryAnswer|pastParticipleAnswer|unagreedPastParticiple|COD|isCODplace_avant|COI|isCOIplace_avant|endingsHelp|contextualBaseHelp|completeAdviceHelp|condensedVerbGroupHelp|condensedTenseRuleHelp|nearFutureHelp|nearFutureAllerHelp|referenceFormHelp|nousFormHelp|conjugationBase|conjugationEnding|referenceMode|referenceTense|referenceSubject|referenceForm|referenceRadical|removedEnding)\}/gu, (_match, key: string) => replacements[key] || '')
   return values.omitIndicativeMode ? withoutIndicativeMode(rendered) : rendered
 }
 
@@ -508,6 +555,19 @@ function tenseWithArticle(value: string) {
 function modeWithArticle(value: string) {
   const mode = value.trim()
   return startsWithVowelForArticle(mode) ? `de l’${mode}` : `du ${mode}`
+}
+
+export function buildNearFutureCoachHelpHtml(verb?: Pick<Verb, 'infinitif'> & Partial<Pick<Verb, 'typeHInitial'>>) {
+  const infinitive = verb?.infinitif?.trim() || 'chanter'
+  const lexicalInfinitive = bareNearFutureInfinitive(infinitive) || 'chanter'
+  const pronominal = isPronominalNearFutureInfinitive(infinitive)
+    ? `<p>Pour un verbe pronominal, place le pronom réfléchi devant l’infinitif : <code>je vais ${nearFutureReflexivePronoun(4, infinitive, verb?.typeHInitial)}${escapedCoachText(lexicalInfinitive)}</code>.</p>`
+    : ''
+  return `<p><strong>Le futur proche se construit avec « aller » au présent, suivi de l’infinitif du verbe.</strong></p><p>Ce n'est pas un temps comme les autres. Il est utilisé pour une action proche.</p><p><code>aller au présent + ${escapedCoachText(lexicalInfinitive)}</code></p><p><strong>Un exemple :</strong><br><code>Il va ouvrir la porte.</code></p>${pronominal}`
+}
+
+export function buildNearFutureAllerHelpHtml() {
+  return '<details><summary>Aller au présent</summary><table><tbody><tr><th>je</th><td>vais</td></tr><tr><th>tu</th><td>vas</td></tr><tr><th>il, elle, on</th><td>va</td></tr><tr><th>nous</th><td>allons</td></tr><tr><th>vous</th><td>allez</td></tr><tr><th>ils, elles</th><td>vont</td></tr></tbody></table></details>'
 }
 
 function normalizedGrammar(value: string) {
@@ -644,6 +704,8 @@ export function coachHelpQuestionVariables(question: ExerciseQuestion, verb?: Ve
       subject: question.pronom || question.saisiePrefixe,
     }),
     condensedTenseRuleHelp: buildCondensedTenseRuleHtml(question.mode || tense?.mode?.name, question.temps || tense?.name, verb),
+    nearFutureHelp: buildNearFutureCoachHelpHtml(verb),
+    nearFutureAllerHelp: buildNearFutureAllerHelpHtml(),
     contextualBaseTitle: buildContextualBaseTitle(infinitive, verb?.typeHInitial),
     referenceFormHelp,
     nousFormHelp: referenceFormHelp,

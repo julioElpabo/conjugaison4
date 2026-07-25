@@ -5,6 +5,8 @@ import type {
   Tense,
   Verb
 } from '~/composables/useChallengeBuilder'
+import { conjugationTenseOrder } from '~~/shared/data/conjugation-display'
+import { isNearFutureTense } from '~~/shared/utils/near-future'
 
 const props = defineProps<{
   modes: ConjugationMode[]
@@ -36,14 +38,19 @@ const exampleRequestKey = computed(() => (
 ))
 const groups = computed(() => props.modes
   .map((mode) => {
-    const tenses = props.tenses.filter(tense => tense.modeId === mode.id)
+    const tenses = props.tenses
+      .filter(tense => tense.modeId === mode.id)
+      .sort((left, right) => conjugationTenseOrder(mode.name, left.name) - conjugationTenseOrder(mode.name, right.name) || left.id - right.id)
+    const trailingTenses = tenses.filter(tense => isNearFutureTense(tense))
+    const columnTenses = tenses.filter(tense => !isNearFutureTense(tense))
     return {
       mode,
       tenses,
       columns: [
-        tenses.filter(tense => !tense.isCompound),
-        tenses.filter(tense => tense.isCompound)
-      ].filter(column => column.length > 0)
+        columnTenses.filter(tense => !tense.isCompound),
+        columnTenses.filter(tense => tense.isCompound)
+      ].filter(column => column.length > 0),
+      trailingTenses,
     }
   })
   .filter(group => group.tenses.length > 0))
@@ -128,6 +135,33 @@ watch(exampleRequestKey, () => void loadExamples())
             </div>
           </div>
         </div>
+        <div v-if="group.trailingTenses.length" class="tense-group__trailing">
+          <div v-for="tense in group.trailingTenses" :key="tense.id" class="tense-entry">
+            <div class="tense-row">
+              <span class="tense-info">
+                <button
+                  type="button"
+                  :aria-label="`${ui('Voir un exemple :')} ${uiLabel(tense.name)}`"
+                  :aria-describedby="`tense-example-${tense.id}`"
+                >i</button>
+                <span :id="`tense-example-${tense.id}`" class="tense-tooltip" role="tooltip">
+                  <template v-if="examples[tense.id]"> {{ ui('Exemple:') }} <strong>{{ examples[tense.id]!.emphasis }}</strong><template v-if="examples[tense.id]!.rest"> {{ examples[tense.id]!.rest }}</template>
+                  </template>
+                  <template v-else>{{ examplesLoading ? ui('Chargement…') : ui('Exemple momentanément indisponible.') }}</template>
+                </span>
+              </span>
+              <label class="switch-row">
+                <input
+                  type="checkbox"
+                  :checked="selectedSet.has(tense.id)"
+                  @change="emit('toggle', tense.id)"
+                >
+                <span class="switch-row__control" aria-hidden="true" />
+                <span>{{ uiLabel(tense.name) }}</span>
+              </label>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
   </section>
@@ -142,6 +176,12 @@ watch(exampleRequestKey, () => void loadExamples())
 }
 
 .tense-group__columns--single { grid-template-columns: 1fr; }
+
+.tense-group__trailing {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgb(82 104 98 / 18%);
+}
 
 .tense-group__title {
   margin: 0 0 10px;

@@ -1,5 +1,10 @@
 import type { ConjugationTense, ExerciseQuestion, Verb } from '../types/conjugation'
 import type { CoachExplanationApproach } from '../types/coach'
+import {
+  bareNearFutureInfinitive,
+  isNearFutureTense,
+  isPronominalNearFutureInfinitive,
+} from './near-future'
 
 export interface TargetedConjugationHelp {
   title: string
@@ -552,6 +557,33 @@ function pronominalIntroHtml(question: ExerciseQuestion, infinitive: string, ver
   return `<figure><figcaption>Verbe pronominal</figcaption><blockquote><p><strong>${escapedHtml(infinitive)}</strong> est un verbe pronominal.</p><p>Avec <strong>${escapedHtml(subjectKey(subject) || subject)}</strong>, le pronom réfléchi est <strong>${escapedHtml(reflexive)}</strong>. Garde-le dès le début de la réponse.</p></blockquote></figure>`
 }
 
+function nearFutureHelpHtml(question: ExerciseQuestion, revealAnswers = true) {
+  const infinitive = question.infinitif?.trim() || 'ce verbe'
+  const lexicalInfinitive = bareNearFutureInfinitive(infinitive)
+  const subject = question.pronom?.trim() || question.saisiePrefixe?.trim() || 'la personne demandée'
+  const officialForm = question.conjugaison1?.trim() || ''
+  const allerForm = officialForm.split(/\s+/u)[0] || ''
+  const pronominal = isPronominalNearFutureInfinitive(infinitive)
+  const allerRows = [
+    ['je', 'vais'], ['tu', 'vas'], ['il / elle / on', 'va'],
+    ['nous', 'allons'], ['vous', 'allez'], ['ils / elles', 'vont'],
+  ].map(([pronoun, form]) => `<tr><th>${escapedHtml(pronoun!)}</th><td><strong>${escapedHtml(form!)}</strong></td></tr>`).join('')
+  const construction = pronominal
+    ? `<li>Garde le verbe à l’infinitif : <strong>${escapedHtml(lexicalInfinitive)}</strong>.</li><li>Place le pronom réfléchi adapté — <strong>me, te, se, nous, vous, se</strong> — juste devant cet infinitif.</li>`
+    : `<li>Garde le verbe à l’infinitif : <strong>${escapedHtml(lexicalInfinitive)}</strong>.</li>`
+  const chosenAller = revealAnswers && allerForm
+    ? `Avec <strong>${escapedHtml(subject)}</strong>, choisis <strong>${escapedHtml(allerForm)}</strong>.`
+    : `Choisis la forme de <strong>aller</strong> qui correspond à <strong>${escapedHtml(subject)}</strong>.`
+  const result = revealAnswers && officialForm
+    ? `<blockquote><strong>Résultat</strong><p>${resultFormMarkup(`${subject} ${officialForm}`)}</p></blockquote>`
+    : ''
+  const pronominalReminder = pronominal
+    ? '<blockquote><strong>Attention à l’ordre</strong><p>Le pronom réfléchi ne se place pas devant « aller » : on dit <em>je vais me lever</em>, et non <em>je me vais lever</em>.</p></blockquote>'
+    : ''
+
+  return `<figure>${knowledgeCaption()}<blockquote><strong>« Aller » au présent</strong><p>Le futur proche est une construction : <strong>aller au présent + infinitif</strong>.</p><table><tbody>${allerRows}</tbody></table></blockquote></figure><figure><figcaption>Construis le futur proche</figcaption><ol><li>${chosenAller}</li>${construction}</ol>${result}</figure>${pronominalReminder}`
+}
+
 function imperativePresentHelpHtml(
   question: ExerciseQuestion,
   reference?: ExerciseQuestion['radicalReference'],
@@ -990,7 +1022,13 @@ function tenseRule(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationT
   let auxiliaryLabel = ''
   let exception: string | null = null
 
-  if (question.isCompound || tense?.isCompound) {
+  if (isNearFutureTense({ code: question.tenseCode || tense?.code, name: question.temps || tense?.name })) {
+    endings = ['vais', 'vas', 'va', 'allons', 'allez', 'vont']
+    endingsKind = 'auxiliary'
+    auxiliaryLabel = 'aller'
+    endingsText = 'Formes de « aller » au présent : vais, vas, va, allons, allez, vont.'
+    rule = 'Conjugue « aller » au présent, puis ajoute l’infinitif du verbe. Avec un verbe pronominal, place le pronom réfléchi devant l’infinitif.'
+  } else if (question.isCompound || tense?.isCompound) {
     const auxiliaryLabelFromVerb = verb?.auxiliaire?.trim() || 'avoir ou être selon le verbe'
     const auxiliary = normalized(auxiliaryLabelFromVerb)
     auxiliaryLabel = auxiliaryLabelFromVerb
@@ -1156,6 +1194,9 @@ export function buildConjugationBaseHtml(
   const highlightedReference = displayedReference ? rememberedFormMarkup(displayedReference) : ''
   const normalizedMode = normalized(question.mode || tense?.mode?.name)
   const normalizedTense = normalized(question.temps || tense?.name)
+  if (isNearFutureTense({ code: question.tenseCode || tense?.code, name: question.temps || tense?.name })) {
+    return nearFutureHelpHtml(question)
+  }
   if (normalizedMode === 'participe' && normalizedTense === 'passe') {
     const participle = verb?.participePasse?.trim() || actualForm
     if (approach === 'concise') return `<p>Le participe passé est <strong>${escapedHtml(participle)}</strong> : apprends cette forme.</p>`
@@ -1337,6 +1378,9 @@ export function buildConjugationEndingsHtml(
   tense?: ConjugationTense,
   approach: CoachExplanationApproach = 'grammatical-technical',
 ) {
+  if (isNearFutureTense({ code: question.tenseCode || tense?.code, name: question.temps || tense?.name })) {
+    return nearFutureHelpHtml(question)
+  }
   const infinitive = question.infinitif || verb?.infinitif || 'ce verbe'
   const rule = tenseRule(question, verb, tense)
   const endingsAreFamilyDependent = !hasFamilyIndependentEndings(question, verb, tense)
@@ -1477,6 +1521,9 @@ function answerFreeNonPersonalHelpHtml(question: ExerciseQuestion, verb?: Verb, 
  * réponse à la place de l’élève et retire les mises en évidence ciblées.
  */
 export function buildCompleteConjugationAdviceHtml(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationTense) {
+  if (isNearFutureTense({ code: question.tenseCode || tense?.code, name: question.temps || tense?.name })) {
+    return nearFutureHelpHtml(question, false)
+  }
   if (question.isCompound || tense?.isCompound) {
     return buildCompoundConjugationHtml(question, verb, tense, false)
   }

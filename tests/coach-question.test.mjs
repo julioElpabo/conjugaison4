@@ -96,6 +96,32 @@ describe('questions affichées dans le chat', () => {
     assert.deepEqual(blankGroups(result.sentence), [SIMPLE_TENSE_BLANK])
   })
 
+  it('réserve deux champs au futur proche et trois pour un verbe pronominal', () => {
+    const simple = coachQuestionBubbles({
+      consigne: 'je | manger | futur proche (indicatif)',
+      pronom: 'je',
+      infinitif: 'manger',
+      mode: 'indicatif',
+      temps: 'futur proche',
+      tenseCode: 'near-future',
+      isCompound: false,
+      conjugaison1: 'vais manger',
+    })
+    const pronominal = coachQuestionBubbles({
+      consigne: 'je | se réveiller | futur proche (indicatif)',
+      pronom: 'je',
+      infinitif: 'se réveiller',
+      mode: 'indicatif',
+      temps: 'futur proche',
+      tenseCode: 'near-future',
+      isCompound: false,
+      conjugaison1: 'vais me réveiller',
+    })
+
+    assert.deepEqual(blankGroups(simple.sentence), ['............', '.......................'])
+    assert.deepEqual(blankGroups(pronominal.sentence), ['............', '............', '.......................'])
+  })
+
   it('affiche un seul champ pour « mangeant » au participe présent', () => {
     const result = coachQuestionBubbles({
       consigne: 'Le participe présent de Manger',

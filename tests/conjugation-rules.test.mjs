@@ -3,7 +3,7 @@ import { describe, it } from 'node:test'
 
 import { formatNonFiniteQuestion } from '../server/services/non-finite-formatter.ts'
 import { formatAnswer, formatConjugationQuestion } from '../server/services/question-formatter.ts'
-import { getAlternativeCorrections, isAnswerCorrect } from '../shared/utils/answer.ts'
+import { getAlternativeCorrections, isAnswerCorrect, isFutureSimpleInsteadOfNearFuture } from '../shared/utils/answer.ts'
 
 function row(overrides = {}) {
   return {
@@ -54,6 +54,38 @@ describe('formes multiples reconnues par le correcteur', () => {
       auxiliaire_participe_present: "s'étant",
     }, { id: 20, name: 'présent', mode_name: 'participe' })
     assert.deepEqual(question?.reponsesPourCorrige, ["S'asseyant", "S'assoyant"])
+  })
+})
+
+describe('futur proche et futur simple', () => {
+  it('conserve les formes du futur simple pour produire un rappel ciblé', () => {
+    const question = formatConjugationQuestion(row({
+      infinitif: 'manger',
+      conjugaison1: 'vas manger',
+      conjugaison2: '',
+      temps_name: 'futur proche',
+      tense_code: 'near-future',
+      future_simple_forms: ['mangeras'],
+    }), 'tu')
+
+    assert.equal(isAnswerCorrect('tu vas manger', question.reponses), true)
+    assert.equal(isAnswerCorrect('tu mangeras', question.reponses), false)
+    assert.ok(question.futureSimpleAnswers?.includes('tu mangeras'))
+    assert.equal(isFutureSimpleInsteadOfNearFuture('mangeras', question), true)
+  })
+
+  it('reconnaît aussi le futur simple d’un verbe pronominal', () => {
+    const question = formatConjugationQuestion(row({
+      infinitif: 'se réveiller',
+      conjugaison1: 'vas te réveiller',
+      conjugaison2: '',
+      temps_name: 'futur proche',
+      tense_code: 'near-future',
+      future_simple_forms: ['te réveilleras'],
+    }), 'tu')
+
+    assert.ok(question.futureSimpleAnswers?.includes('tu te réveilleras'))
+    assert.equal(isFutureSimpleInsteadOfNearFuture('te réveilleras', question), true)
   })
 })
 

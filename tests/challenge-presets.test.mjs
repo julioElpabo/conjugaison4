@@ -68,6 +68,12 @@ describe('défis résolus par critères', () => {
     assert.equal(challengePresetDefinitions.some(preset => preset.group === 'training'), false)
   })
 
+  it('sélectionne le futur proche par défaut dans tous les défis CIF', () => {
+    const cifPresets = challengePresetDefinitions.filter(preset => preset.group === 'cif')
+    assert.deepEqual(cifPresets.map(preset => preset.id), ['CIF1', 'CIF2', 'CIF3', 'CIF4'])
+    assert.ok(cifPresets.every(preset => preset.tenseIds.includes(24)))
+  })
+
   it('produit des configurations valides', () => {
     for (const preset of resolveChallengePresets(verbs)) {
       const definition = challengePresetDefinitions.find(candidate => candidate.id === preset.id)

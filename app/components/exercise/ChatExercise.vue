@@ -3,7 +3,7 @@ const { ui, uiLabel } = useLanguagePreferences()
 import type { ConjugationTense, ExerciseAttempt, ExerciseQuestion, Verb } from '~~/shared/types/conjugation'
 import type { CoachEvent, CoachMedia, CoachMessageContext, CoachProfile } from '~~/shared/types/coach'
 import type { AnswerComparison } from '~~/shared/utils/answer-difference'
-import { getAlternativeCorrections, validateAnswer } from '~~/shared/utils/answer'
+import { getAlternativeCorrections, isFutureSimpleInsteadOfNearFuture, validateAnswer } from '~~/shared/utils/answer'
 import { buildAnswerComparison } from '~~/shared/utils/answer-difference'
 import { createCoachDialogueState, createVariedCoachReaction } from '~~/shared/utils/coach-dialogue'
 import {
@@ -106,7 +106,7 @@ const helpTense = computed(() => {
 const targetedHelp = computed(() => helpQuestion.value
   ? buildTargetedConjugationHelp(helpQuestion.value, helpVerb.value, helpTense.value)
   : null)
-const helpBlocks = computed(() => visibleCoachHelpBlocks(props.coach.helpApproach))
+const helpBlocks = computed(() => visibleCoachHelpBlocks(props.coach.helpApproach, helpQuestion.value))
 const correctCount = computed(() => attempts.value.filter(item => item.status === 'correct').length)
 const score = computed(() => attempts.value.length
   ? Math.round(correctCount.value / attempts.value.length * 100)
@@ -542,6 +542,7 @@ async function submit() {
 
   const alternatives = result.isCorrect ? getAlternativeCorrections(candidate, question.reponsesPourCorrige) : []
   const diagnostic = diagnoseCoachAnswer(candidate, question, result.isCorrect)
+  const usedFutureSimple = !result.isCorrect && isFutureSimpleInsteadOfNearFuture(candidate, question)
   const incorrectEvent = diagnostic.errorKind === 'agreement' && question.agreementReminder
     ? question.agreementReminder.kind
     : 'incorrect'
@@ -554,6 +555,7 @@ async function submit() {
   })
   nextQuestionDelay.value = result.isCorrect ? CHAT_CORRECT_DELAY_MS : CHAT_INCORRECT_DELAY_MS
   let comparisonDisplayed = false
+  let futureSimpleReminderDisplayed = false
   for (const step of plan) {
     if (step.kind === 'reaction') {
       const isIncorrectReaction = step.eventType === 'incorrect' || step.eventType === 'cod-before'
@@ -562,6 +564,14 @@ async function submit() {
       const displayed = await addCoachReaction(step.eventType, contextFor(question), isIncorrectReaction ? 'error' : isCorrectReaction ? 'success' : undefined)
       if (!displayed && isIncorrectReaction && step.eventType !== 'incorrect') {
         await addCoachReaction('incorrect', contextFor(question), 'error')
+      }
+      if (isIncorrectReaction && usedFutureSimple && !futureSimpleReminderDisplayed) {
+        addMessage(
+          'coach',
+          ui('Ta conjugaison est correcte au futur simple, mais la question demande le futur proche. Au futur simple, le verbe est conjugué en un seul mot (« tu mangeras »). Au futur proche, on utilise « aller » au présent suivi de l’infinitif (« tu vas manger »).'),
+          'error',
+        )
+        futureSimpleReminderDisplayed = true
       }
       if (isIncorrectReaction && !comparisonDisplayed) {
         // Le texte de correction peut contenir tout le contexte de la phrase

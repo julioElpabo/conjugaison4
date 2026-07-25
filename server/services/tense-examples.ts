@@ -31,6 +31,10 @@ const NON_FINITE_FORMS: Record<string, string> = {
   'gérondif:passé': 'En ayant mangé',
 }
 
+const GENERATED_FINITE_FORMS: Record<string, string> = {
+  'indicatif:futur proche': 'Je vais manger',
+}
+
 function normalized(value: string) {
   return value.trim().toLocaleLowerCase('fr').normalize('NFC')
 }
@@ -71,7 +75,7 @@ export function buildTenseExamples(
     }
 
     const key = `${normalized(tense.mode)}:${normalized(tense.name)}`
-    const form = NON_FINITE_FORMS[key] ?? 'Manger'
+    const form = GENERATED_FINITE_FORMS[key] ?? NON_FINITE_FORMS[key] ?? 'Manger'
     return [Number(tense.id), withComplementAfter(form, pickComplement(random))]
   }))
 }

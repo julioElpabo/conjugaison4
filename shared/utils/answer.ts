@@ -139,6 +139,14 @@ export function isAnswerCorrect(
   return validateAnswer(answer, expectedAnswers, options).isCorrect
 }
 
+export function isFutureSimpleInsteadOfNearFuture(
+  answer: unknown,
+  question: { futureSimpleAnswers?: readonly string[] },
+) {
+  return Boolean(question.futureSimpleAnswers?.length)
+    && validateAnswer(answer, question.futureSimpleAnswers || []).isCorrect
+}
+
 /**
  * Retourne les autres formes canoniques qui auraient également été justes.
  * Une réponse sans pronom peut correspondre à un corrigé qui le contient ; la

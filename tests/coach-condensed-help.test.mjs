@@ -4,7 +4,7 @@ import { COACH_CONDENSED_TENSE_RULES, coachCondensedTenseRule } from '../shared/
 import { buildCondensedTenseRuleHtml } from '../shared/utils/coach-help.ts'
 
 const expectedKeys = [
-  'indicatif:present', 'indicatif:imparfait', 'indicatif:futur', 'indicatif:passe simple',
+  'indicatif:present', 'indicatif:futur proche', 'indicatif:imparfait', 'indicatif:futur', 'indicatif:passe simple',
   'indicatif:passe compose', 'indicatif:futur anterieur', 'indicatif:plus-que-parfait', 'indicatif:passe anterieur',
   'imperatif:present', 'imperatif:passe',
   'subjonctif:present', 'subjonctif:passe', 'subjonctif:imparfait', 'subjonctif:plus-que-parfait',
@@ -13,9 +13,21 @@ const expectedKeys = [
 ]
 
 describe('aide très condensée par mode et temps', () => {
-  it('couvre tous les 21 couples proposés dans les exercices', () => {
+  it('couvre tous les 22 couples proposés dans les exercices', () => {
     assert.deepEqual(Object.keys(COACH_CONDENSED_TENSE_RULES).sort(), expectedKeys.sort())
     assert.ok(Object.values(COACH_CONDENSED_TENSE_RULES).every(item => item.rule && item.example))
+  })
+
+  it('explique la construction du futur proche et la place du pronom réfléchi', () => {
+    const rule = coachCondensedTenseRule('indicatif', 'futur proche')
+    assert.equal(rule.rule, 'Verbe « aller » au présent + infinitif du verbe.')
+    assert.deepEqual(rule.notes, ["Ce n'est pas un temps comme les autres. Il est utilisé pour une action proche."])
+    const html = buildCondensedTenseRuleHtml('indicatif', 'futur proche', {
+      infinitif: 'se lever',
+      typePronominal: 'essentiel',
+    })
+    assert.match(html, /place « me, te, se, nous, vous, se » devant l’infinitif/u)
+    assert.match(html, /je vais \+ me lever = je vais me lever/u)
   })
 
   it('explique le conditionnel présent avec le radical du futur et les terminaisons de l’imparfait', () => {

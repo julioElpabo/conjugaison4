@@ -10,6 +10,13 @@ import type { ComplementOption } from '../../shared/types/conjugation'
 import { indirectRelative } from './indirect-relative'
 import { resolveVariableAuxiliary } from './compound-auxiliary'
 import { buildRadicalReference } from '../../shared/utils/radical-reference'
+import {
+  buildNearFutureParadigm,
+  isNearFutureTense,
+  isPronominalNearFutureInfinitive,
+  nearFutureReflexivePronoun,
+  type NearFutureAuxiliaryForm,
+} from '../../shared/utils/near-future'
 
 interface IdRow extends RowDataPacket { id: number }
 
@@ -44,6 +51,8 @@ interface ConjugationRow extends RowDataPacket {
   mode_name: string
   mode_code: ExerciseQuestion['modeCode']
   base_verbe_id?: number
+  type_h_initial?: string | null
+  future_simple_forms?: string[]
 }
 
 interface RadicalReferenceRow extends RowDataPacket {
@@ -51,6 +60,8 @@ interface RadicalReferenceRow extends RowDataPacket {
   personne_id: number
   pronom: string
   conjugaison1: string
+  conjugaison2: string
+  conjugaison3: string
   mode_name: string
   temps_name: string
 }
@@ -78,6 +89,29 @@ interface AuxiliaryFormRow extends RowDataPacket {
   mode_name: string
   temps_name: string
   conjugaison1: string
+}
+
+interface NearFutureAllerRow extends RowDataPacket {
+  personne_id: number
+  pronom: string
+  conjugaison1: string
+  conjugaison2: string
+  conjugaison3: string
+}
+
+interface NearFutureVerbRow extends RowDataPacket {
+  id: number
+  infinitif: string
+  type_h_initial: string | null
+  personnes_disponibles: string | number[] | null
+}
+
+interface NearFutureUseRow extends RowDataPacket {
+  id: number
+  verbe_id: number
+  infinitif_pronominal: string
+  type_h_initial: string | null
+  personnes_autorisees: string | number[] | null
 }
 
 interface ComplementRow extends RowDataPacket {
@@ -110,6 +144,77 @@ function allowedPersons(value: string | number[] | null | undefined) {
   } catch {
     return null
   }
+}
+
+function nearFutureAuxiliaryForms(rows: readonly NearFutureAllerRow[]): NearFutureAuxiliaryForm[] {
+  return rows.map(row => ({
+    personId: Number(row.personne_id),
+    pronoun: row.pronom,
+    forms: unique([row.conjugaison1, row.conjugaison2, row.conjugaison3]),
+  }))
+}
+
+function nearFutureRows(
+  tense: TenseSelectionRow,
+  verbs: readonly NearFutureVerbRow[],
+  pronominalUses: readonly NearFutureUseRow[],
+  allerRows: readonly NearFutureAllerRow[],
+): ConjugationRow[] {
+  const auxiliaryForms = nearFutureAuxiliaryForms(allerRows)
+  const sources = [
+    ...verbs.map(verb => ({
+      selectionId: Number(verb.id),
+      baseVerbId: Number(verb.id),
+      infinitive: verb.infinitif,
+      typeHInitial: verb.type_h_initial,
+      allowedPersonIds: allowedPersons(verb.personnes_disponibles),
+    })),
+    ...pronominalUses.map(use => ({
+      selectionId: -Number(use.id),
+      baseVerbId: Number(use.verbe_id),
+      infinitive: use.infinitif_pronominal,
+      typeHInitial: use.type_h_initial,
+      allowedPersonIds: allowedPersons(use.personnes_autorisees),
+    })),
+  ]
+
+  return sources.flatMap((source) => {
+    const paradigm = buildNearFutureParadigm(
+      Number(tense.id),
+      source.selectionId,
+      source.infinitive,
+      auxiliaryForms,
+      {
+        typeHInitial: source.typeHInitial,
+        allowedPersonIds: source.allowedPersonIds,
+      },
+    )
+    const nousForm = paradigm.find(form => form.personId === 7)?.forms[0] ?? null
+    return paradigm.map(form => ({
+      id: form.id,
+      verbe_id: source.selectionId,
+      base_verbe_id: source.baseVerbId,
+      personne_id: form.personId,
+      temp_id: Number(tense.id),
+      conjugaison1: form.forms[0] ?? '',
+      conjugaison2: form.forms[1] ?? '',
+      conjugaison3: form.forms[2] ?? '',
+      infinitif: source.infinitive,
+      auxiliaire: 'aller',
+      participe_present: '',
+      participe_passe: '',
+      auxiliaire_infinitif: null,
+      auxiliaire_participe_present: null,
+      pronom: form.pronoun,
+      temps_name: tense.name,
+      tense_code: tense.code,
+      is_compound: 0,
+      mode_name: tense.mode_name,
+      mode_code: tense.mode_code,
+      nous_form: nousForm,
+      type_h_initial: source.typeHInitial,
+    }))
+  }) as unknown as ConjugationRow[]
 }
 
 function shuffle<T>(values: T[]) {
@@ -167,6 +272,28 @@ function radicalReferenceFor(
     ...reference,
     ...(paradigmForms.length ? { paradigmForms } : {}),
   }
+}
+
+export function futureSimpleFormsFor(
+  row: ConjugationRow,
+  references: ReadonlyMap<number, readonly RadicalReferenceRow[]>,
+) {
+  if (!isNearFutureTense({ code: row.tense_code, name: row.temps_name })) return []
+  const forms = references.get(Number(row.base_verbe_id || row.verbe_id)) || []
+  const futureForms = forms
+    .filter(form => Number(form.personne_id) === Number(row.personne_id)
+      && normalized(form.mode_name) === 'indicatif'
+      && normalized(form.temps_name) === 'futur')
+    .flatMap(form => unique([form.conjugaison1, form.conjugaison2, form.conjugaison3]))
+  if (!isPronominalNearFutureInfinitive(row.infinitif) || Number(row.verbe_id) > 0) {
+    return unique(futureForms)
+  }
+  const proclitic = nearFutureReflexivePronoun(
+    Number(row.personne_id),
+    row.infinitif,
+    row.type_h_initial,
+  )
+  return unique(futureForms.map(form => `${proclitic}${form}`))
 }
 
 export function allowsAnteposedComplement(row: Pick<ConjugationRow, 'is_compound' | 'mode_name'>) {
@@ -300,7 +427,9 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
     .filter((id): id is number => id !== null)
 
   if (finiteTenses.length > 0) {
-    const finiteIds = finiteTenses.map(row => Number(row.id))
+    const nearFutureTenses = finiteTenses.filter(isNearFutureTense)
+    const storedFiniteTenses = finiteTenses.filter(tense => !isNearFutureTense(tense))
+    const finiteIds = storedFiniteTenses.map(row => Number(row.id))
     const pastSimpleClause = request.pastSimplePronouns === 'third-person-only'
       ? "AND (t.name NOT IN ('passé simple', 'passé antérieur') OR p.pronom IN ('il', 'ils'))"
       : ''
@@ -308,7 +437,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
     const rows: ConjugationRow[] = []
     let radicalReferences = new Map<number, RadicalReferenceRow[]>()
     let etreAuxiliaryForms: AuxiliaryFormRow[] = []
-    if (verbIds.length > 0) {
+    if (verbIds.length > 0 && finiteIds.length > 0) {
       const [storedRows] = await database.execute<ConjugationRow[]>(`
       SELECT vc.id, vc.verbe_id, vc.personne_id, vc.temp_id,
              vc.conjugaison1, vc.conjugaison2, vc.conjugaison3,
@@ -339,7 +468,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
       rows.push(...storedRows)
     }
 
-    if (pronominalUseIds.length > 0) {
+    if (pronominalUseIds.length > 0 && finiteIds.length > 0) {
       const [sourceRows, auxiliaryForms] = await Promise.all([
         database.execute<PronominalSourceRow[]>(`
           SELECT vc.id, -ep.id AS verbe_id, ep.verbe_id AS base_verbe_id, vc.personne_id, vc.temp_id,
@@ -390,13 +519,54 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
         .filter(row => row.conjugaison1) as ConjugationRow[])
     }
 
+    if (nearFutureTenses.length > 0) {
+      const [nearFutureVerbs, nearFutureUses, allerRows] = await Promise.all([
+        verbIds.length
+          ? database.execute<NearFutureVerbRow[]>(`
+              SELECT id, infinitif, type_h_initial, personnes_disponibles
+              FROM verbes
+              WHERE id IN (${placeholders(verbIds)}) AND est_archive = 0
+            `, verbIds)
+          : Promise.resolve([[]] as unknown as Awaited<ReturnType<typeof database.execute<NearFutureVerbRow[]>>>),
+        pronominalUseIds.length
+          ? database.execute<NearFutureUseRow[]>(`
+              SELECT ep.id, ep.verbe_id, ep.infinitif_pronominal,
+                     ep.personnes_autorisees, base.type_h_initial
+              FROM emplois_pronominaux ep
+              INNER JOIN verbes base ON base.id = ep.verbe_id AND base.est_archive = 0
+              WHERE ep.id IN (${placeholders(pronominalUseIds)})
+                AND ep.actif = 1 AND ep.verbe_id IS NOT NULL
+            `, pronominalUseIds)
+          : Promise.resolve([[]] as unknown as Awaited<ReturnType<typeof database.execute<NearFutureUseRow[]>>>),
+        database.execute<NearFutureAllerRow[]>(`
+          SELECT vc.personne_id, p.pronom,
+                 vc.conjugaison1, vc.conjugaison2, vc.conjugaison3
+          FROM verbesconjugues vc
+          INNER JOIN verbes v ON v.id = vc.verbe_id
+          INNER JOIN personnes p ON p.id = vc.personne_id
+          INNER JOIN temps t ON t.id = vc.temp_id
+          INNER JOIN modes m ON m.id = t.mode_id
+          WHERE v.infinitif = 'aller' AND m.name = 'indicatif'
+            AND t.name = 'présent' AND vc.conjugaison1 <> ''
+          ORDER BY p.id
+        `),
+      ])
+      for (const tense of nearFutureTenses) {
+        rows.push(...nearFutureRows(tense, nearFutureVerbs[0], nearFutureUses[0], allerRows[0]))
+      }
+    }
+
     const radicalReferenceVerbIds = [...new Set([
       ...verbIds,
       ...rows.map(row => Number(row.base_verbe_id || row.verbe_id)).filter(id => id > 0),
     ])]
     if (radicalReferenceVerbIds.length > 0) {
+      const selectedTenseReferenceClause = finiteIds.length
+        ? `OR t.id IN (${placeholders(finiteIds)})`
+        : ''
       const [referenceRows] = await database.execute<RadicalReferenceRow[]>(`
-        SELECT vc.verbe_id, vc.personne_id, p.pronom, vc.conjugaison1,
+        SELECT vc.verbe_id, vc.personne_id, p.pronom,
+               vc.conjugaison1, vc.conjugaison2, vc.conjugaison3,
                m.name AS mode_name, t.name AS temps_name
         FROM verbesconjugues vc
         INNER JOIN personnes p ON p.id = vc.personne_id
@@ -405,7 +575,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
         WHERE vc.verbe_id IN (${placeholders(radicalReferenceVerbIds)})
           AND (
             (m.name = 'indicatif' AND t.name IN ('présent', 'futur', 'passé simple'))
-            OR t.id IN (${placeholders(finiteIds)})
+            ${selectedTenseReferenceClause}
           )
           AND vc.conjugaison1 <> ''
       `, [...radicalReferenceVerbIds, ...finiteIds])
@@ -489,9 +659,16 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
           }
         : row
       const semanticRow = resolveVariableAuxiliary(enrichedRow, etreAuxiliaryForms)
-      const radicalReference = radicalReferenceFor(row, radicalReferences)
+      const radicalReference = isNearFutureTense({ code: row.tense_code, name: row.temps_name })
+        ? undefined
+        : radicalReferenceFor(row, radicalReferences)
+      const futureSimpleForms = futureSimpleFormsFor(row, radicalReferences)
       return request.exerciseKind === 'conjugation'
-        ? formatConjugationQuestion({ ...semanticRow, radical_reference: radicalReference }, choosePronoun(row.pronom, request.inclusivePronouns))
+        ? formatConjugationQuestion({
+            ...semanticRow,
+            radical_reference: radicalReference,
+            future_simple_forms: futureSimpleForms,
+          }, choosePronoun(row.pronom, request.inclusivePronouns))
         : identificationQuestion(semanticRow)
     }))
   }

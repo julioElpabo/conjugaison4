@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { automaticOrthographyHelpBlocks, buildCondensedVerbGroupHtml, buildContextualBaseTitle, buildDefinitionHelpHtml, buildReferenceFormHelpHtml, coachHelpBlockUsesPedagogicalApproach, coachHelpQuestionVariables, conditionalCoachHelpBlocks, defaultCoachHelpBlocks, renderCoachHelpContent, visibleCoachHelpBlocks } from '../shared/utils/coach-help.ts'
+import { automaticOrthographyHelpBlocks, buildCondensedVerbGroupHtml, buildContextualBaseTitle, buildDefinitionHelpHtml, buildNearFutureAllerHelpHtml, buildNearFutureCoachHelpHtml, buildReferenceFormHelpHtml, coachHelpBlockUsesPedagogicalApproach, coachHelpQuestionVariables, conditionalCoachHelpBlocks, defaultCoachHelpBlocks, renderCoachHelpContent, visibleCoachHelpBlocks } from '../shared/utils/coach-help.ts'
 import { COACH_HELP_BLOCK_TYPES } from '../shared/types/coach.ts'
 import { formatCoachHtmlSource } from '../shared/utils/html-source-format.ts'
 import { sanitizeCoachHtml } from '../shared/utils/safe-html.ts'
@@ -213,6 +213,27 @@ describe('aides visuelles configurables', () => {
     assert.deepEqual(draft, published)
     assert.deepEqual(draft.map(item => item.content), configured.map(item => item.content))
     assert.ok(draft.every(item => item.explanationApproach === 'concise'))
+  })
+
+  it('remplace le radical par les blocs Futur proche et Verbe aller dans le chat', () => {
+    const futureQuestion = { temps: 'futur proche', tenseCode: 'near-future' }
+    for (const profile of ['complete-avec-reponses', 'complete', 'tres-condensee']) {
+      const blocks = visibleCoachHelpBlocks(profile, futureQuestion)
+      assert.deepEqual(blocks.slice(-2).map(item => item.title), ['Futur proche', 'Verbe aller'])
+      assert.ok(!blocks.some(item => [
+        '{contextualBaseHelp}',
+        '{completeAdviceHelp}',
+        '{condensedVerbGroupHelp}',
+      ].includes(item.content)))
+    }
+    const futureHelp = buildNearFutureCoachHelpHtml({ infinitif: 'manger' })
+    assert.match(futureHelp, /Ce n'est pas un temps comme les autres\. Il est utilisé pour une action proche\./u)
+    assert.match(futureHelp, /aller au présent \+ manger<\/code><\/p><p><strong>Un exemple :<\/strong><br><code>Il va ouvrir la porte\.<\/code>/u)
+    assert.doesNotMatch(futureHelp, /radical/iu)
+    assert.match(buildNearFutureCoachHelpHtml({ infinitif: "s'habiller", typeHInitial: 'muet' }), /je vais m'habiller/u)
+    const aller = buildNearFutureAllerHelpHtml()
+    assert.match(aller, /<details><summary>Aller au présent<\/summary>/u)
+    assert.match(aller, /<th>nous<\/th><td>allons<\/td>/u)
   })
 
   it('ne transmet aucune réponse cible aux profils sans réponses', () => {

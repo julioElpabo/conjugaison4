@@ -37,9 +37,11 @@ export function normalizeChallengeCode(value: string) {
   return value.trim().toUpperCase()
 }
 
-export function toSharedChallengeRequest(challenge: ChallengeConfig) {
+export function toSharedChallengeRequest(challenge: ChallengeConfig, title?: string, description?: string) {
   return {
     version: 1 as const,
+    ...(title === undefined ? {} : { title: title.trim() }),
+    ...(description?.trim() ? { description: description.trim() } : {}),
     verbIds: [...challenge.verbIds],
     tenseIds: [...challenge.tenseIds],
     questionCount: challenge.questionCount,
@@ -61,10 +63,10 @@ export function useChallengeApi() {
     })
   }
 
-  async function saveChallenge(challenge: ChallengeConfig) {
+  async function saveChallenge(challenge: ChallengeConfig, title: string, description = '') {
     return await $fetch<{ code: string }>('/api/defis', {
       method: 'POST',
-      body: toSharedChallengeRequest(challenge)
+      body: toSharedChallengeRequest(challenge, title, description)
     })
   }
 

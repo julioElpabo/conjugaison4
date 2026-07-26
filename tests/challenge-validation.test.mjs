@@ -75,6 +75,46 @@ describe('validation des défis partagés', () => {
     }
 
     assert.deepEqual(toSharedChallengeRequest(challenge), { version: 1, ...challenge })
+    assert.equal(toSharedChallengeRequest(challenge, '  Révision du présent  ').title, 'Révision du présent')
+    assert.equal(
+      toSharedChallengeRequest(challenge, 'Révision', '  À réaliser avant vendredi.  ').description,
+      'À réaliser avant vendredi.',
+    )
+  })
+
+  it('sauvegarde et valide le titre du défi', () => {
+    const challenge = parseDefiDefinition({
+      version: 1,
+      title: '  Révision des verbes en -ir  ',
+      description: '  Commence par relire la règle.  ',
+      verbIds: [1],
+      tenseIds: [1],
+      questionCount: 10,
+    })
+
+    assert.equal(challenge.title, 'Révision des verbes en -ir')
+    assert.equal(challenge.description, 'Commence par relire la règle.')
+    assert.throws(
+      () => parseDefiDefinition({
+        version: 1,
+        title: ' '.repeat(5),
+        verbIds: [1],
+        tenseIds: [1],
+        questionCount: 10,
+      }),
+      /entre 1 et 80 caractères/u,
+    )
+    assert.throws(
+      () => parseDefiDefinition({
+        version: 1,
+        title: 'Révision',
+        description: 'x'.repeat(1001),
+        verbIds: [1],
+        tenseIds: [1],
+        questionCount: 10,
+      }),
+      /1000 caractères/u,
+    )
   })
 
   it('complète un ancien code avec les valeurs par défaut actuelles', () => {
@@ -108,6 +148,32 @@ describe('validation des défis partagés', () => {
 })
 
 describe('validation des questionnaires', () => {
+  it('accepte la description d’un défi enregistré sans la transmettre au générateur', () => {
+    const request = parseQuestionnaireRequest({
+      description: '  À retravailler avant vendredi.  ',
+      verbIds: [1],
+      tenseIds: [4],
+      questionCount: 5,
+      exerciseKind: 'conjugation',
+      pastSimplePronouns: 'all',
+      inclusivePronouns: false,
+    })
+
+    assert.equal('description' in request, false)
+    assert.throws(
+      () => parseQuestionnaireRequest({
+        description: 'x'.repeat(1001),
+        verbIds: [1],
+        tenseIds: [4],
+        questionCount: 5,
+        exerciseKind: 'conjugation',
+        pastSimplePronouns: 'all',
+        inclusivePronouns: false,
+      }),
+      /1000 caractères/u,
+    )
+  })
+
   it('normalise les alias historiques', () => {
     const request = parseQuestionnaireRequest({
       verbIds: [1],

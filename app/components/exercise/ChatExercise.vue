@@ -1,9 +1,17 @@
 <script setup lang="ts">
 const { ui, uiLabel } = useLanguagePreferences()
-import type { ConjugationTense, ExerciseAttempt, ExerciseQuestion, Verb } from '~~/shared/types/conjugation'
+import type { ConjugationTense, ExerciseAttempt, ExerciseQuestion, LearnerErrorDetail, LearnerExerciseTrackingContext, Verb } from '~~/shared/types/conjugation'
 import type { CoachEvent, CoachMedia, CoachMessageContext, CoachProfile } from '~~/shared/types/coach'
 import type { AnswerComparison } from '~~/shared/utils/answer-difference'
-import { getAlternativeCorrections, isFutureSimpleInsteadOfNearFuture, validateAnswer } from '~~/shared/utils/answer'
+import LearnerErrorFeedback from '~/components/exercise/LearnerErrorFeedback.vue'
+import {
+  findConjugationConfusions,
+  findImpossibleSingularEnding,
+  getAlternativeCorrections,
+  impossibleSingularEndingReminderMessage,
+  isFutureSimpleInsteadOfNearFuture,
+  validateAnswer,
+} from '~~/shared/utils/answer'
 import { buildAnswerComparison } from '~~/shared/utils/answer-difference'
 import { createCoachDialogueState, createVariedCoachReaction } from '~~/shared/utils/coach-dialogue'
 import {
@@ -12,10 +20,16 @@ import {
   CHAT_CORRECT_DELAY_MS,
   CHAT_INCORRECT_DELAY_MS,
   COACH_STREAK_LENGTH,
+  chatMessageHasVisibleContent,
   chatReactionAllowsMedia,
   nextConsecutiveCorrectCount,
 } from '~~/shared/utils/coach-conversation'
-import { diagnoseCoachAnswer } from '~~/shared/utils/coach-feedback'
+import { diagnoseCoachAgreement, diagnoseCoachAnswer } from '~~/shared/utils/coach-feedback'
+import {
+  learnerErrorDetailText,
+  learnerErrorDetails,
+  mergeLearnerErrorDetails,
+} from '~~/shared/utils/learner-error-diagnostics'
 import { coachQuestionBubbles } from '~~/shared/utils/coach-question'
 import { buildTargetedConjugationHelp, isHelpCommand } from '~~/shared/utils/conjugation-help'
 import { coachHelpQuestionVariables, visibleCoachHelpBlocks } from '~~/shared/utils/coach-help'
@@ -30,10 +44,13 @@ const props = defineProps<{
   tenses: ConjugationTense[]
   regenerateQuestions: () => Promise<void>
   tourDemo?: boolean
+  trackingContext?: LearnerExerciseTrackingContext
+  requireSuccess?: boolean
 }>()
 
 const emit = defineEmits<{ close: [] }>()
 const { track } = useSiteAnalytics()
+const { recordAttempt } = useLearnerProgress()
 
 interface ChatMessage {
   id: number
@@ -42,16 +59,19 @@ interface ChatMessage {
   tone?: 'success' | 'error'
   media?: CoachMedia
   emphasis?: boolean
+  mobileHelpHint?: boolean
   questionIndex?: number
   answerComparison?: AnswerComparison
-  kind?: 'help-reminder'
-  helpAlreadyOpen?: boolean
+  errorDetails?: LearnerErrorDetail[]
 }
 
 const currentIndex = ref(0)
 const answer = ref('')
 const attempts = ref<ExerciseAttempt[]>([])
+const pendingErrorLabels = ref<string[]>([])
+const pendingErrorDetails = ref<LearnerErrorDetail[]>([])
 const messages = ref<ChatMessage[]>([])
+const visibleMessages = computed(() => messages.value.filter(chatMessageHasVisibleContent))
 const waitingForNext = ref(false)
 const nextQuestionDelay = ref(CHAT_INCORRECT_DELAY_MS)
 const deliveringFeedback = ref(false)
@@ -62,6 +82,7 @@ const finished = ref(false)
 const finalSummaryPreparing = ref(false)
 const finalSummaryVisible = ref(false)
 const regeneratingQuestions = ref(false)
+const repeatCurrentQuestion = ref(false)
 const restartError = ref('')
 const printSummaryOpen = ref(false)
 const closeConfirmationOpen = ref(false)
@@ -126,6 +147,8 @@ const attemptSummaries = computed(() => attempts.value.map((attempt, index) => {
     questionLabel: formula,
     learnerAnswer: attempt.answer,
     expectedAnswer: attempt.question.reponsesPourCorrige.join(` ${ui('ou')} `) || attempt.question.reponses.join(` ${ui('ou')} `),
+    errorLabels: attempt.errorLabels || [],
+    errorDetails: attempt.errorDetails || [],
   }
 }))
 const hasIncorrectMedia = computed(() => props.coach.assignments.some(assignment => assignment.isActive
@@ -242,6 +265,7 @@ function openHelp(candidate: string) {
   helpOpen.value = true
   track('help_opened', { presentation: 'chat', coach: props.coach.id })
   restartHelpReminderTimer()
+  scrollToHelpOnSmallScreen()
 }
 
 function openHelpForQuestion(questionIndex: number) {
@@ -250,6 +274,7 @@ function openHelpForQuestion(questionIndex: number) {
   helpOpen.value = true
   track('help_opened', { presentation: 'chat', coach: props.coach.id })
   restartHelpReminderTimer()
+  scrollToHelpOnSmallScreen()
 }
 
 function showLatestHelp() {
@@ -258,6 +283,7 @@ function showLatestHelp() {
   track('help_opened', { presentation: 'chat', coach: props.coach.id })
   restartHelpReminderTimer()
   scrollThreadToBottom()
+  scrollToHelpOnSmallScreen()
 }
 
 function showDemoHelp() {
@@ -288,6 +314,20 @@ function closeHelp() {
   helpOpen.value = false
   helpQuestionIndex.value = null
   focusAnswerInput()
+}
+
+function scrollToHelpOnSmallScreen() {
+  if (typeof window === 'undefined' || !window.matchMedia('(max-width: 760px)').matches) return
+  input.value?.blur()
+  void nextTick(() => {
+    window.requestAnimationFrame(() => {
+      const help = dialog.value?.querySelector<HTMLElement>('[data-tour="chat-help"]')
+      help?.scrollIntoView({
+        block: 'start',
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      })
+    })
+  })
 }
 
 function focusAnswerInput() {
@@ -343,23 +383,6 @@ function scrollThreadToMessage(messageId: number) {
   })
 }
 
-function revealChatMessageEnd(messageId: number) {
-  void nextTick(() => {
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => {
-        const container = thread.value
-        const target = container?.querySelector<HTMLElement>(`[data-chat-message-id="${messageId}"]`)
-        if (!container || !target) return
-        const overflow = target.getBoundingClientRect().bottom - container.getBoundingClientRect().bottom
-        if (overflow <= 0) return
-        // Le rappel doit être visible immédiatement : un second défilement fluide peut
-        // interrompre celui de l'annonce précédente et ne laisser voir que la bordure.
-        container.scrollTo({ top: container.scrollTop + overflow + 12, behavior: 'auto' })
-      })
-    })
-  })
-}
-
 function mediaLoaded() {
   scrollThreadToBottom()
 }
@@ -384,6 +407,45 @@ function contextFor(question?: ExerciseQuestion): CoachMessageContext {
     expectedAnswer: question?.reponsesPourCorrige.join(' ou '),
     questionNumber: question ? currentIndex.value + 1 : undefined,
   }
+}
+
+function agreementReminderText(question: ExerciseQuestion) {
+  const reminder = question.agreementReminder
+  if (!reminder) {
+    return ui('Le participe passé n’a pas le bon accord. Compare sa terminaison avec la correction.')
+  }
+  const features = reminder.gender && reminder.number
+    ? `, ${uiLabel(reminder.gender === 'feminin' ? 'féminin' : 'masculin')} ${uiLabel(reminder.number)}`
+    : ''
+  const values = {
+    complement: reminder.complement,
+    verb: reminder.infinitive,
+    participle: reminder.participle,
+    features,
+  }
+  if (reminder.kind === 'cod-before') {
+    return ui('Ici, le COD « {complement} » est placé avant le verbe « {verb} ». Avec avoir, il commande l’accord du participe passé{features} : « {participle} ».', values)
+  }
+  if (reminder.kind === 'cod-after') {
+    return ui('Ici, le COD « {complement} » est placé après le verbe « {verb} ». Il ne commande donc aucun accord : le participe passé reste « {participle} ».', values)
+  }
+  return ui('Attention : « {complement} » n’est pas un COD, mais un COI du verbe « {verb} ». Il ne faut pas accorder le participe avec ce complément : il reste « {participle} ».', values)
+}
+
+function auxiliaryReminderText(
+  question: ExerciseQuestion,
+  learnerAuxiliary: string,
+  expectedAuxiliary: string,
+) {
+  return ui(
+    'L’auxiliaire « {learnerAuxiliary} » ne convient pas. Avec {person} au {tense}, il fallait « {expectedAuxiliary} ».',
+    {
+      learnerAuxiliary,
+      expectedAuxiliary,
+      person: question.pronom || question.saisiePrefixe || ui('cette personne'),
+      tense: uiLabel(question.temps),
+    },
+  )
 }
 
 function wait(milliseconds: number) {
@@ -428,23 +490,17 @@ function addCoachText(text: string, tone?: ChatMessage['tone'], emphasis = false
   return enqueueCoachBubble(() => ({ text, ...(tone ? { tone } : {}), ...(emphasis ? { emphasis: true } : {}) }))
 }
 
-async function addHelpReminderCard() {
-  await enqueueCoachBubble(() => ({
-    text: helpOpen.value
-      ? ui('Tu peux regarder l’aide à droite pour trouver un indice.')
-      : ui('Si tu veux un indice, tape « Aide » dans le champ de réponse'),
-    kind: 'help-reminder',
-    helpAlreadyOpen: helpOpen.value,
-  }))
-  const reminder = messages.value.at(-1)
-  if (reminder?.kind === 'help-reminder') revealChatMessageEnd(reminder.id)
-}
-
 async function suggestHelp() {
   const question = currentQuestion.value
   if (!question || finished.value) return
+  const wasHelpOpen = helpOpen.value
+  helpQuestionIndex.value = null
+  helpOpen.value = true
+  if (!wasHelpOpen) {
+    track('help_opened', { presentation: 'chat', coach: props.coach.id, source: 'reminder' })
+  }
+  await nextTick()
   await addCoachReaction('help-announcement', contextFor(question))
-  await addHelpReminderCard()
 }
 
 function addAnswerComparison(
@@ -464,11 +520,11 @@ async function addCoachReaction(eventType: CoachEvent, context: CoachMessageCont
     allowMotion: allowMotion.value,
     mediaAllowed: chatReactionAllowsMedia(eventType, cooledDown, hasIncorrectMedia.value),
   })
-  if (!reaction.text.trim() && !reaction.media) return false
+  const text = omitIndicativeMode.value ? withoutIndicativeMode(reaction.text) : reaction.text
+  if (!text.trim() && !reaction.media) return false
   if (reaction.media) {
     lastMediaQuestion.value = currentIndex.value
   }
-  const text = omitIndicativeMode.value ? withoutIndicativeMode(reaction.text) : reaction.text
   await enqueueCoachBubble(() => ({ text, ...(tone ? { tone } : {}), ...(reaction.media ? { media: reaction.media } : {}) }))
   return true
 }
@@ -506,6 +562,14 @@ async function runChatOpening(eventType: Extract<CoachEvent, 'introduction' | 'r
   if (version !== conversationVersion) return
   await addCoachReaction(eventType, {})
   if (version !== conversationVersion) return
+  if (eventType === 'introduction') {
+    await enqueueCoachBubble(() => ({
+      text: ui('Glisse vers le bas pour voir l’aide.'),
+      tone: 'success',
+      mobileHelpHint: true,
+    }))
+  }
+  if (version !== conversationVersion) return
   await askCurrentQuestion()
 }
 
@@ -527,12 +591,31 @@ async function submit() {
   track(result.isCorrect ? 'answer_correct' : 'answer_retry', { presentation: 'chat', coach: props.coach.id })
   answer.value = ''
 
-  attempts.value.push({
+  const currentErrorDetails = result.isCorrect ? [] : learnerErrorDetails(candidate, question)
+  const currentErrorLabels = currentErrorDetails.map(detail => detail.label)
+  const attemptErrorLabels = [...new Set([...pendingErrorLabels.value, ...currentErrorLabels])]
+  const attemptErrorDetails = mergeLearnerErrorDetails(pendingErrorDetails.value, currentErrorDetails)
+  const trackedAttempt: ExerciseAttempt = {
     question,
     answer: candidate,
     status: result.isCorrect ? 'correct' : 'incorrect',
-    ...(result.matchedAnswer ? { matchedAnswer: result.matchedAnswer } : {})
-  })
+    attemptNumber: props.requireSuccess && attempts.value[currentIndex.value] ? 2 : 1,
+    ...(result.matchedAnswer ? { matchedAnswer: result.matchedAnswer } : {}),
+    ...(attemptErrorLabels.length ? { errorLabels: attemptErrorLabels } : {}),
+    ...(attemptErrorDetails.length ? { errorDetails: attemptErrorDetails } : {}),
+  }
+  if (props.requireSuccess) attempts.value[currentIndex.value] = trackedAttempt
+  else attempts.value.push(trackedAttempt)
+  if (props.requireSuccess && !result.isCorrect) {
+    pendingErrorLabels.value = attemptErrorLabels
+    pendingErrorDetails.value = attemptErrorDetails
+  }
+  void recordAttempt(
+    props.trackingContext,
+    trackedAttempt,
+    currentIndex.value,
+    currentIndex.value >= props.questions.length - 1 && (!props.requireSuccess || result.isCorrect),
+  )
   consecutiveCorrectCount.value = nextConsecutiveCorrectCount(consecutiveCorrectCount.value, result.isCorrect)
   consecutiveIncorrectCount.value = nextConsecutiveIncorrectCount(consecutiveIncorrectCount.value, result.isCorrect)
   const shouldSuggestHelp = consecutiveIncorrectCount.value >= CHAT_HELP_REMINDER_INCORRECT_COUNT
@@ -541,29 +624,76 @@ async function submit() {
   deliveringFeedback.value = true
 
   const alternatives = result.isCorrect ? getAlternativeCorrections(candidate, question.reponsesPourCorrige) : []
+  const agreementDiagnostic = result.isCorrect ? undefined : diagnoseCoachAgreement(candidate, question)
   const diagnostic = diagnoseCoachAnswer(candidate, question, result.isCorrect)
+  const auxiliaryDiagnostic = diagnostic.errorKind === 'auxiliary'
+    && diagnostic.learnerAuxiliary
+    && diagnostic.expectedAuxiliary
+    ? diagnostic
+    : undefined
   const usedFutureSimple = !result.isCorrect && isFutureSimpleInsteadOfNearFuture(candidate, question)
-  const incorrectEvent = diagnostic.errorKind === 'agreement' && question.agreementReminder
+  const otherConjugations = result.isCorrect ? [] : findConjugationConfusions(candidate, question)
+  const impossibleEnding = result.isCorrect ? null : findImpossibleSingularEnding(candidate, question)
+  const incorrectEvent = agreementDiagnostic?.errorKind === 'agreement' && question.agreementReminder
     ? question.agreementReminder.kind
     : 'incorrect'
   const plan = answerTurnPlan({
     correct: result.isCorrect,
     hasAlternative: alternatives.length > 0,
     streak: reachedStreak,
-    hasNext: currentIndex.value < props.questions.length - 1,
+    hasNext: (props.requireSuccess && !result.isCorrect) || currentIndex.value < props.questions.length - 1,
     incorrectEvent,
   })
   nextQuestionDelay.value = result.isCorrect ? CHAT_CORRECT_DELAY_MS : CHAT_INCORRECT_DELAY_MS
+  repeatCurrentQuestion.value = Boolean(props.requireSuccess && !result.isCorrect)
   let comparisonDisplayed = false
   let futureSimpleReminderDisplayed = false
+  let conjugationConfusionDisplayed = false
+  let impossibleEndingReminderDisplayed = false
+  let agreementReminderDisplayed = false
+  let auxiliaryReminderDisplayed = false
+  let errorTypesDisplayed = false
   for (const step of plan) {
     if (step.kind === 'reaction') {
       const isIncorrectReaction = step.eventType === 'incorrect' || step.eventType === 'cod-before'
         || step.eventType === 'cod-after' || step.eventType === 'coi'
       const isCorrectReaction = step.eventType === 'correct' || step.eventType === 'correct-alternative' || step.eventType === 'streak'
       const displayed = await addCoachReaction(step.eventType, contextFor(question), isIncorrectReaction ? 'error' : isCorrectReaction ? 'success' : undefined)
+      if (displayed && agreementDiagnostic && step.eventType !== 'incorrect') {
+        agreementReminderDisplayed = true
+      }
       if (!displayed && isIncorrectReaction && step.eventType !== 'incorrect') {
-        await addCoachReaction('incorrect', contextFor(question), 'error')
+        if (agreementDiagnostic) {
+          addMessage('coach', agreementReminderText(question), 'error')
+          agreementReminderDisplayed = true
+        }
+        else {
+          await addCoachReaction('incorrect', contextFor(question), 'error')
+        }
+      }
+      if (isIncorrectReaction && currentErrorDetails.length && !errorTypesDisplayed) {
+        await enqueueCoachBubble(() => ({
+          text: currentErrorDetails.map(learnerErrorDetailText).join(' '),
+          tone: 'error',
+          errorDetails: currentErrorDetails,
+        }))
+        errorTypesDisplayed = true
+      }
+      if (isIncorrectReaction && agreementDiagnostic && !agreementReminderDisplayed) {
+        addMessage('coach', agreementReminderText(question), 'error')
+        agreementReminderDisplayed = true
+      }
+      if (isIncorrectReaction && auxiliaryDiagnostic && !auxiliaryReminderDisplayed) {
+        addMessage(
+          'coach',
+          auxiliaryReminderText(
+            question,
+            auxiliaryDiagnostic.learnerAuxiliary!,
+            auxiliaryDiagnostic.expectedAuxiliary!,
+          ),
+          'error',
+        )
+        auxiliaryReminderDisplayed = true
       }
       if (isIncorrectReaction && usedFutureSimple && !futureSimpleReminderDisplayed) {
         addMessage(
@@ -572,6 +702,31 @@ async function submit() {
           'error',
         )
         futureSimpleReminderDisplayed = true
+      }
+      if (isIncorrectReaction && !usedFutureSimple && otherConjugations.length && !conjugationConfusionDisplayed) {
+        const confusion = otherConjugations[0]!
+        addMessage(
+          'coach',
+          ui(
+            'Ta forme est correcte pour le mode {sourceMode}, au temps {sourceTense}. Ici, il fallait le mode {targetMode}, au temps {targetTense}.',
+            {
+              sourceMode: uiLabel(confusion.mode),
+              sourceTense: uiLabel(confusion.tense),
+              targetMode: uiLabel(question.mode),
+              targetTense: uiLabel(question.temps),
+            },
+          ),
+          'error',
+        )
+        conjugationConfusionDisplayed = true
+      }
+      if (isIncorrectReaction && impossibleEnding && !impossibleEndingReminderDisplayed) {
+        addMessage(
+          'coach',
+          ui(impossibleSingularEndingReminderMessage(impossibleEnding)),
+          'error',
+        )
+        impossibleEndingReminderDisplayed = true
       }
       if (isIncorrectReaction && !comparisonDisplayed) {
         // Le texte de correction peut contenir tout le contexte de la phrase
@@ -596,11 +751,19 @@ async function submit() {
 
 async function continueChat() {
   if (!waitingForNext.value || deliveringFeedback.value) return
+  if (repeatCurrentQuestion.value) {
+    repeatCurrentQuestion.value = false
+    waitingForNext.value = false
+    await askCurrentQuestion()
+    return
+  }
   if (currentIndex.value >= props.questions.length - 1) {
     const version = conversationVersion
     finished.value = true
     track('exercise_completed', { presentation: 'chat', coach: props.coach.id })
     waitingForNext.value = false
+    pendingErrorLabels.value = []
+    pendingErrorDetails.value = []
     finalSummaryPreparing.value = true
     scrollThreadToBottom()
     await wait(2000)
@@ -612,6 +775,8 @@ async function continueChat() {
   }
 
   currentIndex.value += 1
+  pendingErrorLabels.value = []
+  pendingErrorDetails.value = []
   waitingForNext.value = false
   await askCurrentQuestion()
 }
@@ -626,12 +791,15 @@ async function restart() {
   currentIndex.value = 0
   answer.value = ''
   attempts.value = []
+  pendingErrorLabels.value = []
+  pendingErrorDetails.value = []
   messages.value = []
   waitingForNext.value = false
   deliveringFeedback.value = false
   posingQuestion.value = false
   consecutiveCorrectCount.value = 0
   consecutiveIncorrectCount.value = 0
+  repeatCurrentQuestion.value = false
   finished.value = false
   track('exercise_started', { presentation: 'chat', coach: props.coach.id })
   finalSummaryPreparing.value = false
@@ -721,7 +889,7 @@ onBeforeUnmount(() => {
 
         <div ref="chat-thread" class="chat-thread" aria-live="polite">
           <div
-            v-for="message in messages"
+            v-for="message in visibleMessages"
             :key="message.id"
             class="chat-message"
             :data-chat-message-id="message.id"
@@ -729,7 +897,7 @@ onBeforeUnmount(() => {
               `chat-message--${message.author}`,
               message.tone ? `chat-message--${message.tone}` : '',
               { 'chat-message--comparison': !!message.answerComparison },
-              { 'chat-message--help-reminder': message.kind === 'help-reminder' },
+              { 'chat-message--mobile-help-hint': message.mobileHelpHint },
               { 'chat-message--help-link': message.author === 'learner' && message.questionIndex !== undefined },
               { 'is-help-selected': helpOpen && message.questionIndex !== undefined && message.questionIndex === helpQuestionIndex },
             ]"
@@ -740,14 +908,10 @@ onBeforeUnmount(() => {
             @keydown.enter.prevent="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
             @keydown.space.prevent="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
           >
-            <div v-if="message.kind === 'help-reminder'" class="chat-help-reminder">
-              <span class="chat-help-reminder__icon" aria-hidden="true">?</span>
-              <span class="chat-help-reminder__content">
-                <strong>{{ ui('Besoin d’un coup de pouce ?') }}</strong>
-                <span>{{ message.text }}<template v-if="!message.helpAlreadyOpen">{{ ui(', ou clique sur ce bouton :') }}</template></span>
-                <button v-if="!message.helpAlreadyOpen" type="button" class="chat-help-reminder__button" @click="showLatestHelp"> {{ ui('Ouvrir l’aide') }} </button>
-              </span>
-            </div>
+            <LearnerErrorFeedback
+              v-if="message.errorDetails?.length"
+              :details="message.errorDetails"
+            />
             <div v-else-if="message.answerComparison" class="answer-comparison">
               <strong>{{ message.answerComparison.mode === 'focused' ? ui('Regarde où ça change :') : ui('Repars de la correction complète :') }}</strong>
               <div class="answer-comparison__line answer-comparison__line--learner">
@@ -815,6 +979,11 @@ onBeforeUnmount(() => {
                     <span>{{ ui('Question') }} {{ item.index }}</span>
                     <span>{{ item.questionLabel }}</span>
                   </strong>
+                  <LearnerErrorFeedback
+                    v-if="item.errorDetails.length"
+                    :details="item.errorDetails"
+                    compact
+                  />
                   <dl>
                     <div>
                       <dt>{{ ui('Réponse donnée') }}</dt>
@@ -1499,6 +1668,7 @@ onBeforeUnmount(() => {
 
 .chat-message {
   display: grid;
+  flex: 0 0 auto;
   width: fit-content;
   max-width: min(82%, 560px);
   padding: 11px 15px;
@@ -1622,104 +1792,19 @@ onBeforeUnmount(() => {
   background: #dcf5e7;
 }
 
+.chat-message--mobile-help-hint {
+  display: none;
+}
+
+:global(:root[data-theme='dark']) .chat-message--mobile-help-hint {
+  color: #a7e1bf;
+  border-color: #477c5d;
+  background: #1d3b2c;
+}
+
 .chat-message--error {
   color: #8b312b;
   background: #ffebe9;
-}
-
-.chat-message--help-reminder {
-  width: min(92%, 600px);
-  max-width: 600px;
-  padding: 0;
-  overflow: hidden;
-  border: 2px solid #f0c64d;
-  color: #173e49;
-  background: linear-gradient(135deg, #fff9dc, #f6f0c8);
-  box-shadow: 0 8px 24px rgb(111 85 15 / 20%);
-}
-
-.chat-help-reminder {
-  display: flex;
-  align-items: center;
-  padding: 15px 17px;
-  gap: 13px;
-}
-
-.chat-help-reminder__icon {
-  display: grid;
-  flex: 0 0 42px;
-  width: 42px;
-  height: 42px;
-  place-items: center;
-  border-radius: 50%;
-  color: #173e49;
-  background: #f0c64d;
-  font-size: 1.4rem;
-  font-weight: 950;
-  box-shadow: inset 0 0 0 3px rgb(255 255 255 / 48%);
-}
-
-.chat-help-reminder__content {
-  display: grid;
-  gap: 4px;
-}
-
-.chat-help-reminder__content > strong {
-  font-size: .95rem;
-  font-weight: 900;
-}
-
-.chat-help-reminder__content > span {
-  line-height: 1.35;
-}
-
-.chat-help-reminder__button {
-  width: fit-content;
-  margin-top: 2px;
-  padding: 9px 15px;
-  border: 2px solid #173e49;
-  border-radius: 10px;
-  color: white;
-  background: #27758e;
-  font: inherit;
-  font-weight: 850;
-  cursor: pointer;
-  box-shadow: 0 3px 0 #173e49;
-  transition: transform .14s ease, box-shadow .14s ease, background-color .14s ease;
-}
-
-.chat-help-reminder__button:hover,
-.chat-help-reminder__button:focus-visible {
-  outline: 3px solid rgb(39 117 142 / 28%);
-  outline-offset: 2px;
-  background: #1f657d;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 0 #173e49;
-}
-
-.chat-help-reminder__button:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 #173e49;
-}
-
-:global(:root[data-theme='dark']) .chat-message--help-reminder {
-  border-color: #f0c64d;
-  color: #f5f0d4;
-  background: linear-gradient(135deg, #3f3923, #302f25);
-  box-shadow: 0 8px 24px rgb(0 0 0 / 30%);
-}
-
-:global(:root[data-theme='dark']) .chat-help-reminder__button {
-  border-color: #f0c64d;
-  color: #102b33;
-  background: #f0c64d;
-  box-shadow: 0 3px 0 #9c7b1f;
-}
-
-:global(:root[data-theme='dark']) .chat-help-reminder__button:hover,
-:global(:root[data-theme='dark']) .chat-help-reminder__button:focus-visible {
-  background: #ffda62;
-  box-shadow: 0 4px 0 #9c7b1f;
 }
 
 .chat-message--comparison {
@@ -2006,6 +2091,32 @@ onBeforeUnmount(() => {
   font-weight: 800;
 }
 
+.chat-summary-list__errors {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.chat-summary-list__errors > strong {
+  color: #a9433d;
+  font-size: .64rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.chat-summary-list__errors > span {
+  padding: 3px 7px;
+  border: 1px solid #e8b6b1;
+  border-radius: 999px;
+  color: #913d37;
+  background: #fff1ef;
+  font-size: .68rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
 .chat-summary-list dl {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2217,6 +2328,16 @@ onBeforeUnmount(() => {
   color: #b9ccd0;
 }
 
+:global(:root[data-theme='dark']) .chat-summary-list__errors > strong {
+  color: #ffaaa3;
+}
+
+:global(:root[data-theme='dark']) .chat-summary-list__errors > span {
+  color: #ffc5c0;
+  border-color: #89534e;
+  background: #442a29;
+}
+
 :global(:root[data-theme='dark']) .chat-summary-tool > header > strong {
   color: white;
   border-color: rgb(255 255 255 / 36%);
@@ -2337,37 +2458,102 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 760px) {
-  .chat-dialogs,
-  .chat-dialogs--with-help {
-    width: min(760px, calc(100vw - 40px));
-  }
-
-  .chat-help-dialog {
-    position: absolute;
-    z-index: 2;
-    inset: 0;
-    width: 100%;
-    min-width: 0;
-  }
-}
-
-@media (max-width: 600px) {
   .chat-overlay {
+    display: block;
+    overflow: hidden;
     padding: 0;
   }
 
   .chat-dialogs,
   .chat-dialogs--with-help {
+    display: grid;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: 100vh;
+    grid-auto-rows: 100dvh;
+    gap: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+  }
+
+  .chat-dialogs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chat-dialog {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    flex: none;
+    border: 0;
+    border-radius: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .chat-dialogs :deep(.coach-help-panel) {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    min-width: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: hidden;
+    border: 0;
+    border-radius: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .chat-dialogs :deep(.coach-help-header),
+  .chat-dialogs :deep(.coach-help-footer) {
+    border-radius: 0;
+  }
+
+  .chat-dialogs :deep(.coach-help-header) {
+    padding-top: max(34px, calc(18px + env(safe-area-inset-top)));
+  }
+
+  .chat-dialogs :deep(.coach-help-footer) {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  .chat-message--mobile-help-hint {
+    display: grid;
+    border: 1px solid #a9dfbe;
+    color: #17613d;
+    background: #d9f6e5;
+    font-weight: 800;
+  }
+
+  .chat-header {
+    padding-top: max(12px, env(safe-area-inset-top));
+  }
+
+  .chat-composer {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 600px) {
+  .chat-dialogs,
+  .chat-dialogs--with-help {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
   }
 
   .chat-dialog {
     height: 100vh;
-    border-radius: 0;
-  }
-
-  .chat-help-dialog {
+    height: 100dvh;
     border-radius: 0;
   }
 
@@ -2416,7 +2602,7 @@ onBeforeUnmount(() => {
   }
 
   .chat-header {
-    padding: 12px;
+    padding: max(12px, env(safe-area-inset-top)) 12px 12px;
     gap: 9px;
   }
 

@@ -41,6 +41,8 @@ export interface ChallengeConfig extends CoreChallengeConfig {
 
 export interface SharedChallenge {
   code: string
+  title?: string
+  description?: string
   verbIds: number[]
   tenseIds: number[]
   questionCount: number
@@ -69,7 +71,7 @@ export const createDefaultPrintOptions = (): PrintOptions => ({
 export const createDefaultChallenge = (): ChallengeConfig => ({
   verbIds: [1, 2, 3, 4],
   tenseIds: [1, 3, 4, 5],
-  questionCount: 20,
+  questionCount: 10,
   ...DEFAULT_SHARED_CHALLENGE_OPTIONS,
   complementOptions: [...DEFAULT_SHARED_CHALLENGE_OPTIONS.complementOptions],
   printOptions: createDefaultPrintOptions()

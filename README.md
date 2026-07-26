@@ -58,10 +58,38 @@ Ouvrir <http://localhost:3000>. Si ce port est déjà occupé :
 npm run dev -- --port 3001
 ```
 
+### Tester depuis un téléphone sur le réseau local
+
+Le téléphone et l’ordinateur doivent être connectés au même réseau Wi-Fi.
+La commande de développement écoute automatiquement sur toutes les interfaces
+réseau :
+
+```bash
+npm run dev
+```
+
+Puis relever l’adresse IPv4 locale du Mac :
+
+```bash
+ipconfig getifaddr en0
+```
+
+Sur le téléphone, ouvrir `http://ADRESSE_IP:3000/fr/`, par exemple
+`http://192.168.1.171:3000/fr/`. Si macOS affiche une demande concernant le
+pare-feu, autoriser Node à recevoir les connexions entrantes sur le réseau
+local.
+
+Pour employer un autre port :
+
+```bash
+npm run dev -- --port 3001
+```
+
 ## Commandes
 
 ```bash
-npm run dev        # développement
+npm run dev        # développement, également accessible sur le réseau local
+npm run dev:lan    # alias explicite de la commande réseau
 npm run test       # tests métier
 npm run test:conjugations # règles françaises, catalogue MySQL et collection Postman
 npm run test:help:condensed # audit grammatical et pédagogique de l’aide très condensée

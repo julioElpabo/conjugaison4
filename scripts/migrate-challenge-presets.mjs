@@ -33,7 +33,7 @@ try {
     category_id INT UNSIGNED NOT NULL,
     name VARCHAR(120) NOT NULL,
     description VARCHAR(500) NOT NULL DEFAULT '',
-    question_count SMALLINT UNSIGNED NOT NULL DEFAULT 20,
+    question_count SMALLINT UNSIGNED NOT NULL DEFAULT 10,
     exercise_kind VARCHAR(40) NOT NULL DEFAULT 'conjugation',
     past_simple_pronouns VARCHAR(40) NOT NULL DEFAULT 'all',
     inclusive_pronouns TINYINT(1) NOT NULL DEFAULT 0,

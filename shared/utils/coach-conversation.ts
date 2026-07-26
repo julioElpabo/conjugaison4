@@ -12,6 +12,20 @@ export function chatReactionAllowsMedia(eventType: CoachEvent, cooledDown: boole
   return !INCORRECT_REACTION_EVENTS.has(eventType) || hasIncorrectMedia
 }
 
+export function chatMessageHasVisibleContent(message: {
+  text?: string
+  media?: unknown
+  answerComparison?: unknown
+  errorDetails?: readonly unknown[]
+}): boolean {
+  return Boolean(
+    message.text?.trim()
+    || message.media
+    || message.answerComparison
+    || message.errorDetails?.length,
+  )
+}
+
 export type CoachTurnStep =
   | { kind: 'reaction', eventType: CoachEvent }
   | { kind: 'instruction' }

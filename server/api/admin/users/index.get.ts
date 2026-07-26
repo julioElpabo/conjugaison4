@@ -1,32 +1,64 @@
 import type { RowDataPacket } from 'mysql2/promise'
 
-interface UserRow extends RowDataPacket {
+interface LearnerRow extends RowDataPacket {
   id: number
-  prenom: string
-  nom: string
-  email: string
   username: string
-  privilegeId: number
-  privilegeName: string
-  created: Date | string
-  modified: Date | string | null
+  status: string
+  createdAt: Date
+  lastLoginAt: Date | null
+  lastActivityAt: Date | null
+  exerciseCount: number
+  correctCount: number
+  incorrectCount: number
 }
 
-interface PrivilegeRow extends RowDataPacket { id: number, name: string }
+interface CountRow extends RowDataPacket {
+  total: number
+}
 
 export default defineEventHandler(async (event) => {
   requireAdministrator(event)
+  setResponseHeader(event, 'Cache-Control', 'no-store')
+  const query = getQuery(event)
+  const offset = Math.min(1_000_000, Math.max(0, Number(query.offset) || 0))
+  const limit = Math.min(100, Math.max(1, Number(query.limit) || 50))
   const database = useDatabase()
-  const [[users], [privileges]] = await Promise.all([
-    database.execute<UserRow[]>(`
-      SELECT u.id, u.prenom, u.nom, u.email, u.username,
-        u.privilege_id AS privilegeId, p.name AS privilegeName,
-        u.created, u.modified
-      FROM users u
-      INNER JOIN privileges p ON p.id = u.privilege_id
-      ORDER BY u.nom, u.prenom, u.id
+  const [[users], [[count]]] = await Promise.all([
+    database.execute<LearnerRow[]>(`
+      SELECT a.id, a.username, a.status, a.created_at AS createdAt,
+             a.last_login_at AS lastLoginAt,
+             MAX(r.last_answered_at) AS lastActivityAt,
+             COUNT(CASE WHEN r.last_answered_at IS NOT NULL THEN 1 END) AS exerciseCount,
+             COALESCE(SUM(r.correct_count), 0) AS correctCount,
+             COALESCE(SUM(r.incorrect_count), 0) AS incorrectCount
+      FROM learner_accounts a
+      LEFT JOIN learner_challenge_runs r ON r.account_id=a.id
+      WHERE a.deleted_at IS NULL
+      GROUP BY a.id, a.username, a.status, a.created_at, a.last_login_at
+      ORDER BY exerciseCount DESC, lastActivityAt DESC, a.id ASC
+      LIMIT ${limit + 1} OFFSET ${offset}
     `),
-    database.execute<PrivilegeRow[]>('SELECT id, name FROM privileges ORDER BY `order`, id'),
+    database.execute<CountRow[]>(`
+      SELECT COUNT(*) AS total
+      FROM learner_accounts
+      WHERE deleted_at IS NULL
+    `),
   ])
-  return { users, privileges }
+  const page = users.slice(0, limit).map(user => ({
+    id: Number(user.id),
+    username: user.username,
+    status: user.status,
+    createdAt: user.createdAt,
+    lastLoginAt: user.lastLoginAt,
+    lastActivityAt: user.lastActivityAt,
+    exerciseCount: Number(user.exerciseCount),
+    correctCount: Number(user.correctCount),
+    incorrectCount: Number(user.incorrectCount),
+  }))
+  return {
+    users: page,
+    total: Number(count?.total || 0),
+    nextOffset: offset + page.length,
+    hasMore: users.length > limit,
+  }
 })

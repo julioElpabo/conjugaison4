@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
   if (administrator.id === id) throw createError({ statusCode: 400, statusMessage: 'Vous ne pouvez pas supprimer votre propre compte' })
 
   const database = useDatabase()
-  const [[user]] = await database.execute<UserRow[]>('SELECT id, privilege_id AS privilegeId FROM users WHERE id = ? LIMIT 1', [id])
+  const [[user]] = await database.execute<UserRow[]>('SELECT id, privilege_id AS privilegeId FROM users WHERE id = ? AND privilege_id = 1 LIMIT 1', [id])
   if (!user) throw createError({ statusCode: 404, statusMessage: 'Utilisateur introuvable' })
   if (Number(user.privilegeId) === 1) {
     const [[administrators]] = await database.execute<CountRow[]>('SELECT COUNT(*) AS count FROM users WHERE privilege_id = 1')

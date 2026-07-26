@@ -81,6 +81,35 @@ describe('questions affichées dans le chat', () => {
     assert.equal(result.sentence, `Ils${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK}`)
   })
 
+  it("élide je devant l’auxiliaire d’un temps composé avec complément", () => {
+    const question = formatConjugationQuestion({
+      id: 4,
+      verbe_id: 12,
+      personne_id: 4,
+      temp_id: 13,
+      conjugaison1: 'avais lu',
+      conjugaison2: '',
+      conjugaison3: '',
+      infinitif: 'lire',
+      auxiliaire: 'avoir',
+      participe_passe: 'lu',
+      temps_name: 'plus-que-parfait',
+      is_compound: 1,
+      mode_name: 'indicatif',
+      complement_phrase: "les lettres de l'alphabet",
+      complement_position: 'after',
+      complement_function: 'cod',
+    }, 'je')
+    const result = coachQuestionBubbles(question)
+
+    assert.equal(question.saisiePrefixe, "j'")
+    assert.equal(question.consigne, "j' … les lettres de l'alphabet | lire | plus-que-parfait (indicatif)")
+    assert.equal(
+      result.sentence,
+      `J'${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK} les lettres de l'alphabet`,
+    )
+  })
+
   it('affiche un seul champ pour « il prend »', () => {
     const result = coachQuestionBubbles({
       consigne: 'il … | prendre | présent (indicatif)',

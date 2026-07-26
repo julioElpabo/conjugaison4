@@ -10,6 +10,10 @@ import {
   isChallengePresetId,
   resolveChallengePresets,
 } from '../shared/data/challenge-presets.ts'
+import {
+  challengePresetTrackingDescription,
+  challengePresetTrackingTitle,
+} from '../shared/utils/challenge-preset-tracking.ts'
 
 function verb(id, infinitif, metadata = {}) {
   return {
@@ -37,6 +41,14 @@ const verbs = [
 ]
 
 describe('défis résolus par critères', () => {
+  it('conserve un titre et une description explicites pour le suivi élève', () => {
+    const preset = resolveChallengePresets(verbs).find(candidate => candidate.id === '5P')
+
+    assert.equal(challengePresetTrackingTitle(preset), 'Niveaux scolaires suisses | 5P')
+    assert.equal(challengePresetTrackingDescription(), 'Tous les verbes')
+    assert.equal(challengePresetTrackingDescription(5), '5 au hasard')
+  })
+
   it('expose les 28 défis avec des identifiants uniques et sans liste de verbes figée', () => {
     assert.equal(challengePresetDefinitions.length, 28)
     assert.equal(new Set(challengePresetDefinitions.map(preset => preset.id)).size, 28)
@@ -79,7 +91,7 @@ describe('défis résolus par critères', () => {
       const definition = challengePresetDefinitions.find(candidate => candidate.id === preset.id)
       assert.ok(definition)
       assert.ok(preset.tenseIds.length > 0, `${preset.id}: aucun temps`)
-      assert.ok(Number.isInteger(preset.questionCount) && preset.questionCount > 0)
+      assert.equal(preset.questionCount, 10, `${preset.id}: nombre de questions`)
       assert.equal(new Set(preset.verbIds).size, preset.verbIds.length, `${preset.id}: verbes en double`)
       assert.equal(new Set(preset.tenseIds).size, preset.tenseIds.length, `${preset.id}: temps en double`)
       assert.ok(preset.verbIds.every(id => Number.isInteger(id) && id > 0))
@@ -123,8 +135,8 @@ describe('conversion du format historique', () => {
     assert.deepEqual(challengeConfigToLegacyTuple(config), [[1, 2], [1, 3], 12])
   })
 
-  it('remplace un nombre de questions invalide par 20', () => {
-    assert.equal(challengeConfigFromLegacyTuple([[1], [1], 0]).questionCount, 20)
+  it('remplace un nombre de questions invalide par 10', () => {
+    assert.equal(challengeConfigFromLegacyTuple([[1], [1], 0]).questionCount, 10)
   })
 })
 

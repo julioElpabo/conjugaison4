@@ -1,11 +1,16 @@
 <script setup lang="ts">
 const { ui, uiLabel, interfaceLocale } = useLanguagePreferences()
+import type { LearnerErrorDetail } from '~~/shared/types/conjugation'
+import { learnerErrorDetailText } from '~~/shared/utils/learner-error-diagnostics'
+
 interface SummaryItem {
   index: number
   status: 'correct' | 'incorrect'
   questionLabel: string
   learnerAnswer: string
   expectedAnswer: string
+  errorLabels: string[]
+  errorDetails: LearnerErrorDetail[]
 }
 
 interface SummaryTense {
@@ -197,10 +202,18 @@ async function buildPdf() {
 
   function drawQuestion(item: SummaryItem) {
     const question = fitCell(`${item.index}. ${item.questionLabel}`, questionWidth, 'bold')
+    const errorLabel = item.errorDetails.length > 1 ? ui('Types de faute') : ui('Type de faute')
+    const comparisons = item.errorDetails.filter(detail => detail.learnerValue && detail.expectedValue)
+    const errors = item.errorDetails.length
+      ? fitCell(`${errorLabel} : ${item.errorDetails.map(detail => (
+          detail.learnerValue && detail.expectedValue ? detail.message : learnerErrorDetailText(detail)
+        )).join(' · ')}`, questionWidth, 'normal')
+      : null
     const learner = fitCell(item.learnerAnswer || '—', learnerWidth, 'normal')
     const expected = fitCell(item.expectedAnswer || '—', expectedWidth, 'bold')
-    const lineCount = Math.max(question.lines.length, learner.lines.length, expected.lines.length)
-    const rowHeight = lineCount > 1 ? 12 : 8.5
+    const questionLineCount = question.lines.length + (errors?.lines.length || 0) + comparisons.length
+    const lineCount = Math.max(questionLineCount, learner.lines.length, expected.lines.length)
+    const rowHeight = Math.max(8.5, 4 + lineCount * 3.2)
 
     if (y + rowHeight > footerLimit) addPage()
 
@@ -209,6 +222,37 @@ async function buildPdf() {
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(question.size)
     pdf.text(question.lines, questionX, y + 2, { baseline: 'top', lineHeightFactor: 1.15 })
+    if (errors) {
+      pdf.setTextColor(174, 55, 48)
+      pdf.setFont('helvetica', 'normal')
+      pdf.setFontSize(errors.size)
+      pdf.text(errors.lines, questionX, y + 2 + question.lines.length * 3.2, { baseline: 'top', lineHeightFactor: 1.15 })
+      let comparisonY = y + 2 + (question.lines.length + errors.lines.length) * 3.2
+      for (const detail of comparisons) {
+        const learnerValue = pdfSafe(detail.learnerValue)
+        const expectedValue = pdfSafe(detail.expectedValue)
+        pdf.setFont('helvetica', 'bold')
+        pdf.setFontSize(6.8)
+        const learnerWidth = pdf.getTextWidth(learnerValue) + 3
+        pdf.setFillColor(255, 216, 213)
+        pdf.roundedRect(questionX, comparisonY - .5, learnerWidth, 3.6, .8, .8, 'F')
+        pdf.setTextColor(143, 41, 37)
+        pdf.text(learnerValue, questionX + 1.5, comparisonY + 2)
+        const separator = 'à la place de'
+        pdf.setFont('helvetica', 'normal')
+        const separatorX = questionX + learnerWidth + 1.2
+        pdf.setTextColor(95, 103, 106)
+        pdf.text(separator, separatorX, comparisonY + 2)
+        const expectedX = separatorX + pdf.getTextWidth(separator) + 1.2
+        pdf.setFont('helvetica', 'bold')
+        const expectedWidth = pdf.getTextWidth(expectedValue) + 3
+        pdf.setFillColor(206, 240, 221)
+        pdf.roundedRect(expectedX, comparisonY - .5, expectedWidth, 3.6, .8, .8, 'F')
+        pdf.setTextColor(23, 97, 63)
+        pdf.text(expectedValue, expectedX + 1.5, comparisonY + 2)
+        comparisonY += 3.2
+      }
+    }
     pdf.setTextColor(45, 45, 45)
     pdf.setFont('helvetica', 'normal')
     pdf.setFontSize(learner.size)

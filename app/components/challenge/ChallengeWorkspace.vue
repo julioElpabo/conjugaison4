@@ -1,7 +1,8 @@
 <script setup lang="ts">
 const { ui, localePath } = useLanguagePreferences()
-import type { ChallengePreset, ComplementOption, ExerciseQuestion } from '~~/shared/types/conjugation'
+import type { ChallengePreset, ComplementOption, ExerciseQuestion, LearnerExerciseTrackingContext } from '~~/shared/types/conjugation'
 import { legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils/complement-options'
+import { challengePresetTrackingDescription, challengePresetTrackingTitle } from '~~/shared/utils/challenge-preset-tracking'
 import ChallengeActions from './ChallengeActions.vue'
 import ChallengeOptions from './ChallengeOptions.vue'
 import LoadChallengeDialog from './LoadChallengeDialog.vue'
@@ -49,9 +50,16 @@ const actionError = ref('')
 const notice = ref('')
 const loadError = ref('')
 const activePresetId = ref<string>()
+const sourcePresetId = ref<string>()
+const sourcePresetRandomCount = ref<number | null>(null)
 const questions = ref<ExerciseQuestion[]>([])
 const printQuestions = ref<ExerciseQuestion[]>([])
 const shareCode = ref('')
+const shareTitle = ref('')
+const shareDescription = ref('')
+const shareError = ref('')
+const savedChallengeTitle = ref('')
+const savedChallengeDescription = ref('')
 const isExerciseOpen = ref(false)
 const exercisePresentation = ref<'classic' | 'chat'>('classic')
 const isPrintOpen = ref(false)
@@ -59,6 +67,7 @@ const isShareOpen = ref(false)
 const isLoadOpen = ref(false)
 const isCoachPickerOpen = ref(false)
 const selectedCoach = ref<CoachProfile | null>(null)
+const exerciseTracking = ref<LearnerExerciseTrackingContext>()
 const complementPlacementLabel = computed(() => ({
   after: ui('toujours après'),
   mixed: ui('parfois avant'),
@@ -133,11 +142,37 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   challenge.value.complementPlacement = preset.complementPlacement
   challenge.value.complementOptions = preset.complementOptions ?? legacyComplementOptions(preset.includeComplements, preset.complementPlacement)
   activePresetId.value = preset.id
+  sourcePresetId.value = preset.id
+  sourcePresetRandomCount.value = randomCount ?? null
+  savedChallengeTitle.value = ''
+  savedChallengeDescription.value = ''
   notice.value = randomCount
     ? `${randomCount} verbes ont été tirés au hasard dans « ${preset.label} ».`
     : `Le défi « ${preset.label} » est chargé.`
   actionError.value = ''
   track('challenge_preset_selected', { preset: preset.id, exerciseKind: preset.exerciseKind })
+}
+
+function beginExerciseTracking(presentation: 'classic' | 'chat') {
+  const preset = catalogue.value.presets.find(candidate => candidate.id === sourcePresetId.value)
+  exerciseTracking.value = createLearnerTrackingContext({
+    challengeLabel: savedChallengeTitle.value
+      || (preset ? challengePresetTrackingTitle(preset) : 'Défi personnalisé'),
+    presentation,
+    challenge: {
+      description: savedChallengeDescription.value
+        || (preset ? challengePresetTrackingDescription(sourcePresetRandomCount.value) : undefined),
+      verbIds: [...challenge.value.verbIds],
+      tenseIds: [...challenge.value.tenseIds],
+      questionCount: challenge.value.questionCount,
+      exerciseKind: challenge.value.exerciseKind,
+      pastSimplePronouns: challenge.value.pastSimplePronouns,
+      inclusivePronouns: challenge.value.inclusivePronouns,
+      includeComplements: challenge.value.includeComplements,
+      complementPlacement: challenge.value.complementPlacement,
+      complementOptions: [...challenge.value.complementOptions],
+    },
+  })
 }
 
 async function prepareExercise(mode: 'classic' | 'chat') {
@@ -154,6 +189,7 @@ async function prepareExercise(mode: 'classic' | 'chat') {
       throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     }
     exercisePresentation.value = mode
+    beginExerciseTracking(mode)
     isExerciseOpen.value = true
     logUsage('exercise')
   } catch (error) {
@@ -174,6 +210,7 @@ async function launchWithCoach(coach: CoachProfile) {
     questions.value = await api.generateQuestions(challenge.value)
     if (!questions.value.length) throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     exercisePresentation.value = 'chat'
+    beginExerciseTracking('chat')
     isExerciseOpen.value = true
     logUsage('exercise')
   } catch (error) {
@@ -207,17 +244,30 @@ async function preparePrint() {
   }
 }
 
-async function saveChallenge() {
+function saveChallenge() {
   if (!isReady.value) return
+  const activePreset = catalogue.value.presets.find(preset => preset.id === activePresetId.value)
+  shareCode.value = ''
+  shareError.value = ''
+  shareTitle.value = activePreset?.label || savedChallengeTitle.value || ui('Défi de conjugaison')
+  shareDescription.value = savedChallengeDescription.value
+  isShareOpen.value = true
+}
+
+async function createSharedChallenge(title: string, description: string) {
   busyAction.value = 'save'
+  shareError.value = ''
   clearMessages()
   try {
-    const result = await api.saveChallenge(challenge.value)
+    const result = await api.saveChallenge(challenge.value, title, description)
     shareCode.value = result.code
-    isShareOpen.value = true
+    shareTitle.value = title
+    shareDescription.value = description
+    savedChallengeTitle.value = title
+    savedChallengeDescription.value = description
     logUsage('challenge-save')
   } catch (error) {
-    actionError.value = getChallengeErrorMessage(error, ui('Impossible de sauvegarder ce défi.'))
+    shareError.value = getChallengeErrorMessage(error, ui('Impossible de sauvegarder ce défi.'))
   } finally {
     busyAction.value = null
   }
@@ -231,7 +281,11 @@ async function restoreChallenge(code: string, closeDialog = true) {
   try {
     const restored = await api.loadChallenge(code)
     applySharedChallenge(restored)
+    savedChallengeTitle.value = restored.title || ''
+    savedChallengeDescription.value = restored.description || ''
     activePresetId.value = undefined
+    sourcePresetId.value = undefined
+    sourcePresetRandomCount.value = null
     notice.value = `Le défi ${restored.code} est chargé.`
     logUsage('challenge-load')
     if (closeDialog) isLoadOpen.value = false
@@ -263,9 +317,9 @@ function onToggleTense(id: number) {
 <template>
   <div class="challenge-page">
     <section class="challenge-hero">
-      <p class="challenge-hero__eyebrow">{{ ui('Gratuit · sans publicité · personnalisable') }}</p>
-      <h1>{{ ui('Crée ton défi de conjugaison') }}</h1>
-      <p>{{ ui('Choisis les verbes et les temps à travailler, puis exerce-toi en ligne ou imprime une fiche avec son corrigé.') }}</p>
+      <p class="challenge-hero__eyebrow">{{ savedChallengeTitle ? ui('Défi partagé') : ui('Gratuit · sans publicité · personnalisable') }}</p>
+      <h1>{{ savedChallengeTitle || ui('Crée ton défi de conjugaison') }}</h1>
+      <p class="challenge-hero__shared-description">{{ savedChallengeDescription || ui('Choisis les verbes et les temps à travailler, puis exerce-toi en ligne ou imprime une fiche avec son corrigé.') }}</p>
     </section>
 
     <div class="challenge-shell">
@@ -366,6 +420,7 @@ function onToggleTense(id: number) {
       v-if="isExerciseOpen && exercisePresentation === 'classic'"
       :questions="questions"
       :exercise-kind="challenge.exerciseKind"
+      :tracking-context="exerciseTracking"
       @close="isExerciseOpen = false"
     />
 
@@ -376,6 +431,7 @@ function onToggleTense(id: number) {
       :verbs="selectedVerbs"
       :tenses="selectedTenses"
       :regenerate-questions="regenerateChatQuestions"
+      :tracking-context="exerciseTracking"
       @close="isExerciseOpen = false"
     />
 
@@ -400,7 +456,12 @@ function onToggleTense(id: number) {
       v-if="isShareOpen"
       :code="shareCode"
       :url="shareUrl"
+      :busy="busyAction === 'save'"
+      :error="shareError"
+      :initial-title="shareTitle"
+      :initial-description="shareDescription"
       @close="isShareOpen = false"
+      @save="createSharedChallenge"
     />
 
     <LoadChallengeDialog

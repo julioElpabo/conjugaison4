@@ -5,7 +5,8 @@
   "scripts": {
     "build": "nuxt build",
     "start": "node app.mjs",
-    "dev": "nuxt dev",
+    "dev": "nuxt dev --host 0.0.0.0",
+    "dev:lan": "nuxt dev --host 0.0.0.0",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "data:asseoir": "node --env-file=.env scripts/add-asseoir-variants.mjs",

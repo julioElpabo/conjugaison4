@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ChallengeWorkspace from '~/components/challenge/ChallengeWorkspace.vue'
+import WizardChallengeWorkspace from '~/components/challenge/WizardChallengeWorkspace.vue'
 const { ui } = useLanguagePreferences()
 
 const route = useRoute()
@@ -14,5 +14,5 @@ useHead(() => ({
 </script>
 
 <template>
-  <ChallengeWorkspace :initial-code="code" />
+  <WizardChallengeWorkspace :initial-code="code" />
 </template>

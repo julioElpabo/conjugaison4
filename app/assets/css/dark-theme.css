@@ -372,6 +372,12 @@
 :root[data-theme='dark'] .answer-feedback--incorrect { color: #f2aaa4; background: #402625; border-color: #92534e; }
 :root[data-theme='dark'] .results-table th { background: #263532; }
 :root[data-theme='dark'] .results-table td { border-color: var(--line); }
+:root[data-theme='dark'] .result-error-types strong { color: #ffaaa3; }
+:root[data-theme='dark'] .result-error-types span {
+  color: #ffc5c0;
+  border-color: #89534e;
+  background: #442a29;
+}
 
 :root[data-theme='dark'] .chat-overlay { background: rgb(8 22 29 / 78%); }
 :root[data-theme='dark'] .chat-dialog {

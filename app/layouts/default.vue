@@ -3,6 +3,7 @@ import type { AppLocale } from '~~/shared/i18n/locales'
 import { guidedTourCopy } from '~~/shared/i18n/guided-tour'
 
 const { ui, interfaceLocale, setInterfaceLocale, localePath } = useLanguagePreferences()
+const { user: learner, checkSession, logout: endLearnerSession } = useLearnerAuth()
 const route = useRoute()
 const { applyTheme } = useColorTheme()
 const isDark = ref(false)
@@ -21,13 +22,37 @@ const guidedTourRequested = useState('guided-tour-requested', () => false)
 const wizardAtHome = useState('wizard-at-home', () => true)
 const tourCopy = computed(() => guidedTourCopy(interfaceLocale.value))
 const isActualHomePage = computed(() => localizedSectionPath.value === '/' && wizardAtHome.value)
+const learnerMenu = ref<HTMLDetailsElement | null>(null)
+const learnerLoggingOut = ref(false)
+const learnerDisplayName = computed(() => {
+  const username = learner.value?.username || ''
+  return username ? username.charAt(0).toLocaleUpperCase('fr-CH') + username.slice(1) : ''
+})
+
+await checkSession()
+
+watch(() => route.fullPath, () => {
+  learnerMenu.value?.removeAttribute('open')
+})
+
+function closeLearnerMenuOnOutside(event: PointerEvent) {
+  const menu = learnerMenu.value
+  const target = event.target
+  if (!menu?.open || !(target instanceof Node) || menu.contains(target)) return
+  menu.removeAttribute('open')
+}
 
 onMounted(() => {
+  document.addEventListener('pointerdown', closeLearnerMenuOnOutside)
   const activeTheme = document.documentElement.dataset.theme
   if (activeTheme === 'light' || activeTheme === 'dark') {
     isDark.value = activeTheme === 'dark'
     applyTheme(activeTheme, false)
   }
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('pointerdown', closeLearnerMenuOnOutside)
 })
 
 function toggleTheme() {
@@ -54,6 +79,19 @@ async function requestGuidedTour() {
   guidedTourRequested.value = true
   if (localizedSectionPath.value !== '/') {
     await navigateTo(localePath('/'))
+  }
+}
+
+async function logoutLearner() {
+  if (learnerLoggingOut.value) return
+  learnerLoggingOut.value = true
+  try {
+    await endLearnerSession()
+    learnerMenu.value?.removeAttribute('open')
+    await navigateTo('/fr/signin')
+  }
+  finally {
+    learnerLoggingOut.value = false
   }
 }
 const activeSection = computed(() => {
@@ -94,38 +132,56 @@ const activeSection = computed(() => {
           <NuxtLink :to="localePath('/')" :class="{ 'is-active': activeSection === 'exercer' }" :aria-current="activeSection === 'exercer' ? 'page' : undefined"> {{ ui('S’exercer') }} </NuxtLink>
           <NuxtLink :to="localePath('/consulter')" :class="{ 'is-active': activeSection === 'consulter' }" :aria-current="activeSection === 'consulter' ? 'page' : undefined"> {{ ui('Consulter') }} </NuxtLink>
           <NuxtLink :to="localePath('/apprendre')" :class="{ 'is-active': activeSection === 'apprendre' }" :aria-current="activeSection === 'apprendre' ? 'page' : undefined"> {{ ui('Apprendre') }} </NuxtLink>
-          <div class="language-selector" role="group" :aria-label="ui('Langue de l’interface')">
+          <details v-if="learner" ref="learnerMenu" class="learner-menu">
+            <summary>
+              <span class="learner-menu__avatar" aria-hidden="true">{{ learnerDisplayName.charAt(0) }}</span>
+              <span>{{ learnerDisplayName }}</span>
+              <svg aria-hidden="true" viewBox="0 0 20 20"><path d="m5 7.5 5 5 5-5" /></svg>
+            </summary>
+            <div class="learner-menu__panel">
+              <NuxtLink :to="localePath('/my-page')">Mon espace</NuxtLink>
+              <NuxtLink :to="`${localePath('/my-page')}?tab=account#change-password`">
+                Changer mon mot de passe
+              </NuxtLink>
+              <button type="button" :disabled="learnerLoggingOut" @click="logoutLearner">
+                {{ learnerLoggingOut ? 'Déconnexion…' : 'Me déconnecter' }}
+              </button>
+            </div>
+          </details>
+          <template v-else>
+            <div class="language-selector" role="group" :aria-label="ui('Langue de l’interface')">
+              <button
+                v-for="option in languageOptions"
+                :key="option.value"
+                type="button"
+                :class="{ 'is-active': interfaceLocale === option.value }"
+                :aria-label="option.label"
+                :aria-pressed="interfaceLocale === option.value"
+                :title="option.label"
+                @click="setInterfaceLocale(option.value)"
+              >
+                <span aria-hidden="true">{{ option.flag }}</span>
+              </button>
+            </div>
             <button
-              v-for="option in languageOptions"
-              :key="option.value"
+              class="theme-switch"
+              :class="{ 'is-dark': isDark }"
               type="button"
-              :class="{ 'is-active': interfaceLocale === option.value }"
-              :aria-label="option.label"
-              :aria-pressed="interfaceLocale === option.value"
-              :title="option.label"
-              @click="setInterfaceLocale(option.value)"
+              role="switch"
+              :aria-checked="isDark"
+              :aria-label="themeSwitchTitle"
+              :title="themeSwitchTitle"
+              @click="toggleTheme"
             >
-              <span aria-hidden="true">{{ option.flag }}</span>
+              <span class="theme-switch__icon theme-switch__icon--moon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M20.1 15.4A8.7 8.7 0 0 1 8.6 3.9 8.8 8.8 0 1 0 20.1 15.4Z" /></svg>
+              </span>
+              <span class="theme-switch__icon theme-switch__icon--sun" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+              </span>
+              <span class="theme-switch__thumb" aria-hidden="true" />
             </button>
-          </div>
-          <button
-            class="theme-switch"
-            :class="{ 'is-dark': isDark }"
-            type="button"
-            role="switch"
-            :aria-checked="isDark"
-            :aria-label="themeSwitchTitle"
-            :title="themeSwitchTitle"
-            @click="toggleTheme"
-          >
-            <span class="theme-switch__icon theme-switch__icon--moon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M20.1 15.4A8.7 8.7 0 0 1 8.6 3.9 8.8 8.8 0 1 0 20.1 15.4Z" /></svg>
-            </span>
-            <span class="theme-switch__icon theme-switch__icon--sun" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
-            </span>
-            <span class="theme-switch__thumb" aria-hidden="true" />
-          </button>
+          </template>
         </nav>
       </div>
     </header>
@@ -449,6 +505,110 @@ a {
   line-height: 1;
 }
 
+.learner-menu {
+  position: relative;
+}
+
+.learner-menu summary {
+  display: flex;
+  min-height: 38px;
+  padding: 4px 10px 4px 5px;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  border: 1px solid rgb(255 255 255 / 25%);
+  border-radius: 999px;
+  background: #7052a0;
+  cursor: pointer;
+  font-size: .86rem;
+  font-weight: 800;
+  list-style: none;
+}
+
+.learner-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.learner-menu summary:hover,
+.learner-menu[open] summary {
+  background: #8162b2;
+}
+
+.learner-menu summary:focus-visible {
+  outline: 3px solid rgb(112 210 232 / 55%);
+  outline-offset: 2px;
+}
+
+.learner-menu__avatar {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  color: #174f62;
+  border-radius: 50%;
+  background: #d9f0ec;
+  font-size: .78rem;
+}
+
+.learner-menu summary svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  transition: transform 150ms ease;
+}
+
+.learner-menu[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.learner-menu__panel {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  width: max-content;
+  min-width: 180px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface);
+  box-shadow: 0 16px 38px rgb(18 35 48 / 24%);
+}
+
+.learner-menu__panel a,
+.learner-menu__panel button {
+  display: flex;
+  min-height: 40px;
+  padding: 8px 11px;
+  align-items: center;
+  justify-content: flex-start;
+  color: var(--ink);
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  text-decoration: none;
+  font: inherit;
+  font-size: .86rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.learner-menu__panel a:hover,
+.learner-menu__panel button:hover {
+  color: var(--brand-dark);
+  background: var(--surface-soft);
+}
+
+.learner-menu__panel button:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -618,6 +778,11 @@ a {
     grid-column: 4;
     justify-self: end;
     margin-left: 2px;
+  }
+
+  .learner-menu {
+    grid-column: 1 / -1;
+    justify-self: end;
   }
 
   .site-main {

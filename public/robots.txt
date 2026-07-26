@@ -1,2 +1,3 @@
 User-Agent: *
-Disallow:
+Disallow: /fr/signin
+Disallow: /fr/my-page

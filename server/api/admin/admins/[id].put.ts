@@ -10,12 +10,10 @@ export default defineEventHandler(async (event) => {
   if (!Number.isInteger(id) || id < 1) throw createError({ statusCode: 400, statusMessage: 'Utilisateur invalide' })
 
   const input = parseAdminUserInput(await readBody<unknown>(event), false)
-  if (administrator.id === id && input.privilegeId !== 1) {
-    throw createError({ statusCode: 400, statusMessage: 'Vous ne pouvez pas retirer vos propres droits administrateur' })
-  }
+  input.privilegeId = 1
 
   const database = useDatabase()
-  const [[existing]] = await database.execute<ExistingRow[]>('SELECT id FROM users WHERE id = ? LIMIT 1', [id])
+  const [[existing]] = await database.execute<ExistingRow[]>('SELECT id FROM users WHERE id = ? AND privilege_id = 1 LIMIT 1', [id])
   if (!existing) throw createError({ statusCode: 404, statusMessage: 'Utilisateur introuvable' })
   await Promise.all([
     assertPrivilegeExists(database, input.privilegeId),

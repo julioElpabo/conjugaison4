@@ -58,12 +58,29 @@ interface ConjugationRow extends RowDataPacket {
 interface RadicalReferenceRow extends RowDataPacket {
   verbe_id: number
   personne_id: number
+  temp_id: number
   pronom: string
   conjugaison1: string
   conjugaison2: string
   conjugaison3: string
   mode_name: string
   temps_name: string
+}
+
+export function conjugationConfusionsFor(
+  row: ConjugationRow,
+  references: ReadonlyMap<number, readonly RadicalReferenceRow[]>,
+) {
+  const forms = references.get(Number(row.base_verbe_id || row.verbe_id)) || []
+  return forms
+    .filter(form => Number(form.personne_id) === Number(row.personne_id)
+      && Number(form.temp_id) !== Number(row.temp_id))
+    .map(form => ({
+      tense: form.temps_name,
+      mode: form.mode_name,
+      forms: unique([form.conjugaison1, form.conjugaison2, form.conjugaison3]),
+    }))
+    .filter(candidate => candidate.forms.length)
 }
 
 interface NonFiniteVerbRow extends RowDataPacket {
@@ -556,16 +573,12 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
       }
     }
 
-    const radicalReferenceVerbIds = [...new Set([
-      ...verbIds,
-      ...rows.map(row => Number(row.base_verbe_id || row.verbe_id)).filter(id => id > 0),
-    ])]
+    const radicalReferenceVerbIds = [...new Set(
+      rows.map(row => Number(row.base_verbe_id || row.verbe_id)).filter(id => id > 0),
+    )]
     if (radicalReferenceVerbIds.length > 0) {
-      const selectedTenseReferenceClause = finiteIds.length
-        ? `OR t.id IN (${placeholders(finiteIds)})`
-        : ''
       const [referenceRows] = await database.execute<RadicalReferenceRow[]>(`
-        SELECT vc.verbe_id, vc.personne_id, p.pronom,
+        SELECT vc.verbe_id, vc.personne_id, vc.temp_id, p.pronom,
                vc.conjugaison1, vc.conjugaison2, vc.conjugaison3,
                m.name AS mode_name, t.name AS temps_name
         FROM verbesconjugues vc
@@ -573,12 +586,8 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
         INNER JOIN temps t ON t.id = vc.temp_id
         INNER JOIN modes m ON m.id = t.mode_id
         WHERE vc.verbe_id IN (${placeholders(radicalReferenceVerbIds)})
-          AND (
-            (m.name = 'indicatif' AND t.name IN ('présent', 'futur', 'passé simple'))
-            ${selectedTenseReferenceClause}
-          )
           AND vc.conjugaison1 <> ''
-      `, [...radicalReferenceVerbIds, ...finiteIds])
+      `, radicalReferenceVerbIds)
       for (const reference of referenceRows) {
         const candidates = radicalReferences.get(Number(reference.verbe_id)) || []
         candidates.push(reference)
@@ -663,11 +672,13 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
         ? undefined
         : radicalReferenceFor(row, radicalReferences)
       const futureSimpleForms = futureSimpleFormsFor(row, radicalReferences)
+      const conjugationConfusions = conjugationConfusionsFor(row, radicalReferences)
       return request.exerciseKind === 'conjugation'
         ? formatConjugationQuestion({
             ...semanticRow,
             radical_reference: radicalReference,
             future_simple_forms: futureSimpleForms,
+            conjugation_confusions: conjugationConfusions,
           }, choosePronoun(row.pronom, request.inclusivePronouns))
         : identificationQuestion(semanticRow)
     }))

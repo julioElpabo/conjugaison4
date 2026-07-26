@@ -67,10 +67,29 @@ function answerBlank(wordCount: number) {
   )).join(COMPOUND_TENSE_GAP)
 }
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')
+}
+
+function templateWithInputPrefix(template: string, question: ExerciseQuestion) {
+  const pronoun = question.pronom?.trim() || ''
+  const inputPrefix = question.saisiePrefixe?.trim() || ''
+  if (!pronoun || !inputPrefix || normalized(pronoun) === normalized(inputPrefix)) return template
+  return template.replace(
+    new RegExp(`^${escapeRegExp(pronoun)}(?=\\s|…|\\.)`, 'iu'),
+    inputPrefix,
+  )
+}
+
 export function coachQuestionBubbles(question: ExerciseQuestion, options: { omitIndicativeMode?: boolean, modeLabel?: string, tenseLabel?: string } = {}): CoachQuestionBubbles {
-  const sentenceTemplate = question.consigne.split('|')[0]?.trim() || ''
+  const sentenceTemplate = templateWithInputPrefix(
+    question.consigne.split('|')[0]?.trim() || '',
+    question,
+  )
   const formulaPronoun = question.pronom
-  const answerPronoun = normalized(question.mode) === 'imperatif' ? '' : question.pronom
+  const answerPronoun = normalized(question.mode) === 'imperatif'
+    ? ''
+    : question.saisiePrefixe ?? question.pronom
   const modeAndTense = [options.omitIndicativeMode ? '' : options.modeLabel || question.mode, options.tenseLabel || question.temps].filter(Boolean).join(' ')
   const formula = [formulaPronoun, question.infinitif, modeAndTense].filter(Boolean).join(' | ')
   if (!formula) return { formula: question.consigne }

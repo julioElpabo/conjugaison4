@@ -3,7 +3,7 @@ import { describe, it } from 'node:test'
 
 import { formatNonFiniteQuestion } from '../server/services/non-finite-formatter.ts'
 import { formatAnswer, formatConjugationQuestion } from '../server/services/question-formatter.ts'
-import { getAlternativeCorrections, isAnswerCorrect, isFutureSimpleInsteadOfNearFuture } from '../shared/utils/answer.ts'
+import { findConjugationConfusions, getAlternativeCorrections, isAnswerCorrect, isFutureSimpleInsteadOfNearFuture } from '../shared/utils/answer.ts'
 
 function row(overrides = {}) {
   return {
@@ -86,6 +86,31 @@ describe('futur proche et futur simple', () => {
 
     assert.ok(question.futureSimpleAnswers?.includes('tu te réveilleras'))
     assert.equal(isFutureSimpleInsteadOfNearFuture('te réveilleras', question), true)
+  })
+})
+
+describe('diagnostic d’un autre temps ou mode', () => {
+  it('conserve les formes alternatives avec leur étiquette grammaticale', () => {
+    const question = formatConjugationQuestion(row({
+      infinitif: 'finir',
+      conjugaison1: 'finissais',
+      conjugaison2: '',
+      temps_name: 'imparfait',
+      conjugation_confusions: [
+        { mode: 'indicatif', tense: 'présent', forms: ['finis'] },
+        { mode: 'subjonctif', tense: 'présent', forms: ['finisses'] },
+      ],
+    }), 'tu')
+
+    assert.deepEqual(
+      findConjugationConfusions('tu finis', question).map(item => [item.mode, item.tense]),
+      [['indicatif', 'présent']],
+    )
+    assert.deepEqual(
+      findConjugationConfusions('que tu finisses', question).map(item => [item.mode, item.tense]),
+      [['subjonctif', 'présent']],
+    )
+    assert.equal(isAnswerCorrect('tu finis', question.reponses), false)
   })
 })
 

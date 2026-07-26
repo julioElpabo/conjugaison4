@@ -3,15 +3,25 @@ const { ui, localePath } = useLanguagePreferences()
 const props = defineProps<{
   code: string
   url: string
+  busy?: boolean
+  error?: string
+  initialTitle?: string
+  initialDescription?: string
 }>()
 
 const emit = defineEmits<{
   close: []
+  save: [title: string, description: string]
 }>()
 
 const copyStatus = ref('')
+const challengeTitle = ref(props.initialTitle?.trim() || ui('Défi de conjugaison'))
+const challengeDescription = ref(props.initialDescription?.trim() || '')
 const closeButton = useTemplateRef<HTMLButtonElement>('close-button')
 const dialog = useTemplateRef<HTMLElement>('share-dialog')
+const normalizedTitle = computed(() => challengeTitle.value.trim())
+const normalizedDescription = computed(() => challengeDescription.value.trim())
+const titleIsValid = computed(() => normalizedTitle.value.length >= 1 && normalizedTitle.value.length <= 80)
 
 useDialogFocus(dialog, () => emit('close'), closeButton)
 
@@ -32,6 +42,11 @@ function highlightChallengeLoaderOnHome() {
   }
 }
 
+function createCode() {
+  if (props.code || props.busy || !titleIsValid.value) return
+  emit('save', normalizedTitle.value, normalizedDescription.value)
+}
+
 </script>
 
 <template>
@@ -41,11 +56,45 @@ function highlightChallengeLoaderOnHome() {
         <button ref="close-button" class="dialog-close" type="button" :aria-label="ui('Fermer')" @click="emit('close')">
           ×
         </button>
-        <p class="dialog-kicker">{{ ui('Défi sauvegardé') }}</p>
+        <p class="dialog-kicker">{{ code ? ui('Défi sauvegardé') : ui('Défi prêt à être partagé') }}</p>
         <h2 id="share-title">{{ ui('Votre défi est prêt à être partagé') }}</h2>
-        <p>{{ ui('Deux possibilités permettent à vos élèves de retrouver ce défi.') }}</p>
+        <form class="share-title-form" @submit.prevent="createCode">
+          <label for="share-challenge-title">{{ ui('Titre du défi') }}</label>
+          <div>
+            <input
+              id="share-challenge-title"
+              v-model="challengeTitle"
+              type="text"
+              maxlength="80"
+              :readonly="Boolean(code)"
+              :aria-invalid="!titleIsValid"
+              :aria-describedby="error ? 'share-title-error' : undefined"
+              required
+              autofocus
+            >
+            <button v-if="!code" class="primary-button" type="submit" :disabled="busy || !titleIsValid">
+              {{ busy ? ui('Création…') : ui('Créer le code') }}
+            </button>
+          </div>
+          <small>{{ normalizedTitle.length }}/80</small>
+          <label for="share-challenge-description">{{ ui('Description du défi') }}</label>
+          <textarea
+            id="share-challenge-description"
+            v-model="challengeDescription"
+            rows="4"
+            maxlength="1000"
+            :readonly="Boolean(code)"
+            :aria-describedby="error ? 'share-title-error share-description-help' : 'share-description-help'"
+          />
+          <small id="share-description-help" class="share-title-form__description-help">
+            {{ ui('Facultatif : une description à l’attention des personnes qui découvriront ce défi') }}
+            · {{ normalizedDescription.length }}/1000
+          </small>
+          <p v-if="error" id="share-title-error" class="form-error" role="alert">{{ error }}</p>
+        </form>
+        <p v-if="code">{{ ui('Deux possibilités permettent à vos élèves de retrouver ce défi.') }}</p>
 
-        <div class="share-methods">
+        <div v-if="code" class="share-methods">
           <section class="share-method" aria-labelledby="share-code-title">
             <header>
               <span class="share-method__number" aria-hidden="true">1</span>
@@ -93,8 +142,10 @@ function highlightChallengeLoaderOnHome() {
           </section>
         </div>
 
-        <p class="copy-status" aria-live="polite">{{ copyStatus }}</p>
-        <button class="primary-button" type="button" @click="emit('close')">{{ ui('Terminé') }}</button>
+        <template v-if="code">
+          <p class="copy-status" aria-live="polite">{{ copyStatus }}</p>
+          <button class="primary-button" type="button" @click="emit('close')">{{ ui('Terminé') }}</button>
+        </template>
       </section>
     </div>
   </Teleport>

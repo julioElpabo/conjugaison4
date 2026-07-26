@@ -4,7 +4,7 @@ import { describe, it } from 'node:test'
 globalThis.createError = ({ statusCode, statusMessage }) => Object.assign(new Error(statusMessage), { statusCode })
 const { parseAdminUserInput } = await import('../server/services/admin-users.ts')
 
-describe('validation des utilisateurs administrés', () => {
+describe('validation des comptes admins', () => {
   it('normalise un compte complet', () => {
     assert.deepEqual(parseAdminUserInput({
       prenom: '  Alice ',
@@ -19,7 +19,7 @@ describe('validation des utilisateurs administrés', () => {
       email: 'alice@exemple.ch',
       username: 'alice',
       password: 'mot-de-passe-solide',
-      privilegeId: 2,
+      privilegeId: 1,
     })
   })
 
@@ -28,12 +28,12 @@ describe('validation des utilisateurs administrés', () => {
       prenom: 'Alice', nom: 'Exemple', email: 'alice@exemple.ch', username: 'alice', password: '', privilegeId: 2,
     }, false)
     assert.equal(input.password, '')
+    assert.equal(input.privilegeId, 1)
   })
 
   for (const [label, changes] of [
     ['adresse invalide', { email: 'pas-une-adresse' }],
     ['mot de passe trop court', { password: 'court' }],
-    ['rôle invalide', { privilegeId: 1.5 }],
   ]) {
     it(`refuse : ${label}`, () => {
       assert.throws(() => parseAdminUserInput({

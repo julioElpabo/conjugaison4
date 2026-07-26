@@ -13,6 +13,7 @@ import { DEFAULT_SHARED_CHALLENGE_OPTIONS } from '../../shared/utils/challenge-d
 export class PublicInputError extends Error {}
 
 const QUESTIONNAIRE_KEYS = new Set([
+  'description',
   'verbIds',
   'tenseIds',
   'questionCount',
@@ -26,6 +27,8 @@ const QUESTIONNAIRE_KEYS = new Set([
 
 const DEFI_KEYS = new Set([
   'version',
+  'title',
+  'description',
   'verbIds',
   'tenseIds',
   'questionCount',
@@ -37,6 +40,31 @@ const DEFI_KEYS = new Set([
   'complementOptions',
   'printOptions'
 ])
+
+function parseChallengeTitle(value: unknown): string | undefined {
+  if (value === undefined) return undefined
+  if (typeof value !== 'string') {
+    throw new PublicInputError('Le titre du défi doit être du texte')
+  }
+  const title = value.trim()
+  if (title.length < 1 || title.length > 80) {
+    throw new PublicInputError('Le titre du défi doit contenir entre 1 et 80 caractères')
+  }
+  return title
+}
+
+function parseChallengeDescription(value: unknown): string | undefined {
+  if (value === undefined || value === '') return undefined
+  if (typeof value !== 'string') {
+    throw new PublicInputError('La description du défi doit être du texte')
+  }
+  const description = value.trim()
+  if (!description) return undefined
+  if (description.length > 1000) {
+    throw new PublicInputError('La description du défi ne peut pas dépasser 1000 caractères')
+  }
+  return description
+}
 
 const PRINT_OPTION_KEYS = new Set([
   'title',
@@ -185,6 +213,10 @@ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest 
     throw new PublicInputError('Le corps de la requête doit être un objet JSON')
   }
   assertOnlyKeys(value, QUESTIONNAIRE_KEYS)
+  // Un défi enregistré peut être relancé directement depuis l’espace élève.
+  // Sa description est une métadonnée : on la valide, puis on ne la transmet
+  // pas au générateur de questions.
+  parseChallengeDescription(value.description)
 
   if (typeof value.inclusivePronouns !== 'boolean') {
     throw new PublicInputError('inclusivePronouns doit être un booléen')
@@ -266,8 +298,12 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
     ? legacyComplementOptions(includeComplements, complementPlacement)
     : parseComplementOptions(modernValue.complementOptions)
   const resolvedLegacy = legacyComplementConfig(complementOptions)
+  const title = parseChallengeTitle(modernValue.title)
+  const description = parseChallengeDescription(modernValue.description)
   return {
     version: 1,
+    ...(title === undefined ? {} : { title }),
+    ...(description === undefined ? {} : { description }),
     verbIds: parseIds(modernValue.verbIds, 'verbIds', 500, true),
     tenseIds: parseIds(modernValue.tenseIds, 'tenseIds', 30),
     questionCount: parseQuestionCount(modernValue.questionCount),

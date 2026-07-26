@@ -89,6 +89,21 @@ function agreementBase(value: string) {
   return value.replace(/(?:es|s|e)$/u, '')
 }
 
+function agreementStems(value: string) {
+  const normalized = comparable(value)
+  return new Set([
+    normalized,
+    normalized.replace(/es$/u, ''),
+    normalized.replace(/s$/u, ''),
+    normalized.replace(/e$/u, ''),
+  ].filter(Boolean))
+}
+
+function belongsToSameAgreementFamily(left: string, right: string) {
+  const leftStems = agreementStems(left)
+  return [...agreementStems(right)].some(stem => leftStems.has(stem))
+}
+
 function commonPrefix(left: string, right: string) {
   let length = 0
   while (length < left.length && length < right.length && left[length] === right[length]) length += 1
@@ -101,6 +116,53 @@ function auxiliaryIn(value: string) {
 
 function displayedCorrection(question: ExerciseQuestion, fallback: string) {
   return question.reponsesPourCorrige.find(candidate => candidate.trim()) || fallback
+}
+
+/**
+ * Détecte l'accord du participe indépendamment des autres différences.
+ * Cela permet notamment de conserver l'erreur d'accord lorsque l'auxiliaire
+ * révèle aussi une confusion de temps ou de mode.
+ */
+export function diagnoseCoachAgreement(
+  learnerAnswer: string,
+  question: ExerciseQuestion,
+): CoachAnswerDiagnostic | undefined {
+  if (!question.isCompound && !question.agreementReminder) return undefined
+  const learnerWords = words(learnerAnswer)
+  const learnerParticiple = learnerWords.at(-1)
+  if (!learnerParticiple) return undefined
+
+  const expected = question.reponses
+    .filter(candidate => candidate.trim())
+    .map(candidate => ({
+      value: candidate,
+      words: words(candidate),
+      distance: editDistance(comparable(learnerAnswer), comparable(candidate)),
+    }))
+    .filter((candidate) => {
+      const expectedParticiple = candidate.words.at(-1)
+      return expectedParticiple
+        && learnerParticiple !== expectedParticiple
+        && belongsToSameAgreementFamily(learnerParticiple, expectedParticiple)
+    })
+    .sort((left, right) => left.distance - right.distance)[0]
+  const expectedParticiple = expected?.words.at(-1)
+  if (!expected || !expectedParticiple) return undefined
+
+  const reminder = question.agreementReminder
+  const features = reminder?.gender && reminder.number
+    ? `${reminder.gender === 'feminin' ? 'féminin' : 'masculin'} ${reminder.number}`
+    : undefined
+  return {
+    result: 'incorrect',
+    learnerAnswer,
+    expectedAnswer: displayedCorrection(question, expected.value),
+    comparedAnswer: expected.value,
+    errorKind: 'agreement',
+    confidence: 'high',
+    agreementFeatures: features,
+    agreementSource: reminder?.kind || 'subject',
+  }
 }
 
 export function diagnoseCoachAnswer(
@@ -132,6 +194,9 @@ export function diagnoseCoachAnswer(
   if (learnerAuxiliary && expectedAuxiliary && learnerAuxiliary !== expectedAuxiliary) {
     return { ...base, errorKind: 'auxiliary', confidence: 'high', learnerAuxiliary, expectedAuxiliary }
   }
+
+  const independentAgreement = diagnoseCoachAgreement(learnerAnswer, question)
+  if (independentAgreement) return independentAgreement
 
   const difference = differingWord(learnerAnswer, comparedAnswer)
   const questionCanRequireAgreement = Boolean(question.agreementReminder)

@@ -5,7 +5,13 @@ export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig()
   const { interfaceLocale } = useLanguagePreferences()
   const measurementId = String(config.public.ga4MeasurementId || '').trim()
-  const googleEnabled = Boolean(measurementId) && !['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)
+  const isPrivatePrototypePath = (path: string) => {
+    const normalized = stripLocaleFromPath(path)
+    return normalized === '/signin' || normalized === '/my-page'
+  }
+  const googleEnabled = Boolean(measurementId)
+    && !['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)
+    && !isPrivatePrototypePath(route.path)
   let timer: number | undefined
 
   type AnalyticsWindow = Window & {
@@ -30,7 +36,7 @@ export default defineNuxtPlugin(() => {
 
   function heartbeat(pageView = false) {
     if (document.visibilityState !== 'visible') return
-    if (isAdministration()) return
+    if (isAdministration() || isPrivatePrototypePath(route.path)) return
     void $fetch('/api/analytics/heartbeat', {
       method: 'POST',
       body: { path: route.fullPath, locale: interfaceLocale.value, pageView },
@@ -38,7 +44,7 @@ export default defineNuxtPlugin(() => {
   }
 
   function googlePageView() {
-    if (!googleEnabled || isAdministration()) return
+    if (!googleEnabled || isAdministration() || isPrivatePrototypePath(route.path)) return
     analyticsWindow.gtag?.('event', 'page_view', {
       page_location: window.location.href,
       page_path: route.fullPath,

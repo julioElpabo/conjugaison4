@@ -4,6 +4,8 @@ function isProtectedMutation(path: string, method: string) {
   if (!UNSAFE_METHODS.has(method.toUpperCase())) return false
   return path === '/api/auth/login'
     || path === '/api/auth/logout'
+    || path === '/api/learner'
+    || path.startsWith('/api/learner/')
     || path === '/api/admin'
     || path.startsWith('/api/admin/')
 }
@@ -36,15 +38,15 @@ export default defineEventHandler((event) => {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    "frame-src 'none'",
+    "frame-src https://challenges.cloudflare.com",
     "object-src 'none'",
-    "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
+    "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://challenges.cloudflare.com",
     "script-src-attr 'none'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://www.google-analytics.com https://*.google-analytics.com",
     "font-src 'self' data:",
     "media-src 'self' blob:",
-    "connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com",
+    "connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://challenges.cloudflare.com",
     "worker-src 'self' blob:",
     "manifest-src 'self'",
   ].join('; ')
@@ -64,11 +66,14 @@ export default defineEventHandler((event) => {
   if (
     path.startsWith('/api/admin')
     || path.startsWith('/api/auth/')
+    || path.startsWith('/api/learner/')
     || /^\/(?:fr|de|en|it|es)\/admin(?:\/|$)/u.test(path)
+    || path === '/fr/signin'
+    || path === '/fr/my-page'
     || path === '/admin'
     || path.startsWith('/admin/')
   ) {
-    setResponseHeader(event, 'Cache-Control', 'no-store')
+    setResponseHeader(event, 'Cache-Control', 'no-store, private')
   }
 
   if (isProtectedMutation(path, event.method)) assertSameOrigin(event)

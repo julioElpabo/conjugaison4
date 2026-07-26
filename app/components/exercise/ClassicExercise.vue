@@ -1,14 +1,29 @@
 <script setup lang="ts">
+import LearnerErrorFeedback from '~/components/exercise/LearnerErrorFeedback.vue'
 const { ui, uiLabel } = useLanguagePreferences()
-import type { ExerciseAttempt, ExerciseQuestion } from '~~/shared/types/conjugation'
-import { getAlternativeCorrections, isFutureSimpleInsteadOfNearFuture } from '~~/shared/utils/answer'
+import type { ExerciseAttempt, ExerciseQuestion, LearnerErrorDetail, LearnerExerciseTrackingContext } from '~~/shared/types/conjugation'
+import {
+  findConjugationConfusions,
+  findImpossibleSingularEnding,
+  getAlternativeCorrections,
+  impossibleSingularEndingReminderMessage,
+  isFutureSimpleInsteadOfNearFuture,
+} from '~~/shared/utils/answer'
+import { diagnoseCoachAgreement, diagnoseCoachAnswer } from '~~/shared/utils/coach-feedback'
 import { evaluateExerciseAnswer } from '~~/shared/utils/exercise-attempt'
+import {
+  learnerErrorDetails,
+  mergeLearnerErrorDetails,
+} from '~~/shared/utils/learner-error-diagnostics'
 
 const props = defineProps<{
   questions: ExerciseQuestion[]
   exerciseKind: 'conjugation' | 'tense-identification'
+  trackingContext?: LearnerExerciseTrackingContext
+  requireSuccess?: boolean
 }>()
 const { track } = useSiteAnalytics()
+const { recordAttempt } = useLearnerProgress()
 
 const emit = defineEmits<{
   close: []
@@ -20,8 +35,16 @@ const feedback = ref<'idle' | 'correct' | 'incorrect'>('idle')
 const retryAlreadyOffered = ref(false)
 const retryMessageVisible = ref(false)
 const futureSimpleConfusion = ref(false)
+const conjugationConfusions = ref<ReturnType<typeof findConjugationConfusions>>([])
+const impossibleSingularEnding = ref<ReturnType<typeof findImpossibleSingularEnding>>(null)
+const agreementError = ref(false)
+const auxiliaryError = ref<{ learner: string, expected: string }>()
 const attempts = ref<ExerciseAttempt[]>([])
+const pendingErrorLabels = ref<string[]>([])
+const pendingErrorDetails = ref<LearnerErrorDetail[]>([])
+const detectedErrorDetails = ref<LearnerErrorDetail[]>([])
 const isFinished = ref(false)
+const printSummaryOpen = ref(false)
 const closeConfirmationOpen = ref(false)
 const answerInput = useTemplateRef<HTMLInputElement>('answer-input')
 const keepExerciseButton = useTemplateRef<HTMLButtonElement>('keep-exercise-button')
@@ -41,6 +64,23 @@ const alternativeCorrections = computed(() => currentQuestion.value
 const alternativeText = computed(() => alternativeCorrections.value.join(` ${ui('ou')} `))
 const alternativePunctuation = computed(() => /[.!?]$/u.test(alternativeText.value) ? '' : '.')
 const agreementReminder = computed(() => currentQuestion.value?.agreementReminder)
+const conjugationConfusionText = computed(() => {
+  const question = currentQuestion.value
+  const confusion = conjugationConfusions.value[0]
+  if (!question || !confusion) return ''
+  return ui(
+    'Ta forme est correcte pour le mode {sourceMode}, au temps {sourceTense}. Ici, il fallait le mode {targetMode}, au temps {targetTense}.',
+    {
+      sourceMode: uiLabel(confusion.mode),
+      sourceTense: uiLabel(confusion.tense),
+      targetMode: uiLabel(question.mode),
+      targetTense: uiLabel(question.temps),
+    },
+  )
+})
+const impossibleSingularEndingText = computed(() => impossibleSingularEnding.value
+  ? ui(impossibleSingularEndingReminderMessage(impossibleSingularEnding.value))
+  : '')
 const agreementFeatures = computed(() => {
   const reminder = agreementReminder.value
   if (!reminder?.gender || !reminder.number) return ''
@@ -52,7 +92,9 @@ const indirectRecognition = computed(() => {
 })
 const agreementExplanation = computed(() => {
   const reminder = agreementReminder.value
-  if (!reminder) return ''
+  if (!reminder) return agreementError.value
+    ? ui('Le participe passé n’a pas le bon accord. Compare sa terminaison avec la correction.')
+    : ''
   const values = {
     complement: reminder.complement,
     verb: reminder.infinitive,
@@ -69,6 +111,33 @@ const agreementExplanation = computed(() => {
     ? ui('C’est juste : « {complement} » n’est pas un COD, mais un COI du verbe « {verb} ». Un COI ne commande jamais l’accord du participe passé employé avec avoir : il reste « {participle} ».', values)
     : ui('Attention : « {complement} » n’est pas un COD, mais un COI du verbe « {verb} ». Il ne faut pas accorder le participe avec ce complément : il reste « {participle} ».', values)
 })
+const auxiliaryErrorText = computed(() => {
+  const error = auxiliaryError.value
+  const question = currentQuestion.value
+  if (!error || !question) return ''
+  return ui(
+    'L’auxiliaire « {learnerAuxiliary} » ne convient pas. Avec {person} au {tense}, il fallait « {expectedAuxiliary} ».',
+    {
+      learnerAuxiliary: error.learner,
+      expectedAuxiliary: error.expected,
+      person: question.pronom || question.saisiePrefixe || ui('cette personne'),
+      tense: uiLabel(question.temps),
+    },
+  )
+})
+const retryMessages = computed(() => {
+  const messages: string[] = []
+  if (futureSimpleConfusion.value) {
+    messages.push(ui('Ta conjugaison est correcte au futur simple, mais la question demande le futur proche. Au futur simple, le verbe est conjugué en un seul mot (« tu mangeras »). Au futur proche, on utilise « aller » au présent suivi de l’infinitif (« tu vas manger »).'))
+  }
+  if (conjugationConfusionText.value) messages.push(conjugationConfusionText.value)
+  if (impossibleSingularEndingText.value) messages.push(impossibleSingularEndingText.value)
+  if (auxiliaryErrorText.value) messages.push(auxiliaryErrorText.value)
+  if (agreementError.value && agreementExplanation.value) messages.push(agreementExplanation.value)
+  return messages.length
+    ? messages
+    : [ui('Pas encore. Vérifie ta réponse et essaie une deuxième fois.')]
+})
 const agreementRecognition = computed(() => {
   const reminder = agreementReminder.value
   if (!reminder) return ''
@@ -82,6 +151,32 @@ const titleMessage = computed(() => {
   if (scorePercent.value >= 40) return ui('Bel effort !')
   return ui('Continue, tu progresses !')
 })
+const summaryItems = computed(() => attempts.value.map((attempt, index) => ({
+  index: index + 1,
+  status: attempt.status,
+  questionLabel: attempt.question.consigne,
+  learnerAnswer: attempt.answer,
+  expectedAnswer: attempt.question.reponsesPourCorrige.join(` ${ui('ou')} `)
+    || attempt.question.reponses.join(` ${ui('ou')} `),
+  errorLabels: attempt.errorLabels || [],
+  errorDetails: attempt.errorDetails || [],
+})))
+const summaryVerbs = computed(() => [...new Set(props.questions.flatMap(question => (
+  question.infinitif ? [question.infinitif] : []
+)))])
+const summaryTenses = computed(() => {
+  const seen = new Set<string>()
+  return props.questions.flatMap((question) => {
+    const key = `${question.mode || ''}\u0000${question.temps || ''}`
+    if (!question.temps || seen.has(key)) return []
+    seen.add(key)
+    return [{ name: question.temps, mode: question.mode }]
+  })
+})
+
+function mergeErrorLabels(...groups: string[][]) {
+  return [...new Set(groups.flat())]
+}
 
 function submitAnswer() {
   const question = currentQuestion.value
@@ -95,12 +190,49 @@ function submitAnswer() {
     retryAlreadyOffered.value,
   )
   const usedFutureSimple = !result.isCorrect && isFutureSimpleInsteadOfNearFuture(answer.value, question)
+  const otherConjugations = result.isCorrect ? [] : findConjugationConfusions(answer.value, question)
+  const impossibleEnding = result.isCorrect ? null : findImpossibleSingularEnding(answer.value, question)
+  const hasAgreementError = !result.isCorrect && Boolean(diagnoseCoachAgreement(answer.value, question))
+  const diagnostic = diagnoseCoachAnswer(answer.value, question, result.isCorrect)
+  const detectedAuxiliaryError = diagnostic.errorKind === 'auxiliary'
+    && diagnostic.learnerAuxiliary
+    && diagnostic.expectedAuxiliary
+    ? { learner: diagnostic.learnerAuxiliary, expected: diagnostic.expectedAuxiliary }
+    : undefined
+  const currentErrorDetails = result.isCorrect ? [] : learnerErrorDetails(answer.value, question)
+  const currentErrorLabels = currentErrorDetails.map(detail => detail.label)
+  const attemptErrorLabels = mergeErrorLabels(pendingErrorLabels.value, currentErrorLabels)
+  const attemptErrorDetails = mergeLearnerErrorDetails(pendingErrorDetails.value, currentErrorDetails)
+  detectedErrorDetails.value = attemptErrorDetails
+  const trackedAttempt: ExerciseAttempt = {
+    question,
+    answer: answer.value,
+    status: result.isCorrect ? 'correct' : 'incorrect',
+    attemptNumber: retryAlreadyOffered.value ? 2 : 1,
+    ...(result.matchedAnswer ? { matchedAnswer: result.matchedAnswer } : {}),
+    ...(attemptErrorLabels.length ? { errorLabels: attemptErrorLabels } : {}),
+    ...(attemptErrorDetails.length ? { errorDetails: attemptErrorDetails } : {}),
+  }
   track('answer_submitted', { presentation: 'classic', exerciseKind: props.exerciseKind })
+  void recordAttempt(
+    props.trackingContext,
+    trackedAttempt,
+    currentIndex.value,
+    !shouldRetry
+      && currentIndex.value >= props.questions.length - 1
+      && (!props.requireSuccess || result.isCorrect),
+  )
   if (shouldRetry) {
     track('answer_retry', { presentation: 'classic', exerciseKind: props.exerciseKind })
     retryAlreadyOffered.value = true
     retryMessageVisible.value = true
     futureSimpleConfusion.value = usedFutureSimple
+    conjugationConfusions.value = otherConjugations
+    impossibleSingularEnding.value = impossibleEnding
+    agreementError.value = hasAgreementError
+    auxiliaryError.value = detectedAuxiliaryError
+    pendingErrorLabels.value = attemptErrorLabels
+    pendingErrorDetails.value = attemptErrorDetails
     nextTick(() => {
       answerInput.value?.focus()
       answerInput.value?.select()
@@ -110,15 +242,14 @@ function submitAnswer() {
 
   retryMessageVisible.value = false
   futureSimpleConfusion.value = usedFutureSimple
+  conjugationConfusions.value = otherConjugations
+  impossibleSingularEnding.value = impossibleEnding
+  agreementError.value = hasAgreementError
+  auxiliaryError.value = detectedAuxiliaryError
   feedback.value = result.isCorrect ? 'correct' : 'incorrect'
   if (result.isCorrect) track('answer_correct', { presentation: 'classic', exerciseKind: props.exerciseKind })
-  attempts.value.push({
-    question,
-    answer: answer.value,
-    status: result.isCorrect ? 'correct' : 'incorrect',
-    attemptNumber: retryAlreadyOffered.value ? 2 : 1,
-    ...(result.matchedAnswer ? { matchedAnswer: result.matchedAnswer } : {})
-  })
+  if (props.requireSuccess) attempts.value[currentIndex.value] = trackedAttempt
+  else attempts.value.push(trackedAttempt)
 }
 
 function showDemoCorrection() {
@@ -135,6 +266,13 @@ function showTourProgress() {
   retryAlreadyOffered.value = false
   retryMessageVisible.value = false
   futureSimpleConfusion.value = false
+  conjugationConfusions.value = []
+  impossibleSingularEnding.value = null
+  agreementError.value = false
+  auxiliaryError.value = undefined
+  pendingErrorLabels.value = []
+  pendingErrorDetails.value = []
+  detectedErrorDetails.value = []
   attempts.value = props.questions.slice(0, 5).map((question, index) => ({
     question,
     answer: index === 1 || index === 4
@@ -153,6 +291,20 @@ function nextQuestion() {
     return
   }
 
+  if (props.requireSuccess && feedback.value === 'incorrect') {
+    answer.value = ''
+    feedback.value = 'idle'
+    retryAlreadyOffered.value = true
+    retryMessageVisible.value = true
+    futureSimpleConfusion.value = false
+    conjugationConfusions.value = []
+    impossibleSingularEnding.value = null
+    agreementError.value = false
+    auxiliaryError.value = undefined
+    nextTick(() => answerInput.value?.focus())
+    return
+  }
+
   if (currentIndex.value >= props.questions.length - 1) {
     isFinished.value = true
     track('exercise_completed', { presentation: 'classic', exerciseKind: props.exerciseKind })
@@ -166,6 +318,13 @@ function nextQuestion() {
   retryAlreadyOffered.value = false
   retryMessageVisible.value = false
   futureSimpleConfusion.value = false
+  conjugationConfusions.value = []
+  impossibleSingularEnding.value = null
+  agreementError.value = false
+  auxiliaryError.value = undefined
+  pendingErrorLabels.value = []
+  pendingErrorDetails.value = []
+  detectedErrorDetails.value = []
   nextTick(() => answerInput.value?.focus())
 }
 
@@ -176,8 +335,16 @@ function restart() {
   retryAlreadyOffered.value = false
   retryMessageVisible.value = false
   futureSimpleConfusion.value = false
+  conjugationConfusions.value = []
+  impossibleSingularEnding.value = null
+  agreementError.value = false
+  auxiliaryError.value = undefined
+  pendingErrorLabels.value = []
+  pendingErrorDetails.value = []
+  detectedErrorDetails.value = []
   attempts.value = []
   isFinished.value = false
+  printSummaryOpen.value = false
   track('exercise_started', { presentation: 'classic', exerciseKind: props.exerciseKind })
   nextTick(() => answerInput.value?.focus())
 }
@@ -302,10 +469,12 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
               </button>
             </form>
             <p v-if="retryMessageVisible" id="answer-retry" class="answer-retry" aria-live="polite">
-              {{ futureSimpleConfusion
-                ? ui('Ta conjugaison est correcte au futur simple, mais la question demande le futur proche. Au futur simple, le verbe est conjugué en un seul mot (« tu mangeras »). Au futur proche, on utilise « aller » au présent suivi de l’infinitif (« tu vas manger »).')
-                : ui('Pas encore. Vérifie ta réponse et essaie une deuxième fois.') }}
+              <span v-for="message in retryMessages" :key="message">{{ message }}</span>
             </p>
+            <LearnerErrorFeedback
+              v-if="retryMessageVisible && detectedErrorDetails.length"
+              :details="detectedErrorDetails"
+            />
           </template>
 
           <p v-else class="question-text">{{ currentQuestion.consigne }}</p>
@@ -334,10 +503,12 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
             </div>
           </form>
           <p v-if="retryMessageVisible && !(exerciseKind === 'conjugation' && currentQuestion.complement)" id="answer-retry" class="answer-retry" aria-live="polite">
-            {{ futureSimpleConfusion
-              ? ui('Ta conjugaison est correcte au futur simple, mais la question demande le futur proche. Au futur simple, le verbe est conjugué en un seul mot (« tu mangeras »). Au futur proche, on utilise « aller » au présent suivi de l’infinitif (« tu vas manger »).')
-              : ui('Pas encore. Vérifie ta réponse et essaie une deuxième fois.') }}
+            <span v-for="message in retryMessages" :key="message">{{ message }}</span>
           </p>
+          <LearnerErrorFeedback
+            v-if="retryMessageVisible && detectedErrorDetails.length && !(exerciseKind === 'conjugation' && currentQuestion.complement)"
+            :details="detectedErrorDetails"
+          />
 
           <div
             v-if="feedback !== 'idle'"
@@ -353,12 +524,29 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
             </p>
             <p v-else>{{ ui('Tu peux passer à la question suivante.') }}</p>
 
+            <LearnerErrorFeedback v-if="detectedErrorDetails.length" :details="detectedErrorDetails" />
+
             <aside v-if="futureSimpleConfusion" class="grammar-reminder">
               <strong>{{ ui('Futur proche ou futur simple ?') }}</strong>
               <p>{{ ui('Ta conjugaison est correcte au futur simple, mais la question demande le futur proche. Au futur simple, le verbe est conjugué en un seul mot (« tu mangeras »). Au futur proche, on utilise « aller » au présent suivi de l’infinitif (« tu vas manger »).') }}</p>
             </aside>
 
-            <aside v-if="agreementReminder" class="grammar-reminder">
+            <aside v-else-if="conjugationConfusionText" class="grammar-reminder">
+              <strong>{{ ui('Attention au temps et au mode') }}</strong>
+              <p>{{ conjugationConfusionText }}</p>
+            </aside>
+
+            <aside v-if="impossibleSingularEndingText" class="grammar-reminder">
+              <strong>{{ ui('Attention à la personne') }}</strong>
+              <p>{{ impossibleSingularEndingText }}</p>
+            </aside>
+
+            <aside v-if="auxiliaryErrorText" class="grammar-reminder">
+              <strong>{{ ui('Attention à l’auxiliaire') }}</strong>
+              <p>{{ auxiliaryErrorText }}</p>
+            </aside>
+
+            <aside v-if="agreementReminder || agreementError" class="grammar-reminder">
               <strong>{{ ui('Rappel de la règle') }}</strong>
 
               <p>{{ agreementExplanation }}</p>
@@ -387,7 +575,14 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
               </thead>
               <tbody>
                 <tr v-for="(attempt, index) in attempts" :key="index">
-                  <td>{{ attempt.question.consigne }}</td>
+                  <td>
+                    <span>{{ attempt.question.consigne }}</span>
+                    <LearnerErrorFeedback
+                      v-if="attempt.errorDetails?.length"
+                      :details="attempt.errorDetails"
+                      compact
+                    />
+                  </td>
                   <td>{{ attempt.answer }}</td>
                   <td>{{ attempt.question.reponsesPourCorrige.join(` ${ui('ou')} `) }}</td>
                   <td>
@@ -409,6 +604,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
 
           <div class="dialog-actions">
             <button class="secondary-button" type="button" @click="emit('close')">{{ ui('Fermer') }}</button>
+            <button class="secondary-button" type="button" @click="printSummaryOpen = true">{{ ui('Imprimer le bilan') }}</button>
             <button class="primary-button" type="button" @click="restart">{{ ui('Recommencer') }}</button>
           </div>
         </div>
@@ -425,6 +621,15 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
           </section>
         </div>
       </section>
+      <ExerciseSummaryPrintPreview
+        v-if="printSummaryOpen"
+        :items="summaryItems"
+        :score="scorePercent"
+        :correct-count="correctCount"
+        :verbs="summaryVerbs"
+        :tenses="summaryTenses"
+        @close="printSummaryOpen = false"
+      />
     </div>
   </Teleport>
 </template>

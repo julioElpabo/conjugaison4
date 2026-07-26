@@ -12,8 +12,13 @@ export default defineNuxtRouteMiddleware((to) => {
     sameSite: 'lax',
   })
   const routeLocale = localeFromPath(to.path)
+  const unlocalizedPath = to.path.replace(/^\/(?:fr|de|en|it|es)(?=\/|$)/u, '') || '/'
+  const frenchPrototypePaths = new Set(['/signin'])
 
   if (routeLocale) {
+    if (frenchPrototypePaths.has(unlocalizedPath) && routeLocale !== 'fr') {
+      return abortNavigation(createError({ statusCode: 404, statusMessage: 'Page introuvable' }))
+    }
     if (interfaceLocale.value !== routeLocale) interfaceLocale.value = routeLocale
     if (to.path.replace(/^\/(?:fr|de|en|it|es)(?=\/|$)/u, '') === '/charts') {
       return navigateTo({
@@ -26,6 +31,11 @@ export default defineNuxtRouteMiddleware((to) => {
       })
     }
     return
+  }
+
+  if (frenchPrototypePaths.has(to.path)) {
+    interfaceLocale.value = 'fr'
+    return navigateTo(`/fr${to.path}`, { redirectCode: 302, replace: true })
   }
 
   const locale = normalizeLocale(interfaceLocale.value, DEFAULT_INTERFACE_LOCALE)

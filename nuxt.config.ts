@@ -10,6 +10,8 @@ export default defineNuxtConfig({
     dbUser: process.env.NUXT_DB_USER || process.env.DB_USER,
     dbPassword: process.env.NUXT_DB_PASSWORD || process.env.DB_PASSWORD,
     sessionSecret: process.env.NUXT_SESSION_SECRET || process.env.SESSION_SECRET || process.env.DB_PASSWORD,
+    learnerSessionSecret: process.env.NUXT_LEARNER_SESSION_SECRET || process.env.LEARNER_SESSION_SECRET,
+    turnstileSecretKey: process.env.NUXT_TURNSTILE_SECRET_KEY || process.env.TURNSTILE_SECRET_KEY,
     ga4PropertyId: process.env.NUXT_GA4_PROPERTY_ID || process.env.GA4_PROPERTY_ID || '309413461',
     ga4ClientEmail: process.env.NUXT_GA4_CLIENT_EMAIL || process.env.GA4_CLIENT_EMAIL,
     ga4PrivateKey: process.env.NUXT_GA4_PRIVATE_KEY || process.env.GA4_PRIVATE_KEY,
@@ -18,11 +20,19 @@ export default defineNuxtConfig({
       || 'cle-google/lobjet-366517-4ee1bb2ab062.json',
     public: {
       ga4MeasurementId: process.env.NUXT_PUBLIC_GA4_MEASUREMENT_ID || process.env.GA4_MEASUREMENT_ID || 'G-T0E6KRN0GZ',
+      turnstileSiteKey: process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY || '',
     },
   },
   nitro: {
     externals: {
       external: ['all-the-cities'],
+      // Le plugin de migration importe un script versionné hors de server/.
+      // Sans inlining, le bundle de développement conserve un chemin relatif
+      // qui remonte jusqu'à /scripts au lieu de rester dans le projet.
+      inline: [
+        /[/\\]scripts[/\\]/,
+        /[/\\]shared[/\\]data[/\\]verb-pilot-/,
+      ],
     },
   },
   hooks: {

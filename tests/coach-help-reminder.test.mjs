@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import { describe, it } from 'node:test'
 
 import {
   CHAT_HELP_REMINDER_DELAY_MS,
   CHAT_HELP_REMINDER_INCORRECT_COUNT,
-  coachHelpReminderMessage,
   nextConsecutiveIncorrectCount,
 } from '../shared/utils/coach-help-reminder.ts'
 import { COACH_EVENTS, REQUIRED_COACH_REPLY_EVENTS } from '../shared/types/coach.ts'
@@ -19,12 +19,7 @@ describe('rappel de l’aide dans le chat', () => {
     assert.equal(nextConsecutiveIncorrectCount(2, true), 0)
   })
 
-  it('adapte le conseil à l’état du volet', () => {
-    assert.match(coachHelpReminderMessage(true), /regarder l’aide à droite/)
-    assert.match(coachHelpReminderMessage(false), /tape « Aide »/)
-  })
-
-  it('utilise une annonce propre au caractère avant le conseil visuel', () => {
+  it('utilise une annonce propre au caractère', () => {
     assert.ok(COACH_EVENTS.includes('help-announcement'))
     assert.ok(REQUIRED_COACH_REPLY_EVENTS.includes('help-announcement'))
     const reaction = createCoachReaction({
@@ -32,5 +27,24 @@ describe('rappel de l’aide dans le chat', () => {
       rules: [], assignments: [], media: [],
     }, 'help-announcement')
     assert.equal(reaction.text, 'Je vois que c’est un peu difficile.')
+  })
+
+  it('ouvre systématiquement le panneau de droite pour la question en cours', async () => {
+    const component = await readFile(
+      new URL('../app/components/exercise/ChatExercise.vue', import.meta.url),
+      'utf8',
+    )
+    const suggestHelp = component.slice(
+      component.indexOf('async function suggestHelp()'),
+      component.indexOf('function addAnswerComparison'),
+    )
+    assert.match(suggestHelp, /helpQuestionIndex\.value = null/u)
+    assert.match(suggestHelp, /helpOpen\.value = true/u)
+    assert.doesNotMatch(component, /chat-message--help-reminder/u)
+    assert.doesNotMatch(component, /addHelpReminderCard/u)
+    assert.ok(
+      suggestHelp.indexOf('helpOpen.value = true') < suggestHelp.indexOf("addCoachReaction('help-announcement'"),
+      'le panneau doit s’ouvrir avant l’annonce du coach',
+    )
   })
 })

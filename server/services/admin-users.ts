@@ -26,7 +26,7 @@ export function parseAdminUserInput(value: unknown, passwordRequired: boolean): 
     email: text(body.email, 254).toLocaleLowerCase('fr-CH'),
     username: text(body.username),
     password: typeof body.password === 'string' ? body.password : '',
-    privilegeId: Number(body.privilegeId),
+    privilegeId: 1,
   }
 
   if (
@@ -34,7 +34,6 @@ export function parseAdminUserInput(value: unknown, passwordRequired: boolean): 
     || !input.nom
     || !input.username
     || !/^\S+@\S+\.\S+$/u.test(input.email)
-    || !Number.isInteger(input.privilegeId)
     || (passwordRequired && input.password.length < 10)
     || input.password.length > 200
     || (!passwordRequired && input.password.length > 0 && input.password.length < 10)

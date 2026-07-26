@@ -19,6 +19,11 @@ export interface ConjugationSourceRow {
   nous_form?: string | null
   radical_reference?: ExerciseQuestion['radicalReference']
   future_simple_forms?: string[]
+  conjugation_confusions?: Array<{
+    tense: string
+    mode: string
+    forms: string[]
+  }>
   agreement_rule?: string | null
   complement_phrase?: string | null
   complement_position?: 'after' | 'before'
@@ -359,7 +364,9 @@ export function formatConjugationQuestion(
         ? `${anteposedComplement!.antecedent} ${withRelativeLink(row.complement_relative_pronoun, pronoun, relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif))} … | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
         : `${anteposedComplement!.antecedent} ${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif, 'before')} …${anteposedComplement!.postposed ? ` ${anteposedComplement!.postposed}` : ''} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
     : row.complement_phrase
-    ? `${normalized(row.mode_name) === 'impératif' ? '' : `${pronoun} `}… ${row.complement_phrase} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
+    ? `${normalized(row.mode_name) === 'impératif'
+      ? ''
+      : `${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif)} `}… ${row.complement_phrase} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
     : `${normalized(row.mode_name) === 'impératif' ? '' : `${pronoun} | `}${row.infinitif} | ${row.temps_name} (${row.mode_name})`
   const displayedComplement = row.complement_position === 'before'
     ? anteposedComplement?.antecedent
@@ -395,6 +402,15 @@ export function formatConjugationQuestion(
         is_compound: 0,
       }, pronoun)
     : []
+  const conjugationConfusions = (row.conjugation_confusions || []).map(candidate => ({
+    tense: candidate.tense,
+    mode: candidate.mode,
+    answers: unique(candidate.forms.flatMap(form => [
+      form,
+      formatAnswer(pronoun, form, candidate.mode, row.infinitif),
+      withPronoun(pronoun, form, row.infinitif),
+    ])),
+  })).filter(candidate => candidate.answers.length)
 
   return {
     id: `c-${row.id}`,
@@ -406,6 +422,7 @@ export function formatConjugationQuestion(
     reponses: answerVariants(row, pronoun),
     reponsesPourCorrige: unique(displayedCorrections),
     ...(futureSimpleAnswers.length ? { futureSimpleAnswers } : {}),
+    ...(conjugationConfusions.length ? { conjugationConfusions } : {}),
     infinitif: row.infinitif,
     pronom: pronoun,
     temps: row.temps_name,

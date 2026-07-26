@@ -38,6 +38,7 @@ const menuGroups = [
     label: 'Admin',
     links: [
       { label: 'Mon compte', path: '/mon-compte' },
+      { label: 'Admins', path: '/admin/admins' },
       { label: 'Utilisateurs', path: '/admin/users' },
     ],
   },

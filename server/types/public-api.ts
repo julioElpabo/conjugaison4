@@ -26,6 +26,8 @@ export interface ChallengePrintOptions {
 
 export interface DefiDefinition extends ChallengeConfig {
   version: 1
+  title?: string
+  description?: string
   printOptions: ChallengePrintOptions
 }
 

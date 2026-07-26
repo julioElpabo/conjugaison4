@@ -1,7 +1,8 @@
 <script setup lang="ts">
 const { ui, localePath, interfaceLocale, setInterfaceLocale } = useLanguagePreferences()
-import type { ChallengePreset, ComplementOption, ExerciseQuestion } from '~~/shared/types/conjugation'
+import type { ChallengePreset, ComplementOption, ExerciseQuestion, LearnerExerciseTrackingContext } from '~~/shared/types/conjugation'
 import { challengePresetGroupLabels } from '~~/shared/data/challenge-presets'
+import { challengePresetTrackingDescription, challengePresetTrackingTitle } from '~~/shared/utils/challenge-preset-tracking'
 import { legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils/complement-options'
 import { guidedTourCopy } from '~~/shared/i18n/guided-tour'
 import type { AppLocale } from '~~/shared/i18n/locales'
@@ -22,6 +23,10 @@ import CoachPicker from '../exercise/CoachPicker.vue'
 import '~/assets/css/main.css'
 import 'driver.js/dist/driver.css'
 
+const props = defineProps<{
+  initialCode?: string
+}>()
+
 type WizardStep = 0 | 1 | 2 | 3 | 4
 type TourFormat = 'quick' | 'complete'
 type ClassicExerciseExposed = {
@@ -39,6 +44,8 @@ interface TourSnapshot {
   presetExpanded: boolean
   presetStage: 'groups' | 'presets'
   activePresetId?: string
+  sourcePresetId?: string
+  sourcePresetRandomCount: number | null
   isPrefilledChallenge: boolean
   isPresetVerbEditing: boolean
   showLaunchSummary: boolean
@@ -81,12 +88,20 @@ const actionError = ref('')
 const notice = ref('')
 const busyAction = ref<'exercise' | 'print' | 'save' | 'load' | null>(null)
 const activePresetId = ref<string>()
+const sourcePresetId = ref<string>()
+const sourcePresetRandomCount = ref<number | null>(null)
 const isPrefilledChallenge = ref(false)
 const isPresetVerbEditing = ref(false)
 const areAllLaunchVerbsVisible = ref(false)
 const questions = ref<ExerciseQuestion[]>([])
 const printQuestions = ref<ExerciseQuestion[]>([])
 const shareCode = ref('')
+const shareTitle = ref('')
+const shareDescription = ref('')
+const shareError = ref('')
+const savedChallengeTitle = ref('')
+const savedChallengeDescription = ref('')
+const exerciseTracking = ref<LearnerExerciseTrackingContext>()
 const isExerciseOpen = ref(false)
 const exercisePresentation = ref<'classic' | 'chat'>('classic')
 const isPrintOpen = ref(false)
@@ -231,6 +246,7 @@ const stepStatus = computed(() => ({
   tenses: selectedTenses.value.length
 }))
 const activePreset = computed(() => catalogue.value.presets.find(preset => preset.id === activePresetId.value) ?? null)
+const sourcePreset = computed(() => catalogue.value.presets.find(preset => preset.id === sourcePresetId.value) ?? null)
 const activePresetGroupLabel = computed(() => activePreset.value
   ? activePreset.value.groupLabel ?? challengePresetGroupLabels[activePreset.value.group] ?? activePreset.value.group
   : '')
@@ -256,6 +272,10 @@ try {
     clearVerbs()
     clearTenses()
     wizardInitialized.value = true
+  }
+  if (props.initialCode) {
+    challengeCode.value = normalizeChallengeCode(props.initialCode)
+    await restoreChallenge()
   }
 } catch {
   // Le composable fournit le message d'erreur affiché dans la page.
@@ -395,7 +415,7 @@ function restartChallenge() {
   cancelPresetReveal()
   clearVerbs()
   clearTenses()
-  challenge.value.questionCount = 20
+  challenge.value.questionCount = 10
   challenge.value.exerciseKind = 'conjugation'
   challenge.value.pastSimplePronouns = 'all'
   challenge.value.inclusivePronouns = false
@@ -403,6 +423,8 @@ function restartChallenge() {
   challenge.value.complementPlacement = 'after'
   challenge.value.complementOptions = ['cod-after', 'coi-after']
   activePresetId.value = undefined
+  sourcePresetId.value = undefined
+  sourcePresetRandomCount.value = null
   prefilledOptionsRevealPending.value = false
   isPrefilledChallenge.value = false
   isPresetVerbEditing.value = false
@@ -417,6 +439,11 @@ function restartChallenge() {
   questions.value = []
   printQuestions.value = []
   shareCode.value = ''
+  shareTitle.value = ''
+  shareDescription.value = ''
+  shareError.value = ''
+  savedChallengeTitle.value = ''
+  savedChallengeDescription.value = ''
   isExerciseOpen.value = false
   isPrintOpen.value = false
   isShareOpen.value = false
@@ -448,7 +475,7 @@ function tourQuestions(): ExerciseQuestion[] {
     { subject: 'je', answer: 'ai été', personId: 4 },
   ]
 
-  return Array.from({ length: 20 }, (_, index) => {
+  return Array.from({ length: 10 }, (_, index) => {
     const { subject, answer, personId } = forms[index % forms.length]!
     return {
     id: `guided-tour-${index + 1}`,
@@ -551,7 +578,7 @@ function prepareTourChallenge() {
     ...challenge.value,
     verbIds,
     tenseIds,
-    questionCount: 20,
+    questionCount: 10,
     exerciseKind: 'conjugation',
     pastSimplePronouns: 'all',
     inclusivePronouns: false,
@@ -568,6 +595,8 @@ function prepareTourChallenge() {
   questions.value = tourQuestions()
   printQuestions.value = [...questions.value]
   activePresetId.value = undefined
+  sourcePresetId.value = undefined
+  sourcePresetRandomCount.value = null
   isPrefilledChallenge.value = false
   isPresetVerbEditing.value = false
   showLaunchSummary.value = false
@@ -895,6 +924,8 @@ function restoreAfterTour() {
     presetExpanded.value = snapshot.presetExpanded
     presetStage.value = snapshot.presetStage
     activePresetId.value = snapshot.activePresetId
+    sourcePresetId.value = snapshot.sourcePresetId
+    sourcePresetRandomCount.value = snapshot.sourcePresetRandomCount
     isPrefilledChallenge.value = snapshot.isPrefilledChallenge
     isPresetVerbEditing.value = snapshot.isPresetVerbEditing
     showLaunchSummary.value = snapshot.showLaunchSummary
@@ -929,6 +960,8 @@ async function startGuidedTour(format: TourFormat) {
     presetExpanded: presetExpanded.value,
     presetStage: presetStage.value,
     activePresetId: activePresetId.value,
+    sourcePresetId: sourcePresetId.value,
+    sourcePresetRandomCount: sourcePresetRandomCount.value,
     isPrefilledChallenge: isPrefilledChallenge.value,
     isPresetVerbEditing: isPresetVerbEditing.value,
     showLaunchSummary: showLaunchSummary.value,
@@ -1024,6 +1057,10 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   challenge.value.complementPlacement = preset.complementPlacement
   challenge.value.complementOptions = preset.complementOptions ?? legacyComplementOptions(preset.includeComplements, preset.complementPlacement)
   activePresetId.value = preset.id
+  sourcePresetId.value = preset.id
+  sourcePresetRandomCount.value = randomCount ?? null
+  savedChallengeTitle.value = ''
+  savedChallengeDescription.value = ''
   isPrefilledChallenge.value = true
   isPresetVerbEditing.value = false
   revealedPresetVerbIds.value = []
@@ -1051,15 +1088,18 @@ async function restoreChallenge() {
   try {
     const restored = await api.loadChallenge(normalized)
     applySharedChallenge(restored)
+    savedChallengeTitle.value = restored.title || ''
+    savedChallengeDescription.value = restored.description || ''
     prefilledOptionsRevealPending.value = true
     isPrefilledChallenge.value = true
     activePresetId.value = undefined
+    sourcePresetId.value = undefined
+    sourcePresetRandomCount.value = null
     isPresetVerbEditing.value = false
     areAllLaunchVerbsVisible.value = false
     challengeCode.value = restored.code
-    notice.value = `Le défi ${restored.code} est chargé. Tu peux le lancer ou le modifier.`
-    showLaunchSummary.value = true
-    currentStep.value = 4
+    notice.value = `Le défi « ${restored.title || restored.code} » est chargé. Tu peux le vérifier ou le modifier.`
+    goToStep(1)
     logUsage('challenge-load')
   } catch (error) {
     codeError.value = getChallengeErrorMessage(error, ui('Ce code ne correspond à aucun défi.'))
@@ -1262,6 +1302,33 @@ onBeforeUnmount(() => {
   document.body.classList.remove('guided-tour-active')
 })
 
+function beginExerciseTracking(presentation: 'classic' | 'chat') {
+  if (tourActive.value) {
+    exerciseTracking.value = undefined
+    return
+  }
+  const preset = sourcePreset.value
+  exerciseTracking.value = createLearnerTrackingContext({
+    challengeLabel: savedChallengeTitle.value
+      || (preset ? challengePresetTrackingTitle(preset) : '')
+      || (challengeCode.value ? `Défi ${challengeCode.value}` : 'Défi personnalisé'),
+    presentation,
+    challenge: {
+      description: savedChallengeDescription.value
+        || (preset ? challengePresetTrackingDescription(sourcePresetRandomCount.value) : undefined),
+      verbIds: [...challenge.value.verbIds],
+      tenseIds: [...challenge.value.tenseIds],
+      questionCount: challenge.value.questionCount,
+      exerciseKind: challenge.value.exerciseKind,
+      pastSimplePronouns: challenge.value.pastSimplePronouns,
+      inclusivePronouns: challenge.value.inclusivePronouns,
+      includeComplements: challenge.value.includeComplements,
+      complementPlacement: challenge.value.complementPlacement,
+      complementOptions: [...challenge.value.complementOptions],
+    },
+  })
+}
+
 async function prepareExercise(mode: 'classic' | 'chat') {
   if (!isReady.value) return
   if (mode === 'chat') {
@@ -1274,6 +1341,7 @@ async function prepareExercise(mode: 'classic' | 'chat') {
     questions.value = await api.generateQuestions(challenge.value)
     if (!questions.value.length) throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     exercisePresentation.value = 'classic'
+    beginExerciseTracking('classic')
     isExerciseOpen.value = true
     logUsage('exercise')
   } catch (error) {
@@ -1294,6 +1362,7 @@ async function launchWithCoach(coach: CoachProfile) {
     questions.value = await api.generateQuestions(challenge.value)
     if (!questions.value.length) throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     exercisePresentation.value = 'chat'
+    beginExerciseTracking('chat')
     isExerciseOpen.value = true
     logUsage('exercise')
   } catch (error) {
@@ -1325,17 +1394,29 @@ async function preparePrint() {
   }
 }
 
-async function saveChallenge() {
+function saveChallenge() {
   if (!isReady.value) return
+  shareCode.value = ''
+  shareError.value = ''
+  shareTitle.value = activePreset.value?.label || savedChallengeTitle.value || ui('Défi de conjugaison')
+  shareDescription.value = savedChallengeDescription.value
+  isShareOpen.value = true
+}
+
+async function createSharedChallenge(title: string, description: string) {
   busyAction.value = 'save'
+  shareError.value = ''
   clearMessages()
   try {
-    const result = await api.saveChallenge(challenge.value)
+    const result = await api.saveChallenge(challenge.value, title, description)
     shareCode.value = result.code
-    isShareOpen.value = true
+    shareTitle.value = title
+    shareDescription.value = description
+    savedChallengeTitle.value = title
+    savedChallengeDescription.value = description
     logUsage('challenge-save')
   } catch (error) {
-    actionError.value = getChallengeErrorMessage(error, ui('Impossible de sauvegarder ce défi.'))
+    shareError.value = getChallengeErrorMessage(error, ui('Impossible de sauvegarder ce défi.'))
   } finally {
     busyAction.value = null
   }
@@ -1555,7 +1636,8 @@ async function saveChallenge() {
               </section>
               <template v-else>
                 <div class="wizard-step__intro wizard-step__intro--selection">
-                  <h2 id="verbs-title">{{ isPrefilledChallenge ? ui('Verbes du défi') : ui('Choisis les verbes') }}</h2>
+                  <h2 id="verbs-title">{{ isPrefilledChallenge ? (savedChallengeTitle || ui('Verbes du défi')) : ui('Choisis les verbes') }}</h2>
+                  <p v-if="isPrefilledChallenge && savedChallengeDescription" class="wizard-step__loaded-description">{{ savedChallengeDescription }}</p>
                 </div>
                 <VerbPicker
                   data-tour="verbs"
@@ -1690,11 +1772,21 @@ async function saveChallenge() {
       </template>
       </main>
 
-      <ClassicExercise ref="classic-exercise" v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" @close="isExerciseOpen = false" />
-      <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :coach="selectedCoach" :verbs="selectedVerbs" :tenses="selectedTenses" :regenerate-questions="regenerateChatQuestions" :tour-demo="tourActive" @close="isExerciseOpen = false" />
+      <ClassicExercise ref="classic-exercise" v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" :tracking-context="exerciseTracking" @close="isExerciseOpen = false" />
+      <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :coach="selectedCoach" :verbs="selectedVerbs" :tenses="selectedTenses" :regenerate-questions="regenerateChatQuestions" :tracking-context="exerciseTracking" :tour-demo="tourActive" @close="isExerciseOpen = false" />
       <CoachPicker v-if="isCoachPickerOpen" :tour-demo="tourActive" @close="isCoachPickerOpen = false" @select="launchWithCoach" />
       <PrintPreview v-if="isPrintOpen" :questions="printQuestions" :verbs="selectedVerbs" :tenses="selectedTenses" :exercise-kind="challenge.exerciseKind" :options="challenge.printOptions" @update-options="challenge.printOptions = $event" @close="isPrintOpen = false" />
-      <ShareChallengeDialog v-if="isShareOpen" :code="shareCode" :url="shareUrl" @close="isShareOpen = false" />
+      <ShareChallengeDialog
+        v-if="isShareOpen"
+        :code="shareCode"
+        :url="shareUrl"
+        :busy="busyAction === 'save'"
+        :error="shareError"
+        :initial-title="shareTitle"
+        :initial-description="shareDescription"
+        @close="isShareOpen = false"
+        @save="createSharedChallenge"
+      />
       <Teleport to="body">
         <div v-if="isTourWelcomeOpen" class="tour-welcome-backdrop" @click.self="postponeTour">
           <section class="tour-welcome-dialog" role="dialog" aria-modal="true" aria-labelledby="tour-welcome-title">
@@ -1743,6 +1835,7 @@ async function saveChallenge() {
 .wizard-hero h1:not(.wizard-hero__brand) { letter-spacing: .035em; opacity: .62; }
 .wizard-hero h1.wizard-hero__preset { font-size: clamp(1.75rem, 4vw, 3.15rem); line-height: 1.1; }
 .wizard-hero__subtitle { max-width: 650px; margin: 12px auto 0; color: var(--muted); font-size: 1.08rem; font-weight: 650; line-height: 1.5; }
+.wizard-step__intro .wizard-step__loaded-description { width: 100%; max-width: none; margin: 8px 0 0; color: var(--muted); line-height: 1.55; white-space: pre-line; }
 .tour-entry-button { display: inline-flex; margin-top: 13px; padding: 7px 13px 7px 8px; align-items: center; gap: 8px; color: #0b4f69; border: 2px solid #e4ad00; border-radius: 999px; background: #fff3a8; box-shadow: 0 5px 15px rgb(70 52 0 / 14%), 0 0 0 4px rgb(255 215 43 / 12%); cursor: pointer; font-size: .84rem; font-weight: 800; }
 .tour-entry-button span { display: grid; width: 22px; height: 22px; place-items: center; color: #493a08; border: 1px solid #c99500; border-radius: 50%; background: #ffd943; font-size: .75rem; font-weight: 900; }
 .tour-entry-button:hover, .tour-entry-button:focus-visible { color: #083f54; border-color: #c99500; background: #ffe978; outline: 0; box-shadow: 0 7px 20px rgb(70 52 0 / 20%), 0 0 0 5px rgb(255 215 43 / 24%); }

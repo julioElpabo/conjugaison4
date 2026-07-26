@@ -2,7 +2,10 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
 import {
+  findConjugationConfusions,
+  findImpossibleSingularEnding,
   getAlternativeCorrections,
+  impossibleSingularEndingReminderMessage,
   isAnswerCorrect,
   isFutureSimpleInsteadOfNearFuture,
   normalizeAnswer,
@@ -123,5 +126,81 @@ describe('confusion entre futur simple et futur proche', () => {
     assert.equal(isFutureSimpleInsteadOfNearFuture('tu mangeras', question), true)
     assert.equal(isFutureSimpleInsteadOfNearFuture('tu vas manger', question), false)
     assert.equal(isFutureSimpleInsteadOfNearFuture('tu mangera', question), false)
+  })
+})
+
+describe('confusion avec un autre temps ou mode', () => {
+  it('ne retient que les conjugaisons auxquelles la réponse correspond exactement', () => {
+    const question = {
+      conjugationConfusions: [
+        { mode: 'indicatif', tense: 'présent', answers: ['tu finis'] },
+        { mode: 'subjonctif', tense: 'présent', answers: ['que tu finisses'] },
+      ],
+    }
+    assert.deepEqual(
+      findConjugationConfusions('tu finis', question).map(item => [item.mode, item.tense]),
+      [['indicatif', 'présent']],
+    )
+    assert.deepEqual(findConjugationConfusions('tu finissais', question), [])
+  })
+})
+
+describe('terminaisons impossibles au singulier', () => {
+  it('repère -t et -d avec je ou tu à un temps simple', () => {
+    assert.deepEqual(
+      findImpossibleSingularEnding('je finit', { personId: 4, pronom: 'je', isCompound: false }),
+      { personGroup: 'first-or-second-singular', target: 'verb', ending: 't' },
+    )
+    assert.deepEqual(
+      findImpossibleSingularEnding('prend', { personId: 5, pronom: 'tu', isCompound: false }),
+      { personGroup: 'first-or-second-singular', target: 'verb', ending: 'd' },
+    )
+  })
+
+  it('repère -s et -x avec il, elle ou iel à un temps simple', () => {
+    assert.deepEqual(
+      findImpossibleSingularEnding('que les exercices qu’iel finis', {
+        personId: 6,
+        pronom: 'iel',
+        isCompound: false,
+      }),
+      { personGroup: 'third-singular', target: 'verb', ending: 's' },
+    )
+    assert.deepEqual(
+      findImpossibleSingularEnding('elle peux', { personId: 6, pronom: 'elle', isCompound: false }),
+      { personGroup: 'third-singular', target: 'verb', ending: 'x' },
+    )
+  })
+
+  it("analyse l'auxiliaire, et non le participe passé, à un temps composé", () => {
+    const reminder = findImpossibleSingularEnding("il s'es trompé", {
+      personId: 6,
+      pronom: 'il',
+      isCompound: true,
+    })
+    assert.deepEqual(reminder, {
+      personGroup: 'third-singular',
+      target: 'auxiliary',
+      ending: 's',
+    })
+    assert.match(impossibleSingularEndingReminderMessage(reminder), /l’auxiliaire/u)
+    assert.equal(findImpossibleSingularEnding('il est partis', {
+      personId: 6,
+      pronom: 'il',
+      isCompound: true,
+    }), null)
+  })
+
+  it('ne déclenche rien pour une terminaison possible ou une personne plurielle', () => {
+    assert.equal(findImpossibleSingularEnding('tu finis', {
+      personId: 5,
+      pronom: 'tu',
+      isCompound: false,
+    }), null)
+    assert.equal(findImpossibleSingularEnding('ils finisses', {
+      personId: 9,
+      pronom: 'ils',
+      isCompound: false,
+    }), null)
   })
 })

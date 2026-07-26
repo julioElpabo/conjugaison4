@@ -126,6 +126,12 @@ export interface ExerciseQuestion {
   reponsesPourCorrige: readonly string[]
   /** Formes admises au futur simple, utilisées pour expliquer cette confusion dans une question au futur proche. */
   futureSimpleAnswers?: readonly string[]
+  /** Formes correctes du même verbe et de la même personne, mais à un autre temps ou mode. */
+  conjugationConfusions?: readonly {
+    tense: string
+    mode: string
+    answers: readonly string[]
+  }[]
   verbeId?: VerbId
   tenseId?: TenseId
   personId?: PersonId | null
@@ -196,12 +202,22 @@ export interface ExerciseQuestion {
 
 export type ExerciseAttemptStatus = 'correct' | 'incorrect'
 
+export interface LearnerErrorDetail {
+  code: string
+  label: string
+  message: string
+  learnerValue?: string
+  expectedValue?: string
+}
+
 export interface ExerciseAttempt {
   question: ExerciseQuestion
   answer: string
   status: ExerciseAttemptStatus
   attemptNumber?: 1 | 2
   matchedAnswer?: string
+  errorLabels?: string[]
+  errorDetails?: LearnerErrorDetail[]
 }
 
 export interface ExerciseResult {
@@ -210,4 +226,27 @@ export interface ExerciseResult {
   incorrectCount: number
   totalCount: number
   scorePercent: number
+}
+
+export interface LearnerChallengeSnapshot {
+  description?: string
+  trainingReportTitle?: string
+  verbIds: number[]
+  tenseIds: number[]
+  questionCount: number
+  exerciseKind: ExerciseKind
+  pastSimplePronouns?: PastSimplePronouns
+  inclusivePronouns?: boolean
+  includeComplements?: boolean
+  complementPlacement?: ComplementPlacement
+  complementOptions?: ComplementOption[]
+}
+
+export interface LearnerExerciseTrackingContext {
+  runId: string
+  challengeFingerprint?: string
+  challengeLabel: string
+  challenge: LearnerChallengeSnapshot
+  presentation: 'classic' | 'chat'
+  isReview?: boolean
 }

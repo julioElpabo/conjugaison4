@@ -1,114 +1,84 @@
 <script setup lang="ts">
 import { getAdminErrorMessage } from '~/composables/useAdminAuth'
 
-interface ManagedUser {
+interface LearnerAccountSummary {
   id: number
-  prenom: string
-  nom: string
-  email: string
   username: string
-  privilegeId: number
-  privilegeName: string
-  created: string
-  modified: string | null
+  status: string
+  createdAt: string
+  lastLoginAt: string | null
+  lastActivityAt: string | null
+  exerciseCount: number
+  correctCount: number
+  incorrectCount: number
 }
-interface Privilege { id: number, name: string }
 
-const { user: sessionUser, handleUnauthorized, checkSession } = useAdminAuth()
-const users = ref<ManagedUser[]>([])
-const privileges = ref<Privilege[]>([])
-const selectedId = ref<number | null>(null)
+interface LearnerAccountsResponse {
+  users: LearnerAccountSummary[]
+  total: number
+  nextOffset: number
+  hasMore: boolean
+}
+
+const { user: sessionUser, handleUnauthorized } = useAdminAuth()
+const users = ref<LearnerAccountSummary[]>([])
+const total = ref(0)
+const nextOffset = ref(0)
+const hasMore = ref(false)
+const selectedId = ref<number>()
 const loading = ref(false)
-const saving = ref(false)
-const deleting = ref(false)
+const loadingMore = ref(false)
 const error = ref('')
-const success = ref('')
 let loaded = false
 
-const draft = reactive({ prenom: '', nom: '', email: '', username: '', password: '', privilegeId: 3 })
-const editing = computed(() => selectedId.value !== null)
-const selectedUser = computed(() => users.value.find(item => item.id === selectedId.value) || null)
+const selectedUser = computed(() => users.value.find(user => user.id === selectedId.value))
 
 useHead({ title: 'Utilisateurs — Administration' })
 
-function resetDraft() {
-  selectedId.value = null
-  Object.assign(draft, { prenom: '', nom: '', email: '', username: '', password: '', privilegeId: privileges.value.find(item => item.id === 3)?.id || privileges.value[0]?.id || 1 })
-  error.value = ''
-  success.value = ''
+function displayUsername(username: string) {
+  return username
+    ? username.charAt(0).toLocaleUpperCase('fr-CH') + username.slice(1)
+    : 'Utilisateur'
 }
 
-function editUser(managed: ManagedUser) {
-  selectedId.value = managed.id
-  Object.assign(draft, { prenom: managed.prenom, nom: managed.nom, email: managed.email, username: managed.username, password: '', privilegeId: managed.privilegeId })
-  error.value = ''
-  success.value = ''
+function exerciseLabel(count: number) {
+  return `${count} exercice${count > 1 ? 's' : ''}`
 }
 
-async function loadUsers(keepSelection = true) {
-  loading.value = true
+async function loadUsers(reset = true) {
+  if (reset ? loading.value : loadingMore.value) return
+  if (reset) loading.value = true
+  else loadingMore.value = true
   error.value = ''
   try {
-    const response = await $fetch<{ users: ManagedUser[], privileges: Privilege[] }>('/api/admin/users', { credentials: 'same-origin' })
-    users.value = response.users
-    privileges.value = response.privileges
-    if (keepSelection && selectedId.value) {
-      const refreshed = users.value.find(item => item.id === selectedId.value)
-      if (refreshed) editUser(refreshed)
-      else resetDraft()
+    const response = await $fetch<LearnerAccountsResponse>('/api/admin/users', {
+      query: { offset: reset ? 0 : nextOffset.value, limit: 50 },
+      credentials: 'same-origin',
+    })
+    users.value = reset ? response.users : [...users.value, ...response.users]
+    total.value = response.total
+    nextOffset.value = response.nextOffset
+    hasMore.value = response.hasMore
+    if (!selectedId.value || !users.value.some(user => user.id === selectedId.value)) {
+      selectedId.value = users.value[0]?.id
     }
-  } catch (caught) {
-    if (!handleUnauthorized(caught)) error.value = getAdminErrorMessage(caught, 'Impossible de charger les utilisateurs.')
-  } finally {
+  }
+  catch (caught) {
+    if (!handleUnauthorized(caught)) {
+      error.value = getAdminErrorMessage(caught, 'Impossible de charger les utilisateurs.')
+    }
+  }
+  finally {
     loading.value = false
-  }
-}
-
-async function saveUser() {
-  if (saving.value) return
-  saving.value = true
-  error.value = ''
-  success.value = ''
-  const body = { ...draft }
-  const wasEditing = editing.value
-  try {
-    if (wasEditing) {
-      await $fetch(`/api/admin/users/${selectedId.value}`, { method: 'PUT', credentials: 'same-origin', body })
-      if (selectedId.value === sessionUser.value?.id) await checkSession(true)
-    } else {
-      const response = await $fetch<{ id: number }>('/api/admin/users', { method: 'POST', credentials: 'same-origin', body })
-      selectedId.value = response.id
-    }
-    const message = wasEditing ? 'Utilisateur enregistré.' : 'Utilisateur créé.'
-    draft.password = ''
-    await loadUsers(true)
-    success.value = message
-  } catch (caught) {
-    if (!handleUnauthorized(caught)) error.value = getAdminErrorMessage(caught, 'Impossible d’enregistrer cet utilisateur.')
-  } finally {
-    saving.value = false
-  }
-}
-
-async function deleteUser() {
-  const managed = selectedUser.value
-  if (!managed || deleting.value || !window.confirm(`Supprimer le compte de ${managed.prenom} ${managed.nom} ?`)) return
-  deleting.value = true
-  error.value = ''
-  try {
-    await $fetch(`/api/admin/users/${managed.id}`, { method: 'DELETE', credentials: 'same-origin' })
-    resetDraft()
-    await loadUsers(false)
-    success.value = 'Utilisateur supprimé.'
-  } catch (caught) {
-    if (!handleUnauthorized(caught)) error.value = getAdminErrorMessage(caught, 'Impossible de supprimer cet utilisateur.')
-  } finally {
-    deleting.value = false
+    loadingMore.value = false
   }
 }
 
 watch(sessionUser, (current) => {
-  if (current && !loaded) { loaded = true; void loadUsers(false) }
+  if (current && !loaded) {
+    loaded = true
+    void loadUsers()
+  }
   if (!current) loaded = false
 }, { immediate: true })
 </script>
@@ -116,43 +86,72 @@ watch(sessionUser, (current) => {
 <template>
   <AdminAuthBoundary>
     <AdminShell>
-      <div class="admin-users">
+      <div class="learner-admin">
         <header class="admin-section-heading">
-          <div><p class="admin-eyebrow">Accès</p><h1>Utilisateurs</h1><p class="admin-muted">Créez les comptes et attribuez les rôles administrateur, prof, élève ou parent.</p></div>
-          <button class="admin-button admin-button--primary" type="button" @click="resetDraft">Nouvel utilisateur</button>
+          <div>
+            <p class="admin-eyebrow">Comptes pseudonymes</p>
+            <h1>Utilisateurs</h1>
+            <p class="admin-muted">Les comptes sont classés du plus actif au moins actif.</p>
+          </div>
+          <button class="admin-button admin-button--small" type="button" :disabled="loading" @click="loadUsers()">
+            Actualiser
+          </button>
         </header>
 
         <p v-if="error" class="admin-notice admin-notice--error" role="alert">{{ error }}</p>
-        <p v-if="success" class="admin-notice admin-notice--success" role="status">{{ success }}</p>
 
-        <div class="admin-users__workspace">
-          <section class="admin-users__list admin-card" aria-labelledby="users-list-title">
-            <header><h2 id="users-list-title">{{ users.length }} comptes</h2><button class="admin-button admin-button--small" :disabled="loading" @click="loadUsers()">Actualiser</button></header>
-            <div v-if="loading" class="admin-users__loading"><span class="admin-spinner" aria-hidden="true" /> Chargement…</div>
-            <template v-else>
-              <button v-for="managed in users" :key="managed.id" :class="['admin-users__item', { 'is-selected': managed.id === selectedId }]" type="button" @click="editUser(managed)">
-                <span class="admin-users__avatar" aria-hidden="true">{{ (managed.prenom[0] || managed.username[0] || '?').toLocaleUpperCase('fr') }}</span>
-                <span><strong>{{ managed.prenom }} {{ managed.nom }}</strong><small>{{ managed.email }}</small></span>
-                <em>{{ managed.privilegeName }}</em>
-              </button>
-            </template>
-          </section>
+        <div class="learner-admin__workspace">
+          <aside class="learner-admin__directory admin-card" aria-labelledby="learner-directory-title">
+            <header>
+              <div>
+                <h2 id="learner-directory-title">{{ total }} utilisateurs</h2>
+                <span>Triés par exercices réalisés</span>
+              </div>
+            </header>
 
-          <form class="admin-users__form admin-card" @submit.prevent="saveUser">
-            <div class="admin-users__form-heading">
-              <div><p class="admin-eyebrow">{{ editing ? `Compte no ${selectedId}` : 'Nouveau compte' }}</p><h2>{{ editing ? 'Modifier l’utilisateur' : 'Créer un utilisateur' }}</h2></div>
-              <button v-if="editing" class="admin-button admin-button--danger admin-button--small" type="button" :disabled="deleting || selectedId === sessionUser?.id" @click="deleteUser">{{ deleting ? 'Suppression…' : 'Supprimer' }}</button>
+            <div v-if="loading" class="learner-admin__loading">
+              <span class="admin-spinner" aria-hidden="true" /> Chargement…
             </div>
-            <div class="admin-users__fields">
-              <label class="admin-field"><span>Prénom *</span><input v-model="draft.prenom" required maxlength="255"></label>
-              <label class="admin-field"><span>Nom *</span><input v-model="draft.nom" required maxlength="255"></label>
-              <label class="admin-field"><span>Adresse e-mail *</span><input v-model="draft.email" required type="email" maxlength="254"></label>
-              <label class="admin-field"><span>Nom d’utilisateur *</span><input v-model="draft.username" required maxlength="255" autocomplete="off"></label>
-              <label class="admin-field"><span>{{ editing ? 'Nouveau mot de passe' : 'Mot de passe *' }}</span><input v-model="draft.password" type="password" :required="!editing" minlength="10" maxlength="200" autocomplete="new-password"><small>{{ editing ? 'Laissez vide pour le conserver.' : '10 caractères minimum.' }}</small></label>
-              <label class="admin-field"><span>Rôle *</span><select v-model="draft.privilegeId" required><option v-for="privilege in privileges" :key="privilege.id" :value="privilege.id">{{ privilege.name }}</option></select></label>
+            <ol v-else class="learner-admin__list">
+              <li v-for="learner in users" :key="learner.id">
+                <button
+                  type="button"
+                  :class="{ 'is-selected': learner.id === selectedId }"
+                  @click="selectedId = learner.id"
+                >
+                  <span class="learner-admin__avatar" aria-hidden="true">
+                    {{ learner.username.charAt(0).toLocaleUpperCase('fr-CH') }}
+                  </span>
+                  <span>
+                    <strong>{{ displayUsername(learner.username) }}</strong>
+                    <small>{{ exerciseLabel(learner.exerciseCount) }}</small>
+                  </span>
+                  <b>{{ learner.exerciseCount }}</b>
+                </button>
+              </li>
+            </ol>
+            <button
+              v-if="hasMore"
+              class="admin-button learner-admin__more"
+              type="button"
+              :disabled="loadingMore"
+              @click="loadUsers(false)"
+            >
+              {{ loadingMore ? 'Chargement…' : 'Afficher les suivants' }}
+            </button>
+          </aside>
+
+          <main class="learner-admin__preview">
+            <LearnerSpace
+              v-if="selectedUser"
+              :key="selectedUser.id"
+              :inspected-learner="{ id: selectedUser.id, username: selectedUser.username }"
+              read-only
+            />
+            <div v-else-if="!loading" class="admin-card learner-admin__empty">
+              Aucun compte utilisateur à afficher.
             </div>
-            <div class="admin-users__actions"><button class="admin-button" type="button" @click="resetDraft">Annuler</button><button class="admin-button admin-button--primary" :disabled="saving">{{ saving ? 'Enregistrement…' : (editing ? 'Enregistrer' : 'Créer le compte') }}</button></div>
-          </form>
+          </main>
         </div>
       </div>
     </AdminShell>
@@ -160,24 +159,5 @@ watch(sessionUser, (current) => {
 </template>
 
 <style scoped>
-.admin-users { display: grid; gap: 23px; }
-.admin-users .admin-section-heading { align-items: center; }
-.admin-users .admin-section-heading p { margin: 6px 0 0; }
-.admin-users__workspace { display: grid; grid-template-columns: minmax(260px, .72fr) minmax(420px, 1.28fr); gap: 18px; align-items: start; }
-.admin-users__list, .admin-users__form { padding: 18px; box-shadow: none; }
-.admin-users__list > header, .admin-users__form-heading, .admin-users__actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.admin-users h2 { margin: 0; color: var(--admin-navy); }
-.admin-users__item { display: grid; width: 100%; margin-top: 8px; padding: 10px; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; text-align: left; background: #f7fafb; border: 1px solid transparent; border-radius: 9px; cursor: pointer; }
-.admin-users__item:hover, .admin-users__item.is-selected { background: var(--admin-cyan); border-color: #9bcbd8; }
-.admin-users__item > span:nth-child(2) { display: grid; min-width: 0; }
-.admin-users__item small { overflow: hidden; color: var(--admin-muted); text-overflow: ellipsis; }
-.admin-users__item em { color: var(--admin-blue-dark); font-size: .72rem; font-style: normal; font-weight: 800; text-transform: capitalize; }
-.admin-users__avatar { display: grid; width: 35px; height: 35px; place-items: center; color: white; background: var(--admin-blue); border-radius: 10px; font-weight: 900; }
-.admin-users__loading { display: flex; margin-top: 20px; align-items: center; gap: 10px; }
-.admin-users__form { display: grid; gap: 20px; }
-.admin-users__fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
-.admin-users__fields small { color: var(--admin-muted); font-weight: 500; }
-.admin-users__actions { justify-content: flex-end; }
-@media (max-width: 900px) { .admin-users__workspace { grid-template-columns: 1fr; } }
-@media (max-width: 600px) { .admin-users .admin-section-heading, .admin-users__form-heading { align-items: stretch; flex-direction: column; } .admin-users__fields { grid-template-columns: 1fr; } }
+.learner-admin{display:grid;gap:20px}.learner-admin .admin-section-heading{align-items:center}.learner-admin .admin-section-heading p{margin:5px 0 0}.learner-admin__workspace{display:grid;grid-template-columns:minmax(260px,320px) minmax(0,1fr);align-items:start;gap:18px}.learner-admin__directory{position:sticky;top:calc(var(--admin-sticky-top,68px) + 82px);display:grid;max-height:calc(100vh - var(--admin-sticky-top,68px) - 100px);padding:14px;gap:10px;overflow:auto;box-shadow:none}.learner-admin__directory>header{padding:5px 5px 10px;border-bottom:1px solid var(--admin-border)}.learner-admin__directory h2{margin:0;color:var(--admin-navy);font-size:1rem}.learner-admin__directory header span{color:var(--admin-muted);font-size:.72rem}.learner-admin__loading{display:flex;min-height:140px;align-items:center;justify-content:center;gap:9px;color:var(--admin-muted)}.learner-admin__list{display:grid;margin:0;padding:0;gap:6px;list-style:none}.learner-admin__list button{display:grid;width:100%;padding:9px;grid-template-columns:38px minmax(0,1fr) auto;align-items:center;gap:9px;color:var(--admin-navy);border:1px solid transparent;border-radius:11px;background:#f7fafb;text-align:left;cursor:pointer}.learner-admin__list button:hover,.learner-admin__list button.is-selected{border-color:#83bfce;background:var(--admin-cyan)}.learner-admin__avatar{display:grid;width:38px;height:38px;place-items:center;color:white;border-radius:11px;background:var(--admin-blue);font-weight:900}.learner-admin__list button>span:nth-child(2){display:grid;min-width:0}.learner-admin__list strong,.learner-admin__list small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.learner-admin__list small{color:var(--admin-muted);font-size:.72rem}.learner-admin__list b{display:grid;min-width:28px;height:28px;padding:0 7px;place-items:center;color:var(--admin-blue-dark);border-radius:999px;background:white;font-size:.72rem}.learner-admin__more{width:100%}.learner-admin__preview{min-width:0}.learner-admin__preview :deep(.learner-space){max-width:none}.learner-admin__empty{display:grid;min-height:360px;place-items:center;color:var(--admin-muted)}@media(max-width:1050px){.learner-admin__workspace{grid-template-columns:1fr}.learner-admin__directory{position:static;max-height:420px}}
 </style>

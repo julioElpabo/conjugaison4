@@ -5,6 +5,7 @@ import { assertPrivilegeExists, assertUserIdentityAvailable, parseAdminUserInput
 export default defineEventHandler(async (event) => {
   requireAdministrator(event)
   const input = parseAdminUserInput(await readBody<unknown>(event), true)
+  input.privilegeId = 1
   const database = useDatabase()
   await Promise.all([
     assertPrivilegeExists(database, input.privilegeId),

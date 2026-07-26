@@ -162,7 +162,7 @@ async function createPreset() {
     categoryId: category?.id ?? 0,
     verbIds: [],
     tenseIds: [],
-    questionCount: 20,
+    questionCount: 10,
     exerciseKind: 'conjugation',
     pastSimplePronouns: 'all',
     inclusivePronouns: false,

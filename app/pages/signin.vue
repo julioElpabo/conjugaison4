@@ -216,9 +216,10 @@ function downloadRecoveryCode() {
     </section>
 
     <section v-else class="learner-card" aria-labelledby="learner-auth-title">
-      <p class="learner-eyebrow">Prototype privé</p>
       <h1 id="learner-auth-title">{{ mode === 'register' ? 'Créer mon compte' : 'Me connecter' }}</h1>
       <p class="learner-intro">
+        Créer un compte t’aide à mieux progresser : tes résultats sont mémorisés,
+        tu peux suivre tes progrès et retravailler tes fautes.
         Aucun nom ni aucune adresse e-mail ne sont demandés.
       </p>
 

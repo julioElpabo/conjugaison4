@@ -65,6 +65,11 @@ describe('câblage du prototype de compte pseudonyme', () => {
 
   it('ouvre la connexion par défaut et préremplit seulement en développement', async () => {
     const page = await read('../app/pages/signin.vue')
+    assert.doesNotMatch(page, /Prototype privé/u)
+    assert.match(page, /Créer un compte t’aide à mieux progresser/u)
+    assert.match(page, /tes résultats sont mémorisés/u)
+    assert.match(page, /retravailler tes fautes/u)
+    assert.match(page, /Aucun nom ni aucune adresse e-mail ne sont demandés/u)
     const endpoint = await read('../server/api/dev-learner-login.get.ts')
     const gitignore = await read('../.gitignore')
     assert.match(page, /const mode = ref<Mode>\('login'\)/u)
@@ -80,6 +85,9 @@ describe('câblage du prototype de compte pseudonyme', () => {
     const auth = await read('../app/composables/useLearnerAuth.ts')
     assert.match(layout, /<details v-if="learner"[^>]+class="learner-menu"/u)
     assert.match(layout, /<template v-else>/u)
+    assert.match(layout, /class="site-login-button"[^>]+localePath\('\/signin'\)/u)
+    assert.match(layout, />\s*Connexion\s*<\/NuxtLink>/u)
+    assert.match(layout, /class="theme-switch"[\s\S]*class="language-selector"[\s\S]*class="site-login-button"/u)
     assert.match(layout, /Mon espace/u)
     assert.match(layout, /Changer mon mot de passe/u)
     assert.match(layout, /tab=account#change-password/u)

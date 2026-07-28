@@ -118,7 +118,6 @@ const activeSection = computed(() => {
             :title="tourCopy.navLabel"
             @click="requestGuidedTour"
           >
-            <span aria-hidden="true">?</span>
             <span>{{ tourCopy.navLabel }}</span>
           </button>
         </div>
@@ -149,20 +148,6 @@ const activeSection = computed(() => {
             </div>
           </details>
           <template v-else>
-            <div class="language-selector" role="group" :aria-label="ui('Langue de l’interface')">
-              <button
-                v-for="option in languageOptions"
-                :key="option.value"
-                type="button"
-                :class="{ 'is-active': interfaceLocale === option.value }"
-                :aria-label="option.label"
-                :aria-pressed="interfaceLocale === option.value"
-                :title="option.label"
-                @click="setInterfaceLocale(option.value)"
-              >
-                <span aria-hidden="true">{{ option.flag }}</span>
-              </button>
-            </div>
             <button
               class="theme-switch"
               :class="{ 'is-dark': isDark }"
@@ -181,6 +166,23 @@ const activeSection = computed(() => {
               </span>
               <span class="theme-switch__thumb" aria-hidden="true" />
             </button>
+            <div class="language-selector" role="group" :aria-label="ui('Langue de l’interface')">
+              <button
+                v-for="option in languageOptions"
+                :key="option.value"
+                type="button"
+                :class="{ 'is-active': interfaceLocale === option.value }"
+                :aria-label="option.label"
+                :aria-pressed="interfaceLocale === option.value"
+                :title="option.label"
+                @click="setInterfaceLocale(option.value)"
+              >
+                <span aria-hidden="true">{{ option.flag }}</span>
+              </button>
+            </div>
+            <NuxtLink class="site-login-button" :to="localePath('/signin')">
+              Connexion
+            </NuxtLink>
           </template>
         </nav>
       </div>
@@ -390,10 +392,9 @@ a {
 .site-tour-button {
   display: inline-flex;
   min-height: 32px;
-  padding: 4px 9px 4px 5px;
+  padding: 5px 10px;
   align-items: center;
   justify-content: center;
-  gap: 5px;
   color: #0b4f69;
   border: 2px solid #e4ad00;
   border-radius: 999px;
@@ -403,19 +404,6 @@ a {
   font-size: .76rem;
   font-weight: 750;
   transition: background-color 150ms ease, border-color 150ms ease;
-}
-
-.site-tour-button > span:first-child {
-  display: grid;
-  width: 18px;
-  height: 18px;
-  place-items: center;
-  color: #493a08;
-  border: 1px solid #c99500;
-  border-radius: 50%;
-  background: #ffd943;
-  font-size: .66rem;
-  font-weight: 900;
 }
 
 .site-tour-button:hover {
@@ -623,10 +611,10 @@ a {
 
 .theme-switch {
   position: relative;
-  width: 3.9rem;
-  height: 2rem;
-  flex: 0 0 3.9rem;
-  margin-left: 4px;
+  width: 2.7rem;
+  height: 1.55rem;
+  flex: 0 0 2.7rem;
+  margin-left: 0;
   overflow: hidden;
   padding: 0;
   color: white;
@@ -654,10 +642,10 @@ a {
 .theme-switch__thumb {
   position: absolute;
   z-index: 2;
-  top: .2rem;
-  left: .2rem;
-  width: 1.5rem;
-  height: 1.5rem;
+  top: .16rem;
+  left: .16rem;
+  width: 1.08rem;
+  height: 1.08rem;
   background: #f7fafb;
   border-radius: 50%;
   box-shadow: 0 2px 5px rgb(0 0 0 / 30%);
@@ -666,7 +654,7 @@ a {
 
 .theme-switch.is-dark .theme-switch__thumb {
   background: #dce8ec;
-  transform: translateX(1.88rem);
+  transform: translateX(1.3rem);
 }
 
 .theme-switch__icon {
@@ -674,16 +662,16 @@ a {
   z-index: 1;
   top: 50%;
   display: grid;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.08rem;
+  height: 1.08rem;
   place-items: center;
   transform: translateY(-50%);
   transition: opacity .2s ease;
 }
 
 .theme-switch__icon svg {
-  width: 15px;
-  height: 15px;
+  width: 11px;
+  height: 11px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
@@ -691,11 +679,29 @@ a {
   stroke-width: 1.9;
 }
 
-.theme-switch__icon--moon { left: .3rem; opacity: 0; }
+.theme-switch__icon--moon { left: .18rem; opacity: 0; }
 .theme-switch__icon--moon svg { fill: currentColor; stroke: none; }
-.theme-switch__icon--sun { right: .3rem; opacity: 1; }
+.theme-switch__icon--sun { right: .18rem; opacity: 1; }
 .theme-switch.is-dark .theme-switch__icon--moon { opacity: 1; }
 .theme-switch.is-dark .theme-switch__icon--sun { opacity: 0; }
+
+.site-navigation .site-login-button {
+  min-height: 2rem;
+  padding: 5px 12px;
+  color: white;
+  border-color: rgb(255 255 255 / 25%);
+  background: #7052a0;
+}
+
+.site-navigation .site-login-button:hover {
+  border-color: rgb(255 255 255 / 25%);
+  background: #8162b2;
+}
+
+.site-navigation .site-login-button:focus-visible {
+  outline: 3px solid rgb(112 210 232 / 55%);
+  outline-offset: 2px;
+}
 
 .site-main {
   width: min(1180px, calc(100% - 32px));
@@ -766,7 +772,7 @@ a {
 
   .language-selector {
     width: max-content;
-    grid-column: 1 / 4;
+    grid-column: 2 / 4;
     justify-self: end;
   }
 
@@ -775,9 +781,15 @@ a {
   }
 
   .theme-switch {
+    grid-column: 1;
+    justify-self: start;
+    margin-left: 0;
+  }
+
+  .site-navigation .site-login-button {
     grid-column: 4;
     justify-self: end;
-    margin-left: 2px;
+    padding-inline: 9px;
   }
 
   .learner-menu {

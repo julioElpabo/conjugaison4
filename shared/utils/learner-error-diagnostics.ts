@@ -11,18 +11,18 @@ import { diagnoseCoachAgreement, diagnoseCoachAnswer } from './coach-feedback'
 export type LearnerErrorConfidence = 'high' | 'medium' | 'low'
 
 export const LEARNER_ERROR_TAXONOMY = [
-  { code: 'task.wrong_mode', domain: 'Consigne', label: 'Confusion de mode', advice: 'Compare le mode demandé avec la forme que tu as utilisée.' },
-  { code: 'task.wrong_tense', domain: 'Consigne', label: 'Confusion de temps', advice: 'Repère le temps demandé avant de construire la forme.' },
+  { code: 'task.wrong_mode', domain: 'Consigne', label: 'Confondre les modes (Indicatif, Subjonctif, ...)', advice: 'Compare le mode demandé avec la forme que tu as utilisée.' },
+  { code: 'task.wrong_tense', domain: 'Consigne', label: 'Confondre les temps (imparfait, futur, ...)', advice: 'Repère le temps demandé avant de construire la forme.' },
   { code: 'task.future_simple_for_near_future', domain: 'Consigne', label: 'Futur simple à la place du futur proche', advice: 'Le futur proche se construit avec aller au présent suivi de l’infinitif.' },
-  { code: 'person.other_form', domain: 'Personne', label: 'Forme d’une autre personne', advice: 'Relis le pronom et cherche la terminaison qui lui correspond.' },
+  { code: 'person.other_form', domain: 'Personne', label: 'confondre les pronoms (je, tu, ils...)', advice: 'Relis le pronom et cherche la terminaison qui lui correspond.' },
   { code: 'person.impossible_ending', domain: 'Personne', label: 'Terminaison impossible pour cette personne', advice: 'Avec je ou tu, pas de -t ou -d ; avec il, elle ou iel, pas de -s ou -x.' },
-  { code: 'compound.auxiliary', domain: 'Temps composé', label: 'Auxiliaire incorrect', advice: 'Identifie l’auxiliaire et conjugue-le au temps demandé.' },
+  { code: 'compound.auxiliary', domain: 'Temps composé', label: 'Auxiliaire incorrect', advice: 'Apprends par coeur les verbes être et avoir à tous les temps' },
   { code: 'agreement.subject', domain: 'Accord', label: 'Accord du participe avec le sujet', advice: 'Avec être, vérifie le genre et le nombre du sujet.' },
   { code: 'agreement.cod_before', domain: 'Accord', label: 'Accord avec un COD placé avant', advice: 'Avec avoir, le participe s’accorde avec le COD lorsque celui-ci est placé avant.' },
   { code: 'agreement.cod_after', domain: 'Accord', label: 'Accord indu avec un COD placé après', advice: 'Un COD placé après le participe ne commande pas son accord.' },
   { code: 'agreement.coi', domain: 'Accord', label: 'Accord indu avec un COI', advice: 'Un COI ne commande jamais l’accord du participe passé avec avoir.' },
   { code: 'agreement.avoir_unwarranted', domain: 'Accord', label: 'Accord indu avec avoir', advice: 'Sans COD placé avant, le participe passé employé avec avoir reste invariable.' },
-  { code: 'morphology.ending', domain: 'Construction', label: 'Terminaison incorrecte', advice: 'Garde le radical, puis vérifie la terminaison du temps et de la personne.' },
+  { code: 'morphology.ending', domain: 'Construction', label: 'Terminaison incorrecte', advice: 'Apprends par coeur les terminaisons du temps demandé' },
   { code: 'orthography.copied_complement', domain: 'Orthographe', label: 'Faute de recopie du complément', advice: 'Recopie précisément le COD ou le COI donné dans la phrase.' },
   { code: 'orthography.accent', domain: 'Orthographe', label: 'Accent incorrect ou manquant', advice: 'Observe précisément les accents de la forme attendue.' },
   { code: 'orthography.punctuation', domain: 'Orthographe', label: 'Ponctuation ou signe incorrect', advice: 'Vérifie les apostrophes, les traits d’union et la ponctuation utile.' },

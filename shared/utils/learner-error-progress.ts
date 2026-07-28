@@ -22,6 +22,14 @@ export interface LearnerErrorProgressPoint {
   sequence?: number
 }
 
+export interface LearnerErrorProgressExample {
+  id: number
+  question: string
+  learnerAnswer: string
+  expectedAnswers: string[]
+  reason: string
+}
+
 export interface LearnerErrorProgressCard {
   code: LearnerErrorTypeCode
   domain: string
@@ -37,6 +45,7 @@ export interface LearnerErrorProgressCard {
   daysSinceLastTest: number
   isStale: boolean
   points: LearnerErrorProgressPoint[]
+  examples: LearnerErrorProgressExample[]
 }
 
 export interface LearnerErrorProgressSummary {
@@ -115,6 +124,7 @@ function progressPoints(rows: readonly LearnerErrorProgressDailySource[]) {
 export function buildLearnerErrorProgress(
   sources: readonly LearnerErrorProgressDailySource[],
   today = new Date().toISOString().slice(0, 10),
+  examples: ReadonlyMap<LearnerErrorTypeCode, LearnerErrorProgressExample[]> = new Map(),
 ): LearnerErrorProgressSummary {
   const taxonomy = new Map(LEARNER_ERROR_TAXONOMY.map(item => [item.code, item]))
   const grouped = new Map<LearnerErrorTypeCode, LearnerErrorProgressDailySource[]>()
@@ -177,6 +187,7 @@ export function buildLearnerErrorProgress(
       daysSinceLastTest,
       isStale: daysSinceLastTest > STALE_AFTER_DAYS,
       points: progressPoints(rows),
+      examples: (examples.get(code) || []).slice(0, 5),
     }]
   }).sort((left, right) =>
     Number(left.isStale) - Number(right.isStale)

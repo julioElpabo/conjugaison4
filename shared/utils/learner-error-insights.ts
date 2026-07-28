@@ -68,7 +68,7 @@ export function buildLearnerErrorInsights(
 ): LearnerErrorInsightsSummary {
   const taxonomy = new Map(LEARNER_ERROR_TAXONOMY.map(item => [item.code, item]))
   const insights = sources.flatMap((source) => {
-    if (source.code === 'unknown') return []
+    if (source.code === 'unknown' || source.code === 'orthography.copied_complement') return []
     const definition = taxonomy.get(source.code)
     const opportunities = count(source.opportunities)
     const errors = count(source.errors)
@@ -102,7 +102,7 @@ export function buildLearnerErrorInsights(
   }).sort((left, right) => right.errors - left.errors || right.errorRate - left.errorRate)
 
   const primaryCounts = new Map<LearnerErrorTypeCode, number>(
-    sources.flatMap(source => source.code === 'unknown'
+    sources.flatMap(source => source.code === 'unknown' || source.code === 'orthography.copied_complement'
       ? []
       : [[source.code, count(source.primaryErrors ?? source.errors)] as const]),
   )

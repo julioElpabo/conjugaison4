@@ -139,7 +139,7 @@ describe('classement pédagogique des erreurs', () => {
     assert.equal(tags[0].evidence.expectedPerson, 'ils')
     assert.deepEqual(details, [{
       code: 'person.other_form',
-      label: 'Forme d’une autre personne',
+      label: 'confondre les pronoms (je, tu, ils...)',
       message: 'Tu as confondu les personnes.',
       learnerValue: 'il',
       expectedValue: 'ils',
@@ -162,7 +162,7 @@ describe('classement pédagogique des erreurs', () => {
     assert.deepEqual(tags.map(tag => tag.code), ['person.other_form'])
     assert.deepEqual(details, [{
       code: 'person.other_form',
-      label: 'Forme d’une autre personne',
+      label: 'confondre les pronoms (je, tu, ils...)',
       message: 'Tu as confondu la terminaison de « ils/elles » avec celle de « nous ».',
       learnerValue: '-ont (ils/elles)',
       expectedValue: '-ons (nous)',
@@ -295,6 +295,23 @@ describe('synthèse longitudinale des types d’erreurs', () => {
       recentErrors: 2,
       previousOpportunities: 5,
       previousErrors: 2,
+    }])
+
+    assert.deepEqual(summary.insights, [])
+    assert.equal(summary.totalErrors, 0)
+    assert.equal(summary.dominant, null)
+  })
+
+  it('écarte les fautes anecdotiques de recopie du complément', () => {
+    const summary = buildLearnerErrorInsights([{
+      code: 'orthography.copied_complement',
+      opportunities: 10,
+      errors: 8,
+      primaryErrors: 8,
+      recentOpportunities: 5,
+      recentErrors: 4,
+      previousOpportunities: 5,
+      previousErrors: 4,
     }])
 
     assert.deepEqual(summary.insights, [])
@@ -440,5 +457,30 @@ describe('progression par occasions réellement testées', () => {
 
     assert.equal(summary.cards[0].trend, 'insufficient')
     assert.deepEqual(summary.cards[0].points, [])
+  })
+
+  it('associe au plus cinq exemples récents à chaque type de faute', () => {
+    const examples = new Map([[
+      'orthography.accent',
+      Array.from({ length: 6 }, (_, index) => ({
+        id: index + 1,
+        question: `Question ${index + 1}`,
+        learnerAnswer: 'reponse',
+        expectedAnswers: ['réponse'],
+        reason: 'Un accent est manquant.',
+      })),
+    ]])
+    const summary = buildLearnerErrorProgress([{
+      code: 'orthography.accent',
+      statDate: '2026-07-26',
+      opportunities: 10,
+      errors: 6,
+    }], '2026-07-26', examples)
+
+    assert.equal(summary.cards[0].examples.length, 5)
+    assert.equal(summary.cards[0].examples[0].question, 'Question 1')
+    assert.equal(summary.cards[0].examples[0].learnerAnswer, 'reponse')
+    assert.deepEqual(summary.cards[0].examples[0].expectedAnswers, ['réponse'])
+    assert.equal(summary.cards[0].examples[0].reason, 'Un accent est manquant.')
   })
 })

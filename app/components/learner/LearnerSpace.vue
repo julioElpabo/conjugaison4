@@ -9,11 +9,6 @@ import type {
 import type { CoachProfile } from '~~/shared/types/coach'
 import type { Catalogue } from '~/composables/useChallengeBuilder'
 import type { AppLocale } from '~~/shared/i18n/locales'
-import type { LearnerReviewForm, LearnerReviewSummary } from '~~/shared/utils/learner-review'
-import type {
-  LearnerErrorInsight,
-  LearnerErrorInsightsSummary,
-} from '~~/shared/utils/learner-error-insights'
 import type {
   LearnerErrorProgressCard,
   LearnerErrorProgressPoint,
@@ -27,7 +22,6 @@ import { shuffledQuestionOrder } from '~~/shared/utils/question-order'
 import ChatExercise from '~/components/exercise/ChatExercise.vue'
 import ClassicExercise from '~/components/exercise/ClassicExercise.vue'
 import CoachPicker from '~/components/exercise/CoachPicker.vue'
-import ChallengeProgressDialog from '~/components/learner/ChallengeProgressDialog.vue'
 import '~/assets/css/main.css'
 
 const props = withDefaults(defineProps<{
@@ -38,10 +32,8 @@ const props = withDefaults(defineProps<{
   readOnly: false,
 })
 
-type UserTab = 'challenges' | 'review' | 'progress' | 'history' | 'preferences' | 'account'
+type UserTab = 'challenges' | 'progress' | 'history' | 'preferences' | 'account'
 type AccountAction = 'results' | 'account'
-type ReviewSort = 'verb' | 'mode' | 'tense'
-type ProgressMetric = 'errors' | 'successes'
 
 interface DashboardChallenge {
   id: number
@@ -121,22 +113,14 @@ const { flushProgress } = useLearnerProgress()
 const route = useRoute()
 const requestFetch = useRequestFetch()
 const requestedTab = (value: unknown): UserTab => (
-  ['challenges', 'review', 'progress', 'history', 'preferences', 'account'].includes(String(value))
+  ['challenges', 'progress', 'history', 'preferences', 'account'].includes(String(value))
     ? String(value) as UserTab
     : 'challenges'
 )
 const activeTab = ref<UserTab>(requestedTab(route.query.tab))
-const reviewSort = ref<ReviewSort>('verb')
-const reviewSummary = ref<LearnerReviewSummary>()
-const errorInsights = ref<LearnerErrorInsightsSummary>()
-const reviewPending = ref(false)
-const reviewError = ref('')
-const errorInsightsPending = ref(false)
-const errorInsightsError = ref('')
 const learnerProgress = ref<LearnerErrorProgressSummary>()
 const learnerProgressPending = ref(false)
 const learnerProgressError = ref('')
-const progressMetric = ref<ProgressMetric>('errors')
 const progressExplanationOpen = ref(false)
 const challengeTrainings = ref<ChallengeTraining[]>([])
 const challengeTrainingsPending = ref(false)
@@ -155,15 +139,16 @@ const selectedCoach = ref<CoachProfile>()
 const coachPickerOpen = ref(false)
 const selectedWork = ref<{
   challenge: DashboardChallenge
-  scope: 'same' | 'new' | 'incorrect' | 'targeted'
+  scope: 'same' | 'random' | 'incorrect' | 'targeted'
   targetQuestions?: ExerciseQuestion[]
 }>()
-const selectedProgressChallenge = ref<DashboardChallenge>()
 const workMenuFingerprint = ref('')
 const catalogue = ref<Catalogue>()
 const challengeStarting = ref<string>()
 const challengeStartError = ref('')
 const expandedDescriptions = ref(new Set<string>())
+const truncatedDescriptions = ref(new Set<string>())
+const challengeDescriptionElements = new Map<string, HTMLElement>()
 const preferencesSaving = ref(false)
 const preferencesSaved = ref(false)
 const preferencesError = ref('')
@@ -184,6 +169,7 @@ const siteHeaderHeight = ref(68)
 const challengeLoader = useTemplateRef<HTMLElement>('challenge-loader')
 let challengeObserver: IntersectionObserver | null = null
 let siteHeaderObserver: ResizeObserver | undefined
+let challengeDescriptionObserver: ResizeObserver | undefined
 let trainingProgressRequest = 0
 const randomCoachAvatar = useState<string>('challenge-random-coach-avatar', () => '')
 const workMenuLeft = ref(0)
@@ -228,6 +214,7 @@ onMounted(() => {
   }
   observeChallengeLoader()
   if (activeTab.value === 'challenges') void loadChallengeTrainings()
+  if (activeTab.value === 'progress') void loadLearnerProgress()
   if (!randomCoachAvatar.value) void loadRandomCoachAvatar()
   if (activeTab.value === 'account' && route.hash === '#change-password') {
     void nextTick(() => {
@@ -246,11 +233,23 @@ onMounted(() => {
     siteHeaderObserver = new ResizeObserver(updateSiteHeaderHeight)
     siteHeaderObserver.observe(siteHeader)
   }
+  challengeDescriptionObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      const descriptionId = entry.target.getAttribute('data-description-id')
+      if (descriptionId && !descriptionIsExpanded(descriptionId)) {
+        updateDescriptionTruncation(descriptionId, entry.target as HTMLElement)
+      }
+    }
+  })
+  for (const element of challengeDescriptionElements.values()) {
+    challengeDescriptionObserver.observe(element)
+  }
 })
 
 onBeforeUnmount(() => {
   challengeObserver?.disconnect()
   siteHeaderObserver?.disconnect()
+  challengeDescriptionObserver?.disconnect()
   document.removeEventListener('pointerdown', closeWorkMenuOnOutside)
   document.removeEventListener('pointerdown', closeProgressExplanationOnOutside)
   document.removeEventListener('keydown', closeAccountDialogOnEscape)
@@ -262,10 +261,6 @@ watch(
 )
 
 watch(activeTab, (tab) => {
-  if (tab === 'review') {
-    void loadLearnerReview()
-    void loadLearnerErrorInsights()
-  }
   if (tab === 'progress') void loadLearnerProgress()
   if (tab === 'challenges') void loadChallengeTrainings()
 })
@@ -284,33 +279,6 @@ watch(
 const displayUsername = computed(() => {
   const username = learner.value?.username || ''
   return username ? username.charAt(0).toLocaleUpperCase('fr-CH') + username.slice(1) : ''
-})
-
-const reviewCollator = new Intl.Collator('fr-CH', { sensitivity: 'base', numeric: true })
-const sortedReviewForms = computed(() => [...(reviewSummary.value?.forms || [])].sort((left, right) => {
-  const keys = (form: LearnerReviewForm) => {
-    if (reviewSort.value === 'mode') return [form.mode, form.infinitive, form.tense, form.person]
-    if (reviewSort.value === 'tense') return [form.mode, form.tense, form.infinitive, form.person]
-    return [form.infinitive, form.mode, form.tense, form.person]
-  }
-  const leftKeys = keys(left)
-  const rightKeys = keys(right)
-  for (let index = 0; index < leftKeys.length; index += 1) {
-    const compared = reviewCollator.compare(leftKeys[index] || '', rightKeys[index] || '')
-    if (compared) return compared
-  }
-  return 0
-}))
-const reviewInsightText = computed(() => {
-  const insight = reviewSummary.value?.insight
-  if (!insight) return ''
-  if (insight.dimension === 'tense') {
-    return `${insight.percent}% de tes fautes concernent le ${insight.label}.`
-  }
-  if (insight.dimension === 'mode') {
-    return `${insight.percent}% de tes fautes concernent le mode ${insight.label}.`
-  }
-  return `${insight.percent}% de tes fautes concernent le verbe « ${insight.label} ».`
 })
 
 const challengeDays = computed(() => {
@@ -561,40 +529,6 @@ function falseQuestionsLabel(count: number) {
   return count === 1 ? 'La question fausse' : `Les ${count} questions fausses`
 }
 
-async function loadLearnerReview(force = false) {
-  if (reviewPending.value || (reviewSummary.value && !force)) return
-  reviewPending.value = true
-  reviewError.value = ''
-  try {
-    reviewSummary.value = await $fetch<LearnerReviewSummary>(learnerApi('review'), {
-      credentials: 'same-origin',
-    })
-  }
-  catch {
-    reviewError.value = 'Impossible de charger les formes à revoir pour le moment.'
-  }
-  finally {
-    reviewPending.value = false
-  }
-}
-
-async function loadLearnerErrorInsights(force = false) {
-  if (errorInsightsPending.value || (errorInsights.value && !force)) return
-  errorInsightsPending.value = true
-  errorInsightsError.value = ''
-  try {
-    errorInsights.value = await $fetch<LearnerErrorInsightsSummary>(learnerApi('error-insights'), {
-      credentials: 'same-origin',
-    })
-  }
-  catch {
-    errorInsightsError.value = 'Impossible d’analyser les types d’erreurs pour le moment.'
-  }
-  finally {
-    errorInsightsPending.value = false
-  }
-}
-
 async function loadLearnerProgress(force = false) {
   if (learnerProgressPending.value || (learnerProgress.value && !force)) return
   learnerProgressPending.value = true
@@ -612,24 +546,13 @@ async function loadLearnerProgress(force = false) {
   }
 }
 
-function errorTrendLabel(insight: LearnerErrorInsight) {
-  if (insight.trend === 'improving') return `En progrès · ${Math.abs(insight.trendDelta || 0)} points de moins`
-  if (insight.trend === 'worsening') return `À consolider · ${Math.abs(insight.trendDelta || 0)} points de plus`
-  if (insight.trend === 'stable') return 'Stable sur les deux derniers mois'
-  return 'Encore trop peu de données pour une tendance'
-}
-
 function progressTrendLabel(card: LearnerErrorProgressCard) {
   if (card.isStale) return 'À retester avant de conclure'
   if (card.trend === 'improving') {
-    return progressMetric.value === 'errors'
-      ? `${Math.abs(card.trendDelta || 0)} points d’erreur en moins`
-      : `${Math.abs(card.trendDelta || 0)} points de réussite en plus`
+    return `${Math.abs(card.trendDelta || 0)} points d’erreur en moins`
   }
   if (card.trend === 'worsening') {
-    return progressMetric.value === 'errors'
-      ? `${Math.abs(card.trendDelta || 0)} points d’erreur en plus`
-      : `${Math.abs(card.trendDelta || 0)} points de réussite en moins`
+    return `${Math.abs(card.trendDelta || 0)} points d’erreur en plus`
   }
   if (card.trend === 'stable') return 'Taux stable'
   return 'Encore trop peu d’occasions comparables'
@@ -658,7 +581,7 @@ interface ProgressChartCoordinate {
 }
 
 function progressRate(errorRate: number) {
-  return progressMetric.value === 'errors' ? errorRate : 100 - errorRate
+  return errorRate
 }
 
 function progressCurrentRate(card: LearnerErrorProgressCard) {
@@ -683,7 +606,7 @@ function progressChartCoordinates(card: LearnerErrorProgressCard): ProgressChart
 }
 
 function progressMetricColor(rate: number) {
-  const riskRate = progressMetric.value === 'errors' ? rate : 100 - rate
+  const riskRate = rate
   const green = { red: 58, green: 166, blue: 111 }
   const yellow = { red: 214, green: 163, blue: 62 }
   const red = { red: 239, green: 103, blue: 96 }
@@ -697,18 +620,11 @@ function progressMetricColor(rate: number) {
 }
 
 function progressGradientId(card: LearnerErrorProgressCard) {
-  return `progress-rate-${progressMetric.value}-${card.code.replaceAll('.', '-')}`
+  return `progress-rate-errors-${card.code.replaceAll('.', '-')}`
 }
 
 function progressCardId(card: LearnerErrorProgressCard) {
   return `progress-card-${card.code.replaceAll('.', '-')}`
-}
-
-function scrollToProgressCard(card: LearnerErrorProgressCard) {
-  const target = document.getElementById(progressCardId(card))
-  if (!target) return
-  target.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  window.setTimeout(() => target.focus({ preventScroll: true }), 450)
 }
 
 function closeProgressExplanationOnOutside(event: PointerEvent) {
@@ -736,11 +652,41 @@ function descriptionIsExpanded(fingerprint: string) {
   return expandedDescriptions.value.has(fingerprint)
 }
 
+function descriptionIsTruncated(fingerprint: string) {
+  return truncatedDescriptions.value.has(fingerprint)
+}
+
+function updateDescriptionTruncation(fingerprint: string, element = challengeDescriptionElements.get(fingerprint)) {
+  if (!element || descriptionIsExpanded(fingerprint)) return
+  const isTruncated = element.scrollHeight > element.clientHeight + 1
+  if (truncatedDescriptions.value.has(fingerprint) === isTruncated) return
+  const next = new Set(truncatedDescriptions.value)
+  if (isTruncated) next.add(fingerprint)
+  else next.delete(fingerprint)
+  truncatedDescriptions.value = next
+}
+
+function setChallengeDescriptionElement(fingerprint: string, element: unknown) {
+  const previous = challengeDescriptionElements.get(fingerprint)
+  if (previous) challengeDescriptionObserver?.unobserve(previous)
+  if (!(element instanceof HTMLElement)) {
+    challengeDescriptionElements.delete(fingerprint)
+    return
+  }
+  element.dataset.descriptionId = fingerprint
+  challengeDescriptionElements.set(fingerprint, element)
+  challengeDescriptionObserver?.observe(element)
+  void nextTick(() => updateDescriptionTruncation(fingerprint, element))
+}
+
 function toggleDescription(fingerprint: string) {
   const next = new Set(expandedDescriptions.value)
   if (next.has(fingerprint)) next.delete(fingerprint)
   else next.add(fingerprint)
   expandedDescriptions.value = next
+  if (!next.has(fingerprint)) {
+    void nextTick(() => updateDescriptionTruncation(fingerprint))
+  }
 }
 
 async function loadRandomCoachAvatar() {
@@ -772,7 +718,7 @@ function closeWorkMenuOnOutside(event: PointerEvent) {
   workMenuFingerprint.value = ''
 }
 
-function openWorkMenu(challenge: DashboardChallenge, scope: 'same' | 'new' | 'incorrect', event: MouseEvent) {
+function openWorkMenu(challenge: DashboardChallenge, scope: 'same' | 'random' | 'incorrect', event: MouseEvent) {
   if (scope === 'incorrect' && !challenge.retryQuestions.length) return
   const menuKey = `${challenge.id}-${scope}`
   const isClosing = workMenuFingerprint.value === menuKey
@@ -785,12 +731,18 @@ async function questionsForSelectedWork() {
   const work = selectedWork.value
   if (!work) return []
   if (work.scope === 'targeted') return shuffledQuestionOrder(work.targetQuestions || [])
-  if (work.scope === 'same') {
-    if (work.challenge.exactQuestions.length) return [...work.challenge.exactQuestions]
+  if (work.scope === 'same' || work.scope === 'random') {
+    if (work.challenge.exactQuestions.length) {
+      return work.scope === 'random'
+        ? shuffledQuestionOrder(work.challenge.exactQuestions)
+        : [...work.challenge.exactQuestions]
+    }
     const preserved = [...work.challenge.retryQuestions]
       .slice(0, work.challenge.challenge.questionCount)
     const missingCount = Math.max(0, work.challenge.challenge.questionCount - preserved.length)
-    if (!missingCount) return preserved
+    if (!missingCount) {
+      return work.scope === 'random' ? shuffledQuestionOrder(preserved) : preserved
+    }
     const generated = await $fetch<ExerciseQuestion[]>('/api/questionnaires', {
       method: 'POST',
       body: {
@@ -798,8 +750,9 @@ async function questionsForSelectedWork() {
         questionCount: missingCount,
       },
     })
-    return [...preserved, ...generated]
+    const questions = [...preserved, ...generated]
       .slice(0, work.challenge.challenge.questionCount)
+    return work.scope === 'random' ? shuffledQuestionOrder(questions) : questions
   }
   if (work.scope === 'incorrect') return shuffledQuestionOrder(work.challenge.retryQuestions)
   return await $fetch<ExerciseQuestion[]>('/api/questionnaires', {
@@ -938,8 +891,6 @@ async function closeReview() {
   await Promise.all([
     refreshVisibleChallenges(),
     refreshTrainings,
-    reviewSummary.value ? loadLearnerReview(true) : Promise.resolve(),
-    errorInsights.value ? loadLearnerErrorInsights(true) : Promise.resolve(),
     learnerProgress.value ? loadLearnerProgress(true) : Promise.resolve(),
   ])
 }
@@ -1045,8 +996,6 @@ async function confirmAccountAction() {
     if (action === 'results') {
       await $fetch('/api/learner/results', { method: 'DELETE' })
       dashboard.value = { challenges: [], nextOffset: 0, hasMore: false }
-      reviewSummary.value = undefined
-      errorInsights.value = undefined
       learnerProgress.value = undefined
       resultsDeleted.value = true
       accountDialog.value = undefined
@@ -1072,30 +1021,41 @@ async function confirmAccountAction() {
   <div class="learner-space" :class="{ 'learner-space--dark': preferredTheme === 'dark' }">
     <header class="learner-space__hero">
       <div>
-        <p>Mon espace</p>
         <h1>Bonjour {{ displayUsername }}</h1>
       </div>
-      <span>Apprendre à ton rythme, à partir de tes réponses.</span>
+      <nav class="learner-space__hero-actions" aria-label="Paramètres personnels">
+        <button
+          :class="{ 'is-active': activeTab === 'preferences' }"
+          type="button"
+          @click="activeTab = 'preferences'"
+        >
+          Préférences
+        </button>
+        <button
+          :class="{ 'is-active': activeTab === 'account' }"
+          type="button"
+          @click="activeTab = 'account'"
+        >
+          Mon compte
+        </button>
+      </nav>
     </header>
 
     <nav class="learner-tabs" :style="stickyTabsStyle" aria-label="Sections de mon espace">
-      <button :class="{ 'is-active': activeTab === 'challenges' }" type="button" @click="activeTab = 'challenges'">
-        Mes défis
-      </button>
-      <button :class="{ 'is-active': activeTab === 'review' }" type="button" @click="activeTab = 'review'">
-        À revoir
-      </button>
-      <button :class="{ 'is-active': activeTab === 'progress' }" type="button" @click="activeTab = 'progress'">
-        Ma progression
-      </button>
       <button :class="{ 'is-active': activeTab === 'history' }" type="button" @click="activeTab = 'history'">
         Historique
       </button>
-      <button :class="{ 'is-active': activeTab === 'preferences' }" type="button" @click="activeTab = 'preferences'">
-        Mes préférences
+      <button :class="{ 'is-active': activeTab === 'progress' }" type="button" @click="activeTab = 'progress'">
+        Fautes courantes
       </button>
-      <button :class="{ 'is-active': activeTab === 'account' }" type="button" @click="activeTab = 'account'">
-        Mon compte
+      <button
+        class="learner-tabs__primary"
+        :class="{ 'is-active': activeTab === 'challenges' }"
+        type="button"
+        @click="activeTab = 'challenges'"
+      >
+        <span aria-hidden="true">✦</span>
+        Progresser
       </button>
     </nav>
 
@@ -1103,9 +1063,21 @@ async function confirmAccountAction() {
       <div class="learner-panel__heading">
         <div>
           <p class="learner-eyebrow">{{ activeTab === 'history' ? 'Retrouver mes activités' : 'Reprendre et consolider' }}</p>
-          <h2 id="challenges-title">{{ activeTab === 'history' ? 'Historique' : 'Mes défis' }}</h2>
+          <h2 id="challenges-title">{{ activeTab === 'history' ? 'Historique' : 'Progresser' }}</h2>
         </div>
       </div>
+
+      <aside class="learner-section-intro">
+        <strong>{{ activeTab === 'history' ? 'Relire mon parcours' : 'Choisir mon prochain entraînement' }}</strong>
+        <p v-if="activeTab === 'history'">
+          Retrouve tes défis du plus récent au plus ancien, avec les réussites et les erreurs de chaque séance.
+          Tu peux ainsi revoir ce que tu as travaillé et reprendre un exercice utile.
+        </p>
+        <p v-else>
+          Reprends un défi, retravaille uniquement tes erreurs ou lance un nouveau tirage.
+          Cette page t’aide à choisir précisément ce que tu veux consolider.
+        </p>
+      </aside>
 
       <template v-if="activeTab === 'history'">
         <p v-if="dashboardPending" class="learner-empty">Chargement de tes défis…</p>
@@ -1132,8 +1104,14 @@ async function confirmAccountAction() {
                     </div>
                   </div>
                   <div v-if="challenge.description" class="challenge-card__description">
-                    <p :class="{ 'is-expanded': descriptionIsExpanded(String(challenge.id)) }">{{ challenge.description }}</p>
+                    <p
+                      :ref="element => setChallengeDescriptionElement(String(challenge.id), element)"
+                      :class="{ 'is-expanded': descriptionIsExpanded(String(challenge.id)) }"
+                    >
+                      {{ challenge.description }}
+                    </p>
                     <button
+                      v-if="descriptionIsTruncated(String(challenge.id))"
                       type="button"
                       :aria-expanded="descriptionIsExpanded(String(challenge.id))"
                       @click="toggleDescription(String(challenge.id))"
@@ -1149,7 +1127,7 @@ async function confirmAccountAction() {
                     · {{ challenge.incorrectCount }} erreur{{ challenge.incorrectCount > 1 ? 's' : '' }}
                   </p>
                   <div v-if="!readOnly" class="challenge-work">
-                    <strong>Travailler :</strong>
+                    <strong>Ré-entraîner le défi :</strong>
                     <div>
                       <button
                         type="button"
@@ -1159,21 +1137,22 @@ async function confirmAccountAction() {
                         :aria-expanded="workMenuFingerprint === `${challenge.id}-same`"
                         @click="openWorkMenu(challenge, 'same', $event)"
                       >
-                        Mêmes questions
+                        Même ordre des questions
                       </button>
                       <button
                         type="button"
                         class="review-button"
                         :disabled="Boolean(challengeStarting)"
-                        :aria-expanded="workMenuFingerprint === `${challenge.id}-new`"
-                        @click="openWorkMenu(challenge, 'new', $event)"
+                        :aria-expanded="workMenuFingerprint === `${challenge.id}-random`"
+                        @click="openWorkMenu(challenge, 'random', $event)"
                       >
-                        Nouveau tirage
+                        Ordre aléatoire
                       </button>
                       <button
+                        v-if="challenge.unresolvedCount > 0"
                         type="button"
                         class="review-button"
-                        :disabled="!challenge.unresolvedCount || Boolean(challengeStarting)"
+                        :disabled="Boolean(challengeStarting)"
                         :aria-expanded="workMenuFingerprint === `${challenge.id}-incorrect`"
                         @click="openWorkMenu(challenge, 'incorrect', $event)"
                       >
@@ -1216,12 +1195,6 @@ async function confirmAccountAction() {
                         </span>
                       </button>
                     </div>
-                  </div>
-                  <div class="challenge-analysis">
-                    <strong>Analyse :</strong>
-                    <button type="button" @click="selectedProgressChallenge = challenge">
-                      Progression
-                    </button>
                   </div>
                 </article>
               </li>
@@ -1573,141 +1546,11 @@ async function confirmAccountAction() {
       </template>
     </section>
 
-    <section v-else-if="activeTab === 'review'" class="learner-panel" aria-labelledby="review-title">
-      <div class="learner-panel__heading">
-        <div>
-          <p class="learner-eyebrow">Comprendre ce qui résiste</p>
-          <h2 id="review-title">À revoir</h2>
-        </div>
-        <div v-if="reviewSummary?.forms.length" class="review-overview">
-          <strong>{{ reviewSummary.forms.length }}</strong>
-          <span>forme{{ reviewSummary.forms.length > 1 ? 's' : '' }} à consolider</span>
-        </div>
-      </div>
-
-      <p v-if="reviewError" class="preferences-error" role="alert">{{ reviewError }}</p>
-      <p v-if="reviewPending && !reviewSummary" class="learner-empty">Analyse de tes erreurs…</p>
-      <template v-else-if="reviewSummary?.forms.length">
-        <aside v-if="reviewInsightText" class="review-insight" aria-labelledby="review-insight-title">
-          <span aria-hidden="true">{{ reviewSummary.insight?.percent }}%</span>
-          <div>
-            <strong id="review-insight-title">Une tendance se dégage</strong>
-            <p>{{ reviewInsightText }}</p>
-            <small>
-              Cette observation repose sur {{ reviewSummary.insight?.errorCount }}
-              faute{{ (reviewSummary.insight?.errorCount || 0) > 1 ? 's' : '' }}
-              parmi {{ reviewSummary.insight?.totalErrors }}.
-            </small>
-          </div>
-        </aside>
-
-        <section class="error-patterns" aria-labelledby="error-patterns-title">
-          <header>
-            <div>
-              <p class="learner-eyebrow">Observer les mécanismes</p>
-              <h3 id="error-patterns-title">Mes types d’erreurs</h3>
-            </div>
-            <span v-if="errorInsights?.totalErrors">
-              {{ errorInsights.totalErrors }} erreur{{ errorInsights.totalErrors > 1 ? 's' : '' }} classée{{ errorInsights.totalErrors > 1 ? 's' : '' }}
-            </span>
-          </header>
-          <p v-if="errorInsightsError" class="preferences-error" role="alert">{{ errorInsightsError }}</p>
-          <p v-else-if="errorInsightsPending && !errorInsights" class="error-patterns__state">Classement des erreurs…</p>
-          <template v-else-if="errorInsights?.insights.length">
-            <aside v-if="errorInsights.dominant" class="error-patterns__dominant">
-              <strong>{{ errorInsights.dominant.percent }}%</strong>
-              <span>
-                de tes erreurs classées concernent
-                <b>{{ errorInsights.dominant.label.toLocaleLowerCase('fr-CH') }}</b>.
-              </span>
-            </aside>
-            <div class="error-patterns__grid">
-              <article
-                v-for="insight in errorInsights.insights"
-                :key="insight.code"
-                class="error-pattern"
-                :class="`is-${insight.trend}`"
-              >
-                <header>
-                  <div>
-                    <small>{{ insight.domain }}</small>
-                    <h4>{{ insight.label }}</h4>
-                  </div>
-                  <strong>{{ insight.errorRate }}%</strong>
-                </header>
-                <div class="error-pattern__meter" aria-hidden="true">
-                  <span :style="{ width: `${insight.errorRate}%` }" />
-                </div>
-                <p>
-                  {{ insight.errors }} erreur{{ insight.errors > 1 ? 's' : '' }}
-                  sur {{ insight.opportunities }} occasion{{ insight.opportunities > 1 ? 's' : '' }}.
-                </p>
-                <b class="error-pattern__trend">{{ errorTrendLabel(insight) }}</b>
-                <p class="error-pattern__advice">{{ insight.advice }}</p>
-                <details v-if="insight.examples.length">
-                  <summary>Voir des exemples</summary>
-                  <ul>
-                    <li v-for="example in insight.examples" :key="`${example.answeredAt}-${example.learnerAnswer}`">
-                      <span>{{ [example.person, example.infinitive, example.tense, example.mode].filter(Boolean).join(' · ') }}</span>
-                      <del>{{ example.learnerAnswer }}</del>
-                      <strong>{{ example.expectedAnswers.join(' / ') }}</strong>
-                    </li>
-                  </ul>
-                </details>
-              </article>
-            </div>
-          </template>
-          <div v-else class="error-patterns__state">
-            <strong>Pas encore assez de réponses classées.</strong>
-            <span>Les prochains défis alimenteront cette analyse sans conserver le détail des réponses justes.</span>
-          </div>
-        </section>
-
-        <div class="review-toolbar">
-          <strong>Trier par</strong>
-          <div role="group" aria-label="Trier les formes à revoir">
-            <button :class="{ 'is-active': reviewSort === 'verb' }" type="button" @click="reviewSort = 'verb'">Verbe</button>
-            <button :class="{ 'is-active': reviewSort === 'mode' }" type="button" @click="reviewSort = 'mode'">Mode</button>
-            <button :class="{ 'is-active': reviewSort === 'tense' }" type="button" @click="reviewSort = 'tense'">Temps du mode</button>
-          </div>
-        </div>
-
-        <div class="review-forms" aria-live="polite">
-          <article v-for="form in sortedReviewForms" :key="form.formKey" class="review-form">
-            <header>
-              <div>
-                <h3>{{ form.infinitive }}</h3>
-                <p>
-                  {{ form.mode }} · {{ form.tense }}
-                  <template v-if="form.person"> · {{ form.person }}</template>
-                </p>
-              </div>
-              <strong>
-                {{ form.errorCount }} faute{{ form.errorCount > 1 ? 's' : '' }}
-              </strong>
-            </header>
-            <div class="review-form__answer">
-              <span>Bonne{{ form.expectedAnswers.length > 1 ? 's' : '' }} réponse{{ form.expectedAnswers.length > 1 ? 's' : '' }}</span>
-              <strong>{{ form.expectedAnswers.join(' ou ') }}</strong>
-            </div>
-            <p v-if="form.learnerAnswers.length" class="review-form__mistakes">
-              <span>Tu avais écrit :</span>
-              {{ form.learnerAnswers.join(' · ') }}
-            </p>
-          </article>
-        </div>
-      </template>
-      <div v-else-if="!reviewPending" class="learner-empty">
-        <strong>Aucune forme à revoir.</strong>
-        <span>Tes prochaines réponses fausses apparaîtront ici avec leur correction.</span>
-      </div>
-    </section>
-
     <section v-else-if="activeTab === 'progress'" class="learner-panel" aria-labelledby="progress-title">
       <div class="learner-panel__heading learner-panel__heading--progress">
         <div>
           <p class="learner-eyebrow">Mesurer ce qui s’installe</p>
-          <h2 id="progress-title">Ma progression</h2>
+          <h2 id="progress-title">Fautes courantes</h2>
         </div>
         <div class="progress-explanation">
           <button
@@ -1737,44 +1580,19 @@ async function confirmAccountAction() {
         </div>
       </div>
 
-      <div class="progress-metric-tabs" role="group" aria-label="Type d’analyse de progression">
-        <button
-          type="button"
-          :aria-pressed="progressMetric === 'errors'"
-          :class="{ 'is-active': progressMetric === 'errors' }"
-          @click="progressMetric = 'errors'"
-        >
-          Erreurs
-        </button>
-        <button
-          type="button"
-          :aria-pressed="progressMetric === 'successes'"
-          :class="{ 'is-active': progressMetric === 'successes' }"
-          @click="progressMetric = 'successes'"
-        >
-          Réussites
-        </button>
-      </div>
+      <aside class="learner-section-intro">
+        <strong>Voir mes fautes dans le temps</strong>
+        <p>
+          Compare l’évolution de tes erreurs pour chaque difficulté.
+          Tu peux repérer celles qui diminuent, celles qui restent stables et celles qui méritent un nouvel entraînement.
+        </p>
+      </aside>
 
       <p v-if="learnerProgressError" class="preferences-error" role="alert">{{ learnerProgressError }}</p>
       <p v-else-if="learnerProgressPending && !learnerProgress" class="learner-empty">
         Analyse de ta progression…
       </p>
       <template v-else-if="learnerProgress?.cards.length">
-        <nav class="progress-chart-menu" aria-label="Accéder à un graphique">
-          <strong>Graphiques</strong>
-          <div>
-            <button
-              v-for="card in learnerProgress.cards"
-              :key="card.code"
-              type="button"
-              @click="scrollToProgressCard(card)"
-            >
-              {{ card.label }}
-            </button>
-          </div>
-        </nav>
-
         <div class="error-progress-list">
           <article
             v-for="card in learnerProgress.cards"
@@ -1783,7 +1601,7 @@ async function confirmAccountAction() {
             class="error-progress-card"
             :class="[
               `is-${card.trend}`,
-              `is-${progressMetric}`,
+              'is-errors',
               { 'is-stale': card.isStale },
             ]"
             tabindex="-1"
@@ -1796,7 +1614,7 @@ async function confirmAccountAction() {
             </div>
             <div class="error-progress-card__rate">
               <strong>{{ progressCurrentRate(card) }}%</strong>
-              <span>{{ progressMetric === 'errors' ? 'd’erreurs' : 'de réussites' }}</span>
+              <span>d’erreurs</span>
             </div>
           </header>
 
@@ -1812,7 +1630,7 @@ async function confirmAccountAction() {
               <svg
                 viewBox="0 0 640 190"
                 role="img"
-                :aria-label="`Évolution du taux de ${progressMetric === 'errors' ? 'erreurs' : 'réussites'} pour ${card.label}`"
+                :aria-label="`Évolution du taux d’erreurs pour ${card.label}`"
               >
                 <defs>
                   <linearGradient
@@ -1823,18 +1641,10 @@ async function confirmAccountAction() {
                     y2="16"
                     gradientUnits="userSpaceOnUse"
                   >
-                    <template v-if="progressMetric === 'errors'">
-                      <stop offset="0%" stop-color="#3aa66f" />
-                      <stop offset="10%" stop-color="#d6a33e" />
-                      <stop offset="20%" stop-color="#ef6760" />
-                      <stop offset="100%" stop-color="#ef6760" />
-                    </template>
-                    <template v-else>
-                      <stop offset="0%" stop-color="#ef6760" />
-                      <stop offset="80%" stop-color="#ef6760" />
-                      <stop offset="90%" stop-color="#d6a33e" />
-                      <stop offset="100%" stop-color="#3aa66f" />
-                    </template>
+                    <stop offset="0%" stop-color="#3aa66f" />
+                    <stop offset="10%" stop-color="#d6a33e" />
+                    <stop offset="20%" stop-color="#ef6760" />
+                    <stop offset="100%" stop-color="#ef6760" />
                   </linearGradient>
                 </defs>
                 <g class="error-progress-chart__grid">
@@ -1858,17 +1668,14 @@ async function confirmAccountAction() {
                 >
                   <title>
                     {{ progressDateLabel(coordinate.point.date) }} :
-                    {{ coordinate.rate }}% de {{ progressMetric === 'errors' ? 'fautes' : 'réussites' }},
-                    {{ progressMetric === 'errors'
-                      ? coordinate.point.errors
-                      : coordinate.point.opportunities - coordinate.point.errors }}
+                    {{ coordinate.rate }}% de fautes,
+                    {{ coordinate.point.errors }}
                     sur {{ coordinate.point.opportunities }} occasions testées
                   </title>
                 </circle>
               </svg>
               <div
-                class="error-progress-chart__rate-axis"
-                :class="`is-${progressMetric}`"
+                class="error-progress-chart__rate-axis is-errors"
                 aria-hidden="true"
               >
                 <span class="is-high">100%</span>
@@ -1881,9 +1688,7 @@ async function confirmAccountAction() {
               </div>
             </div>
             <div class="error-progress-chart__legend">
-              <span>
-                {{ progressMetric === 'errors' ? 'Moins d’erreurs en bas' : 'Plus de réussites en haut' }}
-              </span>
+              <span>Moins d’erreurs en bas</span>
               <span>
                 {{ card.totalOpportunities }} occasion{{ card.totalOpportunities > 1 ? 's' : '' }}
                 réellement testée{{ card.totalOpportunities > 1 ? 's' : '' }} au total
@@ -1893,6 +1698,39 @@ async function confirmAccountAction() {
           <div v-else class="error-progress-card__insufficient">
             Il faut au moins {{ learnerProgress.minimumEvidence }} occasions testées pour tracer une courbe fiable.
           </div>
+          <details v-if="card.examples.length" class="error-progress-examples">
+            <summary>
+              <span class="error-progress-examples__label">
+                <span class="error-progress-examples__chevron" aria-hidden="true" />
+                Voir des exemples
+              </span>
+              <small>{{ card.examples.length }} faute{{ card.examples.length > 1 ? 's' : '' }}</small>
+            </summary>
+            <ol>
+              <li v-for="example in card.examples" :key="example.id">
+                <dl>
+                  <div>
+                    <dt>Question</dt>
+                    <dd>{{ example.question }}</dd>
+                  </div>
+                  <div>
+                    <dt>Ta faute</dt>
+                    <dd class="error-progress-examples__wrong">{{ example.learnerAnswer || 'Aucune réponse' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Correction</dt>
+                    <dd class="error-progress-examples__correct">
+                      {{ example.expectedAnswers.join(' ou ') || 'Réponse attendue indisponible' }}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Raison</dt>
+                    <dd>{{ example.reason }}</dd>
+                  </div>
+                </dl>
+              </li>
+            </ol>
+          </details>
           </article>
         </div>
       </template>
@@ -1906,10 +1744,11 @@ async function confirmAccountAction() {
       <div class="learner-panel__heading">
         <div>
           <p class="learner-eyebrow">Adapter l’interface</p>
-          <h2 id="preferences-title">Mes préférences</h2>
+          <h2 id="preferences-title">Préférences</h2>
         </div>
         <span v-if="preferencesSaved" class="preferences-saved">Enregistré</span>
       </div>
+
       <p v-if="preferencesError" class="preferences-error" role="alert">{{ preferencesError }}</p>
 
       <div class="preference-block">
@@ -2085,14 +1924,6 @@ async function confirmAccountAction() {
       @close="closeReview"
     />
     <CoachPicker v-if="coachPickerOpen" @close="coachPickerOpen = false" @select="launchWithCoach" />
-    <ChallengeProgressDialog
-      v-if="selectedProgressChallenge"
-      :fingerprint="selectedProgressChallenge.fingerprint"
-      :challenge-label="selectedProgressChallenge.label"
-      :admin-learner-id="inspectedLearner?.id"
-      @close="selectedProgressChallenge = undefined"
-    />
-
     <Teleport to="body">
       <div
         v-if="accountDialog"
@@ -2153,6 +1984,122 @@ async function confirmAccountAction() {
 
 <style scoped>
 .learner-space{display:grid;max-width:1060px;margin:0 auto;gap:22px}.learner-space__hero{display:flex;padding:30px 34px;align-items:end;justify-content:space-between;gap:24px;border-radius:24px;color:white;background:linear-gradient(125deg,#624193,#8162b2 62%,#9c78ca);box-shadow:0 18px 42px rgb(74 47 112 / 22%)}.learner-space__hero p,.learner-eyebrow{margin:0 0 5px;font-size:.73rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.learner-space__hero h1{margin:0;font-size:clamp(2rem,5vw,3.8rem);letter-spacing:-.055em}.learner-space__hero>span{max-width:300px;opacity:.86;line-height:1.45}.learner-tabs{display:grid;grid-template-columns:repeat(6,1fr);padding:5px;border:1px solid var(--line);border-radius:16px;background:var(--surface-soft)}.learner-tabs button{min-height:46px;padding:9px 14px;border:0;border-radius:12px;color:var(--muted);background:transparent;font:inherit;font-weight:850;cursor:pointer}.learner-tabs button.is-active{color:white;background:#7052a0;box-shadow:0 7px 18px rgb(75 48 113 / 20%)}.learner-panel{display:grid;min-height:430px;padding:clamp(22px,4vw,38px);border:1px solid var(--line);border-radius:24px;gap:25px;background:var(--surface);box-shadow:var(--shadow)}.learner-panel__heading{display:flex;align-items:center;justify-content:space-between;gap:20px}.learner-panel h2{margin:0;color:var(--brand-dark);font-size:clamp(1.7rem,4vw,2.5rem);letter-spacing:-.04em}.learner-eyebrow{color:#7052a0}.learner-primary-link,.review-button{display:inline-flex;min-height:42px;padding:9px 15px;align-items:center;justify-content:center;border:0;border-radius:999px;color:white;background:#7052a0;text-decoration:none;font:inherit;font-size:.86rem;font-weight:850;cursor:pointer}.challenge-history{position:relative;display:grid;margin:0;padding:0 0 0 42px;gap:18px;list-style:none}.challenge-history::before{position:absolute;top:10px;bottom:10px;left:14px;width:3px;border-radius:99px;background:color-mix(in srgb,#7052a0 30%,var(--line));content:""}.challenge-history>li{position:relative}.challenge-history__dot{position:absolute;z-index:1;top:24px;left:-36px;width:17px;height:17px;border:4px solid var(--surface);border-radius:50%;background:#7052a0;box-shadow:0 0 0 2px #7052a0}.challenge-history>li::before{position:absolute;top:31px;left:-22px;width:22px;height:2px;background:color-mix(in srgb,#7052a0 30%,var(--line));content:""}.challenge-card{display:grid;padding:20px;border:1px solid var(--line);border-radius:18px;gap:13px;background:var(--surface-soft)}.challenge-card__top{display:flex;align-items:start;justify-content:space-between;gap:12px}.challenge-card__top span{color:var(--muted);font-size:.74rem}.challenge-card h3{margin:3px 0 0;color:var(--ink);font-size:1.12rem}.challenge-card__top>strong{display:grid;width:52px;height:52px;place-items:center;color:#9a3b35;border-radius:50%;background:color-mix(in srgb,var(--danger) 12%,var(--surface));font-size:.86rem}.challenge-card__top>strong.is-mastered{color:#24734d;background:color-mix(in srgb,var(--success) 14%,var(--surface))}.challenge-card__bar{height:7px;overflow:hidden;border-radius:99px;background:color-mix(in srgb,var(--danger) 16%,var(--surface))}.challenge-card__bar span{display:block;height:100%;border-radius:inherit;background:var(--success)}.challenge-card>p{margin:0;color:var(--muted);font-size:.86rem;line-height:1.45}.challenge-card .challenge-mastered{color:var(--success);font-weight:750}.review-button{justify-self:start;color:#5a3b86;border:1px solid color-mix(in srgb,#7052a0 35%,var(--line));background:color-mix(in srgb,#7052a0 10%,var(--surface))}.challenge-loader{justify-self:center;padding:10px 17px;border:1px solid color-mix(in srgb,#7052a0 32%,var(--line));border-radius:999px;color:#5a3b86;background:color-mix(in srgb,#7052a0 8%,var(--surface));font:inherit;font-size:.82rem;font-weight:850;cursor:pointer}.challenge-loader:disabled{cursor:progress;opacity:.65}.learner-empty{display:grid;min-height:220px;margin:0;place-content:center;gap:6px;color:var(--muted);text-align:center}.learner-empty strong{color:var(--ink);font-size:1.05rem}.timeline-filters{display:flex;align-items:end;justify-content:space-between;gap:16px}.timeline-filters>div{display:flex;padding:4px;border-radius:12px;background:var(--surface-soft)}.timeline-filters button{padding:8px 12px;border:0;border-radius:9px;color:var(--muted);background:transparent;font:inherit;font-size:.82rem;font-weight:800;cursor:pointer}.timeline-filters button.is-active{color:#5b3e86;background:var(--surface);box-shadow:0 3px 10px rgb(36 50 71 / 10%)}.timeline-filters label{display:grid;gap:5px;color:var(--muted);font-size:.72rem;font-weight:850}.timeline-filters select{min-width:220px;padding:9px 32px 9px 11px;border:1px solid var(--line);border-radius:10px;color:var(--ink);background:var(--surface);font:inherit}.progress-score{display:grid;justify-items:end}.progress-score strong{color:var(--success);font-size:1.8rem;line-height:1}.progress-score span{color:var(--muted);font-size:.72rem}.timeline-scroll{overflow-x:auto;padding:8px 5px 20px}.timeline{position:relative;display:flex;width:max-content;min-width:100%;margin:0;padding:0 10px;gap:14px;list-style:none}.timeline::before{position:absolute;top:45px;right:10px;left:10px;height:3px;background:var(--line);content:""}.timeline li{position:relative;display:grid;width:180px;grid-template-rows:25px 28px auto;justify-items:center}.timeline time{color:var(--muted);font-size:.69rem}.timeline__dot{z-index:1;display:block;width:17px;height:17px;margin-top:4px;border:4px solid var(--surface);border-radius:50%;background:#7052a0;box-shadow:0 0 0 2px #7052a0}.timeline li.is-correct .timeline__dot{background:var(--success);box-shadow:0 0 0 2px var(--success)}.timeline li.is-incorrect .timeline__dot{background:var(--danger);box-shadow:0 0 0 2px var(--danger)}.timeline article{display:grid;width:100%;min-height:122px;padding:12px;border:1px solid var(--line);border-radius:13px;gap:3px;background:var(--surface-soft);text-align:left}.timeline article strong{color:var(--ink)}.timeline article span,.timeline article small{color:var(--muted);font-size:.73rem;line-height:1.3}.timeline article b{align-self:end;justify-self:start;color:var(--success);font-size:.7rem}.timeline li.is-incorrect article b{color:var(--danger)}.preference-block{display:grid;padding:22px;border:1px solid var(--line);border-radius:18px;gap:18px;background:var(--surface-soft)}.preference-block h3{margin:0;color:var(--ink);font-size:1.15rem}.preference-block p{margin:5px 0 0;color:var(--muted)}.locale-choices,.theme-choices{display:flex;flex-wrap:wrap;gap:9px}.locale-choices button,.theme-choices button{display:inline-flex;min-height:43px;padding:9px 13px;align-items:center;gap:7px;border:1px solid var(--line);border-radius:11px;color:var(--ink);background:var(--surface);font:inherit;font-size:.84rem;font-weight:750;cursor:pointer}.locale-choices button.is-active,.theme-choices button.is-active{color:#5a3b86;border-color:#8c6cba;background:color-mix(in srgb,#7052a0 10%,var(--surface));box-shadow:inset 0 0 0 1px #8c6cba}.preferences-saved{padding:6px 10px;border-radius:99px;color:var(--success);background:color-mix(in srgb,var(--success) 12%,var(--surface));font-size:.78rem;font-weight:800}.preferences-error{margin:0;padding:10px 12px;border-radius:10px;color:var(--danger);background:color-mix(in srgb,var(--danger) 10%,transparent)}@media(max-width:720px){.learner-space__hero,.learner-panel__heading,.timeline-filters{align-items:stretch;flex-direction:column}.learner-space__hero>span{max-width:none}.learner-tabs{grid-template-columns:1fr}.progress-score{justify-items:start}.timeline-filters label,.timeline-filters select{width:100%}.learner-primary-link{align-self:start}}@media(max-width:480px){.learner-space__hero{padding:24px 20px}.learner-panel{padding:20px 15px}.challenge-history{padding-left:32px}.challenge-history::before{left:10px}.challenge-history__dot{left:-28px}.challenge-history>li::before{left:-14px;width:14px}.locale-choices button{flex:1 1 130px}.theme-choices button{flex:1}}
+
+.learner-space__hero {
+  padding: 14px 20px;
+  align-items: center;
+  gap: 16px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgb(74 47 112 / 16%);
+}
+
+.learner-space__hero h1 {
+  font-size: clamp(1.15rem, 2.4vw, 1.55rem);
+  letter-spacing: -.02em;
+}
+
+.learner-space__hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.learner-space__hero-actions button {
+  min-height: 34px;
+  padding: 7px 12px;
+  border: 1px solid rgb(255 255 255 / 48%);
+  border-radius: 999px;
+  color: white;
+  background: rgb(255 255 255 / 9%);
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.learner-space__hero-actions button:hover {
+  background: rgb(255 255 255 / 17%);
+}
+
+.learner-space__hero-actions button.is-active {
+  color: #5b3e86;
+  border-color: white;
+  background: white;
+}
+
+.learner-section-intro {
+  display: grid;
+  padding: 15px 17px;
+  border: 1px solid color-mix(in srgb, #7052a0 24%, var(--line));
+  border-radius: 15px;
+  gap: 4px;
+  background: color-mix(in srgb, #7052a0 6%, var(--surface-soft));
+}
+
+.learner-section-intro strong {
+  color: var(--learner-purple-heading);
+  font-size: .86rem;
+}
+
+.learner-section-intro p {
+  max-width: 820px;
+  margin: 0;
+  color: var(--muted);
+  font-size: .82rem;
+  line-height: 1.5;
+}
+
+.learner-tabs button.learner-tabs__primary {
+  display: inline-flex;
+  border: 1px solid color-mix(in srgb, #7052a0 48%, var(--line));
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: var(--learner-purple-copy);
+  background: color-mix(in srgb, #7052a0 11%, var(--surface));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #7052a0 7%, transparent);
+}
+
+.learner-tabs button.learner-tabs__primary:hover {
+  border-color: #7052a0;
+  background: color-mix(in srgb, #7052a0 17%, var(--surface));
+}
+
+.learner-tabs button.learner-tabs__primary.is-active {
+  color: white;
+  border-color: #7052a0;
+  background: #7052a0;
+  box-shadow: 0 7px 18px rgb(75 48 113 / 20%);
+}
+
+.learner-tabs__primary > span {
+  font-size: .9rem;
+}
+
+@media (max-width: 720px) {
+  .learner-space__hero {
+    padding: 12px 16px;
+    align-items: center;
+    flex-direction: row;
+    gap: 5px;
+  }
+
+  .learner-space__hero-actions {
+    margin-left: auto;
+    gap: 5px;
+  }
+
+  .learner-space__hero-actions button {
+    min-height: 32px;
+    padding: 6px 9px;
+    font-size: .7rem;
+  }
+
+  .learner-section-intro {
+    padding: 13px 14px;
+  }
+}
 
 .challenge-work {
   position: relative;
@@ -2308,7 +2255,7 @@ async function confirmAccountAction() {
 
 .error-patterns__grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
 }
 
@@ -2323,6 +2270,7 @@ async function confirmAccountAction() {
 }
 
 .error-pattern > header {
+  position: relative;
   display: flex;
   align-items: start;
   justify-content: space-between;
@@ -2330,12 +2278,30 @@ async function confirmAccountAction() {
 }
 
 .error-pattern h4 {
-  margin: 2px 0 0;
-  color: var(--ink);
-  font-size: 1rem;
+  width: fit-content;
+  margin: 0;
+  padding: 6px 10px;
+  border: 1px solid color-mix(in srgb, #7052a0 32%, var(--line));
+  border-radius: 999px;
+  color: var(--learner-purple-copy);
+  background: color-mix(in srgb, #7052a0 10%, var(--surface-soft));
+  font-size: .82rem;
+  line-height: 1.2;
+}
+
+.error-pattern__identity {
+  display: grid;
+  flex: 1;
+  padding-inline: 54px;
+  justify-items: center;
+  gap: 7px;
+  text-align: center;
 }
 
 .error-pattern header > strong {
+  position: absolute;
+  top: 0;
+  right: 0;
   color: var(--danger);
   font-size: 1.25rem;
 }
@@ -2360,6 +2326,7 @@ async function confirmAccountAction() {
 }
 
 .error-pattern__trend {
+  display: block;
   color: var(--muted);
   font-size: .76rem;
 }
@@ -2373,7 +2340,31 @@ async function confirmAccountAction() {
 }
 
 .error-pattern .error-pattern__advice {
+  display: flex;
+  width: fit-content;
+  padding: 8px 11px;
+  border: 1px solid color-mix(in srgb, var(--success) 30%, var(--line));
+  border-radius: 999px;
+  align-items: baseline;
+  gap: 5px;
   color: var(--ink);
+  background: color-mix(in srgb, var(--success) 9%, var(--surface-soft));
+}
+
+.error-pattern__advice strong {
+  color: var(--success);
+  white-space: nowrap;
+}
+
+.error-pattern__chart {
+  margin-top: 4px;
+}
+
+.error-pattern__chart-state {
+  padding: 15px;
+  border: 1px dashed var(--line);
+  border-radius: 13px;
+  text-align: center;
 }
 
 .error-pattern details {
@@ -2955,7 +2946,7 @@ async function confirmAccountAction() {
   position: sticky;
   z-index: 80;
   top: var(--learner-tabs-sticky-top, 68px);
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   box-shadow: 0 10px 24px rgb(20 28 38 / 12%);
 }
 
@@ -3553,9 +3544,7 @@ async function confirmAccountAction() {
   transform: translateY(-1px);
 }
 
-.progress-explanation__button:focus-visible,
-.progress-metric-tabs button:focus-visible,
-.progress-chart-menu button:focus-visible {
+.progress-explanation__button:focus-visible {
   outline: 3px solid color-mix(in srgb, #7052a0 42%, transparent);
   outline-offset: 3px;
 }
@@ -3592,76 +3581,6 @@ async function confirmAccountAction() {
   color: var(--muted);
   font-size: .84rem;
   line-height: 1.55;
-}
-
-.progress-metric-tabs {
-  display: grid;
-  width: 100%;
-  padding: 5px;
-  border: 1px solid var(--line);
-  border-radius: 15px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  background: var(--surface-soft);
-}
-
-.progress-metric-tabs button {
-  min-height: 44px;
-  padding: 9px 16px;
-  border: 0;
-  border-radius: 11px;
-  color: var(--muted);
-  background: transparent;
-  font: inherit;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.progress-metric-tabs button.is-active {
-  color: white;
-  background: #7052a0;
-  box-shadow: 0 6px 16px rgb(75 48 113 / 20%);
-}
-
-.progress-chart-menu {
-  display: grid;
-  padding: 14px 16px;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  gap: 10px;
-  background: var(--surface-soft);
-}
-
-.progress-chart-menu > strong {
-  color: var(--ink);
-  font-size: .78rem;
-}
-
-.progress-chart-menu > div {
-  display: flex;
-  overflow-x: auto;
-  padding: 1px 1px 5px;
-  gap: 8px;
-  overscroll-behavior-inline: contain;
-  scrollbar-width: thin;
-}
-
-.progress-chart-menu button {
-  flex: 0 0 auto;
-  min-height: 36px;
-  padding: 7px 12px;
-  border: 1px solid color-mix(in srgb, #7052a0 28%, var(--line));
-  border-radius: 999px;
-  color: var(--learner-purple-copy);
-  background: var(--surface);
-  font: inherit;
-  font-size: .74rem;
-  font-weight: 750;
-  cursor: pointer;
-}
-
-.progress-chart-menu button:hover {
-  border-color: #7052a0;
-  background: color-mix(in srgb, #7052a0 10%, var(--surface));
 }
 
 .error-progress-list {
@@ -3902,6 +3821,114 @@ async function confirmAccountAction() {
   background: var(--surface);
   font-size: .78rem;
   text-align: center;
+}
+
+.error-progress-examples {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface);
+}
+
+.error-progress-examples summary {
+  display: flex;
+  min-height: 48px;
+  padding: 12px 15px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: .86rem;
+  font-weight: 850;
+  list-style: none;
+}
+
+.error-progress-examples summary::-webkit-details-marker {
+  display: none;
+}
+
+.error-progress-examples__chevron {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--learner-purple-heading);
+  border-bottom: 2px solid var(--learner-purple-heading);
+  flex: 0 0 auto;
+  transform: rotate(-45deg);
+  transition: transform .18s ease;
+}
+
+.error-progress-examples[open] .error-progress-examples__chevron {
+  transform: rotate(45deg) translate(-2px, -2px);
+}
+
+.error-progress-examples__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.error-progress-examples summary small {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: .7rem;
+  font-weight: 750;
+}
+
+.error-progress-examples > ol {
+  display: grid;
+  margin: 0;
+  padding: 0 15px 15px;
+  gap: 11px;
+  list-style: none;
+}
+
+.error-progress-examples > ol > li {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+
+.error-progress-examples dl {
+  display: grid;
+  margin: 0;
+  gap: 9px;
+}
+
+.error-progress-examples dl > div {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.error-progress-examples dt {
+  color: var(--muted);
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.error-progress-examples dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--ink);
+  font-size: .8rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.error-progress-examples__wrong {
+  color: var(--danger) !important;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.error-progress-examples__correct {
+  color: var(--success) !important;
+  font-weight: 800;
 }
 
 .learner-space--dark .error-progress-card__status > span.is-warning {
@@ -4224,7 +4251,7 @@ async function confirmAccountAction() {
 
 @media (max-width: 720px) {
   .learner-tabs {
-    grid-template-columns: repeat(6, minmax(138px, 1fr));
+    grid-template-columns: repeat(3, minmax(138px, 1fr));
     overflow-x: auto;
     overscroll-behavior-inline: contain;
     scrollbar-width: thin;
@@ -4283,6 +4310,11 @@ async function confirmAccountAction() {
   .error-progress-chart__legend {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .error-progress-examples dl > div {
+    grid-template-columns: 1fr;
+    gap: 3px;
   }
 
   .account-actions article {

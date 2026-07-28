@@ -2,6 +2,7 @@
 const { ui, uiLabel, interfaceLocale } = useLanguagePreferences()
 import type { LearnerErrorDetail } from '~~/shared/types/conjugation'
 import { learnerErrorDetailText } from '~~/shared/utils/learner-error-diagnostics'
+import { learnerErrorInsteadOf, localizedLearnerErrorMessage } from '~~/shared/i18n/learner-errors'
 
 interface SummaryItem {
   index: number
@@ -206,7 +207,9 @@ async function buildPdf() {
     const comparisons = item.errorDetails.filter(detail => detail.learnerValue && detail.expectedValue)
     const errors = item.errorDetails.length
       ? fitCell(`${errorLabel} : ${item.errorDetails.map(detail => (
-          detail.learnerValue && detail.expectedValue ? detail.message : learnerErrorDetailText(detail)
+          detail.learnerValue && detail.expectedValue
+            ? localizedLearnerErrorMessage(detail, interfaceLocale.value)
+            : learnerErrorDetailText(detail, interfaceLocale.value)
         )).join(' · ')}`, questionWidth, 'normal')
       : null
     const learner = fitCell(item.learnerAnswer || '—', learnerWidth, 'normal')
@@ -238,7 +241,7 @@ async function buildPdf() {
         pdf.roundedRect(questionX, comparisonY - .5, learnerWidth, 3.6, .8, .8, 'F')
         pdf.setTextColor(143, 41, 37)
         pdf.text(learnerValue, questionX + 1.5, comparisonY + 2)
-        const separator = 'à la place de'
+        const separator = learnerErrorInsteadOf(interfaceLocale.value)
         pdf.setFont('helvetica', 'normal')
         const separatorX = questionX + learnerWidth + 1.2
         pdf.setTextColor(95, 103, 106)

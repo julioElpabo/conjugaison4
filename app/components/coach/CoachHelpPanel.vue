@@ -7,6 +7,7 @@ import { conditionalCoachHelpBlocks, renderCoachHelpContent } from '~~/shared/ut
 import { sanitizeCoachHtml } from '~~/shared/utils/safe-html'
 import { coachHelpProfile } from '~~/shared/data/coach-help-profiles'
 
+const { ui, uiLabel } = useLanguagePreferences()
 const props = withDefaults(defineProps<{
   blocks: CoachHelpBlock[]
   values: CoachHelpContentValues
@@ -49,12 +50,12 @@ const feedbackType = ref<HelpFeedbackType | ''>('')
 const feedbackComment = ref('')
 const feedbackStatus = ref<FeedbackStatus>('idle')
 const feedbackError = ref('')
-const feedbackOptions: Array<{ type: HelpFeedbackType, label: string, icon: string }> = [
-  { type: 'useful', label: 'Utile', icon: '✓' },
-  { type: 'unclear', label: 'Pas clair', icon: '?' },
-  { type: 'error', label: 'Erreur', icon: '!' },
-  { type: 'remark', label: 'Remarque', icon: '✎' },
-]
+const feedbackOptions = computed<Array<{ type: HelpFeedbackType, label: string, icon: string }>>(() => [
+  { type: 'useful', label: ui('Utile'), icon: '✓' },
+  { type: 'unclear', label: ui('Pas clair'), icon: '?' },
+  { type: 'error', label: ui('Erreur'), icon: '!' },
+  { type: 'remark', label: ui('Remarque'), icon: '✎' },
+])
 const activeProfile = computed(() => coachHelpProfile(props.blocks.find(block => block.profileId)?.profileId))
 const renderedBlocks = computed(() => [
   ...props.blocks
@@ -84,29 +85,29 @@ const automaticAudit = computed(() => automaticAuditInput.value
       tense: automaticAuditInput.value.tense,
     })
   : null)
-const safeFallbackBlock: CoachHelpBlock = {
+const safeFallbackBlock = computed<CoachHelpBlock>(() => ({
   id: -990_001,
   type: 'warning',
-  title: 'Aide sécurisée',
-  content: '<p>Une incohérence a été détectée dans l’explication détaillée. La réponse officielle à retenir est :</p><p><mark><strong>{correctAnswers}</strong></mark></p>',
+  title: ui('Aide sécurisée'),
+  content: `<p>${ui('Une incohérence a été détectée dans l’explication détaillée. La réponse officielle à retenir est :')}</p><p><mark><strong>{correctAnswers}</strong></mark></p>`,
   explanationApproach: 'cif-falc',
   isActive: true,
   sortOrder: 1,
   children: [],
-}
-const safeAdviceFallbackBlock: CoachHelpBlock = {
+}))
+const safeAdviceFallbackBlock = computed<CoachHelpBlock>(() => ({
   id: -990_002,
   type: 'warning',
-  title: 'Aide sécurisée',
-  content: '<p>Une incohérence a été détectée dans cette explication. Repère le temps et la personne, cherche le radical, puis choisis la terminaison correspondante.</p>',
+  title: ui('Aide sécurisée'),
+  content: `<p>${ui('Une incohérence a été détectée dans cette explication. Repère le temps et la personne, cherche le radical, puis choisis la terminaison correspondante.')}</p>`,
   explanationApproach: 'cif-falc',
   profileId: 'complete',
   isActive: true,
   sortOrder: 1,
   children: [],
-}
+}))
 const displayedBlocks = computed(() => automaticAudit.value?.status === 'failed'
-  ? [{ block: activeProfile.value.revealsAnswers ? safeFallbackBlock : safeAdviceFallbackBlock, blockIndex: null as number | null }]
+  ? [{ block: activeProfile.value.revealsAnswers ? safeFallbackBlock.value : safeAdviceFallbackBlock.value, blockIndex: null as number | null }]
   : renderedBlocks.value)
 const renderedHeaderTitle = computed(() => renderCoachHelpContent('{helpTitle}', props.values))
 const renderedHeaderDescription = computed(() => sanitizeCoachHtml(renderCoachHelpContent(props.headerDescription, props.values)))
@@ -157,9 +158,9 @@ function scrollContentToBottom(focusTextarea = false) {
 
 function renderedBlockTitle(block: CoachHelpBlock) {
   const content = block.content.trim()
-  if (content === '{definitionHelp}') return 'Définition'
+  if (content === '{definitionHelp}') return ui('Définition')
   if (content === '{contextualBaseHelp}') return ''
-  return block.title
+  return uiLabel(block.title)
 }
 
 function renderHelpBlockSnapshot(block: CoachHelpBlock, blockIndex: number | null): Record<string, unknown> {
@@ -311,7 +312,7 @@ async function submitFeedback() {
   }
   catch {
     feedbackStatus.value = 'error'
-    feedbackError.value = 'Retour impossible pour le moment.'
+    feedbackError.value = ui('Retour impossible pour le moment.')
   }
 }
 
@@ -345,13 +346,13 @@ onBeforeUnmount(() => {
     role="region"
     aria-labelledby="coach-help-title"
   >
-    <span class="coach-help-badge">Aide</span>
+    <span class="coach-help-badge">{{ ui('Aide') }}</span>
     <header class="coach-help-header">
       <div>
         <h2 id="coach-help-title">{{ renderedHeaderTitle }}</h2>
         <div v-if="renderedHeaderDescription" class="coach-help-header__description" v-html="renderedHeaderDescription" />
       </div>
-      <button v-if="showClose" type="button" aria-label="Fermer l’aide" @click="emit('close')">×</button>
+      <button v-if="showClose" type="button" :aria-label="ui('Fermer l’aide')" @click="emit('close')">×</button>
     </header>
 
     <div ref="content" class="coach-help-content" @scroll.passive="reportPreviewScroll">
@@ -364,12 +365,9 @@ onBeforeUnmount(() => {
       />
 
       <section v-if="showFeedback" class="coach-help-feedback" aria-labelledby="coach-help-feedback-title">
-        <h3 id="coach-help-feedback-title" class="sr-only">Retour sur l’aide automatique</h3>
-        <p>
-          Cette aide est générée automatiquement. Elle peut contenir une erreur ou manquer de clarté.
-          Les retours permettent de l’améliorer.
-        </p>
-        <div class="coach-help-feedback__actions" role="group" aria-label="Retour sur cette aide">
+        <h3 id="coach-help-feedback-title" class="sr-only">{{ ui('Retour sur l’aide automatique') }}</h3>
+        <p>{{ ui('Cette aide est générée automatiquement. Elle peut contenir une erreur ou manquer de clarté. Les retours permettent de l’améliorer.') }}</p>
+        <div class="coach-help-feedback__actions" role="group" :aria-label="ui('Retour sur cette aide')">
           <button
             v-for="option in feedbackOptions"
             :key="option.type"
@@ -383,25 +381,25 @@ onBeforeUnmount(() => {
           </button>
         </div>
         <form v-if="feedbackRequiresComment && feedbackStatus !== 'sent'" class="coach-help-feedback__form" @submit.prevent="submitFeedback">
-          <label for="coach-help-feedback-comment">Remarque optionnelle</label>
+          <label for="coach-help-feedback-comment">{{ ui('Remarque optionnelle') }}</label>
           <textarea
             id="coach-help-feedback-comment"
             ref="feedbackTextarea"
             v-model="feedbackComment"
             rows="3"
             maxlength="2000"
-            placeholder="Précision utile pour corriger ou améliorer l’aide…"
+            :placeholder="ui('Précision utile pour corriger ou améliorer l’aide…')"
           />
           <button type="submit" :disabled="feedbackStatus === 'sending'">
-            {{ feedbackStatus === 'sending' ? 'Envoi…' : 'Envoyer le retour' }}
+            {{ feedbackStatus === 'sending' ? ui('Envoi…') : ui('Envoyer le retour') }}
           </button>
         </form>
-        <p v-if="feedbackStatus === 'sent'" class="coach-help-feedback__status">Retour enregistré.</p>
+        <p v-if="feedbackStatus === 'sent'" class="coach-help-feedback__status">{{ ui('Retour enregistré.') }}</p>
         <p v-else-if="feedbackError" class="coach-help-feedback__error">{{ feedbackError }}</p>
       </section>
     </div>
 
-    <footer class="coach-help-footer"><button type="button" @click="emit('close')">Fermer</button></footer>
+    <footer class="coach-help-footer"><button type="button" @click="emit('close')">{{ ui('Fermer') }}</button></footer>
   </aside>
 </template>
 

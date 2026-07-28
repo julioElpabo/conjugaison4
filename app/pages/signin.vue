@@ -1,5 +1,6 @@
 <script setup lang="ts">
 type Mode = 'register' | 'login'
+import { learnerAuthCopy } from '~~/shared/i18n/learner-auth'
 
 interface UsernameSuggestion {
   username: string
@@ -21,6 +22,8 @@ interface LoginResult {
 
 const config = useRuntimeConfig()
 const { setUser } = useLearnerAuth()
+const { interfaceLocale, localePath } = useLanguagePreferences()
+const copy = computed(() => learnerAuthCopy(interfaceLocale.value))
 const mode = ref<Mode>('login')
 const loadingSuggestion = ref(true)
 const submitting = ref(false)
@@ -38,13 +41,13 @@ const registerForm = ref<HTMLFormElement | null>(null)
 const copied = ref(false)
 const turnstileSiteKey = String(config.public.turnstileSiteKey || '')
 
-useHead({
-  title: 'Compte pseudonyme',
+useHead(() => ({
+  title: copy.value.pageTitle,
   meta: [{ name: 'robots', content: 'noindex, nofollow' }],
   script: turnstileSiteKey
     ? [{ src: 'https://challenges.cloudflare.com/turnstile/v0/api.js', async: true, defer: true }]
     : [],
-})
+}))
 
 onMounted(async () => {
   if (!import.meta.dev) return
@@ -143,6 +146,7 @@ async function register() {
         usernameProof: suggestion.value.proof,
         password: password.value,
         privacyAccepted: privacyAccepted.value,
+        interfaceLocale: interfaceLocale.value,
         website: website.value,
         turnstileToken: turnstileToken(),
       },
@@ -167,10 +171,14 @@ async function login() {
   try {
     const result = await $fetch<LoginResult>('/api/learner/login', {
       method: 'POST',
-      body: { username: loginUsername.value, password: loginPassword.value },
+      body: {
+        username: loginUsername.value,
+        password: loginPassword.value,
+        interfaceLocale: interfaceLocale.value,
+      },
     })
     setUser(result.user)
-    await navigateTo('/fr/my-page')
+    await navigateTo(localePath('/my-page'))
   } catch (error) {
     errorMessage.value = humanError(error, 'Pseudonyme ou mot de passe incorrect.')
   } finally {
@@ -199,36 +207,32 @@ function downloadRecoveryCode() {
 <template>
   <div class="learner-auth-page">
     <section v-if="recovery" class="learner-card learner-recovery" aria-labelledby="recovery-title">
-      <p class="learner-eyebrow">Ton compte est créé</p>
-      <h1 id="recovery-title">Conserve ton code de récupération</h1>
-      <p>Il permet de récupérer ton compte sans adresse e-mail. Il ne sera plus affiché après cette étape.</p>
+      <p class="learner-eyebrow">{{ copy.created }}</p>
+      <h1 id="recovery-title">{{ copy.keepCode }}</h1>
+      <p>{{ copy.recoveryInfo }}</p>
       <dl>
-        <div><dt>Pseudonyme</dt><dd>{{ recovery.username }}</dd></div>
-        <div><dt>Code de récupération</dt><dd><code>{{ recovery.recoveryCode }}</code></dd></div>
+        <div><dt>{{ copy.username }}</dt><dd>{{ recovery.username }}</dd></div>
+        <div><dt>{{ copy.recoveryCode }}</dt><dd><code>{{ recovery.recoveryCode }}</code></dd></div>
       </dl>
       <div class="learner-actions">
         <button type="button" class="secondary-button" @click="copyRecoveryCode">
-          {{ copied ? 'Code copié' : 'Copier le code' }}
+          {{ copied ? copy.codeCopied : copy.copyCode }}
         </button>
-        <button type="button" class="secondary-button" @click="downloadRecoveryCode">Télécharger</button>
-        <NuxtLink class="primary-button" to="/fr/my-page">Continuer</NuxtLink>
+        <button type="button" class="secondary-button" @click="downloadRecoveryCode">{{ copy.download }}</button>
+        <NuxtLink class="primary-button" :to="localePath('/my-page')">{{ copy.continue }}</NuxtLink>
       </div>
     </section>
 
     <section v-else class="learner-card" aria-labelledby="learner-auth-title">
-      <h1 id="learner-auth-title">{{ mode === 'register' ? 'Créer mon compte' : 'Me connecter' }}</h1>
-      <p class="learner-intro">
-        Créer un compte t’aide à mieux progresser : tes résultats sont mémorisés,
-        tu peux suivre tes progrès et retravailler tes fautes.
-        Aucun nom ni aucune adresse e-mail ne sont demandés.
-      </p>
+      <h1 id="learner-auth-title">{{ mode === 'register' ? copy.create : copy.signIn }}</h1>
+      <p class="learner-intro">{{ copy.intro }}</p>
 
-      <div class="learner-tabs" role="tablist" aria-label="Choisir une action">
+      <div class="learner-tabs" role="tablist" :aria-label="copy.chooseAction">
         <button type="button" role="tab" :aria-selected="mode === 'login'" @click="selectMode('login')">
-          Me connecter
+          {{ copy.signIn }}
         </button>
         <button type="button" role="tab" :aria-selected="mode === 'register'" @click="selectMode('register')">
-          Créer un compte
+          {{ copy.create }}
         </button>
       </div>
 
@@ -236,20 +240,20 @@ function downloadRecoveryCode() {
 
       <form v-if="mode === 'register'" ref="registerForm" @submit.prevent="register">
         <div class="learner-field">
-          <span>Ton pseudonyme proposé</span>
+          <span>{{ copy.proposedUsername }}</span>
           <div class="username-proposal" aria-live="polite">
-            <strong>{{ loadingSuggestion ? 'Recherche…' : suggestion?.username || 'Indisponible' }}</strong>
-            <button type="button" :disabled="loadingSuggestion" @click="refreshSuggestion">M’en proposer un autre</button>
+            <strong>{{ loadingSuggestion ? copy.searching : suggestion?.username || copy.unavailable }}</strong>
+            <button type="button" :disabled="loadingSuggestion" @click="refreshSuggestion">{{ copy.anotherUsername }}</button>
           </div>
         </div>
 
         <label class="learner-field">
-          <span>Choisis un mot de passe</span>
+          <span>{{ copy.choosePassword }}</span>
           <input v-model="password" type="password" minlength="10" maxlength="200" autocomplete="new-password" required>
-          <small>Au moins 10 caractères. Une petite phrase est facile à retenir.</small>
+          <small>{{ copy.passwordHint }}</small>
         </label>
         <label class="learner-field">
-          <span>Confirme ton mot de passe</span>
+          <span>{{ copy.confirmPassword }}</span>
           <input v-model="passwordConfirmation" type="password" minlength="10" maxlength="200" autocomplete="new-password" required>
         </label>
 
@@ -260,7 +264,7 @@ function downloadRecoveryCode() {
 
         <label class="privacy-check">
           <input v-model="privacyAccepted" type="checkbox" required>
-          <span>J’ai compris que le site enregistre mon pseudonyme et, plus tard, ma progression. Il ne demande pas mon vrai nom et je pourrai supprimer mon compte.</span>
+          <span>{{ copy.privacy }}</span>
         </label>
 
         <div
@@ -272,21 +276,21 @@ function downloadRecoveryCode() {
         />
 
         <button class="primary-button is-full" type="submit" :disabled="submitting || loadingSuggestion || !suggestion">
-          {{ submitting ? 'Création…' : 'Créer mon compte' }}
+          {{ submitting ? copy.creating : copy.create }}
         </button>
       </form>
 
       <form v-else @submit.prevent="login">
         <label class="learner-field">
-          <span>Pseudonyme</span>
+          <span>{{ copy.username }}</span>
           <input v-model="loginUsername" type="text" maxlength="80" autocomplete="username" autocapitalize="none" spellcheck="false" required>
         </label>
         <label class="learner-field">
-          <span>Mot de passe</span>
+          <span>{{ copy.password }}</span>
           <input v-model="loginPassword" type="password" maxlength="200" autocomplete="current-password" required>
         </label>
         <button class="primary-button is-full" type="submit" :disabled="submitting">
-          {{ submitting ? 'Connexion…' : 'Me connecter' }}
+          {{ submitting ? copy.signingIn : copy.signIn }}
         </button>
       </form>
     </section>

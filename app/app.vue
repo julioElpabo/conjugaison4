@@ -1,12 +1,19 @@
 <template>
   <NuxtRouteAnnouncer />
   <NuxtLayout>
-    <NuxtPage />
+    <NuxtPage :page-key="localizedPageKey" />
   </NuxtLayout>
 </template>
 
 <script setup lang="ts">
+import type { RouteLocationNormalizedLoaded } from 'vue-router'
+import { stripLocaleFromPath } from '~~/shared/i18n/locales'
+
 const { ui } = useLanguagePreferences()
+
+function localizedPageKey(route: RouteLocationNormalizedLoaded) {
+  return stripLocaleFromPath(route.path)
+}
 
 useHead(() => ({
   titleTemplate: title => title ? `${title} · ${ui('Défis de conjugaison')}` : ui('Défis de conjugaison'),

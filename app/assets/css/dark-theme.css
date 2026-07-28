@@ -20,12 +20,6 @@
 
 :root[data-theme='dark'] select { color-scheme: dark; }
 
-:root[data-theme='dark'] .challenge-page {
-  background:
-    radial-gradient(circle at 10% 4%, rgb(37 77 78 / 46%), transparent 31rem),
-    linear-gradient(180deg, #111b1c 0, #182421 48rem, #141e1c 100%);
-}
-
 :root[data-theme='dark'] :is(.challenge-hero h1, .wizard-hero h1, .reference-hero h1, .conjugation-heading h2, .learning-hero h1) {
   color: #c2e2dc;
 }
@@ -272,7 +266,7 @@
 :root[data-theme='dark'] .switch-row input:checked + .switch-row__control { background: #58a895; }
 :root[data-theme='dark'] .tense-picker .switch-row input:checked + .switch-row__control { background: var(--tense-accent); }
 :root[data-theme='dark'] .tense-groups > .tense-group:nth-child(even) { border-color: #49605a; }
-:root[data-theme='dark'] .tense-groups > .tense-group:nth-child(odd):not(:first-child)::before { background: #49605a; }
+:root[data-theme='dark'] .tense-groups > .tense-group:nth-child(n + 2)::before { background: #49605a; }
 
 :root[data-theme='dark'] .tense-info > button {
   color: #8ed1c3;

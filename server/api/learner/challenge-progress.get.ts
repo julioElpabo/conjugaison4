@@ -7,6 +7,7 @@ import {
   learnerErrorDetailText,
 } from '~~/shared/utils/learner-error-diagnostics'
 import { requireLearnerDataSubject } from '../../utils/learner-data-subject'
+import { normalizeLocale } from '../../../shared/i18n/locales'
 
 interface RunRow extends RowDataPacket {
   id: number
@@ -52,6 +53,7 @@ function questionFromJson(source: string) {
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Cache-Control', 'no-store')
   const learner = await requireLearnerDataSubject(event)
+  const locale = normalizeLocale(getQuery(event).locale, 'fr')
   const fingerprint = typeof getQuery(event).fingerprint === 'string'
     ? String(getQuery(event).fingerprint).trim()
     : ''
@@ -125,7 +127,7 @@ export default defineEventHandler(async (event) => {
         : question?.reponses || [],
       question,
       explanations: question
-        ? learnerErrorDetails(row.learnerAnswer, question).map(learnerErrorDetailText)
+        ? learnerErrorDetails(row.learnerAnswer, question).map(detail => learnerErrorDetailText(detail, locale))
         : [],
     })
     errorsByRun.set(Number(row.runId), errors)

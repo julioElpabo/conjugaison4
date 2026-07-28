@@ -917,11 +917,11 @@ body.dialog-open {
   border-left: 1px solid #c9dbd5;
 }
 
-.tense-groups > .tense-group:nth-child(odd):not(:first-child)::before {
+.tense-groups > .tense-group:nth-child(n + 3)::before {
   position: absolute;
   top: 0;
   left: 0;
-  width: 200%;
+  width: 100%;
   height: 1px;
   background: #c9dbd5;
   content: "";
@@ -2501,10 +2501,6 @@ body.dialog-open {
     background: #c9dbd5;
     content: "";
     pointer-events: none;
-  }
-
-  .tense-groups > .tense-group:nth-child(odd):not(:first-child)::before {
-    width: 100%;
   }
 
   .app-dialog,

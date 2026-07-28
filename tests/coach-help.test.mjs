@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { automaticOrthographyHelpBlocks, buildCondensedVerbGroupHtml, buildContextualBaseTitle, buildDefinitionHelpHtml, buildNearFutureAllerHelpHtml, buildNearFutureCoachHelpHtml, buildPronominalCoachHelpHtml, buildReferenceFormHelpHtml, coachHelpBlockUsesPedagogicalApproach, coachHelpQuestionVariables, conditionalCoachHelpBlocks, defaultCoachHelpBlocks, renderCoachHelpContent, visibleCoachHelpBlocks } from '../shared/utils/coach-help.ts'
+import { automaticOrthographyHelpBlocks, buildCondensedVerbGroupHtml, buildContextualBaseTitle, buildDefinitionHelpHtml, buildNearFutureAllerHelpHtml, buildNearFutureCoachHelpHtml, buildPronominalCoachHelpHtml, buildReferenceFormHelpHtml, coachHelpBlockUsesPedagogicalApproach, coachHelpQuestionVariables, conditionalCoachHelpBlocks, defaultCoachHelpBlocks, localizedCoachVerbDefinition, renderCoachHelpContent, visibleCoachHelpBlocks } from '../shared/utils/coach-help.ts'
 import { COACH_HELP_BLOCK_TYPES } from '../shared/types/coach.ts'
 import { formatCoachHtmlSource } from '../shared/utils/html-source-format.ts'
 import { sanitizeCoachHtml } from '../shared/utils/safe-html.ts'
@@ -234,6 +234,23 @@ describe('aides visuelles configurables', () => {
     const aller = buildNearFutureAllerHelpHtml()
     assert.match(aller, /<details><summary>Aller au présent<\/summary>/u)
     assert.match(aller, /<th>nous<\/th><td>allons<\/td>/u)
+
+    const germanHelp = buildNearFutureCoachHelpHtml({ infinitif: 'payer' }, 'de')
+    assert.match(germanHelp, /Das nahe Futur wird mit « aller » im Präsens/u)
+    assert.match(germanHelp, /aller im Präsens \+ payer/u)
+    assert.doesNotMatch(germanHelp, /Ce n'est pas|Un exemple/u)
+    assert.match(buildNearFutureAllerHelpHtml('de'), /<summary>aller im Präsens<\/summary>/u)
+  })
+
+  it('utilise une définition sémantique traduite lorsque la définition administrée est seulement française', () => {
+    const verb = {
+      infinitif: 'payer',
+      meaning: 'Donner de l’argent pour un achat ou une dette.',
+      categoriesSemantiques: ['echange'],
+    }
+    assert.equal(localizedCoachVerbDefinition(verb, 'fr'), verb.meaning)
+    assert.equal(localizedCoachVerbDefinition(verb, 'de'), 'einen Austausch, eine Gabe oder eine Weitergabe ausdrücken')
+    assert.doesNotMatch(localizedCoachVerbDefinition(verb, 'de'), /Donner de l’argent/u)
   })
 
   it('ajoute un bloc pédagogique avec le menu des pronoms réfléchis', () => {

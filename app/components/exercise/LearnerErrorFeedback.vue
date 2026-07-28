@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { LearnerErrorDetail } from '~~/shared/types/conjugation'
+import { learnerErrorInsteadOf, localizedLearnerErrorMessage } from '~~/shared/i18n/learner-errors'
 
 defineProps<{
   details: LearnerErrorDetail[]
   compact?: boolean
 }>()
 
-const { ui } = useLanguagePreferences()
+const { interfaceLocale, ui } = useLanguagePreferences()
 </script>
 
 <template>
@@ -16,10 +17,10 @@ const { ui } = useLanguagePreferences()
     </strong>
     <ul>
       <li v-for="detail in details" :key="detail.code">
-        <b>{{ detail.message }}</b>
+        <b>{{ localizedLearnerErrorMessage(detail, interfaceLocale) }}</b>
         <span v-if="detail.learnerValue && detail.expectedValue" class="learner-error-feedback__comparison">
           <del>{{ detail.learnerValue }}</del>
-          <span>à la place de</span>
+          <span>{{ learnerErrorInsteadOf(interfaceLocale) }}</span>
           <ins>{{ detail.expectedValue }}</ins>
         </span>
       </li>

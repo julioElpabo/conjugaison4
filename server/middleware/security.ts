@@ -68,8 +68,7 @@ export default defineEventHandler((event) => {
     || path.startsWith('/api/auth/')
     || path.startsWith('/api/learner/')
     || /^\/(?:fr|de|en|it|es)\/admin(?:\/|$)/u.test(path)
-    || path === '/fr/signin'
-    || path === '/fr/my-page'
+    || /^\/(?:fr|de|en|it|es)\/(?:signin|my-page)$/u.test(path)
     || path === '/admin'
     || path.startsWith('/admin/')
   ) {

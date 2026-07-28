@@ -1,10 +1,12 @@
 import { COACH_EXPLANATION_APPROACHES, type CoachExplanationApproach, type CoachHelpBlock, type CoachHelpBlockType, type CoachHelpEngineKey, type CoachHelpTemplate, type CoachProfile } from '../types/coach'
 import { coachHelpProfile, normalizeCoachHelpEngineKey, type CoachAutomaticHelpBlockId } from '../data/coach-help-profiles'
 import { coachCondensedTenseRule } from '../data/coach-condensed-tense-rules'
+import { condensedExampleLabel, localizedCondensedTenseRule } from '../i18n/coach-condensed-help'
 import type { ConjugationTense, ExerciseQuestion, Verb } from '../types/conjugation'
 import { withoutIndicativeMode } from './chat-mode-display'
 import { buildCompleteConjugationAdviceHtml, buildConjugationBaseHtml, buildConjugationEndingsHtml, decomposeConjugationForm } from './conjugation-help'
 import { bareNearFutureInfinitive, isNearFutureTense, isPronominalNearFutureInfinitive, nearFutureReflexivePronoun } from './near-future'
+import type { AppLocale } from '../i18n/locales'
 
 const DEFAULT_TITLES: Record<CoachHelpBlockType, string> = {
   normal: '',
@@ -352,6 +354,93 @@ export function buildDefinitionHelpHtml(values: Pick<CoachHelpContentValues, 've
   return `<p><strong>${escapedCoachText(verb)}</strong> = ${escapedCoachText(definition)}</p>`
 }
 
+const semanticDefinitionFallbacks: Record<Exclude<AppLocale, 'fr'>, Record<string, string>> = {
+  de: {
+    mouvement: 'eine Bewegung oder Fortbewegung ausdrücken',
+    position: 'eine Position oder einen Positionswechsel ausdrücken',
+    perception: 'eine Sinneswahrnehmung ausdrücken',
+    manipulation: 'eine Handlung an einem Gegenstand ausdrücken',
+    'creation-transformation': 'eine Erschaffung oder Veränderung ausdrücken',
+    communication: 'Worte, Gedanken oder Informationen mitteilen',
+    cognition: 'einen Gedanken, ein Wissen oder einen Lernvorgang ausdrücken',
+    emotion: 'ein Gefühl, einen Geschmack oder eine Bewertung ausdrücken',
+    modalite: 'ausdrücken, was möglich, notwendig oder erwünscht ist',
+    'relation-sociale': 'eine Beziehung oder Handlung mit anderen Personen ausdrücken',
+    echange: 'einen Austausch, eine Gabe oder eine Weitergabe ausdrücken',
+    corps: 'eine Handlung oder ein Bedürfnis des Körpers ausdrücken',
+    nature: 'ein Naturphänomen beschreiben',
+    'action-processus': 'eine Handlung oder einen Vorgang ausdrücken',
+  },
+  en: {
+    mouvement: 'express movement or travel',
+    position: 'express a position or a change of position',
+    perception: 'express something perceived through the senses',
+    manipulation: 'express an action performed on an object',
+    'creation-transformation': 'express creation or transformation',
+    communication: 'communicate words, ideas or information',
+    cognition: 'express thought, knowledge or learning',
+    emotion: 'express an emotion, preference or appreciation',
+    modalite: 'indicate what is possible, necessary or desired',
+    'relation-sociale': 'express a relationship or an action involving other people',
+    echange: 'express an exchange, a gift or a transfer',
+    corps: 'express an action or a need of the body',
+    nature: 'describe a natural phenomenon',
+    'action-processus': 'express an action or a process',
+  },
+  it: {
+    mouvement: 'esprimere un movimento o uno spostamento',
+    position: 'esprimere una posizione o un cambiamento di posizione',
+    perception: 'esprimere ciò che si percepisce con i sensi',
+    manipulation: 'esprimere un’azione compiuta su un oggetto',
+    'creation-transformation': 'esprimere una creazione o una trasformazione',
+    communication: 'comunicare parole, idee o informazioni',
+    cognition: 'esprimere un pensiero, una conoscenza o un apprendimento',
+    emotion: 'esprimere un’emozione, un gusto o un apprezzamento',
+    modalite: 'indicare ciò che è possibile, necessario o desiderato',
+    'relation-sociale': 'esprimere una relazione o un’azione con altre persone',
+    echange: 'esprimere uno scambio, un dono o una trasmissione',
+    corps: 'esprimere un’azione o un bisogno del corpo',
+    nature: 'descrivere un fenomeno naturale',
+    'action-processus': 'esprimere un’azione o un processo',
+  },
+  es: {
+    mouvement: 'expresar un movimiento o un desplazamiento',
+    position: 'expresar una posición o un cambio de posición',
+    perception: 'expresar lo que se percibe con los sentidos',
+    manipulation: 'expresar una acción realizada sobre un objeto',
+    'creation-transformation': 'expresar una creación o una transformación',
+    communication: 'comunicar palabras, ideas o información',
+    cognition: 'expresar un pensamiento, un conocimiento o un aprendizaje',
+    emotion: 'expresar una emoción, un gusto o una valoración',
+    modalite: 'indicar lo que es posible, necesario o deseado',
+    'relation-sociale': 'expresar una relación o una acción con otras personas',
+    echange: 'expresar un intercambio, un regalo o una transmisión',
+    corps: 'expresar una acción o una necesidad del cuerpo',
+    nature: 'describir un fenómeno natural',
+    'action-processus': 'expresar una acción o un proceso',
+  },
+}
+
+const genericDefinitionFallbacks: Record<Exclude<AppLocale, 'fr'>, string> = {
+  de: 'ein französisches Verb; erschließe seine genaue Bedeutung aus dem Satz',
+  en: 'a French verb; use the sentence to identify its precise meaning',
+  it: 'un verbo francese; usa la frase per individuarne il significato preciso',
+  es: 'un verbo francés; usa la frase para identificar su significado exacto',
+}
+
+/**
+ * Les définitions administrées sont encore incomplètes hors français. Dans ce
+ * cas, une définition sémantique traduite évite de réinjecter du texte français.
+ */
+export function localizedCoachVerbDefinition(verb: Verb | undefined, locale: AppLocale): string {
+  if (!verb) return ''
+  if (locale === 'fr') return verb.meaning?.trim() || ''
+  const definitions = verb.categoriesSemantiques
+    .map(category => semanticDefinitionFallbacks[locale][category])
+    .filter((definition): definition is string => Boolean(definition))
+  return [...new Set(definitions)].join('; ') || genericDefinitionFallbacks[locale]
+}
+
 type CondensedVerb = Pick<Verb, 'infinitif'> & Partial<Pick<Verb, 'groupeConjugaison' | 'auxiliaire' | 'typePronominal' | 'participePresent'>>
 
 function isCondensedPronominalVerb(verb?: CondensedVerb) {
@@ -495,10 +584,11 @@ function contextualCondensedTenseRule(mode?: string, tense?: string, verb?: Cond
   return { ...source, rule, notes, example }
 }
 
-export function buildCondensedTenseRuleHtml(mode?: string, tense?: string, verb?: CondensedVerb) {
-  const rule = contextualCondensedTenseRule(mode, tense, verb)
-  const notes = rule.notes.map(note => `<p>${escapedCoachText(note)}</p>`).join('')
-  return `<p><strong>${escapedCoachText(rule.label)}</strong></p><p>${escapedCoachText(rule.rule)}</p>${notes}<p><strong>Exemple :</strong><br><code>${escapedCoachText(rule.example)}</code></p>`
+export function buildCondensedTenseRuleHtml(mode?: string, tense?: string, verb?: CondensedVerb, locale: AppLocale = 'fr') {
+  const key = `${normalizedGrammar(mode || '')}:${normalizedGrammar(tense || '')}`
+  const rule = localizedCondensedTenseRule(locale, key, contextualCondensedTenseRule(mode, tense, verb))
+  const notes = (rule.notes || []).map(note => `<p>${escapedCoachText(note)}</p>`).join('')
+  return `<p><strong>${escapedCoachText(rule.label)}</strong></p><p>${escapedCoachText(rule.rule)}</p>${notes}<p><strong>${condensedExampleLabel[locale]}</strong><br><code>${escapedCoachText(rule.example)}</code></p>`
 }
 
 function condensedReferenceFormExplanation(mode = '', tense = '', currentSubject = '', auxiliary = 'avoir', pronominal = false) {
@@ -569,21 +659,76 @@ function condensedReferenceFormExplanation(mode = '', tense = '', currentSubject
   return '<details><summary>Qu’est-ce que c’est ?</summary><p>Une forme repère est une forme du verbe que tu as apprise par cœur.</p></details>'
 }
 
-export function buildCondensedVerbGroupHtml(verb?: CondensedVerb, context: { mode?: string, tense?: string, subject?: string } = {}) {
+export function buildCondensedVerbGroupHtml(
+  verb?: CondensedVerb,
+  context: { mode?: string, tense?: string, subject?: string } = {},
+  locale: AppLocale = 'fr',
+) {
   const infinitive = verb?.infinitif?.trim() || 'Ce verbe'
   const group = verb?.groupeConjugaison
-  if (!group) return `<p><strong>${escapedCoachText(infinitive)}</strong> : groupe non renseigné.</p>`
-  const label = `${group}${group === 1 ? 'er' : 'e'} groupe`
-  const consequences = group === 1
-    ? ['Conjugaison généralement régulière.', 'Attention : le radical ne s’écrit pas toujours de la même façon.']
-    : group === 2
-      ? ['Conjugaison régulière, sur le modèle de « finir ». Le radical prend souvent « -iss- ».']
-      : ['Conjugaison souvent irrégulière : le radical et les terminaisons peuvent changer. Appuie-toi sur les formes repères.']
+  const missingGroup: Record<AppLocale, string> = {
+    fr: 'groupe non renseigné.',
+    de: 'Verbgruppe nicht angegeben.',
+    en: 'verb group not specified.',
+    it: 'gruppo del verbo non indicato.',
+    es: 'grupo del verbo no indicado.',
+  }
+  if (!group) return `<p><strong>${escapedCoachText(infinitive)}</strong> : ${missingGroup[locale]}</p>`
+  const groupLabels: Record<AppLocale, string> = {
+    fr: `${group}${group === 1 ? 'er' : 'e'} groupe`,
+    de: `${group}. Verbgruppe`,
+    en: `${group}${group === 1 ? 'st' : group === 2 ? 'nd' : 'rd'} group`,
+    it: `${group}º gruppo`,
+    es: `${group}.${group === 1 || group === 3 ? 'er' : 'º'} grupo`,
+  }
+  const membership: Record<AppLocale, string> = {
+    fr: 'appartient au',
+    de: 'gehört zur',
+    en: 'belongs to the',
+    it: 'appartiene al',
+    es: 'pertenece al',
+  }
+  const consequencesByLocale: Record<AppLocale, Record<1 | 2 | 3, string[]>> = {
+    fr: {
+      1: ['Conjugaison généralement régulière.', 'Attention : le radical ne s’écrit pas toujours de la même façon.'],
+      2: ['Conjugaison régulière, sur le modèle de « finir ». Le radical prend souvent « -iss- ».'],
+      3: ['Conjugaison souvent irrégulière : le radical et les terminaisons peuvent changer. Appuie-toi sur les formes repères.'],
+    },
+    de: {
+      1: ['Die Konjugation ist normalerweise regelmäßig.', 'Achtung: Der Stamm wird nicht immer gleich geschrieben.'],
+      2: ['Regelmäßige Konjugation nach dem Muster von « finir ». Der Stamm enthält häufig « -iss- ».'],
+      3: ['Die Konjugation ist oft unregelmäßig: Stamm und Endungen können sich ändern. Orientiere dich an den gelernten Referenzformen.'],
+    },
+    en: {
+      1: ['The conjugation is generally regular.', 'Be careful: the stem is not always spelt in the same way.'],
+      2: ['Regular conjugation based on the pattern of « finir ». The stem often contains « -iss- ».'],
+      3: ['The conjugation is often irregular: the stem and endings may change. Use the reference forms you have learnt.'],
+    },
+    it: {
+      1: ['La coniugazione è generalmente regolare.', 'Attenzione: la radice non si scrive sempre nello stesso modo.'],
+      2: ['Coniugazione regolare sul modello di « finir ». La radice contiene spesso « -iss- ».'],
+      3: ['La coniugazione è spesso irregolare: la radice e le desinenze possono cambiare. Usa le forme di riferimento imparate.'],
+    },
+    es: {
+      1: ['La conjugación suele ser regular.', 'Atención: la raíz no siempre se escribe de la misma manera.'],
+      2: ['Conjugación regular según el modelo de « finir ». La raíz suele contener « -iss- ».'],
+      3: ['La conjugación suele ser irregular: la raíz y las terminaciones pueden cambiar. Usa las formas de referencia aprendidas.'],
+    },
+  }
+  const consequences = consequencesByLocale[locale][group]
   const consequenceParagraphs = consequences.map(consequence => `<p>${escapedCoachText(consequence)}</p>`).join('')
+  const foreignThirdGroupAdvice: Record<Exclude<AppLocale, 'fr'>, string> = {
+    de: '<p>Bei Verben der 3. Gruppe helfen gelernte Referenzformen dabei, den richtigen Stamm und die richtige Endung zu finden.</p>',
+    en: '<p>For third-group verbs, use learnt reference forms to find the correct stem and ending.</p>',
+    it: '<p>Per i verbi del 3º gruppo, usa le forme di riferimento imparate per trovare la radice e la desinenza corrette.</p>',
+    es: '<p>Para los verbos del 3.er grupo, usa las formas de referencia aprendidas para encontrar la raíz y la terminación correctas.</p>',
+  }
   const referenceFormExplanation = group === 3
-    ? condensedReferenceFormExplanation(context.mode, context.tense, context.subject, condensedVerbAuxiliary(verb) || 'avoir', isCondensedPronominalVerb(verb))
+    ? locale === 'fr'
+      ? condensedReferenceFormExplanation(context.mode, context.tense, context.subject, condensedVerbAuxiliary(verb) || 'avoir', isCondensedPronominalVerb(verb))
+      : foreignThirdGroupAdvice[locale]
     : ''
-  return `<p><strong>${escapedCoachText(infinitive)}</strong> appartient au <strong>${label}</strong>.</p>${consequenceParagraphs}${referenceFormExplanation}`
+  return `<p><strong>${escapedCoachText(infinitive)}</strong> ${membership[locale]} <strong>${groupLabels[locale]}</strong>.</p>${consequenceParagraphs}${referenceFormExplanation}`
 }
 
 export function renderCoachHelpContent(content: string, values: CoachHelpContentValues, approach: CoachExplanationApproach = 'cif-falc'): string {
@@ -642,17 +787,73 @@ function modeWithArticle(value: string) {
   return startsWithVowelForArticle(mode) ? `de l’${mode}` : `du ${mode}`
 }
 
-export function buildNearFutureCoachHelpHtml(verb?: Pick<Verb, 'infinitif'> & Partial<Pick<Verb, 'typeHInitial'>>) {
-  const infinitive = verb?.infinitif?.trim() || 'chanter'
-  const lexicalInfinitive = bareNearFutureInfinitive(infinitive) || 'chanter'
-  const pronominal = isPronominalNearFutureInfinitive(infinitive)
-    ? `<p>Pour un verbe pronominal, place le pronom réfléchi devant l’infinitif : <code>je vais ${nearFutureReflexivePronoun(4, infinitive, verb?.typeHInitial)}${escapedCoachText(lexicalInfinitive)}</code>.</p>`
-    : ''
-  return `<p><strong>Le futur proche se construit avec « aller » au présent, suivi de l’infinitif du verbe.</strong></p><p>Ce n'est pas un temps comme les autres. Il est utilisé pour une action proche.</p><p><code>aller au présent + ${escapedCoachText(lexicalInfinitive)}</code></p><p><strong>Un exemple :</strong><br><code>Il va ouvrir la porte.</code></p>${pronominal}`
+const nearFutureHelpCopy: Record<AppLocale, {
+  construction: string
+  usage: string
+  formulaPresent: string
+  example: string
+  reflexive: (example: string) => string
+}> = {
+  fr: {
+    construction: 'Le futur proche se construit avec « aller » au présent, suivi de l’infinitif du verbe.',
+    usage: "Ce n'est pas un temps comme les autres. Il est utilisé pour une action proche.",
+    formulaPresent: 'au présent',
+    example: 'Un exemple :',
+    reflexive: example => `Pour un verbe pronominal, place le pronom réfléchi devant l’infinitif : <code>${example}</code>.`,
+  },
+  de: {
+    construction: 'Das nahe Futur wird mit « aller » im Präsens und dem Infinitiv des Verbs gebildet.',
+    usage: 'Es bezeichnet eine Handlung, die in naher Zukunft stattfinden wird.',
+    formulaPresent: 'im Präsens',
+    example: 'Beispiel:',
+    reflexive: example => `Bei einem reflexiven Verb steht das Reflexivpronomen vor dem Infinitiv: <code>${example}</code>.`,
+  },
+  en: {
+    construction: 'The near future is formed with « aller » in the present tense followed by the infinitive of the verb.',
+    usage: 'It describes an action that will happen in the near future.',
+    formulaPresent: 'in the present tense',
+    example: 'Example:',
+    reflexive: example => `With a pronominal verb, place the reflexive pronoun before the infinitive: <code>${example}</code>.`,
+  },
+  it: {
+    construction: 'Il futuro prossimo si forma con « aller » al presente, seguito dall’infinito del verbo.',
+    usage: 'Indica un’azione che avverrà in un futuro vicino.',
+    formulaPresent: 'al presente',
+    example: 'Esempio:',
+    reflexive: example => `Con un verbo pronominale, metti il pronome riflessivo davanti all’infinito: <code>${example}</code>.`,
+  },
+  es: {
+    construction: 'El futuro próximo se forma con « aller » en presente, seguido del infinitivo del verbo.',
+    usage: 'Indica una acción que ocurrirá en un futuro cercano.',
+    formulaPresent: 'en presente',
+    example: 'Ejemplo:',
+    reflexive: example => `Con un verbo pronominal, coloca el pronombre reflexivo delante del infinitivo: <code>${example}</code>.`,
+  },
 }
 
-export function buildNearFutureAllerHelpHtml() {
-  return '<details><summary>Aller au présent</summary><table><tbody><tr><th>je</th><td>vais</td></tr><tr><th>tu</th><td>vas</td></tr><tr><th>il, elle, on</th><td>va</td></tr><tr><th>nous</th><td>allons</td></tr><tr><th>vous</th><td>allez</td></tr><tr><th>ils, elles</th><td>vont</td></tr></tbody></table></details>'
+export function buildNearFutureCoachHelpHtml(
+  verb?: Pick<Verb, 'infinitif'> & Partial<Pick<Verb, 'typeHInitial'>>,
+  locale: AppLocale = 'fr',
+) {
+  const infinitive = verb?.infinitif?.trim() || 'chanter'
+  const lexicalInfinitive = bareNearFutureInfinitive(infinitive) || 'chanter'
+  const copy = nearFutureHelpCopy[locale]
+  const reflexiveExample = `je vais ${nearFutureReflexivePronoun(4, infinitive, verb?.typeHInitial)}${escapedCoachText(lexicalInfinitive)}`
+  const pronominal = isPronominalNearFutureInfinitive(infinitive)
+    ? `<p>${copy.reflexive(reflexiveExample)}</p>`
+    : ''
+  return `<p><strong>${copy.construction}</strong></p><p>${copy.usage}</p><p><code>aller ${copy.formulaPresent} + ${escapedCoachText(lexicalInfinitive)}</code></p><p><strong>${copy.example}</strong><br><code>Il va ouvrir la porte.</code></p>${pronominal}`
+}
+
+export function buildNearFutureAllerHelpHtml(locale: AppLocale = 'fr') {
+  const summary: Record<AppLocale, string> = {
+    fr: 'Aller au présent',
+    de: 'aller im Präsens',
+    en: 'aller in the present tense',
+    it: 'aller al presente',
+    es: 'aller en presente',
+  }
+  return `<details><summary>${summary[locale]}</summary><table><tbody><tr><th>je</th><td>vais</td></tr><tr><th>tu</th><td>vas</td></tr><tr><th>il, elle, on</th><td>va</td></tr><tr><th>nous</th><td>allons</td></tr><tr><th>vous</th><td>allez</td></tr><tr><th>ils, elles</th><td>vont</td></tr></tbody></table></details>`
 }
 
 function normalizedGrammar(value: string) {
@@ -744,7 +945,12 @@ function auxiliaryPart(form: string, baseParticiple: string): string {
   return trimmed.replace(new RegExp(`\\s+${escaped}(?:e|s|es)?$`, 'iu'), '').trim()
 }
 
-export function coachHelpQuestionVariables(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationTense) {
+export function coachHelpQuestionVariables(
+  question: ExerciseQuestion,
+  verb?: Verb,
+  tense?: ConjugationTense,
+  locale: AppLocale = 'fr',
+) {
   const complement = question.agreementReminder?.complement || question.complement || ''
   const isCod = question.complementFunction === 'cod' || question.agreementReminder?.kind === 'cod-before' || question.agreementReminder?.kind === 'cod-after'
   const isCoi = question.complementFunction === 'coi' || question.agreementReminder?.kind === 'coi'
@@ -787,10 +993,10 @@ export function coachHelpQuestionVariables(question: ExerciseQuestion, verb?: Ve
       mode: question.mode || tense?.mode?.name,
       tense: question.temps || tense?.name,
       subject: question.pronom || question.saisiePrefixe,
-    }),
-    condensedTenseRuleHelp: buildCondensedTenseRuleHtml(question.mode || tense?.mode?.name, question.temps || tense?.name, verb),
-    nearFutureHelp: buildNearFutureCoachHelpHtml(verb),
-    nearFutureAllerHelp: buildNearFutureAllerHelpHtml(),
+    }, locale),
+    condensedTenseRuleHelp: buildCondensedTenseRuleHtml(question.mode || tense?.mode?.name, question.temps || tense?.name, verb, locale),
+    nearFutureHelp: buildNearFutureCoachHelpHtml(verb, locale),
+    nearFutureAllerHelp: buildNearFutureAllerHelpHtml(locale),
     pronominalHelp: buildPronominalCoachHelpHtml(question, verb),
     contextualBaseTitle: buildContextualBaseTitle(infinitive, verb?.typeHInitial),
     referenceFormHelp,

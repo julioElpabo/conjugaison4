@@ -1609,6 +1609,7 @@ export function buildTargetedConjugationHelp(
   question: ExerciseQuestion,
   verb?: Verb,
   tense?: ConjugationTense,
+  localizedLabels: { tense?: string, mode?: string } = {},
 ): TargetedConjugationHelp {
   const infinitive = question.infinitif || verb?.infinitif || 'ce verbe'
   const stem = lexicalStem(infinitive, verb?.terminaison)
@@ -1619,12 +1620,13 @@ export function buildTargetedConjugationHelp(
   const decomposition = decomposeConjugationForm(question, verb, tense)
   const warnings = targetedWarnings(question, verb)
   const subject = question.pronom || question.saisiePrefixe
-  const displayedTense = question.temps || tense?.name || ''
-  const displayedMode = question.mode || tense?.mode?.name || ''
+  const rawMode = question.mode || tense?.mode?.name || ''
+  const displayedTense = localizedLabels.tense || question.temps || tense?.name || ''
+  const displayedMode = localizedLabels.mode || rawMode
   const helpTitle = [
     subject,
     infinitive,
-    displayedMode && normalized(displayedMode) !== 'indicatif'
+    displayedMode && normalized(rawMode) !== 'indicatif'
       ? `${displayedTense} (${displayedMode})`
       : displayedTense,
   ].filter(Boolean).join(' | ')

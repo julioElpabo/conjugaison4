@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { ui, uiLabel } = useLanguagePreferences()
+const { interfaceLocale, ui, uiLabel } = useLanguagePreferences()
 import type { ConjugationTense, ExerciseAttempt, ExerciseQuestion, LearnerErrorDetail, LearnerExerciseTrackingContext, Verb } from '~~/shared/types/conjugation'
 import type { CoachEvent, CoachMedia, CoachMessageContext, CoachProfile } from '~~/shared/types/coach'
 import type { AnswerComparison } from '~~/shared/utils/answer-difference'
@@ -32,7 +32,7 @@ import {
 } from '~~/shared/utils/learner-error-diagnostics'
 import { coachQuestionBubbles } from '~~/shared/utils/coach-question'
 import { buildTargetedConjugationHelp, isHelpCommand } from '~~/shared/utils/conjugation-help'
-import { coachHelpQuestionVariables, visibleCoachHelpBlocks } from '~~/shared/utils/coach-help'
+import { coachHelpQuestionVariables, localizedCoachVerbDefinition, visibleCoachHelpBlocks } from '~~/shared/utils/coach-help'
 import { CHAT_HELP_REMINDER_DELAY_MS, CHAT_HELP_REMINDER_INCORRECT_COUNT, nextConsecutiveIncorrectCount } from '~~/shared/utils/coach-help-reminder'
 import { sanitizeCoachHtml } from '~~/shared/utils/safe-html'
 import { areOnlyIndicativeTenses, withoutIndicativeMode } from '~~/shared/utils/chat-mode-display'
@@ -125,7 +125,10 @@ const helpTense = computed(() => {
     || props.tenses.find(tense => normalizedInfinitive(tense.name) === normalizedInfinitive(question.temps))
 })
 const targetedHelp = computed(() => helpQuestion.value
-  ? buildTargetedConjugationHelp(helpQuestion.value, helpVerb.value, helpTense.value)
+  ? buildTargetedConjugationHelp(helpQuestion.value, helpVerb.value, helpTense.value, {
+      tense: uiLabel(helpQuestion.value.temps || helpTense.value?.name),
+      mode: uiLabel(helpQuestion.value.mode || helpTense.value?.mode?.name),
+    })
   : null)
 const helpBlocks = computed(() => visibleCoachHelpBlocks(props.coach.helpApproach, helpQuestion.value))
 const correctCount = computed(() => attempts.value.filter(item => item.status === 'correct').length)
@@ -198,8 +201,8 @@ function compactTense(tense: ConjugationTense) {
 
 const helpValues = computed(() => helpQuestion.value ? {
   coach: props.coach,
-  ...coachHelpQuestionVariables(helpQuestion.value, helpVerb.value, helpTense.value),
-  definition: helpVerb.value?.meaning?.trim() || targetedHelp.value?.meaning || '',
+  ...coachHelpQuestionVariables(helpQuestion.value, helpVerb.value, helpTense.value, interfaceLocale.value),
+  definition: localizedCoachVerbDefinition(helpVerb.value, interfaceLocale.value) || targetedHelp.value?.meaning || '',
   helpTitle: targetedHelp.value?.title || '',
   omitIndicativeMode: omitIndicativeMode.value,
 } : { coach: props.coach })
@@ -673,7 +676,7 @@ async function submit() {
       }
       if (isIncorrectReaction && currentErrorDetails.length && !errorTypesDisplayed) {
         await enqueueCoachBubble(() => ({
-          text: currentErrorDetails.map(learnerErrorDetailText).join(' '),
+          text: currentErrorDetails.map(detail => learnerErrorDetailText(detail, interfaceLocale.value)).join(' '),
           tone: 'error',
           errorDetails: currentErrorDetails,
         }))

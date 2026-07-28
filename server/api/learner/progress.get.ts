@@ -13,6 +13,7 @@ import {
   type LearnerErrorProgressExample,
 } from '~~/shared/utils/learner-error-progress'
 import { requireLearnerDataSubject } from '../../utils/learner-data-subject'
+import { normalizeLocale } from '../../../shared/i18n/locales'
 
 interface DailyStatRow extends RowDataPacket {
   code: LearnerErrorTypeCode
@@ -52,6 +53,7 @@ function jsonQuestion(source: string) {
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Cache-Control', 'no-store')
   const learner = await requireLearnerDataSubject(event)
+  const locale = normalizeLocale(getQuery(event).locale, 'fr')
 
   const database = useDatabase()
   const [[runQuestions], [runErrors], [dailyRows], [exampleRows]] = await Promise.all([
@@ -127,7 +129,7 @@ export default defineEventHandler(async (event) => {
       learnerAnswer: row.learnerAnswer,
       expectedAnswers,
       reason: detail
-        ? learnerErrorDetailText(detail)
+        ? learnerErrorDetailText(detail, locale)
         : adviceByCode.get(row.code)
           || 'Compare ta réponse avec la correction pour repérer cette différence.',
     })

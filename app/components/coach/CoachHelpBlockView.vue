@@ -4,6 +4,7 @@ import type { CoachHelpContentValues } from '~~/shared/utils/coach-help'
 import { automaticOrthographyHelpKind, renderCoachHelpContent } from '~~/shared/utils/coach-help'
 import { sanitizeCoachHtml } from '~~/shared/utils/safe-html'
 
+const { ui, uiLabel } = useLanguagePreferences()
 const props = defineProps<{
   block: CoachHelpBlock
   values: CoachHelpContentValues
@@ -16,10 +17,10 @@ const isCondensedTenseRuleBlock = computed(() => props.block.content.trim() === 
 const isResultBlock = computed(() => props.block.title.trim().normalize('NFD').replace(/\p{Diacritic}/gu, '').toLocaleLowerCase('fr') === 'resultat')
 const orthographyKind = computed(() => automaticOrthographyHelpKind(props.block))
 const renderedTitle = computed(() => isDefinitionBlock.value
-  ? 'Définition'
+  ? ui('Définition')
   : isRadicalBlock.value
     ? ''
-    : props.block.title)
+    : uiLabel(props.block.title))
 const renderedContent = computed(() => sanitizeCoachHtml(renderCoachHelpContent(props.block.content, props.values, props.block.explanationApproach || 'cif-falc')))
 </script>
 

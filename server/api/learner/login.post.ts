@@ -4,6 +4,7 @@ import { assertLearnerRateLimit, learnerClientIp } from '../../services/learner-
 import { normalizeLearnerUsername } from '../../services/learner-username'
 import { createLearnerSession } from '../../utils/learner-session'
 import { readLimitedJsonBody } from '../../utils/limited-json-body'
+import { normalizeLocale } from '../../../shared/i18n/locales'
 
 const DUMMY_PASSWORD_HASH = '$2b$12$ty1Uz4EKY7VWSotpC21BLenXpmauqgEttD16EEzo2wp8oeuu2aawq'
 
@@ -17,9 +18,10 @@ interface AccountRow extends RowDataPacket {
 
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Cache-Control', 'no-store')
-  const body = await readLimitedJsonBody<{ username?: unknown, password?: unknown }>(event, 8 * 1024)
+  const body = await readLimitedJsonBody<{ username?: unknown, password?: unknown, interfaceLocale?: unknown }>(event, 8 * 1024)
   const username = normalizeLearnerUsername(body.username)
   const password = typeof body.password === 'string' ? body.password : ''
+  const interfaceLocale = normalizeLocale(body.interfaceLocale, 'fr')
   if (!username || username.length > 80 || !password || password.length > 200) {
     throw createError({ statusCode: 400, statusMessage: 'Identifiants invalides' })
   }
@@ -57,6 +59,11 @@ export default defineEventHandler(async (event) => {
     "INSERT INTO learner_login_events (account_id, event_type) VALUES (?, 'login')",
     [account.id],
   )
+  await useDatabase().execute(`
+    INSERT INTO learner_preferences (account_id, interface_locale, color_theme)
+    VALUES (?, ?, 'light')
+    ON DUPLICATE KEY UPDATE interface_locale=VALUES(interface_locale)
+  `, [account.id, interfaceLocale])
   await createLearnerSession(event, account.id, account.sessionVersion)
   return {
     ok: true,

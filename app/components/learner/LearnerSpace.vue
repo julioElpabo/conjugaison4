@@ -9,6 +9,12 @@ import type {
 import type { CoachProfile } from '~~/shared/types/coach'
 import type { Catalogue } from '~/composables/useChallengeBuilder'
 import type { AppLocale } from '~~/shared/i18n/locales'
+import { learnerSpaceCopy, learnerSpaceText } from '~~/shared/i18n/learner-space'
+import {
+  localizedLearnerErrorDomain,
+  localizedLearnerErrorLabel,
+  localizedLearnerErrorMessageForCode,
+} from '~~/shared/i18n/learner-errors'
 import type {
   LearnerErrorProgressCard,
   LearnerErrorProgressPoint,
@@ -107,7 +113,10 @@ interface LearnerPreferences {
 
 const { user: sessionLearner, clearUser } = useLearnerAuth()
 const learner = computed(() => props.inspectedLearner || sessionLearner.value)
-const { interfaceLocale, setInterfaceLocale } = useLanguagePreferences()
+const { interfaceLocale, localePath, setInterfaceLocale, ui } = useLanguagePreferences()
+const copy = computed(() => learnerSpaceCopy(interfaceLocale.value))
+const text = (key: keyof ReturnType<typeof learnerSpaceCopy>, parameters: Record<string, string | number> = {}) =>
+  learnerSpaceText(copy.value, key, parameters)
 const { applyTheme } = useColorTheme()
 const { flushProgress } = useLearnerProgress()
 const route = useRoute()
@@ -199,13 +208,13 @@ const { data: storedPreferences } = await useAsyncData(
 
 const preferredLocale = ref<AppLocale>(storedPreferences.value?.interfaceLocale || interfaceLocale.value)
 const preferredTheme = ref<'light' | 'dark'>(storedPreferences.value?.colorTheme || 'light')
-const localeOptions: Array<{ value: AppLocale, label: string, flag: string }> = [
-  { value: 'fr', label: 'Français', flag: '🇫🇷' },
-  { value: 'de', label: 'Allemand', flag: '🇩🇪' },
-  { value: 'en', label: 'Anglais', flag: '🇬🇧' },
-  { value: 'it', label: 'Italien', flag: '🇮🇹' },
-  { value: 'es', label: 'Espagnol', flag: '🇪🇸' },
-]
+const localeOptions = computed<Array<{ value: AppLocale, label: string, flag: string }>>(() => [
+  { value: 'fr', label: ui('Français'), flag: '🇫🇷' },
+  { value: 'de', label: ui('Allemand'), flag: '🇩🇪' },
+  { value: 'en', label: ui('Anglais'), flag: '🇬🇧' },
+  { value: 'it', label: ui('Italien'), flag: '🇮🇹' },
+  { value: 'es', label: ui('Espagnol'), flag: '🇪🇸' },
+])
 
 onMounted(() => {
   if (!props.readOnly) applyTheme(preferredTheme.value, false)
@@ -263,6 +272,11 @@ watch(
 watch(activeTab, (tab) => {
   if (tab === 'progress') void loadLearnerProgress()
   if (tab === 'challenges') void loadChallengeTrainings()
+})
+
+watch(interfaceLocale, () => {
+  if (activeTab.value === 'progress') void loadLearnerProgress(true)
+  if (activeTab.value === 'challenges') void loadChallengeTrainings(true)
 })
 
 watch(
@@ -394,7 +408,7 @@ async function loadChallengeTrainings(force = false) {
     if (selectedTrainingFingerprint.value) await loadTrainingProgress(selectedTrainingFingerprint.value)
   }
   catch {
-    challengeTrainingsError.value = 'Impossible de charger les entraînements pour le moment.'
+    challengeTrainingsError.value = copy.value.trainingsLoadError
   }
   finally {
     challengeTrainingsPending.value = false
@@ -412,7 +426,10 @@ async function loadTrainingProgress(fingerprint: string) {
   selectedTrainingProgressPending.value = true
   selectedTrainingProgressError.value = ''
   try {
-    const summary = await $fetch<ChallengeTrainingProgressResponse>(learnerApi('challenge-progress', { fingerprint }), {
+    const summary = await $fetch<ChallengeTrainingProgressResponse>(learnerApi('challenge-progress', {
+      fingerprint,
+      locale: interfaceLocale.value,
+    }), {
       credentials: 'same-origin',
     })
     if (request === trainingProgressRequest) selectedTrainingProgress.value = summary
@@ -420,7 +437,7 @@ async function loadTrainingProgress(fingerprint: string) {
   catch {
     if (request === trainingProgressRequest) {
       selectedTrainingProgress.value = undefined
-      selectedTrainingProgressError.value = 'Impossible de charger la progression de ce défi.'
+      selectedTrainingProgressError.value = copy.value.challengeProgressLoadError
     }
   }
   finally {
@@ -492,7 +509,7 @@ function scrollToTrainingSession(point: ChallengeProgressPoint) {
 }
 
 function challengeDateParts(value: string) {
-  return new Intl.DateTimeFormat('fr-CH', {
+  return new Intl.DateTimeFormat(interfaceLocale.value, {
     timeZone: 'Europe/Zurich',
     weekday: 'long',
     day: 'numeric',
@@ -518,7 +535,7 @@ function challengeDayLabel(value: string) {
 }
 
 function formattedChallengeTime(value: string) {
-  return new Intl.DateTimeFormat('fr-CH', {
+  return new Intl.DateTimeFormat(interfaceLocale.value, {
     timeZone: 'Europe/Zurich',
     hour: '2-digit',
     minute: '2-digit',
@@ -526,7 +543,169 @@ function formattedChallengeTime(value: string) {
 }
 
 function falseQuestionsLabel(count: number) {
+  if (interfaceLocale.value === 'de') return count === 1 ? 'Die falsche Frage' : `Die ${count} falschen Fragen`
+  if (interfaceLocale.value === 'en') return count === 1 ? 'The incorrect question' : `The ${count} incorrect questions`
+  if (interfaceLocale.value === 'it') return count === 1 ? 'La domanda sbagliata' : `Le ${count} domande sbagliate`
+  if (interfaceLocale.value === 'es') return count === 1 ? 'La pregunta incorrecta' : `Las ${count} preguntas incorrectas`
   return count === 1 ? 'La question fausse' : `Les ${count} questions fausses`
+}
+
+function pluralLabel(count: number, forms: Record<AppLocale, [string, string]>) {
+  const [one, many] = forms[interfaceLocale.value]
+  return `${count} ${count === 1 ? one : many}`
+}
+
+function resultCountLabel(correct: number, incorrect: number) {
+  const correctText = pluralLabel(correct, {
+    fr: ['réussite', 'réussites'], de: ['Erfolg', 'Erfolge'], en: ['success', 'successes'],
+    it: ['risposta corretta', 'risposte corrette'], es: ['acierto', 'aciertos'],
+  })
+  const incorrectText = pluralLabel(incorrect, {
+    fr: ['erreur', 'erreurs'], de: ['Fehler', 'Fehler'], en: ['mistake', 'mistakes'],
+    it: ['errore', 'errori'], es: ['error', 'errores'],
+  })
+  return `${correctText} · ${incorrectText}`
+}
+
+function trainingCountLabel(count: number) {
+  return pluralLabel(count, {
+    fr: ['entraînement', 'entraînements'], de: ['Training', 'Trainings'], en: ['practice session', 'practice sessions'],
+    it: ['allenamento', 'allenamenti'], es: ['entrenamiento', 'entrenamientos'],
+  })
+}
+
+function occurrenceCountLabel(count: number) {
+  return pluralLabel(count, {
+    fr: ['occurrence', 'occurrences'], de: ['Sitzung', 'Sitzungen'], en: ['session', 'sessions'],
+    it: ['sessione', 'sessioni'], es: ['sesión', 'sesiones'],
+  })
+}
+
+function questionCountLabel(count: number) {
+  return pluralLabel(count, {
+    fr: ['question', 'questions'], de: ['Frage', 'Fragen'], en: ['question', 'questions'],
+    it: ['domanda', 'domande'], es: ['pregunta', 'preguntas'],
+  })
+}
+
+function successPercentLabel(rate: number) {
+  const suffix = { fr: 'de réussite', de: 'Erfolg', en: 'success', it: 'di successo', es: 'de aciertos' }[interfaceLocale.value]
+  return `${rate}% ${suffix}`
+}
+
+function successEvolutionLabel(label: string) {
+  const prefix = {
+    fr: 'Évolution du pourcentage de réussite pour', de: 'Entwicklung der Erfolgsquote für',
+    en: 'Success rate over time for', it: 'Evoluzione della percentuale di successo per',
+    es: 'Evolución del porcentaje de aciertos para',
+  }[interfaceLocale.value]
+  return `${prefix} ${label}`
+}
+
+function trainingPointLabel(point: ChallengeProgressPoint) {
+  const ending = {
+    fr: 'Voir les erreurs de cette session.', de: 'Fehler dieser Sitzung anzeigen.',
+    en: 'View the mistakes from this session.', it: 'Vedi gli errori di questa sessione.',
+    es: 'Ver los errores de esta sesión.',
+  }[interfaceLocale.value]
+  return `${trainingDateLabel(point.occurredAt, true)}: ${successPercentLabel(point.successPercent)}. ${ending}`
+}
+
+function responseSummaryLabel(correct: number, incorrect: number) {
+  return resultCountLabel(correct, incorrect)
+}
+
+function questionsOutOfLabel(answered: number, total: number) {
+  const middle = { fr: 'questions sur', de: 'Fragen von', en: 'questions out of', it: 'domande su', es: 'preguntas de' }[interfaceLocale.value]
+  return `${answered} ${middle} ${total}`
+}
+
+function trainingErrorsTitle(date: string) {
+  const prefix = {
+    fr: 'Entraînement des erreurs du', de: 'Fehlertraining vom', en: 'Mistake practice from',
+    it: 'Allenamento sugli errori del', es: 'Entrenamiento de errores del',
+  }[interfaceLocale.value]
+  return `${prefix} ${trainingDateLabel(date)}`
+}
+
+function localizedTrainingReportTitle(title: string) {
+  if (!title || interfaceLocale.value === 'fr') return title
+  if (title === learnerSpaceCopy('fr').trainChallengeErrors) return copy.value.trainChallengeErrors
+  const frenchPrefix = 'Entraînement des erreurs du '
+  if (title.startsWith(frenchPrefix)) {
+    const suffix = title.slice(frenchPrefix.length)
+    const prefix = {
+      de: 'Fehlertraining vom ',
+      en: 'Mistake practice from ',
+      it: 'Allenamento sugli errori del ',
+      es: 'Entrenamiento de errores del ',
+    }[interfaceLocale.value]
+    return `${prefix}${suffix}`
+  }
+  return title
+}
+
+function trainQuestionsLabel(count: number) {
+  const prefix = { fr: 'Entraîner ces', de: 'Diese', en: 'Practise these', it: 'Allenare queste', es: 'Practicar estas' }[interfaceLocale.value]
+  const suffix = interfaceLocale.value === 'de'
+    ? (count === 1 ? 'Frage trainieren' : 'Fragen trainieren')
+    : questionCountLabel(count).replace(String(count), '').trim()
+  return interfaceLocale.value === 'de' ? `${prefix} ${count} ${suffix}` : `${prefix} ${count} ${suffix}`
+}
+
+function sessionResultLabel(correct: number, total: number) {
+  const middle = { fr: 'réussites sur', de: 'Erfolge von', en: 'successes out of', it: 'risposte corrette su', es: 'aciertos de' }[interfaceLocale.value]
+  return `${correct} ${middle} ${total}`
+}
+
+function errorEvolutionLabel(label: string) {
+  const prefix = {
+    fr: 'Évolution du taux d’erreurs pour', de: 'Entwicklung der Fehlerquote für',
+    en: 'Error rate over time for', it: 'Evoluzione della percentuale di errori per',
+    es: 'Evolución del porcentaje de errores para',
+  }[interfaceLocale.value]
+  return `${prefix} ${label}`
+}
+
+function chartPointLabel(rate: number, errors: number, opportunities: number) {
+  const values = {
+    fr: `${rate}% de fautes, ${errors} sur ${opportunities} occasions testées`,
+    de: `${rate}% Fehler, ${errors} von ${opportunities} geprüften Gelegenheiten`,
+    en: `${rate}% mistakes, ${errors} out of ${opportunities} tested opportunities`,
+    it: `${rate}% di errori, ${errors} su ${opportunities} occasioni verificate`,
+    es: `${rate}% de errores, ${errors} de ${opportunities} ocasiones evaluadas`,
+  }
+  return values[interfaceLocale.value]
+}
+
+function totalOpportunitiesLabel(count: number) {
+  const values = {
+    fr: `${count} occasion${count === 1 ? '' : 's'} réellement testée${count === 1 ? '' : 's'} au total`,
+    de: `${count} tatsächlich geprüfte ${count === 1 ? 'Gelegenheit' : 'Gelegenheiten'} insgesamt`,
+    en: `${count} ${count === 1 ? 'opportunity' : 'opportunities'} actually tested in total`,
+    it: `${count} ${count === 1 ? 'occasione realmente verificata' : 'occasioni realmente verificate'} in totale`,
+    es: `${count} ${count === 1 ? 'ocasión realmente evaluada' : 'ocasiones realmente evaluadas'} en total`,
+  }
+  return values[interfaceLocale.value]
+}
+
+function mistakeCountLabel(count: number) {
+  return pluralLabel(count, {
+    fr: ['faute', 'fautes'], de: ['Fehler', 'Fehler'], en: ['mistake', 'mistakes'],
+    it: ['errore', 'errori'], es: ['error', 'errores'],
+  })
+}
+
+function progressCardDomain(card: LearnerErrorProgressCard) {
+  return localizedLearnerErrorDomain(card.domain, interfaceLocale.value)
+}
+
+function progressCardLabel(card: LearnerErrorProgressCard) {
+  return localizedLearnerErrorLabel(card.code, card.label, interfaceLocale.value)
+}
+
+function progressCardAdvice(card: LearnerErrorProgressCard) {
+  return localizedLearnerErrorMessageForCode(card.code, card.advice, interfaceLocale.value)
 }
 
 async function loadLearnerProgress(force = false) {
@@ -534,12 +713,14 @@ async function loadLearnerProgress(force = false) {
   learnerProgressPending.value = true
   learnerProgressError.value = ''
   try {
-    learnerProgress.value = await $fetch<LearnerErrorProgressSummary>(learnerApi('progress'), {
+    learnerProgress.value = await $fetch<LearnerErrorProgressSummary>(learnerApi('progress', {
+      locale: interfaceLocale.value,
+    }), {
       credentials: 'same-origin',
     })
   }
   catch {
-    learnerProgressError.value = 'Impossible de charger ta progression pour le moment.'
+    learnerProgressError.value = copy.value.progressLoadError
   }
   finally {
     learnerProgressPending.value = false
@@ -547,21 +728,36 @@ async function loadLearnerProgress(force = false) {
 }
 
 function progressTrendLabel(card: LearnerErrorProgressCard) {
-  if (card.isStale) return 'À retester avant de conclure'
+  if (card.isStale) return copy.value.retest
   if (card.trend === 'improving') {
-    return `${Math.abs(card.trendDelta || 0)} points d’erreur en moins`
+    const count = Math.abs(card.trendDelta || 0)
+    return interfaceLocale.value === 'de' ? `${count} Fehlerpunkte weniger`
+      : interfaceLocale.value === 'en' ? `${count} fewer error points`
+        : interfaceLocale.value === 'it' ? `${count} punti di errore in meno`
+          : interfaceLocale.value === 'es' ? `${count} puntos de error menos`
+            : `${count} points d’erreur en moins`
   }
   if (card.trend === 'worsening') {
-    return `${Math.abs(card.trendDelta || 0)} points d’erreur en plus`
+    const count = Math.abs(card.trendDelta || 0)
+    return interfaceLocale.value === 'de' ? `${count} Fehlerpunkte mehr`
+      : interfaceLocale.value === 'en' ? `${count} more error points`
+        : interfaceLocale.value === 'it' ? `${count} punti di errore in più`
+          : interfaceLocale.value === 'es' ? `${count} puntos de error más`
+            : `${count} points d’erreur en plus`
   }
-  if (card.trend === 'stable') return 'Taux stable'
-  return 'Encore trop peu d’occasions comparables'
+  if (card.trend === 'stable') return copy.value.stableRate
+  return copy.value.tooFewComparable
 }
 
 function progressLastTestLabel(card: LearnerErrorProgressCard) {
-  if (card.daysSinceLastTest === 0) return 'Testé aujourd’hui'
-  if (card.daysSinceLastTest === 1) return 'Testé hier'
-  return `Testé il y a ${card.daysSinceLastTest} jours`
+  if (card.daysSinceLastTest === 0) return copy.value.testedToday
+  if (card.daysSinceLastTest === 1) return copy.value.testedYesterday
+  const count = card.daysSinceLastTest
+  return interfaceLocale.value === 'de' ? `Vor ${count} Tagen getestet`
+    : interfaceLocale.value === 'en' ? `Tested ${count} days ago`
+      : interfaceLocale.value === 'it' ? `Verificato ${count} giorni fa`
+        : interfaceLocale.value === 'es' ? `Evaluado hace ${count} días`
+          : `Testé il y a ${count} jours`
 }
 
 function progressDateLabel(value: string) {
@@ -809,7 +1005,7 @@ async function launchSelectedWork(presentation: 'classic' | 'chat', coach?: Coac
     reviewOpen.value = true
   }
   catch {
-    challengeStartError.value = 'Impossible de préparer ce défi pour le moment.'
+    challengeStartError.value = copy.value.prepareError
   }
   finally {
     challengeStarting.value = undefined
@@ -912,7 +1108,7 @@ async function savePreferences(nextLocale = preferredLocale.value, nextTheme = p
     if (nextLocale !== interfaceLocale.value) setInterfaceLocale(nextLocale)
   }
   catch {
-    preferencesError.value = 'Impossible d’enregistrer ces préférences pour le moment.'
+    preferencesError.value = copy.value.preferencesSaveError
   }
   finally {
     preferencesSaving.value = false
@@ -925,7 +1121,11 @@ function passwordRequestMessage(error: unknown) {
     statusMessage?: string
     data?: { statusMessage?: string, message?: string }
   }
-  return candidate.data?.statusMessage || candidate.data?.message || candidate.statusMessage || ''
+  const message = candidate.data?.statusMessage || candidate.data?.message || candidate.statusMessage || ''
+  if (interfaceLocale.value === 'fr') return message
+  if (message.includes('actuel est incorrect')) return copy.value.currentPasswordError
+  if (message.includes('différent de l’actuel')) return copy.value.passwordSameError
+  return message ? copy.value.passwordChangeError : ''
 }
 
 async function changePassword() {
@@ -933,15 +1133,15 @@ async function changePassword() {
   passwordChanged.value = false
   passwordError.value = ''
   if (passwordForm.newPassword.length < 10 || passwordForm.newPassword.length > 200) {
-    passwordError.value = 'Le nouveau mot de passe doit contenir entre 10 et 200 caractères.'
+    passwordError.value = copy.value.passwordLengthError
     return
   }
   if (passwordForm.newPassword !== passwordForm.confirmation) {
-    passwordError.value = 'La confirmation ne correspond pas au nouveau mot de passe.'
+    passwordError.value = copy.value.passwordMismatchError
     return
   }
   if (passwordForm.currentPassword === passwordForm.newPassword) {
-    passwordError.value = 'Choisis un nouveau mot de passe différent de l’actuel.'
+    passwordError.value = copy.value.passwordSameError
     return
   }
   passwordChanging.value = true
@@ -962,7 +1162,7 @@ async function changePassword() {
   }
   catch (error) {
     passwordError.value = passwordRequestMessage(error)
-      || 'Impossible de modifier ton mot de passe pour le moment.'
+      || copy.value.passwordChangeError
   }
   finally {
     passwordChanging.value = false
@@ -1004,12 +1204,12 @@ async function confirmAccountAction() {
 
     await $fetch('/api/learner/account', { method: 'DELETE' })
     clearUser()
-    await navigateTo('/fr/signin')
+    await navigateTo(localePath('/signin'))
   }
   catch {
     accountActionError.value = action === 'results'
-      ? 'Impossible de supprimer tes résultats pour le moment.'
-      : 'Impossible de supprimer ton compte pour le moment.'
+      ? copy.value.deleteResultsError
+      : copy.value.deleteAccountError
   }
   finally {
     accountActionPending.value = false
@@ -1021,32 +1221,32 @@ async function confirmAccountAction() {
   <div class="learner-space" :class="{ 'learner-space--dark': preferredTheme === 'dark' }">
     <header class="learner-space__hero">
       <div>
-        <h1>Bonjour {{ displayUsername }}</h1>
+        <h1>{{ copy.hello }} {{ displayUsername }}</h1>
       </div>
-      <nav class="learner-space__hero-actions" aria-label="Paramètres personnels">
+      <nav class="learner-space__hero-actions" :aria-label="copy.personalSettings">
         <button
           :class="{ 'is-active': activeTab === 'preferences' }"
           type="button"
           @click="activeTab = 'preferences'"
         >
-          Préférences
+          {{ copy.preferences }}
         </button>
         <button
           :class="{ 'is-active': activeTab === 'account' }"
           type="button"
           @click="activeTab = 'account'"
         >
-          Mon compte
+          {{ copy.account }}
         </button>
       </nav>
     </header>
 
-    <nav class="learner-tabs" :style="stickyTabsStyle" aria-label="Sections de mon espace">
+    <nav class="learner-tabs" :style="stickyTabsStyle" :aria-label="copy.spaceSections">
       <button :class="{ 'is-active': activeTab === 'history' }" type="button" @click="activeTab = 'history'">
-        Historique
+        {{ copy.history }}
       </button>
       <button :class="{ 'is-active': activeTab === 'progress' }" type="button" @click="activeTab = 'progress'">
-        Fautes courantes
+        {{ copy.commonErrors }}
       </button>
       <button
         class="learner-tabs__primary"
@@ -1055,34 +1255,32 @@ async function confirmAccountAction() {
         @click="activeTab = 'challenges'"
       >
         <span aria-hidden="true">✦</span>
-        Progresser
+        {{ copy.improve }}
       </button>
     </nav>
 
     <section v-if="activeTab === 'challenges' || activeTab === 'history'" class="learner-panel" aria-labelledby="challenges-title">
       <div class="learner-panel__heading">
         <div>
-          <p class="learner-eyebrow">{{ activeTab === 'history' ? 'Retrouver mes activités' : 'Reprendre et consolider' }}</p>
-          <h2 id="challenges-title">{{ activeTab === 'history' ? 'Historique' : 'Progresser' }}</h2>
+          <p class="learner-eyebrow">{{ activeTab === 'history' ? copy.findActivities : copy.resumeAndConsolidate }}</p>
+          <h2 id="challenges-title">{{ activeTab === 'history' ? copy.history : copy.improve }}</h2>
         </div>
       </div>
 
       <aside class="learner-section-intro">
-        <strong>{{ activeTab === 'history' ? 'Relire mon parcours' : 'Choisir mon prochain entraînement' }}</strong>
+        <strong>{{ activeTab === 'history' ? copy.reviewJourney : copy.chooseTraining }}</strong>
         <p v-if="activeTab === 'history'">
-          Retrouve tes défis du plus récent au plus ancien, avec les réussites et les erreurs de chaque séance.
-          Tu peux ainsi revoir ce que tu as travaillé et reprendre un exercice utile.
+          {{ copy.historyIntro }}
         </p>
         <p v-else>
-          Reprends un défi, retravaille uniquement tes erreurs ou lance un nouveau tirage.
-          Cette page t’aide à choisir précisément ce que tu veux consolider.
+          {{ copy.improveIntro }}
         </p>
       </aside>
 
       <template v-if="activeTab === 'history'">
-        <p v-if="dashboardPending" class="learner-empty">Chargement de tes défis…</p>
+        <p v-if="dashboardPending" class="learner-empty">{{ copy.loadingChallenges }}</p>
         <template v-else-if="dashboard?.challenges.length">
-        <ol class="challenge-history" aria-label="Historique des défis, du plus récent au plus ancien">
+        <ol class="challenge-history" :aria-label="copy.challengeHistory">
           <li v-for="day in challengeDays" :key="day.key" class="challenge-history__day">
             <time class="challenge-history__date" :datetime="day.key">{{ day.label }}</time>
             <ol class="challenge-history__day-list">
@@ -1116,28 +1314,27 @@ async function confirmAccountAction() {
                       :aria-expanded="descriptionIsExpanded(String(challenge.id))"
                       @click="toggleDescription(String(challenge.id))"
                     >
-                      {{ descriptionIsExpanded(String(challenge.id)) ? 'Réduire' : 'Voir tout' }}
+                      {{ descriptionIsExpanded(String(challenge.id)) ? copy.showLess : copy.showAll }}
                     </button>
                   </div>
                   <div class="challenge-card__bar" aria-hidden="true">
                     <span :style="{ width: `${challenge.scorePercent}%` }" />
                   </div>
                   <p>
-                    {{ challenge.correctCount }} réussite{{ challenge.correctCount > 1 ? 's' : '' }}
-                    · {{ challenge.incorrectCount }} erreur{{ challenge.incorrectCount > 1 ? 's' : '' }}
+                    {{ resultCountLabel(challenge.correctCount, challenge.incorrectCount) }}
                   </p>
                   <div v-if="!readOnly" class="challenge-work">
-                    <strong>Ré-entraîner le défi :</strong>
+                    <strong>{{ copy.retrainChallenge }}</strong>
                     <div>
                       <button
                         type="button"
                         class="review-button"
                         :disabled="Boolean(challengeStarting)"
-                        :title="challenge.exactQuestions.length ? 'Reprendre exactement ce tirage.' : 'Ancien défi : reprendre les questions récupérables et compléter la série.'"
+                        :title="challenge.exactQuestions.length ? copy.sameDraw : copy.oldDraw"
                         :aria-expanded="workMenuFingerprint === `${challenge.id}-same`"
                         @click="openWorkMenu(challenge, 'same', $event)"
                       >
-                        Même ordre des questions
+                        {{ copy.sameOrder }}
                       </button>
                       <button
                         type="button"
@@ -1146,7 +1343,7 @@ async function confirmAccountAction() {
                         :aria-expanded="workMenuFingerprint === `${challenge.id}-random`"
                         @click="openWorkMenu(challenge, 'random', $event)"
                       >
-                        Ordre aléatoire
+                        {{ copy.randomOrder }}
                       </button>
                       <button
                         v-if="challenge.unresolvedCount > 0"
@@ -1164,7 +1361,7 @@ async function confirmAccountAction() {
                       class="challenge-presentation-menu"
                       :style="{ left: `${workMenuLeft}px` }"
                       role="group"
-                      aria-label="Choisir la présentation de l’exercice"
+                      :aria-label="copy.choosePresentation"
                     >
                       <button
                         class="action-button action-button--primary"
@@ -1174,7 +1371,7 @@ async function confirmAccountAction() {
                       >
                         <span class="action-button__icon" aria-hidden="true">●</span>
                         <span>
-                          <strong>Classique</strong>
+                          <strong>{{ copy.classic }}</strong>
                         </span>
                       </button>
                       <button
@@ -1191,7 +1388,7 @@ async function confirmAccountAction() {
                           </svg>
                         </span>
                         <span>
-                          <strong>Avec un coach</strong>
+                          <strong>{{ copy.withCoach }}</strong>
                         </span>
                       </button>
                     </div>
@@ -1210,22 +1407,22 @@ async function confirmAccountAction() {
           :disabled="dashboardLoadingMore"
           @click="loadMoreChallenges"
         >
-          {{ dashboardLoadingMore ? 'Chargement des défis plus anciens…' : 'Charger les défis plus anciens' }}
+          {{ dashboardLoadingMore ? copy.loadingOlder : copy.loadOlder }}
         </button>
         </template>
         <div v-else class="learner-empty">
-          <strong>Aucun défi enregistré pour l’instant.</strong>
-          <span>Les réponses données pendant tes prochains exercices apparaîtront ici.</span>
+          <strong>{{ copy.noChallenge }}</strong>
+          <span>{{ copy.futureAnswers }}</span>
         </div>
       </template>
 
       <template v-else>
         <p v-if="challengeTrainingsError" class="preferences-error" role="alert">{{ challengeTrainingsError }}</p>
         <p v-if="challengeTrainingsPending && !challengeTrainings.length" class="learner-empty">
-          Regroupement de tes entraînements…
+          {{ copy.groupingTrainings }}
         </p>
         <div v-else-if="challengeTrainings.length" class="challenge-training-layout">
-          <nav class="challenge-training-list" aria-label="Défis entraînés, du plus récent au plus ancien">
+          <nav class="challenge-training-list" :aria-label="copy.trainedChallenges">
             <button
               v-for="training in challengeTrainings"
               :key="training.fingerprint"
@@ -1237,7 +1434,7 @@ async function confirmAccountAction() {
               <span>{{ training.label }}</span>
               <small>{{ trainingDateLabel(training.lastTrainedAt) }}</small>
               <b>
-                {{ training.sessionCount }} entraînement{{ training.sessionCount > 1 ? 's' : '' }}
+                {{ trainingCountLabel(training.sessionCount) }}
                 · {{ training.latestSuccessPercent }}%
               </b>
             </button>
@@ -1246,7 +1443,7 @@ async function confirmAccountAction() {
           <section class="challenge-training-analysis" aria-live="polite">
             <header v-if="selectedTraining">
               <div>
-                <p>Évolution des réussites</p>
+                <p>{{ copy.successEvolution }}</p>
                 <h3>{{ selectedTraining.label }}</h3>
               </div>
             </header>
@@ -1255,12 +1452,12 @@ async function confirmAccountAction() {
               {{ selectedTrainingProgressError }}
             </p>
             <div v-else-if="selectedTrainingProgressPending" class="challenge-training-state">
-              Calcul de la progression…
+              {{ copy.calculatingProgress }}
             </div>
             <template v-else-if="selectedTrainingProgress?.points.length">
               <div class="challenge-training-chart">
                 <div class="challenge-training-chart__plot">
-                  <svg viewBox="0 0 640 190" role="img" :aria-label="`Évolution du pourcentage de réussite pour ${selectedTraining?.label}`">
+                  <svg viewBox="0 0 640 190" role="img" :aria-label="successEvolutionLabel(selectedTraining?.label || '')">
                     <defs>
                       <linearGradient
                         id="training-success-gradient"
@@ -1293,7 +1490,7 @@ async function confirmAccountAction() {
                       :class="{ 'is-active': hoveredTrainingPointId === coordinate.point.id }"
                       role="button"
                       tabindex="0"
-                      :aria-label="`${trainingDateLabel(coordinate.point.occurredAt, true)} : ${coordinate.point.successPercent}% de réussite. Voir les erreurs de cette session.`"
+                      :aria-label="trainingPointLabel(coordinate.point)"
                       :r="trainingPointRadius(coordinate.point.totalCount)
                         + (hoveredTrainingPointId === coordinate.point.id ? 2 : 0)"
                       @pointerenter="hoveredTrainingPointId = coordinate.point.id"
@@ -1324,14 +1521,13 @@ async function confirmAccountAction() {
                     }"
                     role="tooltip"
                   >
-                    <strong>{{ hoveredTrainingCoordinate.point.successPercent }}% de réussite</strong>
+                    <strong>{{ successPercentLabel(hoveredTrainingCoordinate.point.successPercent) }}</strong>
                     <span>{{ trainingDateLabel(hoveredTrainingCoordinate.point.occurredAt, true) }}</span>
                     <small>
                       {{ hoveredTrainingCoordinate.point.correctCount }}/{{ hoveredTrainingCoordinate.point.totalCount }}
-                      réponses réussies · {{ hoveredTrainingCoordinate.point.incorrectCount }}
-                      erreur{{ hoveredTrainingCoordinate.point.incorrectCount > 1 ? 's' : '' }}
+                      {{ responseSummaryLabel(hoveredTrainingCoordinate.point.correctCount, hoveredTrainingCoordinate.point.incorrectCount) }}
                     </small>
-                    <b>Cliquer pour voir la session</b>
+                    <b>{{ copy.clickSession }}</b>
                   </div>
                   <div class="challenge-training-chart__rate-axis" aria-hidden="true">
                     <span class="is-high">100%</span>
@@ -1345,21 +1541,21 @@ async function confirmAccountAction() {
                 </div>
                 <footer>
                   <span>
-                    {{ selectedTrainingProgress.points.length }} occurrence{{ selectedTrainingProgress.points.length > 1 ? 's' : '' }}
+                    {{ occurrenceCountLabel(selectedTrainingProgress.points.length) }}
                   </span>
                 </footer>
               </div>
 
-              <section class="challenge-training-achievement" aria-label="Meilleur résultat et réussite complète">
+              <section class="challenge-training-achievement" :aria-label="copy.achievementLabel">
                 <div>
-                  <span>Meilleur résultat</span>
+                  <span>{{ copy.bestResult }}</span>
                   <strong>
                     <span class="challenge-training-achievement__rate">
-                      {{ selectedTrainingProgress.achievement.bestSuccessPercent }}% de réussite
+                      {{ successPercentLabel(selectedTrainingProgress.achievement.bestSuccessPercent) }}
                     </span>
                     <small>
                       {{ selectedTrainingProgress.achievement.bestAnsweredQuestionCount }}
-                      questions sur {{ selectedTrainingProgress.achievement.questionCount }}
+                      {{ questionsOutOfLabel(selectedTrainingProgress.achievement.bestAnsweredQuestionCount, selectedTrainingProgress.achievement.questionCount) }}
                     </small>
                   </strong>
                 </div>
@@ -1371,13 +1567,13 @@ async function confirmAccountAction() {
                     class="challenge-training-achievement__check"
                     role="img"
                     :aria-label="selectedTrainingProgress.achievement.completedWithoutError
-                      ? 'Exercice entier réussi sans faute'
-                      : 'Exercice entier pas encore réussi sans faute'"
+                      ? copy.completeSuccess
+                      : copy.notCompleteSuccess"
                     :aria-disabled="!selectedTrainingProgress.achievement.completedWithoutError"
                   >✓</span>
                   <p>
-                    <strong>Exercice réussi sans faute en entier</strong>
-                    <span>({{ selectedTrainingProgress.achievement.questionCount }} questions)</span>
+                    <strong>{{ copy.exerciseCompleted }}</strong>
+                    <span>({{ questionCountLabel(selectedTrainingProgress.achievement.questionCount) }})</span>
                   </p>
                 </div>
               </section>
@@ -1392,18 +1588,18 @@ async function confirmAccountAction() {
                     allTrainingErrorQuestions,
                     'training-all',
                     1,
-                    'Entraînement des erreurs du défi',
+                    copy.trainChallengeErrors,
                     $event,
                   )"
                 >
-                  M’entraîner à corriger mes fautes sur ce défi
+                  {{ copy.practiseChallengeErrors }}
                 </button>
                 <div
                   v-if="workMenuFingerprint === 'training-all'"
                   class="challenge-presentation-menu"
                   :style="{ left: `${workMenuLeft}px` }"
                   role="group"
-                  aria-label="Choisir la présentation de l’exercice"
+                  :aria-label="copy.choosePresentation"
                 >
                   <button
                     class="action-button action-button--primary"
@@ -1412,7 +1608,7 @@ async function confirmAccountAction() {
                     @click="choosePresentation('classic')"
                   >
                     <span class="action-button__icon" aria-hidden="true">●</span>
-                    <span><strong>Classique</strong></span>
+                    <span><strong>{{ copy.classic }}</strong></span>
                   </button>
                   <button
                     class="action-button action-button--chat"
@@ -1427,7 +1623,7 @@ async function confirmAccountAction() {
                         <path d="M4.5 21a7.5 7.5 0 0 1 15 0" />
                       </svg>
                     </span>
-                    <span><strong>Avec un coach</strong></span>
+                    <span><strong>{{ copy.withCoach }}</strong></span>
                   </button>
                 </div>
               </div>
@@ -1435,10 +1631,10 @@ async function confirmAccountAction() {
               <section class="challenge-training-sessions" aria-labelledby="training-sessions-title">
                 <header>
                   <div>
-                    <p>Du plus récent au plus ancien</p>
-                    <h4 id="training-sessions-title">Erreurs par session</h4>
+                    <p>{{ copy.newestFirst }}</p>
+                    <h4 id="training-sessions-title">{{ copy.errorsBySession }}</h4>
                   </div>
-                  <span>{{ trainingSessions.length }} session{{ trainingSessions.length > 1 ? 's' : '' }}</span>
+                  <span>{{ occurrenceCountLabel(trainingSessions.length) }}</span>
                 </header>
                 <div class="challenge-training-sessions__list">
                   <article
@@ -1456,18 +1652,18 @@ async function confirmAccountAction() {
                           sessionTrainingQuestions(session),
                           `training-session-work-${session.id}`,
                           session.id,
-                          `Entraînement des erreurs du ${trainingDateLabel(session.occurredAt)}`,
+                          trainingErrorsTitle(session.occurredAt),
                           $event,
                         )"
                       >
-                        Entraîner ces {{ session.errors.length }} question{{ session.errors.length > 1 ? 's' : '' }}
+                        {{ trainQuestionsLabel(session.errors.length) }}
                       </button>
                       <div
                         v-if="workMenuFingerprint === `training-session-work-${session.id}`"
                         class="challenge-presentation-menu"
                         :style="{ left: `${workMenuLeft}px` }"
                         role="group"
-                        aria-label="Choisir la présentation de l’exercice"
+                        :aria-label="copy.choosePresentation"
                       >
                         <button
                           class="action-button action-button--primary"
@@ -1476,7 +1672,7 @@ async function confirmAccountAction() {
                           @click="choosePresentation('classic')"
                         >
                           <span class="action-button__icon" aria-hidden="true">●</span>
-                          <span><strong>Classique</strong></span>
+                          <span><strong>{{ copy.classic }}</strong></span>
                         </button>
                         <button
                           class="action-button action-button--chat"
@@ -1491,17 +1687,16 @@ async function confirmAccountAction() {
                               <path d="M4.5 21a7.5 7.5 0 0 1 15 0" />
                             </svg>
                           </span>
-                          <span><strong>Avec un coach</strong></span>
+                          <span><strong>{{ copy.withCoach }}</strong></span>
                         </button>
                       </div>
                     </div>
                     <header>
                       <div>
-                        <h5 v-if="session.title">{{ session.title }}</h5>
+                        <h5 v-if="session.title">{{ localizedTrainingReportTitle(session.title) }}</h5>
                         <time :datetime="session.occurredAt">{{ trainingDateLabel(session.occurredAt, true) }}</time>
                         <span>
-                          {{ session.correctCount }} réussite{{ session.correctCount > 1 ? 's' : '' }}
-                          sur {{ session.totalCount }}
+                          {{ sessionResultLabel(session.correctCount, session.totalCount) }}
                         </span>
                       </div>
                       <strong :style="{ color: trainingSuccessColor(session.successPercent) }">
@@ -1516,7 +1711,7 @@ async function confirmAccountAction() {
                         <div>
                           <span class="challenge-training-error__answer">{{ error.learnerAnswer }}</span>
                           <span aria-hidden="true">→</span>
-                          <strong>{{ error.expectedAnswers.join(' ou ') || 'Réponse attendue indisponible' }}</strong>
+                          <strong>{{ error.expectedAnswers.join(` ${ui('ou')} `) || copy.unavailableAnswer }}</strong>
                         </div>
                         <p
                           v-for="explanation in error.explanations"
@@ -1528,20 +1723,20 @@ async function confirmAccountAction() {
                       </li>
                     </ol>
                     <p v-else class="challenge-training-session__perfect">
-                      Aucune erreur pendant cette session.
+                      {{ copy.noSessionError }}
                     </p>
                   </article>
                 </div>
               </section>
             </template>
             <div v-else class="challenge-training-state">
-              Aucune occurrence exploitable pour ce défi.
+              {{ copy.noUsableOccurrence }}
             </div>
           </section>
         </div>
         <div v-else-if="!challengeTrainingsPending" class="learner-empty">
-          <strong>Aucun entraînement à comparer.</strong>
-          <span>Refais un même défi pour voir si ton taux de réussite se rapproche de 100%.</span>
+          <strong>{{ copy.noTraining }}</strong>
+          <span>{{ copy.noTrainingHint }}</span>
         </div>
       </template>
     </section>
@@ -1549,14 +1744,14 @@ async function confirmAccountAction() {
     <section v-else-if="activeTab === 'progress'" class="learner-panel" aria-labelledby="progress-title">
       <div class="learner-panel__heading learner-panel__heading--progress">
         <div>
-          <p class="learner-eyebrow">Mesurer ce qui s’installe</p>
-          <h2 id="progress-title">Fautes courantes</h2>
+          <p class="learner-eyebrow">{{ copy.measureProgress }}</p>
+          <h2 id="progress-title">{{ copy.commonErrors }}</h2>
         </div>
         <div class="progress-explanation">
           <button
             type="button"
             class="progress-explanation__button"
-            aria-label="Comment la progression est-elle calculée ?"
+            :aria-label="copy.progressCalculation"
             aria-controls="progress-explanation-tooltip"
             :aria-expanded="progressExplanationOpen"
             :aria-describedby="progressExplanationOpen ? 'progress-explanation-tooltip' : undefined"
@@ -1570,27 +1765,22 @@ async function confirmAccountAction() {
             class="progress-explanation__tooltip"
             role="tooltip"
           >
-            <strong>On compare des taux, pas des nombres.</strong>
+            <strong>{{ copy.compareRates }}</strong>
             <p>
-              Chaque point utilise environ les {{ learnerProgress?.opportunityWindow || 10 }} dernières questions
-              où le critère pouvait réellement être testé. Une période sans occasion n’est jamais comptée
-              comme une réussite.
+              {{ text('progressExplanation', { count: learnerProgress?.opportunityWindow || 10 }) }}
             </p>
           </div>
         </div>
       </div>
 
       <aside class="learner-section-intro">
-        <strong>Voir mes fautes dans le temps</strong>
-        <p>
-          Compare l’évolution de tes erreurs pour chaque difficulté.
-          Tu peux repérer celles qui diminuent, celles qui restent stables et celles qui méritent un nouvel entraînement.
-        </p>
+        <strong>{{ copy.errorsOverTime }}</strong>
+        <p>{{ copy.errorsIntro }}</p>
       </aside>
 
       <p v-if="learnerProgressError" class="preferences-error" role="alert">{{ learnerProgressError }}</p>
       <p v-else-if="learnerProgressPending && !learnerProgress" class="learner-empty">
-        Analyse de ta progression…
+        {{ copy.analysingProgress }}
       </p>
       <template v-else-if="learnerProgress?.cards.length">
         <div class="error-progress-list">
@@ -1608,13 +1798,13 @@ async function confirmAccountAction() {
           >
           <header class="error-progress-card__heading">
             <div>
-              <span>{{ card.domain }}</span>
-              <h3>{{ card.label }}</h3>
-              <p>{{ card.advice }}</p>
+              <span>{{ progressCardDomain(card) }}</span>
+              <h3>{{ progressCardLabel(card) }}</h3>
+              <p>{{ progressCardAdvice(card) }}</p>
             </div>
             <div class="error-progress-card__rate">
               <strong>{{ progressCurrentRate(card) }}%</strong>
-              <span>d’erreurs</span>
+              <span>{{ copy.errorRate }}</span>
             </div>
           </header>
 
@@ -1630,7 +1820,7 @@ async function confirmAccountAction() {
               <svg
                 viewBox="0 0 640 190"
                 role="img"
-                :aria-label="`Évolution du taux d’erreurs pour ${card.label}`"
+                :aria-label="errorEvolutionLabel(progressCardLabel(card))"
               >
                 <defs>
                   <linearGradient
@@ -1668,9 +1858,7 @@ async function confirmAccountAction() {
                 >
                   <title>
                     {{ progressDateLabel(coordinate.point.date) }} :
-                    {{ coordinate.rate }}% de fautes,
-                    {{ coordinate.point.errors }}
-                    sur {{ coordinate.point.opportunities }} occasions testées
+                    {{ chartPointLabel(coordinate.rate, coordinate.point.errors, coordinate.point.opportunities) }}
                   </title>
                 </circle>
               </svg>
@@ -1688,44 +1876,41 @@ async function confirmAccountAction() {
               </div>
             </div>
             <div class="error-progress-chart__legend">
-              <span>Moins d’erreurs en bas</span>
-              <span>
-                {{ card.totalOpportunities }} occasion{{ card.totalOpportunities > 1 ? 's' : '' }}
-                réellement testée{{ card.totalOpportunities > 1 ? 's' : '' }} au total
-              </span>
+              <span>{{ copy.fewerErrorsBelow }}</span>
+              <span>{{ totalOpportunitiesLabel(card.totalOpportunities) }}</span>
             </div>
           </div>
           <div v-else class="error-progress-card__insufficient">
-            Il faut au moins {{ learnerProgress.minimumEvidence }} occasions testées pour tracer une courbe fiable.
+            {{ text('reliableCurve', { count: learnerProgress.minimumEvidence }) }}
           </div>
           <details v-if="card.examples.length" class="error-progress-examples">
             <summary>
               <span class="error-progress-examples__label">
                 <span class="error-progress-examples__chevron" aria-hidden="true" />
-                Voir des exemples
+                {{ copy.seeExamples }}
               </span>
-              <small>{{ card.examples.length }} faute{{ card.examples.length > 1 ? 's' : '' }}</small>
+              <small>{{ mistakeCountLabel(card.examples.length) }}</small>
             </summary>
             <ol>
               <li v-for="example in card.examples" :key="example.id">
                 <dl>
                   <div>
-                    <dt>Question</dt>
+                    <dt>{{ copy.question }}</dt>
                     <dd>{{ example.question }}</dd>
                   </div>
                   <div>
-                    <dt>Ta faute</dt>
-                    <dd class="error-progress-examples__wrong">{{ example.learnerAnswer || 'Aucune réponse' }}</dd>
+                    <dt>{{ copy.yourError }}</dt>
+                    <dd class="error-progress-examples__wrong">{{ example.learnerAnswer || copy.noAnswer }}</dd>
                   </div>
                   <div>
-                    <dt>Correction</dt>
+                    <dt>{{ copy.correction }}</dt>
                     <dd class="error-progress-examples__correct">
-                      {{ example.expectedAnswers.join(' ou ') || 'Réponse attendue indisponible' }}
+                      {{ example.expectedAnswers.join(` ${ui('ou')} `) || copy.unavailableAnswer }}
                     </dd>
                   </div>
                   <div>
-                    <dt>Raison</dt>
-                    <dd>{{ example.reason }}</dd>
+                    <dt>{{ copy.reason }}</dt>
+                    <dd>{{ localizedLearnerErrorMessageForCode(card.code, example.reason, interfaceLocale) }}</dd>
                   </div>
                 </dl>
               </li>
@@ -1735,28 +1920,28 @@ async function confirmAccountAction() {
         </div>
       </template>
       <div v-else class="learner-empty">
-        <strong>Pas encore assez de données.</strong>
-        <span>Les types de fautes apparaîtront ici après tes prochains défis.</span>
+        <strong>{{ copy.insufficientData }}</strong>
+        <span>{{ copy.futureErrorTypes }}</span>
       </div>
     </section>
 
     <section v-else-if="activeTab === 'preferences'" class="learner-panel" aria-labelledby="preferences-title">
       <div class="learner-panel__heading">
         <div>
-          <p class="learner-eyebrow">Adapter l’interface</p>
-          <h2 id="preferences-title">Préférences</h2>
+          <p class="learner-eyebrow">{{ copy.adaptInterface }}</p>
+          <h2 id="preferences-title">{{ copy.preferences }}</h2>
         </div>
-        <span v-if="preferencesSaved" class="preferences-saved">Enregistré</span>
+        <span v-if="preferencesSaved" class="preferences-saved">{{ copy.saved }}</span>
       </div>
 
       <p v-if="preferencesError" class="preferences-error" role="alert">{{ preferencesError }}</p>
 
       <div class="preference-block">
         <div>
-          <h3>Langue</h3>
-          <p>Choisis la langue utilisée dans l’interface du site.</p>
+          <h3>{{ copy.language }}</h3>
+          <p>{{ copy.languageHint }}</p>
         </div>
-        <div class="locale-choices" role="group" aria-label="Langue préférée">
+        <div class="locale-choices" role="group" :aria-label="copy.preferredLanguage">
           <button
             v-for="option in localeOptions"
             :key="option.value"
@@ -1772,17 +1957,17 @@ async function confirmAccountAction() {
 
       <div class="preference-block">
         <div>
-          <h3>Apparence</h3>
-          <p>Le mode choisi est conservé pour tes prochaines visites.</p>
+          <h3>{{ copy.appearance }}</h3>
+          <p>{{ copy.appearanceHint }}</p>
         </div>
-        <div class="theme-choices" role="group" aria-label="Apparence préférée">
+        <div class="theme-choices" role="group" :aria-label="copy.preferredAppearance">
           <button
             type="button"
             :class="{ 'is-active': preferredTheme === 'light' }"
             :disabled="readOnly || preferencesSaving"
             @click="savePreferences(preferredLocale, 'light')"
           >
-            <span aria-hidden="true">☀️</span> Clair
+            <span aria-hidden="true">☀️</span> {{ copy.light }}
           </button>
           <button
             type="button"
@@ -1790,7 +1975,7 @@ async function confirmAccountAction() {
             :disabled="readOnly || preferencesSaving"
             @click="savePreferences(preferredLocale, 'dark')"
           >
-            <span aria-hidden="true">🌙</span> Sombre
+            <span aria-hidden="true">🌙</span> {{ copy.dark }}
           </button>
         </div>
       </div>
@@ -1799,26 +1984,21 @@ async function confirmAccountAction() {
     <section v-else class="learner-panel account-panel" aria-labelledby="account-title">
       <div class="learner-panel__heading">
         <div>
-          <p class="learner-eyebrow">Tes données, simplement</p>
-          <h2 id="account-title">Mon compte</h2>
+          <p class="learner-eyebrow">{{ copy.dataSimply }}</p>
+          <h2 id="account-title">{{ copy.account }}</h2>
         </div>
       </div>
 
       <div class="account-privacy">
         <span aria-hidden="true">◌</span>
         <div>
-          <h3>Un compte sans identité personnelle</h3>
-          <p>
-            Nous n’enregistrons ni nom, ni adresse e-mail, ni date de naissance.
-            Ton compte est identifié par le pseudo <strong>{{ displayUsername }}</strong>.
-            Seuls tes résultats, tes préférences et les informations techniques nécessaires
-            à la connexion sont enregistrés.
-          </p>
+          <h3>{{ copy.privateAccount }}</h3>
+          <p>{{ text('privacy', { username: displayUsername }) }}</p>
         </div>
       </div>
 
       <p v-if="resultsDeleted" class="account-success" role="status">
-        Tes résultats ont bien été supprimés. Ton compte et tes préférences sont conservés.
+        {{ copy.resultsDeleted }}
       </p>
 
       <form
@@ -1828,12 +2008,12 @@ async function confirmAccountAction() {
         @submit.prevent="changePassword"
       >
         <div>
-          <h3>Changer mon mot de passe</h3>
-          <p id="password-help">Utilise au moins 10 caractères. Les autres sessions ouvertes seront déconnectées.</p>
+          <h3>{{ copy.changePassword }}</h3>
+          <p id="password-help">{{ copy.passwordHint }}</p>
         </div>
         <div class="account-password__fields">
           <label class="is-current">
-            <span>Mot de passe actuel</span>
+            <span>{{ copy.currentPassword }}</span>
             <input
               v-model="passwordForm.currentPassword"
               type="password"
@@ -1844,7 +2024,7 @@ async function confirmAccountAction() {
             >
           </label>
           <label>
-            <span>Nouveau mot de passe</span>
+            <span>{{ copy.newPassword }}</span>
             <input
               v-model="passwordForm.newPassword"
               type="password"
@@ -1857,7 +2037,7 @@ async function confirmAccountAction() {
             >
           </label>
           <label>
-            <span>Confirmer le nouveau mot de passe</span>
+            <span>{{ copy.confirmPassword }}</span>
             <input
               v-model="passwordForm.confirmation"
               type="password"
@@ -1871,34 +2051,34 @@ async function confirmAccountAction() {
         </div>
         <p v-if="passwordError" class="preferences-error" role="alert">{{ passwordError }}</p>
         <p v-if="passwordChanged" class="account-success" role="status">
-          Ton mot de passe a bien été modifié.
+          {{ copy.passwordChanged }}
         </p>
         <button
           type="submit"
           class="account-button account-button--primary"
           :disabled="passwordChanging"
         >
-          {{ passwordChanging ? 'Modification…' : 'Modifier mon mot de passe' }}
+          {{ passwordChanging ? copy.changing : copy.changePasswordButton }}
         </button>
       </form>
 
       <div v-if="!readOnly" class="account-actions">
         <article>
           <div>
-            <h3>Supprimer mes résultats</h3>
-            <p>Efface définitivement tes défis, tes réponses et toutes les analyses de progression.</p>
+            <h3>{{ copy.deleteResults }}</h3>
+            <p>{{ copy.deleteResultsHint }}</p>
           </div>
           <button type="button" class="account-button account-button--warning" @click="openAccountDialog('results')">
-            Supprimer mes résultats
+            {{ copy.deleteResults }}
           </button>
         </article>
         <article>
           <div>
-            <h3>Supprimer mon compte</h3>
-            <p>Efface définitivement le compte <strong>{{ displayUsername }}</strong> et toutes les données associées.</p>
+            <h3>{{ copy.deleteAccount }}</h3>
+            <p>{{ text('deleteAccountHint', { username: displayUsername }) }}</p>
           </div>
           <button type="button" class="account-button account-button--danger" @click="openAccountDialog('account')">
-            Supprimer mon compte
+            {{ copy.deleteAccount }}
           </button>
         </article>
       </div>
@@ -1941,7 +2121,7 @@ async function confirmAccountAction() {
           <button
             class="account-dialog__close"
             type="button"
-            aria-label="Fermer"
+            :aria-label="copy.close"
             autofocus
             :disabled="accountActionPending"
             @click="closeAccountDialog"
@@ -1950,21 +2130,16 @@ async function confirmAccountAction() {
           </button>
           <span class="account-dialog__icon" aria-hidden="true">!</span>
           <h2 id="account-dialog-title">
-            {{ accountDialog === 'results' ? 'Supprimer tous tes résultats ?' : 'Supprimer définitivement ton compte ?' }}
+            {{ accountDialog === 'results' ? copy.deleteAllResultsQuestion : copy.deleteAccountQuestion }}
           </h2>
           <p id="account-dialog-description">
-            <template v-if="accountDialog === 'results'">
-              Tes défis, tes réponses et tes analyses de progression disparaîtront. Ton compte
-              <strong>{{ displayUsername }}</strong> et tes préférences resteront disponibles.
-            </template>
-            <template v-else>
-              Le compte <strong>{{ displayUsername }}</strong>, ses résultats et ses préférences
-              seront définitivement effacés. Tu seras ensuite déconnecté.
-            </template>
+            {{ accountDialog === 'results'
+              ? text('deleteResultsDialog', { username: displayUsername })
+              : text('deleteAccountDialog', { username: displayUsername }) }}
           </p>
           <p v-if="accountActionError" class="preferences-error" role="alert">{{ accountActionError }}</p>
           <div class="account-dialog__actions">
-            <button type="button" :disabled="accountActionPending" @click="closeAccountDialog">Annuler</button>
+            <button type="button" :disabled="accountActionPending" @click="closeAccountDialog">{{ copy.cancel }}</button>
             <button
               type="button"
               class="is-danger"
@@ -1972,8 +2147,8 @@ async function confirmAccountAction() {
               @click="confirmAccountAction"
             >
               {{ accountActionPending
-                ? 'Suppression…'
-                : accountDialog === 'results' ? 'Oui, supprimer mes résultats' : 'Oui, supprimer mon compte' }}
+                ? copy.deleting
+                : accountDialog === 'results' ? copy.confirmDeleteResults : copy.confirmDeleteAccount }}
             </button>
           </div>
         </section>

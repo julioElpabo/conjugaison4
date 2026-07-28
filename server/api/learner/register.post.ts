@@ -12,6 +12,7 @@ import {
 } from '../../utils/learner-registration'
 import { createLearnerSession } from '../../utils/learner-session'
 import { readLimitedJsonBody } from '../../utils/limited-json-body'
+import { normalizeLocale } from '../../../shared/i18n/locales'
 
 interface RegistrationBody {
   username?: unknown
@@ -20,6 +21,7 @@ interface RegistrationBody {
   privacyAccepted?: unknown
   website?: unknown
   turnstileToken?: unknown
+  interfaceLocale?: unknown
 }
 
 function recoveryCode() {
@@ -34,6 +36,7 @@ export default defineEventHandler(async (event) => {
   const username = normalizeLearnerUsername(body.username)
   const password = typeof body.password === 'string' ? body.password : ''
   const honeypot = typeof body.website === 'string' ? body.website.trim() : ''
+  const interfaceLocale = normalizeLocale(body.interfaceLocale, 'fr')
 
   await Promise.all([
     assertLearnerRateLimit(event, {
@@ -82,8 +85,8 @@ export default defineEventHandler(async (event) => {
       [result.insertId],
     )
     await connection.execute(
-      "INSERT INTO learner_preferences (account_id, interface_locale, color_theme) VALUES (?, 'fr', 'light')",
-      [result.insertId],
+      'INSERT INTO learner_preferences (account_id, interface_locale, color_theme) VALUES (?, ?, \'light\')',
+      [result.insertId, interfaceLocale],
     )
     await connection.commit()
     await createLearnerSession(event, result.insertId, 1)

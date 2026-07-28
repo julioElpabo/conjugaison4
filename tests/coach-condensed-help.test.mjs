@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import { COACH_CONDENSED_TENSE_RULES, coachCondensedTenseRule } from '../shared/data/coach-condensed-tense-rules.ts'
-import { buildCondensedTenseRuleHtml } from '../shared/utils/coach-help.ts'
+import { buildCondensedTenseRuleHtml, buildCondensedVerbGroupHtml } from '../shared/utils/coach-help.ts'
 
 const expectedKeys = [
   'indicatif:present', 'indicatif:futur proche', 'indicatif:imparfait', 'indicatif:futur', 'indicatif:passe simple',
@@ -34,6 +34,24 @@ describe('aide très condensée par mode et temps', () => {
     const rule = coachCondensedTenseRule('conditionnel', 'présent')
     assert.equal(rule.rule, 'Radical du futur + terminaison de l’imparfait.')
     assert.equal(rule.example, 'chanter- + -ait = chanterait')
+  })
+
+  it('traduit les explications condensées et conserve seulement les formes françaises étudiées', () => {
+    const verb = { infinitif: 'écouter', groupeConjugaison: 1, terminaison: 'er', auxiliaire: 'avoir' }
+    const germanGroup = buildCondensedVerbGroupHtml(verb, {}, 'de')
+    const germanFuture = buildCondensedTenseRuleHtml('indicatif', 'futur', verb, 'de')
+    assert.match(germanGroup, /gehört zur <strong>1\. Verbgruppe<\/strong>/u)
+    assert.match(germanGroup, /Die Konjugation ist normalerweise regelmäßig/u)
+    assert.doesNotMatch(germanGroup, /appartient|Conjugaison|Attention/u)
+    assert.match(germanFuture, /Futurstamm/u)
+    assert.match(germanFuture, /<strong>Beispiel:<\/strong>/u)
+    assert.match(germanFuture, /chanter- \+ -ons = chanterons/u)
+    assert.doesNotMatch(germanFuture, /Radical du futur|Exemple :/u)
+
+    for (const locale of ['de', 'en', 'it', 'es']) {
+      const html = buildCondensedTenseRuleHtml('indicatif', 'imparfait', verb, locale)
+      assert.doesNotMatch(html, /Forme avec|terminaison de l’imparfait|Exemple :/u)
+    }
   })
 
   it('normalise les accents et produit un exemple fixe indépendant de la question', () => {

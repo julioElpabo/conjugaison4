@@ -1,12 +1,12 @@
 # Simulation d’import du lot pilote
 
-Rapport généré le 28 juillet 2026 à 15:44.
+Rapport généré le 28 juillet 2026 à 19:19.
 
 ## Résultat technique
 
 - mode : contrôle du lot déjà appliqué, sans nouvelle écriture ;
 - verbes préparés : 100 ;
-- lignes de conjugaison préparées : 10'200 ;
+- lignes de conjugaison préparées : 10 200 ;
 - fiches pédagogiques complètes : 100 ;
 - liens vers les catégories sémantiques : 100 ;
 - constructions avec compléments : 73 ;

@@ -1,7 +1,11 @@
-export default defineNuxtRouteMiddleware(async () => {
+export default defineNuxtRouteMiddleware(async (to) => {
   const { checkSession } = useLearnerAuth()
+  const { localePath } = useLanguagePreferences()
   const learner = await checkSession()
   if (!learner) {
-    return navigateTo('/fr/signin', { replace: true })
+    return navigateTo({
+      path: localePath('/signin'),
+      query: { redirect: to.fullPath },
+    }, { replace: true })
   }
 })

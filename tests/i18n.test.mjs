@@ -8,6 +8,9 @@ import {
 } from '../shared/i18n/locales.ts'
 import { translateUiMessage, uiMessages } from '../shared/i18n/ui-messages.ts'
 import { translateCoachUiText } from '../shared/i18n/coach-ui.ts'
+import { learnerErrorInsteadOf, localizedLearnerErrorMessage, localizedLearnerErrorText } from '../shared/i18n/learner-errors.ts'
+import { learnerAuthCopy } from '../shared/i18n/learner-auth.ts'
+import { learnerSpaceCopy, learnerSpaceText } from '../shared/i18n/learner-space.ts'
 
 test('tous les textes d’interface possèdent les quatre traductions attendues', () => {
   assert.deepEqual(SUPPORTED_LOCALES, ['fr', 'de', 'en', 'it', 'es'])
@@ -42,4 +45,51 @@ test('les URL conservent la page lorsqu’on change de langue', () => {
   assert.equal(localeFromPath('/es/apprendre'), 'es')
   assert.equal(localeFromPath('/admin'), null)
   assert.equal(stripLocaleFromPath('/en/consulter'), '/consulter')
+})
+
+test('les types de fautes et leurs comparaisons suivent la langue de l’interface', () => {
+  const closeForm = {
+    code: 'input.close_form',
+    label: 'Forme proche de la réponse',
+    message: 'Ta réponse était proche de la bonne forme, mais elle contenait encore une différence orthographique.',
+  }
+  assert.equal(
+    localizedLearnerErrorMessage(closeForm, 'de'),
+    'Deine Antwort war fast richtig, enthielt aber noch einen Rechtschreibunterschied.',
+  )
+  assert.doesNotMatch(localizedLearnerErrorMessage(closeForm, 'it'), /Ta réponse|différence orthographique/u)
+  assert.equal(learnerErrorInsteadOf('es'), 'en lugar de')
+  assert.match(
+    localizedLearnerErrorText({ ...closeForm, learnerValue: '-a', expectedValue: '-as' }, 'en'),
+    /-a instead of -as/u,
+  )
+})
+
+test('la création de compte et la connexion disposent d’un texte dans chaque langue', () => {
+  for (const locale of SUPPORTED_LOCALES) {
+    const copy = learnerAuthCopy(locale)
+    assert.ok(copy.signIn)
+    assert.ok(copy.create)
+    assert.ok(copy.password)
+    assert.ok(copy.recoveryCode)
+  }
+  assert.equal(learnerAuthCopy('de').signIn, 'Anmelden')
+  assert.equal(learnerAuthCopy('es').create, 'Crear mi cuenta')
+})
+
+test('tous les onglets de mon espace disposent d’un catalogue complet dans chaque langue', () => {
+  const frenchKeys = Object.keys(learnerSpaceCopy('fr'))
+  for (const locale of SUPPORTED_LOCALES) {
+    const copy = learnerSpaceCopy(locale)
+    assert.deepEqual(Object.keys(copy), frenchKeys)
+    for (const key of frenchKeys) assert.ok(copy[key].trim(), `${locale}.${key} ne doit pas être vide`)
+  }
+  assert.equal(learnerSpaceCopy('de').history, 'Verlauf')
+  assert.equal(learnerSpaceCopy('en').deleteAccount, 'Delete my account')
+  assert.equal(learnerSpaceCopy('it').commonErrors, 'Errori frequenti')
+  assert.equal(learnerSpaceCopy('es').preferences, 'Preferencias')
+  assert.match(
+    learnerSpaceText(learnerSpaceCopy('en'), 'privacy', { username: 'Camille' }),
+    /Camille/u,
+  )
 })

@@ -22,7 +22,10 @@ const guidedTourRequested = useState('guided-tour-requested', () => false)
 const wizardAtHome = useState('wizard-at-home', () => true)
 const tourCopy = computed(() => guidedTourCopy(interfaceLocale.value))
 const isActualHomePage = computed(() => localizedSectionPath.value === '/' && wizardAtHome.value)
+const activeLanguageOption = computed(() => languageOptions.value.find(option => option.value === interfaceLocale.value) ?? languageOptions.value[0]!)
 const learnerMenu = ref<HTMLDetailsElement | null>(null)
+const tabletLanguageMenu = ref<HTMLElement | null>(null)
+const tabletLanguageMenuOpen = ref(false)
 const learnerLoggingOut = ref(false)
 const learnerDisplayName = computed(() => {
   const username = learner.value?.username || ''
@@ -33,13 +36,18 @@ await checkSession()
 
 watch(() => route.fullPath, () => {
   learnerMenu.value?.removeAttribute('open')
+  tabletLanguageMenuOpen.value = false
 })
 
 function closeLearnerMenuOnOutside(event: PointerEvent) {
-  const menu = learnerMenu.value
   const target = event.target
-  if (!menu?.open || !(target instanceof Node) || menu.contains(target)) return
-  menu.removeAttribute('open')
+  if (!(target instanceof Node)) return
+  if (learnerMenu.value?.open && !learnerMenu.value.contains(target)) {
+    learnerMenu.value.removeAttribute('open')
+  }
+  if (tabletLanguageMenuOpen.value && tabletLanguageMenu.value && !tabletLanguageMenu.value.contains(target)) {
+    tabletLanguageMenuOpen.value = false
+  }
 }
 
 onMounted(() => {
@@ -71,6 +79,11 @@ function toggleTheme() {
   updateTheme()
 }
 
+function selectTabletLanguage(locale: AppLocale) {
+  tabletLanguageMenuOpen.value = false
+  setInterfaceLocale(locale)
+}
+
 function requestHomeReset() {
   homeResetRequested.value = true
 }
@@ -88,7 +101,7 @@ async function logoutLearner() {
   try {
     await endLearnerSession()
     learnerMenu.value?.removeAttribute('open')
-    await navigateTo('/fr/signin')
+    await navigateTo(localePath('/signin'))
   }
   finally {
     learnerLoggingOut.value = false
@@ -111,6 +124,56 @@ const activeSection = computed(() => {
             <strong>TATITOTU</strong>
             <span>{{ ui('Défis de conjugaison') }}</span>
           </NuxtLink>
+          <div v-if="isActualHomePage" class="language-selector language-selector--tablet" role="group" :aria-label="ui('Langue de l’interface')">
+            <button
+              v-for="option in languageOptions"
+              :key="option.value"
+              type="button"
+              :class="{ 'is-active': interfaceLocale === option.value }"
+              :aria-label="option.label"
+              :aria-pressed="interfaceLocale === option.value"
+              :title="option.label"
+              @click="setInterfaceLocale(option.value)"
+            >
+              <span aria-hidden="true">{{ option.flag }}</span>
+            </button>
+          </div>
+          <div
+            v-else
+            ref="tabletLanguageMenu"
+            class="tablet-language-menu"
+            :class="{ 'is-open': tabletLanguageMenuOpen }"
+          >
+            <button
+              class="tablet-language-menu__trigger"
+              type="button"
+              :aria-label="ui('Langue de l’interface')"
+              :aria-expanded="tabletLanguageMenuOpen"
+              :title="activeLanguageOption.label"
+              @click="tabletLanguageMenuOpen = !tabletLanguageMenuOpen"
+            >
+              <span aria-hidden="true">{{ activeLanguageOption.flag }}</span>
+            </button>
+            <div
+              class="language-selector tablet-language-menu__panel"
+              role="group"
+              :aria-label="ui('Langue de l’interface')"
+              :aria-hidden="!tabletLanguageMenuOpen"
+            >
+              <button
+                v-for="option in languageOptions"
+                :key="option.value"
+                type="button"
+                :class="{ 'is-active': interfaceLocale === option.value }"
+                :aria-label="option.label"
+                :aria-pressed="interfaceLocale === option.value"
+                :title="option.label"
+                @click="selectTabletLanguage(option.value)"
+              >
+                <span aria-hidden="true">{{ option.flag }}</span>
+              </button>
+            </div>
+          </div>
           <button
             v-if="!isActualHomePage"
             class="site-tour-button"
@@ -118,7 +181,8 @@ const activeSection = computed(() => {
             :title="tourCopy.navLabel"
             @click="requestGuidedTour"
           >
-            <span>{{ tourCopy.navLabel }}</span>
+            <span class="site-tour-button__label">{{ tourCopy.navLabel }}</span>
+            <span class="site-tour-button__tablet-icon" aria-hidden="true">i</span>
           </button>
         </div>
         <nav class="site-navigation" :aria-label="ui('Navigation principale')">
@@ -138,12 +202,12 @@ const activeSection = computed(() => {
               <svg aria-hidden="true" viewBox="0 0 20 20"><path d="m5 7.5 5 5 5-5" /></svg>
             </summary>
             <div class="learner-menu__panel">
-              <NuxtLink :to="localePath('/my-page')">Mon espace</NuxtLink>
+              <NuxtLink :to="localePath('/my-page')">{{ ui('Mon espace') }}</NuxtLink>
               <NuxtLink :to="`${localePath('/my-page')}?tab=account#change-password`">
-                Changer mon mot de passe
+                {{ ui('Changer mon mot de passe') }}
               </NuxtLink>
               <button type="button" :disabled="learnerLoggingOut" @click="logoutLearner">
-                {{ learnerLoggingOut ? 'Déconnexion…' : 'Me déconnecter' }}
+                {{ learnerLoggingOut ? ui('Déconnexion…') : ui('Me déconnecter') }}
               </button>
             </div>
           </details>
@@ -165,7 +229,7 @@ const activeSection = computed(() => {
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
               </span>
             </button>
-            <div class="language-selector" role="group" :aria-label="ui('Langue de l’interface')">
+            <div class="language-selector language-selector--navigation" role="group" :aria-label="ui('Langue de l’interface')">
               <button
                 v-for="option in languageOptions"
                 :key="option.value"
@@ -180,7 +244,7 @@ const activeSection = computed(() => {
               </button>
             </div>
             <NuxtLink class="site-login-button" data-tour="learner-account" :to="localePath('/signin')">
-              Connexion
+              {{ ui('Connexion') }}
             </NuxtLink>
           </template>
         </nav>
@@ -297,6 +361,11 @@ body::after {
 @media (prefers-reduced-motion: reduce) {
   body::after {
     transition: none;
+  }
+
+  .tablet-language-menu__panel,
+  .tablet-language-menu__panel button {
+    transition: none !important;
   }
 }
 
@@ -417,6 +486,10 @@ a {
   outline-offset: 2px;
 }
 
+.site-tour-button__tablet-icon {
+  display: none;
+}
+
 .site-navigation__home {
   width: 42px;
   padding-inline: 0 !important;
@@ -451,6 +524,14 @@ a {
   background: #455b6c;
   border: 1px solid rgb(255 255 255 / 22%);
   border-radius: 999px;
+}
+
+.language-selector--tablet {
+  display: none;
+}
+
+.tablet-language-menu {
+  display: none;
 }
 
 .language-selector button {
@@ -717,6 +798,131 @@ a {
   display: flex;
   justify-content: center;
   gap: 18px;
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .site-header__inner {
+    min-height: 0;
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 10px 0;
+  }
+
+  .site-header__identity {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .site-brand span {
+    white-space: nowrap;
+  }
+
+  .language-selector--tablet {
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  .tablet-language-menu {
+    position: relative;
+    display: block;
+    margin-left: auto;
+  }
+
+  .tablet-language-menu__trigger {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    place-items: center;
+    border: 1px solid rgb(255 255 255 / 22%);
+    border-radius: 50%;
+    background: #455b6c;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .tablet-language-menu__trigger:focus-visible {
+    outline: 3px solid rgb(112 210 232 / 55%);
+    outline-offset: 2px;
+  }
+
+  .tablet-language-menu__trigger > span {
+    font-size: 1.05rem;
+    line-height: 1;
+  }
+
+  .tablet-language-menu__panel {
+    position: absolute;
+    z-index: 10;
+    top: 0;
+    right: calc(100% + 7px);
+    width: max-content;
+    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
+    clip-path: inset(0 0 0 100% round 999px);
+    transform: translateX(20px);
+    transform-origin: right center;
+    box-shadow: 0 8px 22px rgb(14 31 43 / 28%);
+    transition:
+      clip-path 300ms cubic-bezier(.22, 1, .36, 1),
+      transform 300ms cubic-bezier(.22, 1, .36, 1),
+      visibility 0s linear 300ms;
+  }
+
+  .tablet-language-menu__panel button {
+    transform: translateX(150px);
+    transition: transform 300ms cubic-bezier(.22, 1, .36, 1);
+  }
+
+  .tablet-language-menu.is-open .tablet-language-menu__panel {
+    visibility: visible;
+    pointer-events: auto;
+    clip-path: inset(0 round 999px);
+    transform: translateX(0);
+    transition-delay: 0s;
+  }
+
+  .tablet-language-menu.is-open .tablet-language-menu__panel button {
+    transform: translateX(0);
+  }
+
+  .language-selector--navigation {
+    display: none;
+  }
+
+  .site-tour-button {
+    width: 34px;
+    height: 34px;
+    min-height: 34px;
+    flex: 0 0 34px;
+    padding: 0;
+    border-radius: 50%;
+  }
+
+  .site-tour-button__label {
+    display: none;
+  }
+
+  .site-tour-button__tablet-icon {
+    display: inline;
+    font-family: Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .site-navigation {
+    width: 100%;
+    flex: 1 1 100%;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .site-navigation a {
+    padding: 8px 11px;
+    font-size: .88rem;
+  }
 }
 
 @media (max-width: 640px) {

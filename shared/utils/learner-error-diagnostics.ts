@@ -7,6 +7,8 @@ import {
   validateAnswer,
 } from './answer'
 import { diagnoseCoachAgreement, diagnoseCoachAnswer } from './coach-feedback'
+import type { AppLocale } from '../i18n/locales'
+import { localizedLearnerErrorText } from '../i18n/learner-errors'
 
 export type LearnerErrorConfidence = 'high' | 'medium' | 'low'
 
@@ -400,10 +402,8 @@ export function mergeLearnerErrorDetails(...groups: LearnerErrorDetail[][]): Lea
   return [...details.values()]
 }
 
-export function learnerErrorDetailText(detail: LearnerErrorDetail): string {
-  return detail.learnerValue && detail.expectedValue
-    ? `${detail.message} ${detail.learnerValue} à la place de ${detail.expectedValue}`
-    : detail.message
+export function learnerErrorDetailText(detail: LearnerErrorDetail, locale: AppLocale = 'fr'): string {
+  return localizedLearnerErrorText(detail, locale)
 }
 
 export function applicableLearnerErrorTypes(question: ExerciseQuestion): LearnerErrorTypeCode[] {

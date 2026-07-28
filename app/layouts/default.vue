@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { AppLocale } from '~~/shared/i18n/locales'
 import { guidedTourCopy } from '~~/shared/i18n/guided-tour'
+import { learnerSpaceCopy } from '~~/shared/i18n/learner-space'
 
 const { ui, interfaceLocale, setInterfaceLocale, localePath } = useLanguagePreferences()
 const { user: learner, checkSession, logout: endLearnerSession } = useLearnerAuth()
@@ -21,9 +22,11 @@ const homeResetRequested = useState('home-reset-requested', () => false)
 const guidedTourRequested = useState('guided-tour-requested', () => false)
 const wizardAtHome = useState('wizard-at-home', () => true)
 const tourCopy = computed(() => guidedTourCopy(interfaceLocale.value))
+const learnerCopy = computed(() => learnerSpaceCopy(interfaceLocale.value))
 const isActualHomePage = computed(() => localizedSectionPath.value === '/' && wizardAtHome.value)
 const activeLanguageOption = computed(() => languageOptions.value.find(option => option.value === interfaceLocale.value) ?? languageOptions.value[0]!)
 const learnerMenu = ref<HTMLDetailsElement | null>(null)
+const learnerLanguageMenuOpen = ref(false)
 const tabletLanguageMenu = ref<HTMLElement | null>(null)
 const tabletLanguageMenuOpen = ref(false)
 const learnerLoggingOut = ref(false)
@@ -36,6 +39,7 @@ await checkSession()
 
 watch(() => route.fullPath, () => {
   learnerMenu.value?.removeAttribute('open')
+  learnerLanguageMenuOpen.value = false
   tabletLanguageMenuOpen.value = false
 })
 
@@ -44,6 +48,7 @@ function closeLearnerMenuOnOutside(event: PointerEvent) {
   if (!(target instanceof Node)) return
   if (learnerMenu.value?.open && !learnerMenu.value.contains(target)) {
     learnerMenu.value.removeAttribute('open')
+    learnerLanguageMenuOpen.value = false
   }
   if (tabletLanguageMenuOpen.value && tabletLanguageMenu.value && !tabletLanguageMenu.value.contains(target)) {
     tabletLanguageMenuOpen.value = false
@@ -106,6 +111,29 @@ async function logoutLearner() {
   finally {
     learnerLoggingOut.value = false
   }
+}
+const activeLearnerTab = computed(() => {
+  if (localizedSectionPath.value !== '/my-page') return ''
+  const tab = String(route.query.tab || 'challenges')
+  return ['history', 'progress', 'challenges', 'preferences', 'account'].includes(tab) ? tab : 'challenges'
+})
+
+async function selectLearnerLanguage(locale: AppLocale) {
+  learnerLanguageMenuOpen.value = false
+  setInterfaceLocale(locale)
+  try {
+    await $fetch('/api/learner/preferences', {
+      method: 'PUT',
+      body: {
+        interfaceLocale: locale,
+        colorTheme: isDark.value ? 'dark' : 'light',
+      },
+    })
+  }
+  catch {
+    // Le choix reste actif localement même si sa mémorisation échoue.
+  }
+  learnerMenu.value?.removeAttribute('open')
 }
 const activeSection = computed(() => {
   if (localizedSectionPath.value === '/consulter' || localizedSectionPath.value.startsWith('/consulter/')) return 'consulter'
@@ -202,8 +230,68 @@ const activeSection = computed(() => {
               <svg aria-hidden="true" viewBox="0 0 20 20"><path d="m5 7.5 5 5 5-5" /></svg>
             </summary>
             <div class="learner-menu__panel">
-              <NuxtLink :to="localePath('/my-page')">{{ ui('Mon espace') }}</NuxtLink>
-              <NuxtLink :to="`${localePath('/my-page')}?tab=account#change-password`">
+              <NuxtLink
+                :to="`${localePath('/my-page')}?tab=history`"
+                :class="{ 'is-active': activeLearnerTab === 'history' }"
+              >
+                {{ learnerCopy.history }}
+              </NuxtLink>
+              <NuxtLink
+                :to="`${localePath('/my-page')}?tab=progress`"
+                :class="{ 'is-active': activeLearnerTab === 'progress' }"
+              >
+                {{ learnerCopy.commonErrors }}
+              </NuxtLink>
+              <NuxtLink
+                class="learner-menu__progress"
+                :class="{ 'is-active': activeLearnerTab === 'challenges' }"
+                :to="`${localePath('/my-page')}?tab=challenges`"
+              >
+                <span aria-hidden="true">✦</span>
+                {{ learnerCopy.improve }}
+              </NuxtLink>
+              <NuxtLink
+                :to="`${localePath('/my-page')}?tab=preferences`"
+                :class="{ 'is-active': activeLearnerTab === 'preferences' }"
+              >
+                {{ learnerCopy.preferences }}
+              </NuxtLink>
+              <div class="learner-menu__language">
+                <button
+                  class="learner-menu__language-trigger"
+                  type="button"
+                  :aria-expanded="learnerLanguageMenuOpen"
+                  :aria-label="learnerCopy.changeLanguage"
+                  @click="learnerLanguageMenuOpen = !learnerLanguageMenuOpen"
+                >
+                  <span aria-hidden="true">{{ activeLanguageOption.flag }}</span>
+                  <span>{{ learnerCopy.changeLanguage }}</span>
+                  <svg aria-hidden="true" viewBox="0 0 20 20"><path d="m7.5 5 5 5-5 5" /></svg>
+                </button>
+                <div
+                  v-if="learnerLanguageMenuOpen"
+                  class="learner-menu__language-options"
+                  role="group"
+                  :aria-label="ui('Langue de l’interface')"
+                >
+                  <button
+                    v-for="option in languageOptions"
+                    :key="option.value"
+                    type="button"
+                    :class="{ 'is-active': interfaceLocale === option.value }"
+                    :aria-label="option.label"
+                    :aria-pressed="interfaceLocale === option.value"
+                    :title="option.label"
+                    @click="selectLearnerLanguage(option.value)"
+                  >
+                    <span aria-hidden="true">{{ option.flag }}</span>
+                  </button>
+                </div>
+              </div>
+              <NuxtLink
+                :to="`${localePath('/my-page')}?tab=account#change-password`"
+                :class="{ 'is-active': activeLearnerTab === 'account' }"
+              >
                 {{ ui('Changer mon mot de passe') }}
               </NuxtLink>
               <button type="button" :disabled="learnerLoggingOut" @click="logoutLearner">
@@ -640,7 +728,7 @@ a {
   right: 0;
   display: grid;
   width: max-content;
-  min-width: 180px;
+  min-width: 230px;
   padding: 6px;
   border: 1px solid var(--line);
   border-radius: 13px;
@@ -670,6 +758,89 @@ a {
 .learner-menu__panel button:hover {
   color: var(--brand-dark);
   background: var(--surface-soft);
+}
+
+.learner-menu__panel > a.is-active {
+  color: var(--brand-dark);
+  background: var(--surface-soft);
+}
+
+.learner-menu__panel a.learner-menu__progress {
+  gap: 7px;
+  color: #5a3b86;
+  border: 1px solid color-mix(in srgb, #7052a0 48%, var(--line));
+  background: color-mix(in srgb, #7052a0 11%, var(--surface));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #7052a0 7%, transparent);
+}
+
+.learner-menu__panel a.learner-menu__progress:hover {
+  border-color: #7052a0;
+  background: color-mix(in srgb, #7052a0 17%, var(--surface));
+}
+
+.learner-menu__panel a.learner-menu__progress.is-active {
+  color: white;
+  border-color: #7052a0;
+  background: #7052a0;
+  box-shadow: 0 7px 18px rgb(75 48 113 / 20%);
+}
+
+:root[data-theme='dark'] .learner-menu__panel a.learner-menu__progress:not(.is-active) {
+  color: #cdb9f6;
+}
+
+.learner-menu__language {
+  display: grid;
+}
+
+.learner-menu__panel .learner-menu__language-trigger {
+  display: grid;
+  grid-template-columns: 24px 1fr 16px;
+  gap: 7px;
+}
+
+.learner-menu__language-trigger > span:first-child,
+.learner-menu__language-options span {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.learner-menu__language-trigger svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  transition: transform 180ms ease;
+}
+
+.learner-menu__language-trigger[aria-expanded='true'] svg {
+  transform: rotate(90deg);
+}
+
+.learner-menu__language-options {
+  display: flex;
+  padding: 4px 7px 7px;
+  gap: 5px;
+}
+
+.learner-menu__panel .learner-menu__language-options button {
+  display: grid;
+  width: 34px;
+  min-height: 32px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+}
+
+.learner-menu__panel .learner-menu__language-options button.is-active {
+  border-color: #7052a0;
+  background: color-mix(in srgb, #7052a0 18%, var(--surface));
+  box-shadow: inset 0 0 0 1px #7052a0;
 }
 
 .learner-menu__panel button:disabled {

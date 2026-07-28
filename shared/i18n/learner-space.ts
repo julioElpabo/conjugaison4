@@ -3,7 +3,7 @@ import type { AppLocale } from './locales'
 const copies = {
   fr: {
     hello: 'Bonjour', personalSettings: 'Paramètres personnels', spaceSections: 'Sections de mon espace',
-    preferences: 'Préférences', account: 'Mon compte', history: 'Historique', commonErrors: 'Fautes courantes', improve: 'Progresser',
+    preferences: 'Préférences', account: 'Mon compte', history: 'Historique', commonErrors: 'Mes fautes courantes', improve: 'Progresser', changeLanguage: 'Changer de langue',
     findActivities: 'Retrouver mes activités', resumeAndConsolidate: 'Reprendre et consolider', reviewJourney: 'Relire mon parcours',
     chooseTraining: 'Choisir mon prochain entraînement',
     historyIntro: 'Retrouve tes défis du plus récent au plus ancien, avec les réussites et les erreurs de chaque séance. Tu peux ainsi revoir ce que tu as travaillé et reprendre un exercice utile.',
@@ -62,7 +62,7 @@ const copies = {
   },
   de: {
     hello: 'Hallo', personalSettings: 'Persönliche Einstellungen', spaceSections: 'Bereiche meines Kontos',
-    preferences: 'Einstellungen', account: 'Mein Konto', history: 'Verlauf', commonErrors: 'Häufige Fehler', improve: 'Fortschritt',
+    preferences: 'Einstellungen', account: 'Mein Konto', history: 'Verlauf', commonErrors: 'Meine häufigen Fehler', improve: 'Fortschritt', changeLanguage: 'Sprache ändern',
     findActivities: 'Meine Aktivitäten finden', resumeAndConsolidate: 'Wiederholen und festigen', reviewJourney: 'Meinen Lernweg ansehen',
     chooseTraining: 'Nächstes Training auswählen',
     historyIntro: 'Hier findest du deine Übungen von der neuesten bis zur ältesten mit den richtigen und falschen Antworten jeder Sitzung. So kannst du deinen Lernweg ansehen und eine passende Übung wiederholen.',
@@ -119,7 +119,7 @@ const copies = {
   },
   en: {
     hello: 'Hello', personalSettings: 'Personal settings', spaceSections: 'My page sections',
-    preferences: 'Preferences', account: 'My account', history: 'History', commonErrors: 'Common mistakes', improve: 'Improve',
+    preferences: 'Preferences', account: 'My account', history: 'History', commonErrors: 'My common mistakes', improve: 'Improve', changeLanguage: 'Change language',
     findActivities: 'Find my activities', resumeAndConsolidate: 'Resume and consolidate', reviewJourney: 'Review my journey',
     chooseTraining: 'Choose my next practice',
     historyIntro: 'Find your challenges from newest to oldest, with the correct answers and mistakes from each session. You can review what you worked on and resume a useful exercise.',
@@ -176,7 +176,7 @@ const copies = {
   },
   it: {
     hello: 'Ciao', personalSettings: 'Impostazioni personali', spaceSections: 'Sezioni del mio spazio',
-    preferences: 'Preferenze', account: 'Il mio account', history: 'Cronologia', commonErrors: 'Errori frequenti', improve: 'Progredire',
+    preferences: 'Preferenze', account: 'Il mio account', history: 'Cronologia', commonErrors: 'I miei errori frequenti', improve: 'Progredire', changeLanguage: 'Cambia lingua',
     findActivities: 'Ritrovare le mie attività', resumeAndConsolidate: 'Riprendere e consolidare', reviewJourney: 'Rivedere il mio percorso',
     chooseTraining: 'Scegliere il prossimo allenamento',
     historyIntro: 'Ritrova gli esercizi dal più recente al più vecchio, con le risposte corrette e gli errori di ogni sessione. Puoi rivedere ciò che hai studiato e riprendere un esercizio utile.',
@@ -233,7 +233,7 @@ const copies = {
   },
   es: {
     hello: 'Hola', personalSettings: 'Ajustes personales', spaceSections: 'Secciones de mi espacio',
-    preferences: 'Preferencias', account: 'Mi cuenta', history: 'Historial', commonErrors: 'Errores frecuentes', improve: 'Progresar',
+    preferences: 'Preferencias', account: 'Mi cuenta', history: 'Historial', commonErrors: 'Mis errores frecuentes', improve: 'Progresar', changeLanguage: 'Cambiar de idioma',
     findActivities: 'Encontrar mis actividades', resumeAndConsolidate: 'Retomar y consolidar', reviewJourney: 'Revisar mi recorrido',
     chooseTraining: 'Elegir mi próximo entrenamiento',
     historyIntro: 'Encuentra tus ejercicios del más reciente al más antiguo, con los aciertos y errores de cada sesión. Así puedes revisar lo trabajado y retomar un ejercicio útil.',

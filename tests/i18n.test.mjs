@@ -86,7 +86,7 @@ test('tous les onglets de mon espace disposent d’un catalogue complet dans cha
   }
   assert.equal(learnerSpaceCopy('de').history, 'Verlauf')
   assert.equal(learnerSpaceCopy('en').deleteAccount, 'Delete my account')
-  assert.equal(learnerSpaceCopy('it').commonErrors, 'Errori frequenti')
+  assert.equal(learnerSpaceCopy('it').commonErrors, 'I miei errori frequenti')
   assert.equal(learnerSpaceCopy('es').preferences, 'Preferencias')
   assert.match(
     learnerSpaceText(learnerSpaceCopy('en'), 'privacy', { username: 'Camille' }),

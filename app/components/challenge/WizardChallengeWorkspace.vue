@@ -824,6 +824,16 @@ function tourSteps(format: TourFormat): DriveStep[] {
       },
     },
     {
+      element: '[data-tour="learner-account"]',
+      title: copy.accountTitle,
+      description: copy.accountDescription,
+      activate: async () => {
+        closeTourWindows()
+        currentStep.value = 0
+        await nextTick()
+      },
+    },
+    {
       title: copy.completedTitle,
       description: copy.completedDescription,
       activate: async () => {
@@ -834,7 +844,7 @@ function tourSteps(format: TourFormat): DriveStep[] {
     },
   ]
 
-  const quickSceneIndexes = [0, 1, 2, 3, 4, 7,8,9,11, 13,14,15]
+  const quickSceneIndexes = [0, 1, 2, 3, 4, 7, 8, 9, 11, 13, 14, 15, 16]
   const activeScenes = format === 'quick'
     ? quickSceneIndexes.map(index => scenes[index]!)
     : scenes

@@ -131,7 +131,7 @@ const activeSection = computed(() => {
           <NuxtLink :to="localePath('/')" :class="{ 'is-active': activeSection === 'exercer' }" :aria-current="activeSection === 'exercer' ? 'page' : undefined"> {{ ui('S’exercer') }} </NuxtLink>
           <NuxtLink :to="localePath('/consulter')" :class="{ 'is-active': activeSection === 'consulter' }" :aria-current="activeSection === 'consulter' ? 'page' : undefined"> {{ ui('Consulter') }} </NuxtLink>
           <NuxtLink :to="localePath('/apprendre')" :class="{ 'is-active': activeSection === 'apprendre' }" :aria-current="activeSection === 'apprendre' ? 'page' : undefined"> {{ ui('Apprendre') }} </NuxtLink>
-          <details v-if="learner" ref="learnerMenu" class="learner-menu">
+          <details v-if="learner" ref="learnerMenu" class="learner-menu" data-tour="learner-account">
             <summary>
               <span class="learner-menu__avatar" aria-hidden="true">{{ learnerDisplayName.charAt(0) }}</span>
               <span>{{ learnerDisplayName }}</span>
@@ -164,7 +164,6 @@ const activeSection = computed(() => {
               <span class="theme-switch__icon theme-switch__icon--sun" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
               </span>
-              <span class="theme-switch__thumb" aria-hidden="true" />
             </button>
             <div class="language-selector" role="group" :aria-label="ui('Langue de l’interface')">
               <button
@@ -180,7 +179,7 @@ const activeSection = computed(() => {
                 <span aria-hidden="true">{{ option.flag }}</span>
               </button>
             </div>
-            <NuxtLink class="site-login-button" :to="localePath('/signin')">
+            <NuxtLink class="site-login-button" data-tour="learner-account" :to="localePath('/signin')">
               Connexion
             </NuxtLink>
           </template>
@@ -611,9 +610,9 @@ a {
 
 .theme-switch {
   position: relative;
-  width: 2.7rem;
-  height: 1.55rem;
-  flex: 0 0 2.7rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: 0 0 1.75rem;
   margin-left: 0;
   overflow: hidden;
   padding: 0;
@@ -639,39 +638,22 @@ a {
   border-color: rgb(153 211 224 / 34%);
 }
 
-.theme-switch__thumb {
-  position: absolute;
-  z-index: 2;
-  top: .16rem;
-  left: .16rem;
-  width: 1.08rem;
-  height: 1.08rem;
-  background: #f7fafb;
-  border-radius: 50%;
-  box-shadow: 0 2px 5px rgb(0 0 0 / 30%);
-  transition: transform .28s cubic-bezier(.22, 1, .36, 1), background-color .25s ease;
-}
-
-.theme-switch.is-dark .theme-switch__thumb {
-  background: #dce8ec;
-  transform: translateX(1.3rem);
-}
-
 .theme-switch__icon {
   position: absolute;
   z-index: 1;
   top: 50%;
+  left: 50%;
   display: grid;
-  width: 1.08rem;
-  height: 1.08rem;
+  width: 1.35rem;
+  height: 1.35rem;
   place-items: center;
-  transform: translateY(-50%);
+  transform: translate(-50%, -50%);
   transition: opacity .2s ease;
 }
 
 .theme-switch__icon svg {
-  width: 11px;
-  height: 11px;
+  width: 14px;
+  height: 14px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
@@ -679,11 +661,11 @@ a {
   stroke-width: 1.9;
 }
 
-.theme-switch__icon--moon { left: .18rem; opacity: 0; }
+.theme-switch__icon--moon { opacity: 1; }
 .theme-switch__icon--moon svg { fill: currentColor; stroke: none; }
-.theme-switch__icon--sun { right: .18rem; opacity: 1; }
-.theme-switch.is-dark .theme-switch__icon--moon { opacity: 1; }
-.theme-switch.is-dark .theme-switch__icon--sun { opacity: 0; }
+.theme-switch__icon--sun { opacity: 0; }
+.theme-switch.is-dark .theme-switch__icon--moon { opacity: 0; }
+.theme-switch.is-dark .theme-switch__icon--sun { opacity: 1; }
 
 .site-navigation .site-login-button {
   min-height: 2rem;

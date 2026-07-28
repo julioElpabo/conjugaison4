@@ -38,7 +38,7 @@ export default defineEventHandler((event) => {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    "frame-src https://challenges.cloudflare.com",
+    "frame-src 'self' blob: https://challenges.cloudflare.com",
     "object-src 'none'",
     "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://challenges.cloudflare.com",
     "script-src-attr 'none'",

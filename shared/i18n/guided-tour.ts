@@ -51,6 +51,8 @@ export interface GuidedTourCopy {
   shareDescription: string
   resumeTitle: string
   resumeDescription: string
+  accountTitle: string
+  accountDescription: string
   completedTitle: string
   completedDescription: string
 }
@@ -107,6 +109,8 @@ const copies: Record<AppLocale, GuidedTourCopy> = {
     shareDescription: "Créer un code de 8 caractères permet de retrouver plus tard le défi ou de le partager avec d’autres personnes. Idéal pour le partager avec les élèves d'une classe.",
     resumeTitle: 'Reprendre le défi',
     resumeDescription: "Plus tard, l’élève colle le code reçu dans la page d'accueil et retrouve immédiatement le défi. Les anciens codes restent valables.",
+    accountTitle: 'Nouveau : un espace pour suivre tes progrès',
+    accountDescription: 'Avec « Connexion », tu peux créer gratuitement un compte pour enregistrer tes résultats et suivre tes progrès.',
     completedTitle: 'Bon travail !',
     completedDescription: 'Tu connais maintenant le parcours. Tu peux relancer cette visite à tout moment avec « Visite guidée ».',
   },
@@ -161,6 +165,8 @@ const copies: Record<AppLocale, GuidedTourCopy> = {
     shareDescription: 'Mit einem Code aus 8 Zeichen kannst du die Aufgabe später wiederfinden oder mit anderen teilen. Ideal, um sie mit den Schülerinnen und Schülern einer Klasse zu teilen.',
     resumeTitle: 'Aufgabe wiederaufnehmen',
     resumeDescription: 'Später fügt die lernende Person den erhaltenen Code auf der Startseite ein und findet die Aufgabe sofort wieder. Alte Codes bleiben gültig.',
+    accountTitle: 'Neu: ein Bereich für deinen Lernfortschritt',
+    accountDescription: 'Über „Anmelden“ kannst du kostenlos ein Konto erstellen, um deine Ergebnisse zu speichern und deinen Fortschritt zu verfolgen.',
     completedTitle: 'Gute Arbeit!',
     completedDescription: 'Du kennst jetzt den Ablauf. Über „Geführte Tour“ kannst du ihn jederzeit erneut ansehen.',
   },
@@ -215,6 +221,8 @@ const copies: Record<AppLocale, GuidedTourCopy> = {
     shareDescription: 'An 8-character code lets you retrieve the challenge later or share it with other people. Ideal for sharing it with the students in a class.',
     resumeTitle: 'Resume the challenge',
     resumeDescription: 'Later, the learner pastes the received code on the home page and immediately retrieves the challenge. Older codes remain valid.',
+    accountTitle: 'New: a space to track your progress',
+    accountDescription: 'Use “Sign in” to create a free account, save your results and track your progress.',
     completedTitle: 'Good work!',
     completedDescription: 'You now know the workflow. You can restart this tour at any time with “Guided tour”.',
   },
@@ -269,6 +277,8 @@ const copies: Record<AppLocale, GuidedTourCopy> = {
     shareDescription: 'Un codice di 8 caratteri permette di ritrovare la sfida in seguito o di condividerla con altre persone. È ideale per condividerla con gli alunni di una classe.',
     resumeTitle: 'Riprendere la sfida',
     resumeDescription: 'In seguito, l’allievo incolla il codice ricevuto nella pagina iniziale e ritrova subito la sfida. I vecchi codici restano validi.',
+    accountTitle: 'Novità: uno spazio per seguire i tuoi progressi',
+    accountDescription: 'Con « Connessione » puoi creare gratuitamente un account, salvare i risultati e seguire i tuoi progressi.',
     completedTitle: 'Buon lavoro!',
     completedDescription: 'Ora conosci il percorso. Puoi riavviare questa visita in qualsiasi momento con « Visita guidata ».',
   },
@@ -323,6 +333,8 @@ const copies: Record<AppLocale, GuidedTourCopy> = {
     shareDescription: 'Un código de 8 caracteres permite recuperar el desafío más tarde o compartirlo con otras personas. Es ideal para compartirlo con el alumnado de una clase.',
     resumeTitle: 'Retomar el desafío',
     resumeDescription: 'Más tarde, el alumno pega el código recibido en la página de inicio y recupera inmediatamente el desafío. Los códigos antiguos siguen siendo válidos.',
+    accountTitle: 'Nuevo: un espacio para seguir tus progresos',
+    accountDescription: 'Con « Conexión » puedes crear una cuenta gratuita, guardar tus resultados y seguir tus progresos.',
     completedTitle: '¡Buen trabajo!',
     completedDescription: 'Ya conoces el recorrido. Puedes reiniciar esta visita en cualquier momento con « Visita guiada ».',
   },

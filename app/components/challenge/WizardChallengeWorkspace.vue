@@ -1568,7 +1568,7 @@ async function createSharedChallenge(title: string, description: string) {
                       @input="onChallengeCodeInput"
                       @keydown.enter.prevent="restoreChallenge"
                     ></div>
-                    <button class="primary-button" type="button" :disabled="catalogueStatus !== 'success' || busyAction === 'load'" @click="restoreChallenge">
+                    <button class="primary-button wizard-home__outline-action" type="button" :disabled="catalogueStatus !== 'success' || busyAction === 'load'" @click="restoreChallenge">
                       {{ busyAction === 'load' ? ui('Chargement…') : ui('Charger') }}
                     </button>
                   </div>
@@ -1585,9 +1585,9 @@ async function createSharedChallenge(title: string, description: string) {
                   >
                     <span class="wizard-home__choice-icon" aria-hidden="true">★</span>
                     <div>
-                      <h2>{{ ui('Tu veux travailler un de nos défis ?') }}</h2>
+                      <h2>{{ ui('Tu veux travailler un de nos défis ?') }}</h2>
                     </div>
-                    <span class="secondary-button" aria-hidden="true">{{ ui('Voir') }}</span>
+                    <span class="secondary-button wizard-home__outline-action" aria-hidden="true">{{ ui('Découvrir') }}</span>
                   </button>
                   <article
                     v-else
@@ -1597,7 +1597,7 @@ async function createSharedChallenge(title: string, description: string) {
                   >
                     <span class="wizard-home__choice-icon" aria-hidden="true">★</span>
                     <div>
-                      <h2>{{ ui('Tu veux travailler un de nos défis ?') }}</h2>
+                      <h2>{{ ui('Tu veux travailler un de nos défis ?') }}</h2>
                     </div>
                     <PresetPicker
                       class="wizard-home__inline-presets"
@@ -1963,8 +1963,11 @@ async function createSharedChallenge(title: string, description: string) {
 .wizard-home__choice h2 { margin: 1px 0 8px; color: var(--brand-dark); font-size: clamp(1.2rem, 2.2vw, 1.55rem); line-height: 1.15; }
 .wizard-home__choice--preset .wizard-home__choice-icon { width: 38px; height: 38px; border-radius: 11px; font-size: 1.2rem; }
 .wizard-home__choice--preset h2 { margin-top: 6px; font-size: 1rem; letter-spacing: 0; line-height: 1.25; }
-.wizard-home__choice--preset.is-collapsed { min-height: 82px; align-content: center; align-items: center; grid-template-columns: auto 1fr auto; }
+.wizard-home__choice--preset.is-collapsed { min-height: 82px; padding-right: 18px; align-content: center; align-items: center; grid-template-columns: auto 1fr auto; }
 .wizard-home__choice--preset.is-collapsed > .secondary-button { grid-column: 3; align-self: center; justify-self: end; margin: 0; }
+.wizard-home__outline-action { display: inline-flex; width: 10rem; max-width: 100%; min-height: 43px; padding: 9px 16px; align-items: center; justify-content: center; color: var(--brand); border: 1px solid var(--brand); border-radius: 10px; background: transparent; font: inherit; font-weight: 750; line-height: 1.35; text-align: center; transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease; }
+.code-loader__control .wizard-home__outline-action:hover:not(:disabled),
+.wizard-home__choice--preset.is-collapsed:hover > .wizard-home__outline-action { color: white; border-color: var(--brand); background: var(--brand); }
 .wizard-home__choice--preset.is-preset-selection { min-height: 0; padding-block: 16px; }
 .wizard-home__choice--custom { min-height: 130px; align-content: center; align-items: center; grid-template-columns: auto 1fr; }
 .wizard-home__choice.wizard-home__choice--custom > button { grid-column: 1 / -1; align-self: center; justify-self: center; margin: 0; }
@@ -2111,7 +2114,7 @@ async function createSharedChallenge(title: string, description: string) {
   .wizard-home__choice-icon { width: 40px; height: 40px; border-radius: 11px; }
   .wizard-home__choice--preset.is-collapsed,
   .wizard-home__choice--custom { grid-template-columns: 40px 1fr; }
-  .wizard-home__choice--preset.is-collapsed > .secondary-button { grid-column: 1 / -1; grid-row: 3; justify-self: center; }
+  .wizard-home__choice--preset.is-collapsed > .secondary-button { width: 100%; grid-column: 1 / -1; grid-row: 3; justify-self: stretch; }
   .wizard-step--selection,
   .wizard-review,
   .wizard-launch-step { padding-top: 0; }

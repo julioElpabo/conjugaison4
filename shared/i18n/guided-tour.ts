@@ -62,7 +62,7 @@ const copies: Record<AppLocale, GuidedTourCopy> = {
     discover: 'Visite guidée',
     navLabel: 'Visite guidée',
     welcomeTitle: 'Bienvenue sur le nouveau TATITOTU',
-    welcomeBody: "Le site a été amélioré. Il reste 100% gratuit et sans publicité. Aucun compte n'est nécessaire.",
+    welcomeBody: 'Toujours 100% gratuit et sans publicité.',
     quickTitle: 'Visite rapide',
     quickMeta: 'Environ 1 minute',
     fullTitle: 'Visite complète',

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { LearnerErrorDetail } from '~~/shared/types/conjugation'
-import { learnerErrorInsteadOf, localizedLearnerErrorMessage } from '~~/shared/i18n/learner-errors'
+import { learnerErrorInsteadOf } from '~~/shared/i18n/learner-errors'
+import LearnerErrorDetailMessage from '~/components/exercise/LearnerErrorDetailMessage.vue'
 
 defineProps<{
   details: LearnerErrorDetail[]
@@ -17,8 +18,11 @@ const { interfaceLocale, ui } = useLanguagePreferences()
     </strong>
     <ul>
       <li v-for="detail in details" :key="detail.code">
-        <b>{{ localizedLearnerErrorMessage(detail, interfaceLocale) }}</b>
-        <span v-if="detail.learnerValue && detail.expectedValue" class="learner-error-feedback__comparison">
+        <b><LearnerErrorDetailMessage :detail="detail" /></b>
+        <span
+          v-if="detail.code !== 'person.other_form' && detail.learnerValue && detail.expectedValue"
+          class="learner-error-feedback__comparison"
+        >
           <del>{{ detail.learnerValue }}</del>
           <span>{{ learnerErrorInsteadOf(interfaceLocale) }}</span>
           <ins>{{ detail.expectedValue }}</ins>

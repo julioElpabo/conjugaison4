@@ -10,7 +10,7 @@ import {
 } from '../shared/utils/learner-error-diagnostics.ts'
 import { buildLearnerErrorInsights } from '../shared/utils/learner-error-insights.ts'
 import { buildLearnerErrorProgress } from '../shared/utils/learner-error-progress.ts'
-import { diagnoseCoachAgreement } from '../shared/utils/coach-feedback.ts'
+import { diagnoseCoachAgreement, diagnoseCoachAnswer } from '../shared/utils/coach-feedback.ts'
 
 function question(overrides = {}) {
   return {
@@ -140,11 +140,11 @@ describe('classement pédagogique des erreurs', () => {
     assert.deepEqual(details, [{
       code: 'person.other_form',
       label: 'confondre les pronoms (je, tu, ils...)',
-      message: 'Tu as confondu les personnes.',
+      message: 'Tu as confondu la personne. Tu as conjugué avec « il », alors que c’était « ils ».',
       learnerValue: 'il',
       expectedValue: 'ils',
     }])
-    assert.equal(learnerErrorDetailText(details[0]), 'Tu as confondu les personnes. il à la place de ils')
+    assert.equal(learnerErrorDetailText(details[0]), 'Tu as confondu la personne. Tu as conjugué avec « il », alors que c’était « ils ».')
   })
 
   it('explique humainement la confusion entre -ont et -ons', () => {
@@ -163,10 +163,34 @@ describe('classement pédagogique des erreurs', () => {
     assert.deepEqual(details, [{
       code: 'person.other_form',
       label: 'confondre les pronoms (je, tu, ils...)',
-      message: 'Tu as confondu la terminaison de « ils/elles » avec celle de « nous ».',
-      learnerValue: '-ont (ils/elles)',
-      expectedValue: '-ons (nous)',
+      message: 'Tu as confondu la personne. Tu as conjugué avec « ils/elles », alors que c’était « nous ».',
+      learnerValue: 'ils/elles',
+      expectedValue: 'nous',
     }])
+  })
+
+  it('classe les remplacements de fin de mot comme des erreurs de terminaison', () => {
+    const aimer = question({
+      titre: 'aimer',
+      consigne: 'tu · indicatif présent',
+      reponses: ['aimes'],
+      reponsesPourCorrige: ['aimes'],
+      personId: 5,
+      pronom: 'tu',
+      infinitif: 'aimer',
+    })
+    const finir = question({
+      consigne: 'nous · impératif présent',
+      reponses: ['finissons'],
+      reponsesPourCorrige: ['finissons'],
+      personId: 7,
+      pronom: 'nous',
+      mode: 'impératif',
+    })
+
+    assert.equal(learnerErrorDetails('aimee', aimer)[0]?.code, 'morphology.ending')
+    assert.equal(learnerErrorDetails('aimee', aimer)[0]?.message, 'La terminaison est fausse.')
+    assert.equal(learnerErrorDetails('finissone', finir)[0]?.code, 'morphology.ending')
   })
 
   it('distingue une faute de recopie du COD d’une faute de conjugaison', () => {
@@ -282,6 +306,28 @@ describe('classement pédagogique des erreurs', () => {
       isCompound: true,
     })).includes('agreement.avoir_unwarranted'))
   })
+
+  it('distingue une forme conjuguée après l’auxiliaire d’une simple terminaison', () => {
+    const target = question({
+      consigne: 'vous · indicatif passé composé',
+      reponses: ['avez fini'],
+      reponsesPourCorrige: ['vous avez fini'],
+      personId: 9,
+      pronom: 'vous',
+      temps: 'passé composé',
+      isCompound: true,
+    })
+    const diagnostic = diagnoseCoachAnswer('avez finiais', target, false)
+    const details = learnerErrorDetails('avez finiais', target)
+
+    assert.equal(diagnostic.errorKind, 'compound-participle')
+    assert.deepEqual(details, [{
+      code: 'compound.participle_form',
+      label: 'Forme incorrecte après l’auxiliaire',
+      message: 'Après l’auxiliaire « avez », il fallait employer le participe passé « fini », et non « finiais ».',
+    }])
+    assert.ok(applicableLearnerErrorTypes(target).includes('compound.participle_form'))
+  })
 })
 
 describe('synthèse longitudinale des types d’erreurs', () => {
@@ -363,12 +409,32 @@ describe('progression par occasions réellement testées', () => {
     assert.deepEqual(summary.cards, [])
   })
 
+  it('masque un type de faute absent des occasions les plus récentes', () => {
+    const summary = buildLearnerErrorProgress([
+      {
+        code: 'person.impossible_ending',
+        statDate: '2026-07-20',
+        opportunities: 10,
+        errors: 1,
+      },
+      {
+        code: 'person.impossible_ending',
+        statDate: '2026-07-26',
+        opportunities: 10,
+        errors: 0,
+      },
+    ], '2026-07-26')
+
+    assert.deepEqual(summary.cards, [])
+  })
+
   it('compare plusieurs défis réalisés le même jour', () => {
     const summary = buildLearnerErrorProgress([
       {
         code: 'task.wrong_tense',
         statDate: '2026-07-26',
         sequence: 101,
+        challengeKey: 'defi-a',
         opportunities: 10,
         errors: 7,
       },
@@ -376,6 +442,7 @@ describe('progression par occasions réellement testées', () => {
         code: 'task.wrong_tense',
         statDate: '2026-07-26',
         sequence: 102,
+        challengeKey: 'defi-a',
         opportunities: 10,
         errors: 5,
       },
@@ -383,6 +450,7 @@ describe('progression par occasions réellement testées', () => {
         code: 'task.wrong_tense',
         statDate: '2026-07-26',
         sequence: 103,
+        challengeKey: 'defi-b',
         opportunities: 10,
         errors: 3,
       },
@@ -390,6 +458,7 @@ describe('progression par occasions réellement testées', () => {
         code: 'task.wrong_tense',
         statDate: '2026-07-26',
         sequence: 104,
+        challengeKey: 'defi-c',
         opportunities: 10,
         errors: 1,
       },
@@ -400,6 +469,7 @@ describe('progression par occasions réellement testées', () => {
     assert.equal(card.previousRate, 30)
     assert.equal(card.trend, 'improving')
     assert.equal(card.trendDelta, -20)
+    assert.equal(card.affectedChallengeCount, 3)
     assert.deepEqual(card.points.map(point => point.errorRate), [70, 50, 30, 10])
   })
 
@@ -478,6 +548,7 @@ describe('progression par occasions réellement testées', () => {
     }], '2026-07-26', examples)
 
     assert.equal(summary.cards[0].examples.length, 5)
+    assert.equal(summary.cards[0].hasMoreExamples, true)
     assert.equal(summary.cards[0].examples[0].question, 'Question 1')
     assert.equal(summary.cards[0].examples[0].learnerAnswer, 'reponse')
     assert.deepEqual(summary.cards[0].examples[0].expectedAnswers, ['réponse'])

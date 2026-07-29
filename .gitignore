@@ -9,3 +9,4 @@ npm-debug.log*
 reports/academie-articles-cache.json
 BDD-backups/
 cle-google/
+/cloudflare/

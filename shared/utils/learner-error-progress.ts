@@ -2,6 +2,7 @@ import {
   LEARNER_ERROR_TAXONOMY,
   type LearnerErrorTypeCode,
 } from './learner-error-diagnostics'
+import type { LearnerErrorDetail } from '../types/conjugation'
 
 export type LearnerErrorProgressTrend = 'improving' | 'worsening' | 'stable' | 'insufficient'
 
@@ -11,6 +12,7 @@ export interface LearnerErrorProgressDailySource {
   opportunities: number
   errors: number
   sequence?: number
+  challengeKey?: string
 }
 
 export interface LearnerErrorProgressPoint {
@@ -26,8 +28,10 @@ export interface LearnerErrorProgressExample {
   id: number
   question: string
   learnerAnswer: string
+  acceptedAnswers?: string[]
   expectedAnswers: string[]
   reason: string
+  errorDetail?: LearnerErrorDetail
 }
 
 export interface LearnerErrorProgressCard {
@@ -37,6 +41,7 @@ export interface LearnerErrorProgressCard {
   advice: string
   totalOpportunities: number
   totalErrors: number
+  affectedChallengeCount: number
   currentRate: number
   previousRate: number | null
   trend: LearnerErrorProgressTrend
@@ -46,6 +51,7 @@ export interface LearnerErrorProgressCard {
   isStale: boolean
   points: LearnerErrorProgressPoint[]
   examples: LearnerErrorProgressExample[]
+  hasMoreExamples: boolean
 }
 
 export interface LearnerErrorProgressSummary {
@@ -141,6 +147,7 @@ export function buildLearnerErrorProgress(
       opportunities,
       errors: Math.min(count(source.errors), opportunities),
       ...(source.sequence === undefined ? {} : { sequence: count(source.sequence) }),
+      ...(source.challengeKey ? { challengeKey: source.challengeKey } : {}),
     })
     grouped.set(source.code, rows)
   }
@@ -153,6 +160,11 @@ export function buildLearnerErrorProgress(
     )
     const totalOpportunities = rows.reduce((total, row) => total + row.opportunities, 0)
     const totalErrors = rows.reduce((total, row) => total + row.errors, 0)
+    const affectedChallengeCount = new Set(
+      rows
+        .filter(row => row.errors > 0 && row.challengeKey)
+        .map(row => row.challengeKey),
+    ).size
     if (!definition || !totalErrors) return []
 
     const recent = collectOpportunityWindow(rows, rows.length - 1)
@@ -163,6 +175,7 @@ export function buildLearnerErrorProgress(
     const hasComparisonEvidence = hasCurrentEvidence
       && Boolean(previous && previous.opportunities >= MINIMUM_EVIDENCE)
     const currentRate = errorRate(recent.errors, recent.opportunities)
+    if (currentRate === 0) return []
     const previousRate = hasComparisonEvidence && previous
       ? errorRate(previous.errors, previous.opportunities)
       : null
@@ -179,6 +192,7 @@ export function buildLearnerErrorProgress(
       ...definition,
       totalOpportunities,
       totalErrors,
+      affectedChallengeCount,
       currentRate,
       previousRate,
       trend,
@@ -188,6 +202,7 @@ export function buildLearnerErrorProgress(
       isStale: daysSinceLastTest > STALE_AFTER_DAYS,
       points: progressPoints(rows),
       examples: (examples.get(code) || []).slice(0, 5),
+      hasMoreExamples: (examples.get(code) || []).length > 5,
     }]
   }).sort((left, right) =>
     Number(left.isStale) - Number(right.isStale)

@@ -3,6 +3,7 @@ import type {
   ConjugationTense,
   ExerciseQuestion,
   LearnerChallengeSnapshot,
+  LearnerErrorDetail,
   LearnerExerciseTrackingContext,
   Verb,
 } from '~~/shared/types/conjugation'
@@ -17,9 +18,11 @@ import {
 } from '~~/shared/i18n/learner-errors'
 import type {
   LearnerErrorProgressCard,
+  LearnerErrorProgressExample,
   LearnerErrorProgressPoint,
   LearnerErrorProgressSummary,
 } from '~~/shared/utils/learner-error-progress'
+import { buildAnswerComparison } from '~~/shared/utils/answer-difference'
 import type {
   ChallengeProgressPoint,
   ChallengeProgressSummary,
@@ -28,6 +31,7 @@ import { shuffledQuestionOrder } from '~~/shared/utils/question-order'
 import ChatExercise from '~/components/exercise/ChatExercise.vue'
 import ClassicExercise from '~/components/exercise/ClassicExercise.vue'
 import CoachPicker from '~/components/exercise/CoachPicker.vue'
+import LearnerErrorDetailMessage from '~/components/exercise/LearnerErrorDetailMessage.vue'
 import '~/assets/css/main.css'
 
 const props = withDefaults(defineProps<{
@@ -56,6 +60,8 @@ interface DashboardChallenge {
   scorePercent: number
   unresolvedCount: number
   retryQuestions: ExerciseQuestion[]
+  allUnresolvedCount: number
+  allRetryQuestions: ExerciseQuestion[]
   exactQuestions: ExerciseQuestion[]
 }
 
@@ -63,6 +69,22 @@ interface DashboardResponse {
   challenges: DashboardChallenge[]
   nextOffset: number
   hasMore: boolean
+}
+
+interface HistorySummaryResponse {
+  items: Array<{
+    index: number
+    status: 'correct' | 'incorrect'
+    questionLabel: string
+    learnerAnswer: string
+    expectedAnswer: string
+    acceptedAnswers: string[]
+    displayExpectedAnswers: string[]
+    errorLabels: string[]
+    errorDetails: LearnerErrorDetail[]
+  }>
+  verbs: string[]
+  tenses: Array<{ name: string, mode?: string }>
 }
 
 interface ChallengeTraining {
@@ -117,19 +139,25 @@ const { interfaceLocale, localePath, setInterfaceLocale, ui } = useLanguagePrefe
 const copy = computed(() => learnerSpaceCopy(interfaceLocale.value))
 const text = (key: keyof ReturnType<typeof learnerSpaceCopy>, parameters: Record<string, string | number> = {}) =>
   learnerSpaceText(copy.value, key, parameters)
+const learnerErrorComparison = (example: LearnerErrorProgressExample) => buildAnswerComparison(
+  example.learnerAnswer,
+  example.acceptedAnswers?.length ? example.acceptedAnswers : example.expectedAnswers,
+  example.expectedAnswers,
+)
 const { applyTheme } = useColorTheme()
 const { flushProgress } = useLearnerProgress()
 const route = useRoute()
 const requestFetch = useRequestFetch()
 const requestedTab = (value: unknown): UserTab => (
-  ['challenges', 'progress', 'history', 'preferences', 'account'].includes(String(value))
+  ['progress', 'history', 'preferences', 'account'].includes(String(value))
     ? String(value) as UserTab
-    : 'challenges'
+    : 'history'
 )
 const activeTab = ref<UserTab>(requestedTab(route.query.tab))
 const learnerProgress = ref<LearnerErrorProgressSummary>()
 const learnerProgressPending = ref(false)
 const learnerProgressError = ref('')
+const progressExamplesPendingCode = ref<LearnerErrorProgressCard['code']>()
 const progressExplanationOpen = ref(false)
 const challengeTrainings = ref<ChallengeTraining[]>([])
 const challengeTrainingsPending = ref(false)
@@ -148,7 +176,7 @@ const selectedCoach = ref<CoachProfile>()
 const coachPickerOpen = ref(false)
 const selectedWork = ref<{
   challenge: DashboardChallenge
-  scope: 'same' | 'random' | 'incorrect' | 'targeted'
+  scope: 'same' | 'random' | 'incorrect' | 'all-incorrect' | 'targeted'
   targetQuestions?: ExerciseQuestion[]
 }>()
 const workMenuFingerprint = ref('')
@@ -174,6 +202,10 @@ const passwordChanging = ref(false)
 const passwordChanged = ref(false)
 const passwordError = ref('')
 const dashboardLoadingMore = ref(false)
+const visibleHistoryChallengeCount = ref(1)
+const historySummary = ref<{ challenge: DashboardChallenge, report: HistorySummaryResponse }>()
+const historySummaryPendingId = ref<number>()
+const historySummaryError = ref<{ challengeId: number, message: string }>()
 const siteHeaderHeight = ref(68)
 const challengeLoader = useTemplateRef<HTMLElement>('challenge-loader')
 let challengeObserver: IntersectionObserver | null = null
@@ -199,7 +231,10 @@ const stickyTabsStyle = computed(() => ({
 
 const { data: dashboard, pending: dashboardPending } = await useAsyncData(
   dashboardKey,
-  () => requestFetch<DashboardResponse>(learnerApi('dashboard', { offset: 0, limit: 6 })),
+  () => requestFetch<DashboardResponse>(learnerApi('dashboard', {
+    offset: 0,
+    limit: activeTab.value === 'history' ? 1 : 6,
+  })),
 )
 const { data: storedPreferences } = await useAsyncData(
   preferencesKey,
@@ -297,7 +332,8 @@ const displayUsername = computed(() => {
 
 const challengeDays = computed(() => {
   const groups: Array<{ key: string, label: string, challenges: DashboardChallenge[] }> = []
-  for (const challenge of dashboard.value?.challenges || []) {
+  const challenges = (dashboard.value?.challenges || []).slice(0, visibleHistoryChallengeCount.value)
+  for (const challenge of challenges) {
     const key = challengeDayKey(challenge.lastActivityAt)
     const current = groups.at(-1)
     if (current?.key === key) current.challenges.push(challenge)
@@ -309,6 +345,11 @@ const challengeDays = computed(() => {
   }
   return groups
 })
+
+const historyHasMore = computed(() => (
+  visibleHistoryChallengeCount.value < (dashboard.value?.challenges.length || 0)
+  || Boolean(dashboard.value?.hasMore)
+))
 
 const selectedTraining = computed(() => challengeTrainings.value.find(
   training => training.fingerprint === selectedTrainingFingerprint.value,
@@ -477,6 +518,8 @@ function trainingChallenge(sessionId: number, reportTitle: string): DashboardCha
     scorePercent: training.latestSuccessPercent,
     unresolvedCount: 0,
     retryQuestions: [],
+    allUnresolvedCount: 0,
+    allRetryQuestions: [],
     exactQuestions: [],
   }
 }
@@ -542,12 +585,12 @@ function formattedChallengeTime(value: string) {
   }).format(new Date(value))
 }
 
-function falseQuestionsLabel(count: number) {
-  if (interfaceLocale.value === 'de') return count === 1 ? 'Die falsche Frage' : `Die ${count} falschen Fragen`
-  if (interfaceLocale.value === 'en') return count === 1 ? 'The incorrect question' : `The ${count} incorrect questions`
-  if (interfaceLocale.value === 'it') return count === 1 ? 'La domanda sbagliata' : `Le ${count} domande sbagliate`
-  if (interfaceLocale.value === 'es') return count === 1 ? 'La pregunta incorrecta' : `Las ${count} preguntas incorrectas`
-  return count === 1 ? 'La question fausse' : `Les ${count} questions fausses`
+function challengeErrorsLabel(count: number) {
+  if (interfaceLocale.value === 'de') return `${count} Fehler`
+  if (interfaceLocale.value === 'en') return `${count} ${count === 1 ? 'mistake' : 'mistakes'}`
+  if (interfaceLocale.value === 'it') return `${count} ${count === 1 ? 'errore' : 'errori'}`
+  if (interfaceLocale.value === 'es') return `${count} ${count === 1 ? 'error' : 'errores'}`
+  return `${count} ${count === 1 ? 'erreur' : 'erreurs'}`
 }
 
 function pluralLabel(count: number, forms: Record<AppLocale, [string, string]>) {
@@ -646,6 +689,9 @@ function localizedTrainingReportTitle(title: string) {
 }
 
 function trainQuestionsLabel(count: number) {
+  if (interfaceLocale.value === 'fr') {
+    return count === 1 ? 'Entraîner cette question' : `Entraîner ces ${count} questions`
+  }
   const prefix = { fr: 'Entraîner ces', de: 'Diese', en: 'Practise these', it: 'Allenare queste', es: 'Practicar estas' }[interfaceLocale.value]
   const suffix = interfaceLocale.value === 'de'
     ? (count === 1 ? 'Frage trainieren' : 'Fragen trainieren')
@@ -696,6 +742,17 @@ function mistakeCountLabel(count: number) {
   })
 }
 
+function affectedChallengesLabel(count: number) {
+  const values = {
+    fr: `${count === 1 ? 'défi concerné' : 'défis concernés'}`,
+    de: count === 1 ? 'betroffene Übung' : 'betroffene Übungen',
+    en: count === 1 ? 'challenge concerned' : 'challenges concerned',
+    it: count === 1 ? 'esercizio interessato' : 'esercizi interessati',
+    es: count === 1 ? 'ejercicio relacionado' : 'ejercicios relacionados',
+  }
+  return values[interfaceLocale.value]
+}
+
 function progressCardDomain(card: LearnerErrorProgressCard) {
   return localizedLearnerErrorDomain(card.domain, interfaceLocale.value)
 }
@@ -724,6 +781,32 @@ async function loadLearnerProgress(force = false) {
   }
   finally {
     learnerProgressPending.value = false
+  }
+}
+
+async function loadMoreProgressExamples(card: LearnerErrorProgressCard) {
+  if (progressExamplesPendingCode.value || !card.hasMoreExamples) return
+  progressExamplesPendingCode.value = card.code
+  try {
+    const response = await $fetch<{
+      examples: LearnerErrorProgressExample[]
+      hasMore: boolean
+    }>(learnerApi('progress-examples', {
+      code: card.code,
+      offset: card.examples.length,
+      locale: interfaceLocale.value,
+    }), {
+      credentials: 'same-origin',
+    })
+    const knownIds = new Set(card.examples.map(example => example.id))
+    card.examples.push(...response.examples.filter(example => !knownIds.has(example.id)))
+    card.hasMoreExamples = response.hasMore && response.examples.length > 0
+  }
+  catch {
+    // Le bouton reste disponible pour permettre une nouvelle tentative.
+  }
+  finally {
+    progressExamplesPendingCode.value = undefined
   }
 }
 
@@ -914,13 +997,40 @@ function closeWorkMenuOnOutside(event: PointerEvent) {
   workMenuFingerprint.value = ''
 }
 
-function openWorkMenu(challenge: DashboardChallenge, scope: 'same' | 'random' | 'incorrect', event: MouseEvent) {
+function openWorkMenu(
+  challenge: DashboardChallenge,
+  scope: 'same' | 'random' | 'incorrect' | 'all-incorrect',
+  event: MouseEvent,
+) {
   if (scope === 'incorrect' && !challenge.retryQuestions.length) return
+  if (scope === 'all-incorrect' && !challenge.allRetryQuestions.length) return
   const menuKey = `${challenge.id}-${scope}`
   const isClosing = workMenuFingerprint.value === menuKey
   selectedWork.value = { challenge, scope }
   workMenuFingerprint.value = isClosing ? '' : menuKey
   if (!isClosing) positionWorkMenu(event.currentTarget as HTMLElement)
+}
+
+async function openHistorySummary(challenge: DashboardChallenge) {
+  if (historySummaryPendingId.value) return
+  historySummaryPendingId.value = challenge.id
+  historySummaryError.value = undefined
+  try {
+    const report = await $fetch<HistorySummaryResponse>(learnerApi('challenge-summary', {
+      runId: challenge.id,
+      locale: interfaceLocale.value,
+    }), { credentials: 'same-origin' })
+    historySummary.value = { challenge, report }
+  }
+  catch {
+    historySummaryError.value = {
+      challengeId: challenge.id,
+      message: copy.value.summaryLoadError,
+    }
+  }
+  finally {
+    historySummaryPendingId.value = undefined
+  }
 }
 
 async function questionsForSelectedWork() {
@@ -951,6 +1061,7 @@ async function questionsForSelectedWork() {
     return work.scope === 'random' ? shuffledQuestionOrder(questions) : questions
   }
   if (work.scope === 'incorrect') return shuffledQuestionOrder(work.challenge.retryQuestions)
+  if (work.scope === 'all-incorrect') return shuffledQuestionOrder(work.challenge.allRetryQuestions)
   return await $fetch<ExerciseQuestion[]>('/api/questionnaires', {
     method: 'POST',
     body: work.challenge.challenge,
@@ -991,7 +1102,9 @@ async function launchSelectedWork(presentation: 'classic' | 'chat', coach?: Coac
       : standardChallenge
     reviewQuestions.value = await questionsForSelectedWork()
     if (!reviewQuestions.value.length) throw new Error('Aucune question disponible')
-    reviewRequireSuccess.value = work.scope === 'incorrect' || work.scope === 'targeted'
+    reviewRequireSuccess.value = work.scope === 'incorrect'
+      || work.scope === 'all-incorrect'
+      || work.scope === 'targeted'
     exercisePresentation.value = presentation
     selectedCoach.value = coach
     reviewTracking.value = createLearnerTrackingContext({
@@ -999,7 +1112,7 @@ async function launchSelectedWork(presentation: 'classic' | 'chat', coach?: Coac
       challengeLabel: work.challenge.label,
       challenge: trackedChallenge,
       presentation,
-      isReview: work.scope === 'incorrect',
+      isReview: work.scope === 'incorrect' || work.scope === 'all-incorrect',
     })
     workMenuFingerprint.value = ''
     reviewOpen.value = true
@@ -1033,11 +1146,26 @@ async function regenerateChatQuestions() {
 function observeChallengeLoader() {
   challengeObserver?.disconnect()
   challengeObserver = null
-  if (activeTab.value !== 'challenges' || !dashboard.value?.hasMore || !challengeLoader.value) return
+  const canLoad = activeTab.value === 'history' ? historyHasMore.value : Boolean(dashboard.value?.hasMore)
+  if (!['challenges', 'history'].includes(activeTab.value) || !canLoad || !challengeLoader.value) return
   challengeObserver = new IntersectionObserver((entries) => {
-    if (entries.some(entry => entry.isIntersecting)) void loadMoreChallenges()
+    if (!entries.some(entry => entry.isIntersecting)) return
+    if (activeTab.value === 'history') void revealNextHistoryChallenge()
+    else void loadMoreChallenges()
   }, { rootMargin: '240px 0px' })
   challengeObserver.observe(challengeLoader.value)
+}
+
+async function revealNextHistoryChallenge() {
+  if (dashboardLoadingMore.value) return
+  if (visibleHistoryChallengeCount.value >= (dashboard.value?.challenges.length || 0)) {
+    await loadMoreChallenges()
+  }
+  if (visibleHistoryChallengeCount.value < (dashboard.value?.challenges.length || 0)) {
+    visibleHistoryChallengeCount.value += 1
+  }
+  await nextTick()
+  observeChallengeLoader()
 }
 
 async function loadMoreChallenges() {
@@ -1242,20 +1370,17 @@ async function confirmAccountAction() {
     </header>
 
     <nav class="learner-tabs" :style="stickyTabsStyle" :aria-label="copy.spaceSections">
-      <button :class="{ 'is-active': activeTab === 'history' }" type="button" @click="activeTab = 'history'">
+      <button
+        class="learner-tabs__primary"
+        :class="{ 'is-active': activeTab === 'history' }"
+        type="button"
+        @click="activeTab = 'history'"
+      >
+        <span aria-hidden="true">✦</span>
         {{ copy.history }}
       </button>
       <button :class="{ 'is-active': activeTab === 'progress' }" type="button" @click="activeTab = 'progress'">
         {{ copy.commonErrors }}
-      </button>
-      <button
-        class="learner-tabs__primary"
-        :class="{ 'is-active': activeTab === 'challenges' }"
-        type="button"
-        @click="activeTab = 'challenges'"
-      >
-        <span aria-hidden="true">✦</span>
-        {{ copy.improve }}
       </button>
     </nav>
 
@@ -1294,14 +1419,18 @@ async function confirmAccountAction() {
                 }"
               >
                 <span class="challenge-history__dot" aria-hidden="true" />
-                <article class="challenge-card">
+                <article
+                  class="challenge-card"
+                  :class="{ 'challenge-card--perfect': challenge.incorrectCount === 0 }"
+                >
                   <div class="challenge-card__top">
-                    <div>
-                      <span>{{ formattedChallengeTime(challenge.lastActivityAt) }}</span>
-                      <h3>{{ challenge.label }}</h3>
-                    </div>
+                    <h3>{{ challenge.label }}</h3>
+                    <span>{{ formattedChallengeTime(challenge.lastActivityAt) }}</span>
                   </div>
-                  <div v-if="challenge.description" class="challenge-card__description">
+                  <div
+                    v-if="challenge.description && challenge.incorrectCount > 0"
+                    class="challenge-card__description"
+                  >
                     <p
                       :ref="element => setChallengeDescriptionElement(String(challenge.id), element)"
                       :class="{ 'is-expanded': descriptionIsExpanded(String(challenge.id)) }"
@@ -1317,44 +1446,121 @@ async function confirmAccountAction() {
                       {{ descriptionIsExpanded(String(challenge.id)) ? copy.showLess : copy.showAll }}
                     </button>
                   </div>
-                  <div class="challenge-card__bar" aria-hidden="true">
+                  <div
+                    v-if="challenge.correctCount > 0 && challenge.incorrectCount > 0"
+                    class="challenge-card__bar"
+                    aria-hidden="true"
+                  >
                     <span :style="{ width: `${challenge.scorePercent}%` }" />
                   </div>
-                  <p>
-                    {{ resultCountLabel(challenge.correctCount, challenge.incorrectCount) }}
+                  <p :class="{ 'challenge-card__perfect-result': challenge.incorrectCount === 0 }">
+                    {{ challenge.incorrectCount === 0
+                      ? sessionResultLabel(challenge.correctCount, challenge.correctCount)
+                      : resultCountLabel(challenge.correctCount, challenge.incorrectCount) }}
+                  </p>
+                  <button
+                    type="button"
+                    class="review-button review-button--summary"
+                    :disabled="historySummaryPendingId === challenge.id"
+                    @click="openHistorySummary(challenge)"
+                  >
+                    <span class="review-button__scope-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M6 3h9l3 3v15H6zM9 10h6M9 14h6M9 18h4" />
+                      </svg>
+                    </span>
+                    <span class="review-button__scope-copy">
+                      <strong>{{ copy.viewSummary }}</strong>
+                      <small>{{ copy.summaryHint }}</small>
+                    </span>
+                  </button>
+                  <p
+                    v-if="historySummaryError?.challengeId === challenge.id"
+                    class="preferences-error"
+                    role="alert"
+                  >
+                    {{ historySummaryError.message }}
                   </p>
                   <div v-if="!readOnly" class="challenge-work">
-                    <strong>{{ copy.retrainChallenge }}</strong>
-                    <div>
-                      <button
-                        type="button"
-                        class="review-button"
-                        :disabled="Boolean(challengeStarting)"
-                        :title="challenge.exactQuestions.length ? copy.sameDraw : copy.oldDraw"
-                        :aria-expanded="workMenuFingerprint === `${challenge.id}-same`"
-                        @click="openWorkMenu(challenge, 'same', $event)"
-                      >
-                        {{ copy.sameOrder }}
-                      </button>
-                      <button
-                        type="button"
-                        class="review-button"
-                        :disabled="Boolean(challengeStarting)"
-                        :aria-expanded="workMenuFingerprint === `${challenge.id}-random`"
-                        @click="openWorkMenu(challenge, 'random', $event)"
-                      >
-                        {{ copy.randomOrder }}
-                      </button>
-                      <button
-                        v-if="challenge.unresolvedCount > 0"
-                        type="button"
-                        class="review-button"
-                        :disabled="Boolean(challengeStarting)"
-                        :aria-expanded="workMenuFingerprint === `${challenge.id}-incorrect`"
-                        @click="openWorkMenu(challenge, 'incorrect', $event)"
-                      >
-                        {{ falseQuestionsLabel(challenge.unresolvedCount) }}
-                      </button>
+                    <div class="challenge-work__group">
+                      <header class="challenge-work__heading">
+                        <strong>{{ copy.retrainChallenge }}</strong>
+                      </header>
+                      <div>
+                        <button
+                          type="button"
+                          class="review-button review-button--choice"
+                          :disabled="Boolean(challengeStarting)"
+                          :title="challenge.exactQuestions.length ? copy.sameDraw : copy.oldDraw"
+                          :aria-expanded="workMenuFingerprint === `${challenge.id}-same`"
+                          @click="openWorkMenu(challenge, 'same', $event)"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M7 7h10M7 12h10M7 17h10M4 7h.01M4 12h.01M4 17h.01" />
+                          </svg>
+                          <span>{{ copy.sameOrder }}</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="review-button review-button--choice"
+                          :disabled="Boolean(challengeStarting)"
+                          :aria-expanded="workMenuFingerprint === `${challenge.id}-random`"
+                          @click="openWorkMenu(challenge, 'random', $event)"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M4 7h3c4 0 6 10 10 10h3M17 4l3 3-3 3M4 17h3c1.7 0 3-1.7 4.2-3.7M16 7h4M17 14l3 3-3 3" />
+                          </svg>
+                          <span>{{ copy.randomOrder }}</span>
+                        </button>
+                      </div>
+                    </div>
+                    <div
+                      v-if="challenge.unresolvedCount > 0"
+                      class="challenge-work__group"
+                    >
+                      <header class="challenge-work__heading">
+                        <strong>{{ copy.retrainErrors }}</strong>
+                      </header>
+                      <div>
+                        <button
+                          v-if="challenge.unresolvedCount > 0"
+                          type="button"
+                          class="review-button review-button--error-scope"
+                          :disabled="Boolean(challengeStarting)"
+                          :aria-expanded="workMenuFingerprint === `${challenge.id}-incorrect`"
+                          @click="openWorkMenu(challenge, 'incorrect', $event)"
+                        >
+                          <span class="review-button__scope-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                              <rect x="5" y="3" width="14" height="18" rx="3" />
+                              <path d="M9 8h6M9 12h6M9 16h4" />
+                            </svg>
+                          </span>
+                          <span class="review-button__scope-copy">
+                            <strong>{{ copy.errorsThisSession }}</strong>
+                            <small>{{ challengeErrorsLabel(challenge.unresolvedCount) }}</small>
+                          </span>
+                        </button>
+                        <button
+                          v-if="challenge.allUnresolvedCount > 0"
+                          type="button"
+                          class="review-button review-button--error-scope"
+                          :disabled="Boolean(challengeStarting)"
+                          :aria-expanded="workMenuFingerprint === `${challenge.id}-all-incorrect`"
+                          @click="openWorkMenu(challenge, 'all-incorrect', $event)"
+                        >
+                          <span class="review-button__scope-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                              <rect x="7" y="3" width="12" height="16" rx="3" />
+                              <path d="M5 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1M10 8h6M10 12h6" />
+                            </svg>
+                          </span>
+                          <span class="review-button__scope-copy">
+                            <strong>{{ copy.errorsWholeChallenge }}</strong>
+                            <small>{{ challengeErrorsLabel(challenge.allUnresolvedCount) }}</small>
+                          </span>
+                        </button>
+                      </div>
                     </div>
                     <div
                       v-if="selectedWork?.challenge.id === challenge.id && workMenuFingerprint"
@@ -1400,12 +1606,12 @@ async function confirmAccountAction() {
         </ol>
         <p v-if="challengeStartError" class="preferences-error" role="alert">{{ challengeStartError }}</p>
         <button
-          v-if="dashboard.hasMore"
+          v-if="historyHasMore"
           ref="challenge-loader"
           class="challenge-loader"
           type="button"
           :disabled="dashboardLoadingMore"
-          @click="loadMoreChallenges"
+          @click="revealNextHistoryChallenge"
         >
           {{ dashboardLoadingMore ? copy.loadingOlder : copy.loadOlder }}
         </button>
@@ -1785,7 +1991,7 @@ async function confirmAccountAction() {
       <template v-else-if="learnerProgress?.cards.length">
         <div class="error-progress-list">
           <article
-            v-for="card in learnerProgress.cards"
+            v-for="(card, cardIndex) in learnerProgress.cards"
             :key="card.code"
             :id="progressCardId(card)"
             class="error-progress-card"
@@ -1802,9 +2008,15 @@ async function confirmAccountAction() {
               <h3>{{ progressCardLabel(card) }}</h3>
               <p>{{ progressCardAdvice(card) }}</p>
             </div>
-            <div class="error-progress-card__rate">
-              <strong>{{ progressCurrentRate(card) }}%</strong>
-              <span>{{ copy.errorRate }}</span>
+            <div class="error-progress-card__badges">
+              <div class="error-progress-card__affected">
+                <strong>{{ card.affectedChallengeCount }}</strong>
+                <span>{{ affectedChallengesLabel(card.affectedChallengeCount) }}</span>
+              </div>
+              <div class="error-progress-card__rate">
+                <strong>{{ progressCurrentRate(card) }}%</strong>
+                <span>{{ copy.errorRate }}</span>
+              </div>
             </div>
           </header>
 
@@ -1883,7 +2095,11 @@ async function confirmAccountAction() {
           <div v-else class="error-progress-card__insufficient">
             {{ text('reliableCurve', { count: learnerProgress.minimumEvidence }) }}
           </div>
-          <details v-if="card.examples.length" class="error-progress-examples">
+          <details
+            v-if="card.examples.length"
+            class="error-progress-examples"
+            :open="cardIndex === 0"
+          >
             <summary>
               <span class="error-progress-examples__label">
                 <span class="error-progress-examples__chevron" aria-hidden="true" />
@@ -1898,23 +2114,73 @@ async function confirmAccountAction() {
                     <dt>{{ copy.question }}</dt>
                     <dd>{{ example.question }}</dd>
                   </div>
-                  <div>
-                    <dt>{{ copy.yourError }}</dt>
-                    <dd class="error-progress-examples__wrong">{{ example.learnerAnswer || copy.noAnswer }}</dd>
-                  </div>
-                  <div>
-                    <dt>{{ copy.correction }}</dt>
-                    <dd class="error-progress-examples__correct">
-                      {{ example.expectedAnswers.join(` ${ui('ou')} `) || copy.unavailableAnswer }}
-                    </dd>
-                  </div>
+                  <template
+                    v-for="comparison in [learnerErrorComparison(example)]"
+                    :key="`comparison-${example.id}`"
+                  >
+                    <div
+                      v-if="comparison"
+                      class="error-progress-comparison-row error-progress-comparison-row--learner"
+                    >
+                      <dt>{{ ui('Ta réponse') }}</dt>
+                      <dd class="error-progress-comparison__answer error-progress-comparison__answer--learner">
+                        <span
+                          v-for="(part, partIndex) in comparison.learnerParts"
+                          :key="`learner-${partIndex}`"
+                          :class="`error-progress-comparison__part--${part.kind}`"
+                        >{{ part.text }}</span>
+                      </dd>
+                    </div>
+                    <div
+                      v-if="comparison"
+                      class="error-progress-comparison-row error-progress-comparison-row--expected"
+                    >
+                      <dt>{{ copy.correction }}</dt>
+                      <dd class="error-progress-comparison__answer error-progress-comparison__answer--expected">
+                        <span
+                          v-for="(part, partIndex) in comparison.expectedParts"
+                          :key="`expected-${partIndex}`"
+                          :class="`error-progress-comparison__part--${part.kind}`"
+                        >{{ part.text }}</span>
+                      </dd>
+                    </div>
+                    <template v-else>
+                      <div>
+                        <dt>{{ copy.yourError }}</dt>
+                        <dd class="error-progress-examples__wrong">{{ example.learnerAnswer || copy.noAnswer }}</dd>
+                      </div>
+                      <div>
+                        <dt>{{ copy.correction }}</dt>
+                        <dd class="error-progress-examples__correct">
+                          {{ example.expectedAnswers.join(` ${ui('ou')} `) || copy.unavailableAnswer }}
+                        </dd>
+                      </div>
+                    </template>
+                  </template>
                   <div>
                     <dt>{{ copy.reason }}</dt>
-                    <dd>{{ localizedLearnerErrorMessageForCode(card.code, example.reason, interfaceLocale) }}</dd>
+                    <dd>
+                      <LearnerErrorDetailMessage
+                        v-if="example.errorDetail"
+                        :detail="example.errorDetail"
+                      />
+                      <template v-else>
+                        {{ localizedLearnerErrorMessageForCode(card.code, example.reason, interfaceLocale) }}
+                      </template>
+                    </dd>
                   </div>
                 </dl>
               </li>
             </ol>
+            <div v-if="card.hasMoreExamples" class="error-progress-examples__more">
+              <button
+                type="button"
+                :disabled="progressExamplesPendingCode === card.code"
+                @click="loadMoreProgressExamples(card)"
+              >
+                {{ progressExamplesPendingCode === card.code ? copy.loadingMoreErrors : copy.seeMore }}
+              </button>
+            </div>
           </details>
           </article>
         </div>
@@ -2104,6 +2370,14 @@ async function confirmAccountAction() {
       @close="closeReview"
     />
     <CoachPicker v-if="coachPickerOpen" @close="coachPickerOpen = false" @select="launchWithCoach" />
+    <LearnerHistorySessionSummaryDialog
+      v-if="historySummary"
+      :title="historySummary.challenge.label"
+      :items="historySummary.report.items"
+      :correct-count="historySummary.challenge.correctCount"
+      :total-count="historySummary.challenge.correctCount + historySummary.challenge.incorrectCount"
+      @close="historySummary = undefined"
+    />
     <Teleport to="body">
       <div
         v-if="accountDialog"
@@ -2281,6 +2555,48 @@ async function confirmAccountAction() {
   display: grid;
   overflow: visible;
   gap: 8px;
+}
+
+.challenge-card--perfect {
+  padding-block: 16px;
+  gap: 9px;
+  border-color: color-mix(in srgb, var(--success) 28%, var(--line));
+}
+
+.challenge-card__perfect-result {
+  color: var(--success) !important;
+  font-weight: 750;
+}
+
+.review-button--summary {
+  display: grid;
+  width: 100%;
+  min-height: 64px;
+  padding: 10px 13px;
+  justify-self: stretch;
+  grid-template-columns: 34px minmax(0, 1fr);
+  justify-content: stretch;
+  gap: 10px;
+  border-radius: 14px;
+  text-align: left;
+}
+
+.review-button--summary .review-button__scope-icon {
+  width: 34px;
+  height: 34px;
+}
+
+.review-button--summary .review-button__scope-copy strong {
+  font-size: .88rem;
+}
+
+.review-button--summary .review-button__scope-copy small {
+  font-size: .72rem;
+}
+
+.review-button--summary:disabled {
+  cursor: progress;
+  opacity: .62;
 }
 
 .challenge-analysis {
@@ -2723,6 +3039,7 @@ async function confirmAccountAction() {
   overflow: hidden;
   color: var(--muted);
   font-size: .82rem;
+  font-style: italic;
   line-height: 1.45;
   white-space: pre-line;
   -webkit-box-orient: vertical;
@@ -2755,6 +3072,19 @@ async function confirmAccountAction() {
 .learner-space {
   --learner-purple-copy: #5a3b86;
   --learner-purple-heading: #7052a0;
+}
+
+.challenge-card__top {
+  align-items: center;
+}
+
+.challenge-card__top h3 {
+  margin: 0;
+}
+
+.challenge-card__top > span {
+  flex: 0 0 auto;
+  text-align: right;
 }
 
 .learner-eyebrow {
@@ -2815,15 +3145,137 @@ async function confirmAccountAction() {
   opacity: .76;
 }
 
-.challenge-work > strong {
-  color: var(--ink);
-  font-size: .82rem;
+.challenge-work__group {
+  display: grid;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  gap: 10px;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
 }
 
-.challenge-work > div {
-  display: flex;
-  flex-wrap: wrap;
+.challenge-work__group + .challenge-work__group {
+  margin-top: 2px;
+}
+
+.challenge-work__heading {
+  display: grid;
+  gap: 2px;
+}
+
+.challenge-work__heading > strong {
+  color: var(--ink);
+  font-size: .88rem;
+}
+
+.challenge-work__heading > small {
+  color: var(--muted);
+  font-size: .74rem;
+  line-height: 1.35;
+}
+
+.challenge-work__group > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+}
+
+.review-button--choice {
+  min-height: 48px;
+  padding: 9px 11px;
+  justify-self: stretch;
+  justify-content: flex-start;
+  gap: 8px;
+  border-radius: 12px;
+  text-align: left;
+}
+
+.review-button--choice svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.review-button--error-scope {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  min-height: 58px;
+  padding: 9px 11px;
+  border-radius: 13px;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+}
+
+.review-button--error-scope .review-button__scope-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 0;
+  background: transparent;
+}
+
+.review-button--error-scope .review-button__scope-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.review-button__scope-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 9px;
+  color: #674491;
+  background: color-mix(in srgb, #7052a0 12%, var(--surface));
+}
+
+.review-button__scope-icon svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.review-button__scope-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.review-button__scope-copy strong {
+  color: inherit;
+  font-size: .8rem;
+  line-height: 1.25;
+}
+
+.review-button__scope-copy small {
+  color: var(--muted);
+  font-size: .68rem;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.learner-space--dark .review-button__scope-icon {
+  color: #eadfff;
+  background: color-mix(in srgb, #c3a8ed 22%, var(--surface));
+}
+
+.learner-space--dark .review-button--error-scope .review-button__scope-icon {
+  background: transparent;
+}
+
+.learner-space--dark .review-button__scope-copy small {
+  color: #d5c9e8;
 }
 
 .challenge-work .review-button:disabled {
@@ -3121,7 +3573,7 @@ async function confirmAccountAction() {
   position: sticky;
   z-index: 80;
   top: var(--learner-tabs-sticky-top, 68px);
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   box-shadow: 0 10px 24px rgb(20 28 38 / 12%);
 }
 
@@ -3825,6 +4277,35 @@ async function confirmAccountAction() {
   background: color-mix(in srgb, var(--danger) 10%, var(--surface));
 }
 
+.error-progress-card__badges {
+  display: flex;
+  align-items: stretch;
+  gap: 9px;
+}
+
+.error-progress-card__affected {
+  display: grid;
+  min-width: 110px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  justify-items: center;
+  color: var(--ink);
+  background: var(--surface);
+}
+
+.error-progress-card__affected strong {
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.error-progress-card__affected span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: .68rem;
+  text-align: center;
+}
+
 .error-progress-card__rate strong {
   font-size: 1.55rem;
   line-height: 1;
@@ -4059,6 +4540,35 @@ async function confirmAccountAction() {
   list-style: none;
 }
 
+.error-progress-examples__more {
+  display: flex;
+  padding: 0 15px 15px;
+  justify-content: center;
+}
+
+.error-progress-examples__more button {
+  min-height: 40px;
+  padding: 8px 18px;
+  border: 1px solid color-mix(in srgb, #7052a0 42%, var(--line));
+  border-radius: 999px;
+  color: var(--learner-purple-copy);
+  background: color-mix(in srgb, #7052a0 8%, var(--surface));
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.error-progress-examples__more button:hover:not(:disabled) {
+  border-color: #7052a0;
+  background: color-mix(in srgb, #7052a0 14%, var(--surface));
+}
+
+.error-progress-examples__more button:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
 .error-progress-examples > ol > li {
   padding: 14px;
   border: 1px solid var(--line);
@@ -4075,6 +4585,7 @@ async function confirmAccountAction() {
 .error-progress-examples dl > div {
   display: grid;
   grid-template-columns: 82px minmax(0, 1fr);
+  align-items: center;
   gap: 10px;
 }
 
@@ -4097,13 +4608,62 @@ async function confirmAccountAction() {
 
 .error-progress-examples__wrong {
   color: var(--danger) !important;
-  text-decoration: line-through;
-  text-decoration-thickness: 1px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
 .error-progress-examples__correct {
   color: var(--success) !important;
-  font-weight: 800;
+  font-weight: 400;
+}
+
+.error-progress-comparison__answer {
+  padding: 8px 11px;
+  border: 1px solid color-mix(in srgb, var(--danger) 34%, var(--line));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+  color: var(--ink);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.error-progress-comparison__part--changed,
+.error-progress-comparison__part--extra {
+  padding: 1px 2px;
+  border-radius: 4px;
+  font-weight: inherit;
+}
+
+.error-progress-comparison__answer--learner .error-progress-comparison__part--changed {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+  text-decoration: underline 2px;
+  text-underline-offset: 3px;
+}
+
+.error-progress-comparison__answer--learner .error-progress-comparison__part--extra {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+  text-decoration: underline 2px;
+  text-underline-offset: 3px;
+}
+
+.error-progress-comparison__answer--expected {
+  border-color: color-mix(in srgb, #d5a915 65%, var(--line));
+  background: color-mix(in srgb, #fff6c9 50%, var(--surface));
+}
+
+.error-progress-comparison__answer--expected .error-progress-comparison__part--changed {
+  color: #493600;
+  background: #f6d85d;
+  box-shadow: 0 0 0 2px rgb(230 185 54 / 20%);
+}
+
+.learner-space--dark .error-progress-comparison__answer--expected .error-progress-comparison__part--changed {
+  color: #211900;
+  background: #e8c84f;
 }
 
 .learner-space--dark .error-progress-card__status > span.is-warning {
@@ -4426,7 +4986,7 @@ async function confirmAccountAction() {
 
 @media (max-width: 720px) {
   .learner-tabs {
-    grid-template-columns: repeat(3, minmax(138px, 1fr));
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
     overflow-x: auto;
     overscroll-behavior-inline: contain;
     scrollbar-width: thin;
@@ -4473,12 +5033,13 @@ async function confirmAccountAction() {
     grid-template-columns: 1fr;
   }
 
-  .error-progress-card__rate {
-    min-width: 0;
+  .error-progress-card__badges {
     justify-self: start;
-    grid-template-columns: auto auto;
-    align-items: baseline;
-    gap: 6px;
+  }
+
+  .error-progress-card__rate,
+  .error-progress-card__affected {
+    min-width: 0;
   }
 
   .error-progress-card__status,
@@ -4511,6 +5072,10 @@ async function confirmAccountAction() {
 }
 
 @media (max-width: 480px) {
+  .challenge-work__group > div {
+    grid-template-columns: 1fr;
+  }
+
   .progress-explanation__tooltip {
     position: fixed;
     top: 50%;

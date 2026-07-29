@@ -5,6 +5,7 @@ export type CoachErrorKind =
   | 'accent'
   | 'punctuation'
   | 'auxiliary'
+  | 'compound-participle'
   | 'agreement'
   | 'ending'
   | 'close-form'
@@ -21,6 +22,8 @@ export interface CoachAnswerDiagnostic {
   learnerEnding?: string
   expectedAuxiliary?: string
   learnerAuxiliary?: string
+  expectedParticiple?: string
+  learnerFormAfterAuxiliary?: string
   agreementSource?: 'subject' | 'cod-before' | 'cod-after' | 'coi'
   agreementFeatures?: string
 }
@@ -112,6 +115,23 @@ function commonPrefix(left: string, right: string) {
 
 function auxiliaryIn(value: string) {
   return words(value).find(word => AUXILIARIES.has(word))
+}
+
+function compoundParticipleDifference(learnerAnswer: string, expectedAnswer: string) {
+  const learnerWords = words(learnerAnswer)
+  const expectedWords = words(expectedAnswer)
+  const auxiliaryIndex = expectedWords.findIndex(word => AUXILIARIES.has(word))
+  if (auxiliaryIndex < 0 || learnerWords[auxiliaryIndex] !== expectedWords[auxiliaryIndex]) return undefined
+  const expectedParticiple = expectedWords[auxiliaryIndex + 1]
+  const learnerForm = learnerWords[auxiliaryIndex + 1]
+  if (!expectedParticiple || !learnerForm || expectedParticiple === learnerForm) return undefined
+  if (belongsToSameAgreementFamily(learnerForm, expectedParticiple)) return undefined
+  if (commonPrefix(learnerForm, expectedParticiple) < 2) return undefined
+  return {
+    auxiliary: expectedWords[auxiliaryIndex]!,
+    expectedParticiple,
+    learnerForm,
+  }
 }
 
 function displayedCorrection(question: ExerciseQuestion, fallback: string) {
@@ -210,6 +230,21 @@ export function diagnoseCoachAnswer(
     return {
       ...base, errorKind: 'agreement', confidence: 'high', agreementFeatures: features,
       agreementSource: reminder?.kind || 'subject',
+    }
+  }
+
+  const compoundParticiple = question.isCompound
+    ? compoundParticipleDifference(learnerAnswer, comparedAnswer)
+    : undefined
+  if (compoundParticiple) {
+    return {
+      ...base,
+      errorKind: 'compound-participle',
+      confidence: 'high',
+      expectedAuxiliary: compoundParticiple.auxiliary,
+      learnerAuxiliary: compoundParticiple.auxiliary,
+      expectedParticiple: compoundParticiple.expectedParticiple,
+      learnerFormAfterAuxiliary: compoundParticiple.learnerForm,
     }
   }
 

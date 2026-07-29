@@ -8,7 +8,7 @@ import {
 } from './answer'
 import { diagnoseCoachAgreement, diagnoseCoachAnswer } from './coach-feedback'
 import type { AppLocale } from '../i18n/locales'
-import { localizedLearnerErrorText } from '../i18n/learner-errors'
+import { localizedLearnerErrorMessage, localizedLearnerErrorText } from '../i18n/learner-errors'
 
 export type LearnerErrorConfidence = 'high' | 'medium' | 'low'
 
@@ -19,6 +19,7 @@ export const LEARNER_ERROR_TAXONOMY = [
   { code: 'person.other_form', domain: 'Personne', label: 'confondre les pronoms (je, tu, ils...)', advice: 'Relis le pronom et cherche la terminaison qui lui correspond.' },
   { code: 'person.impossible_ending', domain: 'Personne', label: 'Terminaison impossible pour cette personne', advice: 'Avec je ou tu, pas de -t ou -d ; avec il, elle ou iel, pas de -s ou -x.' },
   { code: 'compound.auxiliary', domain: 'Temps composé', label: 'Auxiliaire incorrect', advice: 'Apprends par coeur les verbes être et avoir à tous les temps' },
+  { code: 'compound.participle_form', domain: 'Temps composé', label: 'Forme incorrecte après l’auxiliaire', advice: 'Après l’auxiliaire, emploie le participe passé et non une forme conjuguée.' },
   { code: 'agreement.subject', domain: 'Accord', label: 'Accord du participe avec le sujet', advice: 'Avec être, vérifie le genre et le nombre du sujet.' },
   { code: 'agreement.cod_before', domain: 'Accord', label: 'Accord avec un COD placé avant', advice: 'Avec avoir, le participe s’accorde avec le COD lorsque celui-ci est placé avant.' },
   { code: 'agreement.cod_after', domain: 'Accord', label: 'Accord indu avec un COD placé après', advice: 'Un COD placé après le participe ne commande pas son accord.' },
@@ -41,7 +42,7 @@ export interface LearnerErrorTag {
   evidence?: Record<string, string>
 }
 
-export const LEARNER_ERROR_DETECTOR_VERSION = '1.2.0'
+export const LEARNER_ERROR_DETECTOR_VERSION = '1.3.0'
 
 function text(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
@@ -263,6 +264,13 @@ export function diagnoseLearnerError(
       expectedAuxiliary: text(diagnostic.expectedAuxiliary),
     }))
   }
+  if (diagnostic.errorKind === 'compound-participle') {
+    return withDetectedContext(tag('compound.participle_form', 'high', {
+      auxiliary: text(diagnostic.expectedAuxiliary),
+      learnerForm: text(diagnostic.learnerFormAfterAuxiliary),
+      expectedParticiple: text(diagnostic.expectedParticiple),
+    }))
+  }
   if (diagnostic.errorKind === 'agreement') {
     const detectedAgreement = agreementTag(diagnostic)
     if (detectedAgreement) {
@@ -310,26 +318,19 @@ export function learnerErrorDetails(
       if (item.code === 'person.other_form'
         && item.evidence?.detectedPerson
         && item.evidence?.expectedPerson) {
-        const usesEndingComparison = item.evidence.detectedEnding && item.evidence.expectedEnding
         return [{
           code: item.code,
           label,
-          message: usesEndingComparison
-            ? `Tu as confondu la terminaison de « ${item.evidence.detectedPerson} » avec celle de « ${item.evidence.expectedPerson} ».`
-            : 'Tu as confondu les personnes.',
-          learnerValue: usesEndingComparison
-            ? `${item.evidence.detectedEnding} (${item.evidence.detectedPerson})`
-            : item.evidence.detectedPerson,
-          expectedValue: usesEndingComparison
-            ? `${item.evidence.expectedEnding} (${item.evidence.expectedPerson})`
-            : item.evidence.expectedPerson,
+          message: `Tu as confondu la personne. Tu as conjugué avec « ${item.evidence.detectedPerson} », alors que c’était « ${item.evidence.expectedPerson} ».`,
+          learnerValue: item.evidence.detectedPerson,
+          expectedValue: item.evidence.expectedPerson,
         }]
       }
       if (item.code === 'morphology.ending') {
         return [{
           code: item.code,
           label,
-          message: 'La terminaison n’est pas la bonne.',
+          message: 'La terminaison est fausse.',
           ...(item.evidence?.learnerEnding ? { learnerValue: `-${item.evidence.learnerEnding}` } : {}),
           ...(item.evidence?.expectedEnding ? { expectedValue: `-${item.evidence.expectedEnding}` } : {}),
         }]
@@ -358,6 +359,11 @@ export function learnerErrorDetails(
           return evidence.learnerAuxiliary && evidence.expectedAuxiliary
             ? `Tu as utilisé l’auxiliaire « ${evidence.learnerAuxiliary} », alors qu’il fallait « ${evidence.expectedAuxiliary} ».`
             : 'Tu n’as pas utilisé le bon auxiliaire pour construire ce temps composé.'
+        }
+        if (item.code === 'compound.participle_form') {
+          return evidence.auxiliary && evidence.learnerForm && evidence.expectedParticiple
+            ? `Après l’auxiliaire « ${evidence.auxiliary} », il fallait employer le participe passé « ${evidence.expectedParticiple} », et non « ${evidence.learnerForm} ».`
+            : 'Après l’auxiliaire, il fallait employer le participe passé et non une autre forme conjuguée.'
         }
         if (item.code === 'agreement.subject') {
           return 'Le participe passé n’était pas correctement accordé avec le sujet.'
@@ -403,6 +409,7 @@ export function mergeLearnerErrorDetails(...groups: LearnerErrorDetail[][]): Lea
 }
 
 export function learnerErrorDetailText(detail: LearnerErrorDetail, locale: AppLocale = 'fr'): string {
+  if (detail.code === 'person.other_form') return localizedLearnerErrorMessage(detail, locale)
   return localizedLearnerErrorText(detail, locale)
 }
 
@@ -427,6 +434,7 @@ export function applicableLearnerErrorTypes(question: ExerciseQuestion): Learner
   if (question.isCompound) {
     codes.push(
       'compound.auxiliary',
+      'compound.participle_form',
       expectedUsesEtre(question) ? 'agreement.subject' : 'agreement.avoir_unwarranted',
     )
   }

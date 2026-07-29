@@ -30,6 +30,7 @@ const props = defineProps<{
 const emit = defineEmits<{ close: [] }>()
 const { track } = useSiteAnalytics()
 const dialog = useTemplateRef<HTMLElement>('summary-print-dialog')
+const previewFrame = useTemplateRef<HTMLIFrameElement>('summary-print-frame')
 const pdfPreviewUrl = ref('')
 const previewError = ref('')
 const isPreviewBusy = ref(true)
@@ -326,6 +327,13 @@ async function downloadPdf() {
   }
 }
 
+function printPdf() {
+  const frameWindow = previewFrame.value?.contentWindow
+  if (!frameWindow || !isFrameReady.value) return
+  frameWindow.focus()
+  frameWindow.print()
+}
+
 onMounted(refreshPreview)
 
 onBeforeUnmount(() => {
@@ -342,6 +350,14 @@ onBeforeUnmount(() => {
           <h2 id="summary-print-title">{{ ui('Aperçu du bilan') }}</h2>
           <div>
             <button type="button" class="secondary-button" @click="emit('close')">{{ ui('Fermer') }}</button>
+            <button
+              type="button"
+              class="secondary-button"
+              :disabled="!pdfPreviewUrl || !isFrameReady"
+              @click="printPdf"
+            >
+              {{ ui('Imprimer') }}
+            </button>
             <button type="button" class="primary-button" :disabled="isPdfBusy" @click="downloadPdf">
               {{ isPdfBusy ? 'Création…' : 'PDF' }}
             </button>
@@ -351,6 +367,7 @@ onBeforeUnmount(() => {
         <main class="summary-print-preview">
           <iframe
             v-if="pdfPreviewUrl"
+            ref="summary-print-frame"
             :src="`${pdfPreviewUrl}#view=FitH&toolbar=0&navpanes=0`"
             :title="ui('Aperçu du bilan au format PDF')"
             @load="isFrameReady = true"

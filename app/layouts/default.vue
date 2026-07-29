@@ -114,8 +114,8 @@ async function logoutLearner() {
 }
 const activeLearnerTab = computed(() => {
   if (localizedSectionPath.value !== '/my-page') return ''
-  const tab = String(route.query.tab || 'challenges')
-  return ['history', 'progress', 'challenges', 'preferences', 'account'].includes(tab) ? tab : 'challenges'
+  const tab = String(route.query.tab || 'history')
+  return ['history', 'progress', 'preferences', 'account'].includes(tab) ? tab : 'history'
 })
 
 async function selectLearnerLanguage(locale: AppLocale) {
@@ -231,9 +231,11 @@ const activeSection = computed(() => {
             </summary>
             <div class="learner-menu__panel">
               <NuxtLink
-                :to="`${localePath('/my-page')}?tab=history`"
+                class="learner-menu__progress"
                 :class="{ 'is-active': activeLearnerTab === 'history' }"
+                :to="`${localePath('/my-page')}?tab=history`"
               >
+                <span aria-hidden="true">✦</span>
                 {{ learnerCopy.history }}
               </NuxtLink>
               <NuxtLink
@@ -241,14 +243,6 @@ const activeSection = computed(() => {
                 :class="{ 'is-active': activeLearnerTab === 'progress' }"
               >
                 {{ learnerCopy.commonErrors }}
-              </NuxtLink>
-              <NuxtLink
-                class="learner-menu__progress"
-                :class="{ 'is-active': activeLearnerTab === 'challenges' }"
-                :to="`${localePath('/my-page')}?tab=challenges`"
-              >
-                <span aria-hidden="true">✦</span>
-                {{ learnerCopy.improve }}
               </NuxtLink>
               <NuxtLink
                 :to="`${localePath('/my-page')}?tab=preferences`"

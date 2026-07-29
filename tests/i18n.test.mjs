@@ -84,9 +84,9 @@ test('tous les onglets de mon espace disposent d’un catalogue complet dans cha
     assert.deepEqual(Object.keys(copy), frenchKeys)
     for (const key of frenchKeys) assert.ok(copy[key].trim(), `${locale}.${key} ne doit pas être vide`)
   }
-  assert.equal(learnerSpaceCopy('de').history, 'Verlauf')
+  assert.equal(learnerSpaceCopy('de').history, 'Fortschritte machen')
   assert.equal(learnerSpaceCopy('en').deleteAccount, 'Delete my account')
-  assert.equal(learnerSpaceCopy('it').commonErrors, 'I miei errori frequenti')
+  assert.equal(learnerSpaceCopy('it').commonErrors, 'Capire i miei errori')
   assert.equal(learnerSpaceCopy('es').preferences, 'Preferencias')
   assert.match(
     learnerSpaceText(learnerSpaceCopy('en'), 'privacy', { username: 'Camille' }),

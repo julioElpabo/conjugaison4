@@ -244,6 +244,7 @@ const activeSection = computed(() => {
               >
                 {{ learnerCopy.commonErrors }}
               </NuxtLink>
+              <div class="learner-menu__separator" role="separator" />
               <NuxtLink
                 :to="`${localePath('/my-page')}?tab=preferences`"
                 :class="{ 'is-active': activeLearnerTab === 'preferences' }"
@@ -258,7 +259,6 @@ const activeSection = computed(() => {
                   :aria-label="learnerCopy.changeLanguage"
                   @click="learnerLanguageMenuOpen = !learnerLanguageMenuOpen"
                 >
-                  <span aria-hidden="true">{{ activeLanguageOption.flag }}</span>
                   <span>{{ learnerCopy.changeLanguage }}</span>
                   <svg aria-hidden="true" viewBox="0 0 20 20"><path d="m7.5 5 5 5-5 5" /></svg>
                 </button>
@@ -787,13 +787,26 @@ a {
   display: grid;
 }
 
-.learner-menu__panel .learner-menu__language-trigger {
-  display: grid;
-  grid-template-columns: 24px 1fr 16px;
-  gap: 7px;
+.learner-menu__separator {
+  height: 1px;
+  margin: 5px 8px;
+  background: var(--line);
 }
 
-.learner-menu__language-trigger > span:first-child,
+.learner-menu__panel .learner-menu__language-trigger {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr 16px;
+  align-items: center;
+  justify-items: start;
+  gap: 7px;
+  text-align: left;
+}
+
+.learner-menu__language-trigger svg {
+  justify-self: end;
+}
+
 .learner-menu__language-options span {
   font-size: 1.05rem;
   line-height: 1;

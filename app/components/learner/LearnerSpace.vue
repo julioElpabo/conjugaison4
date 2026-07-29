@@ -47,6 +47,7 @@ type AccountAction = 'results' | 'account'
 
 interface DashboardChallenge {
   id: number
+  clientRunId: string
   fingerprint: string
   label: string
   description: string
@@ -63,6 +64,12 @@ interface DashboardChallenge {
   allUnresolvedCount: number
   allRetryQuestions: ExerciseQuestion[]
   exactQuestions: ExerciseQuestion[]
+  answeredQuestionIndexes: number[]
+  questionResults: Array<{
+    index: number
+    status: 'correct' | 'incorrect'
+    attemptNumber: 1 | 2
+  }>
 }
 
 interface DashboardResponse {
@@ -133,6 +140,11 @@ interface LearnerPreferences {
   colorTheme: 'light' | 'dark'
 }
 
+interface ErrorChallengeResponse {
+  challenge: LearnerChallengeSnapshot
+  questions: ExerciseQuestion[]
+}
+
 const { user: sessionLearner, clearUser } = useLearnerAuth()
 const learner = computed(() => props.inspectedLearner || sessionLearner.value)
 const { interfaceLocale, localePath, setInterfaceLocale, ui } = useLanguagePreferences()
@@ -158,6 +170,8 @@ const learnerProgress = ref<LearnerErrorProgressSummary>()
 const learnerProgressPending = ref(false)
 const learnerProgressError = ref('')
 const progressExamplesPendingCode = ref<LearnerErrorProgressCard['code']>()
+const errorChallengePendingCode = ref<LearnerErrorProgressCard['code']>()
+const errorChallengeErrorCode = ref<LearnerErrorProgressCard['code']>()
 const progressExplanationOpen = ref(false)
 const challengeTrainings = ref<ChallengeTraining[]>([])
 const challengeTrainingsPending = ref(false)
@@ -176,16 +190,13 @@ const selectedCoach = ref<CoachProfile>()
 const coachPickerOpen = ref(false)
 const selectedWork = ref<{
   challenge: DashboardChallenge
-  scope: 'same' | 'random' | 'incorrect' | 'all-incorrect' | 'targeted'
+  scope: 'same' | 'random' | 'incorrect' | 'all-incorrect' | 'targeted' | 'remaining'
   targetQuestions?: ExerciseQuestion[]
 }>()
 const workMenuFingerprint = ref('')
 const catalogue = ref<Catalogue>()
 const challengeStarting = ref<string>()
 const challengeStartError = ref('')
-const expandedDescriptions = ref(new Set<string>())
-const truncatedDescriptions = ref(new Set<string>())
-const challengeDescriptionElements = new Map<string, HTMLElement>()
 const preferencesSaving = ref(false)
 const preferencesSaved = ref(false)
 const preferencesError = ref('')
@@ -202,15 +213,14 @@ const passwordChanging = ref(false)
 const passwordChanged = ref(false)
 const passwordError = ref('')
 const dashboardLoadingMore = ref(false)
-const visibleHistoryChallengeCount = ref(1)
 const historySummary = ref<{ challenge: DashboardChallenge, report: HistorySummaryResponse }>()
 const historySummaryPendingId = ref<number>()
 const historySummaryError = ref<{ challengeId: number, message: string }>()
+const finishMenuChallengeId = ref<number>()
 const siteHeaderHeight = ref(68)
 const challengeLoader = useTemplateRef<HTMLElement>('challenge-loader')
 let challengeObserver: IntersectionObserver | null = null
 let siteHeaderObserver: ResizeObserver | undefined
-let challengeDescriptionObserver: ResizeObserver | undefined
 let trainingProgressRequest = 0
 const randomCoachAvatar = useState<string>('challenge-random-coach-avatar', () => '')
 const workMenuLeft = ref(0)
@@ -233,7 +243,7 @@ const { data: dashboard, pending: dashboardPending } = await useAsyncData(
   dashboardKey,
   () => requestFetch<DashboardResponse>(learnerApi('dashboard', {
     offset: 0,
-    limit: activeTab.value === 'history' ? 1 : 6,
+    limit: 6,
   })),
 )
 const { data: storedPreferences } = await useAsyncData(
@@ -277,23 +287,11 @@ onMounted(() => {
     siteHeaderObserver = new ResizeObserver(updateSiteHeaderHeight)
     siteHeaderObserver.observe(siteHeader)
   }
-  challengeDescriptionObserver = new ResizeObserver((entries) => {
-    for (const entry of entries) {
-      const descriptionId = entry.target.getAttribute('data-description-id')
-      if (descriptionId && !descriptionIsExpanded(descriptionId)) {
-        updateDescriptionTruncation(descriptionId, entry.target as HTMLElement)
-      }
-    }
-  })
-  for (const element of challengeDescriptionElements.values()) {
-    challengeDescriptionObserver.observe(element)
-  }
 })
 
 onBeforeUnmount(() => {
   challengeObserver?.disconnect()
   siteHeaderObserver?.disconnect()
-  challengeDescriptionObserver?.disconnect()
   document.removeEventListener('pointerdown', closeWorkMenuOnOutside)
   document.removeEventListener('pointerdown', closeProgressExplanationOnOutside)
   document.removeEventListener('keydown', closeAccountDialogOnEscape)
@@ -332,7 +330,7 @@ const displayUsername = computed(() => {
 
 const challengeDays = computed(() => {
   const groups: Array<{ key: string, label: string, challenges: DashboardChallenge[] }> = []
-  const challenges = (dashboard.value?.challenges || []).slice(0, visibleHistoryChallengeCount.value)
+  const challenges = dashboard.value?.challenges || []
   for (const challenge of challenges) {
     const key = challengeDayKey(challenge.lastActivityAt)
     const current = groups.at(-1)
@@ -347,9 +345,44 @@ const challengeDays = computed(() => {
 })
 
 const historyHasMore = computed(() => (
-  visibleHistoryChallengeCount.value < (dashboard.value?.challenges.length || 0)
-  || Boolean(dashboard.value?.hasMore)
+  Boolean(dashboard.value?.hasMore)
 ))
+
+function firstUnansweredQuestionIndex(challenge: DashboardChallenge) {
+  const answered = new Set(challenge.answeredQuestionIndexes)
+  for (let index = 0; index < challenge.challenge.questionCount; index += 1) {
+    if (!answered.has(index)) return index
+  }
+  return challenge.challenge.questionCount
+}
+
+function challengeIsComplete(challenge: DashboardChallenge) {
+  return firstUnansweredQuestionIndex(challenge) >= challenge.challenge.questionCount
+}
+
+function challengeQuestionResult(challenge: DashboardChallenge, index: number) {
+  return challenge.questionResults.find(result => result.index === index)
+}
+
+function challengeProgressLabel(challenge: DashboardChallenge) {
+  return ui('{answered} questions répondues sur {total}', {
+    answered: challenge.questionResults.length,
+    total: challenge.challenge.questionCount,
+  })
+}
+
+function challengeQuestionLabel(challenge: DashboardChallenge, index: number) {
+  const result = challengeQuestionResult(challenge, index)
+  if (!result) return `${ui('Question')} ${index + 1} · ${ui('Pas encore répondue')}`
+  if (result.status === 'incorrect') {
+    return `${ui('Question')} ${index + 1} · ${ui('Réponse fausse')}`
+  }
+  return `${ui('Question')} ${index + 1} · ${
+    result.attemptNumber === 2
+      ? ui('Réussie au deuxième essai')
+      : ui('Réussie au premier essai')
+  }`
+}
 
 const selectedTraining = computed(() => challengeTrainings.value.find(
   training => training.fingerprint === selectedTrainingFingerprint.value,
@@ -502,6 +535,7 @@ function trainingChallenge(sessionId: number, reportTitle: string): DashboardCha
   if (!training || !challenge) return undefined
   return {
     id: -Math.abs(sessionId || 1),
+    clientRunId: '',
     fingerprint: training.fingerprint,
     label: training.label,
     description: challenge.description || '',
@@ -521,6 +555,8 @@ function trainingChallenge(sessionId: number, reportTitle: string): DashboardCha
     allUnresolvedCount: 0,
     allRetryQuestions: [],
     exactQuestions: [],
+    answeredQuestionIndexes: [],
+    questionResults: [],
   }
 }
 
@@ -765,6 +801,105 @@ function progressCardAdvice(card: LearnerErrorProgressCard) {
   return localizedLearnerErrorMessageForCode(card.code, card.advice, interfaceLocale.value)
 }
 
+function progressExamplesLabel(card: LearnerErrorProgressCard) {
+  const shown = Math.min(card.examples.length, card.totalErrors)
+  const total = card.totalErrors
+  if (interfaceLocale.value === 'de') {
+    return shown < total
+      ? `${shown} meiner ${total} Fehler anzeigen`
+      : `Meine ${total} ${total === 1 ? 'Fehler' : 'Fehler'} anzeigen`
+  }
+  if (interfaceLocale.value === 'en') {
+    return shown < total
+      ? `View ${shown} of my ${total} mistakes`
+      : `View my ${total} ${total === 1 ? 'mistake' : 'mistakes'}`
+  }
+  if (interfaceLocale.value === 'it') {
+    return shown < total
+      ? `Vedi ${shown} dei miei ${total} errori`
+      : `Vedi i miei ${total} ${total === 1 ? 'errore' : 'errori'}`
+  }
+  if (interfaceLocale.value === 'es') {
+    return shown < total
+      ? `Ver ${shown} de mis ${total} errores`
+      : `Ver mis ${total} ${total === 1 ? 'error' : 'errores'}`
+  }
+  return shown < total
+    ? `Voir ${shown} de mes ${total} erreurs`
+    : `Voir mes ${total} ${total === 1 ? 'erreur' : 'erreurs'}`
+}
+
+function errorChallengeLabel(card: LearnerErrorProgressCard) {
+  const label = progressCardLabel(card)
+  const values = {
+    fr: `Défi ciblé : ${label}`,
+    de: `Gezielte Übung: ${label}`,
+    en: `Targeted challenge: ${label}`,
+    it: `Esercizio mirato: ${label}`,
+    es: `Ejercicio específico: ${label}`,
+  }
+  return values[interfaceLocale.value]
+}
+
+function errorChallengeButtonLabel(card: LearnerErrorProgressCard) {
+  return `${copy.value.launchErrorChallenge} → ${progressCardLabel(card)}`
+}
+
+function errorChallengeIsAvailable(card: LearnerErrorProgressCard) {
+  return card.code !== 'morphology.ending' && card.code !== 'person.other_form'
+}
+
+function errorChallengeDashboardCard(
+  card: LearnerErrorProgressCard,
+  response: ErrorChallengeResponse,
+): DashboardChallenge {
+  return {
+    id: -Date.now(),
+    clientRunId: '',
+    fingerprint: '',
+    label: errorChallengeLabel(card),
+    description: progressCardAdvice(card),
+    challenge: response.challenge,
+    presentation: 'classic',
+    isReview: false,
+    lastActivityAt: new Date().toISOString(),
+    completedAt: null,
+    correctCount: 0,
+    incorrectCount: 0,
+    scorePercent: 0,
+    unresolvedCount: 0,
+    retryQuestions: [],
+    allUnresolvedCount: 0,
+    allRetryQuestions: [],
+    exactQuestions: response.questions,
+    answeredQuestionIndexes: [],
+    questionResults: [],
+  }
+}
+
+async function launchProgressErrorChallenge(card: LearnerErrorProgressCard) {
+  if (props.readOnly || errorChallengePendingCode.value || challengeStarting.value) return
+  errorChallengePendingCode.value = card.code
+  errorChallengeErrorCode.value = undefined
+  try {
+    const response = await $fetch<ErrorChallengeResponse>(learnerApi('error-challenge', {
+      code: card.code,
+    }), { credentials: 'same-origin' })
+    selectedWork.value = {
+      challenge: errorChallengeDashboardCard(card, response),
+      scope: 'targeted',
+      targetQuestions: response.questions,
+    }
+    if (!await launchSelectedWork('classic')) errorChallengeErrorCode.value = card.code
+  }
+  catch {
+    errorChallengeErrorCode.value = card.code
+  }
+  finally {
+    errorChallengePendingCode.value = undefined
+  }
+}
+
 async function loadLearnerProgress(force = false) {
   if (learnerProgressPending.value || (learnerProgress.value && !force)) return
   learnerProgressPending.value = true
@@ -927,47 +1062,6 @@ function progressChartSegments(card: LearnerErrorProgressCard) {
   return segments
 }
 
-function descriptionIsExpanded(fingerprint: string) {
-  return expandedDescriptions.value.has(fingerprint)
-}
-
-function descriptionIsTruncated(fingerprint: string) {
-  return truncatedDescriptions.value.has(fingerprint)
-}
-
-function updateDescriptionTruncation(fingerprint: string, element = challengeDescriptionElements.get(fingerprint)) {
-  if (!element || descriptionIsExpanded(fingerprint)) return
-  const isTruncated = element.scrollHeight > element.clientHeight + 1
-  if (truncatedDescriptions.value.has(fingerprint) === isTruncated) return
-  const next = new Set(truncatedDescriptions.value)
-  if (isTruncated) next.add(fingerprint)
-  else next.delete(fingerprint)
-  truncatedDescriptions.value = next
-}
-
-function setChallengeDescriptionElement(fingerprint: string, element: unknown) {
-  const previous = challengeDescriptionElements.get(fingerprint)
-  if (previous) challengeDescriptionObserver?.unobserve(previous)
-  if (!(element instanceof HTMLElement)) {
-    challengeDescriptionElements.delete(fingerprint)
-    return
-  }
-  element.dataset.descriptionId = fingerprint
-  challengeDescriptionElements.set(fingerprint, element)
-  challengeDescriptionObserver?.observe(element)
-  void nextTick(() => updateDescriptionTruncation(fingerprint, element))
-}
-
-function toggleDescription(fingerprint: string) {
-  const next = new Set(expandedDescriptions.value)
-  if (next.has(fingerprint)) next.delete(fingerprint)
-  else next.add(fingerprint)
-  expandedDescriptions.value = next
-  if (!next.has(fingerprint)) {
-    void nextTick(() => updateDescriptionTruncation(fingerprint))
-  }
-}
-
 async function loadRandomCoachAvatar() {
   try {
     const response = await $fetch<{ coaches: CoachProfile[] }>('/api/coaches')
@@ -993,8 +1087,9 @@ function positionWorkMenu(anchor: HTMLElement) {
 
 function closeWorkMenuOnOutside(event: PointerEvent) {
   const target = event.target
-  if (target instanceof Element && target.closest('.challenge-work')) return
+  if (target instanceof Element && target.closest('.challenge-work, .challenge-finish')) return
   workMenuFingerprint.value = ''
+  finishMenuChallengeId.value = undefined
 }
 
 function openWorkMenu(
@@ -1009,6 +1104,13 @@ function openWorkMenu(
   selectedWork.value = { challenge, scope }
   workMenuFingerprint.value = isClosing ? '' : menuKey
   if (!isClosing) positionWorkMenu(event.currentTarget as HTMLElement)
+}
+
+function openFinishMenu(challenge: DashboardChallenge) {
+  const isClosing = finishMenuChallengeId.value === challenge.id
+  selectedWork.value = { challenge, scope: 'remaining' }
+  workMenuFingerprint.value = ''
+  finishMenuChallengeId.value = isClosing ? undefined : challenge.id
 }
 
 async function openHistorySummary(challenge: DashboardChallenge) {
@@ -1037,6 +1139,21 @@ async function questionsForSelectedWork() {
   const work = selectedWork.value
   if (!work) return []
   if (work.scope === 'targeted') return shuffledQuestionOrder(work.targetQuestions || [])
+  if (work.scope === 'remaining') {
+    const firstUnanswered = firstUnansweredQuestionIndex(work.challenge)
+    const remainingCount = Math.max(0, work.challenge.challenge.questionCount - firstUnanswered)
+    if (!remainingCount) return []
+    const plannedQuestions = work.challenge.exactQuestions
+      .slice(firstUnanswered, firstUnanswered + remainingCount)
+    if (plannedQuestions.length === remainingCount) return plannedQuestions
+    return await $fetch<ExerciseQuestion[]>('/api/questionnaires', {
+      method: 'POST',
+      body: {
+        ...work.challenge.challenge,
+        questionCount: remainingCount,
+      },
+    })
+  }
   if (work.scope === 'same' || work.scope === 'random') {
     if (work.challenge.exactQuestions.length) {
       return work.scope === 'random'
@@ -1086,9 +1203,9 @@ function challengeTenses(challenge: DashboardChallenge): ConjugationTense[] {
     .map(tense => ({ ...tense, mode: tense.mode || modes.get(tense.modeId) }))
 }
 
-async function launchSelectedWork(presentation: 'classic' | 'chat', coach?: CoachProfile) {
+async function launchSelectedWork(presentation: 'classic' | 'chat', coach?: CoachProfile): Promise<boolean> {
   const work = selectedWork.value
-  if (!work || challengeStarting.value) return
+  if (!work || challengeStarting.value) return false
   challengeStarting.value = String(work.challenge.id)
   challengeStartError.value = ''
   try {
@@ -1097,14 +1214,21 @@ async function launchSelectedWork(presentation: 'classic' | 'chat', coach?: Coac
       trainingReportTitle: _trainingReportTitle,
       ...standardChallenge
     } = work.challenge.challenge
-    const trackedChallenge = work.scope === 'targeted'
-      ? work.challenge.challenge
-      : standardChallenge
     reviewQuestions.value = await questionsForSelectedWork()
     if (!reviewQuestions.value.length) throw new Error('Aucune question disponible')
+    const isErrorReview = work.scope === 'incorrect' || work.scope === 'all-incorrect'
+    const isReviewSession = isErrorReview
+      || (work.scope === 'remaining' && work.challenge.isReview)
+    const trackedChallenge = work.scope === 'targeted'
+      ? work.challenge.challenge
+      : {
+          ...standardChallenge,
+          ...(isErrorReview ? { questionCount: reviewQuestions.value.length } : {}),
+        }
     reviewRequireSuccess.value = work.scope === 'incorrect'
       || work.scope === 'all-incorrect'
       || work.scope === 'targeted'
+      || (work.scope === 'remaining' && work.challenge.isReview)
     exercisePresentation.value = presentation
     selectedCoach.value = coach
     reviewTracking.value = createLearnerTrackingContext({
@@ -1112,13 +1236,20 @@ async function launchSelectedWork(presentation: 'classic' | 'chat', coach?: Coac
       challengeLabel: work.challenge.label,
       challenge: trackedChallenge,
       presentation,
-      isReview: work.scope === 'incorrect' || work.scope === 'all-incorrect',
+      isReview: isReviewSession,
     })
+    if (work.scope === 'remaining') {
+      reviewTracking.value.runId = work.challenge.clientRunId
+      reviewTracking.value.questionIndexOffset = firstUnansweredQuestionIndex(work.challenge)
+    }
     workMenuFingerprint.value = ''
+    finishMenuChallengeId.value = undefined
     reviewOpen.value = true
+    return true
   }
   catch {
     challengeStartError.value = copy.value.prepareError
+    return false
   }
   finally {
     challengeStarting.value = undefined
@@ -1127,16 +1258,18 @@ async function launchSelectedWork(presentation: 'classic' | 'chat', coach?: Coac
 
 function choosePresentation(presentation: 'classic' | 'chat') {
   if (presentation === 'chat') {
+    challengeStartError.value = ''
     workMenuFingerprint.value = ''
+    finishMenuChallengeId.value = undefined
     coachPickerOpen.value = true
     return
   }
   void launchSelectedWork('classic')
 }
 
-function launchWithCoach(coach: CoachProfile) {
-  coachPickerOpen.value = false
-  void launchSelectedWork('chat', coach)
+async function launchWithCoach(coach: CoachProfile) {
+  const launched = await launchSelectedWork('chat', coach)
+  if (launched) coachPickerOpen.value = false
 }
 
 async function regenerateChatQuestions() {
@@ -1150,22 +1283,9 @@ function observeChallengeLoader() {
   if (!['challenges', 'history'].includes(activeTab.value) || !canLoad || !challengeLoader.value) return
   challengeObserver = new IntersectionObserver((entries) => {
     if (!entries.some(entry => entry.isIntersecting)) return
-    if (activeTab.value === 'history') void revealNextHistoryChallenge()
-    else void loadMoreChallenges()
-  }, { rootMargin: '240px 0px' })
+    void loadMoreChallenges()
+  }, { rootMargin: '160px 0px' })
   challengeObserver.observe(challengeLoader.value)
-}
-
-async function revealNextHistoryChallenge() {
-  if (dashboardLoadingMore.value) return
-  if (visibleHistoryChallengeCount.value >= (dashboard.value?.challenges.length || 0)) {
-    await loadMoreChallenges()
-  }
-  if (visibleHistoryChallengeCount.value < (dashboard.value?.challenges.length || 0)) {
-    visibleHistoryChallengeCount.value += 1
-  }
-  await nextTick()
-  observeChallengeLoader()
 }
 
 async function loadMoreChallenges() {
@@ -1189,8 +1309,6 @@ async function loadMoreChallenges() {
   }
   finally {
     dashboardLoadingMore.value = false
-    await nextTick()
-    observeChallengeLoader()
   }
 }
 
@@ -1421,7 +1539,7 @@ async function confirmAccountAction() {
                 <span class="challenge-history__dot" aria-hidden="true" />
                 <article
                   class="challenge-card"
-                  :class="{ 'challenge-card--perfect': challenge.incorrectCount === 0 }"
+                  :class="{ 'challenge-card--perfect': challengeIsComplete(challenge) && challenge.incorrectCount === 0 }"
                 >
                   <div class="challenge-card__top">
                     <h3>{{ challenge.label }}</h3>
@@ -1431,33 +1549,86 @@ async function confirmAccountAction() {
                     v-if="challenge.description && challenge.incorrectCount > 0"
                     class="challenge-card__description"
                   >
-                    <p
-                      :ref="element => setChallengeDescriptionElement(String(challenge.id), element)"
-                      :class="{ 'is-expanded': descriptionIsExpanded(String(challenge.id)) }"
-                    >
-                      {{ challenge.description }}
-                    </p>
-                    <button
-                      v-if="descriptionIsTruncated(String(challenge.id))"
-                      type="button"
-                      :aria-expanded="descriptionIsExpanded(String(challenge.id))"
-                      @click="toggleDescription(String(challenge.id))"
-                    >
-                      {{ descriptionIsExpanded(String(challenge.id)) ? copy.showLess : copy.showAll }}
-                    </button>
+                    <p>{{ challenge.description }}</p>
                   </div>
                   <div
-                    v-if="challenge.correctCount > 0 && challenge.incorrectCount > 0"
-                    class="challenge-card__bar"
-                    aria-hidden="true"
+                    class="challenge-card__question-progress"
+                    role="img"
+                    :aria-label="challengeProgressLabel(challenge)"
                   >
-                    <span :style="{ width: `${challenge.scorePercent}%` }" />
+                    <span
+                      v-for="index in challenge.challenge.questionCount"
+                      :key="index"
+                      :title="challengeQuestionLabel(challenge, index - 1)"
+                      :class="{
+                        'is-correct': challengeQuestionResult(challenge, index - 1)?.status === 'correct'
+                          && challengeQuestionResult(challenge, index - 1)?.attemptNumber !== 2,
+                        'is-correct-retry': challengeQuestionResult(challenge, index - 1)?.status === 'correct'
+                          && challengeQuestionResult(challenge, index - 1)?.attemptNumber === 2,
+                        'is-incorrect': challengeQuestionResult(challenge, index - 1)?.status === 'incorrect',
+                      }"
+                    />
                   </div>
-                  <p :class="{ 'challenge-card__perfect-result': challenge.incorrectCount === 0 }">
-                    {{ challenge.incorrectCount === 0
-                      ? sessionResultLabel(challenge.correctCount, challenge.correctCount)
-                      : resultCountLabel(challenge.correctCount, challenge.incorrectCount) }}
-                  </p>
+                  <div
+                    class="challenge-card__primary-actions"
+                    :class="{
+                      'has-single-action': readOnly
+                        || challengeIsComplete(challenge),
+                    }"
+                  >
+                  <div
+                    v-if="!readOnly
+                      && !challengeIsComplete(challenge)"
+                    class="challenge-finish"
+                  >
+                    <button
+                      type="button"
+                      class="challenge-card__finish-session"
+                      :aria-expanded="finishMenuChallengeId === challenge.id"
+                      @click="openFinishMenu(challenge)"
+                    >
+                      <span class="review-button__scope-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </span>
+                      <span class="review-button__scope-copy">
+                        <strong>{{ ui('Terminer la séance') }}</strong>
+                        <small>{{ ui('Reprendre à la prochaine question') }}</small>
+                      </span>
+                    </button>
+                    <div
+                      v-if="finishMenuChallengeId === challenge.id"
+                      class="challenge-presentation-menu"
+                      role="group"
+                      :aria-label="copy.choosePresentation"
+                    >
+                      <button
+                        class="action-button action-button--primary"
+                        type="button"
+                        :disabled="Boolean(challengeStarting)"
+                        @click="choosePresentation('classic')"
+                      >
+                        <span class="action-button__icon" aria-hidden="true">●</span>
+                        <span><strong>{{ copy.classic }}</strong></span>
+                      </button>
+                      <button
+                        class="action-button action-button--chat"
+                        type="button"
+                        :disabled="Boolean(challengeStarting)"
+                        @click="choosePresentation('chat')"
+                      >
+                        <span class="action-button__icon" aria-hidden="true">
+                          <img v-if="randomCoachAvatar" :src="randomCoachAvatar" alt="">
+                          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="8" r="4" />
+                            <path d="M4.5 21a7.5 7.5 0 0 1 15 0" />
+                          </svg>
+                        </span>
+                        <span><strong>{{ copy.withCoach }}</strong></span>
+                      </button>
+                    </div>
+                  </div>
                   <button
                     type="button"
                     class="review-button review-button--summary"
@@ -1474,6 +1645,7 @@ async function confirmAccountAction() {
                       <small>{{ copy.summaryHint }}</small>
                     </span>
                   </button>
+                  </div>
                   <p
                     v-if="historySummaryError?.challengeId === challenge.id"
                     class="preferences-error"
@@ -1482,7 +1654,7 @@ async function confirmAccountAction() {
                     {{ historySummaryError.message }}
                   </p>
                   <div v-if="!readOnly" class="challenge-work">
-                    <div class="challenge-work__group">
+                    <div v-if="challengeIsComplete(challenge)" class="challenge-work__group">
                       <header class="challenge-work__heading">
                         <strong>{{ copy.retrainChallenge }}</strong>
                       </header>
@@ -1605,16 +1777,12 @@ async function confirmAccountAction() {
           </li>
         </ol>
         <p v-if="challengeStartError" class="preferences-error" role="alert">{{ challengeStartError }}</p>
-        <button
+        <div
           v-if="historyHasMore"
           ref="challenge-loader"
-          class="challenge-loader"
-          type="button"
-          :disabled="dashboardLoadingMore"
-          @click="revealNextHistoryChallenge"
-        >
-          {{ dashboardLoadingMore ? copy.loadingOlder : copy.loadOlder }}
-        </button>
+          class="challenge-loader-sentinel"
+          aria-hidden="true"
+        />
         </template>
         <div v-else class="learner-empty">
           <strong>{{ copy.noChallenge }}</strong>
@@ -2103,9 +2271,8 @@ async function confirmAccountAction() {
             <summary>
               <span class="error-progress-examples__label">
                 <span class="error-progress-examples__chevron" aria-hidden="true" />
-                {{ copy.seeExamples }}
+                {{ progressExamplesLabel(card) }}
               </span>
-              <small>{{ mistakeCountLabel(card.examples.length) }}</small>
             </summary>
             <ol>
               <li v-for="example in card.examples" :key="example.id">
@@ -2182,6 +2349,28 @@ async function confirmAccountAction() {
               </button>
             </div>
           </details>
+          <button
+            v-if="!readOnly && errorChallengeIsAvailable(card)"
+            type="button"
+            class="error-progress-card__challenge"
+            :disabled="Boolean(errorChallengePendingCode) || Boolean(challengeStarting)"
+            @click="launchProgressErrorChallenge(card)"
+          >
+            <span aria-hidden="true">▶</span>
+            <strong>
+              {{ errorChallengePendingCode === card.code
+                ? copy.preparingErrorChallenge
+                : errorChallengeButtonLabel(card) }}
+            </strong>
+            <small>{{ copy.tenQuestionChallenge }}</small>
+          </button>
+          <p
+            v-if="errorChallengeErrorCode === card.code"
+            class="preferences-error"
+            role="alert"
+          >
+            {{ copy.prepareError }}
+          </p>
           </article>
         </div>
       </template>
@@ -2369,7 +2558,13 @@ async function confirmAccountAction() {
       :require-success="reviewRequireSuccess"
       @close="closeReview"
     />
-    <CoachPicker v-if="coachPickerOpen" @close="coachPickerOpen = false" @select="launchWithCoach" />
+    <CoachPicker
+      v-if="coachPickerOpen"
+      :selection-pending="Boolean(challengeStarting)"
+      :selection-error="challengeStartError"
+      @close="coachPickerOpen = false"
+      @select="launchWithCoach"
+    />
     <LearnerHistorySessionSummaryDialog
       v-if="historySummary"
       :title="historySummary.challenge.label"
@@ -2557,28 +2752,147 @@ async function confirmAccountAction() {
   gap: 8px;
 }
 
+.challenge-finish {
+  position: relative;
+  width: 100%;
+}
+
+.challenge-card__primary-actions {
+  display: grid;
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, #7052a0 20%, var(--line));
+  border-radius: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  background: color-mix(in srgb, #7052a0 5%, var(--surface));
+}
+
+.challenge-card__primary-actions.has-single-action {
+  grid-template-columns: 1fr;
+}
+
 .challenge-card--perfect {
   padding-block: 16px;
   gap: 9px;
   border-color: color-mix(in srgb, var(--success) 28%, var(--line));
 }
 
-.challenge-card__perfect-result {
-  color: var(--success) !important;
-  font-weight: 750;
+.challenge-card__question-progress {
+  display: flex;
+  gap: 4px;
+}
+
+.challenge-card__question-progress > span {
+  min-width: 3px;
+  height: 8px;
+  flex: 1;
+  border-radius: 999px;
+  background: #dbe4e1;
+}
+
+.challenge-card__question-progress > span.is-correct {
+  background: #42a66f;
+}
+
+.challenge-card__question-progress > span.is-correct-retry {
+  background: #8bc9a6;
+}
+
+.challenge-card__question-progress > span.is-incorrect {
+  background: #d26d64;
+}
+
+.challenge-card__finish-session {
+  display: grid;
+  width: 100%;
+  min-height: 78px;
+  padding: 11px 14px;
+  border: 1px solid #7052a0;
+  border-radius: 14px;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 11px;
+  color: white;
+  background: #7052a0;
+  font: inherit;
+  font-weight: 850;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgb(83 54 123 / 18%);
+}
+
+.challenge-card__finish-session:hover:not(:disabled) {
+  border-color: #5e3e8d;
+  background: #5e3e8d;
+  transform: translateY(-1px);
+}
+
+.challenge-card__finish-session:disabled {
+  opacity: .6;
+  cursor: progress;
+}
+
+.challenge-card__finish-session .review-button__scope-icon {
+  width: 38px;
+  height: 38px;
+  color: white;
+  background: rgb(255 255 255 / 16%);
+}
+
+.challenge-card__finish-session .review-button__scope-icon svg {
+  fill: currentColor;
+  stroke: none;
+}
+
+.challenge-card__finish-session .review-button__scope-copy strong {
+  color: white;
+  font-size: .9rem;
+}
+
+.challenge-card__finish-session .review-button__scope-copy small {
+  color: rgb(255 255 255 / 78%);
+  font-size: .7rem;
+}
+
+.learner-space--dark .challenge-card__question-progress > span {
+  background: #52635f;
+}
+
+.learner-space--dark .challenge-card__question-progress > span.is-correct {
+  background: #54c984;
+}
+
+.learner-space--dark .challenge-card__question-progress > span.is-correct-retry {
+  background: #9bd7b4;
+}
+
+.learner-space--dark .challenge-card__question-progress > span.is-incorrect {
+  background: #ed7d74;
 }
 
 .review-button--summary {
   display: grid;
   width: 100%;
-  min-height: 64px;
-  padding: 10px 13px;
+  min-height: 78px;
+  padding: 11px 14px;
   justify-self: stretch;
   grid-template-columns: 34px minmax(0, 1fr);
   justify-content: stretch;
   gap: 10px;
   border-radius: 14px;
   text-align: left;
+}
+
+.challenge-card__primary-actions .review-button--summary {
+  margin: 0;
+  border-color: color-mix(in srgb, #7052a0 42%, var(--line));
+  background: var(--surface);
+}
+
+@media (max-width: 560px) {
+  .challenge-card__primary-actions {
+    grid-template-columns: 1fr;
+  }
 }
 
 .review-button--summary .review-button__scope-icon {
@@ -3034,39 +3348,12 @@ async function confirmAccountAction() {
 }
 
 .challenge-card__description p {
-  display: -webkit-box;
   margin: 0;
-  overflow: hidden;
   color: var(--muted);
   font-size: .82rem;
   font-style: italic;
   line-height: 1.45;
   white-space: pre-line;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
-.challenge-card__description p.is-expanded {
-  display: block;
-  overflow: visible;
-  -webkit-line-clamp: unset;
-}
-
-.challenge-card__description button {
-  padding: 0;
-  border: 0;
-  color: var(--learner-purple-copy);
-  background: transparent;
-  font: inherit;
-  font-size: .76rem;
-  font-weight: 850;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-
-.challenge-card__description button:hover {
-  color: color-mix(in srgb, var(--learner-purple-copy) 72%, white);
 }
 
 .learner-space {
@@ -3283,7 +3570,8 @@ async function confirmAccountAction() {
   opacity: .48;
 }
 
-.challenge-work > .challenge-presentation-menu {
+.challenge-work > .challenge-presentation-menu,
+.challenge-finish > .challenge-presentation-menu {
   position: absolute;
   z-index: 1100;
   top: calc(100% + 12px);
@@ -3296,6 +3584,16 @@ async function confirmAccountAction() {
   gap: 7px;
   background: var(--surface);
   box-shadow: 0 14px 30px rgb(45 35 62 / 14%);
+}
+
+.challenge-finish > .challenge-presentation-menu {
+  left: 0;
+}
+
+.challenge-loader-sentinel {
+  width: 100%;
+  height: 1px;
+  pointer-events: none;
 }
 
 .challenge-presentation-menu::before {
@@ -4574,6 +4872,51 @@ async function confirmAccountAction() {
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--surface-soft);
+}
+
+.error-progress-card__challenge {
+  display: grid;
+  width: 100%;
+  min-height: 66px;
+  padding: 12px 16px;
+  border: 1px solid #7052a0;
+  border-radius: 14px;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 11px;
+  color: white;
+  background: #7052a0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgb(83 54 123 / 16%);
+}
+
+.error-progress-card__challenge > span {
+  grid-row: 1 / 3;
+  font-size: 1.05rem;
+  text-align: center;
+}
+
+.error-progress-card__challenge strong {
+  font-size: .9rem;
+}
+
+.error-progress-card__challenge small {
+  color: rgb(255 255 255 / 78%);
+  font-size: .7rem;
+  font-weight: 700;
+}
+
+.error-progress-card__challenge:hover:not(:disabled) {
+  border-color: #5e3e8d;
+  background: #5e3e8d;
+  transform: translateY(-1px);
+}
+
+.error-progress-card__challenge:disabled {
+  opacity: .6;
+  cursor: wait;
 }
 
 .error-progress-examples dl {

@@ -1767,18 +1767,147 @@ body.dialog-open {
 }
 
 .answer-retry {
-  margin: 14px 0 0;
-  color: #8c5a21;
-  font-weight: 750;
-  text-align: center;
+  position: relative;
+  display: grid;
+  margin: 18px 0 0;
+  padding: 14px 16px;
+  border: 2px solid #7052a0;
+  border-radius: 15px;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  color: #53367c;
+  background: #f5f0fb;
+  box-shadow: 0 8px 22px rgb(83 54 123 / 14%);
+  font-weight: 700;
+  text-align: left;
+  animation: awaiting-answer-panel 1.8s ease-in-out infinite;
 }
 
-.answer-retry span {
+.answer-retry::before {
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  border-top: 2px solid #7052a0;
+  border-left: 2px solid #7052a0;
+  background: #f5f0fb;
+  content: "";
+  transform: translateX(-50%) rotate(45deg);
+  animation: awaiting-answer-pointer 1.1s ease-in-out infinite;
+}
+
+.answer-retry__icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  place-items: center;
+  color: white;
+  background: #7052a0;
+  font-size: 1.25rem;
+  font-weight: 900;
+  animation: awaiting-answer-icon 1.8s ease-in-out infinite;
+}
+
+.answer-retry strong {
   display: block;
+  color: #53367c;
+  font-size: 1rem;
+  font-weight: 900;
 }
 
-.answer-retry span + span {
+.answer-retry small {
+  display: block;
+  margin-top: 3px;
+  color: #675775;
+  font-size: .9rem;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.answer-retry-hint {
+  margin: 12px 0 0;
+  padding: 14px 16px;
+  border: 1px solid #dfb06a;
+  border-radius: 13px;
+  color: #70420d;
+  background: #fff8ec;
+  text-align: left;
+}
+
+.answer-retry-hint > strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #925a16;
+  font-size: .76rem;
+  font-weight: 900;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+.answer-retry-hint p {
+  margin: 0;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.answer-retry-hint p + p {
   margin-top: 8px;
+}
+
+.is-awaiting-retry :is(input, .completion-sentence input) {
+  animation: awaiting-answer-field 1.8s ease-in-out infinite;
+}
+
+@keyframes awaiting-answer-panel {
+  0%,
+  100% {
+    box-shadow: 0 8px 22px rgb(83 54 123 / 14%);
+  }
+  50% {
+    box-shadow: 0 8px 26px rgb(112 82 160 / 26%), 0 0 0 3px rgb(112 82 160 / 10%);
+  }
+}
+
+@keyframes awaiting-answer-pointer {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -4px;
+  }
+}
+
+@keyframes awaiting-answer-icon {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  50% {
+    transform: rotate(-18deg);
+  }
+}
+
+@keyframes awaiting-answer-field {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(112 82 160 / 0%);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgb(112 82 160 / 22%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .answer-retry,
+  .answer-retry::before,
+  .answer-retry__icon,
+  .is-awaiting-retry :is(input, .completion-sentence input) {
+    animation: none;
+  }
 }
 
 .answer-feedback {

@@ -244,6 +244,7 @@ export interface LearnerChallengeSnapshot {
 
 export interface LearnerExerciseTrackingContext {
   runId: string
+  questionIndexOffset?: number
   challengeFingerprint?: string
   challengeLabel: string
   challenge: LearnerChallengeSnapshot

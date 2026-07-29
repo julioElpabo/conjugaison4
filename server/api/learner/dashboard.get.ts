@@ -4,6 +4,7 @@ import { requireLearnerDataSubject } from '../../utils/learner-data-subject'
 
 interface RunRow extends RowDataPacket {
   id: number
+  clientRunId: string
   fingerprint: string
   label: string
   configJson: string
@@ -28,6 +29,8 @@ interface RunQuestionRow extends RowDataPacket {
   runId: number
   questionIndex: number
   questionJson: string
+  resultStatus: 'correct' | 'incorrect' | null
+  attemptNumber: number | null
 }
 
 function json<T>(source: string, fallback: T): T {
@@ -47,7 +50,8 @@ export default defineEventHandler(async (event) => {
   const limit = Math.min(100, Math.max(1, Number(query.limit) || 6))
   const database = useDatabase()
   const [runs] = await database.execute<RunRow[]>(`
-    SELECT r.id, r.challenge_fingerprint AS fingerprint, r.challenge_label AS label,
+    SELECT r.id, r.client_run_id AS clientRunId,
+           r.challenge_fingerprint AS fingerprint, r.challenge_label AS label,
            r.challenge_config_json AS configJson, r.presentation, r.is_review AS isReview,
            r.started_at AS startedAt, r.last_answered_at AS lastAnsweredAt,
            r.completed_at AS completedAt, r.correct_count AS correctCount,
@@ -91,19 +95,44 @@ export default defineEventHandler(async (event) => {
   const runQuestions = pageRunIds.length
     ? (await database.execute<RunQuestionRow[]>(`
     SELECT q.run_id AS runId, q.question_index AS questionIndex,
-           q.question_json AS questionJson
+           q.question_json AS questionJson, q.result_status AS resultStatus,
+           q.attempt_number AS attemptNumber
     FROM learner_run_questions q
     WHERE q.run_id IN (${pageRunIds.map(() => '?').join(', ')})
     ORDER BY q.run_id, q.question_index
   `, pageRunIds))[0]
     : []
   const questionsByRun = new Map<number, ExerciseQuestion[]>()
+  const plannedQuestionCountByRun = new Map<number, number>()
+  const answeredQuestionIndexesByRun = new Map<number, number[]>()
+  const questionResultsByRun = new Map<number, Array<{
+    index: number
+    status: 'correct' | 'incorrect'
+    attemptNumber: 1 | 2
+  }>>()
   for (const row of runQuestions) {
     const question = json<ExerciseQuestion | null>(row.questionJson, null)
     if (!question) continue
-    const questions = questionsByRun.get(Number(row.runId)) || []
+    const runId = Number(row.runId)
+    const questions = questionsByRun.get(runId) || []
     questions.push(question)
-    questionsByRun.set(Number(row.runId), questions)
+    questionsByRun.set(runId, questions)
+    plannedQuestionCountByRun.set(
+      runId,
+      Math.max(plannedQuestionCountByRun.get(runId) || 0, Number(row.questionIndex) + 1),
+    )
+    if (row.resultStatus === 'correct' || row.resultStatus === 'incorrect') {
+      const answeredIndexes = answeredQuestionIndexesByRun.get(runId) || []
+      answeredIndexes.push(Number(row.questionIndex))
+      answeredQuestionIndexesByRun.set(runId, answeredIndexes)
+      const results = questionResultsByRun.get(runId) || []
+      results.push({
+        index: Number(row.questionIndex),
+        status: row.resultStatus,
+        attemptNumber: Number(row.attemptNumber) === 2 ? 2 : 1,
+      })
+      questionResultsByRun.set(runId, results)
+    }
   }
 
   const latestForms = new Map<number, Map<string, FormRow>>()
@@ -122,12 +151,16 @@ export default defineEventHandler(async (event) => {
 
   const challenges = []
   for (const run of pageRuns) {
-    const challenge = json<LearnerChallengeSnapshot>(run.configJson, {
+    const storedChallenge = json<LearnerChallengeSnapshot>(run.configJson, {
       verbIds: [],
       tenseIds: [],
       questionCount: 1,
       exerciseKind: 'conjugation',
     })
+    const plannedQuestionCount = plannedQuestionCountByRun.get(Number(run.id)) || 0
+    const challenge = Boolean(run.isReview) && plannedQuestionCount
+      ? { ...storedChallenge, questionCount: plannedQuestionCount }
+      : storedChallenge
     const forms = [...(latestForms.get(Number(run.id))?.values() || [])]
     const retryQuestions = forms
       .filter(form => form.questionJson)
@@ -140,8 +173,15 @@ export default defineEventHandler(async (event) => {
       .filter((question): question is ExerciseQuestion => Boolean(question))
       .slice(0, 100)
     const total = Number(run.correctCount) + Number(run.incorrectCount)
+    const answeredQuestionIndexes = answeredQuestionIndexesByRun.get(Number(run.id)) || []
+    const answeredQuestionIndexSet = new Set(answeredQuestionIndexes)
+    const isComplete = Array.from(
+      { length: challenge.questionCount },
+      (_, index) => index,
+    ).every(index => answeredQuestionIndexSet.has(index))
     challenges.push({
       id: Number(run.id),
+      clientRunId: run.clientRunId,
       fingerprint: run.fingerprint,
       label: run.label,
       description: challenge.description || '',
@@ -149,7 +189,7 @@ export default defineEventHandler(async (event) => {
       presentation: run.presentation,
       isReview: Boolean(run.isReview),
       lastActivityAt: run.lastAnsweredAt,
-      completedAt: run.completedAt,
+      completedAt: isComplete ? (run.completedAt || run.lastAnsweredAt) : null,
       correctCount: Number(run.correctCount),
       incorrectCount: Number(run.incorrectCount),
       scorePercent: total ? Math.round(Number(run.correctCount) / total * 100) : 0,
@@ -158,6 +198,8 @@ export default defineEventHandler(async (event) => {
       allUnresolvedCount: allRetryQuestions.length,
       allRetryQuestions,
       exactQuestions: questionsByRun.get(Number(run.id)) || [],
+      answeredQuestionIndexes,
+      questionResults: questionResultsByRun.get(Number(run.id)) || [],
     })
   }
   const nextOffset = offset + challenges.length

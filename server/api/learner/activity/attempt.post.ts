@@ -30,7 +30,6 @@ interface AttemptBody {
   question?: unknown
   answer?: unknown
   correct?: unknown
-  completed?: unknown
 }
 
 export default defineEventHandler(async (event) => {
@@ -120,10 +119,19 @@ export default defineEventHandler(async (event) => {
     const recorded = formUpdate.affectedRows > 0
     if (recorded) {
       await connection.execute(`
-        INSERT INTO learner_run_questions (run_id, question_index, question_json)
-        VALUES (?, ?, ?)
-        ON DUPLICATE KEY UPDATE question_json=VALUES(question_json)
-      `, [runDatabaseId, questionIndex, JSON.stringify(question)])
+        INSERT INTO learner_run_questions
+          (run_id, question_index, question_json, result_status, attempt_number)
+        VALUES (?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE question_json=VALUES(question_json),
+          result_status=VALUES(result_status),
+          attempt_number=VALUES(attempt_number)
+      `, [
+        runDatabaseId,
+        questionIndex,
+        JSON.stringify(question),
+        correct ? 'correct' : 'incorrect',
+        attemptNumber,
+      ])
     }
     if (recorded && !correct) {
       const [attemptInsert] = await connection.execute<ResultSetHeader>(`
@@ -183,13 +191,39 @@ export default defineEventHandler(async (event) => {
         }
       }
       await connection.execute(`
-        UPDATE learner_challenge_runs
+        UPDATE learner_challenge_runs runs
         SET last_answered_at=CURRENT_TIMESTAMP,
-            completed_at=IF(?, CURRENT_TIMESTAMP, completed_at),
+            completed_at=IF(
+              (
+                SELECT COUNT(*)
+                FROM learner_run_questions completed_questions
+                WHERE completed_questions.run_id=runs.id
+                  AND completed_questions.question_index < GREATEST(
+                    1,
+                    COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(
+                      runs.challenge_config_json,
+                      '$.questionCount'
+                    )) AS UNSIGNED), 1)
+                  )
+                  AND completed_questions.result_status IN ('correct', 'incorrect')
+              ) >= GREATEST(
+                1,
+                COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(
+                  runs.challenge_config_json,
+                  '$.questionCount'
+                )) AS UNSIGNED), 1)
+              ),
+              COALESCE(completed_at, CURRENT_TIMESTAMP),
+              NULL
+            ),
             correct_count=correct_count + ?,
             incorrect_count=incorrect_count + ?
         WHERE id=?
-      `, [body.completed === true ? 1 : 0, correct ? 1 : 0, correct ? 0 : 1, runDatabaseId])
+      `, [
+        correct ? 1 : 0,
+        correct ? 0 : 1,
+        runDatabaseId,
+      ])
     }
     await connection.commit()
     return { recorded, challengeFingerprint: fingerprint }

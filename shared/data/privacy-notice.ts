@@ -1,0 +1,1 @@
+export const CURRENT_PRIVACY_NOTICE_VERSION = 'privacy-2026-07-29'

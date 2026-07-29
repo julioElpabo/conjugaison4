@@ -204,14 +204,14 @@ async function buildPdf() {
 
   function drawQuestion(item: SummaryItem) {
     const question = fitCell(`${item.index}. ${item.questionLabel}`, questionWidth, 'bold')
-    const errorLabel = item.errorDetails.length > 1 ? ui('Types de faute') : ui('Type de faute')
-    const comparisons = item.errorDetails.filter(detail => detail.learnerValue && detail.expectedValue)
-    const errors = item.errorDetails.length
-      ? fitCell(`${errorLabel} : ${item.errorDetails.map(detail => (
+    const visibleErrorDetails = item.errorDetails.filter(detail => detail.code !== 'input.close_form')
+    const comparisons = visibleErrorDetails.filter(detail => detail.learnerValue && detail.expectedValue)
+    const errors = visibleErrorDetails.length
+      ? fitCell(visibleErrorDetails.map(detail => (
           detail.learnerValue && detail.expectedValue
             ? localizedLearnerErrorMessage(detail, interfaceLocale.value)
             : learnerErrorDetailText(detail, interfaceLocale.value)
-        )).join(' · ')}`, questionWidth, 'normal')
+        )).join(' · '), questionWidth, 'normal')
       : null
     const learner = fitCell(item.learnerAnswer || '—', learnerWidth, 'normal')
     const expected = fitCell(item.expectedAnswer || '—', expectedWidth, 'bold')

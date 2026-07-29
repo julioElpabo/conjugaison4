@@ -351,9 +351,16 @@ export function learnerErrorDetails(
           return 'Tu as employé le futur simple, alors qu’il fallait construire le futur proche avec « aller » suivi de l’infinitif.'
         }
         if (item.code === 'person.impossible_ending') {
-          return evidence.ending && evidence.target
-            ? `La terminaison « ${evidence.ending} » n’est pas possible avec ${evidence.target}.`
-            : 'La terminaison utilisée n’est pas possible avec cette personne.'
+          if (evidence.ending && evidence.target) {
+            const subject = evidence.personGroup === 'first-or-second-singular'
+              ? '« je » ou « tu »'
+              : evidence.personGroup === 'third-singular'
+                ? '« il », « elle » ou « iel »'
+                : 'cette personne'
+            const conjugatedPart = evidence.target === 'auxiliary' ? 'l’auxiliaire' : 'le verbe'
+            return `Avec ${subject}, ${conjugatedPart} ne peut pas se terminer par « -${evidence.ending} ».`
+          }
+          return 'La terminaison utilisée n’est pas possible avec cette personne.'
         }
         if (item.code === 'compound.auxiliary') {
           return evidence.learnerAuxiliary && evidence.expectedAuxiliary

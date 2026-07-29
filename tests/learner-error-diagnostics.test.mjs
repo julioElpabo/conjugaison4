@@ -289,6 +289,10 @@ describe('classement pédagogique des erreurs', () => {
       },
     })
     assert.equal(diagnoseLearnerError('finit', target)[0].code, 'person.impossible_ending')
+    assert.equal(
+      learnerErrorDetails('finit', target)[0].message,
+      'Avec « je » ou « tu », l’auxiliaire ne peut pas se terminer par « -t ».',
+    )
     assert.ok(applicableLearnerErrorTypes(target).includes('agreement.cod_before'))
     assert.ok(applicableLearnerErrorTypes(target).includes('compound.auxiliary'))
   })

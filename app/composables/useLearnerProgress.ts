@@ -73,11 +73,39 @@ function compactQuestion(question: ExerciseQuestion): ExerciseQuestion {
 export function useLearnerProgress() {
   const { user, clearUser } = useLearnerAuth()
 
+  function recordQuestionPlan(
+    context: LearnerExerciseTrackingContext | undefined,
+    questions: ExerciseQuestion[],
+  ) {
+    if (!context || !user.value || !questions.length) return Promise.resolve(false)
+    const task = async () => {
+      try {
+        await $fetch('/api/learner/activity/plan', {
+          method: 'POST',
+          credentials: 'same-origin',
+          body: {
+            ...context,
+            questions: questions.map(compactQuestion),
+          },
+        })
+        return true
+      }
+      catch (error) {
+        const status = (error as { statusCode?: number, response?: { status?: number } })?.statusCode
+          ?? (error as { response?: { status?: number } })?.response?.status
+        if (status === 401) clearUser()
+        console.error('[learner] Plan de questions non enregistré.', error)
+        return false
+      }
+    }
+    recordingQueue = recordingQueue.then(task, task)
+    return recordingQueue
+  }
+
   function recordAttempt(
     context: LearnerExerciseTrackingContext | undefined,
     attempt: ExerciseAttempt,
     questionIndex: number,
-    completed: boolean,
   ) {
     if (!context || !user.value) return Promise.resolve(false)
     const task = async () => {
@@ -88,12 +116,11 @@ export function useLearnerProgress() {
           body: {
             attemptId: progressIdentifier('attempt'),
             ...context,
-            questionIndex,
+            questionIndex: questionIndex + (context.questionIndexOffset || 0),
             attemptNumber: attempt.attemptNumber || 1,
             question: compactQuestion(attempt.question),
             answer: attempt.answer,
             correct: attempt.status === 'correct',
-            completed,
           },
         })
         return true
@@ -111,6 +138,7 @@ export function useLearnerProgress() {
   }
 
   return {
+    recordQuestionPlan,
     recordAttempt,
     flushProgress: () => recordingQueue,
   }

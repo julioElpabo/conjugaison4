@@ -1,3 +1,5 @@
+import { randomBytes } from 'node:crypto'
+
 const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
 
 function isProtectedMutation(path: string, method: string) {
@@ -33,6 +35,8 @@ function assertSameOrigin(event: Parameters<typeof getRequestURL>[0]) {
 
 export default defineEventHandler((event) => {
   const path = event.path.split('?')[0] || '/'
+  const scriptNonce = randomBytes(18).toString('base64url')
+  event.context.cspNonce = scriptNonce
   const contentSecurityPolicy = [
     "default-src 'self'",
     "base-uri 'self'",
@@ -40,7 +44,7 @@ export default defineEventHandler((event) => {
     "frame-ancestors 'none'",
     "frame-src 'self' blob: https://challenges.cloudflare.com",
     "object-src 'none'",
-    "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://challenges.cloudflare.com",
+    `script-src 'self' 'nonce-${scriptNonce}' https://www.googletagmanager.com https://challenges.cloudflare.com`,
     "script-src-attr 'none'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://www.google-analytics.com https://*.google-analytics.com",

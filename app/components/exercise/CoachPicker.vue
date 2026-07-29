@@ -4,7 +4,11 @@ import type { CoachProfile } from '~~/shared/types/coach'
 import { coachHelpApproachTitle, localizeCoachProfile, translateCoachUiText } from '~~/shared/i18n/coach-ui'
 import { coachPickerGroups } from '~~/shared/utils/coach-picker-groups'
 
-const props = defineProps<{ tourDemo?: boolean }>()
+const props = defineProps<{
+  tourDemo?: boolean
+  selectionPending?: boolean
+  selectionError?: string
+}>()
 const emit = defineEmits<{ close: [], select: [coach: CoachProfile] }>()
 const coaches = ref<CoachProfile[]>([])
 const loading = ref(true)
@@ -25,6 +29,10 @@ const coachGroups = computed(() => coachPickerGroups(coaches.value)
 
 function coachGroupDomId(id: string) {
   return `coach-help-${id.replace(/[^a-z0-9]+/giu, '-')}`
+}
+
+function requestClose() {
+  if (!props.selectionPending) emit('close')
 }
 
 function scrollToCoachGroup(id: string) {
@@ -57,11 +65,11 @@ onBeforeUnmount(() => {
 
 <template>
   <Teleport to="body">
-    <div class="coach-picker-overlay" data-tour="coach-picker" @click.self="emit('close')">
-      <section class="coach-picker" role="dialog" aria-modal="true" aria-labelledby="coach-picker-title">
+    <div class="coach-picker-overlay" data-tour="coach-picker" @click.self="requestClose">
+      <section class="coach-picker" role="dialog" aria-modal="true" aria-labelledby="coach-picker-title" :aria-busy="selectionPending">
         <header>
           <div><h2 id="coach-picker-title">{{ ui('Choisis ton coach') }}</h2></div>
-          <button type="button" :aria-label="ui('Fermer')" @click="emit('close')">×</button>
+          <button type="button" :aria-label="ui('Fermer')" :disabled="selectionPending" @click="requestClose">×</button>
         </header>
 
         <div class="coach-safety">
@@ -69,6 +77,8 @@ onBeforeUnmount(() => {
           <p>{{ ui('Un avatar, un prénom ou un âge ne prouvent jamais l’identité d’une personne sur Internet.') }} </p>
         </div>
 
+        <p v-if="selectionPending" class="coach-picker__state coach-picker__state--pending" role="status">{{ ui('Préparation de la séance…') }}</p>
+        <p v-else-if="selectionError" class="coach-picker__state coach-picker__state--error" role="alert">{{ selectionError }}</p>
         <p v-if="loading" class="coach-picker__state">{{ ui('Chargement des coaches…') }}</p>
         <p v-else-if="error" class="coach-picker__state coach-picker__state--error">{{ error }}</p>
         <template v-else>
@@ -97,7 +107,7 @@ onBeforeUnmount(() => {
               <small>{{ ui(group.coaches.length > 1 ? '{count} coaches' : '{count} coach', { count: group.coaches.length }) }}</small>
             </header>
             <div class="coach-picker__grid">
-              <button v-for="coach in group.coaches" :key="coach.id" type="button" class="coach-card" :style="{ '--coach-color': coach.themeColor }" @click="emit('select', coach)">
+              <button v-for="coach in group.coaches" :key="coach.id" type="button" class="coach-card" :style="{ '--coach-color': coach.themeColor }" :disabled="selectionPending" @click="emit('select', coach)">
                 <img :src="coach.avatarPath" :alt="ui('Avatar de {name}', { name: coach.firstName })">
                 <span>
                   <strong>{{ coach.firstName }}</strong>
@@ -154,7 +164,9 @@ onBeforeUnmount(() => {
 .coach-card__likes { color: #405b63; font-size: .86rem; line-height: 1.35; }
 .coach-card__likes b { color: #173f55; }
 .coach-picker__state { padding: 30px; text-align: center; }
+.coach-picker__state--pending { margin: 16px 0; padding: 14px 18px; color: #255f70; background: #e9f5f7; border-radius: 12px; font-weight: 800; }
 .coach-picker__state--error { color: #913e38; }
+.coach-picker button:disabled { cursor: wait; opacity: .6; }
 :global(:root[data-theme='dark'] .coach-caractere-group) { border-color: #405963; border-left-color: var(--caractere-accent); background: color-mix(in srgb, var(--caractere-accent) 14%, #17262a); }
 :global(:root[data-theme='dark'] .coach-caractere-group__header h3) { color: #d4e9ee; }
 :global(:root[data-theme='dark'] .coach-caractere-group__header p) { color: #b8ced5; }

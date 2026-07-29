@@ -50,7 +50,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ close: [] }>()
 const { track } = useSiteAnalytics()
-const { recordAttempt } = useLearnerProgress()
+const { recordAttempt, recordQuestionPlan } = useLearnerProgress()
 
 interface ChatMessage {
   id: number
@@ -111,6 +111,11 @@ const CHAT_MESSAGES_AFTER_HELP_DELAY_MS = 1000
 useDialogFocus(dialog, handleEscapeClose, input)
 
 const currentQuestion = computed(() => props.questions[currentIndex.value])
+const questionNumberOffset = computed(() => props.trackingContext?.questionIndexOffset || 0)
+const displayedQuestionNumber = computed(() => questionNumberOffset.value + currentIndex.value + 1)
+const displayedQuestionCount = computed(() => questionNumberOffset.value
+  ? props.trackingContext?.challenge.questionCount || props.questions.length
+  : props.questions.length)
 const helpQuestion = computed(() => props.questions[helpQuestionIndex.value ?? currentIndex.value])
 const helpVerb = computed(() => {
   const question = helpQuestion.value
@@ -229,9 +234,9 @@ const helpFeedbackContext = computed(() => {
     caractereName: props.coach.caractereName,
     helpApproach: props.coach.helpApproach,
     helpName: `Aide automatique — ${props.coach.caractereName}`,
-    questionNumber: question ? questionIndex + 1 : undefined,
-    questionIndex,
-    questionCount: props.questions.length,
+    questionNumber: question ? questionNumberOffset.value + questionIndex + 1 : undefined,
+    questionIndex: questionNumberOffset.value + questionIndex,
+    questionCount: displayedQuestionCount.value,
     verbId: question?.verbeId,
     verb: question?.infinitif,
     tenseId: question?.tenseId,
@@ -408,7 +413,7 @@ function contextFor(question?: ExerciseQuestion): CoachMessageContext {
     mode: uiLabel(question?.mode),
     tense: uiLabel(question?.temps),
     expectedAnswer: question?.reponsesPourCorrige.join(' ou '),
-    questionNumber: question ? currentIndex.value + 1 : undefined,
+    questionNumber: question ? displayedQuestionNumber.value : undefined,
   }
 }
 
@@ -617,7 +622,6 @@ async function submit() {
     props.trackingContext,
     trackedAttempt,
     currentIndex.value,
-    currentIndex.value >= props.questions.length - 1 && (!props.requireSuccess || result.isCorrect),
   )
   consecutiveCorrectCount.value = nextConsecutiveCorrectCount(consecutiveCorrectCount.value, result.isCorrect)
   consecutiveIncorrectCount.value = nextConsecutiveIncorrectCount(consecutiveIncorrectCount.value, result.isCorrect)
@@ -855,6 +859,7 @@ onMounted(async () => {
   chatSessionId.value = randomIdentifier('chat')
   resetExerciseRunId()
   allowMotion.value = !props.tourDemo && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  await recordQuestionPlan(props.trackingContext, props.questions)
   await runChatOpening('introduction')
   tourDemoReady.value = true
 })
@@ -883,11 +888,11 @@ onBeforeUnmount(() => {
         </header>
 
         <div class="chat-progress" :aria-label="ui('Progression')">
-          <span :style="{ width: `${finished ? 100 : (currentIndex / questions.length) * 100}%` }" />
+          <span :style="{ width: `${finished ? 100 : ((questionNumberOffset + currentIndex) / displayedQuestionCount) * 100}%` }" />
         </div>
 
         <div v-if="!finished && currentQuestion" class="chat-instruction">
-          <span>{{ ui('Question {current} sur {total}', { current: currentIndex + 1, total: questions.length }) }}</span>
+          <span>{{ ui('Question {current} sur {total}', { current: displayedQuestionNumber, total: displayedQuestionCount }) }}</span>
         </div>
 
         <div ref="chat-thread" class="chat-thread" aria-live="polite">

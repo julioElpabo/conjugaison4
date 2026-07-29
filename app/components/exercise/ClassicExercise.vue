@@ -23,7 +23,7 @@ const props = defineProps<{
   requireSuccess?: boolean
 }>()
 const { track } = useSiteAnalytics()
-const { recordAttempt } = useLearnerProgress()
+const { recordAttempt, recordQuestionPlan } = useLearnerProgress()
 
 const emit = defineEmits<{
   close: []
@@ -53,6 +53,11 @@ const dialog = useTemplateRef<HTMLElement>('exercise-dialog')
 useDialogFocus(dialog, handleEscapeClose, answerInput)
 
 const currentQuestion = computed(() => props.questions[currentIndex.value])
+const questionNumberOffset = computed(() => props.trackingContext?.questionIndexOffset || 0)
+const displayedQuestionNumber = computed(() => questionNumberOffset.value + currentIndex.value + 1)
+const displayedQuestionCount = computed(() => questionNumberOffset.value
+  ? props.trackingContext?.challenge.questionCount || props.questions.length
+  : props.questions.length)
 const correctCount = computed(() => attempts.value.filter(attempt => attempt.status === 'correct').length)
 const scorePercent = computed(() => attempts.value.length
   ? Math.round(correctCount.value / attempts.value.length * 100)
@@ -125,7 +130,7 @@ const auxiliaryErrorText = computed(() => {
     },
   )
 })
-const retryMessages = computed(() => {
+const retryGuidanceMessages = computed(() => {
   const messages: string[] = []
   if (futureSimpleConfusion.value) {
     messages.push(ui('Ta conjugaison est correcte au futur simple, mais la question demande le futur proche. Au futur simple, le verbe est conjugué en un seul mot (« tu mangeras »). Au futur proche, on utilise « aller » au présent suivi de l’infinitif (« tu vas manger »).'))
@@ -134,9 +139,7 @@ const retryMessages = computed(() => {
   if (impossibleSingularEndingText.value) messages.push(impossibleSingularEndingText.value)
   if (auxiliaryErrorText.value) messages.push(auxiliaryErrorText.value)
   if (agreementError.value && agreementExplanation.value) messages.push(agreementExplanation.value)
-  return messages.length
-    ? messages
-    : [ui('Pas encore. Vérifie ta réponse et essaie une deuxième fois.')]
+  return messages
 })
 const agreementRecognition = computed(() => {
   const reminder = agreementReminder.value
@@ -218,9 +221,6 @@ function submitAnswer() {
     props.trackingContext,
     trackedAttempt,
     currentIndex.value,
-    !shouldRetry
-      && currentIndex.value >= props.questions.length - 1
-      && (!props.requireSuccess || result.isCorrect),
   )
   if (shouldRetry) {
     track('answer_retry', { presentation: 'classic', exerciseKind: props.exerciseKind })
@@ -384,7 +384,10 @@ function onDocumentKeydown(event: KeyboardEvent) {
   nextQuestion()
 }
 
-onMounted(() => document.addEventListener('keydown', onDocumentKeydown))
+onMounted(() => {
+  document.addEventListener('keydown', onDocumentKeydown)
+  void recordQuestionPlan(props.trackingContext, props.questions)
+})
 onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown))
 
 </script>
@@ -404,7 +407,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
           <div>
             <p class="dialog-kicker">{{ ui('Questionnaire') }}</p>
             <h2 id="exercise-title">
-              {{ isFinished ? ui('Résultats') : ui('Question {current} sur {total}', { current: currentIndex + 1, total: questions.length }) }}
+              {{ isFinished ? ui('Résultats') : ui('Question {current} sur {total}', { current: displayedQuestionNumber, total: displayedQuestionCount }) }}
             </h2>
           </div>
           <button class="dialog-close" type="button" :aria-label="ui('Quitter l’exercice')" @click="requestClose">×</button>
@@ -440,7 +443,11 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
               </template>
             </p>
 
-            <form class="completion-form" @submit.prevent="feedback === 'idle' ? submitAnswer() : nextQuestion()">
+            <form
+              class="completion-form"
+              :class="{ 'is-awaiting-retry': retryMessageVisible }"
+              @submit.prevent="feedback === 'idle' ? submitAnswer() : nextQuestion()"
+            >
               <div class="completion-sentence">
                 <span v-if="currentQuestion.complementPosition === 'before'">{{ currentQuestion.complement }}</span>
                 <span v-if="currentQuestion.saisiePrefixe" class="completion-sentence__prefix">{{ currentQuestion.saisiePrefixe }}</span>
@@ -468,9 +475,17 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
                 {{ currentIndex === questions.length - 1 ? ui('Voir mes résultats') : ui('Question suivante') }}
               </button>
             </form>
-            <p v-if="retryMessageVisible" id="answer-retry" class="answer-retry" aria-live="polite">
-              <span v-for="message in retryMessages" :key="message">{{ message }}</span>
-            </p>
+            <div v-if="retryMessageVisible" id="answer-retry" class="answer-retry" role="status" aria-live="polite">
+              <span class="answer-retry__icon" aria-hidden="true">↻</span>
+              <div>
+                <strong>{{ ui('Pas encore. Essaie une deuxième fois.') }}</strong>
+                <small>{{ ui('Modifie ta réponse ci-dessus, puis clique à nouveau sur « Vérifier ».') }}</small>
+              </div>
+            </div>
+            <aside v-if="retryMessageVisible && retryGuidanceMessages.length" class="answer-retry-hint">
+              <strong>{{ ui('Un indice pour t’aider') }}</strong>
+              <p v-for="message in retryGuidanceMessages" :key="message">{{ message }}</p>
+            </aside>
             <LearnerErrorFeedback
               v-if="retryMessageVisible && detectedErrorDetails.length"
               :details="detectedErrorDetails"
@@ -479,7 +494,12 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
 
           <p v-else class="question-text">{{ currentQuestion.consigne }}</p>
 
-          <form v-if="!(exerciseKind === 'conjugation' && currentQuestion.complement)" class="answer-form" @submit.prevent="feedback === 'idle' ? submitAnswer() : nextQuestion()">
+          <form
+            v-if="!(exerciseKind === 'conjugation' && currentQuestion.complement)"
+            class="answer-form"
+            :class="{ 'is-awaiting-retry': retryMessageVisible }"
+            @submit.prevent="feedback === 'idle' ? submitAnswer() : nextQuestion()"
+          >
             <label for="exercise-answer">{{ ui('Ta réponse') }}</label>
             <div class="answer-form__row">
               <input
@@ -502,9 +522,26 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown)
               </button>
             </div>
           </form>
-          <p v-if="retryMessageVisible && !(exerciseKind === 'conjugation' && currentQuestion.complement)" id="answer-retry" class="answer-retry" aria-live="polite">
-            <span v-for="message in retryMessages" :key="message">{{ message }}</span>
-          </p>
+          <div
+            v-if="retryMessageVisible && !(exerciseKind === 'conjugation' && currentQuestion.complement)"
+            id="answer-retry"
+            class="answer-retry"
+            role="status"
+            aria-live="polite"
+          >
+            <span class="answer-retry__icon" aria-hidden="true">↻</span>
+            <div>
+              <strong>{{ ui('Pas encore. Essaie une deuxième fois.') }}</strong>
+              <small>{{ ui('Modifie ta réponse ci-dessus, puis clique à nouveau sur « Vérifier ».') }}</small>
+            </div>
+          </div>
+          <aside
+            v-if="retryMessageVisible && retryGuidanceMessages.length && !(exerciseKind === 'conjugation' && currentQuestion.complement)"
+            class="answer-retry-hint"
+          >
+            <strong>{{ ui('Un indice pour t’aider') }}</strong>
+            <p v-for="message in retryGuidanceMessages" :key="message">{{ message }}</p>
+          </aside>
           <LearnerErrorFeedback
             v-if="retryMessageVisible && detectedErrorDetails.length && !(exerciseKind === 'conjugation' && currentQuestion.complement)"
             :details="detectedErrorDetails"

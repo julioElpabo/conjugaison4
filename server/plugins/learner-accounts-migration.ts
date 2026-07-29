@@ -1,5 +1,7 @@
+import type { RowDataPacket } from 'mysql2/promise'
 import { useDatabase } from '../utils/database'
 import { LEARNER_ERROR_TAXONOMY } from '~~/shared/utils/learner-error-diagnostics'
+import { CURRENT_PRIVACY_NOTICE_VERSION } from '~~/shared/data/privacy-notice'
 
 export default defineNitroPlugin(async () => {
   try {
@@ -13,7 +15,7 @@ export default defineNitroPlugin(async () => {
         recovery_code_hash VARCHAR(255) NOT NULL,
         status VARCHAR(20) NOT NULL DEFAULT 'pending',
         session_version INT UNSIGNED NOT NULL DEFAULT 1,
-        privacy_notice_version VARCHAR(30) NOT NULL DEFAULT 'prototype-2026-07',
+        privacy_notice_version VARCHAR(30) NOT NULL DEFAULT '${CURRENT_PRIVACY_NOTICE_VERSION}',
         created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         last_login_at DATETIME NULL,
         activated_at DATETIME NULL,
@@ -182,6 +184,8 @@ export default defineNitroPlugin(async () => {
         run_id BIGINT UNSIGNED NOT NULL,
         question_index INT UNSIGNED NOT NULL,
         question_json LONGTEXT NOT NULL,
+        result_status VARCHAR(12) NULL,
+        attempt_number TINYINT UNSIGNED NULL,
         created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         PRIMARY KEY (run_id, question_index),
@@ -189,6 +193,20 @@ export default defineNitroPlugin(async () => {
           FOREIGN KEY (run_id) REFERENCES learner_challenge_runs(id) ON DELETE CASCADE
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `)
+    const [runQuestionColumns] = await database.query<Array<RowDataPacket & { Field: string }>>(
+      'SHOW COLUMNS FROM learner_run_questions',
+    )
+    const runQuestionColumnNames = new Set(runQuestionColumns.map(column => column.Field))
+    if (!runQuestionColumnNames.has('result_status')) {
+      await database.query(
+        'ALTER TABLE learner_run_questions ADD COLUMN result_status VARCHAR(12) NULL AFTER question_json',
+      )
+    }
+    if (!runQuestionColumnNames.has('attempt_number')) {
+      await database.query(
+        'ALTER TABLE learner_run_questions ADD COLUMN attempt_number TINYINT UNSIGNED NULL AFTER result_status',
+      )
+    }
     await database.query(`
       INSERT IGNORE INTO learner_run_forms
         (run_id, form_key, last_client_attempt_id, question_index, verb_id,
@@ -211,6 +229,53 @@ export default defineNitroPlugin(async () => {
         FROM learner_answer_attempts
         GROUP BY run_id, form_key
       ) summary ON summary.latest_id = latest.id
+    `)
+    await database.query(`
+      UPDATE learner_run_questions q
+      INNER JOIN learner_run_forms f
+        ON f.run_id=q.run_id AND f.question_index=q.question_index
+      SET q.result_status=IF(f.is_mastered=1, 'correct', 'incorrect'),
+          q.attempt_number=IF(f.attempt_count > 1, 2, 1)
+      WHERE q.result_status IS NULL
+    `)
+    await database.query(`
+      UPDATE learner_challenge_runs runs
+      INNER JOIN (
+        SELECT run_id, MAX(question_index) + 1 AS question_count
+        FROM learner_run_questions
+        GROUP BY run_id
+        HAVING SUM(result_status IS NULL) > 0
+      ) review_plan ON review_plan.run_id=runs.id
+      SET runs.challenge_config_json=JSON_SET(
+        runs.challenge_config_json,
+        '$.questionCount',
+        review_plan.question_count
+      )
+      WHERE runs.is_review=1
+    `)
+    await database.query(`
+      UPDATE learner_challenge_runs runs
+      SET runs.completed_at=NULL
+      WHERE runs.completed_at IS NOT NULL
+        AND (
+          SELECT COUNT(*)
+          FROM learner_run_questions answered_questions
+          WHERE answered_questions.run_id=runs.id
+            AND answered_questions.question_index < GREATEST(
+              1,
+              COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(
+                runs.challenge_config_json,
+                '$.questionCount'
+              )) AS UNSIGNED), 1)
+            )
+            AND answered_questions.result_status IN ('correct', 'incorrect')
+        ) < GREATEST(
+          1,
+          COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(
+            runs.challenge_config_json,
+            '$.questionCount'
+          )) AS UNSIGNED), 1)
+        )
     `)
     await database.query('DELETE FROM learner_answer_attempts WHERE is_correct = 1')
     await database.query(`

@@ -13,6 +13,7 @@ import {
 import { createLearnerSession } from '../../utils/learner-session'
 import { readLimitedJsonBody } from '../../utils/limited-json-body'
 import { normalizeLocale } from '../../../shared/i18n/locales'
+import { CURRENT_PRIVACY_NOTICE_VERSION } from '../../../shared/data/privacy-notice'
 
 interface RegistrationBody {
   username?: unknown
@@ -78,8 +79,8 @@ export default defineEventHandler(async (event) => {
       INSERT INTO learner_accounts
         (username, username_normalized, password_hash, recovery_code_hash, status,
          privacy_notice_version, deletion_scheduled_at)
-      VALUES (?, ?, ?, ?, 'pending', 'prototype-2026-07', CURRENT_TIMESTAMP + INTERVAL 48 HOUR)
-    `, [username, username, passwordHash, recoveryCodeHash])
+      VALUES (?, ?, ?, ?, 'pending', ?, CURRENT_TIMESTAMP + INTERVAL 48 HOUR)
+    `, [username, username, passwordHash, recoveryCodeHash, CURRENT_PRIVACY_NOTICE_VERSION])
     await connection.execute(
       "INSERT INTO learner_login_events (account_id, event_type) VALUES (?, 'registration')",
       [result.insertId],

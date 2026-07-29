@@ -316,6 +316,32 @@
   border-color: #536a64;
 }
 
+:root[data-theme='dark'] .answer-retry {
+  color: #e6d8f7;
+  background: #302541;
+  border-color: #9b7bc8;
+  box-shadow: 0 8px 22px rgb(0 0 0 / 22%);
+}
+
+:root[data-theme='dark'] .answer-retry::before {
+  background: #302541;
+  border-color: #9b7bc8;
+}
+
+:root[data-theme='dark'] :is(.answer-retry strong, .answer-retry small) {
+  color: #e6d8f7;
+}
+
+:root[data-theme='dark'] .answer-retry-hint {
+  color: #ffe0ad;
+  background: #382817;
+  border-color: #a87234;
+}
+
+:root[data-theme='dark'] .answer-retry-hint > strong {
+  color: #f1bd72;
+}
+
 :root[data-theme='dark'] .share-help .share-help__trigger { color: #9ed7e4; background: transparent; }
 :root[data-theme='dark'] .share-method { background: #1c2d29; border-color: #49605b; }
 :root[data-theme='dark'] .share-method__number { color: #fff; background: #39786c; }

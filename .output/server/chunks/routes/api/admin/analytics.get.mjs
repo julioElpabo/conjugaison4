@@ -16,6 +16,15 @@ const reportCache = /* @__PURE__ */ new Map();
 const quotaBackoff = /* @__PURE__ */ new Map();
 const GOOGLE_AUTH_TIMEOUT_MS = 1e4;
 const GOOGLE_REPORT_TIMEOUT_MS = 12e3;
+function privateKeyFromEnvironment() {
+  const parts = [];
+  for (let index = 1; index <= 20; index += 1) {
+    const value = process.env[`NUXT_GA4_PRIVATE_KEY_${index}`] || process.env[`GA4_PRIVATE_KEY_${index}`];
+    if (!value) break;
+    parts.push(value);
+  }
+  return parts.join("");
+}
 function base64url(value) {
   return Buffer.from(value).toString("base64url");
 }
@@ -59,7 +68,7 @@ async function googleAnalyticsOverview(options) {
   const config = useRuntimeConfig();
   const propertyId = String(config.ga4PropertyId || "").trim();
   let email = String(config.ga4ClientEmail || "").trim();
-  let privateKey = String(config.ga4PrivateKey || "").trim();
+  let privateKey = String(config.ga4PrivateKey || privateKeyFromEnvironment()).trim();
   const credentialsFile = String(config.ga4CredentialsFile || "").trim();
   if ((!email || !privateKey) && credentialsFile) {
     try {

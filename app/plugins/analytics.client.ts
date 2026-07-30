@@ -36,7 +36,7 @@ export default defineNuxtPlugin(() => {
 
   function heartbeat(pageView = false) {
     if (document.visibilityState !== 'visible') return
-    if (isAdministration() || isPrivatePrototypePath(route.path)) return
+    if (isAdministration()) return
     void $fetch('/api/analytics/heartbeat', {
       method: 'POST',
       body: { path: route.fullPath, locale: interfaceLocale.value, pageView },

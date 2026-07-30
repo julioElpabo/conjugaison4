@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { ui, uiLabel } = useLanguagePreferences()
+const { track } = useSiteAnalytics()
 import { challengePresetGroupLabels, challengePresetGroupOrder } from '~~/shared/data/challenge-presets'
 import type { ChallengePreset, ConjugationMode, ConjugationTense, Verb } from '~~/shared/types/conjugation'
 
@@ -48,6 +49,7 @@ const selectedCompactPreset = computed(() => props.presets.find(preset => preset
 const compactBrowser = ref<HTMLElement | null>(null)
 const hoveredInfoPresetId = ref<string | null>(null)
 const pinnedInfoPresetId = ref<string | null>(null)
+const exposedPresetIds = new Set<string>()
 
 const verbNameById = computed(() => new Map((props.verbs ?? []).map(verb => [verb.id, verb.infinitif])))
 const tenseById = computed(() => new Map((props.tenses ?? []).map(tense => [tense.id, tense])))
@@ -89,6 +91,23 @@ function closePinnedInfo(event: PointerEvent) {
 
 onMounted(() => document.addEventListener('pointerdown', closePinnedInfo))
 onBeforeUnmount(() => document.removeEventListener('pointerdown', closePinnedInfo))
+
+function exposePresets(presets: readonly ChallengePreset[]) {
+  if (!import.meta.client) return
+  for (const preset of presets) {
+    if (exposedPresetIds.has(preset.id)) continue
+    exposedPresetIds.add(preset.id)
+    track('feature_exposed', { feature: 'preset', item: preset.id })
+  }
+}
+
+watch([() => props.compact, activeGroup, compactGroup], ([compact, currentGroup, currentCompactGroup]) => {
+  if (compact) {
+    if (currentCompactGroup) exposePresets(currentCompactGroup.presets)
+    return
+  }
+  if (currentGroup) exposePresets(currentGroup.presets)
+}, { immediate: true })
 
 function revealCompactColumn(column: number) {
   nextTick(() => {

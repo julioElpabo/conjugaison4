@@ -1,4 +1,5 @@
 import type { AnalyticsEventName } from '~~/shared/types/analytics'
+import { stripLocaleFromPath } from '~~/shared/i18n/locales'
 
 export function useSiteAnalytics() {
   const route = useRoute()
@@ -10,7 +11,10 @@ export function useSiteAnalytics() {
       body: { name, path: route.fullPath, metadata },
     }).catch(() => {})
     const gtag = (globalThis as typeof globalThis & { gtag?: (...args: unknown[]) => void }).gtag
-    gtag?.('event', name, metadata || {})
+    const normalized = stripLocaleFromPath(route.path)
+    const isPrivate = normalized === '/signin' || normalized === '/my-page'
+    const isAdministration = normalized === '/admin' || normalized.startsWith('/admin/')
+    if (!isPrivate && !isAdministration) gtag?.('event', name, metadata || {})
   }
 
   return { track }

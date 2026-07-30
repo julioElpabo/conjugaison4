@@ -1,14 +1,23 @@
 <script setup lang="ts">
-import type { AnalyticsResponse, AnalyticsWindow } from '../../../shared/types/analytics'
+import type {
+  AnalyticsActorFilter,
+  AnalyticsResponse,
+  AnalyticsUsageResponse,
+  AnalyticsWindow,
+} from '../../../shared/types/analytics'
 import AdminStatsProgression from '~/components/admin/AdminStatsProgression.vue'
 import { getAdminErrorMessage } from '~/composables/useAdminAuth'
 
 const { ui } = useLanguagePreferences()
 const { user, handleUnauthorized } = useAdminAuth()
 const stats = ref<AnalyticsResponse | null>(null)
+const usage = ref<AnalyticsUsageResponse | null>(null)
 const loading = ref(false)
+const usageLoading = ref(false)
 const error = ref('')
-const activeTab = ref<'realtime' | 'range'>('realtime')
+const usageError = ref('')
+const usageActor = ref<AnalyticsActorFilter>('all')
+const activeTab = ref<'realtime' | 'range' | 'usage'>('realtime')
 const rangeView = ref<'summary' | 'progression'>('summary')
 type StatsTheme = 'summary' | 'audience' | 'pedagogy' | 'usage'
 const activeTheme = ref<StatsTheme>('summary')
@@ -48,6 +57,7 @@ const activePresetDays = computed(() => (
 let loadedForUserId: number | null = null
 let refreshTimer: ReturnType<typeof setInterval> | undefined
 let statsRequest = 0
+let usageRequest = 0
 
 useHead(() => ({ title: ui('Statistiques') }))
 
@@ -60,13 +70,15 @@ function offsetDate(days: number) {
 function choosePreset(days: number) {
   startDate.value = offsetDate(-(days - 1))
   endDate.value = today
-  showWindow('range')
+  if (activeTab.value === 'usage') void loadUsage()
+  else showWindow('range')
 }
 
-function chooseTab(tab: 'realtime' | 'range') {
+function chooseTab(tab: 'realtime' | 'range' | 'usage') {
   activeTab.value = tab
   realtimeMenuOpen.value = false
-  showWindow(tab === 'realtime' ? realtimeWindow.value : 'range')
+  if (tab === 'usage') void loadUsage()
+  else showWindow(tab === 'realtime' ? realtimeWindow.value : 'range')
 }
 
 function chooseRealtimeWindow(window: Exclude<AnalyticsWindow, 'range'>) {
@@ -90,8 +102,39 @@ function showWindow(window: AnalyticsWindow) {
 }
 
 function showCustomRange() {
-  activeTab.value = 'range'
-  showWindow('range')
+  if (activeTab.value === 'usage') void loadUsage()
+  else {
+    activeTab.value = 'range'
+    showWindow('range')
+  }
+}
+
+async function loadUsage() {
+  if (!user.value) return
+  const request = ++usageRequest
+  usageLoading.value = true
+  usageError.value = ''
+  try {
+    const response = await $fetch<AnalyticsUsageResponse>('/api/admin/analytics-usage', {
+      credentials: 'same-origin',
+      query: { start: startDate.value, end: endDate.value, actor: usageActor.value },
+      timeout: 20_000,
+    })
+    if (request === usageRequest) usage.value = response
+  }
+  catch (caught) {
+    if (request === usageRequest && !handleUnauthorized(caught)) {
+      usageError.value = getAdminErrorMessage(caught, 'Impossible de charger les usages.')
+    }
+  }
+  finally {
+    if (request === usageRequest) usageLoading.value = false
+  }
+}
+
+function refreshActiveTab() {
+  if (activeTab.value === 'usage') void loadUsage()
+  else void loadStats()
 }
 
 async function loadStats() {
@@ -137,6 +180,9 @@ function handleDocumentKeydown(event: KeyboardEvent) {
 }
 
 watch(selectedWindow, () => { configureRefresh(); void loadStats() })
+watch(usageActor, () => {
+  if (activeTab.value === 'usage') void loadUsage()
+})
 watch(user, (currentUser) => {
   if (!currentUser) { loadedForUserId = null; return }
   if (loadedForUserId !== currentUser.id) { loadedForUserId = currentUser.id; void loadStats() }
@@ -196,16 +242,22 @@ onBeforeUnmount(() => {
               <strong>Durée particulière</strong>
               <small>Semaine, mois, année ou dates libres</small>
             </button>
+            <button id="stats-tab-usage" type="button" role="tab" :aria-selected="activeTab === 'usage'" aria-controls="stats-panel-usage" :class="{ active: activeTab === 'usage' }" @click="chooseTab('usage')">
+              <strong>Usages</strong>
+              <small>Fonctions et défis à conserver ou retirer</small>
+            </button>
           </div>
-          <button class="admin-button" type="button" :disabled="loading" @click="loadStats">{{ loading ? 'Actualisation…' : 'Actualiser' }}</button>
+          <button class="admin-button" type="button" :disabled="loading || usageLoading" @click="refreshActiveTab">
+            {{ loading || usageLoading ? 'Actualisation…' : 'Actualiser' }}
+          </button>
         </header>
 
         <div
-          :id="activeTab === 'realtime' ? 'stats-panel-realtime' : 'stats-panel-range'"
+          :id="`stats-panel-${activeTab}`"
           class="stats-workspace"
           :class="`stats-workspace--${activeTab}`"
           role="tabpanel"
-          :aria-labelledby="activeTab === 'realtime' ? 'stats-tab-realtime' : 'stats-tab-range'"
+          :aria-labelledby="`stats-tab-${activeTab}`"
         >
           <aside v-if="activeTab === 'realtime'" class="stats-sidebar stats-sidebar--realtime">
             <div class="stats-sidebar__status">
@@ -230,7 +282,16 @@ onBeforeUnmount(() => {
           </aside>
 
           <main class="stats-content">
-            <div v-if="loading && !visibleStats" class="charts-page__loading" role="status"><span class="admin-spinner" aria-hidden="true" /><p>Chargement des statistiques…</p></div>
+            <template v-if="activeTab === 'usage'">
+              <div v-if="usageLoading && !usage" class="charts-page__loading" role="status"><span class="admin-spinner" aria-hidden="true" /><p>Analyse des usages…</p></div>
+              <div v-else-if="usageError && !usage" class="charts-page__loading"><p class="admin-notice admin-notice--error" role="alert">{{ usageError }}</p><button class="admin-button" type="button" @click="loadUsage">Réessayer</button></div>
+              <template v-else-if="usage">
+                <p v-if="usageError" class="admin-notice admin-notice--error" role="alert">{{ usageError }}</p>
+                <AdminUsageDashboard v-model:actor="usageActor" :usage="usage" />
+                <p class="updated-at">Dernière actualisation : {{ new Date(usage.generatedAt).toLocaleTimeString('fr-CH') }}</p>
+              </template>
+            </template>
+            <div v-else-if="loading && !visibleStats" class="charts-page__loading" role="status"><span class="admin-spinner" aria-hidden="true" /><p>Chargement des statistiques…</p></div>
             <div v-else-if="error && !visibleStats" class="charts-page__loading"><p class="admin-notice admin-notice--error" role="alert">{{ error }}</p><button class="admin-button" type="button" @click="loadStats">Réessayer</button></div>
             <template v-else-if="visibleStats">
               <p v-if="error" class="admin-notice admin-notice--error" role="alert">{{ error }}</p>
@@ -240,7 +301,7 @@ onBeforeUnmount(() => {
             </template>
           </main>
 
-          <aside v-if="activeTab === 'range'" class="stats-sidebar stats-sidebar--range">
+          <aside v-if="activeTab === 'range' || activeTab === 'usage'" class="stats-sidebar stats-sidebar--range">
             <section class="period-picker">
               <div>
                 <p class="admin-eyebrow">Plage de temps</p>
@@ -263,7 +324,7 @@ onBeforeUnmount(() => {
                 <label><span>Au</span><input v-model="endDate" type="date" :min="startDate" :max="today"></label>
                 <button class="admin-button" type="submit">Afficher</button>
               </form>
-              <div class="range-view" role="group" aria-label="Présentation des statistiques">
+              <div v-if="activeTab === 'range'" class="range-view" role="group" aria-label="Présentation des statistiques">
                 <button type="button" :class="{ active: rangeView === 'summary' }" :aria-pressed="rangeView === 'summary'" @click="rangeView = 'summary'">
                   <strong>Synthèse</strong><small>Totaux de la durée</small>
                 </button>
@@ -272,7 +333,7 @@ onBeforeUnmount(() => {
                 </button>
               </div>
             </section>
-            <nav class="stats-theme-menu" role="tablist" aria-label="Thèmes de la période" aria-orientation="vertical">
+            <nav v-if="activeTab === 'range'" class="stats-theme-menu" role="tablist" aria-label="Thèmes de la période" aria-orientation="vertical">
               <button
                 v-for="theme in statsThemes"
                 :id="`range-theme-tab-${theme.id}`"
@@ -301,4 +362,8 @@ onBeforeUnmount(() => {
 @media(max-width:1100px){.charts-page__heading{grid-template-columns:auto 1fr}.charts-page__heading>.admin-button{grid-column:1/-1;justify-self:end}.stats-tabs{min-width:0}.stats-workspace--realtime{grid-template-columns:190px minmax(0,1fr)}.stats-workspace--range{grid-template-columns:240px minmax(0,1fr)}}
 @media(max-width:820px){.charts-page__heading{grid-template-columns:1fr}.charts-page__heading>.admin-button{grid-column:auto}.stats-tabs{justify-self:stretch}.stats-workspace--realtime,.stats-workspace--range{grid-template-columns:1fr}.stats-workspace--range .stats-content{grid-column:1;grid-row:2}.stats-sidebar{position:static}.stats-sidebar--range{grid-column:1;grid-row:1}.stats-theme-menu{grid-template-columns:repeat(2,minmax(0,1fr))}.period-picker__custom{grid-template-columns:1fr 1fr}.period-picker__custom .admin-button{grid-column:1/-1}}
 @media(max-width:650px){.charts-page__heading{align-items:stretch}.stats-tabs{grid-template-columns:1fr}.stats-tabs>button,.stats-tabs__dropdown>button{min-height:56px}.stats-theme-menu,.period-picker__custom{grid-template-columns:1fr}.period-picker__custom .admin-button{grid-column:auto}}
+.charts-page__heading{grid-template-columns:auto minmax(620px,880px) auto}.stats-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.stats-workspace--usage{grid-template-columns:minmax(235px,280px) minmax(0,1fr)}.stats-workspace--usage .stats-content{grid-column:2;grid-row:1}
+@media(max-width:1100px){.charts-page__heading{grid-template-columns:auto 1fr}.stats-workspace--usage{grid-template-columns:240px minmax(0,1fr)}}
+@media(max-width:820px){.charts-page__heading{grid-template-columns:1fr}.stats-workspace--usage{grid-template-columns:1fr}.stats-workspace--usage .stats-content{grid-column:1;grid-row:2}}
+@media(max-width:650px){.stats-tabs{grid-template-columns:1fr}}
 </style>

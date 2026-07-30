@@ -7,6 +7,7 @@ const { ui, interfaceLocale, setInterfaceLocale, localePath } = useLanguagePrefe
 const { user: learner, checkSession, logout: endLearnerSession } = useLearnerAuth()
 const route = useRoute()
 const { applyTheme } = useColorTheme()
+const { track } = useSiteAnalytics()
 const isDark = ref(false)
 const localizedSectionPath = computed(() => route.path.replace(/^\/(?:fr|de|en|it|es)(?=\/|$)/u, '') || '/')
 const isAdminRoute = computed(() => localizedSectionPath.value === '/admin' || localizedSectionPath.value.startsWith('/admin/'))
@@ -19,6 +20,7 @@ const languageOptions = computed<{ value: AppLocale, label: string, flag: string
   { value: 'es', label: ui('Espagnol'), flag: '🇪🇸' },
 ])
 const homeResetRequested = useState('home-reset-requested', () => false)
+const newChallengeRequested = useState('new-challenge-requested', () => false)
 const guidedTourRequested = useState('guided-tour-requested', () => false)
 const wizardAtHome = useState('wizard-at-home', () => true)
 const tourCopy = computed(() => guidedTourCopy(interfaceLocale.value))
@@ -57,6 +59,8 @@ function closeLearnerMenuOnOutside(event: PointerEvent) {
 
 onMounted(() => {
   document.addEventListener('pointerdown', closeLearnerMenuOnOutside)
+  track('feature_exposed', { feature: 'language.change' })
+  track('feature_exposed', { feature: 'theme.change' })
   const activeTheme = document.documentElement.dataset.theme
   if (activeTheme === 'light' || activeTheme === 'dark') {
     isDark.value = activeTheme === 'dark'
@@ -70,9 +74,11 @@ onBeforeUnmount(() => {
 
 function toggleTheme() {
   const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
+  track('feature_selected', { feature: 'theme.change', item: nextTheme })
   const updateTheme = () => {
     isDark.value = nextTheme === 'dark'
     applyTheme(nextTheme)
+    track('feature_completed', { feature: 'theme.change', item: nextTheme })
   }
   const viewTransitionDocument = document as Document & {
     startViewTransition?: (update: () => void) => unknown
@@ -87,10 +93,16 @@ function toggleTheme() {
 function selectTabletLanguage(locale: AppLocale) {
   tabletLanguageMenuOpen.value = false
   setInterfaceLocale(locale)
+  track('feature_selected', { feature: 'language.change', item: locale })
+  track('feature_completed', { feature: 'language.change', item: locale })
 }
 
 function requestHomeReset() {
   homeResetRequested.value = true
+}
+
+function requestNewChallenge() {
+  newChallengeRequested.value = true
 }
 
 async function requestGuidedTour() {
@@ -120,6 +132,7 @@ const activeLearnerTab = computed(() => {
 
 async function selectLearnerLanguage(locale: AppLocale) {
   learnerLanguageMenuOpen.value = false
+  track('feature_selected', { feature: 'language.change', item: locale })
   setInterfaceLocale(locale)
   try {
     await $fetch('/api/learner/preferences', {
@@ -129,8 +142,10 @@ async function selectLearnerLanguage(locale: AppLocale) {
         colorTheme: isDark.value ? 'dark' : 'light',
       },
     })
+    track('feature_completed', { feature: 'language.change', item: locale })
   }
   catch {
+    track('feature_failed', { feature: 'language.change', item: locale })
     // Le choix reste actif localement même si sa mémorisation échoue.
   }
   learnerMenu.value?.removeAttribute('open')
@@ -220,7 +235,14 @@ const activeSection = computed(() => {
               <path d="M5.5 10.7V20h4.8v-5.4h3.4V20h4.8v-9.3" />
             </svg>
           </NuxtLink>
-          <NuxtLink :to="localePath('/')" :class="{ 'is-active': activeSection === 'exercer' }" :aria-current="activeSection === 'exercer' ? 'page' : undefined"> {{ ui('S’exercer') }} </NuxtLink>
+          <NuxtLink
+            :to="localePath('/')"
+            :class="{ 'is-active': activeSection === 'exercer' }"
+            :aria-current="activeSection === 'exercer' ? 'page' : undefined"
+            @click="requestNewChallenge"
+          >
+            {{ ui('S’exercer') }}
+          </NuxtLink>
           <NuxtLink :to="localePath('/consulter')" :class="{ 'is-active': activeSection === 'consulter' }" :aria-current="activeSection === 'consulter' ? 'page' : undefined"> {{ ui('Consulter') }} </NuxtLink>
           <NuxtLink :to="localePath('/apprendre')" :class="{ 'is-active': activeSection === 'apprendre' }" :aria-current="activeSection === 'apprendre' ? 'page' : undefined"> {{ ui('Apprendre') }} </NuxtLink>
           <details v-if="learner" ref="learnerMenu" class="learner-menu" data-tour="learner-account">

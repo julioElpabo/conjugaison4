@@ -46,11 +46,18 @@ const props = defineProps<{
   tourDemo?: boolean
   trackingContext?: LearnerExerciseTrackingContext
   requireSuccess?: boolean
+  analyticsMetadata?: Record<string, string | number | boolean>
 }>()
 
 const emit = defineEmits<{ close: [] }>()
 const { track } = useSiteAnalytics()
 const { recordAttempt, recordQuestionPlan } = useLearnerProgress()
+const exerciseAnalyticsMetadata = computed(() => ({
+  ...props.analyticsMetadata,
+  presentation: 'chat',
+  exerciseKind: props.trackingContext?.challenge.exerciseKind || 'conjugation',
+  coach: props.coach.id,
+}))
 
 interface ChatMessage {
   id: number
@@ -271,7 +278,7 @@ function openHelp(candidate: string) {
   answer.value = ''
   helpQuestionIndex.value = null
   helpOpen.value = true
-  track('help_opened', { presentation: 'chat', coach: props.coach.id })
+  track('help_opened', exerciseAnalyticsMetadata.value)
   restartHelpReminderTimer()
   scrollToHelpOnSmallScreen()
 }
@@ -280,7 +287,7 @@ function openHelpForQuestion(questionIndex: number) {
   if (!Number.isInteger(questionIndex) || !props.questions[questionIndex]) return
   helpQuestionIndex.value = questionIndex
   helpOpen.value = true
-  track('help_opened', { presentation: 'chat', coach: props.coach.id })
+  track('help_opened', exerciseAnalyticsMetadata.value)
   restartHelpReminderTimer()
   scrollToHelpOnSmallScreen()
 }
@@ -288,7 +295,7 @@ function openHelpForQuestion(questionIndex: number) {
 function showLatestHelp() {
   helpQuestionIndex.value = null
   helpOpen.value = true
-  track('help_opened', { presentation: 'chat', coach: props.coach.id })
+  track('help_opened', exerciseAnalyticsMetadata.value)
   restartHelpReminderTimer()
   scrollThreadToBottom()
   scrollToHelpOnSmallScreen()
@@ -505,7 +512,7 @@ async function suggestHelp() {
   helpQuestionIndex.value = null
   helpOpen.value = true
   if (!wasHelpOpen) {
-    track('help_opened', { presentation: 'chat', coach: props.coach.id, source: 'reminder' })
+    track('help_opened', { ...exerciseAnalyticsMetadata.value, source: 'reminder' })
   }
   await nextTick()
   await addCoachReaction('help-announcement', contextFor(question))
@@ -595,8 +602,8 @@ async function submit() {
   addMessage('learner', candidate, undefined, currentIndex.value)
   lastCoachBubbleAt = Date.now()
   const result = validateAnswer(candidate, question.reponses)
-  track('answer_submitted', { presentation: 'chat', coach: props.coach.id })
-  track(result.isCorrect ? 'answer_correct' : 'answer_retry', { presentation: 'chat', coach: props.coach.id })
+  track('answer_submitted', exerciseAnalyticsMetadata.value)
+  track(result.isCorrect ? 'answer_correct' : 'answer_retry', exerciseAnalyticsMetadata.value)
   answer.value = ''
 
   const currentErrorDetails = result.isCorrect ? [] : learnerErrorDetails(candidate, question)
@@ -767,7 +774,7 @@ async function continueChat() {
   if (currentIndex.value >= props.questions.length - 1) {
     const version = conversationVersion
     finished.value = true
-    track('exercise_completed', { presentation: 'chat', coach: props.coach.id })
+    track('exercise_completed', exerciseAnalyticsMetadata.value)
     waitingForNext.value = false
     pendingErrorLabels.value = []
     pendingErrorDetails.value = []
@@ -808,7 +815,7 @@ async function restart() {
   consecutiveIncorrectCount.value = 0
   repeatCurrentQuestion.value = false
   finished.value = false
-  track('exercise_started', { presentation: 'chat', coach: props.coach.id })
+  track('exercise_started', exerciseAnalyticsMetadata.value)
   finalSummaryPreparing.value = false
   finalSummaryVisible.value = false
   printSummaryOpen.value = false
@@ -868,6 +875,7 @@ onBeforeUnmount(() => {
   clearHelpReminderTimer()
   if (questionScrollFrame !== null) window.cancelAnimationFrame(questionScrollFrame)
   conversationVersion += 1
+  if (!finished.value && attempts.value.length) track('exercise_abandoned', exerciseAnalyticsMetadata.value)
 })
 </script>
 

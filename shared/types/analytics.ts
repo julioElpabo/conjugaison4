@@ -14,11 +14,20 @@ export const ANALYTICS_EVENTS = [
   'print_opened',
   'pdf_downloaded',
   'word_downloaded',
+  'feature_exposed',
+  'feature_selected',
+  'feature_completed',
+  'feature_failed',
+  'exercise_abandoned',
+  'account_registered',
+  'account_login',
   'client_error',
 ] as const
 
 export type AnalyticsEventName = typeof ANALYTICS_EVENTS[number]
 export type AnalyticsWindow = 'now' | '3m' | '5m' | '30m' | 'range'
+export type AnalyticsActorType = 'anonymous' | 'learner'
+export type AnalyticsActorFilter = 'all' | AnalyticsActorType
 
 export interface AnalyticsBreakdownItem {
   label: string
@@ -32,6 +41,50 @@ export interface AnalyticsResponse {
   endDate: string
   local: AnalyticsOverview
   ga4: AnalyticsOverview | null
+}
+
+export type AnalyticsUsageDiagnostic =
+  | 'keep'
+  | 'improve'
+  | 'promote'
+  | 'niche'
+  | 'remove-candidate'
+  | 'insufficient'
+
+export interface AnalyticsUsageRow {
+  key: string
+  label: string
+  category: 'preset' | 'feature'
+  exposures: number
+  selections: number
+  starts: number
+  completions: number
+  failures: number
+  uniqueSessions: number
+  repeatSessions: number
+  adoptionRate: number | null
+  completionRate: number | null
+  repeatRate: number | null
+  lastUsedAt: string | null
+  diagnostic: AnalyticsUsageDiagnostic
+  diagnosticReason: string
+}
+
+export interface AnalyticsUsageResponse {
+  startDate: string
+  endDate: string
+  actor: AnalyticsActorFilter
+  summary: {
+    exposedSessions: number
+    activeFeatureSessions: number
+    trackedFeatures: number
+    removeCandidates: number
+    insufficient: number
+  }
+  presets: AnalyticsUsageRow[]
+  features: AnalyticsUsageRow[]
+  generatedAt: string
+  notice?: string
 }
 
 export interface AnalyticsSeriesPoint {

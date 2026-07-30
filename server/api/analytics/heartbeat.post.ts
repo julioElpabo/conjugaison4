@@ -1,6 +1,7 @@
 import { analyticsDeviceCategory, analyticsSessionId, safeAnalyticsPath } from '../../utils/analytics-session'
 import { assertPublicApiRateLimit, PUBLIC_RATE_LIMITS } from '../../services/public-api-rate-limit'
 import { readLimitedJsonBody } from '../../utils/limited-json-body'
+import { getLearnerSession } from '../../utils/learner-session'
 
 export default defineEventHandler(async (event) => {
   await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.telemetry)
@@ -9,6 +10,7 @@ export default defineEventHandler(async (event) => {
   const path = safeAnalyticsPath(body?.path)
   const locale = typeof body?.locale === 'string' && /^[a-z]{2}$/u.test(body.locale) ? body.locale : 'fr'
   const device = analyticsDeviceCategory(getHeader(event, 'user-agent') || '')
+  const actorType = await getLearnerSession(event) ? 'learner' : 'anonymous'
   const pageView = body?.pageView === true
   const database = useDatabase()
 
@@ -23,8 +25,8 @@ export default defineEventHandler(async (event) => {
       page_views=page_views + VALUES(page_views)`, [sessionId, path, locale, device, pageView ? 1 : 0])
 
   if (pageView) {
-    await database.execute(`INSERT INTO analytics_events (session_id, event_name, path)
-      VALUES (?, 'page_view', ?)`, [sessionId, path])
+    await database.execute(`INSERT INTO analytics_events (session_id, event_name, path, metadata)
+      VALUES (?, 'page_view', ?, ?)`, [sessionId, path, JSON.stringify({ actor: actorType })])
   }
   return { ok: true }
 })

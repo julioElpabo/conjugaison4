@@ -158,6 +158,7 @@ const learnerErrorComparison = (example: LearnerErrorProgressExample) => buildAn
 )
 const { applyTheme } = useColorTheme()
 const { flushProgress } = useLearnerProgress()
+const { track } = useSiteAnalytics()
 const route = useRoute()
 const requestFetch = useRequestFetch()
 const requestedTab = (value: unknown): UserTab => (
@@ -192,6 +193,7 @@ const selectedWork = ref<{
   challenge: DashboardChallenge
   scope: 'same' | 'random' | 'incorrect' | 'all-incorrect' | 'targeted' | 'remaining'
   targetQuestions?: ExerciseQuestion[]
+  analyticsItem?: string
 }>()
 const workMenuFingerprint = ref('')
 const catalogue = ref<Catalogue>()
@@ -224,6 +226,31 @@ let siteHeaderObserver: ResizeObserver | undefined
 let trainingProgressRequest = 0
 const randomCoachAvatar = useState<string>('challenge-random-coach-avatar', () => '')
 const workMenuLeft = ref(0)
+const exposedUsageFeatures = new Set<string>()
+let learnerTabReady = false
+
+function exposeUsageFeature(feature: string) {
+  if (props.readOnly || exposedUsageFeatures.has(feature)) return
+  exposedUsageFeatures.add(feature)
+  track('feature_exposed', { feature })
+}
+
+function selectedWorkFeature() {
+  const scope = selectedWork.value?.scope
+  if (scope === 'remaining') return 'learner.finish'
+  if (scope === 'same') return 'learner.relaunch.same'
+  if (scope === 'random') return 'learner.relaunch.random'
+  if (scope === 'incorrect') return 'learner.errors.session'
+  if (scope === 'all-incorrect') return 'learner.errors.challenge'
+  if (scope === 'targeted') return 'learner.errors.targeted'
+  return ''
+}
+
+const reviewAnalyticsMetadata = computed(() => ({
+  feature: selectedWorkFeature(),
+  scope: selectedWork.value?.scope || '',
+  item: selectedWork.value?.analyticsItem || '',
+}))
 
 function learnerApi(path: string, query: Record<string, string | number> = {}) {
   const parameters = new URLSearchParams()
@@ -270,6 +297,9 @@ onMounted(() => {
   if (activeTab.value === 'challenges') void loadChallengeTrainings()
   if (activeTab.value === 'progress') void loadLearnerProgress()
   if (!randomCoachAvatar.value) void loadRandomCoachAvatar()
+  const initialFeature = activeTab.value === 'progress' ? 'learner.progress' : 'learner.history'
+  exposeUsageFeature(initialFeature)
+  learnerTabReady = true
   if (activeTab.value === 'account' && route.hash === '#change-password') {
     void nextTick(() => {
       document.getElementById('change-password')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -303,9 +333,26 @@ watch(
 )
 
 watch(activeTab, (tab) => {
+  const feature = tab === 'progress' ? 'learner.progress' : tab === 'history' ? 'learner.history' : ''
+  if (feature) {
+    exposeUsageFeature(feature)
+    if (learnerTabReady && !props.readOnly) track('feature_selected', { feature })
+  }
   if (tab === 'progress') void loadLearnerProgress()
   if (tab === 'challenges') void loadChallengeTrainings()
 })
+
+watch(() => dashboard.value?.challenges, (challenges) => {
+  if (props.readOnly || !challenges?.length) return
+  exposeUsageFeature('learner.summary')
+  if (challenges.some(challenge => !challengeIsComplete(challenge))) exposeUsageFeature('learner.finish')
+  if (challenges.some(challenge => challengeIsComplete(challenge))) {
+    exposeUsageFeature('learner.relaunch.same')
+    exposeUsageFeature('learner.relaunch.random')
+  }
+  if (challenges.some(challenge => challenge.unresolvedCount > 0)) exposeUsageFeature('learner.errors.session')
+  if (challenges.some(challenge => challenge.allUnresolvedCount > 0)) exposeUsageFeature('learner.errors.challenge')
+}, { immediate: true })
 
 watch(interfaceLocale, () => {
   if (activeTab.value === 'progress') void loadLearnerProgress(true)
@@ -889,6 +936,7 @@ async function launchProgressErrorChallenge(card: LearnerErrorProgressCard) {
       challenge: errorChallengeDashboardCard(card, response),
       scope: 'targeted',
       targetQuestions: response.questions,
+      analyticsItem: card.code,
     }
     if (!await launchSelectedWork('classic')) errorChallengeErrorCode.value = card.code
   }
@@ -910,6 +958,9 @@ async function loadLearnerProgress(force = false) {
     }), {
       credentials: 'same-origin',
     })
+    if (learnerProgress.value.cards.some(errorChallengeIsAvailable)) {
+      exposeUsageFeature('learner.errors.targeted')
+    }
   }
   catch {
     learnerProgressError.value = copy.value.progressLoadError
@@ -1115,6 +1166,7 @@ function openFinishMenu(challenge: DashboardChallenge) {
 
 async function openHistorySummary(challenge: DashboardChallenge) {
   if (historySummaryPendingId.value) return
+  track('feature_selected', { feature: 'learner.summary' })
   historySummaryPendingId.value = challenge.id
   historySummaryError.value = undefined
   try {
@@ -1123,8 +1175,10 @@ async function openHistorySummary(challenge: DashboardChallenge) {
       locale: interfaceLocale.value,
     }), { credentials: 'same-origin' })
     historySummary.value = { challenge, report }
+    track('feature_completed', { feature: 'learner.summary' })
   }
   catch {
+    track('feature_failed', { feature: 'learner.summary' })
     historySummaryError.value = {
       challengeId: challenge.id,
       message: copy.value.summaryLoadError,
@@ -1208,6 +1262,14 @@ async function launchSelectedWork(presentation: 'classic' | 'chat', coach?: Coac
   if (!work || challengeStarting.value) return false
   challengeStarting.value = String(work.challenge.id)
   challengeStartError.value = ''
+  const analyticsFeature = selectedWorkFeature()
+  if (analyticsFeature) {
+    track('feature_selected', {
+      feature: analyticsFeature,
+      scope: work.scope,
+      item: work.analyticsItem || '',
+    })
+  }
   try {
     if (presentation === 'chat') await ensureCatalogue()
     const {
@@ -1248,6 +1310,13 @@ async function launchSelectedWork(presentation: 'classic' | 'chat', coach?: Coac
     return true
   }
   catch {
+    if (analyticsFeature) {
+      track('feature_failed', {
+        feature: analyticsFeature,
+        scope: work.scope,
+        item: work.analyticsItem || '',
+      })
+    }
     challengeStartError.value = copy.value.prepareError
     return false
   }
@@ -1344,6 +1413,13 @@ async function savePreferences(nextLocale = preferredLocale.value, nextTheme = p
   preferencesError.value = ''
   preferredLocale.value = nextLocale
   preferredTheme.value = nextTheme
+  const preferenceFeature = nextLocale !== storedPreferences.value?.interfaceLocale
+    ? 'language.change'
+    : 'theme.change'
+  track('feature_selected', {
+    feature: preferenceFeature,
+    item: preferenceFeature === 'language.change' ? nextLocale : nextTheme,
+  })
   try {
     await $fetch(learnerApi('preferences'), {
       method: 'PUT',
@@ -1352,8 +1428,16 @@ async function savePreferences(nextLocale = preferredLocale.value, nextTheme = p
     applyTheme(nextTheme)
     preferencesSaved.value = true
     if (nextLocale !== interfaceLocale.value) setInterfaceLocale(nextLocale)
+    track('feature_completed', {
+      feature: preferenceFeature,
+      item: preferenceFeature === 'language.change' ? nextLocale : nextTheme,
+    })
   }
   catch {
+    track('feature_failed', {
+      feature: preferenceFeature,
+      item: preferenceFeature === 'language.change' ? nextLocale : nextTheme,
+    })
     preferencesError.value = copy.value.preferencesSaveError
   }
   finally {
@@ -2545,6 +2629,7 @@ async function confirmAccountAction() {
       :exercise-kind="reviewTracking.challenge.exerciseKind"
       :tracking-context="reviewTracking"
       :require-success="reviewRequireSuccess"
+      :analytics-metadata="reviewAnalyticsMetadata"
       @close="closeReview"
     />
     <ChatExercise
@@ -2556,6 +2641,7 @@ async function confirmAccountAction() {
       :regenerate-questions="regenerateChatQuestions"
       :tracking-context="reviewTracking"
       :require-success="reviewRequireSuccess"
+      :analytics-metadata="reviewAnalyticsMetadata"
       @close="closeReview"
     />
     <CoachPicker

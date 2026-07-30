@@ -90,7 +90,28 @@ function logUsage(event: 'homepage' | 'print' | 'challenge-save' | 'challenge-lo
   track(detailedEvent[event], event === 'exercise' ? { presentation: exercisePresentation.value, exerciseKind: challenge.value.exerciseKind } : undefined)
 }
 
-onMounted(() => logUsage('homepage'))
+function exerciseUsageMetadata(presentation: 'classic' | 'chat') {
+  return {
+    feature: presentation === 'chat' ? 'exercise.chat' : 'exercise.classic',
+    source: sourcePresetId.value ? 'preset' : props.initialCode ? 'code' : 'custom',
+    ...(sourcePresetId.value ? { preset: sourcePresetId.value } : {}),
+  }
+}
+
+onMounted(() => {
+  logUsage('homepage')
+  for (const feature of ['preset.library', 'builder.custom', 'challenge.load']) {
+    track('feature_exposed', { feature })
+  }
+})
+const launchFeaturesExposed = ref(false)
+watch(isReady, (ready) => {
+  if (!ready || launchFeaturesExposed.value || !import.meta.client) return
+  launchFeaturesExposed.value = true
+  for (const feature of ['exercise.classic', 'exercise.chat', 'print.preview', 'challenge.share']) {
+    track('feature_exposed', { feature })
+  }
+})
 
 try {
   await loadCatalogue()
@@ -177,10 +198,13 @@ function beginExerciseTracking(presentation: 'classic' | 'chat') {
 
 async function prepareExercise(mode: 'classic' | 'chat') {
   if (!isReady.value) return
+  if (!sourcePresetId.value) track('feature_selected', { feature: 'builder.custom' })
   if (mode === 'chat') {
+    track('feature_selected', exerciseUsageMetadata('chat'))
     isCoachPickerOpen.value = true
     return
   }
+  track('feature_selected', exerciseUsageMetadata('classic'))
   busyAction.value = 'exercise'
   clearMessages()
   try {
@@ -191,8 +215,8 @@ async function prepareExercise(mode: 'classic' | 'chat') {
     exercisePresentation.value = mode
     beginExerciseTracking(mode)
     isExerciseOpen.value = true
-    logUsage('exercise')
   } catch (error) {
+    track('feature_failed', exerciseUsageMetadata('classic'))
     actionError.value = getChallengeErrorMessage(error, ui('Impossible de préparer le questionnaire.'))
   } finally {
     busyAction.value = null
@@ -212,8 +236,8 @@ async function launchWithCoach(coach: CoachProfile) {
     exercisePresentation.value = 'chat'
     beginExerciseTracking('chat')
     isExerciseOpen.value = true
-    logUsage('exercise')
   } catch (error) {
+    track('feature_failed', exerciseUsageMetadata('chat'))
     actionError.value = getChallengeErrorMessage(error, ui('Impossible de préparer le questionnaire.'))
   } finally {
     busyAction.value = null
@@ -228,6 +252,7 @@ async function regenerateChatQuestions() {
 
 async function preparePrint() {
   if (!isReady.value) return
+  track('feature_selected', { feature: 'print.preview' })
   busyAction.value = 'print'
   clearMessages()
   try {
@@ -238,6 +263,7 @@ async function preparePrint() {
     isPrintOpen.value = true
     logUsage('print')
   } catch (error) {
+    track('feature_failed', { feature: 'print.preview' })
     actionError.value = getChallengeErrorMessage(error, ui('Impossible de préparer la fiche à imprimer.'))
   } finally {
     busyAction.value = null
@@ -246,6 +272,7 @@ async function preparePrint() {
 
 function saveChallenge() {
   if (!isReady.value) return
+  track('feature_selected', { feature: 'challenge.share' })
   const activePreset = catalogue.value.presets.find(preset => preset.id === activePresetId.value)
   shareCode.value = ''
   shareError.value = ''
@@ -267,6 +294,7 @@ async function createSharedChallenge(title: string, description: string) {
     savedChallengeDescription.value = description
     logUsage('challenge-save')
   } catch (error) {
+    track('feature_failed', { feature: 'challenge.share' })
     shareError.value = getChallengeErrorMessage(error, ui('Impossible de sauvegarder ce défi.'))
   } finally {
     busyAction.value = null
@@ -274,6 +302,7 @@ async function createSharedChallenge(title: string, description: string) {
 }
 
 async function restoreChallenge(code: string, closeDialog = true) {
+  track('feature_selected', { feature: 'challenge.load' })
   busyAction.value = 'load'
   actionError.value = ''
   loadError.value = ''
@@ -290,6 +319,7 @@ async function restoreChallenge(code: string, closeDialog = true) {
     logUsage('challenge-load')
     if (closeDialog) isLoadOpen.value = false
   } catch (error) {
+    track('feature_failed', { feature: 'challenge.load' })
     const message = getChallengeErrorMessage(error, ui('Ce code ne correspond à aucun défi.'))
     if (closeDialog) loadError.value = message
     else actionError.value = message
@@ -421,6 +451,7 @@ function onToggleTense(id: number) {
       :questions="questions"
       :exercise-kind="challenge.exerciseKind"
       :tracking-context="exerciseTracking"
+      :analytics-metadata="exerciseUsageMetadata('classic')"
       @close="isExerciseOpen = false"
     />
 
@@ -432,6 +463,7 @@ function onToggleTense(id: number) {
       :tenses="selectedTenses"
       :regenerate-questions="regenerateChatQuestions"
       :tracking-context="exerciseTracking"
+      :analytics-metadata="exerciseUsageMetadata('chat')"
       @close="isExerciseOpen = false"
     />
 

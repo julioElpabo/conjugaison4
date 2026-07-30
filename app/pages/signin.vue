@@ -22,6 +22,7 @@ interface LoginResult {
 
 const config = useRuntimeConfig()
 const { setUser } = useLearnerAuth()
+const { track } = useSiteAnalytics()
 const { interfaceLocale, localePath } = useLanguagePreferences()
 const copy = computed(() => learnerAuthCopy(interfaceLocale.value))
 const mode = ref<Mode>('login')
@@ -50,6 +51,8 @@ useHead(() => ({
 }))
 
 onMounted(async () => {
+  track('feature_exposed', { feature: 'auth.login' })
+  track('feature_exposed', { feature: 'auth.register' })
   if (!import.meta.dev) return
 
   try {
@@ -90,6 +93,7 @@ async function startRegistration() {
 }
 
 function selectMode(nextMode: Mode) {
+  track('feature_selected', { feature: nextMode === 'register' ? 'auth.register' : 'auth.login' })
   mode.value = nextMode
   errorMessage.value = ''
   if (nextMode === 'register' && !suggestion.value) {
@@ -152,9 +156,11 @@ async function register() {
       },
     })
     setUser(recovery.value.user)
+    track('account_registered', { feature: 'auth.register' })
     password.value = ''
     passwordConfirmation.value = ''
   } catch (error) {
+    track('feature_failed', { feature: 'auth.register' })
     const candidate = error as { data?: { data?: UsernameSuggestion } }
     if (candidate.data?.data?.username && candidate.data.data.proof) {
       suggestion.value = candidate.data.data
@@ -167,6 +173,7 @@ async function register() {
 
 async function login() {
   errorMessage.value = ''
+  track('feature_selected', { feature: 'auth.login' })
   submitting.value = true
   try {
     const result = await $fetch<LoginResult>('/api/learner/login', {
@@ -178,8 +185,10 @@ async function login() {
       },
     })
     setUser(result.user)
+    track('account_login', { feature: 'auth.login' })
     await navigateTo(localePath('/my-page'))
   } catch (error) {
+    track('feature_failed', { feature: 'auth.login' })
     errorMessage.value = humanError(error, 'Pseudonyme ou mot de passe incorrect.')
   } finally {
     submitting.value = false

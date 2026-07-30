@@ -315,12 +315,17 @@ async function buildPdf() {
 
 async function downloadPdf() {
   if (isPdfBusy.value) return
+  track('feature_selected', { feature: 'download.pdf' })
   isPdfBusy.value = true
   try {
     const pdf = await buildPdf()
     pdf.save(pdfFileName())
     track('pdf_downloaded', { exerciseKind: props.exerciseKind })
-  } finally {
+  }
+  catch {
+    track('feature_failed', { feature: 'download.pdf' })
+  }
+  finally {
     isPdfBusy.value = false
   }
 }
@@ -374,6 +379,8 @@ watch(
 )
 
 onMounted(() => {
+  track('feature_exposed', { feature: 'download.pdf' })
+  track('feature_exposed', { feature: 'download.word' })
   void refreshPdfPreview()
 })
 
@@ -385,6 +392,7 @@ onBeforeUnmount(() => {
 
 async function downloadWord() {
   if (isWordBusy.value) return
+  track('feature_selected', { feature: 'download.word' })
   isWordBusy.value = true
   try {
     const {
@@ -599,7 +607,11 @@ async function downloadWord() {
     track('word_downloaded', { exerciseKind: props.exerciseKind })
     link.remove()
     URL.revokeObjectURL(url)
-  } finally {
+  }
+  catch {
+    track('feature_failed', { feature: 'download.word' })
+  }
+  finally {
     isWordBusy.value = false
   }
 }

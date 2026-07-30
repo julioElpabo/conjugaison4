@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import type { H3Event } from 'h3'
+import { stripLocaleFromPath } from '../../shared/i18n/locales'
 
 const COOKIE_NAME = 'tatitotu_session'
 
@@ -23,13 +24,32 @@ export function analyticsDeviceCategory(userAgent = '') {
 }
 
 export function safeAnalyticsPath(value: unknown) {
-  const path = typeof value === 'string' ? value.trim().slice(0, 255) : '/'
-  return path.startsWith('/') ? path : '/'
+  const raw = typeof value === 'string' ? value.trim().slice(0, 500) : '/'
+  if (!raw.startsWith('/')) return '/'
+  let parsed: URL
+  try {
+    parsed = new URL(raw, 'https://analytics.local')
+  }
+  catch {
+    return '/'
+  }
+  const path = stripLocaleFromPath(parsed.pathname).replace(/\/+$/u, '') || '/'
+  if (/^\/defi\/[^/]+$/u.test(path)) return '/defi/:code'
+  if (path === '/my-page') {
+    const tab = String(parsed.searchParams.get('tab') || '')
+    return ['history', 'progress', 'preferences', 'account'].includes(tab)
+      ? `/my-page/${tab}`
+      : '/my-page'
+  }
+  return path.slice(0, 255)
 }
 
 export function safeAnalyticsMetadata(value: unknown) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null
-  const allowed = ['presentation', 'exerciseKind', 'coach', 'preset', 'mode', 'tense', 'status']
+  const allowed = [
+    'presentation', 'exerciseKind', 'coach', 'preset', 'mode', 'tense', 'status',
+    'feature', 'item', 'source', 'scope', 'step', 'action', 'repeat', 'questions',
+  ]
   const entries = Object.entries(value as Record<string, unknown>)
     .filter(([key, item]) => allowed.includes(key) && ['string', 'number', 'boolean'].includes(typeof item))
     .slice(0, 8)

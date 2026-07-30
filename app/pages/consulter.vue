@@ -13,6 +13,7 @@ interface Catalogue {
 
 const route = useRoute()
 const router = useRouter()
+const { track } = useSiteAnalytics()
 const query = ref('')
 const suggestionsOpen = ref(false)
 const activeSuggestion = ref(0)
@@ -129,16 +130,25 @@ async function loadVerb(id: number) {
   }
 }
 
-function selectVerb(verb: Verb) {
+async function selectVerb(verb: Verb) {
+  track('feature_selected', { feature: 'consult.verb', item: String(verb.id) })
   query.value = verb.infinitif
   suggestionsOpen.value = false
   activeSuggestion.value = 0
   transitionDirection.value = 'forward'
   showingDetail.value = true
   void router.replace({ query: { ...route.query, verbe: String(verb.id) } })
-  void loadVerb(verb.id)
+  await loadVerb(verb.id)
+  if (detail.value?.verb.id === verb.id) {
+    track('feature_completed', { feature: 'consult.verb', item: String(verb.id) })
+  }
+  else {
+    track('feature_failed', { feature: 'consult.verb', item: String(verb.id) })
+  }
   nextTick(() => consultationContainer.value?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
 }
+
+onMounted(() => track('feature_exposed', { feature: 'consult.verb' }))
 
 function returnToSelection() {
   transitionDirection.value = 'back'

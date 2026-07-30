@@ -21,6 +21,7 @@ const props = defineProps<{
   exerciseKind: 'conjugation' | 'tense-identification'
   trackingContext?: LearnerExerciseTrackingContext
   requireSuccess?: boolean
+  analyticsMetadata?: Record<string, string | number | boolean>
 }>()
 const { track } = useSiteAnalytics()
 const { recordAttempt, recordQuestionPlan } = useLearnerProgress()
@@ -49,6 +50,11 @@ const closeConfirmationOpen = ref(false)
 const answerInput = useTemplateRef<HTMLInputElement>('answer-input')
 const keepExerciseButton = useTemplateRef<HTMLButtonElement>('keep-exercise-button')
 const dialog = useTemplateRef<HTMLElement>('exercise-dialog')
+const exerciseAnalyticsMetadata = computed(() => ({
+  ...props.analyticsMetadata,
+  presentation: 'classic',
+  exerciseKind: props.exerciseKind,
+}))
 
 useDialogFocus(dialog, handleEscapeClose, answerInput)
 
@@ -216,14 +222,14 @@ function submitAnswer() {
     ...(attemptErrorLabels.length ? { errorLabels: attemptErrorLabels } : {}),
     ...(attemptErrorDetails.length ? { errorDetails: attemptErrorDetails } : {}),
   }
-  track('answer_submitted', { presentation: 'classic', exerciseKind: props.exerciseKind })
+  track('answer_submitted', exerciseAnalyticsMetadata.value)
   void recordAttempt(
     props.trackingContext,
     trackedAttempt,
     currentIndex.value,
   )
   if (shouldRetry) {
-    track('answer_retry', { presentation: 'classic', exerciseKind: props.exerciseKind })
+    track('answer_retry', exerciseAnalyticsMetadata.value)
     retryAlreadyOffered.value = true
     retryMessageVisible.value = true
     futureSimpleConfusion.value = usedFutureSimple
@@ -247,7 +253,7 @@ function submitAnswer() {
   agreementError.value = hasAgreementError
   auxiliaryError.value = detectedAuxiliaryError
   feedback.value = result.isCorrect ? 'correct' : 'incorrect'
-  if (result.isCorrect) track('answer_correct', { presentation: 'classic', exerciseKind: props.exerciseKind })
+  if (result.isCorrect) track('answer_correct', exerciseAnalyticsMetadata.value)
   if (props.requireSuccess) attempts.value[currentIndex.value] = trackedAttempt
   else attempts.value.push(trackedAttempt)
 }
@@ -307,7 +313,7 @@ function nextQuestion() {
 
   if (currentIndex.value >= props.questions.length - 1) {
     isFinished.value = true
-    track('exercise_completed', { presentation: 'classic', exerciseKind: props.exerciseKind })
+    track('exercise_completed', exerciseAnalyticsMetadata.value)
     nextTick(() => dialog.value?.focus())
     return
   }
@@ -345,7 +351,7 @@ function restart() {
   attempts.value = []
   isFinished.value = false
   printSummaryOpen.value = false
-  track('exercise_started', { presentation: 'classic', exerciseKind: props.exerciseKind })
+  track('exercise_started', exerciseAnalyticsMetadata.value)
   nextTick(() => answerInput.value?.focus())
 }
 
@@ -388,7 +394,10 @@ onMounted(() => {
   document.addEventListener('keydown', onDocumentKeydown)
   void recordQuestionPlan(props.trackingContext, props.questions)
 })
-onBeforeUnmount(() => document.removeEventListener('keydown', onDocumentKeydown))
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', onDocumentKeydown)
+  if (!isFinished.value && attempts.value.length) track('exercise_abandoned', exerciseAnalyticsMetadata.value)
+})
 
 </script>
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { ui, localePath } = useLanguagePreferences()
+const { track } = useSiteAnalytics()
 useHead(() => ({
   title: ui('Apprendre la conjugaison'),
   meta: [{ name: 'description', content: ui('Une synthèse claire des règles essentielles de la conjugaison française.') }],
@@ -14,9 +15,13 @@ const sections = computed(() => [
 ])
 
 function scrollToSection(sectionId: string) {
+  track('feature_selected', { feature: 'learn.content', item: sectionId })
+  track('feature_completed', { feature: 'learn.content', item: sectionId })
   const behavior: ScrollBehavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
   document.getElementById(sectionId)?.scrollIntoView({ behavior, block: 'start' })
 }
+
+onMounted(() => track('feature_exposed', { feature: 'learn.content' }))
 </script>
 
 <template>

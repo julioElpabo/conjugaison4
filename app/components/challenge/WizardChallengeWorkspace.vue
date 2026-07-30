@@ -75,6 +75,7 @@ const { track } = useSiteAnalytics()
 const requestUrl = useRequestURL()
 const wizardInitialized = useState('wizard-challenge-initialized', () => false)
 const homeResetRequested = useState('home-reset-requested', () => false)
+const newChallengeRequested = useState('new-challenge-requested', () => false)
 const guidedTourRequested = useState('guided-tour-requested', () => false)
 const wizardAtHome = useState('wizard-at-home', () => true)
 const currentStep = ref<WizardStep>(0)
@@ -108,6 +109,7 @@ const isPrintOpen = ref(false)
 const isShareOpen = ref(false)
 const isCoachPickerOpen = ref(false)
 const selectedCoach = ref<CoachProfile | null>(null)
+const exposedUsageFeatures = new Set<string>()
 const classicExerciseRef = useTemplateRef<ClassicExerciseExposed>('classic-exercise')
 const chatExerciseRef = useTemplateRef<ChatExerciseExposed>('chat-exercise')
 // Cet état doit survivre au changement d’URL effectué par le sélecteur de langue.
@@ -287,9 +289,26 @@ function logUsage(event: 'homepage' | 'print' | 'challenge-save' | 'challenge-lo
   track(detailedEvent[event], event === 'exercise' ? { presentation: exercisePresentation.value, exerciseKind: challenge.value.exerciseKind } : undefined)
 }
 
+function exposeUsageFeature(feature: string) {
+  if (!import.meta.client || tourActive.value || exposedUsageFeatures.has(feature)) return
+  exposedUsageFeatures.add(feature)
+  track('feature_exposed', { feature })
+}
+
+function exerciseUsageMetadata(presentation: 'classic' | 'chat') {
+  return {
+    feature: presentation === 'chat' ? 'exercise.chat' : 'exercise.classic',
+    source: sourcePresetId.value ? 'preset' : challengeCode.value ? 'code' : 'custom',
+    ...(sourcePresetId.value ? { preset: sourcePresetId.value } : {}),
+  }
+}
+
 onMounted(() => {
   wizardAtHome.value = currentStep.value === 0
   logUsage('homepage')
+  exposeUsageFeature('preset.library')
+  exposeUsageFeature('builder.custom')
+  exposeUsageFeature('challenge.load')
   try {
     if (sessionStorage.getItem('highlight-home-challenge-loader') === '1') {
       sessionStorage.removeItem('highlight-home-challenge-loader')
@@ -364,6 +383,12 @@ function goToStep(step: WizardStep) {
   if (step === 2 && selectedVerbs.value.length === 0) return
   if ((step === 3 || step === 4) && !isReady.value) return
   currentStep.value = step
+  if (step === 4) {
+    exposeUsageFeature('exercise.classic')
+    exposeUsageFeature('exercise.chat')
+    exposeUsageFeature('print.preview')
+    exposeUsageFeature('challenge.share')
+  }
   if (step === 1 && isPrefilledChallenge.value) {
     cancelPresetReveal()
     revealedPresetVerbIds.value = []
@@ -379,6 +404,7 @@ function goToStep(step: WizardStep) {
 }
 
 async function startCustomChallenge() {
+  track('feature_selected', { feature: 'builder.custom' })
   restartChallenge()
   goToStep(1)
   await nextTick()
@@ -401,6 +427,10 @@ async function prepareStep4() {
   await new Promise(resolve => setTimeout(resolve, 1_000))
   isPreparingStep4.value = false
   goToStep(4)
+  exposeUsageFeature('exercise.classic')
+  exposeUsageFeature('exercise.chat')
+  exposeUsageFeature('print.preview')
+  exposeUsageFeature('challenge.share')
 }
 
 function previousStep() {
@@ -1044,6 +1074,12 @@ watch(homeResetRequested, (requested) => {
   homeResetRequested.value = false
 }, { immediate: true })
 
+watch(newChallengeRequested, (requested) => {
+  if (!requested) return
+  newChallengeRequested.value = false
+  void startCustomChallenge()
+}, { immediate: true })
+
 function shuffledSample(ids: readonly number[], count: number) {
   const result = [...ids]
   for (let index = result.length - 1; index > 0; index -= 1) {
@@ -1092,6 +1128,7 @@ async function restoreChallenge() {
   }
 
   busyAction.value = 'load'
+  track('feature_selected', { feature: 'challenge.load' })
   codeError.value = ''
   actionError.value = ''
   notice.value = ''
@@ -1112,6 +1149,7 @@ async function restoreChallenge() {
     goToStep(1)
     logUsage('challenge-load')
   } catch (error) {
+    track('feature_failed', { feature: 'challenge.load' })
     codeError.value = getChallengeErrorMessage(error, ui('Ce code ne correspond à aucun défi.'))
   } finally {
     busyAction.value = null
@@ -1342,9 +1380,11 @@ function beginExerciseTracking(presentation: 'classic' | 'chat') {
 async function prepareExercise(mode: 'classic' | 'chat') {
   if (!isReady.value) return
   if (mode === 'chat') {
+    track('feature_selected', exerciseUsageMetadata('chat'))
     isCoachPickerOpen.value = true
     return
   }
+  track('feature_selected', exerciseUsageMetadata('classic'))
   busyAction.value = 'exercise'
   clearMessages()
   try {
@@ -1353,8 +1393,8 @@ async function prepareExercise(mode: 'classic' | 'chat') {
     exercisePresentation.value = 'classic'
     beginExerciseTracking('classic')
     isExerciseOpen.value = true
-    logUsage('exercise')
   } catch (error) {
+    track('feature_failed', exerciseUsageMetadata('classic'))
     actionError.value = getChallengeErrorMessage(error, ui('Impossible de préparer le questionnaire.'))
   } finally {
     busyAction.value = null
@@ -1374,8 +1414,8 @@ async function launchWithCoach(coach: CoachProfile) {
     exercisePresentation.value = 'chat'
     beginExerciseTracking('chat')
     isExerciseOpen.value = true
-    logUsage('exercise')
   } catch (error) {
+    track('feature_failed', exerciseUsageMetadata('chat'))
     actionError.value = getChallengeErrorMessage(error, ui('Impossible de préparer le questionnaire.'))
   } finally {
     busyAction.value = null
@@ -1390,6 +1430,10 @@ async function regenerateChatQuestions() {
 
 async function preparePrint() {
   if (!isReady.value) return
+  track('feature_selected', {
+    feature: 'print.preview',
+    source: sourcePresetId.value ? 'preset' : challengeCode.value ? 'code' : 'custom',
+  })
   busyAction.value = 'print'
   clearMessages()
   try {
@@ -1398,6 +1442,7 @@ async function preparePrint() {
     isPrintOpen.value = true
     logUsage('print')
   } catch (error) {
+    track('feature_failed', { feature: 'print.preview' })
     actionError.value = getChallengeErrorMessage(error, ui('Impossible de préparer la fiche à imprimer.'))
   } finally {
     busyAction.value = null
@@ -1406,6 +1451,7 @@ async function preparePrint() {
 
 function saveChallenge() {
   if (!isReady.value) return
+  track('feature_selected', { feature: 'challenge.share' })
   shareCode.value = ''
   shareError.value = ''
   shareTitle.value = activePreset.value?.label || savedChallengeTitle.value || ui('Défi de conjugaison')
@@ -1426,6 +1472,7 @@ async function createSharedChallenge(title: string, description: string) {
     savedChallengeDescription.value = description
     logUsage('challenge-save')
   } catch (error) {
+    track('feature_failed', { feature: 'challenge.share' })
     shareError.value = getChallengeErrorMessage(error, ui('Impossible de sauvegarder ce défi.'))
   } finally {
     busyAction.value = null
@@ -1782,8 +1829,8 @@ async function createSharedChallenge(title: string, description: string) {
       </template>
       </main>
 
-      <ClassicExercise ref="classic-exercise" v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" :tracking-context="exerciseTracking" @close="isExerciseOpen = false" />
-      <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :coach="selectedCoach" :verbs="selectedVerbs" :tenses="selectedTenses" :regenerate-questions="regenerateChatQuestions" :tracking-context="exerciseTracking" :tour-demo="tourActive" @close="isExerciseOpen = false" />
+      <ClassicExercise ref="classic-exercise" v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('classic')" @close="isExerciseOpen = false" />
+      <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :coach="selectedCoach" :verbs="selectedVerbs" :tenses="selectedTenses" :regenerate-questions="regenerateChatQuestions" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('chat')" :tour-demo="tourActive" @close="isExerciseOpen = false" />
       <CoachPicker v-if="isCoachPickerOpen" :tour-demo="tourActive" @close="isCoachPickerOpen = false" @select="launchWithCoach" />
       <PrintPreview v-if="isPrintOpen" :questions="printQuestions" :verbs="selectedVerbs" :tenses="selectedTenses" :exercise-kind="challenge.exerciseKind" :options="challenge.printOptions" @update-options="challenge.printOptions = $event" @close="isPrintOpen = false" />
       <ShareChallengeDialog

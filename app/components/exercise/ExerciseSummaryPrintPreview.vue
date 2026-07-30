@@ -317,12 +317,17 @@ async function refreshPreview() {
 
 async function downloadPdf() {
   if (isPdfBusy.value) return
+  track('feature_selected', { feature: 'download.pdf', source: 'summary' })
   isPdfBusy.value = true
   try {
     const pdf = await buildPdf()
     pdf.save(pdfFileName())
     track('pdf_downloaded', { presentation: 'chat' })
-  } finally {
+  }
+  catch {
+    track('feature_failed', { feature: 'download.pdf', source: 'summary' })
+  }
+  finally {
     isPdfBusy.value = false
   }
 }
@@ -334,7 +339,10 @@ function printPdf() {
   frameWindow.print()
 }
 
-onMounted(refreshPreview)
+onMounted(() => {
+  track('feature_exposed', { feature: 'download.pdf', source: 'summary' })
+  void refreshPreview()
+})
 
 onBeforeUnmount(() => {
   previewGeneration += 1

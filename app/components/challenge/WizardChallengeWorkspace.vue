@@ -1392,6 +1392,7 @@ async function prepareExercise(mode: 'classic' | 'chat') {
     if (!questions.value.length) throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     exercisePresentation.value = 'classic'
     beginExerciseTracking('classic')
+    track('exercise_started', exerciseUsageMetadata('classic'))
     isExerciseOpen.value = true
   } catch (error) {
     track('feature_failed', exerciseUsageMetadata('classic'))
@@ -1413,6 +1414,7 @@ async function launchWithCoach(coach: CoachProfile) {
     if (!questions.value.length) throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     exercisePresentation.value = 'chat'
     beginExerciseTracking('chat')
+    track('exercise_started', exerciseUsageMetadata('chat'))
     isExerciseOpen.value = true
   } catch (error) {
     track('feature_failed', exerciseUsageMetadata('chat'))

@@ -12,6 +12,17 @@ const quotaBackoff = new Map<string, number>()
 const GOOGLE_AUTH_TIMEOUT_MS = 10_000
 const GOOGLE_REPORT_TIMEOUT_MS = 12_000
 
+function privateKeyFromEnvironment() {
+  const parts: string[] = []
+  for (let index = 1; index <= 20; index += 1) {
+    const value = process.env[`NUXT_GA4_PRIVATE_KEY_${index}`]
+      || process.env[`GA4_PRIVATE_KEY_${index}`]
+    if (!value) break
+    parts.push(value)
+  }
+  return parts.join('')
+}
+
 function base64url(value: string | Buffer) {
   return Buffer.from(value).toString('base64url')
 }
@@ -58,7 +69,7 @@ export async function googleAnalyticsOverview(options: {
   const config = useRuntimeConfig()
   const propertyId = String(config.ga4PropertyId || '').trim()
   let email = String(config.ga4ClientEmail || '').trim()
-  let privateKey = String(config.ga4PrivateKey || '').trim()
+  let privateKey = String(config.ga4PrivateKey || privateKeyFromEnvironment()).trim()
   const credentialsFile = String(config.ga4CredentialsFile || '').trim()
   if ((!email || !privateKey) && credentialsFile) {
     try {

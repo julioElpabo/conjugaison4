@@ -1,0 +1,1 @@
+import{ac as n,q as o,ad as c,G as u}from"./C-fxfarb.js";import{u as i}from"./CHZtg8L4.js";import"./D3-Tcd6s.js";const h=n(async r=>{let e,a;const{checkSession:t}=i(),{localePath:s}=o();if(!([e,a]=c(()=>t()),e=await e,a(),e))return u({path:s("/signin"),query:{redirect:r.fullPath}},{replace:!0})});export{h as default};

@@ -1,0 +1,1 @@
+import{s as r,as as h}from"./C-fxfarb.js";function l(){const i=r();function n(s,a){$fetch("/api/analytics/event",{method:"POST",body:{name:s,path:i.fullPath,metadata:a}}).catch(()=>{});const o=globalThis.gtag,t=h(i.path),e=t==="/signin"||t==="/my-page",c=t==="/admin"||t.startsWith("/admin/");!e&&!c&&o?.("event",s,a||{})}return{track:n}}export{l as u};

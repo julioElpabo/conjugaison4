@@ -1389,12 +1389,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-Cr1-7G3c.mjs')
+    component: () => import('./_code_-DmjSX2TF.mjs')
   },
   {
     name: "accueil",
     path: "/accueil",
-    component: () => import('./accueil-B-EzaSXH.mjs')
+    component: () => import('./accueil-CEO7qlSu.mjs')
   },
   {
     name: "admin",
@@ -1425,7 +1425,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-CzLQgzUu.mjs')
+    component: () => import('./nouveau-defi-Th59BgWJ.mjs')
   },
   {
     name: "signin",
@@ -1435,7 +1435,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-Bq2EgDCm.mjs')
+    component: () => import('./index-Ds4SS79s.mjs')
   },
   {
     name: "localized-admin-admins",
@@ -1505,12 +1505,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-Cr1-7G3c.mjs')
+    component: () => import('./_code_-DmjSX2TF.mjs')
   },
   {
     name: "localized-accueil",
     path: "/:locale(fr|de|en|it|es)/accueil",
-    component: () => import('./accueil-B-EzaSXH.mjs')
+    component: () => import('./accueil-CEO7qlSu.mjs')
   },
   {
     name: "localized-admin",
@@ -1541,7 +1541,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-CzLQgzUu.mjs')
+    component: () => import('./nouveau-defi-Th59BgWJ.mjs')
   },
   {
     name: "localized-signin",
@@ -1551,7 +1551,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-Bq2EgDCm.mjs')
+    component: () => import('./index-Ds4SS79s.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {

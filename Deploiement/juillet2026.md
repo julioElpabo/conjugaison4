@@ -294,6 +294,21 @@ NUXT_GA4_PRIVATE_KEY
 NUXT_PUBLIC_GA4_MEASUREMENT_ID
 ```
 
+Plesk limite parfois une variable personnelle à 255 caractères. Dans ce cas,
+ne pas définir `NUXT_GA4_PRIVATE_KEY` et découper sa valeur, sans espace ni
+chevauchement, dans des variables de 200 caractères maximum :
+
+```text
+NUXT_GA4_PRIVATE_KEY_1
+NUXT_GA4_PRIVATE_KEY_2
+NUXT_GA4_PRIVATE_KEY_3
+...
+```
+
+L'application concatène les morceaux dans l'ordre au démarrage. Les séquences
+`\n`, y compris celle qui suit `-----END PRIVATE KEY-----`, doivent être
+conservées.
+
 Les secrets doivent être saisis dans l’interface Node.js de Plesk. Ils ne
 doivent jamais être ajoutés au dépôt Git.
 
@@ -463,4 +478,3 @@ Lorsque la nouvelle version est stable :
    choisie ;
 6. supprimer l’ancienne application et son ancienne base uniquement lorsque
    tout retour arrière est définitivement exclu.
-

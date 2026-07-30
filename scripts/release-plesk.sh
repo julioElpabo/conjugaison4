@@ -7,6 +7,19 @@ main_branch='main'
 release_branch='plesk-release'
 github_remote='origin'
 plesk_remote='plesk-production'
+generated_report_paths=(
+  'reports/verb-pilot-import-check.md'
+  'reports/verb-pilot-pedagogy-part-01.json'
+  'reports/verb-pilot-pedagogy-part-01.md'
+  'reports/verb-pilot-pedagogy-part-02.json'
+  'reports/verb-pilot-pedagogy-part-02.md'
+  'reports/verb-pilot-pedagogy-part-03.json'
+  'reports/verb-pilot-pedagogy-part-03.md'
+  'reports/verb-pilot-pedagogy-part-04.json'
+  'reports/verb-pilot-pedagogy-part-04.md'
+  'reports/verb-pilot-pedagogy-part-05.json'
+  'reports/verb-pilot-pedagogy-part-05.md'
+)
 
 print_usage() {
   printf 'Usage : %s\n' "$command_name"
@@ -105,8 +118,18 @@ npm --prefix "$repository_root" ci
 printf '\n[6/8] Construction du paquet Nuxt\n'
 npm --prefix "$repository_root" run build
 
-if ! git -C "$repository_root" diff --quiet -- . ':(exclude).output'; then
-  fail 'le build a modifié des fichiers suivis en dehors de .output.'
+# Le bundlage de la migration du lot pilote régénère ces rapports avec un
+# nouvel horodatage. Leur contenu validé est déjà dans Git : on annule
+# uniquement cet effet de bord du build avant le contrôle de sécurité.
+git -C "$repository_root" restore --worktree -- "${generated_report_paths[@]}"
+
+unexpected_changes="$(
+  git -C "$repository_root" status --porcelain --untracked-files=all \
+    -- . ':(exclude).output'
+)"
+if [[ -n "$unexpected_changes" ]]; then
+  printf '%s\n' "$unexpected_changes" >&2
+  fail 'le build a créé ou modifié des fichiers inattendus en dehors de .output.'
 fi
 
 printf '\n[7/8] Enregistrement du paquet Plesk\n'

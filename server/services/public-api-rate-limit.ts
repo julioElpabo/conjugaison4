@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import type { H3Event } from 'h3'
 import type { RowDataPacket } from 'mysql2/promise'
 
-interface PublicRateLimit {
+export interface PublicRateLimit {
   bucket: string
   maximum: number
   windowSeconds: number
@@ -69,5 +69,11 @@ export async function assertPublicApiRateLimit(event: H3Event, limit: PublicRate
     statusCode: 429,
     statusMessage: 'Too Many Requests',
     message: 'Trop de requêtes. Réessayez dans quelques instants.',
+    data: {
+      rateLimitBucket: limit.bucket,
+      retryAfter,
+      maximum: limit.maximum,
+      windowSeconds: limit.windowSeconds,
+    },
   })
 }

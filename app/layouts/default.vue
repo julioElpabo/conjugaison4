@@ -32,6 +32,7 @@ const learnerLanguageMenuOpen = ref(false)
 const tabletLanguageMenu = ref<HTMLElement | null>(null)
 const tabletLanguageMenuOpen = ref(false)
 const learnerLoggingOut = ref(false)
+const contactDialog = ref<{ open: () => void } | null>(null)
 const learnerDisplayName = computed(() => {
   const username = learner.value?.username || ''
   return username ? username.charAt(0).toLocaleUpperCase('fr-CH') + username.slice(1) : ''
@@ -362,10 +363,11 @@ const activeSection = computed(() => {
     <footer class="site-footer">
       <p>{{ ui('Un outil gratuit pour travailler la conjugaison française.') }}</p>
       <div class="site-footer__links">
-        <a href="mailto:christophe.roulet@edu-vd.ch">{{ ui('Contact') }}</a>
+        <button type="button" @click="contactDialog?.open()">{{ ui('Contact') }}</button>
         <NuxtLink :to="localePath('/admin')">{{ ui('Administration') }}</NuxtLink>
       </div>
     </footer>
+    <ContactDialog ref="contactDialog" />
   </div>
 </template>
 
@@ -990,8 +992,15 @@ a {
   margin: 0 0 10px;
 }
 
-.site-footer a {
+.site-footer a,
+.site-footer button {
+  padding: 0;
+  border: 0;
   color: white;
+  background: transparent;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .site-footer__links {

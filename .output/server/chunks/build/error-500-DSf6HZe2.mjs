@@ -1,4 +1,4 @@
-import { useSSRContext, mergeProps } from 'vue';
+import { mergeProps, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrInterpolate } from 'vue/server-renderer';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 import { u as useHead } from './server.mjs';

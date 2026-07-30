@@ -1,5 +1,5 @@
 import { _ as __nuxt_component_0 } from './nuxt-link-icjx6oE7.mjs';
-import { useSSRContext, mergeProps, withCtx, createTextVNode, toDisplayString } from 'vue';
+import { mergeProps, withCtx, createTextVNode, toDisplayString, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrInterpolate, ssrRenderComponent } from 'vue/server-renderer';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 import { u as useHead } from './server.mjs';

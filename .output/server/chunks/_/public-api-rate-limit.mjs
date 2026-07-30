@@ -1,4 +1,4 @@
-import { u as useDatabase, q as setResponseHeader, c as createError, w as getRequestIP } from '../nitro/nitro.mjs';
+import { u as useDatabase, q as setResponseHeader, c as createError, A as getRequestIP } from '../nitro/nitro.mjs';
 import { createHash } from 'node:crypto';
 
 const PUBLIC_RATE_LIMITS = {
@@ -46,7 +46,13 @@ async function assertPublicApiRateLimit(event, limit) {
   throw createError({
     statusCode: 429,
     statusMessage: "Too Many Requests",
-    message: "Trop de requ\xEAtes. R\xE9essayez dans quelques instants."
+    message: "Trop de requ\xEAtes. R\xE9essayez dans quelques instants.",
+    data: {
+      rateLimitBucket: limit.bucket,
+      retryAfter,
+      maximum: limit.maximum,
+      windowSeconds: limit.windowSeconds
+    }
   });
 }
 

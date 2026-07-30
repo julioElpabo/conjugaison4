@@ -1,4 +1,4 @@
-import { k as getCookie, c as createError, j as deleteCookie, s as setCookie, t as getRequestURL, m as useRuntimeConfig } from '../nitro/nitro.mjs';
+import { k as getCookie, c as createError, j as deleteCookie, s as setCookie, y as getRequestURL, m as useRuntimeConfig } from '../nitro/nitro.mjs';
 import { randomBytes, timingSafeEqual, createHmac } from 'node:crypto';
 
 const COOKIE_NAME = "learner_registration";
@@ -74,5 +74,5 @@ function assertUsernameProof(flow, username, proof) {
   }
 }
 
-export { createUsernameProof as a, assertUsernameProof as b, createLearnerRegistrationFlow as c, clearLearnerRegistrationFlow as d, requireLearnerRegistrationFlow as r };
+export { assertUsernameProof as a, createUsernameProof as b, clearLearnerRegistrationFlow as c, createLearnerRegistrationFlow as d, requireLearnerRegistrationFlow as r };
 //# sourceMappingURL=learner-registration.mjs.map

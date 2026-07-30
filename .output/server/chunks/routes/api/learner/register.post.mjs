@@ -1,9 +1,10 @@
-import { m as useRuntimeConfig, t as getRequestURL, c as createError, d as defineEventHandler, q as setResponseHeader, n as normalizeLocale, u as useDatabase, _ as CURRENT_PRIVACY_NOTICE_VERSION } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, q as setResponseHeader, n as normalizeLocale, c as createError, u as useDatabase, Q as CURRENT_PRIVACY_NOTICE_VERSION } from '../../../nitro/nitro.mjs';
 import { randomBytes } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { n as normalizeLearnerUsername, i as isGeneratedLearnerUsername, a as availableLearnerUsername } from '../../../_/learner-username.mjs';
 import { a as assertLearnerRateLimit, l as learnerClientIp } from '../../../_/learner-rate-limit.mjs';
-import { r as requireLearnerRegistrationFlow, b as assertUsernameProof, d as clearLearnerRegistrationFlow, a as createUsernameProof } from '../../../_/learner-registration.mjs';
+import { a as assertTurnstile } from '../../../_/turnstile.mjs';
+import { r as requireLearnerRegistrationFlow, a as assertUsernameProof, c as clearLearnerRegistrationFlow, b as createUsernameProof } from '../../../_/learner-registration.mjs';
 import { a as createLearnerSession } from '../../../_/learner-session.mjs';
 import { r as readLimitedJsonBody } from '../../../_/limited-json-body.mjs';
 import 'node:http';
@@ -15,32 +16,6 @@ import 'node:path';
 import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
-
-async function assertTurnstile(event, token, expectedAction) {
-  const secret = useRuntimeConfig().turnstileSecretKey;
-  const expectedHostname = getRequestURL(event, { xForwardedHost: true, xForwardedProto: true }).hostname;
-  if (typeof secret !== "string" || !secret.trim()) {
-    if (["localhost", "127.0.0.1", "::1"].includes(expectedHostname)) return;
-    throw createError({ statusCode: 503, statusMessage: "Protection antibot indisponible" });
-  }
-  const responseToken = typeof token === "string" ? token.trim() : "";
-  if (!responseToken || responseToken.length > 2048) {
-    throw createError({ statusCode: 400, statusMessage: "V\xE9rification antibot manquante" });
-  }
-  const result = await $fetch(
-    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-    {
-      method: "POST",
-      body: {
-        secret,
-        response: responseToken
-      }
-    }
-  ).catch(() => null);
-  if (!(result == null ? void 0 : result.success) || result.hostname !== expectedHostname || result.action && result.action !== expectedAction) {
-    throw createError({ statusCode: 400, statusMessage: "V\xE9rification antibot refus\xE9e" });
-  }
-}
 
 function recoveryCode() {
   var _a;

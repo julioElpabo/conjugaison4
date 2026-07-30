@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, toRef, isReadonly, isRef, isShallow, isReactive, toRaw } from 'vue';
-import { a3 as parseURL, a4 as encodePath, a5 as decodePath, a6 as localeFromPath, n as normalizeLocale, a7 as getRequestHeaders, c as createError$1, O as hasProtocol, Q as isScriptProtocol, P as joinURL, a8 as withQuery, a9 as klona, aa as DEFAULT_LANGUAGE_PREFERENCES, ab as localizePath, ac as sanitizeStatusCode, ad as getContext, ae as getRequestHeader, af as isEqual, s as setCookie, k as getCookie, j as deleteCookie, ag as $fetch, ah as defu, v as stripLocaleFromPath, V as executeAsync, ai as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { a6 as parseURL, a7 as encodePath, a8 as decodePath, a9 as localeFromPath, n as normalizeLocale, aa as getRequestHeaders, c as createError$1, S as hasProtocol, U as isScriptProtocol, T as joinURL, ab as withQuery, ac as klona, ad as DEFAULT_LANGUAGE_PREFERENCES, ae as localizePath, af as sanitizeStatusCode, ag as getContext, ah as getRequestHeader, ai as isEqual, s as setCookie, k as getCookie, j as deleteCookie, aj as $fetch, ak as defu, z as stripLocaleFromPath, Z as executeAsync, al as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -1324,17 +1324,17 @@ const _routes = [
   {
     name: "admin-admins",
     path: "/admin/admins",
-    component: () => import('./admins-CC61QtxE.mjs')
+    component: () => import('./admins-CFeOIjYe.mjs')
   },
   {
     name: "admin-caracteres",
     path: "/admin/caracteres",
-    component: () => import('./caracteres-9wC-2PoS.mjs')
+    component: () => import('./caracteres-DpL0k9FB.mjs')
   },
   {
     name: "admin-challenges",
     path: "/admin/challenges",
-    component: () => import('./challenges-BqIUYBRJ.mjs')
+    component: () => import('./challenges-BimTmhS-.mjs')
   },
   {
     name: "admin-characters",
@@ -1344,42 +1344,47 @@ const _routes = [
   {
     name: "admin-charts",
     path: "/admin/charts",
-    component: () => import('./charts-hCHBZQgx.mjs')
+    component: () => import('./charts-CQF_KWrl.mjs')
   },
   {
     name: "admin-coaches",
     path: "/admin/coaches",
-    component: () => import('./coaches-Bo8Kt8gA.mjs')
+    component: () => import('./coaches-D2IeNzbF.mjs')
+  },
+  {
+    name: "admin-contact",
+    path: "/admin/contact",
+    component: () => import('./contact-DVNqdg_1.mjs')
   },
   {
     name: "admin-errors",
     path: "/admin/errors",
-    component: () => import('./errors-kF8V85j3.mjs')
+    component: () => import('./errors-CmvdRch0.mjs')
   },
   {
     name: "admin-feedbacks",
     path: "/admin/feedbacks",
-    component: () => import('./feedbacks-3MpLDfsN.mjs')
+    component: () => import('./feedbacks-Q7uN9jS9.mjs')
   },
   {
     name: "admin-help-verification",
     path: "/admin/help-verification",
-    component: () => import('./help-verification-Bsz9QuqP.mjs')
+    component: () => import('./help-verification-CapOEAOO.mjs')
   },
   {
     name: "admin-helps",
     path: "/admin/helps",
-    component: () => import('./helps-CF5HIbVm.mjs')
+    component: () => import('./helps-J7axSOoo.mjs')
   },
   {
     name: "admin-tests",
     path: "/admin/tests",
-    component: () => import('./tests-DEicn7rf.mjs')
+    component: () => import('./tests-DvfKtuyd.mjs')
   },
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-0mFlan-G.mjs')
+    component: () => import('./users-UJrWOye-.mjs')
   },
   {
     name: "defi-code",
@@ -1394,7 +1399,7 @@ const _routes = [
   {
     name: "admin",
     path: "/admin",
-    component: () => import('./index-ixIMi15k.mjs')
+    component: () => import('./index-CvaOC7vi.mjs')
   },
   {
     name: "apprendre",
@@ -1409,7 +1414,7 @@ const _routes = [
   {
     name: "mon-compte",
     path: "/mon-compte",
-    component: () => import('./mon-compte-DSsgi16W.mjs')
+    component: () => import('./mon-compte-CUSvcx7S.mjs')
   },
   {
     name: "my-page",
@@ -1435,17 +1440,17 @@ const _routes = [
   {
     name: "localized-admin-admins",
     path: "/:locale(fr|de|en|it|es)/admin/admins",
-    component: () => import('./admins-CC61QtxE.mjs')
+    component: () => import('./admins-CFeOIjYe.mjs')
   },
   {
     name: "localized-admin-caracteres",
     path: "/:locale(fr|de|en|it|es)/admin/caracteres",
-    component: () => import('./caracteres-9wC-2PoS.mjs')
+    component: () => import('./caracteres-DpL0k9FB.mjs')
   },
   {
     name: "localized-admin-challenges",
     path: "/:locale(fr|de|en|it|es)/admin/challenges",
-    component: () => import('./challenges-BqIUYBRJ.mjs')
+    component: () => import('./challenges-BimTmhS-.mjs')
   },
   {
     name: "localized-admin-characters",
@@ -1455,42 +1460,47 @@ const _routes = [
   {
     name: "localized-admin-charts",
     path: "/:locale(fr|de|en|it|es)/admin/charts",
-    component: () => import('./charts-hCHBZQgx.mjs')
+    component: () => import('./charts-CQF_KWrl.mjs')
   },
   {
     name: "localized-admin-coaches",
     path: "/:locale(fr|de|en|it|es)/admin/coaches",
-    component: () => import('./coaches-Bo8Kt8gA.mjs')
+    component: () => import('./coaches-D2IeNzbF.mjs')
+  },
+  {
+    name: "localized-admin-contact",
+    path: "/:locale(fr|de|en|it|es)/admin/contact",
+    component: () => import('./contact-DVNqdg_1.mjs')
   },
   {
     name: "localized-admin-errors",
     path: "/:locale(fr|de|en|it|es)/admin/errors",
-    component: () => import('./errors-kF8V85j3.mjs')
+    component: () => import('./errors-CmvdRch0.mjs')
   },
   {
     name: "localized-admin-feedbacks",
     path: "/:locale(fr|de|en|it|es)/admin/feedbacks",
-    component: () => import('./feedbacks-3MpLDfsN.mjs')
+    component: () => import('./feedbacks-Q7uN9jS9.mjs')
   },
   {
     name: "localized-admin-help-verification",
     path: "/:locale(fr|de|en|it|es)/admin/help-verification",
-    component: () => import('./help-verification-Bsz9QuqP.mjs')
+    component: () => import('./help-verification-CapOEAOO.mjs')
   },
   {
     name: "localized-admin-helps",
     path: "/:locale(fr|de|en|it|es)/admin/helps",
-    component: () => import('./helps-CF5HIbVm.mjs')
+    component: () => import('./helps-J7axSOoo.mjs')
   },
   {
     name: "localized-admin-tests",
     path: "/:locale(fr|de|en|it|es)/admin/tests",
-    component: () => import('./tests-DEicn7rf.mjs')
+    component: () => import('./tests-DvfKtuyd.mjs')
   },
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-0mFlan-G.mjs')
+    component: () => import('./users-UJrWOye-.mjs')
   },
   {
     name: "localized-defi-code",
@@ -1505,7 +1515,7 @@ const _routes = [
   {
     name: "localized-admin",
     path: "/:locale(fr|de|en|it|es)/admin",
-    component: () => import('./index-ixIMi15k.mjs')
+    component: () => import('./index-CvaOC7vi.mjs')
   },
   {
     name: "localized-apprendre",
@@ -1520,7 +1530,7 @@ const _routes = [
   {
     name: "localized-mon-compte",
     path: "/:locale(fr|de|en|it|es)/mon-compte",
-    component: () => import('./mon-compte-DSsgi16W.mjs')
+    component: () => import('./mon-compte-CUSvcx7S.mjs')
   },
   {
     name: "localized-my-page",
@@ -2132,7 +2142,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-BBCtSyDi.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-BqWOZJdn.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

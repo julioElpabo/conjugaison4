@@ -47,6 +47,7 @@
     "lru.min": "1.1.4",
     "mysql2": "3.22.6",
     "named-placeholders": "1.1.6",
+    "nodemailer": "9.0.3",
     "pako": "2.2.0",
     "pbf": "3.3.0",
     "perfect-debounce": "2.1.0",

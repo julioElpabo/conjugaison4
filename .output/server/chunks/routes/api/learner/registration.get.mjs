@@ -1,7 +1,7 @@
 import { d as defineEventHandler, q as setResponseHeader, u as useDatabase } from '../../../nitro/nitro.mjs';
 import { a as availableLearnerUsername } from '../../../_/learner-username.mjs';
 import { a as assertLearnerRateLimit, l as learnerClientIp } from '../../../_/learner-rate-limit.mjs';
-import { c as createLearnerRegistrationFlow, a as createUsernameProof } from '../../../_/learner-registration.mjs';
+import { d as createLearnerRegistrationFlow, b as createUsernameProof } from '../../../_/learner-registration.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';

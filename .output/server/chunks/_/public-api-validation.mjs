@@ -1,4 +1,4 @@
-import { C as legacyComplementOptions, D as legacyComplementConfig, E as normalizeComplementOptions } from '../nitro/nitro.mjs';
+import { F as legacyComplementOptions, G as legacyComplementConfig, H as normalizeComplementOptions } from '../nitro/nitro.mjs';
 import { D as DEFAULT_SHARED_CHALLENGE_OPTIONS } from './challenge-defaults.mjs';
 
 class PublicInputError extends Error {

@@ -1,6 +1,6 @@
 import { defineComponent, ref, computed, watch, withAsyncContext, mergeProps, unref, useTemplateRef, useSSRContext } from 'vue';
 import { ssrRenderComponent, ssrRenderAttrs, ssrInterpolate, ssrIncludeBooleanAttr, ssrRenderClass, ssrRenderTeleport, ssrRenderAttr } from 'vue/server-renderer';
-import { C as legacyComplementOptions, D as legacyComplementConfig } from '../nitro/nitro.mjs';
+import { F as legacyComplementOptions, G as legacyComplementConfig } from '../nitro/nitro.mjs';
 import { u as useChallengeBuilder, a as useRequestURL, g as getChallengeErrorMessage, P as PresetPicker, V as VerbPicker, T as TensePicker, C as ChallengeOptions, b as ChallengeActions, c as PrintPreview, S as ShareChallengeDialog, d as useChallengeApi, e as challengePresetTrackingDescription, f as challengePresetTrackingTitle } from './url-DAL47GEB.mjs';
 import { f as useLanguagePreferences, u as useHead } from './server.mjs';
 import { C as ClassicExercise, a as ChatExercise, b as CoachPicker, c as createLearnerTrackingContext } from './main-rp0Umf9X.mjs';

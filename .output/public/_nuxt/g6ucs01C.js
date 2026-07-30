@@ -1,0 +1,1 @@
+function r(i){return i.normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().toLocaleLowerCase("fr")}function s(i,a){const t=r(a);return t?i.filter(n=>r(n.infinitif).includes(t)).sort((n,e)=>{const f=r(n.infinitif).startsWith(t),o=r(e.infinitif).startsWith(t);return f!==o?f?-1:1:n.infinitif.localeCompare(e.infinitif,"fr")}):i}export{s as m,r as n};

@@ -1,0 +1,67 @@
+import { d as defineEventHandler, c as createError, u as useDatabase } from '../../../nitro/nitro.mjs';
+import { a as analyticsSessionId, s as safeAnalyticsPath, c as safeAnalyticsMetadata } from '../../../_/analytics-session.mjs';
+import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../../_/public-api-rate-limit.mjs';
+import { r as readLimitedJsonBody } from '../../../_/limited-json-body.mjs';
+import { g as getLearnerSession } from '../../../_/learner-session.mjs';
+import 'node:http';
+import 'node:https';
+import 'node:events';
+import 'node:buffer';
+import 'node:fs';
+import 'node:path';
+import 'node:crypto';
+import 'mysql2/promise';
+import 'node:fs/promises';
+import 'node:url';
+
+const ANALYTICS_EVENTS = [
+  "page_view",
+  "homepage",
+  "challenge_preset_selected",
+  "challenge_load",
+  "challenge_save",
+  "exercise_started",
+  "exercise_completed",
+  "answer_submitted",
+  "answer_correct",
+  "answer_retry",
+  "help_opened",
+  "coach_selected",
+  "print_opened",
+  "pdf_downloaded",
+  "word_downloaded",
+  "feature_exposed",
+  "feature_selected",
+  "feature_completed",
+  "feature_failed",
+  "exercise_abandoned",
+  "account_registered",
+  "account_login",
+  "client_error"
+];
+
+const event_post = defineEventHandler(async (event) => {
+  await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.telemetry);
+  const body = await readLimitedJsonBody(event, 8 * 1024);
+  const name = typeof (body == null ? void 0 : body.name) === "string" ? body.name : "";
+  if (!ANALYTICS_EVENTS.includes(name)) throw createError({ statusCode: 400, statusMessage: "\xC9v\xE9nement inconnu" });
+  const sessionId = analyticsSessionId(event);
+  const path = safeAnalyticsPath(body == null ? void 0 : body.path);
+  const metadata = safeAnalyticsMetadata(body == null ? void 0 : body.metadata);
+  const actorType = await getLearnerSession(event) ? "learner" : "anonymous";
+  const storedMetadata = { ...metadata || {}, actor: actorType };
+  const database = useDatabase();
+  await database.execute(`INSERT INTO analytics_sessions (session_id, current_path)
+    VALUES (?, ?) ON DUPLICATE KEY UPDATE last_seen=CURRENT_TIMESTAMP,
+      current_path=VALUES(current_path)`, [sessionId, path]);
+  await database.execute("INSERT INTO analytics_events (session_id, event_name, path, metadata) VALUES (?, ?, ?, ?)", [
+    sessionId,
+    name,
+    path,
+    JSON.stringify(storedMetadata)
+  ]);
+  return { ok: true };
+});
+
+export { event_post as default };
+//# sourceMappingURL=event.post.mjs.map

@@ -1,5 +1,19 @@
 Pour enregistrer les modifs et faire des commits et push
 
+## Méthode automatisée
+
+Depuis n’importe quel dossier du terminal :
+
+```bash
+deploy-conjugaison
+```
+
+Le script demande la description du commit, puis exécute automatiquement les
+points 1 et 2 ci-dessous. Il s’arrête immédiatement si une commande échoue. Le
+redémarrage normal de Node.js reste à effectuer dans Plesk.
+
+## Méthode manuelle
+
 1. Enregistrer la modification sur main
 git switch main
 git status

@@ -8,6 +8,18 @@ type DashboardTheme = 'summary' | 'audience' | 'pedagogy' | 'usage'
 const activeTheme = defineModel<DashboardTheme>('theme', { default: 'summary' })
 const audience = computed<AnalyticsOverview>(() => {
   const ga4 = props.stats.ga4
+  if (props.stats.window !== 'range') {
+    const local = props.stats.local
+    return {
+      ...(ga4 || local),
+      source: 'local',
+      activeUsers: local.activeUsers,
+      sessions: local.sessions,
+      devices: local.devices,
+      languages: local.languages,
+      activity: local.activity,
+    }
+  }
   const hasCachedGa4Data = Boolean(ga4?.countries.length || ga4?.activity.length || ga4?.activeUsers)
   return ga4?.configured && (!ga4.notice || hasCachedGa4Data) ? ga4 : props.stats.local
 })

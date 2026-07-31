@@ -15,13 +15,18 @@ export default defineNuxtPlugin(() => {
   let timer: number | undefined
 
   type AnalyticsWindow = Window & {
-    dataLayer?: unknown[][]
+    dataLayer?: unknown[]
     gtag?: (...args: unknown[]) => void
   }
   const analyticsWindow = window as unknown as AnalyticsWindow
   if (googleEnabled) {
     analyticsWindow.dataLayer = analyticsWindow.dataLayer || []
-    analyticsWindow.gtag = analyticsWindow.gtag || ((...args: unknown[]) => analyticsWindow.dataLayer!.push(args))
+    analyticsWindow.gtag = analyticsWindow.gtag || function (..._args: unknown[]) {
+      // Google attend l'objet `arguments`, et non un tableau créé avec les
+      // paramètres restants. Sans ce format, le conteneur se charge mais peut
+      // ignorer les commandes config et event placées dans la file.
+      analyticsWindow.dataLayer!.push(arguments)
+    }
     analyticsWindow.gtag('js', new Date())
     analyticsWindow.gtag('config', measurementId, { send_page_view: false })
     useHead({

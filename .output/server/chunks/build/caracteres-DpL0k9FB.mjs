@@ -24,6 +24,7 @@ import '../routes/renderer.mjs';
 import 'vue-bundle-renderer/runtime';
 import 'unhead/server';
 import 'devalue';
+import 'unhead/plugins';
 import 'unhead/utils';
 
 const COACH_CARACTERE_ICON_GROUPS = [

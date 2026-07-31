@@ -1,4 +1,4 @@
-import { X as challengePresetGroupLabels, y as getRequestURL, F as legacyComplementOptions, G as legacyComplementConfig, a2 as challengePresetGroupOrder } from '../nitro/nitro.mjs';
+import { _ as challengePresetGroupLabels, y as getRequestURL, F as legacyComplementOptions, G as legacyComplementConfig, a5 as challengePresetGroupOrder } from '../nitro/nitro.mjs';
 import { D as DEFAULT_SHARED_CHALLENGE_OPTIONS } from '../_/challenge-defaults.mjs';
 import { u as useState } from './state-DjsguMyT.mjs';
 import { computed, defineComponent, ref, watch, mergeProps, unref, useTemplateRef, withCtx, createTextVNode, toDisplayString, useSSRContext } from 'vue';

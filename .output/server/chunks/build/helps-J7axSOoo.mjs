@@ -26,6 +26,7 @@ import '../routes/renderer.mjs';
 import 'vue-bundle-renderer/runtime';
 import 'unhead/server';
 import 'devalue';
+import 'unhead/plugins';
 import 'unhead/utils';
 import 'vue-router';
 

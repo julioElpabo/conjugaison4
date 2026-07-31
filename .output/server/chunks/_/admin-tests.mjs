@@ -1,4 +1,4 @@
-import { a0 as formatConjugationQuestion, c as createError, u as useDatabase } from '../nitro/nitro.mjs';
+import { a3 as formatConjugationQuestion, c as createError, u as useDatabase } from '../nitro/nitro.mjs';
 import { execFile } from 'node:child_process';
 import { readFile, readdir } from 'node:fs/promises';
 import { resolve, join } from 'node:path';

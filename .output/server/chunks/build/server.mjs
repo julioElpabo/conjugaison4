@@ -1,6 +1,6 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, toRef, isReadonly, isRef, isShallow, isReactive, toRaw } from 'vue';
-import { a6 as parseURL, a7 as encodePath, a8 as decodePath, a9 as localeFromPath, o as normalizeLocale, aa as getRequestHeaders, c as createError$1, S as hasProtocol, U as isScriptProtocol, T as joinURL, ab as withQuery, ac as klona, ad as DEFAULT_LANGUAGE_PREFERENCES, ae as localizePath, af as sanitizeStatusCode, ag as getContext, ah as getRequestHeader, ai as isEqual, j as setCookie, m as getCookie, k as deleteCookie, aj as $fetch, ak as defu, z as stripLocaleFromPath, Z as executeAsync, al as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
-import { u as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
+import { a9 as parseURL, aa as encodePath, ab as decodePath, ac as localeFromPath, o as normalizeLocale, ad as getRequestHeaders, c as createError$1, V as hasProtocol, X as isScriptProtocol, W as joinURL, ae as withQuery, af as klona, ag as DEFAULT_LANGUAGE_PREFERENCES, T as localizePath, ah as sanitizeStatusCode, ai as getContext, aj as getRequestHeader, ak as isEqual, j as setCookie, m as getCookie, k as deleteCookie, al as $fetch, am as defu, z as stripLocaleFromPath, S as SUPPORTED_LOCALES, a0 as executeAsync, an as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { u as useSeoMeta$1, a as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
 import 'node:http';
@@ -16,6 +16,7 @@ import 'node:url';
 import 'vue-bundle-renderer/runtime';
 import 'unhead/server';
 import 'devalue';
+import 'unhead/plugins';
 import 'unhead/utils';
 
 function flatHooks(configHooks, hooks = {}, parentName) {
@@ -1387,9 +1388,24 @@ const _routes = [
     component: () => import('./users-DErd5kcf.mjs')
   },
   {
+    name: "modes-mode-temps",
+    path: "/modes/:mode()/:temps()",
+    component: () => import('./_temps_-7eMtn0vx.mjs')
+  },
+  {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-Dt5opbo2.mjs')
+    component: () => import('./_code_-DpvZ_a2d.mjs')
+  },
+  {
+    name: "exercices-parcours",
+    path: "/exercices/:parcours()",
+    component: () => import('./_parcours_-DsFp0Cj3.mjs')
+  },
+  {
+    name: "modes-mode",
+    path: "/modes/:mode()",
+    component: () => import('./index-e4z-xcJq.mjs')
   },
   {
     name: "accueil",
@@ -1404,12 +1420,12 @@ const _routes = [
   {
     name: "apprendre",
     path: "/apprendre",
-    component: () => import('./apprendre-CPMyzq3H.mjs')
+    component: () => import('./apprendre-B4GG16cz.mjs')
   },
   {
     name: "consulter",
     path: "/consulter",
-    component: () => import('./consulter-H_xS9mXQ.mjs')
+    component: () => import('./consulter-dqJMy6s0.mjs')
   },
   {
     name: "mon-compte",
@@ -1425,7 +1441,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-Jkgl-0V6.mjs')
+    component: () => import('./nouveau-defi-w8OEhwhy.mjs')
   },
   {
     name: "signin",
@@ -1435,7 +1451,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-D5EzuGzf.mjs')
+    component: () => import('./index-DOI-kGCS.mjs')
   },
   {
     name: "localized-admin-admins",
@@ -1503,9 +1519,24 @@ const _routes = [
     component: () => import('./users-DErd5kcf.mjs')
   },
   {
+    name: "localized-modes-mode-temps",
+    path: "/:locale(fr|de|en|it|es)/modes/:mode()/:temps()",
+    component: () => import('./_temps_-7eMtn0vx.mjs')
+  },
+  {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-Dt5opbo2.mjs')
+    component: () => import('./_code_-DpvZ_a2d.mjs')
+  },
+  {
+    name: "localized-exercices-parcours",
+    path: "/:locale(fr|de|en|it|es)/exercices/:parcours()",
+    component: () => import('./_parcours_-DsFp0Cj3.mjs')
+  },
+  {
+    name: "localized-modes-mode",
+    path: "/:locale(fr|de|en|it|es)/modes/:mode()",
+    component: () => import('./index-e4z-xcJq.mjs')
   },
   {
     name: "localized-accueil",
@@ -1520,12 +1551,12 @@ const _routes = [
   {
     name: "localized-apprendre",
     path: "/:locale(fr|de|en|it|es)/apprendre",
-    component: () => import('./apprendre-CPMyzq3H.mjs')
+    component: () => import('./apprendre-B4GG16cz.mjs')
   },
   {
     name: "localized-consulter",
     path: "/:locale(fr|de|en|it|es)/consulter",
-    component: () => import('./consulter-H_xS9mXQ.mjs')
+    component: () => import('./consulter-dqJMy6s0.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1541,7 +1572,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-Jkgl-0V6.mjs')
+    component: () => import('./nouveau-defi-w8OEhwhy.mjs')
   },
   {
     name: "localized-signin",
@@ -1551,7 +1582,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-D5EzuGzf.mjs')
+    component: () => import('./index-DOI-kGCS.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -1701,6 +1732,10 @@ function injectHead(nuxtApp) {
 function useHead(input, options = {}) {
   const head = options.head || injectHead(options.nuxt);
   return useHead$1(input, { head, ...options });
+}
+function useSeoMeta(input, options = {}) {
+  const head = options.head || injectHead(options.nuxt);
+  return useSeoMeta$1(input, { head, ...options });
 }
 function useRequestEvent(nuxtApp) {
   nuxtApp ||= useNuxtApp();
@@ -1882,7 +1917,7 @@ const globalMiddleware = [
   manifest_45route_45rule
 ];
 const namedMiddleware = {
-  "learner-auth": () => import('./learner-auth-BijwIoV0.mjs')
+  "learner-auth": () => import('./learner-auth-C9dYJp58.mjs')
 };
 Object.assign(/* @__PURE__ */ Object.create(null), {});
 const pageIslandRoutes = Object.assign(/* @__PURE__ */ Object.create(null), {});
@@ -2142,7 +2177,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-ByNX8rVk.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-BCw6Xavx.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({
@@ -2440,17 +2475,39 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
   __name: "app",
   __ssrInlineRender: true,
   setup(__props) {
-    const { ui } = useLanguagePreferences();
-    function localizedPageKey(route) {
-      return stripLocaleFromPath(route.path);
+    const { ui, interfaceLocale } = useLanguagePreferences();
+    const route = useRoute();
+    const config = /* @__PURE__ */ useRuntimeConfig();
+    const siteUrl = computed(() => String(config.public.siteUrl).replace(/\/$/u, ""));
+    const routeWithoutLocale = computed(() => stripLocaleFromPath(route.path));
+    const canonicalUrl = computed(() => `${siteUrl.value}${localizePath(routeWithoutLocale.value, interfaceLocale.value)}`);
+    const privatePath = computed(() => /^(?:\/admin(?:\/|$)|\/(?:signin|my-page|mon-compte|nouveau-defi)(?:\/|$)|\/defi(?:\/|$))/u.test(routeWithoutLocale.value));
+    function localizedPageKey(route2) {
+      return stripLocaleFromPath(route2.path);
     }
     useHead(() => ({
       titleTemplate: (title) => title ? `${title} · ${ui("Défis de conjugaison")}` : ui("Défis de conjugaison"),
       meta: [
         { name: "theme-color", content: "#344758" },
+        { name: "robots", content: privatePath.value ? "noindex, nofollow" : "index, follow" },
+        { property: "og:site_name", content: "TATITOTU" },
+        { property: "og:url", content: canonicalUrl.value },
         {
           name: "description",
           content: ui("Créez des défis de conjugaison, entraînez-vous et imprimez vos questionnaires.")
+        }
+      ],
+      link: [
+        { rel: "canonical", href: canonicalUrl.value },
+        ...SUPPORTED_LOCALES.map((locale) => ({
+          rel: "alternate",
+          hreflang: locale,
+          href: `${siteUrl.value}${localizePath(routeWithoutLocale.value, locale)}`
+        })),
+        {
+          rel: "alternate",
+          hreflang: "x-default",
+          href: `${siteUrl.value}${localizePath(routeWithoutLocale.value, "fr")}`
         }
       ],
       script: [{
@@ -2593,5 +2650,5 @@ let entry;
 }
 const entry_default = ((ssrContext) => entry(ssrContext));
 
-export { useRouter as a, useNuxtApp as b, useRuntimeConfig as c, nuxtLinkDefaults as d, entry_default as default, encodeRoutePath as e, useLanguagePreferences as f, useRoute as g, useRequestFetch as h, useRequestHeaders as i, asyncDataDefaults as j, createError as k, useRequestEvent as l, fetchDefaults as m, navigateTo as n, defineNuxtRouteMiddleware as o, resolveRouteObject as r, useHead as u };
+export { useRouter as a, useNuxtApp as b, useRuntimeConfig as c, nuxtLinkDefaults as d, entry_default as default, encodeRoutePath as e, useLanguagePreferences as f, useRoute as g, useRequestFetch as h, useRequestHeaders as i, asyncDataDefaults as j, createError as k, useRequestEvent as l, useSeoMeta as m, navigateTo as n, fetchDefaults as o, defineNuxtRouteMiddleware as p, resolveRouteObject as r, useHead as u };
 //# sourceMappingURL=server.mjs.map

@@ -16,6 +16,7 @@ import 'vue-bundle-renderer/runtime';
 import 'vue/server-renderer';
 import 'unhead/server';
 import 'devalue';
+import 'unhead/plugins';
 import 'unhead/utils';
 import 'vue-router';
 

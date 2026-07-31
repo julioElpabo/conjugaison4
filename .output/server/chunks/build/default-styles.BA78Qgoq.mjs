@@ -15,6 +15,7 @@ import 'node:url';
 import 'vue/server-renderer';
 import 'unhead/server';
 import 'devalue';
+import 'unhead/plugins';
 import 'unhead/utils';
 import 'vue';
 

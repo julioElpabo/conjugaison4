@@ -2,7 +2,7 @@ import { defineComponent, useTemplateRef, ref, computed, watch, mergeProps, unre
 import { ssrRenderAttrs, ssrInterpolate, ssrRenderAttr, ssrRenderList, ssrRenderComponent, ssrRenderClass, ssrIncludeBooleanAttr } from 'vue/server-renderer';
 import { b as COACH_EXPLANATION_APPROACHES } from '../_/coach.mjs';
 import { d as decomposeConjugationForm, e as buildConjugationEndingsHtml, f as buildConjugationBaseHtml, g as buildCompleteConjugationAdviceHtml, n as normalizeCoachHelpEngineKey, c as coachHelpProfile, a as auditRenderedCoachHelp } from '../_/coach-help-audit.mjs';
-import { am as grammarModeCode } from '../nitro/nitro.mjs';
+import { ao as grammarModeCode } from '../nitro/nitro.mjs';
 import { c as bareNearFutureInfinitive, n as nearFutureReflexivePronoun, a as isPronominalNearFutureInfinitive, i as isNearFutureTense } from '../_/near-future.mjs';
 import { f as useLanguagePreferences } from './server.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';

@@ -1,8 +1,9 @@
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'vue-bundle-renderer/runtime';
-import { ax as joinRelativeURL, n as useRuntimeConfig, a7 as encodePath, ay as defineRenderHandler, a as getQuery, c as createError, az as destr, aA as getRouteRules, aB as getResponseStatusText, aC as getResponseStatus, aD as useNitroApp } from '../nitro/nitro.mjs';
+import { az as joinRelativeURL, n as useRuntimeConfig, aa as encodePath, aA as defineRenderHandler, a as getQuery, c as createError, aB as destr, aC as getRouteRules, aD as getResponseStatusText, aE as getResponseStatus, aF as useNitroApp } from '../nitro/nitro.mjs';
 import { renderToString } from 'vue/server-renderer';
 import { createHead as createHead$1, propsToString, renderSSRHead } from 'unhead/server';
 import { stringify, uneval } from 'devalue';
+import { FlatMetaPlugin } from 'unhead/plugins';
 import { walkResolver } from 'unhead/utils';
 import { isRef, toValue, hasInjectionContext, inject, ref, watchEffect, getCurrentInstance, onBeforeUnmount, onDeactivated, onActivated } from 'vue';
 
@@ -61,6 +62,16 @@ function clientUseHead(head, input, options = {}) {
     });
   }
   return entry;
+}
+function useSeoMeta(input = {}, options = {}) {
+  const head = options.head || /* @__PURE__ */ injectHead();
+  head.use(FlatMetaPlugin);
+  const { title, titleTemplate, ...meta } = input;
+  return useHead({
+    title,
+    titleTemplate,
+    _flatMeta: meta
+  }, options);
 }
 
 // @__NO_SIDE_EFFECTS__
@@ -454,5 +465,5 @@ const renderer = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: handler
 }, Symbol.toStringTag, { value: 'Module' }));
 
-export { baseURL as b, headSymbol as h, publicAssetsURL as p, renderer as r, useHead as u };
+export { useHead as a, baseURL as b, headSymbol as h, publicAssetsURL as p, renderer as r, useSeoMeta as u };
 //# sourceMappingURL=renderer.mjs.map

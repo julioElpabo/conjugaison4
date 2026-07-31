@@ -1,5 +1,8 @@
 <script setup lang="ts">
-const { ui, localePath } = useLanguagePreferences()
+import { EXERCISE_LANDING_SLUGS, exerciseLandingPage } from '~~/shared/data/exercise-landing-pages'
+import { MODE_LANDING_SLUGS, modeLandingPage } from '~~/shared/data/mode-landing-pages'
+
+const { ui, localePath, interfaceLocale } = useLanguagePreferences()
 const { track } = useSiteAnalytics()
 useHead(() => ({
   title: ui('Apprendre la conjugaison'),
@@ -13,6 +16,8 @@ const sections = computed(() => [
   { id: 'accords', number: '04', title: ui('Réussir les accords'), description: ui('Sujet, auxiliaires et participe passé.') },
   { id: 'orthographe', number: '05', title: ui('Éviter les pièges'), description: ui('Modifications du radical et terminaisons à surveiller.') },
 ])
+const exerciseJourneys = computed(() => EXERCISE_LANDING_SLUGS.map(slug => exerciseLandingPage(slug, interfaceLocale.value)))
+const modeJourneys = computed(() => MODE_LANDING_SLUGS.map(slug => modeLandingPage(slug, interfaceLocale.value)))
 
 function scrollToSection(sectionId: string) {
   track('feature_selected', { feature: 'learn.content', item: sectionId })
@@ -86,6 +91,11 @@ onMounted(() => track('feature_exposed', { feature: 'learn.content' }))
           <article><span>{{ ui('Hypothèse') }}</span><h3>{{ ui('Conditionnel') }}</h3><p>{{ ui('Présente une possibilité, une information incertaine ou une action soumise à une condition.') }}</p><em>Je viendrais si je pouvais.</em></article>
           <article><span>{{ ui('Consigne') }}</span><h3>{{ ui('Impératif') }}</h3><p>{{ ui('Exprime un ordre, un conseil ou une invitation, sans sujet exprimé.') }}</p><em>Écoutez attentivement !</em></article>
         </div>
+        <nav class="mode-page-links" :aria-label="ui('Choisir le bon mode')">
+          <NuxtLink v-for="mode in modeJourneys" :key="mode.slug" :to="localePath(`/modes/${mode.slug}`)">
+            <strong>{{ mode.title }}</strong><span aria-hidden="true">→</span>
+          </NuxtLink>
+        </nav>
       </section>
 
       <section id="accords" class="rule-section">
@@ -110,6 +120,20 @@ onMounted(() => track('feature_exposed', { feature: 'learn.content' }))
         </div>
       </section>
 
+      <section class="learning-journeys" aria-labelledby="journeys-title">
+        <header>
+          <p class="learning-eyebrow">{{ ui('À toi de jouer') }}</p>
+          <h2 id="journeys-title">{{ ui('Passe de la règle à la pratique') }}</h2>
+        </header>
+        <div>
+          <NuxtLink v-for="journey in exerciseJourneys" :key="journey.slug" :to="localePath(`/exercices/${journey.slug}`)">
+            <span>{{ journey.eyebrow }}</span>
+            <strong>{{ journey.title }}</strong>
+            <small>{{ journey.description }}</small>
+          </NuxtLink>
+        </div>
+      </section>
+
       <section class="learning-actions" aria-labelledby="continue-title">
         <div><p class="learning-eyebrow">{{ ui('À toi de jouer') }}</p><h2 id="continue-title">{{ ui('Passe de la règle à la pratique') }}</h2><p>{{ ui('Consulte un modèle complet ou crée un exercice ciblé pour vérifier ce que tu viens d’apprendre.') }}</p></div>
         <div><NuxtLink :to="localePath('/consulter')">{{ ui('Consulter un verbe') }}</NuxtLink><NuxtLink class="is-primary" :to="localePath('/')">{{ ui('S’exercer') }}</NuxtLink></div>
@@ -128,6 +152,15 @@ onMounted(() => track('feature_exposed', { feature: 'learn.content' }))
 .learning-summary button { display: flex; min-height: 155px; flex-direction: column; padding: 16px; border: 1px solid var(--line); border-radius: 17px; color: var(--ink); background: rgb(255 255 255 / 88%); text-align: left; box-shadow: 0 10px 28px rgb(42 65 61 / 7%); transition: transform 150ms ease, border-color 150ms ease; cursor: pointer; }
 .learning-summary button:hover { transform: translateY(-3px); border-color: var(--brand); }
 .learning-summary span { color: var(--accent); font-size: .76rem; font-weight: 850; }
+.learning-journeys { max-width: 1080px; margin: 42px auto 20px; }
+.learning-journeys > header { margin-bottom: 17px; text-align: center; }
+.learning-journeys h2 { margin: 0; color: #294c4b; font-size: clamp(1.7rem, 4vw, 2.6rem); letter-spacing: -.04em; }
+.learning-journeys > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.learning-journeys a { display: flex; min-height: 190px; padding: 21px; flex-direction: column; border: 1px solid var(--line); border-radius: 18px; gap: 8px; color: var(--ink); background: var(--surface); text-decoration: none; box-shadow: 0 10px 28px rgb(42 65 61 / 7%); transition: transform 150ms ease, border-color 150ms ease; }
+.learning-journeys a:hover { transform: translateY(-3px); border-color: var(--brand); }
+.learning-journeys a span { color: var(--accent); font-size: .72rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.learning-journeys a strong { color: var(--brand-dark); font-size: 1.1rem; line-height: 1.3; }
+.learning-journeys a small { color: var(--muted); font-size: .88rem; line-height: 1.5; }
 .learning-summary strong { margin-top: auto; color: var(--brand-dark); line-height: 1.2; }
 .learning-summary small { margin-top: 6px; color: var(--muted); line-height: 1.35; }
 .learning-content { display: grid; max-width: 1080px; margin: 0 auto; gap: 24px; }
@@ -157,6 +190,10 @@ onMounted(() => track('feature_exposed', { feature: 'learn.content' }))
 .mode-cards article > span { display: inline-block; margin-bottom: 15px; padding: 5px 8px; border-radius: 99px; color: var(--brand-dark); background: var(--brand-pale); font-size: .72rem; font-weight: 800; text-transform: uppercase; }
 .mode-cards p { min-height: 105px; margin-bottom: 10px; }
 .mode-cards em, .trap-grid em, .agreement-flow em { color: var(--brand-dark); }
+.mode-page-links { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin-top: 14px; gap: 8px; }
+.mode-page-links a { display: flex; min-height: 72px; padding: 12px; align-items: center; justify-content: space-between; gap: 8px; border: 1px solid var(--line); border-radius: 13px; color: var(--brand-dark); background: var(--surface); font-size: .82rem; line-height: 1.3; text-decoration: none; }
+.mode-page-links a:hover { border-color: var(--brand); background: var(--brand-pale); }
+.mode-page-links a span { color: var(--accent); font-size: 1.1rem; }
 .agreement-flow { display: grid; gap: 10px; }
 .agreement-flow article { display: flex; align-items: start; gap: 15px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--soft); }
 .agreement-flow article > span { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; border-radius: 50%; color: white; background: var(--brand); font-weight: 800; }
@@ -172,14 +209,18 @@ onMounted(() => track('feature_exposed', { feature: 'learn.content' }))
 .learning-actions a.is-primary { border-color: var(--accent); background: var(--accent); }
 @media (max-width: 850px) {
   .learning-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .learning-journeys > div { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .rule-grid--three, .trap-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .mode-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mode-page-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 620px) {
   .learning-summary { grid-template-columns: 1fr; }
+  .learning-journeys > div { grid-template-columns: 1fr; }
   .learning-summary button { min-height: 105px; }
   .rule-section { padding: 20px; border-radius: 19px; }
   .rule-grid--three, .trap-grid, .mode-cards { grid-template-columns: 1fr; }
+  .mode-page-links { grid-template-columns: 1fr; }
   .mode-cards p, .trap-grid p { min-height: 0; }
   .formation-row { grid-template-columns: 1fr; gap: 4px; }
   .formation-row--head { display: none; }

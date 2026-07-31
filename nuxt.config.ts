@@ -33,6 +33,7 @@ export default defineNuxtConfig({
       || process.env.GA4_CREDENTIALS_FILE
       || 'cle-google/lobjet-366517-4ee1bb2ab062.json',
     public: {
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://conjugaison.tatitotu.ch',
       ga4MeasurementId: process.env.NUXT_PUBLIC_GA4_MEASUREMENT_ID || process.env.GA4_MEASUREMENT_ID || 'G-T0E6KRN0GZ',
       turnstileSiteKey: process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY || '',
     },

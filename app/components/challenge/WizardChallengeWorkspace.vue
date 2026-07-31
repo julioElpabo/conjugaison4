@@ -72,6 +72,7 @@ const {
 
 const api = useChallengeApi()
 const { track } = useSiteAnalytics()
+const route = useRoute()
 const requestUrl = useRequestURL()
 const wizardInitialized = useState('wizard-challenge-initialized', () => false)
 const homeResetRequested = useState('home-reset-requested', () => false)
@@ -268,12 +269,79 @@ const heroTitle = computed(() => {
 })
 const launchVerbPreview = computed(() => selectedVerbs.value.slice(0, 10))
 const remainingLaunchVerbs = computed(() => selectedVerbs.value.slice(10))
+
+function requestedLandingTense() {
+  const requested = Array.isArray(route.query.parcours) ? route.query.parcours[0] : route.query.parcours
+  const tenseByJourney: Record<string, string> = {
+    present: 'présent',
+    imparfait: 'imparfait',
+    'passe-compose': 'passé composé',
+  }
+  return requested ? tenseByJourney[requested] : undefined
+}
+
+function requestedLandingMode() {
+  const requested = Array.isArray(route.query.mode) ? route.query.mode[0] : route.query.mode
+  const modeByJourney: Record<string, string> = {
+    indicatif: 'indicatif',
+    subjonctif: 'subjonctif',
+    conditionnel: 'conditionnel',
+    imperatif: 'impératif',
+    participe: 'participe',
+  }
+  return requested ? modeByJourney[requested] : undefined
+}
+
+function requestedModeTense() {
+  const requested = Array.isArray(route.query.temps) ? route.query.temps[0] : route.query.temps
+  if (!requested) return undefined
+  const tenseAliases: Record<string, string> = {
+    'futur simple': 'futur',
+    'passé première forme': 'passé 1',
+    'passé deuxième forme': 'passé 2',
+    'gérondif présent': 'présent',
+    'gérondif passé': 'passé',
+  }
+  return tenseAliases[requested] ?? requested
+}
+
 try {
   await loadCatalogue()
   if (!wizardInitialized.value) {
     clearVerbs()
     clearTenses()
     wizardInitialized.value = true
+  }
+  const landingTense = requestedLandingTense()
+  const landingMode = requestedLandingMode()
+  const modeTense = requestedModeTense()
+  if ((landingTense || landingMode) && !props.initialCode) {
+    const indicative = catalogue.value.modes.find(mode => mode.name.toLocaleLowerCase('fr') === 'indicatif')
+    const tense = landingTense ? catalogue.value.temps.find(candidate => (
+      candidate.name.toLocaleLowerCase('fr') === landingTense
+      && (!indicative || candidate.modeId === indicative.id)
+    )) : undefined
+    const requestedModeName = landingMode === 'participe' && String(route.query.temps || '').startsWith('gérondif')
+      ? 'gérondif'
+      : landingMode
+    const mode = requestedModeName ? catalogue.value.modes.find(candidate => candidate.name.toLocaleLowerCase('fr') === requestedModeName) : undefined
+    const selectedModeTense = mode && modeTense ? catalogue.value.temps.find(candidate => (
+      candidate.modeId === mode.id
+      && candidate.name.toLocaleLowerCase('fr') === modeTense
+    )) : undefined
+    const tenseIds = tense
+      ? [tense.id]
+      : selectedModeTense ? [selectedModeTense.id]
+      : mode ? catalogue.value.temps.filter(candidate => candidate.modeId === mode.id).map(candidate => candidate.id) : []
+    if (tenseIds.length) {
+      clearVerbs()
+      applySelection({ verbIds: [], tenseIds, questionCount: 10 })
+      activePresetId.value = undefined
+      sourcePresetId.value = undefined
+      sourcePresetRandomCount.value = null
+      isPrefilledChallenge.value = false
+      currentStep.value = 1
+    }
   }
   if (props.initialCode) {
     challengeCode.value = normalizeChallengeCode(props.initialCode)

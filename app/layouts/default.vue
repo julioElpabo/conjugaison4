@@ -91,11 +91,26 @@ function toggleTheme() {
   updateTheme()
 }
 
+function trackLanguageChoice(locale: AppLocale, source: string) {
+  if (locale === interfaceLocale.value) return false
+  track('language_tested', {
+    locale,
+    previousLocale: interfaceLocale.value,
+    source,
+  })
+  track('feature_selected', { feature: 'language.change', item: locale })
+  return true
+}
+
+function selectPublicLanguage(locale: AppLocale, source: string) {
+  if (!trackLanguageChoice(locale, source)) return
+  setInterfaceLocale(locale)
+  track('feature_completed', { feature: 'language.change', item: locale })
+}
+
 function selectTabletLanguage(locale: AppLocale) {
   tabletLanguageMenuOpen.value = false
-  setInterfaceLocale(locale)
-  track('feature_selected', { feature: 'language.change', item: locale })
-  track('feature_completed', { feature: 'language.change', item: locale })
+  selectPublicLanguage(locale, 'tablet-menu')
 }
 
 function requestHomeReset() {
@@ -133,7 +148,7 @@ const activeLearnerTab = computed(() => {
 
 async function selectLearnerLanguage(locale: AppLocale) {
   learnerLanguageMenuOpen.value = false
-  track('feature_selected', { feature: 'language.change', item: locale })
+  if (!trackLanguageChoice(locale, 'learner-menu')) return
   setInterfaceLocale(locale)
   try {
     await $fetch('/api/learner/preferences', {
@@ -177,7 +192,7 @@ const activeSection = computed(() => {
               :aria-label="option.label"
               :aria-pressed="interfaceLocale === option.value"
               :title="option.label"
-              @click="setInterfaceLocale(option.value)"
+              @click="selectPublicLanguage(option.value, 'homepage-tablet')"
             >
               <span aria-hidden="true">{{ option.flag }}</span>
             </button>
@@ -343,7 +358,7 @@ const activeSection = computed(() => {
                 :aria-label="option.label"
                 :aria-pressed="interfaceLocale === option.value"
                 :title="option.label"
-                @click="setInterfaceLocale(option.value)"
+                @click="selectPublicLanguage(option.value, 'navigation')"
               >
                 <span aria-hidden="true">{{ option.flag }}</span>
               </button>

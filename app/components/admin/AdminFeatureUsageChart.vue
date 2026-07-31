@@ -7,15 +7,17 @@ const props = withDefaults(defineProps<{
   title?: string
   eyebrow?: string
   centerLabel?: string
+  maxItems?: number
 }>(), {
   insight: '',
   title: 'Modes d’utilisation',
   eyebrow: 'Répartition',
   centerLabel: 'utilisations',
+  maxItems: 3,
 })
 
-const colors = ['#168eaa', '#6251a5', '#d28a2d']
-const visibleItems = computed(() => props.items.slice(0, 3).map((item, index) => ({ ...item, color: colors[index]! })))
+const colors = ['#168eaa', '#6251a5', '#d28a2d', '#2b9767', '#d05e56']
+const visibleItems = computed(() => props.items.slice(0, props.maxItems).map((item, index) => ({ ...item, color: colors[index % colors.length]! })))
 const total = computed(() => visibleItems.value.reduce((sum, item) => sum + item.value, 0))
 const gradient = computed(() => {
   if (!total.value) return '#dce8eb'

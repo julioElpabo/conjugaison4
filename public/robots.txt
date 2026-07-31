@@ -1,3 +1,9 @@
 User-Agent: *
-Disallow: /fr/signin
-Disallow: /fr/my-page
+Disallow: /api/
+Disallow: /fr/admin/
+Disallow: /de/admin/
+Disallow: /en/admin/
+Disallow: /it/admin/
+Disallow: /es/admin/
+
+Sitemap: https://conjugaison.tatitotu.ch/sitemap.xml

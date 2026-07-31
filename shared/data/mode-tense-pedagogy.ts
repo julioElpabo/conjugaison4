@@ -1,0 +1,243 @@
+import type { ModeLandingSlug } from './mode-landing-pages'
+
+export interface ContextualExample {
+  sentence: string
+  context: string
+  reason: string
+}
+
+export interface ModeTensePedagogy {
+  summary: string
+  formation: string
+  uses: string[]
+  examples: ContextualExample[]
+}
+
+type PedagogyKey = `${ModeLandingSlug}:${string}`
+
+const pedagogy: Record<PedagogyKey, ModeTensePedagogy> = {
+  'indicatif:present': {
+    summary: 'Le présent de l’indicatif situe le fait au moment où l’on parle, mais il sert aussi à exprimer une habitude ou une vérité valable en général.',
+    formation: 'On conjugue directement le verbe au présent. Le radical et les terminaisons varient selon le groupe et le verbe.',
+    uses: ['Une action en cours maintenant', 'Une habitude ou une répétition', 'Une vérité générale'],
+    examples: [
+      { sentence: 'Je ferme la fenêtre maintenant.', context: 'La personne décrit son geste au moment même où elle parle.', reason: 'L’indicatif présente le geste comme réel ; le présent le rend simultané à la parole.' },
+      { sentence: 'Chaque matin, Lina prend le train.', context: '« Chaque matin » signale une habitude.', reason: 'Le présent convient à une action qui se répète régulièrement.' },
+      { sentence: 'L’eau bout à 100 °C.', context: 'Il s’agit d’un fait scientifique général.', reason: 'Le présent de vérité générale ne dépend pas d’un moment précis.' },
+    ],
+  },
+  'indicatif:imparfait': {
+    summary: 'L’imparfait montre une action passée en cours, habituelle ou utilisée comme décor d’un récit, sans insister sur sa fin.',
+    formation: 'On prend généralement le radical de « nous » au présent sans -ons, puis on ajoute -ais, -ais, -ait, -ions, -iez, -aient.',
+    uses: ['Le décor et les circonstances d’un récit', 'Une habitude passée', 'Une action en cours interrompue'],
+    examples: [
+      { sentence: 'Le soleil brillait et la place était calme.', context: 'Le narrateur installe le décor avant les événements.', reason: 'L’imparfait décrit un état durable à l’arrière-plan du récit.' },
+      { sentence: 'Enfant, nous jouions ici tous les mercredis.', context: '« Tous les mercredis » marque une répétition dans le passé.', reason: 'L’imparfait exprime une habitude passée sans limites précises.' },
+      { sentence: 'Je préparais le repas quand tu as appelé.', context: 'La préparation était déjà en cours au moment de l’appel.', reason: 'L’imparfait porte l’action longue ; le passé composé signale l’événement qui l’interrompt.' },
+    ],
+  },
+  'indicatif:passe-compose': {
+    summary: 'Le passé composé présente un événement passé achevé, souvent lié au présent ou raconté dans une conversation.',
+    formation: 'On emploie avoir ou être au présent, suivi du participe passé. L’accord dépend de l’auxiliaire et de la place du complément direct.',
+    uses: ['Un événement terminé', 'Une suite d’actions au premier plan', 'Un résultat encore visible maintenant'],
+    examples: [
+      { sentence: 'Ce matin, j’ai envoyé le dossier.', context: 'L’envoi est terminé et le moment est identifié.', reason: 'L’indicatif affirme le fait ; le passé composé présente l’action comme accomplie.' },
+      { sentence: 'Elle est entrée, a salué puis s’est assise.', context: 'Les actions font avancer le récit l’une après l’autre.', reason: 'Le passé composé convient aux événements successifs du premier plan.' },
+      { sentence: 'Nous avons perdu la clé, donc nous attendons dehors.', context: 'La perte passée a une conséquence présente.', reason: 'Le passé composé relie naturellement l’événement accompli à son résultat actuel.' },
+    ],
+  },
+  'indicatif:plus-que-parfait': {
+    summary: 'Le plus-que-parfait exprime un fait déjà accompli avant un autre moment du passé.',
+    formation: 'On conjugue avoir ou être à l’imparfait, puis on ajoute le participe passé.',
+    uses: ['Une action antérieure à une autre action passée', 'Une cause déjà réalisée', 'Un retour en arrière dans un récit'],
+    examples: [
+      { sentence: 'Quand le train est arrivé, nous avions déjà acheté les billets.', context: 'L’achat précède l’arrivée du train.', reason: 'Le plus-que-parfait marque clairement l’antériorité entre deux faits passés.' },
+      { sentence: 'Elle était rassurée parce qu’elle avait reçu la réponse.', context: 'La réception explique un état ressenti ensuite.', reason: 'Le temps présente la cause comme achevée avant sa conséquence passée.' },
+      { sentence: 'Il reconnut la maison où il avait grandi.', context: 'Le récit revient sur une période plus ancienne.', reason: 'Le plus-que-parfait ouvre un retour en arrière par rapport au moment raconté.' },
+    ],
+  },
+  'indicatif:passe-simple': {
+    summary: 'Le passé simple raconte des événements achevés au premier plan, surtout dans les récits écrits et littéraires.',
+    formation: 'C’est un temps simple dont les terminaisons dépendent du groupe ; de nombreux verbes du troisième groupe ont un radical particulier.',
+    uses: ['Les actions principales d’un récit écrit', 'Un événement bref et délimité', 'Une succession d’actions achevées'],
+    examples: [
+      { sentence: 'Le voyageur ouvrit la porte et entra.', context: 'Un récit écrit enchaîne deux actions brèves.', reason: 'Le passé simple fait progresser l’histoire avec des événements achevés.' },
+      { sentence: 'Soudain, la lumière s’éteignit.', context: '« Soudain » annonce une rupture ponctuelle.', reason: 'Le passé simple détache cet événement du décor décrit à l’imparfait.' },
+      { sentence: 'Ils traversèrent la forêt, atteignirent le col et disparurent.', context: 'Plusieurs étapes successives structurent le récit.', reason: 'Chaque verbe au passé simple présente une étape complète.' },
+    ],
+  },
+  'indicatif:passe-anterieur': {
+    summary: 'Le passé antérieur indique qu’une action s’est achevée immédiatement avant une autre action au passé simple, surtout dans un récit soutenu.',
+    formation: 'On conjugue avoir ou être au passé simple, suivi du participe passé.',
+    uses: ['Une action juste antérieure au passé simple', 'Une action accomplie avant la suite du récit', 'Les propositions introduites par quand, dès que ou après que'],
+    examples: [
+      { sentence: 'Dès qu’il eut fermé la porte, il partit.', context: 'La fermeture est entièrement terminée avant le départ.', reason: 'Le passé antérieur ordonne deux actions rapprochées dans un récit au passé simple.' },
+      { sentence: 'Quand elles furent arrivées, la réunion commença.', context: 'Le début attend l’achèvement de leur arrivée.', reason: 'Le temps souligne que la première action est accomplie avant la seconde.' },
+      { sentence: 'Après qu’il eut relu sa lettre, il la signa.', context: 'La relecture précède nécessairement la signature.', reason: 'Dans ce registre écrit, le passé antérieur marque cette antériorité immédiate.' },
+    ],
+  },
+  'indicatif:futur-simple': {
+    summary: 'Le futur simple présente comme à venir un fait que le locuteur annonce, prévoit ou promet.',
+    formation: 'On ajoute généralement -ai, -as, -a, -ons, -ez, -ont à l’infinitif ou à un radical futur irrégulier.',
+    uses: ['Une prévision', 'Une promesse ou un engagement', 'Un événement futur daté'],
+    examples: [
+      { sentence: 'Demain, nous partirons à huit heures.', context: '« Demain » situe clairement le départ après le moment présent.', reason: 'L’indicatif annonce le départ comme prévu ; le futur simple le place à venir.' },
+      { sentence: 'Je te rappellerai ce soir.', context: 'La personne prend un engagement pour plus tard.', reason: 'Le futur simple donne à la promesse une valeur directe et assurée.' },
+      { sentence: 'Selon la météo, il neigera en altitude.', context: 'Il s’agit d’une prévision fondée sur des informations.', reason: 'Le futur convient à un fait attendu mais pas encore réalisé.' },
+    ],
+  },
+  'indicatif:futur-anterieur': {
+    summary: 'Le futur antérieur présente une action qui sera déjà terminée avant un autre repère futur.',
+    formation: 'On emploie avoir ou être au futur simple, suivi du participe passé.',
+    uses: ['Une action accomplie avant une autre action future', 'Un bilan à une échéance', 'Une supposition sur un fait passé'],
+    examples: [
+      { sentence: 'Quand tu arriveras, j’aurai terminé le repas.', context: 'La fin de la préparation précédera l’arrivée.', reason: 'Le futur antérieur marque l’accomplissement avant le second repère futur.' },
+      { sentence: 'À la fin du mois, nous aurons parcouru mille kilomètres.', context: 'On se place à une échéance pour dresser un bilan.', reason: 'Ce temps présente la distance comme entièrement parcourue à ce moment futur.' },
+      { sentence: 'Il n’est pas là ; il aura oublié notre rendez-vous.', context: 'Le locuteur formule une explication probable d’un fait présent.', reason: 'Le futur antérieur peut exprimer une supposition sur ce qui s’est passé.' },
+    ],
+  },
+  'indicatif:futur-proche': {
+    summary: 'Le futur proche annonce une action imminente ou déjà préparée, souvent perçue comme proche du présent.',
+    formation: 'On conjugue aller au présent, puis on ajoute l’infinitif du verbe principal.',
+    uses: ['Une action imminente', 'Une intention déjà décidée', 'Une conséquence visible'],
+    examples: [
+      { sentence: 'Attention, le verre va tomber !', context: 'La situation montre que la chute est imminente.', reason: 'Le futur proche relie directement la prédiction aux indices présents.' },
+      { sentence: 'Nous allons repeindre la cuisine ce week-end.', context: 'Le projet est décidé et préparé.', reason: 'Cette forme convient à une intention concrète proche du moment présent.' },
+      { sentence: 'Regarde ces nuages : il va pleuvoir.', context: 'Les nuages constituent un signe observable maintenant.', reason: 'Le choix du futur proche souligne la conséquence attendue des indices présents.' },
+    ],
+  },
+  'subjonctif:present': {
+    summary: 'Le subjonctif présent exprime une action envisagée au présent ou dans l’avenir à travers une volonté, une nécessité, une émotion ou un doute.',
+    formation: 'Il est souvent introduit par que. On utilise les terminaisons -e, -es, -e, -ions, -iez, -ent, avec des radicaux parfois irréguliers.',
+    uses: ['Une nécessité', 'Un souhait ou une volonté', 'Un doute ou un sentiment'],
+    examples: [
+      { sentence: 'Il faut que tu viennes avant midi.', context: '« Il faut que » exprime une nécessité.', reason: 'Le subjonctif est imposé par la nécessité ; le présent vise une venue non encore réalisée.' },
+      { sentence: 'Je souhaite que vous réussissiez.', context: 'La réussite est désirée, mais elle n’est pas présentée comme un fait.', reason: 'Le souhait déclenche le subjonctif présent.' },
+      { sentence: 'Je doute qu’elle connaisse la réponse.', context: 'Le locuteur ne tient pas sa connaissance pour certaine.', reason: 'Le doute conduit à présenter l’action au subjonctif plutôt qu’à l’indicatif.' },
+    ],
+  },
+  'subjonctif:passe': {
+    summary: 'Le subjonctif passé exprime une action accomplie, mais toujours envisagée à travers un sentiment, un jugement, un souhait ou un doute.',
+    formation: 'On met avoir ou être au subjonctif présent, suivi du participe passé.',
+    uses: ['Un jugement sur une action achevée', 'Un regret ou une émotion liés au passé', 'Un doute portant sur un fait antérieur'],
+    examples: [
+      { sentence: 'Je suis heureux que tu aies réussi.', context: 'La réussite a déjà eu lieu ; elle provoque une émotion présente.', reason: 'Le sentiment appelle le subjonctif et l’antériorité exige sa forme passée.' },
+      { sentence: 'Elle regrette que nous soyons partis si tôt.', context: 'Le départ est achevé avant le regret exprimé.', reason: 'Le subjonctif passé combine le regard subjectif et l’action accomplie.' },
+      { sentence: 'Je doute qu’ils aient reçu le message.', context: 'La réception éventuelle précède le doute actuel.', reason: 'Le doute impose le subjonctif ; le passé situe la réception avant ce doute.' },
+    ],
+  },
+  'subjonctif:imparfait': {
+    summary: 'Le subjonctif imparfait est une forme surtout littéraire qui exprime, dans un contexte passé, une action simultanée ou postérieure soumise au subjonctif.',
+    formation: 'Il se construit à partir du radical du passé simple et de terminaisons comme -sse, -sses, -ât / -ît / -ût, -ssions, -ssiez, -ssent.',
+    uses: ['La concordance littéraire après un verbe au passé', 'Un souhait ou une nécessité dans un récit soutenu', 'Une action non accomplie vue depuis le passé'],
+    examples: [
+      { sentence: 'Le roi voulait que chacun obéît.', context: 'Le récit est au passé et adopte un registre littéraire.', reason: 'La volonté exige le subjonctif ; l’imparfait respecte la concordance soutenue avec « voulait ».' },
+      { sentence: 'Il fallait qu’elle partît avant l’aube.', context: 'Une nécessité passée concerne un départ encore à venir à ce moment-là.', reason: 'Le subjonctif imparfait situe cette action dépendante depuis le point de vue passé.' },
+      { sentence: 'Je craignais qu’il ne fût trop tard.', context: 'Une crainte est rapportée dans un récit au passé.', reason: 'La crainte appelle le subjonctif et le registre littéraire choisit l’imparfait.' },
+    ],
+  },
+  'subjonctif:plus-que-parfait': {
+    summary: 'Le subjonctif plus-que-parfait, aujourd’hui littéraire, exprime une action accomplie avant un repère passé tout en conservant une valeur subjective.',
+    formation: 'On emploie avoir ou être au subjonctif imparfait, suivi du participe passé.',
+    uses: ['Une action antérieure dépendant d’un sentiment passé', 'Un doute ou un regret dans un récit soutenu', 'La concordance littéraire des temps'],
+    examples: [
+      { sentence: 'Elle regrettait qu’il fût parti sans prévenir.', context: 'Le départ précède le regret, tous deux situés dans le passé.', reason: 'Le subjonctif traduit le regret et le plus-que-parfait marque l’antériorité.' },
+      { sentence: 'Je doutais qu’ils eussent compris.', context: 'Le doute passé porte sur une compréhension encore antérieure.', reason: 'La forme composée ordonne les deux moments dans un registre littéraire.' },
+      { sentence: 'Il était heureux que nous eussions accepté.', context: 'L’acceptation était déjà acquise lorsqu’il a ressenti cette joie.', reason: 'L’émotion impose le subjonctif ; l’antériorité appelle le plus-que-parfait.' },
+    ],
+  },
+  'conditionnel:present': {
+    summary: 'Le conditionnel présent présente une action possible, dépendante d’une condition, ou atténue une demande et une affirmation.',
+    formation: 'On emploie le radical du futur avec les terminaisons de l’imparfait : -ais, -ais, -ait, -ions, -iez, -aient.',
+    uses: ['La conséquence d’une condition', 'Une demande polie', 'Une information non confirmée'],
+    examples: [
+      { sentence: 'Je viendrais si je pouvais me libérer.', context: 'La venue dépend d’une condition qui n’est pas remplie.', reason: 'Le conditionnel présente la conséquence comme seulement possible.' },
+      { sentence: 'Pourriez-vous fermer la porte ?', context: 'La personne formule une demande sans donner un ordre direct.', reason: 'Le conditionnel atténue la demande et la rend plus polie.' },
+      { sentence: 'Le musée rouvrirait lundi, selon la presse.', context: 'La source est citée, mais l’information n’est pas confirmée.', reason: 'Le conditionnel marque la distance du locuteur envers l’annonce.' },
+    ],
+  },
+  'conditionnel:passe-premiere-forme': {
+    summary: 'Le conditionnel passé première forme exprime une action qui aurait pu se produire dans le passé, un regret ou une information passée non confirmée.',
+    formation: 'On conjugue avoir ou être au conditionnel présent, puis on ajoute le participe passé.',
+    uses: ['La conséquence irréelle d’une condition passée', 'Un regret ou un reproche', 'Une information passée non confirmée'],
+    examples: [
+      { sentence: 'Nous serions venus si nous avions reçu l’invitation.', context: 'L’invitation n’a pas été reçue et la venue n’a donc pas eu lieu.', reason: 'Le conditionnel passé exprime la conséquence irréalisée dans le passé.' },
+      { sentence: 'Tu aurais pu me prévenir.', context: 'Le locuteur reproche une action qui n’a pas été accomplie.', reason: 'Cette forme porte un jugement rétrospectif sur une possibilité passée.' },
+      { sentence: 'Le tableau aurait été vendu hier.', context: 'L’information circule, mais elle reste à vérifier.', reason: 'Le conditionnel passé signale la réserve à propos d’un événement supposé accompli.' },
+    ],
+  },
+  'conditionnel:passe-deuxieme-forme': {
+    summary: 'Le conditionnel passé deuxième forme a le même sens que la première, mais appartient surtout à la langue littéraire ou très soutenue.',
+    formation: 'Sa forme est identique au subjonctif plus-que-parfait : auxiliaire au subjonctif imparfait et participe passé.',
+    uses: ['Une conséquence passée irréelle en style littéraire', 'Un regret dans un récit soutenu', 'Une variante stylistique du conditionnel passé'],
+    examples: [
+      { sentence: 'Il eût accepté si on le lui avait demandé.', context: 'La demande n’a pas eu lieu ; l’acceptation reste imaginaire.', reason: 'La deuxième forme exprime l’irréel du passé avec une tonalité littéraire.' },
+      { sentence: 'Nous fussions partis plus tôt sans cet orage.', context: 'L’orage a empêché un départ envisagé.', reason: 'Le contexte irréel appelle le conditionnel passé ; cette forme marque un registre soutenu.' },
+      { sentence: 'Elle eût aimé revoir cette ville.', context: 'Le souhait n’a pas été réalisé dans le passé.', reason: 'La forme littéraire souligne ici le regret d’une possibilité perdue.' },
+    ],
+  },
+  'imperatif:present': {
+    summary: 'L’impératif présent sert à faire agir maintenant ou plus tard : ordre, conseil, invitation, interdiction ou instruction.',
+    formation: 'On utilise les formes de tu, nous et vous sans écrire le pronom sujet. À l’affirmatif, certains pronoms se placent après le verbe.',
+    uses: ['Un ordre ou une interdiction', 'Un conseil', 'Une invitation ou une consigne'],
+    examples: [
+      { sentence: 'Ferme doucement la porte.', context: 'Le locuteur demande une action directe à une personne.', reason: 'L’impératif convient à la consigne et le présent vise une exécution immédiate.' },
+      { sentence: 'Prenez le temps de relire votre réponse.', context: 'Un enseignant donne un conseil à plusieurs élèves ou vouvoie une personne.', reason: 'L’impératif peut conseiller sans exprimer un ordre autoritaire.' },
+      { sentence: 'Allons voir cette exposition !', context: 'La personne s’inclut dans la proposition.', reason: 'La forme en « nous » transforme l’impératif en invitation collective.' },
+    ],
+  },
+  'imperatif:passe': {
+    summary: 'L’impératif passé ordonne qu’une action soit terminée avant une échéance future.',
+    formation: 'On emploie avoir ou être à l’impératif présent, suivi du participe passé.',
+    uses: ['Une tâche à achever avant un moment donné', 'Une consigne portant sur un résultat', 'Une injonction d’antériorité'],
+    examples: [
+      { sentence: 'Ayez terminé ce rapport avant midi.', context: 'À midi, le résultat devra déjà être obtenu.', reason: 'L’impératif donne la consigne ; sa forme passée insiste sur l’achèvement avant l’échéance.' },
+      { sentence: 'Sois revenu avant la nuit.', context: 'Le retour doit être accompli lorsque la nuit commencera.', reason: 'Le passé de l’impératif place l’action avant ce repère futur.' },
+      { sentence: 'Ayons rangé la salle avant l’arrivée des invités.', context: 'Le locuteur s’inclut dans une tâche collective à finir.', reason: 'La forme composée fixe le résultat attendu avant l’arrivée.' },
+    ],
+  },
+  'participe:present': {
+    summary: 'Le participe présent présente une action liée à un nom ou simultanée à une autre, sans porter lui-même de personne ni de temps pleinement autonome.',
+    formation: 'On part généralement de la forme « nous » au présent, on retire -ons et on ajoute -ant. Le participe présent est invariable.',
+    uses: ['Caractériser un nom par une action', 'Exprimer deux actions simultanées', 'Alléger une proposition relative'],
+    examples: [
+      { sentence: 'Les élèves connaissant la réponse lèvent la main.', context: 'Le groupe est défini par l’action de connaître.', reason: 'Le participe présent remplace ici « qui connaissent » et reste invariable.' },
+      { sentence: 'Voyant la pluie, nous sommes rentrés.', context: 'La perception de la pluie accompagne et motive le retour.', reason: 'La forme non personnelle relie les deux actions sans nouvelle proposition complète.' },
+      { sentence: 'Une eau bouillant à gros bouillons remplit la casserole.', context: 'L’action caractérise directement le nom « eau ».', reason: 'Le participe présent conserve une valeur verbale et ne s’accorde pas comme un adjectif.' },
+    ],
+  },
+  'participe:passe': {
+    summary: 'Le participe passé sert à former les temps composés et peut aussi caractériser un nom ; son accord dépend alors de sa construction.',
+    formation: 'Sa terminaison varie selon le verbe. Employé seul, il s’accorde comme un adjectif ; avec un auxiliaire, des règles particulières s’appliquent.',
+    uses: ['Former un temps composé', 'Caractériser le résultat d’une action', 'Construire la voix passive'],
+    examples: [
+      { sentence: 'Nous avons terminé le projet.', context: '« Terminé » complète l’auxiliaire avoir.', reason: 'Le participe passé permet ici de construire le passé composé.' },
+      { sentence: 'Les fenêtres ouvertes laissent entrer l’air.', context: '« Ouvertes » décrit l’état des fenêtres.', reason: 'Employé comme adjectif, le participe s’accorde avec le nom féminin pluriel.' },
+      { sentence: 'La route est bloquée par la neige.', context: 'La phrase met l’accent sur la route qui subit l’action.', reason: 'Être et le participe passé construisent la voix passive ; « bloquée » s’accorde avec « route ».' },
+    ],
+  },
+  'participe:gerondif-present': {
+    summary: 'Le gérondif présent relie deux actions ayant le même sujet et exprime souvent la simultanéité, la manière, la cause ou la condition.',
+    formation: 'On place « en » devant le participe présent : en parlant, en finissant, en prenant.',
+    uses: ['Deux actions simultanées', 'La manière ou le moyen', 'Une condition'],
+    examples: [
+      { sentence: 'Elle écoute de la musique en travaillant.', context: 'La même personne écoute et travaille au même moment.', reason: 'Le gérondif marque la simultanéité avec un sujet commun.' },
+      { sentence: 'Tu progresseras en pratiquant régulièrement.', context: 'La pratique est le moyen d’obtenir le progrès.', reason: 'Le gérondif répond ici à la question « comment ? ».' },
+      { sentence: 'En partant maintenant, nous arriverons à l’heure.', context: 'Le départ immédiat constitue la condition de l’arrivée ponctuelle.', reason: 'Le gérondif exprime une condition sans employer une proposition avec « si ».' },
+    ],
+  },
+  'participe:gerondif-passe': {
+    summary: 'Le gérondif passé exprime une action déjà accomplie avant l’action du verbe principal, avec le même sujet.',
+    formation: 'On emploie « en » suivi de avoir ou être au participe présent, puis du participe passé : en ayant fini, en étant parti.',
+    uses: ['Une action accomplie avant l’action principale', 'La cause issue d’un fait antérieur', 'Une manière antérieure d’obtenir un résultat'],
+    examples: [
+      { sentence: 'En ayant terminé tôt, elle a pu nous rejoindre.', context: 'Elle termine d’abord, puis elle peut rejoindre le groupe.', reason: 'Le gérondif passé marque l’antériorité et explique la possibilité qui suit.' },
+      { sentence: 'En étant partis avant l’aube, nous avons évité la circulation.', context: 'Le départ précède le trajet sans embouteillages.', reason: 'La forme passée présente ce choix antérieur comme la cause du résultat.' },
+      { sentence: 'Il a rassuré l’équipe en ayant vérifié chaque détail.', context: 'La vérification est achevée avant l’effet rassurant.', reason: 'Le gérondif passé relie l’action préalable au résultat, avec le même sujet « il ».' },
+    ],
+  },
+}
+
+export function modeTensePedagogy(mode: ModeLandingSlug, tenseSlug: string): ModeTensePedagogy | undefined {
+  return pedagogy[`${mode}:${tenseSlug}`]
+}

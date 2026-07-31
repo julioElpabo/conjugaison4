@@ -1,5 +1,4 @@
 import { d as defineEventHandler, n as useRuntimeConfig, S as SUPPORTED_LOCALES, R as setHeader, T as localizePath } from '../nitro/nitro.mjs';
-import { E as EXERCISE_LANDING_SLUGS } from '../_/exercise-landing-pages.mjs';
 import { M as MODE_LANDING_SLUGS } from '../_/mode-landing-pages.mjs';
 import { M as MODE_TENSE_PATHS } from '../_/mode-tense-pages.mjs';
 import 'node:http';
@@ -16,8 +15,8 @@ import 'node:url';
 const PUBLIC_PATHS = [
   "/",
   "/apprendre",
+  "/exercices",
   "/consulter",
-  ...EXERCISE_LANDING_SLUGS.map((slug) => `/exercices/${slug}`),
   ...MODE_LANDING_SLUGS.map((slug) => `/modes/${slug}`),
   ...MODE_TENSE_PATHS
 ];

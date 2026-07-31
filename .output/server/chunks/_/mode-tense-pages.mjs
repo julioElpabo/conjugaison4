@@ -1,8 +1,8 @@
 const tenseDefinitions = {
   indicatif: [
-    { slug: "present", label: "pr\xE9sent", exercisePath: "/exercices/present" },
-    { slug: "imparfait", label: "imparfait", exercisePath: "/exercices/imparfait" },
-    { slug: "passe-compose", label: "pass\xE9 compos\xE9", exercisePath: "/exercices/passe-compose" },
+    { slug: "present", label: "pr\xE9sent" },
+    { slug: "imparfait", label: "imparfait" },
+    { slug: "passe-compose", label: "pass\xE9 compos\xE9" },
     { slug: "plus-que-parfait", label: "plus-que-parfait" },
     { slug: "passe-simple", label: "pass\xE9 simple" },
     { slug: "passe-anterieur", label: "pass\xE9 ant\xE9rieur" },
@@ -33,19 +33,16 @@ const tenseDefinitions = {
   ]
 };
 function modeTensePages(mode) {
-  return tenseDefinitions[mode].map((tense) => {
-    var _a;
-    return {
-      slug: tense.slug,
-      label: tense.label,
-      path: (_a = tense.exercisePath) != null ? _a : `/modes/${mode}/${tense.slug}`
-    };
-  });
+  return tenseDefinitions[mode].map((tense) => ({
+    slug: tense.slug,
+    label: tense.label,
+    path: `/modes/${mode}/${tense.slug}`
+  }));
 }
 function modeTensePage(mode, tenseSlug) {
   return modeTensePages(mode).find((tense) => tense.slug === tenseSlug);
 }
-const MODE_TENSE_PATHS = Object.keys(tenseDefinitions).flatMap((mode) => modeTensePages(mode).map((tense) => tense.path)).filter((path) => path.startsWith("/modes/"));
+const MODE_TENSE_PATHS = Object.keys(tenseDefinitions).flatMap((mode) => modeTensePages(mode).map((tense) => tense.path));
 
-export { MODE_TENSE_PATHS as M, modeTensePages as a, modeTensePage as m };
+export { MODE_TENSE_PATHS as M, modeTensePage as a, modeTensePages as m };
 //# sourceMappingURL=mode-tense-pages.mjs.map

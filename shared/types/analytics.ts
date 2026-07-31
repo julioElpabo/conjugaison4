@@ -21,6 +21,8 @@ export const ANALYTICS_EVENTS = [
   'exercise_abandoned',
   'account_registered',
   'account_login',
+  'language_tested',
+  'language_used',
   'client_error',
 ] as const
 
@@ -28,6 +30,7 @@ export type AnalyticsEventName = typeof ANALYTICS_EVENTS[number]
 export type AnalyticsWindow = 'now' | '3m' | '5m' | '30m' | 'range'
 export type AnalyticsActorType = 'anonymous' | 'learner'
 export type AnalyticsActorFilter = 'all' | AnalyticsActorType
+export type AnalyticsUserActivityWindow = 'week' | 'month' | 'year'
 
 export interface AnalyticsBreakdownItem {
   label: string
@@ -83,6 +86,21 @@ export interface AnalyticsUsageResponse {
   }
   presets: AnalyticsUsageRow[]
   features: AnalyticsUsageRow[]
+  generatedAt: string
+  notice?: string
+}
+
+export interface AnalyticsUsersResponse {
+  startDate: string
+  endDate: string
+  activityWindow: AnalyticsUserActivityWindow
+  activityDays: number
+  totalAccounts: number
+  activeAccounts: number
+  errorReviewUsers: number
+  languages: AnalyticsBreakdownItem[]
+  registrations: AnalyticsSeriesPoint[]
+  registrationUnit: 'Jours' | 'Semaines' | 'Mois'
   generatedAt: string
   notice?: string
 }

@@ -8,6 +8,8 @@ interface SummaryRow extends RowDataPacket { sessions: number }
 interface EventRow extends RowDataPacket { event_name: string, value: number }
 interface EventSeriesRow extends RowDataPacket { date: string, event_name: string, value: number }
 interface SessionSeriesRow extends RowDataPacket { date: string, value: number }
+interface PresentationSeriesRow extends RowDataPacket { date: string, presentation: string, value: number }
+interface LanguageSeriesRow extends RowDataPacket { date: string, event_name: string, locale: string, value: number }
 interface FeatureUsageRow extends RowDataPacket { classic: number, chat: number, print: number }
 interface LegacyRow extends RowDataPacket {
   date?: string
@@ -61,25 +63,31 @@ export default defineEventHandler(async (event) => {
   const eventParams = window === 'range' ? [startDate, endDate] : [liveMinutes]
   const sessionParams = window === 'range' ? [startDate, endDate] : [liveMinutes]
   const rangeDays = Math.max(1, Math.ceil((Date.parse(`${endDate}T12:00:00Z`) - Date.parse(`${startDate}T12:00:00Z`)) / 86400000) + 1)
-  const activityFormat = window !== 'range' ? '%Y-%m-%d %H:%i:00' : rangeDays <= 2 ? '%Y-%m-%d %H:00:00' : '%Y-%m-%d'
+  const seriesFormat = window !== 'range' ? '%Y-%m-%d %H:%i:00' : rangeDays <= 2 ? '%Y-%m-%d %H:00:00' : '%Y-%m-%d'
   const database = useDatabase()
   let local = emptyOverview()
 
   try {
-    const [[summary], [eventRows], [devices], [languages], [activity], [eventSeries], [sessionSeries], [featureUsageRows]] = await Promise.all([
+    const [[summary], [eventRows], [devices], [languages], [activity], [eventSeries], [sessionSeries], [presentationSeries], [languageSeries], [featureUsageRows]] = await Promise.all([
       database.execute<SummaryRow[]>(`SELECT COUNT(*) AS sessions FROM analytics_sessions WHERE ${sessionWhere}`, sessionParams),
       database.execute<EventRow[]>(`SELECT event_name, COUNT(*) AS value FROM analytics_events WHERE ${eventWhere} GROUP BY event_name ORDER BY value DESC`, eventParams),
       database.execute<ValueRow[]>(`SELECT device_category AS label, COUNT(*) AS value FROM analytics_sessions WHERE ${sessionWhere} GROUP BY device_category ORDER BY value DESC`, sessionParams),
       database.execute<ValueRow[]>(`SELECT interface_locale AS label, COUNT(*) AS value FROM analytics_sessions WHERE ${sessionWhere} GROUP BY interface_locale ORDER BY value DESC`, sessionParams),
-      database.execute<ValueRow[]>(`SELECT DATE_FORMAT(created_at, '${activityFormat}') AS label, COUNT(*) AS value FROM analytics_events WHERE ${eventWhere} GROUP BY label ORDER BY label`, eventParams),
-      window === 'range'
-        ? database.execute<EventSeriesRow[]>(`SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date, event_name, COUNT(*) AS value
-          FROM analytics_events WHERE ${eventWhere} GROUP BY date,event_name ORDER BY date`, eventParams)
-        : Promise.resolve([[] as EventSeriesRow[], []] as unknown as Awaited<ReturnType<typeof database.execute<EventSeriesRow[]>>>),
-      window === 'range'
-        ? database.execute<SessionSeriesRow[]>(`SELECT DATE_FORMAT(first_seen, '%Y-%m-%d') AS date, COUNT(*) AS value
-          FROM analytics_sessions WHERE ${sessionWhere} GROUP BY date ORDER BY date`, sessionParams)
-        : Promise.resolve([[] as SessionSeriesRow[], []] as unknown as Awaited<ReturnType<typeof database.execute<SessionSeriesRow[]>>>),
+      database.execute<ValueRow[]>(`SELECT DATE_FORMAT(created_at, '${seriesFormat}') AS label, COUNT(*) AS value FROM analytics_events WHERE ${eventWhere} GROUP BY label ORDER BY label`, eventParams),
+      database.execute<EventSeriesRow[]>(`SELECT DATE_FORMAT(created_at, '${seriesFormat}') AS date, event_name, COUNT(*) AS value
+        FROM analytics_events WHERE ${eventWhere} GROUP BY date,event_name ORDER BY date`, eventParams),
+      database.execute<SessionSeriesRow[]>(`SELECT DATE_FORMAT(${window === 'range' ? 'first_seen' : 'last_seen'}, '${seriesFormat}') AS date, COUNT(*) AS value
+        FROM analytics_sessions WHERE ${sessionWhere} GROUP BY date ORDER BY date`, sessionParams),
+      database.execute<PresentationSeriesRow[]>(`SELECT DATE_FORMAT(created_at, '${seriesFormat}') AS date,
+        JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.presentation')) AS presentation, COUNT(*) AS value
+        FROM analytics_events WHERE ${eventWhere} AND event_name='exercise_started'
+          AND JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.presentation')) IN ('classic','chat')
+        GROUP BY date,presentation ORDER BY date`, eventParams),
+      database.execute<LanguageSeriesRow[]>(`SELECT DATE_FORMAT(created_at, '${seriesFormat}') AS date,
+        event_name, JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.locale')) AS locale, COUNT(*) AS value
+        FROM analytics_events WHERE ${eventWhere} AND event_name IN ('language_tested','language_used')
+          AND JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.locale')) IN ('fr','de','en','it','es')
+        GROUP BY date,event_name,locale ORDER BY date`, eventParams),
       database.execute<FeatureUsageRow[]>(`SELECT
         SUM(CASE WHEN event_name='exercise_started' AND JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.presentation'))='classic' THEN 1 ELSE 0 END) AS classic,
         SUM(CASE WHEN event_name='exercise_started' AND JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.presentation'))='chat' THEN 1 ELSE 0 END) AS chat,
@@ -99,6 +107,14 @@ export default defineEventHandler(async (event) => {
       return result
     }, {})
     series.sessions = sessionSeries.map(row => ({ date: String(row.date), value: Number(row.value) || 0 }))
+    for (const row of presentationSeries) {
+      const name = `exercise_started.${String(row.presentation)}`
+      ;(series[name] ||= []).push({ date: String(row.date), value: Number(row.value) || 0 })
+    }
+    for (const row of languageSeries) {
+      const name = `${String(row.event_name)}.${String(row.locale)}`
+      ;(series[name] ||= []).push({ date: String(row.date), value: Number(row.value) || 0 })
+    }
     const featureUsage = featureUsageRows[0]
     local = {
       ...emptyOverview(), source: 'local', configured: true, activeUsers: sessions, sessions,
@@ -123,7 +139,7 @@ export default defineEventHandler(async (event) => {
     }
 
     if (window === 'range') {
-      const [legacyRows] = await database.execute<LegacyRow[]>(`SELECT DATE_FORMAT(created, '%Y-%m-%d') AS date,
+      const [legacyRows] = await database.execute<LegacyRow[]>(`SELECT DATE_FORMAT(created, '${seriesFormat}') AS date,
         COALESCE(SUM(creationpdf),0) creationpdf, COALESCE(SUM(sauvedefi),0) sauvedefi,
         COALESCE(SUM(chargedefi),0) chargedefi, COALESCE(SUM(exercer),0) exercer,
         COALESCE(SUM(exercersimple),0) exercersimple, COALESCE(SUM(resultat),0) resultat,

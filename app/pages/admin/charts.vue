@@ -2,6 +2,8 @@
 import type {
   AnalyticsActorFilter,
   AnalyticsResponse,
+  AnalyticsUserActivityWindow,
+  AnalyticsUsersResponse,
   AnalyticsUsageResponse,
   AnalyticsWindow,
 } from '../../../shared/types/analytics'
@@ -12,20 +14,38 @@ const { ui } = useLanguagePreferences()
 const { user, handleUnauthorized } = useAdminAuth()
 const stats = ref<AnalyticsResponse | null>(null)
 const usage = ref<AnalyticsUsageResponse | null>(null)
+const userUsage = ref<AnalyticsUsersResponse | null>(null)
 const loading = ref(false)
+const dashboardLoading = ref(false)
 const usageLoading = ref(false)
+const userUsageLoading = ref(false)
 const error = ref('')
+const dashboardError = ref('')
 const usageError = ref('')
+const userUsageError = ref('')
 const usageActor = ref<AnalyticsActorFilter>('all')
-const activeTab = ref<'realtime' | 'range' | 'usage'>('realtime')
+const usageView = ref<'product' | 'users'>('product')
+const userActivityWindow = ref<AnalyticsUserActivityWindow>('month')
+const activeTab = ref<'dashboard' | 'realtime' | 'range' | 'usage'>('dashboard')
 const rangeView = ref<'summary' | 'progression'>('summary')
 type StatsTheme = 'summary' | 'audience' | 'pedagogy' | 'usage'
 const activeTheme = ref<StatsTheme>('summary')
+const timelineMetric = ref('page_view')
 const realtimeWindow = ref<Exclude<AnalyticsWindow, 'range'>>('30m')
 const selectedWindow = ref<AnalyticsWindow>('30m')
 const realtimeMenuOpen = ref(false)
 const realtimeMenu = ref<HTMLElement | null>(null)
 const visibleStats = computed(() => stats.value?.window === selectedWindow.value ? stats.value : null)
+const dashboardReady = computed(() => (
+  stats.value?.window === 'range'
+  && stats.value.startDate === startDate.value
+  && stats.value.endDate === endDate.value
+  && usage.value?.startDate === startDate.value
+  && usage.value.endDate === endDate.value
+  && userUsage.value?.startDate === startDate.value
+  && userUsage.value.endDate === endDate.value
+  && userUsage.value.activityWindow === userActivityWindow.value
+))
 const realtimeOptions: Array<{ value: Exclude<AnalyticsWindow, 'range' | '5m'>, label: string }> = [
   { value: 'now', label: 'Maintenant' },
   { value: '3m', label: '3 dernières minutes' },
@@ -58,7 +78,9 @@ const activePresetDays = computed(() => (
 let loadedForUserId: number | null = null
 let refreshTimer: ReturnType<typeof setInterval> | undefined
 let statsRequest = 0
+let dashboardRequest = 0
 let usageRequest = 0
+let userUsageRequest = 0
 
 useHead(() => ({ title: ui('Statistiques') }))
 
@@ -71,14 +93,20 @@ function offsetDate(days: number) {
 function choosePreset(days: number) {
   startDate.value = offsetDate(-(days - 1))
   endDate.value = today
-  if (activeTab.value === 'usage') void loadUsage()
+  if (activeTab.value === 'dashboard') void loadDashboard()
+  else if (activeTab.value === 'usage') void loadActiveUsageView()
   else showWindow('range')
 }
 
-function chooseTab(tab: 'realtime' | 'range' | 'usage') {
+function chooseTab(tab: 'dashboard' | 'realtime' | 'range' | 'usage') {
+  if (tab !== 'dashboard') {
+    dashboardRequest += 1
+    dashboardLoading.value = false
+  }
   activeTab.value = tab
   realtimeMenuOpen.value = false
-  if (tab === 'usage') void loadUsage()
+  if (tab === 'dashboard') void loadDashboard()
+  else if (tab === 'usage') void loadActiveUsageView()
   else showWindow(tab === 'realtime' ? realtimeWindow.value : 'range')
 }
 
@@ -103,7 +131,8 @@ function showWindow(window: AnalyticsWindow) {
 }
 
 function showCustomRange() {
-  if (activeTab.value === 'usage') void loadUsage()
+  if (activeTab.value === 'dashboard') void loadDashboard()
+  else if (activeTab.value === 'usage') void loadActiveUsageView()
   else {
     activeTab.value = 'range'
     showWindow('range')
@@ -133,8 +162,91 @@ async function loadUsage() {
   }
 }
 
+async function loadUserUsage() {
+  if (!user.value) return
+  const request = ++userUsageRequest
+  userUsageLoading.value = true
+  userUsageError.value = ''
+  try {
+    const response = await $fetch<AnalyticsUsersResponse>('/api/admin/analytics-users', {
+      credentials: 'same-origin',
+      query: {
+        start: startDate.value,
+        end: endDate.value,
+        activity: userActivityWindow.value,
+      },
+      timeout: 20_000,
+    })
+    if (request === userUsageRequest) userUsage.value = response
+  }
+  catch (caught) {
+    if (request === userUsageRequest && !handleUnauthorized(caught)) {
+      userUsageError.value = getAdminErrorMessage(caught, 'Impossible de charger les statistiques des utilisateurs.')
+    }
+  }
+  finally {
+    if (request === userUsageRequest) userUsageLoading.value = false
+  }
+}
+
+async function loadDashboard() {
+  if (!user.value) return
+  // Invalide une éventuelle réponse du minuteur temps réel encore en vol.
+  statsRequest += 1
+  const request = ++dashboardRequest
+  dashboardLoading.value = true
+  dashboardError.value = ''
+  try {
+    const [statsResponse, usageResponse, usersResponse] = await Promise.all([
+      $fetch<AnalyticsResponse>('/api/admin/analytics', {
+        credentials: 'same-origin',
+        query: { window: 'range', start: startDate.value, end: endDate.value },
+        timeout: 20_000,
+      }),
+      $fetch<AnalyticsUsageResponse>('/api/admin/analytics-usage', {
+        credentials: 'same-origin',
+        query: { start: startDate.value, end: endDate.value, actor: 'all' },
+        timeout: 20_000,
+      }),
+      $fetch<AnalyticsUsersResponse>('/api/admin/analytics-users', {
+        credentials: 'same-origin',
+        query: {
+          start: startDate.value,
+          end: endDate.value,
+          activity: userActivityWindow.value,
+        },
+        timeout: 20_000,
+      }),
+    ])
+    if (request === dashboardRequest) {
+      stats.value = statsResponse
+      usage.value = usageResponse
+      userUsage.value = usersResponse
+    }
+  }
+  catch (caught) {
+    if (request === dashboardRequest && !handleUnauthorized(caught)) {
+      dashboardError.value = getAdminErrorMessage(caught, 'Impossible de charger le dashboard.')
+    }
+  }
+  finally {
+    if (request === dashboardRequest) dashboardLoading.value = false
+  }
+}
+
+function loadActiveUsageView() {
+  if (usageView.value === 'users') return loadUserUsage()
+  return loadUsage()
+}
+
+function chooseUsageView(view: 'product' | 'users') {
+  usageView.value = view
+  void loadActiveUsageView()
+}
+
 function refreshActiveTab() {
-  if (activeTab.value === 'usage') void loadUsage()
+  if (activeTab.value === 'dashboard') void loadDashboard()
+  else if (activeTab.value === 'usage') void loadActiveUsageView()
   else void loadStats()
 }
 
@@ -181,12 +293,20 @@ function handleDocumentKeydown(event: KeyboardEvent) {
 }
 
 watch(selectedWindow, () => { configureRefresh(); void loadStats() })
+watch(activeTab, configureRefresh)
 watch(usageActor, () => {
-  if (activeTab.value === 'usage') void loadUsage()
+  if (activeTab.value === 'usage' && usageView.value === 'product') void loadUsage()
+})
+watch(userActivityWindow, () => {
+  if (activeTab.value === 'dashboard') void loadDashboard()
+  else if (activeTab.value === 'usage' && usageView.value === 'users') void loadUserUsage()
 })
 watch(user, (currentUser) => {
   if (!currentUser) { loadedForUserId = null; return }
-  if (loadedForUserId !== currentUser.id) { loadedForUserId = currentUser.id; void loadStats() }
+  if (loadedForUserId !== currentUser.id) {
+    loadedForUserId = currentUser.id
+    refreshActiveTab()
+  }
 }, { immediate: true })
 onMounted(() => {
   configureRefresh()
@@ -209,6 +329,10 @@ onBeforeUnmount(() => {
         <header class="admin-section-heading charts-page__heading">
           <h1>Statistiques</h1>
           <div class="stats-tabs" role="tablist" aria-label="Type de statistiques">
+            <button id="stats-tab-dashboard" type="button" role="tab" :aria-selected="activeTab === 'dashboard'" aria-controls="stats-panel-dashboard" :class="{ active: activeTab === 'dashboard' }" @click="chooseTab('dashboard')">
+              <strong>Dashboard</strong>
+              <small>Indicateurs et constats à suivre</small>
+            </button>
             <div ref="realtimeMenu" class="stats-tabs__dropdown">
               <button
                 id="stats-tab-realtime"
@@ -248,8 +372,8 @@ onBeforeUnmount(() => {
               <small>Fonctions et défis à conserver ou retirer</small>
             </button>
           </div>
-          <button class="admin-button" type="button" :disabled="loading || usageLoading" @click="refreshActiveTab">
-            {{ loading || usageLoading ? 'Actualisation…' : 'Actualiser' }}
+          <button class="admin-button" type="button" :disabled="loading || dashboardLoading || usageLoading || userUsageLoading" @click="refreshActiveTab">
+            {{ loading || dashboardLoading || usageLoading || userUsageLoading ? 'Actualisation…' : 'Actualiser' }}
           </button>
         </header>
 
@@ -283,26 +407,59 @@ onBeforeUnmount(() => {
           </aside>
 
           <main class="stats-content">
-            <template v-if="activeTab === 'usage'">
-              <div v-if="usageLoading && !usage" class="charts-page__loading" role="status"><span class="admin-spinner" aria-hidden="true" /><p>Analyse des usages…</p></div>
-              <div v-else-if="usageError && !usage" class="charts-page__loading"><p class="admin-notice admin-notice--error" role="alert">{{ usageError }}</p><button class="admin-button" type="button" @click="loadUsage">Réessayer</button></div>
-              <template v-else-if="usage">
-                <p v-if="usageError" class="admin-notice admin-notice--error" role="alert">{{ usageError }}</p>
-                <AdminUsageDashboard v-model:actor="usageActor" :usage="usage" />
-                <p class="updated-at">Dernière actualisation : {{ new Date(usage.generatedAt).toLocaleTimeString('fr-CH') }}</p>
+            <template v-if="activeTab === 'dashboard'">
+              <div v-if="dashboardLoading && !dashboardReady" class="charts-page__loading" role="status"><span class="admin-spinner" aria-hidden="true" /><p>Préparation du dashboard…</p></div>
+              <div v-else-if="dashboardError && !dashboardReady" class="charts-page__loading"><p class="admin-notice admin-notice--error" role="alert">{{ dashboardError }}</p><button class="admin-button" type="button" @click="loadDashboard">Réessayer</button></div>
+              <template v-else-if="dashboardReady && stats && usage && userUsage">
+                <p v-if="dashboardError" class="admin-notice admin-notice--error" role="alert">{{ dashboardError }}</p>
+                <AdminIntelligentDashboard :stats="stats" :usage="usage" :users="userUsage" />
+                <p class="updated-at">Dernière actualisation : {{ new Date(stats.local.generatedAt).toLocaleTimeString('fr-CH') }}</p>
+              </template>
+              <div v-else class="charts-page__loading">
+                <p>Les données du dashboard doivent être actualisées.</p>
+                <button class="admin-button" type="button" @click="loadDashboard">Actualiser le dashboard</button>
+              </div>
+            </template>
+            <template v-else-if="activeTab === 'usage'">
+              <nav class="usage-view-tabs" role="tablist" aria-label="Type d’usage analysé">
+                <button type="button" role="tab" :aria-selected="usageView === 'product'" :class="{ active: usageView === 'product' }" @click="chooseUsageView('product')">
+                  Défis et fonctionnalités
+                </button>
+                <button type="button" role="tab" :aria-selected="usageView === 'users'" :class="{ active: usageView === 'users' }" @click="chooseUsageView('users')">
+                  Utilisateurs
+                </button>
+              </nav>
+              <template v-if="usageView === 'users'">
+                <div v-if="userUsageLoading && !userUsage" class="charts-page__loading" role="status"><span class="admin-spinner" aria-hidden="true" /><p>Analyse des utilisateurs…</p></div>
+                <div v-else-if="userUsageError && !userUsage" class="charts-page__loading"><p class="admin-notice admin-notice--error" role="alert">{{ userUsageError }}</p><button class="admin-button" type="button" @click="loadUserUsage">Réessayer</button></div>
+                <template v-else-if="userUsage">
+                  <p v-if="userUsageError" class="admin-notice admin-notice--error" role="alert">{{ userUsageError }}</p>
+                  <AdminUserUsageDashboard v-model:activity-window="userActivityWindow" :users="userUsage" />
+                  <p class="updated-at">Dernière actualisation : {{ new Date(userUsage.generatedAt).toLocaleTimeString('fr-CH') }}</p>
+                </template>
+              </template>
+              <template v-else>
+                <div v-if="usageLoading && !usage" class="charts-page__loading" role="status"><span class="admin-spinner" aria-hidden="true" /><p>Analyse des usages…</p></div>
+                <div v-else-if="usageError && !usage" class="charts-page__loading"><p class="admin-notice admin-notice--error" role="alert">{{ usageError }}</p><button class="admin-button" type="button" @click="loadUsage">Réessayer</button></div>
+                <template v-else-if="usage">
+                  <p v-if="usageError" class="admin-notice admin-notice--error" role="alert">{{ usageError }}</p>
+                  <AdminUsageDashboard v-model:actor="usageActor" :usage="usage" />
+                  <p class="updated-at">Dernière actualisation : {{ new Date(usage.generatedAt).toLocaleTimeString('fr-CH') }}</p>
+                </template>
               </template>
             </template>
             <div v-else-if="loading && !visibleStats" class="charts-page__loading" role="status"><span class="admin-spinner" aria-hidden="true" /><p>Chargement des statistiques…</p></div>
             <div v-else-if="error && !visibleStats" class="charts-page__loading"><p class="admin-notice admin-notice--error" role="alert">{{ error }}</p><button class="admin-button" type="button" @click="loadStats">Réessayer</button></div>
             <template v-else-if="visibleStats">
               <p v-if="error" class="admin-notice admin-notice--error" role="alert">{{ error }}</p>
+              <AdminMetricTimeline v-model:metric="timelineMetric" :stats="visibleStats" />
               <AdminStatsProgression v-if="activeTab === 'range' && rangeView === 'progression'" v-model:theme="activeTheme" :stats="visibleStats" />
               <AdminStatsDashboard v-else v-model:theme="activeTheme" :stats="visibleStats" />
               <p class="updated-at">Dernière actualisation : {{ new Date(visibleStats.local.generatedAt).toLocaleTimeString('fr-CH') }}</p>
             </template>
           </main>
 
-          <aside v-if="activeTab === 'range' || activeTab === 'usage'" class="stats-sidebar stats-sidebar--range">
+          <aside v-if="activeTab === 'dashboard' || activeTab === 'range' || activeTab === 'usage'" class="stats-sidebar stats-sidebar--range">
             <section class="period-picker">
               <div>
                 <p class="admin-eyebrow">Plage de temps</p>
@@ -363,8 +520,10 @@ onBeforeUnmount(() => {
 @media(max-width:1100px){.charts-page__heading{grid-template-columns:auto 1fr}.charts-page__heading>.admin-button{grid-column:1/-1;justify-self:end}.stats-tabs{min-width:0}.stats-workspace--realtime{grid-template-columns:190px minmax(0,1fr)}.stats-workspace--range{grid-template-columns:240px minmax(0,1fr)}}
 @media(max-width:820px){.charts-page__heading{grid-template-columns:1fr}.charts-page__heading>.admin-button{grid-column:auto}.stats-tabs{justify-self:stretch}.stats-workspace--realtime,.stats-workspace--range{grid-template-columns:1fr}.stats-workspace--range .stats-content{grid-column:1;grid-row:2}.stats-sidebar{position:static}.stats-sidebar--range{grid-column:1;grid-row:1}.stats-theme-menu{grid-template-columns:repeat(2,minmax(0,1fr))}.period-picker__custom{grid-template-columns:1fr 1fr}.period-picker__custom .admin-button{grid-column:1/-1}}
 @media(max-width:650px){.charts-page__heading{align-items:stretch}.stats-tabs{grid-template-columns:1fr}.stats-tabs>button,.stats-tabs__dropdown>button{min-height:56px}.stats-theme-menu,.period-picker__custom{grid-template-columns:1fr}.period-picker__custom .admin-button{grid-column:auto}}
-.charts-page__heading{grid-template-columns:auto minmax(620px,880px) auto}.stats-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.stats-workspace--usage{grid-template-columns:minmax(235px,280px) minmax(0,1fr)}.stats-workspace--usage .stats-content{grid-column:2;grid-row:1}
-@media(max-width:1100px){.charts-page__heading{grid-template-columns:auto 1fr}.stats-workspace--usage{grid-template-columns:240px minmax(0,1fr)}}
-@media(max-width:820px){.charts-page__heading{grid-template-columns:1fr}.stats-workspace--usage{grid-template-columns:1fr}.stats-workspace--usage .stats-content{grid-column:1;grid-row:2}}
+.charts-page__heading{grid-template-columns:auto minmax(760px,1040px) auto}.stats-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}.stats-workspace--dashboard,.stats-workspace--usage{grid-template-columns:minmax(235px,280px) minmax(0,1fr)}.stats-workspace--dashboard .stats-content,.stats-workspace--usage .stats-content{grid-column:2;grid-row:1}
+.usage-view-tabs{display:flex;padding:5px;gap:5px;border:1px solid #c9dce0;border-radius:12px;background:#edf4f5}.usage-view-tabs button{padding:9px 14px;border:0;border-radius:8px;color:#49636c;background:transparent;font:inherit;font-size:.76rem;font-weight:850;cursor:pointer}.usage-view-tabs button.active{color:#fff;background:#08758b;box-shadow:0 4px 10px rgb(8 117 139 / 16%)}:global(:root[data-theme='dark']) .usage-view-tabs{border-color:#3d565e;background:#172a30}:global(:root[data-theme='dark']) .usage-view-tabs button{color:#b7ccd1}:global(:root[data-theme='dark']) .usage-view-tabs button.active{color:#fff;background:#08758b}
+@media(max-width:1250px){.charts-page__heading{grid-template-columns:1fr}.charts-page__heading>.admin-button{justify-self:end}}
+@media(max-width:1100px){.charts-page__heading{grid-template-columns:1fr}.stats-workspace--dashboard,.stats-workspace--usage{grid-template-columns:240px minmax(0,1fr)}}
+@media(max-width:820px){.charts-page__heading{grid-template-columns:1fr}.stats-workspace--dashboard,.stats-workspace--usage{grid-template-columns:1fr}.stats-workspace--dashboard .stats-content,.stats-workspace--usage .stats-content{grid-column:1;grid-row:2}}
 @media(max-width:650px){.stats-tabs{grid-template-columns:1fr}}
 </style>

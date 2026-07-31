@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<{
 
 const normalizedDate = (value: string) => /^\d{8}$/u.test(value)
   ? `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}`
-  : value.slice(0, 10)
+  : value
 const dates = computed(() => [...new Set(props.series.flatMap(item => item.points.map(point => normalizedDate(point.date))))].sort())
 const values = computed(() => props.series.flatMap(item => item.points.map(point => point.value)))
 const rawMaximum = computed(() => Math.max(1, ...values.value))
@@ -76,8 +76,17 @@ function formatValue(value: number) {
 }
 
 function formatDate(value: string) {
-  const date = new Date(`${normalizedDate(value)}T12:00:00`)
+  const normalized = normalizedDate(value)
+  const date = /^\d{4}-\d{2}-\d{2}$/u.test(normalized)
+    ? new Date(`${normalized}T12:00:00`)
+    : new Date(normalized.replace(' ', 'T'))
   if (Number.isNaN(date.getTime())) return value
+  if (props.xUnit === 'Minutes') {
+    return new Intl.DateTimeFormat('fr-CH', { hour: '2-digit', minute: '2-digit' }).format(date)
+  }
+  if (props.xUnit === 'Heures') {
+    return new Intl.DateTimeFormat('fr-CH', { weekday: 'short', hour: '2-digit' }).format(date)
+  }
   if (props.xUnit === 'Jours') {
     return new Intl.DateTimeFormat('fr-CH', { weekday: 'short', day: 'numeric', month: 'short' }).format(date)
   }

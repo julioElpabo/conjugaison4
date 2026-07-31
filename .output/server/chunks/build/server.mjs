@@ -1344,7 +1344,7 @@ const _routes = [
   {
     name: "admin-charts",
     path: "/admin/charts",
-    component: () => import('./charts-CQF_KWrl.mjs')
+    component: () => import('./charts-Bq0LMuU_.mjs')
   },
   {
     name: "admin-coaches",
@@ -1460,7 +1460,7 @@ const _routes = [
   {
     name: "localized-admin-charts",
     path: "/:locale(fr|de|en|it|es)/admin/charts",
-    component: () => import('./charts-CQF_KWrl.mjs')
+    component: () => import('./charts-Bq0LMuU_.mjs')
   },
   {
     name: "localized-admin-coaches",

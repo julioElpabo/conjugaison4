@@ -235,6 +235,14 @@ function exposeUsageFeature(feature: string) {
   track('feature_exposed', { feature })
 }
 
+function learnerTabFeature(tab: UserTab) {
+  if (tab === 'challenges') return 'learner.training'
+  if (tab === 'progress') return 'learner.progress'
+  if (tab === 'history') return 'learner.history'
+  if (tab === 'preferences') return 'learner.preferences'
+  return 'learner.account'
+}
+
 function selectedWorkFeature() {
   const scope = selectedWork.value?.scope
   if (scope === 'remaining') return 'learner.finish'
@@ -297,8 +305,7 @@ onMounted(() => {
   if (activeTab.value === 'challenges') void loadChallengeTrainings()
   if (activeTab.value === 'progress') void loadLearnerProgress()
   if (!randomCoachAvatar.value) void loadRandomCoachAvatar()
-  const initialFeature = activeTab.value === 'progress' ? 'learner.progress' : 'learner.history'
-  exposeUsageFeature(initialFeature)
+  exposeUsageFeature(learnerTabFeature(activeTab.value))
   learnerTabReady = true
   if (activeTab.value === 'account' && route.hash === '#change-password') {
     void nextTick(() => {
@@ -333,11 +340,9 @@ watch(
 )
 
 watch(activeTab, (tab) => {
-  const feature = tab === 'progress' ? 'learner.progress' : tab === 'history' ? 'learner.history' : ''
-  if (feature) {
-    exposeUsageFeature(feature)
-    if (learnerTabReady && !props.readOnly) track('feature_selected', { feature })
-  }
+  const feature = learnerTabFeature(tab)
+  exposeUsageFeature(feature)
+  if (learnerTabReady && !props.readOnly) track('feature_selected', { feature })
   if (tab === 'progress') void loadLearnerProgress()
   if (tab === 'challenges') void loadChallengeTrainings()
 })
@@ -537,9 +542,19 @@ async function loadChallengeTrainings(force = false) {
 }
 
 async function selectTraining(training: ChallengeTraining) {
+  if (!props.readOnly) {
+    exposeUsageFeature('learner.training.analysis')
+    track('feature_selected', { feature: 'learner.training.analysis' })
+  }
   selectedTrainingFingerprint.value = training.fingerprint
   hoveredTrainingPointId.value = undefined
   await loadTrainingProgress(training.fingerprint)
+  if (!props.readOnly) {
+    track(
+      selectedTrainingProgressError.value ? 'feature_failed' : 'feature_completed',
+      { feature: 'learner.training.analysis' },
+    )
+  }
 }
 
 async function loadTrainingProgress(fingerprint: string) {
@@ -630,6 +645,10 @@ function openTrainingWorkMenu(
 function scrollToTrainingSession(point: ChallengeProgressPoint) {
   const target = document.getElementById(trainingSessionId(point.id))
   if (!target) return
+  if (!props.readOnly) {
+    exposeUsageFeature('learner.training.session')
+    track('feature_selected', { feature: 'learner.training.session' })
+  }
   target.scrollIntoView({ behavior: 'smooth', block: 'start' })
   window.setTimeout(() => target.focus({ preventScroll: true }), 450)
 }
@@ -972,6 +991,11 @@ async function loadLearnerProgress(force = false) {
 
 async function loadMoreProgressExamples(card: LearnerErrorProgressCard) {
   if (progressExamplesPendingCode.value || !card.hasMoreExamples) return
+  exposeUsageFeature('learner.progress.examples')
+  track('feature_selected', {
+    feature: 'learner.progress.examples',
+    item: card.code,
+  })
   progressExamplesPendingCode.value = card.code
   try {
     const response = await $fetch<{
@@ -987,8 +1011,16 @@ async function loadMoreProgressExamples(card: LearnerErrorProgressCard) {
     const knownIds = new Set(card.examples.map(example => example.id))
     card.examples.push(...response.examples.filter(example => !knownIds.has(example.id)))
     card.hasMoreExamples = response.hasMore && response.examples.length > 0
+    track('feature_completed', {
+      feature: 'learner.progress.examples',
+      item: card.code,
+    })
   }
   catch {
+    track('feature_failed', {
+      feature: 'learner.progress.examples',
+      item: card.code,
+    })
     // Le bouton reste disponible pour permettre une nouvelle tentative.
   }
   finally {
@@ -1460,17 +1492,22 @@ function passwordRequestMessage(error: unknown) {
 
 async function changePassword() {
   if (props.readOnly || passwordChanging.value) return
+  exposeUsageFeature('learner.password')
+  track('feature_selected', { feature: 'learner.password' })
   passwordChanged.value = false
   passwordError.value = ''
   if (passwordForm.newPassword.length < 10 || passwordForm.newPassword.length > 200) {
+    track('feature_failed', { feature: 'learner.password', status: 'validation' })
     passwordError.value = copy.value.passwordLengthError
     return
   }
   if (passwordForm.newPassword !== passwordForm.confirmation) {
+    track('feature_failed', { feature: 'learner.password', status: 'validation' })
     passwordError.value = copy.value.passwordMismatchError
     return
   }
   if (passwordForm.currentPassword === passwordForm.newPassword) {
+    track('feature_failed', { feature: 'learner.password', status: 'validation' })
     passwordError.value = copy.value.passwordSameError
     return
   }
@@ -1489,8 +1526,10 @@ async function changePassword() {
     passwordForm.newPassword = ''
     passwordForm.confirmation = ''
     passwordChanged.value = true
+    track('feature_completed', { feature: 'learner.password' })
   }
   catch (error) {
+    track('feature_failed', { feature: 'learner.password', status: 'request' })
     passwordError.value = passwordRequestMessage(error)
       || copy.value.passwordChangeError
   }
@@ -1501,6 +1540,9 @@ async function changePassword() {
 
 function openAccountDialog(action: AccountAction) {
   if (props.readOnly) return
+  const feature = action === 'results' ? 'learner.results.delete' : 'learner.account.delete'
+  exposeUsageFeature(feature)
+  track('feature_selected', { feature })
   accountActionError.value = ''
   accountDialog.value = action
 }
@@ -1525,6 +1567,7 @@ async function confirmAccountAction() {
   try {
     if (action === 'results') {
       await $fetch('/api/learner/results', { method: 'DELETE' })
+      track('feature_completed', { feature: 'learner.results.delete' })
       dashboard.value = { challenges: [], nextOffset: 0, hasMore: false }
       learnerProgress.value = undefined
       resultsDeleted.value = true
@@ -1533,10 +1576,14 @@ async function confirmAccountAction() {
     }
 
     await $fetch('/api/learner/account', { method: 'DELETE' })
+    track('feature_completed', { feature: 'learner.account.delete' })
     clearUser()
     await navigateTo(localePath('/signin'))
   }
   catch {
+    track('feature_failed', {
+      feature: action === 'results' ? 'learner.results.delete' : 'learner.account.delete',
+    })
     accountActionError.value = action === 'results'
       ? copy.value.deleteResultsError
       : copy.value.deleteAccountError

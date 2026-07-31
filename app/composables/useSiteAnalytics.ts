@@ -12,9 +12,15 @@ export function useSiteAnalytics() {
     }).catch(() => {})
     const gtag = (globalThis as typeof globalThis & { gtag?: (...args: unknown[]) => void }).gtag
     const normalized = stripLocaleFromPath(route.path)
-    const isPrivate = normalized === '/signin' || normalized === '/my-page'
+    const isSignIn = normalized === '/signin'
+    const isLearnerSpace = normalized === '/my-page'
     const isAdministration = normalized === '/admin' || normalized.startsWith('/admin/')
-    if (!isPrivate && !isAdministration) gtag?.('event', name, metadata || {})
+    if (!isSignIn && !isAdministration) {
+      gtag?.('event', name, {
+        ...(metadata || {}),
+        ...(isLearnerSpace ? { user_type: 'learner' } : {}),
+      })
+    }
   }
 
   return { track }

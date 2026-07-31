@@ -5,13 +5,12 @@ export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig()
   const { interfaceLocale } = useLanguagePreferences()
   const measurementId = String(config.public.ga4MeasurementId || '').trim()
-  const isPrivatePrototypePath = (path: string) => {
+  const isSignInPath = (path: string) => {
     const normalized = stripLocaleFromPath(path)
-    return normalized === '/signin' || normalized === '/my-page'
+    return normalized === '/signin'
   }
   const googleEnabled = Boolean(measurementId)
     && !['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)
-    && !isPrivatePrototypePath(route.path)
   let timer: number | undefined
 
   type AnalyticsWindow = Window & {
@@ -49,7 +48,7 @@ export default defineNuxtPlugin(() => {
   }
 
   function googlePageView() {
-    if (!googleEnabled || isAdministration() || isPrivatePrototypePath(route.path)) return
+    if (!googleEnabled || isAdministration() || isSignInPath(route.path)) return
     analyticsWindow.gtag?.('event', 'page_view', {
       page_location: window.location.href,
       page_path: route.fullPath,

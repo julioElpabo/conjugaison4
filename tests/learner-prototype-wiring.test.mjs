@@ -14,12 +14,30 @@ describe('câblage du prototype de compte pseudonyme', () => {
     assert.match(space, /\{\{ copy\.hello \}\} \{\{ displayUsername \}\}/u)
   })
 
-  it('garde les deux routes hors des statistiques', async () => {
+  it('garde la connexion hors des statistiques et mesure anonymement les outils personnels', async () => {
     const analytics = await read('../app/plugins/analytics.client.ts')
-    assert.match(analytics, /normalized === '\/signin' \|\| normalized === '\/my-page'/u)
+    const siteAnalytics = await read('../app/composables/useSiteAnalytics.ts')
+    assert.match(analytics, /normalized === '\/signin'/u)
+    assert.doesNotMatch(analytics, /normalized === '\/signin' \|\| normalized === '\/my-page'/u)
+    assert.match(siteAnalytics, /isLearnerSpace \? \{ user_type: 'learner' \}/u)
     const robots = await read('../public/robots.txt')
     assert.match(robots, /Disallow: \/fr\/signin/u)
     assert.match(robots, /Disallow: \/fr\/my-page/u)
+  })
+
+  it('mesure les outils personnels sans transmettre l’identité du compte', async () => {
+    const space = await read('../app/components/learner/LearnerSpace.vue')
+    const usage = await read('../server/api/admin/analytics-usage.get.ts')
+    assert.match(space, /learnerTabFeature/u)
+    assert.match(space, /learner\.progress\.examples/u)
+    assert.match(space, /learner\.training\.analysis/u)
+    assert.match(space, /learner\.training\.session/u)
+    assert.match(space, /learner\.password/u)
+    assert.match(space, /learner\.results\.delete/u)
+    assert.match(space, /learner\.account\.delete/u)
+    assert.doesNotMatch(space, /track\([^)]*(username|email|learner\\.value\\?\\.id)/u)
+    assert.match(usage, /'learner\.preferences': 'Consulter ses préférences'/u)
+    assert.match(usage, /'learner\.account': 'Consulter les réglages du compte'/u)
   })
 
   it('applique le contrôle de même origine aux mutations du compte', async () => {

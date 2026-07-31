@@ -1,4 +1,4 @@
-import { d as defineEventHandler, b as parseChallengePresetPayload, r as readBody, u as useDatabase, e as replaceChallengePresetSelections, a as reorderChallengePresets, c as createError } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, e as parseChallengePresetPayload, r as readBody, u as useDatabase, f as replaceChallengePresetSelections, b as reorderChallengePresets, c as createError } from '../../../nitro/nitro.mjs';
 import { r as requireAdministrator } from '../../../_/session.mjs';
 import 'node:http';
 import 'node:https';

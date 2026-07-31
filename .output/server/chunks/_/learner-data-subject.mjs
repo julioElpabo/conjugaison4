@@ -1,4 +1,4 @@
-import { i as getQuery, c as createError, u as useDatabase } from '../nitro/nitro.mjs';
+import { a as getQuery, c as createError, u as useDatabase } from '../nitro/nitro.mjs';
 import { r as requireAdministrator } from './session.mjs';
 import { g as getLearnerSession } from './learner-session.mjs';
 

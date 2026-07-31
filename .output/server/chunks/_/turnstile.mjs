@@ -1,4 +1,4 @@
-import { m as useRuntimeConfig, y as getRequestURL, c as createError } from '../nitro/nitro.mjs';
+import { n as useRuntimeConfig, y as getRequestURL, c as createError } from '../nitro/nitro.mjs';
 
 async function assertTurnstile(event, token, expectedAction, options = {}) {
   const config = useRuntimeConfig();

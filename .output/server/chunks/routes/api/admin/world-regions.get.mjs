@@ -1,4 +1,4 @@
-import { d as defineEventHandler, i as getQuery, c as createError } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, a as getQuery, c as createError } from '../../../nitro/nitro.mjs';
 import { r as requireAdministrator } from '../../../_/session.mjs';
 import countries from 'i18n-iso-countries';
 import 'node:http';

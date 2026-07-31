@@ -1,4 +1,4 @@
-import { d as defineEventHandler, q as setResponseHeader, c as createError, u as useDatabase } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, c as createError, u as useDatabase } from '../../../nitro/nitro.mjs';
 import bcrypt from 'bcryptjs';
 import { a as assertLearnerRateLimit, l as learnerClientIp } from '../../../_/learner-rate-limit.mjs';
 import { g as getLearnerSession, a as createLearnerSession } from '../../../_/learner-session.mjs';

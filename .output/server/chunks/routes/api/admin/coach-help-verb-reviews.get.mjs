@@ -1,4 +1,4 @@
-import { d as defineEventHandler, i as getQuery, u as useDatabase } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, a as getQuery, u as useDatabase } from '../../../nitro/nitro.mjs';
 import { r as requireAdministrator } from '../../../_/session.mjs';
 import 'node:http';
 import 'node:https';

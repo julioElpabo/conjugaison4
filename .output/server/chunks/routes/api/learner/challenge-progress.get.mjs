@@ -1,4 +1,4 @@
-import { d as defineEventHandler, q as setResponseHeader, n as normalizeLocale, i as getQuery, c as createError, u as useDatabase, N as learnerErrorDetails, P as learnerErrorDetailText } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, o as normalizeLocale, a as getQuery, c as createError, u as useDatabase, N as learnerErrorDetails, P as learnerErrorDetailText } from '../../../nitro/nitro.mjs';
 import { createHash } from 'node:crypto';
 import { r as requireLearnerDataSubject } from '../../../_/learner-data-subject.mjs';
 import 'node:http';

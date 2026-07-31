@@ -1,4 +1,4 @@
-import { c as createError, s as setCookie, j as deleteCookie, k as getCookie, m as useRuntimeConfig } from '../nitro/nitro.mjs';
+import { c as createError, j as setCookie, k as deleteCookie, m as getCookie, n as useRuntimeConfig } from '../nitro/nitro.mjs';
 import { timingSafeEqual, createHmac } from 'node:crypto';
 
 const COOKIE_NAME = "conjugaison_session";

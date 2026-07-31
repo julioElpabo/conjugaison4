@@ -37,6 +37,8 @@ const ANALYTICS_EVENTS = [
   "exercise_abandoned",
   "account_registered",
   "account_login",
+  "language_tested",
+  "language_used",
   "client_error"
 ];
 

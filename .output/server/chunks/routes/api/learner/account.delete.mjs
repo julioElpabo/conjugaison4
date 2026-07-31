@@ -1,4 +1,4 @@
-import { d as defineEventHandler, q as setResponseHeader, c as createError, u as useDatabase } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, c as createError, u as useDatabase } from '../../../nitro/nitro.mjs';
 import { g as getLearnerSession, c as clearLearnerSession } from '../../../_/learner-session.mjs';
 import 'node:http';
 import 'node:https';

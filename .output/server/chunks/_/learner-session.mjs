@@ -1,4 +1,4 @@
-import { k as getCookie, u as useDatabase, j as deleteCookie, s as setCookie, y as getRequestURL } from '../nitro/nitro.mjs';
+import { m as getCookie, u as useDatabase, k as deleteCookie, j as setCookie, y as getRequestURL } from '../nitro/nitro.mjs';
 import { randomBytes, createHash } from 'node:crypto';
 
 const COOKIE_NAME = "learner_session";

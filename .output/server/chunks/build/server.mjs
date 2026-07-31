@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, toRef, isReadonly, isRef, isShallow, isReactive, toRaw } from 'vue';
-import { a6 as parseURL, a7 as encodePath, a8 as decodePath, a9 as localeFromPath, n as normalizeLocale, aa as getRequestHeaders, c as createError$1, S as hasProtocol, U as isScriptProtocol, T as joinURL, ab as withQuery, ac as klona, ad as DEFAULT_LANGUAGE_PREFERENCES, ae as localizePath, af as sanitizeStatusCode, ag as getContext, ah as getRequestHeader, ai as isEqual, s as setCookie, k as getCookie, j as deleteCookie, aj as $fetch, ak as defu, z as stripLocaleFromPath, Z as executeAsync, al as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { a6 as parseURL, a7 as encodePath, a8 as decodePath, a9 as localeFromPath, o as normalizeLocale, aa as getRequestHeaders, c as createError$1, S as hasProtocol, U as isScriptProtocol, T as joinURL, ab as withQuery, ac as klona, ad as DEFAULT_LANGUAGE_PREFERENCES, ae as localizePath, af as sanitizeStatusCode, ag as getContext, ah as getRequestHeader, ai as isEqual, j as setCookie, m as getCookie, k as deleteCookie, aj as $fetch, ak as defu, z as stripLocaleFromPath, Z as executeAsync, al as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -1344,7 +1344,7 @@ const _routes = [
   {
     name: "admin-charts",
     path: "/admin/charts",
-    component: () => import('./charts-Bq0LMuU_.mjs')
+    component: () => import('./charts-DikT4AdJ.mjs')
   },
   {
     name: "admin-coaches",
@@ -1384,17 +1384,17 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-BTOcxh5Z.mjs')
+    component: () => import('./users-DErd5kcf.mjs')
   },
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-DmjSX2TF.mjs')
+    component: () => import('./_code_-Dt5opbo2.mjs')
   },
   {
     name: "accueil",
     path: "/accueil",
-    component: () => import('./accueil-CEO7qlSu.mjs')
+    component: () => import('./accueil-CF8x0S48.mjs')
   },
   {
     name: "admin",
@@ -1404,12 +1404,12 @@ const _routes = [
   {
     name: "apprendre",
     path: "/apprendre",
-    component: () => import('./apprendre-BkR4qlFK.mjs')
+    component: () => import('./apprendre-CPMyzq3H.mjs')
   },
   {
     name: "consulter",
     path: "/consulter",
-    component: () => import('./consulter-aXCxMirP.mjs')
+    component: () => import('./consulter-H_xS9mXQ.mjs')
   },
   {
     name: "mon-compte",
@@ -1420,22 +1420,22 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-P9mOhi4L.mjs')
+    component: () => import('./my-page-B1zNIMqD.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-Th59BgWJ.mjs')
+    component: () => import('./nouveau-defi-Jkgl-0V6.mjs')
   },
   {
     name: "signin",
     path: "/signin",
-    component: () => import('./signin-CtQDM4Sh.mjs')
+    component: () => import('./signin-DR41Hgv5.mjs')
   },
   {
     name: "index",
     path: "/",
-    component: () => import('./index-Ds4SS79s.mjs')
+    component: () => import('./index-D5EzuGzf.mjs')
   },
   {
     name: "localized-admin-admins",
@@ -1460,7 +1460,7 @@ const _routes = [
   {
     name: "localized-admin-charts",
     path: "/:locale(fr|de|en|it|es)/admin/charts",
-    component: () => import('./charts-Bq0LMuU_.mjs')
+    component: () => import('./charts-DikT4AdJ.mjs')
   },
   {
     name: "localized-admin-coaches",
@@ -1500,17 +1500,17 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-BTOcxh5Z.mjs')
+    component: () => import('./users-DErd5kcf.mjs')
   },
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-DmjSX2TF.mjs')
+    component: () => import('./_code_-Dt5opbo2.mjs')
   },
   {
     name: "localized-accueil",
     path: "/:locale(fr|de|en|it|es)/accueil",
-    component: () => import('./accueil-CEO7qlSu.mjs')
+    component: () => import('./accueil-CF8x0S48.mjs')
   },
   {
     name: "localized-admin",
@@ -1520,12 +1520,12 @@ const _routes = [
   {
     name: "localized-apprendre",
     path: "/:locale(fr|de|en|it|es)/apprendre",
-    component: () => import('./apprendre-BkR4qlFK.mjs')
+    component: () => import('./apprendre-CPMyzq3H.mjs')
   },
   {
     name: "localized-consulter",
     path: "/:locale(fr|de|en|it|es)/consulter",
-    component: () => import('./consulter-aXCxMirP.mjs')
+    component: () => import('./consulter-H_xS9mXQ.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1536,22 +1536,22 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-P9mOhi4L.mjs')
+    component: () => import('./my-page-B1zNIMqD.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-Th59BgWJ.mjs')
+    component: () => import('./nouveau-defi-Jkgl-0V6.mjs')
   },
   {
     name: "localized-signin",
     path: "/:locale(fr|de|en|it|es)/signin",
-    component: () => import('./signin-CtQDM4Sh.mjs')
+    component: () => import('./signin-DR41Hgv5.mjs')
   },
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-Ds4SS79s.mjs')
+    component: () => import('./index-D5EzuGzf.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -2142,7 +2142,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-BqWOZJdn.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-ByNX8rVk.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

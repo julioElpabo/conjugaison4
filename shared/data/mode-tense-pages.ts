@@ -6,11 +6,11 @@ export interface ModeTensePage {
   path: string
 }
 
-const tenseDefinitions: Record<ModeLandingSlug, Array<{ slug: string, label: string, exercisePath?: string }>> = {
+const tenseDefinitions: Record<ModeLandingSlug, Array<{ slug: string, label: string }>> = {
   indicatif: [
-    { slug: 'present', label: 'présent', exercisePath: '/exercices/present' },
-    { slug: 'imparfait', label: 'imparfait', exercisePath: '/exercices/imparfait' },
-    { slug: 'passe-compose', label: 'passé composé', exercisePath: '/exercices/passe-compose' },
+    { slug: 'present', label: 'présent' },
+    { slug: 'imparfait', label: 'imparfait' },
+    { slug: 'passe-compose', label: 'passé composé' },
     { slug: 'plus-que-parfait', label: 'plus-que-parfait' },
     { slug: 'passe-simple', label: 'passé simple' },
     { slug: 'passe-anterieur', label: 'passé antérieur' },
@@ -45,7 +45,7 @@ export function modeTensePages(mode: ModeLandingSlug): ModeTensePage[] {
   return tenseDefinitions[mode].map(tense => ({
     slug: tense.slug,
     label: tense.label,
-    path: tense.exercisePath ?? `/modes/${mode}/${tense.slug}`,
+    path: `/modes/${mode}/${tense.slug}`,
   }))
 }
 
@@ -55,4 +55,3 @@ export function modeTensePage(mode: ModeLandingSlug, tenseSlug: string) {
 
 export const MODE_TENSE_PATHS = (Object.keys(tenseDefinitions) as ModeLandingSlug[])
   .flatMap(mode => modeTensePages(mode).map(tense => tense.path))
-  .filter(path => path.startsWith('/modes/'))

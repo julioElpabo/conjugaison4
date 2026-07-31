@@ -168,7 +168,7 @@ async function selectLearnerLanguage(locale: AppLocale) {
 }
 const activeSection = computed(() => {
   if (localizedSectionPath.value === '/consulter' || localizedSectionPath.value.startsWith('/consulter/')) return 'consulter'
-  if (localizedSectionPath.value === '/apprendre' || localizedSectionPath.value.startsWith('/apprendre/') || localizedSectionPath.value.startsWith('/modes/')) return 'apprendre'
+  if (localizedSectionPath.value === '/apprendre' || localizedSectionPath.value.startsWith('/apprendre/') || localizedSectionPath.value.startsWith('/modes/') || localizedSectionPath.value === '/exercices' || localizedSectionPath.value.startsWith('/exercices/')) return 'apprendre'
   if (!isAdminRoute.value) return 'exercer'
   return ''
 })

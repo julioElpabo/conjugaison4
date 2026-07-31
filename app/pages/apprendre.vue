@@ -10,9 +10,9 @@ useHead(() => ({
 }))
 
 const sections = computed(() => [
-  { id: 'bases', number: '01', title: ui('Comprendre le verbe'), description: ui('Radical, terminaison, groupes et auxiliaires.') },
+  { id: 'modes', number: '01', title: ui('Choisir le bon mode'), description: ui('Indicatif, subjonctif, conditionnel et impératif.') },
   { id: 'temps', number: '02', title: ui('Former les temps'), description: ui('Les repères pour construire les temps simples et composés.') },
-  { id: 'modes', number: '03', title: ui('Choisir le bon mode'), description: ui('Indicatif, subjonctif, conditionnel et impératif.') },
+  { id: 'bases', number: '03', title: ui('Comprendre le verbe'), description: ui('Radical, terminaison, groupes et auxiliaires.') },
   { id: 'accords', number: '04', title: ui('Réussir les accords'), description: ui('Sujet, auxiliaires et participe passé.') },
   { id: 'orthographe', number: '05', title: ui('Éviter les pièges'), description: ui('Modifications du radical et terminaisons à surveiller.') },
 ])
@@ -46,8 +46,36 @@ onMounted(() => track('feature_exposed', { feature: 'learn.content' }))
     </nav>
 
     <main class="learning-content">
+      <section id="modes" class="rule-section">
+        <header><span>01</span><div><p class="learning-eyebrow">{{ ui('Le sens') }}</p><h2>{{ ui('Choisir le bon mode') }}</h2></div></header>
+        <div class="mode-cards">
+          <article><span>{{ ui('Fait') }}</span><h3>{{ ui('Indicatif') }}</h3><p>{{ ui('Présente un fait, une action certaine ou située dans le temps.') }}</p><em>Demain, nous partirons.</em></article>
+          <article><span>{{ ui('Doute') }}</span><h3>{{ ui('Subjonctif') }}</h3><p>{{ ui('Exprime notamment le souhait, la nécessité, le sentiment ou l’incertitude.') }}</p><em>Il faut que tu viennes.</em></article>
+          <article><span>{{ ui('Hypothèse') }}</span><h3>{{ ui('Conditionnel') }}</h3><p>{{ ui('Présente une possibilité, une information incertaine ou une action soumise à une condition.') }}</p><em>Je viendrais si je pouvais.</em></article>
+          <article><span>{{ ui('Consigne') }}</span><h3>{{ ui('Impératif') }}</h3><p>{{ ui('Exprime un ordre, un conseil ou une invitation, sans sujet exprimé.') }}</p><em>Écoutez attentivement !</em></article>
+        </div>
+        <nav class="mode-page-links" :aria-label="ui('Choisir le bon mode')">
+          <NuxtLink v-for="mode in modeJourneys" :key="mode.slug" :to="localePath(`/modes/${mode.slug}`)">
+            <strong>{{ mode.title }}</strong><span aria-hidden="true">→</span>
+          </NuxtLink>
+        </nav>
+      </section>
+
+      <section id="temps" class="rule-section">
+        <header><span>02</span><div><p class="learning-eyebrow">{{ ui('La construction') }}</p><h2>{{ ui('Former les temps') }}</h2></div></header>
+        <div class="formation-table" role="table" :aria-label="ui('Formation des principaux temps')">
+          <div class="formation-row formation-row--head" role="row"><span>{{ ui('Temps') }}</span><span>{{ ui('Construction') }}</span><span>{{ ui('Exemple') }}</span></div>
+          <div class="formation-row" role="row"><strong>{{ ui('Présent') }}</strong><span>{{ ui('radical + terminaisons du présent') }}</span><em>je parle, nous finissons</em></div>
+          <div class="formation-row" role="row"><strong>{{ ui('Imparfait') }}</strong><span>{{ ui('radical de « nous » au présent + -ais, -ais, -ait, -ions, -iez, -aient') }}</span><em>nous parlions</em></div>
+          <div class="formation-row" role="row"><strong>{{ ui('Futur simple') }}</strong><span>{{ ui('infinitif, ou radical irrégulier, + -ai, -as, -a, -ons, -ez, -ont') }}</span><em>tu viendras</em></div>
+          <div class="formation-row" role="row"><strong>{{ ui('Conditionnel présent') }}</strong><span>{{ ui('radical du futur + terminaisons de l’imparfait') }}</span><em>vous pourriez</em></div>
+          <div class="formation-row" role="row"><strong>{{ ui('Temps composé') }}</strong><span>{{ ui('auxiliaire conjugué + participe passé') }}</span><em>ils avaient compris</em></div>
+        </div>
+        <aside class="rule-note"><strong>{{ ui('Le bon réflexe') }}</strong><p>{{ ui('Pour reconnaître un temps composé, cherche d’abord une forme de avoir ou d’être, puis le participe passé.') }}</p></aside>
+      </section>
+
       <section id="bases" class="rule-section">
-        <header><span>01</span><div><p class="learning-eyebrow">{{ ui('Les fondations') }}</p><h2>{{ ui('Comprendre le verbe') }}</h2></div></header>
+        <header><span>03</span><div><p class="learning-eyebrow">{{ ui('Les fondations') }}</p><h2>{{ ui('Comprendre le verbe') }}</h2></div></header>
         <div class="rule-grid rule-grid--three">
           <article>
             <h3>{{ ui('Radical + terminaison') }}</h3>
@@ -68,34 +96,6 @@ onMounted(() => track('feature_exposed', { feature: 'learn.content' }))
             <p class="rule-example"><strong>elle a fini</strong><span>{{ ui('auxiliaire + participe passé') }}</span></p>
           </article>
         </div>
-      </section>
-
-      <section id="temps" class="rule-section">
-        <header><span>02</span><div><p class="learning-eyebrow">{{ ui('La construction') }}</p><h2>{{ ui('Former les temps') }}</h2></div></header>
-        <div class="formation-table" role="table" :aria-label="ui('Formation des principaux temps')">
-          <div class="formation-row formation-row--head" role="row"><span>{{ ui('Temps') }}</span><span>{{ ui('Construction') }}</span><span>{{ ui('Exemple') }}</span></div>
-          <div class="formation-row" role="row"><strong>{{ ui('Présent') }}</strong><span>{{ ui('radical + terminaisons du présent') }}</span><em>je parle, nous finissons</em></div>
-          <div class="formation-row" role="row"><strong>{{ ui('Imparfait') }}</strong><span>{{ ui('radical de « nous » au présent + -ais, -ais, -ait, -ions, -iez, -aient') }}</span><em>nous parlions</em></div>
-          <div class="formation-row" role="row"><strong>{{ ui('Futur simple') }}</strong><span>{{ ui('infinitif, ou radical irrégulier, + -ai, -as, -a, -ons, -ez, -ont') }}</span><em>tu viendras</em></div>
-          <div class="formation-row" role="row"><strong>{{ ui('Conditionnel présent') }}</strong><span>{{ ui('radical du futur + terminaisons de l’imparfait') }}</span><em>vous pourriez</em></div>
-          <div class="formation-row" role="row"><strong>{{ ui('Temps composé') }}</strong><span>{{ ui('auxiliaire conjugué + participe passé') }}</span><em>ils avaient compris</em></div>
-        </div>
-        <aside class="rule-note"><strong>{{ ui('Le bon réflexe') }}</strong><p>{{ ui('Pour reconnaître un temps composé, cherche d’abord une forme de avoir ou d’être, puis le participe passé.') }}</p></aside>
-      </section>
-
-      <section id="modes" class="rule-section">
-        <header><span>03</span><div><p class="learning-eyebrow">{{ ui('Le sens') }}</p><h2>{{ ui('Choisir le bon mode') }}</h2></div></header>
-        <div class="mode-cards">
-          <article><span>{{ ui('Fait') }}</span><h3>{{ ui('Indicatif') }}</h3><p>{{ ui('Présente un fait, une action certaine ou située dans le temps.') }}</p><em>Demain, nous partirons.</em></article>
-          <article><span>{{ ui('Doute') }}</span><h3>{{ ui('Subjonctif') }}</h3><p>{{ ui('Exprime notamment le souhait, la nécessité, le sentiment ou l’incertitude.') }}</p><em>Il faut que tu viennes.</em></article>
-          <article><span>{{ ui('Hypothèse') }}</span><h3>{{ ui('Conditionnel') }}</h3><p>{{ ui('Présente une possibilité, une information incertaine ou une action soumise à une condition.') }}</p><em>Je viendrais si je pouvais.</em></article>
-          <article><span>{{ ui('Consigne') }}</span><h3>{{ ui('Impératif') }}</h3><p>{{ ui('Exprime un ordre, un conseil ou une invitation, sans sujet exprimé.') }}</p><em>Écoutez attentivement !</em></article>
-        </div>
-        <nav class="mode-page-links" :aria-label="ui('Choisir le bon mode')">
-          <NuxtLink v-for="mode in modeJourneys" :key="mode.slug" :to="localePath(`/modes/${mode.slug}`)">
-            <strong>{{ mode.title }}</strong><span aria-hidden="true">→</span>
-          </NuxtLink>
-        </nav>
       </section>
 
       <section id="accords" class="rule-section">
@@ -126,7 +126,7 @@ onMounted(() => track('feature_exposed', { feature: 'learn.content' }))
           <h2 id="journeys-title">{{ ui('Passe de la règle à la pratique') }}</h2>
         </header>
         <div>
-          <NuxtLink v-for="journey in exerciseJourneys" :key="journey.slug" :to="localePath(`/exercices/${journey.slug}`)">
+          <NuxtLink v-for="journey in exerciseJourneys" :key="journey.slug" :to="localePath(`/modes/indicatif/${journey.slug}`)">
             <span>{{ journey.eyebrow }}</span>
             <strong>{{ journey.title }}</strong>
             <small>{{ journey.description }}</small>

@@ -12,6 +12,8 @@ if (!isExerciseLandingSlug(slug)) {
   throw createError({ statusCode: 404, statusMessage: 'Parcours introuvable' })
 }
 
+await navigateTo(localePath(`/modes/indicatif/${slug}`), { redirectCode: 301 })
+
 const page = computed(() => exerciseLandingPage(slug, interfaceLocale.value))
 const groupGuide = computed(() => tenseGroupGuide(slug, interfaceLocale.value))
 const modeNavigation = computed(() => MODE_LANDING_SLUGS.map(modeSlug => ({

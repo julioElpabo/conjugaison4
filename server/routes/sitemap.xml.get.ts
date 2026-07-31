@@ -1,4 +1,3 @@
-import { EXERCISE_LANDING_SLUGS } from '../../shared/data/exercise-landing-pages'
 import { MODE_LANDING_SLUGS } from '../../shared/data/mode-landing-pages'
 import { MODE_TENSE_PATHS } from '../../shared/data/mode-tense-pages'
 import { localizePath, SUPPORTED_LOCALES, type AppLocale } from '../../shared/i18n/locales'
@@ -6,8 +5,8 @@ import { localizePath, SUPPORTED_LOCALES, type AppLocale } from '../../shared/i1
 const PUBLIC_PATHS = [
   '/',
   '/apprendre',
+  '/exercices',
   '/consulter',
-  ...EXERCISE_LANDING_SLUGS.map(slug => `/exercices/${slug}`),
   ...MODE_LANDING_SLUGS.map(slug => `/modes/${slug}`),
   ...MODE_TENSE_PATHS,
 ]

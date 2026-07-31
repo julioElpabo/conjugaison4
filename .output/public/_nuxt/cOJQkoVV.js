@@ -1,1 +1,0 @@
-import{ac as n,q as o,ad as c,G as u}from"./BtnniV2X.js";import{u as i}from"./BBUrRIrW.js";import"./B5m_MpBT.js";const h=n(async r=>{let e,a;const{checkSession:t}=i(),{localePath:s}=o();if(!([e,a]=c(()=>t()),e=await e,a(),e))return u({path:s("/signin"),query:{redirect:r.fullPath}},{replace:!0})});export{h as default};

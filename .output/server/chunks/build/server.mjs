@@ -1384,7 +1384,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-UJrWOye-.mjs')
+    component: () => import('./users-BTOcxh5Z.mjs')
   },
   {
     name: "defi-code",
@@ -1420,7 +1420,7 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-DNz8wtav.mjs')
+    component: () => import('./my-page-P9mOhi4L.mjs')
   },
   {
     name: "nouveau-defi",
@@ -1500,7 +1500,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-UJrWOye-.mjs')
+    component: () => import('./users-BTOcxh5Z.mjs')
   },
   {
     name: "localized-defi-code",
@@ -1536,7 +1536,7 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-DNz8wtav.mjs')
+    component: () => import('./my-page-P9mOhi4L.mjs')
   },
   {
     name: "localized-nouveau-defi",

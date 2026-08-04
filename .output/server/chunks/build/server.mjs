@@ -1415,7 +1415,7 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-DcZZGRNC.mjs')
+    component: () => import('./_code_-9tAw7xUd.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1430,7 +1430,7 @@ const _routes = [
   {
     name: "accueil",
     path: "/accueil",
-    component: () => import('./accueil-CK0b8vZi.mjs')
+    component: () => import('./accueil-BLXufQub.mjs')
   },
   {
     name: "admin",
@@ -1466,7 +1466,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-Basbyxrt.mjs')
+    component: () => import('./nouveau-defi-DP33CIuC.mjs')
   },
   {
     name: "signin",
@@ -1476,7 +1476,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-WharKTy3.mjs')
+    component: () => import('./index-H1gvjZJA.mjs')
   },
   {
     name: "localized-admin-admins",
@@ -1561,7 +1561,7 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-DcZZGRNC.mjs')
+    component: () => import('./_code_-9tAw7xUd.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1576,7 +1576,7 @@ const _routes = [
   {
     name: "localized-accueil",
     path: "/:locale(fr|de|en|it|es)/accueil",
-    component: () => import('./accueil-CK0b8vZi.mjs')
+    component: () => import('./accueil-BLXufQub.mjs')
   },
   {
     name: "localized-admin",
@@ -1612,7 +1612,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-Basbyxrt.mjs')
+    component: () => import('./nouveau-defi-DP33CIuC.mjs')
   },
   {
     name: "localized-signin",
@@ -1622,7 +1622,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-WharKTy3.mjs')
+    component: () => import('./index-H1gvjZJA.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {

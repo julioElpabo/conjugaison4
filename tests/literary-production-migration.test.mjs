@@ -10,7 +10,7 @@ const [snapshotText, migration, exporter] = await Promise.all([
 const snapshot = JSON.parse(snapshotText)
 
 test('l’instantané de production contient uniquement le corpus validé attendu', () => {
-  assert.equal(snapshot.schemaVersion, 1)
+  assert.equal(snapshot.schemaVersion, 2)
   assert.match(snapshot.checksum, /^[a-f0-9]{64}$/u)
   assert.deepEqual(snapshot.counts, { sources: 6, sentences: 1183, targets: 1337 })
   assert.equal(snapshot.sources.length, snapshot.counts.sources)
@@ -29,6 +29,10 @@ test('l’instantané de production contient uniquement le corpus validé attend
       for (const target of sentence.targets) {
         targetCount += 1
         assert.equal(sentence.text.slice(target.start, target.end), target.form)
+        assert.ok(target.verbInfinitive)
+        assert.ok(target.modeCode)
+        assert.ok(target.tenseCode)
+        assert.ok(target.personPronoun)
       }
     }
   }
@@ -37,7 +41,11 @@ test('l’instantané de production contient uniquement le corpus validé attend
 })
 
 test('la migration remplace le corpus dans une transaction et ne se rejoue pas', () => {
-  assert.match(migration, /production-literary-corpus-v1-/u)
+  assert.match(migration, /production-literary-corpus-v2-/u)
+  assert.match(migration, /ensureLiteraryGrammarPrerequisites/u)
+  assert.match(migration, /target\.verbInfinitive/u)
+  assert.match(migration, /target\.modeCode/u)
+  assert.match(migration, /target\.personPronoun/u)
   assert.match(migration, /await connection\.beginTransaction\(\)/u)
   assert.match(migration, /DELETE FROM literary_targets/u)
   assert.match(migration, /DELETE FROM literary_sentences/u)

@@ -164,6 +164,7 @@ async function createPreset() {
     tenseIds: [],
     questionCount: 10,
     exerciseKind: 'conjugation',
+    identificationSource: 'selected-verbs',
     pastSimplePronouns: 'all',
     inclusivePronouns: false,
     includeComplements: true,

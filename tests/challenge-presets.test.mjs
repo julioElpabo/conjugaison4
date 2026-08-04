@@ -126,6 +126,7 @@ describe('conversion du format historique', () => {
       tenseIds: [1, 3],
       questionCount: 12,
       exerciseKind: 'conjugation',
+      identificationSource: 'selected-verbs',
       pastSimplePronouns: 'all',
       inclusivePronouns: false,
       includeComplements: false,

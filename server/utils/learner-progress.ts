@@ -30,7 +30,8 @@ export function learnerChallengeSnapshot(value: unknown): LearnerChallengeSnapsh
   }
   const candidate = value as Record<string, unknown>
   const exerciseKind = candidate.exerciseKind === 'tense-identification'
-    ? 'tense-identification'
+    || candidate.exerciseKind === 'mode-identification'
+    ? candidate.exerciseKind
     : 'conjugation'
   const questionCount = Math.min(200, Math.max(1, Number(candidate.questionCount) || 1))
   const description = typeof candidate.description === 'string'
@@ -46,6 +47,9 @@ export function learnerChallengeSnapshot(value: unknown): LearnerChallengeSnapsh
     tenseIds: integerList(candidate.tenseIds),
     questionCount,
     exerciseKind,
+    identificationSource: candidate.identificationSource === 'literary-corpus'
+      ? 'literary-corpus'
+      : 'selected-verbs',
     pastSimplePronouns: candidate.pastSimplePronouns === 'third-person-only'
       ? 'third-person-only'
       : 'all',
@@ -80,6 +84,10 @@ export function learnerChallengeFingerprint(snapshot: LearnerChallengeSnapshot, 
 
 function shortText(value: unknown, maximum: number) {
   return typeof value === 'string' ? value.trim().slice(0, maximum) : ''
+}
+
+function boundedText(value: unknown, maximum: number) {
+  return typeof value === 'string' ? value.slice(0, maximum) : ''
 }
 
 export function learnerQuestionSnapshot(value: unknown): ExerciseQuestion {
@@ -134,6 +142,10 @@ export function learnerQuestionSnapshot(value: unknown): ExerciseQuestion {
   const agreementKind = ['cod-before', 'cod-after', 'coi'].includes(String(agreement?.kind))
     ? agreement?.kind as 'cod-before' | 'cod-after' | 'coi'
     : null
+  const citation = question.literaryCitation && typeof question.literaryCitation === 'object'
+    ? question.literaryCitation as Record<string, unknown>
+    : null
+  const citationTarget = shortText(citation?.target, 200)
   return {
     titre: shortText(question.titre, 300),
     instruction: shortText(question.instruction, 300) || undefined,
@@ -150,6 +162,9 @@ export function learnerQuestionSnapshot(value: unknown): ExerciseQuestion {
     temps: shortText(question.temps, 100) || undefined,
     mode: shortText(question.mode, 100) || undefined,
     isCompound: question.isCompound === true,
+    conjugaison1: shortText(question.conjugaison1, 300) || undefined,
+    conjugaison2: shortText(question.conjugaison2, 300) || undefined,
+    conjugaison3: shortText(question.conjugaison3, 300) || undefined,
     radicalReference: paradigmForms.length
       ? {
           kind: 'memorized-form',
@@ -177,6 +192,17 @@ export function learnerQuestionSnapshot(value: unknown): ExerciseQuestion {
           number: agreement?.number === 'pluriel' || agreement?.number === 'singulier'
             ? agreement.number
             : null,
+      }
+      : undefined,
+    literaryCitation: citation && citationTarget
+      ? {
+          before: boundedText(citation.before, 500),
+          target: citationTarget,
+          after: boundedText(citation.after, 500),
+          author: shortText(citation.author, 200),
+          work: shortText(citation.work, 300),
+          chapter: shortText(citation.chapter, 200) || null,
+          sourceUrl: shortText(citation.sourceUrl, 500),
         }
       : undefined,
   }

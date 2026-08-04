@@ -89,6 +89,9 @@ interface HistorySummaryResponse {
     displayExpectedAnswers: string[]
     errorLabels: string[]
     errorDetails: LearnerErrorDetail[]
+    identificationForm: { before: string, target: string, after: string } | null
+    literaryCitation?: ExerciseQuestion['literaryCitation']
+    isIdentification: boolean
   }>
   verbs: string[]
   tenses: Array<{ name: string, mode?: string }>
@@ -197,6 +200,12 @@ const selectedWork = ref<{
 }>()
 const workMenuFingerprint = ref('')
 const catalogue = ref<Catalogue>()
+const identificationTenses = computed(() => {
+  const data = catalogue.value
+  if (!data) return []
+  const modes = new Map(data.modes.map(mode => [mode.id, mode]))
+  return data.temps.map(tense => ({ ...tense, mode: tense.mode || modes.get(tense.modeId) }))
+})
 const challengeStarting = ref<string>()
 const challengeStartError = ref('')
 const preferencesSaving = ref(false)
@@ -216,6 +225,9 @@ const passwordChanged = ref(false)
 const passwordError = ref('')
 const dashboardLoadingMore = ref(false)
 const historySummary = ref<{ challenge: DashboardChallenge, report: HistorySummaryResponse }>()
+const historySummaryTitle = computed(() => historySummary.value
+  ? challengeDisplayLabel(historySummary.value.challenge)
+  : '')
 const historySummaryPendingId = ref<number>()
 const historySummaryError = ref<{ challengeId: number, message: string }>()
 const finishMenuChallengeId = ref<number>()
@@ -421,6 +433,18 @@ function challengeProgressLabel(challenge: DashboardChallenge) {
     answered: challenge.questionResults.length,
     total: challenge.challenge.questionCount,
   })
+}
+
+function challengeExerciseKindLabel(challenge: DashboardChallenge) {
+  return challenge.challenge.exerciseKind === 'tense-identification'
+    ? ui('Trouver le mode et les temps')
+    : ''
+}
+
+function challengeDisplayLabel(challenge: DashboardChallenge) {
+  return challenge.challenge.identificationSource === 'literary-corpus'
+    ? ui('Phrases littéraires')
+    : challenge.label
 }
 
 function challengeQuestionLabel(challenge: DashboardChallenge, index: number) {
@@ -1278,7 +1302,10 @@ async function ensureCatalogue() {
 }
 
 function challengeVerbs(challenge: DashboardChallenge): Verb[] {
-  const ids = new Set(challenge.challenge.verbIds)
+  const ids = new Set([
+    ...challenge.challenge.verbIds,
+    ...reviewQuestions.value.map(question => Number(question.verbeId)).filter(id => id > 0),
+  ])
   return catalogue.value?.verbes.filter(verb => ids.has(verb.id)) || []
 }
 
@@ -1673,7 +1700,12 @@ async function confirmAccountAction() {
                   :class="{ 'challenge-card--perfect': challengeIsComplete(challenge) && challenge.incorrectCount === 0 }"
                 >
                   <div class="challenge-card__top">
-                    <h3>{{ challenge.label }}</h3>
+                    <div class="challenge-card__heading">
+                      <h3>{{ challengeDisplayLabel(challenge) }}</h3>
+                      <p v-if="challengeExerciseKindLabel(challenge)" class="challenge-card__exercise-kind">
+                        {{ challengeExerciseKindLabel(challenge) }}
+                      </p>
+                    </div>
                     <span>{{ formattedChallengeTime(challenge.lastActivityAt) }}</span>
                   </div>
                   <div
@@ -2674,6 +2706,7 @@ async function confirmAccountAction() {
       v-if="reviewOpen && reviewTracking && exercisePresentation === 'classic'"
       :questions="reviewQuestions"
       :exercise-kind="reviewTracking.challenge.exerciseKind"
+      :identification-tenses="identificationTenses"
       :tracking-context="reviewTracking"
       :require-success="reviewRequireSuccess"
       :analytics-metadata="reviewAnalyticsMetadata"
@@ -2682,9 +2715,11 @@ async function confirmAccountAction() {
     <ChatExercise
       v-if="reviewOpen && reviewTracking && exercisePresentation === 'chat' && selectedCoach && selectedWork"
       :questions="reviewQuestions"
+      :exercise-kind="reviewTracking.challenge.exerciseKind"
       :coach="selectedCoach"
       :verbs="challengeVerbs(selectedWork.challenge)"
       :tenses="challengeTenses(selectedWork.challenge)"
+      :identification-tenses="identificationTenses"
       :regenerate-questions="regenerateChatQuestions"
       :tracking-context="reviewTracking"
       :require-success="reviewRequireSuccess"
@@ -2700,7 +2735,7 @@ async function confirmAccountAction() {
     />
     <LearnerHistorySessionSummaryDialog
       v-if="historySummary"
-      :title="historySummary.challenge.label"
+      :title="historySummaryTitle"
       :items="historySummary.report.items"
       :correct-count="historySummary.challenge.correctCount"
       :total-count="historySummary.challenge.correctCount + historySummary.challenge.incorrectCount"
@@ -3498,8 +3533,22 @@ async function confirmAccountAction() {
   align-items: center;
 }
 
+.challenge-card__heading {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
 .challenge-card__top h3 {
   margin: 0;
+}
+
+.challenge-card__exercise-kind {
+  margin: 0;
+  color: var(--learner-purple-copy);
+  font-size: .74rem;
+  font-weight: 800;
+  line-height: 1.25;
 }
 
 .challenge-card__top > span {

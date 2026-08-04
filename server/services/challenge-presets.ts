@@ -149,6 +149,7 @@ export async function listStoredChallengePresets(
       tenseIds: [...definition.tenseIds],
       questionCount: Number(row.questionCount),
       exerciseKind: row.exerciseKind,
+      identificationSource: 'selected-verbs',
       pastSimplePronouns: row.pastSimplePronouns,
       inclusivePronouns: Boolean(row.inclusivePronouns),
       includeComplements: legacy.includeComplements,

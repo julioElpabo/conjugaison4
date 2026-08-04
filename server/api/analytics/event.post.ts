@@ -18,8 +18,8 @@ export default defineEventHandler(async (event) => {
   await database.execute(`INSERT INTO analytics_sessions (session_id, current_path)
     VALUES (?, ?) ON DUPLICATE KEY UPDATE last_seen=CURRENT_TIMESTAMP,
       current_path=VALUES(current_path)`, [sessionId, path])
-  await database.execute('INSERT INTO analytics_events (session_id, event_name, path, metadata) VALUES (?, ?, ?, ?)', [
-    sessionId, name, path, JSON.stringify(storedMetadata),
+  await database.execute('INSERT INTO analytics_events (session_id, event_name, path, actor_type, metadata) VALUES (?, ?, ?, ?, ?)', [
+    sessionId, name, path, actorType, JSON.stringify(storedMetadata),
   ])
   return { ok: true }
 })

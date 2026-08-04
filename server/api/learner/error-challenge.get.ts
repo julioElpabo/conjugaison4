@@ -189,6 +189,7 @@ export default defineEventHandler(async (event) => {
     tenseIds: selectedTenseIds,
     questionCount: 10,
     exerciseKind: 'conjugation',
+    identificationSource: 'selected-verbs',
     pastSimplePronouns,
     inclusivePronouns,
     includeComplements: includeComplements || targetedOptions.length > 0,

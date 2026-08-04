@@ -92,6 +92,51 @@ export function visibleCoachHelpBlocks(
   ]
 }
 
+/** Aide de référence pour identifier un mode dans une citation, sans expliquer la conjugaison de la réponse. */
+export function literaryIdentificationCoachHelpBlocks(): CoachHelpBlock[] {
+  const mode = (id: number, title: string, description: string, examples: string): CoachHelpBlock => ({
+    id,
+    type: 'info',
+    title,
+    content: `<p>${description}</p><p><strong>Exemples :</strong> ${examples}</p>`,
+    explanationApproach: 'cif-falc',
+    profileId: 'complete',
+    isActive: true,
+    sortOrder: id,
+    children: [],
+  })
+
+  return [
+    {
+      id: -8_201,
+      type: 'normal',
+      title: 'Définition du verbe',
+      content: '{definitionHelp}',
+      explanationApproach: 'cif-falc',
+      profileId: 'complete',
+      isActive: true,
+      sortOrder: 1,
+      children: [],
+    },
+    {
+      id: -8_202,
+      type: 'normal',
+      title: 'Reconnaître les modes',
+      content: '<p>Observe ce que la forme verbale exprime dans la phrase.</p>',
+      explanationApproach: 'cif-falc',
+      profileId: 'complete',
+      isActive: true,
+      sortOrder: 2,
+      children: [
+        mode(-8_211, 'Indicatif', 'Il présente un fait, une action ou une situation comme réelle ou certaine.', '<em>Il arrive.</em> · <em>Il arrivait.</em> · <em>Il arrivera.</em>'),
+        mode(-8_212, 'Subjonctif', 'Il exprime souvent un souhait, une nécessité, un doute ou une possibilité. Il est fréquemment introduit par « que ».', '<em>Il faut qu’il arrive.</em> · <em>Je souhaite qu’il vienne.</em>'),
+        mode(-8_213, 'Conditionnel', 'Il exprime une action soumise à une condition, une hypothèse ou une information incertaine.', '<em>Il arriverait s’il pouvait.</em> · <em>Elle viendrait peut-être.</em>'),
+        mode(-8_214, 'Impératif', 'Il sert à donner un ordre, un conseil ou une consigne. Le sujet n’est généralement pas écrit.', '<em>Arrive à l’heure !</em> · <em>Prenons le temps.</em>'),
+      ],
+    },
+  ]
+}
+
 const AUTOMATIC_LETTER_G_HELP_ID = -9_001
 const AUTOMATIC_LETTER_C_HELP_ID = -9_002
 const AUTOMATIC_COD_BEFORE_HELP_ID = -9_003

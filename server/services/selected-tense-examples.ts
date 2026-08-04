@@ -79,6 +79,7 @@ function questionnaireRequest(verbIds: number[], tenseIds: number[], questionCou
     tenseIds,
     questionCount,
     exerciseKind: 'conjugation' as const,
+    identificationSource: 'selected-verbs' as const,
     pastSimplePronouns: 'all' as const,
     inclusivePronouns: false,
     includeComplements: true,

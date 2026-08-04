@@ -7,6 +7,14 @@ import { legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils
 import { guidedTourCopy } from '~~/shared/i18n/guided-tour'
 import type { AppLocale } from '~~/shared/i18n/locales'
 import type { CoachProfile } from '~~/shared/types/coach'
+import {
+  GUIDED_TOUR_COMPLETED_STORAGE_KEY,
+  GUIDED_TOUR_REMINDER_STORAGE_KEY,
+  parseGuidedTourReminderState,
+  postponedGuidedTourState,
+  registerGuidedTourHomepageVisit,
+  shouldRemindAboutGuidedTour,
+} from '~~/shared/utils/guided-tour-reminder'
 import type { DriveStep, Driver } from 'driver.js'
 import { getChallengeErrorMessage, useChallengeBuilder, type ChallengeConfig as BuilderChallengeConfig } from '~/composables/useChallengeBuilder'
 import { normalizeChallengeCode, useChallengeApi } from '~/composables/useChallengeApi'
@@ -113,8 +121,20 @@ const selectedCoach = ref<CoachProfile | null>(null)
 const exposedUsageFeatures = new Set<string>()
 const classicExerciseRef = useTemplateRef<ClassicExerciseExposed>('classic-exercise')
 const chatExerciseRef = useTemplateRef<ChatExerciseExposed>('chat-exercise')
+const chatExerciseVerbs = computed(() => {
+  if (challenge.value.identificationSource !== 'literary-corpus'
+    || challenge.value.exerciseKind !== 'tense-identification') return selectedVerbs.value
+  const questionVerbIds = new Set(questions.value.map(question => Number(question.verbeId)))
+  const literaryVerbs = catalogue.value.verbes.filter(verb => questionVerbIds.has(verb.id))
+  return literaryVerbs.length ? literaryVerbs : selectedVerbs.value
+})
+const identificationTenses = computed(() => {
+  const modes = new Map(catalogue.value.modes.map(mode => [mode.id, mode]))
+  return catalogue.value.temps.map(tense => ({ ...tense, mode: tense.mode || modes.get(tense.modeId) }))
+})
 // Cet état doit survivre au changement d’URL effectué par le sélecteur de langue.
 const isTourWelcomeOpen = useState('guided-tour-welcome-open', () => false)
+const tourWelcomeSource = useState<'initial' | 'reminder' | 'manual' | null>('guided-tour-welcome-source', () => null)
 const tourActive = ref(false)
 const tourSecondaryWizardStep = ref<WizardStep | null>(null)
 const tourWizardIndicatorStyle = ref<Record<string, string>>({})
@@ -138,6 +158,7 @@ const conjugationExampleRaw = ref('')
 const conjugationExamplePrefixRaw = ref('')
 const conjugationExampleEmphasisRaw = ref('')
 const conjugationExampleSuffixRaw = ref('')
+const conjugationLiteraryCitationRaw = ref<ExerciseQuestion['literaryCitation']>()
 const conjugationExampleLoading = ref(false)
 let conjugationExampleRequest = 0
 let presetRevealTimers: ReturnType<typeof setTimeout>[] = []
@@ -386,12 +407,42 @@ onMounted(() => {
     // L'accueil fonctionne normalement si le stockage du navigateur est indisponible.
   }
   try {
-    const completed = localStorage.getItem('tatitotu-guided-tour-v1') === 'completed'
-    const postponed = sessionStorage.getItem('tatitotu-guided-tour-postponed') === '1'
-    if (!completed && !postponed) {
+    const completed = localStorage.getItem(GUIDED_TOUR_COMPLETED_STORAGE_KEY) === 'completed'
+    let reminderState = parseGuidedTourReminderState(localStorage.getItem(GUIDED_TOUR_REMINDER_STORAGE_KEY))
+
+    // Conserve le choix des personnes ayant cliqué avant le passage au stockage persistant.
+    if (!reminderState && sessionStorage.getItem('tatitotu-guided-tour-postponed') === '1') {
+      reminderState = postponedGuidedTourState()
+      localStorage.setItem(GUIDED_TOUR_REMINDER_STORAGE_KEY, JSON.stringify(reminderState))
+      sessionStorage.removeItem('tatitotu-guided-tour-postponed')
+    }
+
+    if (!completed && !reminderState) {
       tourPromptTimer = setTimeout(() => {
-        if (currentStep.value === 0 && !tourActive.value) isTourWelcomeOpen.value = true
+        if (currentStep.value === 0 && !tourActive.value && !isTourWelcomeOpen.value) {
+          tourWelcomeSource.value = 'initial'
+          isTourWelcomeOpen.value = true
+        }
       }, 900)
+    }
+    else if (!completed && reminderState && !reminderState.reminderShown) {
+      reminderState = registerGuidedTourHomepageVisit(reminderState)
+      localStorage.setItem(GUIDED_TOUR_REMINDER_STORAGE_KEY, JSON.stringify(reminderState))
+      if (shouldRemindAboutGuidedTour(reminderState)) {
+        tourPromptTimer = setTimeout(() => {
+          if (currentStep.value !== 0 || tourActive.value || isTourWelcomeOpen.value) return
+          try {
+            localStorage.setItem(GUIDED_TOUR_REMINDER_STORAGE_KEY, JSON.stringify({
+              ...reminderState,
+              reminderShown: true,
+            }))
+          } catch {
+            // Le rappel peut tout de même être affiché si le stockage devient indisponible.
+          }
+          tourWelcomeSource.value = 'reminder'
+          isTourWelcomeOpen.value = true
+        }, 900)
+      }
     }
   } catch {
     // La visite reste accessible manuellement si le stockage est indisponible.
@@ -722,6 +773,7 @@ function setTourOptionsExample() {
   conjugationExamplePrefixRaw.value = 'Il mange '
   conjugationExampleEmphasisRaw.value = 'une pomme'
   conjugationExampleSuffixRaw.value = '.'
+  conjugationLiteraryCitationRaw.value = undefined
 }
 
 async function showTourBuilderStep(step: WizardStep, secondaryFocus: WizardStep | null = null) {
@@ -1051,7 +1103,8 @@ function restoreAfterTour() {
   if (currentStep.value === 3) void refreshConjugationExample()
   if (tourCompleted) {
     try {
-      localStorage.setItem('tatitotu-guided-tour-v1', 'completed')
+      localStorage.setItem(GUIDED_TOUR_COMPLETED_STORAGE_KEY, 'completed')
+      localStorage.removeItem(GUIDED_TOUR_REMINDER_STORAGE_KEY)
     } catch {
       // La visite fonctionne même sans stockage persistant.
     }
@@ -1062,6 +1115,7 @@ function restoreAfterTour() {
 async function startGuidedTour(format: TourFormat) {
   if (tourActive.value || catalogueStatus.value !== 'success') return
   isTourWelcomeOpen.value = false
+  tourWelcomeSource.value = null
   tourSnapshot = {
     challenge: JSON.parse(JSON.stringify(challenge.value)) as BuilderChallengeConfig,
     currentStep: currentStep.value,
@@ -1119,14 +1173,18 @@ async function startGuidedTour(format: TourFormat) {
 function postponeTour() {
   isTourWelcomeOpen.value = false
   try {
-    sessionStorage.setItem('tatitotu-guided-tour-postponed', '1')
+    if (tourWelcomeSource.value === 'initial') {
+      localStorage.setItem(GUIDED_TOUR_REMINDER_STORAGE_KEY, JSON.stringify(postponedGuidedTourState()))
+    }
   } catch {
     // Le bouton reste fonctionnel sans stockage.
   }
+  tourWelcomeSource.value = null
 }
 
 function openTourMenu() {
   if (tourActive.value) return
+  tourWelcomeSource.value = 'manual'
   isTourWelcomeOpen.value = true
 }
 
@@ -1165,6 +1223,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
     questionCount: preset.questionCount
   })
   challenge.value.exerciseKind = preset.exerciseKind
+  challenge.value.identificationSource = preset.identificationSource
   challenge.value.pastSimplePronouns = preset.pastSimplePronouns
   challenge.value.inclusivePronouns = preset.inclusivePronouns
   challenge.value.includeComplements = preset.includeComplements
@@ -1256,6 +1315,7 @@ async function refreshConjugationExample() {
     conjugationExamplePrefixRaw.value = ''
     conjugationExampleEmphasisRaw.value = ''
     conjugationExampleSuffixRaw.value = ''
+    conjugationLiteraryCitationRaw.value = undefined
     conjugationExampleLoading.value = false
     return
   }
@@ -1368,6 +1428,7 @@ async function refreshConjugationExample() {
       conjugationExamplePrefixRaw.value = expectedParts.prefix
       conjugationExampleEmphasisRaw.value = expectedParts.emphasis
       conjugationExampleSuffixRaw.value = expectedParts.suffix
+      conjugationLiteraryCitationRaw.value = example?.literaryCitation
     }
   } catch {
     if (request === conjugationExampleRequest) {
@@ -1378,6 +1439,7 @@ async function refreshConjugationExample() {
       conjugationExamplePrefixRaw.value = ''
       conjugationExampleEmphasisRaw.value = ''
       conjugationExampleSuffixRaw.value = ''
+      conjugationLiteraryCitationRaw.value = undefined
     }
   } finally {
     const remainingSpinnerTime = 1000 - (Date.now() - loadingStartedAt)
@@ -1396,6 +1458,7 @@ watch(
     () => challenge.value.complementPlacement,
     () => challenge.value.complementOptions.join(','),
     () => challenge.value.exerciseKind,
+    () => challenge.value.identificationSource,
     () => challenge.value.inclusivePronouns,
   ],
   () => {
@@ -1436,6 +1499,7 @@ function beginExerciseTracking(presentation: 'classic' | 'chat') {
       tenseIds: [...challenge.value.tenseIds],
       questionCount: challenge.value.questionCount,
       exerciseKind: challenge.value.exerciseKind,
+      identificationSource: challenge.value.identificationSource,
       pastSimplePronouns: challenge.value.pastSimplePronouns,
       inclusivePronouns: challenge.value.inclusivePronouns,
       includeComplements: challenge.value.includeComplements,
@@ -1822,6 +1886,7 @@ async function createSharedChallenge(title: string, description: string) {
                 data-tour="options"
                 :question-count="challenge.questionCount"
                 :exercise-kind="challenge.exerciseKind"
+                :identification-source="challenge.identificationSource"
                 :inclusive-pronouns="challenge.inclusivePronouns"
                 :complement-options="challenge.complementOptions"
                 :complement-verbs="selectedVerbs"
@@ -1832,6 +1897,7 @@ async function createSharedChallenge(title: string, description: string) {
                 :conjugation-example-prefix="conjugationExamplePrefix"
                 :conjugation-example-emphasis="conjugationExampleEmphasis"
                 :conjugation-example-suffix="conjugationExampleSuffix"
+                :conjugation-literary-citation="conjugationLiteraryCitationRaw"
                 :conjugation-example-loading="conjugationExampleLoading"
                 :reveal-prefilled-options="prefilledOptionsRevealPending"
                 grid-layout
@@ -1839,6 +1905,7 @@ async function createSharedChallenge(title: string, description: string) {
                 @prefilled-options-reveal-start="prefilledOptionsRevealPending = false"
                 @update-question-count="challenge.questionCount = $event; markAsCustom()"
                 @update-exercise-kind="challenge.exerciseKind = $event; markAsCustom()"
+                @update-identification-source="challenge.identificationSource = $event; markAsCustom()"
                 @update-inclusive-pronouns="challenge.inclusivePronouns = $event; markAsCustom()"
                 @update-complement-options="updateComplementOptions"
               />
@@ -1899,8 +1966,8 @@ async function createSharedChallenge(title: string, description: string) {
       </template>
       </main>
 
-      <ClassicExercise ref="classic-exercise" v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('classic')" @close="isExerciseOpen = false" />
-      <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :coach="selectedCoach" :verbs="selectedVerbs" :tenses="selectedTenses" :regenerate-questions="regenerateChatQuestions" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('chat')" :tour-demo="tourActive" @close="isExerciseOpen = false" />
+      <ClassicExercise ref="classic-exercise" v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" :identification-tenses="identificationTenses" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('classic')" @close="isExerciseOpen = false" />
+      <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :exercise-kind="challenge.exerciseKind" :coach="selectedCoach" :verbs="chatExerciseVerbs" :tenses="selectedTenses" :identification-tenses="identificationTenses" :regenerate-questions="regenerateChatQuestions" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('chat')" :tour-demo="tourActive" @close="isExerciseOpen = false" />
       <CoachPicker v-if="isCoachPickerOpen" :tour-demo="tourActive" @close="isCoachPickerOpen = false" @select="launchWithCoach" />
       <PrintPreview v-if="isPrintOpen" :questions="printQuestions" :verbs="selectedVerbs" :tenses="selectedTenses" :exercise-kind="challenge.exerciseKind" :options="challenge.printOptions" @update-options="challenge.printOptions = $event" @close="isPrintOpen = false" />
       <ShareChallengeDialog
@@ -1931,7 +1998,7 @@ async function createSharedChallenge(title: string, description: string) {
                 <span aria-hidden="true">{{ option.flag }}</span>
               </button>
             </div>
-            <button class="tour-welcome-dialog__close" type="button" :aria-label="tourCopy.later" @click="postponeTour">×</button>
+            <button class="tour-welcome-dialog__close" type="button" :aria-label="tourWelcomeSource === 'reminder' ? ui('Fermer') : tourCopy.later" @click="postponeTour">×</button>
             <span class="tour-welcome-dialog__icon" aria-hidden="true">?</span>
             <h2 id="tour-welcome-title">{{ tourCopy.welcomeTitle }}</h2>
             <p>{{ tourCopy.welcomeBody }}</p>
@@ -1945,7 +2012,9 @@ async function createSharedChallenge(title: string, description: string) {
                 <small>{{ tourCopy.fullMeta }}</small>
               </button>
             </div>
-            <button class="tour-welcome-dialog__later" type="button" @click="postponeTour">{{ tourCopy.later }}</button>
+            <button class="tour-welcome-dialog__later" type="button" @click="postponeTour">
+              {{ tourWelcomeSource === 'reminder' ? ui('Fermer') : tourCopy.later }}
+            </button>
           </section>
         </div>
       </Teleport>

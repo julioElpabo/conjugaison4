@@ -59,7 +59,7 @@ function percentage(value: number) {
         </li>
       </ul>
     </div>
-    <p v-else class="feature-chart__empty">Aucune utilisation de ces trois modes sur cette période.</p>
+    <p v-else class="feature-chart__empty">Aucune donnée sur cette période.</p>
   </section>
 </template>
 

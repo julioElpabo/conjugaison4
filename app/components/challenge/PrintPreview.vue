@@ -93,6 +93,8 @@ function pdfSafe(value: unknown) {
     .replace(/[“”]/g, '"')
     .replace(/…/g, '...')
     .replace(/–|—/g, '-')
+    .replace(/【/g, '[')
+    .replace(/】/g, ']')
 }
 
 function capitalizePrintLine(value: unknown) {

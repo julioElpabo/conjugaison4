@@ -19,6 +19,7 @@ const props = withDefaults(defineProps<{
   showClose?: boolean
   showFeedback?: boolean
   includeAutomaticOrthography?: boolean
+  enableAutomaticAudit?: boolean
   feedbackContext?: Record<string, unknown>
 }>(), {
   questionNumber: 1,
@@ -27,6 +28,7 @@ const props = withDefaults(defineProps<{
   showClose: true,
   showFeedback: true,
   includeAutomaticOrthography: true,
+  enableAutomaticAudit: true,
   headerTitle: '{helpTitle}',
   headerDescription: '',
 })
@@ -76,7 +78,7 @@ const automaticAuditInput = computed(() => {
   const tense = context.currentTense as ConjugationTense | undefined
   return question && verb ? { question, verb, tense } : null
 })
-const automaticAudit = computed(() => automaticAuditInput.value
+const automaticAudit = computed(() => props.enableAutomaticAudit && automaticAuditInput.value
   ? auditRenderedCoachHelp({
       renderedHtml: sourceRenderedHtml.value,
       blocks: renderedBlocks.value.map(item => item.block),
@@ -158,7 +160,7 @@ function scrollContentToBottom(focusTextarea = false) {
 
 function renderedBlockTitle(block: CoachHelpBlock) {
   const content = block.content.trim()
-  if (content === '{definitionHelp}') return ui('Définition')
+  if (content === '{definitionHelp}') return block.id === -8_201 ? uiLabel(block.title) : ui('Définition')
   if (content === '{contextualBaseHelp}') return ''
   return uiLabel(block.title)
 }

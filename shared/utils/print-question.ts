@@ -50,10 +50,13 @@ function completionParts(sentence: string, question: ExerciseQuestion) {
 
 export function printableQuestionParts(question: ExerciseQuestion, exerciseKind: string): PrintableQuestionParts {
   if (exerciseKind === 'tense-identification') {
+    const sentence = question.literaryCitation
+      ? `${question.literaryCitation.before}【${question.literaryCitation.target}】${question.literaryCitation.after} — ${question.literaryCitation.author}, ${question.literaryCitation.work}`
+      : question.consigne
     return {
       label: '',
-      completion: question.consigne,
-      completionPrefix: question.consigne,
+      completion: sentence,
+      completionPrefix: sentence,
       completionSuffix: '',
       fillBlank: false,
       suffixOnNextLine: false,

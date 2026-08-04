@@ -33,7 +33,21 @@ describe('dashboard intelligent des statistiques', () => {
     assert.match(component, /seriesTrend/u)
     assert.match(component, /insufficientData/u)
     assert.match(component, /Langues préférées/u)
+    assert.match(component, /Langues des utilisateurs non connectés/u)
+    const funnelIndex = component.indexOf('Du passage à l’apprentissage')
+    const anonymousLanguagesIndex = component.indexOf('Langues des utilisateurs non connectés')
+    const accountLanguagesIndex = component.indexOf('Langues préférées')
+    assert.ok(anonymousLanguagesIndex > funnelIndex)
+    assert.ok(accountLanguagesIndex > anonymousLanguagesIndex)
     assert.match(component, /Créations de comptes/u)
+  })
+
+  it('compte les sessions anonymes ayant réellement lancé un exercice par langue', async () => {
+    const endpoint = await read('../server/api/admin/analytics-users.get.ts')
+    assert.match(endpoint, /events\.event_name='exercise_started'/u)
+    assert.match(endpoint, /events\.actor_type='anonymous'/u)
+    assert.match(endpoint, /COUNT\(DISTINCT events\.session_id\)/u)
+    assert.match(endpoint, /sessions\.interface_locale IN \('fr','de','en','it','es'\)/u)
   })
 
   it('adapte les constats à la période et évite les conclusions sur un faible volume', async () => {

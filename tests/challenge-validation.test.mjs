@@ -23,6 +23,7 @@ describe('validation des défis partagés', () => {
 
     assert.equal(challenge.version, 1)
     assert.equal(challenge.exerciseKind, 'conjugation')
+    assert.equal(challenge.identificationSource, 'selected-verbs')
     assert.equal(challenge.pastSimplePronouns, 'third-person-only')
     assert.equal(challenge.inclusivePronouns, true)
     assert.equal(challenge.includeComplements, true)
@@ -38,6 +39,7 @@ describe('validation des défis partagés', () => {
       tenseIds: [1, 2],
       questionCount: 10,
       exerciseKind: 'tense-identification',
+      identificationSource: 'literary-corpus',
       pastSimplePronouns: 'all',
       inclusivePronouns: true,
       includeComplements: true,
@@ -58,6 +60,7 @@ describe('validation des défis partagés', () => {
     }
 
     const parsed = parseDefiDefinition(input)
+    assert.equal(parsed.identificationSource, 'literary-corpus')
     assert.deepEqual(JSON.parse(serializeDefi(parsed)), parsed)
   })
 
@@ -65,6 +68,8 @@ describe('validation des défis partagés', () => {
     const challenge = {
       verbIds: [4, 8], tenseIds: [2, 7], questionCount: 42,
       exerciseKind: 'tense-identification', pastSimplePronouns: 'third-person-only',
+      identificationSource: 'literary-corpus',
+      literaryRegister: 'courant',
       inclusivePronouns: true, includeComplements: true, complementPlacement: 'mixed',
       complementOptions: ['cod-before', 'coi-after'],
       printOptions: {
@@ -122,6 +127,7 @@ describe('validation des défis partagés', () => {
 
     assert.deepEqual({
       exerciseKind: challenge.exerciseKind,
+      identificationSource: challenge.identificationSource,
       pastSimplePronouns: challenge.pastSimplePronouns,
       inclusivePronouns: challenge.inclusivePronouns,
       includeComplements: challenge.includeComplements,
@@ -129,6 +135,7 @@ describe('validation des défis partagés', () => {
       complementOptions: challenge.complementOptions,
     }, {
       exerciseKind: 'conjugation',
+      identificationSource: 'selected-verbs',
       pastSimplePronouns: 'all',
       inclusivePronouns: false,
       includeComplements: true,

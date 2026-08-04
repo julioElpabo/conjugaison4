@@ -68,6 +68,17 @@ const isLoadOpen = ref(false)
 const isCoachPickerOpen = ref(false)
 const selectedCoach = ref<CoachProfile | null>(null)
 const exerciseTracking = ref<LearnerExerciseTrackingContext>()
+const chatExerciseVerbs = computed(() => {
+  if (challenge.value.identificationSource !== 'literary-corpus'
+    || challenge.value.exerciseKind !== 'tense-identification') return selectedVerbs.value
+  const questionVerbIds = new Set(questions.value.map(question => Number(question.verbeId)))
+  const literaryVerbs = catalogue.value.verbes.filter(verb => questionVerbIds.has(verb.id))
+  return literaryVerbs.length ? literaryVerbs : selectedVerbs.value
+})
+const identificationTenses = computed(() => {
+  const modes = new Map(catalogue.value.modes.map(mode => [mode.id, mode]))
+  return catalogue.value.temps.map(tense => ({ ...tense, mode: tense.mode || modes.get(tense.modeId) }))
+})
 const complementPlacementLabel = computed(() => ({
   after: ui('toujours après'),
   mixed: ui('parfois avant'),
@@ -157,6 +168,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
     questionCount: preset.questionCount
   })
   challenge.value.exerciseKind = preset.exerciseKind
+  challenge.value.identificationSource = preset.identificationSource
   challenge.value.pastSimplePronouns = preset.pastSimplePronouns
   challenge.value.inclusivePronouns = preset.inclusivePronouns
   challenge.value.includeComplements = preset.includeComplements
@@ -187,6 +199,7 @@ function beginExerciseTracking(presentation: 'classic' | 'chat') {
       tenseIds: [...challenge.value.tenseIds],
       questionCount: challenge.value.questionCount,
       exerciseKind: challenge.value.exerciseKind,
+      identificationSource: challenge.value.identificationSource,
       pastSimplePronouns: challenge.value.pastSimplePronouns,
       inclusivePronouns: challenge.value.inclusivePronouns,
       includeComplements: challenge.value.includeComplements,
@@ -409,11 +422,13 @@ function onToggleTense(id: number) {
           <ChallengeOptions
             :question-count="challenge.questionCount"
             :exercise-kind="challenge.exerciseKind"
+            :identification-source="challenge.identificationSource"
             :inclusive-pronouns="challenge.inclusivePronouns"
             :complement-options="challenge.complementOptions"
             :complement-verbs="selectedVerbs"
             @update-question-count="challenge.questionCount = $event; markAsCustom()"
             @update-exercise-kind="challenge.exerciseKind = $event"
+            @update-identification-source="challenge.identificationSource = $event"
             @update-inclusive-pronouns="challenge.inclusivePronouns = $event"
             @update-complement-options="updateComplementOptions"
           />
@@ -452,6 +467,7 @@ function onToggleTense(id: number) {
       v-if="isExerciseOpen && exercisePresentation === 'classic'"
       :questions="questions"
       :exercise-kind="challenge.exerciseKind"
+      :identification-tenses="identificationTenses"
       :tracking-context="exerciseTracking"
       :analytics-metadata="exerciseUsageMetadata('classic')"
       @close="isExerciseOpen = false"
@@ -460,9 +476,11 @@ function onToggleTense(id: number) {
     <ChatExercise
       v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach"
       :questions="questions"
+      :exercise-kind="challenge.exerciseKind"
       :coach="selectedCoach"
-      :verbs="selectedVerbs"
+      :verbs="chatExerciseVerbs"
       :tenses="selectedTenses"
+      :identification-tenses="identificationTenses"
       :regenerate-questions="regenerateChatQuestions"
       :tracking-context="exerciseTracking"
       :analytics-metadata="exerciseUsageMetadata('chat')"

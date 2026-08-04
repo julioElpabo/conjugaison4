@@ -99,6 +99,8 @@ export interface AnalyticsUsersResponse {
   activeAccounts: number
   errorReviewUsers: number
   languages: AnalyticsBreakdownItem[]
+  anonymousExerciseSessions: number
+  anonymousExerciseLanguages: AnalyticsBreakdownItem[]
   registrations: AnalyticsSeriesPoint[]
   registrationUnit: 'Jours' | 'Semaines' | 'Mois'
   generatedAt: string

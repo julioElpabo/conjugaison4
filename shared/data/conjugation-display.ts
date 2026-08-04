@@ -27,6 +27,8 @@ const TENSE_ORDER = new Map([
   ['conditionnel:passé 2', 30],
   ['impératif:présent', 10],
   ['impératif:passé', 20],
+  ['infinitif:présent', 10],
+  ['infinitif:passé', 20],
 ])
 
 function key(value: string) {

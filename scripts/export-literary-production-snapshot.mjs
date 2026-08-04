@@ -51,12 +51,19 @@ try {
   `)
   const [targetRows] = await database.query(`
     SELECT sentence.external_key AS sentenceKey,target.verb_id AS verbId,
-           target.tense_id AS tenseId,target.person_id AS personId,
+           verb.infinitif AS verbInfinitive,
+           target.tense_id AS tenseId,mode.code AS modeCode,mode.name AS modeName,
+           tense.code AS tenseCode,tense.name AS tenseName,
+           target.person_id AS personId,person.pronom AS personPronoun,
            target.target_text AS form,target.target_start AS start,target.target_end AS end,
            target.confidence,target.ambiguity_reason AS ambiguityReason,
            target.review_note AS reviewNote
     FROM literary_targets target
     INNER JOIN literary_sentences sentence ON sentence.id=target.sentence_id
+    INNER JOIN verbes verb ON verb.id=target.verb_id
+    INNER JOIN temps tense ON tense.id=target.tense_id
+    INNER JOIN modes mode ON mode.id=tense.mode_id
+    INNER JOIN personnes person ON person.id=target.person_id
     WHERE target.review_status='validated'
     ORDER BY sentence.external_key,target.target_start,target.target_end,
              target.verb_id,target.tense_id,target.person_id
@@ -85,8 +92,14 @@ try {
     const end = Number(row.end)
     sentence.targets.push({
       verbId: Number(row.verbId),
+      verbInfinitive: row.verbInfinitive,
       tenseId: Number(row.tenseId),
+      modeCode: row.modeCode,
+      modeName: row.modeName,
+      tenseCode: row.tenseCode,
+      tenseName: row.tenseName,
       personId: Number(row.personId),
+      personPronoun: row.personPronoun,
       form: sentence.text.slice(start, end),
       start,
       end,
@@ -116,9 +129,9 @@ try {
     targets: targetRows.length,
   }
   const checksum = createHash('sha256')
-    .update(JSON.stringify({ schemaVersion: 1, counts, sources }))
+    .update(JSON.stringify({ schemaVersion: 2, counts, sources }))
     .digest('hex')
-  const snapshot = { schemaVersion: 1, checksum, counts, sources }
+  const snapshot = { schemaVersion: 2, checksum, counts, sources }
 
   await writeFile(temporaryPath, `${JSON.stringify(snapshot, null, 2)}\n`, 'utf8')
   await rename(temporaryPath, outputPath)

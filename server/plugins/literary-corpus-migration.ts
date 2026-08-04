@@ -81,6 +81,12 @@ interface CorpusSeed {
 }
 
 interface ProductionTargetSeed extends CorpusTargetSeed {
+  verbInfinitive: string
+  modeCode: string
+  modeName: string
+  tenseCode: string
+  tenseName: string
+  personPronoun: string
   reviewNote: string | null
 }
 
@@ -109,9 +115,52 @@ interface ProductionCorpusSnapshot {
   }>
 }
 
+interface GrammarRow extends IdRow {
+  code?: string
+  name?: string
+  infinitive?: string
+  pronoun?: string
+  modeCode?: string
+  modeName?: string
+  tenseCode?: string
+  tenseName?: string
+}
+
+async function ensureLiteraryGrammarPrerequisites(connection: PoolConnection) {
+  await connection.query(`
+    INSERT INTO modes (code,name,\`order\`)
+    SELECT 'infinitive','infinitif',60
+    WHERE NOT EXISTS (SELECT 1 FROM modes WHERE code='infinitive' OR name='infinitif')
+  `)
+  await connection.query(`
+    INSERT INTO modes (code,name,\`order\`)
+    SELECT 'gerund','gérondif',50
+    WHERE NOT EXISTS (SELECT 1 FROM modes WHERE code='gerund' OR name='gérondif')
+  `)
+  for (const reference of [
+    ['infinitive', 'infinitif', 'present', 'présent', 0],
+    ['infinitive', 'infinitif', 'past', 'passé', 1],
+    ['gerund', 'gérondif', 'present', 'présent', 0],
+    ['gerund', 'gérondif', 'past', 'passé', 1],
+  ] as const) {
+    const [modeCode, modeName, tenseCode, tenseName, compound] = reference
+    await connection.query(`
+      INSERT INTO temps (mode_id,code,name,isTempsCompose,selected)
+      SELECT mode.id,?,?,?,0
+      FROM modes mode
+      WHERE (mode.code=? OR mode.name=?)
+        AND NOT EXISTS (
+          SELECT 1 FROM temps tense
+          WHERE tense.mode_id=mode.id AND (tense.code=? OR tense.name=?)
+        )
+      ORDER BY mode.id LIMIT 1
+    `, [tenseCode, tenseName, compound, modeCode, modeName, tenseCode, tenseName])
+  }
+}
+
 async function applyProductionCorpusSnapshot(connection: PoolConnection) {
   const snapshot = productionCorpus as ProductionCorpusSnapshot
-  const migrationKey = `production-literary-corpus-v1-${snapshot.checksum.slice(0, 40)}`
+  const migrationKey = `production-literary-corpus-v2-${snapshot.checksum.slice(0, 40)}`
   const [[alreadyApplied]] = await connection.execute<IdRow[]>(
     'SELECT 1 AS id FROM literary_corpus_migrations WHERE migration_key=?',
     [migrationKey],
@@ -129,7 +178,7 @@ async function applyProductionCorpusSnapshot(connection: PoolConnection) {
     sentenceKey: sentence.key,
     ...target,
   })))
-  if (snapshot.schemaVersion !== 1
+  if (snapshot.schemaVersion !== 2
     || !/^[a-f0-9]{64}$/u.test(snapshot.checksum)
     || snapshot.counts.sources !== snapshot.sources.length
     || snapshot.counts.sentences !== sentences.length
@@ -147,14 +196,28 @@ async function applyProductionCorpusSnapshot(connection: PoolConnection) {
     }
   }
 
-  const [verbRows] = await connection.query<IdRow[]>('SELECT id FROM verbes')
-  const [tenseRows] = await connection.query<IdRow[]>('SELECT id FROM temps')
-  const [personRows] = await connection.query<IdRow[]>('SELECT id FROM personnes')
-  const verbIds = new Set(verbRows.map(row => Number(row.id)))
-  const tenseIds = new Set(tenseRows.map(row => Number(row.id)))
-  const personIds = new Set(personRows.map(row => Number(row.id)))
-  const invalidTarget = targets.find(target => !verbIds.has(target.verbId)
-    || !tenseIds.has(target.tenseId) || !personIds.has(target.personId))
+  await ensureLiteraryGrammarPrerequisites(connection)
+  const [verbRows] = await connection.query<GrammarRow[]>('SELECT id,infinitif AS infinitive FROM verbes')
+  const [tenseRows] = await connection.query<GrammarRow[]>(`
+    SELECT tense.id,mode.code AS modeCode,mode.name AS modeName,
+           tense.code AS tenseCode,tense.name AS tenseName
+    FROM temps tense INNER JOIN modes mode ON mode.id=tense.mode_id
+  `)
+  const [personRows] = await connection.query<GrammarRow[]>('SELECT id,pronom AS pronoun FROM personnes')
+  const verbIds = new Map(verbRows.map(row => [String(row.infinitive).toLocaleLowerCase('fr'), Number(row.id)]))
+  const tenseIds = new Map(tenseRows.flatMap(row => [
+    [`${row.modeCode}:${row.tenseCode}`, Number(row.id)] as const,
+    [`${row.modeName}:${row.tenseName}`, Number(row.id)] as const,
+  ]))
+  const personIds = new Map(personRows.map(row => [String(row.pronoun).toLocaleLowerCase('fr'), Number(row.id)]))
+  const resolvedTargets = targets.map(target => ({
+    ...target,
+    verbId: verbIds.get(target.verbInfinitive.toLocaleLowerCase('fr')) || 0,
+    tenseId: tenseIds.get(`${target.modeCode}:${target.tenseCode}`)
+      || tenseIds.get(`${target.modeName}:${target.tenseName}`) || 0,
+    personId: personIds.get(target.personPronoun.toLocaleLowerCase('fr')) || 0,
+  }))
+  const invalidTarget = resolvedTargets.find(target => !target.verbId || !target.tenseId || !target.personId)
   if (invalidTarget) {
     throw new Error(`Référence grammaticale absente pour la phrase ${invalidTarget.sentenceKey}.`)
   }
@@ -197,8 +260,8 @@ async function applyProductionCorpusSnapshot(connection: PoolConnection) {
     )
     const sentenceIds = new Map(storedSentences.map(row => [row.sentenceKey, Number(row.id)]))
 
-    for (let start = 0; start < targets.length; start += 200) {
-      const batch = targets.slice(start, start + 200)
+    for (let start = 0; start < resolvedTargets.length; start += 200) {
+      const batch = resolvedTargets.slice(start, start + 200)
       const values = batch.flatMap(target => [
         sentenceIds.get(target.sentenceKey), target.verbId, target.tenseId, target.personId,
         target.form, target.start, target.end, target.confidence, target.ambiguityReason,

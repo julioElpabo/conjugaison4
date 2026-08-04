@@ -41,5 +41,7 @@ describe('enchaînement du chat après une réponse', () => {
     assert.equal(chatMessageHasVisibleContent({ text: '', answerComparison: { mode: 'focused' } }), true)
     assert.equal(chatMessageHasVisibleContent({ text: '', errorDetails: [{ code: 'orthography.copied_complement' }] }), true)
     assert.equal(chatMessageHasVisibleContent({ text: '', media: { id: 1 } }), true)
+    assert.equal(chatMessageHasVisibleContent({ text: '', literaryCitation: { target: 'commencera' } }), true)
+    assert.equal(chatMessageHasVisibleContent({ text: '', identificationForm: { target: 'commencera' } }), true)
   })
 })

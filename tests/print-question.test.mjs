@@ -116,6 +116,22 @@ describe('questions imprimables', () => {
     )
   })
 
+  it('délimite la forme ciblée dans une citation littéraire imprimée', () => {
+    assert.equal(
+      printableQuestion({
+        titre: 'commencer',
+        consigne: 'Il commencera ses devoirs demain.',
+        reponses: [],
+        reponsesPourCorrige: [],
+        literaryCitation: {
+          before: 'Il ', target: 'commencera', after: ' ses devoirs demain.',
+          author: 'Une autrice', work: 'Une œuvre', sourceUrl: 'https://example.test',
+        },
+      }, 'tense-identification'),
+      'Il 【commencera】 ses devoirs demain. — Une autrice, Une œuvre',
+    )
+  })
+
   it('ne montre que la forme canonique d’un accord à un temps composé', () => {
     const question = {
       titre: 'allumer',

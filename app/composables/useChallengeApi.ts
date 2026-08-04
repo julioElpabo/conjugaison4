@@ -8,6 +8,8 @@ export interface QuestionnaireRequest {
   tenseIds: number[]
   questionCount: number
   exerciseKind: ChallengeConfig['exerciseKind']
+  identificationSource: ChallengeConfig['identificationSource']
+  literaryRegister: NonNullable<ChallengeConfig['literaryRegister']>
   pastSimplePronouns: ChallengeConfig['pastSimplePronouns']
   inclusivePronouns: boolean
   includeComplements: boolean
@@ -21,6 +23,8 @@ export function toQuestionnaireRequest(challenge: ChallengeConfig): Questionnair
     tenseIds: [...challenge.tenseIds],
     questionCount: challenge.questionCount,
     exerciseKind: challenge.exerciseKind,
+    identificationSource: challenge.identificationSource ?? 'selected-verbs',
+    literaryRegister: challenge.literaryRegister ?? 'all',
     pastSimplePronouns: challenge.pastSimplePronouns,
     inclusivePronouns: challenge.inclusivePronouns,
     includeComplements: challenge.includeComplements,
@@ -46,6 +50,8 @@ export function toSharedChallengeRequest(challenge: ChallengeConfig, title?: str
     tenseIds: [...challenge.tenseIds],
     questionCount: challenge.questionCount,
     exerciseKind: challenge.exerciseKind,
+    identificationSource: challenge.identificationSource ?? 'selected-verbs',
+    literaryRegister: challenge.literaryRegister ?? 'all',
     pastSimplePronouns: challenge.pastSimplePronouns,
     inclusivePronouns: challenge.inclusivePronouns,
     includeComplements: challenge.includeComplements,

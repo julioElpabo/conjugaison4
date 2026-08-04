@@ -89,7 +89,7 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsersResponse>
   const cutoffSql = cutoff.toISOString().slice(0, 19).replace('T', ' ')
   const database = useDatabase()
 
-  const [[[total]], [[active]], [languageRows], [registrationRows], [[errorReviews]]] = await Promise.all([
+  const [[[total]], [[active]], [languageRows], [anonymousLanguageRows], [registrationRows], [[errorReviews]]] = await Promise.all([
     database.execute<CountRow[]>(`
       SELECT COUNT(*) AS value
       FROM learner_accounts
@@ -119,6 +119,18 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsersResponse>
       GROUP BY locale
       ORDER BY value DESC
     `),
+    database.execute<LanguageRow[]>(`
+      SELECT sessions.interface_locale AS locale,
+             COUNT(DISTINCT events.session_id) AS value
+      FROM analytics_events events
+      INNER JOIN analytics_sessions sessions ON sessions.session_id=events.session_id
+      WHERE events.event_name='exercise_started'
+        AND events.actor_type='anonymous'
+        AND events.created_at>=? AND events.created_at<DATE_ADD(?, INTERVAL 1 DAY)
+        AND sessions.interface_locale IN ('fr','de','en','it','es')
+      GROUP BY sessions.interface_locale
+      ORDER BY value DESC
+    `, [startDate, endDate]),
     database.execute<SeriesRow[]>(`
       SELECT ${registrationDate} AS date, COUNT(*) AS value
       FROM learner_accounts a
@@ -143,6 +155,12 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsersResponse>
     label: localeLabels[String(row.locale)] || String(row.locale || 'Non précisée'),
     value: Number(row.value) || 0,
   }))
+  const anonymousExerciseLanguages: AnalyticsBreakdownItem[] = anonymousLanguageRows.map(row => ({
+    code: String(row.locale || 'fr'),
+    label: localeLabels[String(row.locale)] || String(row.locale || 'Non précisée'),
+    value: Number(row.value) || 0,
+  }))
+  const anonymousExerciseSessions = anonymousExerciseLanguages.reduce((sum, row) => sum + row.value, 0)
   const registrations = filledRegistrationSeries(
     registrationRows,
     startDate,
@@ -159,6 +177,8 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsersResponse>
     activeAccounts: Number(active?.value) || 0,
     errorReviewUsers: Number(errorReviews?.value) || 0,
     languages,
+    anonymousExerciseSessions,
+    anonymousExerciseLanguages,
     registrations,
     registrationUnit,
     generatedAt: new Date().toISOString(),

@@ -29,6 +29,8 @@ const NON_FINITE_FORMS: Record<string, string> = {
   'participe:passé': 'Ayant mangé',
   'gérondif:présent': 'En mangeant',
   'gérondif:passé': 'En ayant mangé',
+  'infinitif:présent': 'Manger',
+  'infinitif:passé': 'Avoir mangé',
 }
 
 const GENERATED_FINITE_FORMS: Record<string, string> = {

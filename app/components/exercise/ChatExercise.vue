@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const { interfaceLocale, ui, uiLabel } = useLanguagePreferences()
-import type { ConjugationTense, ExerciseAttempt, ExerciseQuestion, LearnerErrorDetail, LearnerExerciseTrackingContext, Verb } from '~~/shared/types/conjugation'
+import type { ConjugationTense, ExerciseAttempt, ExerciseKind, ExerciseQuestion, LearnerErrorDetail, LearnerExerciseTrackingContext, Verb } from '~~/shared/types/conjugation'
 import type { CoachEvent, CoachMedia, CoachMessageContext, CoachProfile } from '~~/shared/types/coach'
 import type { AnswerComparison } from '~~/shared/utils/answer-difference'
 import LearnerErrorFeedback from '~/components/exercise/LearnerErrorFeedback.vue'
@@ -32,16 +32,19 @@ import {
 } from '~~/shared/utils/learner-error-diagnostics'
 import { coachQuestionBubbles } from '~~/shared/utils/coach-question'
 import { buildTargetedConjugationHelp, isHelpCommand } from '~~/shared/utils/conjugation-help'
-import { coachHelpQuestionVariables, localizedCoachVerbDefinition, visibleCoachHelpBlocks } from '~~/shared/utils/coach-help'
+import { coachHelpQuestionVariables, literaryIdentificationCoachHelpBlocks, localizedCoachVerbDefinition, visibleCoachHelpBlocks } from '~~/shared/utils/coach-help'
 import { CHAT_HELP_REMINDER_DELAY_MS, CHAT_HELP_REMINDER_INCORRECT_COUNT, nextConsecutiveIncorrectCount } from '~~/shared/utils/coach-help-reminder'
 import { sanitizeCoachHtml } from '~~/shared/utils/safe-html'
 import { areOnlyIndicativeTenses, withoutIndicativeMode } from '~~/shared/utils/chat-mode-display'
+import { identificationFormParts, type IdentificationFormParts } from '~~/shared/utils/identification-form'
 
 const props = defineProps<{
   questions: ExerciseQuestion[]
+  exerciseKind?: ExerciseKind
   coach: CoachProfile
   verbs: Verb[]
   tenses: ConjugationTense[]
+  identificationTenses?: ConjugationTense[]
   regenerateQuestions: () => Promise<void>
   tourDemo?: boolean
   trackingContext?: LearnerExerciseTrackingContext
@@ -55,9 +58,31 @@ const { recordAttempt, recordQuestionPlan } = useLearnerProgress()
 const exerciseAnalyticsMetadata = computed(() => ({
   ...props.analyticsMetadata,
   presentation: 'chat',
-  exerciseKind: props.trackingContext?.challenge.exerciseKind || 'conjugation',
+  exerciseKind: props.exerciseKind || props.trackingContext?.challenge.exerciseKind || 'conjugation',
   coach: props.coach.id,
 }))
+const activeExerciseKind = computed(() => props.exerciseKind || props.trackingContext?.challenge.exerciseKind)
+const isModeIdentificationExercise = computed(() => activeExerciseKind.value === 'mode-identification')
+const isIdentificationExercise = computed(() => (
+  activeExerciseKind.value === 'tense-identification' || isModeIdentificationExercise.value
+))
+const isSmallScreen = ref(false)
+const modeAnswerChoices = computed(() => [
+  { value: 'indicatif', label: ui('Indicatif') },
+  { value: 'impératif', label: ui('Impératif') },
+  { value: 'subjonctif', label: ui('Subjonctif') },
+  { value: 'conditionnel', label: ui('Conditionnel') },
+  { value: 'infinitif', label: ui('Infinitif') },
+])
+const chatAnswerPlaceholder = computed(() => isSmallScreen.value
+  ? ui('Écris ta réponse')
+  : isModeIdentificationExercise.value
+    ? ui('Écris ta réponse ou clique directement sur le mode correct')
+    : activeExerciseKind.value === 'tense-identification'
+      ? ui('Écris ta réponse ou clique directement sur le mode puis sur le temps correct')
+      : helpOpen.value
+        ? ui('Écris ta réponse…')
+        : ui('Écris ta réponse ou « Aide »…'))
 
 interface ChatMessage {
   id: number
@@ -70,10 +95,14 @@ interface ChatMessage {
   questionIndex?: number
   answerComparison?: AnswerComparison
   errorDetails?: LearnerErrorDetail[]
+  literaryCitation?: NonNullable<ExerciseQuestion['literaryCitation']>
+  identificationForm?: IdentificationFormParts
+  identificationPrompt?: boolean
 }
 
 const currentIndex = ref(0)
 const answer = ref('')
+const selectedIdentificationMode = ref('')
 const attempts = ref<ExerciseAttempt[]>([])
 const pendingErrorLabels = ref<string[]>([])
 const pendingErrorDetails = ref<LearnerErrorDetail[]>([])
@@ -136,13 +165,16 @@ const helpTense = computed(() => {
   return props.tenses.find(tense => tense.id === question.tenseId)
     || props.tenses.find(tense => normalizedInfinitive(tense.name) === normalizedInfinitive(question.temps))
 })
+const usesIdentificationHelp = computed(() => isIdentificationExercise.value)
 const targetedHelp = computed(() => helpQuestion.value
   ? buildTargetedConjugationHelp(helpQuestion.value, helpVerb.value, helpTense.value, {
       tense: uiLabel(helpQuestion.value.temps || helpTense.value?.name),
       mode: uiLabel(helpQuestion.value.mode || helpTense.value?.mode?.name),
     })
   : null)
-const helpBlocks = computed(() => visibleCoachHelpBlocks(props.coach.helpApproach, helpQuestion.value))
+const helpBlocks = computed(() => usesIdentificationHelp.value
+  ? literaryIdentificationCoachHelpBlocks()
+  : visibleCoachHelpBlocks(props.coach.helpApproach, helpQuestion.value))
 const correctCount = computed(() => attempts.value.filter(item => item.status === 'correct').length)
 const score = computed(() => attempts.value.length
   ? Math.round(correctCount.value / attempts.value.length * 100)
@@ -164,6 +196,10 @@ const attemptSummaries = computed(() => attempts.value.map((attempt, index) => {
     expectedAnswer: attempt.question.reponsesPourCorrige.join(` ${ui('ou')} `) || attempt.question.reponses.join(` ${ui('ou')} `),
     errorLabels: attempt.errorLabels || [],
     errorDetails: attempt.errorDetails || [],
+    identificationForm: isIdentificationExercise.value && attempt.status === 'incorrect'
+      ? identificationFormParts(attempt.question)
+      : null,
+    literaryCitation: attempt.question.literaryCitation,
   }
 }))
 const hasIncorrectMedia = computed(() => props.coach.assignments.some(assignment => assignment.isActive
@@ -175,6 +211,66 @@ const hasIncorrectMedia = computed(() => props.coach.assignments.some(assignment
 
 function normalizedInfinitive(value?: string | null) {
   return (value || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLocaleLowerCase('fr')
+}
+
+const displayedIdentificationModeChoices = computed(() => modeAnswerChoices.value)
+type ChatTenseChoice = ConjugationTense
+const selectedModeTenses = computed(() => {
+  const tenses = new Map<string, ChatTenseChoice>()
+  for (const tense of props.identificationTenses?.length ? props.identificationTenses : props.tenses) {
+    if (normalizedInfinitive(tense.mode?.name) !== normalizedInfinitive(selectedIdentificationMode.value)) continue
+    const key = normalizedInfinitive(tense.name)
+    if (key === 'futur proche') continue
+    if (!tenses.has(key)) tenses.set(key, {
+      ...tense,
+    })
+  }
+  return [...tenses.values()]
+})
+const selectedModeTenseRows = computed(() => pairChatTenseChoices(
+  selectedIdentificationMode.value,
+  selectedModeTenses.value,
+))
+
+function pairChatTenseChoices(mode: string, choices: ChatTenseChoice[]) {
+  const pairsByMode: Record<string, Array<[string | null, string | null]>> = {
+    indicatif: [
+      ['present', 'passe compose'],
+      ['imparfait', 'plus-que-parfait'],
+      ['passe simple', 'passe anterieur'],
+      ['futur', 'futur anterieur'],
+    ],
+    imperatif: [['present', 'passe']],
+    subjonctif: [
+      ['present', 'passe'],
+      ['imparfait', 'plus-que-parfait'],
+    ],
+    conditionnel: [
+      ['present', 'passe 1'],
+      [null, 'passe 2'],
+    ],
+  }
+  const byName = new Map(choices.map(choice => [normalizedInfinitive(choice.name), choice]))
+  const used = new Set<string>()
+  const rows: Array<{ key: string, simple: ChatTenseChoice | null, compound: ChatTenseChoice | null }> = []
+  for (const [simpleName, compoundName] of pairsByMode[normalizedInfinitive(mode)] || []) {
+    const simple = simpleName ? byName.get(simpleName) || null : null
+    const compound = compoundName ? byName.get(compoundName) || null : null
+    if (!simple && !compound) continue
+    if (simpleName && simple) used.add(simpleName)
+    if (compoundName && compound) used.add(compoundName)
+    rows.push({ key: `${simpleName || 'empty'}:${compoundName || 'empty'}`, simple, compound })
+  }
+  for (const choice of choices) {
+    const key = normalizedInfinitive(choice.name)
+    if (used.has(key)) continue
+    rows.push({
+      key,
+      simple: choice.isCompound ? null : choice,
+      compound: choice.isCompound ? choice : null,
+    })
+  }
+  return rows
 }
 
 function randomIdentifier(prefix: string) {
@@ -215,7 +311,7 @@ const helpValues = computed(() => helpQuestion.value ? {
   coach: props.coach,
   ...coachHelpQuestionVariables(helpQuestion.value, helpVerb.value, helpTense.value, interfaceLocale.value),
   definition: localizedCoachVerbDefinition(helpVerb.value, interfaceLocale.value) || targetedHelp.value?.meaning || '',
-  helpTitle: targetedHelp.value?.title || '',
+  helpTitle: usesIdentificationHelp.value ? ui('Reconnaître les modes') : targetedHelp.value?.title || '',
   omitIndicativeMode: omitIndicativeMode.value,
 } : { coach: props.coach })
 const helpFeedbackContext = computed(() => {
@@ -407,9 +503,31 @@ function addMessage(author: ChatMessage['author'], text: string, tone?: ChatMess
   scrollThreadToBottom()
 }
 
-function contextFor(question?: ExerciseQuestion): CoachMessageContext {
+async function chooseIdentificationMode(mode: string) {
+  if (!isIdentificationExercise.value || waitingForNext.value || posingQuestion.value || deliveringFeedback.value || finished.value) return
+  if (isModeIdentificationExercise.value) {
+    answer.value = mode
+    await submit()
+    return
+  }
+  selectedIdentificationMode.value = mode
+  scrollThreadToBottom()
+}
+
+async function submitIdentificationTense(tense: ConjugationTense) {
+  if (activeExerciseKind.value !== 'tense-identification' || !selectedIdentificationMode.value
+    || waitingForNext.value || posingQuestion.value || deliveringFeedback.value || finished.value) return
+  answer.value = `${tense.name} ${selectedIdentificationMode.value}`
+  await submit()
+}
+
+function contextFor(question?: ExerciseQuestion, hideIdentificationAnswer = false): CoachMessageContext {
   const reminder = question?.agreementReminder
-  const instruction = question ? [question.instruction, question.consigne].filter(Boolean).join('\n') : undefined
+  const displayedQuestion = question?.literaryCitation
+    ? `${question.literaryCitation.before}【${question.literaryCitation.target}】${question.literaryCitation.after}`
+    : question?.consigne
+  const instruction = question ? [question.instruction, displayedQuestion].filter(Boolean).join('\n') : undefined
+  const hidesAnswer = hideIdentificationAnswer && isIdentificationExercise.value
   return {
     instruction: instruction && omitIndicativeMode.value ? withoutIndicativeMode(instruction) : instruction,
     verb: question?.infinitif || reminder?.infinitive,
@@ -417,9 +535,9 @@ function contextFor(question?: ExerciseQuestion): CoachMessageContext {
     participle: reminder?.participle,
     gender: reminder?.gender === 'feminin' ? 'féminin' : reminder?.gender === 'masculin' ? 'masculin' : undefined,
     number: reminder?.number || undefined,
-    mode: uiLabel(question?.mode),
-    tense: uiLabel(question?.temps),
-    expectedAnswer: question?.reponsesPourCorrige.join(' ou '),
+    mode: hidesAnswer ? undefined : uiLabel(question?.mode),
+    tense: hidesAnswer ? undefined : uiLabel(question?.temps),
+    expectedAnswer: hidesAnswer ? undefined : question?.reponsesPourCorrige.join(' ou '),
     questionNumber: question ? displayedQuestionNumber.value : undefined,
   }
 }
@@ -547,10 +665,35 @@ async function addCoachReaction(eventType: CoachEvent, context: CoachMessageCont
 async function askCurrentQuestion() {
   const question = currentQuestion.value
   if (!question) return
+  selectedIdentificationMode.value = ''
   posingQuestion.value = true
   const firstQuestionMessageId = sequence.value + 1
-  if (currentIndex.value > 0) await addCoachReaction('question', contextFor(question))
+  if (currentIndex.value > 0) await addCoachReaction('question', contextFor(question, true))
   if (question.instruction) await addCoachText(uiLabel(question.instruction))
+  if (isIdentificationExercise.value) {
+    if (question.literaryCitation) {
+      await enqueueCoachBubble(() => ({
+        text: '',
+        literaryCitation: question.literaryCitation,
+        questionIndex: currentIndex.value,
+        identificationPrompt: true,
+      }))
+    } else {
+      const formParts = identificationFormParts(question)
+      await enqueueCoachBubble(() => ({
+        text: formParts ? '' : question.consigne,
+        emphasis: !formParts,
+        identificationForm: formParts || undefined,
+        questionIndex: currentIndex.value,
+        identificationPrompt: true,
+      }))
+    }
+    posingQuestion.value = false
+    restartHelpReminderTimer()
+    scrollThreadToMessage(firstQuestionMessageId)
+    focusAnswerInput()
+    return
+  }
   const bubbles = coachQuestionBubbles(question, {
     omitIndicativeMode: omitIndicativeMode.value,
     modeLabel: uiLabel(question.mode),
@@ -606,7 +749,7 @@ async function submit() {
   track(result.isCorrect ? 'answer_correct' : 'answer_retry', exerciseAnalyticsMetadata.value)
   answer.value = ''
 
-  const currentErrorDetails = result.isCorrect ? [] : learnerErrorDetails(candidate, question)
+  const currentErrorDetails = result.isCorrect || isIdentificationExercise.value ? [] : learnerErrorDetails(candidate, question)
   const currentErrorLabels = currentErrorDetails.map(detail => detail.label)
   const attemptErrorLabels = [...new Set([...pendingErrorLabels.value, ...currentErrorLabels])]
   const attemptErrorDetails = mergeLearnerErrorDetails(pendingErrorDetails.value, currentErrorDetails)
@@ -638,16 +781,16 @@ async function submit() {
   deliveringFeedback.value = true
 
   const alternatives = result.isCorrect ? getAlternativeCorrections(candidate, question.reponsesPourCorrige) : []
-  const agreementDiagnostic = result.isCorrect ? undefined : diagnoseCoachAgreement(candidate, question)
-  const diagnostic = diagnoseCoachAnswer(candidate, question, result.isCorrect)
-  const auxiliaryDiagnostic = diagnostic.errorKind === 'auxiliary'
+  const agreementDiagnostic = result.isCorrect || isIdentificationExercise.value ? undefined : diagnoseCoachAgreement(candidate, question)
+  const diagnostic = isIdentificationExercise.value ? null : diagnoseCoachAnswer(candidate, question, result.isCorrect)
+  const auxiliaryDiagnostic = diagnostic?.errorKind === 'auxiliary'
     && diagnostic.learnerAuxiliary
     && diagnostic.expectedAuxiliary
     ? diagnostic
     : undefined
-  const usedFutureSimple = !result.isCorrect && isFutureSimpleInsteadOfNearFuture(candidate, question)
-  const otherConjugations = result.isCorrect ? [] : findConjugationConfusions(candidate, question)
-  const impossibleEnding = result.isCorrect ? null : findImpossibleSingularEnding(candidate, question)
+  const usedFutureSimple = !isIdentificationExercise.value && !result.isCorrect && isFutureSimpleInsteadOfNearFuture(candidate, question)
+  const otherConjugations = isIdentificationExercise.value || result.isCorrect ? [] : findConjugationConfusions(candidate, question)
+  const impossibleEnding = isIdentificationExercise.value || result.isCorrect ? null : findImpossibleSingularEnding(candidate, question)
   const incorrectEvent = agreementDiagnostic?.errorKind === 'agreement' && question.agreementReminder
     ? question.agreementReminder.kind
     : 'incorrect'
@@ -742,7 +885,7 @@ async function submit() {
         )
         impossibleEndingReminderDisplayed = true
       }
-      if (isIncorrectReaction && !comparisonDisplayed) {
+      if (isIncorrectReaction && !isIdentificationExercise.value && !comparisonDisplayed) {
         // Le texte de correction peut contenir tout le contexte de la phrase
         // (« Ce sont… que j’… »), alors que l'élève ne saisit que les blancs.
         // On compare donc en priorité avec les formes réellement validées.
@@ -862,7 +1005,15 @@ function confirmClose() {
   emit('close')
 }
 
+let smallScreenQuery: MediaQueryList | null = null
+function updateSmallScreen(event: MediaQueryList | MediaQueryListEvent) {
+  isSmallScreen.value = event.matches
+}
+
 onMounted(async () => {
+  smallScreenQuery = window.matchMedia('(max-width: 760px)')
+  updateSmallScreen(smallScreenQuery)
+  smallScreenQuery.addEventListener('change', updateSmallScreen)
   chatSessionId.value = randomIdentifier('chat')
   resetExerciseRunId()
   allowMotion.value = !props.tourDemo && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -872,6 +1023,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  smallScreenQuery?.removeEventListener('change', updateSmallScreen)
   clearHelpReminderTimer()
   if (questionScrollFrame !== null) window.cancelAnimationFrame(questionScrollFrame)
   conversationVersion += 1
@@ -913,6 +1065,7 @@ onBeforeUnmount(() => {
               `chat-message--${message.author}`,
               message.tone ? `chat-message--${message.tone}` : '',
               { 'chat-message--comparison': !!message.answerComparison },
+              { 'chat-message--identification-question': message.identificationPrompt },
               { 'chat-message--mobile-help-hint': message.mobileHelpHint },
               { 'chat-message--help-link': message.author === 'learner' && message.questionIndex !== undefined },
               { 'is-help-selected': helpOpen && message.questionIndex !== undefined && message.questionIndex === helpQuestionIndex },
@@ -928,6 +1081,17 @@ onBeforeUnmount(() => {
               v-if="message.errorDetails?.length"
               :details="message.errorDetails"
             />
+            <div v-else-if="message.literaryCitation" class="chat-literary-question">
+              <blockquote class="chat-literary-citation">
+                <p><span>{{ message.literaryCitation.before }}</span><mark>{{ message.literaryCitation.target }}</mark><span>{{ message.literaryCitation.after }}</span></p>
+                <footer>
+                  {{ message.literaryCitation.author }}, <cite>{{ message.literaryCitation.work }}</cite>
+                </footer>
+              </blockquote>
+            </div>
+            <p v-else-if="message.identificationForm" class="chat-identification-form">
+              <span>{{ message.identificationForm.before }}</span><mark>{{ message.identificationForm.target }}</mark><span>{{ message.identificationForm.after }}</span>
+            </p>
             <div v-else-if="message.answerComparison" class="answer-comparison">
               <strong>{{ message.answerComparison.mode === 'focused' ? ui('Regarde où ça change :') : ui('Repars de la correction complète :') }}</strong>
               <div class="answer-comparison__line answer-comparison__line--learner">
@@ -962,6 +1126,53 @@ onBeforeUnmount(() => {
             <span v-else-if="message.text">{{ message.text }}</span>
             <video v-if="message.media?.mediaType === 'video'" :src="message.media.filePath" :aria-label="message.media.altText" muted playsinline controls @loadedmetadata="mediaLoaded" />
             <img v-else-if="message.media" :class="{ 'chat-media--emoji': message.media.mediaType === 'emoji' }" :src="message.media.filePath" :alt="message.media.altText" @load="mediaLoaded">
+            <div
+              v-if="message.identificationPrompt && message.questionIndex === currentIndex"
+              class="chat-identification-choices"
+            >
+              <div
+                v-if="activeExerciseKind === 'tense-identification' && selectedIdentificationMode"
+                class="chat-tense-choice-step"
+              >
+                <div class="chat-tense-choice-step__header">
+                  <button type="button" @click.stop="selectedIdentificationMode = ''">← {{ ui('Modes') }}</button>
+                  <strong>{{ ui('Choisis le temps') }}</strong>
+                </div>
+                <div class="chat-tense-choices" role="group" :aria-label="ui('Choisis le temps')">
+                  <div v-for="row in selectedModeTenseRows" :key="row.key" class="chat-tense-choice-row">
+                    <button
+                      v-if="row.simple"
+                      type="button"
+                      :disabled="waitingForNext || posingQuestion || deliveringFeedback"
+                      @click.stop="submitIdentificationTense(row.simple)"
+                    >
+                      {{ uiLabel(row.simple.name) }}
+                    </button>
+                    <span v-else aria-hidden="true" />
+                    <button
+                      v-if="row.compound"
+                      type="button"
+                      :disabled="waitingForNext || posingQuestion || deliveringFeedback"
+                      @click.stop="submitIdentificationTense(row.compound)"
+                    >
+                      {{ uiLabel(row.compound.name) }}
+                    </button>
+                    <span v-else aria-hidden="true" />
+                  </div>
+                </div>
+              </div>
+              <div v-else class="chat-mode-choices" role="group" :aria-label="ui('Choisis le mode')">
+                <button
+                  v-for="choice in displayedIdentificationModeChoices"
+                  :key="choice.value"
+                  type="button"
+                  :disabled="waitingForNext || posingQuestion || deliveringFeedback"
+                  @click.stop="chooseIdentificationMode(choice.value)"
+                >
+                  {{ choice.label }}
+                </button>
+              </div>
+            </div>
           </div>
 
           <div v-if="finalSummaryPreparing" class="chat-summary-loading" role="status" aria-live="polite">
@@ -995,6 +1206,14 @@ onBeforeUnmount(() => {
                     <span>{{ ui('Question') }} {{ item.index }}</span>
                     <span>{{ item.questionLabel }}</span>
                   </strong>
+                  <blockquote v-if="item.identificationForm" class="chat-summary-list__citation">
+                    <p>
+                      <span>{{ item.identificationForm.before }}</span><mark>{{ item.identificationForm.target }}</mark><span>{{ item.identificationForm.after }}</span>
+                    </p>
+                    <footer v-if="item.literaryCitation">
+                      {{ item.literaryCitation.author }}, <cite>{{ item.literaryCitation.work }}</cite>
+                    </footer>
+                  </blockquote>
                   <LearnerErrorFeedback
                     v-if="item.errorDetails.length"
                     :details="item.errorDetails"
@@ -1042,7 +1261,7 @@ onBeforeUnmount(() => {
             type="text"
             autocomplete="off"
             :disabled="waitingForNext"
-            :placeholder="helpOpen ? ui('Écris ta réponse…') : ui('Écris ta réponse ou « Aide »…')"
+            :placeholder="chatAnswerPlaceholder"
           >
           <button type="submit" :disabled="waitingForNext || posingQuestion || deliveringFeedback || !answer.trim()">
             {{ posingQuestion ? ui('Question…') : deliveringFeedback ? ui('Réponse…') : waitingForNext ? ui('Suite…') : ui('Envoyer') }}
@@ -1076,7 +1295,7 @@ onBeforeUnmount(() => {
 
       <Transition name="chat-help" appear>
         <CoachHelpPanel
-          v-if="helpOpen && targetedHelp"
+          v-if="helpOpen && (targetedHelp || usesIdentificationHelp)"
           :blocks="helpBlocks"
           :values="helpValues"
           header-title="{helpTitle}"
@@ -1084,6 +1303,8 @@ onBeforeUnmount(() => {
           :question-number="(helpQuestionIndex ?? currentIndex) + 1"
           :coach-color="coach.themeColor"
           :feedback-context="helpFeedbackContext"
+          :include-automatic-orthography="!usesIdentificationHelp"
+          :enable-automatic-audit="!usesIdentificationHelp"
           @content-scroll="restartHelpReminderTimer"
           @close="closeHelp"
         />
@@ -1703,6 +1924,27 @@ onBeforeUnmount(() => {
   font-weight: 800;
 }
 
+.chat-literary-citation { display: grid; max-width: 100%; margin: 0; gap: 7px; }
+.chat-literary-citation p { margin: 0; font-size: 1rem; line-height: 1.55; }
+.chat-literary-citation mark { padding: 1px 4px; border-radius: 4px; color: #4b3563; background: #eadcf8; box-decoration-break: clone; font-weight: 900; }
+.chat-literary-citation footer { color: #637a84; font-size: .7rem; font-weight: 700; }
+.chat-literary-question { display: grid; gap: 12px; }
+.chat-identification-form { margin: 0; font-weight: 800; }
+.chat-identification-form mark { padding: 1px 4px; border-radius: 4px; color: #4b3563; background: #eadcf8; box-decoration-break: clone; font-weight: 900; }
+.chat-message--identification-question { width: min(100%, 650px); max-width: 94%; }
+.chat-identification-choices { display: grid; margin-top: 12px; gap: 8px; }
+.chat-mode-choices { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.chat-tense-choices { display: grid; gap: 6px; }
+.chat-tense-choice-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.chat-mode-choices button, .chat-tense-choices button, .chat-tense-choice-step__header button { min-width: 0; padding: 8px 5px; overflow: hidden; color: #1d6378; border: 1px solid #9fc6cf; border-radius: 10px; background: #edf8fa; cursor: pointer; font: inherit; font-size: clamp(.64rem, 1.4vw, .76rem); font-weight: 850; text-overflow: ellipsis; white-space: nowrap; }
+.chat-mode-choices button:hover, .chat-mode-choices button:focus-visible, .chat-tense-choices button:hover, .chat-tense-choices button:focus-visible, .chat-tense-choice-step__header button:hover, .chat-tense-choice-step__header button:focus-visible { color: white; border-color: #27758e; background: #27758e; outline: 2px solid rgb(39 117 142 / 22%); outline-offset: 1px; }
+.chat-mode-choices button:disabled, .chat-tense-choices button:disabled { color: #87979b; border-color: #d2dbdd; background: #f1f4f4; cursor: not-allowed; opacity: 1; }
+.chat-tense-choice-step { display: grid; gap: 7px; }
+.chat-tense-choice-step__header { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: #375d68; font-size: .75rem; }
+.chat-tense-choice-step__header button { padding-inline: 9px; }
+:global(:root[data-theme='dark']) :is(.chat-mode-choices, .chat-tense-choices, .chat-tense-choice-step__header) button { color: #bce6ee; border-color: #426d77; background: #1b3a42; }
+:global(:root[data-theme='dark']) :is(.chat-mode-choices, .chat-tense-choices, .chat-tense-choice-step__header) button:hover, :global(:root[data-theme='dark']) :is(.chat-mode-choices, .chat-tense-choices, .chat-tense-choice-step__header) button:focus-visible { color: white; border-color: #65b7c8; background: #286f80; }
+
 .chat-message__text :deep(p),
 .chat-message__text :deep(blockquote),
 .chat-message__text :deep(ul),
@@ -2106,6 +2348,20 @@ onBeforeUnmount(() => {
   color: #2d7083;
   font-weight: 800;
 }
+
+.chat-summary-list__citation {
+  display: grid;
+  margin: 9px 0;
+  padding: 9px 11px;
+  gap: 4px;
+  border-left: 3px solid #e2b945;
+  border-radius: 0 9px 9px 0;
+  background: #fffaf0;
+}
+
+.chat-summary-list__citation p { margin: 0; color: #294e55; font-weight: 700; line-height: 1.45; }
+.chat-summary-list__citation mark { padding: 1px 4px; color: #4b3563; border-radius: 4px; background: #eadcf8; font-weight: 900; }
+.chat-summary-list__citation footer { color: #637a84; font-size: .68rem; font-weight: 700; }
 
 .chat-summary-list__errors {
   display: flex;

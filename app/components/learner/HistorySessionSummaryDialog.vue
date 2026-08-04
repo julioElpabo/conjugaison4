@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { LearnerErrorDetail } from '~~/shared/types/conjugation'
+import type { ExerciseQuestion, LearnerErrorDetail } from '~~/shared/types/conjugation'
+import type { IdentificationFormParts } from '~~/shared/utils/identification-form'
 import { buildAnswerComparison } from '~~/shared/utils/answer-difference'
 import LearnerErrorDetailMessage from '~/components/exercise/LearnerErrorDetailMessage.vue'
 
@@ -13,6 +14,9 @@ interface SummaryItem {
   displayExpectedAnswers: string[]
   errorLabels: string[]
   errorDetails: LearnerErrorDetail[]
+  identificationForm: IdentificationFormParts | null
+  literaryCitation?: ExerciseQuestion['literaryCitation']
+  isIdentification: boolean
 }
 
 const props = defineProps<{
@@ -72,13 +76,22 @@ useDialogFocus(dialog, () => emit('close'))
             <ol>
               <li v-for="item in incorrectItems" :key="`error-${item.index}`">
                 <p class="history-summary-item__question">{{ item.questionLabel }}</p>
+                <blockquote v-if="item.identificationForm" class="history-summary-item__citation">
+                  <p>
+                    <span>{{ item.identificationForm.before }}</span><mark>{{ item.identificationForm.target }}</mark><span>{{ item.identificationForm.after }}</span>
+                  </p>
+                  <footer v-if="item.literaryCitation">
+                    {{ item.literaryCitation.author }}, <cite>{{ item.literaryCitation.work }}</cite>
+                  </footer>
+                </blockquote>
                 <div
                   v-for="comparison in [answerComparison(item)]"
                   :key="`${item.index}-comparison`"
                   class="history-summary-item__comparison"
                 >
                   <span class="history-summary-item__answer history-summary-item__answer--learner">
-                    <template v-if="comparison">
+                    <template v-if="item.isIdentification">{{ item.learnerAnswer || '—' }}</template>
+                    <template v-else-if="comparison">
                       <span
                         v-for="(part, partIndex) in comparison.learnerParts"
                         :key="`learner-${partIndex}`"
@@ -89,7 +102,8 @@ useDialogFocus(dialog, () => emit('close'))
                   </span>
                   <b aria-hidden="true">→</b>
                   <strong class="history-summary-item__answer history-summary-item__answer--expected">
-                    <template v-if="comparison">
+                    <template v-if="item.isIdentification">{{ item.expectedAnswer }}</template>
+                    <template v-else-if="comparison">
                       <span
                         v-for="(part, partIndex) in comparison.expectedParts"
                         :key="`expected-${partIndex}`"
@@ -141,6 +155,10 @@ useDialogFocus(dialog, () => emit('close'))
 .history-summary-section--errors>ol>li{border-left-color:var(--danger);background:color-mix(in srgb,var(--danger) 7%,var(--surface))}
 .history-summary-section--successes>ol>li{border-left-color:var(--success);background:color-mix(in srgb,var(--success) 7%,var(--surface))}
 .history-summary-item__question{margin:0;color:var(--muted);font-size:.78rem;line-height:1.35}
+.history-summary-item__citation{display:grid;margin:0;padding:10px 12px;gap:4px;border-left:3px solid #e2b945;border-radius:0 9px 9px 0;background:color-mix(in srgb,#f6d85d 13%,var(--surface))}
+.history-summary-item__citation p{margin:0;color:var(--ink);font-weight:700;line-height:1.5}
+.history-summary-item__citation mark{padding:1px 4px;color:#4b3563;border-radius:4px;background:#eadcf8;font-weight:900}
+.history-summary-item__citation footer{color:var(--muted);font-size:.7rem;font-weight:700}
 .history-summary-item__comparison{display:flex;flex-wrap:wrap;align-items:baseline;gap:9px;font-size:1rem;line-height:1.45}
 .history-summary-item__answer--learner{color:#ba2f28}
 .history-summary-item__comparison>b{color:var(--muted);font-weight:600}

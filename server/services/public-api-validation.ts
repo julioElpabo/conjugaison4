@@ -18,6 +18,8 @@ const QUESTIONNAIRE_KEYS = new Set([
   'tenseIds',
   'questionCount',
   'exerciseKind',
+  'identificationSource',
+  'literaryRegister',
   'pastSimplePronouns',
   'inclusivePronouns',
   'includeComplements',
@@ -33,6 +35,8 @@ const DEFI_KEYS = new Set([
   'tenseIds',
   'questionCount',
   'exerciseKind',
+  'identificationSource',
+  'literaryRegister',
   'pastSimplePronouns',
   'inclusivePronouns',
   'includeComplements',
@@ -145,7 +149,18 @@ function parseExerciseKind(value: unknown): ExerciseKind {
   if (value === 'tense-identification' || value === 'temps-mode') {
     return 'tense-identification'
   }
-  throw new PublicInputError('exerciseKind doit valoir conjugation ou tense-identification')
+  if (value === 'mode-identification') return 'mode-identification'
+  throw new PublicInputError('exerciseKind doit valoir conjugation, tense-identification ou mode-identification')
+}
+
+function parseIdentificationSource(value: unknown) {
+  if (value === 'selected-verbs' || value === 'literary-corpus') return value
+  throw new PublicInputError('identificationSource doit valoir selected-verbs ou literary-corpus')
+}
+
+function parseLiteraryRegister(value: unknown) {
+  if (value === 'all' || value === 'courant' || value === 'soutenu') return value
+  throw new PublicInputError('literaryRegister doit valoir all, courant ou soutenu')
 }
 
 function parsePastSimplePronouns(value: unknown): PastSimplePronouns {
@@ -238,6 +253,12 @@ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest 
     tenseIds: parseIds(value.tenseIds, 'tenseIds', 30),
     questionCount: parseQuestionCount(value.questionCount),
     exerciseKind: parseExerciseKind(value.exerciseKind),
+    identificationSource: value.identificationSource === undefined
+      ? DEFAULT_SHARED_CHALLENGE_OPTIONS.identificationSource
+      : parseIdentificationSource(value.identificationSource),
+    literaryRegister: value.literaryRegister === undefined
+      ? DEFAULT_SHARED_CHALLENGE_OPTIONS.literaryRegister
+      : parseLiteraryRegister(value.literaryRegister),
     pastSimplePronouns: parsePastSimplePronouns(value.pastSimplePronouns),
     inclusivePronouns: value.inclusivePronouns,
     includeComplements: resolvedLegacy.includeComplements,
@@ -276,6 +297,12 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
   const exerciseKind = modernValue.exerciseKind === undefined
     ? DEFAULT_SHARED_CHALLENGE_OPTIONS.exerciseKind
     : parseExerciseKind(modernValue.exerciseKind)
+  const identificationSource = modernValue.identificationSource === undefined
+    ? DEFAULT_SHARED_CHALLENGE_OPTIONS.identificationSource
+    : parseIdentificationSource(modernValue.identificationSource)
+  const literaryRegister = modernValue.literaryRegister === undefined
+    ? DEFAULT_SHARED_CHALLENGE_OPTIONS.literaryRegister
+    : parseLiteraryRegister(modernValue.literaryRegister)
   const pastSimplePronouns = modernValue.pastSimplePronouns === undefined
     ? (legacyPastSimple === undefined ? DEFAULT_SHARED_CHALLENGE_OPTIONS.pastSimplePronouns : parsePastSimplePronouns(legacyPastSimple))
     : parsePastSimplePronouns(modernValue.pastSimplePronouns)
@@ -308,6 +335,8 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
     tenseIds: parseIds(modernValue.tenseIds, 'tenseIds', 30),
     questionCount: parseQuestionCount(modernValue.questionCount),
     exerciseKind,
+    identificationSource,
+    literaryRegister,
     pastSimplePronouns,
     inclusivePronouns,
     includeComplements: resolvedLegacy.includeComplements,

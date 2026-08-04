@@ -1,0 +1,1706 @@
+{
+  "source": {
+    "key": "stendhal-le-rouge-et-le-noir-1830",
+    "author": "Stendhal",
+    "title": "Le Rouge et le Noir",
+    "edition": "Michel Lévy Frères, 1854 ; œuvre originale publiée en 1830",
+    "sourceUrl": "https://fr.wikisource.org/wiki/Le_Rouge_et_le_Noir/Texte_entier",
+    "license": "Domaine public ; transcription Wikisource sous CC BY-SA",
+    "publicDomainBasis": "Stendhal est décédé en 1842 ; œuvre originale en français publiée en 1830.",
+    "checksum": "4e101d8fb6bf37b7d37b6dfee4320291d180eff5609754417f00a3d852381782"
+  },
+  "sentences": [
+    {
+      "key": "0eefbc707bb58512022f489af83917d1c406d57aa4a29243f1970cd1906bcdaf",
+      "chapter": "II Un Maire.",
+      "locator": "Phrase 45",
+      "text": "Après avoir couru de cascade en cascade, on les voit tomber dans le Doubs.",
+      "wordCount": 14,
+      "characterCount": 74,
+      "targets": [
+        {
+          "verbId": 77,
+          "tenseId": 26,
+          "personId": 6,
+          "form": "avoir couru",
+          "start": 6,
+          "end": 17,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "f74f5eb7f12895ea11bd17e7d3396a168e303383b7baf02819a87507443e8c16",
+      "chapter": "II Un Maire.",
+      "locator": "Phrase 53",
+      "text": "Tout en écoutant son mari qui parlait d’un air grave, l’œil de madame de Rênal suivait avec inquiétude les mouvements de trois petits garçons.",
+      "wordCount": 24,
+      "characterCount": 142,
+      "targets": [
+        {
+          "verbId": 218,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en écoutant",
+          "start": 5,
+          "end": 16,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "db6178cf862d8692bbb87f6b456d393f5f17ad148ea5613129ac4c4a7c67d76f",
+      "chapter": "III Le Bien des Pauvres",
+      "locator": "Phrase 68",
+      "text": "En lisant la lettre que lui écrivait M. le marquis de La Mole, pair de France, et le plus riche propriétaire de la province, le curé Chélan resta pensif.",
+      "wordCount": 29,
+      "characterCount": 153,
+      "targets": [
+        {
+          "verbId": 50,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "En lisant",
+          "start": 0,
+          "end": 9,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "5229fc02634c9f6b04ef6fe1805727b7435cf8cf83ca8c2b8af36ae665c38e9f",
+      "chapter": "IV Un Père et un Fils",
+      "locator": "Phrase 147",
+      "text": "En approchant de son usine, le père Sorel appela Julien de sa voix de stentor ; personne ne répondit.",
+      "wordCount": 18,
+      "characterCount": 101,
+      "targets": [
+        {
+          "verbId": 481,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "En approchant",
+          "start": 0,
+          "end": 13,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "ed56743869e42c0aee4208ff822abc17d93cd46823be5fbe952c5e5c486749bc",
+      "chapter": "IV Un Père et un Fils",
+      "locator": "Phrase 168",
+      "text": "En passant, il regarda tristement le ruisseau où était tombé son livre ; c’était celui de tous qu’il affectionnait le plus, le Mémorial de Sainte-Hélène .",
+      "wordCount": 24,
+      "characterCount": 154,
+      "targets": [
+        {
+          "verbId": 206,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "En passant",
+          "start": 0,
+          "end": 10,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "78cda59d41307701ab9d60ee87fe0aab808cb2e7217372bcee48b6cab5015692",
+      "chapter": "VI L’Ennui.",
+      "locator": "Phrase 378",
+      "text": "Ce but n’eût point été rempli si j’eusse laissé à Julien l’accoutrement d’un ouvrier.",
+      "wordCount": 14,
+      "characterCount": 85,
+      "targets": [
+        {
+          "verbId": 220,
+          "tenseId": 19,
+          "personId": 4,
+          "form": "eusse laissé",
+          "start": 35,
+          "end": 47,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "fb37dd9e7bed5968c56b9e18a59c67706e6e973195dc6f5844018832bf435eff",
+      "chapter": "VI L’Ennui.",
+      "locator": "Phrase 386",
+      "text": "Je suis ici, messieurs, leur dit-il en finissant son allocution, pour vous apprendre le latin.",
+      "wordCount": 15,
+      "characterCount": 94,
+      "targets": [
+        {
+          "verbId": 49,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en finissant",
+          "start": 36,
+          "end": 48,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "f32ba41f9c76413121b40259bd5b549e83591d8a1691d1c483c1ee6a525b11f0",
+      "chapter": "VIII Petits Événements.",
+      "locator": "Phrase 571",
+      "text": "Trois jours après, Julien avait trouvé le prétexte dont il eût dû se munir dès le premier jour ; ce prétexte était une calomnie, mais qu’importe ?",
+      "wordCount": 25,
+      "characterCount": 146,
+      "targets": [
+        {
+          "verbId": 15,
+          "tenseId": 19,
+          "personId": 6,
+          "form": "eût dû",
+          "start": 59,
+          "end": 65,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "84ec3333fee9cabb02124d7fc86a354c6d647885fddd510ff8a2da0588d37483",
+      "chapter": "IX Une soirée à la Campagne.",
+      "locator": "Phrase 717",
+      "text": "Après les progrès étonnants qu’il a fait faire aux enfants, qu’importe qu’il passe une matinée sans leur parler ; il faut convenir que les hommes sont bien durs.",
+      "wordCount": 27,
+      "characterCount": 161,
+      "targets": [
+        {
+          "verbId": 206,
+          "tenseId": 10,
+          "personId": 6,
+          "form": "passe",
+          "start": 77,
+          "end": 82,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "d25bb4fd429479d1513d4962f20edfd8e2cfc5e531e5edad12386d6672131e57",
+      "chapter": "IX Une soirée à la Campagne.",
+      "locator": "Phrase 746",
+      "text": "Il faut que j’aie cette boîte, se dit-elle en doublant le pas.",
+      "wordCount": 12,
+      "characterCount": 62,
+      "targets": [
+        {
+          "verbId": 4,
+          "tenseId": 10,
+          "personId": 4,
+          "form": "aie",
+          "start": 14,
+          "end": 17,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        },
+        {
+          "verbId": 753,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en doublant",
+          "start": 43,
+          "end": 54,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "239febc2edef436996cc32ac241b581abd40627240874e998285e54fb8c78881",
+      "chapter": "X Un grand Cœur et une petite Fortune.",
+      "locator": "Phrase 793",
+      "text": "Je sais où aller, monsieur, en sortant de chez vous.",
+      "wordCount": 10,
+      "characterCount": 52,
+      "targets": [
+        {
+          "verbId": 66,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en sortant",
+          "start": 28,
+          "end": 38,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "cdd6c93db4b21e5c53a3e4b44636e998e42d4bb2efefe74e393a1ece68bc5f21",
+      "chapter": "XV Le Chant du Coq.",
+      "locator": "Phrase 1132",
+      "text": "Si Julien avait eu un peu de l’adresse qu’il se supposait si gratuitement, il eût pu s’applaudir le lendemain de l’effet produit par son voyage à Verrières.",
+      "wordCount": 27,
+      "characterCount": 156,
+      "targets": [
+        {
+          "verbId": 5,
+          "tenseId": 19,
+          "personId": 6,
+          "form": "eût pu",
+          "start": 78,
+          "end": 84,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "5cdd076ef9b6d80ff6304654064aa440843489dcb7388b991809237891b5a316",
+      "chapter": "XV Le Chant du Coq.",
+      "locator": "Phrase 1181",
+      "text": "Telle fut la première pensée de Julien, en rentrant dans sa chambre.",
+      "wordCount": 12,
+      "characterCount": 68,
+      "targets": [
+        {
+          "verbId": 223,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en rentrant",
+          "start": 40,
+          "end": 51,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "9bf237e5da736e814aa3d0288f653033a6d3e1ef0bd3544540539ee895dedc10",
+      "chapter": "XVII Le premier Adjoint.",
+      "locator": "Phrase 1293",
+      "text": "Souvent il eût été bien aise de n’être pas interrompu par une visite, dont l’attente, la veille encore de la petite scène du verger, l’eût mis hors d’état de lire.",
+      "wordCount": 30,
+      "characterCount": 163,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 19,
+          "personId": 6,
+          "form": "eût été",
+          "start": 11,
+          "end": 18,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "d045d7a9d1f02815748e09b85dc67ba279bbd4b5c506e86d9159933a1b3677e8",
+      "chapter": "XVIII Un Roi à Verrières.",
+      "locator": "Phrase 1468",
+      "text": "Et l’évêque se mit de nouveau à marcher en donnant des bénédictions.",
+      "wordCount": 12,
+      "characterCount": 68,
+      "targets": [
+        {
+          "verbId": 213,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en donnant",
+          "start": 40,
+          "end": 50,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "600f7fe5856cb9d6c2c53b206e82da8688ba404f3d1e78512c08d5abdfb903e1",
+      "chapter": "XVIII Un Roi à Verrières.",
+      "locator": "Phrase 1521",
+      "text": "Après avoir monté un long escalier, on parvint à une porte extrêmement petite, mais dont le chambranle gothique était doré avec magnificence.",
+      "wordCount": 22,
+      "characterCount": 141,
+      "targets": [
+        {
+          "verbId": 226,
+          "tenseId": 26,
+          "personId": 6,
+          "form": "avoir monté",
+          "start": 6,
+          "end": 17,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "df0819e2d7af9f791f0ff3d3cea8eed2f8314292072274b2661fc4d2657e5620",
+      "chapter": "XIX Penser fait souffrir.",
+      "locator": "Phrase 1586",
+      "text": "Je vous en conjure, lui disait Julien, dès qu’ils se trouvaient seuls, ne parlez à personne ; que je sois le seul confident de vos peines.",
+      "wordCount": 25,
+      "characterCount": 138,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 10,
+          "personId": 4,
+          "form": "sois",
+          "start": 101,
+          "end": 105,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "67f4b82c2774f9ff1d10dddabf1517dc2bd50131231bbfdb42db0c74a701d29b",
+      "chapter": "XXI Dialogue avec un Maître.",
+      "locator": "Phrase 1982",
+      "text": "Vous oubliez la naissance, dit M. de Rênal, en souriant un peu.",
+      "wordCount": 12,
+      "characterCount": 63,
+      "targets": [
+        {
+          "verbId": 185,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en souriant",
+          "start": 44,
+          "end": 55,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "f6ce79edb9791bcb2cb8b72fd8d6240ca97ef70e094af48c37c7de05b77ddaaf",
+      "chapter": "XXI Dialogue avec un Maître.",
+      "locator": "Phrase 2003",
+      "text": "Il eût été sans pitié pour moi !",
+      "wordCount": 7,
+      "characterCount": 32,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 19,
+          "personId": 6,
+          "form": "eût été",
+          "start": 3,
+          "end": 10,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "abc8954774c5c04ee7d8fd13da348f3a7cafc627fb071e417326a2bd098ac12b",
+      "chapter": "XXII Façons d’agir en 1830.",
+      "locator": "Phrase 2088",
+      "text": "Rubigneau, c’était le membre des deux académies, a la bonté de lire au hasard une phrase latine, au lieu de répondre en suivant le texte latin, j’essaierai de le traduire impromptu.",
+      "wordCount": 31,
+      "characterCount": 181,
+      "targets": [
+        {
+          "verbId": 67,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en suivant",
+          "start": 117,
+          "end": 127,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "787be13d17fca848750721aa129207687b302e8f9d4baca98c732e36ac8d30c8",
+      "chapter": "XXII Façons d’agir en 1830.",
+      "locator": "Phrase 2178",
+      "text": "Il aurait été puissamment soutenu contre le maire.",
+      "wordCount": 8,
+      "characterCount": 50,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 15,
+          "personId": 6,
+          "form": "aurait été",
+          "start": 3,
+          "end": 13,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "68154b7982c29ea9bfddfb95d86c45258f5601aba0a6e70aa62180475819c8ce",
+      "chapter": "XXIII Chagrins d’un fonctionnaire.",
+      "locator": "Phrase 2250",
+      "text": "S’il m’avait cru, il eût fait un voyage.",
+      "wordCount": 8,
+      "characterCount": 40,
+      "targets": [
+        {
+          "verbId": 3,
+          "tenseId": 19,
+          "personId": 6,
+          "form": "eût fait",
+          "start": 21,
+          "end": 29,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "94643d090d43fa7ea2652b317b23fc40183b44458849b57367ac433fae251892",
+      "chapter": "XXIII Chagrins d’un fonctionnaire.",
+      "locator": "Phrase 2277",
+      "text": "Somme énorme, dit-il en regardant les enfants, et les enfants de rire.",
+      "wordCount": 12,
+      "characterCount": 70,
+      "targets": [
+        {
+          "verbId": 207,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en regardant",
+          "start": 21,
+          "end": 33,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "076f10087084c26ed397559852fcf80c6ea6736372e4c9bad036af78ceedf0c7",
+      "chapter": "XXIII Chagrins d’un fonctionnaire.",
+      "locator": "Phrase 2309",
+      "text": "Qu’il chante à mon théâtre, et cet hiver, je marie ma fille.",
+      "wordCount": 12,
+      "characterCount": 60,
+      "targets": [
+        {
+          "verbId": 74,
+          "tenseId": 10,
+          "personId": 6,
+          "form": "chante",
+          "start": 6,
+          "end": 12,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "ebaa1ae9be315062d8c369f520a14a194fd8cc33dd7d626ca0f9757d5a888d1b",
+      "chapter": "XXV Le Séminaire.",
+      "locator": "Phrase 2578",
+      "text": "Là, Julien fut laissé seul ; il était atterré, son cœur battait violemment ; il eût été heureux d’oser pleurer.",
+      "wordCount": 18,
+      "characterCount": 111,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 19,
+          "personId": 6,
+          "form": "eût été",
+          "start": 80,
+          "end": 87,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "dae1e047ecbd36f2c80f50da5eec68f7e8701471b4285aa4c0e09eeb3e259067",
+      "chapter": "XXV Le Séminaire.",
+      "locator": "Phrase 2650",
+      "text": "C’est la première fois de ma vie, la figure du portier m’avait glacé, ajouta Julien en rougissant comme un enfant.",
+      "wordCount": 20,
+      "characterCount": 114,
+      "targets": [
+        {
+          "verbId": 560,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en rougissant",
+          "start": 84,
+          "end": 97,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "e2a45bccec57160c7bbe0cc4160634865c02b0f3da37086d117feeef64a7d312",
+      "chapter": "XXVI Le Monde, ou ce qui manque au Riche.",
+      "locator": "Phrase 2795",
+      "text": "À leur arrivée au séminaire, le professeur n’a point à les délivrer de ce nombre effroyable d’idées mondaines que j’y apporte, et qu’ils lisent sur ma figure, quoi que je fasse.",
+      "wordCount": 31,
+      "characterCount": 177,
+      "targets": [
+        {
+          "verbId": 3,
+          "tenseId": 10,
+          "personId": 4,
+          "form": "fasse",
+          "start": 171,
+          "end": 176,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "21c462058fa4f2ab0e63a6c1974522237d7a5497f964b3654e0bfbc37136899e",
+      "chapter": "XXVIII Une Procession.",
+      "locator": "Phrase 2929",
+      "text": "Julien se saisit des bouquets de plumes, et monta l’échelle en courant.",
+      "wordCount": 12,
+      "characterCount": 71,
+      "targets": [
+        {
+          "verbId": 77,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en courant",
+          "start": 60,
+          "end": 70,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "db3bbc10ede8023acd3ff8b48c26d00d238fbbf76457a8695d07589a49b05af7",
+      "chapter": "XXVIII Une Procession.",
+      "locator": "Phrase 2961",
+      "text": "Ils auraient examiné avec le génie de Barême si le degré d’émotion du public valait l’argent qu’on donnait aux sonneurs.",
+      "wordCount": 20,
+      "characterCount": 120,
+      "targets": [
+        {
+          "verbId": 445,
+          "tenseId": 15,
+          "personId": 9,
+          "form": "auraient examiné",
+          "start": 4,
+          "end": 20,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "15780407a358ebf5c8436cbd780ed4f3ddcbfe208da626f82e248c7deaa72dac",
+      "chapter": "XXIX Le premier Avancement.",
+      "locator": "Phrase 3046",
+      "text": "Ce fut là que tous les séminaristes les virent en allant dîner.",
+      "wordCount": 12,
+      "characterCount": 63,
+      "targets": [
+        {
+          "verbId": 2,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en allant",
+          "start": 47,
+          "end": 56,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "a94b3a8c55e1a535289e04c045a53f0049e49d3295adbcda5f873316b078dff4",
+      "chapter": "XXIX Le premier Avancement.",
+      "locator": "Phrase 3085",
+      "text": "Quelques semaines après, Julien tressaillit en recevant une lettre ; elle portait le timbre de Paris.",
+      "wordCount": 15,
+      "characterCount": 101,
+      "targets": [
+        {
+          "verbId": 17,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en recevant",
+          "start": 44,
+          "end": 55,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "d5082d042cede276ba530e71fc075027b73ea74f78455da0d0a3fd5bebcba9d8",
+      "chapter": "XXIX Le premier Avancement.",
+      "locator": "Phrase 3105",
+      "text": "Cependant, m’écrit-on, ce noble pair ne laisse pas passer de semaine sans aller étaler son cordon bleu dans le salon du garde des sceaux, quel qu’il soit.",
+      "wordCount": 27,
+      "characterCount": 154,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 10,
+          "personId": 6,
+          "form": "soit",
+          "start": 149,
+          "end": 153,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "6329045377996e497a1fb84b89e7afff22cf403bd55af253087d11ad3370abb3",
+      "chapter": "XXIX Le premier Avancement.",
+      "locator": "Phrase 3118",
+      "text": "Il espère qu’après avoir lu cette lettre, il vous conviendra de partir pour Paris, dans quatre ou cinq jours.",
+      "wordCount": 19,
+      "characterCount": 109,
+      "targets": [
+        {
+          "verbId": 50,
+          "tenseId": 26,
+          "personId": 6,
+          "form": "avoir lu",
+          "start": 19,
+          "end": 27,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "a21195653a77d2134800c93e555409d721bf70819e3a9864841226c278a8d57c",
+      "chapter": "XXIX Le premier Avancement.",
+      "locator": "Phrase 3132",
+      "text": "Il eût été difficile de trouver des phrases plus irréprochables et respirant un respect plus sincère.",
+      "wordCount": 16,
+      "characterCount": 101,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 19,
+          "personId": 6,
+          "form": "eût été",
+          "start": 3,
+          "end": 10,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "718dd1c9cbf6cfc9430c2fa48964bb8f52ad1b73464d6e02edd4655c5f9acd98",
+      "chapter": "XXIX Le premier Avancement.",
+      "locator": "Phrase 3189",
+      "text": "Il est impossible d’avoir fait de meilleures études.",
+      "wordCount": 8,
+      "characterCount": 52,
+      "targets": [
+        {
+          "verbId": 3,
+          "tenseId": 26,
+          "personId": 6,
+          "form": "avoir fait",
+          "start": 20,
+          "end": 30,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "90e6408c8403d6cc9d8ca354262cbca1c4009edc1144d1e7fda49161f557b6ae",
+      "chapter": "XXIX Le premier Avancement.",
+      "locator": "Phrase 3195",
+      "text": "Optimè , dit l’évêque ; quoi, c’est vous qui avez fait preuve de tant de courage, en plaçant les bouquets de plumes sur le baldaquin ?",
+      "wordCount": 23,
+      "characterCount": 134,
+      "targets": [
+        {
+          "verbId": 88,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en plaçant",
+          "start": 82,
+          "end": 92,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "2f53bf2dbc73e155062856668a003dea7ab4598573232d9ee455851aed6501d0",
+      "chapter": "XXX Un Ambitieux.",
+      "locator": "Phrase 3327",
+      "text": "Il ouvrit le volet assez pour passer la tête, et en répétant à voix basse : C’est un ami .",
+      "wordCount": 18,
+      "characterCount": 90,
+      "targets": [
+        {
+          "verbId": 189,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en répétant",
+          "start": 49,
+          "end": 60,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "81295d63d34cd9de0a48c578b3c3cc9da22e2f913afc5d85c6efcba4e4916fc3",
+      "chapter": "XXX Un Ambitieux.",
+      "locator": "Phrase 3483",
+      "text": "Fais-les venir dans le jardin, sous la fenêtre, dit Julien, que j’aie le plaisir de les voir, fais-les parler.",
+      "wordCount": 19,
+      "characterCount": 110,
+      "targets": [
+        {
+          "verbId": 4,
+          "tenseId": 10,
+          "personId": 4,
+          "form": "aie",
+          "start": 66,
+          "end": 69,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "1e9d45e64bfa851ce6af2d735066421a076ab91406abe8fdc44a65c5bb8a4db8",
+      "chapter": "XXX Un Ambitieux.",
+      "locator": "Phrase 3540",
+      "text": "Surtout point d’aveux, je le défends, il vaut mieux qu’il ait des soupçons, que des certitudes.",
+      "wordCount": 16,
+      "characterCount": 95,
+      "targets": [
+        {
+          "verbId": 4,
+          "tenseId": 10,
+          "personId": 6,
+          "form": "ait",
+          "start": 58,
+          "end": 61,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "9bf879c396a6feccd4248d30aa0085d733692ac627fa76dec4adec51a84479e7",
+      "chapter": "XXXII Entrée dans le Monde.",
+      "locator": "Phrase 3745",
+      "text": "Vous avez regardé le marquis, comme vous eussiez fait un tableau.",
+      "wordCount": 11,
+      "characterCount": 65,
+      "targets": [
+        {
+          "verbId": 3,
+          "tenseId": 19,
+          "personId": 8,
+          "form": "eussiez fait",
+          "start": 41,
+          "end": 53,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "3dc16c07c0df5299254e96840789fe6d7436973b7cedb18cc32c6feb83f7fbf2",
+      "chapter": "XXXII Entrée dans le Monde.",
+      "locator": "Phrase 3838",
+      "text": "Serait-il possible qu’il sût quelque chose pensait-il !",
+      "wordCount": 7,
+      "characterCount": 55,
+      "targets": [
+        {
+          "verbId": 10,
+          "tenseId": 16,
+          "personId": 6,
+          "form": "sût",
+          "start": 25,
+          "end": 28,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "a66a70a45de599063ec1390c6cb6b94061dce548a2ec2648525ebf19125573fc",
+      "chapter": "XXXIV L’Hôtel de La Mole.",
+      "locator": "Phrase 3903",
+      "text": "Pour que je puisse m’y reconnaître, il faut, se dit Julien, que j’écrive les noms et un mot sur le caractère des personnages que je vois arriver dans ce salon.",
+      "wordCount": 30,
+      "characterCount": 159,
+      "targets": [
+        {
+          "verbId": 5,
+          "tenseId": 10,
+          "personId": 4,
+          "form": "puisse",
+          "start": 12,
+          "end": 18,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        },
+        {
+          "verbId": 48,
+          "tenseId": 10,
+          "personId": 4,
+          "form": "écrive",
+          "start": 66,
+          "end": 72,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "93d9b5a9c2cd2f66e7e27c74671ca8e9bb0ab31ec88599cf898725695a96d06a",
+      "chapter": "XXXIV L’Hôtel de La Mole.",
+      "locator": "Phrase 3969",
+      "text": "Mais est-il vrai qu’il ait trahi ?",
+      "wordCount": 6,
+      "characterCount": 34,
+      "targets": [
+        {
+          "verbId": 275,
+          "tenseId": 11,
+          "personId": 6,
+          "form": "ait trahi",
+          "start": 23,
+          "end": 32,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "6af62616162a73b694ab25c1a47b264fb3344835a48d83da4b5dec7035f85af3",
+      "chapter": "XXXIV L’Hôtel de La Mole.",
+      "locator": "Phrase 4007",
+      "text": "Pourquoi veut-on que je sois aujourd’hui de la même opinion qu’il y a six semaines ?",
+      "wordCount": 15,
+      "characterCount": 84,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 10,
+          "personId": 4,
+          "form": "sois",
+          "start": 24,
+          "end": 28,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "c6e9a7f2076a08a4b927aabe1fa43556715a199face84ef0eb87aafd2e94c989",
+      "chapter": "XXXIV L’Hôtel de La Mole.",
+      "locator": "Phrase 4081",
+      "text": "Par ce côté de son caractère il eût été digne d’être roi.",
+      "wordCount": 12,
+      "characterCount": 57,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 19,
+          "personId": 6,
+          "form": "eût été",
+          "start": 32,
+          "end": 39,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "b61df8d6069dce8a77337c19f040c015f72cb83d98a7f2f0f2de3d5a216f2de3",
+      "chapter": "XXXVIII Quelle est la Décoration qui distingue.",
+      "locator": "Phrase 4417",
+      "text": "Le soir, en arrivant au bal, il fut frappé de la magnificence de l’hôtel de Retz.",
+      "wordCount": 16,
+      "characterCount": 81,
+      "targets": [
+        {
+          "verbId": 191,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en arrivant",
+          "start": 9,
+          "end": 20,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "0a96b92068e55106f251fd66839351dd6beca2e5f384db906812bc181669fdd2",
+      "chapter": "XXXVIII Quelle est la Décoration qui distingue.",
+      "locator": "Phrase 4459",
+      "text": "Je ne saurais être un bon juge, mademoiselle ; je passe ma vie à écrire : c’est le premier bal de cette magnificence que j’aie vu.",
+      "wordCount": 24,
+      "characterCount": 130,
+      "targets": [
+        {
+          "verbId": 19,
+          "tenseId": 11,
+          "personId": 4,
+          "form": "aie vu",
+          "start": 123,
+          "end": 129,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "a68320a2b1a9cd980089965714bb2e4dc01c895ca7c6e1fb9345d2161840280c",
+      "chapter": "XXXVIII Quelle est la Décoration qui distingue.",
+      "locator": "Phrase 4549",
+      "text": "Y a-t-il une raison pour que je m’ennuie moins quand j’aurai changé mon nom pour celui du marquis de Croisenois ?",
+      "wordCount": 20,
+      "characterCount": 113,
+      "targets": [
+        {
+          "verbId": 73,
+          "tenseId": 6,
+          "personId": 4,
+          "form": "aurai changé",
+          "start": 55,
+          "end": 67,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "9eda151ee3faa7f4f8b5efd9a1f9c02e42d21a406443dfe56356a961b688860e",
+      "chapter": "XXXIX Le Bal.",
+      "locator": "Phrase 4676",
+      "text": "Le lendemain, en faisant ses lettres dans la bibliothèque, il ne songeait encore qu’à la conversation du comte Altamira.",
+      "wordCount": 19,
+      "characterCount": 120,
+      "targets": [
+        {
+          "verbId": 3,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en faisant",
+          "start": 14,
+          "end": 24,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "0ac4029257a9fc6936b4eadf5723e67887906a894c669179577514b4774a02d0",
+      "chapter": "XXXIX Le Bal.",
+      "locator": "Phrase 4688",
+      "text": "Mathilde vit avec évidence qu’elle l’avait troublé, et qu’il eût mieux aimé songer à ce qui l’occupait avant son arrivée, que lui parler.",
+      "wordCount": 23,
+      "characterCount": 137,
+      "targets": [
+        {
+          "verbId": 87,
+          "tenseId": 17,
+          "personId": 6,
+          "form": "eût mieux aimé",
+          "start": 61,
+          "end": 75,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "40319f7327177de997c96b3e99251307cca885a136438db0cd5a2dda1ed9abd4",
+      "chapter": "XL La Reine Marguerite.",
+      "locator": "Phrase 4820",
+      "text": "Il rougit beaucoup en parlant de sa pauvreté à une personne aussi riche.",
+      "wordCount": 13,
+      "characterCount": 72,
+      "targets": [
+        {
+          "verbId": 172,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en parlant",
+          "start": 19,
+          "end": 29,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "25bb1bb76ff34561803e71afd63ca4fcb4de01580a383fb02f6c788de8d98592",
+      "chapter": "XLII Serait-ce un Danton ?.",
+      "locator": "Phrase 4984",
+      "text": "Mais, reprit-elle tout à coup, l’œil brillant de joie, l’amertume et la fréquence de leurs plaisanteries prouvent, en dépit d’eux, que c’est l’homme le plus distingué que nous ayons vu cet hiver.",
+      "wordCount": 32,
+      "characterCount": 195,
+      "targets": [
+        {
+          "verbId": 19,
+          "tenseId": 11,
+          "personId": 7,
+          "form": "ayons vu",
+          "start": 176,
+          "end": 184,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "65227a4d65955fafb5b35dba529bd14ae1189aa1f19e6a6113d83a71415b4b2e",
+      "chapter": "XLII Serait-ce un Danton ?.",
+      "locator": "Phrase 5014",
+      "text": "Il faut que vous soyez bien mal pour répondre à des plaisanteries par de la morale.",
+      "wordCount": 16,
+      "characterCount": 83,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 10,
+          "personId": 8,
+          "form": "soyez",
+          "start": 17,
+          "end": 22,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "32526a8339ddea258a9497c2b152a11bbe135a2f112f4f60983d22088e8a6069",
+      "chapter": "XLIII Un Complot.",
+      "locator": "Phrase 5122",
+      "text": "Et elle s’éloigna en courant.",
+      "wordCount": 5,
+      "characterCount": 29,
+      "targets": [
+        {
+          "verbId": 77,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en courant",
+          "start": 18,
+          "end": 28,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "dd0cf4d398566cc5967a266e158e2d6c6fe8060b27cbee6648746624e7ec7cf9",
+      "chapter": "XLIII Un Complot.",
+      "locator": "Phrase 5142",
+      "text": "Je suis bien aise que vous ne partiez pas, lui dit le marquis, quand ils eurent fini de parler d’affaires, j’aime à vous voir .",
+      "wordCount": 24,
+      "characterCount": 127,
+      "targets": [
+        {
+          "verbId": 49,
+          "tenseId": 8,
+          "personId": 9,
+          "form": "eurent fini",
+          "start": 73,
+          "end": 84,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "2cbe4c3504e2cd5679c58d6568552985da74d5ba7e443ff2e42278347ccd8b50",
+      "chapter": "XLIV Pensées d’une jeune Fille.",
+      "locator": "Phrase 5297",
+      "text": "En apercevant mademoiselle de La Mole à trente pas de distance, un homme de goût devinerait le rang qu’elle occupe dans la société.",
+      "wordCount": 23,
+      "characterCount": 131,
+      "targets": [
+        {
+          "verbId": 14,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "En apercevant",
+          "start": 0,
+          "end": 13,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "5b8328d18f6830289457d5c56c148d0b81e8a7489f86e39def3961897cffbd3d",
+      "chapter": "XLV Est-ce un complot ?",
+      "locator": "Phrase 5313",
+      "text": "Ceci devient sérieux, pensa Julien… et un peu trop clair, ajouta-t-il après avoir pensé.",
+      "wordCount": 14,
+      "characterCount": 88,
+      "targets": [
+        {
+          "verbId": 209,
+          "tenseId": 26,
+          "personId": 6,
+          "form": "avoir pensé",
+          "start": 76,
+          "end": 87,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "b8731059e9db0715bf94c28cd4a2141f8408f62758619fc6511cc3a94ce4b5c8",
+      "chapter": "XLVIII Moments cruels.",
+      "locator": "Phrase 5652",
+      "text": "Cette sottise était à peu près la plus grande qu’il pût commettre.",
+      "wordCount": 12,
+      "characterCount": 66,
+      "targets": [
+        {
+          "verbId": 5,
+          "tenseId": 16,
+          "personId": 6,
+          "form": "pût",
+          "start": 52,
+          "end": 55,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "8ca0219b6138be02bc37d2bdb3d9dbf374ff5f117478e8918e6464c6d16f3d69",
+      "chapter": "XLIX L’Opéra Bouffe.",
+      "locator": "Phrase 5692",
+      "text": "En faisant ces réflexions, Mathilde, traçait au hasard des traits de crayon sur une feuille de son album.",
+      "wordCount": 18,
+      "characterCount": 105,
+      "targets": [
+        {
+          "verbId": 3,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "En faisant",
+          "start": 0,
+          "end": 10,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "0587aa6e18512ec67a027b90e5e0de98a192ad7f5ebfd5ff811d6761d8fb0583",
+      "chapter": "XLIX L’Opéra Bouffe.",
+      "locator": "Phrase 5718",
+      "text": "Mais quelque exalté qu’il fût, Julien avait de l’honneur.",
+      "wordCount": 9,
+      "characterCount": 57,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 16,
+          "personId": 6,
+          "form": "fût",
+          "start": 26,
+          "end": 29,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "fc092a1c9c27828f2a9135e16e45662094bcc4deeecc968d5cbee291fdea66f3",
+      "chapter": "L Le Vase du Japon.",
+      "locator": "Phrase 5801",
+      "text": "Il eût été difficile d’être plus séduisante et plus aimable pour eux.",
+      "wordCount": 12,
+      "characterCount": 69,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 19,
+          "personId": 6,
+          "form": "eût été",
+          "start": 3,
+          "end": 10,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "3b53fff8eec4fb31808037a089fc6f4a9bad356c82c08997ddb2ca3e8aa65705",
+      "chapter": "L Le Vase du Japon.",
+      "locator": "Phrase 5846",
+      "text": "Mathilde n’écoutait pas ses paroles, leur son l’irritait, elle ne concevait pas qu’il eût l’audace de l’interrompre.",
+      "wordCount": 17,
+      "characterCount": 116,
+      "targets": [
+        {
+          "verbId": 4,
+          "tenseId": 16,
+          "personId": 6,
+          "form": "eût",
+          "start": 86,
+          "end": 89,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "f2f4e47dc300fcb64dee2cd02294a2f531e7275a8b85b5e3990c9c2907c0c3d2",
+      "chapter": "LI La Note secrète.",
+      "locator": "Phrase 5923",
+      "text": "Il faut ce soir que vous ayez l’air peu soigné.",
+      "wordCount": 10,
+      "characterCount": 47,
+      "targets": [
+        {
+          "verbId": 4,
+          "tenseId": 10,
+          "personId": 8,
+          "form": "ayez",
+          "start": 25,
+          "end": 29,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "098373c08b4e78561367d8de52867af047b8b800a98dfc833c112b7ce1b21070",
+      "chapter": "LIII Le Clergé, les Bois, la Liberté.",
+      "locator": "Phrase 6116",
+      "text": "Il se trompait, toujours comme à l’ordinaire, en supposant trop d’esprit aux gens.",
+      "wordCount": 13,
+      "characterCount": 82,
+      "targets": [
+        {
+          "verbId": 665,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en supposant",
+          "start": 46,
+          "end": 58,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "8c9c3785d69ad0b73b7d7f335ac885d71a27b741dad4cfe98424f0fedaa28f19",
+      "chapter": "LIII Le Clergé, les Bois, la Liberté.",
+      "locator": "Phrase 6132",
+      "text": "Il y paraissait avant d’arriver au ministère ; mais le portefeuille change tout, noie tous les intérêts d’un homme, il eût dû le sentir.",
+      "wordCount": 23,
+      "characterCount": 136,
+      "targets": [
+        {
+          "verbId": 15,
+          "tenseId": 19,
+          "personId": 6,
+          "form": "eût dû",
+          "start": 119,
+          "end": 125,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "0138c383eaca4fb2fb15783bc86b8b62e8c2271d21f2c81f2a85ef6c323386f5",
+      "chapter": "LIII Le Clergé, les Bois, la Liberté.",
+      "locator": "Phrase 6205",
+      "text": "Ne craignez pas qu’il se réveille, monsieur le curé, disait le maître de poste.",
+      "wordCount": 14,
+      "characterCount": 79,
+      "targets": [
+        {
+          "verbId": 400,
+          "tenseId": 10,
+          "personId": 6,
+          "form": "se réveille",
+          "start": 22,
+          "end": 33,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "73e1be447e66e66c2242bec40d17a1b84dc1a202522884e9248173e714d0fef0",
+      "chapter": "LIII Le Clergé, les Bois, la Liberté.",
+      "locator": "Phrase 6238",
+      "text": "Quand il eut fini : Recommencez et allez plus lentement , lui dit-on.",
+      "wordCount": 11,
+      "characterCount": 69,
+      "targets": [
+        {
+          "verbId": 49,
+          "tenseId": 8,
+          "personId": 6,
+          "form": "eut fini",
+          "start": 9,
+          "end": 17,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "5e606aabea4458a99d4ce1d4e4aa303d1b70826727873fab3eaee6250bfd73f5",
+      "chapter": "LV Le Ministère de la Vertu.",
+      "locator": "Phrase 6446",
+      "text": "Il faut, se dit-il, en rentrant à l’hôtel, que je tienne un journal de siège ; autrement j’oublierais mes attaques.",
+      "wordCount": 19,
+      "characterCount": 115,
+      "targets": [
+        {
+          "verbId": 8,
+          "tenseId": 10,
+          "personId": 4,
+          "form": "tienne",
+          "start": 50,
+          "end": 56,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "8acb3649de5b3d82f52ec730524e31a6f50308f69a4e345fcc2eb6c17a20b234",
+      "chapter": "LV Le Ministère de la Vertu.",
+      "locator": "Phrase 6460",
+      "text": "Il eût approuvé la conduite que tint Julien les jours suivants.",
+      "wordCount": 11,
+      "characterCount": 63,
+      "targets": [
+        {
+          "verbId": 415,
+          "tenseId": 19,
+          "personId": 6,
+          "form": "eût approuvé",
+          "start": 3,
+          "end": 15,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "a5fa3a0e5166166fb8e5fd5413dfa8f20171853df564fa128ac73173c91f6b5e",
+      "chapter": "LVIII Manon Lescaut.",
+      "locator": "Phrase 6575",
+      "text": "Et il songea beaucoup à Mme de Rênal, en copiant une lettre immense destinée à la maréchale.",
+      "wordCount": 17,
+      "characterCount": 92,
+      "targets": [
+        {
+          "verbId": 397,
+          "tenseId": 22,
+          "personId": 6,
+          "form": "en copiant",
+          "start": 38,
+          "end": 48,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "ea23bdee97db1e1959625f7bf9bd1d9a2ad9c99a3d25e4f51e0a48e83cb78484",
+      "chapter": "LIX L’Ennui.",
+      "locator": "Phrase 6627",
+      "text": "Un jour, après avoir demandé trois fois s’il y avait des lettres, madame de Fervaques se décida subitement à répondre à Julien.",
+      "wordCount": 22,
+      "characterCount": 127,
+      "targets": [
+        {
+          "verbId": 165,
+          "tenseId": 26,
+          "personId": 6,
+          "form": "avoir demandé",
+          "start": 15,
+          "end": 28,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "48a476001ea7c5a83536c8de218ad6942a495cec92afa8ecb7584a2adddfc368",
+      "chapter": "LXII Le Tigre.",
+      "locator": "Phrase 6893",
+      "text": "De quelque bas degré qu’il parte, j’ai la certitude qu’il s’élèvera.",
+      "wordCount": 11,
+      "characterCount": 68,
+      "targets": [
+        {
+          "verbId": 59,
+          "tenseId": 10,
+          "personId": 6,
+          "form": "parte",
+          "start": 27,
+          "end": 32,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "f0a76871d91273ae9d2472eb8cfd4c36d17d3f0c1c512b1aa209632761812f9d",
+      "chapter": "LXIV Un Homme d’esprit.",
+      "locator": "Phrase 7098",
+      "text": "Qu’il parte pour Strasbourg, et songe à marcher droit.",
+      "wordCount": 9,
+      "characterCount": 54,
+      "targets": [
+        {
+          "verbId": 59,
+          "tenseId": 10,
+          "personId": 6,
+          "form": "parte",
+          "start": 6,
+          "end": 11,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "15e6af3f1503ff5bb25a453724d4c0988e3f0e56131b8c429eb9019acbba47d9",
+      "chapter": "LXV Un Orage.",
+      "locator": "Phrase 7133",
+      "text": "Serait-il bien possible, se disait-il, que je fusse le fils naturel de quelque grand seigneur exilé dans nos montagnes par le terrible Napoléon ?",
+      "wordCount": 23,
+      "characterCount": 145,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 16,
+          "personId": 4,
+          "form": "fusse",
+          "start": 46,
+          "end": 51,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "5a2ac084f80ef848b7ab5f82ae5273ce2205f711b5c31329b6a88f860f7a1be9",
+      "chapter": "LXVI Détails tristes.",
+      "locator": "Phrase 7285",
+      "text": "Il faut que vous ayez un fameux cœur, monsieur Julien, lui dit cet homme.",
+      "wordCount": 14,
+      "characterCount": 73,
+      "targets": [
+        {
+          "verbId": 4,
+          "tenseId": 10,
+          "personId": 8,
+          "form": "ayez",
+          "start": 17,
+          "end": 21,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "c1b6de3422b5c1c6e251a4a1c44e066e3b1e531edbab6aa3a1b1a47275287669",
+      "chapter": "LXIX L’Intrigue.",
+      "locator": "Phrase 7530",
+      "text": "Après avoir séché ses larmes, il revint à sa pensée, mais avec plus d’adresse.",
+      "wordCount": 14,
+      "characterCount": 78,
+      "targets": [
+        {
+          "verbId": 752,
+          "tenseId": 26,
+          "personId": 6,
+          "form": "avoir séché",
+          "start": 6,
+          "end": 17,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "5ae3c4b43edb2ca788d867750b3a05d9f420ce8166995a2b90c5795dab23c264",
+      "chapter": "LXX La Tranquillité.",
+      "locator": "Phrase 7550",
+      "text": "Après tout, se disait Julien, quand il fut parvenu à se délivrer de ces deux êtres, il faut que je sois brave, et apparemment plus brave que ces deux hommes.",
+      "wordCount": 30,
+      "characterCount": 157,
+      "targets": [
+        {
+          "verbId": 735,
+          "tenseId": 8,
+          "personId": 6,
+          "form": "fut parvenu",
+          "start": 39,
+          "end": 50,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        },
+        {
+          "verbId": 1,
+          "tenseId": 10,
+          "personId": 4,
+          "form": "sois",
+          "start": 99,
+          "end": 103,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "a52f41de6b95d2047eae0dedd0595ce8df5c50736ab2c441af5ccbf35b2d90ae",
+      "chapter": "LXXIV",
+      "locator": "Phrase 7901",
+      "text": "Enfin, Mathilde, après avoir essayé de tous les raisonnements pour l’attendrir, le laissa seul, mais presque au même instant Fouqué parut.",
+      "wordCount": 21,
+      "characterCount": 138,
+      "targets": [
+        {
+          "verbId": 157,
+          "tenseId": 26,
+          "personId": 6,
+          "form": "avoir essayé",
+          "start": 23,
+          "end": 35,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "4a6d77af594755d91f1912cf29df7354f8499bed459ea31a04d052487f3a0832",
+      "chapter": "LXXV",
+      "locator": "Phrase 8032",
+      "text": "Autrefois, lui disait Julien, quand j’aurais pu être si heureux pendant nos promenades dans les bois de Vergy, une ambition fougueuse entraînait mon âme dans les pays imaginaires.",
+      "wordCount": 28,
+      "characterCount": 179,
+      "targets": [
+        {
+          "verbId": 5,
+          "tenseId": 15,
+          "personId": 4,
+          "form": "aurais pu",
+          "start": 38,
+          "end": 47,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    }
+  ]
+}

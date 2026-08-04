@@ -76,7 +76,9 @@ export interface GrammaticalPerson {
 }
 
 export type PastSimplePronouns = 'all' | 'third-person-only'
-export type ExerciseKind = 'conjugation' | 'tense-identification'
+export type ExerciseKind = 'conjugation' | 'tense-identification' | 'mode-identification'
+export type IdentificationSource = 'selected-verbs' | 'literary-corpus'
+export type LiteraryRegister = 'all' | 'courant' | 'soutenu'
 export type ComplementPlacement = 'after' | 'mixed' | 'before'
 export type ClassicComplementChoice = 'none' | ComplementPlacement
 export type ComplementOption = 'cod-after' | 'cod-before' | 'coi-after' | 'coi-before'
@@ -90,6 +92,8 @@ export interface ChallengeConfig {
   tenseIds: TenseId[]
   questionCount: number
   exerciseKind: ExerciseKind
+  identificationSource: IdentificationSource
+  literaryRegister?: LiteraryRegister
   pastSimplePronouns: PastSimplePronouns
   inclusivePronouns: boolean
   includeComplements: boolean
@@ -198,6 +202,16 @@ export interface ExerciseQuestion {
     gender?: 'masculin' | 'feminin' | null
     number?: 'singulier' | 'pluriel' | null
   }
+  /** Citation littéraire utilisée pour contextualiser une forme à identifier. */
+  literaryCitation?: {
+    before: string
+    target: string
+    after: string
+    author: string
+    work: string
+    chapter?: string | null
+    sourceUrl: string
+  }
 }
 
 export type ExerciseAttemptStatus = 'correct' | 'incorrect'
@@ -235,6 +249,7 @@ export interface LearnerChallengeSnapshot {
   tenseIds: number[]
   questionCount: number
   exerciseKind: ExerciseKind
+  identificationSource?: IdentificationSource
   pastSimplePronouns?: PastSimplePronouns
   inclusivePronouns?: boolean
   includeComplements?: boolean

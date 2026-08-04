@@ -1,0 +1,1626 @@
+{
+  "source": {
+    "key": "colette-la-maison-de-claudine-1922",
+    "author": "Colette",
+    "title": "La Maison de Claudine",
+    "edition": "Ferenczi et fils, 1922 ; transcription Project Gutenberg no 13703",
+    "sourceUrl": "https://www.gutenberg.org/ebooks/13703",
+    "license": "Domaine public ; transcription Project Gutenberg",
+    "publicDomainBasis": "Colette est décédée en 1954 ; ses œuvres sont entrées dans le domaine public en France et en Suisse le 1er janvier 2025.",
+    "register": "courant",
+    "checksum": "d090e25469266218ecd031786d4334d8d293649bbfca1812764fd8b67d7cfe39"
+  },
+  "sentences": [
+    {
+      "key": "8263094f52faf0677baded4fa4d133b0917ed57f3473898d7430252f8e3007e3",
+      "chapter": "OÙ SONT LES ENFANTS?",
+      "locator": "Phrase 22",
+      "text": "Tous, vous entendez, tous!",
+      "wordCount": 4,
+      "characterCount": 26,
+      "targets": [
+        {
+          "verbId": 57,
+          "tenseId": 1,
+          "personId": 8,
+          "form": "entendez",
+          "start": 11,
+          "end": 19,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "9bd577b1d4e88b0b1255d33146da00019bfaeb2e9dbca856960dc60c129f2c3b",
+      "chapter": "AMOUR",
+      "locator": "Phrase 63",
+      "text": "Laisse donc ta mère tranquille, gronde mon père dans sa barbe.",
+      "wordCount": 11,
+      "characterCount": 62,
+      "targets": [
+        {
+          "verbId": 220,
+          "tenseId": 9,
+          "personId": 5,
+          "form": "Laisse",
+          "start": 0,
+          "end": 6,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "f3bc1b9f0f24c5e3b7ee602134d3967c0b3ad046a613bda82aa217198277f44e",
+      "chapter": "AMOUR",
+      "locator": "Phrase 81",
+      "text": "Il fait frais et triste, sur le perron où j'attends le retour de ma mère.",
+      "wordCount": 15,
+      "characterCount": 73,
+      "targets": [
+        {
+          "verbId": 3,
+          "tenseId": 1,
+          "personId": 6,
+          "form": "fait",
+          "start": 3,
+          "end": 7,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        },
+        {
+          "verbId": 158,
+          "tenseId": 1,
+          "personId": 4,
+          "form": "attends",
+          "start": 44,
+          "end": 51,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "8212e549f6540d2d9eaa5cd59554efe3eada648fa28aa6187b9a3cc808d5569d",
+      "chapter": "LA PETITE",
+      "locator": "Phrase 124",
+      "text": "Moi, je serai marin!",
+      "wordCount": 4,
+      "characterCount": 20,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 3,
+          "personId": 4,
+          "form": "serai",
+          "start": 8,
+          "end": 13,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "45466273024298dfb03e22056a4c44cc9cb0a86cd6cee3b7153539dc2257726b",
+      "chapter": "L'ENLÈVEMENT",
+      "locator": "Phrase 143",
+      "text": "Qu'est-ce que tu veux que je dise?",
+      "wordCount": 7,
+      "characterCount": 34,
+      "targets": [
+        {
+          "verbId": 6,
+          "tenseId": 1,
+          "personId": 5,
+          "form": "veux",
+          "start": 17,
+          "end": 21,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        },
+        {
+          "verbId": 31,
+          "tenseId": 10,
+          "personId": 4,
+          "form": "dise",
+          "start": 29,
+          "end": 33,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "f3cf6757b219470895e239960095e3c3cfdc3d453999e12f2f8d7010eb379763",
+      "chapter": "L'ENLÈVEMENT",
+      "locator": "Phrase 160",
+      "text": "Il fallait bien en venir là.",
+      "wordCount": 6,
+      "characterCount": 28,
+      "targets": [
+        {
+          "verbId": 11,
+          "tenseId": 2,
+          "personId": 6,
+          "form": "fallait",
+          "start": 3,
+          "end": 10,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "5dbe28e9b314b21f19a9125aa1dc4251959cc555d45e03107626e6bd2130cb89",
+      "chapter": "LE CURÉ SUR LE MUR",
+      "locator": "Phrase 188",
+      "text": "Et puis je cédai.",
+      "wordCount": 4,
+      "characterCount": 17,
+      "targets": [
+        {
+          "verbId": 101,
+          "tenseId": 4,
+          "personId": 4,
+          "form": "cédai",
+          "start": 11,
+          "end": 16,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "1a9140d48a2b0b024b356dad78b9cd656b40cd8b422f24855d7c21fe0be973ac",
+      "chapter": "MA MÈRE ET LES LIVRES",
+      "locator": "Phrase 207",
+      "text": "Je lisais et relisais les mêmes.",
+      "wordCount": 6,
+      "characterCount": 32,
+      "targets": [
+        {
+          "verbId": 50,
+          "tenseId": 2,
+          "personId": 4,
+          "form": "lisais",
+          "start": 3,
+          "end": 9,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "4ae15be972a78e041c6877abbde6f27c1abf7cbaed6bc65d82c32c789c18a3a7",
+      "chapter": "MA MÈRE ET LES LIVRES",
+      "locator": "Phrase 222",
+      "text": "Tu as lu cette histoire de fantôme, Minet-Chéri?",
+      "wordCount": 8,
+      "characterCount": 48,
+      "targets": [
+        {
+          "verbId": 50,
+          "tenseId": 5,
+          "personId": 5,
+          "form": "as lu",
+          "start": 3,
+          "end": 8,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "fbc34e1160c23d471dddb85861339f58b46409a12a793d2d12546bf45f58959a",
+      "chapter": "MA MÈRE ET LES LIVRES",
+      "locator": "Phrase 225",
+      "text": "Je voudrais bien en voir un, je t'appellerais.",
+      "wordCount": 8,
+      "characterCount": 46,
+      "targets": [
+        {
+          "verbId": 6,
+          "tenseId": 14,
+          "personId": 4,
+          "form": "voudrais",
+          "start": 3,
+          "end": 11,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "a40818d904d5b8ac046999e3392375b5078f6fff6e9ce6a474c9bc914dcefa5f",
+      "chapter": "MA MÈRE ET LES LIVRES",
+      "locator": "Phrase 232",
+      "text": "Ils sont à court d'inventions, tu comprends, les écrivains, depuis le temps.",
+      "wordCount": 12,
+      "characterCount": 76,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 1,
+          "personId": 9,
+          "form": "sont",
+          "start": 4,
+          "end": 8,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        },
+        {
+          "verbId": 108,
+          "tenseId": 1,
+          "personId": 5,
+          "form": "comprends",
+          "start": 34,
+          "end": 43,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "c4cca475efe04eac3f88b7fcf801ebb50fe8c5c05dcf70439675ecb94948195c",
+      "chapter": "PROPAGANDE",
+      "locator": "Phrase 252",
+      "text": "Quand j'eus huit, neuf, dix ans, mon père songea à la politique.",
+      "wordCount": 12,
+      "characterCount": 64,
+      "targets": [
+        {
+          "verbId": 4,
+          "tenseId": 4,
+          "personId": 4,
+          "form": "eus",
+          "start": 8,
+          "end": 11,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "7ac286821bda5b222f73797db4c73fa4614c5816f1bc5a74d5539d6b31c7dc07",
+      "chapter": "PROPAGANDE",
+      "locator": "Phrase 266",
+      "text": "Je connaissais les bonnes manières.",
+      "wordCount": 5,
+      "characterCount": 35,
+      "targets": [
+        {
+          "verbId": 20,
+          "tenseId": 2,
+          "personId": 4,
+          "form": "connaissais",
+          "start": 3,
+          "end": 14,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "d43f14af218a80eebaa235155ef6cbd5899b11ac4bad435cc511a72b056c6b44",
+      "chapter": "PROPAGANDE",
+      "locator": "Phrase 269",
+      "text": "Tu as renoncé à tes conférences?",
+      "wordCount": 6,
+      "characterCount": 32,
+      "targets": [
+        {
+          "verbId": 702,
+          "tenseId": 5,
+          "personId": 5,
+          "form": "as renoncé",
+          "start": 3,
+          "end": 13,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "fe9b9ab2b5d21728ae00e7b14aa37ac508d6fc6a9d343f0a867ae79328327dee",
+      "chapter": "PAPA ET Mme BRUNEAU",
+      "locator": "Phrase 272",
+      "text": "Minet-Chéri, si tu disais bonsoir gentiment à Mme Bruneau?",
+      "wordCount": 9,
+      "characterCount": 58,
+      "targets": [
+        {
+          "verbId": 31,
+          "tenseId": 2,
+          "personId": 5,
+          "form": "disais",
+          "start": 19,
+          "end": 25,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "c533f9e80899fe6cec62789170c611515e328a2b3159634e9be132d645369bcb",
+      "chapter": "PAPA ET Mme BRUNEAU",
+      "locator": "Phrase 273",
+      "text": "Minet-Chéri, si tu dors, il faut aller te coucher.",
+      "wordCount": 9,
+      "characterCount": 50,
+      "targets": [
+        {
+          "verbId": 56,
+          "tenseId": 1,
+          "personId": 5,
+          "form": "dors",
+          "start": 19,
+          "end": 23,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "99b3322f4a68c430b1747ce8ad13442202baea19baa81cecebc47cb53e97abe9",
+      "chapter": "PAPA ET Mme BRUNEAU",
+      "locator": "Phrase 275",
+      "text": "Je sais, je sais que les enfants de huit ans n'ont jamais sommeil.",
+      "wordCount": 13,
+      "characterCount": 66,
+      "targets": [
+        {
+          "verbId": 10,
+          "tenseId": 1,
+          "personId": 4,
+          "form": "sais",
+          "start": 3,
+          "end": 7,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "8fc00b113c61f7b325988a3c6c475a52ad69f2d72628fbc2447daf97ab62fb12",
+      "chapter": "PAPA ET Mme BRUNEAU",
+      "locator": "Phrase 288",
+      "text": "Madame Bruneau, interrompt la voix émouvante, vous savez que je maintiens ma proposition?",
+      "wordCount": 13,
+      "characterCount": 89,
+      "targets": [
+        {
+          "verbId": 10,
+          "tenseId": 1,
+          "personId": 8,
+          "form": "savez",
+          "start": 51,
+          "end": 56,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        },
+        {
+          "verbId": 667,
+          "tenseId": 1,
+          "personId": 4,
+          "form": "maintiens",
+          "start": 64,
+          "end": 73,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "8bb5534f28a74595e02c91fa3b933f1d5284fdf447af7be9900b14730dc0ac57",
+      "chapter": "MA MÈRE ET LES BÊTES",
+      "locator": "Phrase 300",
+      "text": "Je courus à la grande corbeille débordante de chats indistincts.",
+      "wordCount": 10,
+      "characterCount": 64,
+      "targets": [
+        {
+          "verbId": 77,
+          "tenseId": 4,
+          "personId": 4,
+          "form": "courus",
+          "start": 3,
+          "end": 9,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "c0a862d7428e3895fe8eeaa5c81be1decaee247a20d2ac4ec4f669b7da3932f6",
+      "chapter": "MA MÈRE ET LES BÊTES",
+      "locator": "Phrase 320",
+      "text": "L'araignée est dans sa toile, je suppose.",
+      "wordCount": 7,
+      "characterCount": 41,
+      "targets": [
+        {
+          "verbId": 665,
+          "tenseId": 1,
+          "personId": 4,
+          "form": "suppose",
+          "start": 33,
+          "end": 40,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "121789ae07efb5f3bf8d4d0225bb1dd91e2f4a54e2136e718b2df3e6db1b814d",
+      "chapter": "ÉPITAPHES",
+      "locator": "Phrase 335",
+      "text": "Il était tambour de ville.",
+      "wordCount": 5,
+      "characterCount": 26,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 2,
+          "personId": 6,
+          "form": "était",
+          "start": 3,
+          "end": 8,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "def9ac76c659c364ac7a23280902b5ecdac255ab001b71800cd42ed983b455e7",
+      "chapter": "ÉPITAPHES",
+      "locator": "Phrase 343",
+      "text": "Il avait treize ans, et moi sept.",
+      "wordCount": 7,
+      "characterCount": 33,
+      "targets": [
+        {
+          "verbId": 4,
+          "tenseId": 2,
+          "personId": 6,
+          "form": "avait",
+          "start": 3,
+          "end": 8,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "56609679bf0c8f452f582d20ca4be41a97484661f8f5f0784ac39b16033b9a78",
+      "chapter": "ÉPITAPHES",
+      "locator": "Phrase 368",
+      "text": "Mets la colle forte au bain-marie.",
+      "wordCount": 6,
+      "characterCount": 34,
+      "targets": [
+        {
+          "verbId": 58,
+          "tenseId": 9,
+          "personId": 5,
+          "form": "Mets",
+          "start": 0,
+          "end": 4,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "afcdcc5c9a1552de812b2e3e84554ac2efb2f7f4488209589d7a0d656fabc9c6",
+      "chapter": "LA «FILLE DE MON PÈRE»",
+      "locator": "Phrase 387",
+      "text": "Tu sais qui est la fille de mon père?",
+      "wordCount": 9,
+      "characterCount": 37,
+      "targets": [
+        {
+          "verbId": 10,
+          "tenseId": 1,
+          "personId": 5,
+          "form": "sais",
+          "start": 3,
+          "end": 7,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "ffca377c1718fab31e8d9d045e6f36433b122ca3900550c0f20d25ff6fbc2dd6",
+      "chapter": "LA NOCE",
+      "locator": "Phrase 427",
+      "text": "La jolie noce que j'aurai là!",
+      "wordCount": 6,
+      "characterCount": 29,
+      "targets": [
+        {
+          "verbId": 4,
+          "tenseId": 3,
+          "personId": 4,
+          "form": "aurai",
+          "start": 20,
+          "end": 25,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "d60c318f939709538b1155e941b3cc129e2e51d6a86ee66cdeabcaf1569f890f",
+      "chapter": "LA NOCE",
+      "locator": "Phrase 435",
+      "text": "Maman, j'irai avec Julie David et toutes les Follet.",
+      "wordCount": 9,
+      "characterCount": 52,
+      "targets": [
+        {
+          "verbId": 2,
+          "tenseId": 3,
+          "personId": 4,
+          "form": "irai",
+          "start": 9,
+          "end": 13,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "52f0cb18ff7050f71f22c1d0592bea92e72413cb2fb34752024868295daa1ae8",
+      "chapter": "LA NOCE",
+      "locator": "Phrase 436",
+      "text": "J'ai eu treize ans et demi, dit-elle.",
+      "wordCount": 7,
+      "characterCount": 37,
+      "targets": [
+        {
+          "verbId": 4,
+          "tenseId": 5,
+          "personId": 4,
+          "form": "ai eu",
+          "start": 2,
+          "end": 7,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "ab683212cc7ae9b086d3711b52ad07c8bcf7d8e348bb18f6396c10f1a6343f2f",
+      "chapter": "LA NOCE",
+      "locator": "Phrase 471",
+      "text": "Dis, tu as vu que Nana Bouilloux a un chignon?",
+      "wordCount": 10,
+      "characterCount": 46,
+      "targets": [
+        {
+          "verbId": 31,
+          "tenseId": 9,
+          "personId": 5,
+          "form": "Dis",
+          "start": 0,
+          "end": 3,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        },
+        {
+          "verbId": 19,
+          "tenseId": 5,
+          "personId": 5,
+          "form": "as vu",
+          "start": 8,
+          "end": 13,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "548ee46b2abf49a28cdba1d90d0ab437d254453db2539b629251eb22f669324d",
+      "chapter": "LA NOCE",
+      "locator": "Phrase 474",
+      "text": "Mais qu'est-ce que tu as?",
+      "wordCount": 5,
+      "characterCount": 25,
+      "targets": [
+        {
+          "verbId": 4,
+          "tenseId": 1,
+          "personId": 5,
+          "form": "as",
+          "start": 22,
+          "end": 24,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "3208c116e782505059bb55db9130261d12fee296a2158c31ba73557f117b6fcf",
+      "chapter": "MA SOEUR AUX LONGS CHEVEUX",
+      "locator": "Phrase 513",
+      "text": "Veux-tu que je refasse un peu ton lit?",
+      "wordCount": 8,
+      "characterCount": 38,
+      "targets": [
+        {
+          "verbId": 682,
+          "tenseId": 10,
+          "personId": 4,
+          "form": "refasse",
+          "start": 15,
+          "end": 22,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "d667a64b7b3ceb9f2a2a00828b5eb806ed6129e76c7bd34175e6c61de7fb1a10",
+      "chapter": "MA SOEUR AUX LONGS CHEVEUX",
+      "locator": "Phrase 518",
+      "text": "Vous voyez, je suis venue.",
+      "wordCount": 5,
+      "characterCount": 26,
+      "targets": [
+        {
+          "verbId": 19,
+          "tenseId": 1,
+          "personId": 8,
+          "form": "voyez",
+          "start": 5,
+          "end": 10,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "7af06744deea9902dc4e44469371bae155cc84cf01e5debdb93ba34ec83461dc",
+      "chapter": "MA SOEUR AUX LONGS CHEVEUX",
+      "locator": "Phrase 519",
+      "text": "J'ai mis vos cheveux blonds dans le médaillon ovale.",
+      "wordCount": 9,
+      "characterCount": 52,
+      "targets": [
+        {
+          "verbId": 58,
+          "tenseId": 5,
+          "personId": 4,
+          "form": "ai mis",
+          "start": 2,
+          "end": 8,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "9c6451d2e1ea6d3e70a60a4733c34a3efddc3368e52bf9152fc4f97377c7d3f8",
+      "chapter": "LA PETITE BOUILLOUX",
+      "locator": "Phrase 578",
+      "text": "Tu vas gagner tout de suite?",
+      "wordCount": 6,
+      "characterCount": 28,
+      "targets": [
+        {
+          "verbId": 2,
+          "tenseId": 1,
+          "personId": 5,
+          "form": "vas",
+          "start": 3,
+          "end": 6,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "0d8dc24907d505a26895f358619ab8da38a49f83850fce16f74fef11b3c12746",
+      "chapter": "LA PETITE BOUILLOUX",
+      "locator": "Phrase 607",
+      "text": "Ils échangèrent, à mi-voix, des paroles qu'elle feignait de ne pas entendre.",
+      "wordCount": 12,
+      "characterCount": 76,
+      "targets": [
+        {
+          "verbId": 701,
+          "tenseId": 4,
+          "personId": 9,
+          "form": "échangèrent",
+          "start": 4,
+          "end": 15,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "90700dc23366671465728ffd076dd1edb9bc2e9f82453ceae90211ff4e730ff9",
+      "chapter": "L'AMI",
+      "locator": "Phrase 622",
+      "text": "Moi, je ne dis rien, justement parce que je partageais l'enthousiasme maternel.",
+      "wordCount": 12,
+      "characterCount": 79,
+      "targets": [
+        {
+          "verbId": 203,
+          "tenseId": 2,
+          "personId": 4,
+          "form": "partageais",
+          "start": 44,
+          "end": 54,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "baab3839f9b91a651d36992cf0c193c3204b6606f06fba5e38b2359e51d446eb",
+      "chapter": "L'AMI",
+      "locator": "Phrase 630",
+      "text": "Il cessa de rire et me regarda.",
+      "wordCount": 7,
+      "characterCount": 31,
+      "targets": [
+        {
+          "verbId": 509,
+          "tenseId": 4,
+          "personId": 6,
+          "form": "cessa",
+          "start": 3,
+          "end": 8,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "331bbaba98dae3f7c191f964d1c25124ff75893371d273eb8027319f8461e972",
+      "chapter": "L'AMI",
+      "locator": "Phrase 632",
+      "text": "Mais je suis déjà presque avocat, tu sais!",
+      "wordCount": 8,
+      "characterCount": 42,
+      "targets": [
+        {
+          "verbId": 10,
+          "tenseId": 1,
+          "personId": 5,
+          "form": "sais",
+          "start": 37,
+          "end": 41,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "c268083fa0e677091dcc996aa28060a3e34e2773e345a8c11fb208f875bba9a6",
+      "chapter": "L'AMI",
+      "locator": "Phrase 633",
+      "text": "Et elle, votre fiancée, que fera-t-elle pendant que vous serez avocat?",
+      "wordCount": 11,
+      "characterCount": 70,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 3,
+          "personId": 8,
+          "form": "serez",
+          "start": 57,
+          "end": 62,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "ab2467f5a84e999e5c1818fcb116cbe2bb7d0b7627bc91154049ad1c750393f8",
+      "chapter": "L'AMI",
+      "locator": "Phrase 634",
+      "text": "Que tu es drôle!",
+      "wordCount": 4,
+      "characterCount": 16,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 1,
+          "personId": 5,
+          "form": "es",
+          "start": 7,
+          "end": 9,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "301282d3c877afb1c654d1b104b886846ad445f4ac27382e573caae9377b674c",
+      "chapter": "L'AMI",
+      "locator": "Phrase 637",
+      "text": "Tu te moques de moi?",
+      "wordCount": 5,
+      "characterCount": 20,
+      "targets": [
+        {
+          "verbId": 338,
+          "tenseId": 1,
+          "personId": 5,
+          "form": "te moques",
+          "start": 3,
+          "end": 12,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "68704a88f4cb882bbb980d163b95f5efdbbc83a35e43ba81a9bb2cb0ad7cbd70",
+      "chapter": "L'AMI",
+      "locator": "Phrase 638",
+      "text": "Tu sais très bien comment on vit quand on est marié.",
+      "wordCount": 11,
+      "characterCount": 52,
+      "targets": [
+        {
+          "verbId": 10,
+          "tenseId": 1,
+          "personId": 5,
+          "form": "sais",
+          "start": 3,
+          "end": 7,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "f258e3ee8402a422c1726c3a5f45d8e33e7c97eaf811b5fafba013e8e63dd909",
+      "chapter": "L'AMI",
+      "locator": "Phrase 640",
+      "text": "Mais je sais comment nous vivons depuis un mois et demi.",
+      "wordCount": 11,
+      "characterCount": 56,
+      "targets": [
+        {
+          "verbId": 10,
+          "tenseId": 1,
+          "personId": 4,
+          "form": "sais",
+          "start": 8,
+          "end": 12,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        },
+        {
+          "verbId": 72,
+          "tenseId": 1,
+          "personId": 7,
+          "form": "vivons",
+          "start": 26,
+          "end": 32,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "6160c795cd98f021d9db71f7926ee16b9c3327690c9cff7e75a5d3577c99b425",
+      "chapter": "L'AMI",
+      "locator": "Phrase 642",
+      "text": "Vous êtes bien, ici?",
+      "wordCount": 4,
+      "characterCount": 20,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 1,
+          "personId": 8,
+          "form": "êtes",
+          "start": 5,
+          "end": 9,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "bc5dce9f20864adea102c4566546ce040be0d5c290ff036a0473a721cd5ad9cc",
+      "chapter": "YBANEZ EST MORT",
+      "locator": "Phrase 648",
+      "text": "J'ai oublié son nom.",
+      "wordCount": 4,
+      "characterCount": 20,
+      "targets": [
+        {
+          "verbId": 41,
+          "tenseId": 5,
+          "personId": 4,
+          "form": "ai oublié",
+          "start": 2,
+          "end": 11,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "219426e492e60d4cd92cce444056fce83de4f58f72af9ddd371ef3a648c9a061",
+      "chapter": "YBANEZ EST MORT",
+      "locator": "Phrase 662",
+      "text": "Il marchait vite et gauchement, comme quelqu'un qui se hâte dans l'obscurité.",
+      "wordCount": 12,
+      "characterCount": 77,
+      "targets": [
+        {
+          "verbId": 154,
+          "tenseId": 2,
+          "personId": 6,
+          "form": "marchait",
+          "start": 3,
+          "end": 11,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "83697376c29aa5a339528710dfdc7387ced0cec545239527fc7eadad806df1f6",
+      "chapter": "MA MÈRE ET LE CURÉ",
+      "locator": "Phrase 670",
+      "text": "Ces points d'interrogation, cette manie de l'enquête et de l'inquisition, je trouve ça incroyablement indiscret!",
+      "wordCount": 15,
+      "characterCount": 112,
+      "targets": [
+        {
+          "verbId": 169,
+          "tenseId": 1,
+          "personId": 4,
+          "form": "trouve",
+          "start": 77,
+          "end": 83,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "98d907f40ab2c2c416508580859df8741d2bf9f7d7b3f7af7b7f4b9acdf0b981",
+      "chapter": "MA MÈRE ET LE CURÉ",
+      "locator": "Phrase 676",
+      "text": "Regarde comme je suis rouge!",
+      "wordCount": 5,
+      "characterCount": 28,
+      "targets": [
+        {
+          "verbId": 207,
+          "tenseId": 9,
+          "personId": 5,
+          "form": "Regarde",
+          "start": 0,
+          "end": 7,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "22241e3dafc1226f79ab58d09580c5bbbdae1b060bbe0cc27870bab06e3a9344",
+      "chapter": "MA MÈRE ET LE CURÉ",
+      "locator": "Phrase 694",
+      "text": "Qu'est-ce que vous craignez donc qu'il y apprenne?",
+      "wordCount": 8,
+      "characterCount": 50,
+      "targets": [
+        {
+          "verbId": 22,
+          "tenseId": 1,
+          "personId": 8,
+          "form": "craignez",
+          "start": 19,
+          "end": 27,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "fd9cf44994b0978a5ef6eaf941ec85cfab7239c4e8facd1862bee3c272ad9604",
+      "chapter": "MA MÈRE ET LA MORALE",
+      "locator": "Phrase 731",
+      "text": "Tu vas boire un verre de mon sirop de groseilles.",
+      "wordCount": 10,
+      "characterCount": 49,
+      "targets": [
+        {
+          "verbId": 2,
+          "tenseId": 1,
+          "personId": 5,
+          "form": "vas",
+          "start": 3,
+          "end": 6,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "d87afc7bd3689dfcd7c7f780d92f327a9986bce3e8420f106e25f3a053863108",
+      "chapter": "MA MÈRE ET LA MORALE",
+      "locator": "Phrase 732",
+      "text": "Tu vois, j'attache mes capucines.",
+      "wordCount": 5,
+      "characterCount": 33,
+      "targets": [
+        {
+          "verbId": 19,
+          "tenseId": 1,
+          "personId": 5,
+          "form": "vois",
+          "start": 3,
+          "end": 7,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        },
+        {
+          "verbId": 419,
+          "tenseId": 1,
+          "personId": 4,
+          "form": "attache",
+          "start": 11,
+          "end": 18,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "5268051dd719ed7767b9d93ab798e71e58c1532940a3b70b5c7d1f4daf12075e",
+      "chapter": "MA MÈRE ET LA MORALE",
+      "locator": "Phrase 751",
+      "text": "Qu'est-ce que tu ferais donc, à sa place?",
+      "wordCount": 8,
+      "characterCount": 41,
+      "targets": [
+        {
+          "verbId": 3,
+          "tenseId": 14,
+          "personId": 5,
+          "form": "ferais",
+          "start": 17,
+          "end": 23,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "31799234b3bd91a34593ceb036a7ba2aae853fa5038537b2902a2e727f1549e6",
+      "chapter": "LE RIRE",
+      "locator": "Phrase 767",
+      "text": "Il essaya, et réussit du premier coup.",
+      "wordCount": 7,
+      "characterCount": 38,
+      "targets": [
+        {
+          "verbId": 157,
+          "tenseId": 4,
+          "personId": 6,
+          "form": "essaya",
+          "start": 3,
+          "end": 9,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "57fdfac0b4e410ef5892baa2f250ffc45bcf853918bbe0444431d86b8b536963",
+      "chapter": "MA MÈRE ET LA MALADIE",
+      "locator": "Phrase 822",
+      "text": "«Il est près de midi, n'est-ce pas?",
+      "wordCount": 7,
+      "characterCount": 35,
+      "targets": [
+        {
+          "verbId": 1,
+          "tenseId": 1,
+          "personId": 6,
+          "form": "est",
+          "start": 4,
+          "end": 7,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "aa7e5589f481ebbffe052e0a85c55c1683c324a0b64cc5a3606e38acc296e015",
+      "chapter": "MA MÈRE ET LE FRUIT DÉFENDU",
+      "locator": "Phrase 844",
+      "text": "Je descendais l'escalier et je suis tombée.",
+      "wordCount": 7,
+      "characterCount": 43,
+      "targets": [
+        {
+          "verbId": 109,
+          "tenseId": 2,
+          "personId": 4,
+          "form": "descendais",
+          "start": 3,
+          "end": 13,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "7e15fd83acc5a72a37b8191f9ccd6685995da603cde8953965e04a0c562b6695",
+      "chapter": "LA «MERVEILLE»",
+      "locator": "Phrase 886",
+      "text": "Mais tu as parlé: c'est fini!",
+      "wordCount": 6,
+      "characterCount": 29,
+      "targets": [
+        {
+          "verbId": 172,
+          "tenseId": 5,
+          "personId": 5,
+          "form": "as parlé",
+          "start": 8,
+          "end": 16,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "6b6ce6e45d0c29ba2636897176c3ccaae5159d06a2583137ad1513d7673ab889",
+      "chapter": "LA «MERVEILLE»",
+      "locator": "Phrase 904",
+      "text": "Qu'est-ce que j'entends du côté de la cave?",
+      "wordCount": 8,
+      "characterCount": 43,
+      "targets": [
+        {
+          "verbId": 57,
+          "tenseId": 1,
+          "personId": 4,
+          "form": "entends",
+          "start": 16,
+          "end": 23,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "6133bc7e26a9ea7fe7c3cec5335b0631aa6fecd36c5ccbe4219c1be5926b0d1e",
+      "chapter": "LA «MERVEILLE»",
+      "locator": "Phrase 921",
+      "text": "Ton sac et tes gants sont sur la table, nous allons sortir, n'est-ce pas?",
+      "wordCount": 14,
+      "characterCount": 73,
+      "targets": [
+        {
+          "verbId": 2,
+          "tenseId": 1,
+          "personId": 7,
+          "form": "allons",
+          "start": 45,
+          "end": 51,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "de804145877da942c7ebc0dcce3edb65018dcfa19afbe945a352ac687bb1a2d2",
+      "chapter": "LA «MERVEILLE»",
+      "locator": "Phrase 926",
+      "text": "Mais je sais maintenant ce qui vous manque: vous n'aimez pas les animaux.",
+      "wordCount": 13,
+      "characterCount": 73,
+      "targets": [
+        {
+          "verbId": 10,
+          "tenseId": 1,
+          "personId": 4,
+          "form": "sais",
+          "start": 8,
+          "end": 12,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "22aa57138c45ad1ad2638482b79f15a002fa22e2824e3ebbf70f35098d1092fb",
+      "chapter": "BELLAUDE",
+      "locator": "Phrase 971",
+      "text": "Vous voyez, rien d'extraordinaire.",
+      "wordCount": 4,
+      "characterCount": 34,
+      "targets": [
+        {
+          "verbId": 19,
+          "tenseId": 1,
+          "personId": 8,
+          "form": "voyez",
+          "start": 5,
+          "end": 10,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "9598f499c88a7f11d6eaffcee4b75723c9ba6732b849b355c4dc11384930e290",
+      "chapter": "BELLAUDE",
+      "locator": "Phrase 977",
+      "text": "Au-dessus de ma tête, il étudie ce matin le chant qu'il oublie tous les ans.",
+      "wordCount": 15,
+      "characterCount": 76,
+      "targets": [
+        {
+          "verbId": 186,
+          "tenseId": 1,
+          "personId": 6,
+          "form": "étudie",
+          "start": 25,
+          "end": 31,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        },
+        {
+          "verbId": 41,
+          "tenseId": 10,
+          "personId": 6,
+          "form": "oublie",
+          "start": 56,
+          "end": 62,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "d298b3afa624cbdd105c2384f75052cdd71ef76f4077d1c9a041c2459680e77c",
+      "chapter": "LE VEILLEUR",
+      "locator": "Phrase 1042",
+      "text": "Est-ce qu'à Paris je pourrai avoir un chapeau?",
+      "wordCount": 8,
+      "characterCount": 46,
+      "targets": [
+        {
+          "verbId": 5,
+          "tenseId": 3,
+          "personId": 4,
+          "form": "pourrai",
+          "start": 21,
+          "end": 28,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "7b5527aae3d9737108a2e4df79630eebd690213a070ab2d1c7d494540d6958a3",
+      "chapter": "LE VEILLEUR",
+      "locator": "Phrase 1044",
+      "text": "Qu'est-ce que vous avez donc, les enfants?",
+      "wordCount": 7,
+      "characterCount": 42,
+      "targets": [
+        {
+          "verbId": 4,
+          "tenseId": 1,
+          "personId": 8,
+          "form": "avez",
+          "start": 19,
+          "end": 23,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "bf0aa5ef4abbc08167a0b921d85362c7998aaa233bf1731008536ccd918e2955",
+      "chapter": "LE VEILLEUR",
+      "locator": "Phrase 1061",
+      "text": "Tu as peur des souris, maintenant?",
+      "wordCount": 6,
+      "characterCount": 34,
+      "targets": [
+        {
+          "verbId": 4,
+          "tenseId": 1,
+          "personId": 5,
+          "form": "as",
+          "start": 3,
+          "end": 5,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "0d6098c98655c48a6ecee077a6b08ceccd1be26759167992a8df7c0ce8e4becf",
+      "chapter": "LE VEILLEUR",
+      "locator": "Phrase 1077",
+      "text": "Mes chéris, il va falloir que vous m'aidiez à éclaircir quelque chose.",
+      "wordCount": 12,
+      "characterCount": 70,
+      "targets": [
+        {
+          "verbId": 2,
+          "tenseId": 1,
+          "personId": 6,
+          "form": "va",
+          "start": 15,
+          "end": 17,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "91a4fcd989061694fd6ce4fbef8ebff7da3cfbbb220b5c29d28a54275167ee94",
+      "chapter": "LE VEILLEUR",
+      "locator": "Phrase 1083",
+      "text": "Dites donc, les enfants, vous avez fini?",
+      "wordCount": 7,
+      "characterCount": 40,
+      "targets": [
+        {
+          "verbId": 31,
+          "tenseId": 9,
+          "personId": 8,
+          "form": "Dites",
+          "start": 0,
+          "end": 5,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        },
+        {
+          "verbId": 49,
+          "tenseId": 5,
+          "personId": 8,
+          "form": "avez fini",
+          "start": 30,
+          "end": 39,
+          "isCompound": true,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "6ad3d7afbe7ff813c21bfd7e0b3049f4be1aee3aca89a3f366df47a6bd11a988",
+      "chapter": "LE VEILLEUR",
+      "locator": "Phrase 1084",
+      "text": "Je peux placer un mot?",
+      "wordCount": 5,
+      "characterCount": 22,
+      "targets": [
+        {
+          "verbId": 5,
+          "tenseId": 1,
+          "personId": 4,
+          "form": "peux",
+          "start": 3,
+          "end": 7,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "2b689e82a54a7015997fa0b79f431c8443804703aeed80e2a3e81f8f0c3f024b",
+      "chapter": "LE VEILLEUR",
+      "locator": "Phrase 1085",
+      "text": "Je vais guetter la nuit prochaine.",
+      "wordCount": 6,
+      "characterCount": 34,
+      "targets": [
+        {
+          "verbId": 2,
+          "tenseId": 1,
+          "personId": 4,
+          "form": "vais",
+          "start": 3,
+          "end": 7,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "1ceccded6df52b195e79d8ca00d3ce56fbe7a96c56bfb4f399d814877199c1b6",
+      "chapter": "LE VEILLEUR",
+      "locator": "Phrase 1086",
+      "text": "Bête ou homme, nous saurons qui marche.",
+      "wordCount": 7,
+      "characterCount": 39,
+      "targets": [
+        {
+          "verbId": 10,
+          "tenseId": 3,
+          "personId": 7,
+          "form": "saurons",
+          "start": 20,
+          "end": 27,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "d7364aa0fcf5d9224673353741168435b1babcaceefd7ac27ed6e248278ba864",
+      "chapter": "LE VEILLEUR",
+      "locator": "Phrase 1093",
+      "text": "Il approchait, lent, avec un son sourd, bien martelé, répercuté par les planchers anciens.",
+      "wordCount": 14,
+      "characterCount": 90,
+      "targets": [
+        {
+          "verbId": 481,
+          "tenseId": 2,
+          "personId": 6,
+          "form": "approchait",
+          "start": 3,
+          "end": 13,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "8b89a77bf4ff9f94947398a70c93d8745428a3d8fb6e9769a56615db8fbc1fe9",
+      "chapter": "LE VEILLEUR",
+      "locator": "Phrase 1094",
+      "text": "Il entra, au bout d'un temps qui nous parut interminable, dans le chemin éclairé.",
+      "wordCount": 14,
+      "characterCount": 81,
+      "targets": [
+        {
+          "verbId": 211,
+          "tenseId": 4,
+          "personId": 6,
+          "form": "entra",
+          "start": 3,
+          "end": 8,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "1896ee8bc801311dfc18e5904455acce3aa34b1c911a1ef5faa340e9f4f18728",
+      "chapter": "LE VEILLEUR",
+      "locator": "Phrase 1100",
+      "text": "Il devait être âgé, solitaire et puissant.",
+      "wordCount": 7,
+      "characterCount": 42,
+      "targets": [
+        {
+          "verbId": 15,
+          "tenseId": 2,
+          "personId": 6,
+          "form": "devait",
+          "start": 3,
+          "end": 9,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    },
+    {
+      "key": "a97fc59c2dd26a4022c9d82321be4b14cfa04b976cbb0decd2809f8e5b878511",
+      "chapter": "LE VEILLEUR",
+      "locator": "Phrase 1103",
+      "text": "Il devina sans doute notre présence, car il se tourna vers nous d'un air outragé.",
+      "wordCount": 15,
+      "characterCount": 81,
+      "targets": [
+        {
+          "verbId": 675,
+          "tenseId": 4,
+          "personId": 6,
+          "form": "devina",
+          "start": 3,
+          "end": 9,
+          "isCompound": false,
+          "confidence": "high",
+          "ambiguityReason": null
+        }
+      ]
+    }
+  ]
+}

@@ -2,10 +2,12 @@ import type { RowDataPacket } from 'mysql2/promise'
 import type { ExerciseQuestion } from '~~/shared/types/conjugation'
 import { normalizeLocale } from '~~/shared/i18n/locales'
 import { learnerErrorDetails } from '~~/shared/utils/learner-error-diagnostics'
+import { identificationFormParts } from '~~/shared/utils/identification-form'
 import { requireLearnerDataSubject } from '../../utils/learner-data-subject'
 
 interface RunRow extends RowDataPacket {
   id: number
+  challengeConfigJson: string
 }
 
 interface FormRow extends RowDataPacket {
@@ -24,6 +26,18 @@ function questionFromJson(source: string) {
   }
 }
 
+function exerciseKindFromJson(source: string) {
+  try {
+    const config = JSON.parse(source) as { exerciseKind?: unknown }
+    return config.exerciseKind === 'tense-identification' || config.exerciseKind === 'mode-identification'
+      ? config.exerciseKind
+      : 'conjugation'
+  }
+  catch {
+    return 'conjugation'
+  }
+}
+
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Cache-Control', 'no-store')
   const learner = await requireLearnerDataSubject(event)
@@ -36,12 +50,14 @@ export default defineEventHandler(async (event) => {
 
   const database = useDatabase()
   const [[run]] = await database.execute<RunRow[]>(`
-    SELECT id
+    SELECT id, challenge_config_json AS challengeConfigJson
     FROM learner_challenge_runs
     WHERE id=? AND account_id=? AND last_answered_at IS NOT NULL
     LIMIT 1
   `, [runId, learner.id])
   if (!run) throw createError({ statusCode: 404, statusMessage: 'Séance introuvable' })
+  const exerciseKind = exerciseKindFromJson(run.challengeConfigJson)
+  const isIdentificationExercise = exerciseKind === 'tense-identification' || exerciseKind === 'mode-identification'
 
   const [incorrectRows] = await database.execute<FormRow[]>(`
     SELECT a.question_index AS questionIndex,
@@ -85,7 +101,10 @@ export default defineEventHandler(async (event) => {
     const learnerAnswer = mastered
       ? question.reponses[0] || expectedAnswer
       : row.learnerAnswer || ''
-    const errorDetails = mastered ? [] : learnerErrorDetails(learnerAnswer, question)
+    const errorDetails = mastered || isIdentificationExercise ? [] : learnerErrorDetails(learnerAnswer, question)
+    const identificationForm = !mastered && isIdentificationExercise
+      ? identificationFormParts(question)
+      : null
     return [{
       index: itemIndex + 1,
       status: mastered ? 'correct' as const : 'incorrect' as const,
@@ -103,6 +122,9 @@ export default defineEventHandler(async (event) => {
         : question.reponses,
       errorLabels: errorDetails.map(detail => detail.label),
       errorDetails,
+      identificationForm,
+      literaryCitation: !mastered ? question.literaryCitation : undefined,
+      isIdentification: isIdentificationExercise,
     }]
   })
 

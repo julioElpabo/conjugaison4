@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import LearnerErrorFeedback from '~/components/exercise/LearnerErrorFeedback.vue'
-const { ui, uiLabel } = useLanguagePreferences()
-import type { ExerciseAttempt, ExerciseQuestion, LearnerErrorDetail, LearnerExerciseTrackingContext } from '~~/shared/types/conjugation'
+import { isModeLandingSlug, modeLandingPage } from '~~/shared/data/mode-landing-pages'
+import { modeTensePedagogy } from '~~/shared/data/mode-tense-pedagogy'
+import type { ConjugationTense, ExerciseAttempt, ExerciseKind, ExerciseQuestion, LearnerErrorDetail, LearnerExerciseTrackingContext } from '~~/shared/types/conjugation'
+import { grammarTenseCode } from '~~/shared/utils/grammar-codes'
 import {
   findConjugationConfusions,
   findImpossibleSingularEnding,
@@ -11,14 +13,18 @@ import {
 } from '~~/shared/utils/answer'
 import { diagnoseCoachAgreement, diagnoseCoachAnswer } from '~~/shared/utils/coach-feedback'
 import { evaluateExerciseAnswer } from '~~/shared/utils/exercise-attempt'
+import { identificationFormParts } from '~~/shared/utils/identification-form'
 import {
   learnerErrorDetails,
   mergeLearnerErrorDetails,
 } from '~~/shared/utils/learner-error-diagnostics'
 
+const { interfaceLocale, ui, uiLabel } = useLanguagePreferences()
+
 const props = defineProps<{
   questions: ExerciseQuestion[]
-  exerciseKind: 'conjugation' | 'tense-identification'
+  exerciseKind: ExerciseKind
+  identificationTenses?: ConjugationTense[]
   trackingContext?: LearnerExerciseTrackingContext
   requireSuccess?: boolean
   analyticsMetadata?: Record<string, string | number | boolean>
@@ -32,6 +38,9 @@ const emit = defineEmits<{
 
 const currentIndex = ref(0)
 const answer = ref('')
+const selectedIdentificationMode = ref('')
+const lastIncorrectIdentificationAnswer = ref('')
+const isSmallScreen = ref(false)
 const feedback = ref<'idle' | 'correct' | 'incorrect'>('idle')
 const retryAlreadyOffered = ref(false)
 const retryMessageVisible = ref(false)
@@ -59,6 +68,56 @@ const exerciseAnalyticsMetadata = computed(() => ({
 useDialogFocus(dialog, handleEscapeClose, answerInput)
 
 const currentQuestion = computed(() => props.questions[currentIndex.value])
+const isModeIdentificationExercise = computed(() => props.exerciseKind === 'mode-identification')
+const isTenseIdentificationExercise = computed(() => props.exerciseKind === 'tense-identification')
+const isIdentificationExercise = computed(() => isModeIdentificationExercise.value || isTenseIdentificationExercise.value)
+const currentIdentificationFormParts = computed(() => currentQuestion.value && isIdentificationExercise.value
+  ? identificationFormParts(currentQuestion.value)
+  : null)
+const fixedModeChoices = computed(() => [
+  { value: 'indicatif', label: ui('Indicatif') },
+  { value: 'impératif', label: ui('Impératif') },
+  { value: 'subjonctif', label: ui('Subjonctif') },
+  { value: 'conditionnel', label: ui('Conditionnel') },
+  { value: 'infinitif', label: ui('Infinitif') },
+])
+const displayedModeChoices = computed(() => fixedModeChoices.value)
+interface ClassicTenseChoice {
+  name: string
+  label: string
+  isCompound: boolean
+}
+const selectedModeTenseChoices = computed(() => {
+  const tenses = new Map<string, ClassicTenseChoice>()
+  const sources = props.identificationTenses?.length
+    ? props.identificationTenses.map(tense => ({ id: tense.id, mode: tense.mode?.name, tense: tense.name, isCompound: tense.isCompound, selected: tense.selected }))
+    : props.questions.map(question => ({ id: question.tenseId, mode: question.mode, tense: question.temps, isCompound: Boolean(question.isCompound), selected: true }))
+  for (const source of sources) {
+    if (normalizedGrammarChoice(source.mode) !== normalizedGrammarChoice(selectedIdentificationMode.value)) continue
+    const name = source.tense?.trim()
+    if (!name) continue
+    const key = normalizedGrammarChoice(name)
+    if (key === 'futur proche') continue
+    if (!tenses.has(key)) tenses.set(key, {
+      name,
+      label: uiLabel(name),
+      isCompound: source.isCompound,
+    })
+  }
+  return [...tenses.values()].sort((left, right) => left.label.localeCompare(right.label, 'fr'))
+})
+const selectedModeTenseRows = computed(() => pairClassicTenseChoices(
+  selectedIdentificationMode.value,
+  selectedModeTenseChoices.value,
+))
+
+const answerPlaceholder = computed(() => isIdentificationExercise.value && isSmallScreen.value
+  ? ui('Écris ta réponse')
+  : isModeIdentificationExercise.value
+    ? ui('Écris ta réponse ou clique directement sur le mode correct')
+    : isTenseIdentificationExercise.value
+      ? ui('Écris ta réponse ou clique directement sur le mode puis sur le temps correct')
+      : '')
 const questionNumberOffset = computed(() => props.trackingContext?.questionIndexOffset || 0)
 const displayedQuestionNumber = computed(() => questionNumberOffset.value + currentIndex.value + 1)
 const displayedQuestionCount = computed(() => questionNumberOffset.value
@@ -136,7 +195,55 @@ const auxiliaryErrorText = computed(() => {
     },
   )
 })
+const identificationChoiceHelpMessages = computed(() => {
+  const question = currentQuestion.value
+  const submittedAnswer = normalizedGrammarChoice(lastIncorrectIdentificationAnswer.value)
+  if (!isIdentificationExercise.value || !question || !submittedAnswer) return []
+
+  const selectedMode = displayedModeChoices.value.find(choice => submittedAnswer.includes(normalizedGrammarChoice(choice.value)))?.value || ''
+  if (!selectedMode) return []
+
+  const messages: string[] = []
+  const selectedModeSlug = normalizedGrammarChoice(selectedMode)
+  if (normalizedGrammarChoice(selectedMode) !== normalizedGrammarChoice(question.mode) && isModeLandingSlug(selectedModeSlug)) {
+    const modeHelp = modeLandingPage(selectedModeSlug, interfaceLocale.value)
+    messages.push(`${uiLabel(selectedMode)} : ${modeHelp.purpose}`)
+  }
+
+  if (!isTenseIdentificationExercise.value) return messages
+  const tenseSources = props.identificationTenses?.length
+    ? props.identificationTenses.map(tense => ({ mode: tense.mode?.name, name: tense.name }))
+    : props.questions.map(item => ({ mode: item.mode, name: item.temps }))
+  const selectedTense = tenseSources
+    .filter(tense => normalizedGrammarChoice(tense.mode) === selectedModeSlug && tense.name)
+    .sort((left, right) => normalizedGrammarChoice(right.name).length - normalizedGrammarChoice(left.name).length)
+    .find(tense => submittedAnswer.includes(normalizedGrammarChoice(tense.name)))?.name || ''
+  if (!selectedTense || grammarTenseCode(selectedTense) === grammarTenseCode(question.temps)) return messages
+
+  const tenseSlugByCode = {
+    present: 'present',
+    'near-future': 'futur-proche',
+    imperfect: 'imparfait',
+    future: 'futur-simple',
+    'simple-past': 'passe-simple',
+    'compound-past': 'passe-compose',
+    'future-perfect': 'futur-anterieur',
+    pluperfect: 'plus-que-parfait',
+    'past-anterior': 'passe-anterieur',
+    past: 'passe',
+    'past-first-form': 'passe-premiere-forme',
+    'past-second-form': 'passe-deuxieme-forme',
+  } as const
+  const tenseCode = grammarTenseCode(selectedTense)
+  const tenseSlug = tenseCode ? tenseSlugByCode[tenseCode] : undefined
+  const tenseHelp = isModeLandingSlug(selectedModeSlug) && tenseSlug
+    ? modeTensePedagogy(selectedModeSlug, tenseSlug)
+    : undefined
+  if (tenseHelp) messages.push(`${uiLabel(selectedTense)} — ${uiLabel(selectedMode)} : ${tenseHelp.summary}`)
+  return messages
+})
 const retryGuidanceMessages = computed(() => {
+  if (isIdentificationExercise.value) return identificationChoiceHelpMessages.value
   const messages: string[] = []
   if (futureSimpleConfusion.value) {
     messages.push(ui('Ta conjugaison est correcte au futur simple, mais la question demande le futur proche. Au futur simple, le verbe est conjugué en un seul mot (« tu mangeras »). Au futur proche, on utilise « aller » au présent suivi de l’infinitif (« tu vas manger »).'))
@@ -170,6 +277,11 @@ const summaryItems = computed(() => attempts.value.map((attempt, index) => ({
   errorLabels: attempt.errorLabels || [],
   errorDetails: attempt.errorDetails || [],
 })))
+const incorrectSummaryForms = computed(() => attempts.value.map(attempt => (
+  isIdentificationExercise.value && attempt.status === 'incorrect'
+    ? identificationFormParts(attempt.question)
+    : null
+)))
 const summaryVerbs = computed(() => [...new Set(props.questions.flatMap(question => (
   question.infinitif ? [question.infinitif] : []
 )))])
@@ -187,6 +299,68 @@ function mergeErrorLabels(...groups: string[][]) {
   return [...new Set(groups.flat())]
 }
 
+function normalizedGrammarChoice(value?: string | null) {
+  return (value || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLocaleLowerCase('fr')
+}
+
+function pairClassicTenseChoices(mode: string, choices: ClassicTenseChoice[]) {
+  const normalizedMode = normalizedGrammarChoice(mode)
+  const pairsByMode: Record<string, Array<[string | null, string | null]>> = {
+    indicatif: [
+      ['present', 'passe compose'],
+      ['imparfait', 'plus-que-parfait'],
+      ['passe simple', 'passe anterieur'],
+      ['futur', 'futur anterieur'],
+    ],
+    imperatif: [['present', 'passe']],
+    subjonctif: [
+      ['present', 'passe'],
+      ['imparfait', 'plus-que-parfait'],
+    ],
+    conditionnel: [
+      ['present', 'passe 1'],
+      [null, 'passe 2'],
+    ],
+  }
+  const byName = new Map(choices.map(choice => [normalizedGrammarChoice(choice.name), choice]))
+  const used = new Set<string>()
+  const rows: Array<{ key: string, simple: ClassicTenseChoice | null, compound: ClassicTenseChoice | null }> = []
+  for (const [simpleName, compoundName] of pairsByMode[normalizedMode] || []) {
+    const simple = simpleName ? byName.get(simpleName) || null : null
+    const compound = compoundName ? byName.get(compoundName) || null : null
+    if (!simple && !compound) continue
+    if (simpleName && simple) used.add(simpleName)
+    if (compoundName && compound) used.add(compoundName)
+    rows.push({ key: `${simpleName || 'empty'}:${compoundName || 'empty'}`, simple, compound })
+  }
+  for (const choice of choices) {
+    const key = normalizedGrammarChoice(choice.name)
+    if (used.has(key)) continue
+    rows.push({
+      key,
+      simple: choice.isCompound ? null : choice,
+      compound: choice.isCompound ? choice : null,
+    })
+  }
+  return rows
+}
+
+function chooseIdentificationMode(mode: string) {
+  if (!isIdentificationExercise.value || feedback.value !== 'idle') return
+  if (isModeIdentificationExercise.value) {
+    answer.value = mode
+    submitAnswer()
+    return
+  }
+  selectedIdentificationMode.value = mode
+}
+
+function submitIdentificationTense(tense: { name: string }) {
+  if (!isTenseIdentificationExercise.value || !selectedIdentificationMode.value || feedback.value !== 'idle') return
+  answer.value = `${tense.name} ${selectedIdentificationMode.value}`
+  submitAnswer()
+}
+
 function submitAnswer() {
   const question = currentQuestion.value
   if (!question || feedback.value !== 'idle' || !answer.value.trim()) {
@@ -198,17 +372,18 @@ function submitAnswer() {
     question.reponses,
     retryAlreadyOffered.value,
   )
-  const usedFutureSimple = !result.isCorrect && isFutureSimpleInsteadOfNearFuture(answer.value, question)
-  const otherConjugations = result.isCorrect ? [] : findConjugationConfusions(answer.value, question)
-  const impossibleEnding = result.isCorrect ? null : findImpossibleSingularEnding(answer.value, question)
-  const hasAgreementError = !result.isCorrect && Boolean(diagnoseCoachAgreement(answer.value, question))
-  const diagnostic = diagnoseCoachAnswer(answer.value, question, result.isCorrect)
-  const detectedAuxiliaryError = diagnostic.errorKind === 'auxiliary'
+  lastIncorrectIdentificationAnswer.value = isIdentificationExercise.value && !result.isCorrect ? answer.value : ''
+  const usedFutureSimple = !isIdentificationExercise.value && !result.isCorrect && isFutureSimpleInsteadOfNearFuture(answer.value, question)
+  const otherConjugations = isIdentificationExercise.value || result.isCorrect ? [] : findConjugationConfusions(answer.value, question)
+  const impossibleEnding = isIdentificationExercise.value || result.isCorrect ? null : findImpossibleSingularEnding(answer.value, question)
+  const hasAgreementError = !isIdentificationExercise.value && !result.isCorrect && Boolean(diagnoseCoachAgreement(answer.value, question))
+  const diagnostic = isIdentificationExercise.value ? null : diagnoseCoachAnswer(answer.value, question, result.isCorrect)
+  const detectedAuxiliaryError = diagnostic?.errorKind === 'auxiliary'
     && diagnostic.learnerAuxiliary
     && diagnostic.expectedAuxiliary
     ? { learner: diagnostic.learnerAuxiliary, expected: diagnostic.expectedAuxiliary }
     : undefined
-  const currentErrorDetails = result.isCorrect ? [] : learnerErrorDetails(answer.value, question)
+  const currentErrorDetails = result.isCorrect || isIdentificationExercise.value ? [] : learnerErrorDetails(answer.value, question)
   const currentErrorLabels = currentErrorDetails.map(detail => detail.label)
   const attemptErrorLabels = mergeErrorLabels(pendingErrorLabels.value, currentErrorLabels)
   const attemptErrorDetails = mergeLearnerErrorDetails(pendingErrorDetails.value, currentErrorDetails)
@@ -268,6 +443,8 @@ function showTourProgress() {
   if (props.questions.length < 6) return
   currentIndex.value = 5
   answer.value = ''
+  selectedIdentificationMode.value = ''
+  lastIncorrectIdentificationAnswer.value = ''
   feedback.value = 'idle'
   retryAlreadyOffered.value = false
   retryMessageVisible.value = false
@@ -320,6 +497,8 @@ function nextQuestion() {
 
   currentIndex.value += 1
   answer.value = ''
+  selectedIdentificationMode.value = ''
+  lastIncorrectIdentificationAnswer.value = ''
   feedback.value = 'idle'
   retryAlreadyOffered.value = false
   retryMessageVisible.value = false
@@ -337,6 +516,8 @@ function nextQuestion() {
 function restart() {
   currentIndex.value = 0
   answer.value = ''
+  selectedIdentificationMode.value = ''
+  lastIncorrectIdentificationAnswer.value = ''
   feedback.value = 'idle'
   retryAlreadyOffered.value = false
   retryMessageVisible.value = false
@@ -390,11 +571,20 @@ function onDocumentKeydown(event: KeyboardEvent) {
   nextQuestion()
 }
 
+let smallScreenQuery: MediaQueryList | null = null
+function updateSmallScreen(event: MediaQueryList | MediaQueryListEvent) {
+  isSmallScreen.value = event.matches
+}
+
 onMounted(() => {
+  smallScreenQuery = window.matchMedia('(max-width: 760px)')
+  updateSmallScreen(smallScreenQuery)
+  smallScreenQuery.addEventListener('change', updateSmallScreen)
   document.addEventListener('keydown', onDocumentKeydown)
   void recordQuestionPlan(props.trackingContext, props.questions)
 })
 onBeforeUnmount(() => {
+  smallScreenQuery?.removeEventListener('change', updateSmallScreen)
   document.removeEventListener('keydown', onDocumentKeydown)
   if (!isFinished.value && attempts.value.length) track('exercise_abandoned', exerciseAnalyticsMetadata.value)
 })
@@ -436,7 +626,7 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="!isFinished && currentQuestion" class="exercise-question">
-          <p v-if="exerciseKind === 'tense-identification'" class="question-instruction">
+          <p v-if="exerciseKind === 'tense-identification' || exerciseKind === 'mode-identification'" class="question-instruction">
             {{ uiLabel(currentQuestion.instruction) }}
           </p>
           <template v-if="exerciseKind === 'conjugation' && currentQuestion.complement">
@@ -501,7 +691,57 @@ onBeforeUnmount(() => {
             />
           </template>
 
+          <div v-else-if="currentIdentificationFormParts" class="literary-question">
+            <p class="question-text">
+              <span>{{ currentIdentificationFormParts.before }}</span><mark>{{ currentIdentificationFormParts.target }}</mark><span>{{ currentIdentificationFormParts.after }}</span>
+            </p>
+            <small v-if="currentQuestion.literaryCitation">
+              {{ currentQuestion.literaryCitation.author }}, <cite>{{ currentQuestion.literaryCitation.work }}</cite>
+            </small>
+          </div>
           <p v-else class="question-text">{{ currentQuestion.consigne }}</p>
+
+          <div v-if="isIdentificationExercise" class="classic-identification-choices">
+            <div v-if="isTenseIdentificationExercise && selectedIdentificationMode" class="classic-tense-choice-step">
+              <div class="classic-tense-choice-step__header">
+                <button type="button" :disabled="feedback !== 'idle'" @click="selectedIdentificationMode = ''">← {{ ui('Modes') }}</button>
+                <strong>{{ ui('Choisis le temps') }}</strong>
+              </div>
+              <div class="classic-tense-choices" role="group" :aria-label="ui('Choisis le temps')">
+                <div v-for="row in selectedModeTenseRows" :key="row.key" class="classic-tense-choice-row">
+                  <button
+                    v-if="row.simple"
+                    type="button"
+                    :disabled="feedback !== 'idle'"
+                    @click="submitIdentificationTense(row.simple)"
+                  >
+                    {{ row.simple.label }}
+                  </button>
+                  <span v-else aria-hidden="true" />
+                  <button
+                    v-if="row.compound"
+                    type="button"
+                    :disabled="feedback !== 'idle'"
+                    @click="submitIdentificationTense(row.compound)"
+                  >
+                    {{ row.compound.label }}
+                  </button>
+                  <span v-else aria-hidden="true" />
+                </div>
+              </div>
+            </div>
+            <div v-else class="classic-mode-choices" role="group" :aria-label="ui('Choisis le mode')">
+              <button
+                v-for="choice in displayedModeChoices"
+                :key="choice.value"
+                type="button"
+                :disabled="feedback !== 'idle'"
+                @click="chooseIdentificationMode(choice.value)"
+              >
+                {{ choice.label }}
+              </button>
+            </div>
+          </div>
 
           <form
             v-if="!(exerciseKind === 'conjugation' && currentQuestion.complement)"
@@ -517,6 +757,7 @@ onBeforeUnmount(() => {
                 v-model="answer"
                 type="text"
                 autocomplete="off"
+                :placeholder="answerPlaceholder"
                 :disabled="feedback !== 'idle'"
                 :class="{
                   'is-valid': feedback === 'correct',
@@ -622,7 +863,15 @@ onBeforeUnmount(() => {
               <tbody>
                 <tr v-for="(attempt, index) in attempts" :key="index">
                   <td>
-                    <span>{{ attempt.question.consigne }}</span>
+                    <blockquote v-if="incorrectSummaryForms[index]" class="result-identification-citation">
+                      <p>
+                        <span>{{ incorrectSummaryForms[index]?.before }}</span><mark>{{ incorrectSummaryForms[index]?.target }}</mark><span>{{ incorrectSummaryForms[index]?.after }}</span>
+                      </p>
+                      <footer v-if="attempt.question.literaryCitation">
+                        {{ attempt.question.literaryCitation.author }}, <cite>{{ attempt.question.literaryCitation.work }}</cite>
+                      </footer>
+                    </blockquote>
+                    <span v-else>{{ attempt.question.consigne }}</span>
                     <LearnerErrorFeedback
                       v-if="attempt.errorDetails?.length"
                       :details="attempt.errorDetails"

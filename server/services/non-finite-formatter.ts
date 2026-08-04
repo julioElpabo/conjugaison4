@@ -6,6 +6,7 @@ export interface NonFiniteVerbSource {
   infinitif: string
   participe_present: string
   participe_passe: string
+  auxiliaire_infinitif?: string | null
   auxiliaire_participe_present: string | null
   present_nous?: string | null
 }
@@ -59,6 +60,15 @@ export function formatNonFiniteQuestion(
     label = 'Le gérondif passé'
     answers = variants(verb.participe_passe)
       .map(form => `En ${verb.auxiliaire_participe_present} ${form}`)
+  } else if (mode === 'infinitif' && tenseName === 'présent') {
+    label = 'L’infinitif présent'
+    answers = [upperFirst(verb.infinitif)]
+  } else if (mode === 'infinitif' && tenseName === 'passé' && verb.auxiliaire_infinitif) {
+    label = 'L’infinitif passé'
+    const auxiliary = /^s[’']|^se\s/u.test(normalized(verb.infinitif))
+      ? "s’être"
+      : normalized(verb.auxiliaire_infinitif)
+    answers = variants(verb.participe_passe).map(form => upperFirst(`${auxiliary} ${form}`))
   } else {
     return null
   }

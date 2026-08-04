@@ -1,10 +1,12 @@
 <script setup lang="ts">
 const { ui } = useLanguagePreferences()
-import type { ComplementOption, ExerciseKind, Verb } from '~/composables/useChallengeBuilder'
+import type { ExerciseQuestion } from '~~/shared/types/conjugation'
+import type { ComplementOption, ExerciseKind, IdentificationSource, Verb } from '~/composables/useChallengeBuilder'
 
 const props = defineProps<{
   questionCount: number
   exerciseKind: ExerciseKind
+  identificationSource: IdentificationSource
   inclusivePronouns: boolean
   complementOptions: ComplementOption[]
   complementVerbs?: Verb[]
@@ -18,6 +20,7 @@ const props = defineProps<{
   conjugationExamplePrefix?: string
   conjugationExampleEmphasis?: string
   conjugationExampleSuffix?: string
+  conjugationLiteraryCitation?: ExerciseQuestion['literaryCitation']
   conjugationExampleLoading?: boolean
   revealPrefilledOptions?: boolean
 }>()
@@ -25,6 +28,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   updateQuestionCount: [value: number]
   updateExerciseKind: [value: ExerciseKind]
+  updateIdentificationSource: [value: IdentificationSource]
   updateInclusivePronouns: [value: boolean]
   updateComplementOptions: [value: ComplementOption[]]
   prefilledOptionsRevealStart: []
@@ -43,6 +47,7 @@ const idPrefix = computed(() => props.idPrefix ?? 'challenge-options')
 const optionsTitleId = computed(() => `${idPrefix.value}-title`)
 const questionCountId = computed(() => `${idPrefix.value}-question-count`)
 const exerciseKindName = computed(() => `${idPrefix.value}-exercise-kind`)
+const identificationSourceName = computed(() => `${idPrefix.value}-identification-source`)
 const complementPanelId = computed(() => `${idPrefix.value}-complement-panel`)
 const hasConjugationExample = computed(() => Boolean(
   (props.conjugationInstruction || props.conjugationQuestionContext || props.conjugationQuestion)
@@ -57,7 +62,9 @@ const exampleRevealTimers: ReturnType<typeof setTimeout>[] = []
 const displayedQuestionCount = ref(props.questionCount)
 const displayedComplementOptions = ref<ComplementOption[]>([...props.complementOptions])
 const prefilledRevealRunning = ref(false)
+const identificationSourceFieldset = ref<HTMLElement | null>(null)
 let questionCountAnimationFrame: number | undefined
+let identificationScrollFrame: number | undefined
 const prefilledRevealTimers: ReturnType<typeof setTimeout>[] = []
 
 function clearPrefilledRevealTimers() {
@@ -146,6 +153,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   clearExampleRevealTimers()
   clearPrefilledRevealTimers()
+  if (identificationScrollFrame !== undefined) cancelAnimationFrame(identificationScrollFrame)
 })
 
 function onQuestionCountChange(event: Event) {
@@ -157,8 +165,21 @@ function onQuestionCountChange(event: Event) {
   emit('updateQuestionCount', Math.min(99, Math.max(1, Math.round(value))))
 }
 
-function onExerciseKindChange(event: Event) {
-  emit('updateExerciseKind', (event.target as HTMLInputElement).value as ExerciseKind)
+async function onExerciseKindChange(event: Event) {
+  const exerciseKind = (event.target as HTMLInputElement).value as ExerciseKind
+  emit('updateExerciseKind', exerciseKind)
+
+  if (!props.gridLayout || exerciseKind !== 'tense-identification' || !import.meta.client) return
+
+  await nextTick()
+  if (identificationScrollFrame !== undefined) cancelAnimationFrame(identificationScrollFrame)
+  identificationScrollFrame = requestAnimationFrame(() => {
+    identificationSourceFieldset.value?.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'center',
+    })
+    identificationScrollFrame = undefined
+  })
 }
 
 function toggleComplementOption(option: ComplementOption, checked: boolean) {
@@ -239,6 +260,42 @@ watch(complementsAvailable, (available) => {
                 @change="onExerciseKindChange"
               >
               <span>{{ ui('Trouver le mode et le temps') }}</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset
+          v-if="exerciseKind === 'tense-identification'"
+          ref="identificationSourceFieldset"
+          class="option-fieldset identification-source-fieldset"
+        >
+          <legend class="sr-only">Choix des verbes</legend>
+          <div class="segmented-control segmented-control--stacked">
+            <label>
+              <input
+                type="radio"
+                :name="identificationSourceName"
+                value="selected-verbs"
+                :checked="identificationSource === 'selected-verbs'"
+                @change="emit('updateIdentificationSource', 'selected-verbs')"
+              >
+              <span>
+                <strong>Avec mes verbes</strong>
+                <small>Formes conjuguées simples, sans citation.</small>
+              </span>
+            </label>
+            <label>
+              <input
+                type="radio"
+                :name="identificationSourceName"
+                value="literary-corpus"
+                :checked="identificationSource === 'literary-corpus'"
+                @change="emit('updateIdentificationSource', 'literary-corpus')"
+              >
+              <span>
+                <strong>Avec n’importe quel verbe</strong>
+                <small>Construits avec des phrases littéraires</small>
+              </span>
             </label>
           </div>
         </fieldset>
@@ -328,11 +385,18 @@ watch(complementsAvailable, (available) => {
           <Transition name="example-item">
             <div v-if="exampleRevealStage >= 1" class="conjugation-example__question">
               <span class="conjugation-example__block-label">{{ ui('Exemple de question') }}</span>
-              <p v-if="exerciseKind === 'tense-identification' && conjugationInstruction && conjugationQuestion" class="conjugation-example__question-line">
-                <span class="conjugation-example__context">{{ conjugationInstruction }}</span>
-                <span class="conjugation-example__question-separator" aria-hidden="true">—</span>
-                <span class="conjugation-example__prompt">{{ identificationQuestion }}</span>
-              </p>
+              <template v-if="exerciseKind === 'tense-identification' && conjugationInstruction && conjugationQuestion">
+                <p class="conjugation-example__instruction">{{ conjugationInstruction }}</p>
+                <blockquote v-if="conjugationLiteraryCitation" class="conjugation-example__citation">
+                  <p><span>{{ conjugationLiteraryCitation.before }}</span><mark>{{ conjugationLiteraryCitation.target }}</mark><span>{{ conjugationLiteraryCitation.after }}</span></p>
+                  <footer>
+                    {{ conjugationLiteraryCitation.author }}, <cite>{{ conjugationLiteraryCitation.work }}</cite>
+                  </footer>
+                </blockquote>
+                <p v-else class="conjugation-example__question-line">
+                  <span class="conjugation-example__prompt">{{ identificationQuestion }}</span>
+                </p>
+              </template>
               <template v-else>
                 <p v-if="conjugationInstruction" class="conjugation-example__instruction">{{ conjugationInstruction }}</p>
                 <p v-if="conjugationQuestionContext" class="conjugation-example__question-line">
@@ -370,6 +434,13 @@ watch(complementsAvailable, (available) => {
 .options-main-column > * { margin: 0; }
 .options-main-column > .check-row { padding: 15px 4px; }
 .options-main-column > .option-fieldset { padding: 14px 0 0; }
+.segmented-control--stacked { padding: 7px; grid-template-columns: 1fr; gap: 9px; background: #e7efec; }
+.segmented-control--stacked label > span { position: relative; min-height: 62px; padding: 10px 13px 10px 46px; align-content: center; justify-items: start; gap: 2px; background: #f8fbfa; border: 2px solid #b7c9c3; box-shadow: 0 2px 5px rgb(46 67 62 / 8%); text-align: left; transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease, background 150ms ease; }
+.segmented-control--stacked label > span::before { position: absolute; left: 15px; top: 50%; width: 18px; height: 18px; content: ''; border: 2px solid #78918a; border-radius: 50%; background: white; box-shadow: inset 0 0 0 4px white; transform: translateY(-50%); }
+.segmented-control--stacked label:hover > span { border-color: var(--brand); box-shadow: 0 5px 12px rgb(46 96 80 / 14%); transform: translateY(-1px); }
+.segmented-control--stacked input:checked + span { color: var(--brand-dark); background: #f0faf6; border-color: var(--brand); box-shadow: 0 0 0 2px rgb(35 126 96 / 13%), 0 5px 12px rgb(46 96 80 / 12%); }
+.segmented-control--stacked input:checked + span::before { border-color: var(--brand); background: var(--brand); }
+.segmented-control--stacked small { color: var(--muted); font-size: .68rem; font-weight: 600; }
 .question-count-field { display: grid; grid-template-columns: minmax(0, 1fr) 62px; grid-template-rows: 46px; align-items: center; gap: 0 10px; }
 .question-count-field > span:first-child { display: flex; height: 46px; align-items: center; line-height: 1.2; }
 .question-count-field > input { width: 62px; min-width: 0; height: 46px; padding-inline: 8px 5px; align-self: center; text-align: center; }
@@ -396,6 +467,10 @@ watch(complementsAvailable, (available) => {
 .conjugation-example__question-separator { color: #9bb0aa; font-weight: 700; }
 .conjugation-example__prompt { color: var(--ink); font-size: 1.25rem; font-weight: 800; letter-spacing: .025em; line-height: 1.45; }
 .conjugation-example__question-line .conjugation-example__prompt { font-size: 1.05rem; }
+.conjugation-example__citation { display: grid; margin: 4px 0 0; gap: 7px; }
+.conjugation-example__citation p { color: var(--ink); font-size: 1.08rem; font-weight: 750; line-height: 1.55; }
+.conjugation-example__citation mark { padding: 1px 4px; border-radius: 4px; color: #4b3563; background: #eadcf8; box-decoration-break: clone; font-weight: 900; }
+.conjugation-example__citation footer { color: var(--muted); font-size: .72rem; font-weight: 700; }
 .conjugation-example__correction { display: grid; padding: 15px 17px; gap: 8px; border: 1px solid #acd1bb; border-radius: 12px; background: rgb(255 255 255 / 62%); }
 .conjugation-example__correction p { margin: 0; color: var(--success); font-size: 1.05rem; font-weight: 400; line-height: 1.4; white-space: pre-wrap; }
 .conjugation-example__correction p > span { color: inherit; font: inherit; font-weight: 400; letter-spacing: normal; text-transform: none; }

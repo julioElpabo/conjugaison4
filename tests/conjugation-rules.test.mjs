@@ -500,6 +500,7 @@ describe('participe, infinitif et gérondif', () => {
     infinitif: 'aimer',
     participe_present: 'aimant',
     participe_passe: 'aimé',
+    auxiliaire_infinitif: 'avoir',
     auxiliaire_participe_present: 'ayant',
   }
 
@@ -508,6 +509,8 @@ describe('participe, infinitif et gérondif', () => {
     { id: 21, mode: 'participe', tense: 'passé', expected: 'Aimé' },
     { id: 22, mode: 'gérondif', tense: 'présent', expected: 'En aimant' },
     { id: 23, mode: 'gérondif', tense: 'passé', expected: 'En ayant aimé' },
+    { id: 25, mode: 'infinitif', tense: 'présent', expected: 'Aimer' },
+    { id: 26, mode: 'infinitif', tense: 'passé', expected: 'Avoir aimé' },
   ]) {
     it(`produit le ${testCase.mode} ${testCase.tense}`, () => {
       const question = formatNonFiniteQuestion(verb, { id: testCase.id, name: testCase.tense, mode_name: testCase.mode })

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { automaticOrthographyHelpBlocks, buildCondensedVerbGroupHtml, buildContextualBaseTitle, buildDefinitionHelpHtml, buildNearFutureAllerHelpHtml, buildNearFutureCoachHelpHtml, buildPronominalCoachHelpHtml, buildReferenceFormHelpHtml, coachHelpBlockUsesPedagogicalApproach, coachHelpQuestionVariables, conditionalCoachHelpBlocks, defaultCoachHelpBlocks, localizedCoachVerbDefinition, renderCoachHelpContent, visibleCoachHelpBlocks } from '../shared/utils/coach-help.ts'
+import { automaticOrthographyHelpBlocks, buildCondensedVerbGroupHtml, buildContextualBaseTitle, buildDefinitionHelpHtml, buildNearFutureAllerHelpHtml, buildNearFutureCoachHelpHtml, buildPronominalCoachHelpHtml, buildReferenceFormHelpHtml, coachHelpBlockUsesPedagogicalApproach, coachHelpQuestionVariables, conditionalCoachHelpBlocks, defaultCoachHelpBlocks, literaryIdentificationCoachHelpBlocks, localizedCoachVerbDefinition, renderCoachHelpContent, visibleCoachHelpBlocks } from '../shared/utils/coach-help.ts'
 import { COACH_HELP_BLOCK_TYPES } from '../shared/types/coach.ts'
 import { formatCoachHtmlSource } from '../shared/utils/html-source-format.ts'
 import { sanitizeCoachHtml } from '../shared/utils/safe-html.ts'

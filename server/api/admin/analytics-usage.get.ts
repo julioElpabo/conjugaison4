@@ -113,7 +113,7 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsageResponse>
     throw createError({ statusCode: 400, statusMessage: 'La date de début doit précéder la date de fin.' })
   }
 
-  const actorExpression = "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.actor')), 'anonymous')"
+  const actorExpression = "COALESCE(actor_type, 'anonymous')"
   const actorClause = actor === 'all' ? '' : ` AND ${actorExpression}=?`
   const parameters: Array<string> = [startDate, endDate]
   if (actor !== 'all') parameters.push(actor)

@@ -13,11 +13,12 @@ const props = defineProps<{
 const activeChildren = computed(() => (props.block.children || []).filter(child => child.isActive))
 const isRadicalBlock = computed(() => ['{contextualBaseHelp}', '{completeAdviceHelp}'].includes(props.block.content.trim()))
 const isDefinitionBlock = computed(() => props.block.content.trim() === '{definitionHelp}')
+const isLiteraryDefinitionBlock = computed(() => props.block.id === -8_201)
 const isCondensedTenseRuleBlock = computed(() => props.block.content.trim() === '{condensedTenseRuleHelp}')
 const isResultBlock = computed(() => props.block.title.trim().normalize('NFD').replace(/\p{Diacritic}/gu, '').toLocaleLowerCase('fr') === 'resultat')
 const orthographyKind = computed(() => automaticOrthographyHelpKind(props.block))
 const renderedTitle = computed(() => isDefinitionBlock.value
-  ? ui('Définition')
+  ? isLiteraryDefinitionBlock.value ? uiLabel(props.block.title) : ui('Définition')
   : isRadicalBlock.value
     ? ''
     : uiLabel(props.block.title))

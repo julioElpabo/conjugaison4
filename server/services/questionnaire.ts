@@ -5,7 +5,7 @@ import { formatAnswer, formatConjugationQuestion } from './question-formatter'
 import { formatNonFiniteQuestion } from './non-finite-formatter'
 import { generatePronominalRow, type PronominalSourceRow } from './pronominal-formatter'
 import { decodePronominalSelectionId } from '../../shared/utils/pronominal-selection'
-import { TENSE_IDENTIFICATION_INSTRUCTION } from '../../shared/utils/exercise-instructions'
+import { MODE_IDENTIFICATION_INSTRUCTION, TENSE_IDENTIFICATION_INSTRUCTION } from '../../shared/utils/exercise-instructions'
 import type { ComplementOption } from '../../shared/types/conjugation'
 import { indirectRelative } from './indirect-relative'
 import { resolveVariableAuxiliary } from './compound-auxiliary'
@@ -55,6 +55,28 @@ interface ConjugationRow extends RowDataPacket {
   future_simple_forms?: string[]
 }
 
+interface LiteraryCitationRow extends RowDataPacket {
+  id: number
+  verb_id: number
+  tense_id: number
+  person_id: number
+  sentence_text: string
+  target_text: string
+  target_start: number
+  target_end: number
+  author: string
+  work: string
+  chapter: string | null
+  source_url: string
+  infinitif: string
+  pronom: string
+  tense_name: string
+  tense_code: ExerciseQuestion['tenseCode']
+  is_compound: number
+  mode_name: string
+  mode_code: ExerciseQuestion['modeCode']
+}
+
 interface RadicalReferenceRow extends RowDataPacket {
   verbe_id: number
   personne_id: number
@@ -88,6 +110,7 @@ interface NonFiniteVerbRow extends RowDataPacket {
   infinitif: string
   participe_present: string
   participe_passe: string
+  auxiliaire_infinitif: string | null
   auxiliaire_participe_present: string | null
   present_nous: string | null
 }
@@ -341,6 +364,9 @@ function choosePronoun(pronom: string, inclusive: boolean) {
 }
 
 function articleForTense(tense: string, mode: string) {
+  if (normalized(mode) === 'infinitif') {
+    return `L'infinitif ${tense}`
+  }
   const article = startsWithVowel(tense) ? "L'" : 'Le '
   const normalizedMode = normalized(mode)
   if (normalizedMode === 'indicatif' || normalizedMode === 'impératif') {
@@ -349,29 +375,54 @@ function articleForTense(tense: string, mode: string) {
   return `${article}${tense} du ${normalizedMode}`
 }
 
-export function identificationQuestion(row: ConjugationRow): ExerciseQuestion {
+function literaryIdentificationQuestion(citation: LiteraryCitationRow, modeOnly: boolean) {
+  return identificationQuestion({
+    id: citation.id,
+    verbe_id: citation.verb_id,
+    personne_id: citation.person_id,
+    temp_id: citation.tense_id,
+    conjugaison1: citation.target_text,
+    conjugaison2: '',
+    conjugaison3: '',
+    infinitif: citation.infinitif,
+    auxiliaire: '',
+    participe_present: '',
+    participe_passe: '',
+    auxiliaire_infinitif: null,
+    auxiliaire_participe_present: null,
+    pronom: citation.pronom,
+    temps_name: citation.tense_name,
+    tense_code: citation.tense_code,
+    is_compound: citation.is_compound,
+    mode_name: citation.mode_name,
+    mode_code: citation.mode_code,
+  } as ConjugationRow, citation, modeOnly)
+}
+
+export function identificationQuestion(row: ConjugationRow, citation?: LiteraryCitationRow, modeOnly = false): ExerciseQuestion {
   const pronoun = row.pronom
   const phrase = formatAnswer(pronoun, row.conjugaison1, row.mode_name)
   const tense = normalized(row.temps_name)
   const mode = normalized(row.mode_name)
-  const correction = articleForTense(tense, mode)
-  const answers = [
+  const modeCorrection = `${startsWithVowel(mode) ? "L'" : 'Le '}${mode}`
+  const correction = modeOnly ? modeCorrection : articleForTense(tense, mode)
+  const answers = modeOnly ? [mode, `mode ${mode}`, modeCorrection] : [
     `${tense} ${mode}`,
     `${mode} ${tense}`,
     correction,
     `${tense} ${mode === 'indicatif' || mode === 'impératif' ? "de l'" : 'du '}${mode}`
   ]
-  if (tense === 'futur' && mode === 'indicatif') {
+  if (!modeOnly && tense === 'futur' && mode === 'indicatif') {
     answers.push('futur simple indicatif', 'indicatif futur simple', "futur simple de l'indicatif")
   }
 
   return {
-    id: `t-${row.id}`,
+    id: citation ? `lt-${citation.id}` : `t-${row.id}`,
     verbeId: Number(row.verbe_id),
     tenseId: Number(row.temp_id),
     personId: Number(row.personne_id),
     titre: row.infinitif,
-    instruction: TENSE_IDENTIFICATION_INSTRUCTION,
+    instruction: modeOnly ? MODE_IDENTIFICATION_INSTRUCTION : TENSE_IDENTIFICATION_INSTRUCTION,
     consigne: phrase,
     reponses: unique(answers),
     reponsesPourCorrige: [correction],
@@ -383,7 +434,170 @@ export function identificationQuestion(row: ConjugationRow): ExerciseQuestion {
     conjugaison2: row.conjugaison2 || '',
     conjugaison3: row.conjugaison3 || '',
     nousForm: row.nous_form || null,
+    ...(citation ? {
+      consigne: citation.sentence_text,
+      literaryCitation: {
+        before: citation.sentence_text.slice(0, Number(citation.target_start)),
+        target: citation.sentence_text.slice(Number(citation.target_start), Number(citation.target_end)),
+        after: citation.sentence_text.slice(Number(citation.target_end)),
+        author: citation.author,
+        work: citation.work,
+        chapter: citation.chapter,
+        sourceUrl: citation.source_url,
+      },
+    } : {}),
   }
+}
+
+function literaryCitationKey(verbId: number, tenseId: number, personId: number) {
+  return `${verbId}:${tenseId}:${personId}`
+}
+
+async function validatedLiteraryCitations(
+  verbIds: readonly number[] | null,
+  tenseIds: readonly number[],
+  literaryRegister: 'all' | 'courant' | 'soutenu' = 'all',
+) {
+  const citations = new Map<string, LiteraryCitationRow[]>()
+  if (!tenseIds.length || (verbIds !== null && !verbIds.length)) return citations
+  const database = useDatabase()
+  try {
+    const register = literaryRegister === 'courant' || literaryRegister === 'soutenu' ? literaryRegister : ''
+    const coverageRegisterClause = register ? `AND coveredSource.language_register='${register}'` : ''
+    const randomRegisterClause = register ? `AND source.language_register='${register}'` : ''
+    const verbClause = verbIds === null
+      ? ''
+      : `AND target.verb_id IN (${placeholders(verbIds)})`
+    const parameters = verbIds === null ? [...tenseIds] : [...verbIds, ...tenseIds]
+    const [coverageRows, randomRows] = await Promise.all([
+      database.execute<LiteraryCitationRow[]>(`
+      SELECT target.id,target.verb_id,target.tense_id,target.person_id,
+             sentence.sentence_text,target.target_text,target.target_start,target.target_end,
+             source.author,source.title AS work,sentence.chapter,COALESCE(sentence.source_url,source.source_url) AS source_url,
+             verb.infinitif,person.pronom,tense.name AS tense_name,tense.code AS tense_code,
+             tense.isTempsCompose AS is_compound,mode.name AS mode_name,mode.code AS mode_code
+      FROM literary_targets target
+      INNER JOIN (
+        SELECT covered.tense_id, MIN(covered.id) AS id
+        FROM literary_targets covered
+        INNER JOIN literary_sentences coveredSentence ON coveredSentence.id=covered.sentence_id
+        INNER JOIN literary_sources coveredSource ON coveredSource.id=coveredSentence.source_id
+        WHERE covered.review_status='validated'
+          ${verbIds === null ? '' : `AND covered.verb_id IN (${placeholders(verbIds)})`}
+          AND covered.tense_id IN (${placeholders(tenseIds)})
+          ${coverageRegisterClause}
+        GROUP BY covered.tense_id
+      ) coverage ON coverage.id=target.id
+      INNER JOIN literary_sentences sentence ON sentence.id=target.sentence_id
+      INNER JOIN literary_sources source ON source.id=sentence.source_id
+      INNER JOIN verbes verb ON verb.id=target.verb_id
+      INNER JOIN personnes person ON person.id=target.person_id
+      INNER JOIN temps tense ON tense.id=target.tense_id
+      INNER JOIN modes mode ON mode.id=tense.mode_id
+    `, parameters),
+      database.execute<LiteraryCitationRow[]>(`
+      SELECT target.id,target.verb_id,target.tense_id,target.person_id,
+             sentence.sentence_text,target.target_text,target.target_start,target.target_end,
+             source.author,source.title AS work,sentence.chapter,COALESCE(sentence.source_url,source.source_url) AS source_url,
+             verb.infinitif,person.pronom,tense.name AS tense_name,tense.code AS tense_code,
+             tense.isTempsCompose AS is_compound,mode.name AS mode_name,mode.code AS mode_code
+      FROM literary_targets target
+      INNER JOIN literary_sentences sentence ON sentence.id=target.sentence_id
+      INNER JOIN literary_sources source ON source.id=sentence.source_id
+      INNER JOIN verbes verb ON verb.id=target.verb_id
+      INNER JOIN personnes person ON person.id=target.person_id
+      INNER JOIN temps tense ON tense.id=target.tense_id
+      INNER JOIN modes mode ON mode.id=tense.mode_id
+      WHERE target.review_status='validated'
+        ${verbClause}
+        AND target.tense_id IN (${placeholders(tenseIds)})
+        ${randomRegisterClause}
+      ORDER BY RAND()
+      LIMIT 500
+    `, parameters),
+    ])
+    const seen = new Set<number>()
+    for (const row of [...coverageRows[0], ...randomRows[0]]) {
+      if (seen.has(Number(row.id))) continue
+      seen.add(Number(row.id))
+      const key = literaryCitationKey(Number(row.verb_id), Number(row.tense_id), Number(row.person_id))
+      const group = citations.get(key) || []
+      group.push(row)
+      citations.set(key, group)
+    }
+  }
+  catch (error) {
+    const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : ''
+    if (code !== 'ER_NO_SUCH_TABLE') throw error
+  }
+  return citations
+}
+
+export function balancedIdentificationQuestions(questions: ExerciseQuestion[], count: number) {
+  const groupsByMode = new Map<string, Map<string, ExerciseQuestion[]>>()
+  for (const question of shuffle([...questions])) {
+    const mode = normalized(question.mode || '')
+    const tense = question.tenseId === undefined
+      ? normalized(question.temps || '')
+      : String(question.tenseId)
+    if (!mode || !tense) continue
+    const modeGroups = groupsByMode.get(mode) || new Map<string, ExerciseQuestion[]>()
+    modeGroups.set(tense, [...(modeGroups.get(tense) || []), question])
+    groupsByMode.set(mode, modeGroups)
+  }
+
+  const preferredModeOrder = ['indicatif', 'subjonctif', 'conditionnel', 'impératif', 'infinitif']
+  const modes = [...groupsByMode.keys()].sort((left, right) => {
+    const leftOrder = preferredModeOrder.indexOf(left)
+    const rightOrder = preferredModeOrder.indexOf(right)
+    return (leftOrder < 0 ? preferredModeOrder.length : leftOrder)
+      - (rightOrder < 0 ? preferredModeOrder.length : rightOrder)
+  })
+  const unusedGroupsByMode = new Map(modes.map((mode) => {
+    const groups = [...(groupsByMode.get(mode)?.values() || [])]
+      .map(group => ({ group, tieBreaker: Math.random() }))
+      .sort((left, right) => left.group.length - right.group.length || left.tieBreaker - right.tieBreaker)
+      .map(item => item.group)
+    return [mode, groups] as const
+  }))
+
+  const balanced: ExerciseQuestion[] = []
+  while (balanced.length < count && modes.some(mode => unusedGroupsByMode.get(mode)?.length)) {
+    for (const mode of shuffle([...modes])) {
+      const group = unusedGroupsByMode.get(mode)?.shift()
+      const question = group?.shift()
+      if (question) balanced.push(question)
+      if (balanced.length >= count) break
+    }
+  }
+
+  const repeatedGroups = shuffle([...groupsByMode.values()].flatMap(modeGroups => [...modeGroups.values()]))
+  while (balanced.length < count && repeatedGroups.some(group => group.length)) {
+    for (const group of repeatedGroups) {
+      const question = group.shift()
+      if (question) balanced.push(question)
+      if (balanced.length >= count) break
+    }
+  }
+  return shuffle(balanced)
+}
+
+export function balancedModeIdentificationQuestions(questions: ExerciseQuestion[], count: number) {
+  const groups = new Map<string, ExerciseQuestion[]>()
+  for (const question of shuffle(questions.filter(item => item.literaryCitation))) {
+    const mode = normalized(question.mode || '')
+    groups.set(mode, [...(groups.get(mode) || []), question])
+  }
+  const modeOrder = ['indicatif', 'subjonctif', 'conditionnel', 'impératif', 'infinitif']
+  const balanced: ExerciseQuestion[] = []
+  while (balanced.length < count && modeOrder.some(mode => groups.get(mode)?.length)) {
+    for (const mode of shuffle([...modeOrder])) {
+      const question = groups.get(mode)?.shift()
+      if (question) balanced.push(question)
+      if (balanced.length >= count) break
+    }
+  }
+  return shuffle(balanced)
 }
 
 async function validateSelections(request: QuestionnaireRequest) {
@@ -430,8 +644,9 @@ async function validateSelections(request: QuestionnaireRequest) {
 
 export async function generateQuestionnaire(request: QuestionnaireRequest) {
   const selectedTenses = await validateSelections(request)
-  const finiteTenses = selectedTenses.filter(row => !['participe', 'gérondif'].includes(normalized(row.mode_name)))
-  const nonFiniteTenses = selectedTenses.filter(row => ['participe', 'gérondif'].includes(normalized(row.mode_name)))
+  const nonFiniteModes = ['participe', 'gérondif', 'infinitif']
+  const finiteTenses = selectedTenses.filter(row => !nonFiniteModes.includes(normalized(row.mode_name)))
+  const nonFiniteTenses = selectedTenses.filter(row => nonFiniteModes.includes(normalized(row.mode_name)))
   const database = useDatabase()
   const questions: ExerciseQuestion[] = []
   const requestedComplementOptions = request.complementOptions || []
@@ -442,19 +657,63 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
     .filter(id => id < 0)
     .map(decodePronominalSelectionId)
     .filter((id): id is number => id !== null)
+  const usesLiteraryCitations = request.exerciseKind === 'mode-identification'
+    || (request.exerciseKind === 'tense-identification' && request.identificationSource === 'literary-corpus')
+
+  if (usesLiteraryCitations) {
+    const citations = await validatedLiteraryCitations(
+      null,
+      selectedTenses.map(row => Number(row.id)),
+      request.literaryRegister ?? 'all',
+    )
+    const literaryQuestions = [...citations.values()].flat()
+      .map(citation => literaryIdentificationQuestion(citation, request.exerciseKind === 'mode-identification'))
+    if (!literaryQuestions.length) {
+      throw new QuestionnaireSelectionError('Aucune citation validée ne correspond aux temps sélectionnés')
+    }
+    return request.exerciseKind === 'mode-identification'
+      ? balancedModeIdentificationQuestions(literaryQuestions, request.questionCount)
+      : balancedIdentificationQuestions(literaryQuestions, request.questionCount)
+  }
 
   if (finiteTenses.length > 0) {
-    const nearFutureTenses = finiteTenses.filter(isNearFutureTense)
+    const nearFutureTenses = usesLiteraryCitations ? [] : finiteTenses.filter(isNearFutureTense)
     const storedFiniteTenses = finiteTenses.filter(tense => !isNearFutureTense(tense))
     const finiteIds = storedFiniteTenses.map(row => Number(row.id))
     const pastSimpleClause = request.pastSimplePronouns === 'third-person-only'
       ? "AND (t.name NOT IN ('passé simple', 'passé antérieur') OR p.pronom IN ('il', 'ils'))"
       : ''
-    const limit = Math.min(500, Math.max(request.questionCount * 4, request.questionCount))
     const rows: ConjugationRow[] = []
+    const literaryCitations = usesLiteraryCitations
+      ? await validatedLiteraryCitations(null, finiteIds)
+      : new Map<string, LiteraryCitationRow[]>()
+    const limit = request.exerciseKind === 'conjugation'
+      ? Math.min(500, Math.max(request.questionCount * 4, request.questionCount))
+      : 600
+    const questionVerbIds = usesLiteraryCitations
+      ? [...new Set([...literaryCitations.values()].flat().map(citation => Number(citation.verb_id)))]
+      : verbIds
+    const literaryCoordinates = usesLiteraryCitations
+      ? [...literaryCitations.keys()].map((key) => {
+          const [verbId, tenseId, personId] = key.split(':').map(Number)
+          return [verbId!, tenseId!, personId!] as const
+        })
+      : []
+    const exactLiteraryClause = literaryCoordinates.length
+      ? `AND (vc.verbe_id,vc.temp_id,vc.personne_id) IN (${literaryCoordinates.map(() => '(?,?,?)').join(',')})`
+      : ''
+    const literaryOrderClause = literaryCitations.size
+      ? `CASE WHEN EXISTS (
+          SELECT 1 FROM literary_targets prioritized
+          WHERE prioritized.review_status='validated'
+            AND prioritized.verb_id=vc.verbe_id
+            AND prioritized.tense_id=vc.temp_id
+            AND prioritized.person_id=vc.personne_id
+        ) THEN 0 ELSE 1 END,`
+      : ''
     let radicalReferences = new Map<number, RadicalReferenceRow[]>()
     let etreAuxiliaryForms: AuxiliaryFormRow[] = []
-    if (verbIds.length > 0 && finiteIds.length > 0) {
+    if (questionVerbIds.length > 0 && finiteIds.length > 0) {
       const [storedRows] = await database.execute<ConjugationRow[]>(`
       SELECT vc.id, vc.verbe_id, vc.personne_id, vc.temp_id,
              vc.conjugaison1, vc.conjugaison2, vc.conjugaison3,
@@ -475,17 +734,18 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
       INNER JOIN personnes p ON p.id = vc.personne_id
       INNER JOIN temps t ON t.id = vc.temp_id
       INNER JOIN modes m ON m.id = t.mode_id
-      WHERE vc.verbe_id IN (${placeholders(verbIds)})
+      WHERE vc.verbe_id IN (${placeholders(questionVerbIds)})
         AND vc.temp_id IN (${placeholders(finiteIds)})
+        ${exactLiteraryClause}
         AND vc.conjugaison1 <> ''
         ${pastSimpleClause}
-      ORDER BY RAND()
+      ORDER BY ${literaryOrderClause} RAND()
       LIMIT ${limit}
-      `, [...verbIds, ...finiteIds])
+      `, [...questionVerbIds, ...finiteIds, ...literaryCoordinates.flat()])
       rows.push(...storedRows)
     }
 
-    if (pronominalUseIds.length > 0 && finiteIds.length > 0) {
+    if (!usesLiteraryCitations && pronominalUseIds.length > 0 && finiteIds.length > 0) {
       const [sourceRows, auxiliaryForms] = await Promise.all([
         database.execute<PronominalSourceRow[]>(`
           SELECT vc.id, -ep.id AS verbe_id, ep.verbe_id AS base_verbe_id, vc.personne_id, vc.temp_id,
@@ -627,10 +887,15 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
       }
     }
 
-    const rowsForQuestions = onlyBeforeComplements
-      ? rows.filter(row => normalized(row.mode_name) !== 'impératif'
-        && (requestedComplementOptions.includes('coi-before') || Boolean(row.is_compound)))
+    const eligibleRows = usesLiteraryCitations
+      ? rows.filter(row => literaryCitations.has(literaryCitationKey(
+          Number(row.verbe_id), Number(row.temp_id), Number(row.personne_id),
+        )))
       : rows
+    const rowsForQuestions = onlyBeforeComplements
+      ? eligibleRows.filter(row => normalized(row.mode_name) !== 'impératif'
+        && (requestedComplementOptions.includes('coi-before') || Boolean(row.is_compound)))
+      : eligibleRows
 
     questions.push(...rowsForQuestions.map((row) => {
       const candidates = complementsByVerb.get(Number(row.verbe_id)) ?? []
@@ -680,7 +945,13 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
             future_simple_forms: futureSimpleForms,
             conjugation_confusions: conjugationConfusions,
           }, choosePronoun(row.pronom, request.inclusivePronouns))
-        : identificationQuestion(semanticRow)
+        : identificationQuestion(
+            semanticRow,
+            literaryCitations.get(literaryCitationKey(
+              Number(row.verbe_id), Number(row.temp_id), Number(row.personne_id),
+            ))?.shift(),
+            request.exerciseKind === 'mode-identification',
+          )
     }))
   }
 
@@ -699,6 +970,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
       SELECT v.id, v.infinitif,
              v.\`participe_présent\` AS participe_present,
              v.\`participe_passé\` AS participe_passe,
+             auxiliary.infinitif AS auxiliaire_infinitif,
              auxiliary.\`participe_présent\` AS auxiliaire_participe_present,
              (SELECT vc.conjugaison1 FROM verbesconjugues vc
               INNER JOIN temps present_tense ON present_tense.id=vc.temp_id
@@ -746,6 +1018,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
           infinitif: use.infinitif_pronominal,
           participe_present: pronominalParticiples.join('-'),
           participe_passe: use.participe_passe,
+          auxiliaire_infinitif: 'être',
           auxiliaire_participe_present: "s'étant",
           present_nous: use.present_nous,
         } as NonFiniteVerbRow)
@@ -760,5 +1033,14 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
     }
   }
 
-  return shuffle(questions).slice(0, request.questionCount)
+  if (usesLiteraryCitations && !questions.length) {
+    throw new QuestionnaireSelectionError('Aucune citation validée ne correspond aux temps sélectionnés')
+  }
+
+  if (request.exerciseKind === 'mode-identification') {
+    return balancedModeIdentificationQuestions(questions, request.questionCount)
+  }
+  return request.exerciseKind === 'tense-identification'
+    ? balancedIdentificationQuestions(questions, request.questionCount)
+    : shuffle(questions).slice(0, request.questionCount)
 }

@@ -14,6 +14,7 @@ const menuGroups = [
     links: [
       { label: 'Verbes', path: '/admin' },
       { label: 'Défis', path: '/admin/challenges' },
+      { label: 'Phrases', path: '/admin/phrases' },
     ],
   },
   {

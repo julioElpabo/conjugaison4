@@ -50,6 +50,9 @@ function compactQuestion(question: ExerciseQuestion): ExerciseQuestion {
     temps: question.temps,
     mode: question.mode,
     isCompound: question.isCompound,
+    conjugaison1: question.conjugaison1,
+    conjugaison2: question.conjugaison2,
+    conjugaison3: question.conjugaison3,
     radicalReference: question.radicalReference?.paradigmForms?.length
       ? {
           kind: question.radicalReference.kind,
@@ -66,6 +69,9 @@ function compactQuestion(question: ExerciseQuestion): ExerciseQuestion {
     saisiePrefixe: question.saisiePrefixe,
     agreementReminder: question.agreementReminder
       ? { ...question.agreementReminder }
+      : undefined,
+    literaryCitation: question.literaryCitation
+      ? { ...question.literaryCitation }
       : undefined,
   }
 }

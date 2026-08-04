@@ -43,6 +43,8 @@ describe('exemples des infobulles de temps', () => {
       { id: 21, mode: 'participe', name: 'passé' },
       { id: 22, mode: 'gérondif', name: 'présent' },
       { id: 23, mode: 'gérondif', name: 'passé' },
+      { id: 25, mode: 'infinitif', name: 'présent' },
+      { id: 26, mode: 'infinitif', name: 'passé' },
     ], [], (() => {
       const values = [0, 0.2, 0.4, 0.6]
       return () => values.shift() ?? 0
@@ -53,6 +55,8 @@ describe('exemples des infobulles de temps', () => {
       'Ayant mangé un sandwich.',
       'En mangeant son goûter.',
       'En ayant mangé une soupe.',
+      'Manger une pomme.',
+      'Avoir mangé une pomme.',
     ])
   })
 })

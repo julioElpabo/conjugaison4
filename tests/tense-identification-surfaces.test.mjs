@@ -2,12 +2,13 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 
-const [options, wizard, classic, chat, print, questionnaire] = await Promise.all([
+const [options, wizard, classic, chat, print, printPreview, questionnaire] = await Promise.all([
   readFile(new URL('../app/components/challenge/ChallengeOptions.vue', import.meta.url), 'utf8'),
   readFile(new URL('../app/components/challenge/WizardChallengeWorkspace.vue', import.meta.url), 'utf8'),
   readFile(new URL('../app/components/exercise/ClassicExercise.vue', import.meta.url), 'utf8'),
   readFile(new URL('../app/components/exercise/ChatExercise.vue', import.meta.url), 'utf8'),
   readFile(new URL('../shared/utils/print-question.ts', import.meta.url), 'utf8'),
+  readFile(new URL('../app/components/challenge/PrintPreview.vue', import.meta.url), 'utf8'),
   readFile(new URL('../server/services/questionnaire.ts', import.meta.url), 'utf8'),
 ])
 
@@ -92,4 +93,38 @@ test('l’impression délimite la cible et indique la provenance', () => {
   assert.match(print, /literaryCitation\.target/u)
   assert.match(print, /literaryCitation\.author/u)
   assert.match(print, /literaryCitation\.work/u)
+})
+
+test('les fiches PDF et Word réservent une réponse séparée au mode et au temps', () => {
+  assert.match(printPreview, /identificationAnswerHeightMm/u)
+  assert.match(printPreview, /const modeLabel = pdfSafe\(ui\('Mode :'\)\)/u)
+  assert.match(printPreview, /const tenseLabel = pdfSafe\(ui\('Temps :'\)\)/u)
+  assert.match(printPreview, /identificationAnswerParagraph/u)
+  assert.match(printPreview, /LeaderType\.DOT/u)
+  assert.match(printPreview, /Math\.max\(5, questionSpacingMm\.value\)/u)
+})
+
+test('les fiches PDF et Word soulignent la forme ciblée sans afficher de crochets', () => {
+  assert.match(printPreview, /pdfLiteraryCitation/u)
+  assert.match(printPreview, /drawPdfLiteraryCitation/u)
+  assert.match(printPreview, /underline: \{ type: UnderlineType\.SINGLE \}/u)
+  assert.match(printPreview, /spacing: \{ before: 160, after: 480 \}/u)
+  assert.match(printPreview, /capacity -= 19/u)
+})
+
+test('la provenance est isolée sur une ligne plus petite et italique dans les deux formats', () => {
+  assert.match(printPreview, /sourceLines/u)
+  assert.match(printPreview, /pdf\.setFont\('helvetica', 'italic'\)/u)
+  assert.match(printPreview, /pdf\.setFontSize\(8\.3\)/u)
+  assert.match(printPreview, /identificationQuestionParagraphs/u)
+  assert.match(printPreview, /italics: true/u)
+  assert.match(printPreview, /size: Math\.max\(15, size - 3\)/u)
+})
+
+test('le corrigé d’identification ne contient que les réponses de mode et de temps', () => {
+  assert.match(printPreview, /correctionItemHeight\('', printableCorrectionText\(question\)\)/u)
+  assert.match(printPreview, /pdf\.text\(answer, left \+ 10/u)
+  assert.match(printPreview, /columnWidths: isTenseIdentification\.value \? \[480, 9495\]/u)
+  assert.match(printPreview, /identificationCorrectionCells/u)
+  assert.match(printPreview, /children: isTenseIdentification\.value[\s\S]*\? identificationCorrectionCells/u)
 })

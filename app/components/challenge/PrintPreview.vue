@@ -48,6 +48,8 @@ function boundedOption(value: number | undefined, fallback: number, minimum: num
 
 const questionSpacingMm = computed(() => boundedOption(props.options.questionSpacingMm, 8, 2, 15))
 const titleSpacingMm = computed(() => boundedOption(props.options.titleSpacingMm, 30, 8, 30))
+const isTenseIdentification = computed(() => props.exerciseKind === 'tense-identification')
+const identificationAnswerHeightMm = computed(() => 8 + Math.max(0, 5 - questionSpacingMm.value))
 
 const exerciseFirstPageCapacity = computed(() => {
   // La zone utile commence après l'en-tête : 226 mm permet de conserver
@@ -58,7 +60,7 @@ const exerciseFirstPageCapacity = computed(() => {
   }
   if (props.options.showVerbs) capacity -= 8
   if (props.options.showTenses) capacity -= 8
-  if (props.exerciseKind === 'tense-identification') capacity -= 13
+  if (isTenseIdentification.value) capacity -= 19
   return capacity
 })
 const exercisePages = computed(() => paginateByHeight(
@@ -69,13 +71,17 @@ const exercisePages = computed(() => paginateByHeight(
     const printable = printableQuestionParts(question, props.exerciseKind)
     return exerciseItemHeight(printableQuestion(question, props.exerciseKind), questionSpacingMm.value)
       + (printable.suffixOnNextLine ? 6 : 0)
+      + (isTenseIdentification.value ? identificationAnswerHeightMm.value : 0)
+      + (question.literaryCitation ? 4 : 0)
   }
 ))
 const correctionPages = computed(() => paginateByHeight(
   props.questions,
   205,
   220,
-  question => correctionItemHeight(printableCorrectionLabel(question, props.exerciseKind), printableCorrectionText(question))
+  question => isTenseIdentification.value
+    ? correctionItemHeight('', printableCorrectionText(question))
+    : correctionItemHeight(printableCorrectionLabel(question, props.exerciseKind), printableCorrectionText(question))
 ))
 
 useDialogFocus(dialog, () => emit('close'))
@@ -186,11 +192,11 @@ async function buildPdf() {
         pdf.text(lines, left, y)
         y += lines.length * 4.5 + 2
       }
-      if (props.exerciseKind === 'tense-identification') {
+      if (isTenseIdentification.value) {
         pdf.setDrawColor(120, 120, 120)
         pdf.rect(left, y, 176, 10)
         pdf.text(TENSE_IDENTIFICATION_INSTRUCTION, left + 3, y + 6)
-        y += 15
+        y += 21
       }
       return y + 2
     }
@@ -211,6 +217,70 @@ async function buildPdf() {
       return 38
     }
 
+    function pdfLiteraryCitation(question: ExerciseQuestion, width: number) {
+      const citation = question.literaryCitation
+      if (!citation) return null
+      const before = pdfSafe(citation.before).replace(/\s+/gu, ' ')
+      const target = pdfSafe(citation.target).replace(/\s+/gu, ' ')
+      const after = pdfSafe(citation.after).replace(/\s+/gu, ' ')
+      const text = capitalizePrintLine(`${before}${target}${after}`)
+      const source = pdfSafe(`- ${citation.author}, ${citation.work}`)
+      const targetStart = before.length
+      const targetEnd = targetStart + target.length
+      let cursor = 0
+      const lines = (pdf.splitTextToSize(text, width) as string[]).map((line) => {
+        const located = text.indexOf(line, cursor)
+        const start = located >= 0 ? located : cursor
+        cursor = start + line.length
+        return { text: line, start }
+      })
+      const previousSize = pdf.getFontSize()
+      const previousStyle = pdf.getFont().fontStyle
+      pdf.setFont('helvetica', 'italic')
+      pdf.setFontSize(8.3)
+      const sourceLines = pdf.splitTextToSize(source, width) as string[]
+      pdf.setFont('helvetica', previousStyle)
+      pdf.setFontSize(previousSize)
+      return {
+        lines,
+        sourceLines,
+        targetStart,
+        targetEnd,
+        height: lines.length * 5 + sourceLines.length * 4,
+      }
+    }
+
+    function drawPdfLiteraryCitation(
+      citation: NonNullable<ReturnType<typeof pdfLiteraryCitation>>,
+      x: number,
+      y: number,
+    ) {
+      citation.lines.forEach((line, lineIndex) => {
+        const baseline = y + lineIndex * 5
+        pdf.text(line.text, x, baseline)
+        const overlapStart = Math.max(line.start, citation.targetStart)
+        const overlapEnd = Math.min(line.start + line.text.length, citation.targetEnd)
+        if (overlapEnd <= overlapStart) return
+        const prefix = line.text.slice(0, overlapStart - line.start)
+        const underlined = line.text.slice(overlapStart - line.start, overlapEnd - line.start)
+        const underlineStart = x + pdf.getTextWidth(prefix)
+        pdf.setDrawColor(25, 25, 25)
+        pdf.setLineWidth(.25)
+        pdf.line(underlineStart, baseline + .8, underlineStart + pdf.getTextWidth(underlined), baseline + .8)
+      })
+      const previousSize = pdf.getFontSize()
+      const previousStyle = pdf.getFont().fontStyle
+      pdf.setFont('helvetica', 'italic')
+      pdf.setFontSize(8.3)
+      pdf.setTextColor(90, 90, 90)
+      citation.sourceLines.forEach((line, lineIndex) => {
+        pdf.text(line, x, y + citation.lines.length * 5 + lineIndex * 4)
+      })
+      pdf.setTextColor(20, 20, 20)
+      pdf.setFont('helvetica', previousStyle)
+      pdf.setFontSize(previousSize)
+    }
+
     function drawExercisePage(page: typeof exercisePages.value[number], continuation: boolean) {
       addPage()
       let y = drawExerciseHeader(continuation)
@@ -221,7 +291,10 @@ async function buildPdf() {
         pdf.setFont('helvetica', 'normal')
         const labelLines = pdf.splitTextToSize(pdfSafe(capitalizePrintLine(printable.label)), 68)
         const completionWidth = printable.label ? 96 : 169
-        const completionLines = printable.fillBlank
+        const literaryCitation = pdfLiteraryCitation(question, completionWidth)
+        const completionLines = literaryCitation
+          ? [...literaryCitation.lines.map(line => line.text), ...literaryCitation.sourceLines]
+          : printable.fillBlank
           ? [pdfSafe(capitalizePrintLine(printable.completion))]
           : pdf.splitTextToSize(pdfSafe(capitalizePrintLine(printable.completion)), completionWidth)
         const completionX = printable.label ? 96 : left + 7
@@ -275,10 +348,32 @@ async function buildPdf() {
               pdf.text(line, completionX, y + 5 + lineIndex * 5)
             })
           }
+        } else if (literaryCitation) {
+          drawPdfLiteraryCitation(literaryCitation, completionX, y)
         } else {
           pdf.text(completionLines, completionX, y)
         }
-        y += Math.max(5 + questionSpacingMm.value, lineCount * 5 + questionSpacingMm.value)
+        if (isTenseIdentification.value) {
+          const questionHeight = literaryCitation ? literaryCitation.height : lineCount * 5
+          const answerY = y + questionHeight + 2
+          const modeLabel = pdfSafe(ui('Mode :'))
+          const tenseLabel = pdfSafe(ui('Temps :'))
+          pdf.setFont('helvetica', 'bold')
+          pdf.setFontSize(9.5)
+          pdf.setTextColor(70, 70, 70)
+          pdf.text(modeLabel, left + 7, answerY)
+          pdf.text(tenseLabel, 108, answerY)
+          pdf.setLineDashPattern([.65, .65], 0)
+          pdf.setDrawColor(105, 105, 105)
+          pdf.line(left + 7 + pdf.getTextWidth(modeLabel) + 2, answerY + .7, 101, answerY + .7)
+          pdf.line(108 + pdf.getTextWidth(tenseLabel) + 2, answerY + .7, right, answerY + .7)
+          pdf.setLineDashPattern([], 0)
+          pdf.setTextColor(20, 20, 20)
+          pdf.setFontSize(10.5)
+          y += questionHeight + 8 + Math.max(5, questionSpacingMm.value)
+        } else {
+          y += Math.max(5 + questionSpacingMm.value, lineCount * 5 + questionSpacingMm.value)
+        }
       })
       drawFooter()
     }
@@ -288,14 +383,33 @@ async function buildPdf() {
       let y = drawCorrectionHeader(continuation)
       pdf.setFontSize(9.5)
       page.forEach(({ item: question, index }) => {
-        const prompt = pdf.splitTextToSize(pdfSafe(capitalizePrintLine(printableCorrectionLabel(question, props.exerciseKind))), 79)
         const answer = printableCorrectionAnswers(question)
-          .flatMap(value => pdf.splitTextToSize(pdfSafe(capitalizePrintText(value)), 82))
-        const lineCount = Math.max(prompt.length, answer.length)
-        const rowHeight = Math.max(8, lineCount * 5 + 3)
+          .flatMap(value => pdf.splitTextToSize(
+            pdfSafe(capitalizePrintText(value)),
+            isTenseIdentification.value ? 169 : 82,
+          ))
+        const answerHeight = answer.length * 5
+        if (isTenseIdentification.value) {
+          const rowHeight = Math.max(9, answerHeight + 4)
+          const textY = y + Math.max(0, (rowHeight - answerHeight) / 2)
+          pdf.setFont('helvetica', 'normal')
+          pdf.text(`${index + 1}.`, left, textY, { baseline: 'top' })
+          pdf.setFont('helvetica', 'bold')
+          pdf.text(answer, left + 10, textY, { baseline: 'top' })
+          pdf.setDrawColor(225, 225, 225)
+          pdf.line(left, y + rowHeight, right, y + rowHeight)
+          y += rowHeight
+          return
+        }
+        const prompt = pdf.splitTextToSize(
+          pdfSafe(capitalizePrintLine(printableCorrectionLabel(question, props.exerciseKind))),
+          79,
+        )
+        const promptHeight = prompt.length * 5
+        const rowHeight = Math.max(8, Math.max(promptHeight, answerHeight) + 3)
         const numberY = y + Math.max(0, (rowHeight - 5) / 2)
-        const promptY = y + Math.max(0, (rowHeight - prompt.length * 5) / 2)
-        const answerY = y + Math.max(0, (rowHeight - answer.length * 5) / 2)
+        const promptY = y + Math.max(0, (rowHeight - promptHeight) / 2)
+        const answerY = y + Math.max(0, (rowHeight - answerHeight) / 2)
         pdf.setFont('helvetica', 'normal')
         pdf.text(`${index + 1}.`, left, numberY, { baseline: 'top' })
         pdf.text(prompt, left + 7, promptY, { baseline: 'top' })
@@ -416,6 +530,7 @@ async function downloadWord() {
       TableLayoutType,
       TableRow,
       TextRun,
+      UnderlineType,
       VerticalAlign,
       WidthType,
     } = await import('docx')
@@ -445,6 +560,36 @@ async function downloadWord() {
       spacing: noSpacing,
       children: [new TextRun({ text, bold: options.bold, size: options.size ?? 21, font: 'Arial' })]
     })
+    const identificationQuestionParagraphs = (question: ExerciseQuestion, size = 21) => {
+      const citation = question.literaryCitation
+      if (!citation) {
+        return [paragraph(capitalizePrintLine(printableQuestionParts(question, props.exerciseKind).completion), { size })]
+      }
+      const before = capitalizePrintLine(citation.before)
+      const target = citation.before ? citation.target : capitalizePrintLine(citation.target)
+      return [
+        new Paragraph({
+          spacing: noSpacing,
+          children: [
+            new TextRun({ text: before, size, font: 'Arial' }),
+            new TextRun({ text: target, size, font: 'Arial', underline: { type: UnderlineType.SINGLE } }),
+            new TextRun({ text: citation.after, size, font: 'Arial' }),
+          ],
+        }),
+        new Paragraph({
+          spacing: { before: 50, after: 0, line: 220 },
+          children: [
+            new TextRun({
+              text: `— ${citation.author}, ${citation.work}`,
+              size: Math.max(15, size - 3),
+              italics: true,
+              color: '666666',
+              font: 'Arial',
+            }),
+          ],
+        }),
+      ]
+    }
     const completionParagraphs = (question: ExerciseQuestion) => {
       const printable = printableQuestionParts(question, props.exerciseKind)
       if (!printable.fillBlank) return [paragraph(capitalizePrintLine(printable.completion), { size: 21 })]
@@ -469,6 +614,19 @@ async function downloadWord() {
         })],
       })]
     }
+    const identificationAnswerParagraph = () => new Paragraph({
+      spacing: { before: 150, after: 40, line: 240 },
+      tabStops: [
+        { type: TabStopType.RIGHT, position: 4300, leader: LeaderType.DOT },
+        { type: TabStopType.RIGHT, position: 9250, leader: LeaderType.DOT },
+      ],
+      children: [
+        new TextRun({ text: `${ui('Mode :')} `, bold: true, size: 19, color: '555555', font: 'Arial' }),
+        new TextRun({ children: [new Tab()], size: 19, font: 'Arial' }),
+        new TextRun({ text: `   ${ui('Temps :')} `, bold: true, size: 19, color: '555555', font: 'Arial' }),
+        new TextRun({ children: [new Tab()], size: 19, font: 'Arial' }),
+      ],
+    })
     const cell = (children: InstanceType<typeof Paragraph>[], width: number, options: { borders?: Record<string, unknown>, margins?: Record<string, number> } = {}) => new TableCell({
       children,
       width: { size: width, type: WidthType.DXA },
@@ -523,28 +681,40 @@ async function downloadWord() {
     }))
     if (props.options.showVerbs) exerciseChildren.push(paragraph(`Verbes : ${props.verbs.map(verb => verb.infinitif).join(', ')}`, { bold: true, size: 19 }))
     if (props.options.showTenses) exerciseChildren.push(paragraph(`${ui('Temps :')} ${props.tenses.map(tense => uiLabel(tense.name)).join(', ')}`, { bold: true, size: 19 }))
-    if (props.exerciseKind === 'tense-identification') {
+    if (isTenseIdentification.value) {
       exerciseChildren.push(new Paragraph({
-        spacing: { before: 160, after: 160 },
+        spacing: { before: 160, after: 480 },
         border: { top: { style: BorderStyle.SINGLE, size: 4, color: '777777' }, bottom: { style: BorderStyle.SINGLE, size: 4, color: '777777' }, left: { style: BorderStyle.SINGLE, size: 4, color: '777777' }, right: { style: BorderStyle.SINGLE, size: 4, color: '777777' } },
         children: [new TextRun({ text: TENSE_IDENTIFICATION_INSTRUCTION, size: 19, font: 'Arial' })]
       }))
     }
     exerciseChildren.push(new Table({
       width: { size: contentWidth, type: WidthType.DXA },
-      columnWidths: [480, 3900, 5595],
+      columnWidths: isTenseIdentification.value ? [480, 9495] : [480, 3900, 5595],
       layout: TableLayoutType.FIXED,
       borders: TableBorders.NONE,
       rows: props.questions.map((question, index) => {
         const printable = printableQuestionParts(question, props.exerciseKind)
+        const identificationCells = [
+          cell([paragraph(`${index + 1}.`, { size: 21 })], 480, { margins: { top: 90, bottom: 90, left: 0, right: 40 } }),
+          cell([
+            ...identificationQuestionParagraphs(question),
+            identificationAnswerParagraph(),
+          ], 9495, { margins: { top: 90, bottom: 100, left: 70, right: 70 } }),
+        ]
+        const conjugationCells = [
+          cell([paragraph(`${index + 1}.`, { size: 21 })], 480, { margins: { top: 70, bottom: 70, left: 0, right: 40 } }),
+          cell([paragraph(capitalizePrintLine(printable.label), { size: 21 })], 3900),
+          cell(completionParagraphs(question), 5595),
+        ]
         return new TableRow({
           cantSplit: true,
-          height: { value: Math.round((5 + questionSpacingMm.value) * 56.7), rule: HeightRule.ATLEAST },
-          children: [
-            cell([paragraph(`${index + 1}.`, { size: 21 })], 480, { margins: { top: 70, bottom: 70, left: 0, right: 40 } }),
-            cell([paragraph(capitalizePrintLine(printable.label), { size: 21 })], 3900),
-            cell(completionParagraphs(question), 5595),
-          ]
+          height: {
+            value: Math.round(((isTenseIdentification.value ? 13 : 5)
+              + Math.max(isTenseIdentification.value ? 5 : 0, questionSpacingMm.value)) * 56.7),
+            rule: HeightRule.ATLEAST,
+          },
+          children: isTenseIdentification.value ? identificationCells : conjugationCells,
         })
       })
     }))
@@ -559,18 +729,36 @@ async function downloadWord() {
       }),
       new Table({
         width: { size: contentWidth, type: WidthType.DXA },
-        columnWidths: [480, 5100, 4395],
+        columnWidths: isTenseIdentification.value ? [480, 9495] : [480, 5100, 4395],
         layout: TableLayoutType.FIXED,
         borders: TableBorders.NONE,
         rows: props.questions.map((question, index) => {
+          const identificationCorrectionCells = [
+            cell([paragraph(`${index + 1}.`, { size: 19 })], 480, {
+              borders: lightBottomBorder,
+              margins: { top: 70, bottom: 70, left: 0, right: 40 },
+            }),
+            cell(
+              printableCorrectionAnswers(question).map(answer => paragraph(capitalizePrintText(answer), { bold: true, size: 19 })),
+              9495,
+              { borders: lightBottomBorder, margins: { top: 70, bottom: 70, left: 70, right: 70 } },
+            ),
+          ]
+          const conjugationCorrectionCells = [
+            cell([paragraph(`${index + 1}.`, { size: 19 })], 480, { borders: lightBottomBorder, margins: { top: 55, bottom: 55, left: 0, right: 40 } }),
+            cell(
+              [paragraph(capitalizePrintLine(printableCorrectionLabel(question, props.exerciseKind)), { size: 19 })],
+              5100,
+              { borders: lightBottomBorder, margins: { top: 55, bottom: 55, left: 70, right: 70 } },
+            ),
+            cell(printableCorrectionAnswers(question).map(answer => paragraph(capitalizePrintText(answer), { bold: true, size: 19 })), 4395, { borders: lightBottomBorder, margins: { top: 55, bottom: 55, left: 70, right: 70 } }),
+          ]
           return new TableRow({
             cantSplit: true,
             height: { value: 460, rule: HeightRule.ATLEAST },
-            children: [
-              cell([paragraph(`${index + 1}.`, { size: 19 })], 480, { borders: lightBottomBorder, margins: { top: 55, bottom: 55, left: 0, right: 40 } }),
-              cell([paragraph(capitalizePrintLine(printableCorrectionLabel(question, props.exerciseKind)), { size: 19 })], 5100, { borders: lightBottomBorder, margins: { top: 55, bottom: 55, left: 70, right: 70 } }),
-              cell(printableCorrectionAnswers(question).map(answer => paragraph(capitalizePrintText(answer), { bold: true, size: 19 })), 4395, { borders: lightBottomBorder, margins: { top: 55, bottom: 55, left: 70, right: 70 } })
-            ]
+            children: isTenseIdentification.value
+              ? identificationCorrectionCells
+              : conjugationCorrectionCells,
           })
         })
       })

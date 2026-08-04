@@ -10,8 +10,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:fs/promises';
 import 'node:url';
+import 'node:fs/promises';
 import '../../../_/challenge-defaults.mjs';
 
 const _code__get = defineEventHandler(async (event) => {

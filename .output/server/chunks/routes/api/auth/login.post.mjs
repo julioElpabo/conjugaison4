@@ -9,8 +9,8 @@ import 'node:buffer';
 import 'node:fs';
 import 'node:path';
 import 'mysql2/promise';
-import 'node:fs/promises';
 import 'node:url';
+import 'node:fs/promises';
 
 const MAX_FAILURES = 5;
 const WINDOW_MS = 15 * 60 * 1e3;

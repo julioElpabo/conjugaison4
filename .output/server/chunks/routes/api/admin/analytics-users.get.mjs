@@ -8,8 +8,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:fs/promises';
 import 'node:url';
+import 'node:fs/promises';
 
 const activityDays = {
   week: 7,
@@ -70,7 +70,7 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
   cutoff.setDate(cutoff.getDate() - activityDays[activityWindow]);
   const cutoffSql = cutoff.toISOString().slice(0, 19).replace("T", " ");
   const database = useDatabase();
-  const [[[total]], [[active]], [languageRows], [registrationRows], [[errorReviews]]] = await Promise.all([
+  const [[[total]], [[active]], [languageRows], [anonymousLanguageRows], [registrationRows], [[errorReviews]]] = await Promise.all([
     database.execute(`
       SELECT COUNT(*) AS value
       FROM learner_accounts
@@ -101,6 +101,18 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
       ORDER BY value DESC
     `),
     database.execute(`
+      SELECT sessions.interface_locale AS locale,
+             COUNT(DISTINCT events.session_id) AS value
+      FROM analytics_events events
+      INNER JOIN analytics_sessions sessions ON sessions.session_id=events.session_id
+      WHERE events.event_name='exercise_started'
+        AND events.actor_type='anonymous'
+        AND events.created_at>=? AND events.created_at<DATE_ADD(?, INTERVAL 1 DAY)
+        AND sessions.interface_locale IN ('fr','de','en','it','es')
+      GROUP BY sessions.interface_locale
+      ORDER BY value DESC
+    `, [startDate, endDate]),
+    database.execute(`
       SELECT ${registrationDate} AS date, COUNT(*) AS value
       FROM learner_accounts a
       WHERE a.deleted_at IS NULL
@@ -123,6 +135,12 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
     label: localeLabels[String(row.locale)] || String(row.locale || "Non pr\xE9cis\xE9e"),
     value: Number(row.value) || 0
   }));
+  const anonymousExerciseLanguages = anonymousLanguageRows.map((row) => ({
+    code: String(row.locale || "fr"),
+    label: localeLabels[String(row.locale)] || String(row.locale || "Non pr\xE9cis\xE9e"),
+    value: Number(row.value) || 0
+  }));
+  const anonymousExerciseSessions = anonymousExerciseLanguages.reduce((sum, row) => sum + row.value, 0);
   const registrations = filledRegistrationSeries(
     registrationRows,
     startDate,
@@ -138,6 +156,8 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
     activeAccounts: Number(active == null ? void 0 : active.value) || 0,
     errorReviewUsers: Number(errorReviews == null ? void 0 : errorReviews.value) || 0,
     languages,
+    anonymousExerciseSessions,
+    anonymousExerciseLanguages,
     registrations,
     registrationUnit,
     generatedAt: (/* @__PURE__ */ new Date()).toISOString(),

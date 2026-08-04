@@ -22,7 +22,7 @@ function learnerChallengeSnapshot(value) {
     throw createError({ statusCode: 400, statusMessage: "D\xE9fi invalide" });
   }
   const candidate = value;
-  const exerciseKind = candidate.exerciseKind === "tense-identification" ? "tense-identification" : "conjugation";
+  const exerciseKind = candidate.exerciseKind === "tense-identification" || candidate.exerciseKind === "mode-identification" ? candidate.exerciseKind : "conjugation";
   const questionCount = Math.min(200, Math.max(1, Number(candidate.questionCount) || 1));
   const description = typeof candidate.description === "string" ? candidate.description.trim().slice(0, 1e3) : "";
   const trainingReportTitle = typeof candidate.trainingReportTitle === "string" ? candidate.trainingReportTitle.trim().slice(0, 200) : "";
@@ -33,6 +33,7 @@ function learnerChallengeSnapshot(value) {
     tenseIds: integerList(candidate.tenseIds),
     questionCount,
     exerciseKind,
+    identificationSource: candidate.identificationSource === "literary-corpus" ? "literary-corpus" : "selected-verbs",
     pastSimplePronouns: candidate.pastSimplePronouns === "third-person-only" ? "third-person-only" : "all",
     inclusivePronouns: candidate.inclusivePronouns === true,
     includeComplements: candidate.includeComplements === true,
@@ -57,6 +58,9 @@ function learnerChallengeFingerprint(snapshot, supplied) {
 }
 function shortText(value, maximum) {
   return typeof value === "string" ? value.trim().slice(0, maximum) : "";
+}
+function boundedText(value, maximum) {
+  return typeof value === "string" ? value.slice(0, maximum) : "";
 }
 function learnerQuestionSnapshot(value) {
   var _a;
@@ -93,6 +97,8 @@ function learnerQuestionSnapshot(value) {
   }).slice(0, 12) : [];
   const agreement = question.agreementReminder && typeof question.agreementReminder === "object" ? question.agreementReminder : null;
   const agreementKind = ["cod-before", "cod-after", "coi"].includes(String(agreement == null ? void 0 : agreement.kind)) ? agreement == null ? void 0 : agreement.kind : null;
+  const citation = question.literaryCitation && typeof question.literaryCitation === "object" ? question.literaryCitation : null;
+  const citationTarget = shortText(citation == null ? void 0 : citation.target, 200);
   return {
     titre: shortText(question.titre, 300),
     instruction: shortText(question.instruction, 300) || void 0,
@@ -109,6 +115,9 @@ function learnerQuestionSnapshot(value) {
     temps: shortText(question.temps, 100) || void 0,
     mode: shortText(question.mode, 100) || void 0,
     isCompound: question.isCompound === true,
+    conjugaison1: shortText(question.conjugaison1, 300) || void 0,
+    conjugaison2: shortText(question.conjugaison2, 300) || void 0,
+    conjugaison3: shortText(question.conjugaison3, 300) || void 0,
     radicalReference: paradigmForms.length ? {
       kind: "memorized-form",
       label: "",
@@ -129,6 +138,15 @@ function learnerQuestionSnapshot(value) {
       participle: shortText(agreement == null ? void 0 : agreement.participle, 100),
       gender: (agreement == null ? void 0 : agreement.gender) === "feminin" || (agreement == null ? void 0 : agreement.gender) === "masculin" ? agreement.gender : null,
       number: (agreement == null ? void 0 : agreement.number) === "pluriel" || (agreement == null ? void 0 : agreement.number) === "singulier" ? agreement.number : null
+    } : void 0,
+    literaryCitation: citation && citationTarget ? {
+      before: boundedText(citation.before, 500),
+      target: citationTarget,
+      after: boundedText(citation.after, 500),
+      author: shortText(citation.author, 200),
+      work: shortText(citation.work, 300),
+      chapter: shortText(citation.chapter, 200) || null,
+      sourceUrl: shortText(citation.sourceUrl, 500)
     } : void 0
   };
 }

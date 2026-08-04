@@ -1,7 +1,7 @@
-import { u as useDatabase, D as decodePronominalSelectionId, a2 as indirectRelative, a3 as formatConjugationQuestion, a4 as formatAnswer } from '../nitro/nitro.mjs';
+import { u as useDatabase, D as decodePronominalSelectionId, a3 as indirectRelative, a4 as formatConjugationQuestion, a5 as formatAnswer } from '../nitro/nitro.mjs';
 import { b as buildRadicalReference } from './radical-reference.mjs';
 import { g as generatePronominalRow, r as resolveVariableAuxiliary } from './pronominal-formatter.mjs';
-import { T as TENSE_IDENTIFICATION_INSTRUCTION } from './exercise-instructions.mjs';
+import { M as MODE_IDENTIFICATION_INSTRUCTION, T as TENSE_IDENTIFICATION_INSTRUCTION } from './exercise-instructions.mjs';
 import { i as isNearFutureTense, b as buildNearFutureParadigm, a as isPronominalNearFutureInfinitive, n as nearFutureReflexivePronoun } from './near-future.mjs';
 
 function normalized$1(value) {
@@ -34,6 +34,13 @@ function formatNonFiniteQuestion(verb, tense) {
   } else if (mode === "g\xE9rondif" && tenseName === "pass\xE9" && hasPresentParticiple(verb) && verb.auxiliaire_participe_present) {
     label = "Le g\xE9rondif pass\xE9";
     answers = variants(verb.participe_passe).map((form) => `En ${verb.auxiliaire_participe_present} ${form}`);
+  } else if (mode === "infinitif" && tenseName === "pr\xE9sent") {
+    label = "L\u2019infinitif pr\xE9sent";
+    answers = [upperFirst(verb.infinitif)];
+  } else if (mode === "infinitif" && tenseName === "pass\xE9" && verb.auxiliaire_infinitif) {
+    label = "L\u2019infinitif pass\xE9";
+    const auxiliary = /^s[’']|^se\s/u.test(normalized$1(verb.infinitif)) ? "s\u2019\xEAtre" : normalized$1(verb.auxiliaire_infinitif);
+    answers = variants(verb.participe_passe).map((form) => upperFirst(`${auxiliary} ${form}`));
   } else {
     return null;
   }
@@ -244,6 +251,9 @@ function choosePronoun(pronom, inclusive) {
   return pronom;
 }
 function articleForTense(tense, mode) {
+  if (normalized(mode) === "infinitif") {
+    return `L'infinitif ${tense}`;
+  }
   const article = startsWithVowel(tense) ? "L'" : "Le ";
   const normalizedMode = normalized(mode);
   if (normalizedMode === "indicatif" || normalizedMode === "imp\xE9ratif") {
@@ -251,28 +261,47 @@ function articleForTense(tense, mode) {
   }
   return `${article}${tense} du ${normalizedMode}`;
 }
-function identificationQuestion(row) {
+function literaryIdentificationQuestion(citation, modeOnly) {
+  return identificationQuestion({
+    id: citation.id,
+    verbe_id: citation.verb_id,
+    personne_id: citation.person_id,
+    temp_id: citation.tense_id,
+    conjugaison1: citation.target_text,
+    conjugaison2: "",
+    conjugaison3: "",
+    infinitif: citation.infinitif,
+    pronom: citation.pronom,
+    temps_name: citation.tense_name,
+    tense_code: citation.tense_code,
+    is_compound: citation.is_compound,
+    mode_name: citation.mode_name,
+    mode_code: citation.mode_code
+  }, citation, modeOnly);
+}
+function identificationQuestion(row, citation, modeOnly = false) {
   const pronoun = row.pronom;
   const phrase = formatAnswer(pronoun, row.conjugaison1, row.mode_name);
   const tense = normalized(row.temps_name);
   const mode = normalized(row.mode_name);
-  const correction = articleForTense(tense, mode);
-  const answers = [
+  const modeCorrection = `${startsWithVowel(mode) ? "L'" : "Le "}${mode}`;
+  const correction = modeOnly ? modeCorrection : articleForTense(tense, mode);
+  const answers = modeOnly ? [mode, `mode ${mode}`, modeCorrection] : [
     `${tense} ${mode}`,
     `${mode} ${tense}`,
     correction,
     `${tense} ${mode === "indicatif" || mode === "imp\xE9ratif" ? "de l'" : "du "}${mode}`
   ];
-  if (tense === "futur" && mode === "indicatif") {
+  if (!modeOnly && tense === "futur" && mode === "indicatif") {
     answers.push("futur simple indicatif", "indicatif futur simple", "futur simple de l'indicatif");
   }
   return {
-    id: `t-${row.id}`,
+    id: citation ? `lt-${citation.id}` : `t-${row.id}`,
     verbeId: Number(row.verbe_id),
     tenseId: Number(row.temp_id),
     personId: Number(row.personne_id),
     titre: row.infinitif,
-    instruction: TENSE_IDENTIFICATION_INSTRUCTION,
+    instruction: modeOnly ? MODE_IDENTIFICATION_INSTRUCTION : TENSE_IDENTIFICATION_INSTRUCTION,
     consigne: phrase,
     reponses: unique(answers),
     reponsesPourCorrige: [correction],
@@ -283,8 +312,160 @@ function identificationQuestion(row) {
     conjugaison1: row.conjugaison1,
     conjugaison2: row.conjugaison2 || "",
     conjugaison3: row.conjugaison3 || "",
-    nousForm: row.nous_form || null
+    nousForm: row.nous_form || null,
+    ...citation ? {
+      consigne: citation.sentence_text,
+      literaryCitation: {
+        before: citation.sentence_text.slice(0, Number(citation.target_start)),
+        target: citation.sentence_text.slice(Number(citation.target_start), Number(citation.target_end)),
+        after: citation.sentence_text.slice(Number(citation.target_end)),
+        author: citation.author,
+        work: citation.work,
+        chapter: citation.chapter,
+        sourceUrl: citation.source_url
+      }
+    } : {}
   };
+}
+function literaryCitationKey(verbId, tenseId, personId) {
+  return `${verbId}:${tenseId}:${personId}`;
+}
+async function validatedLiteraryCitations(verbIds, tenseIds, literaryRegister = "all") {
+  const citations = /* @__PURE__ */ new Map();
+  if (!tenseIds.length || verbIds !== null) return citations;
+  const database = useDatabase();
+  try {
+    const register = literaryRegister === "courant" || literaryRegister === "soutenu" ? literaryRegister : "";
+    const coverageRegisterClause = register ? `AND coveredSource.language_register='${register}'` : "";
+    const randomRegisterClause = register ? `AND source.language_register='${register}'` : "";
+    const verbClause = verbIds === null ? "" : `AND target.verb_id IN (${placeholders(verbIds)})`;
+    const parameters = verbIds === null ? [...tenseIds] : [...verbIds, ...tenseIds];
+    const [coverageRows, randomRows] = await Promise.all([
+      database.execute(`
+      SELECT target.id,target.verb_id,target.tense_id,target.person_id,
+             sentence.sentence_text,target.target_text,target.target_start,target.target_end,
+             source.author,source.title AS work,sentence.chapter,COALESCE(sentence.source_url,source.source_url) AS source_url,
+             verb.infinitif,person.pronom,tense.name AS tense_name,tense.code AS tense_code,
+             tense.isTempsCompose AS is_compound,mode.name AS mode_name,mode.code AS mode_code
+      FROM literary_targets target
+      INNER JOIN (
+        SELECT covered.tense_id, MIN(covered.id) AS id
+        FROM literary_targets covered
+        INNER JOIN literary_sentences coveredSentence ON coveredSentence.id=covered.sentence_id
+        INNER JOIN literary_sources coveredSource ON coveredSource.id=coveredSentence.source_id
+        WHERE covered.review_status='validated'
+          ${verbIds === null ? "" : `AND covered.verb_id IN (${placeholders(verbIds)})`}
+          AND covered.tense_id IN (${placeholders(tenseIds)})
+          ${coverageRegisterClause}
+        GROUP BY covered.tense_id
+      ) coverage ON coverage.id=target.id
+      INNER JOIN literary_sentences sentence ON sentence.id=target.sentence_id
+      INNER JOIN literary_sources source ON source.id=sentence.source_id
+      INNER JOIN verbes verb ON verb.id=target.verb_id
+      INNER JOIN personnes person ON person.id=target.person_id
+      INNER JOIN temps tense ON tense.id=target.tense_id
+      INNER JOIN modes mode ON mode.id=tense.mode_id
+    `, parameters),
+      database.execute(`
+      SELECT target.id,target.verb_id,target.tense_id,target.person_id,
+             sentence.sentence_text,target.target_text,target.target_start,target.target_end,
+             source.author,source.title AS work,sentence.chapter,COALESCE(sentence.source_url,source.source_url) AS source_url,
+             verb.infinitif,person.pronom,tense.name AS tense_name,tense.code AS tense_code,
+             tense.isTempsCompose AS is_compound,mode.name AS mode_name,mode.code AS mode_code
+      FROM literary_targets target
+      INNER JOIN literary_sentences sentence ON sentence.id=target.sentence_id
+      INNER JOIN literary_sources source ON source.id=sentence.source_id
+      INNER JOIN verbes verb ON verb.id=target.verb_id
+      INNER JOIN personnes person ON person.id=target.person_id
+      INNER JOIN temps tense ON tense.id=target.tense_id
+      INNER JOIN modes mode ON mode.id=tense.mode_id
+      WHERE target.review_status='validated'
+        ${verbClause}
+        AND target.tense_id IN (${placeholders(tenseIds)})
+        ${randomRegisterClause}
+      ORDER BY RAND()
+      LIMIT 500
+    `, parameters)
+    ]);
+    const seen = /* @__PURE__ */ new Set();
+    for (const row of [...coverageRows[0], ...randomRows[0]]) {
+      if (seen.has(Number(row.id))) continue;
+      seen.add(Number(row.id));
+      const key = literaryCitationKey(Number(row.verb_id), Number(row.tense_id), Number(row.person_id));
+      const group = citations.get(key) || [];
+      group.push(row);
+      citations.set(key, group);
+    }
+  } catch (error) {
+    const code = error && typeof error === "object" && "code" in error ? String(error.code) : "";
+    if (code !== "ER_NO_SUCH_TABLE") throw error;
+  }
+  return citations;
+}
+function balancedIdentificationQuestions(questions, count) {
+  var _a;
+  const groupsByMode = /* @__PURE__ */ new Map();
+  for (const question of shuffle([...questions])) {
+    const mode = normalized(question.mode || "");
+    const tense = question.tenseId === void 0 ? normalized(question.temps || "") : String(question.tenseId);
+    if (!mode || !tense) continue;
+    const modeGroups = groupsByMode.get(mode) || /* @__PURE__ */ new Map();
+    modeGroups.set(tense, [...modeGroups.get(tense) || [], question]);
+    groupsByMode.set(mode, modeGroups);
+  }
+  const preferredModeOrder = ["indicatif", "subjonctif", "conditionnel", "imp\xE9ratif", "infinitif"];
+  const modes = [...groupsByMode.keys()].sort((left, right) => {
+    const leftOrder = preferredModeOrder.indexOf(left);
+    const rightOrder = preferredModeOrder.indexOf(right);
+    return (leftOrder < 0 ? preferredModeOrder.length : leftOrder) - (rightOrder < 0 ? preferredModeOrder.length : rightOrder);
+  });
+  const unusedGroupsByMode = new Map(modes.map((mode) => {
+    var _a2;
+    const groups = [...((_a2 = groupsByMode.get(mode)) == null ? void 0 : _a2.values()) || []].map((group) => ({ group, tieBreaker: Math.random() })).sort((left, right) => left.group.length - right.group.length || left.tieBreaker - right.tieBreaker).map((item) => item.group);
+    return [mode, groups];
+  }));
+  const balanced = [];
+  while (balanced.length < count && modes.some((mode) => {
+    var _a2;
+    return (_a2 = unusedGroupsByMode.get(mode)) == null ? void 0 : _a2.length;
+  })) {
+    for (const mode of shuffle([...modes])) {
+      const group = (_a = unusedGroupsByMode.get(mode)) == null ? void 0 : _a.shift();
+      const question = group == null ? void 0 : group.shift();
+      if (question) balanced.push(question);
+      if (balanced.length >= count) break;
+    }
+  }
+  const repeatedGroups = shuffle([...groupsByMode.values()].flatMap((modeGroups) => [...modeGroups.values()]));
+  while (balanced.length < count && repeatedGroups.some((group) => group.length)) {
+    for (const group of repeatedGroups) {
+      const question = group.shift();
+      if (question) balanced.push(question);
+      if (balanced.length >= count) break;
+    }
+  }
+  return shuffle(balanced);
+}
+function balancedModeIdentificationQuestions(questions, count) {
+  var _a;
+  const groups = /* @__PURE__ */ new Map();
+  for (const question of shuffle(questions.filter((item) => item.literaryCitation))) {
+    const mode = normalized(question.mode || "");
+    groups.set(mode, [...groups.get(mode) || [], question]);
+  }
+  const modeOrder = ["indicatif", "subjonctif", "conditionnel", "imp\xE9ratif", "infinitif"];
+  const balanced = [];
+  while (balanced.length < count && modeOrder.some((mode) => {
+    var _a2;
+    return (_a2 = groups.get(mode)) == null ? void 0 : _a2.length;
+  })) {
+    for (const mode of shuffle([...modeOrder])) {
+      const question = (_a = groups.get(mode)) == null ? void 0 : _a.shift();
+      if (question) balanced.push(question);
+      if (balanced.length >= count) break;
+    }
+  }
+  return shuffle(balanced);
 }
 async function validateSelections(request) {
   const database = useDatabase();
@@ -318,26 +499,54 @@ async function validateSelections(request) {
   return tenseResult[0];
 }
 async function generateQuestionnaire(request) {
-  var _a;
+  var _a, _b;
   const selectedTenses = await validateSelections(request);
-  const finiteTenses = selectedTenses.filter((row) => !["participe", "g\xE9rondif"].includes(normalized(row.mode_name)));
-  const nonFiniteTenses = selectedTenses.filter((row) => ["participe", "g\xE9rondif"].includes(normalized(row.mode_name)));
+  const nonFiniteModes = ["participe", "g\xE9rondif", "infinitif"];
+  const finiteTenses = selectedTenses.filter((row) => !nonFiniteModes.includes(normalized(row.mode_name)));
+  const nonFiniteTenses = selectedTenses.filter((row) => nonFiniteModes.includes(normalized(row.mode_name)));
   const database = useDatabase();
   const questions = [];
   const requestedComplementOptions = request.complementOptions || [];
   const onlyBeforeComplements = requestedComplementOptions.length > 0 && requestedComplementOptions.every((option) => option.endsWith("-before"));
   const verbIds = request.verbIds.filter((id) => id > 0);
   const pronominalUseIds = request.verbIds.filter((id) => id < 0).map(decodePronominalSelectionId).filter((id) => id !== null);
+  const usesLiteraryCitations = request.exerciseKind === "mode-identification" || request.exerciseKind === "tense-identification" && request.identificationSource === "literary-corpus";
+  if (usesLiteraryCitations) {
+    const citations = await validatedLiteraryCitations(
+      null,
+      selectedTenses.map((row) => Number(row.id)),
+      (_a = request.literaryRegister) != null ? _a : "all"
+    );
+    const literaryQuestions = [...citations.values()].flat().map((citation) => literaryIdentificationQuestion(citation, request.exerciseKind === "mode-identification"));
+    if (!literaryQuestions.length) {
+      throw new QuestionnaireSelectionError("Aucune citation valid\xE9e ne correspond aux temps s\xE9lectionn\xE9s");
+    }
+    return request.exerciseKind === "mode-identification" ? balancedModeIdentificationQuestions(literaryQuestions, request.questionCount) : balancedIdentificationQuestions(literaryQuestions, request.questionCount);
+  }
   if (finiteTenses.length > 0) {
-    const nearFutureTenses = finiteTenses.filter(isNearFutureTense);
+    const nearFutureTenses = usesLiteraryCitations ? [] : finiteTenses.filter(isNearFutureTense);
     const storedFiniteTenses = finiteTenses.filter((tense) => !isNearFutureTense(tense));
     const finiteIds = storedFiniteTenses.map((row) => Number(row.id));
     const pastSimpleClause = request.pastSimplePronouns === "third-person-only" ? "AND (t.name NOT IN ('pass\xE9 simple', 'pass\xE9 ant\xE9rieur') OR p.pronom IN ('il', 'ils'))" : "";
-    const limit = Math.min(500, Math.max(request.questionCount * 4, request.questionCount));
     const rows = [];
+    const literaryCitations = usesLiteraryCitations ? await validatedLiteraryCitations(null, finiteIds) : /* @__PURE__ */ new Map();
+    const limit = request.exerciseKind === "conjugation" ? Math.min(500, Math.max(request.questionCount * 4, request.questionCount)) : 600;
+    const questionVerbIds = usesLiteraryCitations ? [...new Set([...literaryCitations.values()].flat().map((citation) => Number(citation.verb_id)))] : verbIds;
+    const literaryCoordinates = usesLiteraryCitations ? [...literaryCitations.keys()].map((key) => {
+      const [verbId, tenseId, personId] = key.split(":").map(Number);
+      return [verbId, tenseId, personId];
+    }) : [];
+    const exactLiteraryClause = literaryCoordinates.length ? `AND (vc.verbe_id,vc.temp_id,vc.personne_id) IN (${literaryCoordinates.map(() => "(?,?,?)").join(",")})` : "";
+    const literaryOrderClause = literaryCitations.size ? `CASE WHEN EXISTS (
+          SELECT 1 FROM literary_targets prioritized
+          WHERE prioritized.review_status='validated'
+            AND prioritized.verb_id=vc.verbe_id
+            AND prioritized.tense_id=vc.temp_id
+            AND prioritized.person_id=vc.personne_id
+        ) THEN 0 ELSE 1 END,` : "";
     let radicalReferences = /* @__PURE__ */ new Map();
     let etreAuxiliaryForms = [];
-    if (verbIds.length > 0 && finiteIds.length > 0) {
+    if (questionVerbIds.length > 0 && finiteIds.length > 0) {
       const [storedRows] = await database.execute(`
       SELECT vc.id, vc.verbe_id, vc.personne_id, vc.temp_id,
              vc.conjugaison1, vc.conjugaison2, vc.conjugaison3,
@@ -358,16 +567,17 @@ async function generateQuestionnaire(request) {
       INNER JOIN personnes p ON p.id = vc.personne_id
       INNER JOIN temps t ON t.id = vc.temp_id
       INNER JOIN modes m ON m.id = t.mode_id
-      WHERE vc.verbe_id IN (${placeholders(verbIds)})
+      WHERE vc.verbe_id IN (${placeholders(questionVerbIds)})
         AND vc.temp_id IN (${placeholders(finiteIds)})
+        ${exactLiteraryClause}
         AND vc.conjugaison1 <> ''
         ${pastSimpleClause}
-      ORDER BY RAND()
+      ORDER BY ${literaryOrderClause} RAND()
       LIMIT ${limit}
-      `, [...verbIds, ...finiteIds]);
+      `, [...questionVerbIds, ...finiteIds, ...literaryCoordinates.flat()]);
       rows.push(...storedRows);
     }
-    if (pronominalUseIds.length > 0 && finiteIds.length > 0) {
+    if (!usesLiteraryCitations && pronominalUseIds.length > 0 && finiteIds.length > 0) {
       const [sourceRows, auxiliaryForms] = await Promise.all([
         database.execute(`
           SELECT vc.id, -ep.id AS verbe_id, ep.verbe_id AS base_verbe_id, vc.personne_id, vc.temp_id,
@@ -492,14 +702,19 @@ async function generateQuestionnaire(request) {
         ORDER BY vs.verbe_id, c.id
       `, verbIds);
       for (const complement of complements) {
-        const candidates = (_a = complementsByVerb.get(Number(complement.verbe_id))) != null ? _a : [];
+        const candidates = (_b = complementsByVerb.get(Number(complement.verbe_id))) != null ? _b : [];
         candidates.push(complement);
         complementsByVerb.set(Number(complement.verbe_id), candidates);
       }
     }
-    const rowsForQuestions = onlyBeforeComplements ? rows.filter((row) => normalized(row.mode_name) !== "imp\xE9ratif" && (requestedComplementOptions.includes("coi-before") || Boolean(row.is_compound))) : rows;
+    const eligibleRows = usesLiteraryCitations ? rows.filter((row) => literaryCitations.has(literaryCitationKey(
+      Number(row.verbe_id),
+      Number(row.temp_id),
+      Number(row.personne_id)
+    ))) : rows;
+    const rowsForQuestions = onlyBeforeComplements ? eligibleRows.filter((row) => normalized(row.mode_name) !== "imp\xE9ratif" && (requestedComplementOptions.includes("coi-before") || Boolean(row.is_compound))) : eligibleRows;
     questions.push(...rowsForQuestions.map((row) => {
-      var _a2;
+      var _a2, _b2;
       const candidates = (_a2 = complementsByVerb.get(Number(row.verbe_id))) != null ? _a2 : [];
       const availableOptions = requestedComplementOptions.flatMap((option2) => {
         const [functionObject, position] = option2.split("-");
@@ -536,7 +751,15 @@ async function generateQuestionnaire(request) {
         radical_reference: radicalReference,
         future_simple_forms: futureSimpleForms,
         conjugation_confusions: conjugationConfusions
-      }, choosePronoun(row.pronom, request.inclusivePronouns)) : identificationQuestion(semanticRow);
+      }, choosePronoun(row.pronom, request.inclusivePronouns)) : identificationQuestion(
+        semanticRow,
+        (_b2 = literaryCitations.get(literaryCitationKey(
+          Number(row.verbe_id),
+          Number(row.temp_id),
+          Number(row.personne_id)
+        ))) == null ? void 0 : _b2.shift(),
+        request.exerciseKind === "mode-identification"
+      );
     }));
   }
   if (nonFiniteTenses.length > 0 && request.exerciseKind === "conjugation" && !onlyBeforeComplements) {
@@ -551,6 +774,7 @@ async function generateQuestionnaire(request) {
       SELECT v.id, v.infinitif,
              v.\`participe_pr\xE9sent\` AS participe_present,
              v.\`participe_pass\xE9\` AS participe_passe,
+             auxiliary.infinitif AS auxiliaire_infinitif,
              auxiliary.\`participe_pr\xE9sent\` AS auxiliaire_participe_present,
              (SELECT vc.conjugaison1 FROM verbesconjugues vc
               INNER JOIN temps present_tense ON present_tense.id=vc.temp_id
@@ -595,6 +819,7 @@ async function generateQuestionnaire(request) {
           infinitif: use.infinitif_pronominal,
           participe_present: pronominalParticiples.join("-"),
           participe_passe: use.participe_passe,
+          auxiliaire_infinitif: "\xEAtre",
           auxiliaire_participe_present: "s'\xE9tant",
           present_nous: use.present_nous
         });
@@ -607,7 +832,13 @@ async function generateQuestionnaire(request) {
       }
     }
   }
-  return shuffle(questions).slice(0, request.questionCount);
+  if (usesLiteraryCitations && !questions.length) {
+    throw new QuestionnaireSelectionError("Aucune citation valid\xE9e ne correspond aux temps s\xE9lectionn\xE9s");
+  }
+  if (request.exerciseKind === "mode-identification") {
+    return balancedModeIdentificationQuestions(questions, request.questionCount);
+  }
+  return request.exerciseKind === "tense-identification" ? balancedIdentificationQuestions(questions, request.questionCount) : shuffle(questions).slice(0, request.questionCount);
 }
 
 export { QuestionnaireSelectionError as Q, generateQuestionnaire as g };

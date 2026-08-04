@@ -9,6 +9,8 @@ const QUESTIONNAIRE_KEYS = /* @__PURE__ */ new Set([
   "tenseIds",
   "questionCount",
   "exerciseKind",
+  "identificationSource",
+  "literaryRegister",
   "pastSimplePronouns",
   "inclusivePronouns",
   "includeComplements",
@@ -23,6 +25,8 @@ const DEFI_KEYS = /* @__PURE__ */ new Set([
   "tenseIds",
   "questionCount",
   "exerciseKind",
+  "identificationSource",
+  "literaryRegister",
   "pastSimplePronouns",
   "inclusivePronouns",
   "includeComplements",
@@ -123,7 +127,16 @@ function parseExerciseKind(value) {
   if (value === "tense-identification" || value === "temps-mode") {
     return "tense-identification";
   }
-  throw new PublicInputError("exerciseKind doit valoir conjugation ou tense-identification");
+  if (value === "mode-identification") return "mode-identification";
+  throw new PublicInputError("exerciseKind doit valoir conjugation, tense-identification ou mode-identification");
+}
+function parseIdentificationSource(value) {
+  if (value === "selected-verbs" || value === "literary-corpus") return value;
+  throw new PublicInputError("identificationSource doit valoir selected-verbs ou literary-corpus");
+}
+function parseLiteraryRegister(value) {
+  if (value === "all" || value === "courant" || value === "soutenu") return value;
+  throw new PublicInputError("literaryRegister doit valoir all, courant ou soutenu");
 }
 function parsePastSimplePronouns(value) {
   if (value === "all" || value === "tous") {
@@ -201,6 +214,8 @@ function parseQuestionnaireRequest(value) {
     tenseIds: parseIds(value.tenseIds, "tenseIds", 30),
     questionCount: parseQuestionCount(value.questionCount),
     exerciseKind: parseExerciseKind(value.exerciseKind),
+    identificationSource: value.identificationSource === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.identificationSource : parseIdentificationSource(value.identificationSource),
+    literaryRegister: value.literaryRegister === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.literaryRegister : parseLiteraryRegister(value.literaryRegister),
     pastSimplePronouns: parsePastSimplePronouns(value.pastSimplePronouns),
     inclusivePronouns: value.inclusivePronouns,
     includeComplements: resolvedLegacy.includeComplements,
@@ -234,6 +249,8 @@ function parseDefiDefinition(value) {
     throw new PublicInputError("Version de d\xE9fi non prise en charge");
   }
   const exerciseKind = modernValue.exerciseKind === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.exerciseKind : parseExerciseKind(modernValue.exerciseKind);
+  const identificationSource = modernValue.identificationSource === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.identificationSource : parseIdentificationSource(modernValue.identificationSource);
+  const literaryRegister = modernValue.literaryRegister === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.literaryRegister : parseLiteraryRegister(modernValue.literaryRegister);
   const pastSimplePronouns = modernValue.pastSimplePronouns === void 0 ? legacyPastSimple === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.pastSimplePronouns : parsePastSimplePronouns(legacyPastSimple) : parsePastSimplePronouns(modernValue.pastSimplePronouns);
   const inclusivePronouns = modernValue.inclusivePronouns === void 0 ? legacyInclusive === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.inclusivePronouns : legacyInclusive === "afficherIel" : modernValue.inclusivePronouns;
   if (typeof inclusivePronouns !== "boolean") {
@@ -256,6 +273,8 @@ function parseDefiDefinition(value) {
     tenseIds: parseIds(modernValue.tenseIds, "tenseIds", 30),
     questionCount: parseQuestionCount(modernValue.questionCount),
     exerciseKind,
+    identificationSource,
+    literaryRegister,
     pastSimplePronouns,
     inclusivePronouns,
     includeComplements: resolvedLegacy.includeComplements,

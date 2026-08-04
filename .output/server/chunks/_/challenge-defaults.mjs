@@ -2,6 +2,8 @@ import { I as DEFAULT_COMPLEMENT_OPTIONS } from '../nitro/nitro.mjs';
 
 const DEFAULT_SHARED_CHALLENGE_OPTIONS = {
   exerciseKind: "conjugation",
+  identificationSource: "selected-verbs",
+  literaryRegister: "all",
   pastSimplePronouns: "all",
   inclusivePronouns: false,
   includeComplements: true,

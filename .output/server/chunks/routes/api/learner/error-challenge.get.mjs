@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, a as getQuery, O as LEARNER_ERROR_TAXONOMY, c as createError, u as useDatabase, K as diagnoseLearnerError, M as applicableLearnerErrorTypes } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, a as getQuery, P as LEARNER_ERROR_TAXONOMY, c as createError, u as useDatabase, K as diagnoseLearnerError, M as applicableLearnerErrorTypes } from '../../../nitro/nitro.mjs';
 import { g as generateQuestionnaire } from '../../../_/questionnaire.mjs';
 import { r as requireLearnerDataSubject } from '../../../_/learner-data-subject.mjs';
 import 'node:http';
@@ -9,8 +9,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:fs/promises';
 import 'node:url';
+import 'node:fs/promises';
 import '../../../_/radical-reference.mjs';
 import '../../../_/pronominal-formatter.mjs';
 import '../../../_/exercise-instructions.mjs';
@@ -151,6 +151,7 @@ const errorChallenge_get = defineEventHandler(async (event) => {
     tenseIds: selectedTenseIds,
     questionCount: 10,
     exerciseKind: "conjugation",
+    identificationSource: "selected-verbs",
     pastSimplePronouns,
     inclusivePronouns,
     includeComplements: includeComplements || targetedOptions.length > 0,

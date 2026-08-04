@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, o as normalizeLocale, c as createError, u as useDatabase, Q as CURRENT_PRIVACY_NOTICE_VERSION } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, o as normalizeLocale, c as createError, u as useDatabase, R as CURRENT_PRIVACY_NOTICE_VERSION } from '../../../nitro/nitro.mjs';
 import { randomBytes } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { n as normalizeLearnerUsername, i as isGeneratedLearnerUsername, a as availableLearnerUsername } from '../../../_/learner-username.mjs';
@@ -14,8 +14,8 @@ import 'node:buffer';
 import 'node:fs';
 import 'node:path';
 import 'mysql2/promise';
-import 'node:fs/promises';
 import 'node:url';
+import 'node:fs/promises';
 
 function recoveryCode() {
   var _a;

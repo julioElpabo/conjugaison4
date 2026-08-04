@@ -5,5 +5,15 @@ Disallow: /de/admin/
 Disallow: /en/admin/
 Disallow: /it/admin/
 Disallow: /es/admin/
+Disallow: /fr/signin
+Disallow: /de/signin
+Disallow: /en/signin
+Disallow: /it/signin
+Disallow: /es/signin
+Disallow: /fr/my-page
+Disallow: /de/my-page
+Disallow: /en/my-page
+Disallow: /it/my-page
+Disallow: /es/my-page
 
 Sitemap: https://conjugaison.tatitotu.ch/sitemap.xml

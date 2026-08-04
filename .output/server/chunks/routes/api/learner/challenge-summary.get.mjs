@@ -1,4 +1,5 @@
 import { d as defineEventHandler, s as setResponseHeader, a as getQuery, o as normalizeLocale, c as createError, u as useDatabase, N as learnerErrorDetails } from '../../../nitro/nitro.mjs';
+import { i as identificationFormParts } from '../../../_/identification-form.mjs';
 import { r as requireLearnerDataSubject } from '../../../_/learner-data-subject.mjs';
 import 'node:http';
 import 'node:https';
@@ -8,8 +9,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:fs/promises';
 import 'node:url';
+import 'node:fs/promises';
 import '../../../_/session.mjs';
 import '../../../_/learner-session.mjs';
 
@@ -18,6 +19,14 @@ function questionFromJson(source) {
     return JSON.parse(source);
   } catch {
     return null;
+  }
+}
+function exerciseKindFromJson(source) {
+  try {
+    const config = JSON.parse(source);
+    return config.exerciseKind === "tense-identification" || config.exerciseKind === "mode-identification" ? config.exerciseKind : "conjugation";
+  } catch {
+    return "conjugation";
   }
 }
 const challengeSummary_get = defineEventHandler(async (event) => {
@@ -31,12 +40,14 @@ const challengeSummary_get = defineEventHandler(async (event) => {
   }
   const database = useDatabase();
   const [[run]] = await database.execute(`
-    SELECT id
+    SELECT id, challenge_config_json AS challengeConfigJson
     FROM learner_challenge_runs
     WHERE id=? AND account_id=? AND last_answered_at IS NOT NULL
     LIMIT 1
   `, [runId, learner.id]);
   if (!run) throw createError({ statusCode: 404, statusMessage: "S\xE9ance introuvable" });
+  const exerciseKind = exerciseKindFromJson(run.challengeConfigJson);
+  const isIdentificationExercise = exerciseKind === "tense-identification" || exerciseKind === "mode-identification";
   const [incorrectRows] = await database.execute(`
     SELECT a.question_index AS questionIndex,
            COALESCE(q.question_json, a.question_json) AS questionJson,
@@ -75,7 +86,8 @@ const challengeSummary_get = defineEventHandler(async (event) => {
     const expectedAnswer = question.reponsesPourCorrige.join(answerSeparator) || question.reponses.join(answerSeparator);
     const mastered = Boolean(row.isMastered);
     const learnerAnswer = mastered ? question.reponses[0] || expectedAnswer : row.learnerAnswer || "";
-    const errorDetails = mastered ? [] : learnerErrorDetails(learnerAnswer, question);
+    const errorDetails = mastered || isIdentificationExercise ? [] : learnerErrorDetails(learnerAnswer, question);
+    const identificationForm = !mastered && isIdentificationExercise ? identificationFormParts(question) : null;
     return [{
       index: itemIndex + 1,
       status: mastered ? "correct" : "incorrect",
@@ -90,7 +102,10 @@ const challengeSummary_get = defineEventHandler(async (event) => {
       acceptedAnswers: question.reponses,
       displayExpectedAnswers: question.reponsesPourCorrige.length ? question.reponsesPourCorrige : question.reponses,
       errorLabels: errorDetails.map((detail) => detail.label),
-      errorDetails
+      errorDetails,
+      identificationForm,
+      literaryCitation: !mastered ? question.literaryCitation : void 0,
+      isIdentification: isIdentificationExercise
     }];
   });
   return {

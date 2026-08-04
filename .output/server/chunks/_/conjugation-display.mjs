@@ -25,7 +25,9 @@ const TENSE_ORDER = /* @__PURE__ */ new Map([
   ["conditionnel:pass\xE9 1", 20],
   ["conditionnel:pass\xE9 2", 30],
   ["imp\xE9ratif:pr\xE9sent", 10],
-  ["imp\xE9ratif:pass\xE9", 20]
+  ["imp\xE9ratif:pass\xE9", 20],
+  ["infinitif:pr\xE9sent", 10],
+  ["infinitif:pass\xE9", 20]
 ]);
 function key(value) {
   return value.trim().toLocaleLowerCase("fr-CH");

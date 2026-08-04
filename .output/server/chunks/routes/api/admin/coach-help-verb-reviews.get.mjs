@@ -8,8 +8,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:fs/promises';
 import 'node:url';
+import 'node:fs/promises';
 
 const COACH_HELP_REVIEW_VERSION = "semantic-ai-review-v2";
 

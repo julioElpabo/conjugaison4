@@ -1,4 +1,4 @@
-import { d as defineEventHandler, n as useRuntimeConfig, S as SUPPORTED_LOCALES, R as setHeader, T as localizePath } from '../nitro/nitro.mjs';
+import { d as defineEventHandler, n as useRuntimeConfig, S as SUPPORTED_LOCALES, T as setHeader, U as localizePath } from '../nitro/nitro.mjs';
 import { M as MODE_LANDING_SLUGS } from '../_/mode-landing-pages.mjs';
 import { M as MODE_TENSE_PATHS } from '../_/mode-tense-pages.mjs';
 import 'node:http';
@@ -9,8 +9,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:fs/promises';
 import 'node:url';
+import 'node:fs/promises';
 
 const PUBLIC_PATHS = [
   "/",

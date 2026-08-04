@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, toRef, isReadonly, isRef, isShallow, isReactive, toRaw } from 'vue';
-import { a9 as parseURL, aa as encodePath, ab as decodePath, ac as localeFromPath, o as normalizeLocale, ad as getRequestHeaders, c as createError$1, V as hasProtocol, X as isScriptProtocol, W as joinURL, ae as withQuery, af as klona, ag as DEFAULT_LANGUAGE_PREFERENCES, T as localizePath, ah as sanitizeStatusCode, ai as getContext, aj as getRequestHeader, ak as isEqual, j as setCookie, m as getCookie, k as deleteCookie, al as $fetch, am as defu, z as stripLocaleFromPath, S as SUPPORTED_LOCALES, a0 as executeAsync, an as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { aa as parseURL, ab as encodePath, ac as decodePath, ad as localeFromPath, o as normalizeLocale, ae as getRequestHeaders, c as createError$1, W as hasProtocol, Y as isScriptProtocol, X as joinURL, af as withQuery, ag as klona, ah as DEFAULT_LANGUAGE_PREFERENCES, U as localizePath, ai as sanitizeStatusCode, aj as getContext, ak as getRequestHeader, al as isEqual, j as setCookie, m as getCookie, k as deleteCookie, am as $fetch, an as defu, z as stripLocaleFromPath, S as SUPPORTED_LOCALES, a1 as executeAsync, ao as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useSeoMeta$1, a as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -11,8 +11,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:fs/promises';
 import 'node:url';
+import 'node:fs/promises';
 import 'vue-bundle-renderer/runtime';
 import 'unhead/server';
 import 'devalue';
@@ -341,6 +341,7 @@ const uiMessages = {
   "D\xE9fi de conjugaison": { de: "Konjugations\xFCbung", en: "Conjugation challenge", it: "Esercizio di coniugazione", es: "Ejercicio de conjugaci\xF3n" },
   "D\xE9fi pr\xEAt \xE0 \xEAtre partag\xE9": { de: "\xDCbung bereit zum Teilen", en: "Challenge ready to share", it: "Esercizio pronto per essere condiviso", es: "Ejercicio listo para compartir" },
   "D\xE9fi partag\xE9": { de: "Geteilte \xDCbung", en: "Shared challenge", it: "Esercizio condiviso", es: "Ejercicio compartido" },
+  "Phrases litt\xE9raires": { de: "Literarische S\xE4tze", en: "Literary sentences", it: "Frasi letterarie", es: "Frases literarias" },
   "Titre du d\xE9fi": { de: "Titel der \xDCbung", en: "Challenge title", it: "Titolo dell\u2019esercizio", es: "T\xEDtulo del ejercicio" },
   "Description du d\xE9fi": { de: "Beschreibung der \xDCbung", en: "Challenge description", it: "Descrizione dell\u2019esercizio", es: "Descripci\xF3n del ejercicio" },
   "Facultatif : une description \xE0 l\u2019attention des personnes qui d\xE9couvriront ce d\xE9fi": { de: "Optional: eine Beschreibung f\xFCr Personen, die diese \xDCbung entdecken", en: "Optional: a description for people discovering this challenge", it: "Facoltativo: una descrizione per chi scoprir\xE0 questo esercizio", es: "Opcional: una descripci\xF3n para quienes descubran este ejercicio" },
@@ -444,6 +445,7 @@ const uiMessages = {
   "Conjuguer les formes demand\xE9es": { de: "Die verlangten Formen konjugieren", en: "Conjugate the requested forms", it: "Coniugare le forme richieste", es: "Conjugar las formas solicitadas" },
   "avec compl\xE9ments,": { de: "mit Erg\xE4nzungen,", en: "with complements,", it: "con complementi,", es: "con complementos," },
   "Trouver le mode et le temps": { de: "Modus und Zeitform bestimmen", en: "Identify the mood and tense", it: "Trovare il modo e il tempo", es: "Identificar el modo y el tiempo" },
+  "Trouver le mode et les temps": { de: "Modus und Zeitformen bestimmen", en: "Identify the mood and tenses", it: "Trovare il modo e i tempi", es: "Identificar el modo y los tiempos" },
   "Compl\xE9ments d\u2019objets :": { de: "Objekterg\xE4nzungen:", en: "Object complements:", it: "Complementi oggetto:", es: "Complementos de objeto:" },
   "Ajoute des compl\xE9ments d\u2019objets directs ou indirects.": { de: "F\xFCge direkte oder indirekte Objekte hinzu.", en: "Add direct or indirect object complements.", it: "Aggiungi complementi oggetto diretti o indiretti.", es: "A\xF1ade complementos de objeto directos o indirectos." },
   "nouveau": { de: "neu", en: "new", it: "nuovo", es: "nuevo" },
@@ -696,6 +698,14 @@ const uiMessages = {
   "Accord du participe pass\xE9": { de: "Angleichung des Partizips Perfekt", en: "Past participle agreement", it: "Concordanza del participio passato", es: "Concordancia del participio pasado" },
   "Verbe pronominal": { de: "Reflexives Verb", en: "Pronominal verb", it: "Verbo pronominale", es: "Verbo pronominal" },
   "Indicatif": { de: "Indikativ", en: "Indicative", it: "Indicativo", es: "Indicativo" },
+  "Reconna\xEEtre les modes": { de: "Modi erkennen", en: "Recognise moods", it: "Riconoscere i modi", es: "Reconocer los modos" },
+  "D\xE9finition du verbe": { de: "Definition des Verbs", en: "Verb definition", it: "Definizione del verbo", es: "Definici\xF3n del verbo" },
+  "Choisis le mode": { de: "W\xE4hle den Modus", en: "Choose the mood", it: "Scegli il modo", es: "Elige el modo" },
+  "Modes": { de: "Modi", en: "Moods", it: "Modi", es: "Modos" },
+  "Choisis le temps": { de: "W\xE4hle die Zeitform", en: "Choose the tense", it: "Scegli il tempo", es: "Elige el tiempo" },
+  "\xC9cris ta r\xE9ponse ou clique directement sur le mode correct": { de: "Schreibe deine Antwort oder klicke direkt auf den richtigen Modus", en: "Write your answer or click the correct mood directly", it: "Scrivi la risposta o fai clic direttamente sul modo corretto", es: "Escribe tu respuesta o haz clic directamente en el modo correcto" },
+  "\xC9cris ta r\xE9ponse ou clique directement sur le mode puis sur le temps correct": { de: "Schreibe deine Antwort oder klicke direkt auf den richtigen Modus und dann auf die richtige Zeitform", en: "Write your answer or click the correct mood and then the correct tense", it: "Scrivi la risposta o fai clic direttamente sul modo e poi sul tempo corretto", es: "Escribe tu respuesta o haz clic directamente en el modo y despu\xE9s en el tiempo correcto" },
+  "\xC9cris ta r\xE9ponse": { de: "Schreibe deine Antwort", en: "Type your answer", it: "Scrivi la tua risposta", es: "Escribe tu respuesta" },
   "Subjonctif": { de: "Subjonktiv", en: "Subjunctive", it: "Congiuntivo", es: "Subjuntivo" },
   "Conditionnel": { de: "Konditional", en: "Conditional", it: "Condizionale", es: "Condicional" },
   "Imp\xE9ratif": { de: "Imperativ", en: "Imperative", it: "Imperativo", es: "Imperativo" },
@@ -876,7 +886,7 @@ const uiMessages = {
   "R\xE9duire": { de: "Weniger anzeigen", en: "Show less", it: "Riduci", es: "Mostrar menos" },
   "Voir tout ({count})": { de: "Alle anzeigen ({count})", en: "View all ({count})", it: "Vedi tutti ({count})", es: "Ver todos ({count})" },
   "Retirer le verbe {verb}": { de: "Verb {verb} entfernen", en: "Remove the verb {verb}", it: "Rimuovi il verbo {verb}", es: "Eliminar el verbo {verb}" },
-  "Quel est le temps et le mode de cette forme conjugu\xE9e ?": { de: "Welche Zeitform und welcher Modus hat diese konjugierte Form?", en: "What are the tense and mood of this conjugated form?", it: "Quali sono il tempo e il modo di questa forma coniugata?", es: "\xBFCu\xE1les son el tiempo y el modo de esta forma conjugada?" },
+  "Quel est le mode et le temps de cette forme conjugu\xE9e ?": { de: "Welchen Modus und welche Zeitform hat diese konjugierte Form?", en: "What are the mood and tense of this conjugated form?", it: "Quali sono il modo e il tempo di questa forma coniugata?", es: "\xBFCu\xE1les son el modo y el tiempo de esta forma conjugada?" },
   "ou": { de: "oder", en: "or", it: "o", es: "o" },
   "f\xE9minin": { de: "weiblich", en: "feminine", it: "femminile", es: "femenino" },
   "masculin": { de: "m\xE4nnlich", en: "masculine", it: "maschile", es: "masculino" },
@@ -1325,17 +1335,17 @@ const _routes = [
   {
     name: "admin-admins",
     path: "/admin/admins",
-    component: () => import('./admins-CFeOIjYe.mjs')
+    component: () => import('./admins-dd_jHCwx.mjs')
   },
   {
     name: "admin-caracteres",
     path: "/admin/caracteres",
-    component: () => import('./caracteres-DpL0k9FB.mjs')
+    component: () => import('./caracteres-Cfu5BOyA.mjs')
   },
   {
     name: "admin-challenges",
     path: "/admin/challenges",
-    component: () => import('./challenges-BimTmhS-.mjs')
+    component: () => import('./challenges-DPzo-JwG.mjs')
   },
   {
     name: "admin-characters",
@@ -1345,47 +1355,57 @@ const _routes = [
   {
     name: "admin-charts",
     path: "/admin/charts",
-    component: () => import('./charts-DikT4AdJ.mjs')
+    component: () => import('./charts-DC6wonZY.mjs')
   },
   {
     name: "admin-coaches",
     path: "/admin/coaches",
-    component: () => import('./coaches-D2IeNzbF.mjs')
+    component: () => import('./coaches-DDwijDrA.mjs')
   },
   {
     name: "admin-contact",
     path: "/admin/contact",
-    component: () => import('./contact-DVNqdg_1.mjs')
+    component: () => import('./contact-DoAEhj0W.mjs')
   },
   {
     name: "admin-errors",
     path: "/admin/errors",
-    component: () => import('./errors-CmvdRch0.mjs')
+    component: () => import('./errors-DCS7YHYr.mjs')
   },
   {
     name: "admin-feedbacks",
     path: "/admin/feedbacks",
-    component: () => import('./feedbacks-Q7uN9jS9.mjs')
+    component: () => import('./feedbacks-DGq756Ru.mjs')
   },
   {
     name: "admin-help-verification",
     path: "/admin/help-verification",
-    component: () => import('./help-verification-CapOEAOO.mjs')
+    component: () => import('./help-verification-DikXrPqS.mjs')
   },
   {
     name: "admin-helps",
     path: "/admin/helps",
-    component: () => import('./helps-J7axSOoo.mjs')
+    component: () => import('./helps-EgQJm_qb.mjs')
+  },
+  {
+    name: "admin-literary-corpus",
+    path: "/admin/literary-corpus",
+    component: () => import('./literary-corpus-C9tAYhbs.mjs')
+  },
+  {
+    name: "admin-phrases",
+    path: "/admin/phrases",
+    component: () => import('./phrases-CmPIpkcI.mjs')
   },
   {
     name: "admin-tests",
     path: "/admin/tests",
-    component: () => import('./tests-DvfKtuyd.mjs')
+    component: () => import('./tests-CaXl7ZXo.mjs')
   },
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-DErd5kcf.mjs')
+    component: () => import('./users-wb69I0v7.mjs')
   },
   {
     name: "modes-mode-temps",
@@ -1395,7 +1415,7 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-DpvZ_a2d.mjs')
+    component: () => import('./_code_-DcZZGRNC.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1410,17 +1430,17 @@ const _routes = [
   {
     name: "accueil",
     path: "/accueil",
-    component: () => import('./accueil-CF8x0S48.mjs')
+    component: () => import('./accueil-CK0b8vZi.mjs')
   },
   {
     name: "admin",
     path: "/admin",
-    component: () => import('./index-CvaOC7vi.mjs')
+    component: () => import('./index-BEDlPKuk.mjs')
   },
   {
     name: "apprendre",
     path: "/apprendre",
-    component: () => import('./apprendre-DXLjsd9l.mjs')
+    component: () => import('./apprendre-BVy5rULC.mjs')
   },
   {
     name: "consulter",
@@ -1435,18 +1455,18 @@ const _routes = [
   {
     name: "mon-compte",
     path: "/mon-compte",
-    component: () => import('./mon-compte-CUSvcx7S.mjs')
+    component: () => import('./mon-compte-qEflaIPp.mjs')
   },
   {
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-B1zNIMqD.mjs')
+    component: () => import('./my-page-PrzsPcZt.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-w8OEhwhy.mjs')
+    component: () => import('./nouveau-defi-Basbyxrt.mjs')
   },
   {
     name: "signin",
@@ -1456,22 +1476,22 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-DOI-kGCS.mjs')
+    component: () => import('./index-WharKTy3.mjs')
   },
   {
     name: "localized-admin-admins",
     path: "/:locale(fr|de|en|it|es)/admin/admins",
-    component: () => import('./admins-CFeOIjYe.mjs')
+    component: () => import('./admins-dd_jHCwx.mjs')
   },
   {
     name: "localized-admin-caracteres",
     path: "/:locale(fr|de|en|it|es)/admin/caracteres",
-    component: () => import('./caracteres-DpL0k9FB.mjs')
+    component: () => import('./caracteres-Cfu5BOyA.mjs')
   },
   {
     name: "localized-admin-challenges",
     path: "/:locale(fr|de|en|it|es)/admin/challenges",
-    component: () => import('./challenges-BimTmhS-.mjs')
+    component: () => import('./challenges-DPzo-JwG.mjs')
   },
   {
     name: "localized-admin-characters",
@@ -1481,47 +1501,57 @@ const _routes = [
   {
     name: "localized-admin-charts",
     path: "/:locale(fr|de|en|it|es)/admin/charts",
-    component: () => import('./charts-DikT4AdJ.mjs')
+    component: () => import('./charts-DC6wonZY.mjs')
   },
   {
     name: "localized-admin-coaches",
     path: "/:locale(fr|de|en|it|es)/admin/coaches",
-    component: () => import('./coaches-D2IeNzbF.mjs')
+    component: () => import('./coaches-DDwijDrA.mjs')
   },
   {
     name: "localized-admin-contact",
     path: "/:locale(fr|de|en|it|es)/admin/contact",
-    component: () => import('./contact-DVNqdg_1.mjs')
+    component: () => import('./contact-DoAEhj0W.mjs')
   },
   {
     name: "localized-admin-errors",
     path: "/:locale(fr|de|en|it|es)/admin/errors",
-    component: () => import('./errors-CmvdRch0.mjs')
+    component: () => import('./errors-DCS7YHYr.mjs')
   },
   {
     name: "localized-admin-feedbacks",
     path: "/:locale(fr|de|en|it|es)/admin/feedbacks",
-    component: () => import('./feedbacks-Q7uN9jS9.mjs')
+    component: () => import('./feedbacks-DGq756Ru.mjs')
   },
   {
     name: "localized-admin-help-verification",
     path: "/:locale(fr|de|en|it|es)/admin/help-verification",
-    component: () => import('./help-verification-CapOEAOO.mjs')
+    component: () => import('./help-verification-DikXrPqS.mjs')
   },
   {
     name: "localized-admin-helps",
     path: "/:locale(fr|de|en|it|es)/admin/helps",
-    component: () => import('./helps-J7axSOoo.mjs')
+    component: () => import('./helps-EgQJm_qb.mjs')
+  },
+  {
+    name: "localized-admin-literary-corpus",
+    path: "/:locale(fr|de|en|it|es)/admin/literary-corpus",
+    component: () => import('./literary-corpus-C9tAYhbs.mjs')
+  },
+  {
+    name: "localized-admin-phrases",
+    path: "/:locale(fr|de|en|it|es)/admin/phrases",
+    component: () => import('./phrases-CmPIpkcI.mjs')
   },
   {
     name: "localized-admin-tests",
     path: "/:locale(fr|de|en|it|es)/admin/tests",
-    component: () => import('./tests-DvfKtuyd.mjs')
+    component: () => import('./tests-CaXl7ZXo.mjs')
   },
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-DErd5kcf.mjs')
+    component: () => import('./users-wb69I0v7.mjs')
   },
   {
     name: "localized-modes-mode-temps",
@@ -1531,7 +1561,7 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-DpvZ_a2d.mjs')
+    component: () => import('./_code_-DcZZGRNC.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1546,17 +1576,17 @@ const _routes = [
   {
     name: "localized-accueil",
     path: "/:locale(fr|de|en|it|es)/accueil",
-    component: () => import('./accueil-CF8x0S48.mjs')
+    component: () => import('./accueil-CK0b8vZi.mjs')
   },
   {
     name: "localized-admin",
     path: "/:locale(fr|de|en|it|es)/admin",
-    component: () => import('./index-CvaOC7vi.mjs')
+    component: () => import('./index-BEDlPKuk.mjs')
   },
   {
     name: "localized-apprendre",
     path: "/:locale(fr|de|en|it|es)/apprendre",
-    component: () => import('./apprendre-DXLjsd9l.mjs')
+    component: () => import('./apprendre-BVy5rULC.mjs')
   },
   {
     name: "localized-consulter",
@@ -1571,18 +1601,18 @@ const _routes = [
   {
     name: "localized-mon-compte",
     path: "/:locale(fr|de|en|it|es)/mon-compte",
-    component: () => import('./mon-compte-CUSvcx7S.mjs')
+    component: () => import('./mon-compte-qEflaIPp.mjs')
   },
   {
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-B1zNIMqD.mjs')
+    component: () => import('./my-page-PrzsPcZt.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-w8OEhwhy.mjs')
+    component: () => import('./nouveau-defi-Basbyxrt.mjs')
   },
   {
     name: "localized-signin",
@@ -1592,7 +1622,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-DOI-kGCS.mjs')
+    component: () => import('./index-WharKTy3.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {

@@ -9,8 +9,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:fs/promises';
 import 'node:url';
+import 'node:fs/promises';
 
 function text(value, maximum = 255) {
   return typeof value === "string" ? value.trim().slice(0, maximum) : "";

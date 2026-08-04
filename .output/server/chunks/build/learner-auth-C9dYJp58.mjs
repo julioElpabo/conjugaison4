@@ -1,4 +1,4 @@
-import { a0 as executeAsync } from '../nitro/nitro.mjs';
+import { a1 as executeAsync } from '../nitro/nitro.mjs';
 import { p as defineNuxtRouteMiddleware, f as useLanguagePreferences, n as navigateTo } from './server.mjs';
 import { u as useLearnerAuth } from './useLearnerAuth-BLt5hOAV.mjs';
 import 'node:http';
@@ -9,8 +9,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:fs/promises';
 import 'node:url';
+import 'node:fs/promises';
 import 'vue';
 import '../routes/renderer.mjs';
 import 'vue-bundle-renderer/runtime';

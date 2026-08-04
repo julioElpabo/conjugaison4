@@ -10,8 +10,8 @@ import 'node:buffer';
 import 'node:fs';
 import 'node:path';
 import 'mysql2/promise';
-import 'node:fs/promises';
 import 'node:url';
+import 'node:fs/promises';
 import '../../_/near-future.mjs';
 import '../../_/coach.mjs';
 

@@ -11,8 +11,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:fs/promises';
 import 'node:url';
+import 'node:fs/promises';
 
 const heartbeat_post = defineEventHandler(async (event) => {
   await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.telemetry);
@@ -34,8 +34,8 @@ const heartbeat_post = defineEventHandler(async (event) => {
       device_category=VALUES(device_category),
       page_views=page_views + VALUES(page_views)`, [sessionId, path, locale, device, pageView ? 1 : 0]);
   if (pageView) {
-    await database.execute(`INSERT INTO analytics_events (session_id, event_name, path, metadata)
-      VALUES (?, 'page_view', ?, ?)`, [sessionId, path, JSON.stringify({ actor: actorType })]);
+    await database.execute(`INSERT INTO analytics_events (session_id, event_name, path, actor_type, metadata)
+      VALUES (?, 'page_view', ?, ?, ?)`, [sessionId, path, actorType, JSON.stringify({ actor: actorType })]);
   }
   return { ok: true };
 });

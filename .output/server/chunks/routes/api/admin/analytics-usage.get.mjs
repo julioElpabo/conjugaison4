@@ -1,4 +1,4 @@
-import { d as defineEventHandler, a as getQuery, c as createError, u as useDatabase, a1 as challengePresetDefinitions } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, a as getQuery, c as createError, u as useDatabase, a2 as challengePresetDefinitions } from '../../../nitro/nitro.mjs';
 import { r as requireAdministrator } from '../../../_/session.mjs';
 import 'node:http';
 import 'node:https';
@@ -8,8 +8,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:fs/promises';
 import 'node:url';
+import 'node:fs/promises';
 
 function analyticsUsageDiagnostic(row) {
   var _a, _b, _c;
@@ -130,7 +130,7 @@ const analyticsUsage_get = defineEventHandler(async (event) => {
   if (startDate > endDate) {
     throw createError({ statusCode: 400, statusMessage: "La date de d\xE9but doit pr\xE9c\xE9der la date de fin." });
   }
-  const actorExpression = "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.actor')), 'anonymous')";
+  const actorExpression = "COALESCE(actor_type, 'anonymous')";
   const actorClause = actor === "all" ? "" : ` AND ${actorExpression}=?`;
   const parameters = [startDate, endDate];
   if (actor !== "all") parameters.push(actor);

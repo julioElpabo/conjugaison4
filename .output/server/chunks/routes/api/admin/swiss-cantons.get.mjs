@@ -8,8 +8,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:fs/promises';
 import 'node:url';
+import 'node:fs/promises';
 
 const LAYER = "ch.swisstopo.swissboundaries3d-kanton-flaeche.fill";
 const SWISS_BOUNDS = { minX: 5.8, maxX: 10.7, minY: 45.7, maxY: 47.95 };

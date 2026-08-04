@@ -4465,7 +4465,7 @@ function _expandFromEnv(value) {
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "b7512612-0234-4b7f-ac22-3caf9f329623",
+    "buildId": "3a8f05ef-4d39-48ed-83e1-8580bdfcd9c7",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -82760,8 +82760,8 @@ const coletteCorpus = {
 	sentences: sentences
 };
 
-var schemaVersion = 1;
-var checksum = "f791e0df3501d58344fdb244f1c88441e0823d2c6ccb13107b0362a217999559";
+var schemaVersion = 2;
+var checksum = "7718ae06b4e7725636c1fb5117bc056774a2d434407b8ace9183973477a65263";
 var counts = {
 	sources: 6,
 	sentences: 1183,
@@ -82792,8 +82792,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 108,
+						verbInfinitive: "comprendre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "comprends",
 						start: 3,
 						end: 12,
@@ -82814,8 +82820,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 28,
+						verbInfinitive: "paraître",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "paraissait",
 						start: 3,
 						end: 13,
@@ -82836,8 +82848,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "dus",
 						start: 3,
 						end: 6,
@@ -82858,8 +82876,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "partîmes",
 						start: 27,
 						end: 35,
@@ -82880,8 +82904,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 32,
+						verbInfinitive: "acheter",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "avaient acheté",
 						start: 4,
 						end: 18,
@@ -82902,8 +82932,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 218,
+						verbInfinitive: "écouter",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "écoute",
 						start: 90,
 						end: 96,
@@ -82924,8 +82960,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 230,
+						verbInfinitive: "découvrir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "découvrais",
 						start: 3,
 						end: 13,
@@ -82946,8 +82988,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "êtes",
 						start: 5,
 						end: 9,
@@ -82968,8 +83016,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 207,
+						verbInfinitive: "regarder",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait regardé",
 						start: 3,
 						end: 16,
@@ -82979,8 +83033,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "fussent",
 						start: 71,
 						end: 78,
@@ -83001,8 +83061,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "suis",
 						start: 3,
 						end: 7,
@@ -83012,8 +83078,14 @@ var sources = [
 					},
 					{
 						verbId: 67,
+						verbInfinitive: "suivre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "suis",
 						start: 3,
 						end: 7,
@@ -83034,8 +83106,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 15,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-first-form",
+						tenseName: "passé 1",
 						personId: 4,
+						personPronoun: "je",
 						form: "aurais voulu",
 						start: 2,
 						end: 14,
@@ -83045,8 +83123,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "fût",
 						start: 22,
 						end: 25,
@@ -83067,8 +83151,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Voyez",
 						start: 0,
 						end: 5,
@@ -83078,8 +83168,14 @@ var sources = [
 					},
 					{
 						verbId: 223,
+						verbInfinitive: "rentrer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "rentre",
 						start: 10,
 						end: 16,
@@ -83089,8 +83185,14 @@ var sources = [
 					},
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai fait",
 						start: 32,
 						end: 39,
@@ -83111,8 +83213,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "arrivez",
 						start: 5,
 						end: 12,
@@ -83133,8 +83241,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 77,
+						verbInfinitive: "courir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "courut",
 						start: 3,
 						end: 9,
@@ -83155,8 +83269,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "fallut",
 						start: 3,
 						end: 9,
@@ -83177,8 +83297,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 221,
+						verbInfinitive: "continuer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "continue",
 						start: 3,
 						end: 11,
@@ -83188,8 +83314,14 @@ var sources = [
 					},
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "dire",
 						start: 14,
 						end: 18,
@@ -83210,8 +83342,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 8,
+						personPronoun: "vous",
 						form: "serez",
 						start: 32,
 						end: 37,
@@ -83232,8 +83370,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 230,
+						verbInfinitive: "découvrir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "découvris",
 						start: 22,
 						end: 31,
@@ -83254,8 +83398,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "saurai",
 						start: 3,
 						end: 9,
@@ -83276,8 +83426,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 209,
+						verbInfinitive: "penser",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "pensais",
 						start: 21,
 						end: 28,
@@ -83298,8 +83454,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 485,
+						verbInfinitive: "augmenter",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "augmentais",
 						start: 10,
 						end: 20,
@@ -83320,8 +83482,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 8,
+						verbInfinitive: "tenir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Tiens",
 						start: 0,
 						end: 5,
@@ -83331,8 +83499,14 @@ var sources = [
 					},
 					{
 						verbId: 169,
+						verbInfinitive: "trouver",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai trouvé",
 						start: 17,
 						end: 26,
@@ -83353,8 +83527,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "devaient",
 						start: 4,
 						end: 12,
@@ -83375,8 +83555,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "allez",
 						start: 17,
 						end: 22,
@@ -83397,8 +83583,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 63,
+						verbInfinitive: "répondre",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai répondu",
 						start: 24,
 						end: 34,
@@ -83419,8 +83611,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 15,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-first-form",
+						tenseName: "passé 1",
 						personId: 4,
+						personPronoun: "je",
 						form: "aurais pu",
 						start: 14,
 						end: 23,
@@ -83441,8 +83639,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "arrivai",
 						start: 24,
 						end: 31,
@@ -83463,8 +83667,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 75,
+						verbInfinitive: "commencer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "commençait",
 						start: 41,
 						end: 51,
@@ -83485,8 +83695,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "étaient",
 						start: 4,
 						end: 11,
@@ -83507,8 +83723,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 206,
+						verbInfinitive: "passer",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai passé",
 						start: 2,
 						end: 10,
@@ -83529,8 +83751,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 278,
+						verbInfinitive: "songer",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Songez",
 						start: 0,
 						end: 6,
@@ -83540,8 +83768,14 @@ var sources = [
 					},
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avons fait",
 						start: 21,
 						end: 31,
@@ -83562,8 +83796,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 7,
+						personPronoun: "nous",
 						form: "sommes partis",
 						start: 5,
 						end: 18,
@@ -83584,8 +83824,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "vienne",
 						start: 29,
 						end: 35,
@@ -83606,8 +83852,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 126,
+						verbInfinitive: "jouer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "joue",
 						start: 3,
 						end: 7,
@@ -83628,8 +83880,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 66,
+						verbInfinitive: "sortir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "sortit",
 						start: 8,
 						end: 14,
@@ -83650,8 +83908,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 208,
+						verbInfinitive: "rester",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 7,
+						personPronoun: "nous",
 						form: "sommes restés",
 						start: 8,
 						end: 21,
@@ -83672,8 +83936,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 219,
+						verbInfinitive: "garder",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "gardâmes",
 						start: 8,
 						end: 16,
@@ -83694,8 +83964,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "partirai",
 						start: 88,
 						end: 96,
@@ -83716,8 +83992,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 210,
+						verbInfinitive: "sembler",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "semble",
 						start: 22,
 						end: 28,
@@ -83738,8 +84020,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "fasse",
 						start: 46,
 						end: 51,
@@ -83760,8 +84048,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 58,
+						verbInfinitive: "mettre",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "a mis",
 						start: 3,
 						end: 8,
@@ -83782,8 +84076,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Allons",
 						start: 0,
 						end: 6,
@@ -83804,8 +84104,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Viens",
 						start: 0,
 						end: 5,
@@ -83826,8 +84132,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 220,
+						verbInfinitive: "laisser",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avons laissé",
 						start: 5,
 						end: 17,
@@ -83848,8 +84160,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 87,
+						verbInfinitive: "aimer",
 						tenseId: 15,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-first-form",
+						tenseName: "passé 1",
 						personId: 4,
+						personPronoun: "je",
 						form: "aurais aimé",
 						start: 37,
 						end: 48,
@@ -83870,8 +84188,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Allons",
 						start: 0,
 						end: 6,
@@ -83892,8 +84216,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 207,
+						verbInfinitive: "regarder",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "regardait",
 						start: 3,
 						end: 12,
@@ -83914,8 +84244,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 5,
+						personPronoun: "tu",
 						form: "pourras",
 						start: 3,
 						end: 10,
@@ -83936,8 +84272,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 14,
+						verbInfinitive: "apercevoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "aperçûmes",
 						start: 5,
 						end: 14,
@@ -83958,8 +84300,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 675,
+						verbInfinitive: "deviner",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai deviné",
 						start: 2,
 						end: 11,
@@ -83980,8 +84328,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "vais",
 						start: 3,
 						end: 7,
@@ -84002,8 +84356,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 206,
+						verbInfinitive: "passer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "passe",
 						start: 7,
 						end: 12,
@@ -84024,8 +84384,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "étions partis",
 						start: 5,
 						end: 18,
@@ -84046,8 +84412,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 192,
+						verbInfinitive: "tomber",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "tombe",
 						start: 3,
 						end: 8,
@@ -84068,8 +84440,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 232,
+						verbInfinitive: "manquer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "manquais",
 						start: 60,
 						end: 68,
@@ -84079,8 +84457,14 @@ var sources = [
 					},
 					{
 						verbId: 192,
+						verbInfinitive: "tomber",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "tomber",
 						start: 72,
 						end: 78,
@@ -84101,8 +84485,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 207,
+						verbInfinitive: "regarder",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "regardai",
 						start: 3,
 						end: 11,
@@ -84123,8 +84513,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "devez",
 						start: 5,
 						end: 10,
@@ -84145,8 +84541,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 22,
+						verbInfinitive: "craindre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "craignis",
 						start: 3,
 						end: 11,
@@ -84167,8 +84569,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "fut",
 						start: 3,
 						end: 6,
@@ -84178,8 +84586,14 @@ var sources = [
 					},
 					{
 						verbId: 165,
+						verbInfinitive: "demander",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "demander",
 						start: 23,
 						end: 31,
@@ -84200,8 +84614,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 44,
+						verbInfinitive: "rire",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "rie",
 						start: 63,
 						end: 66,
@@ -84222,8 +84642,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 209,
+						verbInfinitive: "penser",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "pense",
 						start: 43,
 						end: 48,
@@ -84244,8 +84670,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 208,
+						verbInfinitive: "rester",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "restèrent",
 						start: 14,
 						end: 23,
@@ -84266,8 +84698,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "serai",
 						start: 3,
 						end: 8,
@@ -84288,8 +84726,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "va",
 						start: 3,
 						end: 5,
@@ -84299,8 +84743,14 @@ var sources = [
 					},
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "falloir",
 						start: 6,
 						end: 13,
@@ -84321,8 +84771,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 172,
+						verbInfinitive: "parler",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "parlèrent",
 						start: 4,
 						end: 13,
@@ -84343,8 +84799,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 210,
+						verbInfinitive: "sembler",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "semblaient",
 						start: 80,
 						end: 90,
@@ -84365,8 +84827,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 228,
+						verbInfinitive: "décider",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai décidé",
 						start: 41,
 						end: 50,
@@ -84387,8 +84855,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 523,
+						verbInfinitive: "considérer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "considérai",
 						start: 53,
 						end: 63,
@@ -84409,8 +84883,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 220,
+						verbInfinitive: "laisser",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "laissât",
 						start: 27,
 						end: 34,
@@ -84431,8 +84911,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai",
 						start: 5,
 						end: 7,
@@ -84442,8 +84928,14 @@ var sources = [
 					},
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 11,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 6,
+						personPronoun: "il",
 						form: "soit arrivé",
 						start: 30,
 						end: 41,
@@ -84464,8 +84956,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "pars",
 						start: 25,
 						end: 29,
@@ -84486,8 +84984,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 15,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-first-form",
+						tenseName: "passé 1",
 						personId: 7,
+						personPronoun: "nous",
 						form: "aurions été",
 						start: 5,
 						end: 16,
@@ -84508,8 +85012,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 7,
+						verbInfinitive: "apprendre",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "apprenait",
 						start: 16,
 						end: 25,
@@ -84530,8 +85040,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 158,
+						verbInfinitive: "attendre",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "attendaient",
 						start: 4,
 						end: 15,
@@ -84541,8 +85057,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "fût",
 						start: 29,
 						end: 32,
@@ -84563,8 +85085,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 109,
+						verbInfinitive: "descendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "descendirent",
 						start: 4,
 						end: 16,
@@ -84585,8 +85113,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "vois",
 						start: 52,
 						end: 56,
@@ -84607,8 +85141,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 158,
+						verbInfinitive: "attendre",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "attendions",
 						start: 95,
 						end: 105,
@@ -84629,8 +85169,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 172,
+						verbInfinitive: "parler",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "parlèrent",
 						start: 7,
 						end: 16,
@@ -84651,8 +85197,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 57,
+						verbInfinitive: "entendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "entendit",
 						start: 37,
 						end: 45,
@@ -84673,8 +85225,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "suis venu",
 						start: 3,
 						end: 12,
@@ -84695,8 +85253,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 209,
+						verbInfinitive: "penser",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "pense",
 						start: 29,
 						end: 34,
@@ -84717,8 +85281,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "crois",
 						start: 42,
 						end: 47,
@@ -84739,8 +85309,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "étais",
 						start: 2,
 						end: 7,
@@ -84761,8 +85337,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 184,
+						verbInfinitive: "retenir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "retint",
 						start: 29,
 						end: 35,
@@ -84783,8 +85365,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 228,
+						verbInfinitive: "décider",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "décida",
 						start: 3,
 						end: 9,
@@ -84794,8 +85382,14 @@ var sources = [
 					},
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "irait",
 						start: 62,
 						end: 67,
@@ -84816,8 +85410,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Voyez",
 						start: 0,
 						end: 5,
@@ -84827,8 +85427,14 @@ var sources = [
 					},
 					{
 						verbId: 20,
+						verbInfinitive: "connaître",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "connais",
 						start: 11,
 						end: 18,
@@ -84849,8 +85455,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 223,
+						verbInfinitive: "rentrer",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "rentrerai",
 						start: 3,
 						end: 12,
@@ -84871,8 +85483,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 208,
+						verbInfinitive: "rester",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Restez",
 						start: 0,
 						end: 6,
@@ -84882,8 +85500,14 @@ var sources = [
 					},
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "va",
 						start: 25,
 						end: 27,
@@ -84904,8 +85528,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "vas",
 						start: 3,
 						end: 6,
@@ -84926,8 +85556,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "vinsse",
 						start: 37,
 						end: 43,
@@ -84948,8 +85584,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 179,
+						verbInfinitive: "soulever",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "soulevait",
 						start: 39,
 						end: 48,
@@ -84959,8 +85601,14 @@ var sources = [
 					},
 					{
 						verbId: 185,
+						verbInfinitive: "sourire",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en souriant",
 						start: 102,
 						end: 113,
@@ -84981,8 +85629,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Venez",
 						start: 0,
 						end: 5,
@@ -84992,8 +85646,14 @@ var sources = [
 					},
 					{
 						verbId: 225,
+						verbInfinitive: "pousser",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en poussant",
 						start: 68,
 						end: 79,
@@ -85014,8 +85674,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "faisait",
 						start: 3,
 						end: 10,
@@ -85036,8 +85702,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait dû",
 						start: 3,
 						end: 11,
@@ -85058,8 +85730,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 430,
+						verbInfinitive: "chasser",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "chassai",
 						start: 115,
 						end: 122,
@@ -85080,8 +85758,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "puis",
 						start: 25,
 						end: 29,
@@ -85102,8 +85786,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 454,
+						verbInfinitive: "inviter",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "avaient invité",
 						start: 4,
 						end: 18,
@@ -85124,8 +85814,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 57,
+						verbInfinitive: "entendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "entendis",
 						start: 2,
 						end: 10,
@@ -85146,8 +85842,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 33,
+						verbInfinitive: "appeler",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "appelai",
 						start: 2,
 						end: 9,
@@ -85157,8 +85859,14 @@ var sources = [
 					},
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "allâmes",
 						start: 25,
 						end: 32,
@@ -85179,8 +85887,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "voudrais",
 						start: 3,
 						end: 11,
@@ -85190,8 +85904,14 @@ var sources = [
 					},
 					{
 						verbId: 39,
+						verbInfinitive: "lever",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en levant",
 						start: 54,
 						end: 63,
@@ -85212,8 +85932,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avons été",
 						start: 36,
 						end: 45,
@@ -85234,8 +85960,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "pouvez",
 						start: 5,
 						end: 11,
@@ -85256,8 +85988,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "avais voulu",
 						start: 19,
 						end: 30,
@@ -85278,8 +86016,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 154,
+						verbInfinitive: "marcher",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "marchaient",
 						start: 4,
 						end: 14,
@@ -85300,8 +86044,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 108,
+						verbInfinitive: "comprendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "comprit",
 						start: 3,
 						end: 10,
@@ -85322,8 +86072,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait dû",
 						start: 8,
 						end: 16,
@@ -85344,8 +86100,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 295,
+						verbInfinitive: "se lever",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Lève-toi",
 						start: 0,
 						end: 8,
@@ -85355,8 +86117,14 @@ var sources = [
 					},
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "partons",
 						start: 23,
 						end: 30,
@@ -85377,8 +86145,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "faut",
 						start: 8,
 						end: 12,
@@ -85388,8 +86162,14 @@ var sources = [
 					},
 					{
 						verbId: 120,
+						verbInfinitive: "faillir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "faut",
 						start: 8,
 						end: 12,
@@ -85399,8 +86179,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "soit",
 						start: 20,
 						end: 24,
@@ -85421,8 +86207,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 213,
+						verbInfinitive: "donner",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "donnâmes",
 						start: 36,
 						end: 44,
@@ -85443,8 +86235,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "fit",
 						start: 3,
 						end: 6,
@@ -85465,8 +86263,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 9,
+						personPronoun: "ils",
 						form: "seront",
 						start: 47,
 						end: 53,
@@ -85487,8 +86291,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 9,
+						personPronoun: "ils",
 						form: "sont",
 						start: 4,
 						end: 8,
@@ -85509,8 +86319,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 63,
+						verbInfinitive: "répondre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "répondîmes",
 						start: 46,
 						end: 56,
@@ -85531,8 +86347,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "soyons",
 						start: 55,
 						end: 61,
@@ -85553,8 +86375,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 189,
+						verbInfinitive: "répéter",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "répétâmes",
 						start: 68,
 						end: 77,
@@ -85575,8 +86403,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 708,
+						verbInfinitive: "hésiter",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "hésita",
 						start: 3,
 						end: 9,
@@ -85597,8 +86431,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "pûmes",
 						start: 32,
 						end: 37,
@@ -85619,8 +86459,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avons fait",
 						start: 5,
 						end: 15,
@@ -85641,8 +86487,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 9,
+						personPronoun: "ils",
 						form: "ont voulu",
 						start: 4,
 						end: 13,
@@ -85663,8 +86515,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 390,
+						verbInfinitive: "habiter",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "habitions",
 						start: 5,
 						end: 14,
@@ -85685,8 +86543,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "faisait",
 						start: 3,
 						end: 10,
@@ -85707,8 +86571,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "allais",
 						start: 5,
 						end: 11,
@@ -85729,8 +86599,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "partîmes",
 						start: 5,
 						end: 13,
@@ -85751,8 +86627,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait dit",
 						start: 3,
 						end: 12,
@@ -85762,8 +86644,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 17,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût été",
 						start: 67,
 						end: 74,
@@ -85784,8 +86672,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "avaient dû",
 						start: 15,
 						end: 25,
@@ -85806,8 +86700,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 28,
+						verbInfinitive: "paraître",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "paraissait",
 						start: 3,
 						end: 13,
@@ -85828,8 +86728,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "arrivèrent",
 						start: 4,
 						end: 14,
@@ -85839,8 +86745,14 @@ var sources = [
 					},
 					{
 						verbId: 204,
+						verbInfinitive: "déplacer",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "déplacer",
 						start: 67,
 						end: 75,
@@ -85861,8 +86773,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "pouvez",
 						start: 5,
 						end: 11,
@@ -85883,8 +86801,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 228,
+						verbInfinitive: "décider",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "décidèrent",
 						start: 4,
 						end: 14,
@@ -85905,8 +86829,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 44,
+						verbInfinitive: "rire",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "riaient",
 						start: 4,
 						end: 11,
@@ -85927,8 +86857,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "faut",
 						start: 19,
 						end: 23,
@@ -85938,8 +86874,14 @@ var sources = [
 					},
 					{
 						verbId: 120,
+						verbInfinitive: "faillir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "faut",
 						start: 19,
 						end: 23,
@@ -85960,8 +86902,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "fit",
 						start: 3,
 						end: 6,
@@ -85982,8 +86930,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 9,
+						personPronoun: "ils",
 						form: "sont",
 						start: 4,
 						end: 8,
@@ -86004,8 +86958,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "est",
 						start: 8,
 						end: 11,
@@ -86026,8 +86986,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 208,
+						verbInfinitive: "rester",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "restions",
 						start: 5,
 						end: 13,
@@ -86048,8 +87014,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "fus",
 						start: 3,
 						end: 6,
@@ -86070,8 +87042,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 30,
+						verbInfinitive: "résoudre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "résolus",
 						start: 55,
 						end: 62,
@@ -86092,8 +87070,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 97,
+						verbInfinitive: "sentir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait senti",
 						start: 30,
 						end: 41,
@@ -86114,8 +87098,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "a été",
 						start: 13,
 						end: 18,
@@ -86136,8 +87126,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 66,
+						verbInfinitive: "sortir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "sortîmes",
 						start: 5,
 						end: 13,
@@ -86158,8 +87154,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 481,
+						verbInfinitive: "approcher",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "approchâmes",
 						start: 37,
 						end: 48,
@@ -86180,8 +87182,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "crus",
 						start: 3,
 						end: 7,
@@ -86202,8 +87210,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "venait",
 						start: 3,
 						end: 9,
@@ -86224,8 +87238,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Allez",
 						start: 0,
 						end: 5,
@@ -86235,8 +87255,14 @@ var sources = [
 					},
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "voulez",
 						start: 16,
 						end: 22,
@@ -86257,8 +87283,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 107,
+						verbInfinitive: "reprendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "reprit",
 						start: 6,
 						end: 12,
@@ -86279,8 +87311,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 232,
+						verbInfinitive: "manquer",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "avais manqué",
 						start: 2,
 						end: 14,
@@ -86301,8 +87339,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "irons",
 						start: 14,
 						end: 19,
@@ -86323,8 +87367,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "étions",
 						start: 10,
 						end: 16,
@@ -86345,8 +87395,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "fait",
 						start: 3,
 						end: 7,
@@ -86367,8 +87423,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "suis allé",
 						start: 58,
 						end: 67,
@@ -86378,8 +87440,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez été",
 						start: 79,
 						end: 87,
@@ -86400,8 +87468,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "crurent",
 						start: 4,
 						end: 11,
@@ -86422,8 +87496,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 209,
+						verbInfinitive: "penser",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "pensa",
 						start: 14,
 						end: 19,
@@ -86433,8 +87513,14 @@ var sources = [
 					},
 					{
 						verbId: 153,
+						verbInfinitive: "allumer",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "allumer",
 						start: 22,
 						end: 29,
@@ -86455,8 +87541,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "eut",
 						start: 3,
 						end: 6,
@@ -86466,8 +87558,14 @@ var sources = [
 					},
 					{
 						verbId: 77,
+						verbInfinitive: "courir",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "courir",
 						start: 33,
 						end: 39,
@@ -86488,8 +87586,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 22,
+						verbInfinitive: "craindre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "crains",
 						start: 3,
 						end: 9,
@@ -86499,8 +87603,14 @@ var sources = [
 					},
 					{
 						verbId: 61,
+						verbInfinitive: "pleuvoir",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "pleuve",
 						start: 19,
 						end: 25,
@@ -86521,8 +87631,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 57,
+						verbInfinitive: "entendre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "entends",
 						start: 2,
 						end: 9,
@@ -86543,8 +87659,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "sais",
 						start: 3,
 						end: 7,
@@ -86565,8 +87687,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "serai",
 						start: 3,
 						end: 8,
@@ -86587,8 +87715,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "es",
 						start: 3,
 						end: 5,
@@ -86609,8 +87743,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "savez",
 						start: 33,
 						end: 38,
@@ -86631,8 +87771,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "allait",
 						start: 3,
 						end: 9,
@@ -86653,8 +87799,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 509,
+						verbInfinitive: "cesser",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait cessé",
 						start: 3,
 						end: 14,
@@ -86675,8 +87827,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 109,
+						verbInfinitive: "descendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "descendit",
 						start: 6,
 						end: 15,
@@ -86686,8 +87844,14 @@ var sources = [
 					},
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "aller",
 						start: 33,
 						end: 38,
@@ -86708,8 +87872,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 211,
+						verbInfinitive: "entrer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "entrons",
 						start: 5,
 						end: 12,
@@ -86730,8 +87900,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait dû",
 						start: 76,
 						end: 84,
@@ -86752,8 +87928,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 559,
+						verbInfinitive: "reconnaître",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "reconnais",
 						start: 3,
 						end: 12,
@@ -86774,8 +87956,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 61,
+						verbInfinitive: "pleuvoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "pleuvait",
 						start: 27,
 						end: 35,
@@ -86796,8 +87984,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 211,
+						verbInfinitive: "entrer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "entrions",
 						start: 15,
 						end: 23,
@@ -86818,8 +88012,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai pu",
 						start: 45,
 						end: 50,
@@ -86840,8 +88040,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 14,
+						verbInfinitive: "apercevoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "apercevions",
 						start: 5,
 						end: 16,
@@ -86862,8 +88068,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avons fait",
 						start: 5,
 						end: 15,
@@ -86884,8 +88096,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait fallu",
 						start: 25,
 						end: 36,
@@ -86906,8 +88124,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "faisait",
 						start: 3,
 						end: 10,
@@ -86928,8 +88152,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "a été",
 						start: 47,
 						end: 52,
@@ -86950,8 +88180,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 157,
+						verbInfinitive: "essayer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "essayais",
 						start: 5,
 						end: 13,
@@ -86972,8 +88208,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 90,
+						verbInfinitive: "réussir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 6,
+						personPronoun: "il",
 						form: "réussira",
 						start: 3,
 						end: 11,
@@ -86994,8 +88236,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 736,
+						verbInfinitive: "grimper",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "grimpa",
 						start: 25,
 						end: 31,
@@ -87005,8 +88253,14 @@ var sources = [
 					},
 					{
 						verbId: 458,
+						verbInfinitive: "sauter",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait sauté",
 						start: 53,
 						end: 64,
@@ -87027,8 +88281,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 246,
+						verbInfinitive: "se souvenir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "te souviens",
 						start: 3,
 						end: 14,
@@ -87049,8 +88309,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 209,
+						verbInfinitive: "penser",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "pense",
 						start: 17,
 						end: 22,
@@ -87071,8 +88337,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 216,
+						verbInfinitive: "montrer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "montrait",
 						start: 3,
 						end: 11,
@@ -87093,8 +88365,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 8,
+						verbInfinitive: "tenir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Tiens",
 						start: 0,
 						end: 5,
@@ -87115,8 +88393,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 675,
+						verbInfinitive: "deviner",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "a deviné",
 						start: 3,
 						end: 11,
@@ -87126,8 +88410,14 @@ var sources = [
 					},
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "allais",
 						start: 18,
 						end: 24,
@@ -87148,8 +88438,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "devrais",
 						start: 35,
 						end: 42,
@@ -87170,8 +88466,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 50,
+						verbInfinitive: "lire",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "lisait",
 						start: 3,
 						end: 9,
@@ -87192,8 +88494,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 278,
+						verbInfinitive: "songer",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "songeât",
 						start: 54,
 						end: 61,
@@ -87203,8 +88511,14 @@ var sources = [
 					},
 					{
 						verbId: 153,
+						verbInfinitive: "allumer",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "allumer",
 						start: 69,
 						end: 76,
@@ -87225,8 +88539,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 6,
+						personPronoun: "il",
 						form: "faudra",
 						start: 6,
 						end: 12,
@@ -87236,8 +88556,14 @@ var sources = [
 					},
 					{
 						verbId: 169,
+						verbInfinitive: "trouver",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "trouvions",
 						start: 27,
 						end: 36,
@@ -87258,8 +88584,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 22,
+						verbInfinitive: "craindre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "craint",
 						start: 3,
 						end: 9,
@@ -87280,8 +88612,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "eus",
 						start: 2,
 						end: 5,
@@ -87302,8 +88640,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "fallut",
 						start: 3,
 						end: 9,
@@ -87324,8 +88668,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 58,
+						verbInfinitive: "mettre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "mit",
 						start: 32,
 						end: 35,
@@ -87346,8 +88696,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "es",
 						start: 3,
 						end: 5,
@@ -87368,8 +88724,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "voudrais",
 						start: 23,
 						end: 31,
@@ -87390,8 +88752,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 208,
+						verbInfinitive: "rester",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "resta",
 						start: 6,
 						end: 11,
@@ -87412,8 +88780,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avions",
 						start: 25,
 						end: 31,
@@ -87434,8 +88808,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 158,
+						verbInfinitive: "attendre",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "attendais",
 						start: 34,
 						end: 43,
@@ -87456,8 +88836,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "fallut",
 						start: 34,
 						end: 40,
@@ -87478,8 +88864,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait",
 						start: 3,
 						end: 8,
@@ -87500,8 +88892,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "étions",
 						start: 5,
 						end: 11,
@@ -87522,8 +88920,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "savez",
 						start: 5,
 						end: 10,
@@ -87533,8 +88937,14 @@ var sources = [
 					},
 					{
 						verbId: 284,
+						verbInfinitive: "organiser",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "organisons",
 						start: 25,
 						end: 35,
@@ -87555,8 +88965,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 445,
+						verbInfinitive: "examiner",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "examina",
 						start: 3,
 						end: 10,
@@ -87577,8 +88993,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "partis",
 						start: 39,
 						end: 45,
@@ -87599,8 +89021,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 6,
+						personPronoun: "il",
 						form: "sera",
 						start: 3,
 						end: 7,
@@ -87621,8 +89049,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "pourrions",
 						start: 20,
 						end: 29,
@@ -87632,8 +89066,14 @@ var sources = [
 					},
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "dire",
 						start: 87,
 						end: 91,
@@ -87654,8 +89094,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 228,
+						verbInfinitive: "décider",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "décidai",
 						start: 46,
 						end: 53,
@@ -87676,8 +89122,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "étais venu",
 						start: 123,
 						end: 133,
@@ -87698,8 +89150,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 56,
+						verbInfinitive: "dormir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "dors",
 						start: 3,
 						end: 7,
@@ -87720,8 +89178,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "pus",
 						start: 3,
 						end: 6,
@@ -87742,8 +89206,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 12,
+						verbInfinitive: "valoir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "vaudrait",
 						start: 3,
 						end: 11,
@@ -87764,8 +89234,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 559,
+						verbInfinitive: "reconnaître",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "reconnaissais",
 						start: 3,
 						end: 16,
@@ -87786,8 +89262,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "sais",
 						start: 3,
 						end: 7,
@@ -87808,8 +89290,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 154,
+						verbInfinitive: "marcher",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "marchais",
 						start: 3,
 						end: 11,
@@ -87830,8 +89318,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 58,
+						verbInfinitive: "mettre",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai mis",
 						start: 32,
 						end: 38,
@@ -87852,8 +89346,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "vois",
 						start: 17,
 						end: 21,
@@ -87874,8 +89374,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "est allé",
 						start: 3,
 						end: 11,
@@ -87896,8 +89402,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "arrivai",
 						start: 2,
 						end: 9,
@@ -87918,8 +89430,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "arriverons",
 						start: 39,
 						end: 49,
@@ -87940,8 +89458,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait",
 						start: 3,
 						end: 8,
@@ -87962,8 +89486,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "venions",
 						start: 5,
 						end: 12,
@@ -87984,8 +89514,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 8,
+						verbInfinitive: "tenir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Tenez",
 						start: 0,
 						end: 5,
@@ -88006,8 +89542,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 719,
+						verbInfinitive: "boiter",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "boitait",
 						start: 37,
 						end: 44,
@@ -88028,8 +89570,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 28,
+						verbInfinitive: "paraître",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "paraissait",
 						start: 3,
 						end: 13,
@@ -88050,8 +89598,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "pars",
 						start: 12,
 						end: 16,
@@ -88072,8 +89626,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 158,
+						verbInfinitive: "attendre",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avions attendu",
 						start: 5,
 						end: 19,
@@ -88094,8 +89654,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 20,
+						verbInfinitive: "connaître",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "connaissais",
 						start: 6,
 						end: 17,
@@ -88116,8 +89682,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "allais",
 						start: 2,
 						end: 8,
@@ -88138,8 +89710,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "arrivaient",
 						start: 4,
 						end: 14,
@@ -88160,8 +89738,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 9,
+						personPronoun: "ils",
 						form: "sont",
 						start: 4,
 						end: 8,
@@ -88182,8 +89766,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 221,
+						verbInfinitive: "continuer",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "a continué",
 						start: 6,
 						end: 16,
@@ -88204,8 +89794,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "voulut",
 						start: 3,
 						end: 9,
@@ -88226,8 +89822,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "aurait",
 						start: 47,
 						end: 53,
@@ -88248,8 +89850,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "avaient voulu",
 						start: 82,
 						end: 95,
@@ -88270,8 +89878,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "eus",
 						start: 2,
 						end: 5,
@@ -88292,8 +89906,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 455,
+						verbInfinitive: "noter",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait noté",
 						start: 3,
 						end: 13,
@@ -88314,8 +89934,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 195,
+						verbInfinitive: "imaginer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "imaginais",
 						start: 2,
 						end: 11,
@@ -88336,8 +89962,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 92,
+						verbInfinitive: "avancer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "avança",
 						start: 3,
 						end: 9,
@@ -88358,8 +89990,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 458,
+						verbInfinitive: "sauter",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "sauta",
 						start: 12,
 						end: 17,
@@ -88380,8 +90018,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 220,
+						verbInfinitive: "laisser",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "laisserai",
 						start: 3,
 						end: 12,
@@ -88402,8 +90046,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "étaient venus",
 						start: 4,
 						end: 17,
@@ -88424,8 +90074,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "étions",
 						start: 5,
 						end: 11,
@@ -88446,8 +90102,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 8,
+						personPronoun: "vous",
 						form: "viendrez",
 						start: 13,
 						end: 21,
@@ -88468,8 +90130,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 107,
+						verbInfinitive: "reprendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "reprîmes",
 						start: 5,
 						end: 13,
@@ -88490,8 +90158,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Viens",
 						start: 0,
 						end: 5,
@@ -88512,8 +90186,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Soyez",
 						start: 0,
 						end: 5,
@@ -88534,8 +90214,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 221,
+						verbInfinitive: "continuer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "continua",
 						start: 28,
 						end: 36,
@@ -88556,8 +90242,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "vient",
 						start: 3,
 						end: 8,
@@ -88578,8 +90270,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 157,
+						verbInfinitive: "essayer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "essaya",
 						start: 40,
 						end: 46,
@@ -88600,8 +90298,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 57,
+						verbInfinitive: "entendre",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai entendu",
 						start: 14,
 						end: 24,
@@ -88622,8 +90326,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 107,
+						verbInfinitive: "reprendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "reprîmes",
 						start: 35,
 						end: 43,
@@ -88644,8 +90354,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 192,
+						verbInfinitive: "tomber",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "tombait",
 						start: 56,
 						end: 63,
@@ -88666,8 +90382,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 154,
+						verbInfinitive: "marcher",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "marche",
 						start: 3,
 						end: 9,
@@ -88688,8 +90410,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai su",
 						start: 13,
 						end: 18,
@@ -88710,8 +90438,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait voulu",
 						start: 3,
 						end: 14,
@@ -88732,8 +90466,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 7,
+						verbInfinitive: "apprendre",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Apprends",
 						start: 0,
 						end: 8,
@@ -88743,8 +90483,14 @@ var sources = [
 					},
 					{
 						verbId: 48,
+						verbInfinitive: "écrire",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai écrit",
 						start: 24,
 						end: 32,
@@ -88754,8 +90500,14 @@ var sources = [
 					},
 					{
 						verbId: 49,
+						verbInfinitive: "finir",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "finir",
 						start: 79,
 						end: 84,
@@ -88776,8 +90528,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "êtes",
 						start: 5,
 						end: 9,
@@ -88798,8 +90556,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 64,
+						verbInfinitive: "rompre",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "rompait",
 						start: 88,
 						end: 95,
@@ -88820,8 +90584,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 120,
+						verbInfinitive: "faillir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "faillis",
 						start: 86,
 						end: 93,
@@ -88842,8 +90612,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 223,
+						verbInfinitive: "rentrer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "rentrâmes",
 						start: 89,
 						end: 98,
@@ -88864,8 +90640,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "voulez",
 						start: 26,
 						end: 32,
@@ -88886,8 +90668,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "est",
 						start: 3,
 						end: 6,
@@ -88908,8 +90696,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "était",
 						start: 3,
 						end: 8,
@@ -88930,8 +90724,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 207,
+						verbInfinitive: "regarder",
 						tenseId: 26,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 6,
+						personPronoun: "il",
 						form: "avoir regardé",
 						start: 13,
 						end: 26,
@@ -88941,8 +90741,14 @@ var sources = [
 					},
 					{
 						verbId: 675,
+						verbInfinitive: "deviner",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "avais deviné",
 						start: 140,
 						end: 152,
@@ -88963,8 +90769,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 158,
+						verbInfinitive: "attendre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "attends",
 						start: 2,
 						end: 9,
@@ -88985,8 +90797,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 206,
+						verbInfinitive: "passer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "passe",
 						start: 3,
 						end: 8,
@@ -89007,8 +90825,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "sommes",
 						start: 5,
 						end: 11,
@@ -89029,8 +90853,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 84,
+						verbInfinitive: "ouvrir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "ouvrait",
 						start: 11,
 						end: 18,
@@ -89051,8 +90881,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 157,
+						verbInfinitive: "essayer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "essayais",
 						start: 40,
 						end: 48,
@@ -89073,8 +90909,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "aie",
 						start: 19,
 						end: 22,
@@ -89095,8 +90937,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "eut",
 						start: 3,
 						end: 6,
@@ -89117,8 +90965,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 226,
+						verbInfinitive: "monter",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Montez",
 						start: 0,
 						end: 6,
@@ -89139,8 +90993,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "saurons",
 						start: 5,
 						end: 12,
@@ -89150,8 +91010,14 @@ var sources = [
 					},
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 7,
+						personPronoun: "nous",
 						form: "sommes arrivés",
 						start: 29,
 						end: 43,
@@ -89172,8 +91038,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "sais",
 						start: 3,
 						end: 7,
@@ -89194,8 +91066,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "partit",
 						start: 3,
 						end: 9,
@@ -89205,8 +91083,14 @@ var sources = [
 					},
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "dire",
 						start: 68,
 						end: 72,
@@ -89227,8 +91111,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "venais",
 						start: 9,
 						end: 15,
@@ -89249,8 +91139,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "était",
 						start: 3,
 						end: 8,
@@ -89271,8 +91167,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 77,
+						verbInfinitive: "courir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "couraient",
 						start: 4,
 						end: 13,
@@ -89293,8 +91195,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 208,
+						verbInfinitive: "rester",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "était resté",
 						start: 37,
 						end: 48,
@@ -89315,8 +91223,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "avais",
 						start: 2,
 						end: 7,
@@ -89337,8 +91251,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "allons",
 						start: 14,
 						end: 20,
@@ -89359,8 +91279,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "va",
 						start: 3,
 						end: 5,
@@ -89370,8 +91296,14 @@ var sources = [
 					},
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "falloir",
 						start: 6,
 						end: 13,
@@ -89392,8 +91324,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 108,
+						verbInfinitive: "comprendre",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "comprenions",
 						start: 16,
 						end: 27,
@@ -89414,8 +91352,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 12,
+						verbInfinitive: "valoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "vaut",
 						start: 29,
 						end: 33,
@@ -89436,8 +91380,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 9,
+						personPronoun: "ils",
 						form: "partiraient",
 						start: 23,
 						end: 34,
@@ -89458,8 +91408,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai dit",
 						start: 2,
 						end: 8,
@@ -89480,8 +91436,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "suis allé",
 						start: 15,
 						end: 24,
@@ -89502,8 +91464,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 154,
+						verbInfinitive: "marcher",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "marchions",
 						start: 30,
 						end: 39,
@@ -89524,8 +91492,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 211,
+						verbInfinitive: "entrer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "entrâmes",
 						start: 10,
 						end: 18,
@@ -89546,8 +91520,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 418,
+						verbInfinitive: "assister",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "assistais",
 						start: 2,
 						end: 11,
@@ -89568,8 +91548,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "fait",
 						start: 3,
 						end: 7,
@@ -89590,8 +91576,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 195,
+						verbInfinitive: "imaginer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "imaginait",
 						start: 22,
 						end: 31,
@@ -89612,8 +91604,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "étaient",
 						start: 4,
 						end: 11,
@@ -89634,8 +91632,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai",
 						start: 2,
 						end: 4,
@@ -89656,8 +91660,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 708,
+						verbInfinitive: "hésiter",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "hésita",
 						start: 3,
 						end: 9,
@@ -89693,8 +91703,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "va",
 						start: 15,
 						end: 17,
@@ -89715,8 +91731,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 701,
+						verbInfinitive: "échanger",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "échangèrent",
 						start: 4,
 						end: 15,
@@ -89737,8 +91759,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "était",
 						start: 3,
 						end: 8,
@@ -89759,8 +91787,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "devait",
 						start: 3,
 						end: 9,
@@ -89781,8 +91815,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 50,
+						verbInfinitive: "lire",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "lisais",
 						start: 3,
 						end: 9,
@@ -89803,8 +91843,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "saurons",
 						start: 20,
 						end: 27,
@@ -89825,8 +91871,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 154,
+						verbInfinitive: "marcher",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "marchait",
 						start: 3,
 						end: 11,
@@ -89847,8 +91899,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 22,
+						verbInfinitive: "craindre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "craignez",
 						start: 19,
 						end: 27,
@@ -89869,8 +91927,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "voyez",
 						start: 5,
 						end: 10,
@@ -89891,8 +91955,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "vais",
 						start: 3,
 						end: 7,
@@ -89913,8 +91983,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 338,
+						verbInfinitive: "se moquer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "te moques",
 						start: 3,
 						end: 12,
@@ -89935,8 +92011,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 157,
+						verbInfinitive: "essayer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "essaya",
 						start: 3,
 						end: 9,
@@ -89957,8 +92039,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 682,
+						verbInfinitive: "refaire",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "refasse",
 						start: 15,
 						end: 22,
@@ -89979,8 +92067,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "sais",
 						start: 37,
 						end: 41,
@@ -90001,8 +92095,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "veux",
 						start: 17,
 						end: 21,
@@ -90012,8 +92112,14 @@ var sources = [
 					},
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "dise",
 						start: 29,
 						end: 33,
@@ -90034,8 +92140,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 50,
+						verbInfinitive: "lire",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 5,
+						personPronoun: "tu",
 						form: "as lu",
 						start: 3,
 						end: 8,
@@ -90056,8 +92168,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "ferais",
 						start: 17,
 						end: 23,
@@ -90078,8 +92196,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai eu",
 						start: 2,
 						end: 7,
@@ -90100,8 +92224,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "as",
 						start: 22,
 						end: 24,
@@ -90122,8 +92252,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 58,
+						verbInfinitive: "mettre",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Mets",
 						start: 0,
 						end: 4,
@@ -90144,8 +92280,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "est",
 						start: 4,
 						end: 7,
@@ -90166,8 +92308,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 101,
+						verbInfinitive: "céder",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "cédai",
 						start: 11,
 						end: 16,
@@ -90188,8 +92336,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "allons",
 						start: 45,
 						end: 51,
@@ -90210,8 +92364,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "êtes",
 						start: 5,
 						end: 9,
@@ -90232,8 +92392,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "sais",
 						start: 3,
 						end: 7,
@@ -90254,8 +92420,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "peux",
 						start: 3,
 						end: 7,
@@ -90276,8 +92448,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 57,
+						verbInfinitive: "entendre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "entends",
 						start: 16,
 						end: 23,
@@ -90298,8 +92476,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 20,
+						verbInfinitive: "connaître",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "connaissais",
 						start: 3,
 						end: 14,
@@ -90320,8 +92504,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 58,
+						verbInfinitive: "mettre",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai mis",
 						start: 2,
 						end: 8,
@@ -90342,8 +92532,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez",
 						start: 19,
 						end: 23,
@@ -90364,8 +92560,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 172,
+						verbInfinitive: "parler",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 5,
+						personPronoun: "tu",
 						form: "as parlé",
 						start: 8,
 						end: 16,
@@ -90386,8 +92588,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "serai",
 						start: 8,
 						end: 13,
@@ -90408,8 +92616,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 57,
+						verbInfinitive: "entendre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "entendez",
 						start: 11,
 						end: 19,
@@ -90430,8 +92644,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 169,
+						verbInfinitive: "trouver",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "trouve",
 						start: 77,
 						end: 83,
@@ -90452,8 +92672,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 211,
+						verbInfinitive: "entrer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "entra",
 						start: 3,
 						end: 8,
@@ -90474,8 +92700,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 77,
+						verbInfinitive: "courir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "courus",
 						start: 3,
 						end: 9,
@@ -90496,8 +92728,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "savez",
 						start: 51,
 						end: 56,
@@ -90507,8 +92745,14 @@ var sources = [
 					},
 					{
 						verbId: 667,
+						verbInfinitive: "maintenir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "maintiens",
 						start: 64,
 						end: 73,
@@ -90529,8 +92773,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 203,
+						verbInfinitive: "partager",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "partageais",
 						start: 44,
 						end: 54,
@@ -90551,8 +92801,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Dites",
 						start: 0,
 						end: 5,
@@ -90562,8 +92818,14 @@ var sources = [
 					},
 					{
 						verbId: 49,
+						verbInfinitive: "finir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez fini",
 						start: 30,
 						end: 39,
@@ -90584,8 +92846,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 186,
+						verbInfinitive: "étudier",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "étudie",
 						start: 25,
 						end: 31,
@@ -90595,8 +92863,14 @@ var sources = [
 					},
 					{
 						verbId: 41,
+						verbInfinitive: "oublier",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "oublie",
 						start: 56,
 						end: 62,
@@ -90617,8 +92891,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 207,
+						verbInfinitive: "regarder",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Regarde",
 						start: 0,
 						end: 7,
@@ -90639,8 +92919,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "sais",
 						start: 3,
 						end: 7,
@@ -90661,8 +92947,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 220,
+						verbInfinitive: "laisser",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Laisse",
 						start: 0,
 						end: 6,
@@ -90683,8 +92975,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "vas",
 						start: 3,
 						end: 6,
@@ -90705,8 +93003,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 9,
+						personPronoun: "ils",
 						form: "sont",
 						start: 4,
 						end: 8,
@@ -90716,8 +93020,14 @@ var sources = [
 					},
 					{
 						verbId: 108,
+						verbInfinitive: "comprendre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "comprends",
 						start: 34,
 						end: 43,
@@ -90738,8 +93048,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 675,
+						verbInfinitive: "deviner",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "devina",
 						start: 3,
 						end: 9,
@@ -90760,8 +93076,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 109,
+						verbInfinitive: "descendre",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "descendais",
 						start: 3,
 						end: 13,
@@ -90782,8 +93104,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "es",
 						start: 7,
 						end: 9,
@@ -90804,8 +93132,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Dis",
 						start: 0,
 						end: 3,
@@ -90815,8 +93149,14 @@ var sources = [
 					},
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 5,
+						personPronoun: "tu",
 						form: "as vu",
 						start: 8,
 						end: 13,
@@ -90837,8 +93177,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "sais",
 						start: 3,
 						end: 7,
@@ -90859,8 +93205,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 509,
+						verbInfinitive: "cesser",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "cessa",
 						start: 3,
 						end: 8,
@@ -90881,8 +93233,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 41,
+						verbInfinitive: "oublier",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai oublié",
 						start: 2,
 						end: 11,
@@ -90903,8 +93261,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "as",
 						start: 3,
 						end: 5,
@@ -90925,8 +93289,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 665,
+						verbInfinitive: "supposer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "suppose",
 						start: 33,
 						end: 40,
@@ -90947,8 +93317,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 8,
+						personPronoun: "vous",
 						form: "serez",
 						start: 57,
 						end: 62,
@@ -90969,8 +93345,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "eus",
 						start: 8,
 						end: 11,
@@ -90991,8 +93373,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 56,
+						verbInfinitive: "dormir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "dors",
 						start: 19,
 						end: 23,
@@ -91013,8 +93401,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "pourrai",
 						start: 21,
 						end: 28,
@@ -91035,8 +93429,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 702,
+						verbInfinitive: "renoncer",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 5,
+						personPronoun: "tu",
 						form: "as renoncé",
 						start: 3,
 						end: 13,
@@ -91057,8 +93457,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "irai",
 						start: 9,
 						end: 13,
@@ -91079,8 +93485,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "voyez",
 						start: 5,
 						end: 10,
@@ -91101,8 +93513,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 481,
+						verbInfinitive: "approcher",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "approchait",
 						start: 3,
 						end: 13,
@@ -91123,8 +93541,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "vois",
 						start: 3,
 						end: 7,
@@ -91134,8 +93558,14 @@ var sources = [
 					},
 					{
 						verbId: 419,
+						verbInfinitive: "attacher",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "attache",
 						start: 11,
 						end: 18,
@@ -91156,8 +93586,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "sais",
 						start: 8,
 						end: 12,
@@ -91178,8 +93614,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait",
 						start: 3,
 						end: 8,
@@ -91200,8 +93642,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "sais",
 						start: 8,
 						end: 12,
@@ -91211,8 +93659,14 @@ var sources = [
 					},
 					{
 						verbId: 72,
+						verbInfinitive: "vivre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "vivons",
 						start: 26,
 						end: 32,
@@ -91233,8 +93687,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "fait",
 						start: 3,
 						end: 7,
@@ -91244,8 +93704,14 @@ var sources = [
 					},
 					{
 						verbId: 158,
+						verbInfinitive: "attendre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "attends",
 						start: 44,
 						end: 51,
@@ -91266,8 +93732,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "fallait",
 						start: 3,
 						end: 10,
@@ -91288,8 +93760,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "voudrais",
 						start: 3,
 						end: 11,
@@ -91310,8 +93788,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "vas",
 						start: 3,
 						end: 6,
@@ -91332,8 +93816,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 5,
+						personPronoun: "tu",
 						form: "disais",
 						start: 19,
 						end: 25,
@@ -91354,8 +93844,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "aurai",
 						start: 20,
 						end: 25,
@@ -91391,8 +93887,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 389,
+						verbInfinitive: "demeurer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "demeura",
 						start: 36,
 						end: 43,
@@ -91413,8 +93915,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 696,
+						verbInfinitive: "contenir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "contenait",
 						start: 3,
 						end: 12,
@@ -91435,8 +93943,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "pouvais",
 						start: 32,
 						end: 39,
@@ -91457,8 +93971,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 390,
+						verbInfinitive: "habiter",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "habitaient",
 						start: 4,
 						end: 14,
@@ -91479,8 +93999,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 6,
+						personPronoun: "il",
 						form: "ira",
 						start: 3,
 						end: 6,
@@ -91501,8 +94027,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "faites",
 						start: 26,
 						end: 32,
@@ -91523,8 +94055,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "devrais",
 						start: 22,
 						end: 29,
@@ -91545,8 +94083,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "dirais",
 						start: 21,
 						end: 27,
@@ -91567,8 +94111,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Allons",
 						start: 0,
 						end: 6,
@@ -91578,8 +94128,14 @@ var sources = [
 					},
 					{
 						verbId: 60,
+						verbInfinitive: "perdre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "perdons",
 						start: 21,
 						end: 28,
@@ -91600,8 +94156,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 86,
+						verbInfinitive: "travailler",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai travaillé",
 						start: 29,
 						end: 41,
@@ -91622,8 +94184,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "pouvais",
 						start: 12,
 						end: 19,
@@ -91644,8 +94212,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Allons",
 						start: 0,
 						end: 6,
@@ -91655,8 +94229,14 @@ var sources = [
 					},
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "fallait",
 						start: 16,
 						end: 23,
@@ -91677,8 +94257,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 408,
+						verbInfinitive: "s'habiller",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "s’habilla",
 						start: 3,
 						end: 12,
@@ -91699,8 +94285,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "viens",
 						start: 14,
 						end: 19,
@@ -91710,8 +94302,14 @@ var sources = [
 					},
 					{
 						verbId: 394,
+						verbInfinitive: "consulter",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "consulter",
 						start: 23,
 						end: 32,
@@ -91732,8 +94330,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 20,
+						verbInfinitive: "connaître",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Connaissiez",
 						start: 0,
 						end: 11,
@@ -91754,8 +94358,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 195,
+						verbInfinitive: "imaginer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "imaginez",
 						start: 21,
 						end: 29,
@@ -91765,8 +94375,14 @@ var sources = [
 					},
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 11,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 4,
+						personPronoun: "je",
 						form: "aie jamais cru",
 						start: 36,
 						end: 50,
@@ -91787,8 +94403,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Veuillez",
 						start: 0,
 						end: 8,
@@ -91809,8 +94431,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "as",
 						start: 12,
 						end: 14,
@@ -91831,8 +94459,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 208,
+						verbInfinitive: "rester",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Reste",
 						start: 0,
 						end: 5,
@@ -91853,8 +94487,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 172,
+						verbInfinitive: "parler",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez parlé",
 						start: 49,
 						end: 59,
@@ -91875,8 +94515,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez vu",
 						start: 5,
 						end: 12,
@@ -91897,8 +94543,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 392,
+						verbInfinitive: "préférer",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 6,
+						personPronoun: "il",
 						form: "préférera",
 						start: 3,
 						end: 12,
@@ -91919,8 +94571,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait eu",
 						start: 64,
 						end: 72,
@@ -91941,8 +94599,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 8,
+						personPronoun: "vous",
 						form: "saviez",
 						start: 8,
 						end: 14,
@@ -91952,8 +94616,14 @@ var sources = [
 					},
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "veux",
 						start: 46,
 						end: 50,
@@ -91974,8 +94644,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 436,
+						verbInfinitive: "compter",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 8,
+						personPronoun: "vous",
 						form: "comptiez",
 						start: 5,
 						end: 13,
@@ -91996,8 +94672,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 458,
+						verbInfinitive: "sauter",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "sauta",
 						start: 20,
 						end: 25,
@@ -92018,8 +94700,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 213,
+						verbInfinitive: "donner",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "donnons",
 						start: 5,
 						end: 12,
@@ -92040,8 +94728,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 11,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 6,
+						personPronoun: "il",
 						form: "ait pu",
 						start: 50,
 						end: 56,
@@ -92062,8 +94756,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "arrive",
 						start: 24,
 						end: 30,
@@ -92073,8 +94773,14 @@ var sources = [
 					},
 					{
 						verbId: 219,
+						verbInfinitive: "garder",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "garder",
 						start: 34,
 						end: 40,
@@ -92095,8 +94801,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 172,
+						verbInfinitive: "parler",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Parle",
 						start: 0,
 						end: 5,
@@ -92117,8 +94829,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 75,
+						verbInfinitive: "commencer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "commençait",
 						start: 3,
 						end: 13,
@@ -92139,8 +94857,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "étions",
 						start: 23,
 						end: 29,
@@ -92161,8 +94885,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 211,
+						verbInfinitive: "entrer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "entrait",
 						start: 36,
 						end: 43,
@@ -92183,8 +94913,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "fit",
 						start: 3,
 						end: 6,
@@ -92205,8 +94941,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "suis",
 						start: 6,
 						end: 10,
@@ -92227,8 +94969,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 81,
+						verbInfinitive: "espérer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "espère",
 						start: 2,
 						end: 8,
@@ -92249,8 +94997,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 195,
+						verbInfinitive: "imaginer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "imaginais",
 						start: 27,
 						end: 36,
@@ -92271,8 +95025,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 8,
+						verbInfinitive: "tenir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Tiens",
 						start: 0,
 						end: 5,
@@ -92293,8 +95053,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Veuillez",
 						start: 0,
 						end: 8,
@@ -92304,8 +95070,14 @@ var sources = [
 					},
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "puis",
 						start: 29,
 						end: 33,
@@ -92326,8 +95098,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 158,
+						verbInfinitive: "attendre",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "attendrons",
 						start: 88,
 						end: 98,
@@ -92348,8 +95126,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 421,
+						verbInfinitive: "avouer",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Avouons",
 						start: 0,
 						end: 7,
@@ -92359,8 +95143,14 @@ var sources = [
 					},
 					{
 						verbId: 97,
+						verbInfinitive: "sentir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "sentis",
 						start: 15,
 						end: 21,
@@ -92381,8 +95171,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 28,
+						verbInfinitive: "paraître",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "parut",
 						start: 45,
 						end: 50,
@@ -92403,8 +95199,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "serais",
 						start: 3,
 						end: 9,
@@ -92425,8 +95227,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 95,
+						verbInfinitive: "prendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "pris",
 						start: 3,
 						end: 7,
@@ -92447,8 +95255,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "étais",
 						start: 2,
 						end: 7,
@@ -92469,8 +95283,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "devait",
 						start: 14,
 						end: 20,
@@ -92491,8 +95311,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "voulut",
 						start: 3,
 						end: 9,
@@ -92513,8 +95339,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 176,
+						verbInfinitive: "baisser",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "baissa",
 						start: 3,
 						end: 9,
@@ -92535,8 +95367,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 18,
+						verbInfinitive: "envoyer",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 6,
+						personPronoun: "il",
 						form: "enverra",
 						start: 3,
 						end: 10,
@@ -92557,8 +95395,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 277,
+						verbInfinitive: "voyager",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "voyage",
 						start: 3,
 						end: 9,
@@ -92579,8 +95423,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "eut",
 						start: 3,
 						end: 6,
@@ -92601,8 +95451,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "étions",
 						start: 25,
 						end: 31,
@@ -92623,8 +95479,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 494,
+						verbInfinitive: "boucler",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "boucla",
 						start: 3,
 						end: 9,
@@ -92645,8 +95507,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai dit",
 						start: 2,
 						end: 8,
@@ -92656,8 +95524,14 @@ var sources = [
 					},
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "savais",
 						start: 19,
 						end: 25,
@@ -92678,8 +95552,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 192,
+						verbInfinitive: "tomber",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "tomba",
 						start: 3,
 						end: 8,
@@ -92700,8 +95580,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait",
 						start: 3,
 						end: 8,
@@ -92711,8 +95597,14 @@ var sources = [
 					},
 					{
 						verbId: 268,
+						verbInfinitive: "prononcer",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en prononçant",
 						start: 25,
 						end: 38,
@@ -92733,8 +95625,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 108,
+						verbInfinitive: "comprendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "compris",
 						start: 9,
 						end: 16,
@@ -92755,8 +95653,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 5,
+						personPronoun: "tu",
 						form: "avais",
 						start: 61,
 						end: 66,
@@ -92777,8 +95681,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 213,
+						verbInfinitive: "donner",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "donnerais",
 						start: 3,
 						end: 12,
@@ -92799,8 +95709,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "irai",
 						start: 2,
 						end: 6,
@@ -92821,8 +95737,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 50,
+						verbInfinitive: "lire",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai lu",
 						start: 2,
 						end: 7,
@@ -92843,8 +95765,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 109,
+						verbInfinitive: "descendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "descendit",
 						start: 23,
 						end: 32,
@@ -92865,8 +95793,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 50,
+						verbInfinitive: "lire",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "lus",
 						start: 45,
 						end: 48,
@@ -92887,8 +95821,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 20,
+						verbInfinitive: "connaître",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "connaissait",
 						start: 14,
 						end: 25,
@@ -92909,8 +95849,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 109,
+						verbInfinitive: "descendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "descendit",
 						start: 12,
 						end: 21,
@@ -92931,8 +95877,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 12,
+						verbInfinitive: "valoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "valait",
 						start: 8,
 						end: 14,
@@ -92953,8 +95905,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "fit",
 						start: 15,
 						end: 18,
@@ -92975,8 +95933,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 84,
+						verbInfinitive: "ouvrir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "ouvrit",
 						start: 3,
 						end: 9,
@@ -92997,8 +95961,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 264,
+						verbInfinitive: "arranger",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "arrangez",
 						start: 5,
 						end: 13,
@@ -93019,8 +95989,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 14,
+						verbInfinitive: "apercevoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "aperçut",
 						start: 30,
 						end: 37,
@@ -93041,8 +96017,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "savez",
 						start: 5,
 						end: 10,
@@ -93063,8 +96045,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 224,
+						verbInfinitive: "tirer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "tira",
 						start: 40,
 						end: 44,
@@ -93085,8 +96073,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "faudrait",
 						start: 3,
 						end: 11,
@@ -93107,8 +96101,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "fut",
 						start: 3,
 						end: 6,
@@ -93129,8 +96129,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "a dû",
 						start: 3,
 						end: 7,
@@ -93151,8 +96157,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "est",
 						start: 3,
 						end: 6,
@@ -93162,8 +96174,14 @@ var sources = [
 					},
 					{
 						verbId: 206,
+						verbInfinitive: "passer",
 						tenseId: 11,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 6,
+						personPronoun: "il",
 						form: "ait passé",
 						start: 42,
 						end: 51,
@@ -93184,8 +96202,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 50,
+						verbInfinitive: "lire",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai lu",
 						start: 2,
 						end: 7,
@@ -93206,8 +96230,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 97,
+						verbInfinitive: "sentir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "sentais",
 						start: 22,
 						end: 29,
@@ -93228,8 +96258,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 95,
+						verbInfinitive: "prendre",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Prenez",
 						start: 0,
 						end: 6,
@@ -93250,8 +96286,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 227,
+						verbInfinitive: "tourner",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "tourna",
 						start: 19,
 						end: 25,
@@ -93272,8 +96314,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 529,
+						verbInfinitive: "creuser",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "creusa",
 						start: 3,
 						end: 9,
@@ -93294,8 +96342,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 557,
+						verbInfinitive: "diviser",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "divisa",
 						start: 3,
 						end: 9,
@@ -93316,8 +96370,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 6,
+						personPronoun: "il",
 						form: "faudra",
 						start: 3,
 						end: 9,
@@ -93338,8 +96398,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 219,
+						verbInfinitive: "garder",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "gardèrent",
 						start: 66,
 						end: 75,
@@ -93360,8 +96426,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "arrivâmes",
 						start: 17,
 						end: 26,
@@ -93382,8 +96454,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "put",
 						start: 3,
 						end: 6,
@@ -93404,8 +96482,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 41,
+						verbInfinitive: "oublier",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "oubliez",
 						start: 15,
 						end: 22,
@@ -93426,8 +96510,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 459,
+						verbInfinitive: "aborder",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "aborda",
 						start: 24,
 						end: 30,
@@ -93448,8 +96538,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "crois",
 						start: 13,
 						end: 18,
@@ -93470,8 +96566,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 56,
+						verbInfinitive: "dormir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "dormirais",
 						start: 44,
 						end: 53,
@@ -93492,8 +96594,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "étais",
 						start: 2,
 						end: 7,
@@ -93514,8 +96622,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 151,
+						verbInfinitive: "gagner",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "gagne",
 						start: 3,
 						end: 8,
@@ -93536,8 +96650,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 7,
+						verbInfinitive: "apprendre",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 8,
+						personPronoun: "vous",
 						form: "apprendrez",
 						start: 5,
 						end: 15,
@@ -93558,8 +96678,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 8,
+						verbInfinitive: "tenir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Tenez",
 						start: 0,
 						end: 5,
@@ -93580,8 +96706,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 157,
+						verbInfinitive: "essayer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "essaya",
 						start: 7,
 						end: 13,
@@ -93602,8 +96734,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 60,
+						verbInfinitive: "perdre",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 9,
+						personPronoun: "ils",
 						form: "ont perdu",
 						start: 4,
 						end: 13,
@@ -93624,8 +96762,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 75,
+						verbInfinitive: "commencer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "commencions",
 						start: 16,
 						end: 27,
@@ -93646,8 +96790,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 6,
+						personPronoun: "il",
 						form: "sera",
 						start: 23,
 						end: 27,
@@ -93668,8 +96818,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "sauriez",
 						start: 78,
 						end: 85,
@@ -93690,8 +96846,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 151,
+						verbInfinitive: "gagner",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "gagna",
 						start: 10,
 						end: 15,
@@ -93712,8 +96874,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 84,
+						verbInfinitive: "ouvrir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "ouvrit",
 						start: 18,
 						end: 24,
@@ -93734,8 +96902,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 451,
+						verbInfinitive: "fixer",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Fixez",
 						start: 0,
 						end: 5,
@@ -93756,8 +96930,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 218,
+						verbInfinitive: "écouter",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Écoute",
 						start: 0,
 						end: 6,
@@ -93778,8 +96958,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 72,
+						verbInfinitive: "vivre",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "vivait",
 						start: 11,
 						end: 17,
@@ -93800,8 +96986,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 214,
+						verbInfinitive: "choisir",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 4,
+						personPronoun: "je",
 						form: "eusse choisi",
 						start: 46,
 						end: 58,
@@ -93822,8 +97014,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 218,
+						verbInfinitive: "écouter",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Écoutez",
 						start: 0,
 						end: 7,
@@ -93833,8 +97031,14 @@ var sources = [
 					},
 					{
 						verbId: 57,
+						verbInfinitive: "entendre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "entends",
 						start: 20,
 						end: 27,
@@ -93855,8 +97059,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 17,
+						verbInfinitive: "recevoir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 5,
+						personPronoun: "tu",
 						form: "as reçu",
 						start: 3,
 						end: 10,
@@ -93877,8 +97087,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 84,
+						verbInfinitive: "ouvrir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "ouvraient",
 						start: 4,
 						end: 13,
@@ -93888,8 +97104,14 @@ var sources = [
 					},
 					{
 						verbId: 215,
+						verbInfinitive: "chercher",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "cherchaient",
 						start: 36,
 						end: 47,
@@ -93899,8 +97121,14 @@ var sources = [
 					},
 					{
 						verbId: 108,
+						verbInfinitive: "comprendre",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "comprendre",
 						start: 50,
 						end: 60,
@@ -93921,8 +97149,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 218,
+						verbInfinitive: "écouter",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Écoutez",
 						start: 0,
 						end: 7,
@@ -93943,8 +97177,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 77,
+						verbInfinitive: "courir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "courut",
 						start: 3,
 						end: 9,
@@ -93965,8 +97205,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 95,
+						verbInfinitive: "prendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "pris",
 						start: 18,
 						end: 22,
@@ -93987,8 +97233,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 420,
+						verbInfinitive: "attirer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "attirait",
 						start: 44,
 						end: 52,
@@ -94009,8 +97261,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 12,
+						verbInfinitive: "valoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "vaut",
 						start: 3,
 						end: 7,
@@ -94031,8 +97289,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 95,
+						verbInfinitive: "prendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "prit",
 						start: 3,
 						end: 7,
@@ -94053,8 +97317,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 278,
+						verbInfinitive: "songer",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Songeons",
 						start: 0,
 						end: 8,
@@ -94075,8 +97345,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 224,
+						verbInfinitive: "tirer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "tirai",
 						start: 11,
 						end: 16,
@@ -94097,8 +97373,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 157,
+						verbInfinitive: "essayer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "essaya",
 						start: 3,
 						end: 9,
@@ -94108,8 +97390,14 @@ var sources = [
 					},
 					{
 						verbId: 63,
+						verbInfinitive: "répondre",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "répondre",
 						start: 13,
 						end: 21,
@@ -94130,8 +97418,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût voulu",
 						start: 3,
 						end: 12,
@@ -94152,8 +97446,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Veuillez",
 						start: 0,
 						end: 8,
@@ -94174,8 +97474,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 95,
+						verbInfinitive: "prendre",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Prends",
 						start: 0,
 						end: 6,
@@ -94196,8 +97502,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai",
 						start: 23,
 						end: 25,
@@ -94218,8 +97530,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 274,
+						verbInfinitive: "filer",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Filons",
 						start: 0,
 						end: 6,
@@ -94240,8 +97558,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 190,
+						verbInfinitive: "arrêter",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Arrêtez",
 						start: 0,
 						end: 7,
@@ -94262,8 +97586,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 209,
+						verbInfinitive: "penser",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai pensé",
 						start: 2,
 						end: 10,
@@ -94273,8 +97603,14 @@ var sources = [
 					},
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "pourrais",
 						start: 18,
 						end: 26,
@@ -94295,8 +97631,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 50,
+						verbInfinitive: "lire",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai lu",
 						start: 51,
 						end: 56,
@@ -94317,8 +97659,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "voyez",
 						start: 5,
 						end: 10,
@@ -94339,8 +97687,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "a dû",
 						start: 3,
 						end: 7,
@@ -94361,8 +97715,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "a été",
 						start: 38,
 						end: 43,
@@ -94383,8 +97743,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 61,
+						verbInfinitive: "pleuvoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "pleuvait",
 						start: 3,
 						end: 11,
@@ -94405,8 +97771,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "dut",
 						start: 3,
 						end: 6,
@@ -94416,8 +97788,14 @@ var sources = [
 					},
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "voulut",
 						start: 26,
 						end: 32,
@@ -94438,8 +97816,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 211,
+						verbInfinitive: "entrer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "entrait",
 						start: 23,
 						end: 30,
@@ -94460,8 +97844,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 75,
+						verbInfinitive: "commencer",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Commençons",
 						start: 0,
 						end: 10,
@@ -94482,8 +97872,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 206,
+						verbInfinitive: "passer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "passons",
 						start: 5,
 						end: 12,
@@ -94504,8 +97900,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 211,
+						verbInfinitive: "entrer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "entrai",
 						start: 51,
 						end: 57,
@@ -94526,8 +97928,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "fus",
 						start: 17,
 						end: 20,
@@ -94548,8 +97956,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 211,
+						verbInfinitive: "entrer",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "est entré",
 						start: 8,
 						end: 17,
@@ -94570,8 +97984,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 81,
+						verbInfinitive: "espérer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "espère",
 						start: 2,
 						end: 8,
@@ -94592,8 +98012,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait",
 						start: 26,
 						end: 31,
@@ -94614,8 +98040,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 66,
+						verbInfinitive: "sortir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "sortis",
 						start: 3,
 						end: 9,
@@ -94636,8 +98068,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 8,
+						verbInfinitive: "tenir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "tiens",
 						start: 8,
 						end: 13,
@@ -94658,8 +98096,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Voyons",
 						start: 0,
 						end: 6,
@@ -94680,8 +98124,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 8,
+						verbInfinitive: "tenir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "tenez",
 						start: 48,
 						end: 53,
@@ -94702,8 +98152,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 215,
+						verbInfinitive: "chercher",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "cherchèrent",
 						start: 22,
 						end: 33,
@@ -94724,8 +98180,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "venait",
 						start: 27,
 						end: 33,
@@ -94746,8 +98208,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 270,
+						verbInfinitive: "juger",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait jugé",
 						start: 3,
 						end: 13,
@@ -94768,8 +98236,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 278,
+						verbInfinitive: "songer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "songeai",
 						start: 28,
 						end: 35,
@@ -94790,8 +98264,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 699,
+						verbInfinitive: "veiller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "veille",
 						start: 3,
 						end: 9,
@@ -94812,8 +98292,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez voulu",
 						start: 18,
 						end: 28,
@@ -94834,8 +98320,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 232,
+						verbInfinitive: "manquer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "manquait",
 						start: 13,
 						end: 21,
@@ -94856,8 +98348,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 14,
+						verbInfinitive: "apercevoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "aperçut",
 						start: 3,
 						end: 10,
@@ -94878,8 +98376,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 8,
+						verbInfinitive: "tenir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Tiens",
 						start: 0,
 						end: 5,
@@ -94900,8 +98404,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "eus",
 						start: 15,
 						end: 18,
@@ -94922,8 +98432,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 48,
+						verbInfinitive: "écrire",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez écrit",
 						start: 5,
 						end: 15,
@@ -94944,8 +98460,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 208,
+						verbInfinitive: "rester",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "resta",
 						start: 3,
 						end: 8,
@@ -94966,8 +98488,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 126,
+						verbInfinitive: "jouer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "jouez",
 						start: 19,
 						end: 24,
@@ -94988,8 +98516,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez",
 						start: 5,
 						end: 9,
@@ -95010,8 +98544,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai eu",
 						start: 2,
 						end: 7,
@@ -95032,8 +98572,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "vois",
 						start: 3,
 						end: 7,
@@ -95054,8 +98600,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 94,
+						verbInfinitive: "manger",
 						tenseId: 8,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "past-anterior",
+						tenseName: "passé antérieur",
 						personId: 6,
+						personPronoun: "il",
 						form: "eut mangé",
 						start: 12,
 						end: 21,
@@ -95076,8 +98628,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 209,
+						verbInfinitive: "penser",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "pensais",
 						start: 3,
 						end: 10,
@@ -95098,8 +98656,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 723,
+						verbInfinitive: "lutter",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "luttait",
 						start: 19,
 						end: 26,
@@ -95120,8 +98684,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "étais",
 						start: 15,
 						end: 20,
@@ -95142,8 +98712,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 95,
+						verbInfinitive: "prendre",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "a pris",
 						start: 3,
 						end: 9,
@@ -95164,8 +98740,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 172,
+						verbInfinitive: "parler",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "parle",
 						start: 27,
 						end: 32,
@@ -95186,8 +98768,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 72,
+						verbInfinitive: "vivre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "vivons",
 						start: 5,
 						end: 11,
@@ -95208,8 +98796,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 207,
+						verbInfinitive: "regarder",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Regardez",
 						start: 0,
 						end: 8,
@@ -95230,8 +98824,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 86,
+						verbInfinitive: "travailler",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "travaillait",
 						start: 3,
 						end: 14,
@@ -95252,8 +98852,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 8,
+						personPronoun: "vous",
 						form: "vouliez",
 						start: 28,
 						end: 35,
@@ -95263,8 +98869,14 @@ var sources = [
 					},
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "pourrions",
 						start: 88,
 						end: 97,
@@ -95285,8 +98897,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Voyons",
 						start: 0,
 						end: 6,
@@ -95307,8 +98925,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 20,
+						verbInfinitive: "connaître",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai connu",
 						start: 19,
 						end: 27,
@@ -95329,8 +98953,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 169,
+						verbInfinitive: "trouver",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 6,
+						personPronoun: "il",
 						form: "trouvera",
 						start: 3,
 						end: 11,
@@ -95351,8 +98981,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "dois",
 						start: 10,
 						end: 14,
@@ -95373,8 +99009,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 220,
+						verbInfinitive: "laisser",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "laisse",
 						start: 12,
 						end: 18,
@@ -95395,8 +99037,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 215,
+						verbInfinitive: "chercher",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "chercherons",
 						start: 5,
 						end: 16,
@@ -95417,8 +99065,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 207,
+						verbInfinitive: "regarder",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "regardez",
 						start: 11,
 						end: 19,
@@ -95439,8 +99093,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 28,
+						verbInfinitive: "paraître",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "paraît",
 						start: 39,
 						end: 45,
@@ -95461,8 +99121,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 559,
+						verbInfinitive: "reconnaître",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "reconnus",
 						start: 6,
 						end: 14,
@@ -95483,8 +99149,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 280,
+						verbInfinitive: "taire",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "tûmes",
 						start: 13,
 						end: 18,
@@ -95505,8 +99177,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 4,
+						personPronoun: "je",
 						form: "eusse fait",
 						start: 20,
 						end: 30,
@@ -95527,8 +99205,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "fus",
 						start: 3,
 						end: 6,
@@ -95549,8 +99233,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 421,
+						verbInfinitive: "avouer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "avoue",
 						start: 11,
 						end: 16,
@@ -95571,8 +99261,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 665,
+						verbInfinitive: "supposer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "supposais",
 						start: 25,
 						end: 34,
@@ -95593,8 +99289,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 390,
+						verbInfinitive: "habiter",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "habitaient",
 						start: 4,
 						end: 14,
@@ -95615,8 +99317,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 445,
+						verbInfinitive: "examiner",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "examinai",
 						start: 73,
 						end: 81,
@@ -95637,8 +99345,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "pouvez",
 						start: 5,
 						end: 11,
@@ -95659,8 +99373,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 41,
+						verbInfinitive: "oublier",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "oubliez",
 						start: 15,
 						end: 22,
@@ -95681,8 +99401,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai su",
 						start: 16,
 						end: 21,
@@ -95703,8 +99429,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "devons",
 						start: 5,
 						end: 11,
@@ -95725,8 +99457,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 206,
+						verbInfinitive: "passer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "passait",
 						start: 3,
 						end: 10,
@@ -95747,8 +99485,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "sache",
 						start: 57,
 						end: 62,
@@ -95769,8 +99513,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 95,
+						verbInfinitive: "prendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "pris",
 						start: 3,
 						end: 7,
@@ -95780,8 +99530,14 @@ var sources = [
 					},
 					{
 						verbId: 84,
+						verbInfinitive: "ouvrir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "ouvris",
 						start: 21,
 						end: 27,
@@ -95802,8 +99558,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 92,
+						verbInfinitive: "avancer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avancez",
 						start: 10,
 						end: 17,
@@ -95824,8 +99586,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "veux",
 						start: 26,
 						end: 30,
@@ -95846,8 +99614,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 11,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 4,
+						personPronoun: "je",
 						form: "aie été",
 						start: 26,
 						end: 33,
@@ -95868,8 +99642,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "voulais",
 						start: 3,
 						end: 10,
@@ -95890,8 +99670,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "suis",
 						start: 49,
 						end: 53,
@@ -95912,8 +99698,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avons",
 						start: 5,
 						end: 10,
@@ -95934,8 +99726,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "pusse",
 						start: 30,
 						end: 35,
@@ -95956,8 +99754,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 226,
+						verbInfinitive: "monter",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "monta",
 						start: 3,
 						end: 8,
@@ -95978,8 +99782,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 223,
+						verbInfinitive: "rentrer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "rentra",
 						start: 3,
 						end: 9,
@@ -96000,8 +99810,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 207,
+						verbInfinitive: "regarder",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "regarda",
 						start: 3,
 						end: 10,
@@ -96022,8 +99838,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 109,
+						verbInfinitive: "descendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "descendirent",
 						start: 4,
 						end: 16,
@@ -96044,8 +99866,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 456,
+						verbInfinitive: "raconter",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "raconterai",
 						start: 3,
 						end: 13,
@@ -96055,8 +99883,14 @@ var sources = [
 					},
 					{
 						verbId: 44,
+						verbInfinitive: "rire",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "rire",
 						start: 67,
 						end: 71,
@@ -96077,8 +99911,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Soyez",
 						start: 0,
 						end: 5,
@@ -96099,8 +99939,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "serais",
 						start: 3,
 						end: 9,
@@ -96110,8 +99956,14 @@ var sources = [
 					},
 					{
 						verbId: 220,
+						verbInfinitive: "laisser",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "laissât",
 						start: 30,
 						end: 37,
@@ -96132,8 +99984,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "a fallu",
 						start: 9,
 						end: 16,
@@ -96154,8 +100012,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 97,
+						verbInfinitive: "sentir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "sentait",
 						start: 50,
 						end: 57,
@@ -96176,8 +100040,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "crois",
 						start: 3,
 						end: 8,
@@ -96198,8 +100068,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 456,
+						verbInfinitive: "raconter",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Racontez",
 						start: 0,
 						end: 8,
@@ -96209,8 +100085,14 @@ var sources = [
 					},
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez vu",
 						start: 27,
 						end: 34,
@@ -96220,8 +100102,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai été",
 						start: 73,
 						end: 79,
@@ -96242,8 +100130,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 14,
+						verbInfinitive: "apercevoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "aperçois",
 						start: 7,
 						end: 15,
@@ -96264,8 +100158,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 218,
+						verbInfinitive: "écouter",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "écouta",
 						start: 3,
 						end: 9,
@@ -96286,8 +100186,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 436,
+						verbInfinitive: "compter",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai compté",
 						start: 27,
 						end: 36,
@@ -96308,8 +100214,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "voudrais",
 						start: 34,
 						end: 42,
@@ -96330,8 +100242,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "dise",
 						start: 37,
 						end: 41,
@@ -96352,8 +100270,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Dites",
 						start: 0,
 						end: 5,
@@ -96374,8 +100298,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez",
 						start: 5,
 						end: 9,
@@ -96396,8 +100326,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez pu",
 						start: 5,
 						end: 12,
@@ -96418,8 +100354,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Dites",
 						start: 0,
 						end: 5,
@@ -96440,8 +100382,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 81,
+						verbInfinitive: "espérer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "espéra",
 						start: 3,
 						end: 9,
@@ -96462,8 +100410,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "croyais",
 						start: 3,
 						end: 10,
@@ -96484,8 +100438,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 48,
+						verbInfinitive: "écrire",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "écrivit",
 						start: 17,
 						end: 24,
@@ -96506,8 +100466,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 208,
+						verbInfinitive: "rester",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "reste",
 						start: 32,
 						end: 37,
@@ -96528,8 +100494,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 212,
+						verbInfinitive: "porter",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "portait",
 						start: 3,
 						end: 10,
@@ -96550,8 +100522,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait",
 						start: 3,
 						end: 8,
@@ -96572,8 +100550,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 8,
+						personPronoun: "vous",
 						form: "serez",
 						start: 47,
 						end: 52,
@@ -96594,8 +100578,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 250,
+						verbInfinitive: "rappeler",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "rappelait",
 						start: 3,
 						end: 12,
@@ -96616,8 +100606,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 210,
+						verbInfinitive: "sembler",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "semblait",
 						start: 3,
 						end: 11,
@@ -96627,8 +100623,14 @@ var sources = [
 					},
 					{
 						verbId: 445,
+						verbInfinitive: "examiner",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "examinait",
 						start: 43,
 						end: 52,
@@ -96649,8 +100651,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "allez",
 						start: 5,
 						end: 10,
@@ -96671,8 +100679,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 107,
+						verbInfinitive: "reprendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "repris",
 						start: 3,
 						end: 9,
@@ -96693,8 +100707,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez",
 						start: 13,
 						end: 17,
@@ -96715,8 +100735,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "soit",
 						start: 19,
 						end: 23,
@@ -96726,8 +100752,14 @@ var sources = [
 					},
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "faire",
 						start: 36,
 						end: 41,
@@ -96748,8 +100780,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 108,
+						verbInfinitive: "comprendre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "comprends",
 						start: 3,
 						end: 12,
@@ -96759,8 +100797,14 @@ var sources = [
 					},
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 11,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 6,
+						personPronoun: "il",
 						form: "ait pas eu",
 						start: 24,
 						end: 34,
@@ -96781,8 +100825,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 209,
+						verbInfinitive: "penser",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "avais pensé",
 						start: 24,
 						end: 35,
@@ -96803,8 +100853,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "croyez",
 						start: 8,
 						end: 14,
@@ -96825,8 +100881,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "dut",
 						start: 18,
 						end: 21,
@@ -96847,8 +100909,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 680,
+						verbInfinitive: "durer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "dura",
 						start: 3,
 						end: 7,
@@ -96869,8 +100937,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 665,
+						verbInfinitive: "supposer",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Supposons",
 						start: 0,
 						end: 9,
@@ -96891,8 +100965,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 723,
+						verbInfinitive: "lutter",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "luttai",
 						start: 6,
 						end: 12,
@@ -96913,8 +100993,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Dites",
 						start: 0,
 						end: 5,
@@ -96935,8 +101021,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "faut",
 						start: 3,
 						end: 7,
@@ -96946,8 +101038,14 @@ var sources = [
 					},
 					{
 						verbId: 120,
+						verbInfinitive: "faillir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "faut",
 						start: 3,
 						end: 7,
@@ -96968,8 +101066,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 455,
+						verbInfinitive: "noter",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "notai",
 						start: 3,
 						end: 8,
@@ -96990,8 +101094,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 210,
+						verbInfinitive: "sembler",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "semblait",
 						start: 33,
 						end: 41,
@@ -97012,8 +101122,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "voudrai",
 						start: 14,
 						end: 21,
@@ -97034,8 +101150,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 95,
+						verbInfinitive: "prendre",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 6,
+						personPronoun: "il",
 						form: "prendra",
 						start: 65,
 						end: 72,
@@ -97056,8 +101178,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 158,
+						verbInfinitive: "attendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "attendit",
 						start: 3,
 						end: 11,
@@ -97078,8 +101206,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 8,
+						personPronoun: "vous",
 						form: "voudrez",
 						start: 44,
 						end: 51,
@@ -97100,8 +101234,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 35,
+						verbInfinitive: "employer",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "emploierons",
 						start: 5,
 						end: 16,
@@ -97122,8 +101262,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "allons",
 						start: 30,
 						end: 36,
@@ -97144,8 +101290,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 211,
+						verbInfinitive: "entrer",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Entrez",
 						start: 0,
 						end: 6,
@@ -97166,8 +101318,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 44,
+						verbInfinitive: "rire",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "riait",
 						start: 3,
 						end: 8,
@@ -97188,8 +101346,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 87,
+						verbInfinitive: "aimer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "aime",
 						start: 3,
 						end: 7,
@@ -97210,8 +101374,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 338,
+						verbInfinitive: "se moquer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "vous moquez",
 						start: 5,
 						end: 16,
@@ -97232,8 +101402,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 423,
+						verbInfinitive: "bavarder",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "bavarde",
 						start: 8,
 						end: 15,
@@ -97254,8 +101430,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 72,
+						verbInfinitive: "vivre",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "vivait",
 						start: 3,
 						end: 9,
@@ -97276,8 +101458,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 708,
+						verbInfinitive: "hésiter",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "hésites",
 						start: 13,
 						end: 20,
@@ -97298,8 +101486,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "doit",
 						start: 3,
 						end: 7,
@@ -97309,8 +101503,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "être",
 						start: 8,
 						end: 12,
@@ -97331,8 +101531,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "venez",
 						start: 5,
 						end: 10,
@@ -97342,8 +101548,14 @@ var sources = [
 					},
 					{
 						verbId: 17,
+						verbInfinitive: "recevoir",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "recevoir",
 						start: 14,
 						end: 22,
@@ -97364,8 +101576,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 44,
+						verbInfinitive: "rire",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "rire",
 						start: 23,
 						end: 27,
@@ -97375,8 +101593,14 @@ var sources = [
 					},
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "voulus",
 						start: 37,
 						end: 43,
@@ -97397,8 +101621,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 210,
+						verbInfinitive: "sembler",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "semble",
 						start: 9,
 						end: 15,
@@ -97419,8 +101649,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 218,
+						verbInfinitive: "écouter",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "écouta",
 						start: 3,
 						end: 9,
@@ -97441,8 +101677,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "faut",
 						start: 22,
 						end: 26,
@@ -97452,8 +101694,14 @@ var sources = [
 					},
 					{
 						verbId: 120,
+						verbInfinitive: "faillir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "faut",
 						start: 22,
 						end: 26,
@@ -97474,8 +101722,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai vu",
 						start: 2,
 						end: 7,
@@ -97496,8 +101750,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 5,
+						personPronoun: "tu",
 						form: "avais",
 						start: 24,
 						end: 29,
@@ -97518,8 +101778,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 217,
+						verbInfinitive: "apporter",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "apportait",
 						start: 3,
 						end: 12,
@@ -97540,8 +101806,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 154,
+						verbInfinitive: "marcher",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "marchaient",
 						start: 4,
 						end: 14,
@@ -97562,8 +101834,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 224,
+						verbInfinitive: "tirer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "tirai",
 						start: 3,
 						end: 8,
@@ -97584,8 +101862,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 153,
+						verbInfinitive: "allumer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "allumèrent",
 						start: 4,
 						end: 14,
@@ -97606,8 +101890,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 97,
+						verbInfinitive: "sentir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "sentis",
 						start: 49,
 						end: 55,
@@ -97628,8 +101918,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "vais",
 						start: 3,
 						end: 7,
@@ -97639,8 +101935,14 @@ var sources = [
 					},
 					{
 						verbId: 212,
+						verbInfinitive: "porter",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "porter",
 						start: 8,
 						end: 14,
@@ -97661,8 +101963,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 8,
+						verbInfinitive: "tenir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Tiens",
 						start: 0,
 						end: 5,
@@ -97683,8 +101991,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "A",
 						start: 0,
 						end: 1,
@@ -97705,8 +102019,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 42,
+						verbInfinitive: "payer",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Payez",
 						start: 0,
 						end: 5,
@@ -97727,8 +102047,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 32,
+						verbInfinitive: "acheter",
 						tenseId: 8,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "past-anterior",
+						tenseName: "passé antérieur",
 						personId: 4,
+						personPronoun: "je",
 						form: "eus acheté",
 						start: 18,
 						end: 28,
@@ -97738,8 +102064,14 @@ var sources = [
 					},
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai fait",
 						start: 43,
 						end: 50,
@@ -97760,8 +102092,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 8,
+						verbInfinitive: "tenir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 5,
+						personPronoun: "tu",
 						form: "as tenu",
 						start: 12,
 						end: 19,
@@ -97782,8 +102120,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "aurais",
 						start: 12,
 						end: 18,
@@ -97804,8 +102148,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "voulez",
 						start: 8,
 						end: 14,
@@ -97826,8 +102176,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez",
 						start: 8,
 						end: 12,
@@ -97848,8 +102204,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Allons",
 						start: 0,
 						end: 6,
@@ -97859,8 +102221,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "serai",
 						start: 11,
 						end: 16,
@@ -97881,8 +102249,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 41,
+						verbInfinitive: "oublier",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai oublié",
 						start: 28,
 						end: 37,
@@ -97903,8 +102277,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 520,
+						verbInfinitive: "commander",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "commanda",
 						start: 3,
 						end: 11,
@@ -97925,8 +102305,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 227,
+						verbInfinitive: "tourner",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "tourna",
 						start: 3,
 						end: 9,
@@ -97947,8 +102333,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "avais",
 						start: 2,
 						end: 7,
@@ -97969,8 +102361,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 663,
+						verbInfinitive: "prier",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "pria",
 						start: 24,
 						end: 28,
@@ -97980,8 +102378,14 @@ var sources = [
 					},
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "faire",
 						start: 42,
 						end: 47,
@@ -98002,8 +102406,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "avais",
 						start: 34,
 						end: 39,
@@ -98024,8 +102434,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "put",
 						start: 25,
 						end: 28,
@@ -98046,8 +102462,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 179,
+						verbInfinitive: "soulever",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "souleva",
 						start: 3,
 						end: 10,
@@ -98068,8 +102490,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "doit",
 						start: 3,
 						end: 7,
@@ -98090,8 +102518,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 158,
+						verbInfinitive: "attendre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "attendons",
 						start: 5,
 						end: 14,
@@ -98112,8 +102546,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 458,
+						verbInfinitive: "sauter",
 						tenseId: 6,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future-perfect",
+						tenseName: "futur antérieur",
 						personId: 6,
+						personPronoun: "il",
 						form: "aura sauté",
 						start: 104,
 						end: 114,
@@ -98134,8 +102574,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez dû",
 						start: 58,
 						end: 65,
@@ -98156,8 +102602,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 211,
+						verbInfinitive: "entrer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "entra",
 						start: 6,
 						end: 11,
@@ -98178,8 +102630,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 559,
+						verbInfinitive: "reconnaître",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "reconnais",
 						start: 8,
 						end: 17,
@@ -98200,8 +102658,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 157,
+						verbInfinitive: "essayer",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Essayons",
 						start: 0,
 						end: 8,
@@ -98222,8 +102686,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 73,
+						verbInfinitive: "changer",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avons changé",
 						start: 5,
 						end: 17,
@@ -98244,8 +102714,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "crois",
 						start: 39,
 						end: 44,
@@ -98266,8 +102742,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 172,
+						verbInfinitive: "parler",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "parlait",
 						start: 3,
 						end: 10,
@@ -98288,8 +102770,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "savez",
 						start: 16,
 						end: 21,
@@ -98310,8 +102798,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 41,
+						verbInfinitive: "oublier",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "oubliais",
 						start: 35,
 						end: 43,
@@ -98332,8 +102826,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "faut",
 						start: 3,
 						end: 7,
@@ -98343,8 +102843,14 @@ var sources = [
 					},
 					{
 						verbId: 120,
+						verbInfinitive: "faillir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "faut",
 						start: 3,
 						end: 7,
@@ -98354,8 +102860,14 @@ var sources = [
 					},
 					{
 						verbId: 208,
+						verbInfinitive: "rester",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "reste",
 						start: 15,
 						end: 20,
@@ -98376,8 +102888,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 57,
+						verbInfinitive: "entendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "entendit",
 						start: 20,
 						end: 28,
@@ -98398,8 +102916,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 85,
+						verbInfinitive: "souffrir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "souffrirent",
 						start: 4,
 						end: 15,
@@ -98420,8 +102944,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 213,
+						verbInfinitive: "donner",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "donna",
 						start: 7,
 						end: 12,
@@ -98442,8 +102972,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 8,
+						personPronoun: "vous",
 						form: "étiez",
 						start: 5,
 						end: 10,
@@ -98464,8 +103000,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 224,
+						verbInfinitive: "tirer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "tirai",
 						start: 17,
 						end: 22,
@@ -98486,8 +103028,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai vu",
 						start: 82,
 						end: 87,
@@ -98508,8 +103056,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avons",
 						start: 5,
 						end: 10,
@@ -98530,8 +103084,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 33,
+						verbInfinitive: "appeler",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Appelez",
 						start: 0,
 						end: 7,
@@ -98552,8 +103112,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 66,
+						verbInfinitive: "sortir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "sortit",
 						start: 3,
 						end: 9,
@@ -98574,8 +103140,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 77,
+						verbInfinitive: "courir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "courait",
 						start: 3,
 						end: 10,
@@ -98596,8 +103168,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 157,
+						verbInfinitive: "essayer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "essaya",
 						start: 14,
 						end: 20,
@@ -98618,8 +103196,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "sommes",
 						start: 30,
 						end: 36,
@@ -98640,8 +103224,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "as",
 						start: 3,
 						end: 5,
@@ -98662,8 +103252,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "aurons",
 						start: 5,
 						end: 11,
@@ -98684,8 +103280,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 28,
+						verbInfinitive: "paraître",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "paraissez",
 						start: 5,
 						end: 14,
@@ -98706,8 +103308,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Voyons",
 						start: 0,
 						end: 6,
@@ -98728,8 +103336,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 8,
+						verbInfinitive: "tenir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Tiens",
 						start: 0,
 						end: 5,
@@ -98750,8 +103364,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 217,
+						verbInfinitive: "apporter",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 5,
+						personPronoun: "tu",
 						form: "as apporté",
 						start: 15,
 						end: 25,
@@ -98772,8 +103392,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 9,
+						personPronoun: "ils",
 						form: "sont",
 						start: 4,
 						end: 8,
@@ -98794,8 +103420,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 15,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-first-form",
+						tenseName: "passé 1",
 						personId: 4,
+						personPronoun: "je",
 						form: "aurais été",
 						start: 2,
 						end: 12,
@@ -98805,8 +103437,14 @@ var sources = [
 					},
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût eu",
 						start: 24,
 						end: 30,
@@ -98816,8 +103454,14 @@ var sources = [
 					},
 					{
 						verbId: 109,
+						verbInfinitive: "descendre",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "descendre",
 						start: 43,
 						end: 52,
@@ -98838,8 +103482,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 278,
+						verbInfinitive: "songer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "songeais",
 						start: 3,
 						end: 11,
@@ -98860,8 +103510,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 224,
+						verbInfinitive: "tirer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "tirais",
 						start: 9,
 						end: 15,
@@ -98882,8 +103538,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Voyez",
 						start: 0,
 						end: 5,
@@ -98904,8 +103566,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 83,
+						verbInfinitive: "offrir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "avais offert",
 						start: 39,
 						end: 51,
@@ -98915,8 +103583,14 @@ var sources = [
 					},
 					{
 						verbId: 66,
+						verbInfinitive: "sortir",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "sortir",
 						start: 84,
 						end: 90,
@@ -98937,8 +103611,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Dites",
 						start: 0,
 						end: 5,
@@ -98974,8 +103654,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 543,
+						verbInfinitive: "déjeuner",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "déjeunerons",
 						start: 5,
 						end: 16,
@@ -98996,8 +103682,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Faites",
 						start: 0,
 						end: 6,
@@ -99018,8 +103710,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 92,
+						verbInfinitive: "avancer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "avance",
 						start: 39,
 						end: 45,
@@ -99040,8 +103738,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 209,
+						verbInfinitive: "penser",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "pensais",
 						start: 16,
 						end: 23,
@@ -99062,8 +103766,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 15,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-first-form",
+						tenseName: "passé 1",
 						personId: 5,
+						personPronoun: "tu",
 						form: "aurais dû",
 						start: 3,
 						end: 12,
@@ -99084,8 +103794,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "eut",
 						start: 6,
 						end: 9,
@@ -99106,8 +103822,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 543,
+						verbInfinitive: "déjeuner",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "déjeuner",
 						start: 6,
 						end: 14,
@@ -99117,8 +103839,14 @@ var sources = [
 					},
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "ferai",
 						start: 41,
 						end: 46,
@@ -99139,8 +103867,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez fait",
 						start: 5,
 						end: 14,
@@ -99161,8 +103895,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez",
 						start: 5,
 						end: 9,
@@ -99183,8 +103923,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "étions",
 						start: 33,
 						end: 39,
@@ -99205,8 +103951,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "êtes",
 						start: 8,
 						end: 12,
@@ -99227,8 +103979,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "venez",
 						start: 5,
 						end: 10,
@@ -99249,8 +104007,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai pu",
 						start: 28,
 						end: 33,
@@ -99271,8 +104035,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "est",
 						start: 3,
 						end: 6,
@@ -99282,8 +104052,14 @@ var sources = [
 					},
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "sachiez",
 						start: 29,
 						end: 36,
@@ -99304,8 +104080,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "croyez",
 						start: 16,
 						end: 22,
@@ -99326,8 +104108,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 107,
+						verbInfinitive: "reprendre",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avons repris",
 						start: 5,
 						end: 17,
@@ -99348,8 +104136,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 6,
+						personPronoun: "il",
 						form: "faudra",
 						start: 3,
 						end: 9,
@@ -99370,8 +104164,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 77,
+						verbInfinitive: "courir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "courais",
 						start: 3,
 						end: 10,
@@ -99392,8 +104192,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 48,
+						verbInfinitive: "écrire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "écrit",
 						start: 61,
 						end: 66,
@@ -99414,8 +104220,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 169,
+						verbInfinitive: "trouver",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "trouvâmes",
 						start: 59,
 						end: 68,
@@ -99436,8 +104248,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 86,
+						verbInfinitive: "travailler",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avons travaillé",
 						start: 5,
 						end: 20,
@@ -99447,8 +104265,14 @@ var sources = [
 					},
 					{
 						verbId: 543,
+						verbInfinitive: "déjeuner",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avons déjeuné",
 						start: 112,
 						end: 125,
@@ -99469,8 +104293,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "serait",
 						start: 3,
 						end: 9,
@@ -99491,8 +104321,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 6,
+						personPronoun: "il",
 						form: "fera",
 						start: 58,
 						end: 62,
@@ -99513,8 +104349,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 8,
+						verbInfinitive: "tenir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "tiens",
 						start: 6,
 						end: 11,
@@ -99535,8 +104377,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "étais",
 						start: 2,
 						end: 7,
@@ -99557,8 +104405,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 15,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-first-form",
+						tenseName: "passé 1",
 						personId: 4,
+						personPronoun: "je",
 						form: "aurais voulu",
 						start: 2,
 						end: 14,
@@ -99579,8 +104433,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 8,
+						personPronoun: "vous",
 						form: "voudrez",
 						start: 44,
 						end: 51,
@@ -99601,8 +104461,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "dûmes",
 						start: 5,
 						end: 10,
@@ -99623,8 +104489,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 178,
+						verbInfinitive: "interpeller",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "interpella",
 						start: 6,
 						end: 16,
@@ -99645,8 +104517,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 108,
+						verbInfinitive: "comprendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "compris",
 						start: 26,
 						end: 33,
@@ -99667,8 +104545,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "dois",
 						start: 3,
 						end: 7,
@@ -99689,8 +104573,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 57,
+						verbInfinitive: "entendre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "entends",
 						start: 2,
 						end: 9,
@@ -99711,8 +104601,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 215,
+						verbInfinitive: "chercher",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "cherchai",
 						start: 32,
 						end: 40,
@@ -99722,8 +104618,14 @@ var sources = [
 					},
 					{
 						verbId: 169,
+						verbInfinitive: "trouver",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "trouver",
 						start: 48,
 						end: 55,
@@ -99744,8 +104646,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "sais",
 						start: 13,
 						end: 17,
@@ -99766,8 +104674,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 41,
+						verbInfinitive: "oublier",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "avais oublié",
 						start: 2,
 						end: 14,
@@ -99788,8 +104702,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 464,
+						verbInfinitive: "accorder",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "accordez",
 						start: 8,
 						end: 16,
@@ -99810,8 +104730,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 51,
+						verbInfinitive: "plaire",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait plu",
 						start: 8,
 						end: 17,
@@ -99832,8 +104758,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 6,
+						personPronoun: "il",
 						form: "faudra",
 						start: 10,
 						end: 16,
@@ -99854,8 +104786,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 41,
+						verbInfinitive: "oublier",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez oublié",
 						start: 5,
 						end: 16,
@@ -99876,8 +104814,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 154,
+						verbInfinitive: "marcher",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "marche",
 						start: 3,
 						end: 9,
@@ -99898,8 +104842,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "dois",
 						start: 3,
 						end: 7,
@@ -99920,8 +104870,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "fût",
 						start: 81,
 						end: 84,
@@ -99931,8 +104887,14 @@ var sources = [
 					},
 					{
 						verbId: 206,
+						verbInfinitive: "passer",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "passer",
 						start: 99,
 						end: 105,
@@ -99953,8 +104915,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 84,
+						verbInfinitive: "ouvrir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "ouvre",
 						start: 15,
 						end: 20,
@@ -99975,8 +104943,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 208,
+						verbInfinitive: "rester",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "restâmes",
 						start: 5,
 						end: 13,
@@ -99986,8 +104960,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "fût",
 						start: 74,
 						end: 77,
@@ -100008,8 +104988,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 211,
+						verbInfinitive: "entrer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "entrions",
 						start: 5,
 						end: 13,
@@ -100030,8 +105016,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "avais pu",
 						start: 60,
 						end: 68,
@@ -100052,8 +105044,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai",
 						start: 17,
 						end: 19,
@@ -100074,8 +105072,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "serait",
 						start: 3,
 						end: 9,
@@ -100096,8 +105100,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 20,
+						verbInfinitive: "connaître",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "connaissez",
 						start: 5,
 						end: 15,
@@ -100118,8 +105128,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "saurai",
 						start: 61,
 						end: 67,
@@ -100140,8 +105156,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 442,
+						verbInfinitive: "douter",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 8,
+						personPronoun: "vous",
 						form: "doutiez",
 						start: 61,
 						end: 68,
@@ -100162,8 +105184,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 81,
+						verbInfinitive: "espérer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "espérais",
 						start: 2,
 						end: 10,
@@ -100184,8 +105212,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 157,
+						verbInfinitive: "essayer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "essaye",
 						start: 3,
 						end: 9,
@@ -100206,8 +105240,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 95,
+						verbInfinitive: "prendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "pris",
 						start: 3,
 						end: 7,
@@ -100228,8 +105268,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 57,
+						verbInfinitive: "entendre",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "entendais",
 						start: 74,
 						end: 83,
@@ -100250,8 +105296,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 216,
+						verbInfinitive: "montrer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "montra",
 						start: 70,
 						end: 76,
@@ -100272,8 +105324,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 63,
+						verbInfinitive: "répondre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "répondit",
 						start: 3,
 						end: 11,
@@ -100294,8 +105352,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 338,
+						verbInfinitive: "se moquer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "se moque",
 						start: 44,
 						end: 52,
@@ -100316,8 +105380,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "avais fait",
 						start: 2,
 						end: 12,
@@ -100338,8 +105408,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 57,
+						verbInfinitive: "entendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "entendîmes",
 						start: 17,
 						end: 27,
@@ -100360,8 +105436,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "faut",
 						start: 3,
 						end: 7,
@@ -100382,8 +105464,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 172,
+						verbInfinitive: "parler",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Parlons",
 						start: 0,
 						end: 7,
@@ -100404,8 +105492,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "voudrais",
 						start: 3,
 						end: 11,
@@ -100426,8 +105520,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 207,
+						verbInfinitive: "regarder",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "regardais",
 						start: 16,
 						end: 25,
@@ -100448,8 +105548,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 559,
+						verbInfinitive: "reconnaître",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "reconnûmes",
 						start: 5,
 						end: 15,
@@ -100470,8 +105576,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 215,
+						verbInfinitive: "chercher",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez cherché",
 						start: 8,
 						end: 20,
@@ -100481,8 +105593,14 @@ var sources = [
 					},
 					{
 						verbId: 169,
+						verbInfinitive: "trouver",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez trouvé",
 						start: 30,
 						end: 41,
@@ -100503,8 +105621,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait su",
 						start: 3,
 						end: 11,
@@ -100525,8 +105649,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 225,
+						verbInfinitive: "pousser",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "poussa",
 						start: 10,
 						end: 16,
@@ -100547,8 +105677,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 20,
+						verbInfinitive: "connaître",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "connaissez",
 						start: 13,
 						end: 23,
@@ -100569,8 +105705,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "avais vu",
 						start: 48,
 						end: 56,
@@ -100591,8 +105733,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "arrivions",
 						start: 30,
 						end: 39,
@@ -100613,8 +105761,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "croyez",
 						start: 5,
 						end: 11,
@@ -100635,8 +105789,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 95,
+						verbInfinitive: "prendre",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait pris",
 						start: 6,
 						end: 16,
@@ -100657,8 +105817,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 57,
+						verbInfinitive: "entendre",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez entendu",
 						start: 8,
 						end: 20,
@@ -100668,8 +105834,14 @@ var sources = [
 					},
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "devez",
 						start: 32,
 						end: 37,
@@ -100690,8 +105862,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "étions arrivés",
 						start: 5,
 						end: 19,
@@ -100712,8 +105890,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 92,
+						verbInfinitive: "avancer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avançâmes",
 						start: 5,
 						end: 14,
@@ -100734,8 +105918,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "voyez",
 						start: 5,
 						end: 10,
@@ -100745,8 +105935,14 @@ var sources = [
 					},
 					{
 						verbId: 664,
+						verbInfinitive: "mentir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "mentez",
 						start: 25,
 						end: 31,
@@ -100767,8 +105963,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 158,
+						verbInfinitive: "attendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "attendis",
 						start: 2,
 						end: 10,
@@ -100778,8 +105980,14 @@ var sources = [
 					},
 					{
 						verbId: 109,
+						verbInfinitive: "descendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "descendis",
 						start: 31,
 						end: 40,
@@ -100800,8 +106008,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 206,
+						verbInfinitive: "passer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "passions",
 						start: 17,
 						end: 25,
@@ -100822,8 +106036,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 77,
+						verbInfinitive: "courir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "courus",
 						start: 3,
 						end: 9,
@@ -100833,8 +106053,14 @@ var sources = [
 					},
 					{
 						verbId: 159,
+						verbInfinitive: "crier",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en criant",
 						start: 24,
 						end: 33,
@@ -100855,8 +106081,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 268,
+						verbInfinitive: "prononcer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "prononça",
 						start: 3,
 						end: 11,
@@ -100877,8 +106109,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 77,
+						verbInfinitive: "courir",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "courir",
 						start: 99,
 						end: 105,
@@ -100888,8 +106126,14 @@ var sources = [
 					},
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 17,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "fût venu",
 						start: 112,
 						end: 120,
@@ -100910,8 +106154,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 445,
+						verbInfinitive: "examiner",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "examinai",
 						start: 38,
 						end: 46,
@@ -100932,8 +106182,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 94,
+						verbInfinitive: "manger",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avions mangé",
 						start: 70,
 						end: 82,
@@ -100954,8 +106210,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 207,
+						verbInfinitive: "regarder",
 						tenseId: 15,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-first-form",
+						tenseName: "passé 1",
 						personId: 7,
+						personPronoun: "nous",
 						form: "aurions regardé",
 						start: 5,
 						end: 20,
@@ -100976,8 +106238,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 208,
+						verbInfinitive: "rester",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "resta",
 						start: 3,
 						end: 8,
@@ -100998,8 +106266,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "voulut",
 						start: 34,
 						end: 40,
@@ -101020,8 +106294,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "avais dû",
 						start: 2,
 						end: 10,
@@ -101042,8 +106322,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 183,
+						verbInfinitive: "apparaître",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "apparaissait",
 						start: 3,
 						end: 15,
@@ -101064,8 +106350,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 158,
+						verbInfinitive: "attendre",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "En attendant",
 						start: 48,
 						end: 60,
@@ -101075,8 +106367,14 @@ var sources = [
 					},
 					{
 						verbId: 190,
+						verbInfinitive: "arrêter",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "arrêtâmes",
 						start: 115,
 						end: 124,
@@ -101097,8 +106395,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "vient",
 						start: 3,
 						end: 8,
@@ -101119,8 +106423,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 268,
+						verbInfinitive: "prononcer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "prononça",
 						start: 6,
 						end: 14,
@@ -101141,8 +106451,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 66,
+						verbInfinitive: "sortir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "sortons",
 						start: 5,
 						end: 12,
@@ -101163,8 +106479,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 22,
+						verbInfinitive: "craindre",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "craignais",
 						start: 22,
 						end: 31,
@@ -101185,8 +106507,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 213,
+						verbInfinitive: "donner",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "donnèrent",
 						start: 4,
 						end: 13,
@@ -101207,8 +106535,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "alla",
 						start: 3,
 						end: 7,
@@ -101229,8 +106563,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 154,
+						verbInfinitive: "marcher",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "marchais",
 						start: 3,
 						end: 11,
@@ -101251,8 +106591,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 195,
+						verbInfinitive: "imaginer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "imaginez",
 						start: 5,
 						end: 13,
@@ -101273,8 +106619,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "êtes",
 						start: 15,
 						end: 19,
@@ -101295,8 +106647,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 169,
+						verbInfinitive: "trouver",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 8,
+						personPronoun: "vous",
 						form: "trouverez",
 						start: 48,
 						end: 57,
@@ -101317,8 +106675,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 400,
+						verbInfinitive: "se réveiller",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "me réveillai",
 						start: 9,
 						end: 21,
@@ -101328,8 +106692,14 @@ var sources = [
 					},
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "faisait",
 						start: 26,
 						end: 33,
@@ -101350,8 +106720,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 20,
+						verbInfinitive: "connaître",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "connaisse",
 						start: 54,
 						end: 63,
@@ -101372,8 +106748,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 209,
+						verbInfinitive: "penser",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "pensez",
 						start: 5,
 						end: 11,
@@ -101394,8 +106776,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 421,
+						verbInfinitive: "avouer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "avoue",
 						start: 2,
 						end: 7,
@@ -101416,8 +106804,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "pouvez",
 						start: 5,
 						end: 11,
@@ -101438,8 +106832,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "vîmes",
 						start: 5,
 						end: 10,
@@ -101460,8 +106860,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avons vu",
 						start: 53,
 						end: 61,
@@ -101482,8 +106888,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 37,
+						verbInfinitive: "fuir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "fuirent",
 						start: 4,
 						end: 11,
@@ -101504,8 +106916,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "croyons",
 						start: 10,
 						end: 17,
@@ -101526,8 +106944,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 559,
+						verbInfinitive: "reconnaître",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "reconnus",
 						start: 17,
 						end: 25,
@@ -101537,8 +106961,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "être",
 						start: 31,
 						end: 35,
@@ -101559,8 +106989,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "avais",
 						start: 2,
 						end: 7,
@@ -101581,8 +107017,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "vais",
 						start: 3,
 						end: 7,
@@ -101603,8 +107045,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 158,
+						verbInfinitive: "attendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "attendis",
 						start: 2,
 						end: 10,
@@ -101625,8 +107073,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 7,
+						verbInfinitive: "apprendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "appris",
 						start: 18,
 						end: 24,
@@ -101636,8 +107090,14 @@ var sources = [
 					},
 					{
 						verbId: 67,
+						verbInfinitive: "suivre",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "suivais",
 						start: 32,
 						end: 39,
@@ -101658,8 +107118,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 165,
+						verbInfinitive: "demander",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "demandai",
 						start: 20,
 						end: 28,
@@ -101680,8 +107146,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 8,
+						personPronoun: "vous",
 						form: "viendrez",
 						start: 37,
 						end: 45,
@@ -101702,8 +107174,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avons",
 						start: 5,
 						end: 10,
@@ -101724,8 +107202,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 66,
+						verbInfinitive: "sortir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "sortait",
 						start: 45,
 						end: 52,
@@ -101746,8 +107230,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai été",
 						start: 2,
 						end: 8,
@@ -101768,8 +107258,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 57,
+						verbInfinitive: "entendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "entendis",
 						start: 44,
 						end: 52,
@@ -101790,8 +107286,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai",
 						start: 2,
 						end: 4,
@@ -101812,8 +107314,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 8,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "past-anterior",
+						tenseName: "passé antérieur",
 						personId: 6,
+						personPronoun: "il",
 						form: "fut parti",
 						start: 9,
 						end: 18,
@@ -101834,8 +107342,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 735,
+						verbInfinitive: "parvenir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "parvins",
 						start: 3,
 						end: 10,
@@ -101856,8 +107370,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "pourrait",
 						start: 3,
 						end: 11,
@@ -101878,8 +107398,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 108,
+						verbInfinitive: "comprendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "comprîmes",
 						start: 5,
 						end: 14,
@@ -101900,8 +107426,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 66,
+						verbInfinitive: "sortir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "sors",
 						start: 3,
 						end: 7,
@@ -101922,8 +107454,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "arrivâmes",
 						start: 12,
 						end: 21,
@@ -101944,8 +107482,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 7,
+						verbInfinitive: "apprendre",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "avais appris",
 						start: 2,
 						end: 14,
@@ -101966,8 +107510,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "voyais",
 						start: 3,
 						end: 9,
@@ -101988,8 +107538,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "pouvons",
 						start: 5,
 						end: 12,
@@ -102010,8 +107566,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 207,
+						verbInfinitive: "regarder",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "regarda",
 						start: 3,
 						end: 10,
@@ -102032,8 +107594,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "fis",
 						start: 32,
 						end: 35,
@@ -102054,8 +107622,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "pouvez",
 						start: 5,
 						end: 11,
@@ -102076,8 +107650,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "allez",
 						start: 5,
 						end: 10,
@@ -102098,8 +107678,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "voyez",
 						start: 12,
 						end: 17,
@@ -102120,8 +107706,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait",
 						start: 3,
 						end: 8,
@@ -102142,8 +107734,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez",
 						start: 5,
 						end: 9,
@@ -102164,8 +107762,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "sachiez",
 						start: 23,
 						end: 30,
@@ -102186,8 +107790,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 246,
+						verbInfinitive: "se souvenir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "me souviens",
 						start: 3,
 						end: 14,
@@ -102208,8 +107818,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "dirent",
 						start: 4,
 						end: 10,
@@ -102219,8 +107835,14 @@ var sources = [
 					},
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 9,
+						personPronoun: "ils",
 						form: "diraient",
 						start: 41,
 						end: 49,
@@ -102230,8 +107852,14 @@ var sources = [
 					},
 					{
 						verbId: 60,
+						verbInfinitive: "perdre",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "perdre",
 						start: 91,
 						end: 97,
@@ -102252,8 +107880,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 481,
+						verbInfinitive: "approcher",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "approchions",
 						start: 5,
 						end: 16,
@@ -102274,8 +107908,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "verrons",
 						start: 5,
 						end: 12,
@@ -102296,8 +107936,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 227,
+						verbInfinitive: "tourner",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait tourné",
 						start: 40,
 						end: 52,
@@ -102318,8 +107964,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "ferai",
 						start: 20,
 						end: 25,
@@ -102340,8 +107992,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 407,
+						verbInfinitive: "s'endormir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "m’endormis",
 						start: 33,
 						end: 43,
@@ -102362,8 +108020,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 211,
+						verbInfinitive: "entrer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "entrâmes",
 						start: 5,
 						end: 13,
@@ -102384,8 +108048,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 14,
+						verbInfinitive: "apercevoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "aperçus",
 						start: 48,
 						end: 55,
@@ -102406,8 +108076,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 703,
+						verbInfinitive: "obéir",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "obéît",
 						start: 92,
 						end: 97,
@@ -102428,8 +108104,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 211,
+						verbInfinitive: "entrer",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "est entré",
 						start: 103,
 						end: 112,
@@ -102450,8 +108132,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 543,
+						verbInfinitive: "déjeuner",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "déjeunerons",
 						start: 5,
 						end: 16,
@@ -102472,8 +108160,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 225,
+						verbInfinitive: "pousser",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "poussa",
 						start: 6,
 						end: 12,
@@ -102494,8 +108188,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "allons",
 						start: 5,
 						end: 11,
@@ -102516,8 +108216,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 109,
+						verbInfinitive: "descendre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "descendons",
 						start: 35,
 						end: 45,
@@ -102527,8 +108233,14 @@ var sources = [
 					},
 					{
 						verbId: 66,
+						verbInfinitive: "sortir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "sortons",
 						start: 83,
 						end: 90,
@@ -102549,8 +108261,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 436,
+						verbInfinitive: "compter",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "comptez",
 						start: 0,
 						end: 7,
@@ -102571,8 +108289,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "peux",
 						start: 3,
 						end: 7,
@@ -102593,8 +108317,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 8,
+						verbInfinitive: "tenir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "tenait",
 						start: 3,
 						end: 9,
@@ -102615,8 +108345,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 163,
+						verbInfinitive: "devenir",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "était devenu",
 						start: 3,
 						end: 15,
@@ -102637,8 +108373,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 20,
+						verbInfinitive: "connaître",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "connaissais",
 						start: 22,
 						end: 33,
@@ -102659,8 +108401,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 20,
+						verbInfinitive: "connaître",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai connu",
 						start: 2,
 						end: 10,
@@ -102681,8 +108429,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "étais",
 						start: 2,
 						end: 7,
@@ -102703,8 +108457,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 41,
+						verbInfinitive: "oublier",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait oublié",
 						start: 3,
 						end: 15,
@@ -102725,8 +108485,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 50,
+						verbInfinitive: "lire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "lis",
 						start: 3,
 						end: 6,
@@ -102747,8 +108513,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 398,
+						verbInfinitive: "coller",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "colla",
 						start: 33,
 						end: 38,
@@ -102769,8 +108541,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "allions",
 						start: 5,
 						end: 12,
@@ -102791,8 +108569,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 22,
+						verbInfinitive: "craindre",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "craignais",
 						start: 38,
 						end: 47,
@@ -102802,8 +108586,14 @@ var sources = [
 					},
 					{
 						verbId: 275,
+						verbInfinitive: "trahir",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "trahir",
 						start: 51,
 						end: 57,
@@ -102824,8 +108614,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 86,
+						verbInfinitive: "travailler",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "travaille",
 						start: 97,
 						end: 106,
@@ -102846,8 +108642,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 108,
+						verbInfinitive: "comprendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "compris",
 						start: 3,
 						end: 10,
@@ -102857,8 +108659,14 @@ var sources = [
 					},
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "devais",
 						start: 18,
 						end: 24,
@@ -102879,8 +108687,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 192,
+						verbInfinitive: "tomber",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "tombâmes",
 						start: 9,
 						end: 17,
@@ -102901,8 +108715,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 280,
+						verbInfinitive: "taire",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "taisions",
 						start: 10,
 						end: 18,
@@ -102923,8 +108743,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 95,
+						verbInfinitive: "prendre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "prenez",
 						start: 10,
 						end: 16,
@@ -102945,8 +108771,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "est parti",
 						start: 3,
 						end: 12,
@@ -102967,8 +108799,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 543,
+						verbInfinitive: "déjeuner",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 8,
+						personPronoun: "vous",
 						form: "déjeunerez",
 						start: 5,
 						end: 15,
@@ -102989,8 +108827,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "pût",
 						start: 89,
 						end: 92,
@@ -103011,8 +108855,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 15,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-first-form",
+						tenseName: "passé 1",
 						personId: 6,
+						personPronoun: "il",
 						form: "aurait pu",
 						start: 13,
 						end: 22,
@@ -103033,8 +108883,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 84,
+						verbInfinitive: "ouvrir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "ouvrit",
 						start: 3,
 						end: 9,
@@ -103055,8 +108911,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 207,
+						verbInfinitive: "regarder",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "regardai",
 						start: 11,
 						end: 19,
@@ -103077,8 +108939,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "arrivâmes",
 						start: 5,
 						end: 14,
@@ -103099,8 +108967,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "voulez",
 						start: 5,
 						end: 11,
@@ -103121,8 +108995,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "veux",
 						start: 25,
 						end: 29,
@@ -103132,8 +109012,14 @@ var sources = [
 					},
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "voir",
 						start: 30,
 						end: 34,
@@ -103154,8 +109040,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 9,
+						personPronoun: "ils",
 						form: "ont",
 						start: 4,
 						end: 7,
@@ -103176,8 +109068,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 225,
+						verbInfinitive: "pousser",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "poussa",
 						start: 6,
 						end: 12,
@@ -103198,8 +109096,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "arrivâmes",
 						start: 5,
 						end: 14,
@@ -103220,8 +109124,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 230,
+						verbInfinitive: "découvrir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai découvert",
 						start: 2,
 						end: 14,
@@ -103242,8 +109152,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "allez",
 						start: 39,
 						end: 44,
@@ -103253,8 +109169,14 @@ var sources = [
 					},
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "voir",
 						start: 45,
 						end: 49,
@@ -103275,8 +109197,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai",
 						start: 2,
 						end: 4,
@@ -103297,8 +109225,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "fallait",
 						start: 15,
 						end: 22,
@@ -103319,8 +109253,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "dus",
 						start: 3,
 						end: 6,
@@ -103330,8 +109270,14 @@ var sources = [
 					},
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "avais dit",
 						start: 67,
 						end: 76,
@@ -103352,8 +109298,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 45,
+						verbInfinitive: "asseoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "assîmes",
 						start: 21,
 						end: 28,
@@ -103374,8 +109326,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "fais",
 						start: 17,
 						end: 21,
@@ -103396,8 +109354,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "dut",
 						start: 6,
 						end: 9,
@@ -103418,8 +109382,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 206,
+						verbInfinitive: "passer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "passe",
 						start: 3,
 						end: 8,
@@ -103440,8 +109410,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avions",
 						start: 5,
 						end: 11,
@@ -103462,8 +109438,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 206,
+						verbInfinitive: "passer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "passa",
 						start: 3,
 						end: 8,
@@ -103484,8 +109466,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 207,
+						verbInfinitive: "regarder",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "regardez",
 						start: 42,
 						end: 50,
@@ -103506,8 +109494,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 226,
+						verbInfinitive: "monter",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Montez",
 						start: 0,
 						end: 6,
@@ -103528,8 +109522,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 165,
+						verbInfinitive: "demander",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "demandâmes",
 						start: 5,
 						end: 15,
@@ -103550,8 +109550,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "a dû",
 						start: 3,
 						end: 7,
@@ -103572,8 +109578,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 165,
+						verbInfinitive: "demander",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "demanda",
 						start: 11,
 						end: 18,
@@ -103594,8 +109606,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 668,
+						verbInfinitive: "pleurer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "pleurait",
 						start: 27,
 						end: 35,
@@ -103605,8 +109623,14 @@ var sources = [
 					},
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "faisait",
 						start: 41,
 						end: 48,
@@ -103616,8 +109640,14 @@ var sources = [
 					},
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "voir",
 						start: 57,
 						end: 61,
@@ -103638,8 +109668,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "voulais",
 						start: 3,
 						end: 10,
@@ -103649,8 +109685,14 @@ var sources = [
 					},
 					{
 						verbId: 186,
+						verbInfinitive: "étudier",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "étudier",
 						start: 32,
 						end: 39,
@@ -103671,8 +109713,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 206,
+						verbInfinitive: "passer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "passâmes",
 						start: 81,
 						end: 89,
@@ -103693,8 +109741,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "crois",
 						start: 34,
 						end: 39,
@@ -103715,8 +109769,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 15,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-first-form",
+						tenseName: "passé 1",
 						personId: 4,
+						personPronoun: "je",
 						form: "aurais été",
 						start: 2,
 						end: 12,
@@ -103737,8 +109797,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "a",
 						start: 3,
 						end: 4,
@@ -103759,8 +109825,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 97,
+						verbInfinitive: "sentir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "sens",
 						start: 3,
 						end: 7,
@@ -103781,8 +109853,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 8,
+						personPronoun: "vous",
 						form: "verrez",
 						start: 31,
 						end: 37,
@@ -103803,8 +109881,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "allâmes",
 						start: 5,
 						end: 12,
@@ -103825,8 +109909,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "voulut",
 						start: 13,
 						end: 19,
@@ -103847,8 +109937,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 663,
+						verbInfinitive: "prier",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "pria",
 						start: 12,
 						end: 16,
@@ -103869,8 +109965,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 184,
+						verbInfinitive: "retenir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez retenu",
 						start: 5,
 						end: 16,
@@ -103891,8 +109993,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "devait",
 						start: 3,
 						end: 9,
@@ -103902,8 +110010,14 @@ var sources = [
 					},
 					{
 						verbId: 264,
+						verbInfinitive: "arranger",
 						tenseId: 26,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 6,
+						personPronoun: "il",
 						form: "avoir arrangé",
 						start: 10,
 						end: 23,
@@ -103913,8 +110027,14 @@ var sources = [
 					},
 					{
 						verbId: 206,
+						verbInfinitive: "passer",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "passât",
 						start: 53,
 						end: 59,
@@ -103935,8 +110055,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "doit",
 						start: 3,
 						end: 7,
@@ -103957,8 +110083,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 20,
+						verbInfinitive: "connaître",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "connaisse",
 						start: 61,
 						end: 70,
@@ -103979,8 +110111,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Faites",
 						start: 0,
 						end: 6,
@@ -104001,8 +110139,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 390,
+						verbInfinitive: "habiter",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "habite",
 						start: 3,
 						end: 9,
@@ -104023,8 +110167,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 444,
+						verbInfinitive: "estimer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "estime",
 						start: 51,
 						end: 57,
@@ -104045,8 +110195,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Venez",
 						start: 0,
 						end: 5,
@@ -104056,8 +110212,14 @@ var sources = [
 					},
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "fait",
 						start: 18,
 						end: 22,
@@ -104078,8 +110240,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 109,
+						verbInfinitive: "descendre",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "suis descendu",
 						start: 6,
 						end: 19,
@@ -104089,8 +110257,14 @@ var sources = [
 					},
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "venir",
 						start: 39,
 						end: 44,
@@ -104111,8 +110285,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 66,
+						verbInfinitive: "sortir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "sortîmes",
 						start: 5,
 						end: 13,
@@ -104122,8 +110302,14 @@ var sources = [
 					},
 					{
 						verbId: 93,
+						verbInfinitive: "diriger",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "dirigeâmes",
 						start: 30,
 						end: 40,
@@ -104144,8 +110330,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 184,
+						verbInfinitive: "retenir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "retiens",
 						start: 3,
 						end: 10,
@@ -104155,8 +110347,14 @@ var sources = [
 					},
 					{
 						verbId: 39,
+						verbInfinitive: "lever",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "lève",
 						start: 31,
 						end: 35,
@@ -104177,8 +110375,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "dis",
 						start: 3,
 						end: 6,
@@ -104199,8 +110403,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 227,
+						verbInfinitive: "tourner",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 4,
+						personPronoun: "je",
 						form: "tournai",
 						start: 3,
 						end: 10,
@@ -104221,8 +110431,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Voyons",
 						start: 0,
 						end: 6,
@@ -104243,8 +110459,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 81,
+						verbInfinitive: "espérer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "espérez",
 						start: 5,
 						end: 12,
@@ -104265,8 +110487,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 7,
+						personPronoun: "nous",
 						form: "fîmes",
 						start: 72,
 						end: 77,
@@ -104287,8 +110515,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 8,
+						personPronoun: "vous",
 						form: "voudrez",
 						start: 11,
 						end: 18,
@@ -104309,8 +110543,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 15,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-first-form",
+						tenseName: "passé 1",
 						personId: 7,
+						personPronoun: "nous",
 						form: "aurions voulu",
 						start: 5,
 						end: 18,
@@ -104320,8 +110560,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 9,
+						personPronoun: "ils",
 						form: "sont",
 						start: 65,
 						end: 69,
@@ -104357,8 +110603,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 400,
+						verbInfinitive: "se réveiller",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "se réveille",
 						start: 22,
 						end: 33,
@@ -104379,8 +110631,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "fût",
 						start: 26,
 						end: 29,
@@ -104401,8 +110659,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 74,
+						verbInfinitive: "chanter",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "chante",
 						start: 6,
 						end: 12,
@@ -104423,8 +110687,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 665,
+						verbInfinitive: "supposer",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en supposant",
 						start: 46,
 						end: 58,
@@ -104445,8 +110715,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 11,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 4,
+						personPronoun: "je",
 						form: "aie vu",
 						start: 123,
 						end: 129,
@@ -104467,8 +110743,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 87,
+						verbInfinitive: "aimer",
 						tenseId: 17,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût mieux aimé",
 						start: 61,
 						end: 75,
@@ -104489,8 +110771,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 77,
+						verbInfinitive: "courir",
 						tenseId: 26,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 6,
+						personPronoun: "il",
 						form: "avoir couru",
 						start: 6,
 						end: 17,
@@ -104511,8 +110799,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en allant",
 						start: 47,
 						end: 56,
@@ -104533,8 +110827,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "fusse",
 						start: 46,
 						end: 51,
@@ -104555,8 +110855,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "ait",
 						start: 58,
 						end: 61,
@@ -104577,8 +110883,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 77,
+						verbInfinitive: "courir",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en courant",
 						start: 60,
 						end: 70,
@@ -104599,8 +110911,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 66,
+						verbInfinitive: "sortir",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en sortant",
 						start: 28,
 						end: 38,
@@ -104621,8 +110939,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 11,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 7,
+						personPronoun: "nous",
 						form: "ayons vu",
 						start: 176,
 						end: 184,
@@ -104643,8 +110967,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 14,
+						verbInfinitive: "apercevoir",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "En apercevant",
 						start: 0,
 						end: 13,
@@ -104665,8 +110995,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 189,
+						verbInfinitive: "répéter",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en répétant",
 						start: 49,
 						end: 60,
@@ -104687,8 +111023,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 77,
+						verbInfinitive: "courir",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en courant",
 						start: 18,
 						end: 28,
@@ -104709,8 +111051,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût",
 						start: 86,
 						end: 89,
@@ -104731,8 +111079,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "sût",
 						start: 25,
 						end: 28,
@@ -104753,8 +111107,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 172,
+						verbInfinitive: "parler",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en parlant",
 						start: 19,
 						end: 29,
@@ -104775,8 +111135,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "parte",
 						start: 27,
 						end: 32,
@@ -104797,8 +111163,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 15,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-first-form",
+						tenseName: "passé 1",
 						personId: 4,
+						personPronoun: "je",
 						form: "aurais pu",
 						start: 38,
 						end: 47,
@@ -104819,8 +111191,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 481,
+						verbInfinitive: "approcher",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "En approchant",
 						start: 0,
 						end: 13,
@@ -104841,8 +111219,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "ayez",
 						start: 17,
 						end: 21,
@@ -104863,8 +111247,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 735,
+						verbInfinitive: "parvenir",
 						tenseId: 8,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "past-anterior",
+						tenseName: "passé antérieur",
 						personId: 6,
+						personPronoun: "il",
 						form: "fut parvenu",
 						start: 39,
 						end: 50,
@@ -104874,8 +111264,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "sois",
 						start: 99,
 						end: 103,
@@ -104896,8 +111292,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 209,
+						verbInfinitive: "penser",
 						tenseId: 26,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 6,
+						personPronoun: "il",
 						form: "avoir pensé",
 						start: 76,
 						end: 87,
@@ -104918,8 +111320,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 223,
+						verbInfinitive: "rentrer",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en rentrant",
 						start: 40,
 						end: 51,
@@ -104940,8 +111348,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 8,
+						verbInfinitive: "tenir",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "tienne",
 						start: 50,
 						end: 56,
@@ -104962,8 +111376,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 226,
+						verbInfinitive: "monter",
 						tenseId: 26,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 6,
+						personPronoun: "il",
 						form: "avoir monté",
 						start: 6,
 						end: 17,
@@ -104984,8 +111404,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 50,
+						verbInfinitive: "lire",
 						tenseId: 26,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 6,
+						personPronoun: "il",
 						form: "avoir lu",
 						start: 19,
 						end: 27,
@@ -105006,8 +111432,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "soyez",
 						start: 17,
 						end: 22,
@@ -105028,8 +111460,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 185,
+						verbInfinitive: "sourire",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en souriant",
 						start: 44,
 						end: 55,
@@ -105050,8 +111488,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût fait",
 						start: 21,
 						end: 29,
@@ -105072,8 +111516,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "sois",
 						start: 24,
 						end: 28,
@@ -105094,8 +111544,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 26,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 6,
+						personPronoun: "il",
 						form: "avoir fait",
 						start: 20,
 						end: 30,
@@ -105116,8 +111572,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 49,
+						verbInfinitive: "finir",
 						tenseId: 8,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "past-anterior",
+						tenseName: "passé antérieur",
 						personId: 6,
+						personPronoun: "il",
 						form: "eut fini",
 						start: 9,
 						end: 17,
@@ -105138,8 +111600,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 15,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-first-form",
+						tenseName: "passé 1",
 						personId: 6,
+						personPronoun: "il",
 						form: "aurait été",
 						start: 3,
 						end: 13,
@@ -105160,8 +111628,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 220,
+						verbInfinitive: "laisser",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 4,
+						personPronoun: "je",
 						form: "eusse laissé",
 						start: 35,
 						end: 47,
@@ -105182,8 +111656,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "aie",
 						start: 66,
 						end: 69,
@@ -105204,8 +111684,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 206,
+						verbInfinitive: "passer",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "passe",
 						start: 77,
 						end: 82,
@@ -105226,8 +111712,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 415,
+						verbInfinitive: "approuver",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût approuvé",
 						start: 3,
 						end: 15,
@@ -105248,8 +111740,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût dû",
 						start: 119,
 						end: 125,
@@ -105270,8 +111768,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "En faisant",
 						start: 0,
 						end: 10,
@@ -105292,8 +111796,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 88,
+						verbInfinitive: "placer",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en plaçant",
 						start: 82,
 						end: 92,
@@ -105314,8 +111824,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 275,
+						verbInfinitive: "trahir",
 						tenseId: 11,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 6,
+						personPronoun: "il",
 						form: "ait trahi",
 						start: 23,
 						end: 32,
@@ -105336,8 +111852,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 207,
+						verbInfinitive: "regarder",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en regardant",
 						start: 21,
 						end: 33,
@@ -105358,8 +111880,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût été",
 						start: 11,
 						end: 18,
@@ -105380,8 +111908,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 8,
+						personPronoun: "vous",
 						form: "eussiez fait",
 						start: 41,
 						end: 53,
@@ -105402,8 +111936,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en faisant",
 						start: 14,
 						end: 24,
@@ -105424,8 +111964,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût été",
 						start: 3,
 						end: 10,
@@ -105446,8 +111992,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 157,
+						verbInfinitive: "essayer",
 						tenseId: 26,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 6,
+						personPronoun: "il",
 						form: "avoir essayé",
 						start: 23,
 						end: 35,
@@ -105468,8 +112020,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 397,
+						verbInfinitive: "copier",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en copiant",
 						start: 38,
 						end: 48,
@@ -105490,8 +112048,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "puisse",
 						start: 12,
 						end: 18,
@@ -105501,8 +112065,14 @@ var sources = [
 					},
 					{
 						verbId: 48,
+						verbInfinitive: "écrire",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "écrive",
 						start: 66,
 						end: 72,
@@ -105523,8 +112093,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 73,
+						verbInfinitive: "changer",
 						tenseId: 6,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future-perfect",
+						tenseName: "futur antérieur",
 						personId: 4,
+						personPronoun: "je",
 						form: "aurai changé",
 						start: 55,
 						end: 67,
@@ -105545,8 +112121,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 17,
+						verbInfinitive: "recevoir",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en recevant",
 						start: 44,
 						end: 55,
@@ -105567,8 +112149,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 67,
+						verbInfinitive: "suivre",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en suivant",
 						start: 117,
 						end: 127,
@@ -105589,8 +112177,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en arrivant",
 						start: 9,
 						end: 20,
@@ -105611,8 +112205,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "pût",
 						start: 52,
 						end: 55,
@@ -105633,8 +112233,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 752,
+						verbInfinitive: "sécher",
 						tenseId: 26,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 6,
+						personPronoun: "il",
 						form: "avoir séché",
 						start: 6,
 						end: 17,
@@ -105655,8 +112261,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût été",
 						start: 32,
 						end: 39,
@@ -105677,8 +112289,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût pu",
 						start: 78,
 						end: 84,
@@ -105699,8 +112317,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 213,
+						verbInfinitive: "donner",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en donnant",
 						start: 40,
 						end: 50,
@@ -105721,8 +112345,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "aie",
 						start: 14,
 						end: 17,
@@ -105732,8 +112362,14 @@ var sources = [
 					},
 					{
 						verbId: 753,
+						verbInfinitive: "doubler",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en doublant",
 						start: 43,
 						end: 54,
@@ -105754,8 +112390,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "soit",
 						start: 149,
 						end: 153,
@@ -105776,8 +112418,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 560,
+						verbInfinitive: "rougir",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en rougissant",
 						start: 84,
 						end: 97,
@@ -105798,8 +112446,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 445,
+						verbInfinitive: "examiner",
 						tenseId: 15,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-first-form",
+						tenseName: "passé 1",
 						personId: 9,
+						personPronoun: "ils",
 						form: "auraient examiné",
 						start: 4,
 						end: 20,
@@ -105820,8 +112474,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 50,
+						verbInfinitive: "lire",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "En lisant",
 						start: 0,
 						end: 9,
@@ -105842,8 +112502,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 49,
+						verbInfinitive: "finir",
 						tenseId: 8,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "past-anterior",
+						tenseName: "passé antérieur",
 						personId: 9,
+						personPronoun: "ils",
 						form: "eurent fini",
 						start: 73,
 						end: 84,
@@ -105864,8 +112530,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "sois",
 						start: 101,
 						end: 105,
@@ -105886,8 +112558,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "fasse",
 						start: 171,
 						end: 176,
@@ -105908,8 +112586,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 165,
+						verbInfinitive: "demander",
 						tenseId: 26,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 6,
+						personPronoun: "il",
 						form: "avoir demandé",
 						start: 15,
 						end: 28,
@@ -105930,8 +112614,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût été",
 						start: 80,
 						end: 87,
@@ -105952,8 +112642,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 206,
+						verbInfinitive: "passer",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "En passant",
 						start: 0,
 						end: 10,
@@ -105974,8 +112670,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "parte",
 						start: 6,
 						end: 11,
@@ -105996,8 +112698,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "ayez",
 						start: 25,
 						end: 29,
@@ -106018,8 +112726,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût dû",
 						start: 59,
 						end: 65,
@@ -106040,8 +112754,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût été",
 						start: 3,
 						end: 10,
@@ -106062,8 +112782,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 218,
+						verbInfinitive: "écouter",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en écoutant",
 						start: 5,
 						end: 16,
@@ -106084,8 +112810,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 49,
+						verbInfinitive: "finir",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "en finissant",
 						start: 36,
 						end: 48,
@@ -106106,8 +112838,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût été",
 						start: 3,
 						end: 10,
@@ -106143,8 +112881,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 189,
+						verbInfinitive: "répéter",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "répétait",
 						start: 17,
 						end: 25,
@@ -106165,8 +112909,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 72,
+						verbInfinitive: "vivre",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "vécût",
 						start: 31,
 						end: 36,
@@ -106187,8 +112937,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 8,
+						personPronoun: "vous",
 						form: "ferez",
 						start: 5,
 						end: 10,
@@ -106209,8 +112965,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "voulait",
 						start: 3,
 						end: 10,
@@ -106231,8 +112993,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez",
 						start: 16,
 						end: 20,
@@ -106253,8 +113021,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "voulut",
 						start: 3,
 						end: 9,
@@ -106275,8 +113049,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "pourriez",
 						start: 8,
 						end: 16,
@@ -106297,8 +113077,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai",
 						start: 2,
 						end: 4,
@@ -106319,8 +113105,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "vais",
 						start: 3,
 						end: 7,
@@ -106341,8 +113133,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "voulaient",
 						start: 4,
 						end: 13,
@@ -106363,8 +113161,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 108,
+						verbInfinitive: "comprendre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "comprenez",
 						start: 5,
 						end: 14,
@@ -106385,8 +113189,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "alla",
 						start: 3,
 						end: 7,
@@ -106407,8 +113217,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 9,
+						personPronoun: "ils",
 						form: "doivent",
 						start: 74,
 						end: 81,
@@ -106429,8 +113245,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 232,
+						verbInfinitive: "manquer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "manque",
 						start: 6,
 						end: 12,
@@ -106451,8 +113273,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "serons",
 						start: 16,
 						end: 22,
@@ -106473,8 +113301,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "virent",
 						start: 61,
 						end: 67,
@@ -106495,8 +113329,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "devez",
 						start: 12,
 						end: 17,
@@ -106517,8 +113357,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 208,
+						verbInfinitive: "rester",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Restez",
 						start: 0,
 						end: 6,
@@ -106539,8 +113385,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 7,
+						personPronoun: "nous",
 						form: "sommes partis",
 						start: 5,
 						end: 18,
@@ -106561,8 +113413,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 158,
+						verbInfinitive: "attendre",
 						tenseId: 22,
+						modeCode: "gerund",
+						modeName: "gérondif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "En attendant",
 						start: 0,
 						end: 12,
@@ -106572,8 +113430,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "êtes",
 						start: 19,
 						end: 23,
@@ -106594,8 +113458,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 699,
+						verbInfinitive: "veiller",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "veillait",
 						start: 3,
 						end: 11,
@@ -106605,8 +113475,14 @@ var sources = [
 					},
 					{
 						verbId: 232,
+						verbInfinitive: "manquer",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "manquât",
 						start: 29,
 						end: 36,
@@ -106627,8 +113503,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 203,
+						verbInfinitive: "partager",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "partage",
 						start: 6,
 						end: 13,
@@ -106649,8 +113531,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "allât",
 						start: 37,
 						end: 42,
@@ -106671,8 +113559,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 28,
+						verbInfinitive: "paraître",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "parut",
 						start: 55,
 						end: 60,
@@ -106693,8 +113587,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 125,
+						verbInfinitive: "suffire",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "suffisait",
 						start: 7,
 						end: 16,
@@ -106704,8 +113604,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "fût",
 						start: 76,
 						end: 79,
@@ -106726,8 +113632,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 169,
+						verbInfinitive: "trouver",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 8,
+						personPronoun: "vous",
 						form: "trouverez",
 						start: 41,
 						end: 50,
@@ -106748,8 +113660,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 75,
+						verbInfinitive: "commencer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "commença",
 						start: 3,
 						end: 11,
@@ -106770,8 +113688,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 11,
+						verbInfinitive: "falloir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "fallait",
 						start: 13,
 						end: 20,
@@ -106792,8 +113716,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 389,
+						verbInfinitive: "demeurer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "demeurèrent",
 						start: 37,
 						end: 48,
@@ -106814,8 +113744,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "pouvaient",
 						start: 41,
 						end: 50,
@@ -106836,8 +113772,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 66,
+						verbInfinitive: "sortir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "sortit",
 						start: 8,
 						end: 14,
@@ -106847,8 +113789,14 @@ var sources = [
 					},
 					{
 						verbId: 42,
+						verbInfinitive: "payer",
 						tenseId: 26,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "past",
+						tenseName: "passé",
 						personId: 6,
+						personPronoun: "il",
 						form: "avoir payé",
 						start: 22,
 						end: 32,
@@ -106869,8 +113817,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "fit",
 						start: 22,
 						end: 25,
@@ -106891,8 +113845,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 708,
+						verbInfinitive: "hésiter",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "hésitait",
 						start: 3,
 						end: 11,
@@ -106902,8 +113862,14 @@ var sources = [
 					},
 					{
 						verbId: 107,
+						verbInfinitive: "reprendre",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "reprendre",
 						start: 21,
 						end: 30,
@@ -106924,8 +113890,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "sois",
 						start: 17,
 						end: 21,
@@ -106946,8 +113918,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Venez",
 						start: 0,
 						end: 5,
@@ -106968,8 +113946,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "faisait",
 						start: 3,
 						end: 10,
@@ -106990,8 +113974,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "verrait",
 						start: 29,
 						end: 36,
@@ -107012,8 +114002,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 17,
+						verbInfinitive: "recevoir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai reçu",
 						start: 107,
 						end: 114,
@@ -107034,8 +114030,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avons",
 						start: 5,
 						end: 10,
@@ -107056,8 +114058,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 192,
+						verbInfinitive: "tomber",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "tombait",
 						start: 3,
 						end: 10,
@@ -107078,8 +114086,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "était",
 						start: 3,
 						end: 8,
@@ -107089,8 +114103,14 @@ var sources = [
 					},
 					{
 						verbId: 436,
+						verbInfinitive: "compter",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "compter",
 						start: 34,
 						end: 41,
@@ -107111,8 +114131,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 232,
+						verbInfinitive: "manquer",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "avais manqué",
 						start: 6,
 						end: 18,
@@ -107133,8 +114159,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "fait",
 						start: 3,
 						end: 7,
@@ -107155,8 +114187,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 7,
+						personPronoun: "nous",
 						form: "sommes arrivés",
 						start: 5,
 						end: 19,
@@ -107177,8 +114215,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 94,
+						verbInfinitive: "manger",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "mangea",
 						start: 3,
 						end: 9,
@@ -107199,8 +114243,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 35,
+						verbInfinitive: "employer",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait employé",
 						start: 3,
 						end: 16,
@@ -107221,8 +114271,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 212,
+						verbInfinitive: "porter",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "portaient",
 						start: 42,
 						end: 51,
@@ -107243,8 +114299,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 67,
+						verbInfinitive: "suivre",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "suivait",
 						start: 3,
 						end: 10,
@@ -107265,8 +114327,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 4,
+						personPronoun: "je",
 						form: "irai",
 						start: 4,
 						end: 8,
@@ -107287,8 +114355,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 559,
+						verbInfinitive: "reconnaître",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait reconnu",
 						start: 3,
 						end: 16,
@@ -107298,8 +114372,14 @@ var sources = [
 					},
 					{
 						verbId: 266,
+						verbInfinitive: "forcer",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "forcer",
 						start: 36,
 						end: 42,
@@ -107320,8 +114400,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "serons",
 						start: 23,
 						end: 29,
@@ -107342,8 +114428,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Allons",
 						start: 0,
 						end: 6,
@@ -107353,8 +114445,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "sommes",
 						start: 25,
 						end: 31,
@@ -107375,8 +114473,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "arrivèrent",
 						start: 63,
 						end: 73,
@@ -107397,8 +114501,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 95,
+						verbInfinitive: "prendre",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "prenne",
 						start: 24,
 						end: 30,
@@ -107419,8 +114529,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "arriverons",
 						start: 33,
 						end: 43,
@@ -107441,8 +114557,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 158,
+						verbInfinitive: "attendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "attendit",
 						start: 46,
 						end: 54,
@@ -107463,8 +114585,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "être",
 						start: 54,
 						end: 58,
@@ -107474,8 +114602,14 @@ var sources = [
 					},
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai fait",
 						start: 68,
 						end: 75,
@@ -107496,8 +114630,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 41,
+						verbInfinitive: "oublier",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait oublié",
 						start: 3,
 						end: 15,
@@ -107518,8 +114658,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "dites",
 						start: 29,
 						end: 34,
@@ -107540,8 +114686,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 5,
+						personPronoun: "tu",
 						form: "Va",
 						start: 0,
 						end: 2,
@@ -107562,8 +114714,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "eut",
 						start: 3,
 						end: 6,
@@ -107584,8 +114742,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 108,
+						verbInfinitive: "comprendre",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait compris",
 						start: 40,
 						end: 53,
@@ -107606,8 +114770,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "étais",
 						start: 30,
 						end: 35,
@@ -107628,8 +114798,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 57,
+						verbInfinitive: "entendre",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "entendrons",
 						start: 10,
 						end: 20,
@@ -107650,8 +114826,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 436,
+						verbInfinitive: "compter",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "comptons",
 						start: 27,
 						end: 35,
@@ -107672,8 +114854,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai été",
 						start: 12,
 						end: 18,
@@ -107694,8 +114882,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "ferions",
 						start: 18,
 						end: 25,
@@ -107705,8 +114899,14 @@ var sources = [
 					},
 					{
 						verbId: 151,
+						verbInfinitive: "gagner",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "gagner",
 						start: 34,
 						end: 40,
@@ -107727,8 +114927,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "savez",
 						start: 8,
 						end: 13,
@@ -107749,8 +114955,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 110,
+						verbInfinitive: "lancer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "lança",
 						start: 10,
 						end: 15,
@@ -107771,8 +114983,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "vint",
 						start: 3,
 						end: 7,
@@ -107782,8 +115000,14 @@ var sources = [
 					},
 					{
 						verbId: 224,
+						verbInfinitive: "tirer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "tira",
 						start: 32,
 						end: 36,
@@ -107804,8 +115028,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 190,
+						verbInfinitive: "arrêter",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "arrêtons",
 						start: 10,
 						end: 18,
@@ -107826,8 +115056,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "est",
 						start: 3,
 						end: 6,
@@ -107848,8 +115084,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 278,
+						verbInfinitive: "songer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "songeait",
 						start: 3,
 						end: 11,
@@ -107870,8 +115112,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 169,
+						verbInfinitive: "trouver",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait trouvé",
 						start: 3,
 						end: 15,
@@ -107892,8 +115140,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 389,
+						verbInfinitive: "demeurer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "demeura",
 						start: 3,
 						end: 10,
@@ -107914,8 +115168,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "pouvez",
 						start: 5,
 						end: 11,
@@ -107936,8 +115196,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 20,
+						verbInfinitive: "connaître",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "connaissez",
 						start: 5,
 						end: 15,
@@ -107958,8 +115224,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 229,
+						verbInfinitive: "réfléchir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "réfléchissait",
 						start: 9,
 						end: 22,
@@ -107980,8 +115252,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 15,
+						verbInfinitive: "devoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "devez",
 						start: 28,
 						end: 33,
@@ -108002,8 +115280,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez",
 						start: 5,
 						end: 9,
@@ -108024,8 +115308,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 87,
+						verbInfinitive: "aimer",
 						tenseId: 15,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-first-form",
+						tenseName: "passé 1",
 						personId: 4,
+						personPronoun: "je",
 						form: "aurais aimé",
 						start: 2,
 						end: 13,
@@ -108035,8 +115325,14 @@ var sources = [
 					},
 					{
 						verbId: 666,
+						verbInfinitive: "revoir",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "revoir",
 						start: 16,
 						end: 22,
@@ -108057,8 +115353,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 77,
+						verbInfinitive: "courir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "courait",
 						start: 3,
 						end: 10,
@@ -108068,8 +115370,14 @@ var sources = [
 					},
 					{
 						verbId: 60,
+						verbInfinitive: "perdre",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "perdre",
 						start: 13,
 						end: 19,
@@ -108090,8 +115398,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "arriva",
 						start: 3,
 						end: 9,
@@ -108112,8 +115426,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 108,
+						verbInfinitive: "comprendre",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "comprenez",
 						start: 10,
 						end: 19,
@@ -108134,8 +115454,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 163,
+						verbInfinitive: "devenir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "devint",
 						start: 3,
 						end: 9,
@@ -108156,8 +115482,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 255,
+						verbInfinitive: "accuser",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "accusait",
 						start: 3,
 						end: 11,
@@ -108167,8 +115499,14 @@ var sources = [
 					},
 					{
 						verbId: 720,
+						verbInfinitive: "transporter",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "transporter",
 						start: 110,
 						end: 121,
@@ -108189,8 +115527,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 675,
+						verbInfinitive: "deviner",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez deviné",
 						start: 5,
 						end: 16,
@@ -108200,8 +115544,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "étais",
 						start: 23,
 						end: 28,
@@ -108222,8 +115572,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 559,
+						verbInfinitive: "reconnaître",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "reconnut",
 						start: 27,
 						end: 35,
@@ -108244,8 +115600,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 108,
+						verbInfinitive: "comprendre",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "comprenait",
 						start: 15,
 						end: 25,
@@ -108266,8 +115628,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "voyait",
 						start: 27,
 						end: 33,
@@ -108288,8 +115656,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 95,
+						verbInfinitive: "prendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "prirent",
 						start: 96,
 						end: 103,
@@ -108310,8 +115684,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 165,
+						verbInfinitive: "demander",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "demanderait",
 						start: 22,
 						end: 33,
@@ -108332,8 +115712,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "aille",
 						start: 21,
 						end: 26,
@@ -108354,8 +115740,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 66,
+						verbInfinitive: "sortir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "sors",
 						start: 17,
 						end: 21,
@@ -108376,8 +115768,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 5,
+						verbInfinitive: "pouvoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "pouvons",
 						start: 5,
 						end: 12,
@@ -108398,8 +115796,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 207,
+						verbInfinitive: "regarder",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "regardez",
 						start: 8,
 						end: 16,
@@ -108420,8 +115824,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "serait",
 						start: 115,
 						end: 121,
@@ -108442,8 +115852,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "vois",
 						start: 3,
 						end: 7,
@@ -108464,8 +115880,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez",
 						start: 5,
 						end: 9,
@@ -108475,8 +115897,14 @@ var sources = [
 					},
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "partir",
 						start: 27,
 						end: 33,
@@ -108497,8 +115925,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "firent",
 						start: 4,
 						end: 10,
@@ -108519,8 +115953,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "croyez",
 						start: 5,
 						end: 11,
@@ -108541,8 +115981,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "faites",
 						start: 10,
 						end: 16,
@@ -108563,8 +116009,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 30,
+						verbInfinitive: "résoudre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 9,
+						personPronoun: "ils",
 						form: "résolurent",
 						start: 53,
 						end: 63,
@@ -108585,8 +116037,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 154,
+						verbInfinitive: "marcher",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "marcherons",
 						start: 17,
 						end: 27,
@@ -108607,8 +116065,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 6,
+						personPronoun: "il",
 						form: "viendra",
 						start: 71,
 						end: 78,
@@ -108629,8 +116093,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 6,
+						personPronoun: "il",
 						form: "aura",
 						start: 9,
 						end: 13,
@@ -108651,8 +116121,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 60,
+						verbInfinitive: "perdre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "perdit",
 						start: 40,
 						end: 46,
@@ -108662,8 +116138,14 @@ var sources = [
 					},
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût pas été",
 						start: 70,
 						end: 81,
@@ -108684,8 +116166,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 666,
+						verbInfinitive: "revoir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "reverrait",
 						start: 54,
 						end: 63,
@@ -108706,8 +116194,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "sût",
 						start: 39,
 						end: 42,
@@ -108728,8 +116222,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 120,
+						verbInfinitive: "faillir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "faillit",
 						start: 70,
 						end: 77,
@@ -108750,8 +116250,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "sois",
 						start: 33,
 						end: 37,
@@ -108772,8 +116278,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Veuillez",
 						start: 0,
 						end: 8,
@@ -108794,8 +116306,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait cru",
 						start: 33,
 						end: 42,
@@ -108816,8 +116334,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 95,
+						verbInfinitive: "prendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "prit",
 						start: 7,
 						end: 11,
@@ -108838,8 +116362,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 208,
+						verbInfinitive: "rester",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "resta",
 						start: 3,
 						end: 8,
@@ -108860,8 +116390,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 666,
+						verbInfinitive: "revoir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "revit",
 						start: 8,
 						end: 13,
@@ -108882,8 +116418,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait",
 						start: 3,
 						end: 8,
@@ -108904,8 +116446,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 65,
+						verbInfinitive: "servir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "servait",
 						start: 3,
 						end: 10,
@@ -108926,8 +116474,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "serait",
 						start: 40,
 						end: 46,
@@ -108948,8 +116502,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "serait",
 						start: 47,
 						end: 53,
@@ -108970,8 +116530,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "voulez",
 						start: 8,
 						end: 14,
@@ -108992,8 +116558,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 97,
+						verbInfinitive: "sentir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "sentait",
 						start: 3,
 						end: 10,
@@ -109014,8 +116586,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "allez",
 						start: 5,
 						end: 10,
@@ -109036,8 +116614,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "crois",
 						start: 21,
 						end: 26,
@@ -109047,8 +116631,14 @@ var sources = [
 					},
 					{
 						verbId: 169,
+						verbInfinitive: "trouver",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai trouvé",
 						start: 33,
 						end: 42,
@@ -109069,8 +116659,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 219,
+						verbInfinitive: "garder",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez gardé",
 						start: 5,
 						end: 15,
@@ -109091,8 +116687,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "êtes",
 						start: 19,
 						end: 23,
@@ -109113,8 +116715,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 6,
+						verbInfinitive: "vouloir",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "voudrais",
 						start: 3,
 						end: 11,
@@ -109135,8 +116743,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 218,
+						verbInfinitive: "écouter",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Écoutez",
 						start: 0,
 						end: 7,
@@ -109157,8 +116771,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 208,
+						verbInfinitive: "rester",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "est resté",
 						start: 3,
 						end: 12,
@@ -109179,8 +116799,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 436,
+						verbInfinitive: "compter",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 8,
+						personPronoun: "vous",
 						form: "comptiez",
 						start: 32,
 						end: 40,
@@ -109201,8 +116827,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "allez",
 						start: 5,
 						end: 10,
@@ -109223,8 +116855,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 31,
+						verbInfinitive: "dire",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "dites",
 						start: 5,
 						end: 10,
@@ -109245,8 +116883,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "avons",
 						start: 5,
 						end: 10,
@@ -109267,8 +116911,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 4,
+						personPronoun: "je",
 						form: "ai cru",
 						start: 13,
 						end: 19,
@@ -109289,8 +116939,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "savait",
 						start: 3,
 						end: 9,
@@ -109311,8 +116967,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 15,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-first-form",
+						tenseName: "passé 1",
 						personId: 6,
+						personPronoun: "il",
 						form: "serait arrivé",
 						start: 36,
 						end: 49,
@@ -109333,8 +116995,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 120,
+						verbInfinitive: "faillir",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "faillit",
 						start: 3,
 						end: 10,
@@ -109355,8 +117023,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 195,
+						verbInfinitive: "imaginer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "imagine",
 						start: 49,
 						end: 56,
@@ -109366,8 +117040,14 @@ var sources = [
 					},
 					{
 						verbId: 95,
+						verbInfinitive: "prendre",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "prendre",
 						start: 71,
 						end: 78,
@@ -109388,8 +117068,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "venez",
 						start: 5,
 						end: 10,
@@ -109410,8 +117096,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "allons",
 						start: 14,
 						end: 20,
@@ -109421,8 +117113,14 @@ var sources = [
 					},
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "avoir",
 						start: 21,
 						end: 26,
@@ -109443,8 +117141,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 394,
+						verbInfinitive: "consulter",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "consulta",
 						start: 58,
 						end: 66,
@@ -109465,8 +117169,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 191,
+						verbInfinitive: "arriver",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "arrivait",
 						start: 79,
 						end: 87,
@@ -109487,8 +117197,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 42,
+						verbInfinitive: "payer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "paie",
 						start: 5,
 						end: 9,
@@ -109509,8 +117225,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "a",
 						start: 32,
 						end: 33,
@@ -109531,8 +117253,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 84,
+						verbInfinitive: "ouvrir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "ouvrait",
 						start: 28,
 						end: 35,
@@ -109553,8 +117281,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 6,
+						personPronoun: "il",
 						form: "sera",
 						start: 8,
 						end: 12,
@@ -109575,8 +117309,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "savait",
 						start: 64,
 						end: 70,
@@ -109597,8 +117337,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 8,
+						verbInfinitive: "tenir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "tenait",
 						start: 3,
 						end: 9,
@@ -109619,8 +117365,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 75,
+						verbInfinitive: "commencer",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "avait commencé",
 						start: 3,
 						end: 17,
@@ -109641,8 +117393,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût été",
 						start: 3,
 						end: 10,
@@ -109663,8 +117421,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 4,
+						personPronoun: "je",
 						form: "savais",
 						start: 3,
 						end: 9,
@@ -109685,8 +117449,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 14,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "serait",
 						start: 3,
 						end: 9,
@@ -109707,8 +117477,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 96,
+						verbInfinitive: "rendre",
 						tenseId: 10,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 9,
+						personPronoun: "ils",
 						form: "rendent",
 						start: 23,
 						end: 30,
@@ -109729,8 +117505,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 208,
+						verbInfinitive: "rester",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "reste",
 						start: 8,
 						end: 13,
@@ -109751,8 +117533,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 32,
+						verbInfinitive: "acheter",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "achèterons",
 						start: 5,
 						end: 15,
@@ -109773,8 +117561,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 19,
+						verbInfinitive: "voir",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "verrons",
 						start: 5,
 						end: 12,
@@ -109795,8 +117589,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 20,
+						verbInfinitive: "connaître",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "connaissez",
 						start: 11,
 						end: 21,
@@ -109817,8 +117617,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Faites",
 						start: 0,
 						end: 6,
@@ -109839,8 +117645,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 673,
+						verbInfinitive: "appartenir",
 						tenseId: 16,
+						modeCode: "subjunctive",
+						modeName: "subjonctif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "appartînt",
 						start: 56,
 						end: 65,
@@ -109861,8 +117673,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 9,
+						verbInfinitive: "venir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "viens",
 						start: 14,
 						end: 19,
@@ -109883,8 +117701,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 213,
+						verbInfinitive: "donner",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "donnait",
 						start: 17,
 						end: 24,
@@ -109905,8 +117729,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "ferons",
 						start: 5,
 						end: 11,
@@ -109927,8 +117757,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 92,
+						verbInfinitive: "avancer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avancez",
 						start: 33,
 						end: 40,
@@ -109949,8 +117785,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "partons",
 						start: 5,
 						end: 12,
@@ -109971,8 +117813,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 206,
+						verbInfinitive: "passer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "passa",
 						start: 69,
 						end: 74,
@@ -109993,8 +117841,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 2,
+						verbInfinitive: "aller",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "allons",
 						start: 5,
 						end: 11,
@@ -110004,8 +117858,14 @@ var sources = [
 					},
 					{
 						verbId: 3,
+						verbInfinitive: "faire",
 						tenseId: 25,
+						modeCode: "infinitive",
+						modeName: "infinitif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "faire",
 						start: 12,
 						end: 17,
@@ -110026,8 +117886,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 674,
+						verbInfinitive: "parier",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "parie",
 						start: 45,
 						end: 50,
@@ -110048,8 +117914,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 252,
+						verbInfinitive: "abandonner",
 						tenseId: 7,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "pluperfect",
+						tenseName: "plus-que-parfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "avaient abandonné",
 						start: 4,
 						end: 21,
@@ -110070,8 +117942,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 108,
+						verbInfinitive: "comprendre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "comprit",
 						start: 7,
 						end: 14,
@@ -110092,8 +117970,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 19,
+						modeCode: "conditional",
+						modeName: "conditionnel",
+						tenseCode: "past-second-form",
+						tenseName: "passé 2",
 						personId: 6,
+						personPronoun: "il",
 						form: "eût été",
 						start: 41,
 						end: 48,
@@ -110114,8 +117998,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 158,
+						verbInfinitive: "attendre",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "Attendons",
 						start: 0,
 						end: 9,
@@ -110125,8 +118015,14 @@ var sources = [
 					},
 					{
 						verbId: 268,
+						verbInfinitive: "prononcer",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "prononçons",
 						start: 19,
 						end: 29,
@@ -110147,8 +118043,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 223,
+						verbInfinitive: "rentrer",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "rentra",
 						start: 3,
 						end: 9,
@@ -110169,8 +118071,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 10,
+						verbInfinitive: "savoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "savez",
 						start: 5,
 						end: 10,
@@ -110191,8 +118099,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 436,
+						verbInfinitive: "compter",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 9,
+						personPronoun: "ils",
 						form: "comptaient",
 						start: 4,
 						end: 14,
@@ -110213,8 +118127,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 59,
+						verbInfinitive: "partir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "est parti",
 						start: 3,
 						end: 12,
@@ -110235,8 +118155,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 165,
+						verbInfinitive: "demander",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "demanda",
 						start: 3,
 						end: 10,
@@ -110257,8 +118183,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 7,
+						personPronoun: "nous",
 						form: "sommes",
 						start: 5,
 						end: 11,
@@ -110279,8 +118211,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 34,
+						verbInfinitive: "croire",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "croyait",
 						start: 3,
 						end: 10,
@@ -110290,8 +118228,14 @@ var sources = [
 					},
 					{
 						verbId: 81,
+						verbInfinitive: "espérer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "espérait",
 						start: 56,
 						end: 64,
@@ -110312,8 +118256,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 30,
+						verbInfinitive: "résoudre",
 						tenseId: 4,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "simple-past",
+						tenseName: "passé simple",
 						personId: 6,
+						personPronoun: "il",
 						form: "résolut",
 						start: 3,
 						end: 10,
@@ -110334,8 +118284,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 392,
+						verbInfinitive: "préférer",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "préférait",
 						start: 3,
 						end: 12,
@@ -110356,8 +118312,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 462,
+						verbInfinitive: "accabler",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "accablait",
 						start: 100,
 						end: 109,
@@ -110378,8 +118340,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 9,
+						modeCode: "imperative",
+						modeName: "impératif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 8,
+						personPronoun: "vous",
 						form: "Ayez",
 						start: 0,
 						end: 4,
@@ -110400,8 +118368,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 172,
+						verbInfinitive: "parler",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "parlait",
 						start: 3,
 						end: 10,
@@ -110422,8 +118396,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "serons",
 						start: 20,
 						end: 26,
@@ -110444,8 +118424,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 436,
+						verbInfinitive: "compter",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "compte",
 						start: 48,
 						end: 54,
@@ -110466,8 +118452,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 1,
+						verbInfinitive: "être",
 						tenseId: 3,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "future",
+						tenseName: "futur",
 						personId: 7,
+						personPronoun: "nous",
 						form: "serons",
 						start: 25,
 						end: 31,
@@ -110488,8 +118480,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 218,
+						verbInfinitive: "écouter",
 						tenseId: 2,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "imperfect",
+						tenseName: "imparfait",
 						personId: 6,
+						personPronoun: "il",
 						form: "écoutait",
 						start: 3,
 						end: 11,
@@ -110510,8 +118508,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 17,
+						verbInfinitive: "recevoir",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 8,
+						personPronoun: "vous",
 						form: "avez reçu",
 						start: 53,
 						end: 62,
@@ -110532,8 +118536,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 94,
+						verbInfinitive: "manger",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 4,
+						personPronoun: "je",
 						form: "mange",
 						start: 3,
 						end: 8,
@@ -110554,8 +118564,14 @@ var sources = [
 				targets: [
 					{
 						verbId: 60,
+						verbInfinitive: "perdre",
 						tenseId: 5,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "compound-past",
+						tenseName: "passé composé",
 						personId: 6,
+						personPronoun: "il",
 						form: "a perdu",
 						start: 3,
 						end: 10,
@@ -110565,8 +118581,14 @@ var sources = [
 					},
 					{
 						verbId: 4,
+						verbInfinitive: "avoir",
 						tenseId: 1,
+						modeCode: "indicative",
+						modeName: "indicatif",
+						tenseCode: "present",
+						tenseName: "présent",
 						personId: 6,
+						personPronoun: "il",
 						form: "a",
 						start: 48,
 						end: 49,
@@ -110594,9 +118616,40 @@ const FREQUENT_TENSE_QUOTAS = /* @__PURE__ */ new Map([
   ["indicatif:pass\xE9 compos\xE9", 3],
   ["indicatif:futur", 3]
 ]);
+async function ensureLiteraryGrammarPrerequisites(connection) {
+  await connection.query(`
+    INSERT INTO modes (code,name,\`order\`)
+    SELECT 'infinitive','infinitif',60
+    WHERE NOT EXISTS (SELECT 1 FROM modes WHERE code='infinitive' OR name='infinitif')
+  `);
+  await connection.query(`
+    INSERT INTO modes (code,name,\`order\`)
+    SELECT 'gerund','g\xE9rondif',50
+    WHERE NOT EXISTS (SELECT 1 FROM modes WHERE code='gerund' OR name='g\xE9rondif')
+  `);
+  for (const reference of [
+    ["infinitive", "infinitif", "present", "pr\xE9sent", 0],
+    ["infinitive", "infinitif", "past", "pass\xE9", 1],
+    ["gerund", "g\xE9rondif", "present", "pr\xE9sent", 0],
+    ["gerund", "g\xE9rondif", "past", "pass\xE9", 1]
+  ]) {
+    const [modeCode, modeName, tenseCode, tenseName, compound] = reference;
+    await connection.query(`
+      INSERT INTO temps (mode_id,code,name,isTempsCompose,selected)
+      SELECT mode.id,?,?,?,0
+      FROM modes mode
+      WHERE (mode.code=? OR mode.name=?)
+        AND NOT EXISTS (
+          SELECT 1 FROM temps tense
+          WHERE tense.mode_id=mode.id AND (tense.code=? OR tense.name=?)
+        )
+      ORDER BY mode.id LIMIT 1
+    `, [tenseCode, tenseName, compound, modeCode, modeName, tenseCode, tenseName]);
+  }
+}
 async function applyProductionCorpusSnapshot(connection) {
   const snapshot = productionCorpus;
-  const migrationKey = `production-literary-corpus-v1-${snapshot.checksum.slice(0, 40)}`;
+  const migrationKey = `production-literary-corpus-v2-${snapshot.checksum.slice(0, 40)}`;
   const [[alreadyApplied]] = await connection.execute(
     "SELECT 1 AS id FROM literary_corpus_migrations WHERE migration_key=?",
     [migrationKey]
@@ -110626,13 +118679,27 @@ async function applyProductionCorpusSnapshot(connection) {
       }
     }
   }
-  const [verbRows] = await connection.query("SELECT id FROM verbes");
-  const [tenseRows] = await connection.query("SELECT id FROM temps");
-  const [personRows] = await connection.query("SELECT id FROM personnes");
-  const verbIds = new Set(verbRows.map((row) => Number(row.id)));
-  const tenseIds = new Set(tenseRows.map((row) => Number(row.id)));
-  const personIds = new Set(personRows.map((row) => Number(row.id)));
-  const invalidTarget = targets.find((target) => !verbIds.has(target.verbId) || !tenseIds.has(target.tenseId) || !personIds.has(target.personId));
+  await ensureLiteraryGrammarPrerequisites(connection);
+  const [verbRows] = await connection.query("SELECT id,infinitif AS infinitive FROM verbes");
+  const [tenseRows] = await connection.query(`
+    SELECT tense.id,mode.code AS modeCode,mode.name AS modeName,
+           tense.code AS tenseCode,tense.name AS tenseName
+    FROM temps tense INNER JOIN modes mode ON mode.id=tense.mode_id
+  `);
+  const [personRows] = await connection.query("SELECT id,pronom AS pronoun FROM personnes");
+  const verbIds = new Map(verbRows.map((row) => [String(row.infinitive).toLocaleLowerCase("fr"), Number(row.id)]));
+  const tenseIds = new Map(tenseRows.flatMap((row) => [
+    [`${row.modeCode}:${row.tenseCode}`, Number(row.id)],
+    [`${row.modeName}:${row.tenseName}`, Number(row.id)]
+  ]));
+  const personIds = new Map(personRows.map((row) => [String(row.pronoun).toLocaleLowerCase("fr"), Number(row.id)]));
+  const resolvedTargets = targets.map((target) => ({
+    ...target,
+    verbId: verbIds.get(target.verbInfinitive.toLocaleLowerCase("fr")) || 0,
+    tenseId: tenseIds.get(`${target.modeCode}:${target.tenseCode}`) || tenseIds.get(`${target.modeName}:${target.tenseName}`) || 0,
+    personId: personIds.get(target.personPronoun.toLocaleLowerCase("fr")) || 0
+  }));
+  const invalidTarget = resolvedTargets.find((target) => !target.verbId || !target.tenseId || !target.personId);
   if (invalidTarget) {
     throw new Error(`R\xE9f\xE9rence grammaticale absente pour la phrase ${invalidTarget.sentenceKey}.`);
   }
@@ -110683,8 +118750,8 @@ async function applyProductionCorpusSnapshot(connection) {
       "SELECT id,external_key AS sentenceKey FROM literary_sentences"
     );
     const sentenceIds = new Map(storedSentences.map((row) => [row.sentenceKey, Number(row.id)]));
-    for (let start = 0; start < targets.length; start += 200) {
-      const batch = targets.slice(start, start + 200);
+    for (let start = 0; start < resolvedTargets.length; start += 200) {
+      const batch = resolvedTargets.slice(start, start + 200);
       const values = batch.flatMap((target) => [
         sentenceIds.get(target.sentenceKey),
         target.verbId,
@@ -115751,2973 +123818,2973 @@ _0T1W4DkA4XhxQ3mqRSifwqf7ZnOeJX9jNfES0b6RQ
 ];
 
 const assets = {
-  "/favicon.svg": {
-    "type": "image/svg+xml",
-    "etag": "\"74-WyA9ZQw0VL+p5r20HpGPoXfXkds\"",
-    "mtime": "2026-08-04T15:39:49.050Z",
-    "size": 116,
-    "path": "../public/favicon.svg"
-  },
   "/favicon.ico": {
     "type": "image/vnd.microsoft.icon",
     "etag": "\"10be-n8egyE9tcb7sKGr/pYCaQ4uWqxI\"",
-    "mtime": "2026-08-04T15:39:49.050Z",
+    "mtime": "2026-08-04T16:01:40.287Z",
     "size": 4286,
     "path": "../public/favicon.ico"
   },
-  "/theme-init.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"15d-LdG5lUVNvFDRrmi87xtSdBWs6zw\"",
-    "mtime": "2026-08-04T15:39:49.051Z",
-    "size": 349,
-    "path": "../public/theme-init.js"
+  "/favicon.svg": {
+    "type": "image/svg+xml",
+    "etag": "\"74-WyA9ZQw0VL+p5r20HpGPoXfXkds\"",
+    "mtime": "2026-08-04T16:01:40.287Z",
+    "size": 116,
+    "path": "../public/favicon.svg"
   },
   "/robots.txt": {
     "type": "text/plain; charset=utf-8",
     "etag": "\"194-zYMBBhB4q/jcC5o0BldfXliaHug\"",
-    "mtime": "2026-08-04T15:39:49.051Z",
+    "mtime": "2026-08-04T16:01:40.288Z",
     "size": 404,
     "path": "../public/robots.txt"
+  },
+  "/theme-init.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"15d-LdG5lUVNvFDRrmi87xtSdBWs6zw\"",
+    "mtime": "2026-08-04T16:01:40.288Z",
+    "size": 349,
+    "path": "../public/theme-init.js"
+  },
+  "/images/recharger-defi.svg": {
+    "type": "image/svg+xml",
+    "etag": "\"7da-sW4Yx/P5X4Hs5bsLkaNr7fae5Cw\"",
+    "mtime": "2026-08-04T16:01:40.280Z",
+    "size": 2010,
+    "path": "../public/images/recharger-defi.svg"
   },
   "/images/ancien-site.webp": {
     "type": "image/webp",
     "etag": "\"3746-e734D11Dqjfh5NlFidUXIfqJ//8\"",
-    "mtime": "2026-08-04T15:39:49.043Z",
+    "mtime": "2026-08-04T16:01:40.280Z",
     "size": 14150,
     "path": "../public/images/ancien-site.webp"
   },
   "/images/site-mountains.svg": {
     "type": "image/svg+xml",
     "etag": "\"2fdd-Kp0xCymtx14aH6SsI0yTF9+0o2s\"",
-    "mtime": "2026-08-04T15:39:49.043Z",
+    "mtime": "2026-08-04T16:01:40.281Z",
     "size": 12253,
     "path": "../public/images/site-mountains.svg"
-  },
-  "/images/recharger-defi.svg": {
-    "type": "image/svg+xml",
-    "etag": "\"7da-sW4Yx/P5X4Hs5bsLkaNr7fae5Cw\"",
-    "mtime": "2026-08-04T15:39:49.042Z",
-    "size": 2010,
-    "path": "../public/images/recharger-defi.svg"
   },
   "/_nuxt/AdminAuthBoundary.DDV853qc.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1c12-/1hfigAtKMNCxKMI3ovssmGIoXk\"",
-    "mtime": "2026-08-04T15:39:49.002Z",
+    "mtime": "2026-08-04T16:01:40.238Z",
     "size": 7186,
     "path": "../public/_nuxt/AdminAuthBoundary.DDV853qc.css"
   },
   "/_nuxt/B6rgVOIL.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"5741-WpD1sjcSxbqFlfPXdfA9RTxmRzE\"",
-    "mtime": "2026-08-04T15:39:49.002Z",
+    "mtime": "2026-08-04T16:01:40.238Z",
     "size": 22337,
     "path": "../public/_nuxt/B6rgVOIL.js"
-  },
-  "/_nuxt/BAkOm8Th.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"31f-k36iE7/mPiG0nIXDVomQgcBuSzc\"",
-    "mtime": "2026-08-04T15:39:49.002Z",
-    "size": 799,
-    "path": "../public/_nuxt/BAkOm8Th.js"
   },
   "/_nuxt/B8Nt-ERl.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"5a49-ESbUzwq0WOLhq2HY+Y3PhM254ME\"",
-    "mtime": "2026-08-04T15:39:49.002Z",
+    "mtime": "2026-08-04T16:01:40.238Z",
     "size": 23113,
     "path": "../public/_nuxt/B8Nt-ERl.js"
   },
-  "/_nuxt/BHPEJeZm.js": {
+  "/_nuxt/BAkOm8Th.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"26d1e-pIIzS17SpqBK/eRwLYcCCchZ7z0\"",
-    "mtime": "2026-08-04T15:39:49.002Z",
-    "size": 159006,
-    "path": "../public/_nuxt/BHPEJeZm.js"
+    "etag": "\"31f-k36iE7/mPiG0nIXDVomQgcBuSzc\"",
+    "mtime": "2026-08-04T16:01:40.238Z",
+    "size": 799,
+    "path": "../public/_nuxt/BAkOm8Th.js"
   },
   "/_nuxt/BOnOzmSz.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"140c-sxS1T7UnGT1lFck3J5BWv6vR9bM\"",
-    "mtime": "2026-08-04T15:39:49.002Z",
+    "mtime": "2026-08-04T16:01:40.239Z",
     "size": 5132,
     "path": "../public/_nuxt/BOnOzmSz.js"
-  },
-  "/_nuxt/BSDWAJ5j.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"4c2-g5ouI/HZcGmsMD46SqumOqq/7uo\"",
-    "mtime": "2026-08-04T15:39:49.003Z",
-    "size": 1218,
-    "path": "../public/_nuxt/BSDWAJ5j.js"
   },
   "/_nuxt/BQFpUjzI.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"4027-c0/tyG99pwUemxNG5RxDmaDd++A\"",
-    "mtime": "2026-08-04T15:39:49.002Z",
+    "mtime": "2026-08-04T16:01:40.239Z",
     "size": 16423,
     "path": "../public/_nuxt/BQFpUjzI.js"
+  },
+  "/_nuxt/BSDWAJ5j.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"4c2-g5ouI/HZcGmsMD46SqumOqq/7uo\"",
+    "mtime": "2026-08-04T16:01:40.239Z",
+    "size": 1218,
+    "path": "../public/_nuxt/BSDWAJ5j.js"
   },
   "/_nuxt/BTqb6WHc.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"140-ay1ew6Pof61TagObIbZVuMCoaTs\"",
-    "mtime": "2026-08-04T15:39:49.003Z",
+    "mtime": "2026-08-04T16:01:40.239Z",
     "size": 320,
     "path": "../public/_nuxt/BTqb6WHc.js"
+  },
+  "/_nuxt/BHPEJeZm.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"26d1e-pIIzS17SpqBK/eRwLYcCCchZ7z0\"",
+    "mtime": "2026-08-04T16:01:40.239Z",
+    "size": 159006,
+    "path": "../public/_nuxt/BHPEJeZm.js"
   },
   "/_nuxt/BUdkK0Af.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"3ac1-6Ru04wqlrN5aMGLYmm5yf8Ajq8Q\"",
-    "mtime": "2026-08-04T15:39:49.003Z",
+    "mtime": "2026-08-04T16:01:40.240Z",
     "size": 15041,
     "path": "../public/_nuxt/BUdkK0Af.js"
   },
   "/_nuxt/BUjjeZUN.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"5f24-Ln2zakJZLthC27QgVywVEdG18Ng\"",
-    "mtime": "2026-08-04T15:39:49.003Z",
+    "mtime": "2026-08-04T16:01:40.240Z",
     "size": 24356,
     "path": "../public/_nuxt/BUjjeZUN.js"
   },
   "/_nuxt/BZL_hdji.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"c87-H57ZKuZNOb/WezLwxY4yQQR+g9Q\"",
-    "mtime": "2026-08-04T15:39:49.003Z",
+    "mtime": "2026-08-04T16:01:40.240Z",
     "size": 3207,
     "path": "../public/_nuxt/BZL_hdji.js"
   },
   "/_nuxt/Baksj_x2.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1747-hN/aSkNaNS8l52fS9zt6YYA0hz4\"",
-    "mtime": "2026-08-04T15:39:49.004Z",
+    "mtime": "2026-08-04T16:01:40.240Z",
     "size": 5959,
     "path": "../public/_nuxt/Baksj_x2.js"
   },
   "/_nuxt/BeHZwg2h.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"186c-J9ZxfT8l7lBxSiCcp6n6sSPTorQ\"",
-    "mtime": "2026-08-04T15:39:49.004Z",
+    "mtime": "2026-08-04T16:01:40.240Z",
     "size": 6252,
     "path": "../public/_nuxt/BeHZwg2h.js"
-  },
-  "/_nuxt/BokIkWiU.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"adff-mwPijVEooZV25E8CAp1Mx04fZPs\"",
-    "mtime": "2026-08-04T15:39:49.004Z",
-    "size": 44543,
-    "path": "../public/_nuxt/BokIkWiU.js"
   },
   "/_nuxt/BiRHIOlc.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"8dbb-ZR4fiX7WjMAkp94mLLgw3w+gCOE\"",
-    "mtime": "2026-08-04T15:39:49.004Z",
+    "mtime": "2026-08-04T16:01:40.241Z",
     "size": 36283,
     "path": "../public/_nuxt/BiRHIOlc.js"
+  },
+  "/_nuxt/BokIkWiU.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"adff-mwPijVEooZV25E8CAp1Mx04fZPs\"",
+    "mtime": "2026-08-04T16:01:40.242Z",
+    "size": 44543,
+    "path": "../public/_nuxt/BokIkWiU.js"
   },
   "/_nuxt/BOF6v8rb.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"643fd-4eAFzvIrVx6RBdakASdECPaZDE0\"",
-    "mtime": "2026-08-04T15:39:49.002Z",
+    "mtime": "2026-08-04T16:01:40.240Z",
     "size": 410621,
     "path": "../public/_nuxt/BOF6v8rb.js"
   },
   "/_nuxt/8LJKx1rz.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"146578-OrlAxCF9kfkNgPdgI3FfOZx1gtQ\"",
-    "mtime": "2026-08-04T15:39:49.003Z",
+    "mtime": "2026-08-04T16:01:40.240Z",
     "size": 1336696,
     "path": "../public/_nuxt/8LJKx1rz.js"
   },
   "/_nuxt/Bq6mvUZl.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"2e6-s2AgatswYqwPcDnAUlhR5trU0b0\"",
-    "mtime": "2026-08-04T15:39:49.004Z",
+    "mtime": "2026-08-04T16:01:40.241Z",
     "size": 742,
     "path": "../public/_nuxt/Bq6mvUZl.js"
   },
   "/_nuxt/C-9S4HFl.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"4f3b-LiVzYoBDkt2P+5jxYWVS3Bx5eJI\"",
-    "mtime": "2026-08-04T15:39:49.004Z",
+    "mtime": "2026-08-04T16:01:40.241Z",
     "size": 20283,
     "path": "../public/_nuxt/C-9S4HFl.js"
   },
   "/_nuxt/C4Sdh6yL.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"5ff2-f4vTi+HR1Pej53qOpSTifGhzh9A\"",
-    "mtime": "2026-08-04T15:39:49.005Z",
+    "mtime": "2026-08-04T16:01:40.241Z",
     "size": 24562,
     "path": "../public/_nuxt/C4Sdh6yL.js"
   },
   "/_nuxt/C96cJ_XF.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"864-h7TsMtyjhCac2+3DC+I/OBmpxus\"",
-    "mtime": "2026-08-04T15:39:49.004Z",
+    "mtime": "2026-08-04T16:01:40.241Z",
     "size": 2148,
     "path": "../public/_nuxt/C96cJ_XF.js"
   },
   "/_nuxt/CC6Dg-HR.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"22d-zLbmxoIJ1yzqffHXVF5n7e4Vse4\"",
-    "mtime": "2026-08-04T15:39:49.004Z",
+    "mtime": "2026-08-04T16:01:40.241Z",
     "size": 557,
     "path": "../public/_nuxt/CC6Dg-HR.js"
   },
   "/_nuxt/CCoEJVFf.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"3460-J9kUhWSKPjT8qfElnso9YplzDKc\"",
-    "mtime": "2026-08-04T15:39:49.004Z",
+    "mtime": "2026-08-04T16:01:40.242Z",
     "size": 13408,
     "path": "../public/_nuxt/CCoEJVFf.js"
   },
   "/_nuxt/CP72-Uj_.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"41d-9Y1zrMxLBnJZZHQVmG5SsKpKSc0\"",
-    "mtime": "2026-08-04T15:39:49.005Z",
+    "mtime": "2026-08-04T16:01:40.242Z",
     "size": 1053,
     "path": "../public/_nuxt/CP72-Uj_.js"
   },
   "/_nuxt/CX7l81Lp.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1bfe-NEZ4c1oN+hBXUZDblFFzwgPX9po\"",
-    "mtime": "2026-08-04T15:39:49.005Z",
+    "mtime": "2026-08-04T16:01:40.242Z",
     "size": 7166,
     "path": "../public/_nuxt/CX7l81Lp.js"
+  },
+  "/_nuxt/CIWLdEfe.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1e5a4-m4wXZcIen/J6kmxcqOObdoI1Vrk\"",
+    "mtime": "2026-08-04T16:01:40.242Z",
+    "size": 124324,
+    "path": "../public/_nuxt/CIWLdEfe.js"
   },
   "/_nuxt/CZmBEfY8.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1627-yVa57/21tEItLO/35++b29YJuEg\"",
-    "mtime": "2026-08-04T15:39:49.005Z",
+    "mtime": "2026-08-04T16:01:40.242Z",
     "size": 5671,
     "path": "../public/_nuxt/CZmBEfY8.js"
   },
   "/_nuxt/CdheuY_a.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"355-vnRvGRfmtW+Q7MnEhtGzH4mZ8/E\"",
-    "mtime": "2026-08-04T15:39:49.005Z",
+    "mtime": "2026-08-04T16:01:40.242Z",
     "size": 853,
     "path": "../public/_nuxt/CdheuY_a.js"
   },
   "/_nuxt/CgdsjPvq.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"4bc-E5EA4W1A2IR2okM8dDI2RaFOqzU\"",
-    "mtime": "2026-08-04T15:39:49.005Z",
+    "mtime": "2026-08-04T16:01:40.242Z",
     "size": 1212,
     "path": "../public/_nuxt/CgdsjPvq.js"
-  },
-  "/_nuxt/CIWLdEfe.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1e5a4-m4wXZcIen/J6kmxcqOObdoI1Vrk\"",
-    "mtime": "2026-08-04T15:39:49.005Z",
-    "size": 124324,
-    "path": "../public/_nuxt/CIWLdEfe.js"
-  },
-  "/_nuxt/CoYRKfuD.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"35-VNA0DjxaxUUvg8NcaUbo2abQ+oU\"",
-    "mtime": "2026-08-04T15:39:49.005Z",
-    "size": 53,
-    "path": "../public/_nuxt/CoYRKfuD.js"
   },
   "/_nuxt/CjoFa3Ch.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"24e6-QKCNrjBirvyHs0Ti8hOrhjx2vpM\"",
-    "mtime": "2026-08-04T15:39:49.005Z",
+    "mtime": "2026-08-04T16:01:40.242Z",
     "size": 9446,
     "path": "../public/_nuxt/CjoFa3Ch.js"
   },
-  "/_nuxt/Cp6lI_-q.js": {
+  "/_nuxt/CoYRKfuD.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"d96-WuwaGfLsqTjOWFTQvcIKdtLzu/Y\"",
-    "mtime": "2026-08-04T15:39:49.005Z",
-    "size": 3478,
-    "path": "../public/_nuxt/Cp6lI_-q.js"
+    "etag": "\"35-VNA0DjxaxUUvg8NcaUbo2abQ+oU\"",
+    "mtime": "2026-08-04T16:01:40.242Z",
+    "size": 53,
+    "path": "../public/_nuxt/CoYRKfuD.js"
   },
   "/_nuxt/CoachHelpPanel.DMO5oait.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"71b4-6ApqM5eiIelHMjNoIz0hWUFcYsY\"",
-    "mtime": "2026-08-04T15:39:49.005Z",
+    "mtime": "2026-08-04T16:01:40.243Z",
     "size": 29108,
     "path": "../public/_nuxt/CoachHelpPanel.DMO5oait.css"
   },
-  "/_nuxt/CuBPxBD-.js": {
+  "/_nuxt/Cp6lI_-q.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"40-3m8/MkwLh1eyRcbpL51ZfdaCO3Y\"",
-    "mtime": "2026-08-04T15:39:49.005Z",
-    "size": 64,
-    "path": "../public/_nuxt/CuBPxBD-.js"
+    "etag": "\"d96-WuwaGfLsqTjOWFTQvcIKdtLzu/Y\"",
+    "mtime": "2026-08-04T16:01:40.243Z",
+    "size": 3478,
+    "path": "../public/_nuxt/Cp6lI_-q.js"
   },
   "/_nuxt/CoachPicker.DW4dO-4s.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"a28f-CnWZR4BlgxneAJRJGXMiJtQDZ/w\"",
-    "mtime": "2026-08-04T15:39:49.005Z",
+    "mtime": "2026-08-04T16:01:40.243Z",
     "size": 41615,
     "path": "../public/_nuxt/CoachPicker.DW4dO-4s.css"
+  },
+  "/_nuxt/CuBPxBD-.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"40-3m8/MkwLh1eyRcbpL51ZfdaCO3Y\"",
+    "mtime": "2026-08-04T16:01:40.243Z",
+    "size": 64,
+    "path": "../public/_nuxt/CuBPxBD-.js"
   },
   "/_nuxt/D-_9wxc-.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"317-rJ6DVnReRrMh22CIFkRiW/tvivQ\"",
-    "mtime": "2026-08-04T15:39:49.006Z",
+    "mtime": "2026-08-04T16:01:40.243Z",
     "size": 791,
     "path": "../public/_nuxt/D-_9wxc-.js"
-  },
-  "/_nuxt/D0p9DBqb.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1f89-PDDe+1ieeBGZgBMqfaTFQ5lJfmU\"",
-    "mtime": "2026-08-04T15:39:49.006Z",
-    "size": 8073,
-    "path": "../public/_nuxt/D0p9DBqb.js"
   },
   "/_nuxt/D5ajyx5d.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"fb-ibli1W65NDVJVKp1vR0IjZUo8/k\"",
-    "mtime": "2026-08-04T15:39:49.006Z",
+    "mtime": "2026-08-04T16:01:40.243Z",
     "size": 251,
     "path": "../public/_nuxt/D5ajyx5d.js"
+  },
+  "/_nuxt/D0p9DBqb.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1f89-PDDe+1ieeBGZgBMqfaTFQ5lJfmU\"",
+    "mtime": "2026-08-04T16:01:40.243Z",
+    "size": 8073,
+    "path": "../public/_nuxt/D0p9DBqb.js"
   },
   "/_nuxt/DLSeUJ7f.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1f96-T2hneTSmBZ5jyY9VCLNmsIcZEbs\"",
-    "mtime": "2026-08-04T15:39:49.006Z",
+    "mtime": "2026-08-04T16:01:40.243Z",
     "size": 8086,
     "path": "../public/_nuxt/DLSeUJ7f.js"
   },
   "/_nuxt/DXEQVQnt.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"31151-TyUyRNm9rR2JDwpyAxcruTmmr6A\"",
-    "mtime": "2026-08-04T15:39:49.006Z",
+    "mtime": "2026-08-04T16:01:40.244Z",
     "size": 201041,
     "path": "../public/_nuxt/DXEQVQnt.js"
   },
   "/_nuxt/DXMz2Rmn.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"4c651-eBgXUtY+B1ROgCSrqt5hf7W5/ds\"",
-    "mtime": "2026-08-04T15:39:49.007Z",
+    "mtime": "2026-08-04T16:01:40.245Z",
     "size": 312913,
     "path": "../public/_nuxt/DXMz2Rmn.js"
   },
   "/_nuxt/Df_c8GGD.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"3dd5-IWP6n0BwFTmvmiCeTw2g283baMA\"",
-    "mtime": "2026-08-04T15:39:49.006Z",
+    "mtime": "2026-08-04T16:01:40.243Z",
     "size": 15829,
     "path": "../public/_nuxt/Df_c8GGD.js"
   },
   "/_nuxt/DhcfMuiu.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1d15-ZwrDa9x06zKMHMO1kMlIshh49ZE\"",
-    "mtime": "2026-08-04T15:39:49.006Z",
+    "mtime": "2026-08-04T16:01:40.244Z",
     "size": 7445,
     "path": "../public/_nuxt/DhcfMuiu.js"
   },
   "/_nuxt/Dj4CfABu.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"6345-RnYNDiaKvisSouzs1GSYqwk0FRo\"",
-    "mtime": "2026-08-04T15:39:49.007Z",
+    "mtime": "2026-08-04T16:01:40.244Z",
     "size": 25413,
     "path": "../public/_nuxt/Dj4CfABu.js"
-  },
-  "/_nuxt/DmFgbOYw.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"160-0VqecBb9fIc05ni3FwOqSO105Bs\"",
-    "mtime": "2026-08-04T15:39:49.007Z",
-    "size": 352,
-    "path": "../public/_nuxt/DmFgbOYw.js"
   },
   "/_nuxt/DlAUqK2U.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"5b-eFCz/UrraTh721pgAl0VxBNR1es\"",
-    "mtime": "2026-08-04T15:39:49.007Z",
+    "mtime": "2026-08-04T16:01:40.244Z",
     "size": 91,
     "path": "../public/_nuxt/DlAUqK2U.js"
+  },
+  "/_nuxt/DmFgbOYw.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"160-0VqecBb9fIc05ni3FwOqSO105Bs\"",
+    "mtime": "2026-08-04T16:01:40.244Z",
+    "size": 352,
+    "path": "../public/_nuxt/DmFgbOYw.js"
   },
   "/_nuxt/DmJGUz2F.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"ecf-FV6hG3u7+WWLor3tZQqGPoHCTBU\"",
-    "mtime": "2026-08-04T15:39:49.007Z",
+    "mtime": "2026-08-04T16:01:40.244Z",
     "size": 3791,
     "path": "../public/_nuxt/DmJGUz2F.js"
   },
   "/_nuxt/Dvzj1l4J.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"24a-0bZ04YMXB0BMF3s0r2qF+cJXld0\"",
-    "mtime": "2026-08-04T15:39:49.007Z",
+    "mtime": "2026-08-04T16:01:40.244Z",
     "size": 586,
     "path": "../public/_nuxt/Dvzj1l4J.js"
   },
   "/_nuxt/DxPFk7gT.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"39cb-tYmF3STL2oZZAsNLRPlk1V0OmCU\"",
-    "mtime": "2026-08-04T15:39:49.007Z",
+    "mtime": "2026-08-04T16:01:40.244Z",
     "size": 14795,
     "path": "../public/_nuxt/DxPFk7gT.js"
   },
   "/_nuxt/K_J0FiuI.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"598c-kBjjEmQKJScm1UES/w5UebeL6+M\"",
-    "mtime": "2026-08-04T15:39:49.007Z",
+    "mtime": "2026-08-04T16:01:40.245Z",
     "size": 22924,
     "path": "../public/_nuxt/K_J0FiuI.js"
   },
   "/_nuxt/KfcMx7BK.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"375c-w+Wz8j99PDQXRJJ69MuBMGdZmVc\"",
-    "mtime": "2026-08-04T15:39:49.007Z",
+    "mtime": "2026-08-04T16:01:40.245Z",
     "size": 14172,
     "path": "../public/_nuxt/KfcMx7BK.js"
-  },
-  "/_nuxt/LearningSubnav.libvFC1v.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"52f-Xz9M9uqiNKTJBt+pdS3q4kJ1FKY\"",
-    "mtime": "2026-08-04T15:39:49.008Z",
-    "size": 1327,
-    "path": "../public/_nuxt/LearningSubnav.libvFC1v.css"
   },
   "/_nuxt/LearnerSpace.CmiZYlvy.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"11380-LgkbVopvaGnrx9GHSoAbnHUu20c\"",
-    "mtime": "2026-08-04T15:39:49.008Z",
+    "mtime": "2026-08-04T16:01:40.246Z",
     "size": 70528,
     "path": "../public/_nuxt/LearnerSpace.CmiZYlvy.css"
+  },
+  "/_nuxt/LearningSubnav.libvFC1v.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"52f-Xz9M9uqiNKTJBt+pdS3q4kJ1FKY\"",
+    "mtime": "2026-08-04T16:01:40.245Z",
+    "size": 1327,
+    "path": "../public/_nuxt/LearningSubnav.libvFC1v.css"
   },
   "/_nuxt/RtrfQ5UI.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"2d60-6+XbZkOALHiX68ArQdnBlL/oYTg\"",
-    "mtime": "2026-08-04T15:39:49.008Z",
+    "mtime": "2026-08-04T16:01:40.245Z",
     "size": 11616,
     "path": "../public/_nuxt/RtrfQ5UI.js"
-  },
-  "/_nuxt/Nn_nskXM.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"28fc6-4uHJtHEZrVyM5IHjb8BeuG/ciL4\"",
-    "mtime": "2026-08-04T15:39:49.008Z",
-    "size": 167878,
-    "path": "../public/_nuxt/Nn_nskXM.js"
   },
   "/_nuxt/S75No6Ug.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"b654-hGvPm94bmDAYWWd7mDlRvqaMMHU\"",
-    "mtime": "2026-08-04T15:39:49.008Z",
+    "mtime": "2026-08-04T16:01:40.246Z",
     "size": 46676,
     "path": "../public/_nuxt/S75No6Ug.js"
   },
   "/_nuxt/VaSPOPhr.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"7032-uZQ20bhcE4YqMv2bJ83N97r01ek\"",
-    "mtime": "2026-08-04T15:39:49.008Z",
+    "mtime": "2026-08-04T16:01:40.246Z",
     "size": 28722,
     "path": "../public/_nuxt/VaSPOPhr.js"
+  },
+  "/_nuxt/Nn_nskXM.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"28fc6-4uHJtHEZrVyM5IHjb8BeuG/ciL4\"",
+    "mtime": "2026-08-04T16:01:40.246Z",
+    "size": 167878,
+    "path": "../public/_nuxt/Nn_nskXM.js"
   },
   "/_nuxt/WizardChallengeWorkspace.CqZbBwaW.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"70e8-7g4LZtmWMOPf3ryVlqRWJILq1Po\"",
-    "mtime": "2026-08-04T15:39:49.009Z",
+    "mtime": "2026-08-04T16:01:40.246Z",
     "size": 28904,
     "path": "../public/_nuxt/WizardChallengeWorkspace.CqZbBwaW.css"
   },
   "/_nuxt/Yf1sIW8d.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1c3-LVe9aJn5NPXYdCawnvv+5s8hcgo\"",
-    "mtime": "2026-08-04T15:39:49.008Z",
+    "mtime": "2026-08-04T16:01:40.246Z",
     "size": 451,
     "path": "../public/_nuxt/Yf1sIW8d.js"
   },
   "/_nuxt/Z-nF04Bu.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"2d31-t4xTuFxcfnJwibzwnMlw7lRPj80\"",
-    "mtime": "2026-08-04T15:39:49.008Z",
+    "mtime": "2026-08-04T16:01:40.246Z",
     "size": 11569,
     "path": "../public/_nuxt/Z-nF04Bu.js"
   },
   "/_nuxt/ZrBg3W11.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"b5f-wlshUgtoEorvnPQ8nir4mcnBK2A\"",
-    "mtime": "2026-08-04T15:39:49.009Z",
+    "mtime": "2026-08-04T16:01:40.246Z",
     "size": 2911,
     "path": "../public/_nuxt/ZrBg3W11.js"
   },
   "/_nuxt/_1HFVgMZ.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"3d72-Mhu5uDbLyGxkZBu/G6JnqqQLZrI\"",
-    "mtime": "2026-08-04T15:39:49.009Z",
+    "mtime": "2026-08-04T16:01:40.246Z",
     "size": 15730,
     "path": "../public/_nuxt/_1HFVgMZ.js"
   },
   "/_nuxt/_parcours_.BP-h7iCq.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"18bc-CbpqTeo+ryfD8pdcWNN8EuBGUEs\"",
-    "mtime": "2026-08-04T15:39:49.009Z",
+    "mtime": "2026-08-04T16:01:40.247Z",
     "size": 6332,
     "path": "../public/_nuxt/_parcours_.BP-h7iCq.css"
   },
   "/_nuxt/_temps_.DeEijNS2.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1e6c-39KY4P8jmuBExQX0OS5wSBQLXZ0\"",
-    "mtime": "2026-08-04T15:39:49.009Z",
+    "mtime": "2026-08-04T16:01:40.247Z",
     "size": 7788,
     "path": "../public/_nuxt/_temps_.DeEijNS2.css"
   },
   "/_nuxt/a5l4Eygb.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"428c-Ot/UWwe3xutMeRt7B3UmZ9KIztY\"",
-    "mtime": "2026-08-04T15:39:49.009Z",
+    "mtime": "2026-08-04T16:01:40.247Z",
     "size": 17036,
     "path": "../public/_nuxt/a5l4Eygb.js"
   },
   "/_nuxt/admins.dzDkGKEv.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"919-IcW5l1f9k07twX9+HuwUcwEj4n0\"",
-    "mtime": "2026-08-04T15:39:49.009Z",
+    "mtime": "2026-08-04T16:01:40.247Z",
     "size": 2329,
     "path": "../public/_nuxt/admins.dzDkGKEv.css"
   },
   "/_nuxt/apprendre.DuEHszbF.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"2d9f-XhQqrpCGTsfjFtFFTakbV4w51ig\"",
-    "mtime": "2026-08-04T15:39:49.009Z",
+    "mtime": "2026-08-04T16:01:40.247Z",
     "size": 11679,
     "path": "../public/_nuxt/apprendre.DuEHszbF.css"
   },
   "/_nuxt/caracteres.BcNkZVio.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"5ed6-eQ6eNeASOetd0aeTsNNXynTuNLo\"",
-    "mtime": "2026-08-04T15:39:49.010Z",
+    "mtime": "2026-08-04T16:01:40.248Z",
     "size": 24278,
     "path": "../public/_nuxt/caracteres.BcNkZVio.css"
   },
   "/_nuxt/challenges.BkmQCB6w.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"2be1-o0mDUgMmIOIhdTdukSrGxZ9id3k\"",
-    "mtime": "2026-08-04T15:39:49.010Z",
+    "mtime": "2026-08-04T16:01:40.248Z",
     "size": 11233,
     "path": "../public/_nuxt/challenges.BkmQCB6w.css"
-  },
-  "/_nuxt/coaches.BaDV-bQP.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"2220-x9RcJK5uh5+VaoyG5f2pdZ3z28E\"",
-    "mtime": "2026-08-04T15:39:49.010Z",
-    "size": 8736,
-    "path": "../public/_nuxt/coaches.BaDV-bQP.css"
   },
   "/_nuxt/charts.Cx5h-dJ3.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"d7cf-B0batpc3ChDKY8DQZERcYOpigcA\"",
-    "mtime": "2026-08-04T15:39:49.010Z",
+    "mtime": "2026-08-04T16:01:40.249Z",
     "size": 55247,
     "path": "../public/_nuxt/charts.Cx5h-dJ3.css"
+  },
+  "/_nuxt/coaches.BaDV-bQP.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"2220-x9RcJK5uh5+VaoyG5f2pdZ3z28E\"",
+    "mtime": "2026-08-04T16:01:40.248Z",
+    "size": 8736,
+    "path": "../public/_nuxt/coaches.BaDV-bQP.css"
   },
   "/_nuxt/consulter.BZzAvpPP.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"23c9-vXSgLeFHKDkDNl5IsGf9YpG9fnw\"",
-    "mtime": "2026-08-04T15:39:49.010Z",
+    "mtime": "2026-08-04T16:01:40.249Z",
     "size": 9161,
     "path": "../public/_nuxt/consulter.BZzAvpPP.css"
   },
   "/_nuxt/contact.CEAlz-zn.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"8f4-ykOUqzOkUVv5IJI3yhju5VrDLdo\"",
-    "mtime": "2026-08-04T15:39:49.010Z",
+    "mtime": "2026-08-04T16:01:40.249Z",
     "size": 2292,
     "path": "../public/_nuxt/contact.CEAlz-zn.css"
   },
   "/_nuxt/default.BZGlWQec.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"4208-37NGK+sKDF/acYjf1n+HrGCOlK4\"",
-    "mtime": "2026-08-04T15:39:49.010Z",
+    "mtime": "2026-08-04T16:01:40.249Z",
     "size": 16904,
     "path": "../public/_nuxt/default.BZGlWQec.css"
-  },
-  "/_nuxt/error-404.C3kT2QX-.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"97e-Xk26Nv4oQLpK3PtofolSggS9Z1M\"",
-    "mtime": "2026-08-04T15:39:49.010Z",
-    "size": 2430,
-    "path": "../public/_nuxt/error-404.C3kT2QX-.css"
   },
   "/_nuxt/entry.CRRjxRjR.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"4c10-SAOgeK1r6diHaEiecX8rmBR1GI8\"",
-    "mtime": "2026-08-04T15:39:49.010Z",
+    "mtime": "2026-08-04T16:01:40.250Z",
     "size": 19472,
     "path": "../public/_nuxt/entry.CRRjxRjR.css"
+  },
+  "/_nuxt/error-404.C3kT2QX-.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"97e-Xk26Nv4oQLpK3PtofolSggS9Z1M\"",
+    "mtime": "2026-08-04T16:01:40.249Z",
+    "size": 2430,
+    "path": "../public/_nuxt/error-404.C3kT2QX-.css"
   },
   "/_nuxt/error-500.BW0Y54Of.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"773-NSoEX19gPmM2NozVKWotHuvxtho\"",
-    "mtime": "2026-08-04T15:39:49.010Z",
+    "mtime": "2026-08-04T16:01:40.249Z",
     "size": 1907,
     "path": "../public/_nuxt/error-500.BW0Y54Of.css"
   },
   "/_nuxt/errors.BjGnDVcv.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1362-+l8lZeseXcg1LBBZAI84EJMTHAg\"",
-    "mtime": "2026-08-04T15:39:49.011Z",
+    "mtime": "2026-08-04T16:01:40.249Z",
     "size": 4962,
     "path": "../public/_nuxt/errors.BjGnDVcv.css"
-  },
-  "/_nuxt/feedbacks.2l4c_9on.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"19b7-IeFg4/GX0231o85Ya2XpgZqJHFg\"",
-    "mtime": "2026-08-04T15:39:49.011Z",
-    "size": 6583,
-    "path": "../public/_nuxt/feedbacks.2l4c_9on.css"
   },
   "/_nuxt/g6ucs01C.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"160-gtb4LsLA85Vn+6lu9juD+DKhlTM\"",
-    "mtime": "2026-08-04T15:39:49.011Z",
+    "mtime": "2026-08-04T16:01:40.249Z",
     "size": 352,
     "path": "../public/_nuxt/g6ucs01C.js"
+  },
+  "/_nuxt/feedbacks.2l4c_9on.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"19b7-IeFg4/GX0231o85Ya2XpgZqJHFg\"",
+    "mtime": "2026-08-04T16:01:40.250Z",
+    "size": 6583,
+    "path": "../public/_nuxt/feedbacks.2l4c_9on.css"
   },
   "/_nuxt/help-verification.DODWt3zK.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1e41-GtHymoSAF4psafTipM39PN7Xytg\"",
-    "mtime": "2026-08-04T15:39:49.011Z",
+    "mtime": "2026-08-04T16:01:40.250Z",
     "size": 7745,
     "path": "../public/_nuxt/help-verification.DODWt3zK.css"
   },
   "/_nuxt/helps.DZJ6t0nO.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"2207-jtfvJZDC3TYKKO8XFRnFINfGF8k\"",
-    "mtime": "2026-08-04T15:39:49.011Z",
+    "mtime": "2026-08-04T16:01:40.250Z",
     "size": 8711,
     "path": "../public/_nuxt/helps.DZJ6t0nO.css"
-  },
-  "/_nuxt/gJpU8yXm.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"21cee-qnjeLOkW8nFCOC5Q05gF4pUz6E4\"",
-    "mtime": "2026-08-04T15:39:49.011Z",
-    "size": 138478,
-    "path": "../public/_nuxt/gJpU8yXm.js"
   },
   "/_nuxt/hsvi8lhy.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"e48-n4N9gr5zdj6RZqoq60dBdWNYIbU\"",
-    "mtime": "2026-08-04T15:39:49.011Z",
+    "mtime": "2026-08-04T16:01:40.250Z",
     "size": 3656,
     "path": "../public/_nuxt/hsvi8lhy.js"
+  },
+  "/_nuxt/gJpU8yXm.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"21cee-qnjeLOkW8nFCOC5Q05gF4pUz6E4\"",
+    "mtime": "2026-08-04T16:01:40.250Z",
+    "size": 138478,
+    "path": "../public/_nuxt/gJpU8yXm.js"
   },
   "/_nuxt/index.BMdnpm1M.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"f19-lwnkK424zogpMkzb9fLmT+5G7ZU\"",
-    "mtime": "2026-08-04T15:39:49.011Z",
+    "mtime": "2026-08-04T16:01:40.250Z",
     "size": 3865,
     "path": "../public/_nuxt/index.BMdnpm1M.css"
   },
   "/_nuxt/index.BzhQLiPK.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"f6b-acZH3aIqv4bsIUpsO/6S7qZgmDE\"",
-    "mtime": "2026-08-04T15:39:49.011Z",
+    "mtime": "2026-08-04T16:01:40.250Z",
     "size": 3947,
     "path": "../public/_nuxt/index.BzhQLiPK.css"
   },
   "/_nuxt/index.D579FHEw.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"488d-eb885muPMUoohkLI9Q5AZBeConM\"",
-    "mtime": "2026-08-04T15:39:49.011Z",
+    "mtime": "2026-08-04T16:01:40.251Z",
     "size": 18573,
     "path": "../public/_nuxt/index.D579FHEw.css"
   },
   "/_nuxt/jkXCFtNo.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"3441-ZzaKx1XlBcblXv2ytqSjyyeUuVE\"",
-    "mtime": "2026-08-04T15:39:49.011Z",
+    "mtime": "2026-08-04T16:01:40.251Z",
     "size": 13377,
     "path": "../public/_nuxt/jkXCFtNo.js"
+  },
+  "/_nuxt/kVEkOw-m.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"8ef2-AZfr4kFmfqor5KcztdLqRcDm3uo\"",
+    "mtime": "2026-08-04T16:01:40.251Z",
+    "size": 36594,
+    "path": "../public/_nuxt/kVEkOw-m.js"
   },
   "/_nuxt/literary-corpus.B2DRjof-.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1d49-4rT2LXp/VIU3wxeTP6DJcMLavx4\"",
-    "mtime": "2026-08-04T15:39:49.012Z",
+    "mtime": "2026-08-04T16:01:40.251Z",
     "size": 7497,
     "path": "../public/_nuxt/literary-corpus.B2DRjof-.css"
   },
   "/_nuxt/lqjz7Vdz.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"fefa-6fxeBrJ6ky8/9IK9V10VKAurFh8\"",
-    "mtime": "2026-08-04T15:39:49.012Z",
+    "mtime": "2026-08-04T16:01:40.251Z",
     "size": 65274,
     "path": "../public/_nuxt/lqjz7Vdz.js"
-  },
-  "/_nuxt/kVEkOw-m.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"8ef2-AZfr4kFmfqor5KcztdLqRcDm3uo\"",
-    "mtime": "2026-08-04T15:39:49.012Z",
-    "size": 36594,
-    "path": "../public/_nuxt/kVEkOw-m.js"
   },
   "/_nuxt/main.CWZgKaah.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"a92d-rEf8KpffyLkDsguWUtK0GEVXAbQ\"",
-    "mtime": "2026-08-04T15:39:49.012Z",
+    "mtime": "2026-08-04T16:01:40.251Z",
     "size": 43309,
     "path": "../public/_nuxt/main.CWZgKaah.css"
   },
   "/_nuxt/mon-compte.BfHrW1fD.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"81f-qRXMInFEyvge+C3tRZgg5uCaXx4\"",
-    "mtime": "2026-08-04T15:39:49.012Z",
+    "mtime": "2026-08-04T16:01:40.251Z",
     "size": 2079,
     "path": "../public/_nuxt/mon-compte.BfHrW1fD.css"
   },
   "/_nuxt/mptZLsEg.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"55f-CNDZcDuGycMwvF3O3c/dSXMW5nc\"",
-    "mtime": "2026-08-04T15:39:49.012Z",
+    "mtime": "2026-08-04T16:01:40.251Z",
     "size": 1375,
     "path": "../public/_nuxt/mptZLsEg.js"
+  },
+  "/_nuxt/ni5V7eBP.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"5e479-fy3ECTv/PY3OISPJUgRQRi3jgOE\"",
+    "mtime": "2026-08-04T16:01:40.253Z",
+    "size": 386169,
+    "path": "../public/_nuxt/ni5V7eBP.js"
   },
   "/_nuxt/o8IBrv2u.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"3da1-1TIQ+mABaX2r0hF5y6No6uL/c+s\"",
-    "mtime": "2026-08-04T15:39:49.012Z",
+    "mtime": "2026-08-04T16:01:40.252Z",
     "size": 15777,
     "path": "../public/_nuxt/o8IBrv2u.js"
   },
   "/_nuxt/signin.CF2VGsJc.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"100e-jDykrebphTgAAdflfwX9MSv7ams\"",
-    "mtime": "2026-08-04T15:39:49.013Z",
+    "mtime": "2026-08-04T16:01:40.252Z",
     "size": 4110,
     "path": "../public/_nuxt/signin.CF2VGsJc.css"
   },
   "/_nuxt/tests.LWRbe2kp.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"39e7-BTQZpkKx07gIFERalmVUK0MvJ74\"",
-    "mtime": "2026-08-04T15:39:49.013Z",
+    "mtime": "2026-08-04T16:01:40.252Z",
     "size": 14823,
     "path": "../public/_nuxt/tests.LWRbe2kp.css"
   },
   "/_nuxt/url.BdbsAmZd.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"4ae0-/x/hVNn0fkmMm0aPL0YmL9WFgno\"",
-    "mtime": "2026-08-04T15:39:49.013Z",
+    "mtime": "2026-08-04T16:01:40.252Z",
     "size": 19168,
     "path": "../public/_nuxt/url.BdbsAmZd.css"
   },
   "/_nuxt/users.D0_n7LnF.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"a87-gdpl2VnXOVPpa/zExdiw5k6pK2I\"",
-    "mtime": "2026-08-04T15:39:49.013Z",
+    "mtime": "2026-08-04T16:01:40.252Z",
     "size": 2695,
     "path": "../public/_nuxt/users.D0_n7LnF.css"
-  },
-  "/_nuxt/ni5V7eBP.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"5e479-fy3ECTv/PY3OISPJUgRQRi3jgOE\"",
-    "mtime": "2026-08-04T15:39:49.013Z",
-    "size": 386169,
-    "path": "../public/_nuxt/ni5V7eBP.js"
   },
   "/coach-media/avatars-cartoon/Defi-de-conjugaison.pdf": {
     "type": "application/pdf",
     "etag": "\"1971-GvyCFxsExS5nnjCoRJihmJWjW1Y\"",
-    "mtime": "2026-08-04T15:39:49.065Z",
+    "mtime": "2026-08-04T16:01:40.302Z",
     "size": 6513,
     "path": "../public/coach-media/avatars-cartoon/Defi-de-conjugaison.pdf"
   },
   "/coach-media/avatars-cartoon/4f7a8330-834e-44e0-ad17-397d1e2a5891.png": {
     "type": "image/png",
     "etag": "\"15dca6-tSDm1naznyFNYIkdupEaTCi//zk\"",
-    "mtime": "2026-08-04T15:39:49.059Z",
+    "mtime": "2026-08-04T16:01:40.297Z",
     "size": 1432742,
     "path": "../public/coach-media/avatars-cartoon/4f7a8330-834e-44e0-ad17-397d1e2a5891.png"
-  },
-  "/coach-media/people/200.webp": {
-    "type": "image/webp",
-    "etag": "\"1d696-kiyalxZWWq76I5xPP32p65sny50\"",
-    "mtime": "2026-08-04T15:39:49.048Z",
-    "size": 120470,
-    "path": "../public/coach-media/people/200.webp"
   },
   "/coach-media/avatars-cartoon/42f6c648-e545-4d49-8f0b-518fb3a2d186.png": {
     "type": "image/png",
     "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
-    "mtime": "2026-08-04T15:39:49.061Z",
+    "mtime": "2026-08-04T16:01:40.296Z",
     "size": 1500823,
     "path": "../public/coach-media/avatars-cartoon/42f6c648-e545-4d49-8f0b-518fb3a2d186.png"
   },
   "/coach-media/avatars-cartoon/732fe1f9-b633-4261-bdf8-542b99b2a98c.png": {
     "type": "image/png",
     "etag": "\"172bf9-bwNVo0D3pGzvGYiYtpjtpXMEyow\"",
-    "mtime": "2026-08-04T15:39:49.061Z",
+    "mtime": "2026-08-04T16:01:40.311Z",
     "size": 1518585,
     "path": "../public/coach-media/avatars-cartoon/732fe1f9-b633-4261-bdf8-542b99b2a98c.png"
   },
   "/coach-media/avatars-cartoon/8f23428e-ed2c-4938-9186-44447f1efcbe.png": {
     "type": "image/png",
     "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
-    "mtime": "2026-08-04T15:39:49.061Z",
+    "mtime": "2026-08-04T16:01:40.305Z",
     "size": 1562456,
     "path": "../public/coach-media/avatars-cartoon/8f23428e-ed2c-4938-9186-44447f1efcbe.png"
   },
   "/coach-media/avatars-cartoon/db266268-397e-4920-93bb-f134a85cd8b7.png": {
     "type": "image/png",
     "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
-    "mtime": "2026-08-04T15:39:49.068Z",
+    "mtime": "2026-08-04T16:01:40.305Z",
     "size": 1416623,
     "path": "../public/coach-media/avatars-cartoon/db266268-397e-4920-93bb-f134a85cd8b7.png"
+  },
+  "/coach-media/avatars/amel.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"bdc2-XpfseHXprhgQ2kOwJnuzEG4Szrk\"",
+    "mtime": "2026-08-04T16:01:40.282Z",
+    "size": 48578,
+    "path": "../public/coach-media/avatars/amel.jpg"
   },
   "/coach-media/avatars-cartoon/19f352b5-75f2-449a-b441-7b8203da9e6f.png": {
     "type": "image/png",
     "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
-    "mtime": "2026-08-04T15:39:49.048Z",
+    "mtime": "2026-08-04T16:01:40.291Z",
     "size": 1696814,
     "path": "../public/coach-media/avatars-cartoon/19f352b5-75f2-449a-b441-7b8203da9e6f.png"
-  },
-  "/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png": {
-    "type": "image/png",
-    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
-    "mtime": "2026-08-04T15:39:49.054Z",
-    "size": 1578337,
-    "path": "../public/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png"
   },
   "/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png": {
     "type": "image/png",
     "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
-    "mtime": "2026-08-04T15:39:49.054Z",
+    "mtime": "2026-08-04T16:01:40.292Z",
     "size": 1745848,
     "path": "../public/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png"
+  },
+  "/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png": {
+    "type": "image/png",
+    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
+    "mtime": "2026-08-04T16:01:40.294Z",
+    "size": 1578337,
+    "path": "../public/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png"
   },
   "/coach-media/avatars-cartoon/10f80bed-4250-41d9-8a65-fbaa5deba408.png": {
     "type": "image/png",
     "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
-    "mtime": "2026-08-04T15:39:49.053Z",
+    "mtime": "2026-08-04T16:01:40.285Z",
     "size": 1882140,
     "path": "../public/coach-media/avatars-cartoon/10f80bed-4250-41d9-8a65-fbaa5deba408.png"
   },
   "/coach-media/avatars-cartoon/1af3afdd-5c5a-41ef-b639-d2e415aaa4fd.png": {
     "type": "image/png",
     "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
-    "mtime": "2026-08-04T15:39:49.053Z",
+    "mtime": "2026-08-04T16:01:40.292Z",
     "size": 1993248,
     "path": "../public/coach-media/avatars-cartoon/1af3afdd-5c5a-41ef-b639-d2e415aaa4fd.png"
   },
   "/coach-media/avatars-cartoon/5da085b6-2b23-4338-bc79-31f5e9a4b5bc.png": {
     "type": "image/png",
     "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-08-04T15:39:49.059Z",
+    "mtime": "2026-08-04T16:01:40.296Z",
     "size": 1993166,
     "path": "../public/coach-media/avatars-cartoon/5da085b6-2b23-4338-bc79-31f5e9a4b5bc.png"
-  },
-  "/coach-media/avatars-cartoon/8ced5816-480d-4d64-8e16-a33a743d155c.png": {
-    "type": "image/png",
-    "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
-    "mtime": "2026-08-04T15:39:49.061Z",
-    "size": 1785490,
-    "path": "../public/coach-media/avatars-cartoon/8ced5816-480d-4d64-8e16-a33a743d155c.png"
   },
   "/coach-media/avatars-cartoon/830a8cdd-fb26-4191-a673-42c5f28f2e73.png": {
     "type": "image/png",
     "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
-    "mtime": "2026-08-04T15:39:49.066Z",
+    "mtime": "2026-08-04T16:01:40.297Z",
     "size": 1602205,
     "path": "../public/coach-media/avatars-cartoon/830a8cdd-fb26-4191-a673-42c5f28f2e73.png"
+  },
+  "/coach-media/avatars-cartoon/8ced5816-480d-4d64-8e16-a33a743d155c.png": {
+    "type": "image/png",
+    "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
+    "mtime": "2026-08-04T16:01:40.305Z",
+    "size": 1785490,
+    "path": "../public/coach-media/avatars-cartoon/8ced5816-480d-4d64-8e16-a33a743d155c.png"
   },
   "/coach-media/avatars-cartoon/b970ff06-9199-44c9-90d3-4adf29466ef2.png": {
     "type": "image/png",
     "etag": "\"191b76-HQFygNHbvhIArIsnfMO1th0D4OU\"",
-    "mtime": "2026-08-04T15:39:49.068Z",
+    "mtime": "2026-08-04T16:01:40.306Z",
     "size": 1645430,
     "path": "../public/coach-media/avatars-cartoon/b970ff06-9199-44c9-90d3-4adf29466ef2.png"
   },
   "/coach-media/avatars-cartoon/fad8cab6-7cd9-454b-a967-00de62cdde32.png": {
     "type": "image/png",
     "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
-    "mtime": "2026-08-04T15:39:49.068Z",
+    "mtime": "2026-08-04T16:01:40.311Z",
     "size": 1665643,
     "path": "../public/coach-media/avatars-cartoon/fad8cab6-7cd9-454b-a967-00de62cdde32.png"
-  },
-  "/coach-media/people/T01.06.01.xlsx": {
-    "type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "etag": "\"dcc6-yJKLWkGDw+a72V9Ge5nDtMengWg\"",
-    "mtime": "2026-08-04T15:39:49.067Z",
-    "size": 56518,
-    "path": "../public/coach-media/people/T01.06.01.xlsx"
-  },
-  "/coach-media/people/portrait1.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"8236-iF9IFpUQ41mOrk3DW4giaY2v1A4\"",
-    "mtime": "2026-08-04T15:39:49.067Z",
-    "size": 33334,
-    "path": "../public/coach-media/people/portrait1.jpg"
-  },
-  "/coach-media/people/portrait11.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"122fb-lSrwI6GnjcqOU7p9bL3eLB6zbPk\"",
-    "mtime": "2026-08-04T15:39:49.070Z",
-    "size": 74491,
-    "path": "../public/coach-media/people/portrait11.jpg"
-  },
-  "/coach-media/people/portrait12.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"f434-vbQD186KDkY42S4uGz7cixTeM3Y\"",
-    "mtime": "2026-08-04T15:39:49.072Z",
-    "size": 62516,
-    "path": "../public/coach-media/people/portrait12.jpg"
-  },
-  "/coach-media/people/portrait13.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e0ab-BgIuErDh4c6iTXJy8Qw9D1fV2Y4\"",
-    "mtime": "2026-08-04T15:39:49.072Z",
-    "size": 57515,
-    "path": "../public/coach-media/people/portrait13.jpg"
-  },
-  "/coach-media/people/portrait10.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"13242-oU9sw67fXaoOhBCspE1ufcKQVJk\"",
-    "mtime": "2026-08-04T15:39:49.068Z",
-    "size": 78402,
-    "path": "../public/coach-media/people/portrait10.jpg"
-  },
-  "/coach-media/people/portrait14.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"10f02-mIKj8itqNevLJJvdMQvCLra5sZs\"",
-    "mtime": "2026-08-04T15:39:49.072Z",
-    "size": 69378,
-    "path": "../public/coach-media/people/portrait14.jpg"
-  },
-  "/coach-media/people/portrait15.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e76c-vSk8fJrHyAqX+V28777ha8WbgNQ\"",
-    "mtime": "2026-08-04T15:39:49.074Z",
-    "size": 59244,
-    "path": "../public/coach-media/people/portrait15.jpg"
-  },
-  "/coach-media/people/portrait16.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"cf97-C0nHicl9/0pZcc6nPoN1AK6qGxg\"",
-    "mtime": "2026-08-04T15:39:49.076Z",
-    "size": 53143,
-    "path": "../public/coach-media/people/portrait16.jpg"
-  },
-  "/coach-media/people/portrait17.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"bcf0-Gm00KTQi4TW4IfPKJlSbLvra1vY\"",
-    "mtime": "2026-08-04T15:39:49.076Z",
-    "size": 48368,
-    "path": "../public/coach-media/people/portrait17.jpg"
-  },
-  "/coach-media/people/portrait18.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"c54e-brF3vVSmHDKtuq1fWp3D7oFg51M\"",
-    "mtime": "2026-08-04T15:39:49.076Z",
-    "size": 50510,
-    "path": "../public/coach-media/people/portrait18.jpg"
-  },
-  "/coach-media/people/portrait19.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"c393-S8Ro+/yzyBY+cBCNNh6M59U1lLI\"",
-    "mtime": "2026-08-04T15:39:49.077Z",
-    "size": 50067,
-    "path": "../public/coach-media/people/portrait19.jpg"
-  },
-  "/coach-media/people/portrait2.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"bcdc-0QQ4XzMu+rYTbqYvpc9NTeUA8tY\"",
-    "mtime": "2026-08-04T15:39:49.076Z",
-    "size": 48348,
-    "path": "../public/coach-media/people/portrait2.jpg"
-  },
-  "/coach-media/people/portrait20.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"b13e-AVASgC2NUl9cEqNeVXQZf710AtI\"",
-    "mtime": "2026-08-04T15:39:49.077Z",
-    "size": 45374,
-    "path": "../public/coach-media/people/portrait20.jpg"
-  },
-  "/coach-media/people/portrait21.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"f9f5-I+UeknSzltKnBgxau2s+TTvCXzM\"",
-    "mtime": "2026-08-04T15:39:49.077Z",
-    "size": 63989,
-    "path": "../public/coach-media/people/portrait21.jpg"
-  },
-  "/coach-media/people/portrait22.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"bdc2-XpfseHXprhgQ2kOwJnuzEG4Szrk\"",
-    "mtime": "2026-08-04T15:39:49.077Z",
-    "size": 48578,
-    "path": "../public/coach-media/people/portrait22.jpg"
-  },
-  "/coach-media/people/portrait23.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"be4c-P8CT4CrVwbEaeQLat0jhjTQMjxo\"",
-    "mtime": "2026-08-04T15:39:49.078Z",
-    "size": 48716,
-    "path": "../public/coach-media/people/portrait23.jpg"
-  },
-  "/coach-media/people/portrait25.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e0a7-8029IuA0LaQ6Vf6lujX/+UuHaV0\"",
-    "mtime": "2026-08-04T15:39:49.078Z",
-    "size": 57511,
-    "path": "../public/coach-media/people/portrait25.jpg"
-  },
-  "/coach-media/people/portrait24.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"abed-vXR8pegbgVS9EPJiKC3ZDRQ4dJg\"",
-    "mtime": "2026-08-04T15:39:49.078Z",
-    "size": 44013,
-    "path": "../public/coach-media/people/portrait24.jpg"
-  },
-  "/coach-media/people/portrait26.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"10adb-Y2avzIjFtKDJtMnigpGDItgDIK4\"",
-    "mtime": "2026-08-04T15:39:49.078Z",
-    "size": 68315,
-    "path": "../public/coach-media/people/portrait26.jpg"
-  },
-  "/coach-media/people/portrait27.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e758-fcjR+RePqA6Bh1Ol6SdhNalWKxo\"",
-    "mtime": "2026-08-04T15:39:49.079Z",
-    "size": 59224,
-    "path": "../public/coach-media/people/portrait27.jpg"
-  },
-  "/coach-media/people/portrait28.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"ab15-QtgsG93oCrKL2cWD/M5wqljszjg\"",
-    "mtime": "2026-08-04T15:39:49.079Z",
-    "size": 43797,
-    "path": "../public/coach-media/people/portrait28.jpg"
-  },
-  "/coach-media/people/portrait29.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"f507-Nj981GfUvc5eTvpZtyN0ieyiCHU\"",
-    "mtime": "2026-08-04T15:39:49.079Z",
-    "size": 62727,
-    "path": "../public/coach-media/people/portrait29.jpg"
-  },
-  "/coach-media/people/portrait3.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"ce90-1wGjSDgtEHb8AUpH3znLDA47jOw\"",
-    "mtime": "2026-08-04T15:39:49.079Z",
-    "size": 52880,
-    "path": "../public/coach-media/people/portrait3.jpg"
-  },
-  "/coach-media/people/portrait30.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"91aa-41JiP0aXvZq9y9u/b4pTIbC5DeU\"",
-    "mtime": "2026-08-04T15:39:49.079Z",
-    "size": 37290,
-    "path": "../public/coach-media/people/portrait30.jpg"
-  },
-  "/coach-media/people/portrait31.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"ee72-6mKQvP6WUZZaZuh//G3t4u0EMBg\"",
-    "mtime": "2026-08-04T15:39:49.079Z",
-    "size": 61042,
-    "path": "../public/coach-media/people/portrait31.jpg"
-  },
-  "/coach-media/people/portrait32.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"c2cc-IStqzFyonefLZL/ubYviGC+lI+w\"",
-    "mtime": "2026-08-04T15:39:49.079Z",
-    "size": 49868,
-    "path": "../public/coach-media/people/portrait32.jpg"
-  },
-  "/coach-media/people/portrait34.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"1002d-6T6Xf9AX5UafZW2vbYEzj+5xvO0\"",
-    "mtime": "2026-08-04T15:39:49.080Z",
-    "size": 65581,
-    "path": "../public/coach-media/people/portrait34.jpg"
-  },
-  "/coach-media/people/portrait33.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e86f-wCIX8Pwsa0GqVd/2WH5WG1WSyNs\"",
-    "mtime": "2026-08-04T15:39:49.079Z",
-    "size": 59503,
-    "path": "../public/coach-media/people/portrait33.jpg"
-  },
-  "/coach-media/people/portrait4.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"d171-TlrBkVdDwxLYUzqOqRWUkbkpkAo\"",
-    "mtime": "2026-08-04T15:39:49.080Z",
-    "size": 53617,
-    "path": "../public/coach-media/people/portrait4.jpg"
-  },
-  "/coach-media/people/portrait5.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"c82f-tvc7CKCgsthto9vLFPf7pJndf5o\"",
-    "mtime": "2026-08-04T15:39:49.081Z",
-    "size": 51247,
-    "path": "../public/coach-media/people/portrait5.jpg"
-  },
-  "/coach-media/people/portrait6.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"10235-GkA1z8RzeZJIqSW/DgPAy8/3Vj0\"",
-    "mtime": "2026-08-04T15:39:49.080Z",
-    "size": 66101,
-    "path": "../public/coach-media/people/portrait6.jpg"
-  },
-  "/coach-media/people/portrait8.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e800-jIBzhW7XT+HESqFyHPtIW1HuZc4\"",
-    "mtime": "2026-08-04T15:39:49.081Z",
-    "size": 59392,
-    "path": "../public/coach-media/people/portrait8.jpg"
-  },
-  "/coach-media/people/portrait7.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e4ac-HYcziHIjoK0r/C0hUk1bV4NjrUM\"",
-    "mtime": "2026-08-04T15:39:49.081Z",
-    "size": 58540,
-    "path": "../public/coach-media/people/portrait7.jpg"
-  },
-  "/coach-media/people/portrait9.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e386-JbEwT6JqpTHkIY1qDgk1a5zOrIc\"",
-    "mtime": "2026-08-04T15:39:49.081Z",
-    "size": 58246,
-    "path": "../public/coach-media/people/portrait9.jpg"
-  },
-  "/coach-media/avatars/amel.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"bdc2-XpfseHXprhgQ2kOwJnuzEG4Szrk\"",
-    "mtime": "2026-08-04T15:39:49.051Z",
-    "size": 48578,
-    "path": "../public/coach-media/avatars/amel.jpg"
   },
   "/coach-media/avatars/camille.jpg": {
     "type": "image/jpeg",
     "etag": "\"8236-iF9IFpUQ41mOrk3DW4giaY2v1A4\"",
-    "mtime": "2026-08-04T15:39:49.051Z",
+    "mtime": "2026-08-04T16:01:40.288Z",
     "size": 33334,
     "path": "../public/coach-media/avatars/camille.jpg"
   },
   "/coach-media/avatars/claire.jpg": {
     "type": "image/jpeg",
     "etag": "\"c54e-brF3vVSmHDKtuq1fWp3D7oFg51M\"",
-    "mtime": "2026-08-04T15:39:49.047Z",
+    "mtime": "2026-08-04T16:01:40.288Z",
     "size": 50510,
     "path": "../public/coach-media/avatars/claire.jpg"
   },
   "/coach-media/avatars/gabriel.jpg": {
     "type": "image/jpeg",
     "etag": "\"bcf0-Gm00KTQi4TW4IfPKJlSbLvra1vY\"",
-    "mtime": "2026-08-04T15:39:49.051Z",
+    "mtime": "2026-08-04T16:01:40.288Z",
     "size": 48368,
     "path": "../public/coach-media/avatars/gabriel.jpg"
   },
   "/coach-media/avatars/hugo.jpg": {
     "type": "image/jpeg",
     "etag": "\"e0ab-BgIuErDh4c6iTXJy8Qw9D1fV2Y4\"",
-    "mtime": "2026-08-04T15:39:49.051Z",
+    "mtime": "2026-08-04T16:01:40.288Z",
     "size": 57515,
     "path": "../public/coach-media/avatars/hugo.jpg"
-  },
-  "/coach-media/avatars/lucas.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"10f02-mIKj8itqNevLJJvdMQvCLra5sZs\"",
-    "mtime": "2026-08-04T15:39:49.051Z",
-    "size": 69378,
-    "path": "../public/coach-media/avatars/lucas.jpg"
   },
   "/coach-media/avatars/karim.jpg": {
     "type": "image/jpeg",
     "etag": "\"f507-Nj981GfUvc5eTvpZtyN0ieyiCHU\"",
-    "mtime": "2026-08-04T15:39:49.051Z",
+    "mtime": "2026-08-04T16:01:40.288Z",
     "size": 62727,
     "path": "../public/coach-media/avatars/karim.jpg"
   },
   "/coach-media/avatars/lea.jpg": {
     "type": "image/jpeg",
     "etag": "\"f9f5-I+UeknSzltKnBgxau2s+TTvCXzM\"",
-    "mtime": "2026-08-04T15:39:49.052Z",
+    "mtime": "2026-08-04T16:01:40.289Z",
     "size": 63989,
     "path": "../public/coach-media/avatars/lea.jpg"
+  },
+  "/coach-media/avatars/lucas.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"10f02-mIKj8itqNevLJJvdMQvCLra5sZs\"",
+    "mtime": "2026-08-04T16:01:40.289Z",
+    "size": 69378,
+    "path": "../public/coach-media/avatars/lucas.jpg"
   },
   "/coach-media/avatars/nora.jpg": {
     "type": "image/jpeg",
     "etag": "\"f434-vbQD186KDkY42S4uGz7cixTeM3Y\"",
-    "mtime": "2026-08-04T15:39:49.051Z",
+    "mtime": "2026-08-04T16:01:40.289Z",
     "size": 62516,
     "path": "../public/coach-media/avatars/nora.jpg"
   },
   "/coach-media/avatars/sami.jpg": {
     "type": "image/jpeg",
     "etag": "\"b13e-AVASgC2NUl9cEqNeVXQZf710AtI\"",
-    "mtime": "2026-08-04T15:39:49.052Z",
+    "mtime": "2026-08-04T16:01:40.290Z",
     "size": 45374,
     "path": "../public/coach-media/avatars/sami.jpg"
-  },
-  "/coach-media/avatars/thomas.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"cf97-C0nHicl9/0pZcc6nPoN1AK6qGxg\"",
-    "mtime": "2026-08-04T15:39:49.051Z",
-    "size": 53143,
-    "path": "../public/coach-media/avatars/thomas.jpg"
   },
   "/coach-media/avatars/zoe.jpg": {
     "type": "image/jpeg",
     "etag": "\"c393-S8Ro+/yzyBY+cBCNNh6M59U1lLI\"",
-    "mtime": "2026-08-04T15:39:49.052Z",
+    "mtime": "2026-08-04T16:01:40.289Z",
     "size": 50067,
     "path": "../public/coach-media/avatars/zoe.jpg"
   },
-  "/coach-media/uploads/58a1f2ac-9ac5-4c89-9453-f96b177e021a.png": {
-    "type": "image/png",
-    "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
-    "mtime": "2026-08-04T15:39:49.083Z",
-    "size": 1416623,
-    "path": "../public/coach-media/uploads/58a1f2ac-9ac5-4c89-9453-f96b177e021a.png"
+  "/coach-media/avatars/thomas.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"cf97-C0nHicl9/0pZcc6nPoN1AK6qGxg\"",
+    "mtime": "2026-08-04T16:01:40.289Z",
+    "size": 53143,
+    "path": "../public/coach-media/avatars/thomas.jpg"
   },
   "/coach-media/uploads/538b12dc-7f77-437e-a281-3db72a0a987c.png": {
     "type": "image/png",
     "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
-    "mtime": "2026-08-04T15:39:49.083Z",
+    "mtime": "2026-08-04T16:01:40.319Z",
     "size": 1562456,
     "path": "../public/coach-media/uploads/538b12dc-7f77-437e-a281-3db72a0a987c.png"
+  },
+  "/coach-media/uploads/58a1f2ac-9ac5-4c89-9453-f96b177e021a.png": {
+    "type": "image/png",
+    "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
+    "mtime": "2026-08-04T16:01:40.325Z",
+    "size": 1416623,
+    "path": "../public/coach-media/uploads/58a1f2ac-9ac5-4c89-9453-f96b177e021a.png"
   },
   "/coach-media/uploads/7c2bbc4c-d63f-430b-a18d-fcee64d2ee27.png": {
     "type": "image/png",
     "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
-    "mtime": "2026-08-04T15:39:49.088Z",
+    "mtime": "2026-08-04T16:01:40.335Z",
     "size": 1416623,
     "path": "../public/coach-media/uploads/7c2bbc4c-d63f-430b-a18d-fcee64d2ee27.png"
-  },
-  "/coach-media/uploads/841d5131-04ff-427b-893a-847773422907.png": {
-    "type": "image/png",
-    "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
-    "mtime": "2026-08-04T15:39:49.089Z",
-    "size": 1562456,
-    "path": "../public/coach-media/uploads/841d5131-04ff-427b-893a-847773422907.png"
   },
   "/coach-media/uploads/06e4101b-298e-4352-bf66-f4ea7a350500.png": {
     "type": "image/png",
     "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
-    "mtime": "2026-08-04T15:39:49.081Z",
+    "mtime": "2026-08-04T16:01:40.319Z",
     "size": 1785490,
     "path": "../public/coach-media/uploads/06e4101b-298e-4352-bf66-f4ea7a350500.png"
   },
   "/coach-media/uploads/2f16e10d-f885-45d1-9208-7faac71a6577.png": {
     "type": "image/png",
     "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
-    "mtime": "2026-08-04T15:39:49.049Z",
+    "mtime": "2026-08-04T16:01:40.287Z",
     "size": 1696814,
     "path": "../public/coach-media/uploads/2f16e10d-f885-45d1-9208-7faac71a6577.png"
+  },
+  "/coach-media/uploads/841d5131-04ff-427b-893a-847773422907.png": {
+    "type": "image/png",
+    "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
+    "mtime": "2026-08-04T16:01:40.335Z",
+    "size": 1562456,
+    "path": "../public/coach-media/uploads/841d5131-04ff-427b-893a-847773422907.png"
   },
   "/coach-media/uploads/30fdf4c2-bf1e-492d-b2ee-e4c920be3e28.png": {
     "type": "image/png",
     "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
-    "mtime": "2026-08-04T15:39:49.083Z",
+    "mtime": "2026-08-04T16:01:40.318Z",
     "size": 1602205,
     "path": "../public/coach-media/uploads/30fdf4c2-bf1e-492d-b2ee-e4c920be3e28.png"
   },
   "/coach-media/uploads/4f43eb0e-1591-4688-9a04-ad786c1ed617.png": {
     "type": "image/png",
     "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-08-04T15:39:49.084Z",
+    "mtime": "2026-08-04T16:01:40.319Z",
     "size": 1993166,
     "path": "../public/coach-media/uploads/4f43eb0e-1591-4688-9a04-ad786c1ed617.png"
-  },
-  "/coach-media/uploads/5c10171b-755c-4d43-aa06-52e70ee0c28e.png": {
-    "type": "image/png",
-    "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
-    "mtime": "2026-08-04T15:39:49.085Z",
-    "size": 1696814,
-    "path": "../public/coach-media/uploads/5c10171b-755c-4d43-aa06-52e70ee0c28e.png"
-  },
-  "/coach-media/uploads/5d410305-96e0-4e99-ae37-0ad0346d2834.png": {
-    "type": "image/png",
-    "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
-    "mtime": "2026-08-04T15:39:49.085Z",
-    "size": 1785490,
-    "path": "../public/coach-media/uploads/5d410305-96e0-4e99-ae37-0ad0346d2834.png"
-  },
-  "/coach-media/uploads/5b59b65b-55d0-4b8a-a0d0-37bf9385ba24.png": {
-    "type": "image/png",
-    "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
-    "mtime": "2026-08-04T15:39:49.086Z",
-    "size": 1745848,
-    "path": "../public/coach-media/uploads/5b59b65b-55d0-4b8a-a0d0-37bf9385ba24.png"
-  },
-  "/coach-media/uploads/5fef96f4-0377-4736-b0e0-f084e8c0acb1.png": {
-    "type": "image/png",
-    "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
-    "mtime": "2026-08-04T15:39:49.087Z",
-    "size": 1602205,
-    "path": "../public/coach-media/uploads/5fef96f4-0377-4736-b0e0-f084e8c0acb1.png"
   },
   "/coach-media/uploads/c92ca73c-2c4e-4f00-8d40-78323ecc6d1d.png": {
     "type": "image/png",
     "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
-    "mtime": "2026-08-04T15:39:49.100Z",
+    "mtime": "2026-08-04T16:01:40.348Z",
     "size": 1500823,
     "path": "../public/coach-media/uploads/c92ca73c-2c4e-4f00-8d40-78323ecc6d1d.png"
   },
-  "/coach-media/uploads/9e91555a-0c28-4378-8797-391dee96076d.png": {
+  "/coach-media/uploads/5c10171b-755c-4d43-aa06-52e70ee0c28e.png": {
     "type": "image/png",
-    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
-    "mtime": "2026-08-04T15:39:49.088Z",
-    "size": 1993248,
-    "path": "../public/coach-media/uploads/9e91555a-0c28-4378-8797-391dee96076d.png"
+    "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
+    "mtime": "2026-08-04T16:01:40.327Z",
+    "size": 1696814,
+    "path": "../public/coach-media/uploads/5c10171b-755c-4d43-aa06-52e70ee0c28e.png"
+  },
+  "/coach-media/uploads/5b59b65b-55d0-4b8a-a0d0-37bf9385ba24.png": {
+    "type": "image/png",
+    "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
+    "mtime": "2026-08-04T16:01:40.327Z",
+    "size": 1745848,
+    "path": "../public/coach-media/uploads/5b59b65b-55d0-4b8a-a0d0-37bf9385ba24.png"
+  },
+  "/coach-media/uploads/5d410305-96e0-4e99-ae37-0ad0346d2834.png": {
+    "type": "image/png",
+    "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
+    "mtime": "2026-08-04T16:01:40.327Z",
+    "size": 1785490,
+    "path": "../public/coach-media/uploads/5d410305-96e0-4e99-ae37-0ad0346d2834.png"
+  },
+  "/coach-media/uploads/5fef96f4-0377-4736-b0e0-f084e8c0acb1.png": {
+    "type": "image/png",
+    "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
+    "mtime": "2026-08-04T16:01:40.329Z",
+    "size": 1602205,
+    "path": "../public/coach-media/uploads/5fef96f4-0377-4736-b0e0-f084e8c0acb1.png"
   },
   "/coach-media/uploads/849249ef-60fe-497d-a0cc-1ff6224e1035.png": {
     "type": "image/png",
     "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
-    "mtime": "2026-08-04T15:39:49.091Z",
+    "mtime": "2026-08-04T16:01:40.335Z",
     "size": 1993248,
     "path": "../public/coach-media/uploads/849249ef-60fe-497d-a0cc-1ff6224e1035.png"
+  },
+  "/coach-media/uploads/9e91555a-0c28-4378-8797-391dee96076d.png": {
+    "type": "image/png",
+    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
+    "mtime": "2026-08-04T16:01:40.335Z",
+    "size": 1993248,
+    "path": "../public/coach-media/uploads/9e91555a-0c28-4378-8797-391dee96076d.png"
   },
   "/coach-media/uploads/a09d1eae-bb31-49b6-9b87-2f6b14cc7720.png": {
     "type": "image/png",
     "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
-    "mtime": "2026-08-04T15:39:49.089Z",
+    "mtime": "2026-08-04T16:01:40.341Z",
     "size": 1665643,
     "path": "../public/coach-media/uploads/a09d1eae-bb31-49b6-9b87-2f6b14cc7720.png"
-  },
-  "/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png": {
-    "type": "image/png",
-    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
-    "mtime": "2026-08-04T15:39:49.100Z",
-    "size": 1500823,
-    "path": "../public/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png"
   },
   "/coach-media/uploads/a1ec228e-1055-4648-9252-fb2dd6fb5a02.png": {
     "type": "image/png",
     "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-08-04T15:39:49.092Z",
+    "mtime": "2026-08-04T16:01:40.342Z",
     "size": 1993166,
     "path": "../public/coach-media/uploads/a1ec228e-1055-4648-9252-fb2dd6fb5a02.png"
   },
   "/coach-media/uploads/a2a433ff-1b21-482b-a9d9-6cb0da8146f4.png": {
     "type": "image/png",
     "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
-    "mtime": "2026-08-04T15:39:49.094Z",
+    "mtime": "2026-08-04T16:01:40.341Z",
     "size": 1745848,
     "path": "../public/coach-media/uploads/a2a433ff-1b21-482b-a9d9-6cb0da8146f4.png"
   },
   "/coach-media/uploads/ab818ee2-0431-430e-a9af-e78936417633.png": {
     "type": "image/png",
     "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
-    "mtime": "2026-08-04T15:39:49.097Z",
+    "mtime": "2026-08-04T16:01:40.342Z",
     "size": 1665643,
     "path": "../public/coach-media/uploads/ab818ee2-0431-430e-a9af-e78936417633.png"
-  },
-  "/_nuxt/builds/latest.json": {
-    "type": "application/json",
-    "etag": "\"47-30ibuZS/rjiFMuGMinOS5trz5oM\"",
-    "mtime": "2026-08-04T15:39:48.990Z",
-    "size": 71,
-    "path": "../public/_nuxt/builds/latest.json"
   },
   "/coach-media/uploads/aed28159-a121-45cb-9dd1-16ecc349b84d.png": {
     "type": "image/png",
     "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
-    "mtime": "2026-08-04T15:39:49.097Z",
+    "mtime": "2026-08-04T16:01:40.347Z",
     "size": 1578337,
     "path": "../public/coach-media/uploads/aed28159-a121-45cb-9dd1-16ecc349b84d.png"
-  },
-  "/coach-media/animations/fail/fail1.webp": {
-    "type": "image/webp",
-    "etag": "\"3e6cc-CLBekLwBwSBNLCxvb1eKJT9+wZU\"",
-    "mtime": "2026-08-04T15:39:49.047Z",
-    "size": 255692,
-    "path": "../public/coach-media/animations/fail/fail1.webp"
-  },
-  "/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png": {
-    "type": "image/png",
-    "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
-    "mtime": "2026-08-04T15:39:49.100Z",
-    "size": 1882140,
-    "path": "../public/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png"
   },
   "/coach-media/uploads/bf6f3f5e-efca-4554-9963-44587811c0f8.png": {
     "type": "image/png",
     "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-08-04T15:39:49.093Z",
+    "mtime": "2026-08-04T16:01:40.359Z",
     "size": 1993166,
     "path": "../public/coach-media/uploads/bf6f3f5e-efca-4554-9963-44587811c0f8.png"
+  },
+  "/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png": {
+    "type": "image/png",
+    "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
+    "mtime": "2026-08-04T16:01:40.348Z",
+    "size": 1882140,
+    "path": "../public/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png"
   },
   "/coach-media/uploads/e5108547-b1b3-4c96-89ca-6e00c0d1c60a.png": {
     "type": "image/png",
     "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
-    "mtime": "2026-08-04T15:39:49.095Z",
+    "mtime": "2026-08-04T16:01:40.348Z",
     "size": 1882140,
     "path": "../public/coach-media/uploads/e5108547-b1b3-4c96-89ca-6e00c0d1c60a.png"
+  },
+  "/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png": {
+    "type": "image/png",
+    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
+    "mtime": "2026-08-04T16:01:40.356Z",
+    "size": 1500823,
+    "path": "../public/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png"
+  },
+  "/coach-media/people/200.webp": {
+    "type": "image/webp",
+    "etag": "\"1d696-kiyalxZWWq76I5xPP32p65sny50\"",
+    "mtime": "2026-08-04T16:01:40.283Z",
+    "size": 120470,
+    "path": "../public/coach-media/people/200.webp"
   },
   "/coach-media/uploads/f8346f58-2678-4a95-aaa8-d37ba71ecb3b.png": {
     "type": "image/png",
     "etag": "\"191b76-HQFygNHbvhIArIsnfMO1th0D4OU\"",
-    "mtime": "2026-08-04T15:39:49.104Z",
+    "mtime": "2026-08-04T16:01:40.351Z",
     "size": 1645430,
     "path": "../public/coach-media/uploads/f8346f58-2678-4a95-aaa8-d37ba71ecb3b.png"
+  },
+  "/coach-media/people/T01.06.01.xlsx": {
+    "type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "etag": "\"dcc6-yJKLWkGDw+a72V9Ge5nDtMengWg\"",
+    "mtime": "2026-08-04T16:01:40.308Z",
+    "size": 56518,
+    "path": "../public/coach-media/people/T01.06.01.xlsx"
+  },
+  "/coach-media/people/portrait1.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"8236-iF9IFpUQ41mOrk3DW4giaY2v1A4\"",
+    "mtime": "2026-08-04T16:01:40.310Z",
+    "size": 33334,
+    "path": "../public/coach-media/people/portrait1.jpg"
+  },
+  "/coach-media/people/portrait10.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"13242-oU9sw67fXaoOhBCspE1ufcKQVJk\"",
+    "mtime": "2026-08-04T16:01:40.311Z",
+    "size": 78402,
+    "path": "../public/coach-media/people/portrait10.jpg"
+  },
+  "/coach-media/people/portrait11.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"122fb-lSrwI6GnjcqOU7p9bL3eLB6zbPk\"",
+    "mtime": "2026-08-04T16:01:40.312Z",
+    "size": 74491,
+    "path": "../public/coach-media/people/portrait11.jpg"
+  },
+  "/coach-media/people/portrait12.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"f434-vbQD186KDkY42S4uGz7cixTeM3Y\"",
+    "mtime": "2026-08-04T16:01:40.311Z",
+    "size": 62516,
+    "path": "../public/coach-media/people/portrait12.jpg"
+  },
+  "/coach-media/people/portrait13.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e0ab-BgIuErDh4c6iTXJy8Qw9D1fV2Y4\"",
+    "mtime": "2026-08-04T16:01:40.312Z",
+    "size": 57515,
+    "path": "../public/coach-media/people/portrait13.jpg"
+  },
+  "/coach-media/people/portrait14.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"10f02-mIKj8itqNevLJJvdMQvCLra5sZs\"",
+    "mtime": "2026-08-04T16:01:40.312Z",
+    "size": 69378,
+    "path": "../public/coach-media/people/portrait14.jpg"
+  },
+  "/coach-media/people/portrait15.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e76c-vSk8fJrHyAqX+V28777ha8WbgNQ\"",
+    "mtime": "2026-08-04T16:01:40.312Z",
+    "size": 59244,
+    "path": "../public/coach-media/people/portrait15.jpg"
+  },
+  "/coach-media/people/portrait16.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"cf97-C0nHicl9/0pZcc6nPoN1AK6qGxg\"",
+    "mtime": "2026-08-04T16:01:40.312Z",
+    "size": 53143,
+    "path": "../public/coach-media/people/portrait16.jpg"
+  },
+  "/coach-media/people/portrait17.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"bcf0-Gm00KTQi4TW4IfPKJlSbLvra1vY\"",
+    "mtime": "2026-08-04T16:01:40.312Z",
+    "size": 48368,
+    "path": "../public/coach-media/people/portrait17.jpg"
+  },
+  "/coach-media/people/portrait18.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"c54e-brF3vVSmHDKtuq1fWp3D7oFg51M\"",
+    "mtime": "2026-08-04T16:01:40.313Z",
+    "size": 50510,
+    "path": "../public/coach-media/people/portrait18.jpg"
+  },
+  "/coach-media/people/portrait19.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"c393-S8Ro+/yzyBY+cBCNNh6M59U1lLI\"",
+    "mtime": "2026-08-04T16:01:40.313Z",
+    "size": 50067,
+    "path": "../public/coach-media/people/portrait19.jpg"
+  },
+  "/coach-media/people/portrait2.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"bcdc-0QQ4XzMu+rYTbqYvpc9NTeUA8tY\"",
+    "mtime": "2026-08-04T16:01:40.313Z",
+    "size": 48348,
+    "path": "../public/coach-media/people/portrait2.jpg"
+  },
+  "/coach-media/people/portrait20.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"b13e-AVASgC2NUl9cEqNeVXQZf710AtI\"",
+    "mtime": "2026-08-04T16:01:40.313Z",
+    "size": 45374,
+    "path": "../public/coach-media/people/portrait20.jpg"
+  },
+  "/coach-media/people/portrait21.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"f9f5-I+UeknSzltKnBgxau2s+TTvCXzM\"",
+    "mtime": "2026-08-04T16:01:40.314Z",
+    "size": 63989,
+    "path": "../public/coach-media/people/portrait21.jpg"
+  },
+  "/coach-media/people/portrait22.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"bdc2-XpfseHXprhgQ2kOwJnuzEG4Szrk\"",
+    "mtime": "2026-08-04T16:01:40.313Z",
+    "size": 48578,
+    "path": "../public/coach-media/people/portrait22.jpg"
+  },
+  "/coach-media/people/portrait23.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"be4c-P8CT4CrVwbEaeQLat0jhjTQMjxo\"",
+    "mtime": "2026-08-04T16:01:40.314Z",
+    "size": 48716,
+    "path": "../public/coach-media/people/portrait23.jpg"
+  },
+  "/coach-media/people/portrait24.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"abed-vXR8pegbgVS9EPJiKC3ZDRQ4dJg\"",
+    "mtime": "2026-08-04T16:01:40.313Z",
+    "size": 44013,
+    "path": "../public/coach-media/people/portrait24.jpg"
+  },
+  "/coach-media/people/portrait25.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e0a7-8029IuA0LaQ6Vf6lujX/+UuHaV0\"",
+    "mtime": "2026-08-04T16:01:40.314Z",
+    "size": 57511,
+    "path": "../public/coach-media/people/portrait25.jpg"
+  },
+  "/coach-media/people/portrait26.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"10adb-Y2avzIjFtKDJtMnigpGDItgDIK4\"",
+    "mtime": "2026-08-04T16:01:40.314Z",
+    "size": 68315,
+    "path": "../public/coach-media/people/portrait26.jpg"
+  },
+  "/coach-media/people/portrait27.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e758-fcjR+RePqA6Bh1Ol6SdhNalWKxo\"",
+    "mtime": "2026-08-04T16:01:40.314Z",
+    "size": 59224,
+    "path": "../public/coach-media/people/portrait27.jpg"
+  },
+  "/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png": {
+    "type": "image/png",
+    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
+    "mtime": "2026-08-04T16:01:40.356Z",
+    "size": 1578337,
+    "path": "../public/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png"
+  },
+  "/coach-media/people/portrait28.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"ab15-QtgsG93oCrKL2cWD/M5wqljszjg\"",
+    "mtime": "2026-08-04T16:01:40.314Z",
+    "size": 43797,
+    "path": "../public/coach-media/people/portrait28.jpg"
+  },
+  "/coach-media/people/portrait29.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"f507-Nj981GfUvc5eTvpZtyN0ieyiCHU\"",
+    "mtime": "2026-08-04T16:01:40.314Z",
+    "size": 62727,
+    "path": "../public/coach-media/people/portrait29.jpg"
+  },
+  "/coach-media/people/portrait3.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"ce90-1wGjSDgtEHb8AUpH3znLDA47jOw\"",
+    "mtime": "2026-08-04T16:01:40.315Z",
+    "size": 52880,
+    "path": "../public/coach-media/people/portrait3.jpg"
+  },
+  "/coach-media/people/portrait30.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"91aa-41JiP0aXvZq9y9u/b4pTIbC5DeU\"",
+    "mtime": "2026-08-04T16:01:40.315Z",
+    "size": 37290,
+    "path": "../public/coach-media/people/portrait30.jpg"
+  },
+  "/coach-media/people/portrait31.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"ee72-6mKQvP6WUZZaZuh//G3t4u0EMBg\"",
+    "mtime": "2026-08-04T16:01:40.315Z",
+    "size": 61042,
+    "path": "../public/coach-media/people/portrait31.jpg"
+  },
+  "/coach-media/people/portrait32.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"c2cc-IStqzFyonefLZL/ubYviGC+lI+w\"",
+    "mtime": "2026-08-04T16:01:40.315Z",
+    "size": 49868,
+    "path": "../public/coach-media/people/portrait32.jpg"
+  },
+  "/coach-media/people/portrait33.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e86f-wCIX8Pwsa0GqVd/2WH5WG1WSyNs\"",
+    "mtime": "2026-08-04T16:01:40.315Z",
+    "size": 59503,
+    "path": "../public/coach-media/people/portrait33.jpg"
+  },
+  "/coach-media/people/portrait34.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"1002d-6T6Xf9AX5UafZW2vbYEzj+5xvO0\"",
+    "mtime": "2026-08-04T16:01:40.315Z",
+    "size": 65581,
+    "path": "../public/coach-media/people/portrait34.jpg"
+  },
+  "/coach-media/people/portrait4.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"d171-TlrBkVdDwxLYUzqOqRWUkbkpkAo\"",
+    "mtime": "2026-08-04T16:01:40.316Z",
+    "size": 53617,
+    "path": "../public/coach-media/people/portrait4.jpg"
+  },
+  "/coach-media/people/portrait5.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"c82f-tvc7CKCgsthto9vLFPf7pJndf5o\"",
+    "mtime": "2026-08-04T16:01:40.316Z",
+    "size": 51247,
+    "path": "../public/coach-media/people/portrait5.jpg"
+  },
+  "/coach-media/people/portrait6.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"10235-GkA1z8RzeZJIqSW/DgPAy8/3Vj0\"",
+    "mtime": "2026-08-04T16:01:40.316Z",
+    "size": 66101,
+    "path": "../public/coach-media/people/portrait6.jpg"
+  },
+  "/coach-media/people/portrait7.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e4ac-HYcziHIjoK0r/C0hUk1bV4NjrUM\"",
+    "mtime": "2026-08-04T16:01:40.316Z",
+    "size": 58540,
+    "path": "../public/coach-media/people/portrait7.jpg"
+  },
+  "/coach-media/people/portrait8.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e800-jIBzhW7XT+HESqFyHPtIW1HuZc4\"",
+    "mtime": "2026-08-04T16:01:40.316Z",
+    "size": 59392,
+    "path": "../public/coach-media/people/portrait8.jpg"
+  },
+  "/coach-media/people/portrait9.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e386-JbEwT6JqpTHkIY1qDgk1a5zOrIc\"",
+    "mtime": "2026-08-04T16:01:40.316Z",
+    "size": 58246,
+    "path": "../public/coach-media/people/portrait9.jpg"
+  },
+  "/_nuxt/builds/latest.json": {
+    "type": "application/json",
+    "etag": "\"47-qUOHc0oO13mYiLJZznJPoCo3bDA\"",
+    "mtime": "2026-08-04T16:01:40.225Z",
+    "size": 71,
+    "path": "../public/_nuxt/builds/latest.json"
+  },
+  "/coach-media/animations/fail/fail1.webp": {
+    "type": "image/webp",
+    "etag": "\"3e6cc-CLBekLwBwSBNLCxvb1eKJT9+wZU\"",
+    "mtime": "2026-08-04T16:01:40.357Z",
+    "size": 255692,
+    "path": "../public/coach-media/animations/fail/fail1.webp"
   },
   "/coach-media/animations/fail/fail2.webp": {
     "type": "image/webp",
     "etag": "\"5e028-RHwRc2cf0IvG2H9MS53ShV8XyoY\"",
-    "mtime": "2026-08-04T15:39:49.110Z",
+    "mtime": "2026-08-04T16:01:40.354Z",
     "size": 385064,
     "path": "../public/coach-media/animations/fail/fail2.webp"
   },
   "/coach-media/animations/fail/fail4.webp": {
     "type": "image/webp",
     "etag": "\"5cece-RjBisoBNjPRhvK+ndq3WET8sFcg\"",
-    "mtime": "2026-08-04T15:39:49.105Z",
+    "mtime": "2026-08-04T16:01:40.356Z",
     "size": 380622,
     "path": "../public/coach-media/animations/fail/fail4.webp"
   },
   "/coach-media/animations/fail/fail5.webp": {
     "type": "image/webp",
     "etag": "\"3418c-nUcgdhefQjLBbi5YPrFDciGNe1I\"",
-    "mtime": "2026-08-04T15:39:49.110Z",
+    "mtime": "2026-08-04T16:01:40.358Z",
     "size": 213388,
     "path": "../public/coach-media/animations/fail/fail5.webp"
   },
   "/coach-media/animations/fail/fail6.webp": {
     "type": "image/webp",
     "etag": "\"31e86-st4q2D401jTAQjaB6fQJge0HiLk\"",
-    "mtime": "2026-08-04T15:39:49.107Z",
+    "mtime": "2026-08-04T16:01:40.357Z",
     "size": 204422,
     "path": "../public/coach-media/animations/fail/fail6.webp"
-  },
-  "/coach-media/animations/fail/fail8.webp": {
-    "type": "image/webp",
-    "etag": "\"39a32-GZjK64v2UufujF0nhcGEc6ElNfk\"",
-    "mtime": "2026-08-04T15:39:49.109Z",
-    "size": 236082,
-    "path": "../public/coach-media/animations/fail/fail8.webp"
   },
   "/coach-media/animations/fail/fail7.webp": {
     "type": "image/webp",
     "etag": "\"63788-deMgnTG8ziw8Sq9HQAAG5lpmaYQ\"",
-    "mtime": "2026-08-04T15:39:49.110Z",
+    "mtime": "2026-08-04T16:01:40.366Z",
     "size": 407432,
     "path": "../public/coach-media/animations/fail/fail7.webp"
+  },
+  "/coach-media/animations/fail/fail8.webp": {
+    "type": "image/webp",
+    "etag": "\"39a32-GZjK64v2UufujF0nhcGEc6ElNfk\"",
+    "mtime": "2026-08-04T16:01:40.365Z",
+    "size": 236082,
+    "path": "../public/coach-media/animations/fail/fail8.webp"
   },
   "/coach-media/animations/fail/fail10.webp": {
     "type": "image/webp",
     "etag": "\"ec4a8-LxdVywk4WTKCcK/Mz98lMc+PlrY\"",
-    "mtime": "2026-08-04T15:39:49.104Z",
+    "mtime": "2026-08-04T16:01:40.284Z",
     "size": 967848,
     "path": "../public/coach-media/animations/fail/fail10.webp"
-  },
-  "/coach-media/animations/fail/fail9.webp": {
-    "type": "image/webp",
-    "etag": "\"f5f18-OaHXpPB3qd/rQVrqz8lBFShsxjI\"",
-    "mtime": "2026-08-04T15:39:49.112Z",
-    "size": 1007384,
-    "path": "../public/coach-media/animations/fail/fail9.webp"
-  },
-  "/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png": {
-    "type": "image/png",
-    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
-    "mtime": "2026-08-04T15:39:49.101Z",
-    "size": 1578337,
-    "path": "../public/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png"
   },
   "/coach-media/animations/bravo/bravo1.webp": {
     "type": "image/webp",
     "etag": "\"44738-4QhsLfUd9XIbDTSNeKIP8/efIFU\"",
-    "mtime": "2026-08-04T15:39:49.048Z",
+    "mtime": "2026-08-04T16:01:40.359Z",
     "size": 280376,
     "path": "../public/coach-media/animations/bravo/bravo1.webp"
   },
   "/coach-media/animations/bravo/bravo11.webp": {
     "type": "image/webp",
     "etag": "\"1a216-3xX4QCqG7FtxwZvgt1PBqgFlbzg\"",
-    "mtime": "2026-08-04T15:39:49.111Z",
+    "mtime": "2026-08-04T16:01:40.284Z",
     "size": 107030,
     "path": "../public/coach-media/animations/bravo/bravo11.webp"
   },
   "/coach-media/animations/bravo/bravo12.webp": {
     "type": "image/webp",
     "etag": "\"1205a-/7k+Wui1IgWSv4DPL8QXZSf1p2U\"",
-    "mtime": "2026-08-04T15:39:49.110Z",
+    "mtime": "2026-08-04T16:01:40.359Z",
     "size": 73818,
     "path": "../public/coach-media/animations/bravo/bravo12.webp"
+  },
+  "/coach-media/animations/fail/fail9.webp": {
+    "type": "image/webp",
+    "etag": "\"f5f18-OaHXpPB3qd/rQVrqz8lBFShsxjI\"",
+    "mtime": "2026-08-04T16:01:40.359Z",
+    "size": 1007384,
+    "path": "../public/coach-media/animations/fail/fail9.webp"
   },
   "/coach-media/animations/bravo/bravo13.webp": {
     "type": "image/webp",
     "etag": "\"56106-bhB3PYpSVxWys8XQ9pz9OrU7QBA\"",
-    "mtime": "2026-08-04T15:39:49.111Z",
+    "mtime": "2026-08-04T16:01:40.365Z",
     "size": 352518,
     "path": "../public/coach-media/animations/bravo/bravo13.webp"
   },
   "/coach-media/animations/bravo/bravo14.webp": {
     "type": "image/webp",
     "etag": "\"34da4-cRZ9lyimIePouzhUvQ/mHfvEtuY\"",
-    "mtime": "2026-08-04T15:39:49.114Z",
+    "mtime": "2026-08-04T16:01:40.365Z",
     "size": 216484,
     "path": "../public/coach-media/animations/bravo/bravo14.webp"
   },
   "/coach-media/animations/bravo/bravo15.webp": {
     "type": "image/webp",
     "etag": "\"2b0e2-qaGuoSfLeg5vXhKMrtg/rxugwqA\"",
-    "mtime": "2026-08-04T15:39:49.118Z",
+    "mtime": "2026-08-04T16:01:40.365Z",
     "size": 176354,
     "path": "../public/coach-media/animations/bravo/bravo15.webp"
   },
   "/coach-media/animations/bravo/bravo16.webp": {
     "type": "image/webp",
     "etag": "\"203f8-jg0MLG/nBqRrdnyLW65UaerRQNM\"",
-    "mtime": "2026-08-04T15:39:49.114Z",
+    "mtime": "2026-08-04T16:01:40.367Z",
     "size": 132088,
     "path": "../public/coach-media/animations/bravo/bravo16.webp"
-  },
-  "/coach-media/animations/fail/fail3.webp": {
-    "type": "image/webp",
-    "etag": "\"19d1a6-49q6JpI6yKtRh2mygNyjyUsItIM\"",
-    "mtime": "2026-08-04T15:39:49.106Z",
-    "size": 1692070,
-    "path": "../public/coach-media/animations/fail/fail3.webp"
   },
   "/coach-media/animations/bravo/bravo17.webp": {
     "type": "image/webp",
     "etag": "\"241a0-uyZNtAYraFvIQXIqjMvyOPE1jTw\"",
-    "mtime": "2026-08-04T15:39:49.113Z",
+    "mtime": "2026-08-04T16:01:40.366Z",
     "size": 147872,
     "path": "../public/coach-media/animations/bravo/bravo17.webp"
+  },
+  "/coach-media/animations/fail/fail3.webp": {
+    "type": "image/webp",
+    "etag": "\"19d1a6-49q6JpI6yKtRh2mygNyjyUsItIM\"",
+    "mtime": "2026-08-04T16:01:40.356Z",
+    "size": 1692070,
+    "path": "../public/coach-media/animations/fail/fail3.webp"
   },
   "/coach-media/animations/bravo/bravo18.webp": {
     "type": "image/webp",
     "etag": "\"a01a-cps+HXxadKCjeKKYWHbwcIGk6hU\"",
-    "mtime": "2026-08-04T15:39:49.118Z",
+    "mtime": "2026-08-04T16:01:40.367Z",
     "size": 40986,
     "path": "../public/coach-media/animations/bravo/bravo18.webp"
   },
   "/coach-media/animations/bravo/bravo19.webp": {
     "type": "image/webp",
     "etag": "\"13352-7XcYb6ke3l0xF2LCw/KR+dXmc7Q\"",
-    "mtime": "2026-08-04T15:39:49.118Z",
+    "mtime": "2026-08-04T16:01:40.366Z",
     "size": 78674,
     "path": "../public/coach-media/animations/bravo/bravo19.webp"
   },
   "/coach-media/animations/bravo/bravo2.webp": {
     "type": "image/webp",
     "etag": "\"d0ca-uTre9Wq69Wtq99T7Vn3/dRXQFkg\"",
-    "mtime": "2026-08-04T15:39:49.114Z",
+    "mtime": "2026-08-04T16:01:40.366Z",
     "size": 53450,
     "path": "../public/coach-media/animations/bravo/bravo2.webp"
-  },
-  "/coach-media/animations/bravo/bravo20.webp": {
-    "type": "image/webp",
-    "etag": "\"233b2-LlDa1c9jqNgHkGB9k+cU7ap5b0Y\"",
-    "mtime": "2026-08-04T15:39:49.114Z",
-    "size": 144306,
-    "path": "../public/coach-media/animations/bravo/bravo20.webp"
   },
   "/coach-media/animations/bravo/bravo10.webp": {
     "type": "image/webp",
     "etag": "\"adbd4-UywgFHyHGzDijqz6jodwTseMtkI\"",
-    "mtime": "2026-08-04T15:39:49.111Z",
+    "mtime": "2026-08-04T16:01:40.365Z",
     "size": 711636,
     "path": "../public/coach-media/animations/bravo/bravo10.webp"
+  },
+  "/coach-media/animations/bravo/bravo20.webp": {
+    "type": "image/webp",
+    "etag": "\"233b2-LlDa1c9jqNgHkGB9k+cU7ap5b0Y\"",
+    "mtime": "2026-08-04T16:01:40.367Z",
+    "size": 144306,
+    "path": "../public/coach-media/animations/bravo/bravo20.webp"
   },
   "/coach-media/animations/bravo/bravo21.webp": {
     "type": "image/webp",
     "etag": "\"3da68-ISHGzxh2cgKoQraDg+pa1TIB3Eo\"",
-    "mtime": "2026-08-04T15:39:49.119Z",
+    "mtime": "2026-08-04T16:01:40.369Z",
     "size": 252520,
     "path": "../public/coach-media/animations/bravo/bravo21.webp"
   },
   "/coach-media/animations/bravo/bravo22.webp": {
     "type": "image/webp",
     "etag": "\"695d4-fo3c1QhJVPT0yXYAuoQyAXrIO9E\"",
-    "mtime": "2026-08-04T15:39:49.119Z",
+    "mtime": "2026-08-04T16:01:40.367Z",
     "size": 431572,
     "path": "../public/coach-media/animations/bravo/bravo22.webp"
   },
   "/coach-media/animations/bravo/bravo23.webp": {
     "type": "image/webp",
     "etag": "\"203f8-jg0MLG/nBqRrdnyLW65UaerRQNM\"",
-    "mtime": "2026-08-04T15:39:49.119Z",
+    "mtime": "2026-08-04T16:01:40.366Z",
     "size": 132088,
     "path": "../public/coach-media/animations/bravo/bravo23.webp"
-  },
-  "/coach-media/animations/bravo/bravo24.webp": {
-    "type": "image/webp",
-    "etag": "\"21c1c-BCPPzQaqjCgONCZQqIz0MRfkhnk\"",
-    "mtime": "2026-08-04T15:39:49.120Z",
-    "size": 138268,
-    "path": "../public/coach-media/animations/bravo/bravo24.webp"
   },
   "/coach-media/animations/bravo/bravo26.webp": {
     "type": "image/webp",
     "etag": "\"30b4-3zSDRUC/kfpm2SrLPRZXdNLOLHk\"",
-    "mtime": "2026-08-04T15:39:49.119Z",
+    "mtime": "2026-08-04T16:01:40.368Z",
     "size": 12468,
     "path": "../public/coach-media/animations/bravo/bravo26.webp"
+  },
+  "/coach-media/animations/bravo/bravo24.webp": {
+    "type": "image/webp",
+    "etag": "\"21c1c-BCPPzQaqjCgONCZQqIz0MRfkhnk\"",
+    "mtime": "2026-08-04T16:01:40.367Z",
+    "size": 138268,
+    "path": "../public/coach-media/animations/bravo/bravo24.webp"
   },
   "/coach-media/animations/bravo/bravo27.webp": {
     "type": "image/webp",
     "etag": "\"18b24-qcCeJs9S6OXbNHnCNtW2ImrJbvY\"",
-    "mtime": "2026-08-04T15:39:49.120Z",
+    "mtime": "2026-08-04T16:01:40.368Z",
     "size": 101156,
     "path": "../public/coach-media/animations/bravo/bravo27.webp"
   },
   "/coach-media/animations/bravo/bravo25.webp": {
     "type": "image/webp",
     "etag": "\"6e646-B09j5zbOGx/pB/KUZrJkPccQvk0\"",
-    "mtime": "2026-08-04T15:39:49.120Z",
+    "mtime": "2026-08-04T16:01:40.368Z",
     "size": 452166,
     "path": "../public/coach-media/animations/bravo/bravo25.webp"
   },
   "/coach-media/animations/bravo/bravo28.webp": {
     "type": "image/webp",
     "etag": "\"18612-7Zj+YVZPRJ6CKyZAwrxfXIc7fjI\"",
-    "mtime": "2026-08-04T15:39:49.121Z",
+    "mtime": "2026-08-04T16:01:40.368Z",
     "size": 99858,
     "path": "../public/coach-media/animations/bravo/bravo28.webp"
   },
   "/coach-media/animations/bravo/bravo29.webp": {
     "type": "image/webp",
     "etag": "\"163a6-ViRk6UjMsrG8Il8pS7HYT3/WiFk\"",
-    "mtime": "2026-08-04T15:39:49.120Z",
+    "mtime": "2026-08-04T16:01:40.368Z",
     "size": 91046,
     "path": "../public/coach-media/animations/bravo/bravo29.webp"
   },
   "/coach-media/animations/bravo/bravo3.webp": {
     "type": "image/webp",
     "etag": "\"80d8-WZGwWFCLsk3YDTm9XP5QCq8R7Es\"",
-    "mtime": "2026-08-04T15:39:49.121Z",
+    "mtime": "2026-08-04T16:01:40.369Z",
     "size": 32984,
     "path": "../public/coach-media/animations/bravo/bravo3.webp"
   },
   "/coach-media/animations/bravo/bravo30.webp": {
     "type": "image/webp",
     "etag": "\"2be66-2mV/o9/SR26sBGn1HK62usspEXM\"",
-    "mtime": "2026-08-04T15:39:49.122Z",
+    "mtime": "2026-08-04T16:01:40.371Z",
     "size": 179814,
     "path": "../public/coach-media/animations/bravo/bravo30.webp"
   },
   "/coach-media/animations/bravo/bravo31.webp": {
     "type": "image/webp",
     "etag": "\"2154c-mTHroY9VN55S8jkoGrrtwcul4rs\"",
-    "mtime": "2026-08-04T15:39:49.122Z",
+    "mtime": "2026-08-04T16:01:40.369Z",
     "size": 136524,
     "path": "../public/coach-media/animations/bravo/bravo31.webp"
-  },
-  "/coach-media/animations/bravo/bravo32.webp": {
-    "type": "image/webp",
-    "etag": "\"3ddf2-eZeHr4gLF4RNVRJoLdRkGG/wq/4\"",
-    "mtime": "2026-08-04T15:39:49.121Z",
-    "size": 253426,
-    "path": "../public/coach-media/animations/bravo/bravo32.webp"
   },
   "/coach-media/animations/bravo/bravo33.webp": {
     "type": "image/webp",
     "etag": "\"19ec0-c95YrxMrzqQW4G9FjU0ykKQ7V9o\"",
-    "mtime": "2026-08-04T15:39:49.121Z",
+    "mtime": "2026-08-04T16:01:40.369Z",
     "size": 106176,
     "path": "../public/coach-media/animations/bravo/bravo33.webp"
+  },
+  "/coach-media/animations/bravo/bravo32.webp": {
+    "type": "image/webp",
+    "etag": "\"3ddf2-eZeHr4gLF4RNVRJoLdRkGG/wq/4\"",
+    "mtime": "2026-08-04T16:01:40.369Z",
+    "size": 253426,
+    "path": "../public/coach-media/animations/bravo/bravo32.webp"
   },
   "/coach-media/animations/bravo/bravo4.webp": {
     "type": "image/webp",
     "etag": "\"301b0-kZdjup76tUvXnUsAqLJ/bPOuJLQ\"",
-    "mtime": "2026-08-04T15:39:49.122Z",
+    "mtime": "2026-08-04T16:01:40.370Z",
     "size": 197040,
     "path": "../public/coach-media/animations/bravo/bravo4.webp"
   },
   "/coach-media/animations/bravo/bravo5.webp": {
     "type": "image/webp",
     "etag": "\"120aa-WQCZmq2H4iAmCwkgGz0jbhroUMU\"",
-    "mtime": "2026-08-04T15:39:49.121Z",
+    "mtime": "2026-08-04T16:01:40.370Z",
     "size": 73898,
     "path": "../public/coach-media/animations/bravo/bravo5.webp"
   },
   "/coach-media/animations/bravo/bravo6.webp": {
     "type": "image/webp",
     "etag": "\"1a95c-STnlzMe66YjYqbDuY5yLt9ADvzM\"",
-    "mtime": "2026-08-04T15:39:49.122Z",
+    "mtime": "2026-08-04T16:01:40.370Z",
     "size": 108892,
     "path": "../public/coach-media/animations/bravo/bravo6.webp"
   },
   "/coach-media/animations/bravo/bravo7.webp": {
     "type": "image/webp",
     "etag": "\"29fa6-QguGsOjUTD8OjKKTZfpb9dijR5g\"",
-    "mtime": "2026-08-04T15:39:49.123Z",
+    "mtime": "2026-08-04T16:01:40.371Z",
     "size": 171942,
     "path": "../public/coach-media/animations/bravo/bravo7.webp"
   },
   "/coach-media/animations/bravo/bravo8.webp": {
     "type": "image/webp",
     "etag": "\"1d8b4-xhvLiSPfxFlQsAeh/JU1EhCyKtQ\"",
-    "mtime": "2026-08-04T15:39:49.122Z",
+    "mtime": "2026-08-04T16:01:40.371Z",
     "size": 121012,
     "path": "../public/coach-media/animations/bravo/bravo8.webp"
   },
   "/coach-media/animations/bravo/bravo9.webp": {
     "type": "image/webp",
     "etag": "\"1105e-m+/rIlVAaoiD3hxFGIcC7Skzq0k\"",
-    "mtime": "2026-08-04T15:39:49.123Z",
+    "mtime": "2026-08-04T16:01:40.371Z",
     "size": 69726,
     "path": "../public/coach-media/animations/bravo/bravo9.webp"
+  },
+  "/coach-media/emojis/danger/danger1.png": {
+    "type": "image/png",
+    "etag": "\"3036-eXYZ+J7eqF26NQJZHhXFXrNgGww\"",
+    "mtime": "2026-08-04T16:01:40.282Z",
+    "size": 12342,
+    "path": "../public/coach-media/emojis/danger/danger1.png"
   },
   "/coach-media/animations/surprise/surprise1.webp": {
     "type": "image/webp",
     "etag": "\"4a370-9Oi37cBTqcZsmdkv+CmJExyHBlo\"",
-    "mtime": "2026-08-04T15:39:49.048Z",
+    "mtime": "2026-08-04T16:01:40.287Z",
     "size": 303984,
     "path": "../public/coach-media/animations/surprise/surprise1.webp"
   },
   "/coach-media/animations/surprise/surprise10.webp": {
     "type": "image/webp",
     "etag": "\"131a0-flDD1aRXvJm4HKE+7qPrfT2YS20\"",
-    "mtime": "2026-08-04T15:39:49.123Z",
+    "mtime": "2026-08-04T16:01:40.372Z",
     "size": 78240,
     "path": "../public/coach-media/animations/surprise/surprise10.webp"
   },
   "/coach-media/animations/surprise/surprise11.webp": {
     "type": "image/webp",
     "etag": "\"226fa-Xm81GJcMlpKVokcSNJtb09zW62k\"",
-    "mtime": "2026-08-04T15:39:49.124Z",
+    "mtime": "2026-08-04T16:01:40.372Z",
     "size": 141050,
     "path": "../public/coach-media/animations/surprise/surprise11.webp"
   },
   "/coach-media/animations/surprise/surprise12.webp": {
     "type": "image/webp",
     "etag": "\"a118-ZWkYpEVwrTmfFkTwYVBVpG6odjA\"",
-    "mtime": "2026-08-04T15:39:49.124Z",
+    "mtime": "2026-08-04T16:01:40.372Z",
     "size": 41240,
     "path": "../public/coach-media/animations/surprise/surprise12.webp"
   },
   "/coach-media/animations/surprise/surprise13.webp": {
     "type": "image/webp",
     "etag": "\"289d4-B/06SsPdfqNr35A+kWV5GqsWzHg\"",
-    "mtime": "2026-08-04T15:39:49.127Z",
+    "mtime": "2026-08-04T16:01:40.379Z",
     "size": 166356,
     "path": "../public/coach-media/animations/surprise/surprise13.webp"
   },
   "/coach-media/animations/surprise/surprise14.webp": {
     "type": "image/webp",
     "etag": "\"3f97e-wtHNBTyAPcvP3sC4pqeu2CzXJMs\"",
-    "mtime": "2026-08-04T15:39:49.124Z",
+    "mtime": "2026-08-04T16:01:40.379Z",
     "size": 260478,
     "path": "../public/coach-media/animations/surprise/surprise14.webp"
   },
   "/coach-media/animations/surprise/surprise16.webp": {
     "type": "image/webp",
     "etag": "\"10334-Gb5fHOWmtfoadRAb/ahHh2AADW0\"",
-    "mtime": "2026-08-04T15:39:49.124Z",
+    "mtime": "2026-08-04T16:01:40.379Z",
     "size": 66356,
     "path": "../public/coach-media/animations/surprise/surprise16.webp"
   },
   "/coach-media/animations/surprise/surprise17.webp": {
     "type": "image/webp",
     "etag": "\"1b95e-L11+Pw+wBWHBUC/2neg+jcazG2Y\"",
-    "mtime": "2026-08-04T15:39:49.128Z",
+    "mtime": "2026-08-04T16:01:40.379Z",
     "size": 112990,
     "path": "../public/coach-media/animations/surprise/surprise17.webp"
   },
   "/coach-media/animations/surprise/surprise18.webp": {
     "type": "image/webp",
     "etag": "\"18598-xHc16X67VNu9v8+Gc1s2b0JpwDg\"",
-    "mtime": "2026-08-04T15:39:49.127Z",
+    "mtime": "2026-08-04T16:01:40.380Z",
     "size": 99736,
     "path": "../public/coach-media/animations/surprise/surprise18.webp"
   },
   "/coach-media/animations/surprise/surprise19.webp": {
     "type": "image/webp",
     "etag": "\"11b66-taP6NYs2DrSJ1/Fu0gCrYIFdJrI\"",
-    "mtime": "2026-08-04T15:39:49.131Z",
+    "mtime": "2026-08-04T16:01:40.378Z",
     "size": 72550,
     "path": "../public/coach-media/animations/surprise/surprise19.webp"
   },
   "/coach-media/animations/surprise/surprise2.webp": {
     "type": "image/webp",
     "etag": "\"1b28c-nMtO/w3tSIWPnQA/P/d7OQO8Fos\"",
-    "mtime": "2026-08-04T15:39:49.127Z",
+    "mtime": "2026-08-04T16:01:40.381Z",
     "size": 111244,
     "path": "../public/coach-media/animations/surprise/surprise2.webp"
   },
   "/coach-media/animations/surprise/surprise20.webp": {
     "type": "image/webp",
     "etag": "\"193ea-58K//9bArX9XDu0po5Lr3OMkZHg\"",
-    "mtime": "2026-08-04T15:39:49.128Z",
+    "mtime": "2026-08-04T16:01:40.382Z",
     "size": 103402,
     "path": "../public/coach-media/animations/surprise/surprise20.webp"
   },
   "/coach-media/animations/surprise/surprise15.webp": {
     "type": "image/webp",
     "etag": "\"83768-IbKQoFThb02i7K7OLM8NjZwMn+w\"",
-    "mtime": "2026-08-04T15:39:49.127Z",
+    "mtime": "2026-08-04T16:01:40.379Z",
     "size": 538472,
     "path": "../public/coach-media/animations/surprise/surprise15.webp"
   },
   "/coach-media/animations/surprise/surprise21.webp": {
     "type": "image/webp",
     "etag": "\"a180-9IgNwh+Zz8BrStL5KFb1UAAyx08\"",
-    "mtime": "2026-08-04T15:39:49.128Z",
+    "mtime": "2026-08-04T16:01:40.380Z",
     "size": 41344,
     "path": "../public/coach-media/animations/surprise/surprise21.webp"
   },
   "/coach-media/animations/surprise/surprise22.webp": {
     "type": "image/webp",
     "etag": "\"14758-fKETCESGU4TOKmR+Tq2Jt5vsZv4\"",
-    "mtime": "2026-08-04T15:39:49.128Z",
+    "mtime": "2026-08-04T16:01:40.382Z",
     "size": 83800,
     "path": "../public/coach-media/animations/surprise/surprise22.webp"
-  },
-  "/coach-media/animations/surprise/surprise24.webp": {
-    "type": "image/webp",
-    "etag": "\"8ec6-3SAThVbqdRWZ2r2MmBs4qSDgNSA\"",
-    "mtime": "2026-08-04T15:39:49.129Z",
-    "size": 36550,
-    "path": "../public/coach-media/animations/surprise/surprise24.webp"
   },
   "/coach-media/animations/surprise/surprise23.webp": {
     "type": "image/webp",
     "etag": "\"309fc-vmf3IDCZQraeJiH2u5nNYnBmLE0\"",
-    "mtime": "2026-08-04T15:39:49.130Z",
+    "mtime": "2026-08-04T16:01:40.382Z",
     "size": 199164,
     "path": "../public/coach-media/animations/surprise/surprise23.webp"
+  },
+  "/coach-media/animations/surprise/surprise24.webp": {
+    "type": "image/webp",
+    "etag": "\"8ec6-3SAThVbqdRWZ2r2MmBs4qSDgNSA\"",
+    "mtime": "2026-08-04T16:01:40.382Z",
+    "size": 36550,
+    "path": "../public/coach-media/animations/surprise/surprise24.webp"
   },
   "/coach-media/animations/surprise/surprise25.webp": {
     "type": "image/webp",
     "etag": "\"34a6-dvr2Gjy94G6cfLjV7K9ojhZks7w\"",
-    "mtime": "2026-08-04T15:39:49.130Z",
+    "mtime": "2026-08-04T16:01:40.382Z",
     "size": 13478,
     "path": "../public/coach-media/animations/surprise/surprise25.webp"
-  },
-  "/coach-media/animations/surprise/surprise26.webp": {
-    "type": "image/webp",
-    "etag": "\"743c6-pt6mVsMYiG3+eBL112jrgey0Gzo\"",
-    "mtime": "2026-08-04T15:39:49.132Z",
-    "size": 476102,
-    "path": "../public/coach-media/animations/surprise/surprise26.webp"
   },
   "/coach-media/animations/bravo/bravo34.webp": {
     "type": "image/webp",
     "etag": "\"26ccac-0lLmGbQH56H1iPHEYHxgMHzvGqg\"",
-    "mtime": "2026-08-04T15:39:49.123Z",
+    "mtime": "2026-08-04T16:01:40.372Z",
     "size": 2542764,
     "path": "../public/coach-media/animations/bravo/bravo34.webp"
+  },
+  "/coach-media/animations/surprise/surprise26.webp": {
+    "type": "image/webp",
+    "etag": "\"743c6-pt6mVsMYiG3+eBL112jrgey0Gzo\"",
+    "mtime": "2026-08-04T16:01:40.384Z",
+    "size": 476102,
+    "path": "../public/coach-media/animations/surprise/surprise26.webp"
   },
   "/coach-media/animations/surprise/surprise27.webp": {
     "type": "image/webp",
     "etag": "\"2fd12-RMFF8r6epFOKQpfSCriVPGTdgVU\"",
-    "mtime": "2026-08-04T15:39:49.130Z",
+    "mtime": "2026-08-04T16:01:40.383Z",
     "size": 195858,
     "path": "../public/coach-media/animations/surprise/surprise27.webp"
   },
   "/coach-media/animations/surprise/surprise28.webp": {
     "type": "image/webp",
     "etag": "\"ad24-FgC+hvDgvud9BCFGf28pvxl71oQ\"",
-    "mtime": "2026-08-04T15:39:49.129Z",
+    "mtime": "2026-08-04T16:01:40.383Z",
     "size": 44324,
     "path": "../public/coach-media/animations/surprise/surprise28.webp"
   },
   "/coach-media/animations/surprise/surprise29.webp": {
     "type": "image/webp",
     "etag": "\"12cd0-q0YDo94p3qYkje+5yt5zOubu2/Q\"",
-    "mtime": "2026-08-04T15:39:49.130Z",
+    "mtime": "2026-08-04T16:01:40.383Z",
     "size": 77008,
     "path": "../public/coach-media/animations/surprise/surprise29.webp"
   },
   "/coach-media/animations/surprise/surprise31.webp": {
     "type": "image/webp",
     "etag": "\"8b78-fIpPGO3WzV7KeoLiRXPR1uc7I+0\"",
-    "mtime": "2026-08-04T15:39:49.131Z",
+    "mtime": "2026-08-04T16:01:40.385Z",
     "size": 35704,
     "path": "../public/coach-media/animations/surprise/surprise31.webp"
   },
   "/coach-media/animations/surprise/surprise32.webp": {
     "type": "image/webp",
     "etag": "\"1fc6e-bll0tlhrTsQvI87il4kKbajXbMg\"",
-    "mtime": "2026-08-04T15:39:49.131Z",
+    "mtime": "2026-08-04T16:01:40.384Z",
     "size": 130158,
     "path": "../public/coach-media/animations/surprise/surprise32.webp"
   },
   "/coach-media/animations/surprise/surprise34.webp": {
     "type": "image/webp",
     "etag": "\"39c0c-gOa+85OS+P0yapBXCLgb6G4e3KY\"",
-    "mtime": "2026-08-04T15:39:49.132Z",
+    "mtime": "2026-08-04T16:01:40.385Z",
     "size": 236556,
     "path": "../public/coach-media/animations/surprise/surprise34.webp"
   },
   "/coach-media/animations/surprise/surprise35.webp": {
     "type": "image/webp",
     "etag": "\"2fdf0-P29h6puCfyWcpyj5Hiuay3K7+XI\"",
-    "mtime": "2026-08-04T15:39:49.132Z",
+    "mtime": "2026-08-04T16:01:40.385Z",
     "size": 196080,
     "path": "../public/coach-media/animations/surprise/surprise35.webp"
   },
   "/coach-media/animations/surprise/surprise36.webp": {
     "type": "image/webp",
     "etag": "\"65d6a-XLUQAUVvNKrY0Ak4xmcIhKdi+kc\"",
-    "mtime": "2026-08-04T15:39:49.133Z",
+    "mtime": "2026-08-04T16:01:40.387Z",
     "size": 417130,
     "path": "../public/coach-media/animations/surprise/surprise36.webp"
   },
   "/coach-media/animations/surprise/surprise37.webp": {
     "type": "image/webp",
     "etag": "\"1c006-O6avPzSEEE8867z/qx4SNy/2Dbs\"",
-    "mtime": "2026-08-04T15:39:49.133Z",
+    "mtime": "2026-08-04T16:01:40.386Z",
     "size": 114694,
     "path": "../public/coach-media/animations/surprise/surprise37.webp"
   },
   "/coach-media/animations/surprise/surprise38.webp": {
     "type": "image/webp",
     "etag": "\"13470-E9RJjOFPzc8oN6aIexSBkTIvvno\"",
-    "mtime": "2026-08-04T15:39:49.132Z",
+    "mtime": "2026-08-04T16:01:40.391Z",
     "size": 78960,
     "path": "../public/coach-media/animations/surprise/surprise38.webp"
   },
   "/coach-media/animations/surprise/surprise39.webp": {
     "type": "image/webp",
     "etag": "\"3f126-BT2+LxctzUWG3/ThOwuDtTgAArY\"",
-    "mtime": "2026-08-04T15:39:49.132Z",
+    "mtime": "2026-08-04T16:01:40.391Z",
     "size": 258342,
     "path": "../public/coach-media/animations/surprise/surprise39.webp"
-  },
-  "/coach-media/animations/surprise/surprise40.webp": {
-    "type": "image/webp",
-    "etag": "\"39564-nIAqPe45sz0KpkAx2CKOstSaCTA\"",
-    "mtime": "2026-08-04T15:39:49.133Z",
-    "size": 234852,
-    "path": "../public/coach-media/animations/surprise/surprise40.webp"
-  },
-  "/coach-media/animations/surprise/surprise4.webp": {
-    "type": "image/webp",
-    "etag": "\"435ca-axYlJUxq0dxVUcdPGXfx7jIjOqI\"",
-    "mtime": "2026-08-04T15:39:49.132Z",
-    "size": 275914,
-    "path": "../public/coach-media/animations/surprise/surprise4.webp"
   },
   "/coach-media/animations/surprise/surprise3.webp": {
     "type": "image/webp",
     "etag": "\"c1a0c-usHwa9n1ie+2Cm+CLsVeWK9PJMQ\"",
-    "mtime": "2026-08-04T15:39:49.131Z",
+    "mtime": "2026-08-04T16:01:40.384Z",
     "size": 793100,
     "path": "../public/coach-media/animations/surprise/surprise3.webp"
+  },
+  "/coach-media/animations/surprise/surprise4.webp": {
+    "type": "image/webp",
+    "etag": "\"435ca-axYlJUxq0dxVUcdPGXfx7jIjOqI\"",
+    "mtime": "2026-08-04T16:01:40.387Z",
+    "size": 275914,
+    "path": "../public/coach-media/animations/surprise/surprise4.webp"
+  },
+  "/coach-media/animations/surprise/surprise40.webp": {
+    "type": "image/webp",
+    "etag": "\"39564-nIAqPe45sz0KpkAx2CKOstSaCTA\"",
+    "mtime": "2026-08-04T16:01:40.393Z",
+    "size": 234852,
+    "path": "../public/coach-media/animations/surprise/surprise40.webp"
   },
   "/coach-media/animations/surprise/surprise30.webp": {
     "type": "image/webp",
     "etag": "\"a5fd0-Hnpb/dNn7ssnoWT9WjuIq+4t5Qo\"",
-    "mtime": "2026-08-04T15:39:49.131Z",
+    "mtime": "2026-08-04T16:01:40.386Z",
     "size": 679888,
     "path": "../public/coach-media/animations/surprise/surprise30.webp"
   },
   "/coach-media/animations/surprise/surprise41.webp": {
     "type": "image/webp",
     "etag": "\"a8cc-eJpn1iM/G93mG/y3J7MYZxb5oZk\"",
-    "mtime": "2026-08-04T15:39:49.138Z",
+    "mtime": "2026-08-04T16:01:40.385Z",
     "size": 43212,
     "path": "../public/coach-media/animations/surprise/surprise41.webp"
   },
   "/coach-media/animations/surprise/surprise42.webp": {
     "type": "image/webp",
     "etag": "\"646bc-7+aKS5sl1K5hY8UDNYAFM4lfo6Y\"",
-    "mtime": "2026-08-04T15:39:49.139Z",
+    "mtime": "2026-08-04T16:01:40.391Z",
     "size": 411324,
     "path": "../public/coach-media/animations/surprise/surprise42.webp"
   },
   "/coach-media/animations/surprise/surprise43.webp": {
     "type": "image/webp",
     "etag": "\"4b24-EbrAgTKhgJEIluaU9wK/fZsqFQI\"",
-    "mtime": "2026-08-04T15:39:49.139Z",
+    "mtime": "2026-08-04T16:01:40.393Z",
     "size": 19236,
     "path": "../public/coach-media/animations/surprise/surprise43.webp"
   },
   "/coach-media/animations/surprise/surprise45.webp": {
     "type": "image/webp",
     "etag": "\"1a680-xKF6ecJOJz07Bq3nMYUvl7ZSmJo\"",
-    "mtime": "2026-08-04T15:39:49.138Z",
+    "mtime": "2026-08-04T16:01:40.387Z",
     "size": 108160,
     "path": "../public/coach-media/animations/surprise/surprise45.webp"
   },
   "/coach-media/animations/surprise/surprise46.webp": {
     "type": "image/webp",
     "etag": "\"b624-UVBhSbU4BcnZsHBEFLk/NJkigMs\"",
-    "mtime": "2026-08-04T15:39:49.139Z",
+    "mtime": "2026-08-04T16:01:40.391Z",
     "size": 46628,
     "path": "../public/coach-media/animations/surprise/surprise46.webp"
   },
   "/coach-media/animations/surprise/surprise47.webp": {
     "type": "image/webp",
     "etag": "\"ed28-q4uXmQ440B/uZ44347cvninGGos\"",
-    "mtime": "2026-08-04T15:39:49.138Z",
+    "mtime": "2026-08-04T16:01:40.392Z",
     "size": 60712,
     "path": "../public/coach-media/animations/surprise/surprise47.webp"
   },
   "/coach-media/animations/surprise/surprise48.webp": {
     "type": "image/webp",
     "etag": "\"132e0-ARE5bC0A3JVvXvF646DPkIObvBU\"",
-    "mtime": "2026-08-04T15:39:49.138Z",
+    "mtime": "2026-08-04T16:01:40.392Z",
     "size": 78560,
     "path": "../public/coach-media/animations/surprise/surprise48.webp"
-  },
-  "/coach-media/animations/surprise/surprise33.webp": {
-    "type": "image/webp",
-    "etag": "\"1ff378-3ceZyeJGfgZwkrgPrzBv1AbDx9o\"",
-    "mtime": "2026-08-04T15:39:49.133Z",
-    "size": 2093944,
-    "path": "../public/coach-media/animations/surprise/surprise33.webp"
   },
   "/coach-media/animations/surprise/surprise49.webp": {
     "type": "image/webp",
     "etag": "\"25b6c-wCdzxaXfkdqyDcw6a8xy07JXmzE\"",
-    "mtime": "2026-08-04T15:39:49.138Z",
+    "mtime": "2026-08-04T16:01:40.392Z",
     "size": 154476,
     "path": "../public/coach-media/animations/surprise/surprise49.webp"
+  },
+  "/coach-media/animations/surprise/surprise33.webp": {
+    "type": "image/webp",
+    "etag": "\"1ff378-3ceZyeJGfgZwkrgPrzBv1AbDx9o\"",
+    "mtime": "2026-08-04T16:01:40.385Z",
+    "size": 2093944,
+    "path": "../public/coach-media/animations/surprise/surprise33.webp"
   },
   "/coach-media/animations/surprise/surprise5.webp": {
     "type": "image/webp",
     "etag": "\"27cfa-OX0fnlOewddMbbATr6i9i2ynE3Y\"",
-    "mtime": "2026-08-04T15:39:49.138Z",
+    "mtime": "2026-08-04T16:01:40.395Z",
     "size": 163066,
     "path": "../public/coach-media/animations/surprise/surprise5.webp"
   },
   "/coach-media/animations/surprise/surprise50.webp": {
     "type": "image/webp",
     "etag": "\"54ee6-utB6xrbIiRW/BR2zFsCbLOBuYQ0\"",
-    "mtime": "2026-08-04T15:39:49.138Z",
+    "mtime": "2026-08-04T16:01:40.393Z",
     "size": 347878,
     "path": "../public/coach-media/animations/surprise/surprise50.webp"
   },
   "/coach-media/animations/surprise/surprise51.webp": {
     "type": "image/webp",
     "etag": "\"2227a-5yeomBh1J53C2OweVlrUJRsy7d0\"",
-    "mtime": "2026-08-04T15:39:49.138Z",
+    "mtime": "2026-08-04T16:01:40.393Z",
     "size": 139898,
     "path": "../public/coach-media/animations/surprise/surprise51.webp"
   },
   "/coach-media/animations/surprise/surprise52.webp": {
     "type": "image/webp",
     "etag": "\"142aa-ez2zkO6VqB8WIkeukvxz7D7f1lU\"",
-    "mtime": "2026-08-04T15:39:49.139Z",
+    "mtime": "2026-08-04T16:01:40.398Z",
     "size": 82602,
     "path": "../public/coach-media/animations/surprise/surprise52.webp"
-  },
-  "/coach-media/animations/surprise/surprise44.webp": {
-    "type": "image/webp",
-    "etag": "\"a77fc-figlb0a9uvdibEtUPy5WQ390cJ0\"",
-    "mtime": "2026-08-04T15:39:49.133Z",
-    "size": 686076,
-    "path": "../public/coach-media/animations/surprise/surprise44.webp"
   },
   "/coach-media/animations/surprise/surprise53.webp": {
     "type": "image/webp",
     "etag": "\"118e2-l9zmLQtW2P6gxSkdSTudjLq2c3Q\"",
-    "mtime": "2026-08-04T15:39:49.139Z",
+    "mtime": "2026-08-04T16:01:40.393Z",
     "size": 71906,
     "path": "../public/coach-media/animations/surprise/surprise53.webp"
   },
   "/coach-media/animations/surprise/surprise54.webp": {
     "type": "image/webp",
     "etag": "\"1e178-jaNfsOInt+QvPbLkhzwWaJqG/Bs\"",
-    "mtime": "2026-08-04T15:39:49.139Z",
+    "mtime": "2026-08-04T16:01:40.397Z",
     "size": 123256,
     "path": "../public/coach-media/animations/surprise/surprise54.webp"
+  },
+  "/coach-media/animations/surprise/surprise44.webp": {
+    "type": "image/webp",
+    "etag": "\"a77fc-figlb0a9uvdibEtUPy5WQ390cJ0\"",
+    "mtime": "2026-08-04T16:01:40.392Z",
+    "size": 686076,
+    "path": "../public/coach-media/animations/surprise/surprise44.webp"
   },
   "/coach-media/animations/surprise/surprise55.webp": {
     "type": "image/webp",
     "etag": "\"5a896-O68fUxVUguZ0BzBxfGlXQFyP0DA\"",
-    "mtime": "2026-08-04T15:39:49.139Z",
+    "mtime": "2026-08-04T16:01:40.394Z",
     "size": 370838,
     "path": "../public/coach-media/animations/surprise/surprise55.webp"
   },
   "/coach-media/animations/surprise/surprise56.webp": {
     "type": "image/webp",
     "etag": "\"1b960-DZp5H8cTkUG7OqYKTKt0Wb41j6Y\"",
-    "mtime": "2026-08-04T15:39:49.139Z",
+    "mtime": "2026-08-04T16:01:40.394Z",
     "size": 112992,
     "path": "../public/coach-media/animations/surprise/surprise56.webp"
   },
   "/coach-media/animations/surprise/surprise57.webp": {
     "type": "image/webp",
     "etag": "\"44ab8-mSBT2ojhhuQLKvtVbnLyoP47hJY\"",
-    "mtime": "2026-08-04T15:39:49.140Z",
+    "mtime": "2026-08-04T16:01:40.394Z",
     "size": 281272,
     "path": "../public/coach-media/animations/surprise/surprise57.webp"
-  },
-  "/coach-media/animations/surprise/surprise59.webp": {
-    "type": "image/webp",
-    "etag": "\"ad24-FgC+hvDgvud9BCFGf28pvxl71oQ\"",
-    "mtime": "2026-08-04T15:39:49.140Z",
-    "size": 44324,
-    "path": "../public/coach-media/animations/surprise/surprise59.webp"
   },
   "/coach-media/animations/surprise/surprise58.webp": {
     "type": "image/webp",
     "etag": "\"21a8a-Yf9qQLhbyXuD9/JZ+89b4mvgAKw\"",
-    "mtime": "2026-08-04T15:39:49.140Z",
+    "mtime": "2026-08-04T16:01:40.394Z",
     "size": 137866,
     "path": "../public/coach-media/animations/surprise/surprise58.webp"
+  },
+  "/coach-media/animations/surprise/surprise59.webp": {
+    "type": "image/webp",
+    "etag": "\"ad24-FgC+hvDgvud9BCFGf28pvxl71oQ\"",
+    "mtime": "2026-08-04T16:01:40.398Z",
+    "size": 44324,
+    "path": "../public/coach-media/animations/surprise/surprise59.webp"
   },
   "/coach-media/animations/surprise/surprise6.webp": {
     "type": "image/webp",
     "etag": "\"efbe-4a9rtfMIdF2+TFeY3gBQcGq2OOY\"",
-    "mtime": "2026-08-04T15:39:49.140Z",
+    "mtime": "2026-08-04T16:01:40.395Z",
     "size": 61374,
     "path": "../public/coach-media/animations/surprise/surprise6.webp"
-  },
-  "/coach-media/animations/surprise/surprise60.webp": {
-    "type": "image/webp",
-    "etag": "\"4b7a6-epNKh/4axQkdUr59kQLtvLuUWxk\"",
-    "mtime": "2026-08-04T15:39:49.140Z",
-    "size": 309158,
-    "path": "../public/coach-media/animations/surprise/surprise60.webp"
   },
   "/coach-media/animations/surprise/surprise61.webp": {
     "type": "image/webp",
     "etag": "\"12cd0-q0YDo94p3qYkje+5yt5zOubu2/Q\"",
-    "mtime": "2026-08-04T15:39:49.140Z",
+    "mtime": "2026-08-04T16:01:40.395Z",
     "size": 77008,
     "path": "../public/coach-media/animations/surprise/surprise61.webp"
+  },
+  "/coach-media/animations/surprise/surprise60.webp": {
+    "type": "image/webp",
+    "etag": "\"4b7a6-epNKh/4axQkdUr59kQLtvLuUWxk\"",
+    "mtime": "2026-08-04T16:01:40.396Z",
+    "size": 309158,
+    "path": "../public/coach-media/animations/surprise/surprise60.webp"
   },
   "/coach-media/animations/surprise/surprise62.webp": {
     "type": "image/webp",
     "etag": "\"1c6a0-mXpnKRv+Hz25jP09BjR4foiD6qw\"",
-    "mtime": "2026-08-04T15:39:49.141Z",
+    "mtime": "2026-08-04T16:01:40.395Z",
     "size": 116384,
     "path": "../public/coach-media/animations/surprise/surprise62.webp"
   },
   "/coach-media/animations/surprise/surprise63.webp": {
     "type": "image/webp",
     "etag": "\"1eeba-iqr/NnLNgmJCGHzVJ166UGdRB4Q\"",
-    "mtime": "2026-08-04T15:39:49.141Z",
+    "mtime": "2026-08-04T16:01:40.396Z",
     "size": 126650,
     "path": "../public/coach-media/animations/surprise/surprise63.webp"
   },
   "/coach-media/animations/surprise/surprise7.webp": {
     "type": "image/webp",
     "etag": "\"28cf0-WZKrfZgxmWudkDiNqJ2t+yttmY4\"",
-    "mtime": "2026-08-04T15:39:49.141Z",
+    "mtime": "2026-08-04T16:01:40.396Z",
     "size": 167152,
     "path": "../public/coach-media/animations/surprise/surprise7.webp"
   },
   "/coach-media/animations/surprise/surprise9.webp": {
     "type": "image/webp",
     "etag": "\"3567c-XTH6klwiC89h9A35OVWjuAEqJ5A\"",
-    "mtime": "2026-08-04T15:39:49.141Z",
+    "mtime": "2026-08-04T16:01:40.396Z",
     "size": 218748,
     "path": "../public/coach-media/animations/surprise/surprise9.webp"
-  },
-  "/coach-media/animations/happy/happy10.webp": {
-    "type": "image/webp",
-    "etag": "\"13102-1AwfKNNogN0hV9N7INQr8b/L5U0\"",
-    "mtime": "2026-08-04T15:39:49.145Z",
-    "size": 78082,
-    "path": "../public/coach-media/animations/happy/happy10.webp"
-  },
-  "/coach-media/animations/happy/happy11.webp": {
-    "type": "image/webp",
-    "etag": "\"c51c-aSSJ/YerC2d+QHIzkxapjUKX1xo\"",
-    "mtime": "2026-08-04T15:39:49.141Z",
-    "size": 50460,
-    "path": "../public/coach-media/animations/happy/happy11.webp"
-  },
-  "/coach-media/animations/happy/happy12.webp": {
-    "type": "image/webp",
-    "etag": "\"26dd0-kEufqOKIIc4EphkqsilP8Vg0anA\"",
-    "mtime": "2026-08-04T15:39:49.141Z",
-    "size": 159184,
-    "path": "../public/coach-media/animations/happy/happy12.webp"
-  },
-  "/coach-media/animations/happy/happy13.webp": {
-    "type": "image/webp",
-    "etag": "\"1b7c8-6YwhPgMDDi09N6QaiQGvB3MESN8\"",
-    "mtime": "2026-08-04T15:39:49.146Z",
-    "size": 112584,
-    "path": "../public/coach-media/animations/happy/happy13.webp"
-  },
-  "/coach-media/animations/happy/happy14.webp": {
-    "type": "image/webp",
-    "etag": "\"2b5e-Tlk4vz7sMxW+TPrlh/TTUPVQZ64\"",
-    "mtime": "2026-08-04T15:39:49.141Z",
-    "size": 11102,
-    "path": "../public/coach-media/animations/happy/happy14.webp"
-  },
-  "/coach-media/animations/happy/happy15.webp": {
-    "type": "image/webp",
-    "etag": "\"1f82e-GdfVpoK+FBOph2APqZZ2ksTEi/M\"",
-    "mtime": "2026-08-04T15:39:49.145Z",
-    "size": 129070,
-    "path": "../public/coach-media/animations/happy/happy15.webp"
-  },
-  "/coach-media/animations/happy/happy16.webp": {
-    "type": "image/webp",
-    "etag": "\"39676-m3hlL8MEmfcM8A6RQ/d34G7k4z4\"",
-    "mtime": "2026-08-04T15:39:49.141Z",
-    "size": 235126,
-    "path": "../public/coach-media/animations/happy/happy16.webp"
-  },
-  "/coach-media/animations/happy/happy17.webp": {
-    "type": "image/webp",
-    "etag": "\"6c236-lcuyQg6sSZcT0+fCpGNG/JhMi7U\"",
-    "mtime": "2026-08-04T15:39:49.142Z",
-    "size": 442934,
-    "path": "../public/coach-media/animations/happy/happy17.webp"
-  },
-  "/coach-media/animations/happy/happy18.webp": {
-    "type": "image/webp",
-    "etag": "\"38cca-HDXyFn4nw7hhDQ0f8voh7jHxFIU\"",
-    "mtime": "2026-08-04T15:39:49.142Z",
-    "size": 232650,
-    "path": "../public/coach-media/animations/happy/happy18.webp"
-  },
-  "/coach-media/animations/happy/happy19.webp": {
-    "type": "image/webp",
-    "etag": "\"7340-Mvycs8QTkYX6zm7iIfL2nLfxOe8\"",
-    "mtime": "2026-08-04T15:39:49.149Z",
-    "size": 29504,
-    "path": "../public/coach-media/animations/happy/happy19.webp"
-  },
-  "/coach-media/animations/happy/happy2.webp": {
-    "type": "image/webp",
-    "etag": "\"1b638-CG1y3zibI0VpxAfTb3zZrzRaw90\"",
-    "mtime": "2026-08-04T15:39:49.147Z",
-    "size": 112184,
-    "path": "../public/coach-media/animations/happy/happy2.webp"
-  },
-  "/coach-media/animations/happy/happy1.webp": {
-    "type": "image/webp",
-    "etag": "\"9a9fe-dnJ60THXbLE/qdsCoy8mks8JEWo\"",
-    "mtime": "2026-08-04T15:39:49.050Z",
-    "size": 633342,
-    "path": "../public/coach-media/animations/happy/happy1.webp"
-  },
-  "/coach-media/animations/happy/happy20.webp": {
-    "type": "image/webp",
-    "etag": "\"31eb2-eG0f1RbiJPRwmWx1p+zVbeej7Jo\"",
-    "mtime": "2026-08-04T15:39:49.145Z",
-    "size": 204466,
-    "path": "../public/coach-media/animations/happy/happy20.webp"
-  },
-  "/coach-media/animations/happy/happy21.webp": {
-    "type": "image/webp",
-    "etag": "\"d20a-nJXSMlgY3QzHwwJw2j7rW4bD6HU\"",
-    "mtime": "2026-08-04T15:39:49.146Z",
-    "size": 53770,
-    "path": "../public/coach-media/animations/happy/happy21.webp"
-  },
-  "/coach-media/animations/happy/happy22.webp": {
-    "type": "image/webp",
-    "etag": "\"2be74-wts9jwpJqVDGud0ZifbURmTwf7g\"",
-    "mtime": "2026-08-04T15:39:49.148Z",
-    "size": 179828,
-    "path": "../public/coach-media/animations/happy/happy22.webp"
-  },
-  "/coach-media/animations/happy/happy23.webp": {
-    "type": "image/webp",
-    "etag": "\"e74a-F+BBio6AhOZ5hwHOGh8wKCLcoGA\"",
-    "mtime": "2026-08-04T15:39:49.147Z",
-    "size": 59210,
-    "path": "../public/coach-media/animations/happy/happy23.webp"
-  },
-  "/coach-media/animations/happy/happy24.webp": {
-    "type": "image/webp",
-    "etag": "\"23e02-CIi7WeJXeH8cd/GgwMtt3CFFVkM\"",
-    "mtime": "2026-08-04T15:39:49.147Z",
-    "size": 146946,
-    "path": "../public/coach-media/animations/happy/happy24.webp"
-  },
-  "/coach-media/animations/happy/happy25.webp": {
-    "type": "image/webp",
-    "etag": "\"16574-kubThW5vAMKccIZc2jswkTWLUoA\"",
-    "mtime": "2026-08-04T15:39:49.147Z",
-    "size": 91508,
-    "path": "../public/coach-media/animations/happy/happy25.webp"
-  },
-  "/coach-media/animations/happy/happy27.webp": {
-    "type": "image/webp",
-    "etag": "\"1c662-1bbHXwmlK1/Q6duQFfbU/+Wg5Fg\"",
-    "mtime": "2026-08-04T15:39:49.149Z",
-    "size": 116322,
-    "path": "../public/coach-media/animations/happy/happy27.webp"
-  },
-  "/coach-media/animations/happy/happy26.webp": {
-    "type": "image/webp",
-    "etag": "\"6c706-bOAKAMAiElDmC2MCxEJkrvr5A+k\"",
-    "mtime": "2026-08-04T15:39:49.148Z",
-    "size": 444166,
-    "path": "../public/coach-media/animations/happy/happy26.webp"
-  },
-  "/coach-media/animations/happy/happy29.webp": {
-    "type": "image/webp",
-    "etag": "\"15a6e-F4FEHmzAIG7WW3pszvFsq0XKYGk\"",
-    "mtime": "2026-08-04T15:39:49.148Z",
-    "size": 88686,
-    "path": "../public/coach-media/animations/happy/happy29.webp"
-  },
-  "/coach-media/animations/happy/happy28.webp": {
-    "type": "image/webp",
-    "etag": "\"2090a-cfPB8KwXDFTC2iWhg6Pn7kOvGeg\"",
-    "mtime": "2026-08-04T15:39:49.150Z",
-    "size": 133386,
-    "path": "../public/coach-media/animations/happy/happy28.webp"
-  },
-  "/coach-media/animations/happy/happy3.webp": {
-    "type": "image/webp",
-    "etag": "\"6438c-AQmLLI1sVtzVfySWLf8q8/SnoDQ\"",
-    "mtime": "2026-08-04T15:39:49.148Z",
-    "size": 410508,
-    "path": "../public/coach-media/animations/happy/happy3.webp"
-  },
-  "/coach-media/animations/happy/happy30.webp": {
-    "type": "image/webp",
-    "etag": "\"46140-52DID+yWWHNDhSWo2wqCW7AgztI\"",
-    "mtime": "2026-08-04T15:39:49.152Z",
-    "size": 287040,
-    "path": "../public/coach-media/animations/happy/happy30.webp"
-  },
-  "/coach-media/animations/happy/happy31.webp": {
-    "type": "image/webp",
-    "etag": "\"4d6ca-GZQfzSkO4AbRu7KJoQWgnIw6U6k\"",
-    "mtime": "2026-08-04T15:39:49.148Z",
-    "size": 317130,
-    "path": "../public/coach-media/animations/happy/happy31.webp"
-  },
-  "/coach-media/animations/happy/happy32.webp": {
-    "type": "image/webp",
-    "etag": "\"1ce94-qd5mvwxqL3x8atGLGoQ6T5SBIM8\"",
-    "mtime": "2026-08-04T15:39:49.149Z",
-    "size": 118420,
-    "path": "../public/coach-media/animations/happy/happy32.webp"
-  },
-  "/coach-media/animations/happy/happy33.webp": {
-    "type": "image/webp",
-    "etag": "\"1ca8a-w5q1HyoRf3YSX2wny1ajxC1lVTw\"",
-    "mtime": "2026-08-04T15:39:49.149Z",
-    "size": 117386,
-    "path": "../public/coach-media/animations/happy/happy33.webp"
-  },
-  "/coach-media/animations/happy/happy34.webp": {
-    "type": "image/webp",
-    "etag": "\"7a6e-N4lUoynD0pY1HrZqbhKsKEJcIdY\"",
-    "mtime": "2026-08-04T15:39:49.149Z",
-    "size": 31342,
-    "path": "../public/coach-media/animations/happy/happy34.webp"
-  },
-  "/coach-media/animations/happy/happy35.webp": {
-    "type": "image/webp",
-    "etag": "\"27e2a-nINbfIIzpb0aB5cQDbxz/GDwNug\"",
-    "mtime": "2026-08-04T15:39:49.149Z",
-    "size": 163370,
-    "path": "../public/coach-media/animations/happy/happy35.webp"
-  },
-  "/coach-media/animations/happy/happy36.webp": {
-    "type": "image/webp",
-    "etag": "\"1480e-iU7KcSbk60IXH4CWOzNyttBsbE0\"",
-    "mtime": "2026-08-04T15:39:49.149Z",
-    "size": 83982,
-    "path": "../public/coach-media/animations/happy/happy36.webp"
-  },
-  "/coach-media/animations/happy/happy37.webp": {
-    "type": "image/webp",
-    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
-    "mtime": "2026-08-04T15:39:49.150Z",
-    "size": 57724,
-    "path": "../public/coach-media/animations/happy/happy37.webp"
-  },
-  "/coach-media/animations/happy/happy38.webp": {
-    "type": "image/webp",
-    "etag": "\"20928-zE86yLQztSZEATTCxTKRuQFifnw\"",
-    "mtime": "2026-08-04T15:39:49.150Z",
-    "size": 133416,
-    "path": "../public/coach-media/animations/happy/happy38.webp"
-  },
-  "/coach-media/animations/happy/happy39.webp": {
-    "type": "image/webp",
-    "etag": "\"1031c-0I4f6s3jDJrqeEDNAVBubusuRqQ\"",
-    "mtime": "2026-08-04T15:39:49.150Z",
-    "size": 66332,
-    "path": "../public/coach-media/animations/happy/happy39.webp"
-  },
-  "/coach-media/animations/happy/happy4.webp": {
-    "type": "image/webp",
-    "etag": "\"80d8-WZGwWFCLsk3YDTm9XP5QCq8R7Es\"",
-    "mtime": "2026-08-04T15:39:49.150Z",
-    "size": 32984,
-    "path": "../public/coach-media/animations/happy/happy4.webp"
-  },
-  "/coach-media/animations/happy/happy40.webp": {
-    "type": "image/webp",
-    "etag": "\"116ba-M7X1kM6tt7dIECx3koEGYbji1us\"",
-    "mtime": "2026-08-04T15:39:49.150Z",
-    "size": 71354,
-    "path": "../public/coach-media/animations/happy/happy40.webp"
-  },
-  "/coach-media/animations/happy/happy41.webp": {
-    "type": "image/webp",
-    "etag": "\"a76a-Nmck64+pAP0tEnTHpG1mitI4ONk\"",
-    "mtime": "2026-08-04T15:39:49.150Z",
-    "size": 42858,
-    "path": "../public/coach-media/animations/happy/happy41.webp"
-  },
-  "/coach-media/animations/happy/happy42.webp": {
-    "type": "image/webp",
-    "etag": "\"7eba-Xqry0H+Qj7x/M1eDmO0CIQ+A7Mg\"",
-    "mtime": "2026-08-04T15:39:49.151Z",
-    "size": 32442,
-    "path": "../public/coach-media/animations/happy/happy42.webp"
-  },
-  "/coach-media/animations/happy/happy43.webp": {
-    "type": "image/webp",
-    "etag": "\"55a5e-kUYTswcDoeybUYnmGXDBV0ny564\"",
-    "mtime": "2026-08-04T15:39:49.151Z",
-    "size": 350814,
-    "path": "../public/coach-media/animations/happy/happy43.webp"
-  },
-  "/coach-media/animations/happy/happy44.webp": {
-    "type": "image/webp",
-    "etag": "\"24e16-Y7u+Md6oQPbYSDjE0D9H77j0Z5I\"",
-    "mtime": "2026-08-04T15:39:49.151Z",
-    "size": 151062,
-    "path": "../public/coach-media/animations/happy/happy44.webp"
-  },
-  "/coach-media/animations/happy/happy45.webp": {
-    "type": "image/webp",
-    "etag": "\"65a82-XxALJISFlOUdD3wSziHwFXHhxqc\"",
-    "mtime": "2026-08-04T15:39:49.151Z",
-    "size": 416386,
-    "path": "../public/coach-media/animations/happy/happy45.webp"
-  },
-  "/coach-media/animations/happy/happy46.webp": {
-    "type": "image/webp",
-    "etag": "\"13dec-uj4sm+IwuLOmQY7lGy1JeMzt2FM\"",
-    "mtime": "2026-08-04T15:39:49.152Z",
-    "size": 81388,
-    "path": "../public/coach-media/animations/happy/happy46.webp"
-  },
-  "/coach-media/animations/happy/happy47.webp": {
-    "type": "image/webp",
-    "etag": "\"234e4-DNBmLISLOFimd+G8XihNRgMsjGw\"",
-    "mtime": "2026-08-04T15:39:49.151Z",
-    "size": 144612,
-    "path": "../public/coach-media/animations/happy/happy47.webp"
-  },
-  "/coach-media/animations/happy/happy5.webp": {
-    "type": "image/webp",
-    "etag": "\"10784-0Rzy5v92HqFbOQ0qn2Jo9XRJ1r0\"",
-    "mtime": "2026-08-04T15:39:49.151Z",
-    "size": 67460,
-    "path": "../public/coach-media/animations/happy/happy5.webp"
-  },
-  "/coach-media/animations/happy/happy49.webp": {
-    "type": "image/webp",
-    "etag": "\"3123c-mf62C2iWRtx585STd9CHbYmICyM\"",
-    "mtime": "2026-08-04T15:39:49.153Z",
-    "size": 201276,
-    "path": "../public/coach-media/animations/happy/happy49.webp"
-  },
-  "/coach-media/animations/happy/happy50.webp": {
-    "type": "image/webp",
-    "etag": "\"2b72a-Xz8Gb2Cdj+rrnnpbXbSGBQRTFYw\"",
-    "mtime": "2026-08-04T15:39:49.152Z",
-    "size": 177962,
-    "path": "../public/coach-media/animations/happy/happy50.webp"
-  },
-  "/coach-media/animations/happy/happy51.webp": {
-    "type": "image/webp",
-    "etag": "\"29090-le1WcmrRN+RDX52joaRj6kdNQS0\"",
-    "mtime": "2026-08-04T15:39:49.152Z",
-    "size": 168080,
-    "path": "../public/coach-media/animations/happy/happy51.webp"
-  },
-  "/coach-media/animations/happy/happy52.webp": {
-    "type": "image/webp",
-    "etag": "\"4a9b0-bNgmWpmTSjuc06DQcbX6RkVvCnU\"",
-    "mtime": "2026-08-04T15:39:49.152Z",
-    "size": 305584,
-    "path": "../public/coach-media/animations/happy/happy52.webp"
-  },
-  "/coach-media/animations/happy/happy53.webp": {
-    "type": "image/webp",
-    "etag": "\"57d0-WEnplvWuFKWqXkfuwNFuk472muo\"",
-    "mtime": "2026-08-04T15:39:49.151Z",
-    "size": 22480,
-    "path": "../public/coach-media/animations/happy/happy53.webp"
-  },
-  "/coach-media/animations/happy/happy48.webp": {
-    "type": "image/webp",
-    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
-    "mtime": "2026-08-04T15:39:49.151Z",
-    "size": 566688,
-    "path": "../public/coach-media/animations/happy/happy48.webp"
-  },
-  "/coach-media/animations/happy/happy54.webp": {
-    "type": "image/webp",
-    "etag": "\"de70-7JEgp30lMgh1RT82Z43BnbOPyME\"",
-    "mtime": "2026-08-04T15:39:49.157Z",
-    "size": 56944,
-    "path": "../public/coach-media/animations/happy/happy54.webp"
-  },
-  "/coach-media/animations/happy/happy55.webp": {
-    "type": "image/webp",
-    "etag": "\"4b40a-Dq55EPJ++rGpcOm3dfVMczMYPaI\"",
-    "mtime": "2026-08-04T15:39:49.152Z",
-    "size": 308234,
-    "path": "../public/coach-media/animations/happy/happy55.webp"
-  },
-  "/coach-media/animations/happy/happy56.webp": {
-    "type": "image/webp",
-    "etag": "\"7ec86-JO0Q1vC7rgTxvmuYQZ3337jzHAM\"",
-    "mtime": "2026-08-04T15:39:49.157Z",
-    "size": 519302,
-    "path": "../public/coach-media/animations/happy/happy56.webp"
-  },
-  "/coach-media/animations/happy/happy57.webp": {
-    "type": "image/webp",
-    "etag": "\"74f88-eEN2CyUJ9rLsRvqY7OzSZS3p2IU\"",
-    "mtime": "2026-08-04T15:39:49.153Z",
-    "size": 479112,
-    "path": "../public/coach-media/animations/happy/happy57.webp"
-  },
-  "/coach-media/animations/happy/happy59.webp": {
-    "type": "image/webp",
-    "etag": "\"e290-fQb7JlOst9pysXxzv35HJTcHlpE\"",
-    "mtime": "2026-08-04T15:39:49.158Z",
-    "size": 58000,
-    "path": "../public/coach-media/animations/happy/happy59.webp"
-  },
-  "/coach-media/animations/happy/happy58.webp": {
-    "type": "image/webp",
-    "etag": "\"695d4-fo3c1QhJVPT0yXYAuoQyAXrIO9E\"",
-    "mtime": "2026-08-04T15:39:49.159Z",
-    "size": 431572,
-    "path": "../public/coach-media/animations/happy/happy58.webp"
-  },
-  "/coach-media/animations/happy/happy6.webp": {
-    "type": "image/webp",
-    "etag": "\"2f8ce-NjZdr7Vin1NbHT+GFgWzMwsZeZE\"",
-    "mtime": "2026-08-04T15:39:49.161Z",
-    "size": 194766,
-    "path": "../public/coach-media/animations/happy/happy6.webp"
-  },
-  "/coach-media/animations/happy/happy61.webp": {
-    "type": "image/webp",
-    "etag": "\"253e8-1Fqod1LG1PZNTdmri6v0gPMthaE\"",
-    "mtime": "2026-08-04T15:39:49.157Z",
-    "size": 152552,
-    "path": "../public/coach-media/animations/happy/happy61.webp"
-  },
-  "/coach-media/animations/happy/happy63.webp": {
-    "type": "image/webp",
-    "etag": "\"2b52a-B18WnXoFNFEoRmRiTpAPD0Xw4fA\"",
-    "mtime": "2026-08-04T15:39:49.158Z",
-    "size": 177450,
-    "path": "../public/coach-media/animations/happy/happy63.webp"
-  },
-  "/coach-media/animations/happy/happy62.webp": {
-    "type": "image/webp",
-    "etag": "\"4f8f8-tLTO1/dtiZumcCPIDjxNhkIrS9g\"",
-    "mtime": "2026-08-04T15:39:49.159Z",
-    "size": 325880,
-    "path": "../public/coach-media/animations/happy/happy62.webp"
-  },
-  "/coach-media/animations/happy/happy65.webp": {
-    "type": "image/webp",
-    "etag": "\"153e2-1MrE6YaWW1bqq3uRkAG3roDYdbI\"",
-    "mtime": "2026-08-04T15:39:49.159Z",
-    "size": 87010,
-    "path": "../public/coach-media/animations/happy/happy65.webp"
-  },
-  "/coach-media/animations/happy/happy66.webp": {
-    "type": "image/webp",
-    "etag": "\"5aac0-EL5Dnfs0ZHXfZ2nFXHuqusIiA6U\"",
-    "mtime": "2026-08-04T15:39:49.161Z",
-    "size": 371392,
-    "path": "../public/coach-media/animations/happy/happy66.webp"
-  },
-  "/coach-media/animations/happy/happy67.webp": {
-    "type": "image/webp",
-    "etag": "\"26842-Ttlq6ska7bBpzXjvIXLqSUaPnIk\"",
-    "mtime": "2026-08-04T15:39:49.159Z",
-    "size": 157762,
-    "path": "../public/coach-media/animations/happy/happy67.webp"
-  },
-  "/coach-media/animations/happy/happy68.webp": {
-    "type": "image/webp",
-    "etag": "\"3a9f6-uXcrvu87C4tyxdUD8qy84likyxA\"",
-    "mtime": "2026-08-04T15:39:49.163Z",
-    "size": 240118,
-    "path": "../public/coach-media/animations/happy/happy68.webp"
-  },
-  "/coach-media/animations/happy/happy69.webp": {
-    "type": "image/webp",
-    "etag": "\"1843a-+cJ0+7F0PNcalsjHJcXNkw7qRDw\"",
-    "mtime": "2026-08-04T15:39:49.161Z",
-    "size": 99386,
-    "path": "../public/coach-media/animations/happy/happy69.webp"
-  },
-  "/coach-media/animations/happy/happy7.webp": {
-    "type": "image/webp",
-    "etag": "\"6dbe6-GIqYtKyf033a2vAUrfvCUdyYOmE\"",
-    "mtime": "2026-08-04T15:39:49.162Z",
-    "size": 449510,
-    "path": "../public/coach-media/animations/happy/happy7.webp"
-  },
-  "/coach-media/animations/happy/happy71.webp": {
-    "type": "image/webp",
-    "etag": "\"12890-iDkXNnqbnihYZd5fm+x9SogtFL0\"",
-    "mtime": "2026-08-04T15:39:49.162Z",
-    "size": 75920,
-    "path": "../public/coach-media/animations/happy/happy71.webp"
-  },
-  "/coach-media/animations/happy/happy72.webp": {
-    "type": "image/webp",
-    "etag": "\"1132e-N279XcIE77SVgWI5RK4HGZTKNNQ\"",
-    "mtime": "2026-08-04T15:39:49.164Z",
-    "size": 70446,
-    "path": "../public/coach-media/animations/happy/happy72.webp"
-  },
-  "/coach-media/animations/happy/happy73.webp": {
-    "type": "image/webp",
-    "etag": "\"12dd8-PuAHZqC2ZtYnGQM/yt5HL7w8Z5w\"",
-    "mtime": "2026-08-04T15:39:49.162Z",
-    "size": 77272,
-    "path": "../public/coach-media/animations/happy/happy73.webp"
-  },
-  "/coach-media/animations/happy/happy64.webp": {
-    "type": "image/webp",
-    "etag": "\"8b070-7oC7TYj4LIldWg1605cOC8gYl+w\"",
-    "mtime": "2026-08-04T15:39:49.159Z",
-    "size": 569456,
-    "path": "../public/coach-media/animations/happy/happy64.webp"
-  },
-  "/coach-media/animations/happy/happy74.webp": {
-    "type": "image/webp",
-    "etag": "\"5deae-Nnfy+JPdNa90X/TKIQJKDHXtEDg\"",
-    "mtime": "2026-08-04T15:39:49.162Z",
-    "size": 384686,
-    "path": "../public/coach-media/animations/happy/happy74.webp"
-  },
-  "/coach-media/animations/happy/happy75.webp": {
-    "type": "image/webp",
-    "etag": "\"1cfd0-9c+pPyscG4ipyzhzbN//E8mdshQ\"",
-    "mtime": "2026-08-04T15:39:49.163Z",
-    "size": 118736,
-    "path": "../public/coach-media/animations/happy/happy75.webp"
-  },
-  "/coach-media/animations/happy/happy76.webp": {
-    "type": "image/webp",
-    "etag": "\"14a9e-d6rGydXTPMji/MdwYzCalRd2xW0\"",
-    "mtime": "2026-08-04T15:39:49.163Z",
-    "size": 84638,
-    "path": "../public/coach-media/animations/happy/happy76.webp"
-  },
-  "/coach-media/animations/happy/happy70.webp": {
-    "type": "image/webp",
-    "etag": "\"813fc-MRr6jjBP9Dwv9BEsHOHSRAaT2vg\"",
-    "mtime": "2026-08-04T15:39:49.162Z",
-    "size": 529404,
-    "path": "../public/coach-media/animations/happy/happy70.webp"
-  },
-  "/coach-media/animations/happy/happy77.webp": {
-    "type": "image/webp",
-    "etag": "\"1e10a-1aPPim9G6xum8/Hs8Ro6u3VlG6U\"",
-    "mtime": "2026-08-04T15:39:49.163Z",
-    "size": 123146,
-    "path": "../public/coach-media/animations/happy/happy77.webp"
-  },
-  "/coach-media/animations/happy/happy60.webp": {
-    "type": "image/webp",
-    "etag": "\"1e7f54-IoOugN/ir+60blKcpy6Kl2RuTBI\"",
-    "mtime": "2026-08-04T15:39:49.157Z",
-    "size": 1998676,
-    "path": "../public/coach-media/animations/happy/happy60.webp"
-  },
-  "/coach-media/animations/happy/happy78.webp": {
-    "type": "image/webp",
-    "etag": "\"17ba4-3h26xVZZTGib30A7sQhqoYBlgqs\"",
-    "mtime": "2026-08-04T15:39:49.162Z",
-    "size": 97188,
-    "path": "../public/coach-media/animations/happy/happy78.webp"
-  },
-  "/coach-media/animations/happy/happy79.webp": {
-    "type": "image/webp",
-    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
-    "mtime": "2026-08-04T15:39:49.168Z",
-    "size": 57724,
-    "path": "../public/coach-media/animations/happy/happy79.webp"
-  },
-  "/coach-media/animations/happy/happy8.webp": {
-    "type": "image/webp",
-    "etag": "\"9d5e-zP9Tu9ncCFIvZEyvVyuhVBachAE\"",
-    "mtime": "2026-08-04T15:39:49.164Z",
-    "size": 40286,
-    "path": "../public/coach-media/animations/happy/happy8.webp"
-  },
-  "/coach-media/animations/happy/happy80.webp": {
-    "type": "image/webp",
-    "etag": "\"1da90-C0sljbqRem33mzQhLpalQ7JqSpU\"",
-    "mtime": "2026-08-04T15:39:49.163Z",
-    "size": 121488,
-    "path": "../public/coach-media/animations/happy/happy80.webp"
-  },
-  "/coach-media/animations/happy/happy82.webp": {
-    "type": "image/webp",
-    "etag": "\"f1a4-tNEKunf3T9spLovIQWFozZvffw4\"",
-    "mtime": "2026-08-04T15:39:49.163Z",
-    "size": 61860,
-    "path": "../public/coach-media/animations/happy/happy82.webp"
-  },
-  "/coach-media/animations/happy/happy83.webp": {
-    "type": "image/webp",
-    "etag": "\"2fe42-Kmm0KGXV1dEPQbjoM5G8BWcNWBM\"",
-    "mtime": "2026-08-04T15:39:49.163Z",
-    "size": 196162,
-    "path": "../public/coach-media/animations/happy/happy83.webp"
-  },
-  "/coach-media/animations/happy/happy84.webp": {
-    "type": "image/webp",
-    "etag": "\"7b984-0wPlyvPIzXRP9eIMHgiBJFl+27A\"",
-    "mtime": "2026-08-04T15:39:49.166Z",
-    "size": 506244,
-    "path": "../public/coach-media/animations/happy/happy84.webp"
-  },
-  "/coach-media/animations/happy/happy85.webp": {
-    "type": "image/webp",
-    "etag": "\"150ae-QMfLvsJpp/BJuZy4OwOXUD8OYUQ\"",
-    "mtime": "2026-08-04T15:39:49.168Z",
-    "size": 86190,
-    "path": "../public/coach-media/animations/happy/happy85.webp"
-  },
-  "/coach-media/animations/happy/happy86.webp": {
-    "type": "image/webp",
-    "etag": "\"d7f8-QCvUvt2Z0TOPZeSr+n8EKTRxFUo\"",
-    "mtime": "2026-08-04T15:39:49.168Z",
-    "size": 55288,
-    "path": "../public/coach-media/animations/happy/happy86.webp"
-  },
-  "/coach-media/animations/happy/happy87.webp": {
-    "type": "image/webp",
-    "etag": "\"17dec-6w/mkYwGAw5T0lZlhGXtO5BcsZU\"",
-    "mtime": "2026-08-04T15:39:49.168Z",
-    "size": 97772,
-    "path": "../public/coach-media/animations/happy/happy87.webp"
-  },
-  "/coach-media/animations/happy/happy88.webp": {
-    "type": "image/webp",
-    "etag": "\"10722-eVPV4BPr+xXKB/m7b01HTc3BYvY\"",
-    "mtime": "2026-08-04T15:39:49.168Z",
-    "size": 67362,
-    "path": "../public/coach-media/animations/happy/happy88.webp"
-  },
-  "/coach-media/animations/happy/happy89.webp": {
-    "type": "image/webp",
-    "etag": "\"1c7e2-sUSfie0YAo/54wJ6tzJq/DwQ0Uw\"",
-    "mtime": "2026-08-04T15:39:49.169Z",
-    "size": 116706,
-    "path": "../public/coach-media/animations/happy/happy89.webp"
-  },
-  "/coach-media/animations/happy/happy81.webp": {
-    "type": "image/webp",
-    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
-    "mtime": "2026-08-04T15:39:49.164Z",
-    "size": 566688,
-    "path": "../public/coach-media/animations/happy/happy81.webp"
-  },
-  "/coach-media/animations/happy/happy9.webp": {
-    "type": "image/webp",
-    "etag": "\"48688-/orx463Bv1qJxQ1v4poLAvBrNjI\"",
-    "mtime": "2026-08-04T15:39:49.169Z",
-    "size": 296584,
-    "path": "../public/coach-media/animations/happy/happy9.webp"
-  },
-  "/coach-media/animations/happy/happy90.webp": {
-    "type": "image/webp",
-    "etag": "\"40b96-2KBRO6W19pvILapZ8+Vi3lurBCw\"",
-    "mtime": "2026-08-04T15:39:49.169Z",
-    "size": 265110,
-    "path": "../public/coach-media/animations/happy/happy90.webp"
-  },
-  "/coach-media/animations/happy/happy91.webp": {
-    "type": "image/webp",
-    "etag": "\"162e4-8HqkqL71/r+QJURh8ZbqNFMM6ZE\"",
-    "mtime": "2026-08-04T15:39:49.168Z",
-    "size": 90852,
-    "path": "../public/coach-media/animations/happy/happy91.webp"
-  },
-  "/coach-media/animations/happy/happy92.webp": {
-    "type": "image/webp",
-    "etag": "\"1eb3c-dpJ07uxpsVOLdaMyS3SOlqMT6/k\"",
-    "mtime": "2026-08-04T15:39:49.169Z",
-    "size": 125756,
-    "path": "../public/coach-media/animations/happy/happy92.webp"
-  },
-  "/coach-media/emojis/danger/danger1.png": {
-    "type": "image/png",
-    "etag": "\"3036-eXYZ+J7eqF26NQJZHhXFXrNgGww\"",
-    "mtime": "2026-08-04T15:39:49.045Z",
-    "size": 12342,
-    "path": "../public/coach-media/emojis/danger/danger1.png"
   },
   "/coach-media/emojis/heureux/heureux1.png": {
     "type": "image/png",
     "etag": "\"5091-+uAnUfC4q2tlld3BzD89z3lKd4w\"",
-    "mtime": "2026-08-04T15:39:49.050Z",
+    "mtime": "2026-08-04T16:01:40.437Z",
     "size": 20625,
     "path": "../public/coach-media/emojis/heureux/heureux1.png"
   },
   "/coach-media/emojis/heureux/heureux10.png": {
     "type": "image/png",
     "etag": "\"5bbe-8dpJHwcxgGm/L+GGIgukoN99+qw\"",
-    "mtime": "2026-08-04T15:39:49.171Z",
+    "mtime": "2026-08-04T16:01:40.437Z",
     "size": 23486,
     "path": "../public/coach-media/emojis/heureux/heureux10.png"
   },
   "/coach-media/emojis/heureux/heureux11.png": {
     "type": "image/png",
     "etag": "\"60b8-LMMAFjmB/Rwe+6qwtxB0KRRjFVE\"",
-    "mtime": "2026-08-04T15:39:49.171Z",
+    "mtime": "2026-08-04T16:01:40.287Z",
     "size": 24760,
     "path": "../public/coach-media/emojis/heureux/heureux11.png"
   },
   "/coach-media/emojis/heureux/heureux12.png": {
     "type": "image/png",
     "etag": "\"79c6-gOXTGgNP0DRA6mU73TQkCLA2IZc\"",
-    "mtime": "2026-08-04T15:39:49.170Z",
+    "mtime": "2026-08-04T16:01:40.437Z",
     "size": 31174,
     "path": "../public/coach-media/emojis/heureux/heureux12.png"
   },
   "/coach-media/emojis/heureux/heureux2.png": {
     "type": "image/png",
     "etag": "\"54c1-7stf5vr0fIsbVKX4y+9cXcdF6Mo\"",
-    "mtime": "2026-08-04T15:39:49.172Z",
+    "mtime": "2026-08-04T16:01:40.437Z",
     "size": 21697,
     "path": "../public/coach-media/emojis/heureux/heureux2.png"
   },
   "/coach-media/emojis/heureux/heureux3.png": {
     "type": "image/png",
     "etag": "\"531f-VfeI7fmVy/9I1cJdA+JneCazNHU\"",
-    "mtime": "2026-08-04T15:39:49.171Z",
+    "mtime": "2026-08-04T16:01:40.437Z",
     "size": 21279,
     "path": "../public/coach-media/emojis/heureux/heureux3.png"
   },
   "/coach-media/emojis/heureux/heureux4.png": {
     "type": "image/png",
     "etag": "\"5885-WkglwLUYH5ALdE1dXhy9hL4kIX4\"",
-    "mtime": "2026-08-04T15:39:49.172Z",
+    "mtime": "2026-08-04T16:01:40.439Z",
     "size": 22661,
     "path": "../public/coach-media/emojis/heureux/heureux4.png"
   },
   "/coach-media/emojis/heureux/heureux5.png": {
     "type": "image/png",
     "etag": "\"5a47-dAmqVWfHl7YFERUDnBuBJDfdxvs\"",
-    "mtime": "2026-08-04T15:39:49.171Z",
+    "mtime": "2026-08-04T16:01:40.439Z",
     "size": 23111,
     "path": "../public/coach-media/emojis/heureux/heureux5.png"
   },
   "/coach-media/emojis/heureux/heureux6.png": {
     "type": "image/png",
     "etag": "\"536f-MLOUAyVp0bZpHOQ61BWW10gqYAk\"",
-    "mtime": "2026-08-04T15:39:49.172Z",
+    "mtime": "2026-08-04T16:01:40.439Z",
     "size": 21359,
     "path": "../public/coach-media/emojis/heureux/heureux6.png"
   },
   "/coach-media/emojis/heureux/heureux7.png": {
     "type": "image/png",
     "etag": "\"4c1e-5J3Hb2P7b9Dhw36q+lPFACHsBzo\"",
-    "mtime": "2026-08-04T15:39:49.172Z",
+    "mtime": "2026-08-04T16:01:40.439Z",
     "size": 19486,
     "path": "../public/coach-media/emojis/heureux/heureux7.png"
   },
   "/coach-media/emojis/heureux/heureux8.png": {
     "type": "image/png",
     "etag": "\"4c3d-xFJiCChiW5P5PT3dzl6b9pdUZCU\"",
-    "mtime": "2026-08-04T15:39:49.172Z",
+    "mtime": "2026-08-04T16:01:40.439Z",
     "size": 19517,
     "path": "../public/coach-media/emojis/heureux/heureux8.png"
   },
   "/coach-media/emojis/heureux/heureux9.png": {
     "type": "image/png",
     "etag": "\"53d1-nvrpEmDOGFDrOhR0CwIqhjydUqw\"",
-    "mtime": "2026-08-04T15:39:49.172Z",
+    "mtime": "2026-08-04T16:01:40.439Z",
     "size": 21457,
     "path": "../public/coach-media/emojis/heureux/heureux9.png"
   },
   "/coach-media/emojis/muet/muet1.png": {
     "type": "image/png",
     "etag": "\"51a6-vln2s/UdhcTRTaO8VHDa3lfz0h8\"",
-    "mtime": "2026-08-04T15:39:49.169Z",
+    "mtime": "2026-08-04T16:01:40.439Z",
     "size": 20902,
     "path": "../public/coach-media/emojis/muet/muet1.png"
   },
   "/coach-media/emojis/muet/muet2.png": {
     "type": "image/png",
     "etag": "\"4fd6-7oBC0gGyTBoUjDE6sag9tGTRXEk\"",
-    "mtime": "2026-08-04T15:39:49.050Z",
+    "mtime": "2026-08-04T16:01:40.439Z",
     "size": 20438,
     "path": "../public/coach-media/emojis/muet/muet2.png"
   },
   "/coach-media/emojis/muet/muet3.png": {
     "type": "image/png",
     "etag": "\"5287-ywn34jaL1+x0Qfo7jSf48qjMhfs\"",
-    "mtime": "2026-08-04T15:39:49.169Z",
+    "mtime": "2026-08-04T16:01:40.287Z",
     "size": 21127,
     "path": "../public/coach-media/emojis/muet/muet3.png"
   },
   "/coach-media/emojis/muet/muet4.png": {
     "type": "image/png",
     "etag": "\"56a5-+3X/CcPHmEJ0+beAZBYg2M7ZSgA\"",
-    "mtime": "2026-08-04T15:39:49.171Z",
+    "mtime": "2026-08-04T16:01:40.439Z",
     "size": 22181,
     "path": "../public/coach-media/emojis/muet/muet4.png"
+  },
+  "/coach-media/animations/happy/happy10.webp": {
+    "type": "image/webp",
+    "etag": "\"13102-1AwfKNNogN0hV9N7INQr8b/L5U0\"",
+    "mtime": "2026-08-04T16:01:40.287Z",
+    "size": 78082,
+    "path": "../public/coach-media/animations/happy/happy10.webp"
+  },
+  "/coach-media/animations/happy/happy11.webp": {
+    "type": "image/webp",
+    "etag": "\"c51c-aSSJ/YerC2d+QHIzkxapjUKX1xo\"",
+    "mtime": "2026-08-04T16:01:40.397Z",
+    "size": 50460,
+    "path": "../public/coach-media/animations/happy/happy11.webp"
+  },
+  "/coach-media/animations/happy/happy12.webp": {
+    "type": "image/webp",
+    "etag": "\"26dd0-kEufqOKIIc4EphkqsilP8Vg0anA\"",
+    "mtime": "2026-08-04T16:01:40.398Z",
+    "size": 159184,
+    "path": "../public/coach-media/animations/happy/happy12.webp"
+  },
+  "/coach-media/animations/happy/happy13.webp": {
+    "type": "image/webp",
+    "etag": "\"1b7c8-6YwhPgMDDi09N6QaiQGvB3MESN8\"",
+    "mtime": "2026-08-04T16:01:40.397Z",
+    "size": 112584,
+    "path": "../public/coach-media/animations/happy/happy13.webp"
+  },
+  "/coach-media/animations/happy/happy14.webp": {
+    "type": "image/webp",
+    "etag": "\"2b5e-Tlk4vz7sMxW+TPrlh/TTUPVQZ64\"",
+    "mtime": "2026-08-04T16:01:40.396Z",
+    "size": 11102,
+    "path": "../public/coach-media/animations/happy/happy14.webp"
+  },
+  "/coach-media/animations/happy/happy15.webp": {
+    "type": "image/webp",
+    "etag": "\"1f82e-GdfVpoK+FBOph2APqZZ2ksTEi/M\"",
+    "mtime": "2026-08-04T16:01:40.399Z",
+    "size": 129070,
+    "path": "../public/coach-media/animations/happy/happy15.webp"
+  },
+  "/coach-media/animations/happy/happy16.webp": {
+    "type": "image/webp",
+    "etag": "\"39676-m3hlL8MEmfcM8A6RQ/d34G7k4z4\"",
+    "mtime": "2026-08-04T16:01:40.406Z",
+    "size": 235126,
+    "path": "../public/coach-media/animations/happy/happy16.webp"
+  },
+  "/coach-media/animations/happy/happy1.webp": {
+    "type": "image/webp",
+    "etag": "\"9a9fe-dnJ60THXbLE/qdsCoy8mks8JEWo\"",
+    "mtime": "2026-08-04T16:01:40.398Z",
+    "size": 633342,
+    "path": "../public/coach-media/animations/happy/happy1.webp"
+  },
+  "/coach-media/animations/happy/happy17.webp": {
+    "type": "image/webp",
+    "etag": "\"6c236-lcuyQg6sSZcT0+fCpGNG/JhMi7U\"",
+    "mtime": "2026-08-04T16:01:40.403Z",
+    "size": 442934,
+    "path": "../public/coach-media/animations/happy/happy17.webp"
+  },
+  "/coach-media/animations/happy/happy19.webp": {
+    "type": "image/webp",
+    "etag": "\"7340-Mvycs8QTkYX6zm7iIfL2nLfxOe8\"",
+    "mtime": "2026-08-04T16:01:40.398Z",
+    "size": 29504,
+    "path": "../public/coach-media/animations/happy/happy19.webp"
+  },
+  "/coach-media/animations/happy/happy18.webp": {
+    "type": "image/webp",
+    "etag": "\"38cca-HDXyFn4nw7hhDQ0f8voh7jHxFIU\"",
+    "mtime": "2026-08-04T16:01:40.403Z",
+    "size": 232650,
+    "path": "../public/coach-media/animations/happy/happy18.webp"
+  },
+  "/coach-media/animations/happy/happy2.webp": {
+    "type": "image/webp",
+    "etag": "\"1b638-CG1y3zibI0VpxAfTb3zZrzRaw90\"",
+    "mtime": "2026-08-04T16:01:40.403Z",
+    "size": 112184,
+    "path": "../public/coach-media/animations/happy/happy2.webp"
+  },
+  "/coach-media/animations/happy/happy21.webp": {
+    "type": "image/webp",
+    "etag": "\"d20a-nJXSMlgY3QzHwwJw2j7rW4bD6HU\"",
+    "mtime": "2026-08-04T16:01:40.402Z",
+    "size": 53770,
+    "path": "../public/coach-media/animations/happy/happy21.webp"
+  },
+  "/coach-media/animations/happy/happy20.webp": {
+    "type": "image/webp",
+    "etag": "\"31eb2-eG0f1RbiJPRwmWx1p+zVbeej7Jo\"",
+    "mtime": "2026-08-04T16:01:40.405Z",
+    "size": 204466,
+    "path": "../public/coach-media/animations/happy/happy20.webp"
+  },
+  "/coach-media/animations/happy/happy22.webp": {
+    "type": "image/webp",
+    "etag": "\"2be74-wts9jwpJqVDGud0ZifbURmTwf7g\"",
+    "mtime": "2026-08-04T16:01:40.411Z",
+    "size": 179828,
+    "path": "../public/coach-media/animations/happy/happy22.webp"
+  },
+  "/coach-media/animations/happy/happy23.webp": {
+    "type": "image/webp",
+    "etag": "\"e74a-F+BBio6AhOZ5hwHOGh8wKCLcoGA\"",
+    "mtime": "2026-08-04T16:01:40.405Z",
+    "size": 59210,
+    "path": "../public/coach-media/animations/happy/happy23.webp"
+  },
+  "/coach-media/animations/happy/happy24.webp": {
+    "type": "image/webp",
+    "etag": "\"23e02-CIi7WeJXeH8cd/GgwMtt3CFFVkM\"",
+    "mtime": "2026-08-04T16:01:40.405Z",
+    "size": 146946,
+    "path": "../public/coach-media/animations/happy/happy24.webp"
+  },
+  "/coach-media/animations/happy/happy25.webp": {
+    "type": "image/webp",
+    "etag": "\"16574-kubThW5vAMKccIZc2jswkTWLUoA\"",
+    "mtime": "2026-08-04T16:01:40.405Z",
+    "size": 91508,
+    "path": "../public/coach-media/animations/happy/happy25.webp"
+  },
+  "/coach-media/animations/happy/happy26.webp": {
+    "type": "image/webp",
+    "etag": "\"6c706-bOAKAMAiElDmC2MCxEJkrvr5A+k\"",
+    "mtime": "2026-08-04T16:01:40.406Z",
+    "size": 444166,
+    "path": "../public/coach-media/animations/happy/happy26.webp"
+  },
+  "/coach-media/animations/happy/happy27.webp": {
+    "type": "image/webp",
+    "etag": "\"1c662-1bbHXwmlK1/Q6duQFfbU/+Wg5Fg\"",
+    "mtime": "2026-08-04T16:01:40.407Z",
+    "size": 116322,
+    "path": "../public/coach-media/animations/happy/happy27.webp"
+  },
+  "/coach-media/animations/happy/happy28.webp": {
+    "type": "image/webp",
+    "etag": "\"2090a-cfPB8KwXDFTC2iWhg6Pn7kOvGeg\"",
+    "mtime": "2026-08-04T16:01:40.409Z",
+    "size": 133386,
+    "path": "../public/coach-media/animations/happy/happy28.webp"
+  },
+  "/coach-media/animations/happy/happy29.webp": {
+    "type": "image/webp",
+    "etag": "\"15a6e-F4FEHmzAIG7WW3pszvFsq0XKYGk\"",
+    "mtime": "2026-08-04T16:01:40.411Z",
+    "size": 88686,
+    "path": "../public/coach-media/animations/happy/happy29.webp"
+  },
+  "/coach-media/animations/happy/happy3.webp": {
+    "type": "image/webp",
+    "etag": "\"6438c-AQmLLI1sVtzVfySWLf8q8/SnoDQ\"",
+    "mtime": "2026-08-04T16:01:40.407Z",
+    "size": 410508,
+    "path": "../public/coach-media/animations/happy/happy3.webp"
+  },
+  "/coach-media/animations/happy/happy30.webp": {
+    "type": "image/webp",
+    "etag": "\"46140-52DID+yWWHNDhSWo2wqCW7AgztI\"",
+    "mtime": "2026-08-04T16:01:40.406Z",
+    "size": 287040,
+    "path": "../public/coach-media/animations/happy/happy30.webp"
+  },
+  "/coach-media/animations/happy/happy31.webp": {
+    "type": "image/webp",
+    "etag": "\"4d6ca-GZQfzSkO4AbRu7KJoQWgnIw6U6k\"",
+    "mtime": "2026-08-04T16:01:40.412Z",
+    "size": 317130,
+    "path": "../public/coach-media/animations/happy/happy31.webp"
+  },
+  "/coach-media/animations/happy/happy32.webp": {
+    "type": "image/webp",
+    "etag": "\"1ce94-qd5mvwxqL3x8atGLGoQ6T5SBIM8\"",
+    "mtime": "2026-08-04T16:01:40.407Z",
+    "size": 118420,
+    "path": "../public/coach-media/animations/happy/happy32.webp"
+  },
+  "/coach-media/animations/happy/happy33.webp": {
+    "type": "image/webp",
+    "etag": "\"1ca8a-w5q1HyoRf3YSX2wny1ajxC1lVTw\"",
+    "mtime": "2026-08-04T16:01:40.411Z",
+    "size": 117386,
+    "path": "../public/coach-media/animations/happy/happy33.webp"
+  },
+  "/coach-media/animations/happy/happy34.webp": {
+    "type": "image/webp",
+    "etag": "\"7a6e-N4lUoynD0pY1HrZqbhKsKEJcIdY\"",
+    "mtime": "2026-08-04T16:01:40.407Z",
+    "size": 31342,
+    "path": "../public/coach-media/animations/happy/happy34.webp"
+  },
+  "/coach-media/animations/happy/happy35.webp": {
+    "type": "image/webp",
+    "etag": "\"27e2a-nINbfIIzpb0aB5cQDbxz/GDwNug\"",
+    "mtime": "2026-08-04T16:01:40.412Z",
+    "size": 163370,
+    "path": "../public/coach-media/animations/happy/happy35.webp"
+  },
+  "/coach-media/animations/happy/happy36.webp": {
+    "type": "image/webp",
+    "etag": "\"1480e-iU7KcSbk60IXH4CWOzNyttBsbE0\"",
+    "mtime": "2026-08-04T16:01:40.410Z",
+    "size": 83982,
+    "path": "../public/coach-media/animations/happy/happy36.webp"
+  },
+  "/coach-media/animations/happy/happy37.webp": {
+    "type": "image/webp",
+    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
+    "mtime": "2026-08-04T16:01:40.411Z",
+    "size": 57724,
+    "path": "../public/coach-media/animations/happy/happy37.webp"
+  },
+  "/coach-media/animations/happy/happy38.webp": {
+    "type": "image/webp",
+    "etag": "\"20928-zE86yLQztSZEATTCxTKRuQFifnw\"",
+    "mtime": "2026-08-04T16:01:40.411Z",
+    "size": 133416,
+    "path": "../public/coach-media/animations/happy/happy38.webp"
+  },
+  "/coach-media/animations/happy/happy39.webp": {
+    "type": "image/webp",
+    "etag": "\"1031c-0I4f6s3jDJrqeEDNAVBubusuRqQ\"",
+    "mtime": "2026-08-04T16:01:40.411Z",
+    "size": 66332,
+    "path": "../public/coach-media/animations/happy/happy39.webp"
+  },
+  "/coach-media/animations/happy/happy4.webp": {
+    "type": "image/webp",
+    "etag": "\"80d8-WZGwWFCLsk3YDTm9XP5QCq8R7Es\"",
+    "mtime": "2026-08-04T16:01:40.412Z",
+    "size": 32984,
+    "path": "../public/coach-media/animations/happy/happy4.webp"
+  },
+  "/coach-media/animations/happy/happy40.webp": {
+    "type": "image/webp",
+    "etag": "\"116ba-M7X1kM6tt7dIECx3koEGYbji1us\"",
+    "mtime": "2026-08-04T16:01:40.414Z",
+    "size": 71354,
+    "path": "../public/coach-media/animations/happy/happy40.webp"
+  },
+  "/coach-media/animations/happy/happy41.webp": {
+    "type": "image/webp",
+    "etag": "\"a76a-Nmck64+pAP0tEnTHpG1mitI4ONk\"",
+    "mtime": "2026-08-04T16:01:40.412Z",
+    "size": 42858,
+    "path": "../public/coach-media/animations/happy/happy41.webp"
+  },
+  "/coach-media/animations/happy/happy42.webp": {
+    "type": "image/webp",
+    "etag": "\"7eba-Xqry0H+Qj7x/M1eDmO0CIQ+A7Mg\"",
+    "mtime": "2026-08-04T16:01:40.412Z",
+    "size": 32442,
+    "path": "../public/coach-media/animations/happy/happy42.webp"
+  },
+  "/coach-media/animations/happy/happy43.webp": {
+    "type": "image/webp",
+    "etag": "\"55a5e-kUYTswcDoeybUYnmGXDBV0ny564\"",
+    "mtime": "2026-08-04T16:01:40.412Z",
+    "size": 350814,
+    "path": "../public/coach-media/animations/happy/happy43.webp"
+  },
+  "/coach-media/animations/happy/happy44.webp": {
+    "type": "image/webp",
+    "etag": "\"24e16-Y7u+Md6oQPbYSDjE0D9H77j0Z5I\"",
+    "mtime": "2026-08-04T16:01:40.414Z",
+    "size": 151062,
+    "path": "../public/coach-media/animations/happy/happy44.webp"
+  },
+  "/coach-media/animations/happy/happy45.webp": {
+    "type": "image/webp",
+    "etag": "\"65a82-XxALJISFlOUdD3wSziHwFXHhxqc\"",
+    "mtime": "2026-08-04T16:01:40.415Z",
+    "size": 416386,
+    "path": "../public/coach-media/animations/happy/happy45.webp"
+  },
+  "/coach-media/animations/happy/happy46.webp": {
+    "type": "image/webp",
+    "etag": "\"13dec-uj4sm+IwuLOmQY7lGy1JeMzt2FM\"",
+    "mtime": "2026-08-04T16:01:40.415Z",
+    "size": 81388,
+    "path": "../public/coach-media/animations/happy/happy46.webp"
+  },
+  "/coach-media/animations/happy/happy47.webp": {
+    "type": "image/webp",
+    "etag": "\"234e4-DNBmLISLOFimd+G8XihNRgMsjGw\"",
+    "mtime": "2026-08-04T16:01:40.415Z",
+    "size": 144612,
+    "path": "../public/coach-media/animations/happy/happy47.webp"
+  },
+  "/coach-media/animations/happy/happy49.webp": {
+    "type": "image/webp",
+    "etag": "\"3123c-mf62C2iWRtx585STd9CHbYmICyM\"",
+    "mtime": "2026-08-04T16:01:40.416Z",
+    "size": 201276,
+    "path": "../public/coach-media/animations/happy/happy49.webp"
+  },
+  "/coach-media/animations/happy/happy5.webp": {
+    "type": "image/webp",
+    "etag": "\"10784-0Rzy5v92HqFbOQ0qn2Jo9XRJ1r0\"",
+    "mtime": "2026-08-04T16:01:40.415Z",
+    "size": 67460,
+    "path": "../public/coach-media/animations/happy/happy5.webp"
+  },
+  "/coach-media/animations/happy/happy50.webp": {
+    "type": "image/webp",
+    "etag": "\"2b72a-Xz8Gb2Cdj+rrnnpbXbSGBQRTFYw\"",
+    "mtime": "2026-08-04T16:01:40.419Z",
+    "size": 177962,
+    "path": "../public/coach-media/animations/happy/happy50.webp"
+  },
+  "/coach-media/animations/happy/happy51.webp": {
+    "type": "image/webp",
+    "etag": "\"29090-le1WcmrRN+RDX52joaRj6kdNQS0\"",
+    "mtime": "2026-08-04T16:01:40.416Z",
+    "size": 168080,
+    "path": "../public/coach-media/animations/happy/happy51.webp"
+  },
+  "/coach-media/animations/happy/happy52.webp": {
+    "type": "image/webp",
+    "etag": "\"4a9b0-bNgmWpmTSjuc06DQcbX6RkVvCnU\"",
+    "mtime": "2026-08-04T16:01:40.417Z",
+    "size": 305584,
+    "path": "../public/coach-media/animations/happy/happy52.webp"
+  },
+  "/coach-media/animations/happy/happy53.webp": {
+    "type": "image/webp",
+    "etag": "\"57d0-WEnplvWuFKWqXkfuwNFuk472muo\"",
+    "mtime": "2026-08-04T16:01:40.417Z",
+    "size": 22480,
+    "path": "../public/coach-media/animations/happy/happy53.webp"
+  },
+  "/coach-media/animations/happy/happy54.webp": {
+    "type": "image/webp",
+    "etag": "\"de70-7JEgp30lMgh1RT82Z43BnbOPyME\"",
+    "mtime": "2026-08-04T16:01:40.419Z",
+    "size": 56944,
+    "path": "../public/coach-media/animations/happy/happy54.webp"
+  },
+  "/coach-media/animations/happy/happy48.webp": {
+    "type": "image/webp",
+    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
+    "mtime": "2026-08-04T16:01:40.416Z",
+    "size": 566688,
+    "path": "../public/coach-media/animations/happy/happy48.webp"
+  },
+  "/coach-media/animations/happy/happy55.webp": {
+    "type": "image/webp",
+    "etag": "\"4b40a-Dq55EPJ++rGpcOm3dfVMczMYPaI\"",
+    "mtime": "2026-08-04T16:01:40.421Z",
+    "size": 308234,
+    "path": "../public/coach-media/animations/happy/happy55.webp"
+  },
+  "/coach-media/animations/happy/happy56.webp": {
+    "type": "image/webp",
+    "etag": "\"7ec86-JO0Q1vC7rgTxvmuYQZ3337jzHAM\"",
+    "mtime": "2026-08-04T16:01:40.419Z",
+    "size": 519302,
+    "path": "../public/coach-media/animations/happy/happy56.webp"
+  },
+  "/coach-media/animations/happy/happy57.webp": {
+    "type": "image/webp",
+    "etag": "\"74f88-eEN2CyUJ9rLsRvqY7OzSZS3p2IU\"",
+    "mtime": "2026-08-04T16:01:40.421Z",
+    "size": 479112,
+    "path": "../public/coach-media/animations/happy/happy57.webp"
+  },
+  "/coach-media/animations/happy/happy58.webp": {
+    "type": "image/webp",
+    "etag": "\"695d4-fo3c1QhJVPT0yXYAuoQyAXrIO9E\"",
+    "mtime": "2026-08-04T16:01:40.427Z",
+    "size": 431572,
+    "path": "../public/coach-media/animations/happy/happy58.webp"
+  },
+  "/coach-media/animations/happy/happy59.webp": {
+    "type": "image/webp",
+    "etag": "\"e290-fQb7JlOst9pysXxzv35HJTcHlpE\"",
+    "mtime": "2026-08-04T16:01:40.419Z",
+    "size": 58000,
+    "path": "../public/coach-media/animations/happy/happy59.webp"
+  },
+  "/coach-media/animations/happy/happy6.webp": {
+    "type": "image/webp",
+    "etag": "\"2f8ce-NjZdr7Vin1NbHT+GFgWzMwsZeZE\"",
+    "mtime": "2026-08-04T16:01:40.420Z",
+    "size": 194766,
+    "path": "../public/coach-media/animations/happy/happy6.webp"
+  },
+  "/coach-media/animations/happy/happy61.webp": {
+    "type": "image/webp",
+    "etag": "\"253e8-1Fqod1LG1PZNTdmri6v0gPMthaE\"",
+    "mtime": "2026-08-04T16:01:40.425Z",
+    "size": 152552,
+    "path": "../public/coach-media/animations/happy/happy61.webp"
+  },
+  "/coach-media/animations/happy/happy62.webp": {
+    "type": "image/webp",
+    "etag": "\"4f8f8-tLTO1/dtiZumcCPIDjxNhkIrS9g\"",
+    "mtime": "2026-08-04T16:01:40.425Z",
+    "size": 325880,
+    "path": "../public/coach-media/animations/happy/happy62.webp"
+  },
+  "/coach-media/animations/happy/happy65.webp": {
+    "type": "image/webp",
+    "etag": "\"153e2-1MrE6YaWW1bqq3uRkAG3roDYdbI\"",
+    "mtime": "2026-08-04T16:01:40.425Z",
+    "size": 87010,
+    "path": "../public/coach-media/animations/happy/happy65.webp"
+  },
+  "/coach-media/animations/happy/happy63.webp": {
+    "type": "image/webp",
+    "etag": "\"2b52a-B18WnXoFNFEoRmRiTpAPD0Xw4fA\"",
+    "mtime": "2026-08-04T16:01:40.421Z",
+    "size": 177450,
+    "path": "../public/coach-media/animations/happy/happy63.webp"
+  },
+  "/coach-media/animations/happy/happy66.webp": {
+    "type": "image/webp",
+    "etag": "\"5aac0-EL5Dnfs0ZHXfZ2nFXHuqusIiA6U\"",
+    "mtime": "2026-08-04T16:01:40.425Z",
+    "size": 371392,
+    "path": "../public/coach-media/animations/happy/happy66.webp"
+  },
+  "/coach-media/animations/happy/happy67.webp": {
+    "type": "image/webp",
+    "etag": "\"26842-Ttlq6ska7bBpzXjvIXLqSUaPnIk\"",
+    "mtime": "2026-08-04T16:01:40.426Z",
+    "size": 157762,
+    "path": "../public/coach-media/animations/happy/happy67.webp"
+  },
+  "/coach-media/animations/happy/happy68.webp": {
+    "type": "image/webp",
+    "etag": "\"3a9f6-uXcrvu87C4tyxdUD8qy84likyxA\"",
+    "mtime": "2026-08-04T16:01:40.426Z",
+    "size": 240118,
+    "path": "../public/coach-media/animations/happy/happy68.webp"
+  },
+  "/coach-media/animations/happy/happy69.webp": {
+    "type": "image/webp",
+    "etag": "\"1843a-+cJ0+7F0PNcalsjHJcXNkw7qRDw\"",
+    "mtime": "2026-08-04T16:01:40.428Z",
+    "size": 99386,
+    "path": "../public/coach-media/animations/happy/happy69.webp"
+  },
+  "/coach-media/animations/happy/happy7.webp": {
+    "type": "image/webp",
+    "etag": "\"6dbe6-GIqYtKyf033a2vAUrfvCUdyYOmE\"",
+    "mtime": "2026-08-04T16:01:40.426Z",
+    "size": 449510,
+    "path": "../public/coach-media/animations/happy/happy7.webp"
+  },
+  "/coach-media/animations/happy/happy71.webp": {
+    "type": "image/webp",
+    "etag": "\"12890-iDkXNnqbnihYZd5fm+x9SogtFL0\"",
+    "mtime": "2026-08-04T16:01:40.426Z",
+    "size": 75920,
+    "path": "../public/coach-media/animations/happy/happy71.webp"
+  },
+  "/coach-media/animations/happy/happy72.webp": {
+    "type": "image/webp",
+    "etag": "\"1132e-N279XcIE77SVgWI5RK4HGZTKNNQ\"",
+    "mtime": "2026-08-04T16:01:40.426Z",
+    "size": 70446,
+    "path": "../public/coach-media/animations/happy/happy72.webp"
+  },
+  "/coach-media/animations/happy/happy64.webp": {
+    "type": "image/webp",
+    "etag": "\"8b070-7oC7TYj4LIldWg1605cOC8gYl+w\"",
+    "mtime": "2026-08-04T16:01:40.428Z",
+    "size": 569456,
+    "path": "../public/coach-media/animations/happy/happy64.webp"
+  },
+  "/coach-media/animations/happy/happy73.webp": {
+    "type": "image/webp",
+    "etag": "\"12dd8-PuAHZqC2ZtYnGQM/yt5HL7w8Z5w\"",
+    "mtime": "2026-08-04T16:01:40.427Z",
+    "size": 77272,
+    "path": "../public/coach-media/animations/happy/happy73.webp"
+  },
+  "/coach-media/animations/happy/happy74.webp": {
+    "type": "image/webp",
+    "etag": "\"5deae-Nnfy+JPdNa90X/TKIQJKDHXtEDg\"",
+    "mtime": "2026-08-04T16:01:40.428Z",
+    "size": 384686,
+    "path": "../public/coach-media/animations/happy/happy74.webp"
+  },
+  "/coach-media/animations/happy/happy75.webp": {
+    "type": "image/webp",
+    "etag": "\"1cfd0-9c+pPyscG4ipyzhzbN//E8mdshQ\"",
+    "mtime": "2026-08-04T16:01:40.428Z",
+    "size": 118736,
+    "path": "../public/coach-media/animations/happy/happy75.webp"
+  },
+  "/coach-media/animations/happy/happy76.webp": {
+    "type": "image/webp",
+    "etag": "\"14a9e-d6rGydXTPMji/MdwYzCalRd2xW0\"",
+    "mtime": "2026-08-04T16:01:40.436Z",
+    "size": 84638,
+    "path": "../public/coach-media/animations/happy/happy76.webp"
+  },
+  "/coach-media/animations/happy/happy77.webp": {
+    "type": "image/webp",
+    "etag": "\"1e10a-1aPPim9G6xum8/Hs8Ro6u3VlG6U\"",
+    "mtime": "2026-08-04T16:01:40.429Z",
+    "size": 123146,
+    "path": "../public/coach-media/animations/happy/happy77.webp"
+  },
+  "/coach-media/animations/happy/happy78.webp": {
+    "type": "image/webp",
+    "etag": "\"17ba4-3h26xVZZTGib30A7sQhqoYBlgqs\"",
+    "mtime": "2026-08-04T16:01:40.427Z",
+    "size": 97188,
+    "path": "../public/coach-media/animations/happy/happy78.webp"
+  },
+  "/coach-media/animations/happy/happy70.webp": {
+    "type": "image/webp",
+    "etag": "\"813fc-MRr6jjBP9Dwv9BEsHOHSRAaT2vg\"",
+    "mtime": "2026-08-04T16:01:40.427Z",
+    "size": 529404,
+    "path": "../public/coach-media/animations/happy/happy70.webp"
+  },
+  "/coach-media/animations/happy/happy8.webp": {
+    "type": "image/webp",
+    "etag": "\"9d5e-zP9Tu9ncCFIvZEyvVyuhVBachAE\"",
+    "mtime": "2026-08-04T16:01:40.428Z",
+    "size": 40286,
+    "path": "../public/coach-media/animations/happy/happy8.webp"
+  },
+  "/coach-media/animations/happy/happy79.webp": {
+    "type": "image/webp",
+    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
+    "mtime": "2026-08-04T16:01:40.429Z",
+    "size": 57724,
+    "path": "../public/coach-media/animations/happy/happy79.webp"
+  },
+  "/coach-media/animations/happy/happy80.webp": {
+    "type": "image/webp",
+    "etag": "\"1da90-C0sljbqRem33mzQhLpalQ7JqSpU\"",
+    "mtime": "2026-08-04T16:01:40.429Z",
+    "size": 121488,
+    "path": "../public/coach-media/animations/happy/happy80.webp"
+  },
+  "/coach-media/animations/happy/happy60.webp": {
+    "type": "image/webp",
+    "etag": "\"1e7f54-IoOugN/ir+60blKcpy6Kl2RuTBI\"",
+    "mtime": "2026-08-04T16:01:40.422Z",
+    "size": 1998676,
+    "path": "../public/coach-media/animations/happy/happy60.webp"
+  },
+  "/coach-media/animations/happy/happy82.webp": {
+    "type": "image/webp",
+    "etag": "\"f1a4-tNEKunf3T9spLovIQWFozZvffw4\"",
+    "mtime": "2026-08-04T16:01:40.428Z",
+    "size": 61860,
+    "path": "../public/coach-media/animations/happy/happy82.webp"
+  },
+  "/coach-media/animations/happy/happy83.webp": {
+    "type": "image/webp",
+    "etag": "\"2fe42-Kmm0KGXV1dEPQbjoM5G8BWcNWBM\"",
+    "mtime": "2026-08-04T16:01:40.430Z",
+    "size": 196162,
+    "path": "../public/coach-media/animations/happy/happy83.webp"
+  },
+  "/coach-media/animations/happy/happy81.webp": {
+    "type": "image/webp",
+    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
+    "mtime": "2026-08-04T16:01:40.436Z",
+    "size": 566688,
+    "path": "../public/coach-media/animations/happy/happy81.webp"
+  },
+  "/coach-media/animations/happy/happy84.webp": {
+    "type": "image/webp",
+    "etag": "\"7b984-0wPlyvPIzXRP9eIMHgiBJFl+27A\"",
+    "mtime": "2026-08-04T16:01:40.430Z",
+    "size": 506244,
+    "path": "../public/coach-media/animations/happy/happy84.webp"
+  },
+  "/coach-media/animations/happy/happy85.webp": {
+    "type": "image/webp",
+    "etag": "\"150ae-QMfLvsJpp/BJuZy4OwOXUD8OYUQ\"",
+    "mtime": "2026-08-04T16:01:40.429Z",
+    "size": 86190,
+    "path": "../public/coach-media/animations/happy/happy85.webp"
+  },
+  "/coach-media/animations/happy/happy86.webp": {
+    "type": "image/webp",
+    "etag": "\"d7f8-QCvUvt2Z0TOPZeSr+n8EKTRxFUo\"",
+    "mtime": "2026-08-04T16:01:40.430Z",
+    "size": 55288,
+    "path": "../public/coach-media/animations/happy/happy86.webp"
+  },
+  "/coach-media/animations/happy/happy87.webp": {
+    "type": "image/webp",
+    "etag": "\"17dec-6w/mkYwGAw5T0lZlhGXtO5BcsZU\"",
+    "mtime": "2026-08-04T16:01:40.430Z",
+    "size": 97772,
+    "path": "../public/coach-media/animations/happy/happy87.webp"
+  },
+  "/coach-media/animations/happy/happy88.webp": {
+    "type": "image/webp",
+    "etag": "\"10722-eVPV4BPr+xXKB/m7b01HTc3BYvY\"",
+    "mtime": "2026-08-04T16:01:40.436Z",
+    "size": 67362,
+    "path": "../public/coach-media/animations/happy/happy88.webp"
+  },
+  "/coach-media/animations/happy/happy89.webp": {
+    "type": "image/webp",
+    "etag": "\"1c7e2-sUSfie0YAo/54wJ6tzJq/DwQ0Uw\"",
+    "mtime": "2026-08-04T16:01:40.435Z",
+    "size": 116706,
+    "path": "../public/coach-media/animations/happy/happy89.webp"
+  },
+  "/coach-media/animations/happy/happy9.webp": {
+    "type": "image/webp",
+    "etag": "\"48688-/orx463Bv1qJxQ1v4poLAvBrNjI\"",
+    "mtime": "2026-08-04T16:01:40.436Z",
+    "size": 296584,
+    "path": "../public/coach-media/animations/happy/happy9.webp"
+  },
+  "/coach-media/animations/happy/happy90.webp": {
+    "type": "image/webp",
+    "etag": "\"40b96-2KBRO6W19pvILapZ8+Vi3lurBCw\"",
+    "mtime": "2026-08-04T16:01:40.436Z",
+    "size": 265110,
+    "path": "../public/coach-media/animations/happy/happy90.webp"
+  },
+  "/coach-media/animations/happy/happy91.webp": {
+    "type": "image/webp",
+    "etag": "\"162e4-8HqkqL71/r+QJURh8ZbqNFMM6ZE\"",
+    "mtime": "2026-08-04T16:01:40.436Z",
+    "size": 90852,
+    "path": "../public/coach-media/animations/happy/happy91.webp"
   },
   "/coach-media/emojis/triste/triste1.png": {
     "type": "image/png",
     "etag": "\"4ad5-sZv/ngDIpKluR3uoIL+9/tVgBAk\"",
-    "mtime": "2026-08-04T15:39:49.050Z",
+    "mtime": "2026-08-04T16:01:40.289Z",
     "size": 19157,
     "path": "../public/coach-media/emojis/triste/triste1.png"
+  },
+  "/coach-media/animations/happy/happy92.webp": {
+    "type": "image/webp",
+    "etag": "\"1eb3c-dpJ07uxpsVOLdaMyS3SOlqMT6/k\"",
+    "mtime": "2026-08-04T16:01:40.436Z",
+    "size": 125756,
+    "path": "../public/coach-media/animations/happy/happy92.webp"
   },
   "/coach-media/emojis/triste/triste10.png": {
     "type": "image/png",
     "etag": "\"6ad7-6iFb9ksjGHu03kWI85GQAULPlgA\"",
-    "mtime": "2026-08-04T15:39:49.172Z",
+    "mtime": "2026-08-04T16:01:40.440Z",
     "size": 27351,
     "path": "../public/coach-media/emojis/triste/triste10.png"
   },
   "/coach-media/emojis/triste/triste11.png": {
     "type": "image/png",
     "etag": "\"7b07-5Y/2vAUDwkCG9yUv2xhGyKhfVv4\"",
-    "mtime": "2026-08-04T15:39:49.172Z",
+    "mtime": "2026-08-04T16:01:40.440Z",
     "size": 31495,
     "path": "../public/coach-media/emojis/triste/triste11.png"
   },
   "/coach-media/emojis/triste/triste4.png": {
     "type": "image/png",
     "etag": "\"51ea-mZrIfYhaUQQDvlUt7+NCSIE6cfI\"",
-    "mtime": "2026-08-04T15:39:49.172Z",
+    "mtime": "2026-08-04T16:01:40.439Z",
     "size": 20970,
     "path": "../public/coach-media/emojis/triste/triste4.png"
   },
   "/coach-media/emojis/triste/triste5.png": {
     "type": "image/png",
     "etag": "\"54c1-XD0mhNmrQPVAFqEXG0C1s1P3Oa4\"",
-    "mtime": "2026-08-04T15:39:49.172Z",
+    "mtime": "2026-08-04T16:01:40.440Z",
     "size": 21697,
     "path": "../public/coach-media/emojis/triste/triste5.png"
   },
   "/coach-media/emojis/triste/triste6.png": {
     "type": "image/png",
     "etag": "\"54c1-XD0mhNmrQPVAFqEXG0C1s1P3Oa4\"",
-    "mtime": "2026-08-04T15:39:49.172Z",
+    "mtime": "2026-08-04T16:01:40.440Z",
     "size": 21697,
     "path": "../public/coach-media/emojis/triste/triste6.png"
   },
   "/coach-media/emojis/triste/triste7.png": {
     "type": "image/png",
     "etag": "\"4663-GYg5O4kBtQpnNYQYt+t2VyLkYuE\"",
-    "mtime": "2026-08-04T15:39:49.173Z",
+    "mtime": "2026-08-04T16:01:40.440Z",
     "size": 18019,
     "path": "../public/coach-media/emojis/triste/triste7.png"
   },
   "/coach-media/emojis/triste/triste8.png": {
     "type": "image/png",
     "etag": "\"5281-YyJBOzW/kpn0XNWvaoOHWcnQ+0k\"",
-    "mtime": "2026-08-04T15:39:49.173Z",
+    "mtime": "2026-08-04T16:01:40.440Z",
     "size": 21121,
     "path": "../public/coach-media/emojis/triste/triste8.png"
   },
   "/coach-media/emojis/triste/triste9.png": {
     "type": "image/png",
     "etag": "\"56b5-7e4ksvafotKRdiRp4CmrqGW7UkM\"",
-    "mtime": "2026-08-04T15:39:49.173Z",
+    "mtime": "2026-08-04T16:01:40.440Z",
     "size": 22197,
     "path": "../public/coach-media/emojis/triste/triste9.png"
   },
-  "/_nuxt/builds/meta/b7512612-0234-4b7f-ac22-3caf9f329623.json": {
+  "/_nuxt/builds/meta/3a8f05ef-4d39-48ed-83e1-8580bdfcd9c7.json": {
     "type": "application/json",
-    "etag": "\"58-t9/YdJyQgOS/9qk8yWCMXdX7rD8\"",
-    "mtime": "2026-08-04T15:39:48.987Z",
+    "etag": "\"58-ZVugVnqmlCthhLw6Xv475WJCQo4\"",
+    "mtime": "2026-08-04T16:01:40.222Z",
     "size": 88,
-    "path": "../public/_nuxt/builds/meta/b7512612-0234-4b7f-ac22-3caf9f329623.json"
+    "path": "../public/_nuxt/builds/meta/3a8f05ef-4d39-48ed-83e1-8580bdfcd9c7.json"
   }
 };
 

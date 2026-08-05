@@ -575,6 +575,7 @@ export const uiMessages = {
   'Verbes choisis': { de: 'Ausgewählte Verben', en: 'Selected verbs', it: 'Verbi scelti', es: 'Verbos elegidos' },
   '{count} verbe': { de: '{count} Verb', en: '{count} verb', it: '{count} verbo', es: '{count} verbo' },
   '{count} verbes': { de: '{count} Verben', en: '{count} verbs', it: '{count} verbi', es: '{count} verbos' },
+  '{count} temps': { de: '{count} Zeitformen', en: '{count} tenses', it: '{count} tempi', es: '{count} tiempos' },
   'Réduire': { de: 'Weniger anzeigen', en: 'Show less', it: 'Riduci', es: 'Mostrar menos' },
   'Voir tout ({count})': { de: 'Alle anzeigen ({count})', en: 'View all ({count})', it: 'Vedi tutti ({count})', es: 'Ver todos ({count})' },
   'Retirer le verbe {verb}': { de: 'Verb {verb} entfernen', en: 'Remove the verb {verb}', it: 'Rimuovi il verbo {verb}', es: 'Eliminar el verbo {verb}' },

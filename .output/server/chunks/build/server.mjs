@@ -904,6 +904,7 @@ const uiMessages = {
   "Verbes choisis": { de: "Ausgew\xE4hlte Verben", en: "Selected verbs", it: "Verbi scelti", es: "Verbos elegidos" },
   "{count} verbe": { de: "{count} Verb", en: "{count} verb", it: "{count} verbo", es: "{count} verbo" },
   "{count} verbes": { de: "{count} Verben", en: "{count} verbs", it: "{count} verbi", es: "{count} verbos" },
+  "{count} temps": { de: "{count} Zeitformen", en: "{count} tenses", it: "{count} tempi", es: "{count} tiempos" },
   "R\xE9duire": { de: "Weniger anzeigen", en: "Show less", it: "Riduci", es: "Mostrar menos" },
   "Voir tout ({count})": { de: "Alle anzeigen ({count})", en: "View all ({count})", it: "Vedi tutti ({count})", es: "Ver todos ({count})" },
   "Retirer le verbe {verb}": { de: "Verb {verb} entfernen", en: "Remove the verb {verb}", it: "Rimuovi il verbo {verb}", es: "Eliminar el verbo {verb}" },
@@ -1436,7 +1437,7 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-jSkgudC2.mjs')
+    component: () => import('./_code_-DZi9-P6G.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1487,7 +1488,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-CtL0BUyF.mjs')
+    component: () => import('./nouveau-defi-CNzI2mjB.mjs')
   },
   {
     name: "signin",
@@ -1497,7 +1498,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-SmyAuSaZ.mjs')
+    component: () => import('./index-q4fa1uHd.mjs')
   },
   {
     name: "localized-admin-admins",
@@ -1582,7 +1583,7 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-jSkgudC2.mjs')
+    component: () => import('./_code_-DZi9-P6G.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1633,7 +1634,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-CtL0BUyF.mjs')
+    component: () => import('./nouveau-defi-CNzI2mjB.mjs')
   },
   {
     name: "localized-signin",
@@ -1643,7 +1644,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-SmyAuSaZ.mjs')
+    component: () => import('./index-q4fa1uHd.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {

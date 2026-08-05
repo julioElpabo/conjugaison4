@@ -3,7 +3,7 @@ import { defineComponent, ref, computed, unref, useTemplateRef, nextTick, watch,
 import { ssrRenderTeleport, ssrRenderAttr, ssrInterpolate, ssrIncludeBooleanAttr, ssrRenderList, ssrRenderClass, ssrRenderStyle, ssrRenderComponent, ssrRenderAttrs } from 'vue/server-renderer';
 import { J as validateAnswer, aq as getAlternativeCorrections, ar as impossibleSingularEndingReminderMessage, O as grammarTenseCode, as as localizedLearnerErrorMessage, at as isFutureSimpleInsteadOfNearFuture, au as findConjugationConfusions, av as findImpossibleSingularEnding, aw as diagnoseCoachAgreement, ax as diagnoseCoachAnswer, N as learnerErrorDetails, ay as mergeLearnerErrorDetails, az as learnerErrorInsteadOf } from '../nitro/nitro.mjs';
 import { a as createVariedCoachReaction, b as createCoachDialogueState } from '../_/coach-dialogue.mjs';
-import { c as coachHelpProfile, h as buildTargetedConjugationHelp } from '../_/coach-help-audit.mjs';
+import { c as coachHelpProfile, j as buildTargetedConjugationHelp } from '../_/coach-help-audit.mjs';
 import { i as identificationFormParts } from '../_/identification-form.mjs';
 import { f as useLanguagePreferences } from './server.mjs';
 import { u as useSiteAnalytics } from './useSiteAnalytics-D1wpWTOZ.mjs';

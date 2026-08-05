@@ -1,4 +1,4 @@
-import { i as isNearFutureTense, c as bareNearFutureInfinitive, a as isPronominalNearFutureInfinitive } from './near-future.mjs';
+import { i as isNearFutureTense, a as bareNearFutureInfinitive, c as isPronominalNearFutureInfinitive } from './near-future.mjs';
 import { a as COACH_HELP_ENGINE_KEYS } from './coach.mjs';
 
 const semanticMeanings = {
@@ -693,6 +693,26 @@ function officialCompoundForm(question, baseParticiple) {
   const escaped = baseParticiple.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
   return source.replace(new RegExp(`${escaped}(?:e|s|es)?(?=$|[\\s.,!?;:\u2019'])`, "iu"), expectedParticiple);
 }
+function buildPassiveVoiceHelpHtml(question, _verb, _tense, _revealAnswers = true, condensed = false) {
+  const subject = question.passiveSubject || question.pronom || "le sujet qui subit l\u2019action";
+  if (condensed) {
+    return `<p>La voix passive met en avant ce qui <strong>subit l\u2019action</strong>.</p><p>Par exemple :<br>Le facteur a distribu\xE9 les lettres ce matin<br>Les lettres ont \xE9t\xE9 distribu\xE9es ce matin.</p><p>sujet + <strong>\xEAtre au temps demand\xE9</strong> + participe pass\xE9 accord\xE9.</p><p>Ici, le sujet est <strong>${escapedHtml(subject)}</strong>. Le participe pass\xE9 s\u2019accorde avec lui.</p>`;
+  }
+  return `<p>La voix passive sert \xE0 mettre en avant la personne ou la chose qui <strong>subit l\u2019action</strong>. L\u2019auteur de l\u2019action devient secondaire et peut parfois \xEAtre omis.</p><p>Par exemple :<br>Le facteur a distribu\xE9 les lettres ce matin<br>Les lettres ont \xE9t\xE9 distribu\xE9es ce matin.</p><p><strong>sujet qui subit l\u2019action</strong> + <strong>\xEAtre conjugu\xE9</strong> + <strong>participe pass\xE9 accord\xE9</strong>.</p><p><strong>Attention au temps</strong><br>C\u2019est le verbe <strong>\xEAtre</strong> qui porte le mode et le temps demand\xE9s. Le verbe \xE9tudi\xE9 reste au participe pass\xE9.</p>`;
+}
+function buildPassiveVoiceMethodHtml(question, verb, tense, revealAnswers = true) {
+  var _a;
+  const subject = question.passiveSubject || question.pronom || "le sujet qui subit l\u2019action";
+  const agent = question.passiveAgent || "par quelqu\u2019un";
+  const participle = ((_a = verb == null ? void 0 : verb.participePasse) == null ? void 0 : _a.trim()) || "le participe pass\xE9 du verbe";
+  const auxiliary = compoundAuxiliaryPart(question.conjugaison1 || "", participle);
+  const agreed = agreedParticipleFromCompound(question.conjugaison1 || "", participle);
+  const context = tenseContext(question, tense);
+  if (!revealAnswers) {
+    return `<ol><li>Rep\xE8re le sujet qui subit l\u2019action : <strong>${escapedHtml(subject)}</strong>.</li><li>Conjugue <strong>\xEAtre</strong> ${escapedHtml(context)}.</li><li>Ajoute le participe pass\xE9 de <strong>${escapedHtml(question.infinitif || (verb == null ? void 0 : verb.infinitif) || "ce verbe")}</strong>.</li><li>Accorde ce participe avec le sujet, puis relis la phrase avec \xAB ${escapedHtml(agent)} \xBB.</li></ol>`;
+  }
+  return `<ol><li>Le COD de la phrase active devient le sujet : <strong>${escapedHtml(subject)}</strong>.</li><li>Conjugue <strong>\xEAtre</strong> ${escapedHtml(context)} : <strong>${escapedHtml(auxiliary)}</strong>.</li><li>Ajoute le participe pass\xE9 et accorde-le avec ce sujet : <strong>${escapedHtml(agreed)}</strong>.</li><li>Relis la phrase compl\xE8te avec \xAB ${escapedHtml(agent)} \xBB.</li></ol><p><strong>R\xE9sultat</strong><br>${resultFormMarkup(question.reponsesPourCorrige[0] || question.conjugaison1 || "")}</p>`;
+}
 function compoundAgreementHtml(auxiliary, subject, baseParticiple = "", answer = "", question, verb) {
   var _a, _b;
   if (auxiliary === "\xEAtre") {
@@ -883,6 +903,9 @@ function buildConjugationBaseHtml(question, verb, tense, approach = "grammatical
   const highlightedReference = displayedReference ? rememberedFormMarkup(displayedReference) : "";
   const normalizedMode = normalized$1(question.mode || ((_d = tense == null ? void 0 : tense.mode) == null ? void 0 : _d.name));
   const normalizedTense = normalized$1(question.temps || (tense == null ? void 0 : tense.name));
+  if (question.voice === "passive") {
+    return `${buildPassiveVoiceMethodHtml(question, verb, tense)}${buildPassiveVoiceHelpHtml(question)}`;
+  }
   if (isNearFutureTense({ code: question.tenseCode || (tense == null ? void 0 : tense.code), name: question.temps || (tense == null ? void 0 : tense.name) })) {
     return nearFutureHelpHtml(question);
   }
@@ -1005,6 +1028,9 @@ function buildConjugationBaseHtml(question, verb, tense, approach = "grammatical
 }
 function buildConjugationEndingsHtml(question, verb, tense, approach = "grammatical-technical") {
   var _a, _b, _c;
+  if (question.voice === "passive") {
+    return `${buildPassiveVoiceMethodHtml(question, verb, tense)}${buildPassiveVoiceHelpHtml(question)}`;
+  }
   if (isNearFutureTense({ code: question.tenseCode || (tense == null ? void 0 : tense.code), name: question.temps || (tense == null ? void 0 : tense.name) })) {
     return nearFutureHelpHtml(question);
   }
@@ -1091,6 +1117,9 @@ function answerFreeNonPersonalHelpHtml(question, verb, tense) {
 }
 function buildCompleteConjugationAdviceHtml(question, verb, tense) {
   var _a, _b;
+  if (question.voice === "passive") {
+    return `${buildPassiveVoiceMethodHtml(question, verb, tense, false)}${buildPassiveVoiceHelpHtml(question, verb, tense, false)}`;
+  }
   if (isNearFutureTense({ code: question.tenseCode || (tense == null ? void 0 : tense.code), name: question.temps || (tense == null ? void 0 : tense.name) })) {
     return nearFutureHelpHtml(question, false);
   }
@@ -1122,6 +1151,9 @@ function targetedWarnings(question, verb) {
   const warnings = [];
   const infinitive = normalized$1(question.infinitif || (verb == null ? void 0 : verb.infinitif));
   const particularities = new Set(((verb == null ? void 0 : verb.particularites) || []).map(normalized$1));
+  if (question.voice === "passive") {
+    warnings.push("\xC0 la voix passive, le participe pass\xE9 s\u2019accorde avec le sujet qui subit l\u2019action.");
+  }
   if (infinitive.endsWith("ger") || particularities.has("ger")) {
     warnings.push("Verbe en -ger : devant a ou o, on garde le son doux de g en ajoutant e, par exemple \xAB nous mangeons \xBB.");
   }
@@ -1180,9 +1212,9 @@ function buildTargetedConjugationHelp(question, verb, tense, localizedLabels = {
     displayedMode && normalized$1(rawMode) !== "indicatif" ? `${displayedTense} (${displayedMode})` : displayedTense
   ].filter(Boolean).join(" | ");
   const method = [
-    subject ? `Rep\xE8re la personne : ${subject}.` : "Rep\xE8re la personne demand\xE9e.",
-    question.isCompound || (tense == null ? void 0 : tense.isCompound) ? "Conjugue d\u2019abord l\u2019auxiliaire, puis ajoute le participe pass\xE9." : "Choisis le bon radical, puis ajoute la terminaison de cette personne.",
-    question.complement ? `Relis la phrase avec \xAB ${question.complement} \xBB pour v\xE9rifier le sens et l\u2019accord.` : "Relis la forme obtenue \xE0 voix basse pour v\xE9rifier qu\u2019elle convient."
+    question.voice === "passive" ? `Rep\xE8re le sujet qui subit l\u2019action : ${question.passiveSubject || subject}.` : subject ? `Rep\xE8re la personne : ${subject}.` : "Rep\xE8re la personne demand\xE9e.",
+    question.voice === "passive" ? "Conjugue \xEAtre au temps demand\xE9, puis ajoute le participe pass\xE9 du verbe." : question.isCompound || (tense == null ? void 0 : tense.isCompound) ? "Conjugue d\u2019abord l\u2019auxiliaire, puis ajoute le participe pass\xE9." : "Choisis le bon radical, puis ajoute la terminaison de cette personne.",
+    question.voice === "passive" ? "Accorde le participe pass\xE9 avec le sujet de la phrase passive." : question.complement ? `Relis la phrase avec \xAB ${question.complement} \xBB pour v\xE9rifier le sens et l\u2019accord.` : "Relis la forme obtenue \xE0 voix basse pour v\xE9rifier qu\u2019elle convient."
   ];
   return {
     title: helpTitle || `Aide pour \xAB ${infinitive} \xBB`,
@@ -1195,8 +1227,8 @@ function buildTargetedConjugationHelp(question, verb, tense, localizedLabels = {
       ...(verb == null ? void 0 : verb.familleConjugaison) ? [{ label: "Famille", value: verb.familleConjugaison.replaceAll("-", " ") }] : [],
       ...(verb == null ? void 0 : verb.participePasse) && (question.isCompound || (tense == null ? void 0 : tense.isCompound)) ? [{ label: "Participe pass\xE9", value: verb.participePasse }] : []
     ],
-    formation: [rule.rule],
-    endings: rule.endings,
+    formation: question.voice === "passive" ? ["Voix passive = sujet + \xEAtre conjugu\xE9 + participe pass\xE9 accord\xE9."] : [rule.rule],
+    endings: question.voice === "passive" ? null : rule.endings,
     exception: rule.exception,
     warnings,
     method,
@@ -1413,5 +1445,5 @@ function auditRenderedCoachHelp(input) {
   return { status, issues };
 }
 
-export { auditRenderedCoachHelp as a, automaticHelpErrorsForRecording as b, coachHelpProfile as c, decomposeConjugationForm as d, buildConjugationEndingsHtml as e, buildConjugationBaseHtml as f, buildCompleteConjugationAdviceHtml as g, buildTargetedConjugationHelp as h, normalizeCoachHelpEngineKey as n };
+export { auditRenderedCoachHelp as a, automaticHelpErrorsForRecording as b, coachHelpProfile as c, decomposeConjugationForm as d, buildConjugationEndingsHtml as e, buildConjugationBaseHtml as f, buildPassiveVoiceHelpHtml as g, buildPassiveVoiceMethodHtml as h, buildCompleteConjugationAdviceHtml as i, buildTargetedConjugationHelp as j, normalizeCoachHelpEngineKey as n };
 //# sourceMappingURL=coach-help-audit.mjs.map

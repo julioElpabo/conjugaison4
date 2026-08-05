@@ -1,10 +1,10 @@
-import { u as useDatabase, D as decodePronominalSelectionId, a3 as indirectRelative, a4 as formatConjugationQuestion, a5 as formatAnswer } from '../nitro/nitro.mjs';
+import { u as useDatabase, D as decodePronominalSelectionId, a5 as indirectRelative, a4 as formatConjugationQuestion, a6 as formatAnswer } from '../nitro/nitro.mjs';
 import { b as buildRadicalReference } from './radical-reference.mjs';
 import { g as generatePronominalRow, r as resolveVariableAuxiliary } from './pronominal-formatter.mjs';
-import { M as MODE_IDENTIFICATION_INSTRUCTION, T as TENSE_IDENTIFICATION_INSTRUCTION } from './exercise-instructions.mjs';
-import { i as isNearFutureTense, b as buildNearFutureParadigm, a as isPronominalNearFutureInfinitive, n as nearFutureReflexivePronoun } from './near-future.mjs';
+import { i as isPassivizableInfinitive, M as MODE_IDENTIFICATION_INSTRUCTION, T as TENSE_IDENTIFICATION_INSTRUCTION } from './passive-voice.mjs';
+import { i as isNearFutureTense, b as buildNearFutureParadigm, c as isPronominalNearFutureInfinitive, n as nearFutureReflexivePronoun } from './near-future.mjs';
 
-function normalized$1(value) {
+function normalized$2(value) {
   return value.trim().toLocaleLowerCase("fr-CH");
 }
 function upperFirst(value) {
@@ -17,8 +17,8 @@ function hasPresentParticiple(verb) {
   return variants(verb.participe_present).length > 0;
 }
 function formatNonFiniteQuestion(verb, tense) {
-  const mode = normalized$1(tense.mode_name);
-  const tenseName = normalized$1(tense.name);
+  const mode = normalized$2(tense.mode_name);
+  const tenseName = normalized$2(tense.name);
   const infinitive = upperFirst(verb.infinitif);
   let label;
   let answers;
@@ -39,7 +39,7 @@ function formatNonFiniteQuestion(verb, tense) {
     answers = [upperFirst(verb.infinitif)];
   } else if (mode === "infinitif" && tenseName === "pass\xE9" && verb.auxiliaire_infinitif) {
     label = "L\u2019infinitif pass\xE9";
-    const auxiliary = /^s[’']|^se\s/u.test(normalized$1(verb.infinitif)) ? "s\u2019\xEAtre" : normalized$1(verb.auxiliaire_infinitif);
+    const auxiliary = /^s[’']|^se\s/u.test(normalized$2(verb.infinitif)) ? "s\u2019\xEAtre" : normalized$2(verb.auxiliaire_infinitif);
     answers = variants(verb.participe_passe).map((form) => upperFirst(`${auxiliary} ${form}`));
   } else {
     return null;
@@ -72,6 +72,95 @@ function formatNonFiniteQuestion(verb, tense) {
     conjugaison2: answers[1] || "",
     conjugaison3: answers[2] || "",
     ...radicalReference ? { radicalReference } : {}
+  };
+}
+
+function normalized$1(value) {
+  return value.trim().toLocaleLowerCase("fr-CH");
+}
+function unique$1(values) {
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+function capitalize(value) {
+  return value ? value.charAt(0).toLocaleUpperCase("fr-CH") + value.slice(1) : value;
+}
+function startsWithVowel$1(value) {
+  const first = value.trim().normalize("NFD").replace(/\p{Diacritic}/gu, "").charAt(0).toLowerCase();
+  return "aeiouy".includes(first);
+}
+function subjunctiveSubject(subject) {
+  return startsWithVowel$1(subject) ? `qu'${subject}` : `que ${subject}`;
+}
+function agreePassiveParticiple(participle, gender, number) {
+  var _a;
+  let result = participle.trim();
+  if (!result) return "";
+  if (normalized$1(gender || "") === "feminin") {
+    const exceptions = {
+      absous: "absoute",
+      dissous: "dissoute",
+      d\u00FB: "due",
+      m\u00FB: "mue",
+      cr\u00FB: "crue"
+    };
+    result = (_a = exceptions[result]) != null ? _a : result.endsWith("e") ? result : `${result}e`;
+  }
+  if (normalized$1(number || "") === "pluriel" && !/[sx]$/u.test(result)) result += "s";
+  return result;
+}
+function passiveAuxiliaryForm(row, auxiliaryForms) {
+  var _a;
+  if (row.tense_code === "near-future" || normalized$1(row.temps_name) === "futur proche") {
+    const active = row.conjugaison1.trim();
+    return active.endsWith(row.infinitif) ? `${active.slice(0, -row.infinitif.length)}\xEAtre`.trim() : null;
+  }
+  return ((_a = auxiliaryForms.find((form) => Number(form.personne_id) === Number(row.personne_id) && normalized$1(form.mode_name) === normalized$1(row.mode_name) && normalized$1(form.temps_name) === normalized$1(row.temps_name))) == null ? void 0 : _a.conjugaison1.trim()) || null;
+}
+function formatPassiveQuestion(row, complement, auxiliaryForms) {
+  var _a;
+  const subject = ((_a = complement.texte_antepose) == null ? void 0 : _a.trim()) || "";
+  const auxiliary = passiveAuxiliaryForm(row, auxiliaryForms);
+  const participle = agreePassiveParticiple(row.participe_passe, complement.genre, complement.nombre);
+  if (!subject || !auxiliary || !participle) return null;
+  const agent = "par quelqu\u2019un";
+  const verbPhrase = `${auxiliary} ${participle}`;
+  const subjunctive = normalized$1(row.mode_name) === "subjonctif";
+  const subjectPrefix = subjunctive ? subjunctiveSubject(subject) : subject;
+  const fullWithoutAgent = `${subjectPrefix} ${verbPhrase}`;
+  const fullWithAgent = `${fullWithoutAgent} ${agent}`;
+  const displayedSentence = `${capitalize(fullWithAgent)}.`;
+  return {
+    id: `p-${row.id}-${complement.id}`,
+    verbeId: Number(row.verbe_id),
+    tenseId: Number(row.temp_id),
+    personId: Number(row.personne_id),
+    titre: row.infinitif,
+    instruction: "Conjugue le verbe \xE0 la voix passive.",
+    consigne: `${capitalize(subjectPrefix)} \u2026 ${agent} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`,
+    reponses: unique$1([
+      verbPhrase,
+      `${verbPhrase} ${agent}`,
+      fullWithoutAgent,
+      fullWithAgent,
+      displayedSentence
+    ]),
+    reponsesPourCorrige: [displayedSentence],
+    infinitif: row.infinitif,
+    pronom: subject,
+    temps: row.temps_name,
+    mode: row.mode_name,
+    ...row.tense_code ? { tenseCode: row.tense_code } : {},
+    ...row.mode_code ? { modeCode: row.mode_code } : {},
+    isCompound: Boolean(row.is_compound),
+    voice: "passive",
+    passiveSubject: subject,
+    passiveAgent: agent,
+    conjugaison1: verbPhrase,
+    conjugaison2: "",
+    conjugaison3: "",
+    complement: agent,
+    complementPosition: "after",
+    saisiePrefixe: capitalize(subjectPrefix)
   };
 }
 
@@ -116,6 +205,7 @@ function nearFutureRows(tense, verbs, pronominalUses, allerRows) {
       baseVerbId: Number(verb.id),
       infinitive: verb.infinitif,
       typeHInitial: verb.type_h_initial,
+      pastParticiple: verb.participe_passe,
       allowedPersonIds: allowedPersons(verb.personnes_disponibles)
     })),
     ...pronominalUses.map((use) => ({
@@ -123,6 +213,7 @@ function nearFutureRows(tense, verbs, pronominalUses, allerRows) {
       baseVerbId: Number(use.verbe_id),
       infinitive: use.infinitif_pronominal,
       typeHInitial: use.type_h_initial,
+      pastParticiple: "",
       allowedPersonIds: allowedPersons(use.personnes_autorisees)
     }))
   ];
@@ -153,7 +244,7 @@ function nearFutureRows(tense, verbs, pronominalUses, allerRows) {
         infinitif: source.infinitive,
         auxiliaire: "aller",
         participe_present: "",
-        participe_passe: "",
+        participe_passe: source.pastParticiple,
         auxiliaire_infinitif: null,
         auxiliaire_participe_present: null,
         pronom: form.pronoun,
@@ -177,6 +268,16 @@ function shuffleWith(values, random) {
     [values[index], values[other]] = [values[other], values[index]];
   }
   return values;
+}
+function limitedNearFutureRows(rows, limit, wantsActiveVoice, wantsPassiveVoice) {
+  const candidates = wantsActiveVoice ? rows : rows.filter((row) => [6, 9].includes(Number(row.personne_id)));
+  const passiveSources = wantsPassiveVoice ? shuffle(candidates.filter((row) => [6, 9].includes(Number(row.personne_id)))) : [];
+  const required = passiveSources.slice(0, Math.min(2, limit));
+  const requiredIds = new Set(required.map((row) => String(row.id)));
+  return [
+    ...required,
+    ...shuffle(candidates.filter((row) => !requiredIds.has(String(row.id))))
+  ].slice(0, limit);
 }
 function randomComplement(rows) {
   var _a;
@@ -257,23 +358,55 @@ function choosePronoun(pronom, inclusive, includeOn, random = Math.random) {
   }
   return pronom;
 }
+function conjugationTenseKey(question) {
+  if (question.tenseId !== void 0 && question.tenseId !== null) return `id:${question.tenseId}`;
+  const mode = normalized(question.mode || "");
+  const tense = normalized(question.temps || "");
+  return mode || tense ? `${mode}:${tense}` : "unknown";
+}
+function conjugationVerbKey(question, fallback) {
+  const verbId = Number(question.verbeId);
+  return Number.isFinite(verbId) ? `id:${verbId}` : `unknown:${fallback}`;
+}
 function diverseConjugationQuestions(questions, count, random = Math.random) {
-  const byVerb = /* @__PURE__ */ new Map();
-  for (const question of shuffleWith([...questions], random)) {
-    const verbId = Number(question.verbeId);
-    const key = Number.isFinite(verbId) ? verbId : Number.MIN_SAFE_INTEGER + byVerb.size;
-    const group = byVerb.get(key) || [];
-    group.push(question);
-    byVerb.set(key, group);
-  }
-  const groups = shuffleWith([...byVerb.values()], random);
+  var _a, _b;
+  const remaining = shuffleWith([...questions], random);
+  const tenseUses = /* @__PURE__ */ new Map();
+  const verbUses = /* @__PURE__ */ new Map();
+  const hasActive = remaining.some((question) => question.voice !== "passive");
+  const hasPassive = remaining.some((question) => question.voice === "passive");
+  let nextVoice = random() < 0.5 ? "active" : "passive";
   const selected = [];
-  while (selected.length < count && groups.some((group) => group.length)) {
-    for (const group of shuffleWith([...groups], random)) {
-      const question = group.shift();
-      if (question) selected.push(question);
-      if (selected.length >= count) break;
+  while (selected.length < count && remaining.length) {
+    const minimumTenseUse = Math.min(...remaining.map((question) => {
+      var _a2;
+      return (_a2 = tenseUses.get(conjugationTenseKey(question))) != null ? _a2 : 0;
+    }));
+    let candidates = remaining.filter((question) => {
+      var _a2;
+      return ((_a2 = tenseUses.get(conjugationTenseKey(question))) != null ? _a2 : 0) === minimumTenseUse;
+    });
+    const minimumVerbUse = Math.min(...candidates.map((question, index) => {
+      var _a2;
+      return (_a2 = verbUses.get(conjugationVerbKey(question, index))) != null ? _a2 : 0;
+    }));
+    candidates = candidates.filter((question, index) => {
+      var _a2;
+      return ((_a2 = verbUses.get(conjugationVerbKey(question, index))) != null ? _a2 : 0) === minimumVerbUse;
+    });
+    if (hasActive && hasPassive) {
+      const preferred = candidates.filter((question) => nextVoice === "passive" ? question.voice === "passive" : question.voice !== "passive");
+      if (preferred.length) candidates = preferred;
     }
+    const chosen = candidates[Math.floor(random() * candidates.length)];
+    const chosenIndex = remaining.indexOf(chosen);
+    remaining.splice(chosenIndex, 1);
+    selected.push(chosen);
+    const tenseKey = conjugationTenseKey(chosen);
+    const verbKey = conjugationVerbKey(chosen, chosenIndex);
+    tenseUses.set(tenseKey, ((_a = tenseUses.get(tenseKey)) != null ? _a : 0) + 1);
+    verbUses.set(verbKey, ((_b = verbUses.get(verbKey)) != null ? _b : 0) + 1);
+    nextVoice = chosen.voice === "passive" ? "active" : "passive";
   }
   return selected;
 }
@@ -526,14 +659,18 @@ async function validateSelections(request) {
   return tenseResult[0];
 }
 async function generateQuestionnaire(request) {
-  var _a, _b;
+  var _a, _b, _c, _d, _e;
   const selectedTenses = await validateSelections(request);
   const nonFiniteModes = ["participe", "g\xE9rondif", "infinitif"];
   const finiteTenses = selectedTenses.filter((row) => !nonFiniteModes.includes(normalized(row.mode_name)));
   const nonFiniteTenses = selectedTenses.filter((row) => nonFiniteModes.includes(normalized(row.mode_name)));
   const database = useDatabase();
   const questions = [];
-  const requestedComplementOptions = request.complementOptions || [];
+  const voiceMode = (_a = request.voiceMode) != null ? _a : "active";
+  const wantsActiveVoice = voiceMode !== "passive";
+  const wantsPassiveVoice = request.exerciseKind === "conjugation" && voiceMode !== "active";
+  const passiveOnly = request.exerciseKind === "conjugation" && voiceMode === "passive";
+  const requestedComplementOptions = wantsActiveVoice ? request.complementOptions || [] : [];
   const onlyBeforeComplements = requestedComplementOptions.length > 0 && requestedComplementOptions.every((option) => option.endsWith("-before"));
   const verbIds = request.verbIds.filter((id) => id > 0);
   const pronominalUseIds = request.verbIds.filter((id) => id < 0).map(decodePronominalSelectionId).filter((id) => id !== null);
@@ -542,7 +679,7 @@ async function generateQuestionnaire(request) {
     const citations = await validatedLiteraryCitations(
       null,
       selectedTenses.map((row) => Number(row.id)),
-      (_a = request.literaryRegister) != null ? _a : "all"
+      (_b = request.literaryRegister) != null ? _b : "all"
     );
     const literaryQuestions = [...citations.values()].flat().map((citation) => literaryIdentificationQuestion(citation, request.exerciseKind === "mode-identification"));
     if (!literaryQuestions.length) {
@@ -558,7 +695,8 @@ async function generateQuestionnaire(request) {
     const rows = [];
     const literaryCitations = usesLiteraryCitations ? await validatedLiteraryCitations(null, finiteIds) : /* @__PURE__ */ new Map();
     const selectedVerbCount = verbIds.length + pronominalUseIds.length;
-    const limit = request.exerciseKind === "conjugation" ? Math.min(3e3, Math.max(request.questionCount * 10, selectedVerbCount * 3, request.questionCount)) : 600;
+    const limit = request.exerciseKind === "conjugation" ? passiveOnly ? 3e3 : Math.min(3e3, Math.max(request.questionCount * 10, selectedVerbCount * 3, request.questionCount)) : 600;
+    const passivePersonClause = passiveOnly ? "AND vc.personne_id IN (6,9)" : "";
     const questionVerbIds = usesLiteraryCitations ? [...new Set([...literaryCitations.values()].flat().map((citation) => Number(citation.verb_id)))] : verbIds;
     const literaryCoordinates = usesLiteraryCitations ? [...literaryCitations.keys()].map((key) => {
       const [verbId, tenseId, personId] = key.split(":").map(Number);
@@ -599,6 +737,7 @@ async function generateQuestionnaire(request) {
         AND vc.temp_id IN (${placeholders(finiteIds)})
         ${exactLiteraryClause}
         AND vc.conjugaison1 <> ''
+        ${passivePersonClause}
         ${pastSimpleClause}
       ORDER BY ${literaryOrderClause} RAND()
       LIMIT ${limit}
@@ -643,7 +782,9 @@ async function generateQuestionnaire(request) {
           INNER JOIN verbes v ON v.id = vc.verbe_id
           INNER JOIN temps t ON t.id = vc.temp_id
           INNER JOIN modes m ON m.id = t.mode_id
-          WHERE v.infinitif = '\xEAtre' AND t.isTempsCompose = 0 AND vc.conjugaison1 <> ''
+          WHERE v.infinitif = '\xEAtre'
+            AND ${wantsPassiveVoice ? "1=1" : "t.isTempsCompose = 0"}
+            AND vc.conjugaison1 <> ''
         `)
       ]);
       etreAuxiliaryForms = auxiliaryForms[0];
@@ -655,8 +796,9 @@ async function generateQuestionnaire(request) {
     if (nearFutureTenses.length > 0) {
       const [nearFutureVerbs, nearFutureUses, allerRows] = await Promise.all([
         verbIds.length ? database.execute(`
-              SELECT id, infinitif, type_h_initial, personnes_disponibles
-              FROM verbes
+              SELECT id, infinitif, v.\`participe_pass\xE9\` AS participe_passe,
+                     type_h_initial, personnes_disponibles
+              FROM verbes v
               WHERE id IN (${placeholders(verbIds)}) AND est_archive = 0
             `, verbIds) : Promise.resolve([[]]),
         pronominalUseIds.length ? database.execute(`
@@ -680,8 +822,14 @@ async function generateQuestionnaire(request) {
           ORDER BY p.id
         `)
       ]);
+      const perTenseLimit = Math.max(6, Math.ceil(limit / Math.max(1, finiteTenses.length)));
       for (const tense of nearFutureTenses) {
-        rows.push(...nearFutureRows(tense, nearFutureVerbs[0], nearFutureUses[0], allerRows[0]));
+        rows.push(...limitedNearFutureRows(
+          nearFutureRows(tense, nearFutureVerbs[0], nearFutureUses[0], allerRows[0]),
+          perTenseLimit,
+          wantsActiveVoice,
+          wantsPassiveVoice
+        ));
       }
     }
     const radicalReferenceVerbIds = [...new Set(
@@ -705,21 +853,24 @@ async function generateQuestionnaire(request) {
         radicalReferences.set(Number(reference.verbe_id), candidates);
       }
     }
-    if (!etreAuxiliaryForms.length && rows.some((row) => normalized(row.infinitif) === "sortir" && Boolean(row.is_compound))) {
+    if (!etreAuxiliaryForms.length && (wantsPassiveVoice || rows.some((row) => normalized(row.infinitif) === "sortir" && Boolean(row.is_compound)))) {
       const [auxiliaryForms] = await database.execute(`
         SELECT vc.personne_id, m.name AS mode_name, t.name AS temps_name, vc.conjugaison1
         FROM verbesconjugues vc
         INNER JOIN verbes v ON v.id = vc.verbe_id
         INNER JOIN temps t ON t.id = vc.temp_id
         INNER JOIN modes m ON m.id = t.mode_id
-        WHERE v.infinitif = '\xEAtre' AND t.isTempsCompose = 0 AND vc.conjugaison1 <> ''
+        WHERE v.infinitif = '\xEAtre'
+          AND ${wantsPassiveVoice ? "1=1" : "t.isTempsCompose = 0"}
+          AND vc.conjugaison1 <> ''
       `);
       etreAuxiliaryForms = auxiliaryForms;
     }
     const complementsByVerb = /* @__PURE__ */ new Map();
-    if (request.exerciseKind === "conjugation" && request.includeComplements && verbIds.length > 0) {
+    if (request.exerciseKind === "conjugation" && (request.includeComplements && wantsActiveVoice || wantsPassiveVoice) && verbIds.length > 0) {
       const [complements] = await database.execute(`
-        SELECT vs.verbe_id, cv.fonction_objet, cv.preposition, c.texte, c.texte_antepose, c.genre, c.nombre, c.poids
+        SELECT c.id, vs.verbe_id, cv.fonction_objet, cv.preposition,
+               c.texte, c.texte_antepose, c.genre, c.nombre, c.poids
         FROM verbe_sens vs
         INNER JOIN constructions_verbales cv ON cv.sens_id=vs.id
         INNER JOIN complements_verbaux c ON c.construction_id=cv.id
@@ -730,7 +881,7 @@ async function generateQuestionnaire(request) {
         ORDER BY vs.verbe_id, c.id
       `, verbIds);
       for (const complement of complements) {
-        const candidates = (_b = complementsByVerb.get(Number(complement.verbe_id))) != null ? _b : [];
+        const candidates = (_c = complementsByVerb.get(Number(complement.verbe_id))) != null ? _c : [];
         candidates.push(complement);
         complementsByVerb.set(Number(complement.verbe_id), candidates);
       }
@@ -741,9 +892,8 @@ async function generateQuestionnaire(request) {
       Number(row.personne_id)
     ))) : rows;
     const rowsForQuestions = onlyBeforeComplements ? eligibleRows.filter((row) => normalized(row.mode_name) !== "imp\xE9ratif" && (requestedComplementOptions.includes("coi-before") || Boolean(row.is_compound))) : eligibleRows;
-    questions.push(...rowsForQuestions.map((row) => {
-      var _a2, _b2;
-      const candidates = (_a2 = complementsByVerb.get(Number(row.verbe_id))) != null ? _a2 : [];
+    for (const row of rowsForQuestions) {
+      const candidates = (_d = complementsByVerb.get(Number(row.verbe_id))) != null ? _d : [];
       const availableOptions = requestedComplementOptions.flatMap((option2) => {
         const [functionObject, position] = option2.split("-");
         const matching = candidates.filter((candidate) => candidate.fonction_objet === functionObject).filter((candidate) => {
@@ -774,23 +924,40 @@ async function generateQuestionnaire(request) {
       const radicalReference = isNearFutureTense({ code: row.tense_code, name: row.temps_name }) ? void 0 : radicalReferenceFor(row, radicalReferences);
       const futureSimpleForms = futureSimpleFormsFor(row, radicalReferences);
       const conjugationConfusions = conjugationConfusionsFor(row, radicalReferences);
-      return request.exerciseKind === "conjugation" ? formatConjugationQuestion({
-        ...semanticRow,
-        radical_reference: radicalReference,
-        future_simple_forms: futureSimpleForms,
-        conjugation_confusions: conjugationConfusions
-      }, choosePronoun(row.pronom, request.inclusivePronouns, request.includeOnPronoun)) : identificationQuestion(
-        semanticRow,
-        (_b2 = literaryCitations.get(literaryCitationKey(
-          Number(row.verbe_id),
-          Number(row.temp_id),
-          Number(row.personne_id)
-        ))) == null ? void 0 : _b2.shift(),
-        request.exerciseKind === "mode-identification"
-      );
-    }));
+      if (request.exerciseKind === "conjugation" && wantsActiveVoice) {
+        questions.push(formatConjugationQuestion({
+          ...semanticRow,
+          radical_reference: radicalReference,
+          future_simple_forms: futureSimpleForms,
+          conjugation_confusions: conjugationConfusions
+        }, choosePronoun(row.pronom, request.inclusivePronouns, request.includeOnPronoun)));
+      } else if (request.exerciseKind !== "conjugation") {
+        questions.push(identificationQuestion(
+          semanticRow,
+          (_e = literaryCitations.get(literaryCitationKey(
+            Number(row.verbe_id),
+            Number(row.temp_id),
+            Number(row.personne_id)
+          ))) == null ? void 0 : _e.shift(),
+          request.exerciseKind === "mode-identification"
+        ));
+      }
+      if (wantsPassiveVoice && Number(row.verbe_id) > 0 && isPassivizableInfinitive(row.infinitif) && [6, 9].includes(Number(row.personne_id)) && normalized(row.mode_name) !== "imp\xE9ratif") {
+        const expectedNumber = Number(row.personne_id) === 9 ? "pluriel" : "singulier";
+        const passiveComplements = candidates.filter((candidate) => candidate.fonction_objet === "cod" && Boolean(candidate.texte_antepose && candidate.genre && candidate.nombre) && normalized(candidate.nombre || "") === expectedNumber);
+        const passiveComplement = randomComplement(passiveComplements);
+        if (passiveComplement) {
+          const passive = formatPassiveQuestion(
+            row,
+            passiveComplement,
+            etreAuxiliaryForms
+          );
+          if (passive) questions.push(passive);
+        }
+      }
+    }
   }
-  if (nonFiniteTenses.length > 0 && request.exerciseKind === "conjugation" && !onlyBeforeComplements) {
+  if (nonFiniteTenses.length > 0 && request.exerciseKind === "conjugation" && wantsActiveVoice && !onlyBeforeComplements) {
     const verbs = [];
     const selectedNonFiniteRequirePresentParticiple = nonFiniteTenses.every((tense) => {
       const mode = normalized(tense.mode_name);
@@ -862,6 +1029,11 @@ async function generateQuestionnaire(request) {
   }
   if (usesLiteraryCitations && !questions.length) {
     throw new QuestionnaireSelectionError("Aucune citation valid\xE9e ne correspond aux temps s\xE9lectionn\xE9s");
+  }
+  if (request.exerciseKind === "conjugation" && wantsPassiveVoice && !questions.some((question) => question.voice === "passive")) {
+    throw new QuestionnaireSelectionError(
+      "Aucune forme passive n\u2019est disponible pour les verbes et les temps s\xE9lectionn\xE9s"
+    );
   }
   if (request.exerciseKind === "mode-identification") {
     return balancedModeIdentificationQuestions(questions, request.questionCount);

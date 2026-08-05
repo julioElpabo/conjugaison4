@@ -381,6 +381,9 @@ const uiMessages = {
   "Annuler": { de: "Abbrechen", en: "Cancel", it: "Annulla", es: "Cancelar" },
   "Termin\xE9": { de: "Fertig", en: "Done", it: "Fatto", es: "Listo" },
   "Copier": { de: "Kopieren", en: "Copy", it: "Copia", es: "Copiar" },
+  "Code copi\xE9": { de: "Code kopiert", en: "Code copied", it: "Codice copiato", es: "C\xF3digo copiado" },
+  "Lien copi\xE9": { de: "Link kopiert", en: "Link copied", it: "Link copiato", es: "Enlace copiado" },
+  "La copie a \xE9chou\xE9.": { de: "Das Kopieren ist fehlgeschlagen.", en: "Copying failed.", it: "Copia non riuscita.", es: "No se ha podido copiar." },
   "Retour": { de: "Zur\xFCck", en: "Back", it: "Indietro", es: "Volver" },
   "Continuer": { de: "Weiter", en: "Continue", it: "Continua", es: "Continuar" },
   "Mesure d\u2019activit\xE9": { de: "Aktivit\xE4tsmessung", en: "Activity tracking", it: "Misurazione dell\u2019attivit\xE0", es: "Medici\xF3n de actividad" },
@@ -438,16 +441,32 @@ const uiMessages = {
   "Partager ce d\xE9fi avec d\u2019autres personnes": { de: "Diese \xDCbung mit anderen teilen", en: "Share this challenge with others", it: "Condividi questo esercizio con altre persone", es: "Compartir este ejercicio con otras personas" },
   "Mes options": { de: "Meine Optionen", en: "My options", it: "Le mie opzioni", es: "Mis opciones" },
   "Nombre de questions": { de: "Anzahl der Fragen", en: "Number of questions", it: "Numero di domande", es: "N\xFAmero de preguntas" },
+  "Pronoms": { de: "Pronomen", en: "Pronouns", it: "Pronomi", es: "Pronombres" },
   "Inclure les pronoms": { de: "Pronomen einbeziehen", en: "Include pronouns", it: "Includi i pronomi", es: "Incluir pronombres" },
+  "Voix du verbe": { de: "Verbform", en: "Verb voice", it: "Voce del verbo", es: "Voz del verbo" },
+  "Active uniquement": { de: "Nur Aktiv", en: "Active only", it: "Solo attiva", es: "Solo activa" },
+  "Passive uniquement": { de: "Nur Passiv", en: "Passive only", it: "Solo passiva", es: "Solo pasiva" },
+  "Active et passive": { de: "Aktiv und Passiv", en: "Active and passive", it: "Attiva e passiva", es: "Activa y pasiva" },
+  "Le COD devient le sujet de la phrase.": { de: "Das direkte Objekt wird zum Subjekt des Satzes.", en: "The direct object becomes the subject of the sentence.", it: "Il complemento oggetto diventa il soggetto della frase.", es: "El complemento directo se convierte en el sujeto de la oraci\xF3n." },
+  "Les deux voix alterneront dans le d\xE9fi.": { de: "Beide Formen wechseln sich in der \xDCbung ab.", en: "Both voices will alternate in the challenge.", it: "Le due voci si alterneranno nella sfida.", es: "Las dos voces se alternar\xE1n en el reto." },
+  "Aucun verbe s\xE9lectionn\xE9 ne poss\xE8de de COD valid\xE9.": { de: "Keines der ausgew\xE4hlten Verben hat ein validiertes direktes Objekt.", en: "None of the selected verbs has a validated direct object.", it: "Nessun verbo selezionato ha un complemento oggetto convalidato.", es: "Ning\xFAn verbo seleccionado tiene un complemento directo validado." },
   "Ils appara\xEEtront ponctuellement dans les questions.": { de: "Sie erscheinen gelegentlich in den Fragen.", en: "They will occasionally appear in questions.", it: "Appariranno occasionalmente nelle domande.", es: "Aparecer\xE1n ocasionalmente en las preguntas." },
   "Inclure le pronom": { de: "Pronomen einbeziehen", en: "Include the pronoun", it: "Includi il pronome", es: "Incluir el pronombre" },
   "Il appara\xEEtra ponctuellement dans les questions \xE0 la troisi\xE8me personne du singulier.": { de: "Es erscheint gelegentlich in Fragen in der dritten Person Singular.", en: "It will occasionally appear in third-person singular questions.", it: "Apparir\xE0 occasionalmente nelle domande alla terza persona singolare.", es: "Aparecer\xE1 ocasionalmente en preguntas en tercera persona del singular." },
   "Type d\u2019exercice": { de: "\xDCbungstyp", en: "Exercise type", it: "Tipo di esercizio", es: "Tipo de ejercicio" },
+  "Choix des verbes": { de: "Auswahl der Verben", en: "Verb selection", it: "Scelta dei verbi", es: "Selecci\xF3n de verbos" },
   "Conjuguer": { de: "Konjugieren", en: "Conjugate", it: "Coniugare", es: "Conjugar" },
   "Conjuguer les formes demand\xE9es": { de: "Die verlangten Formen konjugieren", en: "Conjugate the requested forms", it: "Coniugare le forme richieste", es: "Conjugar las formas solicitadas" },
   "avec compl\xE9ments,": { de: "mit Erg\xE4nzungen,", en: "with complements,", it: "con complementi,", es: "con complementos," },
   "Trouver le mode et le temps": { de: "Modus und Zeitform bestimmen", en: "Identify the mood and tense", it: "Trovare il modo e il tempo", es: "Identificar el modo y el tiempo" },
   "Trouver le mode et les temps": { de: "Modus und Zeitformen bestimmen", en: "Identify the mood and tenses", it: "Trovare il modo e i tempi", es: "Identificar el modo y los tiempos" },
+  "Avec mes verbes": { de: "Mit meinen Verben", en: "With my verbs", it: "Con i miei verbi", es: "Con mis verbos" },
+  "Formes conjugu\xE9es simples, sans citation.": { de: "Einfache konjugierte Formen, ohne Zitat.", en: "Simple conjugated forms, without quotations.", it: "Forme coniugate semplici, senza citazioni.", es: "Formas conjugadas simples, sin citas." },
+  "Avec n\u2019importe quel verbe": { de: "Mit beliebigen Verben", en: "With any verb", it: "Con qualsiasi verbo", es: "Con cualquier verbo" },
+  "Construits avec des phrases litt\xE9raires.": { de: "Mit literarischen S\xE4tzen erstellt.", en: "Built from literary sentences.", it: "Costruiti con frasi letterarie.", es: "Construidos con frases literarias." },
+  "Disponible uniquement pour un exercice de conjugaison.": { de: "Nur f\xFCr Konjugations\xFCbungen verf\xFCgbar.", en: "Available only for conjugation exercises.", it: "Disponibile solo per gli esercizi di coniugazione.", es: "Disponible solo para los ejercicios de conjugaci\xF3n." },
+  "Au passif, le COD devient le sujet : ces options ne s\u2019appliquent pas.": { de: "Im Passiv wird das direkte Objekt zum Subjekt: Diese Optionen gelten hier nicht.", en: "In the passive voice, the direct object becomes the subject, so these options do not apply.", it: "Nella forma passiva, il complemento oggetto diventa il soggetto: queste opzioni non si applicano.", es: "En la voz pasiva, el complemento directo se convierte en sujeto: estas opciones no se aplican." },
+  "Les verbes choisis ne proposent pas de compl\xE9ment.": { de: "F\xFCr die ausgew\xE4hlten Verben sind keine Objekterg\xE4nzungen verf\xFCgbar.", en: "The selected verbs do not provide any object complements.", it: "I verbi selezionati non prevedono complementi oggetto.", es: "Los verbos seleccionados no incluyen complementos de objeto." },
   "Compl\xE9ments d\u2019objets :": { de: "Objekterg\xE4nzungen:", en: "Object complements:", it: "Complementi oggetto:", es: "Complementos de objeto:" },
   "Ajoute des compl\xE9ments d\u2019objets directs ou indirects.": { de: "F\xFCge direkte oder indirekte Objekte hinzu.", en: "Add direct or indirect object complements.", it: "Aggiungi complementi oggetto diretti o indiretti.", es: "A\xF1ade complementos de objeto directos o indirectos." },
   "nouveau": { de: "neu", en: "new", it: "nuovo", es: "nuevo" },
@@ -1337,17 +1356,17 @@ const _routes = [
   {
     name: "admin-admins",
     path: "/admin/admins",
-    component: () => import('./admins-dd_jHCwx.mjs')
+    component: () => import('./admins-CFYjOWvt.mjs')
   },
   {
     name: "admin-caracteres",
     path: "/admin/caracteres",
-    component: () => import('./caracteres-Cfu5BOyA.mjs')
+    component: () => import('./caracteres-DwOM0Smh.mjs')
   },
   {
     name: "admin-challenges",
     path: "/admin/challenges",
-    component: () => import('./challenges-BlAemeES.mjs')
+    component: () => import('./challenges-Bglv_bra.mjs')
   },
   {
     name: "admin-characters",
@@ -1357,57 +1376,57 @@ const _routes = [
   {
     name: "admin-charts",
     path: "/admin/charts",
-    component: () => import('./charts-DC6wonZY.mjs')
+    component: () => import('./charts-DAj6tue0.mjs')
   },
   {
     name: "admin-coaches",
     path: "/admin/coaches",
-    component: () => import('./coaches-DDwijDrA.mjs')
+    component: () => import('./coaches-DRvK3Vkp.mjs')
   },
   {
     name: "admin-contact",
     path: "/admin/contact",
-    component: () => import('./contact-DoAEhj0W.mjs')
+    component: () => import('./contact-C4xjfR3t.mjs')
   },
   {
     name: "admin-errors",
     path: "/admin/errors",
-    component: () => import('./errors-DCS7YHYr.mjs')
+    component: () => import('./errors-Dx5aZwcY.mjs')
   },
   {
     name: "admin-feedbacks",
     path: "/admin/feedbacks",
-    component: () => import('./feedbacks-DGq756Ru.mjs')
+    component: () => import('./feedbacks-Cqz0gTkS.mjs')
   },
   {
     name: "admin-help-verification",
     path: "/admin/help-verification",
-    component: () => import('./help-verification-DikXrPqS.mjs')
+    component: () => import('./help-verification-BdeZXsRP.mjs')
   },
   {
     name: "admin-helps",
     path: "/admin/helps",
-    component: () => import('./helps-EgQJm_qb.mjs')
+    component: () => import('./helps-CgOC0qDH.mjs')
   },
   {
     name: "admin-literary-corpus",
     path: "/admin/literary-corpus",
-    component: () => import('./literary-corpus-C9tAYhbs.mjs')
+    component: () => import('./literary-corpus-nYeK9Ee8.mjs')
   },
   {
     name: "admin-phrases",
     path: "/admin/phrases",
-    component: () => import('./phrases-CmPIpkcI.mjs')
+    component: () => import('./phrases-Duyp7VvC.mjs')
   },
   {
     name: "admin-tests",
     path: "/admin/tests",
-    component: () => import('./tests-CaXl7ZXo.mjs')
+    component: () => import('./tests-DR-9qsxm.mjs')
   },
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-wb69I0v7.mjs')
+    component: () => import('./users-VbQhQ9_i.mjs')
   },
   {
     name: "modes-mode-temps",
@@ -1417,7 +1436,7 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-9gdKp6C9.mjs')
+    component: () => import('./_code_-jSkgudC2.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1432,17 +1451,17 @@ const _routes = [
   {
     name: "accueil",
     path: "/accueil",
-    component: () => import('./accueil-Cqwrh6e9.mjs')
+    component: () => import('./accueil-DXKeevH0.mjs')
   },
   {
     name: "admin",
     path: "/admin",
-    component: () => import('./index-BEDlPKuk.mjs')
+    component: () => import('./index-CLdvB-Pz.mjs')
   },
   {
     name: "apprendre",
     path: "/apprendre",
-    component: () => import('./apprendre-Cupb5HCy.mjs')
+    component: () => import('./apprendre-BC5fl4xL.mjs')
   },
   {
     name: "consulter",
@@ -1457,18 +1476,18 @@ const _routes = [
   {
     name: "mon-compte",
     path: "/mon-compte",
-    component: () => import('./mon-compte-qEflaIPp.mjs')
+    component: () => import('./mon-compte-D-9d8KBe.mjs')
   },
   {
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-PrzsPcZt.mjs')
+    component: () => import('./my-page-FIw4VU59.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-7R6owBUR.mjs')
+    component: () => import('./nouveau-defi-CtL0BUyF.mjs')
   },
   {
     name: "signin",
@@ -1478,22 +1497,22 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-Dq2oKZ06.mjs')
+    component: () => import('./index-SmyAuSaZ.mjs')
   },
   {
     name: "localized-admin-admins",
     path: "/:locale(fr|de|en|it|es)/admin/admins",
-    component: () => import('./admins-dd_jHCwx.mjs')
+    component: () => import('./admins-CFYjOWvt.mjs')
   },
   {
     name: "localized-admin-caracteres",
     path: "/:locale(fr|de|en|it|es)/admin/caracteres",
-    component: () => import('./caracteres-Cfu5BOyA.mjs')
+    component: () => import('./caracteres-DwOM0Smh.mjs')
   },
   {
     name: "localized-admin-challenges",
     path: "/:locale(fr|de|en|it|es)/admin/challenges",
-    component: () => import('./challenges-BlAemeES.mjs')
+    component: () => import('./challenges-Bglv_bra.mjs')
   },
   {
     name: "localized-admin-characters",
@@ -1503,57 +1522,57 @@ const _routes = [
   {
     name: "localized-admin-charts",
     path: "/:locale(fr|de|en|it|es)/admin/charts",
-    component: () => import('./charts-DC6wonZY.mjs')
+    component: () => import('./charts-DAj6tue0.mjs')
   },
   {
     name: "localized-admin-coaches",
     path: "/:locale(fr|de|en|it|es)/admin/coaches",
-    component: () => import('./coaches-DDwijDrA.mjs')
+    component: () => import('./coaches-DRvK3Vkp.mjs')
   },
   {
     name: "localized-admin-contact",
     path: "/:locale(fr|de|en|it|es)/admin/contact",
-    component: () => import('./contact-DoAEhj0W.mjs')
+    component: () => import('./contact-C4xjfR3t.mjs')
   },
   {
     name: "localized-admin-errors",
     path: "/:locale(fr|de|en|it|es)/admin/errors",
-    component: () => import('./errors-DCS7YHYr.mjs')
+    component: () => import('./errors-Dx5aZwcY.mjs')
   },
   {
     name: "localized-admin-feedbacks",
     path: "/:locale(fr|de|en|it|es)/admin/feedbacks",
-    component: () => import('./feedbacks-DGq756Ru.mjs')
+    component: () => import('./feedbacks-Cqz0gTkS.mjs')
   },
   {
     name: "localized-admin-help-verification",
     path: "/:locale(fr|de|en|it|es)/admin/help-verification",
-    component: () => import('./help-verification-DikXrPqS.mjs')
+    component: () => import('./help-verification-BdeZXsRP.mjs')
   },
   {
     name: "localized-admin-helps",
     path: "/:locale(fr|de|en|it|es)/admin/helps",
-    component: () => import('./helps-EgQJm_qb.mjs')
+    component: () => import('./helps-CgOC0qDH.mjs')
   },
   {
     name: "localized-admin-literary-corpus",
     path: "/:locale(fr|de|en|it|es)/admin/literary-corpus",
-    component: () => import('./literary-corpus-C9tAYhbs.mjs')
+    component: () => import('./literary-corpus-nYeK9Ee8.mjs')
   },
   {
     name: "localized-admin-phrases",
     path: "/:locale(fr|de|en|it|es)/admin/phrases",
-    component: () => import('./phrases-CmPIpkcI.mjs')
+    component: () => import('./phrases-Duyp7VvC.mjs')
   },
   {
     name: "localized-admin-tests",
     path: "/:locale(fr|de|en|it|es)/admin/tests",
-    component: () => import('./tests-CaXl7ZXo.mjs')
+    component: () => import('./tests-DR-9qsxm.mjs')
   },
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-wb69I0v7.mjs')
+    component: () => import('./users-VbQhQ9_i.mjs')
   },
   {
     name: "localized-modes-mode-temps",
@@ -1563,7 +1582,7 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-9gdKp6C9.mjs')
+    component: () => import('./_code_-jSkgudC2.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1578,17 +1597,17 @@ const _routes = [
   {
     name: "localized-accueil",
     path: "/:locale(fr|de|en|it|es)/accueil",
-    component: () => import('./accueil-Cqwrh6e9.mjs')
+    component: () => import('./accueil-DXKeevH0.mjs')
   },
   {
     name: "localized-admin",
     path: "/:locale(fr|de|en|it|es)/admin",
-    component: () => import('./index-BEDlPKuk.mjs')
+    component: () => import('./index-CLdvB-Pz.mjs')
   },
   {
     name: "localized-apprendre",
     path: "/:locale(fr|de|en|it|es)/apprendre",
-    component: () => import('./apprendre-Cupb5HCy.mjs')
+    component: () => import('./apprendre-BC5fl4xL.mjs')
   },
   {
     name: "localized-consulter",
@@ -1603,18 +1622,18 @@ const _routes = [
   {
     name: "localized-mon-compte",
     path: "/:locale(fr|de|en|it|es)/mon-compte",
-    component: () => import('./mon-compte-qEflaIPp.mjs')
+    component: () => import('./mon-compte-D-9d8KBe.mjs')
   },
   {
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-PrzsPcZt.mjs')
+    component: () => import('./my-page-FIw4VU59.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-7R6owBUR.mjs')
+    component: () => import('./nouveau-defi-CtL0BUyF.mjs')
   },
   {
     name: "localized-signin",
@@ -1624,7 +1643,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-Dq2oKZ06.mjs')
+    component: () => import('./index-SmyAuSaZ.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {

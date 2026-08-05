@@ -1,9 +1,9 @@
 import { defineComponent, useTemplateRef, ref, computed, watch, mergeProps, unref, nextTick, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrInterpolate, ssrRenderAttr, ssrRenderList, ssrRenderComponent, ssrRenderClass, ssrIncludeBooleanAttr } from 'vue/server-renderer';
 import { b as COACH_EXPLANATION_APPROACHES } from '../_/coach.mjs';
-import { d as decomposeConjugationForm, e as buildConjugationEndingsHtml, f as buildConjugationBaseHtml, g as buildCompleteConjugationAdviceHtml, n as normalizeCoachHelpEngineKey, c as coachHelpProfile, a as auditRenderedCoachHelp } from '../_/coach-help-audit.mjs';
+import { c as coachHelpProfile, d as decomposeConjugationForm, e as buildConjugationEndingsHtml, f as buildConjugationBaseHtml, g as buildPassiveVoiceHelpHtml, h as buildPassiveVoiceMethodHtml, i as buildCompleteConjugationAdviceHtml, n as normalizeCoachHelpEngineKey, a as auditRenderedCoachHelp } from '../_/coach-help-audit.mjs';
 import { ap as grammarModeCode } from '../nitro/nitro.mjs';
-import { c as bareNearFutureInfinitive, n as nearFutureReflexivePronoun, a as isPronominalNearFutureInfinitive, i as isNearFutureTense } from '../_/near-future.mjs';
+import { a as bareNearFutureInfinitive, n as nearFutureReflexivePronoun, c as isPronominalNearFutureInfinitive, i as isNearFutureTense } from '../_/near-future.mjs';
 import { f as useLanguagePreferences } from './server.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 
@@ -257,12 +257,40 @@ const NEAR_FUTURE_CORE_TOKENS = /* @__PURE__ */ new Set([
   "{condensedVerbGroupHelp}",
   "{condensedTenseRuleHelp}"
 ]);
+const PASSIVE_METHOD_BLOCK_ID = -8103;
+const PASSIVE_HELP_BLOCK_ID = -8104;
 function visibleCoachHelpBlocks(help, context) {
   const blocks = defaultCoachHelpBlocks(automaticCoachHelpApproach(help));
-  if (!context || !isNearFutureTense({ code: context.tenseCode, name: context.temps })) return blocks;
   const profile = coachHelpProfile(automaticCoachHelpApproach(help));
-  return [
-    ...blocks.filter((block) => !NEAR_FUTURE_CORE_TOKENS.has(block.content.trim())),
+  const isPassive = (context == null ? void 0 : context.voice) === "passive";
+  const isNearFuture = Boolean(context && isNearFutureTense({ code: context.tenseCode, name: context.temps }));
+  if (!isPassive && !isNearFuture) return blocks;
+  const result = blocks.filter((block) => !NEAR_FUTURE_CORE_TOKENS.has(block.content.trim()));
+  if (isPassive) result.push(
+    {
+      id: PASSIVE_METHOD_BLOCK_ID,
+      type: "normal",
+      title: "Marche \xE0 suivre",
+      content: profile.revealsAnswers ? "{passiveVoiceMethodHelp}" : "{passiveVoiceMethodAdviceHelp}",
+      explanationApproach: profile.legacyPresentation,
+      profileId: profile.id,
+      isActive: true,
+      sortOrder: result.length + 1,
+      children: []
+    },
+    {
+      id: PASSIVE_HELP_BLOCK_ID,
+      type: "info",
+      title: "Comprendre la voix passive",
+      content: profile.revealsAnswers ? "{passiveVoiceHelp}" : profile.id === "tres-condensee" ? "{passiveVoiceCondensedHelp}" : "{passiveVoiceAdviceHelp}",
+      explanationApproach: profile.legacyPresentation,
+      profileId: profile.id,
+      isActive: true,
+      sortOrder: result.length + 2,
+      children: []
+    }
+  );
+  if (isNearFuture) result.push(
     {
       id: -8101,
       type: "normal",
@@ -285,7 +313,8 @@ function visibleCoachHelpBlocks(help, context) {
       sortOrder: blocks.length + 2,
       children: []
     }
-  ];
+  );
+  return result;
 }
 function literaryIdentificationCoachHelpBlocks() {
   const mode = (id, title, description, examples) => ({
@@ -854,6 +883,11 @@ function renderCoachHelpContent(content, values, approach = "cif-falc") {
     condensedTenseRuleHelp: values.condensedTenseRuleHelp || "",
     nearFutureHelp: values.nearFutureHelp || "",
     nearFutureAllerHelp: values.nearFutureAllerHelp || "",
+    passiveVoiceHelp: values.passiveVoiceHelp || "",
+    passiveVoiceAdviceHelp: values.passiveVoiceAdviceHelp || "",
+    passiveVoiceCondensedHelp: values.passiveVoiceCondensedHelp || "",
+    passiveVoiceMethodHelp: values.passiveVoiceMethodHelp || "",
+    passiveVoiceMethodAdviceHelp: values.passiveVoiceMethodAdviceHelp || "",
     pronominalHelp: values.pronominalHelp || "",
     referenceFormHelp: values.referenceFormHelp || values.nousFormHelp || "",
     nousFormHelp: values.nousFormHelp || "",
@@ -866,7 +900,7 @@ function renderCoachHelpContent(content, values, approach = "cif-falc") {
     referenceRadical: values.referenceRadical || "",
     removedEnding: values.removedEnding || ""
   };
-  const rendered = content.replace(/\{(coach|verb|definition|definitionHelp|helpTitle|mode|tense|subject|correctAnswers|auxiliaryAnswer|pastParticipleAnswer|unagreedPastParticiple|COD|isCODplace_avant|COI|isCOIplace_avant|endingsHelp|contextualBaseHelp|completeAdviceHelp|condensedVerbGroupHelp|condensedTenseRuleHelp|nearFutureHelp|nearFutureAllerHelp|pronominalHelp|referenceFormHelp|nousFormHelp|conjugationBase|conjugationEnding|referenceMode|referenceTense|referenceSubject|referenceForm|referenceRadical|removedEnding)\}/gu, (_match, key) => replacements[key] || "");
+  const rendered = content.replace(/\{(coach|verb|definition|definitionHelp|helpTitle|mode|tense|subject|correctAnswers|auxiliaryAnswer|pastParticipleAnswer|unagreedPastParticiple|COD|isCODplace_avant|COI|isCOIplace_avant|endingsHelp|contextualBaseHelp|completeAdviceHelp|condensedVerbGroupHelp|condensedTenseRuleHelp|nearFutureHelp|nearFutureAllerHelp|passiveVoiceHelp|passiveVoiceAdviceHelp|passiveVoiceCondensedHelp|passiveVoiceMethodHelp|passiveVoiceMethodAdviceHelp|pronominalHelp|referenceFormHelp|nousFormHelp|conjugationBase|conjugationEnding|referenceMode|referenceTense|referenceSubject|referenceForm|referenceRadical|removedEnding)\}/gu, (_match, key) => replacements[key] || "");
   return values.omitIndicativeMode ? withoutIndicativeMode(rendered) : rendered;
 }
 function startsWithVowelForArticle(value) {
@@ -1023,6 +1057,11 @@ function coachHelpQuestionVariables(question, verb, tense, locale = "fr") {
     approach,
     buildConjugationBaseHtml(question, verb, tense, approach)
   ]));
+  const passiveVoiceHelp = buildPassiveVoiceHelpHtml(question, verb, tense, true);
+  const passiveVoiceAdviceHelp = buildPassiveVoiceHelpHtml(question, verb, tense, false);
+  const passiveVoiceCondensedHelp = buildPassiveVoiceHelpHtml(question, verb, tense, false, true);
+  const passiveVoiceMethodHelp = buildPassiveVoiceMethodHtml(question, verb, tense, true);
+  const passiveVoiceMethodAdviceHelp = buildPassiveVoiceMethodHtml(question, verb, tense, false);
   const referenceFormHelp = buildReferenceFormHelpHtml(question, verb, tense);
   const infinitive = question.infinitif || (verb == null ? void 0 : verb.infinitif) || "";
   return {
@@ -1053,6 +1092,11 @@ function coachHelpQuestionVariables(question, verb, tense, locale = "fr") {
     condensedTenseRuleHelp: buildCondensedTenseRuleHtml(question.mode || ((_j = tense == null ? void 0 : tense.mode) == null ? void 0 : _j.name), question.temps || (tense == null ? void 0 : tense.name), verb, locale),
     nearFutureHelp: buildNearFutureCoachHelpHtml(verb, locale),
     nearFutureAllerHelp: buildNearFutureAllerHelpHtml(locale),
+    passiveVoiceHelp,
+    passiveVoiceAdviceHelp,
+    passiveVoiceCondensedHelp,
+    passiveVoiceMethodHelp,
+    passiveVoiceMethodAdviceHelp,
     pronominalHelp: buildPronominalCoachHelpHtml(question, verb),
     contextualBaseTitle: buildContextualBaseTitle(infinitive, verb == null ? void 0 : verb.typeHInitial),
     referenceFormHelp,

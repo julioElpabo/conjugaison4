@@ -51,5 +51,5 @@ function nearFutureSyntheticId(tenseId, verbId, personId) {
   return -(Number(tenseId) * 1e8 + verbPart * 10 + Number(personId));
 }
 
-export { isPronominalNearFutureInfinitive as a, buildNearFutureParadigm as b, bareNearFutureInfinitive as c, isNearFutureTense as i, nearFutureReflexivePronoun as n };
+export { bareNearFutureInfinitive as a, buildNearFutureParadigm as b, isPronominalNearFutureInfinitive as c, isNearFutureTense as i, nearFutureReflexivePronoun as n };
 //# sourceMappingURL=near-future.mjs.map

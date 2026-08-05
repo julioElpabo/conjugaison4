@@ -13,7 +13,7 @@ import 'node:url';
 import 'node:fs/promises';
 import '../../../_/radical-reference.mjs';
 import '../../../_/pronominal-formatter.mjs';
-import '../../../_/exercise-instructions.mjs';
+import '../../../_/passive-voice.mjs';
 import '../../../_/near-future.mjs';
 import '../../../_/session.mjs';
 import '../../../_/learner-session.mjs';
@@ -89,6 +89,7 @@ const errorChallenge_get = defineEventHandler(async (event) => {
   let pastSimplePronouns = "third-person-only";
   let inclusivePronouns = false;
   let includeOnPronoun = false;
+  const voiceModes = /* @__PURE__ */ new Set();
   let includeComplements = false;
   for (const row of rows) {
     const challenge2 = parsed(row.challengeJson);
@@ -103,6 +104,11 @@ const errorChallenge_get = defineEventHandler(async (event) => {
     if ((challenge2 == null ? void 0 : challenge2.pastSimplePronouns) === "all") pastSimplePronouns = "all";
     if (challenge2 == null ? void 0 : challenge2.inclusivePronouns) inclusivePronouns = true;
     if (challenge2 == null ? void 0 : challenge2.includeOnPronoun) includeOnPronoun = true;
+    if ((challenge2 == null ? void 0 : challenge2.voiceMode) === "passive") voiceModes.add("passive");
+    else if ((challenge2 == null ? void 0 : challenge2.voiceMode) === "mixed") {
+      voiceModes.add("active");
+      voiceModes.add("passive");
+    } else voiceModes.add(question.voice === "passive" ? "passive" : "active");
     if (challenge2 == null ? void 0 : challenge2.includeComplements) includeComplements = true;
     if (applicableLearnerErrorTypes(question).includes(code)) {
       sourceQuestions.push(question);
@@ -157,6 +163,7 @@ const errorChallenge_get = defineEventHandler(async (event) => {
     pastSimplePronouns,
     inclusivePronouns,
     includeOnPronoun,
+    voiceMode: voiceModes.size > 1 ? "mixed" : voiceModes.has("passive") ? "passive" : "active",
     includeComplements: includeComplements || targetedOptions.length > 0,
     complementPlacement: targetedOptions.some((option) => option.endsWith("-before")) ? targetedOptions.some((option) => option.endsWith("-after")) ? "mixed" : "before" : "after",
     complementOptions: targetedOptions

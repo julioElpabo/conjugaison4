@@ -7,6 +7,7 @@ const DEFAULT_SHARED_CHALLENGE_OPTIONS = {
   pastSimplePronouns: "all",
   inclusivePronouns: false,
   includeOnPronoun: false,
+  voiceMode: "active",
   includeComplements: true,
   complementPlacement: "after",
   complementOptions: [...DEFAULT_COMPLEMENT_OPTIONS]

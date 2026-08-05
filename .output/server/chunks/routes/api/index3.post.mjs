@@ -14,7 +14,7 @@ import 'node:url';
 import 'node:fs/promises';
 import '../../_/radical-reference.mjs';
 import '../../_/pronominal-formatter.mjs';
-import '../../_/exercise-instructions.mjs';
+import '../../_/passive-voice.mjs';
 import '../../_/near-future.mjs';
 
 function asSentence(value) {
@@ -79,6 +79,7 @@ function questionnaireRequest(verbIds, tenseIds, questionCount) {
     pastSimplePronouns: "all",
     inclusivePronouns: false,
     includeOnPronoun: false,
+    voiceMode: "active",
     includeComplements: true,
     complementPlacement: "after",
     complementOptions: ["cod-after", "coi-after"]

@@ -36,7 +36,10 @@ const canonicalInfinitives = {
   denommer: "d\xE9nommer",
   deposer: "d\xE9poser",
   deriver: "d\xE9river",
-  desactiver: "d\xE9sactiver"
+  desactiver: "d\xE9sactiver",
+  designer: "d\xE9signer",
+  detourner: "d\xE9tourner",
+  developper: "d\xE9velopper"
 };
 const semanticVerbSeeds = {
   "etat-existence": ["\xEAtre", "avoir", "rester", "demeurer", "sembler", "para\xEEtre", "appara\xEEtre", "devenir", "vivre", "exister", "g\xE9sir", "suffire", "valoir"],

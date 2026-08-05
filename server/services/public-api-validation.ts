@@ -5,7 +5,8 @@ import type {
   DefiDefinition,
   ExerciseKind,
   PastSimplePronouns,
-  QuestionnaireRequest
+  QuestionnaireRequest,
+  VoiceMode,
 } from '../types/public-api'
 import { legacyComplementConfig, legacyComplementOptions, normalizeComplementOptions } from '../../shared/utils/complement-options'
 import { DEFAULT_SHARED_CHALLENGE_OPTIONS } from '../../shared/utils/challenge-defaults'
@@ -25,6 +26,7 @@ const QUESTIONNAIRE_KEYS = new Set([
   'pastSimplePronouns',
   'inclusivePronouns',
   'includeOnPronoun',
+  'voiceMode',
   'includeComplements',
   'complementPlacement',
   'complementOptions'
@@ -43,6 +45,7 @@ const DEFI_KEYS = new Set([
   'pastSimplePronouns',
   'inclusivePronouns',
   'includeOnPronoun',
+  'voiceMode',
   'includeComplements',
   'complementPlacement',
   'complementOptions',
@@ -177,6 +180,11 @@ function parsePastSimplePronouns(value: unknown): PastSimplePronouns {
   throw new PublicInputError('pastSimplePronouns doit valoir all ou third-person-only')
 }
 
+function parseVoiceMode(value: unknown): VoiceMode {
+  if (value === 'active' || value === 'passive' || value === 'mixed') return value
+  throw new PublicInputError('voiceMode doit valoir active, passive ou mixed')
+}
+
 function parseComplementPlacement(value: unknown): ComplementPlacement {
   if (value === 'after' || value === 'mixed' || value === 'before') return value
   throw new PublicInputError('complementPlacement doit valoir after, mixed ou before')
@@ -244,6 +252,9 @@ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest 
   if (typeof includeOnPronoun !== 'boolean') {
     throw new PublicInputError('includeOnPronoun doit être un booléen')
   }
+  const voiceMode = value.voiceMode === undefined
+    ? DEFAULT_SHARED_CHALLENGE_OPTIONS.voiceMode
+    : parseVoiceMode(value.voiceMode)
   const includeComplements = value.includeComplements ?? false
   if (typeof includeComplements !== 'boolean') {
     throw new PublicInputError('includeComplements doit être un booléen')
@@ -270,6 +281,7 @@ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest 
     pastSimplePronouns: parsePastSimplePronouns(value.pastSimplePronouns),
     inclusivePronouns: value.inclusivePronouns,
     includeOnPronoun,
+    voiceMode,
     includeComplements: resolvedLegacy.includeComplements,
     complementPlacement: resolvedLegacy.complementPlacement,
     complementOptions,
@@ -320,6 +332,9 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
     : modernValue.inclusivePronouns
   const includeOnPronoun = modernValue.includeOnPronoun
     ?? DEFAULT_SHARED_CHALLENGE_OPTIONS.includeOnPronoun
+  const voiceMode = modernValue.voiceMode === undefined
+    ? DEFAULT_SHARED_CHALLENGE_OPTIONS.voiceMode
+    : parseVoiceMode(modernValue.voiceMode)
 
   if (typeof inclusivePronouns !== 'boolean') {
     throw new PublicInputError('inclusivePronouns doit être un booléen')
@@ -354,6 +369,7 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
     pastSimplePronouns,
     inclusivePronouns,
     includeOnPronoun,
+    voiceMode,
     includeComplements: resolvedLegacy.includeComplements,
     complementPlacement: resolvedLegacy.complementPlacement,
     complementOptions,

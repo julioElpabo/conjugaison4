@@ -83,6 +83,7 @@ function questionnaireRequest(verbIds: number[], tenseIds: number[], questionCou
     pastSimplePronouns: 'all' as const,
     inclusivePronouns: false,
     includeOnPronoun: false,
+    voiceMode: 'active' as const,
     includeComplements: true,
     complementPlacement: 'after' as const,
     complementOptions: ['cod-after', 'coi-after'] as ('cod-after' | 'coi-after')[],

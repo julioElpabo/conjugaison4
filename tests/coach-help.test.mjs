@@ -242,6 +242,60 @@ describe('aides visuelles configurables', () => {
     assert.match(buildNearFutureAllerHelpHtml('de'), /<summary>aller im Präsens<\/summary>/u)
   })
 
+  it('affiche un bloc dédié à la voix passive pour tous les profils', () => {
+    const passiveQuestion = {
+      voice: 'passive',
+      temps: 'présent',
+      mode: 'indicatif',
+      infinitif: 'abandonner',
+      pronom: 'la mission',
+      passiveSubject: 'la mission',
+      passiveAgent: 'par quelqu’un',
+      conjugaison1: 'est abandonnée',
+      reponsesPourCorrige: ['La mission est abandonnée par quelqu’un.'],
+      titre: 'Question', consigne: '', reponses: ['est abandonnée'],
+    }
+    const verb = { infinitif: 'abandonner', participePasse: 'abandonné' }
+    const values = coachHelpQuestionVariables(passiveQuestion, verb)
+
+    const expectedContent = {
+      'complete-avec-reponses': ['{passiveVoiceMethodHelp}', '{passiveVoiceHelp}'],
+      complete: ['{passiveVoiceMethodAdviceHelp}', '{passiveVoiceAdviceHelp}'],
+      'tres-condensee': ['{passiveVoiceMethodAdviceHelp}', '{passiveVoiceCondensedHelp}'],
+    }
+    for (const profile of Object.keys(expectedContent)) {
+      const blocks = visibleCoachHelpBlocks(profile, passiveQuestion)
+      assert.deepEqual(blocks.map(item => item.content), ['{definitionHelp}', ...expectedContent[profile]])
+      assert.deepEqual(blocks.slice(1).map(item => item.title), ['Marche à suivre', 'Comprendre la voix passive'])
+      const method = renderCoachHelpContent(blocks[1].content, values, blocks[1].explanationApproach)
+      assert.equal(method.match(/<li>/gu)?.length, 4)
+      const rendered = renderCoachHelpContent(blocks[2].content, values, blocks[2].explanationApproach)
+      assert.match(rendered, /met(?:tre)? en avant[\s\S]*subit l’action/iu)
+      assert.match(rendered, /être[\s\S]*(?:temps demandé|porte le mode et le temps)/iu)
+      assert.match(rendered, /participe passé/iu)
+      assert.match(rendered, /Par exemple :<br>Le facteur a distribué les lettres ce matin<br>Les lettres ont été distribuées ce matin\./u)
+      assert.doesNotMatch(rendered, /<(?:blockquote|figure)>/iu)
+    }
+    const advice = visibleCoachHelpBlocks('complete', passiveQuestion)[1]
+    const adviceHtml = renderCoachHelpContent(advice.content, values, advice.explanationApproach)
+    assert.doesNotMatch(adviceHtml, /est abandonnée/u)
+    const revealed = visibleCoachHelpBlocks('complete-avec-reponses', passiveQuestion)[1]
+    assert.match(renderCoachHelpContent(revealed.content, values, revealed.explanationApproach), /est abandonnée/u)
+    const condensed = visibleCoachHelpBlocks('tres-condensee', passiveQuestion)[2]
+    const condensedHtml = renderCoachHelpContent(condensed.content, values, condensed.explanationApproach)
+    assert.doesNotMatch(condensedHtml, /<blockquote>|Formule/iu)
+    assert.match(condensedHtml, /Par exemple :<br>Le facteur a distribué les lettres ce matin<br>Les lettres ont été distribuées ce matin\./u)
+  })
+
+  it('conserve les explications du futur proche après le bloc passif', () => {
+    const blocks = visibleCoachHelpBlocks('complete', {
+      voice: 'passive', temps: 'futur proche', tenseCode: 'near-future',
+    })
+    assert.deepEqual(blocks.slice(-4).map(item => item.title), [
+      'Marche à suivre', 'Comprendre la voix passive', 'Futur proche', 'Verbe aller',
+    ])
+  })
+
   it('utilise une définition sémantique traduite lorsque la définition administrée est seulement française', () => {
     const verb = {
       infinitif: 'payer',

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { after, before, describe, it } from 'node:test'
 import mysql from 'mysql2/promise'
+import { MISSING_DE_ACCENT_REPAIRS } from '../server/services/mail-request-repairs.ts'
 
 const configured = Boolean(process.env.DB_HOST && process.env.DB_NAME && process.env.DB_USER)
 const excludedDirect = new Set(['douter', 'grandir', 'partir', 'pouvoir'])
@@ -13,13 +14,14 @@ const expectedIndirect = new Set([
 ])
 let database
 let expectedDirect
+const repairedInfinitives = new Map(MISSING_DE_ACCENT_REPAIRS.map(({ before, after }) => [before, after]))
 
 before(async () => {
   if (!configured) return
   const report = JSON.parse(await readFile(new URL('../reports/academie-complements.json', import.meta.url), 'utf8'))
   expectedDirect = new Set(report.results
     .filter(item => !item.error && item.direct && !excludedDirect.has(item.infinitive))
-    .map(item => item.infinitive))
+    .map(item => repairedInfinitives.get(item.infinitive) || item.infinitive))
   for (const infinitive of additionalDirect) expectedDirect.add(infinitive)
   database = await mysql.createConnection({
     host: process.env.DB_HOST, port: Number(process.env.DB_PORT || 3306), database: process.env.DB_NAME,

@@ -35,7 +35,7 @@
 :root[data-theme='dark'] :is(
   .action-button, .classic-complement-menu, .classic-complement-menu > button,
   .preset-card, .preset-card > button, .preset-card__random, .verb-suggestions,
-  .verb-suggestions button, .inline-choice, .options-fields--columns > *,
+  .verb-suggestions button, .inline-choice, .options-fields--columns > *, .option-group-card,
   .code-loader, .code-loader__code-entry, .wizard-home__choice, .launch-summary, .launch-verb-list li,
   .verb-combobox input, .verb-combobox ul, .letter-nav button, .mode-nav button,
   .back-button, .rule-example
@@ -43,6 +43,11 @@
   color: var(--ink);
   background: #1c2a28;
   border-color: #40534f;
+}
+
+:root[data-theme='dark'] .options-layout--columns > .options-fields > .options-main-column {
+  background: transparent;
+  border-color: transparent;
 }
 
 :root[data-theme='dark'] :is(.secondary-button, .preset-story__groups button, .preset-story__preset-choice > button, .preset-story__preset-menu, .preset-story__preset-menu button) {

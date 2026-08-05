@@ -4,7 +4,7 @@ import { coachCondensedTenseRule } from '../data/coach-condensed-tense-rules'
 import { condensedExampleLabel, localizedCondensedTenseRule } from '../i18n/coach-condensed-help'
 import type { ConjugationTense, ExerciseQuestion, Verb } from '../types/conjugation'
 import { withoutIndicativeMode } from './chat-mode-display'
-import { buildCompleteConjugationAdviceHtml, buildConjugationBaseHtml, buildConjugationEndingsHtml, decomposeConjugationForm } from './conjugation-help'
+import { buildCompleteConjugationAdviceHtml, buildConjugationBaseHtml, buildConjugationEndingsHtml, buildPassiveVoiceHelpHtml, buildPassiveVoiceMethodHtml, decomposeConjugationForm } from './conjugation-help'
 import { bareNearFutureInfinitive, isNearFutureTense, isPronominalNearFutureInfinitive, nearFutureReflexivePronoun } from './near-future'
 import type { AppLocale } from '../i18n/locales'
 
@@ -58,15 +58,49 @@ const NEAR_FUTURE_CORE_TOKENS = new Set([
   '{condensedTenseRuleHelp}',
 ])
 
+const PASSIVE_METHOD_BLOCK_ID = -8_103
+const PASSIVE_HELP_BLOCK_ID = -8_104
+
 export function visibleCoachHelpBlocks(
   help?: CoachHelpTemplate | CoachHelpEngineKey | CoachExplanationApproach | null,
-  context?: Pick<ExerciseQuestion, 'tenseCode' | 'temps'>,
+  context?: Pick<ExerciseQuestion, 'tenseCode' | 'temps' | 'voice'>,
 ): CoachHelpBlock[] {
   const blocks = defaultCoachHelpBlocks(automaticCoachHelpApproach(help))
-  if (!context || !isNearFutureTense({ code: context.tenseCode, name: context.temps })) return blocks
   const profile = coachHelpProfile(automaticCoachHelpApproach(help))
-  return [
-    ...blocks.filter(block => !NEAR_FUTURE_CORE_TOKENS.has(block.content.trim())),
+  const isPassive = context?.voice === 'passive'
+  const isNearFuture = Boolean(context && isNearFutureTense({ code: context.tenseCode, name: context.temps }))
+  if (!isPassive && !isNearFuture) return blocks
+
+  const result = blocks.filter(block => !NEAR_FUTURE_CORE_TOKENS.has(block.content.trim()))
+  if (isPassive) result.push(
+    {
+      id: PASSIVE_METHOD_BLOCK_ID,
+      type: 'normal',
+      title: 'Marche à suivre',
+      content: profile.revealsAnswers ? '{passiveVoiceMethodHelp}' : '{passiveVoiceMethodAdviceHelp}',
+      explanationApproach: profile.legacyPresentation,
+      profileId: profile.id,
+      isActive: true,
+      sortOrder: result.length + 1,
+      children: [],
+    },
+    {
+      id: PASSIVE_HELP_BLOCK_ID,
+      type: 'info',
+      title: 'Comprendre la voix passive',
+      content: profile.revealsAnswers
+        ? '{passiveVoiceHelp}'
+        : profile.id === 'tres-condensee'
+          ? '{passiveVoiceCondensedHelp}'
+          : '{passiveVoiceAdviceHelp}',
+      explanationApproach: profile.legacyPresentation,
+      profileId: profile.id,
+      isActive: true,
+      sortOrder: result.length + 2,
+      children: [],
+    },
+  )
+  if (isNearFuture) result.push(
     {
       id: -8_101,
       type: 'normal',
@@ -89,7 +123,8 @@ export function visibleCoachHelpBlocks(
       sortOrder: blocks.length + 2,
       children: [],
     },
-  ]
+  )
+  return result
 }
 
 /** Aide de référence pour identifier un mode dans une citation, sans expliquer la conjugaison de la réponse. */
@@ -361,6 +396,11 @@ export interface CoachHelpContentValues {
   condensedTenseRuleHelp?: string
   nearFutureHelp?: string
   nearFutureAllerHelp?: string
+  passiveVoiceHelp?: string
+  passiveVoiceAdviceHelp?: string
+  passiveVoiceCondensedHelp?: string
+  passiveVoiceMethodHelp?: string
+  passiveVoiceMethodAdviceHelp?: string
   pronominalHelp?: string
   contextualBaseTitle?: string
   referenceFormHelp?: string
@@ -378,7 +418,7 @@ export interface CoachHelpContentValues {
 }
 
 export function coachHelpBlockUsesPedagogicalApproach(content: string): boolean {
-  return /\{(?:endingsHelp|contextualBaseHelp|completeAdviceHelp|condensedTenseRuleHelp)\}/u.test(content)
+  return /\{(?:endingsHelp|contextualBaseHelp|completeAdviceHelp|condensedTenseRuleHelp|passiveVoiceHelp|passiveVoiceAdviceHelp|passiveVoiceCondensedHelp|passiveVoiceMethodHelp|passiveVoiceMethodAdviceHelp)\}/u.test(content)
 }
 
 export function buildContextualBaseTitle(infinitive: string, typeHInitial?: Verb['typeHInitial']): string {
@@ -801,6 +841,11 @@ export function renderCoachHelpContent(content: string, values: CoachHelpContent
     condensedTenseRuleHelp: values.condensedTenseRuleHelp || '',
     nearFutureHelp: values.nearFutureHelp || '',
     nearFutureAllerHelp: values.nearFutureAllerHelp || '',
+    passiveVoiceHelp: values.passiveVoiceHelp || '',
+    passiveVoiceAdviceHelp: values.passiveVoiceAdviceHelp || '',
+    passiveVoiceCondensedHelp: values.passiveVoiceCondensedHelp || '',
+    passiveVoiceMethodHelp: values.passiveVoiceMethodHelp || '',
+    passiveVoiceMethodAdviceHelp: values.passiveVoiceMethodAdviceHelp || '',
     pronominalHelp: values.pronominalHelp || '',
     referenceFormHelp: values.referenceFormHelp || values.nousFormHelp || '',
     nousFormHelp: values.nousFormHelp || '',
@@ -813,7 +858,7 @@ export function renderCoachHelpContent(content: string, values: CoachHelpContent
     referenceRadical: values.referenceRadical || '',
     removedEnding: values.removedEnding || '',
   }
-  const rendered = content.replace(/\{(coach|verb|definition|definitionHelp|helpTitle|mode|tense|subject|correctAnswers|auxiliaryAnswer|pastParticipleAnswer|unagreedPastParticiple|COD|isCODplace_avant|COI|isCOIplace_avant|endingsHelp|contextualBaseHelp|completeAdviceHelp|condensedVerbGroupHelp|condensedTenseRuleHelp|nearFutureHelp|nearFutureAllerHelp|pronominalHelp|referenceFormHelp|nousFormHelp|conjugationBase|conjugationEnding|referenceMode|referenceTense|referenceSubject|referenceForm|referenceRadical|removedEnding)\}/gu, (_match, key: string) => replacements[key] || '')
+  const rendered = content.replace(/\{(coach|verb|definition|definitionHelp|helpTitle|mode|tense|subject|correctAnswers|auxiliaryAnswer|pastParticipleAnswer|unagreedPastParticiple|COD|isCODplace_avant|COI|isCOIplace_avant|endingsHelp|contextualBaseHelp|completeAdviceHelp|condensedVerbGroupHelp|condensedTenseRuleHelp|nearFutureHelp|nearFutureAllerHelp|passiveVoiceHelp|passiveVoiceAdviceHelp|passiveVoiceCondensedHelp|passiveVoiceMethodHelp|passiveVoiceMethodAdviceHelp|pronominalHelp|referenceFormHelp|nousFormHelp|conjugationBase|conjugationEnding|referenceMode|referenceTense|referenceSubject|referenceForm|referenceRadical|removedEnding)\}/gu, (_match, key: string) => replacements[key] || '')
   return values.omitIndicativeMode ? withoutIndicativeMode(rendered) : rendered
 }
 
@@ -1010,6 +1055,11 @@ export function coachHelpQuestionVariables(
     approach,
     buildConjugationBaseHtml(question, verb, tense, approach),
   ])) as Record<CoachExplanationApproach, string>
+  const passiveVoiceHelp = buildPassiveVoiceHelpHtml(question, verb, tense, true)
+  const passiveVoiceAdviceHelp = buildPassiveVoiceHelpHtml(question, verb, tense, false)
+  const passiveVoiceCondensedHelp = buildPassiveVoiceHelpHtml(question, verb, tense, false, true)
+  const passiveVoiceMethodHelp = buildPassiveVoiceMethodHtml(question, verb, tense, true)
+  const passiveVoiceMethodAdviceHelp = buildPassiveVoiceMethodHtml(question, verb, tense, false)
   const referenceFormHelp = buildReferenceFormHelpHtml(question, verb, tense)
   const infinitive = question.infinitif || verb?.infinitif || ''
   return {
@@ -1042,6 +1092,11 @@ export function coachHelpQuestionVariables(
     condensedTenseRuleHelp: buildCondensedTenseRuleHtml(question.mode || tense?.mode?.name, question.temps || tense?.name, verb, locale),
     nearFutureHelp: buildNearFutureCoachHelpHtml(verb, locale),
     nearFutureAllerHelp: buildNearFutureAllerHelpHtml(locale),
+    passiveVoiceHelp,
+    passiveVoiceAdviceHelp,
+    passiveVoiceCondensedHelp,
+    passiveVoiceMethodHelp,
+    passiveVoiceMethodAdviceHelp,
     pronominalHelp: buildPronominalCoachHelpHtml(question, verb),
     contextualBaseTitle: buildContextualBaseTitle(infinitive, verb?.typeHInitial),
     referenceFormHelp,

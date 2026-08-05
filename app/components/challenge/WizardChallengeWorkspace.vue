@@ -571,6 +571,7 @@ function restartChallenge() {
   challenge.value.pastSimplePronouns = 'all'
   challenge.value.inclusivePronouns = false
   challenge.value.includeOnPronoun = false
+  challenge.value.voiceMode = 'active'
   challenge.value.includeComplements = true
   challenge.value.complementPlacement = 'after'
   challenge.value.complementOptions = ['cod-after', 'coi-after']
@@ -735,6 +736,7 @@ function prepareTourChallenge() {
     pastSimplePronouns: 'all',
     inclusivePronouns: false,
     includeOnPronoun: false,
+    voiceMode: 'active',
     includeComplements: true,
     complementPlacement: 'after',
     complementOptions: ['cod-after'],
@@ -1231,6 +1233,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   challenge.value.pastSimplePronouns = preset.pastSimplePronouns
   challenge.value.inclusivePronouns = preset.inclusivePronouns
   challenge.value.includeOnPronoun = preset.includeOnPronoun
+  challenge.value.voiceMode = preset.voiceMode
   challenge.value.includeComplements = preset.includeComplements
   challenge.value.complementPlacement = preset.complementPlacement
   challenge.value.complementOptions = preset.complementOptions ?? legacyComplementOptions(preset.includeComplements, preset.complementPlacement)
@@ -1277,8 +1280,8 @@ async function restoreChallenge() {
     isPresetVerbEditing.value = false
     areAllLaunchVerbsVisible.value = false
     challengeCode.value = restored.code
-    notice.value = `Le défi « ${restored.title || restored.code} » est chargé. Tu peux le vérifier ou le modifier.`
-    goToStep(1)
+    notice.value = `Le défi « ${restored.title || restored.code} » est chargé. Tu peux l’utiliser ou le modifier.`
+    goToStep(4)
     logUsage('challenge-load')
   } catch (error) {
     track('feature_failed', { feature: 'challenge.load' })
@@ -1347,6 +1350,7 @@ async function refreshConjugationExample() {
       questionCount: 50,
       inclusivePronouns: false,
       includeOnPronoun: false,
+      voiceMode: challenge.value.voiceMode,
       includeComplements: needsComplement,
       complementPlacement: exampleComplementPlacement,
       complementOptions: exampleComplementOption ? [exampleComplementOption] : [],
@@ -1467,6 +1471,7 @@ watch(
     () => challenge.value.identificationSource,
     () => challenge.value.inclusivePronouns,
     () => challenge.value.includeOnPronoun,
+    () => challenge.value.voiceMode,
   ],
   () => {
     if (currentStep.value === 3) void refreshConjugationExample()
@@ -1510,6 +1515,7 @@ function beginExerciseTracking(presentation: 'classic' | 'chat') {
       pastSimplePronouns: challenge.value.pastSimplePronouns,
       inclusivePronouns: challenge.value.inclusivePronouns,
       includeOnPronoun: challenge.value.includeOnPronoun,
+      voiceMode: challenge.value.voiceMode,
       includeComplements: challenge.value.includeComplements,
       complementPlacement: challenge.value.complementPlacement,
       complementOptions: [...challenge.value.complementOptions],
@@ -1897,6 +1903,7 @@ async function createSharedChallenge(title: string, description: string) {
                 :identification-source="challenge.identificationSource"
                 :inclusive-pronouns="challenge.inclusivePronouns"
                 :include-on-pronoun="challenge.includeOnPronoun"
+                :voice-mode="challenge.voiceMode"
                 :complement-options="challenge.complementOptions"
                 :complement-verbs="selectedVerbs"
                 :conjugation-instruction="conjugationInstruction"
@@ -1917,6 +1924,7 @@ async function createSharedChallenge(title: string, description: string) {
                 @update-identification-source="challenge.identificationSource = $event; markAsCustom()"
                 @update-inclusive-pronouns="challenge.inclusivePronouns = $event; markAsCustom()"
                 @update-include-on-pronoun="challenge.includeOnPronoun = $event; markAsCustom()"
+                @update-voice-mode="challenge.voiceMode = $event; markAsCustom()"
                 @update-complement-options="updateComplementOptions"
               />
 

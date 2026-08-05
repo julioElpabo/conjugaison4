@@ -4,6 +4,7 @@ interface ConjugationRow extends RowDataPacket {
   id: number
   infinitif: string
   participe_passe: string
+  verbe_infinitif?: string
   conjugaison1: string
   conjugaison2: string
   conjugaison3: string
@@ -19,6 +20,31 @@ interface ParadigmRow extends RowDataPacket {
   person_id: number
   conjugaison1: string
 }
+
+interface AccentVerbRow extends RowDataPacket {
+  id: number
+  infinitif: string
+  participe_present: string
+  participe_passe: string
+  forme_canonique: string
+}
+
+interface AccentTextRow extends RowDataPacket {
+  id: number
+  value1: string
+  value2?: string | null
+}
+
+export const MISSING_DE_ACCENT_REPAIRS = [
+  { before: 'deborder', after: 'déborder', presentParticiple: 'débordant', pastParticiple: 'débordé' },
+  { before: 'debuter', after: 'débuter', presentParticiple: 'débutant', pastParticiple: 'débuté' },
+  { before: 'decoller', after: 'décoller', presentParticiple: 'décollant', pastParticiple: 'décollé' },
+  { before: 'dedier', after: 'dédier', presentParticiple: 'dédiant', pastParticiple: 'dédié' },
+  { before: 'defiler', after: 'défiler', presentParticiple: 'défilant', pastParticiple: 'défilé' },
+  { before: 'designer', after: 'désigner', presentParticiple: 'désignant', pastParticiple: 'désigné' },
+  { before: 'detourner', after: 'détourner', presentParticiple: 'détournant', pastParticiple: 'détourné' },
+  { before: 'developper', after: 'développer', presentParticiple: 'développant', pastParticiple: 'développé' },
+] as const
 
 export interface ParadigmIssue {
   infinitive: string
@@ -57,6 +83,107 @@ export function repairMalformedPluralParticiple(form: string, participle: string
     new RegExp(`${escapedRegExp(normalizedParticiple)}s(?=$|[\\s!?.,;:])`, 'gu'),
     normalizedParticiple,
   )
+}
+
+export function repairMissingDeAccentForm(form: string, beforeInfinitive: string, afterInfinitive: string) {
+  const beforeStem = beforeInfinitive.slice(0, -2)
+  const afterStem = afterInfinitive.slice(0, -2)
+  return form.split(beforeStem).join(afterStem)
+}
+
+export async function repairMissingDeAccents(connection: PoolConnection) {
+  const report = {
+    verbs: 0,
+    conjugationRows: 0,
+    conjugationForms: 0,
+    pronominalUses: 0,
+    meaningTexts: 0,
+  }
+
+  for (const repair of MISSING_DE_ACCENT_REPAIRS) {
+    const [verbRows] = await connection.execute<AccentVerbRow[]>(`
+      SELECT id,infinitif,
+             \`participe_présent\` AS participe_present,
+             \`participe_passé\` AS participe_passe,
+             forme_canonique
+      FROM verbes
+      WHERE infinitif IN (?,?)
+      ORDER BY id
+      FOR UPDATE
+    `, [repair.before, repair.after])
+    const beforeRows = verbRows.filter(row => row.infinitif === repair.before)
+    const afterRows = verbRows.filter(row => row.infinitif === repair.after)
+    if (beforeRows.length > 1 || afterRows.length > 1 || (beforeRows.length && afterRows.length)) {
+      throw new Error(`La correction de « ${repair.before} » est ambiguë (${verbRows.length} lignes).`)
+    }
+    const verb = beforeRows[0] ?? afterRows[0]
+    if (!verb) continue
+
+    const [conjugationRows] = await connection.execute<ConjugationRow[]>(`
+      SELECT id,'' AS infinitif,'' AS participe_passe,verbe_infinitif,
+             conjugaison1,conjugaison2,conjugaison3
+      FROM verbesconjugues
+      WHERE verbe_id=?
+      ORDER BY id
+      FOR UPDATE
+    `, [verb.id])
+    for (const row of conjugationRows) {
+      const current = forms(row)
+      const repaired = current.map(form => repairMissingDeAccentForm(form, repair.before, repair.after))
+      const changedForms = current.filter((form, index) => form !== repaired[index]).length
+      if (!changedForms && row.verbe_infinitif === repair.after) continue
+      await connection.execute(
+        'UPDATE verbesconjugues SET verbe_infinitif=?,conjugaison1=?,conjugaison2=?,conjugaison3=? WHERE id=?',
+        [repair.after, ...repaired, row.id],
+      )
+      report.conjugationRows += 1
+      report.conjugationForms += changedForms
+    }
+
+    const [pronominalRows] = await connection.execute<AccentTextRow[]>(`
+      SELECT id,infinitif_pronominal AS value1
+      FROM emplois_pronominaux
+      WHERE verbe_id=?
+      FOR UPDATE
+    `, [verb.id])
+    for (const row of pronominalRows) {
+      const repaired = row.value1.split(repair.before).join(repair.after)
+      if (repaired === row.value1) continue
+      await connection.execute('UPDATE emplois_pronominaux SET infinitif_pronominal=? WHERE id=?', [repaired, row.id])
+      report.pronominalUses += 1
+    }
+
+    const [meaningRows] = await connection.execute<AccentTextRow[]>(`
+      SELECT id,intitule AS value1,definition AS value2
+      FROM verbe_sens
+      WHERE verbe_id=?
+      FOR UPDATE
+    `, [verb.id])
+    for (const row of meaningRows) {
+      const title = String(row.value1 || '').split(repair.before).join(repair.after)
+      const definition = row.value2 === null || row.value2 === undefined
+        ? null
+        : row.value2.split(repair.before).join(repair.after)
+      if (title === row.value1 && definition === (row.value2 ?? null)) continue
+      await connection.execute('UPDATE verbe_sens SET intitule=?,definition=? WHERE id=?', [title, definition, row.id])
+      report.meaningTexts += Number(title !== row.value1) + Number(definition !== (row.value2 ?? null))
+    }
+
+    const verbNeedsRepair = verb.infinitif !== repair.after
+      || verb.participe_present !== repair.presentParticiple
+      || verb.participe_passe !== repair.pastParticiple
+      || verb.forme_canonique !== repair.after
+    if (verbNeedsRepair) {
+      await connection.execute(`
+        UPDATE verbes
+        SET infinitif=?,\`participe_présent\`=?,\`participe_passé\`=?,forme_canonique=?
+        WHERE id=?
+      `, [repair.after, repair.presentParticiple, repair.pastParticiple, repair.after, verb.id])
+      report.verbs += 1
+    }
+  }
+
+  return report
 }
 
 export async function auditFiniteParadigms(connection: PoolConnection): Promise<ParadigmIssue[]> {
@@ -110,6 +237,7 @@ export async function repairMailRequestConjugations(connection: PoolConnection) 
     protegerPresentNous: 0,
     malformedPluralParticiples: 0,
     affaiblirPastSimpleForms: 0,
+    missingDeAccents: await repairMissingDeAccents(connection),
   }
 
   const [protegerRows] = await connection.execute<ConjugationRow[]>(`

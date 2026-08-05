@@ -82,6 +82,7 @@ export type LiteraryRegister = 'all' | 'courant' | 'soutenu'
 export type ComplementPlacement = 'after' | 'mixed' | 'before'
 export type ClassicComplementChoice = 'none' | ComplementPlacement
 export type ComplementOption = 'cod-after' | 'cod-before' | 'coi-after' | 'coi-before'
+export type VoiceMode = 'active' | 'passive' | 'mixed'
 
 /**
  * Configuration moderne d'un exercice. Les listes sont en lecture seule afin
@@ -97,6 +98,7 @@ export interface ChallengeConfig {
   pastSimplePronouns: PastSimplePronouns
   inclusivePronouns: boolean
   includeOnPronoun: boolean
+  voiceMode: VoiceMode
   includeComplements: boolean
   complementPlacement: ComplementPlacement
   complementOptions: ComplementOption[]
@@ -147,6 +149,9 @@ export interface ExerciseQuestion {
   tenseCode?: import('../utils/grammar-codes').GrammarTenseCode
   modeCode?: import('../utils/grammar-codes').GrammarModeCode
   isCompound?: boolean
+  voice?: 'active' | 'passive'
+  passiveSubject?: string
+  passiveAgent?: string
   conjugaison1?: string
   conjugaison2?: string | null
   conjugaison3?: string | null
@@ -254,6 +259,7 @@ export interface LearnerChallengeSnapshot {
   pastSimplePronouns?: PastSimplePronouns
   inclusivePronouns?: boolean
   includeOnPronoun?: boolean
+  voiceMode?: VoiceMode
   includeComplements?: boolean
   complementPlacement?: ComplementPlacement
   complementOptions?: ComplementOption[]

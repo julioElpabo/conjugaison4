@@ -55,6 +55,9 @@ export function learnerChallengeSnapshot(value: unknown): LearnerChallengeSnapsh
       : 'all',
     inclusivePronouns: candidate.inclusivePronouns === true,
     includeOnPronoun: candidate.includeOnPronoun === true,
+    voiceMode: ['active', 'passive', 'mixed'].includes(String(candidate.voiceMode))
+      ? candidate.voiceMode as LearnerChallengeSnapshot['voiceMode']
+      : 'active',
     includeComplements: candidate.includeComplements === true,
     complementPlacement: ['after', 'mixed', 'before'].includes(String(candidate.complementPlacement))
       ? candidate.complementPlacement as 'after' | 'mixed' | 'before'

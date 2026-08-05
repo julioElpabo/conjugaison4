@@ -9,6 +9,8 @@ import { MODE_IDENTIFICATION_INSTRUCTION, TENSE_IDENTIFICATION_INSTRUCTION } fro
 import type { ComplementOption } from '../../shared/types/conjugation'
 import { indirectRelative } from './indirect-relative'
 import { resolveVariableAuxiliary } from './compound-auxiliary'
+import { formatPassiveQuestion, type PassiveAuxiliaryForm } from './passive-voice'
+import { isPassivizableInfinitive } from '../../shared/utils/passive-voice'
 import { buildRadicalReference } from '../../shared/utils/radical-reference'
 import {
   buildNearFutureParadigm,
@@ -142,6 +144,7 @@ interface NearFutureAllerRow extends RowDataPacket {
 interface NearFutureVerbRow extends RowDataPacket {
   id: number
   infinitif: string
+  participe_passe: string
   type_h_initial: string | null
   personnes_disponibles: string | number[] | null
 }
@@ -155,6 +158,7 @@ interface NearFutureUseRow extends RowDataPacket {
 }
 
 interface ComplementRow extends RowDataPacket {
+  id: number
   verbe_id: number
   fonction_objet: 'cod' | 'coi'
   preposition: string | null
@@ -207,6 +211,7 @@ function nearFutureRows(
       baseVerbId: Number(verb.id),
       infinitive: verb.infinitif,
       typeHInitial: verb.type_h_initial,
+      pastParticiple: verb.participe_passe,
       allowedPersonIds: allowedPersons(verb.personnes_disponibles),
     })),
     ...pronominalUses.map(use => ({
@@ -214,6 +219,7 @@ function nearFutureRows(
       baseVerbId: Number(use.verbe_id),
       infinitive: use.infinitif_pronominal,
       typeHInitial: use.type_h_initial,
+      pastParticiple: '',
       allowedPersonIds: allowedPersons(use.personnes_autorisees),
     })),
   ]
@@ -242,7 +248,7 @@ function nearFutureRows(
       infinitif: source.infinitive,
       auxiliaire: 'aller',
       participe_present: '',
-      participe_passe: '',
+      participe_passe: source.pastParticiple,
       auxiliaire_infinitif: null,
       auxiliaire_participe_present: null,
       pronom: form.pronoun,
@@ -267,6 +273,26 @@ function shuffleWith<T>(values: T[], random: () => number) {
     ;[values[index], values[other]] = [values[other]!, values[index]!]
   }
   return values
+}
+
+function limitedNearFutureRows(
+  rows: ConjugationRow[],
+  limit: number,
+  wantsActiveVoice: boolean,
+  wantsPassiveVoice: boolean,
+) {
+  const candidates = wantsActiveVoice
+    ? rows
+    : rows.filter(row => [6, 9].includes(Number(row.personne_id)))
+  const passiveSources = wantsPassiveVoice
+    ? shuffle(candidates.filter(row => [6, 9].includes(Number(row.personne_id))))
+    : []
+  const required = passiveSources.slice(0, Math.min(2, limit))
+  const requiredIds = new Set(required.map(row => String(row.id)))
+  return [
+    ...required,
+    ...shuffle(candidates.filter(row => !requiredIds.has(String(row.id)))),
+  ].slice(0, limit)
 }
 
 function randomComplement(rows: readonly ComplementRow[]) {
@@ -376,32 +402,64 @@ export function choosePronoun(
   return pronom
 }
 
+function conjugationTenseKey(question: ExerciseQuestion) {
+  if (question.tenseId !== undefined && question.tenseId !== null) return `id:${question.tenseId}`
+  const mode = normalized(question.mode || '')
+  const tense = normalized(question.temps || '')
+  return mode || tense ? `${mode}:${tense}` : 'unknown'
+}
+
+function conjugationVerbKey(question: ExerciseQuestion, fallback: number) {
+  const verbId = Number(question.verbeId)
+  return Number.isFinite(verbId) ? `id:${verbId}` : `unknown:${fallback}`
+}
+
 /**
- * Prend une question de chaque verbe avant de commencer un nouveau tour.
- * Les temps et les personnes restent aléatoires à l'intérieur de chaque verbe.
+ * Équilibre d'abord les couples mode-temps, puis les verbes et les voix.
+ * Aucun temps ne se répète tant qu'un autre temps disponible n'a pas été utilisé.
  */
 export function diverseConjugationQuestions(
   questions: ExerciseQuestion[],
   count: number,
   random: () => number = Math.random,
 ) {
-  const byVerb = new Map<number, ExerciseQuestion[]>()
-  for (const question of shuffleWith([...questions], random)) {
-    const verbId = Number(question.verbeId)
-    const key = Number.isFinite(verbId) ? verbId : Number.MIN_SAFE_INTEGER + byVerb.size
-    const group = byVerb.get(key) || []
-    group.push(question)
-    byVerb.set(key, group)
-  }
-
-  const groups = shuffleWith([...byVerb.values()], random)
+  const remaining = shuffleWith([...questions], random)
+  const tenseUses = new Map<string, number>()
+  const verbUses = new Map<string, number>()
+  const hasActive = remaining.some(question => question.voice !== 'passive')
+  const hasPassive = remaining.some(question => question.voice === 'passive')
+  let nextVoice: 'active' | 'passive' = random() < .5 ? 'active' : 'passive'
   const selected: ExerciseQuestion[] = []
-  while (selected.length < count && groups.some(group => group.length)) {
-    for (const group of shuffleWith([...groups], random)) {
-      const question = group.shift()
-      if (question) selected.push(question)
-      if (selected.length >= count) break
+
+  while (selected.length < count && remaining.length) {
+    const minimumTenseUse = Math.min(...remaining.map(question => (
+      tenseUses.get(conjugationTenseKey(question)) ?? 0
+    )))
+    let candidates = remaining.filter(question => (
+      (tenseUses.get(conjugationTenseKey(question)) ?? 0) === minimumTenseUse
+    ))
+    const minimumVerbUse = Math.min(...candidates.map((question, index) => (
+      verbUses.get(conjugationVerbKey(question, index)) ?? 0
+    )))
+    candidates = candidates.filter((question, index) => (
+      (verbUses.get(conjugationVerbKey(question, index)) ?? 0) === minimumVerbUse
+    ))
+    if (hasActive && hasPassive) {
+      const preferred = candidates.filter(question => (
+        nextVoice === 'passive' ? question.voice === 'passive' : question.voice !== 'passive'
+      ))
+      if (preferred.length) candidates = preferred
     }
+
+    const chosen = candidates[Math.floor(random() * candidates.length)]!
+    const chosenIndex = remaining.indexOf(chosen)
+    remaining.splice(chosenIndex, 1)
+    selected.push(chosen)
+    const tenseKey = conjugationTenseKey(chosen)
+    const verbKey = conjugationVerbKey(chosen, chosenIndex)
+    tenseUses.set(tenseKey, (tenseUses.get(tenseKey) ?? 0) + 1)
+    verbUses.set(verbKey, (verbUses.get(verbKey) ?? 0) + 1)
+    nextVoice = chosen.voice === 'passive' ? 'active' : 'passive'
   }
   return selected
 }
@@ -692,7 +750,11 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
   const nonFiniteTenses = selectedTenses.filter(row => nonFiniteModes.includes(normalized(row.mode_name)))
   const database = useDatabase()
   const questions: ExerciseQuestion[] = []
-  const requestedComplementOptions = request.complementOptions || []
+  const voiceMode = request.voiceMode ?? 'active'
+  const wantsActiveVoice = voiceMode !== 'passive'
+  const wantsPassiveVoice = request.exerciseKind === 'conjugation' && voiceMode !== 'active'
+  const passiveOnly = request.exerciseKind === 'conjugation' && voiceMode === 'passive'
+  const requestedComplementOptions = wantsActiveVoice ? (request.complementOptions || []) : []
   const onlyBeforeComplements = requestedComplementOptions.length > 0
     && requestedComplementOptions.every(option => option.endsWith('-before'))
   const verbIds = request.verbIds.filter(id => id > 0)
@@ -732,8 +794,11 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
       : new Map<string, LiteraryCitationRow[]>()
     const selectedVerbCount = verbIds.length + pronominalUseIds.length
     const limit = request.exerciseKind === 'conjugation'
-      ? Math.min(3_000, Math.max(request.questionCount * 10, selectedVerbCount * 3, request.questionCount))
+      ? passiveOnly
+        ? 3_000
+        : Math.min(3_000, Math.max(request.questionCount * 10, selectedVerbCount * 3, request.questionCount))
       : 600
+    const passivePersonClause = passiveOnly ? 'AND vc.personne_id IN (6,9)' : ''
     const questionVerbIds = usesLiteraryCitations
       ? [...new Set([...literaryCitations.values()].flat().map(citation => Number(citation.verb_id)))]
       : verbIds
@@ -782,6 +847,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
         AND vc.temp_id IN (${placeholders(finiteIds)})
         ${exactLiteraryClause}
         AND vc.conjugaison1 <> ''
+        ${passivePersonClause}
         ${pastSimpleClause}
       ORDER BY ${literaryOrderClause} RAND()
       LIMIT ${limit}
@@ -827,7 +893,9 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
           INNER JOIN verbes v ON v.id = vc.verbe_id
           INNER JOIN temps t ON t.id = vc.temp_id
           INNER JOIN modes m ON m.id = t.mode_id
-          WHERE v.infinitif = 'être' AND t.isTempsCompose = 0 AND vc.conjugaison1 <> ''
+          WHERE v.infinitif = 'être'
+            AND ${wantsPassiveVoice ? '1=1' : 't.isTempsCompose = 0'}
+            AND vc.conjugaison1 <> ''
         `),
       ])
       etreAuxiliaryForms = auxiliaryForms[0]
@@ -844,8 +912,9 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
       const [nearFutureVerbs, nearFutureUses, allerRows] = await Promise.all([
         verbIds.length
           ? database.execute<NearFutureVerbRow[]>(`
-              SELECT id, infinitif, type_h_initial, personnes_disponibles
-              FROM verbes
+              SELECT id, infinitif, v.\`participe_passé\` AS participe_passe,
+                     type_h_initial, personnes_disponibles
+              FROM verbes v
               WHERE id IN (${placeholders(verbIds)}) AND est_archive = 0
             `, verbIds)
           : Promise.resolve([[]] as unknown as Awaited<ReturnType<typeof database.execute<NearFutureVerbRow[]>>>),
@@ -872,8 +941,14 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
           ORDER BY p.id
         `),
       ])
+      const perTenseLimit = Math.max(6, Math.ceil(limit / Math.max(1, finiteTenses.length)))
       for (const tense of nearFutureTenses) {
-        rows.push(...nearFutureRows(tense, nearFutureVerbs[0], nearFutureUses[0], allerRows[0]))
+        rows.push(...limitedNearFutureRows(
+          nearFutureRows(tense, nearFutureVerbs[0], nearFutureUses[0], allerRows[0]),
+          perTenseLimit,
+          wantsActiveVoice,
+          wantsPassiveVoice,
+        ))
       }
     }
 
@@ -899,22 +974,28 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
       }
     }
 
-    if (!etreAuxiliaryForms.length && rows.some(row => normalized(row.infinitif) === 'sortir' && Boolean(row.is_compound))) {
+    if (!etreAuxiliaryForms.length && (wantsPassiveVoice
+      || rows.some(row => normalized(row.infinitif) === 'sortir' && Boolean(row.is_compound)))) {
       const [auxiliaryForms] = await database.execute<AuxiliaryFormRow[]>(`
         SELECT vc.personne_id, m.name AS mode_name, t.name AS temps_name, vc.conjugaison1
         FROM verbesconjugues vc
         INNER JOIN verbes v ON v.id = vc.verbe_id
         INNER JOIN temps t ON t.id = vc.temp_id
         INNER JOIN modes m ON m.id = t.mode_id
-        WHERE v.infinitif = 'être' AND t.isTempsCompose = 0 AND vc.conjugaison1 <> ''
+        WHERE v.infinitif = 'être'
+          AND ${wantsPassiveVoice ? '1=1' : 't.isTempsCompose = 0'}
+          AND vc.conjugaison1 <> ''
       `)
       etreAuxiliaryForms = auxiliaryForms
     }
 
     const complementsByVerb = new Map<number, ComplementRow[]>()
-    if (request.exerciseKind === 'conjugation' && request.includeComplements && verbIds.length > 0) {
+    if (request.exerciseKind === 'conjugation'
+        && ((request.includeComplements && wantsActiveVoice) || wantsPassiveVoice)
+        && verbIds.length > 0) {
       const [complements] = await database.execute<ComplementRow[]>(`
-        SELECT vs.verbe_id, cv.fonction_objet, cv.preposition, c.texte, c.texte_antepose, c.genre, c.nombre, c.poids
+        SELECT c.id, vs.verbe_id, cv.fonction_objet, cv.preposition,
+               c.texte, c.texte_antepose, c.genre, c.nombre, c.poids
         FROM verbe_sens vs
         INNER JOIN constructions_verbales cv ON cv.sens_id=vs.id
         INNER JOIN complements_verbaux c ON c.construction_id=cv.id
@@ -941,7 +1022,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
         && (requestedComplementOptions.includes('coi-before') || Boolean(row.is_compound)))
       : eligibleRows
 
-    questions.push(...rowsForQuestions.map((row) => {
+    for (const row of rowsForQuestions) {
       const candidates = complementsByVerb.get(Number(row.verbe_id)) ?? []
       const availableOptions = requestedComplementOptions.flatMap((option) => {
         const [functionObject, position] = option.split('-') as ['cod' | 'coi', 'after' | 'before']
@@ -982,24 +1063,48 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
         : radicalReferenceFor(row, radicalReferences)
       const futureSimpleForms = futureSimpleFormsFor(row, radicalReferences)
       const conjugationConfusions = conjugationConfusionsFor(row, radicalReferences)
-      return request.exerciseKind === 'conjugation'
-        ? formatConjugationQuestion({
+      if (request.exerciseKind === 'conjugation' && wantsActiveVoice) {
+        questions.push(formatConjugationQuestion({
             ...semanticRow,
             radical_reference: radicalReference,
             future_simple_forms: futureSimpleForms,
             conjugation_confusions: conjugationConfusions,
-          }, choosePronoun(row.pronom, request.inclusivePronouns, request.includeOnPronoun))
-        : identificationQuestion(
+          }, choosePronoun(row.pronom, request.inclusivePronouns, request.includeOnPronoun)))
+      } else if (request.exerciseKind !== 'conjugation') {
+        questions.push(identificationQuestion(
             semanticRow,
             literaryCitations.get(literaryCitationKey(
               Number(row.verbe_id), Number(row.temp_id), Number(row.personne_id),
             ))?.shift(),
             request.exerciseKind === 'mode-identification',
+          ))
+      }
+
+      if (wantsPassiveVoice
+          && Number(row.verbe_id) > 0
+          && isPassivizableInfinitive(row.infinitif)
+          && [6, 9].includes(Number(row.personne_id))
+          && normalized(row.mode_name) !== 'impératif') {
+        const expectedNumber = Number(row.personne_id) === 9 ? 'pluriel' : 'singulier'
+        const passiveComplements = candidates.filter(candidate => (
+          candidate.fonction_objet === 'cod'
+          && Boolean(candidate.texte_antepose && candidate.genre && candidate.nombre)
+          && normalized(candidate.nombre || '') === expectedNumber
+        ))
+        const passiveComplement = randomComplement(passiveComplements)
+        if (passiveComplement) {
+          const passive = formatPassiveQuestion(
+            row,
+            passiveComplement,
+            etreAuxiliaryForms as PassiveAuxiliaryForm[],
           )
-    }))
+          if (passive) questions.push(passive)
+        }
+      }
+    }
   }
 
-  if (nonFiniteTenses.length > 0 && request.exerciseKind === 'conjugation'
+  if (nonFiniteTenses.length > 0 && request.exerciseKind === 'conjugation' && wantsActiveVoice
       && !onlyBeforeComplements) {
     const verbs: NonFiniteVerbRow[] = []
     const selectedNonFiniteRequirePresentParticiple = nonFiniteTenses.every((tense) => {
@@ -1079,6 +1184,14 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
 
   if (usesLiteraryCitations && !questions.length) {
     throw new QuestionnaireSelectionError('Aucune citation validée ne correspond aux temps sélectionnés')
+  }
+
+  if (request.exerciseKind === 'conjugation'
+      && wantsPassiveVoice
+      && !questions.some(question => question.voice === 'passive')) {
+    throw new QuestionnaireSelectionError(
+      'Aucune forme passive n’est disponible pour les verbes et les temps sélectionnés',
+    )
   }
 
   if (request.exerciseKind === 'mode-identification') {

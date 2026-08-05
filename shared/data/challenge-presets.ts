@@ -11,6 +11,7 @@ import type {
 import { legacyComplementOptions } from '../utils/complement-options'
 
 type FilterableVerbField =
+  | 'infinitif'
   | 'groupeConjugaison'
   | 'terminaison'
   | 'typePronominal'
@@ -25,6 +26,7 @@ export type VerbCriterion =
   | { field: FilterableVerbField, operator: 'equals', value: string | number }
   | { field: FilterableVerbField, operator: 'not-equals', value: string | number }
   | { field: FilterableVerbField, operator: 'includes', value: string }
+  | { field: FilterableVerbField, operator: 'in', value: readonly (string | number)[] }
   | { field: FilterableVerbField, operator: 'not-in', value: readonly (string | number)[] }
   | { field: FilterableVerbField, operator: 'gte', value: number }
   | { field: 'complementExample', operator: 'has-anteposable-cod' }
@@ -62,6 +64,21 @@ const coreTenses = [1, 2, 3, 4, 5, 6] as const
 const secondaryTenses = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15] as const
 const nearFutureTenseId = 24
 
+export const usefulAllophoneVerbInfinitives = [
+  'être', 'avoir', 'aller', 'faire', 'dire', 'pouvoir', 'vouloir', 'devoir', 'savoir', 'connaître',
+  'comprendre', 'apprendre', 'prendre', 'mettre', 'venir', 'partir', 'arriver', 'rester', 'entrer', 'sortir',
+  'amener', 'passer', 'vivre', 'habiter', 'travailler', 'étudier', 'parler', 'écouter', 'entendre', 'voir',
+  'regarder', 'lire', 'écrire', 'demander', 'répondre', 'expliquer', 'appeler', 'accompagner', 'donner', 'recevoir',
+  'envoyer', 'apporter', 'chercher', 'trouver', 'acheter', 'payer', 'offrir', 'vendre', 'choisir', 'utiliser',
+  'ouvrir', 'montrer', 'commencer', 'finir', 'continuer', 'arrêter', 'attendre', 'aider', 'aimer', 'préférer',
+  'manger', 'boire', 'cuisiner', 'dormir', 'marcher', 'courir', 'conduire', 'voyager', 'visiter', 'rencontrer',
+  'inviter', 'jouer', 'gagner', 'perdre', 'porter', 'changer', 'laver', 'garder', 'remplir', 'vider',
+  'allumer', 'éteindre', 'monter', 'descendre', 'tourner', 'rentrer', 'déposer', 'suivre', 'tenir', 'croire',
+  'penser', 'oublier', 'rappeler', 'essayer', 'sentir', 'commander', 'servir', 'réussir', 'décider', 'falloir',
+] as const
+
+export const usefulAllophoneChallengeId = '100-verbes-utiles-allophones'
+
 export const challengePresetDefinitions = [
   { id: '5P', label: '5P', description: 'Verbes et temps usuels de 5P.', group: 'school', criteria: [{ field: 'niveauxScolaires', operator: 'includes', value: '5P' }], tenseIds: [1, 2], questionCount: 10 },
   { id: '6P', label: '6P', description: 'Verbes et temps usuels de 6P.', group: 'school', criteria: [{ field: 'niveauxScolaires', operator: 'includes', value: '6P' }], tenseIds: [1, 2, 3, 5], questionCount: 10 },
@@ -91,6 +108,7 @@ export const challengePresetDefinitions = [
   { id: 'CIF2', label: 'CIF 2', description: 'Deuxième parcours CIF historique.', group: 'cif', criteria: [{ field: 'parcoursCif', operator: 'includes', value: 'CIF2' }], tenseIds: [1, nearFutureTenseId], questionCount: 10 },
   { id: 'CIF3', label: 'CIF 3', description: 'Troisième parcours CIF historique.', group: 'cif', criteria: [{ field: 'parcoursCif', operator: 'includes', value: 'CIF3' }], tenseIds: [1, 2, 3, 4, nearFutureTenseId], questionCount: 10 },
   { id: 'CIF4', label: 'CIF 4', description: 'Quatrième parcours CIF historique.', group: 'cif', criteria: [{ field: 'parcoursCif', operator: 'includes', value: 'CIF4' }], tenseIds: [...coreTenses, nearFutureTenseId], questionCount: 10 },
+  { id: usefulAllophoneChallengeId, label: '100 verbes utiles', description: 'Les verbes essentiels de la vie quotidienne au présent, à l’imparfait et aux temps du futur et du passé.', group: 'cif', criteria: [{ field: 'infinitif', operator: 'in', value: usefulAllophoneVerbInfinitives }], tenseIds: [1, 2, 3, nearFutureTenseId, 5], questionCount: 20 },
 ] as const satisfies readonly ChallengePresetDefinition[]
 
 export type ChallengePresetId = (typeof challengePresetDefinitions)[number]['id']
@@ -102,6 +120,7 @@ function matchesCriterion(verb: Verb, criterion: VerbCriterion) {
   }
   const value = verb[criterion.field]
   if (criterion.operator === 'includes') return Array.isArray(value) && value.includes(criterion.value)
+  if (criterion.operator === 'in') return criterion.value.includes(value as string | number)
   if (criterion.operator === 'not-in') return !criterion.value.includes(value as string | number)
   if (criterion.operator === 'gte') return typeof value === 'number' && value >= criterion.value
   if (criterion.operator === 'not-equals') return value !== criterion.value
@@ -145,6 +164,7 @@ export function resolveChallengePresetDefinitions(
       pastSimplePronouns: 'all',
       inclusivePronouns: false,
       includeOnPronoun: false,
+      voiceMode: 'active',
       includeComplements,
       complementPlacement,
       complementOptions: legacyComplementOptions(includeComplements, complementPlacement),
@@ -178,6 +198,7 @@ export function challengeConfigFromLegacyTuple(tuple: LegacyChallengeTuple): Cha
     pastSimplePronouns: 'all',
     inclusivePronouns: false,
     includeOnPronoun: false,
+    voiceMode: 'active',
     includeComplements: false,
     complementPlacement: 'after',
     complementOptions: [],

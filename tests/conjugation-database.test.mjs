@@ -140,6 +140,36 @@ describe('verbes défectifs et impersonnels', { skip: !databaseConfigured }, () 
 })
 
 describe('audit des demandes reçues par mail', { skip: !databaseConfigured }, () => {
+  it('utilise l’accent initial des huit verbes ciblés en dé-', async () => {
+    const expected = [
+      'déborder', 'débuter', 'décoller', 'dédier',
+      'défiler', 'désigner', 'détourner', 'développer',
+    ]
+    const [rows] = await database.query(`
+      SELECT infinitif,forme_canonique,
+             \`participe_présent\` AS participe_present,
+             \`participe_passé\` AS participe_passe
+      FROM verbes
+      WHERE infinitif IN ('déborder','débuter','décoller','dédier','défiler','désigner','détourner','développer')
+      ORDER BY infinitif
+    `)
+    assert.deepEqual(rows.map(row => row.infinitif).sort((a, b) => a.localeCompare(b, 'fr')), expected.sort((a, b) => a.localeCompare(b, 'fr')))
+    assert.deepEqual(rows.map(row => row.forme_canonique).sort((a, b) => a.localeCompare(b, 'fr')), expected)
+
+    const [forms] = await database.query(`
+      SELECT vc.id,vc.verbe_infinitif,vc.conjugaison1,vc.conjugaison2,vc.conjugaison3
+      FROM verbesconjugues vc
+      INNER JOIN verbes v ON v.id=vc.verbe_id
+      WHERE v.infinitif IN ('déborder','débuter','décoller','dédier','défiler','désigner','détourner','développer')
+    `)
+    const malformedStems = ['debor', 'debut', 'decoll', 'dedi', 'defil', 'design', 'detourn', 'developp']
+    const malformedForms = forms.filter(row => (
+      [row.verbe_infinitif, row.conjugaison1, row.conjugaison2, row.conjugaison3]
+        .some(value => malformedStems.some(stem => String(value || '').includes(stem)))
+    ))
+    assert.deepEqual(malformedForms, [])
+  })
+
   it('ne conserve aucun s pluriel redoublé après un participe terminé par s ou x', async () => {
     const [rows] = await database.query(`
       SELECT v.infinitif,t.name AS temps,p.pronom,vc.conjugaison1

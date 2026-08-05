@@ -1,4 +1,4 @@
-import type { ComplementOption, ComplementPlacement, ExerciseKind, IdentificationSource, LiteraryRegister, PastSimplePronouns } from '../types/conjugation'
+import type { ComplementOption, ComplementPlacement, ExerciseKind, IdentificationSource, LiteraryRegister, PastSimplePronouns, VoiceMode } from '../types/conjugation'
 import { DEFAULT_COMPLEMENT_OPTIONS } from './complement-options'
 
 export const DEFAULT_SHARED_CHALLENGE_OPTIONS: {
@@ -8,6 +8,7 @@ export const DEFAULT_SHARED_CHALLENGE_OPTIONS: {
   pastSimplePronouns: PastSimplePronouns
   inclusivePronouns: boolean
   includeOnPronoun: boolean
+  voiceMode: VoiceMode
   includeComplements: boolean
   complementPlacement: ComplementPlacement
   complementOptions: ComplementOption[]
@@ -18,6 +19,7 @@ export const DEFAULT_SHARED_CHALLENGE_OPTIONS: {
   pastSimplePronouns: 'all',
   inclusivePronouns: false,
   includeOnPronoun: false,
+  voiceMode: 'active',
   includeComplements: true,
   complementPlacement: 'after',
   complementOptions: [...DEFAULT_COMPLEMENT_OPTIONS],

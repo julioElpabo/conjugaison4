@@ -8,6 +8,7 @@ export default defineNitroPlugin(async () => {
       UPDATE challenge_presets
       SET question_count=10
       WHERE question_count<>10
+        AND preset_key<>'100-verbes-utiles-allophones'
     `)
     console.info(
       `[database] Défis préfabriqués limités à 10 questions`

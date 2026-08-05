@@ -939,6 +939,38 @@ function officialCompoundForm(question: ExerciseQuestion, baseParticiple: string
   return source.replace(new RegExp(`${escaped}(?:e|s|es)?(?=$|[\\s.,!?;:’'])`, 'iu'), expectedParticiple)
 }
 
+export function buildPassiveVoiceHelpHtml(
+  question: ExerciseQuestion,
+  _verb?: Verb,
+  _tense?: ConjugationTense,
+  _revealAnswers = true,
+  condensed = false,
+) {
+  const subject = question.passiveSubject || question.pronom || 'le sujet qui subit l’action'
+  if (condensed) {
+    return `<p>La voix passive met en avant ce qui <strong>subit l’action</strong>.</p><p>Par exemple :<br>Le facteur a distribué les lettres ce matin<br>Les lettres ont été distribuées ce matin.</p><p>sujet + <strong>être au temps demandé</strong> + participe passé accordé.</p><p>Ici, le sujet est <strong>${escapedHtml(subject)}</strong>. Le participe passé s’accorde avec lui.</p>`
+  }
+  return `<p>La voix passive sert à mettre en avant la personne ou la chose qui <strong>subit l’action</strong>. L’auteur de l’action devient secondaire et peut parfois être omis.</p><p>Par exemple :<br>Le facteur a distribué les lettres ce matin<br>Les lettres ont été distribuées ce matin.</p><p><strong>sujet qui subit l’action</strong> + <strong>être conjugué</strong> + <strong>participe passé accordé</strong>.</p><p><strong>Attention au temps</strong><br>C’est le verbe <strong>être</strong> qui porte le mode et le temps demandés. Le verbe étudié reste au participe passé.</p>`
+}
+
+export function buildPassiveVoiceMethodHtml(
+  question: ExerciseQuestion,
+  verb?: Verb,
+  tense?: ConjugationTense,
+  revealAnswers = true,
+) {
+  const subject = question.passiveSubject || question.pronom || 'le sujet qui subit l’action'
+  const agent = question.passiveAgent || 'par quelqu’un'
+  const participle = verb?.participePasse?.trim() || 'le participe passé du verbe'
+  const auxiliary = compoundAuxiliaryPart(question.conjugaison1 || '', participle)
+  const agreed = agreedParticipleFromCompound(question.conjugaison1 || '', participle)
+  const context = tenseContext(question, tense)
+  if (!revealAnswers) {
+    return `<ol><li>Repère le sujet qui subit l’action : <strong>${escapedHtml(subject)}</strong>.</li><li>Conjugue <strong>être</strong> ${escapedHtml(context)}.</li><li>Ajoute le participe passé de <strong>${escapedHtml(question.infinitif || verb?.infinitif || 'ce verbe')}</strong>.</li><li>Accorde ce participe avec le sujet, puis relis la phrase avec « ${escapedHtml(agent)} ».</li></ol>`
+  }
+  return `<ol><li>Le COD de la phrase active devient le sujet : <strong>${escapedHtml(subject)}</strong>.</li><li>Conjugue <strong>être</strong> ${escapedHtml(context)} : <strong>${escapedHtml(auxiliary)}</strong>.</li><li>Ajoute le participe passé et accorde-le avec ce sujet : <strong>${escapedHtml(agreed)}</strong>.</li><li>Relis la phrase complète avec « ${escapedHtml(agent)} ».</li></ol><p><strong>Résultat</strong><br>${resultFormMarkup(question.reponsesPourCorrige[0] || question.conjugaison1 || '')}</p>`
+}
+
 function compoundAgreementHtml(auxiliary: 'avoir' | 'être', subject: string, baseParticiple = '', answer = '', question?: ExerciseQuestion, verb?: Verb) {
   if (auxiliary === 'être') {
     if (isPronominalInfinitive(question?.infinitif || verb?.infinitif || '', verb)) {
@@ -1184,6 +1216,9 @@ export function buildConjugationBaseHtml(
   const highlightedReference = displayedReference ? rememberedFormMarkup(displayedReference) : ''
   const normalizedMode = normalized(question.mode || tense?.mode?.name)
   const normalizedTense = normalized(question.temps || tense?.name)
+  if (question.voice === 'passive') {
+    return `${buildPassiveVoiceMethodHtml(question, verb, tense)}${buildPassiveVoiceHelpHtml(question, verb, tense)}`
+  }
   if (isNearFutureTense({ code: question.tenseCode || tense?.code, name: question.temps || tense?.name })) {
     return nearFutureHelpHtml(question)
   }
@@ -1367,6 +1402,9 @@ export function buildConjugationEndingsHtml(
   tense?: ConjugationTense,
   approach: CoachExplanationApproach = 'grammatical-technical',
 ) {
+  if (question.voice === 'passive') {
+    return `${buildPassiveVoiceMethodHtml(question, verb, tense)}${buildPassiveVoiceHelpHtml(question, verb, tense)}`
+  }
   if (isNearFutureTense({ code: question.tenseCode || tense?.code, name: question.temps || tense?.name })) {
     return nearFutureHelpHtml(question)
   }
@@ -1510,6 +1548,9 @@ function answerFreeNonPersonalHelpHtml(question: ExerciseQuestion, verb?: Verb, 
  * réponse à la place de l’élève et retire les mises en évidence ciblées.
  */
 export function buildCompleteConjugationAdviceHtml(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationTense) {
+  if (question.voice === 'passive') {
+    return `${buildPassiveVoiceMethodHtml(question, verb, tense, false)}${buildPassiveVoiceHelpHtml(question, verb, tense, false)}`
+  }
   if (isNearFutureTense({ code: question.tenseCode || tense?.code, name: question.temps || tense?.name })) {
     return nearFutureHelpHtml(question, false)
   }
@@ -1558,6 +1599,10 @@ function targetedWarnings(question: ExerciseQuestion, verb?: Verb) {
   const warnings: string[] = []
   const infinitive = normalized(question.infinitif || verb?.infinitif)
   const particularities = new Set((verb?.particularites || []).map(normalized))
+
+  if (question.voice === 'passive') {
+    warnings.push('À la voix passive, le participe passé s’accorde avec le sujet qui subit l’action.')
+  }
 
   if (infinitive.endsWith('ger') || particularities.has('ger')) {
     warnings.push('Verbe en -ger : devant a ou o, on garde le son doux de g en ajoutant e, par exemple « nous mangeons ».')
@@ -1631,11 +1676,17 @@ export function buildTargetedConjugationHelp(
       : displayedTense,
   ].filter(Boolean).join(' | ')
   const method = [
-    subject ? `Repère la personne : ${subject}.` : 'Repère la personne demandée.',
-    question.isCompound || tense?.isCompound
+    question.voice === 'passive'
+      ? `Repère le sujet qui subit l’action : ${question.passiveSubject || subject}.`
+      : subject ? `Repère la personne : ${subject}.` : 'Repère la personne demandée.',
+    question.voice === 'passive'
+      ? 'Conjugue être au temps demandé, puis ajoute le participe passé du verbe.'
+      : question.isCompound || tense?.isCompound
       ? 'Conjugue d’abord l’auxiliaire, puis ajoute le participe passé.'
       : 'Choisis le bon radical, puis ajoute la terminaison de cette personne.',
-    question.complement
+    question.voice === 'passive'
+      ? 'Accorde le participe passé avec le sujet de la phrase passive.'
+      : question.complement
       ? `Relis la phrase avec « ${question.complement} » pour vérifier le sens et l’accord.`
       : 'Relis la forme obtenue à voix basse pour vérifier qu’elle convient.',
   ]
@@ -1653,8 +1704,10 @@ export function buildTargetedConjugationHelp(
         ? [{ label: 'Participe passé', value: verb.participePasse }]
         : []),
     ],
-    formation: [rule.rule],
-    endings: rule.endings,
+    formation: question.voice === 'passive'
+      ? ['Voix passive = sujet + être conjugué + participe passé accordé.']
+      : [rule.rule],
+    endings: question.voice === 'passive' ? null : rule.endings,
     exception: rule.exception,
     warnings,
     method,

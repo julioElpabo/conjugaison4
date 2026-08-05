@@ -10,6 +10,19 @@ import {
 } from '../shared/utils/print-question.ts'
 
 describe('questions imprimables', () => {
+  it('imprime le sujet et le complément d’agent d’une forme passive', () => {
+    assert.equal(
+      printableQuestion({
+        titre: 'abandonner',
+        consigne: 'La mission … par quelqu’un | abandonner | présent (indicatif)',
+        reponses: ['est abandonnée'],
+        reponsesPourCorrige: ['La mission est abandonnée par quelqu’un.'],
+        voice: 'passive',
+      }, 'conjugation'),
+      'abandonner | présent (indicatif) : La mission ................................. par quelqu’un',
+    )
+  })
+
   it('place le verbe et le temps avant une phrase avec complément', () => {
     assert.equal(
       printableQuestion({

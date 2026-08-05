@@ -134,6 +134,29 @@ describe('apostrophes et élisions françaises', () => {
   })
 })
 
+describe('accords affichés dans le corrigé', () => {
+  it('montre les formes masculine et féminine avec je et nous', () => {
+    const singular = formatConjugationQuestion(row({
+      conjugaison1: 'suis parti', conjugaison2: '', auxiliaire: 'être', participe_passe: 'parti', is_compound: 1,
+    }), 'je')
+    const plural = formatConjugationQuestion(row({
+      conjugaison1: 'sommes partis', conjugaison2: '', auxiliaire: 'être', participe_passe: 'parti', is_compound: 1,
+    }), 'nous')
+
+    assert.deepEqual(singular.reponsesPourCorrige, ['je suis parti', 'je suis partie'])
+    assert.deepEqual(plural.reponsesPourCorrige, ['nous sommes partis', 'nous sommes parties'])
+  })
+
+  it('accepte les quatre accords possibles avec on', () => {
+    const question = formatConjugationQuestion(row({
+      conjugaison1: 'est parti', conjugaison2: '', auxiliaire: 'être', participe_passe: 'parti', is_compound: 1,
+    }), 'on')
+    assert.deepEqual(question.reponsesPourCorrige, [
+      'on est parti', 'on est partie', 'on est partis', 'on est parties',
+    ])
+  })
+})
+
 describe('compléments d’objet dans les questions', () => {
   it('affiche une phrase naturelle et accepte la forme seule ou la phrase complète', () => {
     const question = formatConjugationQuestion(row({

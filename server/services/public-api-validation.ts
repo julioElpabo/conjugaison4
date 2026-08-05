@@ -12,6 +12,8 @@ import { DEFAULT_SHARED_CHALLENGE_OPTIONS } from '../../shared/utils/challenge-d
 
 export class PublicInputError extends Error {}
 
+const MAX_VERB_IDS = 1_000
+
 const QUESTIONNAIRE_KEYS = new Set([
   'description',
   'verbIds',
@@ -22,6 +24,7 @@ const QUESTIONNAIRE_KEYS = new Set([
   'literaryRegister',
   'pastSimplePronouns',
   'inclusivePronouns',
+  'includeOnPronoun',
   'includeComplements',
   'complementPlacement',
   'complementOptions'
@@ -39,6 +42,7 @@ const DEFI_KEYS = new Set([
   'literaryRegister',
   'pastSimplePronouns',
   'inclusivePronouns',
+  'includeOnPronoun',
   'includeComplements',
   'complementPlacement',
   'complementOptions',
@@ -236,6 +240,10 @@ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest 
   if (typeof value.inclusivePronouns !== 'boolean') {
     throw new PublicInputError('inclusivePronouns doit être un booléen')
   }
+  const includeOnPronoun = value.includeOnPronoun ?? DEFAULT_SHARED_CHALLENGE_OPTIONS.includeOnPronoun
+  if (typeof includeOnPronoun !== 'boolean') {
+    throw new PublicInputError('includeOnPronoun doit être un booléen')
+  }
   const includeComplements = value.includeComplements ?? false
   if (typeof includeComplements !== 'boolean') {
     throw new PublicInputError('includeComplements doit être un booléen')
@@ -249,7 +257,7 @@ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest 
     : parseComplementOptions(value.complementOptions)
   const resolvedLegacy = legacyComplementConfig(complementOptions)
   return {
-    verbIds: parseIds(value.verbIds, 'verbIds', 500, true),
+    verbIds: parseIds(value.verbIds, 'verbIds', MAX_VERB_IDS, true),
     tenseIds: parseIds(value.tenseIds, 'tenseIds', 30),
     questionCount: parseQuestionCount(value.questionCount),
     exerciseKind: parseExerciseKind(value.exerciseKind),
@@ -261,6 +269,7 @@ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest 
       : parseLiteraryRegister(value.literaryRegister),
     pastSimplePronouns: parsePastSimplePronouns(value.pastSimplePronouns),
     inclusivePronouns: value.inclusivePronouns,
+    includeOnPronoun,
     includeComplements: resolvedLegacy.includeComplements,
     complementPlacement: resolvedLegacy.complementPlacement,
     complementOptions,
@@ -309,9 +318,14 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
   const inclusivePronouns = modernValue.inclusivePronouns === undefined
     ? (legacyInclusive === undefined ? DEFAULT_SHARED_CHALLENGE_OPTIONS.inclusivePronouns : legacyInclusive === 'afficherIel')
     : modernValue.inclusivePronouns
+  const includeOnPronoun = modernValue.includeOnPronoun
+    ?? DEFAULT_SHARED_CHALLENGE_OPTIONS.includeOnPronoun
 
   if (typeof inclusivePronouns !== 'boolean') {
     throw new PublicInputError('inclusivePronouns doit être un booléen')
+  }
+  if (typeof includeOnPronoun !== 'boolean') {
+    throw new PublicInputError('includeOnPronoun doit être un booléen')
   }
   const includeComplements = modernValue.includeComplements ?? DEFAULT_SHARED_CHALLENGE_OPTIONS.includeComplements
   if (typeof includeComplements !== 'boolean') {
@@ -331,7 +345,7 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
     version: 1,
     ...(title === undefined ? {} : { title }),
     ...(description === undefined ? {} : { description }),
-    verbIds: parseIds(modernValue.verbIds, 'verbIds', 500, true),
+    verbIds: parseIds(modernValue.verbIds, 'verbIds', MAX_VERB_IDS, true),
     tenseIds: parseIds(modernValue.tenseIds, 'tenseIds', 30),
     questionCount: parseQuestionCount(modernValue.questionCount),
     exerciseKind,
@@ -339,6 +353,7 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
     literaryRegister,
     pastSimplePronouns,
     inclusivePronouns,
+    includeOnPronoun,
     includeComplements: resolvedLegacy.includeComplements,
     complementPlacement: resolvedLegacy.complementPlacement,
     complementOptions,

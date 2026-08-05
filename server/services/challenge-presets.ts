@@ -152,6 +152,7 @@ export async function listStoredChallengePresets(
       identificationSource: 'selected-verbs',
       pastSimplePronouns: row.pastSimplePronouns,
       inclusivePronouns: Boolean(row.inclusivePronouns),
+      includeOnPronoun: false,
       includeComplements: legacy.includeComplements,
       complementPlacement: legacy.complementPlacement,
       complementOptions,

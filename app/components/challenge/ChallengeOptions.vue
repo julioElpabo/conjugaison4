@@ -8,6 +8,7 @@ const props = defineProps<{
   exerciseKind: ExerciseKind
   identificationSource: IdentificationSource
   inclusivePronouns: boolean
+  includeOnPronoun: boolean
   complementOptions: ComplementOption[]
   complementVerbs?: Verb[]
   eyebrow?: string
@@ -30,6 +31,7 @@ const emit = defineEmits<{
   updateExerciseKind: [value: ExerciseKind]
   updateIdentificationSource: [value: IdentificationSource]
   updateInclusivePronouns: [value: boolean]
+  updateIncludeOnPronoun: [value: boolean]
   updateComplementOptions: [value: ComplementOption[]]
   prefilledOptionsRevealStart: []
 }>()
@@ -235,6 +237,17 @@ watch(complementsAvailable, (available) => {
           >
           <span> {{ ui('Inclure les pronoms') }} <strong>iel / iels</strong>
             <small>{{ ui('Ils apparaîtront ponctuellement dans les questions.') }}</small>
+          </span>
+        </label>
+
+        <label class="check-row">
+          <input
+            type="checkbox"
+            :checked="includeOnPronoun"
+            @change="emit('updateIncludeOnPronoun', ($event.target as HTMLInputElement).checked)"
+          >
+          <span> {{ ui('Inclure le pronom') }} <strong>on</strong>
+            <small>{{ ui('Il apparaîtra ponctuellement dans les questions à la troisième personne du singulier.') }}</small>
           </span>
         </label>
 

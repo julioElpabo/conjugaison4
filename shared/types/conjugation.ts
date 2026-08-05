@@ -96,6 +96,7 @@ export interface ChallengeConfig {
   literaryRegister?: LiteraryRegister
   pastSimplePronouns: PastSimplePronouns
   inclusivePronouns: boolean
+  includeOnPronoun: boolean
   includeComplements: boolean
   complementPlacement: ComplementPlacement
   complementOptions: ComplementOption[]
@@ -252,6 +253,7 @@ export interface LearnerChallengeSnapshot {
   identificationSource?: IdentificationSource
   pastSimplePronouns?: PastSimplePronouns
   inclusivePronouns?: boolean
+  includeOnPronoun?: boolean
   includeComplements?: boolean
   complementPlacement?: ComplementPlacement
   complementOptions?: ComplementOption[]

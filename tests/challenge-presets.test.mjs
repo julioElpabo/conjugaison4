@@ -129,6 +129,7 @@ describe('conversion du format historique', () => {
       identificationSource: 'selected-verbs',
       pastSimplePronouns: 'all',
       inclusivePronouns: false,
+      includeOnPronoun: false,
       includeComplements: false,
       complementPlacement: 'after',
       complementOptions: [],

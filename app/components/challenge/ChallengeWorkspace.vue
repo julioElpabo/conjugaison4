@@ -171,6 +171,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   challenge.value.identificationSource = preset.identificationSource
   challenge.value.pastSimplePronouns = preset.pastSimplePronouns
   challenge.value.inclusivePronouns = preset.inclusivePronouns
+  challenge.value.includeOnPronoun = preset.includeOnPronoun
   challenge.value.includeComplements = preset.includeComplements
   challenge.value.complementPlacement = preset.complementPlacement
   challenge.value.complementOptions = preset.complementOptions ?? legacyComplementOptions(preset.includeComplements, preset.complementPlacement)
@@ -202,6 +203,7 @@ function beginExerciseTracking(presentation: 'classic' | 'chat') {
       identificationSource: challenge.value.identificationSource,
       pastSimplePronouns: challenge.value.pastSimplePronouns,
       inclusivePronouns: challenge.value.inclusivePronouns,
+      includeOnPronoun: challenge.value.includeOnPronoun,
       includeComplements: challenge.value.includeComplements,
       complementPlacement: challenge.value.complementPlacement,
       complementOptions: [...challenge.value.complementOptions],
@@ -424,12 +426,14 @@ function onToggleTense(id: number) {
             :exercise-kind="challenge.exerciseKind"
             :identification-source="challenge.identificationSource"
             :inclusive-pronouns="challenge.inclusivePronouns"
+            :include-on-pronoun="challenge.includeOnPronoun"
             :complement-options="challenge.complementOptions"
             :complement-verbs="selectedVerbs"
             @update-question-count="challenge.questionCount = $event; markAsCustom()"
             @update-exercise-kind="challenge.exerciseKind = $event"
             @update-identification-source="challenge.identificationSource = $event"
             @update-inclusive-pronouns="challenge.inclusivePronouns = $event"
+            @update-include-on-pronoun="challenge.includeOnPronoun = $event"
             @update-complement-options="updateComplementOptions"
           />
         </div>

@@ -47,6 +47,8 @@
     "data:remove-coach-off-topic": "node --env-file=.env scripts/remove-unused-coach-off-topic.mjs",
     "data:migrate-mail-requests": "node --env-file-if-exists=.env scripts/migrate-mail-requests.mjs",
     "data:migrate-mail-requests:apply": "node --env-file-if-exists=.env scripts/migrate-mail-requests.mjs --apply",
+    "data:audit-mail-conjugations": "node --env-file-if-exists=.env --import tsx scripts/audit-mail-request-conjugations.mjs",
+    "data:repair-mail-conjugations": "node --env-file-if-exists=.env --import tsx scripts/audit-mail-request-conjugations.mjs --apply",
     "data:migrate-near-future": "node --env-file-if-exists=.env scripts/migrate-near-future.mjs",
     "data:migrate-near-future:apply": "node --env-file-if-exists=.env scripts/migrate-near-future.mjs --apply",
     "data:import-literary-corpus": "node --env-file=.env scripts/import-literary-corpus.mjs",

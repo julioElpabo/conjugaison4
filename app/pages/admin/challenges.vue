@@ -167,6 +167,7 @@ async function createPreset() {
     identificationSource: 'selected-verbs',
     pastSimplePronouns: 'all',
     inclusivePronouns: false,
+    includeOnPronoun: false,
     includeComplements: true,
     complementPlacement: 'mixed',
     complementOptions: ['cod-after', 'coi-after'],
@@ -686,7 +687,7 @@ watch(user, (currentUser) => {
                 <label class="admin-field"><span>Nombre de questions</span><input v-model.number="presetDraft.questionCount" type="number" min="1" max="100" required></label>
                 <label class="admin-field"><span>Type d’exercice</span><select v-model="presetDraft.exerciseKind"><option value="conjugation">Conjugaison</option><option value="tense-identification">Identifier le temps</option></select></label>
                 <label class="admin-field"><span>Pronoms au passé simple</span><select v-model="presetDraft.pastSimplePronouns"><option value="all">Tous les pronoms</option><option value="third-person-only">3e personnes seulement</option></select></label>
-                <label class="check-line"><input v-model="presetDraft.inclusivePronouns" type="checkbox"><span>Inclure les pronoms « on » et « elles »</span></label>
+                <label class="check-line"><input v-model="presetDraft.inclusivePronouns" type="checkbox"><span>Inclure les pronoms « iel / iels »</span></label>
               </div>
               <div><strong class="option-title">Compléments proposés</strong><div class="choice-grid complement-grid"><label v-for="option in COMPLEMENT_OPTIONS" :key="option.value" :class="{ selected: presetDraft.complementOptions.includes(option.value) }"><input type="checkbox" :checked="presetDraft.complementOptions.includes(option.value)" @change="setComplementOption(option.value, inputChecked($event))"><span>{{ option.label }}</span></label></div></div>
             </section>

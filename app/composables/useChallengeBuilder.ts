@@ -53,6 +53,7 @@ export interface SharedChallenge {
   literaryRegister?: LiteraryRegister
   pastSimplePronouns?: PastSimplePronouns
   inclusivePronouns?: boolean
+  includeOnPronoun?: boolean
   includeComplements?: boolean
   complementPlacement?: ComplementPlacement
   complementOptions?: ComplementOption[]
@@ -227,6 +228,7 @@ export function useChallengeBuilder() {
       literaryRegister: shared.literaryRegister ?? defaults.literaryRegister,
       pastSimplePronouns: shared.pastSimplePronouns ?? defaults.pastSimplePronouns,
       inclusivePronouns: shared.inclusivePronouns ?? defaults.inclusivePronouns,
+      includeOnPronoun: shared.includeOnPronoun ?? defaults.includeOnPronoun,
       includeComplements: legacy.includeComplements,
       complementPlacement: legacy.complementPlacement,
       complementOptions,

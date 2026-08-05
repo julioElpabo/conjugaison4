@@ -61,6 +61,7 @@ const exerciseFirstPageCapacity = computed(() => {
   if (props.options.showVerbs) capacity -= 8
   if (props.options.showTenses) capacity -= 8
   if (isTenseIdentification.value) capacity -= 19
+  else capacity -= 6
   return capacity
 })
 const exercisePages = computed(() => paginateByHeight(
@@ -198,7 +199,7 @@ async function buildPdf() {
         pdf.text(TENSE_IDENTIFICATION_INSTRUCTION, left + 3, y + 6)
         y += 21
       }
-      return y + 2
+      return y + (isTenseIdentification.value ? 2 : 8)
     }
 
     function drawCorrectionHeader(continuation: boolean) {
@@ -686,6 +687,12 @@ async function downloadWord() {
         spacing: { before: 160, after: 480 },
         border: { top: { style: BorderStyle.SINGLE, size: 4, color: '777777' }, bottom: { style: BorderStyle.SINGLE, size: 4, color: '777777' }, left: { style: BorderStyle.SINGLE, size: 4, color: '777777' }, right: { style: BorderStyle.SINGLE, size: 4, color: '777777' } },
         children: [new TextRun({ text: TENSE_IDENTIFICATION_INSTRUCTION, size: 19, font: 'Arial' })]
+      }))
+    }
+    else {
+      exerciseChildren.push(new Paragraph({
+        spacing: { before: 0, after: 340 },
+        children: [],
       }))
     }
     exerciseChildren.push(new Table({

@@ -93,6 +93,7 @@ referenceCases('familles à modification orthographique', [
   { infinitive: 'acquérir', mode: 'indicatif', tense: 'présent', pronoun: 'je', expected: ['acquiers'] },
   { infinitive: 'haïr', mode: 'indicatif', tense: 'présent', pronoun: 'je', expected: ['hais'] },
   { infinitive: 'haïr', mode: 'indicatif', tense: 'présent', pronoun: 'nous', expected: ['haïssons'] },
+  { infinitive: 'protéger', mode: 'indicatif', tense: 'présent', pronoun: 'nous', expected: ['protégeons'] },
 ])
 
 referenceCases('doléances vérifiées des utilisateurs', [
@@ -134,6 +135,32 @@ describe('verbes défectifs et impersonnels', { skip: !databaseConfigured }, () 
       for (const pronoun of ['je', 'tu', 'nous', 'vous', 'ils']) {
         assert.deepEqual(await formFor(infinitive, 'indicatif', 'présent', pronoun), [], `${pronoun} ${infinitive} devrait rester vide`)
       }
+    }
+  })
+})
+
+describe('audit des demandes reçues par mail', { skip: !databaseConfigured }, () => {
+  it('ne conserve aucun s pluriel redoublé après un participe terminé par s ou x', async () => {
+    const [rows] = await database.query(`
+      SELECT v.infinitif,t.name AS temps,p.pronom,vc.conjugaison1
+      FROM verbesconjugues vc
+      INNER JOIN verbes v ON v.id=vc.verbe_id
+      INNER JOIN personnes p ON p.id=vc.personne_id
+      INNER JOIN temps t ON t.id=vc.temp_id
+      WHERE t.isTempsCompose=1 AND p.id IN (7,8,9)
+        AND v.\`participe_passé\` REGEXP '[sx]$'
+        AND CONCAT_WS('|',vc.conjugaison1,vc.conjugaison2,vc.conjugaison3)
+          LIKE CONCAT('%',v.\`participe_passé\`,'s%')
+    `)
+    assert.deepEqual(rows, [])
+  })
+
+  it('possède les six formes du passé simple d’affaiblir', async () => {
+    for (const [pronoun, expected] of [
+      ['je', 'affaiblis'], ['tu', 'affaiblis'], ['il', 'affaiblit'],
+      ['nous', 'affaiblîmes'], ['vous', 'affaiblîtes'], ['ils', 'affaiblirent'],
+    ]) {
+      assert.deepEqual(await formFor('affaiblir', 'indicatif', 'passé simple', pronoun), [expected])
     }
   })
 })

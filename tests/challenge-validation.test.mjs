@@ -42,6 +42,7 @@ describe('validation des défis partagés', () => {
       identificationSource: 'literary-corpus',
       pastSimplePronouns: 'all',
       inclusivePronouns: true,
+      includeOnPronoun: true,
       includeComplements: true,
       complementPlacement: 'mixed',
       complementOptions: ['cod-after', 'coi-before'],
@@ -61,6 +62,7 @@ describe('validation des défis partagés', () => {
 
     const parsed = parseDefiDefinition(input)
     assert.equal(parsed.identificationSource, 'literary-corpus')
+    assert.equal(parsed.includeOnPronoun, true)
     assert.deepEqual(JSON.parse(serializeDefi(parsed)), parsed)
   })
 
@@ -70,7 +72,7 @@ describe('validation des défis partagés', () => {
       exerciseKind: 'tense-identification', pastSimplePronouns: 'third-person-only',
       identificationSource: 'literary-corpus',
       literaryRegister: 'courant',
-      inclusivePronouns: true, includeComplements: true, complementPlacement: 'mixed',
+      inclusivePronouns: true, includeOnPronoun: true, includeComplements: true, complementPlacement: 'mixed',
       complementOptions: ['cod-before', 'coi-after'],
       printOptions: {
         title: 'Défi complet', questionSpacingMm: 6, titleSpacingMm: 20,
@@ -130,6 +132,7 @@ describe('validation des défis partagés', () => {
       identificationSource: challenge.identificationSource,
       pastSimplePronouns: challenge.pastSimplePronouns,
       inclusivePronouns: challenge.inclusivePronouns,
+      includeOnPronoun: challenge.includeOnPronoun,
       includeComplements: challenge.includeComplements,
       complementPlacement: challenge.complementPlacement,
       complementOptions: challenge.complementOptions,
@@ -138,6 +141,7 @@ describe('validation des défis partagés', () => {
       identificationSource: 'selected-verbs',
       pastSimplePronouns: 'all',
       inclusivePronouns: false,
+      includeOnPronoun: false,
       includeComplements: true,
       complementPlacement: 'after',
       complementOptions: ['cod-after', 'coi-after'],
@@ -155,6 +159,21 @@ describe('validation des défis partagés', () => {
 })
 
 describe('validation des questionnaires', () => {
+  it('accepte le catalogue complet quand il dépasse 500 verbes', () => {
+    const verbIds = Array.from({ length: 535 }, (_, index) => index + 1)
+    const request = parseQuestionnaireRequest({
+      verbIds,
+      tenseIds: [1],
+      questionCount: 100,
+      exerciseKind: 'conjugation',
+      pastSimplePronouns: 'all',
+      inclusivePronouns: false,
+    })
+
+    assert.deepEqual(request.verbIds, verbIds)
+    assert.deepEqual(parseDefiDefinition({ verbIds, tenseIds: [1], questionCount: 100 }).verbIds, verbIds)
+  })
+
   it('accepte la description d’un défi enregistré sans la transmettre au générateur', () => {
     const request = parseQuestionnaireRequest({
       description: '  À retravailler avant vendredi.  ',

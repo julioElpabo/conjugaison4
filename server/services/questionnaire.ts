@@ -258,8 +258,12 @@ function nearFutureRows(
 }
 
 function shuffle<T>(values: T[]) {
+  return shuffleWith(values, Math.random)
+}
+
+function shuffleWith<T>(values: T[], random: () => number) {
   for (let index = values.length - 1; index > 0; index--) {
-    const other = Math.floor(Math.random() * (index + 1))
+    const other = Math.floor(random() * (index + 1))
     ;[values[index], values[other]] = [values[other]!, values[index]!]
   }
   return values
@@ -353,14 +357,53 @@ function startsWithVowel(value: string) {
   return 'aeiouy'.includes(first)
 }
 
-function choosePronoun(pronom: string, inclusive: boolean) {
+export function choosePronoun(
+  pronom: string,
+  inclusive: boolean,
+  includeOn: boolean,
+  random: () => number = Math.random,
+) {
   if (pronom === 'il') {
-    return shuffle(inclusive ? ['il', 'elle', 'iel'] : ['il', 'elle'])[0]!
+    const choices = ['il', 'elle']
+    if (inclusive) choices.push('iel')
+    if (includeOn) choices.push('on')
+    return choices[Math.floor(random() * choices.length)]!
   }
   if (pronom === 'ils') {
-    return shuffle(inclusive ? ['ils', 'elles', 'iels'] : ['ils', 'elles'])[0]!
+    const choices = inclusive ? ['ils', 'elles', 'iels'] : ['ils', 'elles']
+    return choices[Math.floor(random() * choices.length)]!
   }
   return pronom
+}
+
+/**
+ * Prend une question de chaque verbe avant de commencer un nouveau tour.
+ * Les temps et les personnes restent aléatoires à l'intérieur de chaque verbe.
+ */
+export function diverseConjugationQuestions(
+  questions: ExerciseQuestion[],
+  count: number,
+  random: () => number = Math.random,
+) {
+  const byVerb = new Map<number, ExerciseQuestion[]>()
+  for (const question of shuffleWith([...questions], random)) {
+    const verbId = Number(question.verbeId)
+    const key = Number.isFinite(verbId) ? verbId : Number.MIN_SAFE_INTEGER + byVerb.size
+    const group = byVerb.get(key) || []
+    group.push(question)
+    byVerb.set(key, group)
+  }
+
+  const groups = shuffleWith([...byVerb.values()], random)
+  const selected: ExerciseQuestion[] = []
+  while (selected.length < count && groups.some(group => group.length)) {
+    for (const group of shuffleWith([...groups], random)) {
+      const question = group.shift()
+      if (question) selected.push(question)
+      if (selected.length >= count) break
+    }
+  }
+  return selected
 }
 
 function articleForTense(tense: string, mode: string) {
@@ -687,8 +730,9 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
     const literaryCitations = usesLiteraryCitations
       ? await validatedLiteraryCitations(null, finiteIds)
       : new Map<string, LiteraryCitationRow[]>()
+    const selectedVerbCount = verbIds.length + pronominalUseIds.length
     const limit = request.exerciseKind === 'conjugation'
-      ? Math.min(500, Math.max(request.questionCount * 4, request.questionCount))
+      ? Math.min(3_000, Math.max(request.questionCount * 10, selectedVerbCount * 3, request.questionCount))
       : 600
     const questionVerbIds = usesLiteraryCitations
       ? [...new Set([...literaryCitations.values()].flat().map(citation => Number(citation.verb_id)))]
@@ -944,7 +988,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
             radical_reference: radicalReference,
             future_simple_forms: futureSimpleForms,
             conjugation_confusions: conjugationConfusions,
-          }, choosePronoun(row.pronom, request.inclusivePronouns))
+          }, choosePronoun(row.pronom, request.inclusivePronouns, request.includeOnPronoun))
         : identificationQuestion(
             semanticRow,
             literaryCitations.get(literaryCitationKey(
@@ -1042,5 +1086,5 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
   }
   return request.exerciseKind === 'tense-identification'
     ? balancedIdentificationQuestions(questions, request.questionCount)
-    : shuffle(questions).slice(0, request.questionCount)
+    : diverseConjugationQuestions(questions, request.questionCount)
 }

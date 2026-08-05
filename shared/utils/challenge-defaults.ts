@@ -7,6 +7,7 @@ export const DEFAULT_SHARED_CHALLENGE_OPTIONS: {
   literaryRegister: LiteraryRegister
   pastSimplePronouns: PastSimplePronouns
   inclusivePronouns: boolean
+  includeOnPronoun: boolean
   includeComplements: boolean
   complementPlacement: ComplementPlacement
   complementOptions: ComplementOption[]
@@ -16,6 +17,7 @@ export const DEFAULT_SHARED_CHALLENGE_OPTIONS: {
   literaryRegister: 'all',
   pastSimplePronouns: 'all',
   inclusivePronouns: false,
+  includeOnPronoun: false,
   includeComplements: true,
   complementPlacement: 'after',
   complementOptions: [...DEFAULT_COMPLEMENT_OPTIONS],

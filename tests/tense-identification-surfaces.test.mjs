@@ -128,3 +128,9 @@ test('le corrigé d’identification ne contient que les réponses de mode et de
   assert.match(printPreview, /identificationCorrectionCells/u)
   assert.match(printPreview, /children: isTenseIdentification\.value[\s\S]*\? identificationCorrectionCells/u)
 })
+
+test('les fiches ordinaires éloignent la première question du titre en PDF et Word', () => {
+  assert.match(printPreview, /else capacity -= 6/u)
+  assert.match(printPreview, /return y \+ \(isTenseIdentification\.value \? 2 : 8\)/u)
+  assert.match(printPreview, /spacing: \{ before: 0, after: 340 \}/u)
+})

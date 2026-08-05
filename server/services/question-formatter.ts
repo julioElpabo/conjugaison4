@@ -120,6 +120,8 @@ function agreementVariants(
     variants.push(form, `${stem}es`, `${stem}.e.s`)
   } else if (['je', 'tu'].includes(pronoun)) {
     variants.push(stem, `${stem}e`)
+  } else if (pronoun === 'on') {
+    variants.push(stem, `${stem}e`, `${stem}s`, `${stem}es`)
   } else if (pronoun === 'nous') {
     variants.push(`${stem}es`)
   } else if (pronoun === 'vous') {
@@ -332,24 +334,15 @@ export function formatConjugationQuestion(
     ? splitAnteposedCodComplement(row.complement_anteposed, row.complement_relative_pronoun)
     : null
   const sourceForms = unique([row.conjugaison1, row.conjugaison2, row.conjugaison3])
-  const correctedForms = (row.agreement_rule === 'selon_construction'
-    ? sourceForms.flatMap(form => agreementVariants(
-        form,
-        pronoun,
-        Boolean(row.is_compound),
-        row.auxiliaire,
-        row.participe_passe,
-        row.agreement_rule,
-        allowsInvariableConstruction(row),
-      ))
-    : sourceForms.map(form => applyAgreement(
-        form,
-        pronoun,
-        Boolean(row.is_compound),
-        row.auxiliaire,
-        row.participe_passe,
-        row.agreement_rule,
-      )))
+  const correctedForms = sourceForms.flatMap(form => agreementVariants(
+      form,
+      pronoun,
+      Boolean(row.is_compound),
+      row.auxiliaire,
+      row.participe_passe,
+      row.agreement_rule,
+      allowsInvariableConstruction(row),
+    ))
     .map(form => applyAnteposedCodAgreement(form, row))
     .map(form => formatAnswer(pronoun, form, row.mode_name, row.infinitif))
   const displayedCorrections = row.complement_position === 'before' && row.complement_anteposed

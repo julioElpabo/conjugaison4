@@ -12,6 +12,7 @@ export interface QuestionnaireRequest {
   literaryRegister: NonNullable<ChallengeConfig['literaryRegister']>
   pastSimplePronouns: ChallengeConfig['pastSimplePronouns']
   inclusivePronouns: boolean
+  includeOnPronoun: boolean
   includeComplements: boolean
   complementPlacement: ChallengeConfig['complementPlacement']
   complementOptions: ChallengeConfig['complementOptions']
@@ -27,6 +28,7 @@ export function toQuestionnaireRequest(challenge: ChallengeConfig): Questionnair
     literaryRegister: challenge.literaryRegister ?? 'all',
     pastSimplePronouns: challenge.pastSimplePronouns,
     inclusivePronouns: challenge.inclusivePronouns,
+    includeOnPronoun: challenge.includeOnPronoun,
     includeComplements: challenge.includeComplements,
     complementPlacement: challenge.complementPlacement,
     complementOptions: [...challenge.complementOptions]
@@ -54,6 +56,7 @@ export function toSharedChallengeRequest(challenge: ChallengeConfig, title?: str
     literaryRegister: challenge.literaryRegister ?? 'all',
     pastSimplePronouns: challenge.pastSimplePronouns,
     inclusivePronouns: challenge.inclusivePronouns,
+    includeOnPronoun: challenge.includeOnPronoun,
     includeComplements: challenge.includeComplements,
     complementPlacement: challenge.complementPlacement,
     complementOptions: [...challenge.complementOptions],

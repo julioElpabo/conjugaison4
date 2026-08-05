@@ -54,6 +54,7 @@ export function learnerChallengeSnapshot(value: unknown): LearnerChallengeSnapsh
       ? 'third-person-only'
       : 'all',
     inclusivePronouns: candidate.inclusivePronouns === true,
+    includeOnPronoun: candidate.includeOnPronoun === true,
     includeComplements: candidate.includeComplements === true,
     complementPlacement: ['after', 'mixed', 'before'].includes(String(candidate.complementPlacement))
       ? candidate.complementPlacement as 'after' | 'mixed' | 'before'

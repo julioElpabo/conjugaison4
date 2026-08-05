@@ -38,7 +38,7 @@ describe('auxiliaire variable de sortir', () => {
     const row = useEtreForIntransitiveCompound(source(), auxiliaries)
     assert.equal(row.auxiliaire, 'être')
     assert.equal(row.conjugaison1, 'étais sorti')
-    assert.deepEqual(formatConjugationQuestion(row, 'je').reponsesPourCorrige, ["j'étais sorti"])
+    assert.deepEqual(formatConjugationQuestion(row, 'je').reponsesPourCorrige, ["j'étais sorti", "j'étais sortie"])
   })
 
   it('accorde les personnes du pluriel avec être', () => {

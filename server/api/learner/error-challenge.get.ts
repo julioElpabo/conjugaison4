@@ -108,6 +108,7 @@ export default defineEventHandler(async (event) => {
   const confusedTenses = new Map<string, { tense: string, mode?: string }>()
   let pastSimplePronouns: LearnerChallengeSnapshot['pastSimplePronouns'] = 'third-person-only'
   let inclusivePronouns = false
+  let includeOnPronoun = false
   let includeComplements = false
 
   for (const row of rows) {
@@ -123,6 +124,7 @@ export default defineEventHandler(async (event) => {
     for (const option of challenge?.complementOptions || []) complementOptions.add(option)
     if (challenge?.pastSimplePronouns === 'all') pastSimplePronouns = 'all'
     if (challenge?.inclusivePronouns) inclusivePronouns = true
+    if (challenge?.includeOnPronoun) includeOnPronoun = true
     if (challenge?.includeComplements) includeComplements = true
     if (applicableLearnerErrorTypes(question).includes(code)) {
       sourceQuestions.push(question)
@@ -192,6 +194,7 @@ export default defineEventHandler(async (event) => {
     identificationSource: 'selected-verbs',
     pastSimplePronouns,
     inclusivePronouns,
+    includeOnPronoun,
     includeComplements: includeComplements || targetedOptions.length > 0,
     complementPlacement: targetedOptions.some(option => option.endsWith('-before'))
       ? targetedOptions.some(option => option.endsWith('-after')) ? 'mixed' : 'before'

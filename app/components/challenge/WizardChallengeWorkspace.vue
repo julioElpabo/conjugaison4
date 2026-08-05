@@ -206,7 +206,9 @@ function revealIds(ids: number[], target: Ref<number[]>, duration = 1_000) {
 }
 
 function withExampleSubject(value: string) {
-  const subject = challenge.value.inclusivePronouns ? 'iel' : 'il'
+  const subject = challenge.value.inclusivePronouns
+    ? 'iel'
+    : challenge.value.includeOnPronoun ? 'on' : 'il'
   return value.replace(/\b(?:il|elle|iel)\b/iu, match => (
     /^\p{Lu}/u.test(match) ? subject.charAt(0).toLocaleUpperCase('fr') + subject.slice(1) : subject
   ))
@@ -568,6 +570,7 @@ function restartChallenge() {
   challenge.value.exerciseKind = 'conjugation'
   challenge.value.pastSimplePronouns = 'all'
   challenge.value.inclusivePronouns = false
+  challenge.value.includeOnPronoun = false
   challenge.value.includeComplements = true
   challenge.value.complementPlacement = 'after'
   challenge.value.complementOptions = ['cod-after', 'coi-after']
@@ -731,6 +734,7 @@ function prepareTourChallenge() {
     exerciseKind: 'conjugation',
     pastSimplePronouns: 'all',
     inclusivePronouns: false,
+    includeOnPronoun: false,
     includeComplements: true,
     complementPlacement: 'after',
     complementOptions: ['cod-after'],
@@ -1226,6 +1230,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   challenge.value.identificationSource = preset.identificationSource
   challenge.value.pastSimplePronouns = preset.pastSimplePronouns
   challenge.value.inclusivePronouns = preset.inclusivePronouns
+  challenge.value.includeOnPronoun = preset.includeOnPronoun
   challenge.value.includeComplements = preset.includeComplements
   challenge.value.complementPlacement = preset.complementPlacement
   challenge.value.complementOptions = preset.complementOptions ?? legacyComplementOptions(preset.includeComplements, preset.complementPlacement)
@@ -1341,6 +1346,7 @@ async function refreshConjugationExample() {
       ...challenge.value,
       questionCount: 50,
       inclusivePronouns: false,
+      includeOnPronoun: false,
       includeComplements: needsComplement,
       complementPlacement: exampleComplementPlacement,
       complementOptions: exampleComplementOption ? [exampleComplementOption] : [],
@@ -1460,6 +1466,7 @@ watch(
     () => challenge.value.exerciseKind,
     () => challenge.value.identificationSource,
     () => challenge.value.inclusivePronouns,
+    () => challenge.value.includeOnPronoun,
   ],
   () => {
     if (currentStep.value === 3) void refreshConjugationExample()
@@ -1502,6 +1509,7 @@ function beginExerciseTracking(presentation: 'classic' | 'chat') {
       identificationSource: challenge.value.identificationSource,
       pastSimplePronouns: challenge.value.pastSimplePronouns,
       inclusivePronouns: challenge.value.inclusivePronouns,
+      includeOnPronoun: challenge.value.includeOnPronoun,
       includeComplements: challenge.value.includeComplements,
       complementPlacement: challenge.value.complementPlacement,
       complementOptions: [...challenge.value.complementOptions],
@@ -1888,6 +1896,7 @@ async function createSharedChallenge(title: string, description: string) {
                 :exercise-kind="challenge.exerciseKind"
                 :identification-source="challenge.identificationSource"
                 :inclusive-pronouns="challenge.inclusivePronouns"
+                :include-on-pronoun="challenge.includeOnPronoun"
                 :complement-options="challenge.complementOptions"
                 :complement-verbs="selectedVerbs"
                 :conjugation-instruction="conjugationInstruction"
@@ -1907,6 +1916,7 @@ async function createSharedChallenge(title: string, description: string) {
                 @update-exercise-kind="challenge.exerciseKind = $event; markAsCustom()"
                 @update-identification-source="challenge.identificationSource = $event; markAsCustom()"
                 @update-inclusive-pronouns="challenge.inclusivePronouns = $event; markAsCustom()"
+                @update-include-on-pronoun="challenge.includeOnPronoun = $event; markAsCustom()"
                 @update-complement-options="updateComplementOptions"
               />
 

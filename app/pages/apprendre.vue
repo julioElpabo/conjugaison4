@@ -67,6 +67,7 @@ async function loadModeQuestions() {
         identificationSource: 'literary-corpus',
         pastSimplePronouns: 'all',
         inclusivePronouns: false,
+        includeOnPronoun: false,
         includeComplements: false,
         complementPlacement: 'after',
         complementOptions: [],

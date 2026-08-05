@@ -111,6 +111,8 @@ export const uiMessages = {
   'Nombre de questions': { de: 'Anzahl der Fragen', en: 'Number of questions', it: 'Numero di domande', es: 'Número de preguntas' },
   'Inclure les pronoms': { de: 'Pronomen einbeziehen', en: 'Include pronouns', it: 'Includi i pronomi', es: 'Incluir pronombres' },
   'Ils apparaîtront ponctuellement dans les questions.': { de: 'Sie erscheinen gelegentlich in den Fragen.', en: 'They will occasionally appear in questions.', it: 'Appariranno occasionalmente nelle domande.', es: 'Aparecerán ocasionalmente en las preguntas.' },
+  'Inclure le pronom': { de: 'Pronomen einbeziehen', en: 'Include the pronoun', it: 'Includi il pronome', es: 'Incluir el pronombre' },
+  'Il apparaîtra ponctuellement dans les questions à la troisième personne du singulier.': { de: 'Es erscheint gelegentlich in Fragen in der dritten Person Singular.', en: 'It will occasionally appear in third-person singular questions.', it: 'Apparirà occasionalmente nelle domande alla terza persona singolare.', es: 'Aparecerá ocasionalmente en preguntas en tercera persona del singular.' },
   'Type d’exercice': { de: 'Übungstyp', en: 'Exercise type', it: 'Tipo di esercizio', es: 'Tipo de ejercicio' },
   'Conjuguer': { de: 'Konjugieren', en: 'Conjugate', it: 'Coniugare', es: 'Conjugar' },
   'Conjuguer les formes demandées': { de: 'Die verlangten Formen konjugieren', en: 'Conjugate the requested forms', it: 'Coniugare le forme richieste', es: 'Conjugar las formas solicitadas' },

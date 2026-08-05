@@ -1,12 +1,41 @@
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import { describe, it } from 'node:test'
-import { coachPickerGroups } from '../shared/utils/coach-picker-groups.ts'
+import { coachPairForPicker, coachPickerGroups } from '../shared/utils/coach-picker-groups.ts'
+
+const picker = await readFile(new URL('../app/components/exercise/CoachPicker.vue', import.meta.url), 'utf8')
 
 function coach(id, firstName, helpApproach, sortOrder) {
   return { id, firstName, helpApproach, sortOrder }
 }
 
 describe('regroupement des coaches du sélecteur', () => {
+  it('affiche directement les groupes sans boutons de navigation', () => {
+    assert.doesNotMatch(picker, /coach-help-menu|scrollToCoachGroup|aria-controls/u)
+    assert.match(picker, /class="coach-picker__groups"/u)
+    assert.doesNotMatch(picker, /\{count\} coaches|coach-caractere-group__header > small/u)
+  })
+
+  it('retient un homme et une femme par type dans l’ordre administré', () => {
+    const coaches = [
+      { ...coach(1, 'Zoé', 'complete', 1), gender: 'female' },
+      { ...coach(2, 'Alice', 'complete', 2), gender: 'female' },
+      { ...coach(3, 'Sami', 'complete', 3), gender: 'male' },
+      { ...coach(4, 'Lucas', 'complete', 4), gender: 'male' },
+    ]
+
+    assert.deepEqual(coachPairForPicker(coaches).map(item => item.firstName), ['Zoé', 'Sami'])
+  })
+
+  it('n’affiche aucune paire déséquilibrée lorsqu’un genre manque', () => {
+    const coaches = [
+      { ...coach(1, 'Zoé', 'complete', 1), gender: 'female' },
+      { ...coach(2, 'Alice', 'complete', 2), gender: 'female' },
+    ]
+
+    assert.deepEqual(coachPairForPicker(coaches), [])
+  })
+
   it('regroupe et trie les coaches par type d’aide', () => {
     const groups = coachPickerGroups([
       coach(3, 'Zoé', 'tres-condensee', 2),

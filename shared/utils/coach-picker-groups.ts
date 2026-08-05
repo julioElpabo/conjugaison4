@@ -9,6 +9,15 @@ export interface CoachPickerGroup {
   coaches: CoachProfile[]
 }
 
+/** Retient une paire mixte dans l’ordre administré, ou aucune paire si un genre manque. */
+export function coachPairForPicker(coaches: readonly CoachProfile[]): CoachProfile[] {
+  const female = coaches.find(coach => coach.gender === 'female')
+  const male = coaches.find(coach => coach.gender === 'male')
+  if (!female || !male) return []
+  const selectedIds = new Set([female.id, male.id])
+  return coaches.filter(coach => selectedIds.has(coach.id))
+}
+
 function smallestOrder(items: readonly CoachProfile[], key: 'caractereSortOrder' | 'helpApproachSortOrder') {
   const orders = items.map(item => item[key]).filter((value): value is number => Number.isFinite(value))
   return orders.length ? Math.min(...orders) : undefined

@@ -78,6 +78,7 @@ function questionnaireRequest(verbIds, tenseIds, questionCount) {
     identificationSource: "selected-verbs",
     pastSimplePronouns: "all",
     inclusivePronouns: false,
+    includeOnPronoun: false,
     includeComplements: true,
     complementPlacement: "after",
     complementOptions: ["cod-after", "coi-after"]

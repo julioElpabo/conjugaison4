@@ -6,6 +6,7 @@ const DEFAULT_SHARED_CHALLENGE_OPTIONS = {
   literaryRegister: "all",
   pastSimplePronouns: "all",
   inclusivePronouns: false,
+  includeOnPronoun: false,
   includeComplements: true,
   complementPlacement: "after",
   complementOptions: [...DEFAULT_COMPLEMENT_OPTIONS]

@@ -36,6 +36,7 @@ function learnerChallengeSnapshot(value) {
     identificationSource: candidate.identificationSource === "literary-corpus" ? "literary-corpus" : "selected-verbs",
     pastSimplePronouns: candidate.pastSimplePronouns === "third-person-only" ? "third-person-only" : "all",
     inclusivePronouns: candidate.inclusivePronouns === true,
+    includeOnPronoun: candidate.includeOnPronoun === true,
     includeComplements: candidate.includeComplements === true,
     complementPlacement: ["after", "mixed", "before"].includes(String(candidate.complementPlacement)) ? candidate.complementPlacement : "after",
     complementOptions: Array.isArray(candidate.complementOptions) ? candidate.complementOptions.filter((item) => ["cod-after", "cod-before", "coi-after", "coi-before"].includes(String(item))).slice(0, 4) : []

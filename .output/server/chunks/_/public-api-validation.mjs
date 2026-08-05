@@ -3,6 +3,7 @@ import { D as DEFAULT_SHARED_CHALLENGE_OPTIONS } from './challenge-defaults.mjs'
 
 class PublicInputError extends Error {
 }
+const MAX_VERB_IDS = 1e3;
 const QUESTIONNAIRE_KEYS = /* @__PURE__ */ new Set([
   "description",
   "verbIds",
@@ -13,6 +14,7 @@ const QUESTIONNAIRE_KEYS = /* @__PURE__ */ new Set([
   "literaryRegister",
   "pastSimplePronouns",
   "inclusivePronouns",
+  "includeOnPronoun",
   "includeComplements",
   "complementPlacement",
   "complementOptions"
@@ -29,6 +31,7 @@ const DEFI_KEYS = /* @__PURE__ */ new Set([
   "literaryRegister",
   "pastSimplePronouns",
   "inclusivePronouns",
+  "includeOnPronoun",
   "includeComplements",
   "complementPlacement",
   "complementOptions",
@@ -193,7 +196,7 @@ function parsePrintOptions(value) {
   return parsed;
 }
 function parseQuestionnaireRequest(value) {
-  var _a;
+  var _a, _b;
   if (!isRecord(value)) {
     throw new PublicInputError("Le corps de la requ\xEAte doit \xEAtre un objet JSON");
   }
@@ -202,7 +205,11 @@ function parseQuestionnaireRequest(value) {
   if (typeof value.inclusivePronouns !== "boolean") {
     throw new PublicInputError("inclusivePronouns doit \xEAtre un bool\xE9en");
   }
-  const includeComplements = (_a = value.includeComplements) != null ? _a : false;
+  const includeOnPronoun = (_a = value.includeOnPronoun) != null ? _a : DEFAULT_SHARED_CHALLENGE_OPTIONS.includeOnPronoun;
+  if (typeof includeOnPronoun !== "boolean") {
+    throw new PublicInputError("includeOnPronoun doit \xEAtre un bool\xE9en");
+  }
+  const includeComplements = (_b = value.includeComplements) != null ? _b : false;
   if (typeof includeComplements !== "boolean") {
     throw new PublicInputError("includeComplements doit \xEAtre un bool\xE9en");
   }
@@ -210,7 +217,7 @@ function parseQuestionnaireRequest(value) {
   const complementOptions = value.complementOptions === void 0 ? legacyComplementOptions(includeComplements, complementPlacement) : parseComplementOptions(value.complementOptions);
   const resolvedLegacy = legacyComplementConfig(complementOptions);
   return {
-    verbIds: parseIds(value.verbIds, "verbIds", 500, true),
+    verbIds: parseIds(value.verbIds, "verbIds", MAX_VERB_IDS, true),
     tenseIds: parseIds(value.tenseIds, "tenseIds", 30),
     questionCount: parseQuestionCount(value.questionCount),
     exerciseKind: parseExerciseKind(value.exerciseKind),
@@ -218,13 +225,14 @@ function parseQuestionnaireRequest(value) {
     literaryRegister: value.literaryRegister === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.literaryRegister : parseLiteraryRegister(value.literaryRegister),
     pastSimplePronouns: parsePastSimplePronouns(value.pastSimplePronouns),
     inclusivePronouns: value.inclusivePronouns,
+    includeOnPronoun,
     includeComplements: resolvedLegacy.includeComplements,
     complementPlacement: resolvedLegacy.complementPlacement,
     complementOptions
   };
 }
 function parseDefiDefinition(value) {
-  var _a;
+  var _a, _b;
   let modernValue;
   let legacyPastSimple;
   let legacyInclusive;
@@ -253,10 +261,14 @@ function parseDefiDefinition(value) {
   const literaryRegister = modernValue.literaryRegister === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.literaryRegister : parseLiteraryRegister(modernValue.literaryRegister);
   const pastSimplePronouns = modernValue.pastSimplePronouns === void 0 ? legacyPastSimple === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.pastSimplePronouns : parsePastSimplePronouns(legacyPastSimple) : parsePastSimplePronouns(modernValue.pastSimplePronouns);
   const inclusivePronouns = modernValue.inclusivePronouns === void 0 ? legacyInclusive === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.inclusivePronouns : legacyInclusive === "afficherIel" : modernValue.inclusivePronouns;
+  const includeOnPronoun = (_a = modernValue.includeOnPronoun) != null ? _a : DEFAULT_SHARED_CHALLENGE_OPTIONS.includeOnPronoun;
   if (typeof inclusivePronouns !== "boolean") {
     throw new PublicInputError("inclusivePronouns doit \xEAtre un bool\xE9en");
   }
-  const includeComplements = (_a = modernValue.includeComplements) != null ? _a : DEFAULT_SHARED_CHALLENGE_OPTIONS.includeComplements;
+  if (typeof includeOnPronoun !== "boolean") {
+    throw new PublicInputError("includeOnPronoun doit \xEAtre un bool\xE9en");
+  }
+  const includeComplements = (_b = modernValue.includeComplements) != null ? _b : DEFAULT_SHARED_CHALLENGE_OPTIONS.includeComplements;
   if (typeof includeComplements !== "boolean") {
     throw new PublicInputError("includeComplements doit \xEAtre un bool\xE9en");
   }
@@ -269,7 +281,7 @@ function parseDefiDefinition(value) {
     version: 1,
     ...title === void 0 ? {} : { title },
     ...description === void 0 ? {} : { description },
-    verbIds: parseIds(modernValue.verbIds, "verbIds", 500, true),
+    verbIds: parseIds(modernValue.verbIds, "verbIds", MAX_VERB_IDS, true),
     tenseIds: parseIds(modernValue.tenseIds, "tenseIds", 30),
     questionCount: parseQuestionCount(modernValue.questionCount),
     exerciseKind,
@@ -277,6 +289,7 @@ function parseDefiDefinition(value) {
     literaryRegister,
     pastSimplePronouns,
     inclusivePronouns,
+    includeOnPronoun,
     includeComplements: resolvedLegacy.includeComplements,
     complementPlacement: resolvedLegacy.complementPlacement,
     complementOptions,

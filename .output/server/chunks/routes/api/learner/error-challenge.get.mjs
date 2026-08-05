@@ -88,6 +88,7 @@ const errorChallenge_get = defineEventHandler(async (event) => {
   const confusedTenses = /* @__PURE__ */ new Map();
   let pastSimplePronouns = "third-person-only";
   let inclusivePronouns = false;
+  let includeOnPronoun = false;
   let includeComplements = false;
   for (const row of rows) {
     const challenge2 = parsed(row.challengeJson);
@@ -101,6 +102,7 @@ const errorChallenge_get = defineEventHandler(async (event) => {
     for (const option of (challenge2 == null ? void 0 : challenge2.complementOptions) || []) complementOptions.add(option);
     if ((challenge2 == null ? void 0 : challenge2.pastSimplePronouns) === "all") pastSimplePronouns = "all";
     if (challenge2 == null ? void 0 : challenge2.inclusivePronouns) inclusivePronouns = true;
+    if (challenge2 == null ? void 0 : challenge2.includeOnPronoun) includeOnPronoun = true;
     if (challenge2 == null ? void 0 : challenge2.includeComplements) includeComplements = true;
     if (applicableLearnerErrorTypes(question).includes(code)) {
       sourceQuestions.push(question);
@@ -154,6 +156,7 @@ const errorChallenge_get = defineEventHandler(async (event) => {
     identificationSource: "selected-verbs",
     pastSimplePronouns,
     inclusivePronouns,
+    includeOnPronoun,
     includeComplements: includeComplements || targetedOptions.length > 0,
     complementPlacement: targetedOptions.some((option) => option.endsWith("-before")) ? targetedOptions.some((option) => option.endsWith("-after")) ? "mixed" : "before" : "after",
     complementOptions: targetedOptions

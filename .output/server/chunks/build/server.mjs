@@ -440,6 +440,8 @@ const uiMessages = {
   "Nombre de questions": { de: "Anzahl der Fragen", en: "Number of questions", it: "Numero di domande", es: "N\xFAmero de preguntas" },
   "Inclure les pronoms": { de: "Pronomen einbeziehen", en: "Include pronouns", it: "Includi i pronomi", es: "Incluir pronombres" },
   "Ils appara\xEEtront ponctuellement dans les questions.": { de: "Sie erscheinen gelegentlich in den Fragen.", en: "They will occasionally appear in questions.", it: "Appariranno occasionalmente nelle domande.", es: "Aparecer\xE1n ocasionalmente en las preguntas." },
+  "Inclure le pronom": { de: "Pronomen einbeziehen", en: "Include the pronoun", it: "Includi il pronome", es: "Incluir el pronombre" },
+  "Il appara\xEEtra ponctuellement dans les questions \xE0 la troisi\xE8me personne du singulier.": { de: "Es erscheint gelegentlich in Fragen in der dritten Person Singular.", en: "It will occasionally appear in third-person singular questions.", it: "Apparir\xE0 occasionalmente nelle domande alla terza persona singolare.", es: "Aparecer\xE1 ocasionalmente en preguntas en tercera persona del singular." },
   "Type d\u2019exercice": { de: "\xDCbungstyp", en: "Exercise type", it: "Tipo di esercizio", es: "Tipo de ejercicio" },
   "Conjuguer": { de: "Konjugieren", en: "Conjugate", it: "Coniugare", es: "Conjugar" },
   "Conjuguer les formes demand\xE9es": { de: "Die verlangten Formen konjugieren", en: "Conjugate the requested forms", it: "Coniugare le forme richieste", es: "Conjugar las formas solicitadas" },
@@ -1345,7 +1347,7 @@ const _routes = [
   {
     name: "admin-challenges",
     path: "/admin/challenges",
-    component: () => import('./challenges-DPzo-JwG.mjs')
+    component: () => import('./challenges-BlAemeES.mjs')
   },
   {
     name: "admin-characters",
@@ -1415,7 +1417,7 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-9tAw7xUd.mjs')
+    component: () => import('./_code_-9gdKp6C9.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1430,7 +1432,7 @@ const _routes = [
   {
     name: "accueil",
     path: "/accueil",
-    component: () => import('./accueil-BLXufQub.mjs')
+    component: () => import('./accueil-Cqwrh6e9.mjs')
   },
   {
     name: "admin",
@@ -1440,7 +1442,7 @@ const _routes = [
   {
     name: "apprendre",
     path: "/apprendre",
-    component: () => import('./apprendre-BVy5rULC.mjs')
+    component: () => import('./apprendre-Cupb5HCy.mjs')
   },
   {
     name: "consulter",
@@ -1466,7 +1468,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-DP33CIuC.mjs')
+    component: () => import('./nouveau-defi-7R6owBUR.mjs')
   },
   {
     name: "signin",
@@ -1476,7 +1478,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-H1gvjZJA.mjs')
+    component: () => import('./index-Dq2oKZ06.mjs')
   },
   {
     name: "localized-admin-admins",
@@ -1491,7 +1493,7 @@ const _routes = [
   {
     name: "localized-admin-challenges",
     path: "/:locale(fr|de|en|it|es)/admin/challenges",
-    component: () => import('./challenges-DPzo-JwG.mjs')
+    component: () => import('./challenges-BlAemeES.mjs')
   },
   {
     name: "localized-admin-characters",
@@ -1561,7 +1563,7 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-9tAw7xUd.mjs')
+    component: () => import('./_code_-9gdKp6C9.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1576,7 +1578,7 @@ const _routes = [
   {
     name: "localized-accueil",
     path: "/:locale(fr|de|en|it|es)/accueil",
-    component: () => import('./accueil-BLXufQub.mjs')
+    component: () => import('./accueil-Cqwrh6e9.mjs')
   },
   {
     name: "localized-admin",
@@ -1586,7 +1588,7 @@ const _routes = [
   {
     name: "localized-apprendre",
     path: "/:locale(fr|de|en|it|es)/apprendre",
-    component: () => import('./apprendre-BVy5rULC.mjs')
+    component: () => import('./apprendre-Cupb5HCy.mjs')
   },
   {
     name: "localized-consulter",
@@ -1612,7 +1614,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-DP33CIuC.mjs')
+    component: () => import('./nouveau-defi-7R6owBUR.mjs')
   },
   {
     name: "localized-signin",
@@ -1622,7 +1624,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-H1gvjZJA.mjs')
+    component: () => import('./index-Dq2oKZ06.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {

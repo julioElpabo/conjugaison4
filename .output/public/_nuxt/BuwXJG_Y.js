@@ -1,1 +1,0 @@
-import{as as n,q as o,at as u,G as c}from"./BrTgHTF3.js";import{u as i}from"./CRDF3xUH.js";import"./DjqiTNeV.js";const m=n(async r=>{let e,a;const{checkSession:t}=i(),{localePath:s}=o();if(!([e,a]=u(()=>t()),e=await e,a(),e))return c({path:s("/signin"),query:{redirect:r.fullPath}},{replace:!0})});export{m as default};

@@ -169,8 +169,11 @@ function nearFutureRows(tense, verbs, pronominalUses, allerRows) {
   });
 }
 function shuffle(values) {
+  return shuffleWith(values, Math.random);
+}
+function shuffleWith(values, random) {
   for (let index = values.length - 1; index > 0; index--) {
-    const other = Math.floor(Math.random() * (index + 1));
+    const other = Math.floor(random() * (index + 1));
     [values[index], values[other]] = [values[other], values[index]];
   }
   return values;
@@ -241,14 +244,38 @@ function startsWithVowel(value) {
   const first = value.trim().normalize("NFD").replace(/\p{Diacritic}/gu, "").charAt(0).toLowerCase();
   return "aeiouy".includes(first);
 }
-function choosePronoun(pronom, inclusive) {
+function choosePronoun(pronom, inclusive, includeOn, random = Math.random) {
   if (pronom === "il") {
-    return shuffle(inclusive ? ["il", "elle", "iel"] : ["il", "elle"])[0];
+    const choices = ["il", "elle"];
+    if (inclusive) choices.push("iel");
+    if (includeOn) choices.push("on");
+    return choices[Math.floor(random() * choices.length)];
   }
   if (pronom === "ils") {
-    return shuffle(inclusive ? ["ils", "elles", "iels"] : ["ils", "elles"])[0];
+    const choices = inclusive ? ["ils", "elles", "iels"] : ["ils", "elles"];
+    return choices[Math.floor(random() * choices.length)];
   }
   return pronom;
+}
+function diverseConjugationQuestions(questions, count, random = Math.random) {
+  const byVerb = /* @__PURE__ */ new Map();
+  for (const question of shuffleWith([...questions], random)) {
+    const verbId = Number(question.verbeId);
+    const key = Number.isFinite(verbId) ? verbId : Number.MIN_SAFE_INTEGER + byVerb.size;
+    const group = byVerb.get(key) || [];
+    group.push(question);
+    byVerb.set(key, group);
+  }
+  const groups = shuffleWith([...byVerb.values()], random);
+  const selected = [];
+  while (selected.length < count && groups.some((group) => group.length)) {
+    for (const group of shuffleWith([...groups], random)) {
+      const question = group.shift();
+      if (question) selected.push(question);
+      if (selected.length >= count) break;
+    }
+  }
+  return selected;
 }
 function articleForTense(tense, mode) {
   if (normalized(mode) === "infinitif") {
@@ -530,7 +557,8 @@ async function generateQuestionnaire(request) {
     const pastSimpleClause = request.pastSimplePronouns === "third-person-only" ? "AND (t.name NOT IN ('pass\xE9 simple', 'pass\xE9 ant\xE9rieur') OR p.pronom IN ('il', 'ils'))" : "";
     const rows = [];
     const literaryCitations = usesLiteraryCitations ? await validatedLiteraryCitations(null, finiteIds) : /* @__PURE__ */ new Map();
-    const limit = request.exerciseKind === "conjugation" ? Math.min(500, Math.max(request.questionCount * 4, request.questionCount)) : 600;
+    const selectedVerbCount = verbIds.length + pronominalUseIds.length;
+    const limit = request.exerciseKind === "conjugation" ? Math.min(3e3, Math.max(request.questionCount * 10, selectedVerbCount * 3, request.questionCount)) : 600;
     const questionVerbIds = usesLiteraryCitations ? [...new Set([...literaryCitations.values()].flat().map((citation) => Number(citation.verb_id)))] : verbIds;
     const literaryCoordinates = usesLiteraryCitations ? [...literaryCitations.keys()].map((key) => {
       const [verbId, tenseId, personId] = key.split(":").map(Number);
@@ -751,7 +779,7 @@ async function generateQuestionnaire(request) {
         radical_reference: radicalReference,
         future_simple_forms: futureSimpleForms,
         conjugation_confusions: conjugationConfusions
-      }, choosePronoun(row.pronom, request.inclusivePronouns)) : identificationQuestion(
+      }, choosePronoun(row.pronom, request.inclusivePronouns, request.includeOnPronoun)) : identificationQuestion(
         semanticRow,
         (_b2 = literaryCitations.get(literaryCitationKey(
           Number(row.verbe_id),
@@ -838,7 +866,7 @@ async function generateQuestionnaire(request) {
   if (request.exerciseKind === "mode-identification") {
     return balancedModeIdentificationQuestions(questions, request.questionCount);
   }
-  return request.exerciseKind === "tense-identification" ? balancedIdentificationQuestions(questions, request.questionCount) : shuffle(questions).slice(0, request.questionCount);
+  return request.exerciseKind === "tense-identification" ? balancedIdentificationQuestions(questions, request.questionCount) : diverseConjugationQuestions(questions, request.questionCount);
 }
 
 export { QuestionnaireSelectionError as Q, generateQuestionnaire as g };

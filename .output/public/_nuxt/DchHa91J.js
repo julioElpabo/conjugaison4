@@ -1,1 +1,0 @@
-import{e as s,s as n,q as o,I as u,G as _}from"./CO4Tyyyf.js";const h=s({__name:"characters",async setup(p){let a,t;const r=n(),{localePath:c}=o(),e={...r.query};return e.character&&!e.caractere&&(e.caractere=e.character),delete e.character,[a,t]=u(()=>_({path:c("/admin/caracteres"),query:e},{replace:!0})),await a,t(),()=>{}}});export{h as default};

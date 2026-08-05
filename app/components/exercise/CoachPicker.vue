@@ -10,19 +10,17 @@ const props = defineProps<{
   selectionError?: string
 }>()
 const emit = defineEmits<{ close: [], select: [coach: CoachProfile] }>()
-const coaches = ref<CoachProfile[]>([])
+const coachPairs = ref<ReturnType<typeof coachPickerGroups>>([])
 const loading = ref(true)
 const error = ref('')
 
-const coachGroups = computed(() => coachPickerGroups(coaches.value)
-  .map(group => ({
+const coachGroups = computed(() => coachPairs.value.map(group => ({
     ...group,
     label: coachHelpApproachTitle(interfaceLocale.value, group.approach),
     description: translateCoachUiText(interfaceLocale.value, group.description),
-    coaches: coachPairForPicker(group.coaches)
-      .map(coach => localizeCoachProfile(interfaceLocale.value, coach)),
+    coaches: group.coaches.map(coach => localizeCoachProfile(interfaceLocale.value, coach)),
   }))
-  .filter(group => group.coaches.length === 2))
+)
 
 function requestClose() {
   if (!props.selectionPending) emit('close')
@@ -31,7 +29,9 @@ function requestClose() {
 onMounted(async () => {
   try {
     const response = await $fetch<{ coaches: CoachProfile[] }>('/api/coaches')
-    coaches.value = response.coaches
+    coachPairs.value = coachPickerGroups(response.coaches)
+      .map(group => ({ ...group, coaches: coachPairForPicker(group.coaches) }))
+      .filter(group => group.coaches.length === 2)
   } catch {
     error.value = ui('Impossible de charger les coaches.')
   } finally {

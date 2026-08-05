@@ -9,10 +9,15 @@ export interface CoachPickerGroup {
   coaches: CoachProfile[]
 }
 
-/** Retient une paire mixte dans l’ordre administré, ou aucune paire si un genre manque. */
-export function coachPairForPicker(coaches: readonly CoachProfile[]): CoachProfile[] {
-  const female = coaches.find(coach => coach.gender === 'female')
-  const male = coaches.find(coach => coach.gender === 'male')
+function randomCoach(coaches: readonly CoachProfile[], random: () => number) {
+  const index = Math.min(coaches.length - 1, Math.max(0, Math.floor(random() * coaches.length)))
+  return coaches[index]
+}
+
+/** Tire une femme et un homme, puis conserve leur ordre administré. */
+export function coachPairForPicker(coaches: readonly CoachProfile[], random: () => number = Math.random): CoachProfile[] {
+  const female = randomCoach(coaches.filter(coach => coach.gender === 'female'), random)
+  const male = randomCoach(coaches.filter(coach => coach.gender === 'male'), random)
   if (!female || !male) return []
   const selectedIds = new Set([female.id, male.id])
   return coaches.filter(coach => selectedIds.has(coach.id))

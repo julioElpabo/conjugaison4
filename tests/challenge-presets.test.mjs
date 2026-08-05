@@ -9,6 +9,8 @@ import {
   inspectPresetCompatibility,
   isChallengePresetId,
   resolveChallengePresets,
+  usefulAllophoneChallengeId,
+  usefulAllophoneVerbInfinitives,
 } from '../shared/data/challenge-presets.ts'
 import {
   challengePresetTrackingDescription,
@@ -49,11 +51,12 @@ describe('défis résolus par critères', () => {
     assert.equal(challengePresetTrackingDescription(5), '5 au hasard')
   })
 
-  it('expose les 28 défis avec des identifiants uniques et sans liste de verbes figée', () => {
-    assert.equal(challengePresetDefinitions.length, 28)
-    assert.equal(new Set(challengePresetDefinitions.map(preset => preset.id)).size, 28)
+  it('expose les 29 défis avec des identifiants uniques et sans liste d’identifiants de verbes figée', () => {
+    assert.equal(challengePresetDefinitions.length, 29)
+    assert.equal(new Set(challengePresetDefinitions.map(preset => preset.id)).size, 29)
     assert.ok(challengePresetDefinitions.every(preset => !Object.hasOwn(preset, 'verbIds')))
     assert.equal(isChallengePresetId('7H'), true)
+    assert.equal(isChallengePresetId(usefulAllophoneChallengeId), true)
     assert.equal(isChallengePresetId('cod-avant-passe-compose'), false)
     assert.equal(isChallengePresetId('inconnu'), false)
   })
@@ -80,9 +83,24 @@ describe('défis résolus par critères', () => {
     assert.equal(challengePresetDefinitions.some(preset => preset.group === 'training'), false)
   })
 
+  it('propose exactement 100 verbes utiles aux cinq temps demandés pour les allophones', () => {
+    const definition = challengePresetDefinitions.find(preset => preset.id === usefulAllophoneChallengeId)
+    assert.ok(definition)
+    assert.equal(definition.group, 'cif')
+    assert.equal(definition.questionCount, 20)
+    assert.deepEqual(definition.tenseIds, [1, 2, 3, 24, 5])
+    assert.equal(usefulAllophoneVerbInfinitives.length, 100)
+    assert.equal(new Set(usefulAllophoneVerbInfinitives).size, 100)
+
+    const catalogue = usefulAllophoneVerbInfinitives.map((infinitif, index) => verb(index + 1, infinitif))
+    const preset = getChallengePreset(usefulAllophoneChallengeId, catalogue)
+    assert.ok(preset)
+    assert.equal(preset.verbIds.length, 100)
+  })
+
   it('sélectionne le futur proche par défaut dans tous les défis CIF', () => {
     const cifPresets = challengePresetDefinitions.filter(preset => preset.group === 'cif')
-    assert.deepEqual(cifPresets.map(preset => preset.id), ['CIF1', 'CIF2', 'CIF3', 'CIF4'])
+    assert.deepEqual(cifPresets.map(preset => preset.id), ['CIF1', 'CIF2', 'CIF3', 'CIF4', usefulAllophoneChallengeId])
     assert.ok(cifPresets.every(preset => preset.tenseIds.includes(24)))
   })
 
@@ -91,7 +109,11 @@ describe('défis résolus par critères', () => {
       const definition = challengePresetDefinitions.find(candidate => candidate.id === preset.id)
       assert.ok(definition)
       assert.ok(preset.tenseIds.length > 0, `${preset.id}: aucun temps`)
-      assert.equal(preset.questionCount, 10, `${preset.id}: nombre de questions`)
+      assert.equal(
+        preset.questionCount,
+        preset.id === usefulAllophoneChallengeId ? 20 : 10,
+        `${preset.id}: nombre de questions`,
+      )
       assert.equal(new Set(preset.verbIds).size, preset.verbIds.length, `${preset.id}: verbes en double`)
       assert.equal(new Set(preset.tenseIds).size, preset.tenseIds.length, `${preset.id}: temps en double`)
       assert.ok(preset.verbIds.every(id => Number.isInteger(id) && id > 0))
@@ -130,6 +152,7 @@ describe('conversion du format historique', () => {
       pastSimplePronouns: 'all',
       inclusivePronouns: false,
       includeOnPronoun: false,
+      voiceMode: 'active',
       includeComplements: false,
       complementPlacement: 'after',
       complementOptions: [],

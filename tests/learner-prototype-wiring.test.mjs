@@ -396,8 +396,12 @@ describe('câblage du prototype de compte pseudonyme', () => {
     assert.match(wizard, /savedChallengeTitle \|\| ui\('Verbes du défi'\)/u)
     assert.match(wizard, /wizard-step__loaded-description/u)
     assert.doesNotMatch(wizard, /loaded-challenge-intro/u)
-    assert.match(wizard, /goToStep\(1\)/u)
+    assert.match(
+      wizard,
+      /async function restoreChallenge\(\)[\s\S]*?applySharedChallenge\(restored\)[\s\S]*?goToStep\(4\)/u,
+    )
     assert.match(wizard, /initialCode/u)
+    assert.match(wizard, /if \(props\.initialCode\)[\s\S]*?await restoreChallenge\(\)/u)
     assert.match(directChallengePage, /WizardChallengeWorkspace/u)
     assert.match(progress, /description:\s*_description/u)
     assert.match(dashboard, /f\.question_json IS NOT NULL/u)
@@ -410,10 +414,11 @@ describe('câblage du prototype de compte pseudonyme', () => {
     const builder = await read('../app/composables/useChallengeBuilder.ts')
     const wizard = await read('../app/components/challenge/WizardChallengeWorkspace.vue')
     const migration = await read('../server/plugins/challenge-question-count-migration.ts')
-    assert.doesNotMatch(presets, /questionCount: 20/u)
+    assert.match(presets, /usefulAllophoneChallengeId[\s\S]*?questionCount: 20/u)
     assert.match(builder, /questionCount: 10/u)
     assert.match(wizard, /challenge\.value\.questionCount = 10/u)
     assert.match(migration, /SET question_count=10/u)
+    assert.match(migration, /preset_key<>'100-verbes-utiles-allophones'/u)
   })
 
   it('synthétise toutes les formes mais ne détaille que les erreurs', async () => {

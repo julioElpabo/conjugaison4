@@ -3,9 +3,9 @@ import { describe, it } from 'node:test'
 
 import { choosePronoun, diverseConjugationQuestions } from '../server/services/questionnaire.ts'
 
-function question(id, verbId) {
+function question(id, verbId, tenseId) {
   return {
-    id, verbeId: verbId, titre: `verbe-${verbId}`, consigne: '', reponses: [], reponsesPourCorrige: [],
+    id, verbeId: verbId, tenseId, titre: `verbe-${verbId}`, consigne: '', reponses: [], reponsesPourCorrige: [],
   }
 }
 
@@ -26,6 +26,38 @@ describe('diversité des verbes dans un questionnaire', () => {
       question('a1', 1), question('b1', 2),
     ], 10, () => 0)
     assert.deepEqual(new Set(selected.map(item => item.id)), new Set(['a1', 'b1']))
+  })
+
+  it('alterne les voix active et passive pour un même verbe', () => {
+    const questions = [
+      { ...question('a1', 1), voice: 'active' },
+      { ...question('p1', 1), voice: 'passive' },
+      { ...question('a2', 1), voice: 'active' },
+      { ...question('p2', 1), voice: 'passive' },
+    ]
+    const selected = diverseConjugationQuestions(questions, 4, () => 0)
+    assert.deepEqual(selected.map(item => item.voice), ['active', 'passive', 'active', 'passive'])
+  })
+
+  it('ne répète pas le futur proche avant les autres temps malgré un stock surdimensionné', () => {
+    const questions = [
+      ...Array.from({ length: 60 }, (_, index) => question(`fp-${index}`, index % 20, 24)),
+      ...Array.from({ length: 6 }, (_, index) => question(`pr-${index}`, index, 1)),
+      ...Array.from({ length: 6 }, (_, index) => question(`im-${index}`, index, 2)),
+      ...Array.from({ length: 6 }, (_, index) => question(`pc-${index}`, index, 5)),
+    ]
+    const selected = diverseConjugationQuestions(questions, 4, () => .5)
+
+    assert.equal(new Set(selected.map(item => item.tenseId)).size, 4)
+    assert.equal(selected.filter(item => item.tenseId === 24).length, 1)
+  })
+
+  it('distingue deux temps de même nom appartenant à des modes différents', () => {
+    const selected = diverseConjugationQuestions([
+      { ...question('indicatif', 1), mode: 'indicatif', temps: 'présent' },
+      { ...question('subjonctif', 2), mode: 'subjonctif', temps: 'présent' },
+    ], 2, () => 0)
+    assert.deepEqual(new Set(selected.map(item => item.mode)), new Set(['indicatif', 'subjonctif']))
   })
 })
 

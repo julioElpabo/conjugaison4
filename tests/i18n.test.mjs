@@ -30,6 +30,19 @@ test('le français sert de repli et les paramètres sont remplacés', () => {
   )
 })
 
+test('les sous-options du type d’exercice sont traduites', () => {
+  assert.equal(translateUiMessage('de', 'Avec mes verbes'), 'Mit meinen Verben')
+  assert.equal(translateUiMessage('en', 'Avec n’importe quel verbe'), 'With any verb')
+  assert.equal(
+    translateUiMessage('it', 'Formes conjuguées simples, sans citation.'),
+    'Forme coniugate semplici, senza citazioni.',
+  )
+  assert.equal(
+    translateUiMessage('es', 'Construits avec des phrases littéraires.'),
+    'Construidos con frases literarias.',
+  )
+})
+
 test('les textes administrés des coaches sont localisés sans modifier le français', () => {
   assert.equal(translateCoachUiText('de', 'Très condensée'), 'Sehr kompakt')
   assert.equal(translateCoachUiText('en', 'Salut ! On commence !'), 'Hi! Let’s get started!')

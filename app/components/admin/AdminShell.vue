@@ -124,6 +124,13 @@ async function signOut() {
       </div>
 
       <nav class="admin-shell__nav" aria-label="Navigation d’administration">
+        <NuxtLink
+          class="admin-shell__direct-link"
+          :class="{ 'router-link-exact-active': linkIsActive('/admin/charts') }"
+          :to="localePath('/admin/charts')"
+        >
+          Statistiques
+        </NuxtLink>
         <div
           v-for="group in menuGroups"
           :key="group.id"
@@ -157,7 +164,6 @@ async function signOut() {
             </NuxtLink>
           </div>
         </div>
-        <NuxtLink class="admin-shell__direct-link" :to="localePath('/admin/charts')">Statistiques</NuxtLink>
       </nav>
 
       <button

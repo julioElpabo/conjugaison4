@@ -68,6 +68,7 @@ async function loadModeQuestions() {
         pastSimplePronouns: 'all',
         inclusivePronouns: false,
         includeOnPronoun: false,
+        voiceMode: 'active',
         includeComplements: false,
         complementPlacement: 'after',
         complementOptions: [],

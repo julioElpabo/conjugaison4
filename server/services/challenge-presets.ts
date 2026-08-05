@@ -153,6 +153,7 @@ export async function listStoredChallengePresets(
       pastSimplePronouns: row.pastSimplePronouns,
       inclusivePronouns: Boolean(row.inclusivePronouns),
       includeOnPronoun: false,
+      voiceMode: 'active',
       includeComplements: legacy.includeComplements,
       complementPlacement: legacy.complementPlacement,
       complementOptions,
@@ -180,12 +181,12 @@ function uniqueIds(value: unknown, allowNegative = false) {
 }
 
 const criterionFields = new Set([
-  'groupeConjugaison', 'terminaison', 'typePronominal', 'niveauDifficulte',
+  'infinitif', 'groupeConjugaison', 'terminaison', 'typePronominal', 'niveauDifficulte',
   'registrePrincipal', 'particularites', 'niveauxScolaires', 'parcoursCif',
   'categoriesSemantiques', 'complementExample',
 ])
 const criterionOperators = new Set([
-  'equals', 'not-equals', 'includes', 'not-in', 'gte', 'has-anteposable-cod',
+  'equals', 'not-equals', 'includes', 'in', 'not-in', 'gte', 'has-anteposable-cod',
 ])
 
 function parseCriteria(value: unknown): VerbCriterion[] | null {

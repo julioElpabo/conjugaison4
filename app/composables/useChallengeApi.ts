@@ -13,6 +13,7 @@ export interface QuestionnaireRequest {
   pastSimplePronouns: ChallengeConfig['pastSimplePronouns']
   inclusivePronouns: boolean
   includeOnPronoun: boolean
+  voiceMode: ChallengeConfig['voiceMode']
   includeComplements: boolean
   complementPlacement: ChallengeConfig['complementPlacement']
   complementOptions: ChallengeConfig['complementOptions']
@@ -29,6 +30,7 @@ export function toQuestionnaireRequest(challenge: ChallengeConfig): Questionnair
     pastSimplePronouns: challenge.pastSimplePronouns,
     inclusivePronouns: challenge.inclusivePronouns,
     includeOnPronoun: challenge.includeOnPronoun,
+    voiceMode: challenge.voiceMode,
     includeComplements: challenge.includeComplements,
     complementPlacement: challenge.complementPlacement,
     complementOptions: [...challenge.complementOptions]
@@ -57,6 +59,7 @@ export function toSharedChallengeRequest(challenge: ChallengeConfig, title?: str
     pastSimplePronouns: challenge.pastSimplePronouns,
     inclusivePronouns: challenge.inclusivePronouns,
     includeOnPronoun: challenge.includeOnPronoun,
+    voiceMode: challenge.voiceMode,
     includeComplements: challenge.includeComplements,
     complementPlacement: challenge.complementPlacement,
     complementOptions: [...challenge.complementOptions],

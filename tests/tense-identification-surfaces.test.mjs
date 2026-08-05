@@ -31,12 +31,12 @@ test('l’étape 3 propose les verbes sélectionnés ou les citations de tout le
   assert.match(questionnaire, /exactLiteraryClause/u)
 })
 
-test('le choix du mode et du temps révèle le menu des verbes par un défilement fluide', () => {
-  assert.match(options, /ref="identificationSourceFieldset"/u)
-  assert.match(options, /scrollIntoView\(\{/u)
-  assert.match(options, /behavior: window\.matchMedia[\s\S]*\? 'auto' : 'smooth'/u)
-  assert.match(options, /<legend class="sr-only">Choix des verbes<\/legend>/u)
-  assert.doesNotMatch(options, /<legend>Choix des verbes<\/legend>/u)
+test('le choix du mode et du temps révèle ses sous-options dans le même bloc sans défilement', () => {
+  assert.match(options, /<Transition name="identification-options">/u)
+  assert.match(options, /class="identification-source-panel"/u)
+  assert.match(options, /\.identification-source-panel \{[^}]*margin: 12px 0 0 18px/u)
+  assert.doesNotMatch(options, /scrollIntoView\(/u)
+  assert.doesNotMatch(options, /Choix des verbes/u)
 })
 
 test('l’aperçu de l’étape 3 affiche la citation et sa forme ciblée', () => {

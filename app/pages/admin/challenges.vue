@@ -168,6 +168,7 @@ async function createPreset() {
     pastSimplePronouns: 'all',
     inclusivePronouns: false,
     includeOnPronoun: false,
+    voiceMode: 'active',
     includeComplements: true,
     complementPlacement: 'mixed',
     complementOptions: ['cod-after', 'coi-after'],

@@ -14,7 +14,8 @@ const emit = defineEmits<{
   save: [title: string, description: string]
 }>()
 
-const copyStatus = ref('')
+type CopyTarget = 'code' | 'link'
+const copyStatuses = reactive<Record<CopyTarget, string>>({ code: '', link: '' })
 const challengeTitle = ref(props.initialTitle?.trim() || ui('Défi de conjugaison'))
 const challengeDescription = ref(props.initialDescription?.trim() || '')
 const closeButton = useTemplateRef<HTMLButtonElement>('close-button')
@@ -25,12 +26,36 @@ const titleIsValid = computed(() => normalizedTitle.value.length >= 1 && normali
 
 useDialogFocus(dialog, () => emit('close'), closeButton)
 
-async function copy(value: string, label: string) {
+async function writeClipboard(value: string) {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(value)
+      return
+    } catch {
+      // Certains navigateurs exposent l’API hors contexte sécurisé mais la refusent.
+    }
+  }
+
+  const textarea = document.createElement('textarea')
+  textarea.value = value
+  textarea.setAttribute('readonly', '')
+  textarea.style.position = 'fixed'
+  textarea.style.opacity = '0'
+  document.body.appendChild(textarea)
+  textarea.focus()
+  textarea.select()
+  textarea.setSelectionRange(0, value.length)
+  const copied = document.execCommand('copy')
+  textarea.remove()
+  if (!copied) throw new Error('Copie impossible')
+}
+
+async function copy(value: string, target: CopyTarget) {
   try {
-    await navigator.clipboard.writeText(value)
-    copyStatus.value = `${label} copié.`
+    await writeClipboard(value)
+    copyStatuses[target] = ui(target === 'code' ? 'Code copié' : 'Lien copié')
   } catch {
-    copyStatus.value = `Sélectionnez puis copiez le ${label.toLocaleLowerCase('fr')}.`
+    copyStatuses[target] = ui('La copie a échoué.')
   }
 }
 
@@ -108,8 +133,9 @@ function createCode() {
               <label for="share-code">{{ ui('Code à conserver') }}</label>
               <div>
                 <input id="share-code" :value="code" readonly @focus="($event.target as HTMLInputElement).select()">
-                <button type="button" @click="copy(code, 'Code')">{{ ui('Copier') }}</button>
+                <button type="button" @click="copy(code, 'code')">{{ ui('Copier') }}</button>
               </div>
+              <p v-if="copyStatuses.code" class="share-value__copy-status" role="status">{{ copyStatuses.code }}</p>
               <div class="share-help">
                 <button type="button" class="share-help__trigger" aria-describedby="reload-help-tooltip">{{ ui('Comment le recharger plus tard ?') }}</button>
                 <div id="reload-help-tooltip" class="share-help__tooltip" role="tooltip">
@@ -136,14 +162,14 @@ function createCode() {
               <label for="share-url">{{ ui('Lien à envoyer') }}</label>
               <div>
                 <input id="share-url" :value="url" readonly @focus="($event.target as HTMLInputElement).select()">
-                <button type="button" @click="copy(url, 'Lien')">{{ ui('Copier') }}</button>
+                <button type="button" @click="copy(url, 'link')">{{ ui('Copier') }}</button>
               </div>
+              <p v-if="copyStatuses.link" class="share-value__copy-status" role="status">{{ copyStatuses.link }}</p>
             </div>
           </section>
         </div>
 
         <template v-if="code">
-          <p class="copy-status" aria-live="polite">{{ copyStatus }}</p>
           <button class="primary-button" type="button" @click="emit('close')">{{ ui('Terminé') }}</button>
         </template>
       </section>

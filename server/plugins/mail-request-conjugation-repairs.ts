@@ -17,7 +17,8 @@ export default defineNitroPlugin(async () => {
       '[database] Demandes des utilisateurs contrôlées : '
       + `${report.protegerPresentNous} forme « protégeons », `
       + `${report.malformedPluralParticiples} participe(s) sans s redoublé, `
-      + `${report.affaiblirPastSimpleForms} forme(s) d’« affaiblir » ajoutée(s).`,
+      + `${report.affaiblirPastSimpleForms} forme(s) d’« affaiblir » ajoutée(s), `
+      + `${report.missingDeAccents.verbs} verbe(s) en « dé- » corrigé(s).`,
     )
   } catch (error) {
     await connection.rollback()

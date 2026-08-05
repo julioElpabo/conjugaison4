@@ -109,6 +109,7 @@ export default defineEventHandler(async (event) => {
   let pastSimplePronouns: LearnerChallengeSnapshot['pastSimplePronouns'] = 'third-person-only'
   let inclusivePronouns = false
   let includeOnPronoun = false
+  const voiceModes = new Set<'active' | 'passive'>()
   let includeComplements = false
 
   for (const row of rows) {
@@ -125,6 +126,11 @@ export default defineEventHandler(async (event) => {
     if (challenge?.pastSimplePronouns === 'all') pastSimplePronouns = 'all'
     if (challenge?.inclusivePronouns) inclusivePronouns = true
     if (challenge?.includeOnPronoun) includeOnPronoun = true
+    if (challenge?.voiceMode === 'passive') voiceModes.add('passive')
+    else if (challenge?.voiceMode === 'mixed') {
+      voiceModes.add('active')
+      voiceModes.add('passive')
+    } else voiceModes.add(question.voice === 'passive' ? 'passive' : 'active')
     if (challenge?.includeComplements) includeComplements = true
     if (applicableLearnerErrorTypes(question).includes(code)) {
       sourceQuestions.push(question)
@@ -195,6 +201,7 @@ export default defineEventHandler(async (event) => {
     pastSimplePronouns,
     inclusivePronouns,
     includeOnPronoun,
+    voiceMode: voiceModes.size > 1 ? 'mixed' : voiceModes.has('passive') ? 'passive' : 'active',
     includeComplements: includeComplements || targetedOptions.length > 0,
     complementPlacement: targetedOptions.some(option => option.endsWith('-before'))
       ? targetedOptions.some(option => option.endsWith('-after')) ? 'mixed' : 'before'

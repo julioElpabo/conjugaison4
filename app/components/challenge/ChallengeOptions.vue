@@ -1,7 +1,8 @@
 <script setup lang="ts">
 const { ui } = useLanguagePreferences()
 import type { ExerciseQuestion } from '~~/shared/types/conjugation'
-import type { ComplementOption, ExerciseKind, IdentificationSource, Verb } from '~/composables/useChallengeBuilder'
+import { isPassivizableInfinitive } from '~~/shared/utils/passive-voice'
+import type { ComplementOption, ExerciseKind, IdentificationSource, VoiceMode, Verb } from '~/composables/useChallengeBuilder'
 
 const props = defineProps<{
   questionCount: number
@@ -9,6 +10,7 @@ const props = defineProps<{
   identificationSource: IdentificationSource
   inclusivePronouns: boolean
   includeOnPronoun: boolean
+  voiceMode: VoiceMode
   complementOptions: ComplementOption[]
   complementVerbs?: Verb[]
   eyebrow?: string
@@ -32,6 +34,7 @@ const emit = defineEmits<{
   updateIdentificationSource: [value: IdentificationSource]
   updateInclusivePronouns: [value: boolean]
   updateIncludeOnPronoun: [value: boolean]
+  updateVoiceMode: [value: VoiceMode]
   updateComplementOptions: [value: ComplementOption[]]
   prefilledOptionsRevealStart: []
 }>()
@@ -39,8 +42,15 @@ const emit = defineEmits<{
 const complementsOpen = ref(Boolean(props.gridLayout))
 const selectedComplementVerbs = computed(() => (props.complementVerbs ?? []).filter(verb => Boolean(verb.complementExample)))
 const complementsAvailable = computed(() => (
-  props.exerciseKind === 'conjugation' && selectedComplementVerbs.value.length > 0
+  props.exerciseKind === 'conjugation'
+  && props.voiceMode !== 'passive'
+  && selectedComplementVerbs.value.length > 0
 ))
+const passiveAvailable = computed(() => (props.complementVerbs ?? []).some(verb => (
+  !verb.isPronominalForm
+  && isPassivizableInfinitive(verb.infinitif)
+  && verb.complementFunctions?.includes('cod')
+)))
 const codAvailable = computed(() => selectedComplementVerbs.value.some(verb => verb.complementFunctions?.includes('cod') || verb.complementExample?.functionObject === 'cod'))
 const coiAvailable = computed(() => selectedComplementVerbs.value.some(verb => verb.complementFunctions?.includes('coi') || verb.complementExample?.functionObject === 'coi'))
 const codBeforeAvailable = computed(() => selectedComplementVerbs.value.some(verb => verb.anteposableComplementFunctions?.includes('cod') || Boolean(verb.complementExample?.before)))
@@ -49,6 +59,7 @@ const idPrefix = computed(() => props.idPrefix ?? 'challenge-options')
 const optionsTitleId = computed(() => `${idPrefix.value}-title`)
 const questionCountId = computed(() => `${idPrefix.value}-question-count`)
 const exerciseKindName = computed(() => `${idPrefix.value}-exercise-kind`)
+const voiceModeName = computed(() => `${idPrefix.value}-voice-mode`)
 const identificationSourceName = computed(() => `${idPrefix.value}-identification-source`)
 const complementPanelId = computed(() => `${idPrefix.value}-complement-panel`)
 const hasConjugationExample = computed(() => Boolean(
@@ -64,10 +75,41 @@ const exampleRevealTimers: ReturnType<typeof setTimeout>[] = []
 const displayedQuestionCount = ref(props.questionCount)
 const displayedComplementOptions = ref<ComplementOption[]>([...props.complementOptions])
 const prefilledRevealRunning = ref(false)
-const identificationSourceFieldset = ref<HTMLElement | null>(null)
+const optionsLayout = ref<HTMLElement | null>(null)
 let questionCountAnimationFrame: number | undefined
-let identificationScrollFrame: number | undefined
+let masonryLayoutFrame: number | undefined
+let masonryResizeObserver: ResizeObserver | undefined
+let masonryMutationObserver: MutationObserver | undefined
 const prefilledRevealTimers: ReturnType<typeof setTimeout>[] = []
+
+function layoutMasonry() {
+  masonryLayoutFrame = undefined
+  if (!props.gridLayout || !optionsLayout.value) return
+
+  const cards = optionsLayout.value.querySelectorAll<HTMLElement>('.option-group-card, .complement-options, .conjugation-example')
+  cards.forEach((card) => {
+    masonryResizeObserver?.observe(card)
+    if (getComputedStyle(card).display === 'none') {
+      card.style.removeProperty('grid-row-end')
+      return
+    }
+    card.style.gridRowEnd = `span ${Math.ceil(card.getBoundingClientRect().height + 16)}`
+  })
+}
+
+function scheduleMasonryLayout() {
+  if (!import.meta.client || masonryLayoutFrame !== undefined) return
+  masonryLayoutFrame = requestAnimationFrame(layoutMasonry)
+}
+
+function initializeMasonry() {
+  if (!props.gridLayout || !optionsLayout.value || !import.meta.client) return
+  masonryResizeObserver = new ResizeObserver(scheduleMasonryLayout)
+  masonryMutationObserver = new MutationObserver(scheduleMasonryLayout)
+  masonryMutationObserver.observe(optionsLayout.value, { childList: true, subtree: true })
+  window.addEventListener('resize', scheduleMasonryLayout)
+  scheduleMasonryLayout()
+}
 
 function clearPrefilledRevealTimers() {
   if (questionCountAnimationFrame !== undefined) {
@@ -150,12 +192,16 @@ watch(() => props.revealPrefilledOptions, reveal => {
 
 onMounted(() => {
   if (props.revealPrefilledOptions) revealPrefilledOptions()
+  initializeMasonry()
 })
 
 onBeforeUnmount(() => {
   clearExampleRevealTimers()
   clearPrefilledRevealTimers()
-  if (identificationScrollFrame !== undefined) cancelAnimationFrame(identificationScrollFrame)
+  if (masonryLayoutFrame !== undefined) cancelAnimationFrame(masonryLayoutFrame)
+  masonryResizeObserver?.disconnect()
+  masonryMutationObserver?.disconnect()
+  if (import.meta.client) window.removeEventListener('resize', scheduleMasonryLayout)
 })
 
 function onQuestionCountChange(event: Event) {
@@ -167,21 +213,9 @@ function onQuestionCountChange(event: Event) {
   emit('updateQuestionCount', Math.min(99, Math.max(1, Math.round(value))))
 }
 
-async function onExerciseKindChange(event: Event) {
+function onExerciseKindChange(event: Event) {
   const exerciseKind = (event.target as HTMLInputElement).value as ExerciseKind
   emit('updateExerciseKind', exerciseKind)
-
-  if (!props.gridLayout || exerciseKind !== 'tense-identification' || !import.meta.client) return
-
-  await nextTick()
-  if (identificationScrollFrame !== undefined) cancelAnimationFrame(identificationScrollFrame)
-  identificationScrollFrame = requestAnimationFrame(() => {
-    identificationSourceFieldset.value?.scrollIntoView({
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-      block: 'center',
-    })
-    identificationScrollFrame = undefined
-  })
 }
 
 function toggleComplementOption(option: ComplementOption, checked: boolean) {
@@ -195,6 +229,10 @@ function toggleComplementOption(option: ComplementOption, checked: boolean) {
 watch(complementsAvailable, (available) => {
   if (!available) complementsOpen.value = false
   else if (props.gridLayout) complementsOpen.value = true
+}, { immediate: true })
+
+watch(passiveAvailable, (available) => {
+  if (!available && props.voiceMode !== 'active') emit('updateVoiceMode', 'active')
 }, { immediate: true })
 
 </script>
@@ -212,46 +250,51 @@ watch(complementsAvailable, (available) => {
       </div>
     </div>
 
-    <div class="options-layout" :class="{ 'options-layout--columns': gridLayout }">
-    <div class="options-fields" :class="{ 'options-fields--columns': gridLayout }">
+    <div ref="optionsLayout" class="options-layout" :class="{ 'options-layout--columns': gridLayout }">
+      <div class="options-fields" :class="{ 'options-fields--columns': gridLayout }">
       <div class="options-main-column">
-        <label class="field-stack question-count-field" :for="questionCountId">
-          <span>{{ ui('Nombre de questions') }}</span>
-          <input
-            :id="questionCountId"
-            type="number"
-            inputmode="numeric"
-            min="1"
-            max="99"
-            step="1"
-            :value="displayedQuestionCount"
-            @input="onQuestionCountChange"
-          >
-        </label>
+        <div class="option-group-card option-group-card--questions">
+          <label class="field-stack question-count-field" :for="questionCountId">
+            <span>{{ ui('Nombre de questions') }}</span>
+            <input
+              :id="questionCountId"
+              type="number"
+              inputmode="numeric"
+              min="1"
+              max="99"
+              step="1"
+              :value="displayedQuestionCount"
+              @input="onQuestionCountChange"
+            >
+          </label>
+        </div>
 
-        <label class="check-row">
-          <input
-            type="checkbox"
-            :checked="inclusivePronouns"
-            @change="emit('updateInclusivePronouns', ($event.target as HTMLInputElement).checked)"
-          >
-          <span> {{ ui('Inclure les pronoms') }} <strong>iel / iels</strong>
-            <small>{{ ui('Ils apparaîtront ponctuellement dans les questions.') }}</small>
-          </span>
-        </label>
+        <fieldset class="option-fieldset option-group-card option-group-card--pronouns">
+          <legend>{{ ui('Pronoms') }}</legend>
+          <label class="check-row">
+            <input
+              type="checkbox"
+              :checked="inclusivePronouns"
+              @change="emit('updateInclusivePronouns', ($event.target as HTMLInputElement).checked)"
+            >
+            <span> {{ ui('Inclure les pronoms') }} <strong>iel / iels</strong>
+              <small>{{ ui('Ils apparaîtront ponctuellement dans les questions.') }}</small>
+            </span>
+          </label>
 
-        <label class="check-row">
-          <input
-            type="checkbox"
-            :checked="includeOnPronoun"
-            @change="emit('updateIncludeOnPronoun', ($event.target as HTMLInputElement).checked)"
-          >
-          <span> {{ ui('Inclure le pronom') }} <strong>on</strong>
-            <small>{{ ui('Il apparaîtra ponctuellement dans les questions à la troisième personne du singulier.') }}</small>
-          </span>
-        </label>
+          <label class="check-row">
+            <input
+              type="checkbox"
+              :checked="includeOnPronoun"
+              @change="emit('updateIncludeOnPronoun', ($event.target as HTMLInputElement).checked)"
+            >
+            <span> {{ ui('Inclure le pronom') }} <strong>on</strong>
+              <small>{{ ui('Il apparaîtra ponctuellement dans les questions à la troisième personne du singulier.') }}</small>
+            </span>
+          </label>
+        </fieldset>
 
-        <fieldset class="option-fieldset">
+        <fieldset class="option-fieldset option-group-card option-group-card--exercise">
           <legend>{{ ui('Type d’exercice') }}</legend>
           <div class="segmented-control">
             <label>
@@ -275,42 +318,91 @@ watch(complementsAvailable, (available) => {
               <span>{{ ui('Trouver le mode et le temps') }}</span>
             </label>
           </div>
+
+          <Transition name="identification-options">
+            <div
+              v-if="exerciseKind === 'tense-identification'"
+              class="identification-source-panel"
+            >
+              <div class="segmented-control segmented-control--stacked">
+                <label>
+                  <input
+                    type="radio"
+                    :name="identificationSourceName"
+                    value="selected-verbs"
+                    :checked="identificationSource === 'selected-verbs'"
+                    @change="emit('updateIdentificationSource', 'selected-verbs')"
+                  >
+                  <span>
+                    <strong>{{ ui('Avec mes verbes') }}</strong>
+                    <small>{{ ui('Formes conjuguées simples, sans citation.') }}</small>
+                  </span>
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    :name="identificationSourceName"
+                    value="literary-corpus"
+                    :checked="identificationSource === 'literary-corpus'"
+                    @change="emit('updateIdentificationSource', 'literary-corpus')"
+                  >
+                  <span>
+                    <strong>{{ ui('Avec n’importe quel verbe') }}</strong>
+                    <small>{{ ui('Construits avec des phrases littéraires.') }}</small>
+                  </span>
+                </label>
+              </div>
+            </div>
+          </Transition>
         </fieldset>
 
         <fieldset
-          v-if="exerciseKind === 'tense-identification'"
-          ref="identificationSourceFieldset"
-          class="option-fieldset identification-source-fieldset"
+          class="option-fieldset option-group-card option-group-card--voice voice-mode-fieldset"
+          :class="{ 'option-group-card--disabled': exerciseKind !== 'conjugation' }"
+          :disabled="exerciseKind !== 'conjugation'"
         >
-          <legend class="sr-only">Choix des verbes</legend>
+          <legend>{{ ui('Voix du verbe') }}</legend>
           <div class="segmented-control segmented-control--stacked">
             <label>
               <input
                 type="radio"
-                :name="identificationSourceName"
-                value="selected-verbs"
-                :checked="identificationSource === 'selected-verbs'"
-                @change="emit('updateIdentificationSource', 'selected-verbs')"
+                :name="voiceModeName"
+                value="active"
+                :checked="voiceMode === 'active'"
+                @change="emit('updateVoiceMode', 'active')"
+              >
+              <span><strong>{{ ui('Active uniquement') }}</strong></span>
+            </label>
+            <label>
+              <input
+                type="radio"
+                :name="voiceModeName"
+                value="passive"
+                :checked="voiceMode === 'passive'"
+                :disabled="!passiveAvailable"
+                @change="emit('updateVoiceMode', 'passive')"
               >
               <span>
-                <strong>Avec mes verbes</strong>
-                <small>Formes conjuguées simples, sans citation.</small>
+                <strong>{{ ui('Passive uniquement') }}</strong>
+                <small>{{ ui('Le COD devient le sujet de la phrase.') }}</small>
               </span>
             </label>
             <label>
               <input
                 type="radio"
-                :name="identificationSourceName"
-                value="literary-corpus"
-                :checked="identificationSource === 'literary-corpus'"
-                @change="emit('updateIdentificationSource', 'literary-corpus')"
+                :name="voiceModeName"
+                value="mixed"
+                :checked="voiceMode === 'mixed'"
+                :disabled="!passiveAvailable"
+                @change="emit('updateVoiceMode', 'mixed')"
               >
               <span>
-                <strong>Avec n’importe quel verbe</strong>
-                <small>Construits avec des phrases littéraires</small>
+                <strong>{{ ui('Active et passive') }}</strong>
+                <small>{{ ui('Les deux voix alterneront dans le défi.') }}</small>
               </span>
             </label>
           </div>
+          <small v-if="!passiveAvailable" class="field-hint">{{ ui('Aucun verbe sélectionné ne possède de COD validé.') }}</small>
         </fieldset>
 
       </div>
@@ -320,9 +412,7 @@ watch(complementsAvailable, (available) => {
         data-tour="options-complements"
         :class="{
           'complement-options--disabled': !complementsAvailable,
-          'complement-options--hidden': gridLayout && exerciseKind === 'tense-identification',
         }"
-        :aria-hidden="gridLayout && exerciseKind === 'tense-identification' ? 'true' : undefined"
       >
       <h3 v-if="gridLayout" class="complement-options__title">{{ ui('Compléments d’objets :') }}</h3>
       <p v-if="gridLayout" class="complement-options__description">{{ ui('Ajoute des compléments d’objets directs ou indirects.') }}</p>
@@ -340,8 +430,10 @@ watch(complementsAvailable, (available) => {
       </button>
       <p v-if="!complementsAvailable" class="complement-options__unavailable">
         {{ exerciseKind !== 'conjugation'
-          ? 'Disponible uniquement pour un exercice de conjugaison.'
-          : 'Les verbes choisis ne proposent pas de complément.' }}
+          ? ui('Disponible uniquement pour un exercice de conjugaison.')
+          : voiceMode === 'passive'
+            ? ui('Au passif, le COD devient le sujet : ces options ne s’appliquent pas.')
+          : ui('Les verbes choisis ne proposent pas de complément.') }}
       </p>
 
       <Transition name="complement-panel">
@@ -440,13 +532,32 @@ watch(complementsAvailable, (available) => {
 
 <style scoped>
 .options-card--grid { padding-bottom: 0; }
-.options-layout--columns { display: grid; padding: 24px; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; gap: 16px; }
+.options-layout--columns { display: grid; padding: 24px; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-flow: row dense; grid-auto-rows: 1px; column-gap: 16px; }
 .options-layout--columns > .options-fields { display: contents; }
-.options-layout--columns > .options-fields > * { min-width: 0; margin: 0; padding: 18px; border: 1px solid #bfd2cc; border-radius: 15px; background: #fbfdfc; }
-.options-main-column { display: grid; align-content: start; gap: 18px; }
+.options-layout--columns > .options-fields > .options-main-column { display: contents; }
+.options-main-column { display: grid; align-content: start; gap: 12px; }
+.options-layout:not(.options-layout--columns) .options-main-column { padding: 0 18px; }
 .options-main-column > * { margin: 0; }
-.options-main-column > .check-row { padding: 15px 4px; }
-.options-main-column > .option-fieldset { padding: 14px 0 0; }
+.options-layout--columns :is(.option-group-card, .complement-options, .conjugation-example) { display: block; width: 100%; min-width: 0; margin: 0 0 16px; align-self: start; }
+.options-layout--columns .option-group-card--questions,
+.options-layout--columns .option-group-card--voice { grid-column: 1; }
+.options-layout--columns .option-group-card--pronouns,
+.options-layout--columns > .conjugation-example { grid-column: 2; }
+.options-layout--columns .option-group-card--exercise,
+.options-layout--columns .complement-options { grid-column: 3; }
+.option-group-card { min-width: 0; padding: 15px; border: 1px solid #c8d8d3; border-radius: 13px; background: #fbfdfc; box-shadow: 0 3px 10px rgb(46 67 62 / 5%); }
+.option-group-card > legend { padding: 0 5px; color: var(--brand-dark); font-size: .78rem; font-weight: 850; letter-spacing: .055em; text-transform: uppercase; }
+.option-group-card .check-row { margin: 0; padding: 9px 0; }
+.option-group-card .check-row + .check-row { margin-top: 5px; padding-top: 14px; border-top: 1px solid #dce6e2; }
+.option-group-card .segmented-control { margin-top: 4px; }
+.option-group-card--questions .field-stack { margin: 0; }
+.identification-source-panel { max-width: calc(100% - 18px); margin: 12px 0 0 18px; overflow: hidden; }
+.option-group-card--disabled,
+.complement-options--disabled { filter: grayscale(.35); opacity: .55; }
+.identification-options-enter-active,
+.identification-options-leave-active { max-height: 240px; transition: max-height 260ms ease, opacity 210ms ease, transform 210ms ease, margin-top 260ms ease, padding-top 260ms ease; }
+.identification-options-enter-from,
+.identification-options-leave-to { max-height: 0; margin-top: 0; padding-top: 0; opacity: 0; transform: translateY(-8px); }
 .segmented-control--stacked { padding: 7px; grid-template-columns: 1fr; gap: 9px; background: #e7efec; }
 .segmented-control--stacked label > span { position: relative; min-height: 62px; padding: 10px 13px 10px 46px; align-content: center; justify-items: start; gap: 2px; background: #f8fbfa; border: 2px solid #b7c9c3; box-shadow: 0 2px 5px rgb(46 67 62 / 8%); text-align: left; transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease, background 150ms ease; }
 .segmented-control--stacked label > span::before { position: absolute; left: 15px; top: 50%; width: 18px; height: 18px; content: ''; border: 2px solid #78918a; border-radius: 50%; background: white; box-shadow: inset 0 0 0 4px white; transform: translateY(-50%); }
@@ -459,8 +570,7 @@ watch(complementsAvailable, (available) => {
 .question-count-field > input { width: 62px; min-width: 0; height: 46px; padding-inline: 8px 5px; align-self: center; text-align: center; }
 .field-hint { display: block; margin-top: 6px; color: var(--muted); font-size: .72rem; }
 .conjugation-example { margin: 10px 24px 28px; padding: 20px; overflow: hidden; border: 2px dashed #aa94c5; border-radius: 20px; background: linear-gradient(145deg, #f6f2fb, #f0eaf8 62%, #eae2f4); box-shadow: 0 12px 30px rgb(77 55 105 / 12%); color: var(--brand-dark); }
-.options-layout--columns > .conjugation-example { min-width: 0; margin: 0; border-radius: 15px; }
-.options-layout--columns > .conjugation-example--wide { grid-column: 2 / -1; }
+.options-layout--columns > .conjugation-example { border-radius: 15px; }
 .conjugation-example__header { display: grid; min-height: 62px; margin-bottom: 17px; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 13px; }
 .conjugation-example__preview-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; color: #695284; background: #e3d9f0; box-shadow: 0 0 0 6px rgb(105 82 132 / 8%); font-size: 1.05rem; }
 .conjugation-example__preview-icon svg { width: 23px; height: 23px; }
@@ -497,12 +607,12 @@ watch(complementsAvailable, (available) => {
   100% { opacity: 1; transform: scale(1); }
 }
 .complement-options { margin-bottom: 18px; }
+.options-layout--columns .complement-options { padding: 18px; border: 1px solid #bfd2cc; border-radius: 15px; background: #fbfdfc; }
 .complement-options__title { margin: 0 0 12px; color: var(--brand-dark); font-size: 1rem; font-weight: 800; }
 .complement-options__description { margin: -5px 0 12px; color: var(--muted); font-size: .82rem; line-height: 1.4; }
 .complement-options__trigger { display: flex; width: 100%; min-height: 48px; padding: 10px 13px; align-items: center; justify-content: space-between; gap: 12px; color: var(--brand-dark); background: var(--brand-pale); border: 1px solid #a9c9bf; border-radius: 11px; font-weight: 850; text-align: left; }
 .complement-options__trigger:disabled { cursor: not-allowed; filter: grayscale(.65); opacity: .55; }
 .complement-options--disabled { background: #f3f5f4; }
-.complement-options--hidden { display: none; }
 .complement-options__unavailable { margin: 10px 3px 0; color: var(--muted); font-size: .82rem; line-height: 1.35; }
 .complement-options__trigger > span:first-child { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .complement-options__trigger small { padding: 3px 7px; color: white; background: var(--brand); border-radius: 999px; font-size: .62rem; font-weight: 900; letter-spacing: .06em; line-height: 1; text-transform: uppercase; }
@@ -522,16 +632,24 @@ watch(complementsAvailable, (available) => {
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 @media (max-width: 620px) {
   .options-layout--columns { padding: 19px 14px; grid-template-columns: 1fr; }
+  .options-layout--columns :is(.option-group-card, .complement-options, .conjugation-example) { grid-column: 1; }
   .options-layout--columns > .conjugation-example { padding: 15px; }
 }
 @media (min-width: 621px) and (max-width: 820px) {
   .options-layout--columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .options-layout--columns > .conjugation-example { grid-column: 1 / -1; }
+  .options-layout--columns .option-group-card--questions,
+  .options-layout--columns .option-group-card--exercise,
+  .options-layout--columns .complement-options { grid-column: 1; }
+  .options-layout--columns .option-group-card--pronouns,
+  .options-layout--columns .option-group-card--voice,
+  .options-layout--columns > .conjugation-example { grid-column: 2; }
 }
 @media (max-width: 520px) { .complement-options__panel { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) {
   .complement-panel-enter-active,
   .complement-panel-leave-active,
+  .identification-options-enter-active,
+  .identification-options-leave-active,
   .example-item-enter-active { transition: none; }
   .conjugation-example__spinner { animation-duration: 1.4s; }
   .options-card--revealing .complement-options__panel input:checked { animation: none; }

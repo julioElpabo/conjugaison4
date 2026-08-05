@@ -102,7 +102,6 @@ const sourcePresetId = ref<string>()
 const sourcePresetRandomCount = ref<number | null>(null)
 const isPrefilledChallenge = ref(false)
 const isPresetVerbEditing = ref(false)
-const areAllLaunchVerbsVisible = ref(false)
 const questions = ref<ExerciseQuestion[]>([])
 const printQuestions = ref<ExerciseQuestion[]>([])
 const shareCode = ref('')
@@ -284,14 +283,16 @@ const activePresetDisplayTitle = computed(() => activePreset.value
       .filter(Boolean)
       .join(' | ')
   : '')
+const showSavedChallengeSummary = computed(() => (
+  isPrefilledChallenge.value
+  && Boolean(savedChallengeTitle.value || savedChallengeDescription.value)
+))
 const heroTitle = computed(() => {
   if (currentStep.value === 0) return 'TATITOTU'
   if (activePreset.value) return activePresetDisplayTitle.value
   if (isPrefilledChallenge.value && challengeCode.value) return `Défi ${challengeCode.value}`
   return ui('Construire mon défi')
 })
-const launchVerbPreview = computed(() => selectedVerbs.value.slice(0, 10))
-const remainingLaunchVerbs = computed(() => selectedVerbs.value.slice(10))
 
 function requestedLandingTense() {
   const requested = Array.isArray(route.query.parcours) ? route.query.parcours[0] : route.query.parcours
@@ -490,7 +491,6 @@ function markAsCustom() {
   prefilledOptionsRevealPending.value = false
   isPrefilledChallenge.value = false
   activePresetId.value = undefined
-  areAllLaunchVerbsVisible.value = false
   clearMessages()
 }
 
@@ -581,7 +581,6 @@ function restartChallenge() {
   prefilledOptionsRevealPending.value = false
   isPrefilledChallenge.value = false
   isPresetVerbEditing.value = false
-  areAllLaunchVerbsVisible.value = false
   presetExpanded.value = false
   presetStage.value = 'groups'
   challengeCode.value = ''
@@ -1248,7 +1247,6 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   revealedPresetTenseIds.value = []
   presetTenseRevealPending.value = true
   prefilledOptionsRevealPending.value = true
-  areAllLaunchVerbsVisible.value = false
   notice.value = ''
   actionError.value = ''
   track('challenge_preset_selected', { preset: preset.id, exerciseKind: preset.exerciseKind })
@@ -1278,7 +1276,6 @@ async function restoreChallenge() {
     sourcePresetId.value = undefined
     sourcePresetRandomCount.value = null
     isPresetVerbEditing.value = false
-    areAllLaunchVerbsVisible.value = false
     challengeCode.value = restored.code
     notice.value = `Le défi « ${restored.title || restored.code} » est chargé. Tu peux l’utiliser ou le modifier.`
     goToStep(4)
@@ -1841,8 +1838,7 @@ async function createSharedChallenge(title: string, description: string) {
               </section>
               <template v-else>
                 <div class="wizard-step__intro wizard-step__intro--selection">
-                  <h2 id="verbs-title">{{ isPrefilledChallenge ? (savedChallengeTitle || ui('Verbes du défi')) : ui('Choisis les verbes') }}</h2>
-                  <p v-if="isPrefilledChallenge && savedChallengeDescription" class="wizard-step__loaded-description">{{ savedChallengeDescription }}</p>
+                  <h2 id="verbs-title">{{ isPrefilledChallenge ? ui('Verbes du défi') : ui('Choisis les verbes') }}</h2>
                 </div>
                 <VerbPicker
                   data-tour="verbs"
@@ -1938,35 +1934,18 @@ async function createSharedChallenge(title: string, description: string) {
               <div class="wizard-step__actions wizard-step__actions--split">
                 <button class="secondary-button" type="button" @click="previousStep">{{ ui('← Options') }}</button>
               </div>
-              <section v-if="showLaunchSummary" class="launch-summary" aria-labelledby="launch-verbs-title">
+              <section v-if="showLaunchSummary || showSavedChallengeSummary" class="launch-summary" :aria-labelledby="activePreset || savedChallengeTitle ? 'launch-challenge-title' : undefined">
                 <div class="launch-summary__heading">
                   <div>
                     <p v-if="activePreset" class="builder-card__eyebrow">{{ activePresetGroupLabel }}</p>
-                    <h2 id="launch-verbs-title">{{ activePreset?.label ?? ui('Verbes choisis') }}</h2>
+                    <h2 v-if="activePreset || savedChallengeTitle" id="launch-challenge-title">{{ activePreset?.label || savedChallengeTitle }}</h2>
                   </div>
-                  <span>{{ ui(selectedVerbs.length > 1 ? '{count} verbes' : '{count} verbe', { count: selectedVerbs.length }) }}</span>
+                  <div class="launch-summary__counts">
+                    <span>{{ ui(selectedVerbs.length > 1 ? '{count} verbes' : '{count} verbe', { count: selectedVerbs.length }) }}</span>
+                    <span>{{ ui('{count} temps', { count: selectedTenses.length }) }}</span>
+                  </div>
                 </div>
-                <p v-if="activePreset" class="launch-summary__description">{{ activePreset.description }}</p>
-                <ul class="launch-verb-list" :aria-label="ui('Aperçu des verbes choisis')">
-                  <li v-for="verb in launchVerbPreview" :key="verb.id">{{ verb.infinitif }}</li>
-                </ul>
-                <Transition name="launch-verbs-expand">
-                  <div v-if="areAllLaunchVerbsVisible" class="launch-verbs-expand">
-                    <ul class="launch-verb-list launch-verb-list--remaining" :aria-label="ui('Autres verbes choisis')">
-                      <li v-for="verb in remainingLaunchVerbs" :key="verb.id">{{ verb.infinitif }}</li>
-                    </ul>
-                  </div>
-                </Transition>
-                <button
-                  v-if="remainingLaunchVerbs.length"
-                  class="launch-summary__toggle"
-                  type="button"
-                  :aria-expanded="areAllLaunchVerbsVisible"
-                  @click="areAllLaunchVerbsVisible = !areAllLaunchVerbsVisible"
-                >
-                  {{ areAllLaunchVerbsVisible ? ui('Réduire') : ui('Voir tout ({count})', { count: selectedVerbs.length }) }}
-                  <span aria-hidden="true">{{ areAllLaunchVerbsVisible ? '↑' : '↓' }}</span>
-                </button>
+                <p v-if="activePreset?.description || savedChallengeDescription" class="launch-summary__description">{{ activePreset?.description || savedChallengeDescription }}</p>
               </section>
               <ChallengeActions
                 data-tour="actions"
@@ -2049,7 +2028,6 @@ async function createSharedChallenge(title: string, description: string) {
 .wizard-hero h1:not(.wizard-hero__brand) { letter-spacing: .035em; opacity: .62; }
 .wizard-hero h1.wizard-hero__preset { font-size: clamp(1.75rem, 4vw, 3.15rem); line-height: 1.1; }
 .wizard-hero__subtitle { max-width: 650px; margin: 12px auto 0; color: var(--muted); font-size: 1.08rem; font-weight: 650; line-height: 1.5; }
-.wizard-step__intro .wizard-step__loaded-description { width: 100%; max-width: none; margin: 8px 0 0; color: var(--muted); line-height: 1.55; white-space: pre-line; }
 .tour-entry-button { display: inline-flex; margin-top: 13px; padding: 7px 13px 7px 8px; align-items: center; gap: 8px; color: #0b4f69; border: 2px solid #e4ad00; border-radius: 999px; background: #fff3a8; box-shadow: 0 5px 15px rgb(70 52 0 / 14%), 0 0 0 4px rgb(255 215 43 / 12%); cursor: pointer; font-size: .84rem; font-weight: 800; }
 .tour-entry-button span { display: grid; width: 22px; height: 22px; place-items: center; color: #493a08; border: 1px solid #c99500; border-radius: 50%; background: #ffd943; font-size: .75rem; font-weight: 900; }
 .tour-entry-button:hover, .tour-entry-button:focus-visible { color: #083f54; border-color: #c99500; background: #ffe978; outline: 0; box-shadow: 0 7px 20px rgb(70 52 0 / 20%), 0 0 0 5px rgb(255 215 43 / 24%); }
@@ -2218,16 +2196,9 @@ async function createSharedChallenge(title: string, description: string) {
 .launch-summary { margin-bottom: 18px; padding: 22px; border: 1px solid var(--line); border-radius: 17px; background: #f8fbfa; }
 .launch-summary__heading { display: flex; align-items: start; justify-content: space-between; gap: 18px; }
 .launch-summary__heading h2 { margin: 2px 0 0; color: var(--brand-dark); font-size: clamp(1.35rem, 2.5vw, 1.8rem); }
-.launch-summary__heading > span { flex: 0 0 auto; padding: 6px 10px; border-radius: 999px; color: var(--brand-dark); background: var(--brand-pale); font-size: .82rem; font-weight: 800; }
+.launch-summary__counts { display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.launch-summary__counts span { padding: 6px 10px; border-radius: 999px; color: var(--brand-dark); background: var(--brand-pale); font-size: .82rem; font-weight: 800; }
 .launch-summary__description { margin: 9px 0 16px; color: var(--muted); line-height: 1.45; }
-.launch-verb-list { display: flex; margin: 0; padding: 0; flex-wrap: wrap; gap: 8px; list-style: none; }
-.launch-verb-list li { padding: 6px 11px; border: 1px solid #b8d3cb; border-radius: 999px; color: var(--ink); background: white; font-size: .9rem; }
-.launch-verbs-expand { display: grid; grid-template-rows: 1fr; }
-.launch-verb-list--remaining { min-height: 0; padding-top: 8px; overflow: hidden; }
-.launch-summary__toggle { display: inline-flex; margin-top: 15px; padding: 7px 11px; align-items: center; gap: 7px; border: 0; border-radius: 9px; color: var(--brand-dark); background: var(--brand-pale); font: inherit; font-size: .86rem; font-weight: 800; }
-.launch-summary__toggle:hover { background: #dcefe9; }
-.launch-verbs-expand-enter-active, .launch-verbs-expand-leave-active { transition: grid-template-rows 360ms cubic-bezier(.22, 1, .36, 1), opacity 220ms ease, transform 300ms ease; }
-.launch-verbs-expand-enter-from, .launch-verbs-expand-leave-to { grid-template-rows: 0fr; opacity: 0; transform: translateY(-8px); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 @keyframes wizard-next-pulse {
   0%, 6% {
@@ -2275,7 +2246,6 @@ async function createSharedChallenge(title: string, description: string) {
     box-shadow: 0 0 0 5px rgb(31 123 145 / 18%);
     animation: none;
   }
-  .launch-verbs-expand-enter-active, .launch-verbs-expand-leave-active { transition: none; }
   .preset-verb-enter-active { transition: none; }
 }
 

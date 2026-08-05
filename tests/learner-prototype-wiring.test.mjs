@@ -393,8 +393,15 @@ describe('câblage du prototype de compte pseudonyme', () => {
     assert.match(wizard, /challengePresetTrackingTitle/u)
     assert.match(wizard, /challengePresetTrackingDescription/u)
     assert.match(wizard, /sourcePresetId/u)
-    assert.match(wizard, /savedChallengeTitle \|\| ui\('Verbes du défi'\)/u)
-    assert.match(wizard, /wizard-step__loaded-description/u)
+    assert.match(wizard, /isPrefilledChallenge \? ui\('Verbes du défi'\) : ui\('Choisis les verbes'\)/u)
+    assert.doesNotMatch(wizard, /wizard-step__loaded-description/u)
+    assert.match(wizard, /showLaunchSummary \|\| showSavedChallengeSummary/u)
+    assert.match(wizard, /activePreset\?\.label \|\| savedChallengeTitle/u)
+    assert.doesNotMatch(wizard, /ui\('Verbes choisis'\)/u)
+    assert.match(wizard, /selectedVerbs\.length > 1 \? '\{count\} verbes' : '\{count\} verbe'/u)
+    assert.match(wizard, /ui\('\{count\} temps', \{ count: selectedTenses\.length \}\)/u)
+    assert.doesNotMatch(wizard, /launch-verb-list|launch-summary__toggle|remainingLaunchVerbs|areAllLaunchVerbsVisible/u)
+    assert.match(wizard, /activePreset\?\.description \|\| savedChallengeDescription/u)
     assert.doesNotMatch(wizard, /loaded-challenge-intro/u)
     assert.match(
       wizard,

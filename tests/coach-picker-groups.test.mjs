@@ -24,7 +24,8 @@ describe('regroupement des coaches du sélecteur', () => {
       { ...coach(4, 'Lucas', 'complete', 4), gender: 'male' },
     ]
 
-    assert.deepEqual(coachPairForPicker(coaches).map(item => item.firstName), ['Zoé', 'Sami'])
+    assert.deepEqual(coachPairForPicker(coaches, () => 0).map(item => item.firstName), ['Zoé', 'Sami'])
+    assert.deepEqual(coachPairForPicker(coaches, () => 0.99).map(item => item.firstName), ['Alice', 'Lucas'])
   })
 
   it('n’affiche aucune paire déséquilibrée lorsqu’un genre manque', () => {

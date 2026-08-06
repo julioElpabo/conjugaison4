@@ -1,7 +1,7 @@
 import { w as withoutIndicativeMode, l as literaryIdentificationCoachHelpBlocks, v as visibleCoachHelpBlocks, d as areOnlyIndicativeTenses, e as localizedCoachVerbDefinition, c as coachHelpQuestionVariables, s as sanitizeCoachHtml, _ as __nuxt_component_0$1 } from './CoachHelpPanel-CV6-CBeI.mjs';
 import { defineComponent, ref, computed, unref, useTemplateRef, nextTick, watch, mergeProps, useSSRContext } from 'vue';
 import { ssrRenderTeleport, ssrRenderAttr, ssrInterpolate, ssrIncludeBooleanAttr, ssrRenderList, ssrRenderStyle, ssrRenderClass, ssrRenderComponent, ssrRenderAttrs } from 'vue/server-renderer';
-import { J as validateAnswer, aq as getAlternativeCorrections, ar as impossibleSingularEndingReminderMessage, O as grammarTenseCode, as as localizedLearnerErrorMessage, at as isFutureSimpleInsteadOfNearFuture, au as findConjugationConfusions, av as findImpossibleSingularEnding, aw as diagnoseCoachAgreement, ax as diagnoseCoachAnswer, N as learnerErrorDetails, ay as mergeLearnerErrorDetails, az as learnerErrorInsteadOf } from '../nitro/nitro.mjs';
+import { K as validateAnswer, ar as getAlternativeCorrections, as as impossibleSingularEndingReminderMessage, P as grammarTenseCode, at as localizedLearnerErrorMessage, au as isFutureSimpleInsteadOfNearFuture, av as findConjugationConfusions, aw as findImpossibleSingularEnding, ax as diagnoseCoachAgreement, ay as diagnoseCoachAnswer, O as learnerErrorDetails, az as mergeLearnerErrorDetails, aA as learnerErrorInsteadOf } from '../nitro/nitro.mjs';
 import { a as createVariedCoachReaction, b as createCoachDialogueState } from '../_/coach-dialogue.mjs';
 import { j as buildTargetedConjugationHelp } from '../_/coach-help-audit.mjs';
 import { i as identificationFormParts } from '../_/identification-form.mjs';

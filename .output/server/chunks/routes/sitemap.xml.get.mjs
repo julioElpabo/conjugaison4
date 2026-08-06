@@ -1,4 +1,4 @@
-import { d as defineEventHandler, n as useRuntimeConfig, S as SUPPORTED_LOCALES, T as setHeader, U as localizePath } from '../nitro/nitro.mjs';
+import { d as defineEventHandler, n as useRuntimeConfig, T as SUPPORTED_LOCALES, U as setHeader, V as localizePath } from '../nitro/nitro.mjs';
 import { M as MODE_LANDING_SLUGS } from '../_/mode-landing-pages.mjs';
 import { M as MODE_TENSE_PATHS } from '../_/mode-tense-pages.mjs';
 import 'node:http';

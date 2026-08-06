@@ -2,7 +2,7 @@ import { u as useAdminAuth, _ as __nuxt_component_0$1, a as __nuxt_component_1, 
 import { defineComponent, ref, computed, watch, withCtx, unref, isRef, createVNode, toDisplayString, openBlock, createBlock, Fragment, renderList, createCommentVNode, createTextVNode, withModifiers, withDirectives, vModelText, mergeProps, useModel, mergeModels, useTemplateRef, useSSRContext } from 'vue';
 import { ssrRenderComponent, ssrRenderAttr, ssrRenderClass, ssrInterpolate, ssrRenderList, ssrIncludeBooleanAttr, ssrRenderAttrs, ssrRenderStyle, ssrLooseContain, ssrLooseEqual } from 'vue/server-renderer';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
-import { a3 as challengePresetGroupOrder, $ as challengePresetGroupLabels, a2 as challengePresetDefinitions } from '../nitro/nitro.mjs';
+import { a4 as challengePresetGroupOrder, a0 as challengePresetGroupLabels, a3 as challengePresetDefinitions } from '../nitro/nitro.mjs';
 import { f as useLanguagePreferences, u as useHead } from './server.mjs';
 import { s as setInterval } from './interval-CYXsK9dZ.mjs';
 import './nuxt-link-icjx6oE7.mjs';

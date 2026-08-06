@@ -1,4 +1,4 @@
-import { u as useDatabase, s as setResponseHeader, c as createError, A as getRequestIP } from '../nitro/nitro.mjs';
+import { u as useDatabase, s as setResponseHeader, c as createError, B as getRequestIP } from '../nitro/nitro.mjs';
 import { createHash } from 'node:crypto';
 
 const PUBLIC_RATE_LIMITS = {

@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, toRef, isReadonly, isRef, isShallow, isReactive, toRaw } from 'vue';
-import { aa as parseURL, ab as encodePath, ac as decodePath, ad as localeFromPath, o as normalizeLocale, ae as getRequestHeaders, c as createError$1, W as hasProtocol, Y as isScriptProtocol, X as joinURL, af as withQuery, ag as klona, ah as DEFAULT_LANGUAGE_PREFERENCES, U as localizePath, ai as sanitizeStatusCode, aj as getContext, ak as getRequestHeader, al as isEqual, j as setCookie, m as getCookie, k as deleteCookie, am as $fetch, an as defu, z as stripLocaleFromPath, S as SUPPORTED_LOCALES, a1 as executeAsync, ao as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { ab as parseURL, ac as encodePath, ad as decodePath, ae as localeFromPath, o as normalizeLocale, af as getRequestHeaders, c as createError$1, X as hasProtocol, Z as isScriptProtocol, Y as joinURL, ag as withQuery, ah as klona, ai as DEFAULT_LANGUAGE_PREFERENCES, V as localizePath, aj as sanitizeStatusCode, ak as getContext, al as getRequestHeader, am as isEqual, j as setCookie, m as getCookie, k as deleteCookie, an as $fetch, ao as defu, A as stripLocaleFromPath, T as SUPPORTED_LOCALES, a2 as executeAsync, ap as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useSeoMeta$1, a as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -1422,7 +1422,7 @@ const _routes = [
   {
     name: "admin-tests",
     path: "/admin/tests",
-    component: () => import('./tests-DR-9qsxm.mjs')
+    component: () => import('./tests-CR3ohwNB.mjs')
   },
   {
     name: "admin-users",
@@ -1568,7 +1568,7 @@ const _routes = [
   {
     name: "localized-admin-tests",
     path: "/:locale(fr|de|en|it|es)/admin/tests",
-    component: () => import('./tests-DR-9qsxm.mjs')
+    component: () => import('./tests-CR3ohwNB.mjs')
   },
   {
     name: "localized-admin-users",

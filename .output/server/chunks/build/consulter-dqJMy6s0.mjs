@@ -4,7 +4,7 @@ import { i as isFiniteConjugationMode, c as conjugationModeOrder, a as conjugati
 import { n as normalizeVerbSearch, m as matchingVerbs } from '../_/verb-search.mjs';
 import { f as useLanguagePreferences, g as useRoute, a as useRouter, u as useHead, o as fetchDefaults, h as useRequestFetch } from './server.mjs';
 import { u as useSiteAnalytics } from './useSiteAnalytics-D1wpWTOZ.mjs';
-import { a0 as hash } from '../nitro/nitro.mjs';
+import { a1 as hash } from '../nitro/nitro.mjs';
 import { isPlainObject } from '@vue/shared';
 import { d as defineKeyedFunctionFactory, u as useAsyncData } from './asyncData-BBDHP0iC.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';

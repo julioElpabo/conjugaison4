@@ -4,7 +4,7 @@ import { u as useLearnerProgress, L as LearnerErrorDetailMessage, C as ClassicEx
 import { f as useLanguagePreferences, g as useRoute, h as useRequestFetch } from './server.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 import { l as learnerSpaceCopy, u as useColorTheme, a as learnerSpaceText } from './useColorTheme-Z-rsU5UJ.mjs';
-import { a7 as localizedLearnerErrorMessageForCode, a8 as localizedLearnerErrorDomain, a9 as localizedLearnerErrorLabel } from '../nitro/nitro.mjs';
+import { a8 as localizedLearnerErrorMessageForCode, a9 as localizedLearnerErrorDomain, aa as localizedLearnerErrorLabel } from '../nitro/nitro.mjs';
 import { u as useLearnerAuth } from './useLearnerAuth-BLt5hOAV.mjs';
 import { u as useSiteAnalytics } from './useSiteAnalytics-D1wpWTOZ.mjs';
 import { u as useState } from './state-DjsguMyT.mjs';

@@ -8,6 +8,7 @@ import { auditCoachCredibility } from '../../shared/utils/coach-credibility'
 
 const TEST_DIRECTORY = resolve(process.cwd(), 'tests')
 const MAX_OUTPUT_LENGTH = 200_000
+export const ADMIN_TEST_EXECUTION_TIMEOUT_MS = 45_000
 
 type DatabaseRuntimeConfig = {
   dbHost?: unknown
@@ -29,6 +30,13 @@ export function adminTestEnvironment(
     DB_USER: String(config.dbUser || ''),
     DB_PASSWORD: String(config.dbPassword || ''),
   }
+}
+
+export function executeAdminTestGroups<T>(
+  groups: Array<[string, string[]]>,
+  execute: (category: string, files: string[]) => Promise<T>,
+): Promise<T[]> {
+  return Promise.all(groups.map(([category, files]) => execute(category, files)))
 }
 
 const TEST_CATALOG: Record<string, { title: string, description: string, category: string }> = {
@@ -265,13 +273,12 @@ export async function runAdminTests(requestedFiles: string[]) {
     filesByCategory.set(category, [...(filesByCategory.get(category) || []), file])
   }
 
-  const executions: Array<{ category: string, files: string[], exitCode: number, output: string, timedOut: boolean }> = []
-  for (const [category, categoryFiles] of filesByCategory) {
+  const executions = await executeAdminTestGroups([...filesByCategory], async (category, categoryFiles) => {
     const execution = await new Promise<{ exitCode: number, stdout: string, stderr: string, timedOut: boolean }>((resolveExecution) => {
       execFile(
         process.execPath,
         ['--env-file-if-exists=.env', '--import', 'tsx', '--test', '--test-concurrency=1', '--test-reporter=tap', ...categoryFiles.map(file => join(TEST_DIRECTORY, file))],
-        { cwd: process.cwd(), env: testEnvironment, timeout: 60_000, maxBuffer: 2_000_000 },
+        { cwd: process.cwd(), env: testEnvironment, timeout: ADMIN_TEST_EXECUTION_TIMEOUT_MS, maxBuffer: 2_000_000 },
         (error, stdout, stderr) => {
           const exitCode = error && typeof error.code === 'number' ? error.code : (error ? 1 : 0)
           resolveExecution({
@@ -283,14 +290,14 @@ export async function runAdminTests(requestedFiles: string[]) {
         }
       )
     })
-    executions.push({
+    return {
       category,
       files: categoryFiles,
       exitCode: execution.exitCode,
       output: `${execution.stdout}${execution.stderr ? `\n${execution.stderr}` : ''}`,
       timedOut: execution.timedOut,
-    })
-  }
+    }
+  })
 
   const output = executions
     .map(execution => `# Suite : ${execution.category}\n${execution.output}`)

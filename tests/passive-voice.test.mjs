@@ -102,6 +102,12 @@ describe('questions à la voix passive', () => {
       texte_antepose: 'les lettres', genre: 'feminin', nombre: 'pluriel',
     }), [])
     assert.equal(question.conjugaison1, 'vont être écrites')
+
+    const singular = formatPassiveQuestion(row({
+      conjugaison1: 'va écrire', infinitif: 'écrire', participe_passe: 'écrit',
+      temps_name: 'futur proche', tense_code: 'near-future',
+    }), complement({ texte_antepose: 'la lettre' }), [])
+    assert.equal(singular.conjugaison1, 'va être écrite')
   })
 
   it('introduit correctement un sujet vocalique au subjonctif', () => {

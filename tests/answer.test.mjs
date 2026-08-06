@@ -96,6 +96,14 @@ describe('isAnswerCorrect', () => {
     assert.equal(isAnswerCorrect('aime', null), false)
     assert.equal(isAnswerCorrect(null, ['aime']), false)
   })
+
+  it('ne corrige pas silencieusement les accents, apostrophes, traits d’union ou mots manquants', () => {
+    assert.equal(isAnswerCorrect('j ai mangé', ["j'ai mangé"]), false)
+    assert.equal(isAnswerCorrect('il a mange', ['il a mangé']), false)
+    assert.equal(isAnswerCorrect('assieds toi', ['assieds-toi']), false)
+    assert.equal(isAnswerCorrect('elles parties', ['elles sont parties']), false)
+    assert.equal(isAnswerCorrect('tu finiras', ['tu finirais']), false)
+  })
 })
 
 describe('validateAnswer', () => {

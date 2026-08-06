@@ -42,6 +42,11 @@ const TEST_CATALOG: Record<string, { title: string, description: string, categor
     description: 'Vérifie les apostrophes droites ou typographiques, les accents, les espaces et les réponses alternatives.',
     category: 'Conjugaison française',
   },
+  'answer-engine-database.test.mjs': {
+    title: 'Correcteur sur toutes les formes stockées',
+    description: 'Vérifie les réponses positives et les confusions de personne ou de temps sur tout le catalogue.',
+    category: 'Conjugaison française',
+  },
   'conjugation-display.test.mjs': {
     title: 'Ordre des modes et des temps',
     description: 'Contrôle l’ordre de présentation des modes et des temps dans l’éditeur de verbes.',
@@ -68,8 +73,13 @@ const TEST_CATALOG: Record<string, { title: string, description: string, categor
     category: 'Conjugaison française',
   },
   'conjugation-database.test.mjs': {
-    title: 'Références et intégrité des 488 verbes',
+    title: 'Références et intégrité des 588 verbes',
     description: 'Compare les formes sensibles à des références explicites et audite toutes les données du catalogue.',
+    category: 'Conjugaison française',
+  },
+  'passive-voice-database.test.mjs': {
+    title: 'Voix passive à tous les temps',
+    description: 'Contrôle les formes d’être et les accords du passif aux quinze temps personnels compatibles.',
     category: 'Conjugaison française',
   },
   'verb-search.test.mjs': {

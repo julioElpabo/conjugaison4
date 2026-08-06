@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { after, before, describe, it } from 'node:test'
 
 import mysql from 'mysql2/promise'
+import { auditFiniteParadigms } from '../server/services/mail-request-repairs.ts'
 
 const databaseConfigured = Boolean(process.env.DB_HOST && process.env.DB_NAME && process.env.DB_USER)
 let database
@@ -263,6 +264,61 @@ describe('intégrité des 588 verbes du catalogue', { skip: !databaseConfigured 
     `)
     const unexpected = rows.filter(row => !allowedDefective.has(row.infinitif))
     assert.deepEqual(unexpected, [], `Formes obligatoires manquantes : ${unexpected.map(row => `${row.infinitif} (${row.filled}/6)`).join(', ')}`)
+  })
+
+  it('ne laisse aucune personne isolément vide dans un paradigme disponible', async () => {
+    assert.deepEqual(await auditFiniteParadigms(database), [])
+  })
+
+  it('ne crée aucun nouveau paradigme personnel entièrement absent', async () => {
+    const [rows] = await database.query(`
+      SELECT v.infinitif,m.name AS mode,t.name AS temps,
+             SUM(CASE WHEN COALESCE(vc.conjugaison1,vc.conjugaison2,vc.conjugaison3,'')<>'' THEN 1 ELSE 0 END) AS filled
+      FROM verbes v
+      CROSS JOIN temps t
+      INNER JOIN modes m ON m.id=t.mode_id
+      LEFT JOIN verbesconjugues vc ON vc.verbe_id=v.id AND vc.temp_id=t.id
+      WHERE v.est_archive=0
+        AND m.name IN ('indicatif','subjonctif','conditionnel')
+        AND t.code<>'near-future'
+      GROUP BY v.id,t.id
+      HAVING filled=0
+      ORDER BY v.infinitif,m.name,t.name
+    `)
+    const accidentalDataGaps = [
+      'accuser|indicatif|futur',
+      'accuser|indicatif|passé simple',
+      'dormir|indicatif|passé antérieur',
+      'étudier|subjonctif|imparfait',
+    ]
+    const grammaticallyUnavailable = [
+      'absoudre|indicatif|passé simple',
+      'absoudre|subjonctif|imparfait',
+      'clore|indicatif|imparfait',
+      'clore|indicatif|passé simple',
+      'clore|subjonctif|imparfait',
+      'déchoir|indicatif|imparfait',
+      'distraire|indicatif|passé simple',
+      'distraire|subjonctif|imparfait',
+      'gésir|conditionnel|passé 1',
+      'gésir|conditionnel|passé 2',
+      'gésir|conditionnel|présent',
+      'gésir|indicatif|futur',
+      'gésir|indicatif|futur antérieur',
+      'gésir|indicatif|passé antérieur',
+      'gésir|indicatif|passé composé',
+      'gésir|indicatif|passé simple',
+      'gésir|indicatif|plus-que-parfait',
+      'gésir|subjonctif|imparfait',
+      'gésir|subjonctif|passé',
+      'gésir|subjonctif|plus-que-parfait',
+      'gésir|subjonctif|présent',
+      'traire|indicatif|passé simple',
+      'traire|subjonctif|imparfait',
+    ]
+    const knownUnavailable = new Set([...accidentalDataGaps, ...grammaticallyUnavailable])
+    const actual = new Set(rows.map(row => `${row.infinitif}|${row.mode}|${row.temps}`))
+    assert.deepEqual(actual, knownUnavailable)
   })
 
   it('utilise uniquement avoir ou être comme auxiliaire', async () => {

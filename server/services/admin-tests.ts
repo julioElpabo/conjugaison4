@@ -9,6 +9,28 @@ import { auditCoachCredibility } from '../../shared/utils/coach-credibility'
 const TEST_DIRECTORY = resolve(process.cwd(), 'tests')
 const MAX_OUTPUT_LENGTH = 200_000
 
+type DatabaseRuntimeConfig = {
+  dbHost?: unknown
+  dbPort?: unknown
+  dbName?: unknown
+  dbUser?: unknown
+  dbPassword?: unknown
+}
+
+export function adminTestEnvironment(
+  config: DatabaseRuntimeConfig,
+  inheritedEnvironment: NodeJS.ProcessEnv = process.env,
+): NodeJS.ProcessEnv {
+  return {
+    ...inheritedEnvironment,
+    DB_HOST: String(config.dbHost || ''),
+    DB_PORT: String(config.dbPort || 3306),
+    DB_NAME: String(config.dbName || ''),
+    DB_USER: String(config.dbUser || ''),
+    DB_PASSWORD: String(config.dbPassword || ''),
+  }
+}
+
 const TEST_CATALOG: Record<string, { title: string, description: string, category: string }> = {
   'postman-conjugation.test.mjs': {
     title: 'Formes verbales par mode',
@@ -225,6 +247,7 @@ export async function runAdminTests(requestedFiles: string[]) {
   }
 
   const startedAt = Date.now()
+  const testEnvironment = adminTestEnvironment(useRuntimeConfig())
   const testsById = new Map(available.map(test => [test.id, test]))
   const filesByCategory = new Map<string, string[]>()
   for (const file of files) {
@@ -238,7 +261,7 @@ export async function runAdminTests(requestedFiles: string[]) {
       execFile(
         process.execPath,
         ['--env-file-if-exists=.env', '--import', 'tsx', '--test', '--test-concurrency=1', '--test-reporter=tap', ...categoryFiles.map(file => join(TEST_DIRECTORY, file))],
-        { cwd: process.cwd(), timeout: 60_000, maxBuffer: 2_000_000 },
+        { cwd: process.cwd(), env: testEnvironment, timeout: 60_000, maxBuffer: 2_000_000 },
         (error, stdout, stderr) => {
           const exitCode = error && typeof error.code === 'number' ? error.code : (error ? 1 : 0)
           resolveExecution({

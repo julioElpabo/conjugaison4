@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, c as createError, K as validateAnswer, L as diagnoseLearnerError, u as useDatabase, M as LEARNER_ERROR_DETECTOR_VERSION, N as applicableLearnerErrorTypes } from '../../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, c as createError, Q as validateConjugationAnswer, R as validateAnswer, S as diagnoseLearnerError, u as useDatabase, T as LEARNER_ERROR_DETECTOR_VERSION, U as applicableLearnerErrorTypes } from '../../../../nitro/nitro.mjs';
 import { l as learnerRunIdentifier, a as learnerAttemptIdentifier, b as learnerChallengeSnapshot, c as learnerChallengeFingerprint, d as learnerChallengeLabel, e as learnerQuestionSnapshot, f as learnerFormKey } from '../../../../_/learner-progress.mjs';
 import { g as getLearnerSession } from '../../../../_/learner-session.mjs';
 import { r as readLimitedJsonBody } from '../../../../_/limited-json-body.mjs';
@@ -31,7 +31,7 @@ const attempt_post = defineEventHandler(async (event) => {
   if (!answer || typeof body.correct !== "boolean") {
     throw createError({ statusCode: 400, statusMessage: "Tentative invalide" });
   }
-  const correct = validateAnswer(answer, question.reponses).isCorrect;
+  const correct = (challenge.exerciseKind === "conjugation" ? validateConjugationAnswer(answer, question) : validateAnswer(answer, question.reponses)).isCorrect;
   const diagnostics = correct ? [] : diagnoseLearnerError(answer, question);
   const database = useDatabase();
   const connection = await database.getConnection();

@@ -1,6 +1,6 @@
 import { d as defineEventHandler, c as createError } from '../../nitro/nitro.mjs';
-import { g as generateQuestionnaire, Q as QuestionnaireSelectionError } from '../../_/questionnaire.mjs';
-import { a as parseQuestionnaireRequest, P as PublicInputError } from '../../_/public-api-validation.mjs';
+import { s as saveDefi } from '../../_/defis.mjs';
+import { p as parseDefiDefinition, P as PublicInputError } from '../../_/public-api-validation.mjs';
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../_/public-api-rate-limit.mjs';
 import { r as readLimitedJsonBody } from '../../_/limited-json-body.mjs';
 import 'node:http';
@@ -13,17 +13,13 @@ import 'node:crypto';
 import 'mysql2/promise';
 import 'node:url';
 import 'node:fs/promises';
-import '../../_/radical-reference.mjs';
-import '../../_/pronominal-formatter.mjs';
-import '../../_/passive-voice.mjs';
-import '../../_/near-future.mjs';
 import '../../_/challenge-defaults.mjs';
 
 const index_post = defineEventHandler(async (event) => {
-  await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.questionnaire);
-  let request;
+  await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.challengeCreate);
+  let definition;
   try {
-    request = parseQuestionnaireRequest(await readLimitedJsonBody(event, 32 * 1024));
+    definition = parseDefiDefinition(await readLimitedJsonBody(event, 32 * 1024));
   } catch (error) {
     if (error instanceof PublicInputError) {
       throw createError({ statusCode: 400, statusMessage: error.message });
@@ -32,25 +28,15 @@ const index_post = defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "Corps JSON invalide" });
   }
   try {
-    const questions = await generateQuestionnaire(request);
-    if (questions.length === 0) {
-      throw createError({
-        statusCode: 422,
-        statusMessage: "Aucune question disponible pour cette s\xE9lection"
-      });
-    }
-    return questions;
+    return { code: await saveDefi(definition) };
   } catch (error) {
-    if (error instanceof QuestionnaireSelectionError) {
+    if (error instanceof PublicInputError) {
       throw createError({ statusCode: 400, statusMessage: error.message });
     }
-    if (error && typeof error === "object" && "statusCode" in error) {
-      throw error;
-    }
-    console.error("Impossible de g\xE9n\xE9rer le questionnaire", error);
+    console.error("Impossible de sauvegarder le d\xE9fi", error);
     throw createError({
       statusCode: 500,
-      statusMessage: "Impossible de g\xE9n\xE9rer le questionnaire"
+      statusMessage: "Impossible de sauvegarder le d\xE9fi"
     });
   }
 });

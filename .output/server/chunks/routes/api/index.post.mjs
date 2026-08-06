@@ -1,6 +1,4 @@
-import { d as defineEventHandler, c as createError } from '../../nitro/nitro.mjs';
-import { s as saveDefi } from '../../_/defis.mjs';
-import { p as parseDefiDefinition, P as PublicInputError } from '../../_/public-api-validation.mjs';
+import { d as defineEventHandler, H as saveExerciseSummary, F as ExerciseSummaryInputError, c as createError } from '../../nitro/nitro.mjs';
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../_/public-api-rate-limit.mjs';
 import { r as readLimitedJsonBody } from '../../_/limited-json-body.mjs';
 import 'node:http';
@@ -13,31 +11,19 @@ import 'node:crypto';
 import 'mysql2/promise';
 import 'node:url';
 import 'node:fs/promises';
-import '../../_/challenge-defaults.mjs';
 
 const index_post = defineEventHandler(async (event) => {
-  await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.challengeCreate);
-  let definition;
+  await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.summaryCreate);
   try {
-    definition = parseDefiDefinition(await readLimitedJsonBody(event, 32 * 1024));
+    const body = await readLimitedJsonBody(event, 768 * 1024);
+    return { token: await saveExerciseSummary(body) };
   } catch (error) {
-    if (error instanceof PublicInputError) {
+    if (error instanceof ExerciseSummaryInputError) {
       throw createError({ statusCode: 400, statusMessage: error.message });
     }
     if (error && typeof error === "object" && "statusCode" in error) throw error;
-    throw createError({ statusCode: 400, statusMessage: "Corps JSON invalide" });
-  }
-  try {
-    return { code: await saveDefi(definition) };
-  } catch (error) {
-    if (error instanceof PublicInputError) {
-      throw createError({ statusCode: 400, statusMessage: error.message });
-    }
-    console.error("Impossible de sauvegarder le d\xE9fi", error);
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Impossible de sauvegarder le d\xE9fi"
-    });
+    console.error("Impossible de partager le bilan", error);
+    throw createError({ statusCode: 500, statusMessage: "Impossible de partager le bilan" });
   }
 });
 

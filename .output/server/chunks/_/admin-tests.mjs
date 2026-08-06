@@ -1,4 +1,4 @@
-import { a5 as formatConjugationQuestion, c as createError, n as useRuntimeConfig, u as useDatabase } from '../nitro/nitro.mjs';
+import { ac as formatConjugationQuestion, c as createError, n as useRuntimeConfig, u as useDatabase } from '../nitro/nitro.mjs';
 import { execFile } from 'node:child_process';
 import { readFile, readdir } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
@@ -227,7 +227,7 @@ function auditCoachCredibility(coach, seed = 1) {
 }
 
 const TEST_DIRECTORY = resolve(process.cwd(), "tests");
-const ADMIN_TEST_EXECUTION_TIMEOUT_MS = 45e3;
+const ADMIN_TEST_EXECUTION_TIMEOUT_MS = 15e4;
 function adminTestEnvironment(config, inheritedEnvironment = process.env) {
   return {
     ...inheritedEnvironment,
@@ -240,6 +240,16 @@ function adminTestEnvironment(config, inheritedEnvironment = process.env) {
 }
 function executeAdminTestGroups(groups, execute) {
   return Promise.all(groups.map(([category, files]) => execute(category, files)));
+}
+function adminTestArguments(files) {
+  return [
+    "--import",
+    "tsx",
+    "--test",
+    "--test-concurrency=1",
+    "--test-reporter=tap",
+    ...files.map((file) => join(TEST_DIRECTORY, file))
+  ];
 }
 const TEST_CATALOG = {
   "postman-conjugation.test.mjs": {
@@ -461,7 +471,7 @@ async function runAdminTests(requestedFiles) {
     const execution = await new Promise((resolveExecution) => {
       execFile(
         process.execPath,
-        ["--env-file-if-exists=.env", "--import", "tsx", "--test", "--test-concurrency=1", "--test-reporter=tap", ...categoryFiles.map((file) => join(TEST_DIRECTORY, file))],
+        adminTestArguments(categoryFiles),
         { cwd: process.cwd(), env: testEnvironment, timeout: ADMIN_TEST_EXECUTION_TIMEOUT_MS, maxBuffer: 2e6 },
         (error, stdout, stderr) => {
           const exitCode = error && typeof error.code === "number" ? error.code : error ? 1 : 0;

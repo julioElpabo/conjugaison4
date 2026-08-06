@@ -1,4 +1,4 @@
-import { u as useDatabase, s as setResponseHeader, c as createError, B as getRequestIP } from '../nitro/nitro.mjs';
+import { u as useDatabase, s as setResponseHeader, c as createError, D as getRequestIP } from '../nitro/nitro.mjs';
 import { createHash } from 'node:crypto';
 
 const PUBLIC_RATE_LIMITS = {
@@ -7,6 +7,8 @@ const PUBLIC_RATE_LIMITS = {
   tenseExamples: { bucket: "tense-examples", maximum: 30, windowSeconds: 60 },
   challengeCreate: { bucket: "challenge-create", maximum: 30, windowSeconds: 60 * 60 },
   challengeRead: { bucket: "challenge-read", maximum: 180, windowSeconds: 60 },
+  summaryCreate: { bucket: "summary-create", maximum: 30, windowSeconds: 60 * 60 },
+  summaryRead: { bucket: "summary-read", maximum: 180, windowSeconds: 60 },
   feedback: { bucket: "feedback", maximum: 12, windowSeconds: 10 * 60 },
   automaticHelpError: { bucket: "automatic-help-error", maximum: 30, windowSeconds: 10 * 60 }
 };

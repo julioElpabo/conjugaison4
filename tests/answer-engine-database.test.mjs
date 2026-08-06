@@ -71,8 +71,12 @@ describe('correcteur appliqué à tout le catalogue de conjugaisons', { skip: !d
       for (const form of forms(row)) {
         checkedForms += 1
         const displayed = formatAnswer(row.pronom, form, row.mode_name, row.infinitif)
-        if (!isAnswerCorrect(form, question.reponses) || !isAnswerCorrect(displayed, question.reponses)) {
+        if (!isAnswerCorrect(displayed, question.reponses)) {
           failures.push(`${row.infinitif} | ${row.temps_name} (${row.mode_name}) | ${row.pronom} : ${form}`)
+        }
+        if (String(row.mode_name).toLocaleLowerCase('fr') !== 'impératif'
+            && isAnswerCorrect(form, question.reponses)) {
+          failures.push(`${row.infinitif} | ${row.temps_name} (${row.mode_name}) | ${row.pronom} accepte sans pronom : ${form}`)
         }
       }
       for (const correction of question.reponsesPourCorrige) {
@@ -98,6 +102,7 @@ describe('correcteur appliqué à tout le catalogue de conjugaisons', { skip: !d
         const candidate = group
           .filter(row => Number(row.personne_id) !== Number(target.personne_id))
           .flatMap(forms)
+          .map(form => formatAnswer(target.pronom, form, target.mode_name, target.infinitif))
           .find(form => !accepted.has(normalizeAnswer(form)))
         if (!candidate) continue
         checked += 1
@@ -121,6 +126,7 @@ describe('correcteur appliqué à tout le catalogue de conjugaisons', { skip: !d
         const candidate = group
           .filter(row => Number(row.temp_id) !== Number(target.temp_id))
           .flatMap(forms)
+          .map(form => formatAnswer(target.pronom, form, target.mode_name, target.infinitif))
           .find(form => !accepted.has(normalizeAnswer(form)))
         if (!candidate) continue
         checked += 1

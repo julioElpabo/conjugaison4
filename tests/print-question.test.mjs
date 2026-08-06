@@ -67,6 +67,31 @@ describe('questions imprimables', () => {
     )
   })
 
+  it('imprime une seule longue ligne sans révéler le nombre de mots attendus', () => {
+    assert.deepEqual(
+      printableQuestionParts({
+        titre: 'payer',
+        consigne: 'vous | payer | imparfait (indicatif)',
+        reponses: ['vous payiez'],
+        reponsesPourCorrige: ['vous payiez'],
+        pronom: 'vous',
+        infinitif: 'payer',
+        temps: 'imparfait',
+        mode: 'indicatif',
+        conjugaison1: 'payiez',
+      }, 'conjugation'),
+      {
+        label: 'vous | payer | imparfait (indicatif) :',
+        completion: '.................................',
+        completionPrefix: '',
+        completionSuffix: '',
+        fillBlank: true,
+        suffixOnNextLine: false,
+        blankWidthPercent: 100,
+      },
+    )
+  })
+
   it("utilise j’ devant une forme qui commence par une voyelle", () => {
     const parts = printableQuestionParts({
       titre: 'aimer',

@@ -3,6 +3,7 @@ import { describe, it } from 'node:test'
 
 import {
   ADMIN_TEST_EXECUTION_TIMEOUT_MS,
+  adminTestArguments,
   adminTestEnvironment,
   executeAdminTestGroups,
 } from '../server/services/admin-tests.ts'
@@ -37,8 +38,21 @@ describe('environnement des tests administrateur', () => {
     assert.equal(environment.PATH, '/usr/bin')
   })
 
-  it('garde le délai interne sous la limite HTTP habituelle du proxy', () => {
-    assert.equal(ADMIN_TEST_EXECUTION_TIMEOUT_MS, 45_000)
+  it('laisse aux suites distantes lentes le temps de terminer en arrière-plan', () => {
+    assert.equal(ADMIN_TEST_EXECUTION_TIMEOUT_MS, 150_000)
+  })
+
+  it('utilise l’environnement transmis sans rechercher un fichier .env en production', () => {
+    const argumentsList = adminTestArguments(['answer.test.mjs'])
+    assert.equal(argumentsList.includes('--env-file-if-exists=.env'), false)
+    assert.deepEqual(argumentsList.slice(0, 5), [
+      '--import',
+      'tsx',
+      '--test',
+      '--test-concurrency=1',
+      '--test-reporter=tap',
+    ])
+    assert.match(argumentsList[5], /tests\/answer\.test\.mjs$/u)
   })
 
   it('lance les catégories en parallèle pour ne pas cumuler leurs durées', async () => {

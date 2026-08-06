@@ -4,13 +4,16 @@ import type { ConjugationTense, ExerciseAttempt, ExerciseKind, ExerciseQuestion,
 import type { CoachEvent, CoachMedia, CoachMessageContext, CoachProfile } from '~~/shared/types/coach'
 import type { AnswerComparison } from '~~/shared/utils/answer-difference'
 import LearnerErrorFeedback from '~/components/exercise/LearnerErrorFeedback.vue'
+import ShareExerciseSummaryDialog from '~/components/exercise/ShareExerciseSummaryDialog.vue'
 import {
+  conjugationRequiresSubjectPronoun,
   findConjugationConfusions,
   findImpossibleSingularEnding,
   getAlternativeCorrections,
   impossibleSingularEndingReminderMessage,
   isFutureSimpleInsteadOfNearFuture,
   validateAnswer,
+  validateConjugationAnswer,
 } from '~~/shared/utils/answer'
 import { buildAnswerComparison } from '~~/shared/utils/answer-difference'
 import { createCoachDialogueState, createVariedCoachReaction } from '~~/shared/utils/coach-dialogue'
@@ -121,6 +124,7 @@ const regeneratingQuestions = ref(false)
 const repeatCurrentQuestion = ref(false)
 const restartError = ref('')
 const printSummaryOpen = ref(false)
+const shareSummaryOpen = ref(false)
 const closeConfirmationOpen = ref(false)
 const helpOpen = ref(Boolean(props.tourDemo))
 const helpQuestionIndex = ref<number | null>(null)
@@ -147,6 +151,10 @@ const CHAT_MESSAGES_AFTER_HELP_DELAY_MS = 1000
 useDialogFocus(dialog, handleEscapeClose, input)
 
 const currentQuestion = computed(() => props.questions[currentIndex.value])
+const currentSubjectMustBeTyped = computed(() => Boolean(
+  currentQuestion.value && !isIdentificationExercise.value
+  && conjugationRequiresSubjectPronoun(currentQuestion.value),
+))
 const questionNumberOffset = computed(() => props.trackingContext?.questionIndexOffset || 0)
 const displayedQuestionNumber = computed(() => questionNumberOffset.value + currentIndex.value + 1)
 const displayedQuestionCount = computed(() => questionNumberOffset.value
@@ -729,6 +737,12 @@ async function runChatOpening(eventType: Extract<CoachEvent, 'introduction' | 'r
   }
   if (version !== conversationVersion) return
   await askCurrentQuestion()
+  if (version !== conversationVersion) return
+  if (eventType === 'introduction' && !isIdentificationExercise.value) {
+    await enqueueCoachBubble(() => ({
+      text: ui("N'oublie pas le pronom !"),
+    }))
+  }
 }
 
 async function submit() {
@@ -744,7 +758,9 @@ async function submit() {
 
   addMessage('learner', candidate, undefined, currentIndex.value)
   lastCoachBubbleAt = Date.now()
-  const result = validateAnswer(candidate, question.reponses)
+  const result = isIdentificationExercise.value
+    ? validateAnswer(candidate, question.reponses)
+    : validateConjugationAnswer(candidate, question)
   track('answer_submitted', exerciseAnalyticsMetadata.value)
   track(result.isCorrect ? 'answer_correct' : 'answer_retry', exerciseAnalyticsMetadata.value)
   answer.value = ''
@@ -962,6 +978,7 @@ async function restart() {
   finalSummaryPreparing.value = false
   finalSummaryVisible.value = false
   printSummaryOpen.value = false
+  shareSummaryOpen.value = false
   helpOpen.value = false
   helpQuestionIndex.value = null
   lastMediaQuestion.value = -100
@@ -989,7 +1006,8 @@ function requestClose() {
 }
 
 function handleEscapeClose() {
-  if (printSummaryOpen.value) printSummaryOpen.value = false
+  if (shareSummaryOpen.value) shareSummaryOpen.value = false
+  else if (printSummaryOpen.value) printSummaryOpen.value = false
   else if (closeConfirmationOpen.value) cancelClose()
   else if (helpOpen.value) closeHelp()
   else requestClose()
@@ -1241,25 +1259,26 @@ onBeforeUnmount(() => {
           <div v-if="finalSummaryVisible" class="chat-message chat-message--coach chat-restart-prompt">
             <span>{{ ui('Tu veux refaire ce défi ?') }}</span>
             <div class="chat-restart-prompt__actions">
-              <button type="button" class="chat-restart-prompt__same" :disabled="regeneratingQuestions" @click="restart">{{ ui('Avec les mêmes questions') }}</button>
+              <button type="button" class="chat-restart-prompt__same" :disabled="regeneratingQuestions" @click="restart"><span aria-hidden="true">↻</span>{{ ui('Avec les mêmes questions') }}</button>
               <button type="button" class="chat-restart-prompt__new" :disabled="regeneratingQuestions" @click="restartWithNewQuestions">
-                {{ regeneratingQuestions ? ui('Préparation…') : ui('Avec d’autres questions') }}
+                <span aria-hidden="true">↻</span>{{ regeneratingQuestions ? ui('Préparation…') : ui('Avec d’autres questions') }}
               </button>
+              <button type="button" class="chat-restart-prompt__share" :disabled="regeneratingQuestions" @click="shareSummaryOpen = true"><span aria-hidden="true">↗</span>{{ ui('Partager mon bilan') }}</button>
+              <button type="button" class="chat-restart-prompt__print" :disabled="regeneratingQuestions" @click="printSummaryOpen = true"><span aria-hidden="true">⎙</span>{{ ui('Imprimer mon bilan') }}</button>
               <button type="button" class="chat-restart-prompt__quit" :disabled="regeneratingQuestions" @click="emit('close')">{{ ui('Quitter le chat') }}</button>
-              <button type="button" class="chat-restart-prompt__print" :disabled="regeneratingQuestions" @click="printSummaryOpen = true">{{ ui('Imprimer le bilan') }}</button>
             </div>
             <small v-if="restartError" class="chat-restart-prompt__error" role="alert">{{ restartError }}</small>
           </div>
         </div>
 
         <form v-if="!finished" class="chat-composer" @submit.prevent="submit">
-          <label class="sr-only" for="chat-answer">{{ ui('Ta réponse') }}</label>
           <input
             id="chat-answer"
             ref="chat-answer"
             v-model="answer"
             type="text"
             autocomplete="off"
+            :aria-label="ui('Ta réponse')"
             :disabled="waitingForNext"
             :placeholder="chatAnswerPlaceholder"
           >
@@ -1318,6 +1337,14 @@ onBeforeUnmount(() => {
         :verbs="verbs.map(verb => verb.infinitif)"
         :tenses="tenses.map(tense => ({ name: tense.name, mode: tense.mode?.name }))"
         @close="printSummaryOpen = false"
+      />
+      <ShareExerciseSummaryDialog
+        v-if="shareSummaryOpen"
+        presentation="chat"
+        :items="attemptSummaries"
+        :verbs="verbs.map(verb => verb.infinitif)"
+        :tenses="tenses.map(tense => ({ name: tense.name, mode: tense.mode?.name }))"
+        @close="shareSummaryOpen = false"
       />
     </div>
   </Teleport>
@@ -2478,8 +2505,12 @@ onBeforeUnmount(() => {
 }
 
 .chat-restart-prompt__actions button {
+  display: inline-flex;
   min-height: 42px;
   padding: 8px 12px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   border: 1px solid #bfd4da;
   border-radius: 12px;
   color: #174253;
@@ -2488,6 +2519,12 @@ onBeforeUnmount(() => {
   font-weight: 850;
   line-height: 1.25;
   transition: transform .16s ease, border-color .16s ease, background-color .16s ease, box-shadow .16s ease;
+}
+
+.chat-restart-prompt__actions button > span {
+  flex: 0 0 auto;
+  font-size: 1.15em;
+  line-height: 1;
 }
 
 .chat-restart-prompt__actions button:hover:not(:disabled),
@@ -2545,6 +2582,19 @@ onBeforeUnmount(() => {
   color: #174f61;
   border-style: dashed;
   background: #f5fafb;
+}
+
+.chat-restart-prompt__actions .chat-restart-prompt__share {
+  min-height: 38px;
+  grid-column: 1 / -1;
+  color: #174f61;
+  border-color: #82b9c5;
+  background: #e8f6f8;
+}
+
+.chat-restart-prompt__actions .chat-restart-prompt__share:hover:not(:disabled),
+.chat-restart-prompt__actions .chat-restart-prompt__share:focus-visible {
+  background: #d9f0f3;
 }
 
 .chat-restart-prompt__actions .chat-restart-prompt__print:hover:not(:disabled),
@@ -2868,6 +2918,10 @@ onBeforeUnmount(() => {
     grid-column: auto;
   }
 
+  .chat-restart-prompt__actions .chat-restart-prompt__share {
+    grid-column: auto;
+  }
+
   .coach-avatar {
     width: 94px;
     height: 94px;
@@ -2890,6 +2944,18 @@ onBeforeUnmount(() => {
 
   .chat-close-confirmation__actions {
     flex-direction: column;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 1024px) {
+  .chat-restart-prompt__actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .chat-restart-prompt__actions .chat-restart-prompt__quit,
+  .chat-restart-prompt__actions .chat-restart-prompt__share,
+  .chat-restart-prompt__actions .chat-restart-prompt__print {
+    grid-column: auto;
   }
 }
 

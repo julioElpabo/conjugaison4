@@ -30,6 +30,14 @@ test('le français sert de repli et les paramètres sont remplacés', () => {
   )
 })
 
+test('le rappel du pronom dans le chat est traduit dans toutes les langues', () => {
+  assert.equal(translateUiMessage('fr', "N'oublie pas le pronom !"), "N'oublie pas le pronom !")
+  assert.equal(translateUiMessage('de', "N'oublie pas le pronom !"), 'Vergiss das Pronomen nicht!')
+  assert.equal(translateUiMessage('en', "N'oublie pas le pronom !"), "Don't forget the pronoun!")
+  assert.equal(translateUiMessage('it', "N'oublie pas le pronom !"), 'Non dimenticare il pronome!')
+  assert.equal(translateUiMessage('es', "N'oublie pas le pronom !"), '¡No olvides el pronombre!')
+})
+
 test('les sous-options du type d’exercice sont traduites', () => {
   assert.equal(translateUiMessage('de', 'Avec mes verbes'), 'Mit meinen Verben')
   assert.equal(translateUiMessage('en', 'Avec n’importe quel verbe'), 'With any verb')

@@ -87,10 +87,10 @@ describe('COD placé après le verbe', () => {
         complement_function: 'cod',
       }), 'vous')
 
-      assert.ok(question.reponses.includes('avez mangé'))
+      assert.equal(question.reponses.includes('avez mangé'), false)
       assert.ok(question.reponses.includes(`vous avez mangé ${testCase.after}`))
       assert.deepEqual(question.reponsesPourCorrige, [`vous avez mangé ${testCase.after}`])
-      assert.equal(isAnswerCorrect('avez mangé', question.reponses), true)
+      assert.equal(isAnswerCorrect('vous avez mangé', question.reponses), true)
       if (testCase.form !== 'avez mangé') {
         assert.equal(isAnswerCorrect(testCase.form, question.reponses), false)
       }
@@ -114,10 +114,11 @@ describe('COD placé avant le verbe', () => {
       }), 'vous')
 
       assert.equal(question.saisiePrefixe, 'que vous')
-      assert.ok(question.reponses.includes(testCase.form))
+      assert.equal(question.reponses.includes(testCase.form), false)
+      assert.ok(question.reponses.includes(`que vous ${testCase.form}`))
       assert.ok(question.reponses.includes(`${testCase.before} que vous ${testCase.form}`))
       assert.deepEqual(question.reponsesPourCorrige, [`${testCase.before} que vous ${testCase.form}`])
-      assert.equal(isAnswerCorrect(testCase.form, question.reponses), true)
+      assert.equal(isAnswerCorrect(`que vous ${testCase.form}`, question.reponses), true)
       if (testCase.form !== 'avez mangé') {
         assert.equal(isAnswerCorrect('avez mangé', question.reponses), false)
       }
@@ -147,7 +148,8 @@ describe('COD avec les temps simples et l’impératif', () => {
     }), 'vous')
 
     assert.equal(question.saisiePrefixe, 'que vous')
-    assert.ok(question.reponses.includes('mangiez'))
+    assert.equal(question.reponses.includes('mangiez'), false)
+    assert.ok(question.reponses.includes('que vous mangiez'))
     assert.deepEqual(question.reponsesPourCorrige, ["Ce sont les seules pommes que vous mangiez"])
     assert.equal(question.consigne, "Ce sont les seules pommes que vous … | manger | imparfait (subjonctif)")
     assert.equal(question.agreementReminder, undefined)
@@ -204,7 +206,8 @@ describe('COI placé après le verbe', () => {
       complement_preposition: 'à',
     }), 'vous')
 
-    assert.ok(question.reponses.includes('avez parlé'))
+    assert.equal(question.reponses.includes('avez parlé'), false)
+    assert.ok(question.reponses.includes('vous avez parlé'))
     assert.equal(question.reponses.includes('avez parlées'), false)
     assert.deepEqual(question.reponsesPourCorrige, ['vous avez parlé à ses amies'])
     assert.equal(question.agreementReminder?.kind, 'coi')

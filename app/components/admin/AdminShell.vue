@@ -41,6 +41,7 @@ const menuGroups = [
       { label: 'Mon compte', path: '/mon-compte' },
       { label: 'Admins', path: '/admin/admins' },
       { label: 'Utilisateurs', path: '/admin/users' },
+      { label: 'Bilans partagés', path: '/admin/shared-summaries' },
       { label: 'Contact', path: '/admin/contact' },
     ],
   },

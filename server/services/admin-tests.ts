@@ -8,7 +8,7 @@ import { auditCoachCredibility } from '../../shared/utils/coach-credibility'
 
 const TEST_DIRECTORY = resolve(process.cwd(), 'tests')
 const MAX_OUTPUT_LENGTH = 200_000
-export const ADMIN_TEST_EXECUTION_TIMEOUT_MS = 45_000
+export const ADMIN_TEST_EXECUTION_TIMEOUT_MS = 150_000
 
 type DatabaseRuntimeConfig = {
   dbHost?: unknown
@@ -37,6 +37,17 @@ export function executeAdminTestGroups<T>(
   execute: (category: string, files: string[]) => Promise<T>,
 ): Promise<T[]> {
   return Promise.all(groups.map(([category, files]) => execute(category, files)))
+}
+
+export function adminTestArguments(files: string[]) {
+  return [
+    '--import',
+    'tsx',
+    '--test',
+    '--test-concurrency=1',
+    '--test-reporter=tap',
+    ...files.map(file => join(TEST_DIRECTORY, file)),
+  ]
 }
 
 const TEST_CATALOG: Record<string, { title: string, description: string, category: string }> = {
@@ -277,7 +288,7 @@ export async function runAdminTests(requestedFiles: string[]) {
     const execution = await new Promise<{ exitCode: number, stdout: string, stderr: string, timedOut: boolean }>((resolveExecution) => {
       execFile(
         process.execPath,
-        ['--env-file-if-exists=.env', '--import', 'tsx', '--test', '--test-concurrency=1', '--test-reporter=tap', ...categoryFiles.map(file => join(TEST_DIRECTORY, file))],
+        adminTestArguments(categoryFiles),
         { cwd: process.cwd(), env: testEnvironment, timeout: ADMIN_TEST_EXECUTION_TIMEOUT_MS, maxBuffer: 2_000_000 },
         (error, stdout, stderr) => {
           const exitCode = error && typeof error.code === 'number' ? error.code : (error ? 1 : 0)

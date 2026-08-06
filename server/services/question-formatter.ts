@@ -309,11 +309,15 @@ function answerVariants(row: ConjugationSourceRow, pronoun: string) {
     )) {
       const agreedForm = applyAnteposedCodAgreement(form, row)
       const canonical = formatAnswer(pronoun, agreedForm, row.mode_name, row.infinitif)
-      answers.push(canonical, agreedForm)
+      answers.push(canonical)
       if (normalized(row.mode_name) === 'impératif') {
-        answers.push(agreedForm.replace(/!$/, ''))
+        answers.push(agreedForm, agreedForm.replace(/!$/, ''))
       } else {
         answers.push(withPronoun(pronoun, agreedForm, row.infinitif))
+        if (row.complement_position === 'before') {
+          const prefix = inputPrefix(pronoun, agreedForm, row.mode_name, row.infinitif, 'before')
+          answers.push(`${prefix}${/[’']$/u.test(prefix) ? '' : ' '}${agreedForm}`)
+        }
       }
       if (row.complement_position === 'before' && row.complement_anteposed) {
         answers.push(withAnteposedComplement(canonical, pronoun, row.mode_name, row.complement_anteposed, row.complement_relative_pronoun, row.complement_gender, row.complement_number))
@@ -399,7 +403,6 @@ export function formatConjugationQuestion(
     tense: candidate.tense,
     mode: candidate.mode,
     answers: unique(candidate.forms.flatMap(form => [
-      form,
       formatAnswer(pronoun, form, candidate.mode, row.infinitif),
       withPronoun(pronoun, form, row.infinitif),
     ])),

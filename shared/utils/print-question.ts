@@ -1,4 +1,5 @@
 import type { ExerciseQuestion } from '../types/conjugation'
+import { conjugationRequiresSubjectPronoun } from './answer'
 
 const ANSWER_DOTS = '.................................'
 const GERUND_ANSWER_DOTS = '......................................'
@@ -22,6 +23,27 @@ function withSubjunctiveCue(sentence: string, question: ExerciseQuestion) {
   return `que ${sentence}`.replace(/^que (i(?:l|ls|el|els)|elle?s?|on)\b/iu, "qu'$1")
 }
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')
+}
+
+function prefixWithoutWrittenSubject(prefix: string, question: ExerciseQuestion) {
+  const pronoun = question.pronom?.trim() || ''
+  const candidates = [
+    question.saisiePrefixe?.trim(),
+    pronoun.toLocaleLowerCase('fr-CH') === 'je' ? "j'" : '',
+    pronoun,
+  ]
+    .filter((value): value is string => Boolean(value))
+    .sort((left, right) => right.length - left.length)
+  for (const candidate of candidates) {
+    const pattern = new RegExp(`${escapeRegExp(candidate).replace(/[’']/gu, "[’']")}\\s*$`, 'iu')
+    if (!pattern.test(prefix)) continue
+    return prefix.replace(pattern, '').trim()
+  }
+  return prefix.trim()
+}
+
 function completionParts(sentence: string, question: ExerciseQuestion) {
   const promptedSentence = withSubjunctiveCue(sentence.trim(), question)
   const [prefix = '', ...suffixParts] = promptedSentence.split('…')
@@ -30,7 +52,10 @@ function completionParts(sentence: string, question: ExerciseQuestion) {
   const suffix = isImperative && !rawSuffix.endsWith('!')
     ? `${rawSuffix}${rawSuffix ? ' ' : ''}!`
     : rawSuffix
-  const completionPrefix = question.complementPosition !== 'before' && question.saisiePrefixe !== undefined
+  const requiresWrittenSubject = conjugationRequiresSubjectPronoun(question)
+  const completionPrefix = requiresWrittenSubject
+    ? prefixWithoutWrittenSubject(prefix.trim(), question)
+    : question.complementPosition !== 'before' && question.saisiePrefixe !== undefined
     ? question.saisiePrefixe.trim()
     : prefix.trim()
   const dots = ANSWER_DOTS
@@ -111,7 +136,7 @@ export function printableQuestionParts(question: ExerciseQuestion, exerciseKind:
   const completion = completionParts(sentence, question)
 
   return {
-    label: `${infinitive} | ${tenseAndMode} :`,
+    label: `${question.pronom ? `${question.pronom} | ` : ''}${infinitive} | ${tenseAndMode} :`,
     ...completion,
   }
 }

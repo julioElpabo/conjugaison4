@@ -15,7 +15,7 @@ const config = useRuntimeConfig()
 const siteUrl = computed(() => String(config.public.siteUrl).replace(/\/$/u, ''))
 const routeWithoutLocale = computed(() => stripLocaleFromPath(route.path))
 const canonicalUrl = computed(() => `${siteUrl.value}${localizePath(routeWithoutLocale.value, interfaceLocale.value)}`)
-const privatePath = computed(() => /^(?:\/admin(?:\/|$)|\/(?:signin|my-page|mon-compte|nouveau-defi)(?:\/|$)|\/defi(?:\/|$))/u.test(routeWithoutLocale.value))
+const privatePath = computed(() => /^(?:\/admin(?:\/|$)|\/(?:signin|my-page|mon-compte|nouveau-defi)(?:\/|$)|\/(?:defi|bilan)(?:\/|$))/u.test(routeWithoutLocale.value))
 
 function localizedPageKey(route: RouteLocationNormalizedLoaded) {
   return stripLocaleFromPath(route.path)

@@ -7,6 +7,7 @@ import {
   PAST_GERUND_BLANK,
   PRESENT_GERUND_BLANK,
   SIMPLE_TENSE_BLANK,
+  SUBJECT_PRONOUN_BLANK,
 } from '../shared/utils/coach-question.ts'
 import { formatConjugationQuestion } from '../server/services/question-formatter.ts'
 
@@ -78,7 +79,7 @@ describe('questions affichées dans le chat', () => {
 
     assert.equal(COMPOUND_TENSE_GAP, '\u00a0'.repeat(4))
     assert.equal(COMPOUND_TENSE_BLANK, `............${COMPOUND_TENSE_GAP}.......................`)
-    assert.equal(result.sentence, `Ils${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK}`)
+    assert.equal(result.sentence, `${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK}`)
   })
 
   it("élide je devant l’auxiliaire d’un temps composé avec complément", () => {
@@ -106,11 +107,11 @@ describe('questions affichées dans le chat', () => {
     assert.equal(question.consigne, "j' … les lettres de l'alphabet | lire | plus-que-parfait (indicatif)")
     assert.equal(
       result.sentence,
-      `J'${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK} les lettres de l'alphabet`,
+      `${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK} les lettres de l'alphabet`,
     )
   })
 
-  it('affiche un seul champ pour « il prend »', () => {
+  it('affiche aussi un champ pour le pronom de « il prend »', () => {
     const result = coachQuestionBubbles({
       consigne: 'il … | prendre | présent (indicatif)',
       pronom: 'il',
@@ -121,8 +122,8 @@ describe('questions affichées dans le chat', () => {
       conjugaison1: 'prend',
     })
 
-    assert.equal(result.sentence, `Il ${SIMPLE_TENSE_BLANK}`)
-    assert.deepEqual(blankGroups(result.sentence), [SIMPLE_TENSE_BLANK])
+    assert.equal(result.sentence, `${SUBJECT_PRONOUN_BLANK} ${SIMPLE_TENSE_BLANK}`)
+    assert.deepEqual(blankGroups(result.sentence), [SUBJECT_PRONOUN_BLANK, SIMPLE_TENSE_BLANK])
   })
 
   it('réserve deux champs au futur proche et trois pour un verbe pronominal', () => {
@@ -147,8 +148,27 @@ describe('questions affichées dans le chat', () => {
       conjugaison1: 'vais me réveiller',
     })
 
-    assert.deepEqual(blankGroups(simple.sentence), ['............', '.......................'])
-    assert.deepEqual(blankGroups(pronominal.sentence), ['............', '............', '.......................'])
+    assert.deepEqual(blankGroups(simple.sentence), [SUBJECT_PRONOUN_BLANK, '............', '.......................'])
+    assert.deepEqual(blankGroups(pronominal.sentence), [SUBJECT_PRONOUN_BLANK, '............', '............', '.......................'])
+  })
+
+  it('réserve quatre champs pour « nous nous sommes aperçus »', () => {
+    const result = coachQuestionBubbles({
+      consigne: 'nous | s’apercevoir | passé composé (indicatif)',
+      pronom: 'nous',
+      infinitif: 's’apercevoir',
+      mode: 'indicatif',
+      temps: 'passé composé',
+      isCompound: true,
+      conjugaison1: 'nous sommes aperçus',
+    })
+
+    assert.deepEqual(blankGroups(result.sentence), [
+      SUBJECT_PRONOUN_BLANK,
+      '............',
+      '............',
+      '.......................',
+    ])
   })
 
   it('affiche un seul champ pour « mangeant » au participe présent', () => {
@@ -206,7 +226,7 @@ describe('questions affichées dans le chat', () => {
     assert.deepEqual(blankGroups(result.sentence), ['............', '............', '.......................'])
   })
 
-  it('garde exactement deux champs pour « il a pris »', () => {
+  it('garde les deux champs verbaux et ajoute celui du pronom pour « il a pris »', () => {
     const result = coachQuestionBubbles({
       consigne: 'il … | prendre | passé composé (indicatif)',
       pronom: 'il',
@@ -217,8 +237,8 @@ describe('questions affichées dans le chat', () => {
       conjugaison1: 'a pris',
     })
 
-    assert.equal(result.sentence, `Il${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK}`)
-    assert.deepEqual(blankGroups(result.sentence), ['............', '.......................'])
+    assert.equal(result.sentence, `${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK}`)
+    assert.deepEqual(blankGroups(result.sentence), [SUBJECT_PRONOUN_BLANK, '............', '.......................'])
   })
 
   it('introduit le subjonctif présent avec « Il faut que »', () => {
@@ -232,7 +252,7 @@ describe('questions affichées dans le chat', () => {
       conjugaison1: 'prenne',
     })
 
-    assert.equal(result.sentence, `Il faut que je ${SIMPLE_TENSE_BLANK}`)
+    assert.equal(result.sentence, `Il faut que ${SUBJECT_PRONOUN_BLANK} ${SIMPLE_TENSE_BLANK}`)
   })
 
   it('introduit le subjonctif passé avec « Il faut qu’il » et deux champs', () => {
@@ -246,7 +266,7 @@ describe('questions affichées dans le chat', () => {
       conjugaison1: 'ait pris',
     })
 
-    assert.equal(result.sentence, `Il faut qu'il${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK}`)
+    assert.equal(result.sentence, `Il faut que ${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK}`)
   })
 
   it('introduit le subjonctif imparfait avec « Il fallait qu’elle »', () => {
@@ -260,7 +280,7 @@ describe('questions affichées dans le chat', () => {
       conjugaison1: 'prît',
     })
 
-    assert.equal(result.sentence, `Il fallait qu'elle ${SIMPLE_TENSE_BLANK}`)
+    assert.equal(result.sentence, `Il fallait que ${SUBJECT_PRONOUN_BLANK} ${SIMPLE_TENSE_BLANK}`)
   })
 
   it('introduit le subjonctif plus-que-parfait avec « Il fallait que »', () => {
@@ -274,7 +294,7 @@ describe('questions affichées dans le chat', () => {
       conjugaison1: 'eussions pris',
     })
 
-    assert.equal(result.sentence, `Il fallait que nous${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK}`)
+    assert.equal(result.sentence, `Il fallait que ${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK}`)
   })
 
   it('conserve le cadre naturel d’une relative au subjonctif', () => {
@@ -300,7 +320,7 @@ describe('questions affichées dans le chat', () => {
     }, 'tu')
 
     const result = coachQuestionBubbles(question)
-    assert.equal(result.sentence, `C'est la seule autre maison que tu${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK}`)
+    assert.equal(result.sentence, `C'est la seule autre maison que ${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK}`)
   })
 
   it('masque le mode indicatif quand la session ne contient que ce mode', () => {

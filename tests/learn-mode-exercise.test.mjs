@@ -28,6 +28,20 @@ test('le parcours propose les présentations classique et chat avec dix citation
   assert.match(learn, /<ChatExercise[\s\S]*exercise-kind="mode-identification"/u)
 })
 
+test('le chat rappelle le pronom dans une bulle après la question à compléter', () => {
+  const openingStart = chat.indexOf('async function runChatOpening')
+  const welcome = chat.indexOf('await addCoachReaction(eventType, {})', openingStart)
+  const mobileHint = chat.indexOf("text: ui('Glisse vers le bas pour voir l’aide.')", welcome)
+  const question = chat.indexOf('await askCurrentQuestion()', mobileHint)
+  const reminder = chat.indexOf('text: ui("N\'oublie pas le pronom !")', question)
+
+  assert.ok(welcome >= 0 && welcome < mobileHint)
+  assert.ok(mobileHint < question && question < reminder)
+  assert.match(chat.slice(question, reminder), /eventType === 'introduction' && !isIdentificationExercise\.value[\s\S]*await enqueueCoachBubble/u)
+  assert.doesNotMatch(chat, /<label for="chat-answer">/u)
+  assert.match(chat, /:aria-label="ui\('Ta réponse'\)"/u)
+})
+
 test('les questions sont équilibrées par mode et les deux interfaces savent les afficher', () => {
   assert.match(questionnaire, /balancedModeIdentificationQuestions/u)
   assert.match(questionnaire, /\['indicatif', 'subjonctif', 'conditionnel', 'impératif', 'infinitif'\]/u)
@@ -85,7 +99,7 @@ test('la version classique propose les mêmes boutons pour le mode et le temps',
   assert.match(classic, /@click="chooseIdentificationMode\(choice\.value\)"/u)
   assert.match(classic, /@click="submitIdentificationTense\(row\.simple\)"/u)
   assert.match(classic, /@click="submitIdentificationTense\(row\.compound\)"/u)
-  assert.match(classic, /:placeholder="answerPlaceholder"/u)
+  assert.match(classic, /:placeholder="currentSubjectMustBeTyped \? currentAnswerPlaceholder : answerPlaceholder"/u)
   assert.match(classic, /Écris ta réponse ou clique directement sur le mode puis sur le temps correct/u)
   assert.match(classic, /props\.identificationTenses\?\.length/u)
   assert.match(chat, /props\.identificationTenses\?\.length/u)

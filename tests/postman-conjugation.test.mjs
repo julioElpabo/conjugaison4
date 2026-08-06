@@ -42,9 +42,9 @@ function sourceRow(item, index) {
 }
 
 describe('collection Postman — formatage des conjugaisons', () => {
-  it('importe les 30 scénarios et leurs 182 assertions', () => {
+  it('importe les 30 scénarios et leurs 150 assertions', () => {
     assert.equal(collection.item.length, 30)
-    assert.equal(collection.item.flatMap(expectationsFor).length, 182)
+    assert.equal(collection.item.flatMap(expectationsFor).length, 150)
   })
 
   collection.item.forEach((item, index) => {

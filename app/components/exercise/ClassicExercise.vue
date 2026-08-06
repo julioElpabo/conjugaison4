@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import LearnerErrorFeedback from '~/components/exercise/LearnerErrorFeedback.vue'
+import ShareExerciseSummaryDialog from '~/components/exercise/ShareExerciseSummaryDialog.vue'
 import { isModeLandingSlug, modeLandingPage } from '~~/shared/data/mode-landing-pages'
 import { modeTensePedagogy } from '~~/shared/data/mode-tense-pedagogy'
 import type { ConjugationTense, ExerciseAttempt, ExerciseKind, ExerciseQuestion, LearnerErrorDetail, LearnerExerciseTrackingContext } from '~~/shared/types/conjugation'
 import { grammarTenseCode } from '~~/shared/utils/grammar-codes'
 import {
+  conjugationAnswerPlaceholder,
+  conjugationRequiresSubjectPronoun,
   findConjugationConfusions,
   findImpossibleSingularEnding,
   getAlternativeCorrections,
@@ -55,6 +58,7 @@ const pendingErrorDetails = ref<LearnerErrorDetail[]>([])
 const detectedErrorDetails = ref<LearnerErrorDetail[]>([])
 const isFinished = ref(false)
 const printSummaryOpen = ref(false)
+const shareSummaryOpen = ref(false)
 const closeConfirmationOpen = ref(false)
 const answerInput = useTemplateRef<HTMLInputElement>('answer-input')
 const keepExerciseButton = useTemplateRef<HTMLButtonElement>('keep-exercise-button')
@@ -68,6 +72,13 @@ const exerciseAnalyticsMetadata = computed(() => ({
 useDialogFocus(dialog, handleEscapeClose, answerInput)
 
 const currentQuestion = computed(() => props.questions[currentIndex.value])
+const currentSubjectMustBeTyped = computed(() => Boolean(
+  currentQuestion.value && props.exerciseKind === 'conjugation'
+  && conjugationRequiresSubjectPronoun(currentQuestion.value),
+))
+const currentAnswerPlaceholder = computed(() => currentQuestion.value
+  ? conjugationAnswerPlaceholder(currentQuestion.value)
+  : '')
 const isModeIdentificationExercise = computed(() => props.exerciseKind === 'mode-identification')
 const isTenseIdentificationExercise = computed(() => props.exerciseKind === 'tense-identification')
 const isIdentificationExercise = computed(() => isModeIdentificationExercise.value || isTenseIdentificationExercise.value)
@@ -369,8 +380,9 @@ function submitAnswer() {
 
   const { result, shouldRetry } = evaluateExerciseAnswer(
     answer.value,
-    question.reponses,
+    question,
     retryAlreadyOffered.value,
+    !isIdentificationExercise.value,
   )
   lastIncorrectIdentificationAnswer.value = isIdentificationExercise.value && !result.isCorrect ? answer.value : ''
   const usedFutureSimple = !isIdentificationExercise.value && !result.isCorrect && isFutureSimpleInsteadOfNearFuture(answer.value, question)
@@ -532,6 +544,7 @@ function restart() {
   attempts.value = []
   isFinished.value = false
   printSummaryOpen.value = false
+  shareSummaryOpen.value = false
   track('exercise_started', exerciseAnalyticsMetadata.value)
   nextTick(() => answerInput.value?.focus())
 }
@@ -542,7 +555,9 @@ function requestClose() {
 }
 
 function handleEscapeClose() {
-  if (closeConfirmationOpen.value) cancelClose()
+  if (shareSummaryOpen.value) shareSummaryOpen.value = false
+  else if (printSummaryOpen.value) printSummaryOpen.value = false
+  else if (closeConfirmationOpen.value) cancelClose()
   else requestClose()
 }
 
@@ -636,26 +651,27 @@ onBeforeUnmount(() => {
               <span>{{ ui('Mode :') }} <strong>{{ uiLabel(currentQuestion.mode) }}</strong></span>
               <i aria-hidden="true">|</i>
               <span>{{ ui('Temps :') }} <strong>{{ uiLabel(currentQuestion.temps) }}</strong></span>
-              <template v-if="currentQuestion.mode?.toLocaleLowerCase('fr') === 'impératif'">
+              <template v-if="currentQuestion.pronom">
                 <i aria-hidden="true">|</i>
                 <span>{{ ui('Personne :') }} <strong>{{ currentQuestion.pronom }}</strong></span>
               </template>
             </p>
-
             <form
               class="completion-form"
               :class="{ 'is-awaiting-retry': retryMessageVisible }"
               @submit.prevent="feedback === 'idle' ? submitAnswer() : nextQuestion()"
             >
+              <label class="completion-form__label" for="exercise-answer">{{ ui('Ta réponse') }}</label>
               <div class="completion-sentence">
                 <span v-if="currentQuestion.complementPosition === 'before'">{{ currentQuestion.complement }}</span>
-                <span v-if="currentQuestion.saisiePrefixe" class="completion-sentence__prefix">{{ currentQuestion.saisiePrefixe }}</span>
+                <span v-if="currentQuestion.saisiePrefixe && !currentSubjectMustBeTyped" class="completion-sentence__prefix">{{ currentQuestion.saisiePrefixe }}</span>
                 <input
                   id="exercise-answer"
                   ref="answer-input"
                   v-model="answer"
                   type="text"
                   autocomplete="off"
+                  :placeholder="currentSubjectMustBeTyped ? currentAnswerPlaceholder : undefined"
                   :aria-label="ui('Forme conjuguée de {verb}', { verb: currentQuestion.infinitif || '' })"
                   :disabled="feedback !== 'idle'"
                   :class="{
@@ -700,7 +716,6 @@ onBeforeUnmount(() => {
             </small>
           </div>
           <p v-else class="question-text">{{ currentQuestion.consigne }}</p>
-
           <div v-if="isIdentificationExercise" class="classic-identification-choices">
             <div v-if="isTenseIdentificationExercise && selectedIdentificationMode" class="classic-tense-choice-step">
               <div class="classic-tense-choice-step__header">
@@ -757,7 +772,7 @@ onBeforeUnmount(() => {
                 v-model="answer"
                 type="text"
                 autocomplete="off"
-                :placeholder="answerPlaceholder"
+                :placeholder="currentSubjectMustBeTyped ? currentAnswerPlaceholder : answerPlaceholder"
                 :disabled="feedback !== 'idle'"
                 :class="{
                   'is-valid': feedback === 'correct',
@@ -897,10 +912,11 @@ onBeforeUnmount(() => {
             </table>
           </div>
 
-          <div class="dialog-actions">
-            <button class="secondary-button" type="button" @click="emit('close')">{{ ui('Fermer') }}</button>
-            <button class="secondary-button" type="button" @click="printSummaryOpen = true">{{ ui('Imprimer le bilan') }}</button>
-            <button class="primary-button" type="button" @click="restart">{{ ui('Recommencer') }}</button>
+          <div class="dialog-actions exercise-results__actions">
+            <button class="secondary-button exercise-result-action" type="button" @click="shareSummaryOpen = true"><span aria-hidden="true">↗</span>{{ ui('Partager mon bilan') }}</button>
+            <button class="secondary-button exercise-result-action" type="button" @click="printSummaryOpen = true"><span aria-hidden="true">⎙</span>{{ ui('Imprimer mon bilan') }}</button>
+            <button class="primary-button exercise-result-action" type="button" @click="restart"><span aria-hidden="true">↻</span>{{ ui('Recommencer') }}</button>
+            <button class="secondary-button exercise-results__close" type="button" @click="emit('close')">{{ ui('Fermer') }}</button>
           </div>
         </div>
 
@@ -924,6 +940,14 @@ onBeforeUnmount(() => {
         :verbs="summaryVerbs"
         :tenses="summaryTenses"
         @close="printSummaryOpen = false"
+      />
+      <ShareExerciseSummaryDialog
+        v-if="shareSummaryOpen"
+        presentation="classic"
+        :items="summaryItems"
+        :verbs="summaryVerbs"
+        :tenses="summaryTenses"
+        @close="shareSummaryOpen = false"
       />
     </div>
   </Teleport>

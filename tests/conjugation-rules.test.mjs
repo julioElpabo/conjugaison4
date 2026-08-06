@@ -71,7 +71,8 @@ describe('futur proche et futur simple', () => {
     assert.equal(isAnswerCorrect('tu vas manger', question.reponses), true)
     assert.equal(isAnswerCorrect('tu mangeras', question.reponses), false)
     assert.ok(question.futureSimpleAnswers?.includes('tu mangeras'))
-    assert.equal(isFutureSimpleInsteadOfNearFuture('mangeras', question), true)
+    assert.equal(isFutureSimpleInsteadOfNearFuture('tu mangeras', question), true)
+    assert.equal(isFutureSimpleInsteadOfNearFuture('mangeras', question), false)
   })
 
   it('reconnaît aussi le futur simple d’un verbe pronominal', () => {
@@ -85,7 +86,8 @@ describe('futur proche et futur simple', () => {
     }), 'tu')
 
     assert.ok(question.futureSimpleAnswers?.includes('tu te réveilleras'))
-    assert.equal(isFutureSimpleInsteadOfNearFuture('te réveilleras', question), true)
+    assert.equal(isFutureSimpleInsteadOfNearFuture('tu te réveilleras', question), true)
+    assert.equal(isFutureSimpleInsteadOfNearFuture('te réveilleras', question), false)
   })
 })
 
@@ -158,7 +160,7 @@ describe('accords affichés dans le corrigé', () => {
 })
 
 describe('compléments d’objet dans les questions', () => {
-  it('affiche une phrase naturelle et accepte la forme seule ou la phrase complète', () => {
+  it('affiche une phrase naturelle et exige le pronom dans la réponse', () => {
     const question = formatConjugationQuestion(row({
       infinitif: 'manger',
       conjugaison1: 'mangeait',
@@ -168,9 +170,9 @@ describe('compléments d’objet dans les questions', () => {
     }), 'il')
 
     assert.equal(question.consigne, 'il … des pommes | manger | imparfait (indicatif)')
-    assert.ok(question.reponses.includes('mangeait'))
+    assert.equal(question.reponses.includes('mangeait'), false)
     assert.ok(question.reponses.includes('il mangeait'))
-    assert.ok(question.reponses.includes('mangeait des pommes'))
+    assert.equal(question.reponses.includes('mangeait des pommes'), false)
     assert.ok(question.reponses.includes('il mangeait des pommes'))
     assert.deepEqual(question.reponsesPourCorrige, ['il mangeait des pommes'])
     assert.equal(question.complement, 'des pommes')
@@ -230,7 +232,8 @@ describe('compléments d’objet dans les questions', () => {
     assert.equal(question.complement, 'les pommes')
     assert.equal(question.complementPosition, 'before')
     assert.equal(question.saisiePrefixe, 'que vous')
-    assert.ok(question.reponses.includes('avez mangées'))
+    assert.equal(question.reponses.includes('avez mangées'), false)
+    assert.ok(question.reponses.includes('que vous avez mangées'))
     assert.equal(question.reponses.includes('avez mangé'), false)
     assert.deepEqual(question.reponsesPourCorrige, ['les pommes que vous avez mangées'])
   })

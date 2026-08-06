@@ -25,6 +25,9 @@ export interface AnswerValidationResult {
   matchedAnswer: string | null
 }
 
+const SUBJECT_PRONOUNS = new Set(['je', 'tu', 'il', 'elle', 'iel', 'on', 'nous', 'vous', 'ils', 'elles', 'iels'])
+export const SUBJECT_PRONOUN_PLACEHOLDER = '......'
+
 export interface ImpossibleSingularEndingReminder {
   personGroup: 'first-or-second-singular' | 'third-singular'
   target: 'verb' | 'auxiliary'
@@ -135,6 +138,66 @@ export function validateAnswer(
     expectedAnswers: safeExpectedAnswers,
     normalizedExpectedAnswers,
     matchedAnswer: matchIndex >= 0 ? safeExpectedAnswers[matchIndex]! : null,
+  }
+}
+
+function normalizedSubjectPronoun(value?: string) {
+  const subject = normalizeAnswer(value || '', { ignoreWhitespace: false })
+    .replace(/^(?:que\s+|qu')/u, '')
+    .trim()
+  return SUBJECT_PRONOUNS.has(subject) ? subject : ''
+}
+
+function answerContainsSubjectPronoun(answer: unknown, pronoun: string) {
+  const words = lexicalWords(answer)
+  const accepted = pronoun === 'je' ? new Set(['je', 'j']) : new Set([pronoun])
+  return words.some(word => accepted.has(word))
+}
+
+export function conjugationRequiresSubjectPronoun(question: { pronom?: string, mode?: string }) {
+  const mode = normalizeAnswer(question.mode || '', { ignoreWhitespace: false })
+    .normalize('NFD').replace(/\p{Diacritic}/gu, '')
+  return Boolean(normalizedSubjectPronoun(question.pronom))
+    && !['imperatif', 'infinitif', 'participe', 'gerondif'].includes(mode)
+}
+
+/** Produit un groupe de pointillés pour chaque mot que l’élève doit saisir. */
+export function conjugationAnswerPlaceholder(question: {
+  conjugaison1?: string
+  pronom?: string
+  saisiePrefixe?: string
+}) {
+  const prefix = question.saisiePrefixe?.trim() || question.pronom?.trim() || ''
+  const prefixWords = prefix.split(/\s+/u).filter(Boolean)
+  const conjugationWords = (question.conjugaison1 || '').trim().split(/\s+/u).filter(Boolean)
+  const prefixBlanks = prefixWords.map((_, index) => (
+    index === prefixWords.length - 1 ? SUBJECT_PRONOUN_PLACEHOLDER : '............'
+  ))
+  const conjugationBlanks = conjugationWords.map((_, index) => (
+    index === conjugationWords.length - 1 ? '........................' : '............'
+  ))
+  return [...prefixBlanks, ...conjugationBlanks].join(' ')
+}
+
+/** Valide une réponse de conjugaison finie en exigeant le pronom sujet demandé. */
+export function validateConjugationAnswer(
+  answer: unknown,
+  question: {
+    reponses: readonly unknown[]
+    pronom?: string
+    mode?: string
+  },
+  options: AnswerNormalizationOptions = {},
+): AnswerValidationResult {
+  const result = validateAnswer(answer, question.reponses, options)
+  const pronoun = normalizedSubjectPronoun(question.pronom)
+  if (!result.isCorrect || !pronoun || !conjugationRequiresSubjectPronoun(question)) return result
+  if (answerContainsSubjectPronoun(answer, pronoun)) return result
+  return {
+    ...result,
+    isCorrect: false,
+    reason: 'no-match',
+    matchedAnswer: null,
   }
 }
 
@@ -267,8 +330,7 @@ export function impossibleSingularEndingReminderMessage(
 
 /**
  * Retourne les autres formes canoniques qui auraient également été justes.
- * Une réponse sans pronom peut correspondre à un corrigé qui le contient ; la
- * ponctuation finale de l'impératif est également facultative dans l'exercice.
+ * La ponctuation finale de l'impératif est facultative dans l'exercice.
  */
 export function getAlternativeCorrections(
   answer: unknown,
@@ -285,9 +347,7 @@ export function getAlternativeCorrections(
   const normalizedCorrections = safeCorrections.map(correction => (
     normalizeAnswer(correction).replace(/[.!?]+$/u, '')
   ))
-  const matchesAnswer = (normalizedCorrection: string) => (
-    normalizedCorrection === normalizedAnswer || normalizedCorrection.endsWith(normalizedAnswer)
-  )
+  const matchesAnswer = (normalizedCorrection: string) => normalizedCorrection === normalizedAnswer
 
   if (!normalizedCorrections.some(matchesAnswer)) return []
   const seen = new Set<string>()

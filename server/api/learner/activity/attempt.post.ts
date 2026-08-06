@@ -1,5 +1,5 @@
 import type { ResultSetHeader } from 'mysql2/promise'
-import { validateAnswer } from '~~/shared/utils/answer'
+import { validateAnswer, validateConjugationAnswer } from '~~/shared/utils/answer'
 import {
   applicableLearnerErrorTypes,
   diagnoseLearnerError,
@@ -50,7 +50,9 @@ export default defineEventHandler(async (event) => {
   if (!answer || typeof body.correct !== 'boolean') {
     throw createError({ statusCode: 400, statusMessage: 'Tentative invalide' })
   }
-  const correct = validateAnswer(answer, question.reponses).isCorrect
+  const correct = (challenge.exerciseKind === 'conjugation'
+    ? validateConjugationAnswer(answer, question)
+    : validateAnswer(answer, question.reponses)).isCorrect
   const diagnostics = correct ? [] : diagnoseLearnerError(answer, question)
 
   const database = useDatabase()

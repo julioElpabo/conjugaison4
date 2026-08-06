@@ -131,6 +131,10 @@ const resultSuites = computed(() => (result.value?.suiteResults || []).map((suit
 })))
 const passedResultSuites = computed(() => resultSuites.value.filter(suite => suite.passed))
 const failedResultSuites = computed(() => resultSuites.value.filter(suite => !suite.passed))
+const resultTitle = computed(() => {
+  if (result.value?.timedOut) return 'Tests interrompus par le délai maximal'
+  return result.value?.success ? 'Tous les tests passent' : 'Des tests ont échoué'
+})
 
 function resultSuiteId(index: number) {
   return `test-results-suite-${index + 1}`
@@ -279,9 +283,12 @@ watch(user, (current) => {
 
         <section v-if="result" :class="['admin-tests__result', 'admin-card', { 'is-success': result.success, 'is-failure': !result.success }]" aria-live="polite">
           <header>
-            <div><p class="admin-eyebrow">Dernière exécution</p><h2>{{ result.success ? 'Tous les tests passent' : 'Des tests ont échoué' }}</h2></div>
+            <div><p class="admin-eyebrow">Dernière exécution</p><h2>{{ resultTitle }}</h2></div>
             <strong>{{ (result.durationMs / 1000).toFixed(2) }} s</strong>
           </header>
+          <p v-if="result.timedOut" class="admin-notice admin-notice--error">
+            Les tests comptabilisés ont terminé, mais au moins une suite a été arrêtée avant de rendre son résultat complet.
+          </p>
           <dl>
             <div><dt>Tests</dt><dd>{{ result.summary.tests }}</dd></div>
             <div><dt>Réussis</dt><dd>{{ result.summary.passed }}</dd></div>

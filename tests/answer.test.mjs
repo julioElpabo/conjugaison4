@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
 import {
+  conjugationAnswerPlaceholder,
   findConjugationConfusions,
   findImpossibleSingularEnding,
   getAlternativeCorrections,
@@ -10,7 +11,28 @@ import {
   isFutureSimpleInsteadOfNearFuture,
   normalizeAnswer,
   validateAnswer,
+  validateConjugationAnswer,
 } from '../shared/utils/answer.ts'
+
+describe('conjugationAnswerPlaceholder', () => {
+  it('affiche un groupe de pointillés pour chaque mot à saisir', () => {
+    assert.equal(
+      conjugationAnswerPlaceholder({ pronom: 'nous', conjugaison1: 'nous sommes aperçus' }),
+      '...... ............ ............ ........................',
+    )
+    assert.equal(
+      conjugationAnswerPlaceholder({ pronom: 'il', conjugaison1: 'vient' }),
+      '...... ........................',
+    )
+  })
+
+  it('compte aussi les mots du préfixe d’une proposition relative', () => {
+    assert.equal(
+      conjugationAnswerPlaceholder({ saisiePrefixe: 'que vous', conjugaison1: 'avez mangées' }),
+      '............ ...... ............ ........................',
+    )
+  })
+})
 
 describe('normalizeAnswer', () => {
   it('ignore la casse, tous les espaces et les apostrophes typographiques', () => {
@@ -33,10 +55,10 @@ describe('normalizeAnswer', () => {
 })
 
 describe('getAlternativeCorrections', () => {
-  it('signale la seconde conjugaison après une réponse complète ou sans pronom', () => {
+  it('signale la seconde conjugaison après une réponse complète', () => {
     const corrections = ["j'assieds", "j'assois"]
     assert.deepEqual(getAlternativeCorrections("j'assieds", corrections), ["j'assois"])
-    assert.deepEqual(getAlternativeCorrections('assois', corrections), ["j'assieds"])
+    assert.deepEqual(getAlternativeCorrections('assois', corrections), [])
   })
 
   it("tolère l'absence de ponctuation à l'impératif", () => {
@@ -58,7 +80,7 @@ describe('isAnswerCorrect', () => {
     { accepted: ['abcd'], answer: 'abcd', label: 'égalité simple' },
     { accepted: ['abcd', 'efgh', 'ijkl'], answer: 'ijkl', label: 'variante admise' },
     { accepted: ['Aimez'], answer: 'aimez', label: 'majuscule' },
-    { accepted: ['aimez', 'vous aimez'], answer: 'vous aimez', label: 'pronom facultatif' },
+    { accepted: ['vous aimez'], answer: 'vous aimez', label: 'réponse avec pronom' },
     { accepted: ['vous aimez'], answer: ' vous  aimez ', label: 'espaces surnuméraires' },
     { accepted: ["qu'elles aient mangé"], answer: 'qu’elles aient mangé', label: 'apostrophe typographique' },
     { accepted: ['suis tombé', 'suis tombée'], answer: 'suis tombée', label: 'accord féminin avec je' },
@@ -103,6 +125,24 @@ describe('isAnswerCorrect', () => {
     assert.equal(isAnswerCorrect('assieds toi', ['assieds-toi']), false)
     assert.equal(isAnswerCorrect('elles parties', ['elles sont parties']), false)
     assert.equal(isAnswerCorrect('tu finiras', ['tu finirais']), false)
+  })
+})
+
+describe('pronom sujet obligatoire', () => {
+  const question = { reponses: ['vient', 'il vient'], pronom: 'il', mode: 'indicatif' }
+
+  it('refuse la forme verbale seule même si une ancienne question la proposait', () => {
+    assert.equal(validateConjugationAnswer('vient', question).isCorrect, false)
+  })
+
+  it('accepte la réponse complète avec le pronom demandé', () => {
+    assert.equal(validateConjugationAnswer('Il vient', question).isCorrect, true)
+  })
+
+  it('conserve la construction sans sujet de l’impératif', () => {
+    assert.equal(validateConjugationAnswer('viens', {
+      reponses: ['viens'], pronom: 'tu', mode: 'impératif',
+    }).isCorrect, true)
   })
 })
 

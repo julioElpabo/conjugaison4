@@ -1,7 +1,9 @@
 import type { ExerciseQuestion } from '../types/conjugation'
+import { SUBJECT_PRONOUN_PLACEHOLDER } from './answer'
 import { withoutIndicativeMode } from './chat-mode-display'
 
 export const SIMPLE_TENSE_BLANK = '........................'
+export const SUBJECT_PRONOUN_BLANK = SUBJECT_PRONOUN_PLACEHOLDER
 export const COMPOUND_TENSE_GAP = '\u00a0\u00a0\u00a0\u00a0'
 export const COMPOUND_TENSE_BLANK = `............${COMPOUND_TENSE_GAP}.......................`
 export const PRESENT_GERUND_BLANK = COMPOUND_TENSE_BLANK
@@ -81,6 +83,29 @@ function templateWithInputPrefix(template: string, question: ExerciseQuestion) {
   )
 }
 
+function withMaskedSubject(sentence: string, question: ExerciseQuestion) {
+  if (normalized(question.mode) === 'imperatif') return sentence
+  const pronoun = question.pronom?.trim() || ''
+  const candidates = [
+    question.saisiePrefixe?.trim(),
+    pronoun && startsWithVowelSound(pronoun) ? `qu'${pronoun}` : pronoun ? `que ${pronoun}` : '',
+    pronoun,
+  ]
+    .filter((value): value is string => Boolean(value))
+    .sort((left, right) => right.length - left.length)
+  for (const candidate of candidates) {
+    const pattern = new RegExp(escapeRegExp(candidate).replace(/[’']/gu, "[’']"), 'giu')
+    const matches = [...sentence.matchAll(pattern)]
+    const match = matches.at(-1)
+    if (!match || match.index === undefined) continue
+    const replacement = /^(?:que\s+|qu['’])/iu.test(candidate)
+      ? `que ${SUBJECT_PRONOUN_BLANK}`
+      : SUBJECT_PRONOUN_BLANK
+    return `${sentence.slice(0, match.index)}${replacement}${sentence.slice(match.index + match[0].length)}`
+  }
+  return sentence
+}
+
 export function coachQuestionBubbles(question: ExerciseQuestion, options: { omitIndicativeMode?: boolean, modeLabel?: string, tenseLabel?: string } = {}): CoachQuestionBubbles {
   const sentenceTemplate = templateWithInputPrefix(
     question.consigne.split('|')[0]?.trim() || '',
@@ -113,6 +138,7 @@ export function coachQuestionBubbles(question: ExerciseQuestion, options: { omit
       ? contextualizeSubjunctiveTemplate(sentence, question)
       : `${subjunctiveSubject(question)}${blankPrefix}${blank}`
   }
+  sentence = withMaskedSubject(sentence, question)
 
   return {
     formula: options.omitIndicativeMode ? withoutIndicativeMode(formula) : formula,

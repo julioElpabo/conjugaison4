@@ -1,4 +1,4 @@
-import { a4 as formatConjugationQuestion, c as createError, u as useDatabase } from '../nitro/nitro.mjs';
+import { a4 as formatConjugationQuestion, c as createError, n as useRuntimeConfig, u as useDatabase } from '../nitro/nitro.mjs';
 import { execFile } from 'node:child_process';
 import { readFile, readdir } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
@@ -227,6 +227,16 @@ function auditCoachCredibility(coach, seed = 1) {
 }
 
 const TEST_DIRECTORY = resolve(process.cwd(), "tests");
+function adminTestEnvironment(config, inheritedEnvironment = process.env) {
+  return {
+    ...inheritedEnvironment,
+    DB_HOST: String(config.dbHost || ""),
+    DB_PORT: String(config.dbPort || 3306),
+    DB_NAME: String(config.dbName || ""),
+    DB_USER: String(config.dbUser || ""),
+    DB_PASSWORD: String(config.dbPassword || "")
+  };
+}
 const TEST_CATALOG = {
   "postman-conjugation.test.mjs": {
     title: "Formes verbales par mode",
@@ -426,6 +436,7 @@ async function runAdminTests(requestedFiles) {
     throw createError({ statusCode: 400, statusMessage: "S\xE9lection de tests invalide" });
   }
   const startedAt = Date.now();
+  const testEnvironment = adminTestEnvironment(useRuntimeConfig());
   const testsById = new Map(available.map((test) => [test.id, test]));
   const filesByCategory = /* @__PURE__ */ new Map();
   for (const file of files) {
@@ -438,7 +449,7 @@ async function runAdminTests(requestedFiles) {
       execFile(
         process.execPath,
         ["--env-file-if-exists=.env", "--import", "tsx", "--test", "--test-concurrency=1", "--test-reporter=tap", ...categoryFiles.map((file) => join(TEST_DIRECTORY, file))],
-        { cwd: process.cwd(), timeout: 6e4, maxBuffer: 2e6 },
+        { cwd: process.cwd(), env: testEnvironment, timeout: 6e4, maxBuffer: 2e6 },
         (error, stdout, stderr) => {
           const exitCode = error && typeof error.code === "number" ? error.code : error ? 1 : 0;
           resolveExecution({

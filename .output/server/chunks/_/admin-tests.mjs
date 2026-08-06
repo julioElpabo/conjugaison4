@@ -227,6 +227,7 @@ function auditCoachCredibility(coach, seed = 1) {
 }
 
 const TEST_DIRECTORY = resolve(process.cwd(), "tests");
+const ADMIN_TEST_EXECUTION_TIMEOUT_MS = 45e3;
 function adminTestEnvironment(config, inheritedEnvironment = process.env) {
   return {
     ...inheritedEnvironment,
@@ -236,6 +237,9 @@ function adminTestEnvironment(config, inheritedEnvironment = process.env) {
     DB_USER: String(config.dbUser || ""),
     DB_PASSWORD: String(config.dbPassword || "")
   };
+}
+function executeAdminTestGroups(groups, execute) {
+  return Promise.all(groups.map(([category, files]) => execute(category, files)));
 }
 const TEST_CATALOG = {
   "postman-conjugation.test.mjs": {
@@ -453,13 +457,12 @@ async function runAdminTests(requestedFiles) {
     const category = ((_a = testsById.get(file)) == null ? void 0 : _a.category) || "Technique";
     filesByCategory.set(category, [...filesByCategory.get(category) || [], file]);
   }
-  const executions = [];
-  for (const [category, categoryFiles] of filesByCategory) {
+  const executions = await executeAdminTestGroups([...filesByCategory], async (category, categoryFiles) => {
     const execution = await new Promise((resolveExecution) => {
       execFile(
         process.execPath,
         ["--env-file-if-exists=.env", "--import", "tsx", "--test", "--test-concurrency=1", "--test-reporter=tap", ...categoryFiles.map((file) => join(TEST_DIRECTORY, file))],
-        { cwd: process.cwd(), env: testEnvironment, timeout: 6e4, maxBuffer: 2e6 },
+        { cwd: process.cwd(), env: testEnvironment, timeout: ADMIN_TEST_EXECUTION_TIMEOUT_MS, maxBuffer: 2e6 },
         (error, stdout, stderr) => {
           const exitCode = error && typeof error.code === "number" ? error.code : error ? 1 : 0;
           resolveExecution({
@@ -471,15 +474,15 @@ async function runAdminTests(requestedFiles) {
         }
       );
     });
-    executions.push({
+    return {
       category,
       files: categoryFiles,
       exitCode: execution.exitCode,
       output: `${execution.stdout}${execution.stderr ? `
 ${execution.stderr}` : ""}`,
       timedOut: execution.timedOut
-    });
-  }
+    };
+  });
   const output = executions.map((execution) => `# Suite : ${execution.category}
 ${execution.output}`).join("\n\n").slice(-2e5);
   const totalFor = (label) => executions.reduce((total, execution) => total + summaryValue(execution.output, label), 0);

@@ -248,6 +248,11 @@ const TEST_CATALOG = {
     description: "V\xE9rifie les apostrophes droites ou typographiques, les accents, les espaces et les r\xE9ponses alternatives.",
     category: "Conjugaison fran\xE7aise"
   },
+  "answer-engine-database.test.mjs": {
+    title: "Correcteur sur toutes les formes stock\xE9es",
+    description: "V\xE9rifie les r\xE9ponses positives et les confusions de personne ou de temps sur tout le catalogue.",
+    category: "Conjugaison fran\xE7aise"
+  },
   "conjugation-display.test.mjs": {
     title: "Ordre des modes et des temps",
     description: "Contr\xF4le l\u2019ordre de pr\xE9sentation des modes et des temps dans l\u2019\xE9diteur de verbes.",
@@ -274,8 +279,13 @@ const TEST_CATALOG = {
     category: "Conjugaison fran\xE7aise"
   },
   "conjugation-database.test.mjs": {
-    title: "R\xE9f\xE9rences et int\xE9grit\xE9 des 488 verbes",
+    title: "R\xE9f\xE9rences et int\xE9grit\xE9 des 588 verbes",
     description: "Compare les formes sensibles \xE0 des r\xE9f\xE9rences explicites et audite toutes les donn\xE9es du catalogue.",
+    category: "Conjugaison fran\xE7aise"
+  },
+  "passive-voice-database.test.mjs": {
+    title: "Voix passive \xE0 tous les temps",
+    description: "Contr\xF4le les formes d\u2019\xEAtre et les accords du passif aux quinze temps personnels compatibles.",
     category: "Conjugaison fran\xE7aise"
   },
   "verb-search.test.mjs": {

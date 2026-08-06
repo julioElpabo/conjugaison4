@@ -1,4 +1,4 @@
-import { runAdminTests } from '../../../services/admin-tests'
+import { startAdminTestJob } from '../../../services/admin-test-jobs'
 
 export default defineEventHandler(async (event) => {
   requireAdministrator(event)
@@ -6,5 +6,7 @@ export default defineEventHandler(async (event) => {
   const files = Array.isArray(body?.files)
     ? body.files.filter((file): file is string => typeof file === 'string')
     : []
-  return runAdminTests(files)
+  const job = await startAdminTestJob(files)
+  setResponseStatus(event, 202)
+  return { jobId: job.id }
 })

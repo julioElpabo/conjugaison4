@@ -57,6 +57,11 @@ interface TestRun {
   repairPrompt: string
   output: string
 }
+interface AdminTestJob {
+  status: 'running' | 'completed' | 'failed'
+  result?: TestRun
+  error?: string
+}
 
 const { user, handleUnauthorized } = useAdminAuth()
 const tests = ref<AdminTest[]>([])
@@ -162,17 +167,34 @@ function toggleAll() {
   selected.value = allSelected.value ? [] : tests.value.map(test => test.id)
 }
 
+function pollingDelay(milliseconds: number) {
+  return new Promise(resolve => window.setTimeout(resolve, milliseconds))
+}
+
+async function waitForTestResult(jobId: string) {
+  for (let attempt = 0; attempt < 180; attempt += 1) {
+    const job = await $fetch<AdminTestJob>(`/api/admin/tests/runs/${encodeURIComponent(jobId)}`, {
+      credentials: 'same-origin',
+    })
+    if (job.status === 'completed' && job.result) return job.result
+    if (job.status === 'failed') throw new Error(job.error || 'Le lanceur de tests a échoué.')
+    await pollingDelay(1_000)
+  }
+  throw new Error('Les tests durent anormalement longtemps. Leur exécution continue peut-être sur le serveur.')
+}
+
 async function runTests() {
   if (running.value || selected.value.length === 0) return
   running.value = true
   result.value = null
   error.value = ''
   try {
-    result.value = await $fetch<TestRun>('/api/admin/tests/run', {
+    const started = await $fetch<{ jobId: string }>('/api/admin/tests/run', {
       method: 'POST',
       credentials: 'same-origin',
       body: { files: selected.value },
     })
+    result.value = await waitForTestResult(started.jobId)
     scenarioFilter.value = result.value.conjugationScenarios.some(scenario => !scenario.passed) ? 'failed' : 'all'
     ruleFilter.value = 'all'
     selectedScenarioId.value = result.value.conjugationScenarios.find(scenario => !scenario.passed)?.id

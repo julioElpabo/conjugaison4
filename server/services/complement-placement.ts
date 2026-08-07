@@ -48,6 +48,18 @@ export function resolveAnteposedComplement(
 export function inferAnteposedComplement(value: string): AnteposedComplement | null {
   const text = value.replace(/\s+/g, ' ').trim()
   const pluralGenders = new Map<string, AnteposedComplement['gender']>([
+    ['des acteurs', 'masculin'], ['des amis à dîner', 'masculin'], ['des arbres', 'masculin'],
+    ['des bras', 'masculin'], ['des briques d’un mur', 'feminin'], ['des cartes', 'feminin'],
+    ['des céréales', 'feminin'], ['des chiffres', 'masculin'], ['des couleurs', 'feminin'],
+    ['des couleurs sur une toile', 'feminin'], ['des connaissances', 'feminin'],
+    ['des éléments', 'masculin'], ['des enfants à la campagne', 'masculin'],
+    ['des enfants à l’école', 'masculin'], ['des fleurs', 'feminin'],
+    ['des fleurs dans un vase', 'feminin'], ['des idées', 'feminin'],
+    ['des livres d’une bibliothèque', 'masculin'], ['des marchandises dans un entrepôt', 'feminin'],
+    ['des matériaux', 'masculin'], ['des meubles anciens', 'masculin'], ['des noix', 'feminin'],
+    ['des pièces', 'feminin'], ['des pièces de monnaie', 'feminin'], ['des pieds', 'masculin'],
+    ['des poires', 'feminin'], ['des secours', 'masculin'],
+    ['des spectateurs dans une salle', 'masculin'], ['des vaches', 'feminin'], ['des verres', 'masculin'],
     ['des chaussures', 'feminin'], ['des documents', 'masculin'], ['des lunettes', 'feminin'],
     ['des légumes', 'masculin'], ['des pommes', 'feminin'], ['les clés', 'feminin'],
     ['les consignes', 'feminin'], ['les documents', 'masculin'], ['les informations', 'feminin'],

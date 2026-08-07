@@ -2,7 +2,7 @@
 const { ui, uiLabel } = useLanguagePreferences()
 import type { ConjugationMode, ConjugationTense, Verb } from '~~/shared/types/conjugation'
 import type { ConsultedConjugation, VerbConsultation } from '~~/shared/types/verb-consultation'
-import { conjugationModeOrder, conjugationTenseLabel, conjugationTenseOrder, isFiniteConjugationMode } from '~~/shared/data/conjugation-display'
+import { conjugationModeOrder, conjugationTenseLabel, conjugationTenseOrder, conjugationTenseRow, isFiniteConjugationMode } from '~~/shared/data/conjugation-display'
 import { matchingVerbs, normalizeVerbSearch } from '~~/shared/utils/verb-search'
 
 interface Catalogue {
@@ -58,18 +58,23 @@ const alphabetGroups = computed(() => {
 const groups = computed(() => [...(catalogue.value?.modes ?? [])]
   .filter(mode => isFiniteConjugationMode(mode.name))
   .sort((left, right) => conjugationModeOrder(left.name) - conjugationModeOrder(right.name) || left.id - right.id)
-  .map(mode => ({
-    mode,
-    tenses: [...(catalogue.value?.temps ?? [])]
+  .map(mode => {
+    const tenses = [...(catalogue.value?.temps ?? [])]
       .filter(tense => tense.modeId === mode.id)
       .sort((left, right) => conjugationTenseOrder(mode.name, left.name) - conjugationTenseOrder(mode.name, right.name) || left.id - right.id)
       .map(tense => ({
         ...tense,
         rows: (detail.value?.conjugations ?? []).filter(row => row.tenseId === tense.id),
       }))
-      .filter(tense => tense.rows.length),
-  }))
-  .filter(group => group.tenses.length))
+      .filter(tense => tense.rows.length)
+    const rows = new Map<number, typeof tenses>()
+    for (const tense of tenses) {
+      const row = conjugationTenseRow(mode.name, tense.name)
+      rows.set(row, [...(rows.get(row) ?? []), tense])
+    }
+    return { mode, tenseRows: [...rows.values()] }
+  })
+  .filter(group => group.tenseRows.length))
 
 const nonFiniteForms = computed(() => {
   const verb = detail.value?.verb
@@ -110,6 +115,10 @@ function groupLabel(group: number | null) {
   if (group === 1) return ui('1er groupe')
   if (group === 2) return ui('2e groupe')
   return ui('3e groupe')
+}
+
+function agreementGenderLabel(gender: 'masculin' | 'feminin') {
+  return gender === 'feminin' ? ui('féminin') : ui('masculin')
 }
 
 async function loadVerb(id: number) {
@@ -337,6 +346,33 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
               </dl>
             </header>
 
+            <section v-if="detail.pastParticipleAgreement" class="agreement-panel" :aria-labelledby="`agreement-title-${detail.verb.id}`">
+              <header>
+                <p class="reference-eyebrow">{{ ui('Le participe passé avec avoir') }}</p>
+                <h3 :id="`agreement-title-${detail.verb.id}`">{{ ui('La place du COD change l’accord') }}</h3>
+              </header>
+              <div class="agreement-examples">
+                <article>
+                  <span class="agreement-badge">{{ ui('COD placé après') }}</span>
+                  <p class="agreement-sentence">{{ detail.pastParticipleAgreement.afterSentence }}</p>
+                  <p class="agreement-rule">{{ ui('Avec avoir, le participe passé ne s’accorde pas avec le COD placé après.') }}</p>
+                </article>
+                <article>
+                  <span class="agreement-badge agreement-badge--before">{{ ui('COD placé avant') }}</span>
+                  <p class="agreement-sentence">
+                    {{ detail.pastParticipleAgreement.beforeSentenceStart }}{{ detail.pastParticipleAgreement.agreedParticipleStart }}<mark>{{ detail.pastParticipleAgreement.agreementLetters }}</mark>{{ detail.pastParticipleAgreement.beforeSentenceEnd }}
+                  </p>
+                  <p class="agreement-rule">
+                    {{ ui('COD « {cod} » placé avant : accord avec le COD ({gender}, {number}).', {
+                      cod: detail.pastParticipleAgreement.cod,
+                      gender: agreementGenderLabel(detail.pastParticipleAgreement.gender),
+                      number: ui(detail.pastParticipleAgreement.number),
+                    }) }}
+                  </p>
+                </article>
+              </div>
+            </section>
+
             <nav class="mode-nav" :aria-label="ui('Accès aux modes')">
               <button v-for="group in groups" :key="group.mode.id" type="button" @click="scrollToMode(`consult-mode-${group.mode.id}`)">
                 {{ uiLabel(group.mode.name) }}
@@ -347,16 +383,18 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
             <section v-for="group in groups" :id="`consult-mode-${group.mode.id}`" :key="group.mode.id" class="mode-section">
               <h2>{{ uiLabel(group.mode.name) }}</h2>
               <div class="tense-grid">
-                <article v-for="tense in group.tenses" :key="tense.id" class="tense-consult-card">
-                  <h3>{{ uiLabel(conjugationTenseLabel(group.mode.name, tense.name)) }}</h3>
-                  <ul>
-                    <li v-for="row in tense.rows" :key="row.id">
-                      <span v-for="(form, index) in row.forms" :key="form">
-                        {{ displayedForm(row, form, group.mode.name) }}<small v-if="index < row.forms.length - 1"> {{ ui('ou') }} </small>
-                      </span>
-                    </li>
-                  </ul>
-                </article>
+                <div v-for="(tenseRow, rowIndex) in group.tenseRows" :key="rowIndex" class="tense-row">
+                  <article v-for="tense in tenseRow" :key="tense.id" class="tense-consult-card">
+                    <h3>{{ uiLabel(conjugationTenseLabel(group.mode.name, tense.name)) }}</h3>
+                    <ul>
+                      <li v-for="row in tense.rows" :key="row.id">
+                        <span v-for="(form, index) in row.forms" :key="form">
+                          {{ displayedForm(row, form, group.mode.name) }}<small v-if="index < row.forms.length - 1"> {{ ui('ou') }} </small>
+                        </span>
+                      </li>
+                    </ul>
+                  </article>
+                </div>
               </div>
             </section>
 
@@ -423,10 +461,20 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
 .conjugation-heading dl div { padding: 8px 12px; border-radius: 12px; background: var(--soft); }
 .conjugation-heading dt { color: var(--muted); font-size: .72rem; text-transform: uppercase; }
 .conjugation-heading dd { margin: 2px 0 0; color: var(--brand-dark); font-weight: 750; }
+.agreement-panel { display: grid; margin: 22px 0; padding: clamp(18px, 3vw, 26px); border: 1px solid #bad4cc; border-radius: 19px; background: linear-gradient(135deg, #f5faf8, #edf6f3); gap: 17px; }
+.agreement-panel h3 { margin: 0; color: var(--brand-dark); font-size: clamp(1.25rem, 3vw, 1.65rem); letter-spacing: -.025em; }
+.agreement-examples { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.agreement-examples article { display: grid; align-content: start; padding: 16px; border: 1px solid rgb(62 112 99 / 18%); border-radius: 14px; background: rgb(255 255 255 / 82%); gap: 10px; }
+.agreement-badge { justify-self: start; padding: 5px 9px; border-radius: 999px; color: #76511d; background: #f7e8c8; font-size: .73rem; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
+.agreement-badge--before { color: #205b4b; background: #d7eee6; }
+.agreement-sentence { margin: 0; color: var(--ink); font-size: clamp(1.08rem, 2.3vw, 1.3rem); font-weight: 800; line-height: 1.45; }
+.agreement-sentence mark { padding: 0 .08em; border-radius: 4px; color: #713a00; background: #ffd76a; box-shadow: 0 0 0 2px #ffd76a; }
+.agreement-rule { margin: 0; color: var(--muted); font-size: .9rem; line-height: 1.5; }
 .mode-nav { position: sticky; z-index: 3; top: 8px; padding: 8px; border: 1px solid var(--line); border-radius: 14px; background: rgb(255 255 255 / 94%); box-shadow: 0 8px 20px rgb(36 50 71 / 8%); }
 .mode-section { padding-top: 18px; scroll-margin-top: 72px; }
 .mode-section > h2 { margin: 0 0 14px; color: var(--brand-dark); font-size: 1.6rem; text-transform: capitalize; }
-.tense-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.tense-grid { display: grid; gap: 14px; }
+.tense-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .tense-consult-card { padding: 18px; border: 1px solid var(--line); border-radius: 17px; background: var(--soft); }
 .tense-consult-card h3 { margin: 0 0 12px; color: var(--brand); font-size: 1.05rem; text-transform: capitalize; }
 .tense-consult-card ul { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
@@ -446,7 +494,7 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
 }
 @media (max-width: 760px) {
   .search-tab-panel { min-height: 350px; grid-template-columns: 1fr; align-content: center; gap: 24px; padding: 10px 4px 30px; }
-  .alphabet-groups, .tense-grid { grid-template-columns: 1fr; }
+  .alphabet-groups, .tense-row, .agreement-examples { grid-template-columns: 1fr; }
   .conjugation-heading { align-items: start; flex-direction: column; }
   .non-finite-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

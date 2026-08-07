@@ -6,6 +6,10 @@ import {
   buildNearFutureParadigm,
   type NearFutureAuxiliaryForm,
 } from '../../../shared/utils/near-future'
+import {
+  buildPastParticipleAgreementExample,
+  type AgreementComplementRow,
+} from '../../services/past-participle-agreement-example'
 
 interface VerbRow extends RowDataPacket {
   id: number
@@ -133,7 +137,7 @@ export default defineEventHandler(async (event): Promise<VerbConsultation> => {
 
   const database = useDatabase()
   if (id > 0) {
-    const [[verbs], [conjugations], [nearFutureTenses], [allerRows]] = await Promise.all([
+    const [[verbs], [conjugations], [nearFutureTenses], [allerRows], [agreementComplements]] = await Promise.all([
       database.execute<VerbRow[]>(`
         SELECT id, infinitif, \`participe_présent\` AS participe_present,
           \`participe_passé\` AS participe_passe, auxiliaire, groupe_conjugaison,
@@ -157,6 +161,19 @@ export default defineEventHandler(async (event): Promise<VerbConsultation> => {
       `, [id]),
       database.execute<NearFutureTenseRow[]>(nearFutureTenseQuery),
       database.execute<NearFutureAllerRow[]>(nearFutureAllerQuery),
+      database.execute<AgreementComplementRow[]>(`
+        SELECT c.texte, c.texte_antepose, c.genre, c.nombre
+        FROM verbe_sens vs
+        INNER JOIN constructions_verbales cv ON cv.sens_id=vs.id
+        INNER JOIN complements_verbaux c ON c.construction_id=cv.id
+        WHERE vs.verbe_id=?
+          AND cv.actif=1 AND cv.statut_validation='valide' AND cv.fonction_objet='cod'
+          AND c.actif=1 AND c.statut_validation='valide'
+          AND c.nombre IS NOT NULL
+          AND (c.genre='feminin' OR c.nombre='pluriel')
+        ORDER BY (c.genre='feminin' AND c.nombre='pluriel') DESC,
+          (c.genre='feminin') DESC, c.poids DESC, c.id
+      `, [id]),
     ])
     const verb = verbs[0]
     if (!verb) throw createError({ statusCode: 404, statusMessage: 'Verbe introuvable' })
@@ -188,6 +205,9 @@ export default defineEventHandler(async (event): Promise<VerbConsultation> => {
         typePronominal: verb.type_pronominal || 'aucun',
       },
       conjugations: [...publicConjugations(conjugations), ...nearFuture],
+      pastParticipleAgreement: verb.auxiliaire.toLocaleLowerCase('fr') === 'avoir'
+        ? buildPastParticipleAgreementExample(verb.participe_passe, agreementComplements)
+        : undefined,
     }
   }
 

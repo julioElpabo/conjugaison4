@@ -741,8 +741,11 @@ async function runChatOpening(eventType: Extract<CoachEvent, 'introduction' | 'r
   await askCurrentQuestion()
   if (version !== conversationVersion) return
   if (eventType === 'introduction' && !isIdentificationExercise.value) {
+    const imperative = normalizedInfinitive(currentQuestion.value?.mode) === 'imperatif'
     await enqueueCoachBubble(() => ({
-      text: ui("N'oublie pas le pronom !"),
+      text: imperative
+        ? ui("À l'impératif, la personne est indiquée, mais n'écris pas le pronom.")
+        : ui("N'oublie pas le pronom !"),
     }))
   }
 }

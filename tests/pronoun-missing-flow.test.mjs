@@ -25,3 +25,8 @@ test('le chat répond avec un émoticône sans enregistrer une faute de pronom',
   assert.match(chat.slice(missing, tracking), /Il manque le pronom[\s\S]*🙂/u)
   assert.match(chat.slice(missing, tracking), /restartHelpReminderTimer\(\)[\s\S]*focusAnswerInput\(\)/u)
 })
+
+test('le chat ne demande pas d’écrire le pronom à l’impératif', () => {
+  assert.match(chat, /normalizedInfinitive\(currentQuestion\.value\?\.mode\) === 'imperatif'/u)
+  assert.match(chat, /À l'impératif, la personne est indiquée, mais n'écris pas le pronom\./u)
+})

@@ -677,7 +677,7 @@ const uiMessages = {
   "Partager mon bilan": { de: "Meine Auswertung teilen", en: "Share my summary", it: "Condividi il mio riepilogo", es: "Compartir mi resumen" },
   "Imprimer mon bilan": { de: "Meine Auswertung drucken", en: "Print my summary", it: "Stampa il mio riepilogo", es: "Imprimir mi resumen" },
   "PARTAGER MON BILAN": { de: "MEINE AUSWERTUNG TEILEN", en: "SHARE MY SUMMARY", it: "CONDIVIDI IL MIO RIEPILOGO", es: "COMPARTIR MI RESUMEN" },
-  "Mon bilan est pr\xEAt \xE0 \xEAtre envoy\xE9": { de: "Meine Auswertung kann verschickt werden", en: "My summary is ready to send", it: "Il mio riepilogo \xE8 pronto per essere inviato", es: "Mi resumen est\xE1 listo para enviar" },
+  "Ton bilan est pr\xEAt \xE0 \xEAtre envoy\xE9": { de: "Deine Auswertung kann verschickt werden", en: "Your summary is ready to send", it: "Il tuo riepilogo \xE8 pronto per essere inviato", es: "Tu resumen est\xE1 listo para enviar" },
   "Il te suffit d\u2019envoyer ce lien \xE0 la personne de ton choix, par e-mail, WhatsApp ou tout autre moyen. En l\u2019ouvrant, elle verra directement ton bilan. Le lien restera disponible pendant un mois.": { de: "Sende diesen Link einfach per E-Mail, WhatsApp oder auf einem anderen Weg an die Person deiner Wahl. Beim \xD6ffnen sieht sie direkt deine Auswertung. Der Link bleibt einen Monat lang verf\xFCgbar.", en: "Simply send this link to anyone you choose by email, WhatsApp or any other means. When they open it, they will see your summary directly. The link will remain available for one month.", it: "Invia questo link alla persona che preferisci via e-mail, WhatsApp o con qualsiasi altro mezzo. Aprendolo, vedr\xE0 direttamente il tuo riepilogo. Il link rester\xE0 disponibile per un mese.", es: "Solo tienes que enviar este enlace a quien quieras por correo electr\xF3nico, WhatsApp o cualquier otro medio. Al abrirlo, ver\xE1 directamente tu resumen. El enlace estar\xE1 disponible durante un mes." },
   "Cr\xE9ation du lien\u2026": { de: "Link wird erstellt\u2026", en: "Creating link\u2026", it: "Creazione del link\u2026", es: "Creando el enlace\u2026" },
   "Lien complet \xE0 envoyer": { de: "Vollst\xE4ndiger Link zum Versenden", en: "Full link to send", it: "Link completo da inviare", es: "Enlace completo para enviar" },
@@ -696,6 +696,7 @@ const uiMessages = {
   "Contenu de l\u2019exercice": { de: "Inhalt der \xDCbung", en: "Exercise content", it: "Contenuto dell\u2019esercizio", es: "Contenido del ejercicio" },
   "Glisse vers le bas pour voir l\u2019aide.": { de: "Wische nach unten, um die Hilfe zu sehen.", en: "Swipe down to see the help.", it: "Scorri verso il basso per vedere l\u2019aiuto.", es: "Desliza hacia abajo para ver la ayuda." },
   "N'oublie pas le pronom !": { de: "Vergiss das Pronomen nicht!", en: "Don't forget the pronoun!", it: "Non dimenticare il pronome!", es: "\xA1No olvides el pronombre!" },
+  "Il manque le pronom": { de: "Das Pronomen fehlt", en: "The pronoun is missing", it: "Manca il pronome", es: "Falta el pronombre" },
   "Type de faute": { de: "Fehlertyp", en: "Error type", it: "Tipo di errore", es: "Tipo de error" },
   "Types de faute": { de: "Fehlertypen", en: "Error types", it: "Tipi di errore", es: "Tipos de error" },
   "Choisis ton coach": { de: "W\xE4hle deinen Coach", en: "Choose your coach", it: "Scegli il tuo coach", es: "Elige tu coach" },
@@ -1453,7 +1454,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-DGHeT2HU.mjs')
+    component: () => import('./users-Di8X4b4N.mjs')
   },
   {
     name: "modes-mode-temps",
@@ -1468,7 +1469,7 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-DERx0ynp.mjs')
+    component: () => import('./_code_-BvTZOkTW.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1483,7 +1484,7 @@ const _routes = [
   {
     name: "accueil",
     path: "/accueil",
-    component: () => import('./accueil-T3ESeKIP.mjs')
+    component: () => import('./accueil-LjtnfWv0.mjs')
   },
   {
     name: "admin",
@@ -1493,7 +1494,7 @@ const _routes = [
   {
     name: "apprendre",
     path: "/apprendre",
-    component: () => import('./apprendre-DCsExCvM.mjs')
+    component: () => import('./apprendre-BUERm2Xf.mjs')
   },
   {
     name: "consulter",
@@ -1514,12 +1515,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page--NJKKyTU.mjs')
+    component: () => import('./my-page-ApSBJ0CX.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-BwCIFy9Q.mjs')
+    component: () => import('./nouveau-defi-BYQml2Q5.mjs')
   },
   {
     name: "signin",
@@ -1529,7 +1530,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-B5eYfPj9.mjs')
+    component: () => import('./index-BrcP647q.mjs')
   },
   {
     name: "localized-admin-admins",
@@ -1609,7 +1610,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-DGHeT2HU.mjs')
+    component: () => import('./users-Di8X4b4N.mjs')
   },
   {
     name: "localized-modes-mode-temps",
@@ -1624,7 +1625,7 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-DERx0ynp.mjs')
+    component: () => import('./_code_-BvTZOkTW.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1639,7 +1640,7 @@ const _routes = [
   {
     name: "localized-accueil",
     path: "/:locale(fr|de|en|it|es)/accueil",
-    component: () => import('./accueil-T3ESeKIP.mjs')
+    component: () => import('./accueil-LjtnfWv0.mjs')
   },
   {
     name: "localized-admin",
@@ -1649,7 +1650,7 @@ const _routes = [
   {
     name: "localized-apprendre",
     path: "/:locale(fr|de|en|it|es)/apprendre",
-    component: () => import('./apprendre-DCsExCvM.mjs')
+    component: () => import('./apprendre-BUERm2Xf.mjs')
   },
   {
     name: "localized-consulter",
@@ -1670,12 +1671,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page--NJKKyTU.mjs')
+    component: () => import('./my-page-ApSBJ0CX.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-BwCIFy9Q.mjs')
+    component: () => import('./nouveau-defi-BYQml2Q5.mjs')
   },
   {
     name: "localized-signin",
@@ -1685,7 +1686,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-B5eYfPj9.mjs')
+    component: () => import('./index-BrcP647q.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {

@@ -132,7 +132,7 @@ onMounted(() => {
       >
         <button ref="close-button" class="summary-share-dialog__close" type="button" :aria-label="ui('Fermer')" @click="emit('close')">×</button>
         <p class="summary-share-dialog__kicker">{{ ui('PARTAGER MON BILAN') }}</p>
-        <h2 id="summary-share-title">{{ ui('Mon bilan est prêt à être envoyé') }}</h2>
+        <h2 id="summary-share-title">{{ ui('Ton bilan est prêt à être envoyé') }}</h2>
         <p>{{ ui('Il te suffit d’envoyer ce lien à la personne de ton choix, par e-mail, WhatsApp ou tout autre moyen. En l’ouvrant, elle verra directement ton bilan. Le lien restera disponible pendant un mois.') }}</p>
 
         <div v-if="busy" class="summary-share-dialog__state" role="status">

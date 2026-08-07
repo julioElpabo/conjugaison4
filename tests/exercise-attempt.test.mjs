@@ -29,6 +29,8 @@ describe('deuxième tentative avant correction', () => {
       reponses: ['aimes', 'tu aimes'], pronom: 'tu', mode: 'indicatif',
     }, false, true)
     assert.equal(evaluation.result.isCorrect, false)
-    assert.equal(evaluation.shouldRetry, true)
+    assert.equal(evaluation.result.reason, 'missing-subject-pronoun')
+    assert.equal(evaluation.missingSubjectPronoun, true)
+    assert.equal(evaluation.shouldRetry, false)
   })
 })

@@ -10,8 +10,10 @@ export function evaluateExerciseAnswer(
   const result = requireSubjectPronoun
     ? validateConjugationAnswer(answer, question)
     : validateAnswer(answer, question.reponses)
+  const missingSubjectPronoun = result.reason === 'missing-subject-pronoun'
   return {
     result,
-    shouldRetry: !result.isCorrect && !retryAlreadyOffered,
+    missingSubjectPronoun,
+    shouldRetry: !result.isCorrect && !missingSubjectPronoun && !retryAlreadyOffered,
   }
 }

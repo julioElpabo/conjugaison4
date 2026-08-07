@@ -1,5 +1,7 @@
 <script setup lang="ts">
 const { interfaceLocale, ui, uiLabel } = useLanguagePreferences()
+import { faArrowUpFromBracket, faPrint } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import type { ConjugationTense, ExerciseAttempt, ExerciseKind, ExerciseQuestion, LearnerErrorDetail, LearnerExerciseTrackingContext, Verb } from '~~/shared/types/conjugation'
 import type { CoachEvent, CoachMedia, CoachMessageContext, CoachProfile } from '~~/shared/types/coach'
 import type { AnswerComparison } from '~~/shared/utils/answer-difference'
@@ -761,6 +763,18 @@ async function submit() {
   const result = isIdentificationExercise.value
     ? validateAnswer(candidate, question.reponses)
     : validateConjugationAnswer(candidate, question)
+  if (result.reason === 'missing-subject-pronoun') {
+    answer.value = ''
+    deliveringFeedback.value = true
+    await enqueueCoachBubble(() => ({
+      text: `${ui('Il manque le pronom')} 🙂`,
+    }))
+    if (version !== conversationVersion) return
+    deliveringFeedback.value = false
+    restartHelpReminderTimer()
+    focusAnswerInput()
+    return
+  }
   track('answer_submitted', exerciseAnalyticsMetadata.value)
   track(result.isCorrect ? 'answer_correct' : 'answer_retry', exerciseAnalyticsMetadata.value)
   answer.value = ''
@@ -1263,8 +1277,8 @@ onBeforeUnmount(() => {
               <button type="button" class="chat-restart-prompt__new" :disabled="regeneratingQuestions" @click="restartWithNewQuestions">
                 <span aria-hidden="true">↻</span>{{ regeneratingQuestions ? ui('Préparation…') : ui('Avec d’autres questions') }}
               </button>
-              <button type="button" class="chat-restart-prompt__share" :disabled="regeneratingQuestions" @click="shareSummaryOpen = true"><span aria-hidden="true">↗</span>{{ ui('Partager mon bilan') }}</button>
-              <button type="button" class="chat-restart-prompt__print" :disabled="regeneratingQuestions" @click="printSummaryOpen = true"><span aria-hidden="true">⎙</span>{{ ui('Imprimer mon bilan') }}</button>
+              <button type="button" class="chat-restart-prompt__share" :disabled="regeneratingQuestions" @click="shareSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faArrowUpFromBracket" /></span>{{ ui('Partager mon bilan') }}</button>
+              <button type="button" class="chat-restart-prompt__print" :disabled="regeneratingQuestions" @click="printSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faPrint" /></span>{{ ui('Imprimer mon bilan') }}</button>
               <button type="button" class="chat-restart-prompt__quit" :disabled="regeneratingQuestions" @click="emit('close')">{{ ui('Quitter le chat') }}</button>
             </div>
             <small v-if="restartError" class="chat-restart-prompt__error" role="alert">{{ restartError }}</small>
@@ -2525,6 +2539,12 @@ onBeforeUnmount(() => {
   flex: 0 0 auto;
   font-size: 1.15em;
   line-height: 1;
+}
+
+.chat-restart-prompt__actions button > span svg {
+  display: block;
+  width: 1em;
+  height: 1em;
 }
 
 .chat-restart-prompt__actions button:hover:not(:disabled),

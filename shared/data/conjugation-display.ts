@@ -10,25 +10,25 @@ const MODE_ORDER = new Map([
 
 const TENSE_ORDER = new Map([
   ['indicatif:présent', 10],
-  ['indicatif:futur proche', 15],
-  ['indicatif:passé composé', 20],
-  ['indicatif:imparfait', 30],
-  ['indicatif:plus-que-parfait', 40],
-  ['indicatif:passé simple', 50],
-  ['indicatif:passé antérieur', 60],
-  ['indicatif:futur', 70],
-  ['indicatif:futur antérieur', 80],
+  ['indicatif:passé composé', 11],
+  ['indicatif:imparfait', 20],
+  ['indicatif:plus-que-parfait', 21],
+  ['indicatif:passé simple', 30],
+  ['indicatif:passé antérieur', 31],
+  ['indicatif:futur proche', 40],
+  ['indicatif:futur', 50],
+  ['indicatif:futur antérieur', 51],
   ['subjonctif:présent', 10],
-  ['subjonctif:passé', 20],
-  ['subjonctif:imparfait', 30],
-  ['subjonctif:plus-que-parfait', 40],
+  ['subjonctif:passé', 11],
+  ['subjonctif:imparfait', 20],
+  ['subjonctif:plus-que-parfait', 21],
   ['conditionnel:présent', 10],
-  ['conditionnel:passé 1', 20],
-  ['conditionnel:passé 2', 30],
+  ['conditionnel:passé 1', 11],
+  ['conditionnel:passé 2', 20],
   ['impératif:présent', 10],
-  ['impératif:passé', 20],
+  ['impératif:passé', 11],
   ['infinitif:présent', 10],
-  ['infinitif:passé', 20],
+  ['infinitif:passé', 11],
 ])
 
 function key(value: string) {
@@ -41,6 +41,11 @@ export function conjugationModeOrder(mode: string) {
 
 export function conjugationTenseOrder(mode: string, tense: string) {
   return TENSE_ORDER.get(`${key(mode)}:${key(tense)}`) ?? 999
+}
+
+export function conjugationTenseRow(mode: string, tense: string) {
+  const order = conjugationTenseOrder(mode, tense)
+  return order === 999 ? 999 : Math.floor(order / 10)
 }
 
 export function conjugationTenseLabel(mode: string, tense: string) {

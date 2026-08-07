@@ -45,9 +45,10 @@ describe('questions affichées dans le chat', () => {
       const result = coachQuestionBubbles(question)
 
       assert.equal(question.saisiePrefixe, '')
-      assert.equal(question.consigne, `manger | ${testCase.tense} (impératif)`)
+      assert.equal(question.consigne, `${testCase.pronoun} | manger | ${testCase.tense} (impératif)`)
       assert.equal(result.formula, `${testCase.pronoun} | manger | impératif ${testCase.tense}`)
       assert.equal(result.sentence, testCase.blank)
+      assert.equal(question.reponses.some(answer => new RegExp(`^${testCase.pronoun}\\s`, 'iu').test(answer)), false)
     }
   })
 

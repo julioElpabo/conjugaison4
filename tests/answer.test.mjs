@@ -160,9 +160,11 @@ describe('pronom sujet obligatoire', () => {
   })
 
   it('conserve la construction sans sujet de l’impératif', () => {
-    assert.equal(validateConjugationAnswer('viens', {
+    const imperative = {
       reponses: ['viens'], pronom: 'tu', mode: 'impératif',
-    }).isCorrect, true)
+    }
+    assert.equal(validateConjugationAnswer('viens', imperative).isCorrect, true)
+    assert.equal(validateConjugationAnswer('tu viens', imperative).isCorrect, false)
   })
 })
 

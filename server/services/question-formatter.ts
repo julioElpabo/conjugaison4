@@ -1,4 +1,5 @@
 import type { ExerciseQuestion } from '../types/public-api'
+import { agreePastParticiple } from '../../shared/utils/past-participle-agreement'
 
 export interface ConjugationSourceRow {
   id: number
@@ -147,18 +148,6 @@ function withComplement(answer: string, complement: string) {
   return `${stem} ${complement.trim()}${punctuation ? ` ${punctuation}` : ''}`
 }
 
-function agreedParticiple(participle: string, gender?: string | null, number?: string | null) {
-  let result = participle
-  if (gender === 'feminin') {
-    const exceptions: Record<string, string> = {
-      absous: 'absoute', dissous: 'dissoute', dû: 'due', mû: 'mue', crû: 'crue',
-    }
-    result = exceptions[result] ?? (result.endsWith('e') ? result : `${result}e`)
-  }
-  if (number === 'pluriel' && !/[sx]$/u.test(result)) result += 's'
-  return result
-}
-
 function applyAnteposedCodAgreement(form: string, row: ConjugationSourceRow) {
   if (row.complement_position !== 'before'
       || row.complement_function === 'coi'
@@ -170,7 +159,7 @@ function applyAnteposedCodAgreement(form: string, row: ConjugationSourceRow) {
       || !form.endsWith(row.participe_passe)) {
     return form
   }
-  const agreed = agreedParticiple(row.participe_passe, row.complement_gender, row.complement_number)
+  const agreed = agreePastParticiple(row.participe_passe, row.complement_gender, row.complement_number)
   return `${form.slice(0, -row.participe_passe.length)}${agreed}`
 }
 
@@ -364,7 +353,7 @@ export function formatConjugationQuestion(
     ? `${normalized(row.mode_name) === 'impératif'
       ? ''
       : `${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif)} `}… ${row.complement_phrase} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
-    : `${normalized(row.mode_name) === 'impératif' ? '' : `${pronoun} | `}${row.infinitif} | ${row.temps_name} (${row.mode_name})`
+    : `${pronoun} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
   const displayedComplement = row.complement_position === 'before'
     ? anteposedComplement?.antecedent
     : row.complement_phrase
@@ -382,7 +371,7 @@ export function formatConjugationQuestion(
         preposition: row.complement_preposition,
         participle: row.complement_function === 'cod' && row.complement_position === 'before'
           && row.complement_gender && row.complement_number
-          ? agreedParticiple(row.participe_passe, row.complement_gender, row.complement_number)
+          ? agreePastParticiple(row.participe_passe, row.complement_gender, row.complement_number)
           : row.participe_passe,
         gender: (row.complement_gender as 'masculin' | 'feminin' | null | undefined) ?? null,
         number: (row.complement_number as 'singulier' | 'pluriel' | null | undefined) ?? null,

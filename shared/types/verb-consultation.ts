@@ -1,4 +1,5 @@
 import type { Verb, VerbId } from './conjugation'
+import type { AgreementGender, AgreementNumber } from '../utils/past-participle-agreement'
 
 export interface ConsultedConjugation {
   id: number
@@ -21,4 +22,14 @@ export interface VerbConsultation {
     | 'typePronominal'
   > & { id: VerbId }
   conjugations: ConsultedConjugation[]
+  pastParticipleAgreement?: {
+    afterSentence: string
+    beforeSentenceStart: string
+    agreedParticipleStart: string
+    agreementLetters: string
+    beforeSentenceEnd: string
+    cod: string
+    gender: AgreementGender
+    number: AgreementNumber
+  }
 }

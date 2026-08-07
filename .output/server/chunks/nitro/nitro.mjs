@@ -4465,7 +4465,7 @@ function _expandFromEnv(value) {
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "e92d0f8a-f448-436b-829c-2a622ece2986",
+    "buildId": "08fc8e63-729d-4b9e-8001-9bf42570b3ee",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -5538,6 +5538,34 @@ function decodePronominalSelectionId(selectionId) {
   return selectionId < 0 ? Math.abs(selectionId) : null;
 }
 
+function agreePastParticiple(participle, gender, number) {
+  var _a;
+  let result = participle;
+  if (gender === "feminin") {
+    const exceptions = {
+      absous: "absoute",
+      dissous: "dissoute",
+      d\u00FB: "due",
+      m\u00FB: "mue",
+      cr\u00FB: "crue"
+    };
+    result = (_a = exceptions[result]) != null ? _a : result.endsWith("e") ? result : `${result}e`;
+  }
+  if (number === "pluriel" && !/[sx]$/u.test(result)) result += "s";
+  return result;
+}
+function splitPastParticipleAgreement(participle, agreedParticiple) {
+  let commonLength = 0;
+  const maximum = Math.min(participle.length, agreedParticiple.length);
+  while (commonLength < maximum && participle[commonLength] === agreedParticiple[commonLength]) {
+    commonLength += 1;
+  }
+  return {
+    unchanged: agreedParticiple.slice(0, commonLength),
+    agreement: agreedParticiple.slice(commonLength)
+  };
+}
+
 function unique(values) {
   return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
 }
@@ -5615,27 +5643,11 @@ function withComplement(answer, complement) {
   const stem = punctuation ? trimmed.slice(0, -1).trimEnd() : trimmed;
   return `${stem} ${complement.trim()}${punctuation ? ` ${punctuation}` : ""}`;
 }
-function agreedParticiple(participle, gender, number) {
-  var _a;
-  let result = participle;
-  if (gender === "feminin") {
-    const exceptions = {
-      absous: "absoute",
-      dissous: "dissoute",
-      d\u00FB: "due",
-      m\u00FB: "mue",
-      cr\u00FB: "crue"
-    };
-    result = (_a = exceptions[result]) != null ? _a : result.endsWith("e") ? result : `${result}e`;
-  }
-  if (number === "pluriel" && !/[sx]$/u.test(result)) result += "s";
-  return result;
-}
 function applyAnteposedCodAgreement(form, row) {
   if (row.complement_position !== "before" || row.complement_function === "coi" || !row.is_compound || normalized$3(row.auxiliaire) !== "avoir" || !row.participe_passe || !row.complement_gender || !row.complement_number || !form.endsWith(row.participe_passe)) {
     return form;
   }
-  const agreed = agreedParticiple(row.participe_passe, row.complement_gender, row.complement_number);
+  const agreed = agreePastParticiple(row.participe_passe, row.complement_gender, row.complement_number);
   return `${form.slice(0, -row.participe_passe.length)}${agreed}`;
 }
 function withoutSubjunctiveLink(value) {
@@ -5765,7 +5777,7 @@ function formatConjugationQuestion(row, pronoun) {
     allowsInvariableConstruction(row)
   )).map((form) => applyAnteposedCodAgreement(form, row)).map((form) => formatAnswer(pronoun, form, row.mode_name, row.infinitif));
   const displayedCorrections = row.complement_position === "before" && row.complement_anteposed ? correctedForms.map((answer) => withAnteposedComplement(answer, pronoun, row.mode_name, row.complement_anteposed, row.complement_relative_pronoun, row.complement_gender, row.complement_number)) : row.complement_phrase ? correctedForms.map((answer) => withComplement(answer, row.complement_phrase)) : correctedForms;
-  const prompt = row.complement_position === "before" && row.complement_anteposed ? normalized$3(row.mode_name) === "subjonctif" ? `${subjunctiveRelativeAntecedent(anteposedComplement.antecedent, row.complement_relative_pronoun, row.complement_gender, row.complement_number)} ${withRelativeLink(row.complement_relative_pronoun, pronoun, relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif))} \u2026${anteposedComplement.postposed ? ` ${anteposedComplement.postposed}` : ""} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})` : row.complement_relative_pronoun ? `${anteposedComplement.antecedent} ${withRelativeLink(row.complement_relative_pronoun, pronoun, relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif))} \u2026 | ${row.infinitif} | ${row.temps_name} (${row.mode_name})` : `${anteposedComplement.antecedent} ${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif, "before")} \u2026${anteposedComplement.postposed ? ` ${anteposedComplement.postposed}` : ""} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})` : row.complement_phrase ? `${normalized$3(row.mode_name) === "imp\xE9ratif" ? "" : `${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif)} `}\u2026 ${row.complement_phrase} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})` : `${normalized$3(row.mode_name) === "imp\xE9ratif" ? "" : `${pronoun} | `}${row.infinitif} | ${row.temps_name} (${row.mode_name})`;
+  const prompt = row.complement_position === "before" && row.complement_anteposed ? normalized$3(row.mode_name) === "subjonctif" ? `${subjunctiveRelativeAntecedent(anteposedComplement.antecedent, row.complement_relative_pronoun, row.complement_gender, row.complement_number)} ${withRelativeLink(row.complement_relative_pronoun, pronoun, relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif))} \u2026${anteposedComplement.postposed ? ` ${anteposedComplement.postposed}` : ""} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})` : row.complement_relative_pronoun ? `${anteposedComplement.antecedent} ${withRelativeLink(row.complement_relative_pronoun, pronoun, relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif))} \u2026 | ${row.infinitif} | ${row.temps_name} (${row.mode_name})` : `${anteposedComplement.antecedent} ${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif, "before")} \u2026${anteposedComplement.postposed ? ` ${anteposedComplement.postposed}` : ""} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})` : row.complement_phrase ? `${normalized$3(row.mode_name) === "imp\xE9ratif" ? "" : `${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif)} `}\u2026 ${row.complement_phrase} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})` : `${pronoun} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`;
   const displayedComplement = row.complement_position === "before" ? anteposedComplement == null ? void 0 : anteposedComplement.antecedent : row.complement_phrase;
   const hasAvoirParticipleRule = Boolean(row.is_compound) && normalized$3(row.auxiliaire) === "avoir" && Boolean(displayedComplement) && (row.complement_function === "cod" || row.complement_function === "coi");
   const agreementReminder = hasAvoirParticipleRule ? {
@@ -5773,7 +5785,7 @@ function formatConjugationQuestion(row, pronoun) {
     infinitive: row.infinitif,
     complement: displayedComplement,
     preposition: row.complement_preposition,
-    participle: row.complement_function === "cod" && row.complement_position === "before" && row.complement_gender && row.complement_number ? agreedParticiple(row.participe_passe, row.complement_gender, row.complement_number) : row.participe_passe,
+    participle: row.complement_function === "cod" && row.complement_position === "before" && row.complement_gender && row.complement_number ? agreePastParticiple(row.participe_passe, row.complement_gender, row.complement_number) : row.participe_passe,
     gender: (_a = row.complement_gender) != null ? _a : null,
     number: (_b = row.complement_number) != null ? _b : null
   } : void 0;
@@ -124805,3005 +124817,3005 @@ const assets = {
   "/favicon.ico": {
     "type": "image/vnd.microsoft.icon",
     "etag": "\"10be-n8egyE9tcb7sKGr/pYCaQ4uWqxI\"",
-    "mtime": "2026-08-07T17:57:19.876Z",
+    "mtime": "2026-08-07T19:57:51.257Z",
     "size": 4286,
     "path": "../public/favicon.ico"
   },
   "/favicon.svg": {
     "type": "image/svg+xml",
     "etag": "\"74-WyA9ZQw0VL+p5r20HpGPoXfXkds\"",
-    "mtime": "2026-08-07T17:57:19.877Z",
+    "mtime": "2026-08-07T19:57:51.261Z",
     "size": 116,
     "path": "../public/favicon.svg"
   },
   "/robots.txt": {
     "type": "text/plain; charset=utf-8",
     "etag": "\"194-zYMBBhB4q/jcC5o0BldfXliaHug\"",
-    "mtime": "2026-08-07T17:57:19.876Z",
+    "mtime": "2026-08-07T19:57:51.263Z",
     "size": 404,
     "path": "../public/robots.txt"
   },
   "/theme-init.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"15d-LdG5lUVNvFDRrmi87xtSdBWs6zw\"",
-    "mtime": "2026-08-07T17:57:19.876Z",
+    "mtime": "2026-08-07T19:57:51.263Z",
     "size": 349,
     "path": "../public/theme-init.js"
-  },
-  "/images/ancien-site.webp": {
-    "type": "image/webp",
-    "etag": "\"3746-e734D11Dqjfh5NlFidUXIfqJ//8\"",
-    "mtime": "2026-08-07T17:57:19.872Z",
-    "size": 14150,
-    "path": "../public/images/ancien-site.webp"
   },
   "/images/recharger-defi.svg": {
     "type": "image/svg+xml",
     "etag": "\"7da-sW4Yx/P5X4Hs5bsLkaNr7fae5Cw\"",
-    "mtime": "2026-08-07T17:57:19.872Z",
+    "mtime": "2026-08-07T19:57:51.249Z",
     "size": 2010,
     "path": "../public/images/recharger-defi.svg"
+  },
+  "/images/ancien-site.webp": {
+    "type": "image/webp",
+    "etag": "\"3746-e734D11Dqjfh5NlFidUXIfqJ//8\"",
+    "mtime": "2026-08-07T19:57:51.249Z",
+    "size": 14150,
+    "path": "../public/images/ancien-site.webp"
   },
   "/images/site-mountains.svg": {
     "type": "image/svg+xml",
     "etag": "\"2fdd-Kp0xCymtx14aH6SsI0yTF9+0o2s\"",
-    "mtime": "2026-08-07T17:57:19.871Z",
+    "mtime": "2026-08-07T19:57:51.248Z",
     "size": 12253,
     "path": "../public/images/site-mountains.svg"
   },
-  "/_nuxt/0XgJ-iHY.js": {
+  "/_nuxt/0CGbdEgf.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"3dd5-s/sa2XfPS5OE5sILH5R8LxoRk2Q\"",
-    "mtime": "2026-08-07T17:57:19.838Z",
-    "size": 15829,
-    "path": "../public/_nuxt/0XgJ-iHY.js"
+    "etag": "\"2d31-9MwbUTDehruqf0BWqVYfTQa66pA\"",
+    "mtime": "2026-08-07T19:57:51.221Z",
+    "size": 11569,
+    "path": "../public/_nuxt/0CGbdEgf.js"
+  },
+  "/_nuxt/5vbK_BcU.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"140c-2Zggn2ci7UdTB/kumcEF3br2Q+Y\"",
+    "mtime": "2026-08-07T19:57:51.221Z",
+    "size": 5132,
+    "path": "../public/_nuxt/5vbK_BcU.js"
+  },
+  "/_nuxt/6zriYszF.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"fb-0iGjwaCGQesb2oEaKmHKPWmN2uI\"",
+    "mtime": "2026-08-07T19:57:51.221Z",
+    "size": 251,
+    "path": "../public/_nuxt/6zriYszF.js"
   },
   "/_nuxt/AdminAuthBoundary.9aO0xNHc.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1c12-FEyUv3YidSV55qa/8fzaiHwtFHY\"",
-    "mtime": "2026-08-07T17:57:19.838Z",
+    "mtime": "2026-08-07T19:57:51.221Z",
     "size": 7186,
     "path": "../public/_nuxt/AdminAuthBoundary.9aO0xNHc.css"
   },
-  "/_nuxt/B0pIBIFQ.js": {
+  "/_nuxt/B0D265sG.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"d96-8MmBbwdlgztfn7vtH2uz1CYGmKI\"",
-    "mtime": "2026-08-07T17:57:19.838Z",
-    "size": 3478,
-    "path": "../public/_nuxt/B0pIBIFQ.js"
+    "etag": "\"140-qcmruCT9s85armYaUgxTVRrqSBs\"",
+    "mtime": "2026-08-07T19:57:51.221Z",
+    "size": 320,
+    "path": "../public/_nuxt/B0D265sG.js"
   },
-  "/_nuxt/AvgHy4ds.js": {
+  "/_nuxt/B0fvEuvo.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"bbb-V/sexD+6CbBq2pF5Lrguz59Swek\"",
-    "mtime": "2026-08-07T17:57:19.838Z",
-    "size": 3003,
-    "path": "../public/_nuxt/AvgHy4ds.js"
+    "etag": "\"2e6-2fAXFVX0FZB70a0Ta6KhnbSqavA\"",
+    "mtime": "2026-08-07T19:57:51.221Z",
+    "size": 742,
+    "path": "../public/_nuxt/B0fvEuvo.js"
   },
-  "/_nuxt/B6eNXi1J.js": {
+  "/_nuxt/B6XAFhIJ.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"8ef2-hlidYPN9CZ90qLRk5s6ehmFNqoM\"",
-    "mtime": "2026-08-07T17:57:19.838Z",
-    "size": 36594,
-    "path": "../public/_nuxt/B6eNXi1J.js"
+    "etag": "\"3dd5-fHyefzFec8GjdXuAT4ZD8bwYGI8\"",
+    "mtime": "2026-08-07T19:57:51.221Z",
+    "size": 15829,
+    "path": "../public/_nuxt/B6XAFhIJ.js"
   },
   "/_nuxt/B8Nt-ERl.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"5a49-ESbUzwq0WOLhq2HY+Y3PhM254ME\"",
-    "mtime": "2026-08-07T17:57:19.838Z",
+    "mtime": "2026-08-07T19:57:51.221Z",
     "size": 23113,
     "path": "../public/_nuxt/B8Nt-ERl.js"
   },
-  "/_nuxt/BGicoDii.js": {
+  "/_nuxt/B8RDj7PH.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"2ce9-29vi1LuULjoWHNOboD0LUdxcmsE\"",
-    "mtime": "2026-08-07T17:57:19.838Z",
-    "size": 11497,
-    "path": "../public/_nuxt/BGicoDii.js"
+    "etag": "\"31f-kejR+FrglIPzkZwH4u9seQOh2js\"",
+    "mtime": "2026-08-07T19:57:51.221Z",
+    "size": 799,
+    "path": "../public/_nuxt/B8RDj7PH.js"
   },
-  "/_nuxt/BKyJarMH.js": {
+  "/_nuxt/BCi2PqZ_.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"2d60-PFYoMXRajZdbs9r5hS8MM8Z8KBc\"",
-    "mtime": "2026-08-07T17:57:19.838Z",
-    "size": 11616,
-    "path": "../public/_nuxt/BKyJarMH.js"
-  },
-  "/_nuxt/BHrB0mEU.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"125b0-viCfPo+2V6WQER3oiWFQnHtoYIU\"",
-    "mtime": "2026-08-07T17:57:19.839Z",
-    "size": 75184,
-    "path": "../public/_nuxt/BHrB0mEU.js"
+    "etag": "\"1d93-zF3ShSS/mK7XimrFwXrpPDBeUpk\"",
+    "mtime": "2026-08-07T19:57:51.221Z",
+    "size": 7571,
+    "path": "../public/_nuxt/BCi2PqZ_.js"
   },
   "/_nuxt/BSDWAJ5j.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"4c2-g5ouI/HZcGmsMD46SqumOqq/7uo\"",
-    "mtime": "2026-08-07T17:57:19.839Z",
+    "mtime": "2026-08-07T19:57:51.222Z",
     "size": 1218,
     "path": "../public/_nuxt/BSDWAJ5j.js"
   },
-  "/_nuxt/BNnwveDH.js": {
+  "/_nuxt/BWP34nN0.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"2d31-OOKL+8KBy6A73wd6Ai/7JjRbdsI\"",
-    "mtime": "2026-08-07T17:57:19.839Z",
-    "size": 11569,
-    "path": "../public/_nuxt/BNnwveDH.js"
+    "etag": "\"24a-MbjfOyTppnm7jOBYyS7tyZuY6L4\"",
+    "mtime": "2026-08-07T19:57:51.221Z",
+    "size": 586,
+    "path": "../public/_nuxt/BWP34nN0.js"
   },
-  "/_nuxt/BTQQK3FZ.js": {
+  "/_nuxt/BXrBKUsJ.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"5f44-6Z11xpZdDfZJddqCDmPWegrT1m8\"",
-    "mtime": "2026-08-07T17:57:19.839Z",
-    "size": 24388,
-    "path": "../public/_nuxt/BTQQK3FZ.js"
+    "etag": "\"55f-aqEFIYbnPWAPgWRm6MrDcZzdatE\"",
+    "mtime": "2026-08-07T19:57:51.222Z",
+    "size": 1375,
+    "path": "../public/_nuxt/BXrBKUsJ.js"
   },
-  "/_nuxt/BYUtY63I.js": {
+  "/_nuxt/BaBFibHo.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"579d-RqQDay2pPgPEMCL5sYgFoh9QWmc\"",
-    "mtime": "2026-08-07T17:57:19.839Z",
-    "size": 22429,
-    "path": "../public/_nuxt/BYUtY63I.js"
+    "etag": "\"bbb-g+3d3PKimYbk/eTcHu541I5GwcI\"",
+    "mtime": "2026-08-07T19:57:51.222Z",
+    "size": 3003,
+    "path": "../public/_nuxt/BaBFibHo.js"
   },
-  "/_nuxt/Bj01ViQf.js": {
+  "/_nuxt/BaFSUHIE.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"2216-c0Zm6//isqmlt6l79YGuGsuetPg\"",
-    "mtime": "2026-08-07T17:57:19.839Z",
-    "size": 8726,
-    "path": "../public/_nuxt/Bj01ViQf.js"
+    "etag": "\"1627-6RtgCzVVp2LKZpJxSWkerXf9r9M\"",
+    "mtime": "2026-08-07T19:57:51.222Z",
+    "size": 5671,
+    "path": "../public/_nuxt/BaFSUHIE.js"
   },
-  "/_nuxt/BbmdL-fh.js": {
+  "/_nuxt/BbzJnYU3.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"22d-1X1AZK0I4aRudPldqDPLr/81uL8\"",
-    "mtime": "2026-08-07T17:57:19.839Z",
-    "size": 557,
-    "path": "../public/_nuxt/BbmdL-fh.js"
+    "etag": "\"317-F1RptkjIu4kHf0jz+NSa1b3miFA\"",
+    "mtime": "2026-08-07T19:57:51.222Z",
+    "size": 791,
+    "path": "../public/_nuxt/BbzJnYU3.js"
   },
-  "/_nuxt/BkeUcZTp.js": {
+  "/_nuxt/BK1HzvdP.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"e48-X2uREFj7vUJ04DW8zvs+MRjt93c\"",
-    "mtime": "2026-08-07T17:57:19.839Z",
-    "size": 3656,
-    "path": "../public/_nuxt/BkeUcZTp.js"
-  },
-  "/_nuxt/B__eMdj6.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"598c-ToR36KNYc/FtOHDxWx9SzmMbEJY\"",
-    "mtime": "2026-08-07T17:57:19.839Z",
-    "size": 22924,
-    "path": "../public/_nuxt/B__eMdj6.js"
+    "etag": "\"4f3f5-/aNjEIEayPlZz5HRDAAUpsawzz4\"",
+    "mtime": "2026-08-07T19:57:51.222Z",
+    "size": 324597,
+    "path": "../public/_nuxt/BK1HzvdP.js"
   },
   "/_nuxt/BOF6v8rb.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"643fd-4eAFzvIrVx6RBdakASdECPaZDE0\"",
-    "mtime": "2026-08-07T17:57:19.839Z",
+    "mtime": "2026-08-07T19:57:51.222Z",
     "size": 410621,
     "path": "../public/_nuxt/BOF6v8rb.js"
   },
-  "/_nuxt/BooDvREz.js": {
+  "/_nuxt/BeLhFXyR.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1747-wHKlAyEqzc9mm+ljA6xqdL9nJfY\"",
-    "mtime": "2026-08-07T17:57:19.839Z",
-    "size": 5959,
-    "path": "../public/_nuxt/BooDvREz.js"
+    "etag": "\"8ef2-O0tF9ETrXgpLFYCDZfe2l/Gl0dA\"",
+    "mtime": "2026-08-07T19:57:51.222Z",
+    "size": 36594,
+    "path": "../public/_nuxt/BeLhFXyR.js"
   },
-  "/_nuxt/Brksz-tE.js": {
+  "/_nuxt/BiUJ6SHV.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"140-f5PySBczGFfRyP9yKJYna5jPMTM\"",
-    "mtime": "2026-08-07T17:57:19.840Z",
-    "size": 320,
-    "path": "../public/_nuxt/Brksz-tE.js"
+    "etag": "\"598c-IuFcH7aNGn3sOtvh1GW+lBltVQk\"",
+    "mtime": "2026-08-07T19:57:51.222Z",
+    "size": 22924,
+    "path": "../public/_nuxt/BiUJ6SHV.js"
   },
-  "/_nuxt/BsmOfJ26.js": {
+  "/_nuxt/Bj01ViQf.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"3c32-eY90N8zWZzFPeyFyx+ruryG4JWk\"",
-    "mtime": "2026-08-07T17:57:19.840Z",
-    "size": 15410,
-    "path": "../public/_nuxt/BsmOfJ26.js"
+    "etag": "\"2216-c0Zm6//isqmlt6l79YGuGsuetPg\"",
+    "mtime": "2026-08-07T19:57:51.222Z",
+    "size": 8726,
+    "path": "../public/_nuxt/Bj01ViQf.js"
   },
-  "/_nuxt/BqKFm2AW.js": {
+  "/_nuxt/C1OeM3tP.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"26d1e-y3VNNAXbnICyyoyAU3hEeTKwsgE\"",
-    "mtime": "2026-08-07T17:57:19.840Z",
-    "size": 159006,
-    "path": "../public/_nuxt/BqKFm2AW.js"
-  },
-  "/_nuxt/By-p2G6E.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"140c-k8cB2X9xWgOv3nAfFlvfWXRq2EM\"",
-    "mtime": "2026-08-07T17:57:19.840Z",
-    "size": 5132,
-    "path": "../public/_nuxt/By-p2G6E.js"
-  },
-  "/_nuxt/C-D7FzV9.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"3754-x4Yb/DR8PWMQJxGT+yXw2nt4hKE\"",
-    "mtime": "2026-08-07T17:57:19.840Z",
-    "size": 14164,
-    "path": "../public/_nuxt/C-D7FzV9.js"
-  },
-  "/_nuxt/CA13DrFx.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"355-UvK0eVGTRAxYCK5mWxcsw8P6oFs\"",
-    "mtime": "2026-08-07T17:57:19.840Z",
+    "etag": "\"355-xkLmDpqCuv7cTgE/rU04ztg8JaM\"",
+    "mtime": "2026-08-07T19:57:51.222Z",
     "size": 853,
-    "path": "../public/_nuxt/CA13DrFx.js"
+    "path": "../public/_nuxt/C1OeM3tP.js"
+  },
+  "/_nuxt/BxBGwucJ.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"2d60-/XvIBPNBxIkNOztcDRL1J79TrxU\"",
+    "mtime": "2026-08-07T19:57:51.222Z",
+    "size": 11616,
+    "path": "../public/_nuxt/BxBGwucJ.js"
+  },
+  "/_nuxt/CG-eIRzH.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"41d-GEJP7NKLkW1gND7SOy8UxURbZ9o\"",
+    "mtime": "2026-08-07T19:57:51.222Z",
+    "size": 1053,
+    "path": "../public/_nuxt/CG-eIRzH.js"
   },
   "/_nuxt/C4Sdh6yL.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"5ff2-f4vTi+HR1Pej53qOpSTifGhzh9A\"",
-    "mtime": "2026-08-07T17:57:19.840Z",
+    "mtime": "2026-08-07T19:57:51.222Z",
     "size": 24562,
     "path": "../public/_nuxt/C4Sdh6yL.js"
   },
-  "/_nuxt/CFRxb6nl.js": {
+  "/_nuxt/CHsGr-GB.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"39cb-ngEfmSZIMLGERmJl1t9YGFqUgbQ\"",
-    "mtime": "2026-08-07T17:57:19.840Z",
-    "size": 14795,
-    "path": "../public/_nuxt/CFRxb6nl.js"
+    "etag": "\"50b-5U6LLVkjislDAYgLVllQCAhmXm4\"",
+    "mtime": "2026-08-07T19:57:51.222Z",
+    "size": 1291,
+    "path": "../public/_nuxt/CHsGr-GB.js"
   },
-  "/_nuxt/CLoOXKB5.js": {
+  "/_nuxt/CJb2VQzN.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"40-DEXluPrd6E7PgJjEZ5Tpy6MEknE\"",
-    "mtime": "2026-08-07T17:57:19.840Z",
-    "size": 64,
-    "path": "../public/_nuxt/CLoOXKB5.js"
+    "etag": "\"3460-dc5+eJL3ozM2H0b+wWm3aME+4oQ\"",
+    "mtime": "2026-08-07T19:57:51.222Z",
+    "size": 13408,
+    "path": "../public/_nuxt/CJb2VQzN.js"
   },
-  "/_nuxt/COFQiHPr.js": {
+  "/_nuxt/C6hWxcGt.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"41d-caKVxIbH1/dIDI+12vne7BQhO1o\"",
-    "mtime": "2026-08-07T17:57:19.840Z",
-    "size": 1053,
-    "path": "../public/_nuxt/COFQiHPr.js"
+    "etag": "\"125b0-RFL5ew2VYCQzdRBQTEN9qWUP+v0\"",
+    "mtime": "2026-08-07T19:57:51.222Z",
+    "size": 75184,
+    "path": "../public/_nuxt/C6hWxcGt.js"
   },
-  "/_nuxt/CRL_cm90.js": {
+  "/_nuxt/CPdwVpZf.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1d93-T3ot3CTxZfLXBKbfGnt6hN/KsRI\"",
-    "mtime": "2026-08-07T17:57:19.840Z",
-    "size": 7571,
-    "path": "../public/_nuxt/CRL_cm90.js"
+    "etag": "\"26d1e-Hu7H2mUV5Es7WteTXMlsHVrFT/s\"",
+    "mtime": "2026-08-07T19:57:51.222Z",
+    "size": 159006,
+    "path": "../public/_nuxt/CPdwVpZf.js"
   },
-  "/_nuxt/CgdsjPvq.js": {
+  "/_nuxt/CU29wEe_.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"4bc-E5EA4W1A2IR2okM8dDI2RaFOqzU\"",
-    "mtime": "2026-08-07T17:57:19.840Z",
-    "size": 1212,
-    "path": "../public/_nuxt/CgdsjPvq.js"
+    "etag": "\"3369-NxQN1KcbLftnhf8u+SZ35NpbIfc\"",
+    "mtime": "2026-08-07T19:57:51.223Z",
+    "size": 13161,
+    "path": "../public/_nuxt/CU29wEe_.js"
   },
-  "/_nuxt/ChvzQgsA.js": {
+  "/_nuxt/CU2KxyDk.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"31f-+LdZOohVTyRCYnrccEGl+52S98I\"",
-    "mtime": "2026-08-07T17:57:19.840Z",
-    "size": 799,
-    "path": "../public/_nuxt/ChvzQgsA.js"
+    "etag": "\"5f44-fwpHjxh0Oj90sphBwwyLvYaeoZ4\"",
+    "mtime": "2026-08-07T19:57:51.223Z",
+    "size": 24388,
+    "path": "../public/_nuxt/CU2KxyDk.js"
+  },
+  "/_nuxt/CZFWJyTs.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"3dc8-psPg1mPuajcDDvFsB0f5z69wnPM\"",
+    "mtime": "2026-08-07T19:57:51.223Z",
+    "size": 15816,
+    "path": "../public/_nuxt/CZFWJyTs.js"
+  },
+  "/_nuxt/CQFb0tF5.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"391be-/6UR3+85djTG3Pqj4KpLvmlhguU\"",
+    "mtime": "2026-08-07T19:57:51.222Z",
+    "size": 233918,
+    "path": "../public/_nuxt/CQFb0tF5.js"
+  },
+  "/_nuxt/CaesxqWT.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"b2d-vQr2Z1PMH8ESgg9eZwEFIQMcEHo\"",
+    "mtime": "2026-08-07T19:57:51.223Z",
+    "size": 2861,
+    "path": "../public/_nuxt/CaesxqWT.js"
+  },
+  "/_nuxt/Cc-T6Nwb.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1f96-/1ujN1iamIuaL3ufG+fymPc/lwA\"",
+    "mtime": "2026-08-07T19:57:51.223Z",
+    "size": 8086,
+    "path": "../public/_nuxt/Cc-T6Nwb.js"
+  },
+  "/_nuxt/Cc9gvcFk.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"22d-C+526QrLCYwQGu6YAe+gid/g8ms\"",
+    "mtime": "2026-08-07T19:57:51.223Z",
+    "size": 557,
+    "path": "../public/_nuxt/Cc9gvcFk.js"
+  },
+  "/_nuxt/Cj9exGep.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"d96-w2OL6IKXKvjV1Bud6VkfdAQaln4\"",
+    "mtime": "2026-08-07T19:57:51.223Z",
+    "size": 3478,
+    "path": "../public/_nuxt/Cj9exGep.js"
+  },
+  "/_nuxt/ChsQ_8B8.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1747-8/iGEp79C+vjn4ZoUbyKkv5NjoA\"",
+    "mtime": "2026-08-07T19:57:51.223Z",
+    "size": 5959,
+    "path": "../public/_nuxt/ChsQ_8B8.js"
+  },
+  "/_nuxt/CjMPFfXK.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"579d-9nbk6OFhkH/JQHmv1CV8XKq/Hcc\"",
+    "mtime": "2026-08-07T19:57:51.223Z",
+    "size": 22429,
+    "path": "../public/_nuxt/CjMPFfXK.js"
+  },
+  "/_nuxt/CjbswqB7.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"fefa-5Rb8OGFJMR3P9YEhc8aPzKddmEQ\"",
+    "mtime": "2026-08-07T19:57:51.223Z",
+    "size": 65274,
+    "path": "../public/_nuxt/CjbswqB7.js"
+  },
+  "/_nuxt/CR7Cp1E0.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"5e479-e40O8FN+h0QCjebhlfDOmVpI1RQ\"",
+    "mtime": "2026-08-07T19:57:51.223Z",
+    "size": 386169,
+    "path": "../public/_nuxt/CR7Cp1E0.js"
   },
   "/_nuxt/CjoFa3Ch.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"24e6-QKCNrjBirvyHs0Ti8hOrhjx2vpM\"",
-    "mtime": "2026-08-07T17:57:19.840Z",
+    "mtime": "2026-08-07T19:57:51.223Z",
     "size": 9446,
     "path": "../public/_nuxt/CjoFa3Ch.js"
   },
-  "/_nuxt/CmQNOKui.js": {
+  "/_nuxt/CKXNwghx.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1bfe-/mJ5py0aZRpNvb7qX7UyUmmaz54\"",
-    "mtime": "2026-08-07T17:57:19.841Z",
-    "size": 7166,
-    "path": "../public/_nuxt/CmQNOKui.js"
+    "etag": "\"146578-4zWdpp+aNcwd0gFrxpuBMLihyHE\"",
+    "mtime": "2026-08-07T19:57:51.223Z",
+    "size": 1336696,
+    "path": "../public/_nuxt/CKXNwghx.js"
+  },
+  "/_nuxt/CmvtB3DD.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1f89-aF3MXrVCFhc1myegQDIOimj6MmI\"",
+    "mtime": "2026-08-07T19:57:51.223Z",
+    "size": 8073,
+    "path": "../public/_nuxt/CmvtB3DD.js"
   },
   "/_nuxt/CoYRKfuD.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"35-VNA0DjxaxUUvg8NcaUbo2abQ+oU\"",
-    "mtime": "2026-08-07T17:57:19.841Z",
+    "mtime": "2026-08-07T19:57:51.223Z",
     "size": 53,
     "path": "../public/_nuxt/CoYRKfuD.js"
   },
   "/_nuxt/CoachHelpPanel.DMO5oait.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"71b4-6ApqM5eiIelHMjNoIz0hWUFcYsY\"",
-    "mtime": "2026-08-07T17:57:19.841Z",
+    "mtime": "2026-08-07T19:57:51.223Z",
     "size": 29108,
     "path": "../public/_nuxt/CoachHelpPanel.DMO5oait.css"
   },
-  "/_nuxt/Cegny-tg.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"39144-zZ/Vlf+RucTot3fGXRRfKNUJXc4\"",
-    "mtime": "2026-08-07T17:57:19.840Z",
-    "size": 233796,
-    "path": "../public/_nuxt/Cegny-tg.js"
-  },
-  "/_nuxt/DIhs5cKf.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"317-DvZylZ/58RC7fQD0o2Kau8nZ4Xg\"",
-    "mtime": "2026-08-07T17:57:19.841Z",
-    "size": 791,
-    "path": "../public/_nuxt/DIhs5cKf.js"
-  },
-  "/_nuxt/DQL4Ntgy.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"375c-Cd8ZH6dsL0/OJZmn/yigJ31CZOw\"",
-    "mtime": "2026-08-07T17:57:19.841Z",
-    "size": 14172,
-    "path": "../public/_nuxt/DQL4Ntgy.js"
-  },
-  "/_nuxt/DYig1re1.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"2e6-6sHvytdHPd/ruQvatMjJ3TPNUpI\"",
-    "mtime": "2026-08-07T17:57:19.841Z",
-    "size": 742,
-    "path": "../public/_nuxt/DYig1re1.js"
-  },
-  "/_nuxt/COdaIkaL.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"5e479-wdz7vfVASdotnmNvyjVH1nXB3HQ\"",
-    "mtime": "2026-08-07T17:57:19.841Z",
-    "size": 386169,
-    "path": "../public/_nuxt/COdaIkaL.js"
-  },
-  "/_nuxt/CoachPicker.Bjl3wPgx.css": {
+  "/_nuxt/CoachPicker.Nf8OiCQ5.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"a963-OJAhuZze/fEgMxMbj80c+jTlGdA\"",
-    "mtime": "2026-08-07T17:57:19.841Z",
+    "etag": "\"a963-NHG1njAxoZI+TTmyaTpSMk/kAUY\"",
+    "mtime": "2026-08-07T19:57:51.223Z",
     "size": 43363,
-    "path": "../public/_nuxt/CoachPicker.Bjl3wPgx.css"
+    "path": "../public/_nuxt/CoachPicker.Nf8OiCQ5.css"
   },
-  "/_nuxt/DXEQVQnt.js": {
+  "/_nuxt/D-ADup3Z.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"31151-TyUyRNm9rR2JDwpyAxcruTmmr6A\"",
-    "mtime": "2026-08-07T17:57:19.841Z",
-    "size": 201041,
-    "path": "../public/_nuxt/DXEQVQnt.js"
-  },
-  "/_nuxt/D_GG63JV.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"b56e-i7G0mNf9x0r3j9oTmM3LQQ9b+5Q\"",
-    "mtime": "2026-08-07T17:57:19.841Z",
-    "size": 46446,
-    "path": "../public/_nuxt/D_GG63JV.js"
-  },
-  "/_nuxt/DaTzHYxP.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"fefa-rxKR+TsxSWtN4mO9qIBwamISZxQ\"",
-    "mtime": "2026-08-07T17:57:19.841Z",
-    "size": 65274,
-    "path": "../public/_nuxt/DaTzHYxP.js"
-  },
-  "/_nuxt/DagsdG9V.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"864-ELAS0I7pX9wmeZqq3r86gGaOzxw\"",
-    "mtime": "2026-08-07T17:57:19.841Z",
-    "size": 2148,
-    "path": "../public/_nuxt/DagsdG9V.js"
-  },
-  "/_nuxt/Ddom7xnH.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"ecf-4rSNYRvgzsWAAc6irVwqkaS4d9w\"",
-    "mtime": "2026-08-07T17:57:19.841Z",
-    "size": 3791,
-    "path": "../public/_nuxt/Ddom7xnH.js"
-  },
-  "/_nuxt/DeWer6C0.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"3460-Zoz9RdXPI0TBb54wJRMNdHeVJVE\"",
-    "mtime": "2026-08-07T17:57:19.841Z",
-    "size": 13408,
-    "path": "../public/_nuxt/DeWer6C0.js"
-  },
-  "/_nuxt/DeTVQtQu.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"22c38-0Wqgsdgd5kiuHLmx+rTk6dEF/WU\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
+    "etag": "\"22c38-kcB1+nwo2PxZXPUkZeWv0bWZ8WI\"",
+    "mtime": "2026-08-07T19:57:51.224Z",
     "size": 142392,
-    "path": "../public/_nuxt/DeTVQtQu.js"
+    "path": "../public/_nuxt/D-ADup3Z.js"
+  },
+  "/_nuxt/D-hQcS-m.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"e48-4IgWRH99wL/nfyJG5KUDAKmMU5E\"",
+    "mtime": "2026-08-07T19:57:51.223Z",
+    "size": 3656,
+    "path": "../public/_nuxt/D-hQcS-m.js"
+  },
+  "/_nuxt/D5Bvz55q.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"adff-+pQIJKxKfEB+htiG7zWn6eM+7Hw\"",
+    "mtime": "2026-08-07T19:57:51.224Z",
+    "size": 44543,
+    "path": "../public/_nuxt/D5Bvz55q.js"
+  },
+  "/_nuxt/D8df7Met.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"c87-Ib3Qgl8/LIKoxt6NWtSZ6KE+NvU\"",
+    "mtime": "2026-08-07T19:57:51.224Z",
+    "size": 3207,
+    "path": "../public/_nuxt/D8df7Met.js"
+  },
+  "/_nuxt/DF9QO3Sb.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"40-DAgHKkHcQr6MqrsMe3tXiaxCPDE\"",
+    "mtime": "2026-08-07T19:57:51.224Z",
+    "size": 64,
+    "path": "../public/_nuxt/DF9QO3Sb.js"
   },
   "/_nuxt/Dj4CfABu.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"6345-RnYNDiaKvisSouzs1GSYqwk0FRo\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
+    "mtime": "2026-08-07T19:57:51.224Z",
     "size": 25413,
     "path": "../public/_nuxt/Dj4CfABu.js"
   },
-  "/_nuxt/DkwFp8Tp.js": {
+  "/_nuxt/DjxuMP14.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1627-tdbN8AkT77ZYvL0KuKDipcNyvcQ\"",
-    "mtime": "2026-08-07T17:57:19.841Z",
-    "size": 5671,
-    "path": "../public/_nuxt/DkwFp8Tp.js"
+    "etag": "\"3754-zcQ/QRViYUzJ8v4oSEtq0216hzw\"",
+    "mtime": "2026-08-07T19:57:51.224Z",
+    "size": 14164,
+    "path": "../public/_nuxt/DjxuMP14.js"
   },
-  "/_nuxt/Dp145H_P.js": {
+  "/_nuxt/DkKQOTu9.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"fb-WJWwl97wAw6N9AIl85jAomI6QK8\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
-    "size": 251,
-    "path": "../public/_nuxt/Dp145H_P.js"
+    "etag": "\"4f3b-e1ISER8QkJXBKu+HlGbM8nZpY/8\"",
+    "mtime": "2026-08-07T19:57:51.224Z",
+    "size": 20283,
+    "path": "../public/_nuxt/DkKQOTu9.js"
   },
-  "/_nuxt/DwzdYmwH.js": {
+  "/_nuxt/DXEQVQnt.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"c87-3aQgpG20QPclWYiw81NaRthrVPg\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
-    "size": 3207,
-    "path": "../public/_nuxt/DwzdYmwH.js"
-  },
-  "/_nuxt/DzMwd2dL.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1375-lJ8YjbxlfT41bYP/1aH4GRlUDWc\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
-    "size": 4981,
-    "path": "../public/_nuxt/DzMwd2dL.js"
+    "etag": "\"31151-TyUyRNm9rR2JDwpyAxcruTmmr6A\"",
+    "mtime": "2026-08-07T19:57:51.224Z",
+    "size": 201041,
+    "path": "../public/_nuxt/DXEQVQnt.js"
   },
   "/_nuxt/DlAUqK2U.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"5b-eFCz/UrraTh721pgAl0VxBNR1es\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
+    "mtime": "2026-08-07T19:57:51.224Z",
     "size": 91,
     "path": "../public/_nuxt/DlAUqK2U.js"
+  },
+  "/_nuxt/Dl-jiPAy.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"8dbb-nUyB4ugKZh2JT9Mq2RrSIoMYKyU\"",
+    "mtime": "2026-08-07T19:57:51.224Z",
+    "size": 36283,
+    "path": "../public/_nuxt/Dl-jiPAy.js"
+  },
+  "/_nuxt/DzKrp45T.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"ecf-wKAzzcu4hHeYbX0+2jc9QgU54hs\"",
+    "mtime": "2026-08-07T19:57:51.224Z",
+    "size": 3791,
+    "path": "../public/_nuxt/DzKrp45T.js"
   },
   "/_nuxt/LearningSubnav.libvFC1v.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"52f-Xz9M9uqiNKTJBt+pdS3q4kJ1FKY\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
+    "mtime": "2026-08-07T19:57:51.224Z",
     "size": 1327,
     "path": "../public/_nuxt/LearningSubnav.libvFC1v.css"
+  },
+  "/_nuxt/UhDeLxMg.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1375-7q2GrgmamZzFgefoTwSRkJGbjiI\"",
+    "mtime": "2026-08-07T19:57:51.224Z",
+    "size": 4981,
+    "path": "../public/_nuxt/UhDeLxMg.js"
   },
   "/_nuxt/LearnerSpace.CmiZYlvy.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"11380-LgkbVopvaGnrx9GHSoAbnHUu20c\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
+    "mtime": "2026-08-07T19:57:51.224Z",
     "size": 70528,
     "path": "../public/_nuxt/LearnerSpace.CmiZYlvy.css"
   },
-  "/_nuxt/LoffNaVV.js": {
+  "/_nuxt/Uii8Uytz.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"160-zv+qt6tspVSkUCQfNmSw+SPZLoo\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
-    "size": 352,
-    "path": "../public/_nuxt/LoffNaVV.js"
-  },
-  "/_nuxt/N21NfldD.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"24a-bXKUlencwxiP9KYcrgiVETesh4E\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
-    "size": 586,
-    "path": "../public/_nuxt/N21NfldD.js"
-  },
-  "/_nuxt/DxGEtALQ.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"4ecd9-2tZ1M7CoMG6/XB3bTNGCJDP7NaM\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
-    "size": 322777,
-    "path": "../public/_nuxt/DxGEtALQ.js"
-  },
-  "/_nuxt/O7EJfvPw.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"4f3b-7tsaA3mu+mH8G6RRY1S1loYWJIw\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
-    "size": 20283,
-    "path": "../public/_nuxt/O7EJfvPw.js"
-  },
-  "/_nuxt/RvowqHBh.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"55f-xLTE4M8Y99gVOOu+Ksj+0M6253M\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
-    "size": 1375,
-    "path": "../public/_nuxt/RvowqHBh.js"
-  },
-  "/_nuxt/UF5Q-mxm.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"b2d-NwdbgtfGPIa6E4hVMqczDH9OtCQ\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
-    "size": 2861,
-    "path": "../public/_nuxt/UF5Q-mxm.js"
+    "etag": "\"39cb-uXwm/Q2nya9dAKcF80wsFXjol5o\"",
+    "mtime": "2026-08-07T19:57:51.224Z",
+    "size": 14795,
+    "path": "../public/_nuxt/Uii8Uytz.js"
   },
   "/_nuxt/VaSPOPhr.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"7032-uZQ20bhcE4YqMv2bJ83N97r01ek\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
+    "mtime": "2026-08-07T19:57:51.224Z",
     "size": 28722,
     "path": "../public/_nuxt/VaSPOPhr.js"
-  },
-  "/_nuxt/Vx0OEtYB.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"adff-afr3CW5323ILzWXQrnE8JsV2Ecg\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
-    "size": 44543,
-    "path": "../public/_nuxt/Vx0OEtYB.js"
   },
   "/_nuxt/WizardChallengeWorkspace.BsINZ80G.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"6bfe-FISgVUgk6BPDhlej46ZwK1SeW7U\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
+    "mtime": "2026-08-07T19:57:51.224Z",
     "size": 27646,
     "path": "../public/_nuxt/WizardChallengeWorkspace.BsINZ80G.css"
   },
-  "/_nuxt/Wca0u6Ij.js": {
+  "/_nuxt/Xf5Qsoph.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"3dc8-dvC0wdWkQE+AJ+EZCa87s+tRgiA\"",
-    "mtime": "2026-08-07T17:57:19.842Z",
-    "size": 15816,
-    "path": "../public/_nuxt/Wca0u6Ij.js"
+    "etag": "\"1bfe-Ksu3ftVtrkQn6koE/hAZkBOqWY8\"",
+    "mtime": "2026-08-07T19:57:51.224Z",
+    "size": 7166,
+    "path": "../public/_nuxt/Xf5Qsoph.js"
   },
   "/_nuxt/Yf1sIW8d.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1c3-LVe9aJn5NPXYdCawnvv+5s8hcgo\"",
-    "mtime": "2026-08-07T17:57:19.843Z",
+    "mtime": "2026-08-07T19:57:51.224Z",
     "size": 451,
     "path": "../public/_nuxt/Yf1sIW8d.js"
   },
   "/_nuxt/ZrBg3W11.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"b5f-wlshUgtoEorvnPQ8nir4mcnBK2A\"",
-    "mtime": "2026-08-07T17:57:19.843Z",
+    "mtime": "2026-08-07T19:57:51.224Z",
     "size": 2911,
     "path": "../public/_nuxt/ZrBg3W11.js"
+  },
+  "/_nuxt/_AC95p6d.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"864-jnFt/ezkRVPJUMQ/B3NzFcNNgr0\"",
+    "mtime": "2026-08-07T19:57:51.224Z",
+    "size": 2148,
+    "path": "../public/_nuxt/_AC95p6d.js"
   },
   "/_nuxt/_1HFVgMZ.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"3d72-Mhu5uDbLyGxkZBu/G6JnqqQLZrI\"",
-    "mtime": "2026-08-07T17:57:19.843Z",
+    "mtime": "2026-08-07T19:57:51.224Z",
     "size": 15730,
     "path": "../public/_nuxt/_1HFVgMZ.js"
   },
   "/_nuxt/_parcours_.BP-h7iCq.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"18bc-CbpqTeo+ryfD8pdcWNN8EuBGUEs\"",
-    "mtime": "2026-08-07T17:57:19.843Z",
+    "mtime": "2026-08-07T19:57:51.225Z",
     "size": 6332,
     "path": "../public/_nuxt/_parcours_.BP-h7iCq.css"
+  },
+  "/_nuxt/_HvnHuvu.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"b56e-IzbGTfW/Bl/yeEf3dN0X505G9TA\"",
+    "mtime": "2026-08-07T19:57:51.225Z",
+    "size": 46446,
+    "path": "../public/_nuxt/_HvnHuvu.js"
   },
   "/_nuxt/_temps_.DeEijNS2.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1e6c-39KY4P8jmuBExQX0OS5wSBQLXZ0\"",
-    "mtime": "2026-08-07T17:57:19.843Z",
+    "mtime": "2026-08-07T19:57:51.225Z",
     "size": 7788,
     "path": "../public/_nuxt/_temps_.DeEijNS2.css"
   },
   "/_nuxt/_token_.DJ8z344i.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"dc9-IUF9q98uusqkH67ica0HBPs1f0E\"",
-    "mtime": "2026-08-07T17:57:19.843Z",
+    "mtime": "2026-08-07T19:57:51.225Z",
     "size": 3529,
     "path": "../public/_nuxt/_token_.DJ8z344i.css"
   },
   "/_nuxt/a5l4Eygb.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"428c-Ot/UWwe3xutMeRt7B3UmZ9KIztY\"",
-    "mtime": "2026-08-07T17:57:19.843Z",
+    "mtime": "2026-08-07T19:57:51.225Z",
     "size": 17036,
     "path": "../public/_nuxt/a5l4Eygb.js"
-  },
-  "/_nuxt/admins.dzDkGKEv.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"919-IcW5l1f9k07twX9+HuwUcwEj4n0\"",
-    "mtime": "2026-08-07T17:57:19.843Z",
-    "size": 2329,
-    "path": "../public/_nuxt/admins.dzDkGKEv.css"
   },
   "/_nuxt/apprendre.BPd7ecjx.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"2d9f-CWvnmgiFd+sRLGOYJwnjf+jYYIk\"",
-    "mtime": "2026-08-07T17:57:19.843Z",
+    "mtime": "2026-08-07T19:57:51.225Z",
     "size": 11679,
     "path": "../public/_nuxt/apprendre.BPd7ecjx.css"
+  },
+  "/_nuxt/admins.dzDkGKEv.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"919-IcW5l1f9k07twX9+HuwUcwEj4n0\"",
+    "mtime": "2026-08-07T19:57:51.225Z",
+    "size": 2329,
+    "path": "../public/_nuxt/admins.dzDkGKEv.css"
   },
   "/_nuxt/caracteres.BcNkZVio.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"5ed6-eQ6eNeASOetd0aeTsNNXynTuNLo\"",
-    "mtime": "2026-08-07T17:57:19.843Z",
+    "mtime": "2026-08-07T19:57:51.225Z",
     "size": 24278,
     "path": "../public/_nuxt/caracteres.BcNkZVio.css"
   },
   "/_nuxt/challenges.CY1VeRXH.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"2be1-FyxsjSPTFngUhLkETjRsyZ8N/RA\"",
-    "mtime": "2026-08-07T17:57:19.843Z",
+    "mtime": "2026-08-07T19:57:51.225Z",
     "size": 11233,
     "path": "../public/_nuxt/challenges.CY1VeRXH.css"
-  },
-  "/_nuxt/charts.Cx5h-dJ3.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"d7cf-B0batpc3ChDKY8DQZERcYOpigcA\"",
-    "mtime": "2026-08-07T17:57:19.843Z",
-    "size": 55247,
-    "path": "../public/_nuxt/charts.Cx5h-dJ3.css"
   },
   "/_nuxt/coaches.BaDV-bQP.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"2220-x9RcJK5uh5+VaoyG5f2pdZ3z28E\"",
-    "mtime": "2026-08-07T17:57:19.843Z",
+    "mtime": "2026-08-07T19:57:51.225Z",
     "size": 8736,
     "path": "../public/_nuxt/coaches.BaDV-bQP.css"
   },
-  "/_nuxt/consulter.BZzAvpPP.css": {
+  "/_nuxt/charts.Cx5h-dJ3.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"23c9-vXSgLeFHKDkDNl5IsGf9YpG9fnw\"",
-    "mtime": "2026-08-07T17:57:19.844Z",
-    "size": 9161,
-    "path": "../public/_nuxt/consulter.BZzAvpPP.css"
+    "etag": "\"d7cf-B0batpc3ChDKY8DQZERcYOpigcA\"",
+    "mtime": "2026-08-07T19:57:51.225Z",
+    "size": 55247,
+    "path": "../public/_nuxt/charts.Cx5h-dJ3.css"
+  },
+  "/_nuxt/av8hqivG.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"3c32-qWDjD5zYFY6rMyJE17goGzCJG38\"",
+    "mtime": "2026-08-07T19:57:51.225Z",
+    "size": 15410,
+    "path": "../public/_nuxt/av8hqivG.js"
   },
   "/_nuxt/contact.CEAlz-zn.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"8f4-ykOUqzOkUVv5IJI3yhju5VrDLdo\"",
-    "mtime": "2026-08-07T17:57:19.844Z",
+    "mtime": "2026-08-07T19:57:51.225Z",
     "size": 2292,
     "path": "../public/_nuxt/contact.CEAlz-zn.css"
   },
-  "/_nuxt/dHqcHzTv.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"8dbb-QhzJh8fP+K4C6EYzDdLgggdGc8A\"",
-    "mtime": "2026-08-07T17:57:19.844Z",
-    "size": 36283,
-    "path": "../public/_nuxt/dHqcHzTv.js"
+  "/_nuxt/consulter.BYSPDHpp.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"2904-2X9hrsBpW7y+VXPd+H0nxo4Dtms\"",
+    "mtime": "2026-08-07T19:57:51.225Z",
+    "size": 10500,
+    "path": "../public/_nuxt/consulter.BYSPDHpp.css"
   },
   "/_nuxt/default.BZGlWQec.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"4208-37NGK+sKDF/acYjf1n+HrGCOlK4\"",
-    "mtime": "2026-08-07T17:57:19.844Z",
+    "mtime": "2026-08-07T19:57:51.225Z",
     "size": 16904,
     "path": "../public/_nuxt/default.BZGlWQec.css"
   },
-  "/_nuxt/entry.CV6J0Yfi.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"4ca8-aQ0IkbocUh/dB3AoC+7BD8Fg9vY\"",
-    "mtime": "2026-08-07T17:57:19.844Z",
-    "size": 19624,
-    "path": "../public/_nuxt/entry.CV6J0Yfi.css"
+  "/_nuxt/eXYNPZfG.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"375c-pCedeuYuSMnptgbPA7lLyqEWruE\"",
+    "mtime": "2026-08-07T19:57:51.225Z",
+    "size": 14172,
+    "path": "../public/_nuxt/eXYNPZfG.js"
   },
   "/_nuxt/error-404.C3kT2QX-.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"97e-Xk26Nv4oQLpK3PtofolSggS9Z1M\"",
-    "mtime": "2026-08-07T17:57:19.844Z",
+    "mtime": "2026-08-07T19:57:51.225Z",
     "size": 2430,
     "path": "../public/_nuxt/error-404.C3kT2QX-.css"
+  },
+  "/_nuxt/entry.CV6J0Yfi.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"4ca8-aQ0IkbocUh/dB3AoC+7BD8Fg9vY\"",
+    "mtime": "2026-08-07T19:57:51.225Z",
+    "size": 19624,
+    "path": "../public/_nuxt/entry.CV6J0Yfi.css"
   },
   "/_nuxt/error-500.BW0Y54Of.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"773-NSoEX19gPmM2NozVKWotHuvxtho\"",
-    "mtime": "2026-08-07T17:57:19.844Z",
+    "mtime": "2026-08-07T19:57:51.225Z",
     "size": 1907,
     "path": "../public/_nuxt/error-500.BW0Y54Of.css"
   },
   "/_nuxt/errors.BjGnDVcv.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1362-+l8lZeseXcg1LBBZAI84EJMTHAg\"",
-    "mtime": "2026-08-07T17:57:19.844Z",
+    "mtime": "2026-08-07T19:57:51.225Z",
     "size": 4962,
     "path": "../public/_nuxt/errors.BjGnDVcv.css"
   },
   "/_nuxt/feedbacks.2l4c_9on.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"19b7-IeFg4/GX0231o85Ya2XpgZqJHFg\"",
-    "mtime": "2026-08-07T17:57:19.844Z",
+    "mtime": "2026-08-07T19:57:51.225Z",
     "size": 6583,
     "path": "../public/_nuxt/feedbacks.2l4c_9on.css"
   },
   "/_nuxt/g6ucs01C.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"160-gtb4LsLA85Vn+6lu9juD+DKhlTM\"",
-    "mtime": "2026-08-07T17:57:19.844Z",
+    "mtime": "2026-08-07T19:57:51.225Z",
     "size": 352,
     "path": "../public/_nuxt/g6ucs01C.js"
   },
   "/_nuxt/help-verification.DODWt3zK.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1e41-GtHymoSAF4psafTipM39PN7Xytg\"",
-    "mtime": "2026-08-07T17:57:19.844Z",
+    "mtime": "2026-08-07T19:57:51.225Z",
     "size": 7745,
     "path": "../public/_nuxt/help-verification.DODWt3zK.css"
   },
   "/_nuxt/helps.DZJ6t0nO.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"2207-jtfvJZDC3TYKKO8XFRnFINfGF8k\"",
-    "mtime": "2026-08-07T17:57:19.844Z",
+    "mtime": "2026-08-07T19:57:51.226Z",
     "size": 8711,
     "path": "../public/_nuxt/helps.DZJ6t0nO.css"
   },
   "/_nuxt/index.BMdnpm1M.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"f19-lwnkK424zogpMkzb9fLmT+5G7ZU\"",
-    "mtime": "2026-08-07T17:57:19.844Z",
+    "mtime": "2026-08-07T19:57:51.225Z",
     "size": 3865,
     "path": "../public/_nuxt/index.BMdnpm1M.css"
   },
   "/_nuxt/index.BzhQLiPK.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"f6b-acZH3aIqv4bsIUpsO/6S7qZgmDE\"",
-    "mtime": "2026-08-07T17:57:19.845Z",
+    "mtime": "2026-08-07T19:57:51.226Z",
     "size": 3947,
     "path": "../public/_nuxt/index.BzhQLiPK.css"
   },
   "/_nuxt/index.D579FHEw.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"488d-eb885muPMUoohkLI9Q5AZBeConM\"",
-    "mtime": "2026-08-07T17:57:19.845Z",
+    "mtime": "2026-08-07T19:57:51.226Z",
     "size": 18573,
     "path": "../public/_nuxt/index.D579FHEw.css"
   },
-  "/_nuxt/k7qQubDn.js": {
+  "/_nuxt/lQ_XiN9H.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1f96-mDDBKD2xr2PQvwMgBNC+V4UIBuQ\"",
-    "mtime": "2026-08-07T17:57:19.845Z",
-    "size": 8086,
-    "path": "../public/_nuxt/k7qQubDn.js"
+    "etag": "\"160-vXZkipq/Svhu9e1Q0mFlHYiExas\"",
+    "mtime": "2026-08-07T19:57:51.226Z",
+    "size": 352,
+    "path": "../public/_nuxt/lQ_XiN9H.js"
   },
   "/_nuxt/literary-corpus.B2DRjof-.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1d49-4rT2LXp/VIU3wxeTP6DJcMLavx4\"",
-    "mtime": "2026-08-07T17:57:19.845Z",
+    "mtime": "2026-08-07T19:57:51.226Z",
     "size": 7497,
     "path": "../public/_nuxt/literary-corpus.B2DRjof-.css"
   },
   "/_nuxt/main.CR83iajl.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"aba4-azXRRBGKtmh+GxqyfV65x5AjX8A\"",
-    "mtime": "2026-08-07T17:57:19.845Z",
+    "mtime": "2026-08-07T19:57:51.226Z",
     "size": 43940,
     "path": "../public/_nuxt/main.CR83iajl.css"
   },
   "/_nuxt/mon-compte.BfHrW1fD.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"81f-qRXMInFEyvge+C3tRZgg5uCaXx4\"",
-    "mtime": "2026-08-07T17:57:19.845Z",
+    "mtime": "2026-08-07T19:57:51.226Z",
     "size": 2079,
     "path": "../public/_nuxt/mon-compte.BfHrW1fD.css"
-  },
-  "/_nuxt/sfnyMOmB.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1f89-JlJTRIbCggAnYSydaFOtfsKEpww\"",
-    "mtime": "2026-08-07T17:57:19.845Z",
-    "size": 8073,
-    "path": "../public/_nuxt/sfnyMOmB.js"
   },
   "/_nuxt/shared-summaries.ByFL8yZh.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"65b-PFjai3xJO+fBrqQOoI5SsmPeBzQ\"",
-    "mtime": "2026-08-07T17:57:19.845Z",
+    "mtime": "2026-08-07T19:57:51.226Z",
     "size": 1627,
     "path": "../public/_nuxt/shared-summaries.ByFL8yZh.css"
   },
   "/_nuxt/signin.CF2VGsJc.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"100e-jDykrebphTgAAdflfwX9MSv7ams\"",
-    "mtime": "2026-08-07T17:57:19.845Z",
+    "mtime": "2026-08-07T19:57:51.226Z",
     "size": 4110,
     "path": "../public/_nuxt/signin.CF2VGsJc.css"
   },
   "/_nuxt/tests.BqPF9Zsa.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"39e7-GxuNd1OxNpLv+j5qgLOQuuK6myU\"",
-    "mtime": "2026-08-07T17:57:19.845Z",
+    "mtime": "2026-08-07T19:57:51.226Z",
     "size": 14823,
     "path": "../public/_nuxt/tests.BqPF9Zsa.css"
   },
   "/_nuxt/url.DIVvCsXv.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"5452-ngeZ9r/oIEJx07WIII6nUC9i338\"",
-    "mtime": "2026-08-07T17:57:19.845Z",
+    "mtime": "2026-08-07T19:57:51.226Z",
     "size": 21586,
     "path": "../public/_nuxt/url.DIVvCsXv.css"
   },
   "/_nuxt/users.D0_n7LnF.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"a87-gdpl2VnXOVPpa/zExdiw5k6pK2I\"",
-    "mtime": "2026-08-07T17:57:19.845Z",
+    "mtime": "2026-08-07T19:57:51.226Z",
     "size": 2695,
     "path": "../public/_nuxt/users.D0_n7LnF.css"
   },
   "/coach-media/avatars/amel.jpg": {
     "type": "image/jpeg",
     "etag": "\"bdc2-XpfseHXprhgQ2kOwJnuzEG4Szrk\"",
-    "mtime": "2026-08-07T17:57:19.876Z",
+    "mtime": "2026-08-07T19:57:51.252Z",
     "size": 48578,
     "path": "../public/coach-media/avatars/amel.jpg"
   },
   "/coach-media/avatars/camille.jpg": {
     "type": "image/jpeg",
     "etag": "\"8236-iF9IFpUQ41mOrk3DW4giaY2v1A4\"",
-    "mtime": "2026-08-07T17:57:19.873Z",
+    "mtime": "2026-08-07T19:57:51.261Z",
     "size": 33334,
     "path": "../public/coach-media/avatars/camille.jpg"
   },
   "/coach-media/avatars/claire.jpg": {
     "type": "image/jpeg",
     "etag": "\"c54e-brF3vVSmHDKtuq1fWp3D7oFg51M\"",
-    "mtime": "2026-08-07T17:57:19.876Z",
+    "mtime": "2026-08-07T19:57:51.263Z",
     "size": 50510,
     "path": "../public/coach-media/avatars/claire.jpg"
   },
   "/coach-media/avatars/gabriel.jpg": {
     "type": "image/jpeg",
     "etag": "\"bcf0-Gm00KTQi4TW4IfPKJlSbLvra1vY\"",
-    "mtime": "2026-08-07T17:57:19.876Z",
+    "mtime": "2026-08-07T19:57:51.263Z",
     "size": 48368,
     "path": "../public/coach-media/avatars/gabriel.jpg"
   },
   "/coach-media/avatars/hugo.jpg": {
     "type": "image/jpeg",
     "etag": "\"e0ab-BgIuErDh4c6iTXJy8Qw9D1fV2Y4\"",
-    "mtime": "2026-08-07T17:57:19.877Z",
+    "mtime": "2026-08-07T19:57:51.263Z",
     "size": 57515,
     "path": "../public/coach-media/avatars/hugo.jpg"
   },
   "/coach-media/avatars/karim.jpg": {
     "type": "image/jpeg",
     "etag": "\"f507-Nj981GfUvc5eTvpZtyN0ieyiCHU\"",
-    "mtime": "2026-08-07T17:57:19.877Z",
+    "mtime": "2026-08-07T19:57:51.264Z",
     "size": 62727,
     "path": "../public/coach-media/avatars/karim.jpg"
   },
   "/coach-media/avatars/lea.jpg": {
     "type": "image/jpeg",
     "etag": "\"f9f5-I+UeknSzltKnBgxau2s+TTvCXzM\"",
-    "mtime": "2026-08-07T17:57:19.877Z",
+    "mtime": "2026-08-07T19:57:51.264Z",
     "size": 63989,
     "path": "../public/coach-media/avatars/lea.jpg"
-  },
-  "/coach-media/avatars/nora.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"f434-vbQD186KDkY42S4uGz7cixTeM3Y\"",
-    "mtime": "2026-08-07T17:57:19.877Z",
-    "size": 62516,
-    "path": "../public/coach-media/avatars/nora.jpg"
   },
   "/coach-media/avatars/lucas.jpg": {
     "type": "image/jpeg",
     "etag": "\"10f02-mIKj8itqNevLJJvdMQvCLra5sZs\"",
-    "mtime": "2026-08-07T17:57:19.877Z",
+    "mtime": "2026-08-07T19:57:51.264Z",
     "size": 69378,
     "path": "../public/coach-media/avatars/lucas.jpg"
+  },
+  "/coach-media/avatars/nora.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"f434-vbQD186KDkY42S4uGz7cixTeM3Y\"",
+    "mtime": "2026-08-07T19:57:51.264Z",
+    "size": 62516,
+    "path": "../public/coach-media/avatars/nora.jpg"
   },
   "/coach-media/avatars/sami.jpg": {
     "type": "image/jpeg",
     "etag": "\"b13e-AVASgC2NUl9cEqNeVXQZf710AtI\"",
-    "mtime": "2026-08-07T17:57:19.878Z",
+    "mtime": "2026-08-07T19:57:51.264Z",
     "size": 45374,
     "path": "../public/coach-media/avatars/sami.jpg"
   },
   "/coach-media/avatars/thomas.jpg": {
     "type": "image/jpeg",
     "etag": "\"cf97-C0nHicl9/0pZcc6nPoN1AK6qGxg\"",
-    "mtime": "2026-08-07T17:57:19.877Z",
+    "mtime": "2026-08-07T19:57:51.264Z",
     "size": 53143,
     "path": "../public/coach-media/avatars/thomas.jpg"
   },
   "/coach-media/avatars/zoe.jpg": {
     "type": "image/jpeg",
     "etag": "\"c393-S8Ro+/yzyBY+cBCNNh6M59U1lLI\"",
-    "mtime": "2026-08-07T17:57:19.878Z",
+    "mtime": "2026-08-07T19:57:51.265Z",
     "size": 50067,
     "path": "../public/coach-media/avatars/zoe.jpg"
-  },
-  "/_nuxt/oRN9JKZR.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"146578-9x8sOo4EuXtz2uyRNv2RlnHHTjc\"",
-    "mtime": "2026-08-07T17:57:19.846Z",
-    "size": 1336696,
-    "path": "../public/_nuxt/oRN9JKZR.js"
   },
   "/coach-media/avatars-cartoon/Defi-de-conjugaison.pdf": {
     "type": "application/pdf",
     "etag": "\"1971-GvyCFxsExS5nnjCoRJihmJWjW1Y\"",
-    "mtime": "2026-08-07T17:57:19.889Z",
+    "mtime": "2026-08-07T19:57:51.277Z",
     "size": 6513,
     "path": "../public/coach-media/avatars-cartoon/Defi-de-conjugaison.pdf"
-  },
-  "/coach-media/avatars-cartoon/4f7a8330-834e-44e0-ad17-397d1e2a5891.png": {
-    "type": "image/png",
-    "etag": "\"15dca6-tSDm1naznyFNYIkdupEaTCi//zk\"",
-    "mtime": "2026-08-07T17:57:19.888Z",
-    "size": 1432742,
-    "path": "../public/coach-media/avatars-cartoon/4f7a8330-834e-44e0-ad17-397d1e2a5891.png"
-  },
-  "/coach-media/avatars-cartoon/42f6c648-e545-4d49-8f0b-518fb3a2d186.png": {
-    "type": "image/png",
-    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
-    "mtime": "2026-08-07T17:57:19.888Z",
-    "size": 1500823,
-    "path": "../public/coach-media/avatars-cartoon/42f6c648-e545-4d49-8f0b-518fb3a2d186.png"
-  },
-  "/coach-media/avatars-cartoon/732fe1f9-b633-4261-bdf8-542b99b2a98c.png": {
-    "type": "image/png",
-    "etag": "\"172bf9-bwNVo0D3pGzvGYiYtpjtpXMEyow\"",
-    "mtime": "2026-08-07T17:57:19.891Z",
-    "size": 1518585,
-    "path": "../public/coach-media/avatars-cartoon/732fe1f9-b633-4261-bdf8-542b99b2a98c.png"
-  },
-  "/coach-media/avatars-cartoon/8f23428e-ed2c-4938-9186-44447f1efcbe.png": {
-    "type": "image/png",
-    "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
-    "mtime": "2026-08-07T17:57:19.892Z",
-    "size": 1562456,
-    "path": "../public/coach-media/avatars-cartoon/8f23428e-ed2c-4938-9186-44447f1efcbe.png"
-  },
-  "/coach-media/avatars-cartoon/db266268-397e-4920-93bb-f134a85cd8b7.png": {
-    "type": "image/png",
-    "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
-    "mtime": "2026-08-07T17:57:19.892Z",
-    "size": 1416623,
-    "path": "../public/coach-media/avatars-cartoon/db266268-397e-4920-93bb-f134a85cd8b7.png"
-  },
-  "/coach-media/uploads/538b12dc-7f77-437e-a281-3db72a0a987c.png": {
-    "type": "image/png",
-    "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
-    "mtime": "2026-08-07T17:57:19.909Z",
-    "size": 1562456,
-    "path": "../public/coach-media/uploads/538b12dc-7f77-437e-a281-3db72a0a987c.png"
-  },
-  "/coach-media/uploads/58a1f2ac-9ac5-4c89-9453-f96b177e021a.png": {
-    "type": "image/png",
-    "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
-    "mtime": "2026-08-07T17:57:19.909Z",
-    "size": 1416623,
-    "path": "../public/coach-media/uploads/58a1f2ac-9ac5-4c89-9453-f96b177e021a.png"
-  },
-  "/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png": {
-    "type": "image/png",
-    "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
-    "mtime": "2026-08-07T17:57:19.880Z",
-    "size": 1745848,
-    "path": "../public/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png"
-  },
-  "/coach-media/avatars-cartoon/19f352b5-75f2-449a-b441-7b8203da9e6f.png": {
-    "type": "image/png",
-    "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
-    "mtime": "2026-08-07T17:57:19.880Z",
-    "size": 1696814,
-    "path": "../public/coach-media/avatars-cartoon/19f352b5-75f2-449a-b441-7b8203da9e6f.png"
-  },
-  "/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png": {
-    "type": "image/png",
-    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
-    "mtime": "2026-08-07T17:57:19.880Z",
-    "size": 1578337,
-    "path": "../public/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png"
-  },
-  "/coach-media/avatars-cartoon/10f80bed-4250-41d9-8a65-fbaa5deba408.png": {
-    "type": "image/png",
-    "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
-    "mtime": "2026-08-07T17:57:19.875Z",
-    "size": 1882140,
-    "path": "../public/coach-media/avatars-cartoon/10f80bed-4250-41d9-8a65-fbaa5deba408.png"
-  },
-  "/coach-media/avatars-cartoon/1af3afdd-5c5a-41ef-b639-d2e415aaa4fd.png": {
-    "type": "image/png",
-    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
-    "mtime": "2026-08-07T17:57:19.880Z",
-    "size": 1993248,
-    "path": "../public/coach-media/avatars-cartoon/1af3afdd-5c5a-41ef-b639-d2e415aaa4fd.png"
-  },
-  "/coach-media/avatars-cartoon/830a8cdd-fb26-4191-a673-42c5f28f2e73.png": {
-    "type": "image/png",
-    "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
-    "mtime": "2026-08-07T17:57:19.889Z",
-    "size": 1602205,
-    "path": "../public/coach-media/avatars-cartoon/830a8cdd-fb26-4191-a673-42c5f28f2e73.png"
-  },
-  "/coach-media/avatars-cartoon/8ced5816-480d-4d64-8e16-a33a743d155c.png": {
-    "type": "image/png",
-    "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
-    "mtime": "2026-08-07T17:57:19.889Z",
-    "size": 1785490,
-    "path": "../public/coach-media/avatars-cartoon/8ced5816-480d-4d64-8e16-a33a743d155c.png"
-  },
-  "/coach-media/avatars-cartoon/5da085b6-2b23-4338-bc79-31f5e9a4b5bc.png": {
-    "type": "image/png",
-    "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-08-07T17:57:19.899Z",
-    "size": 1993166,
-    "path": "../public/coach-media/avatars-cartoon/5da085b6-2b23-4338-bc79-31f5e9a4b5bc.png"
-  },
-  "/coach-media/uploads/2f16e10d-f885-45d1-9208-7faac71a6577.png": {
-    "type": "image/png",
-    "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
-    "mtime": "2026-08-07T17:57:19.899Z",
-    "size": 1696814,
-    "path": "../public/coach-media/uploads/2f16e10d-f885-45d1-9208-7faac71a6577.png"
-  },
-  "/coach-media/avatars-cartoon/b970ff06-9199-44c9-90d3-4adf29466ef2.png": {
-    "type": "image/png",
-    "etag": "\"191b76-HQFygNHbvhIArIsnfMO1th0D4OU\"",
-    "mtime": "2026-08-07T17:57:19.892Z",
-    "size": 1645430,
-    "path": "../public/coach-media/avatars-cartoon/b970ff06-9199-44c9-90d3-4adf29466ef2.png"
-  },
-  "/coach-media/avatars-cartoon/fad8cab6-7cd9-454b-a967-00de62cdde32.png": {
-    "type": "image/png",
-    "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
-    "mtime": "2026-08-07T17:57:19.900Z",
-    "size": 1665643,
-    "path": "../public/coach-media/avatars-cartoon/fad8cab6-7cd9-454b-a967-00de62cdde32.png"
-  },
-  "/coach-media/uploads/06e4101b-298e-4352-bf66-f4ea7a350500.png": {
-    "type": "image/png",
-    "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
-    "mtime": "2026-08-07T17:57:19.875Z",
-    "size": 1785490,
-    "path": "../public/coach-media/uploads/06e4101b-298e-4352-bf66-f4ea7a350500.png"
-  },
-  "/coach-media/uploads/30fdf4c2-bf1e-492d-b2ee-e4c920be3e28.png": {
-    "type": "image/png",
-    "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
-    "mtime": "2026-08-07T17:57:19.900Z",
-    "size": 1602205,
-    "path": "../public/coach-media/uploads/30fdf4c2-bf1e-492d-b2ee-e4c920be3e28.png"
-  },
-  "/coach-media/uploads/4f43eb0e-1591-4688-9a04-ad786c1ed617.png": {
-    "type": "image/png",
-    "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-08-07T17:57:19.909Z",
-    "size": 1993166,
-    "path": "../public/coach-media/uploads/4f43eb0e-1591-4688-9a04-ad786c1ed617.png"
-  },
-  "/coach-media/uploads/5c10171b-755c-4d43-aa06-52e70ee0c28e.png": {
-    "type": "image/png",
-    "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
-    "mtime": "2026-08-07T17:57:19.909Z",
-    "size": 1696814,
-    "path": "../public/coach-media/uploads/5c10171b-755c-4d43-aa06-52e70ee0c28e.png"
-  },
-  "/coach-media/uploads/5b59b65b-55d0-4b8a-a0d0-37bf9385ba24.png": {
-    "type": "image/png",
-    "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
-    "mtime": "2026-08-07T17:57:19.913Z",
-    "size": 1745848,
-    "path": "../public/coach-media/uploads/5b59b65b-55d0-4b8a-a0d0-37bf9385ba24.png"
-  },
-  "/coach-media/uploads/5d410305-96e0-4e99-ae37-0ad0346d2834.png": {
-    "type": "image/png",
-    "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
-    "mtime": "2026-08-07T17:57:19.913Z",
-    "size": 1785490,
-    "path": "../public/coach-media/uploads/5d410305-96e0-4e99-ae37-0ad0346d2834.png"
-  },
-  "/coach-media/uploads/5fef96f4-0377-4736-b0e0-f084e8c0acb1.png": {
-    "type": "image/png",
-    "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
-    "mtime": "2026-08-07T17:57:19.913Z",
-    "size": 1602205,
-    "path": "../public/coach-media/uploads/5fef96f4-0377-4736-b0e0-f084e8c0acb1.png"
   },
   "/coach-media/people/200.webp": {
     "type": "image/webp",
     "etag": "\"1d696-kiyalxZWWq76I5xPP32p65sny50\"",
-    "mtime": "2026-08-07T17:57:19.874Z",
+    "mtime": "2026-08-07T19:57:51.327Z",
     "size": 120470,
     "path": "../public/coach-media/people/200.webp"
   },
   "/coach-media/people/T01.06.01.xlsx": {
     "type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     "etag": "\"dcc6-yJKLWkGDw+a72V9Ge5nDtMengWg\"",
-    "mtime": "2026-08-07T17:57:19.942Z",
+    "mtime": "2026-08-07T19:57:51.253Z",
     "size": 56518,
     "path": "../public/coach-media/people/T01.06.01.xlsx"
   },
   "/coach-media/people/portrait1.jpg": {
     "type": "image/jpeg",
     "etag": "\"8236-iF9IFpUQ41mOrk3DW4giaY2v1A4\"",
-    "mtime": "2026-08-07T17:57:19.940Z",
+    "mtime": "2026-08-07T19:57:51.327Z",
     "size": 33334,
     "path": "../public/coach-media/people/portrait1.jpg"
   },
   "/coach-media/people/portrait10.jpg": {
     "type": "image/jpeg",
     "etag": "\"13242-oU9sw67fXaoOhBCspE1ufcKQVJk\"",
-    "mtime": "2026-08-07T17:57:19.942Z",
+    "mtime": "2026-08-07T19:57:51.328Z",
     "size": 78402,
     "path": "../public/coach-media/people/portrait10.jpg"
   },
   "/coach-media/people/portrait11.jpg": {
     "type": "image/jpeg",
     "etag": "\"122fb-lSrwI6GnjcqOU7p9bL3eLB6zbPk\"",
-    "mtime": "2026-08-07T17:57:19.944Z",
+    "mtime": "2026-08-07T19:57:51.330Z",
     "size": 74491,
     "path": "../public/coach-media/people/portrait11.jpg"
   },
   "/coach-media/people/portrait12.jpg": {
     "type": "image/jpeg",
     "etag": "\"f434-vbQD186KDkY42S4uGz7cixTeM3Y\"",
-    "mtime": "2026-08-07T17:57:19.942Z",
+    "mtime": "2026-08-07T19:57:51.328Z",
     "size": 62516,
     "path": "../public/coach-media/people/portrait12.jpg"
   },
   "/coach-media/people/portrait13.jpg": {
     "type": "image/jpeg",
     "etag": "\"e0ab-BgIuErDh4c6iTXJy8Qw9D1fV2Y4\"",
-    "mtime": "2026-08-07T17:57:19.944Z",
+    "mtime": "2026-08-07T19:57:51.330Z",
     "size": 57515,
     "path": "../public/coach-media/people/portrait13.jpg"
-  },
-  "/coach-media/uploads/7c2bbc4c-d63f-430b-a18d-fcee64d2ee27.png": {
-    "type": "image/png",
-    "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
-    "mtime": "2026-08-07T17:57:19.913Z",
-    "size": 1416623,
-    "path": "../public/coach-media/uploads/7c2bbc4c-d63f-430b-a18d-fcee64d2ee27.png"
-  },
-  "/coach-media/uploads/841d5131-04ff-427b-893a-847773422907.png": {
-    "type": "image/png",
-    "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
-    "mtime": "2026-08-07T17:57:19.922Z",
-    "size": 1562456,
-    "path": "../public/coach-media/uploads/841d5131-04ff-427b-893a-847773422907.png"
-  },
-  "/coach-media/uploads/c92ca73c-2c4e-4f00-8d40-78323ecc6d1d.png": {
-    "type": "image/png",
-    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
-    "mtime": "2026-08-07T17:57:19.937Z",
-    "size": 1500823,
-    "path": "../public/coach-media/uploads/c92ca73c-2c4e-4f00-8d40-78323ecc6d1d.png"
-  },
-  "/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png": {
-    "type": "image/png",
-    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
-    "mtime": "2026-08-07T17:57:19.941Z",
-    "size": 1500823,
-    "path": "../public/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png"
-  },
-  "/coach-media/uploads/849249ef-60fe-497d-a0cc-1ff6224e1035.png": {
-    "type": "image/png",
-    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
-    "mtime": "2026-08-07T17:57:19.924Z",
-    "size": 1993248,
-    "path": "../public/coach-media/uploads/849249ef-60fe-497d-a0cc-1ff6224e1035.png"
-  },
-  "/coach-media/uploads/a09d1eae-bb31-49b6-9b87-2f6b14cc7720.png": {
-    "type": "image/png",
-    "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
-    "mtime": "2026-08-07T17:57:19.922Z",
-    "size": 1665643,
-    "path": "../public/coach-media/uploads/a09d1eae-bb31-49b6-9b87-2f6b14cc7720.png"
-  },
-  "/coach-media/uploads/9e91555a-0c28-4378-8797-391dee96076d.png": {
-    "type": "image/png",
-    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
-    "mtime": "2026-08-07T17:57:19.922Z",
-    "size": 1993248,
-    "path": "../public/coach-media/uploads/9e91555a-0c28-4378-8797-391dee96076d.png"
   },
   "/coach-media/people/portrait14.jpg": {
     "type": "image/jpeg",
     "etag": "\"10f02-mIKj8itqNevLJJvdMQvCLra5sZs\"",
-    "mtime": "2026-08-07T17:57:19.943Z",
+    "mtime": "2026-08-07T19:57:51.331Z",
     "size": 69378,
     "path": "../public/coach-media/people/portrait14.jpg"
   },
-  "/coach-media/uploads/a1ec228e-1055-4648-9252-fb2dd6fb5a02.png": {
+  "/coach-media/avatars-cartoon/4f7a8330-834e-44e0-ad17-397d1e2a5891.png": {
     "type": "image/png",
-    "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-08-07T17:57:19.931Z",
-    "size": 1993166,
-    "path": "../public/coach-media/uploads/a1ec228e-1055-4648-9252-fb2dd6fb5a02.png"
+    "etag": "\"15dca6-tSDm1naznyFNYIkdupEaTCi//zk\"",
+    "mtime": "2026-08-07T19:57:51.267Z",
+    "size": 1432742,
+    "path": "../public/coach-media/avatars-cartoon/4f7a8330-834e-44e0-ad17-397d1e2a5891.png"
   },
-  "/coach-media/uploads/a2a433ff-1b21-482b-a9d9-6cb0da8146f4.png": {
+  "/coach-media/avatars-cartoon/42f6c648-e545-4d49-8f0b-518fb3a2d186.png": {
     "type": "image/png",
-    "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
-    "mtime": "2026-08-07T17:57:19.930Z",
-    "size": 1745848,
-    "path": "../public/coach-media/uploads/a2a433ff-1b21-482b-a9d9-6cb0da8146f4.png"
+    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
+    "mtime": "2026-08-07T19:57:51.276Z",
+    "size": 1500823,
+    "path": "../public/coach-media/avatars-cartoon/42f6c648-e545-4d49-8f0b-518fb3a2d186.png"
   },
-  "/coach-media/uploads/aed28159-a121-45cb-9dd1-16ecc349b84d.png": {
+  "/coach-media/avatars-cartoon/732fe1f9-b633-4261-bdf8-542b99b2a98c.png": {
     "type": "image/png",
-    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
-    "mtime": "2026-08-07T17:57:19.936Z",
-    "size": 1578337,
-    "path": "../public/coach-media/uploads/aed28159-a121-45cb-9dd1-16ecc349b84d.png"
+    "etag": "\"172bf9-bwNVo0D3pGzvGYiYtpjtpXMEyow\"",
+    "mtime": "2026-08-07T19:57:51.276Z",
+    "size": 1518585,
+    "path": "../public/coach-media/avatars-cartoon/732fe1f9-b633-4261-bdf8-542b99b2a98c.png"
   },
-  "/coach-media/uploads/bf6f3f5e-efca-4554-9963-44587811c0f8.png": {
+  "/coach-media/avatars-cartoon/8f23428e-ed2c-4938-9186-44447f1efcbe.png": {
     "type": "image/png",
-    "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-08-07T17:57:19.930Z",
-    "size": 1993166,
-    "path": "../public/coach-media/uploads/bf6f3f5e-efca-4554-9963-44587811c0f8.png"
+    "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
+    "mtime": "2026-08-07T19:57:51.282Z",
+    "size": 1562456,
+    "path": "../public/coach-media/avatars-cartoon/8f23428e-ed2c-4938-9186-44447f1efcbe.png"
   },
-  "/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png": {
+  "/coach-media/avatars-cartoon/db266268-397e-4920-93bb-f134a85cd8b7.png": {
     "type": "image/png",
-    "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
-    "mtime": "2026-08-07T17:57:19.937Z",
-    "size": 1882140,
-    "path": "../public/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png"
-  },
-  "/coach-media/uploads/ab818ee2-0431-430e-a9af-e78936417633.png": {
-    "type": "image/png",
-    "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
-    "mtime": "2026-08-07T17:57:19.930Z",
-    "size": 1665643,
-    "path": "../public/coach-media/uploads/ab818ee2-0431-430e-a9af-e78936417633.png"
-  },
-  "/coach-media/uploads/e5108547-b1b3-4c96-89ca-6e00c0d1c60a.png": {
-    "type": "image/png",
-    "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
-    "mtime": "2026-08-07T17:57:19.938Z",
-    "size": 1882140,
-    "path": "../public/coach-media/uploads/e5108547-b1b3-4c96-89ca-6e00c0d1c60a.png"
-  },
-  "/coach-media/uploads/f8346f58-2678-4a95-aaa8-d37ba71ecb3b.png": {
-    "type": "image/png",
-    "etag": "\"191b76-HQFygNHbvhIArIsnfMO1th0D4OU\"",
-    "mtime": "2026-08-07T17:57:19.943Z",
-    "size": 1645430,
-    "path": "../public/coach-media/uploads/f8346f58-2678-4a95-aaa8-d37ba71ecb3b.png"
-  },
-  "/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png": {
-    "type": "image/png",
-    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
-    "mtime": "2026-08-07T17:57:19.944Z",
-    "size": 1578337,
-    "path": "../public/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png"
+    "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
+    "mtime": "2026-08-07T19:57:51.284Z",
+    "size": 1416623,
+    "path": "../public/coach-media/avatars-cartoon/db266268-397e-4920-93bb-f134a85cd8b7.png"
   },
   "/coach-media/people/portrait15.jpg": {
     "type": "image/jpeg",
     "etag": "\"e76c-vSk8fJrHyAqX+V28777ha8WbgNQ\"",
-    "mtime": "2026-08-07T17:57:19.943Z",
+    "mtime": "2026-08-07T19:57:51.330Z",
     "size": 59244,
     "path": "../public/coach-media/people/portrait15.jpg"
+  },
+  "/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png": {
+    "type": "image/png",
+    "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
+    "mtime": "2026-08-07T19:57:51.274Z",
+    "size": 1745848,
+    "path": "../public/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png"
+  },
+  "/coach-media/avatars-cartoon/19f352b5-75f2-449a-b441-7b8203da9e6f.png": {
+    "type": "image/png",
+    "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
+    "mtime": "2026-08-07T19:57:51.267Z",
+    "size": 1696814,
+    "path": "../public/coach-media/avatars-cartoon/19f352b5-75f2-449a-b441-7b8203da9e6f.png"
+  },
+  "/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png": {
+    "type": "image/png",
+    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
+    "mtime": "2026-08-07T19:57:51.267Z",
+    "size": 1578337,
+    "path": "../public/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png"
+  },
+  "/coach-media/avatars-cartoon/10f80bed-4250-41d9-8a65-fbaa5deba408.png": {
+    "type": "image/png",
+    "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
+    "mtime": "2026-08-07T19:57:51.254Z",
+    "size": 1882140,
+    "path": "../public/coach-media/avatars-cartoon/10f80bed-4250-41d9-8a65-fbaa5deba408.png"
+  },
+  "/coach-media/avatars-cartoon/830a8cdd-fb26-4191-a673-42c5f28f2e73.png": {
+    "type": "image/png",
+    "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
+    "mtime": "2026-08-07T19:57:51.284Z",
+    "size": 1602205,
+    "path": "../public/coach-media/avatars-cartoon/830a8cdd-fb26-4191-a673-42c5f28f2e73.png"
+  },
+  "/coach-media/avatars-cartoon/1af3afdd-5c5a-41ef-b639-d2e415aaa4fd.png": {
+    "type": "image/png",
+    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
+    "mtime": "2026-08-07T19:57:51.267Z",
+    "size": 1993248,
+    "path": "../public/coach-media/avatars-cartoon/1af3afdd-5c5a-41ef-b639-d2e415aaa4fd.png"
+  },
+  "/coach-media/avatars-cartoon/5da085b6-2b23-4338-bc79-31f5e9a4b5bc.png": {
+    "type": "image/png",
+    "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
+    "mtime": "2026-08-07T19:57:51.276Z",
+    "size": 1993166,
+    "path": "../public/coach-media/avatars-cartoon/5da085b6-2b23-4338-bc79-31f5e9a4b5bc.png"
+  },
+  "/coach-media/avatars-cartoon/fad8cab6-7cd9-454b-a967-00de62cdde32.png": {
+    "type": "image/png",
+    "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
+    "mtime": "2026-08-07T19:57:51.287Z",
+    "size": 1665643,
+    "path": "../public/coach-media/avatars-cartoon/fad8cab6-7cd9-454b-a967-00de62cdde32.png"
+  },
+  "/coach-media/avatars-cartoon/8ced5816-480d-4d64-8e16-a33a743d155c.png": {
+    "type": "image/png",
+    "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
+    "mtime": "2026-08-07T19:57:51.277Z",
+    "size": 1785490,
+    "path": "../public/coach-media/avatars-cartoon/8ced5816-480d-4d64-8e16-a33a743d155c.png"
+  },
+  "/coach-media/avatars-cartoon/b970ff06-9199-44c9-90d3-4adf29466ef2.png": {
+    "type": "image/png",
+    "etag": "\"191b76-HQFygNHbvhIArIsnfMO1th0D4OU\"",
+    "mtime": "2026-08-07T19:57:51.283Z",
+    "size": 1645430,
+    "path": "../public/coach-media/avatars-cartoon/b970ff06-9199-44c9-90d3-4adf29466ef2.png"
   },
   "/coach-media/people/portrait16.jpg": {
     "type": "image/jpeg",
     "etag": "\"cf97-C0nHicl9/0pZcc6nPoN1AK6qGxg\"",
-    "mtime": "2026-08-07T17:57:19.944Z",
+    "mtime": "2026-08-07T19:57:51.329Z",
     "size": 53143,
     "path": "../public/coach-media/people/portrait16.jpg"
   },
   "/coach-media/people/portrait17.jpg": {
     "type": "image/jpeg",
     "etag": "\"bcf0-Gm00KTQi4TW4IfPKJlSbLvra1vY\"",
-    "mtime": "2026-08-07T17:57:19.945Z",
+    "mtime": "2026-08-07T19:57:51.330Z",
     "size": 48368,
     "path": "../public/coach-media/people/portrait17.jpg"
   },
   "/coach-media/people/portrait18.jpg": {
     "type": "image/jpeg",
     "etag": "\"c54e-brF3vVSmHDKtuq1fWp3D7oFg51M\"",
-    "mtime": "2026-08-07T17:57:19.948Z",
+    "mtime": "2026-08-07T19:57:51.330Z",
     "size": 50510,
     "path": "../public/coach-media/people/portrait18.jpg"
   },
   "/coach-media/people/portrait19.jpg": {
     "type": "image/jpeg",
     "etag": "\"c393-S8Ro+/yzyBY+cBCNNh6M59U1lLI\"",
-    "mtime": "2026-08-07T17:57:19.945Z",
+    "mtime": "2026-08-07T19:57:51.330Z",
     "size": 50067,
     "path": "../public/coach-media/people/portrait19.jpg"
   },
   "/coach-media/people/portrait2.jpg": {
     "type": "image/jpeg",
     "etag": "\"bcdc-0QQ4XzMu+rYTbqYvpc9NTeUA8tY\"",
-    "mtime": "2026-08-07T17:57:19.945Z",
+    "mtime": "2026-08-07T19:57:51.331Z",
     "size": 48348,
     "path": "../public/coach-media/people/portrait2.jpg"
   },
   "/coach-media/people/portrait20.jpg": {
     "type": "image/jpeg",
     "etag": "\"b13e-AVASgC2NUl9cEqNeVXQZf710AtI\"",
-    "mtime": "2026-08-07T17:57:19.947Z",
+    "mtime": "2026-08-07T19:57:51.331Z",
     "size": 45374,
     "path": "../public/coach-media/people/portrait20.jpg"
   },
   "/coach-media/people/portrait21.jpg": {
     "type": "image/jpeg",
     "etag": "\"f9f5-I+UeknSzltKnBgxau2s+TTvCXzM\"",
-    "mtime": "2026-08-07T17:57:19.945Z",
+    "mtime": "2026-08-07T19:57:51.331Z",
     "size": 63989,
     "path": "../public/coach-media/people/portrait21.jpg"
   },
   "/coach-media/people/portrait22.jpg": {
     "type": "image/jpeg",
     "etag": "\"bdc2-XpfseHXprhgQ2kOwJnuzEG4Szrk\"",
-    "mtime": "2026-08-07T17:57:19.947Z",
+    "mtime": "2026-08-07T19:57:51.331Z",
     "size": 48578,
     "path": "../public/coach-media/people/portrait22.jpg"
   },
   "/coach-media/people/portrait23.jpg": {
     "type": "image/jpeg",
     "etag": "\"be4c-P8CT4CrVwbEaeQLat0jhjTQMjxo\"",
-    "mtime": "2026-08-07T17:57:19.947Z",
+    "mtime": "2026-08-07T19:57:51.332Z",
     "size": 48716,
     "path": "../public/coach-media/people/portrait23.jpg"
   },
   "/coach-media/people/portrait24.jpg": {
     "type": "image/jpeg",
     "etag": "\"abed-vXR8pegbgVS9EPJiKC3ZDRQ4dJg\"",
-    "mtime": "2026-08-07T17:57:19.949Z",
+    "mtime": "2026-08-07T19:57:51.331Z",
     "size": 44013,
     "path": "../public/coach-media/people/portrait24.jpg"
   },
   "/coach-media/people/portrait25.jpg": {
     "type": "image/jpeg",
     "etag": "\"e0a7-8029IuA0LaQ6Vf6lujX/+UuHaV0\"",
-    "mtime": "2026-08-07T17:57:19.948Z",
+    "mtime": "2026-08-07T19:57:51.332Z",
     "size": 57511,
     "path": "../public/coach-media/people/portrait25.jpg"
   },
   "/coach-media/people/portrait26.jpg": {
     "type": "image/jpeg",
     "etag": "\"10adb-Y2avzIjFtKDJtMnigpGDItgDIK4\"",
-    "mtime": "2026-08-07T17:57:19.948Z",
+    "mtime": "2026-08-07T19:57:51.332Z",
     "size": 68315,
     "path": "../public/coach-media/people/portrait26.jpg"
   },
   "/coach-media/people/portrait27.jpg": {
     "type": "image/jpeg",
     "etag": "\"e758-fcjR+RePqA6Bh1Ol6SdhNalWKxo\"",
-    "mtime": "2026-08-07T17:57:19.948Z",
+    "mtime": "2026-08-07T19:57:51.332Z",
     "size": 59224,
     "path": "../public/coach-media/people/portrait27.jpg"
   },
   "/coach-media/people/portrait28.jpg": {
     "type": "image/jpeg",
     "etag": "\"ab15-QtgsG93oCrKL2cWD/M5wqljszjg\"",
-    "mtime": "2026-08-07T17:57:19.948Z",
+    "mtime": "2026-08-07T19:57:51.333Z",
     "size": 43797,
     "path": "../public/coach-media/people/portrait28.jpg"
   },
   "/coach-media/people/portrait29.jpg": {
     "type": "image/jpeg",
     "etag": "\"f507-Nj981GfUvc5eTvpZtyN0ieyiCHU\"",
-    "mtime": "2026-08-07T17:57:19.948Z",
+    "mtime": "2026-08-07T19:57:51.332Z",
     "size": 62727,
     "path": "../public/coach-media/people/portrait29.jpg"
   },
   "/coach-media/people/portrait3.jpg": {
     "type": "image/jpeg",
     "etag": "\"ce90-1wGjSDgtEHb8AUpH3znLDA47jOw\"",
-    "mtime": "2026-08-07T17:57:19.949Z",
+    "mtime": "2026-08-07T19:57:51.333Z",
     "size": 52880,
     "path": "../public/coach-media/people/portrait3.jpg"
   },
   "/coach-media/people/portrait30.jpg": {
     "type": "image/jpeg",
     "etag": "\"91aa-41JiP0aXvZq9y9u/b4pTIbC5DeU\"",
-    "mtime": "2026-08-07T17:57:19.949Z",
+    "mtime": "2026-08-07T19:57:51.333Z",
     "size": 37290,
     "path": "../public/coach-media/people/portrait30.jpg"
   },
   "/coach-media/people/portrait31.jpg": {
     "type": "image/jpeg",
     "etag": "\"ee72-6mKQvP6WUZZaZuh//G3t4u0EMBg\"",
-    "mtime": "2026-08-07T17:57:19.949Z",
+    "mtime": "2026-08-07T19:57:51.333Z",
     "size": 61042,
     "path": "../public/coach-media/people/portrait31.jpg"
   },
   "/coach-media/people/portrait32.jpg": {
     "type": "image/jpeg",
     "etag": "\"c2cc-IStqzFyonefLZL/ubYviGC+lI+w\"",
-    "mtime": "2026-08-07T17:57:19.949Z",
+    "mtime": "2026-08-07T19:57:51.333Z",
     "size": 49868,
     "path": "../public/coach-media/people/portrait32.jpg"
   },
   "/coach-media/people/portrait33.jpg": {
     "type": "image/jpeg",
     "etag": "\"e86f-wCIX8Pwsa0GqVd/2WH5WG1WSyNs\"",
-    "mtime": "2026-08-07T17:57:19.950Z",
+    "mtime": "2026-08-07T19:57:51.334Z",
     "size": 59503,
     "path": "../public/coach-media/people/portrait33.jpg"
   },
   "/coach-media/people/portrait34.jpg": {
     "type": "image/jpeg",
     "etag": "\"1002d-6T6Xf9AX5UafZW2vbYEzj+5xvO0\"",
-    "mtime": "2026-08-07T17:57:19.949Z",
+    "mtime": "2026-08-07T19:57:51.333Z",
     "size": 65581,
     "path": "../public/coach-media/people/portrait34.jpg"
   },
   "/coach-media/people/portrait4.jpg": {
     "type": "image/jpeg",
     "etag": "\"d171-TlrBkVdDwxLYUzqOqRWUkbkpkAo\"",
-    "mtime": "2026-08-07T17:57:19.950Z",
+    "mtime": "2026-08-07T19:57:51.333Z",
     "size": 53617,
     "path": "../public/coach-media/people/portrait4.jpg"
   },
   "/coach-media/people/portrait5.jpg": {
     "type": "image/jpeg",
     "etag": "\"c82f-tvc7CKCgsthto9vLFPf7pJndf5o\"",
-    "mtime": "2026-08-07T17:57:19.953Z",
+    "mtime": "2026-08-07T19:57:51.333Z",
     "size": 51247,
     "path": "../public/coach-media/people/portrait5.jpg"
   },
   "/coach-media/people/portrait6.jpg": {
     "type": "image/jpeg",
     "etag": "\"10235-GkA1z8RzeZJIqSW/DgPAy8/3Vj0\"",
-    "mtime": "2026-08-07T17:57:19.950Z",
+    "mtime": "2026-08-07T19:57:51.334Z",
     "size": 66101,
     "path": "../public/coach-media/people/portrait6.jpg"
   },
   "/coach-media/people/portrait7.jpg": {
     "type": "image/jpeg",
     "etag": "\"e4ac-HYcziHIjoK0r/C0hUk1bV4NjrUM\"",
-    "mtime": "2026-08-07T17:57:19.950Z",
+    "mtime": "2026-08-07T19:57:51.334Z",
     "size": 58540,
     "path": "../public/coach-media/people/portrait7.jpg"
   },
   "/coach-media/people/portrait8.jpg": {
     "type": "image/jpeg",
     "etag": "\"e800-jIBzhW7XT+HESqFyHPtIW1HuZc4\"",
-    "mtime": "2026-08-07T17:57:19.950Z",
+    "mtime": "2026-08-07T19:57:51.333Z",
     "size": 59392,
     "path": "../public/coach-media/people/portrait8.jpg"
   },
   "/coach-media/people/portrait9.jpg": {
     "type": "image/jpeg",
     "etag": "\"e386-JbEwT6JqpTHkIY1qDgk1a5zOrIc\"",
-    "mtime": "2026-08-07T17:57:19.950Z",
+    "mtime": "2026-08-07T19:57:51.334Z",
     "size": 58246,
     "path": "../public/coach-media/people/portrait9.jpg"
   },
+  "/coach-media/uploads/58a1f2ac-9ac5-4c89-9453-f96b177e021a.png": {
+    "type": "image/png",
+    "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
+    "mtime": "2026-08-07T19:57:51.296Z",
+    "size": 1416623,
+    "path": "../public/coach-media/uploads/58a1f2ac-9ac5-4c89-9453-f96b177e021a.png"
+  },
+  "/coach-media/uploads/538b12dc-7f77-437e-a281-3db72a0a987c.png": {
+    "type": "image/png",
+    "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
+    "mtime": "2026-08-07T19:57:51.291Z",
+    "size": 1562456,
+    "path": "../public/coach-media/uploads/538b12dc-7f77-437e-a281-3db72a0a987c.png"
+  },
+  "/coach-media/uploads/06e4101b-298e-4352-bf66-f4ea7a350500.png": {
+    "type": "image/png",
+    "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
+    "mtime": "2026-08-07T19:57:51.255Z",
+    "size": 1785490,
+    "path": "../public/coach-media/uploads/06e4101b-298e-4352-bf66-f4ea7a350500.png"
+  },
+  "/coach-media/uploads/2f16e10d-f885-45d1-9208-7faac71a6577.png": {
+    "type": "image/png",
+    "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
+    "mtime": "2026-08-07T19:57:51.289Z",
+    "size": 1696814,
+    "path": "../public/coach-media/uploads/2f16e10d-f885-45d1-9208-7faac71a6577.png"
+  },
+  "/coach-media/uploads/30fdf4c2-bf1e-492d-b2ee-e4c920be3e28.png": {
+    "type": "image/png",
+    "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
+    "mtime": "2026-08-07T19:57:51.291Z",
+    "size": 1602205,
+    "path": "../public/coach-media/uploads/30fdf4c2-bf1e-492d-b2ee-e4c920be3e28.png"
+  },
+  "/coach-media/uploads/4f43eb0e-1591-4688-9a04-ad786c1ed617.png": {
+    "type": "image/png",
+    "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
+    "mtime": "2026-08-07T19:57:51.292Z",
+    "size": 1993166,
+    "path": "../public/coach-media/uploads/4f43eb0e-1591-4688-9a04-ad786c1ed617.png"
+  },
+  "/coach-media/uploads/5b59b65b-55d0-4b8a-a0d0-37bf9385ba24.png": {
+    "type": "image/png",
+    "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
+    "mtime": "2026-08-07T19:57:51.298Z",
+    "size": 1745848,
+    "path": "../public/coach-media/uploads/5b59b65b-55d0-4b8a-a0d0-37bf9385ba24.png"
+  },
+  "/coach-media/uploads/7c2bbc4c-d63f-430b-a18d-fcee64d2ee27.png": {
+    "type": "image/png",
+    "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
+    "mtime": "2026-08-07T19:57:51.305Z",
+    "size": 1416623,
+    "path": "../public/coach-media/uploads/7c2bbc4c-d63f-430b-a18d-fcee64d2ee27.png"
+  },
+  "/coach-media/uploads/841d5131-04ff-427b-893a-847773422907.png": {
+    "type": "image/png",
+    "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
+    "mtime": "2026-08-07T19:57:51.310Z",
+    "size": 1562456,
+    "path": "../public/coach-media/uploads/841d5131-04ff-427b-893a-847773422907.png"
+  },
+  "/coach-media/uploads/5c10171b-755c-4d43-aa06-52e70ee0c28e.png": {
+    "type": "image/png",
+    "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
+    "mtime": "2026-08-07T19:57:51.299Z",
+    "size": 1696814,
+    "path": "../public/coach-media/uploads/5c10171b-755c-4d43-aa06-52e70ee0c28e.png"
+  },
+  "/coach-media/uploads/5d410305-96e0-4e99-ae37-0ad0346d2834.png": {
+    "type": "image/png",
+    "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
+    "mtime": "2026-08-07T19:57:51.298Z",
+    "size": 1785490,
+    "path": "../public/coach-media/uploads/5d410305-96e0-4e99-ae37-0ad0346d2834.png"
+  },
+  "/coach-media/uploads/c92ca73c-2c4e-4f00-8d40-78323ecc6d1d.png": {
+    "type": "image/png",
+    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
+    "mtime": "2026-08-07T19:57:51.322Z",
+    "size": 1500823,
+    "path": "../public/coach-media/uploads/c92ca73c-2c4e-4f00-8d40-78323ecc6d1d.png"
+  },
+  "/coach-media/uploads/5fef96f4-0377-4736-b0e0-f084e8c0acb1.png": {
+    "type": "image/png",
+    "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
+    "mtime": "2026-08-07T19:57:51.299Z",
+    "size": 1602205,
+    "path": "../public/coach-media/uploads/5fef96f4-0377-4736-b0e0-f084e8c0acb1.png"
+  },
+  "/coach-media/uploads/849249ef-60fe-497d-a0cc-1ff6224e1035.png": {
+    "type": "image/png",
+    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
+    "mtime": "2026-08-07T19:57:51.306Z",
+    "size": 1993248,
+    "path": "../public/coach-media/uploads/849249ef-60fe-497d-a0cc-1ff6224e1035.png"
+  },
+  "/coach-media/uploads/9e91555a-0c28-4378-8797-391dee96076d.png": {
+    "type": "image/png",
+    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
+    "mtime": "2026-08-07T19:57:51.314Z",
+    "size": 1993248,
+    "path": "../public/coach-media/uploads/9e91555a-0c28-4378-8797-391dee96076d.png"
+  },
+  "/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png": {
+    "type": "image/png",
+    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
+    "mtime": "2026-08-07T19:57:51.322Z",
+    "size": 1500823,
+    "path": "../public/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png"
+  },
+  "/coach-media/uploads/a09d1eae-bb31-49b6-9b87-2f6b14cc7720.png": {
+    "type": "image/png",
+    "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
+    "mtime": "2026-08-07T19:57:51.307Z",
+    "size": 1665643,
+    "path": "../public/coach-media/uploads/a09d1eae-bb31-49b6-9b87-2f6b14cc7720.png"
+  },
+  "/coach-media/uploads/a1ec228e-1055-4648-9252-fb2dd6fb5a02.png": {
+    "type": "image/png",
+    "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
+    "mtime": "2026-08-07T19:57:51.307Z",
+    "size": 1993166,
+    "path": "../public/coach-media/uploads/a1ec228e-1055-4648-9252-fb2dd6fb5a02.png"
+  },
+  "/coach-media/uploads/a2a433ff-1b21-482b-a9d9-6cb0da8146f4.png": {
+    "type": "image/png",
+    "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
+    "mtime": "2026-08-07T19:57:51.308Z",
+    "size": 1745848,
+    "path": "../public/coach-media/uploads/a2a433ff-1b21-482b-a9d9-6cb0da8146f4.png"
+  },
+  "/coach-media/uploads/ab818ee2-0431-430e-a9af-e78936417633.png": {
+    "type": "image/png",
+    "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
+    "mtime": "2026-08-07T19:57:51.314Z",
+    "size": 1665643,
+    "path": "../public/coach-media/uploads/ab818ee2-0431-430e-a9af-e78936417633.png"
+  },
+  "/coach-media/uploads/aed28159-a121-45cb-9dd1-16ecc349b84d.png": {
+    "type": "image/png",
+    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
+    "mtime": "2026-08-07T19:57:51.314Z",
+    "size": 1578337,
+    "path": "../public/coach-media/uploads/aed28159-a121-45cb-9dd1-16ecc349b84d.png"
+  },
+  "/coach-media/uploads/bf6f3f5e-efca-4554-9963-44587811c0f8.png": {
+    "type": "image/png",
+    "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
+    "mtime": "2026-08-07T19:57:51.329Z",
+    "size": 1993166,
+    "path": "../public/coach-media/uploads/bf6f3f5e-efca-4554-9963-44587811c0f8.png"
+  },
+  "/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png": {
+    "type": "image/png",
+    "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
+    "mtime": "2026-08-07T19:57:51.315Z",
+    "size": 1882140,
+    "path": "../public/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png"
+  },
   "/_nuxt/builds/latest.json": {
     "type": "application/json",
-    "etag": "\"47-pr5we1oU+sbG5QmavZriU/E5kkE\"",
-    "mtime": "2026-08-07T17:57:19.825Z",
+    "etag": "\"47-GpUcgp1BRF4N0UAN10/ZweMeUcU\"",
+    "mtime": "2026-08-07T19:57:51.208Z",
     "size": 71,
     "path": "../public/_nuxt/builds/latest.json"
   },
-  "/coach-media/animations/fail/fail1.webp": {
-    "type": "image/webp",
-    "etag": "\"3e6cc-CLBekLwBwSBNLCxvb1eKJT9+wZU\"",
-    "mtime": "2026-08-07T17:57:19.873Z",
-    "size": 255692,
-    "path": "../public/coach-media/animations/fail/fail1.webp"
+  "/coach-media/uploads/e5108547-b1b3-4c96-89ca-6e00c0d1c60a.png": {
+    "type": "image/png",
+    "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
+    "mtime": "2026-08-07T19:57:51.323Z",
+    "size": 1882140,
+    "path": "../public/coach-media/uploads/e5108547-b1b3-4c96-89ca-6e00c0d1c60a.png"
   },
-  "/coach-media/animations/fail/fail2.webp": {
-    "type": "image/webp",
-    "etag": "\"5e028-RHwRc2cf0IvG2H9MS53ShV8XyoY\"",
-    "mtime": "2026-08-07T17:57:19.951Z",
-    "size": 385064,
-    "path": "../public/coach-media/animations/fail/fail2.webp"
-  },
-  "/coach-media/animations/fail/fail4.webp": {
-    "type": "image/webp",
-    "etag": "\"5cece-RjBisoBNjPRhvK+ndq3WET8sFcg\"",
-    "mtime": "2026-08-07T17:57:19.952Z",
-    "size": 380622,
-    "path": "../public/coach-media/animations/fail/fail4.webp"
-  },
-  "/coach-media/animations/fail/fail5.webp": {
-    "type": "image/webp",
-    "etag": "\"3418c-nUcgdhefQjLBbi5YPrFDciGNe1I\"",
-    "mtime": "2026-08-07T17:57:19.951Z",
-    "size": 213388,
-    "path": "../public/coach-media/animations/fail/fail5.webp"
-  },
-  "/coach-media/animations/fail/fail10.webp": {
-    "type": "image/webp",
-    "etag": "\"ec4a8-LxdVywk4WTKCcK/Mz98lMc+PlrY\"",
-    "mtime": "2026-08-07T17:57:19.952Z",
-    "size": 967848,
-    "path": "../public/coach-media/animations/fail/fail10.webp"
-  },
-  "/coach-media/animations/fail/fail6.webp": {
-    "type": "image/webp",
-    "etag": "\"31e86-st4q2D401jTAQjaB6fQJge0HiLk\"",
-    "mtime": "2026-08-07T17:57:19.952Z",
-    "size": 204422,
-    "path": "../public/coach-media/animations/fail/fail6.webp"
-  },
-  "/coach-media/animations/fail/fail7.webp": {
-    "type": "image/webp",
-    "etag": "\"63788-deMgnTG8ziw8Sq9HQAAG5lpmaYQ\"",
-    "mtime": "2026-08-07T17:57:19.953Z",
-    "size": 407432,
-    "path": "../public/coach-media/animations/fail/fail7.webp"
-  },
-  "/coach-media/animations/fail/fail8.webp": {
-    "type": "image/webp",
-    "etag": "\"39a32-GZjK64v2UufujF0nhcGEc6ElNfk\"",
-    "mtime": "2026-08-07T17:57:19.952Z",
-    "size": 236082,
-    "path": "../public/coach-media/animations/fail/fail8.webp"
+  "/coach-media/uploads/f8346f58-2678-4a95-aaa8-d37ba71ecb3b.png": {
+    "type": "image/png",
+    "etag": "\"191b76-HQFygNHbvhIArIsnfMO1th0D4OU\"",
+    "mtime": "2026-08-07T19:57:51.323Z",
+    "size": 1645430,
+    "path": "../public/coach-media/uploads/f8346f58-2678-4a95-aaa8-d37ba71ecb3b.png"
   },
   "/coach-media/animations/bravo/bravo1.webp": {
     "type": "image/webp",
     "etag": "\"44738-4QhsLfUd9XIbDTSNeKIP8/efIFU\"",
-    "mtime": "2026-08-07T17:57:19.957Z",
+    "mtime": "2026-08-07T19:57:51.337Z",
     "size": 280376,
     "path": "../public/coach-media/animations/bravo/bravo1.webp"
   },
   "/coach-media/animations/bravo/bravo11.webp": {
     "type": "image/webp",
     "etag": "\"1a216-3xX4QCqG7FtxwZvgt1PBqgFlbzg\"",
-    "mtime": "2026-08-07T17:57:19.874Z",
+    "mtime": "2026-08-07T19:57:51.339Z",
     "size": 107030,
     "path": "../public/coach-media/animations/bravo/bravo11.webp"
   },
   "/coach-media/animations/bravo/bravo12.webp": {
     "type": "image/webp",
     "etag": "\"1205a-/7k+Wui1IgWSv4DPL8QXZSf1p2U\"",
-    "mtime": "2026-08-07T17:57:19.954Z",
+    "mtime": "2026-08-07T19:57:51.252Z",
     "size": 73818,
     "path": "../public/coach-media/animations/bravo/bravo12.webp"
-  },
-  "/coach-media/animations/bravo/bravo14.webp": {
-    "type": "image/webp",
-    "etag": "\"34da4-cRZ9lyimIePouzhUvQ/mHfvEtuY\"",
-    "mtime": "2026-08-07T17:57:19.958Z",
-    "size": 216484,
-    "path": "../public/coach-media/animations/bravo/bravo14.webp"
-  },
-  "/coach-media/animations/bravo/bravo16.webp": {
-    "type": "image/webp",
-    "etag": "\"203f8-jg0MLG/nBqRrdnyLW65UaerRQNM\"",
-    "mtime": "2026-08-07T17:57:19.957Z",
-    "size": 132088,
-    "path": "../public/coach-media/animations/bravo/bravo16.webp"
-  },
-  "/coach-media/animations/bravo/bravo15.webp": {
-    "type": "image/webp",
-    "etag": "\"2b0e2-qaGuoSfLeg5vXhKMrtg/rxugwqA\"",
-    "mtime": "2026-08-07T17:57:19.954Z",
-    "size": 176354,
-    "path": "../public/coach-media/animations/bravo/bravo15.webp"
   },
   "/coach-media/animations/bravo/bravo13.webp": {
     "type": "image/webp",
     "etag": "\"56106-bhB3PYpSVxWys8XQ9pz9OrU7QBA\"",
-    "mtime": "2026-08-07T17:57:19.960Z",
+    "mtime": "2026-08-07T19:57:51.335Z",
     "size": 352518,
     "path": "../public/coach-media/animations/bravo/bravo13.webp"
+  },
+  "/coach-media/animations/bravo/bravo14.webp": {
+    "type": "image/webp",
+    "etag": "\"34da4-cRZ9lyimIePouzhUvQ/mHfvEtuY\"",
+    "mtime": "2026-08-07T19:57:51.341Z",
+    "size": 216484,
+    "path": "../public/coach-media/animations/bravo/bravo14.webp"
+  },
+  "/coach-media/animations/bravo/bravo10.webp": {
+    "type": "image/webp",
+    "etag": "\"adbd4-UywgFHyHGzDijqz6jodwTseMtkI\"",
+    "mtime": "2026-08-07T19:57:51.341Z",
+    "size": 711636,
+    "path": "../public/coach-media/animations/bravo/bravo10.webp"
+  },
+  "/coach-media/animations/bravo/bravo15.webp": {
+    "type": "image/webp",
+    "etag": "\"2b0e2-qaGuoSfLeg5vXhKMrtg/rxugwqA\"",
+    "mtime": "2026-08-07T19:57:51.341Z",
+    "size": 176354,
+    "path": "../public/coach-media/animations/bravo/bravo15.webp"
+  },
+  "/coach-media/animations/bravo/bravo16.webp": {
+    "type": "image/webp",
+    "etag": "\"203f8-jg0MLG/nBqRrdnyLW65UaerRQNM\"",
+    "mtime": "2026-08-07T19:57:51.339Z",
+    "size": 132088,
+    "path": "../public/coach-media/animations/bravo/bravo16.webp"
   },
   "/coach-media/animations/bravo/bravo17.webp": {
     "type": "image/webp",
     "etag": "\"241a0-uyZNtAYraFvIQXIqjMvyOPE1jTw\"",
-    "mtime": "2026-08-07T17:57:19.958Z",
+    "mtime": "2026-08-07T19:57:51.341Z",
     "size": 147872,
     "path": "../public/coach-media/animations/bravo/bravo17.webp"
   },
   "/coach-media/animations/bravo/bravo18.webp": {
     "type": "image/webp",
     "etag": "\"a01a-cps+HXxadKCjeKKYWHbwcIGk6hU\"",
-    "mtime": "2026-08-07T17:57:19.957Z",
+    "mtime": "2026-08-07T19:57:51.343Z",
     "size": 40986,
     "path": "../public/coach-media/animations/bravo/bravo18.webp"
   },
   "/coach-media/animations/bravo/bravo19.webp": {
     "type": "image/webp",
     "etag": "\"13352-7XcYb6ke3l0xF2LCw/KR+dXmc7Q\"",
-    "mtime": "2026-08-07T17:57:19.957Z",
+    "mtime": "2026-08-07T19:57:51.341Z",
     "size": 78674,
     "path": "../public/coach-media/animations/bravo/bravo19.webp"
   },
-  "/coach-media/animations/fail/fail9.webp": {
-    "type": "image/webp",
-    "etag": "\"f5f18-OaHXpPB3qd/rQVrqz8lBFShsxjI\"",
-    "mtime": "2026-08-07T17:57:19.957Z",
-    "size": 1007384,
-    "path": "../public/coach-media/animations/fail/fail9.webp"
-  },
-  "/coach-media/animations/bravo/bravo10.webp": {
-    "type": "image/webp",
-    "etag": "\"adbd4-UywgFHyHGzDijqz6jodwTseMtkI\"",
-    "mtime": "2026-08-07T17:57:19.958Z",
-    "size": 711636,
-    "path": "../public/coach-media/animations/bravo/bravo10.webp"
-  },
-  "/coach-media/animations/fail/fail3.webp": {
-    "type": "image/webp",
-    "etag": "\"19d1a6-49q6JpI6yKtRh2mygNyjyUsItIM\"",
-    "mtime": "2026-08-07T17:57:19.953Z",
-    "size": 1692070,
-    "path": "../public/coach-media/animations/fail/fail3.webp"
+  "/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png": {
+    "type": "image/png",
+    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
+    "mtime": "2026-08-07T19:57:51.329Z",
+    "size": 1578337,
+    "path": "../public/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png"
   },
   "/coach-media/animations/bravo/bravo2.webp": {
     "type": "image/webp",
     "etag": "\"d0ca-uTre9Wq69Wtq99T7Vn3/dRXQFkg\"",
-    "mtime": "2026-08-07T17:57:19.959Z",
+    "mtime": "2026-08-07T19:57:51.342Z",
     "size": 53450,
     "path": "../public/coach-media/animations/bravo/bravo2.webp"
   },
   "/coach-media/animations/bravo/bravo20.webp": {
     "type": "image/webp",
     "etag": "\"233b2-LlDa1c9jqNgHkGB9k+cU7ap5b0Y\"",
-    "mtime": "2026-08-07T17:57:19.957Z",
+    "mtime": "2026-08-07T19:57:51.343Z",
     "size": 144306,
     "path": "../public/coach-media/animations/bravo/bravo20.webp"
   },
   "/coach-media/animations/bravo/bravo21.webp": {
     "type": "image/webp",
     "etag": "\"3da68-ISHGzxh2cgKoQraDg+pa1TIB3Eo\"",
-    "mtime": "2026-08-07T17:57:19.958Z",
+    "mtime": "2026-08-07T19:57:51.341Z",
     "size": 252520,
     "path": "../public/coach-media/animations/bravo/bravo21.webp"
-  },
-  "/coach-media/animations/bravo/bravo22.webp": {
-    "type": "image/webp",
-    "etag": "\"695d4-fo3c1QhJVPT0yXYAuoQyAXrIO9E\"",
-    "mtime": "2026-08-07T17:57:19.961Z",
-    "size": 431572,
-    "path": "../public/coach-media/animations/bravo/bravo22.webp"
   },
   "/coach-media/animations/bravo/bravo23.webp": {
     "type": "image/webp",
     "etag": "\"203f8-jg0MLG/nBqRrdnyLW65UaerRQNM\"",
-    "mtime": "2026-08-07T17:57:19.959Z",
+    "mtime": "2026-08-07T19:57:51.341Z",
     "size": 132088,
     "path": "../public/coach-media/animations/bravo/bravo23.webp"
   },
   "/coach-media/animations/bravo/bravo24.webp": {
     "type": "image/webp",
     "etag": "\"21c1c-BCPPzQaqjCgONCZQqIz0MRfkhnk\"",
-    "mtime": "2026-08-07T17:57:19.959Z",
+    "mtime": "2026-08-07T19:57:51.342Z",
     "size": 138268,
     "path": "../public/coach-media/animations/bravo/bravo24.webp"
-  },
-  "/coach-media/animations/bravo/bravo25.webp": {
-    "type": "image/webp",
-    "etag": "\"6e646-B09j5zbOGx/pB/KUZrJkPccQvk0\"",
-    "mtime": "2026-08-07T17:57:19.960Z",
-    "size": 452166,
-    "path": "../public/coach-media/animations/bravo/bravo25.webp"
   },
   "/coach-media/animations/bravo/bravo26.webp": {
     "type": "image/webp",
     "etag": "\"30b4-3zSDRUC/kfpm2SrLPRZXdNLOLHk\"",
-    "mtime": "2026-08-07T17:57:19.959Z",
+    "mtime": "2026-08-07T19:57:51.342Z",
     "size": 12468,
     "path": "../public/coach-media/animations/bravo/bravo26.webp"
   },
   "/coach-media/animations/bravo/bravo27.webp": {
     "type": "image/webp",
     "etag": "\"18b24-qcCeJs9S6OXbNHnCNtW2ImrJbvY\"",
-    "mtime": "2026-08-07T17:57:19.960Z",
+    "mtime": "2026-08-07T19:57:51.343Z",
     "size": 101156,
     "path": "../public/coach-media/animations/bravo/bravo27.webp"
+  },
+  "/coach-media/animations/bravo/bravo22.webp": {
+    "type": "image/webp",
+    "etag": "\"695d4-fo3c1QhJVPT0yXYAuoQyAXrIO9E\"",
+    "mtime": "2026-08-07T19:57:51.342Z",
+    "size": 431572,
+    "path": "../public/coach-media/animations/bravo/bravo22.webp"
   },
   "/coach-media/animations/bravo/bravo28.webp": {
     "type": "image/webp",
     "etag": "\"18612-7Zj+YVZPRJ6CKyZAwrxfXIc7fjI\"",
-    "mtime": "2026-08-07T17:57:19.960Z",
+    "mtime": "2026-08-07T19:57:51.343Z",
     "size": 99858,
     "path": "../public/coach-media/animations/bravo/bravo28.webp"
+  },
+  "/coach-media/animations/bravo/bravo25.webp": {
+    "type": "image/webp",
+    "etag": "\"6e646-B09j5zbOGx/pB/KUZrJkPccQvk0\"",
+    "mtime": "2026-08-07T19:57:51.342Z",
+    "size": 452166,
+    "path": "../public/coach-media/animations/bravo/bravo25.webp"
   },
   "/coach-media/animations/bravo/bravo29.webp": {
     "type": "image/webp",
     "etag": "\"163a6-ViRk6UjMsrG8Il8pS7HYT3/WiFk\"",
-    "mtime": "2026-08-07T17:57:19.960Z",
+    "mtime": "2026-08-07T19:57:51.343Z",
     "size": 91046,
     "path": "../public/coach-media/animations/bravo/bravo29.webp"
   },
   "/coach-media/animations/bravo/bravo3.webp": {
     "type": "image/webp",
     "etag": "\"80d8-WZGwWFCLsk3YDTm9XP5QCq8R7Es\"",
-    "mtime": "2026-08-07T17:57:19.960Z",
+    "mtime": "2026-08-07T19:57:51.344Z",
     "size": 32984,
     "path": "../public/coach-media/animations/bravo/bravo3.webp"
   },
   "/coach-media/animations/bravo/bravo30.webp": {
     "type": "image/webp",
     "etag": "\"2be66-2mV/o9/SR26sBGn1HK62usspEXM\"",
-    "mtime": "2026-08-07T17:57:19.961Z",
+    "mtime": "2026-08-07T19:57:51.343Z",
     "size": 179814,
     "path": "../public/coach-media/animations/bravo/bravo30.webp"
   },
   "/coach-media/animations/bravo/bravo31.webp": {
     "type": "image/webp",
     "etag": "\"2154c-mTHroY9VN55S8jkoGrrtwcul4rs\"",
-    "mtime": "2026-08-07T17:57:19.966Z",
+    "mtime": "2026-08-07T19:57:51.345Z",
     "size": 136524,
     "path": "../public/coach-media/animations/bravo/bravo31.webp"
   },
   "/coach-media/animations/bravo/bravo32.webp": {
     "type": "image/webp",
     "etag": "\"3ddf2-eZeHr4gLF4RNVRJoLdRkGG/wq/4\"",
-    "mtime": "2026-08-07T17:57:19.963Z",
+    "mtime": "2026-08-07T19:57:51.344Z",
     "size": 253426,
     "path": "../public/coach-media/animations/bravo/bravo32.webp"
   },
   "/coach-media/animations/bravo/bravo33.webp": {
     "type": "image/webp",
     "etag": "\"19ec0-c95YrxMrzqQW4G9FjU0ykKQ7V9o\"",
-    "mtime": "2026-08-07T17:57:19.961Z",
+    "mtime": "2026-08-07T19:57:51.344Z",
     "size": 106176,
     "path": "../public/coach-media/animations/bravo/bravo33.webp"
   },
   "/coach-media/animations/bravo/bravo4.webp": {
     "type": "image/webp",
     "etag": "\"301b0-kZdjup76tUvXnUsAqLJ/bPOuJLQ\"",
-    "mtime": "2026-08-07T17:57:19.963Z",
+    "mtime": "2026-08-07T19:57:51.344Z",
     "size": 197040,
     "path": "../public/coach-media/animations/bravo/bravo4.webp"
-  },
-  "/coach-media/animations/bravo/bravo6.webp": {
-    "type": "image/webp",
-    "etag": "\"1a95c-STnlzMe66YjYqbDuY5yLt9ADvzM\"",
-    "mtime": "2026-08-07T17:57:19.962Z",
-    "size": 108892,
-    "path": "../public/coach-media/animations/bravo/bravo6.webp"
   },
   "/coach-media/animations/bravo/bravo5.webp": {
     "type": "image/webp",
     "etag": "\"120aa-WQCZmq2H4iAmCwkgGz0jbhroUMU\"",
-    "mtime": "2026-08-07T17:57:19.963Z",
+    "mtime": "2026-08-07T19:57:51.344Z",
     "size": 73898,
     "path": "../public/coach-media/animations/bravo/bravo5.webp"
+  },
+  "/coach-media/animations/bravo/bravo6.webp": {
+    "type": "image/webp",
+    "etag": "\"1a95c-STnlzMe66YjYqbDuY5yLt9ADvzM\"",
+    "mtime": "2026-08-07T19:57:51.345Z",
+    "size": 108892,
+    "path": "../public/coach-media/animations/bravo/bravo6.webp"
   },
   "/coach-media/animations/bravo/bravo7.webp": {
     "type": "image/webp",
     "etag": "\"29fa6-QguGsOjUTD8OjKKTZfpb9dijR5g\"",
-    "mtime": "2026-08-07T17:57:19.966Z",
+    "mtime": "2026-08-07T19:57:51.345Z",
     "size": 171942,
     "path": "../public/coach-media/animations/bravo/bravo7.webp"
   },
   "/coach-media/animations/bravo/bravo8.webp": {
     "type": "image/webp",
     "etag": "\"1d8b4-xhvLiSPfxFlQsAeh/JU1EhCyKtQ\"",
-    "mtime": "2026-08-07T17:57:19.966Z",
+    "mtime": "2026-08-07T19:57:51.352Z",
     "size": 121012,
     "path": "../public/coach-media/animations/bravo/bravo8.webp"
   },
   "/coach-media/animations/bravo/bravo9.webp": {
     "type": "image/webp",
     "etag": "\"1105e-m+/rIlVAaoiD3hxFGIcC7Skzq0k\"",
-    "mtime": "2026-08-07T17:57:19.966Z",
+    "mtime": "2026-08-07T19:57:51.350Z",
     "size": 69726,
     "path": "../public/coach-media/animations/bravo/bravo9.webp"
   },
-  "/coach-media/animations/happy/happy10.webp": {
+  "/coach-media/animations/fail/fail1.webp": {
     "type": "image/webp",
-    "etag": "\"13102-1AwfKNNogN0hV9N7INQr8b/L5U0\"",
-    "mtime": "2026-08-07T17:57:19.874Z",
-    "size": 78082,
-    "path": "../public/coach-media/animations/happy/happy10.webp"
+    "etag": "\"3e6cc-CLBekLwBwSBNLCxvb1eKJT9+wZU\"",
+    "mtime": "2026-08-07T19:57:51.254Z",
+    "size": 255692,
+    "path": "../public/coach-media/animations/fail/fail1.webp"
   },
-  "/coach-media/animations/happy/happy11.webp": {
+  "/coach-media/animations/fail/fail2.webp": {
     "type": "image/webp",
-    "etag": "\"c51c-aSSJ/YerC2d+QHIzkxapjUKX1xo\"",
-    "mtime": "2026-08-07T17:57:19.966Z",
-    "size": 50460,
-    "path": "../public/coach-media/animations/happy/happy11.webp"
+    "etag": "\"5e028-RHwRc2cf0IvG2H9MS53ShV8XyoY\"",
+    "mtime": "2026-08-07T19:57:51.347Z",
+    "size": 385064,
+    "path": "../public/coach-media/animations/fail/fail2.webp"
   },
-  "/coach-media/animations/happy/happy12.webp": {
+  "/coach-media/animations/fail/fail5.webp": {
     "type": "image/webp",
-    "etag": "\"26dd0-kEufqOKIIc4EphkqsilP8Vg0anA\"",
-    "mtime": "2026-08-07T17:57:19.968Z",
-    "size": 159184,
-    "path": "../public/coach-media/animations/happy/happy12.webp"
+    "etag": "\"3418c-nUcgdhefQjLBbi5YPrFDciGNe1I\"",
+    "mtime": "2026-08-07T19:57:51.351Z",
+    "size": 213388,
+    "path": "../public/coach-media/animations/fail/fail5.webp"
   },
-  "/coach-media/animations/happy/happy13.webp": {
+  "/coach-media/animations/fail/fail6.webp": {
     "type": "image/webp",
-    "etag": "\"1b7c8-6YwhPgMDDi09N6QaiQGvB3MESN8\"",
-    "mtime": "2026-08-07T17:57:19.971Z",
-    "size": 112584,
-    "path": "../public/coach-media/animations/happy/happy13.webp"
+    "etag": "\"31e86-st4q2D401jTAQjaB6fQJge0HiLk\"",
+    "mtime": "2026-08-07T19:57:51.351Z",
+    "size": 204422,
+    "path": "../public/coach-media/animations/fail/fail6.webp"
   },
-  "/coach-media/animations/happy/happy14.webp": {
+  "/coach-media/animations/fail/fail4.webp": {
     "type": "image/webp",
-    "etag": "\"2b5e-Tlk4vz7sMxW+TPrlh/TTUPVQZ64\"",
-    "mtime": "2026-08-07T17:57:19.967Z",
-    "size": 11102,
-    "path": "../public/coach-media/animations/happy/happy14.webp"
-  },
-  "/coach-media/animations/happy/happy1.webp": {
-    "type": "image/webp",
-    "etag": "\"9a9fe-dnJ60THXbLE/qdsCoy8mks8JEWo\"",
-    "mtime": "2026-08-07T17:57:19.970Z",
-    "size": 633342,
-    "path": "../public/coach-media/animations/happy/happy1.webp"
-  },
-  "/coach-media/animations/happy/happy15.webp": {
-    "type": "image/webp",
-    "etag": "\"1f82e-GdfVpoK+FBOph2APqZZ2ksTEi/M\"",
-    "mtime": "2026-08-07T17:57:19.969Z",
-    "size": 129070,
-    "path": "../public/coach-media/animations/happy/happy15.webp"
-  },
-  "/coach-media/animations/happy/happy16.webp": {
-    "type": "image/webp",
-    "etag": "\"39676-m3hlL8MEmfcM8A6RQ/d34G7k4z4\"",
-    "mtime": "2026-08-07T17:57:19.971Z",
-    "size": 235126,
-    "path": "../public/coach-media/animations/happy/happy16.webp"
-  },
-  "/coach-media/animations/happy/happy17.webp": {
-    "type": "image/webp",
-    "etag": "\"6c236-lcuyQg6sSZcT0+fCpGNG/JhMi7U\"",
-    "mtime": "2026-08-07T17:57:19.969Z",
-    "size": 442934,
-    "path": "../public/coach-media/animations/happy/happy17.webp"
-  },
-  "/coach-media/animations/happy/happy18.webp": {
-    "type": "image/webp",
-    "etag": "\"38cca-HDXyFn4nw7hhDQ0f8voh7jHxFIU\"",
-    "mtime": "2026-08-07T17:57:19.969Z",
-    "size": 232650,
-    "path": "../public/coach-media/animations/happy/happy18.webp"
-  },
-  "/coach-media/animations/happy/happy19.webp": {
-    "type": "image/webp",
-    "etag": "\"7340-Mvycs8QTkYX6zm7iIfL2nLfxOe8\"",
-    "mtime": "2026-08-07T17:57:19.970Z",
-    "size": 29504,
-    "path": "../public/coach-media/animations/happy/happy19.webp"
-  },
-  "/coach-media/animations/happy/happy2.webp": {
-    "type": "image/webp",
-    "etag": "\"1b638-CG1y3zibI0VpxAfTb3zZrzRaw90\"",
-    "mtime": "2026-08-07T17:57:19.970Z",
-    "size": 112184,
-    "path": "../public/coach-media/animations/happy/happy2.webp"
-  },
-  "/coach-media/animations/happy/happy21.webp": {
-    "type": "image/webp",
-    "etag": "\"d20a-nJXSMlgY3QzHwwJw2j7rW4bD6HU\"",
-    "mtime": "2026-08-07T17:57:19.972Z",
-    "size": 53770,
-    "path": "../public/coach-media/animations/happy/happy21.webp"
-  },
-  "/coach-media/animations/happy/happy20.webp": {
-    "type": "image/webp",
-    "etag": "\"31eb2-eG0f1RbiJPRwmWx1p+zVbeej7Jo\"",
-    "mtime": "2026-08-07T17:57:19.970Z",
-    "size": 204466,
-    "path": "../public/coach-media/animations/happy/happy20.webp"
-  },
-  "/coach-media/animations/happy/happy22.webp": {
-    "type": "image/webp",
-    "etag": "\"2be74-wts9jwpJqVDGud0ZifbURmTwf7g\"",
-    "mtime": "2026-08-07T17:57:19.971Z",
-    "size": 179828,
-    "path": "../public/coach-media/animations/happy/happy22.webp"
-  },
-  "/coach-media/animations/happy/happy23.webp": {
-    "type": "image/webp",
-    "etag": "\"e74a-F+BBio6AhOZ5hwHOGh8wKCLcoGA\"",
-    "mtime": "2026-08-07T17:57:19.970Z",
-    "size": 59210,
-    "path": "../public/coach-media/animations/happy/happy23.webp"
-  },
-  "/coach-media/animations/happy/happy24.webp": {
-    "type": "image/webp",
-    "etag": "\"23e02-CIi7WeJXeH8cd/GgwMtt3CFFVkM\"",
-    "mtime": "2026-08-07T17:57:19.971Z",
-    "size": 146946,
-    "path": "../public/coach-media/animations/happy/happy24.webp"
-  },
-  "/coach-media/animations/happy/happy25.webp": {
-    "type": "image/webp",
-    "etag": "\"16574-kubThW5vAMKccIZc2jswkTWLUoA\"",
-    "mtime": "2026-08-07T17:57:19.972Z",
-    "size": 91508,
-    "path": "../public/coach-media/animations/happy/happy25.webp"
-  },
-  "/coach-media/animations/happy/happy27.webp": {
-    "type": "image/webp",
-    "etag": "\"1c662-1bbHXwmlK1/Q6duQFfbU/+Wg5Fg\"",
-    "mtime": "2026-08-07T17:57:19.971Z",
-    "size": 116322,
-    "path": "../public/coach-media/animations/happy/happy27.webp"
-  },
-  "/coach-media/animations/happy/happy28.webp": {
-    "type": "image/webp",
-    "etag": "\"2090a-cfPB8KwXDFTC2iWhg6Pn7kOvGeg\"",
-    "mtime": "2026-08-07T17:57:19.978Z",
-    "size": 133386,
-    "path": "../public/coach-media/animations/happy/happy28.webp"
-  },
-  "/coach-media/animations/happy/happy26.webp": {
-    "type": "image/webp",
-    "etag": "\"6c706-bOAKAMAiElDmC2MCxEJkrvr5A+k\"",
-    "mtime": "2026-08-07T17:57:19.972Z",
-    "size": 444166,
-    "path": "../public/coach-media/animations/happy/happy26.webp"
-  },
-  "/coach-media/animations/happy/happy29.webp": {
-    "type": "image/webp",
-    "etag": "\"15a6e-F4FEHmzAIG7WW3pszvFsq0XKYGk\"",
-    "mtime": "2026-08-07T17:57:19.972Z",
-    "size": 88686,
-    "path": "../public/coach-media/animations/happy/happy29.webp"
-  },
-  "/coach-media/animations/happy/happy3.webp": {
-    "type": "image/webp",
-    "etag": "\"6438c-AQmLLI1sVtzVfySWLf8q8/SnoDQ\"",
-    "mtime": "2026-08-07T17:57:19.974Z",
-    "size": 410508,
-    "path": "../public/coach-media/animations/happy/happy3.webp"
-  },
-  "/coach-media/animations/bravo/bravo34.webp": {
-    "type": "image/webp",
-    "etag": "\"26ccac-0lLmGbQH56H1iPHEYHxgMHzvGqg\"",
-    "mtime": "2026-08-07T17:57:19.966Z",
-    "size": 2542764,
-    "path": "../public/coach-media/animations/bravo/bravo34.webp"
-  },
-  "/coach-media/animations/happy/happy30.webp": {
-    "type": "image/webp",
-    "etag": "\"46140-52DID+yWWHNDhSWo2wqCW7AgztI\"",
-    "mtime": "2026-08-07T17:57:19.974Z",
-    "size": 287040,
-    "path": "../public/coach-media/animations/happy/happy30.webp"
-  },
-  "/coach-media/animations/happy/happy31.webp": {
-    "type": "image/webp",
-    "etag": "\"4d6ca-GZQfzSkO4AbRu7KJoQWgnIw6U6k\"",
-    "mtime": "2026-08-07T17:57:19.973Z",
-    "size": 317130,
-    "path": "../public/coach-media/animations/happy/happy31.webp"
-  },
-  "/coach-media/animations/happy/happy32.webp": {
-    "type": "image/webp",
-    "etag": "\"1ce94-qd5mvwxqL3x8atGLGoQ6T5SBIM8\"",
-    "mtime": "2026-08-07T17:57:19.973Z",
-    "size": 118420,
-    "path": "../public/coach-media/animations/happy/happy32.webp"
-  },
-  "/coach-media/animations/happy/happy33.webp": {
-    "type": "image/webp",
-    "etag": "\"1ca8a-w5q1HyoRf3YSX2wny1ajxC1lVTw\"",
-    "mtime": "2026-08-07T17:57:19.974Z",
-    "size": 117386,
-    "path": "../public/coach-media/animations/happy/happy33.webp"
-  },
-  "/coach-media/animations/happy/happy34.webp": {
-    "type": "image/webp",
-    "etag": "\"7a6e-N4lUoynD0pY1HrZqbhKsKEJcIdY\"",
-    "mtime": "2026-08-07T17:57:19.979Z",
-    "size": 31342,
-    "path": "../public/coach-media/animations/happy/happy34.webp"
-  },
-  "/coach-media/animations/happy/happy35.webp": {
-    "type": "image/webp",
-    "etag": "\"27e2a-nINbfIIzpb0aB5cQDbxz/GDwNug\"",
-    "mtime": "2026-08-07T17:57:19.978Z",
-    "size": 163370,
-    "path": "../public/coach-media/animations/happy/happy35.webp"
-  },
-  "/coach-media/animations/happy/happy36.webp": {
-    "type": "image/webp",
-    "etag": "\"1480e-iU7KcSbk60IXH4CWOzNyttBsbE0\"",
-    "mtime": "2026-08-07T17:57:19.974Z",
-    "size": 83982,
-    "path": "../public/coach-media/animations/happy/happy36.webp"
-  },
-  "/coach-media/animations/happy/happy37.webp": {
-    "type": "image/webp",
-    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
-    "mtime": "2026-08-07T17:57:19.977Z",
-    "size": 57724,
-    "path": "../public/coach-media/animations/happy/happy37.webp"
-  },
-  "/coach-media/animations/happy/happy38.webp": {
-    "type": "image/webp",
-    "etag": "\"20928-zE86yLQztSZEATTCxTKRuQFifnw\"",
-    "mtime": "2026-08-07T17:57:19.978Z",
-    "size": 133416,
-    "path": "../public/coach-media/animations/happy/happy38.webp"
-  },
-  "/coach-media/animations/happy/happy39.webp": {
-    "type": "image/webp",
-    "etag": "\"1031c-0I4f6s3jDJrqeEDNAVBubusuRqQ\"",
-    "mtime": "2026-08-07T17:57:19.979Z",
-    "size": 66332,
-    "path": "../public/coach-media/animations/happy/happy39.webp"
-  },
-  "/coach-media/animations/happy/happy4.webp": {
-    "type": "image/webp",
-    "etag": "\"80d8-WZGwWFCLsk3YDTm9XP5QCq8R7Es\"",
-    "mtime": "2026-08-07T17:57:19.979Z",
-    "size": 32984,
-    "path": "../public/coach-media/animations/happy/happy4.webp"
-  },
-  "/coach-media/animations/happy/happy40.webp": {
-    "type": "image/webp",
-    "etag": "\"116ba-M7X1kM6tt7dIECx3koEGYbji1us\"",
-    "mtime": "2026-08-07T17:57:19.978Z",
-    "size": 71354,
-    "path": "../public/coach-media/animations/happy/happy40.webp"
-  },
-  "/coach-media/animations/happy/happy41.webp": {
-    "type": "image/webp",
-    "etag": "\"a76a-Nmck64+pAP0tEnTHpG1mitI4ONk\"",
-    "mtime": "2026-08-07T17:57:19.980Z",
-    "size": 42858,
-    "path": "../public/coach-media/animations/happy/happy41.webp"
-  },
-  "/coach-media/animations/happy/happy42.webp": {
-    "type": "image/webp",
-    "etag": "\"7eba-Xqry0H+Qj7x/M1eDmO0CIQ+A7Mg\"",
-    "mtime": "2026-08-07T17:57:19.978Z",
-    "size": 32442,
-    "path": "../public/coach-media/animations/happy/happy42.webp"
-  },
-  "/coach-media/animations/happy/happy43.webp": {
-    "type": "image/webp",
-    "etag": "\"55a5e-kUYTswcDoeybUYnmGXDBV0ny564\"",
-    "mtime": "2026-08-07T17:57:19.979Z",
-    "size": 350814,
-    "path": "../public/coach-media/animations/happy/happy43.webp"
-  },
-  "/coach-media/animations/happy/happy44.webp": {
-    "type": "image/webp",
-    "etag": "\"24e16-Y7u+Md6oQPbYSDjE0D9H77j0Z5I\"",
-    "mtime": "2026-08-07T17:57:19.978Z",
-    "size": 151062,
-    "path": "../public/coach-media/animations/happy/happy44.webp"
-  },
-  "/coach-media/animations/happy/happy45.webp": {
-    "type": "image/webp",
-    "etag": "\"65a82-XxALJISFlOUdD3wSziHwFXHhxqc\"",
-    "mtime": "2026-08-07T17:57:19.981Z",
-    "size": 416386,
-    "path": "../public/coach-media/animations/happy/happy45.webp"
-  },
-  "/coach-media/animations/happy/happy46.webp": {
-    "type": "image/webp",
-    "etag": "\"13dec-uj4sm+IwuLOmQY7lGy1JeMzt2FM\"",
-    "mtime": "2026-08-07T17:57:19.979Z",
-    "size": 81388,
-    "path": "../public/coach-media/animations/happy/happy46.webp"
-  },
-  "/coach-media/animations/happy/happy47.webp": {
-    "type": "image/webp",
-    "etag": "\"234e4-DNBmLISLOFimd+G8XihNRgMsjGw\"",
-    "mtime": "2026-08-07T17:57:19.980Z",
-    "size": 144612,
-    "path": "../public/coach-media/animations/happy/happy47.webp"
-  },
-  "/coach-media/animations/happy/happy49.webp": {
-    "type": "image/webp",
-    "etag": "\"3123c-mf62C2iWRtx585STd9CHbYmICyM\"",
-    "mtime": "2026-08-07T17:57:19.981Z",
-    "size": 201276,
-    "path": "../public/coach-media/animations/happy/happy49.webp"
-  },
-  "/coach-media/animations/happy/happy5.webp": {
-    "type": "image/webp",
-    "etag": "\"10784-0Rzy5v92HqFbOQ0qn2Jo9XRJ1r0\"",
-    "mtime": "2026-08-07T17:57:19.980Z",
-    "size": 67460,
-    "path": "../public/coach-media/animations/happy/happy5.webp"
-  },
-  "/coach-media/animations/happy/happy50.webp": {
-    "type": "image/webp",
-    "etag": "\"2b72a-Xz8Gb2Cdj+rrnnpbXbSGBQRTFYw\"",
-    "mtime": "2026-08-07T17:57:19.981Z",
-    "size": 177962,
-    "path": "../public/coach-media/animations/happy/happy50.webp"
-  },
-  "/coach-media/animations/happy/happy51.webp": {
-    "type": "image/webp",
-    "etag": "\"29090-le1WcmrRN+RDX52joaRj6kdNQS0\"",
-    "mtime": "2026-08-07T17:57:19.981Z",
-    "size": 168080,
-    "path": "../public/coach-media/animations/happy/happy51.webp"
-  },
-  "/coach-media/animations/happy/happy52.webp": {
-    "type": "image/webp",
-    "etag": "\"4a9b0-bNgmWpmTSjuc06DQcbX6RkVvCnU\"",
-    "mtime": "2026-08-07T17:57:19.982Z",
-    "size": 305584,
-    "path": "../public/coach-media/animations/happy/happy52.webp"
-  },
-  "/coach-media/animations/happy/happy53.webp": {
-    "type": "image/webp",
-    "etag": "\"57d0-WEnplvWuFKWqXkfuwNFuk472muo\"",
-    "mtime": "2026-08-07T17:57:19.982Z",
-    "size": 22480,
-    "path": "../public/coach-media/animations/happy/happy53.webp"
-  },
-  "/coach-media/animations/happy/happy54.webp": {
-    "type": "image/webp",
-    "etag": "\"de70-7JEgp30lMgh1RT82Z43BnbOPyME\"",
-    "mtime": "2026-08-07T17:57:19.980Z",
-    "size": 56944,
-    "path": "../public/coach-media/animations/happy/happy54.webp"
-  },
-  "/coach-media/animations/happy/happy55.webp": {
-    "type": "image/webp",
-    "etag": "\"4b40a-Dq55EPJ++rGpcOm3dfVMczMYPaI\"",
-    "mtime": "2026-08-07T17:57:19.982Z",
-    "size": 308234,
-    "path": "../public/coach-media/animations/happy/happy55.webp"
-  },
-  "/coach-media/animations/happy/happy48.webp": {
-    "type": "image/webp",
-    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
-    "mtime": "2026-08-07T17:57:19.981Z",
-    "size": 566688,
-    "path": "../public/coach-media/animations/happy/happy48.webp"
-  },
-  "/coach-media/animations/happy/happy56.webp": {
-    "type": "image/webp",
-    "etag": "\"7ec86-JO0Q1vC7rgTxvmuYQZ3337jzHAM\"",
-    "mtime": "2026-08-07T17:57:19.983Z",
-    "size": 519302,
-    "path": "../public/coach-media/animations/happy/happy56.webp"
-  },
-  "/coach-media/animations/happy/happy57.webp": {
-    "type": "image/webp",
-    "etag": "\"74f88-eEN2CyUJ9rLsRvqY7OzSZS3p2IU\"",
-    "mtime": "2026-08-07T17:57:19.984Z",
-    "size": 479112,
-    "path": "../public/coach-media/animations/happy/happy57.webp"
-  },
-  "/coach-media/animations/happy/happy59.webp": {
-    "type": "image/webp",
-    "etag": "\"e290-fQb7JlOst9pysXxzv35HJTcHlpE\"",
-    "mtime": "2026-08-07T17:57:19.983Z",
-    "size": 58000,
-    "path": "../public/coach-media/animations/happy/happy59.webp"
-  },
-  "/coach-media/animations/happy/happy58.webp": {
-    "type": "image/webp",
-    "etag": "\"695d4-fo3c1QhJVPT0yXYAuoQyAXrIO9E\"",
-    "mtime": "2026-08-07T17:57:19.983Z",
-    "size": 431572,
-    "path": "../public/coach-media/animations/happy/happy58.webp"
-  },
-  "/coach-media/animations/happy/happy6.webp": {
-    "type": "image/webp",
-    "etag": "\"2f8ce-NjZdr7Vin1NbHT+GFgWzMwsZeZE\"",
-    "mtime": "2026-08-07T17:57:19.989Z",
-    "size": 194766,
-    "path": "../public/coach-media/animations/happy/happy6.webp"
-  },
-  "/coach-media/animations/happy/happy61.webp": {
-    "type": "image/webp",
-    "etag": "\"253e8-1Fqod1LG1PZNTdmri6v0gPMthaE\"",
-    "mtime": "2026-08-07T17:57:19.989Z",
-    "size": 152552,
-    "path": "../public/coach-media/animations/happy/happy61.webp"
-  },
-  "/coach-media/animations/happy/happy62.webp": {
-    "type": "image/webp",
-    "etag": "\"4f8f8-tLTO1/dtiZumcCPIDjxNhkIrS9g\"",
-    "mtime": "2026-08-07T17:57:19.989Z",
-    "size": 325880,
-    "path": "../public/coach-media/animations/happy/happy62.webp"
-  },
-  "/coach-media/animations/happy/happy63.webp": {
-    "type": "image/webp",
-    "etag": "\"2b52a-B18WnXoFNFEoRmRiTpAPD0Xw4fA\"",
-    "mtime": "2026-08-07T17:57:19.984Z",
-    "size": 177450,
-    "path": "../public/coach-media/animations/happy/happy63.webp"
-  },
-  "/coach-media/animations/happy/happy65.webp": {
-    "type": "image/webp",
-    "etag": "\"153e2-1MrE6YaWW1bqq3uRkAG3roDYdbI\"",
-    "mtime": "2026-08-07T17:57:19.991Z",
-    "size": 87010,
-    "path": "../public/coach-media/animations/happy/happy65.webp"
-  },
-  "/coach-media/animations/happy/happy67.webp": {
-    "type": "image/webp",
-    "etag": "\"26842-Ttlq6ska7bBpzXjvIXLqSUaPnIk\"",
-    "mtime": "2026-08-07T17:57:19.989Z",
-    "size": 157762,
-    "path": "../public/coach-media/animations/happy/happy67.webp"
-  },
-  "/coach-media/animations/happy/happy66.webp": {
-    "type": "image/webp",
-    "etag": "\"5aac0-EL5Dnfs0ZHXfZ2nFXHuqusIiA6U\"",
-    "mtime": "2026-08-07T17:57:19.985Z",
-    "size": 371392,
-    "path": "../public/coach-media/animations/happy/happy66.webp"
-  },
-  "/coach-media/animations/happy/happy68.webp": {
-    "type": "image/webp",
-    "etag": "\"3a9f6-uXcrvu87C4tyxdUD8qy84likyxA\"",
-    "mtime": "2026-08-07T17:57:19.990Z",
-    "size": 240118,
-    "path": "../public/coach-media/animations/happy/happy68.webp"
-  },
-  "/coach-media/animations/happy/happy69.webp": {
-    "type": "image/webp",
-    "etag": "\"1843a-+cJ0+7F0PNcalsjHJcXNkw7qRDw\"",
-    "mtime": "2026-08-07T17:57:19.992Z",
-    "size": 99386,
-    "path": "../public/coach-media/animations/happy/happy69.webp"
-  },
-  "/coach-media/animations/happy/happy64.webp": {
-    "type": "image/webp",
-    "etag": "\"8b070-7oC7TYj4LIldWg1605cOC8gYl+w\"",
-    "mtime": "2026-08-07T17:57:19.990Z",
-    "size": 569456,
-    "path": "../public/coach-media/animations/happy/happy64.webp"
-  },
-  "/coach-media/animations/happy/happy71.webp": {
-    "type": "image/webp",
-    "etag": "\"12890-iDkXNnqbnihYZd5fm+x9SogtFL0\"",
-    "mtime": "2026-08-07T17:57:19.991Z",
-    "size": 75920,
-    "path": "../public/coach-media/animations/happy/happy71.webp"
-  },
-  "/coach-media/animations/happy/happy7.webp": {
-    "type": "image/webp",
-    "etag": "\"6dbe6-GIqYtKyf033a2vAUrfvCUdyYOmE\"",
-    "mtime": "2026-08-07T17:57:19.990Z",
-    "size": 449510,
-    "path": "../public/coach-media/animations/happy/happy7.webp"
-  },
-  "/coach-media/animations/happy/happy72.webp": {
-    "type": "image/webp",
-    "etag": "\"1132e-N279XcIE77SVgWI5RK4HGZTKNNQ\"",
-    "mtime": "2026-08-07T17:57:19.990Z",
-    "size": 70446,
-    "path": "../public/coach-media/animations/happy/happy72.webp"
-  },
-  "/coach-media/animations/happy/happy73.webp": {
-    "type": "image/webp",
-    "etag": "\"12dd8-PuAHZqC2ZtYnGQM/yt5HL7w8Z5w\"",
-    "mtime": "2026-08-07T17:57:19.992Z",
-    "size": 77272,
-    "path": "../public/coach-media/animations/happy/happy73.webp"
-  },
-  "/coach-media/animations/happy/happy75.webp": {
-    "type": "image/webp",
-    "etag": "\"1cfd0-9c+pPyscG4ipyzhzbN//E8mdshQ\"",
-    "mtime": "2026-08-07T17:57:19.996Z",
-    "size": 118736,
-    "path": "../public/coach-media/animations/happy/happy75.webp"
-  },
-  "/coach-media/animations/happy/happy74.webp": {
-    "type": "image/webp",
-    "etag": "\"5deae-Nnfy+JPdNa90X/TKIQJKDHXtEDg\"",
-    "mtime": "2026-08-07T17:57:19.992Z",
-    "size": 384686,
-    "path": "../public/coach-media/animations/happy/happy74.webp"
-  },
-  "/coach-media/animations/happy/happy76.webp": {
-    "type": "image/webp",
-    "etag": "\"14a9e-d6rGydXTPMji/MdwYzCalRd2xW0\"",
-    "mtime": "2026-08-07T17:57:19.991Z",
-    "size": 84638,
-    "path": "../public/coach-media/animations/happy/happy76.webp"
-  },
-  "/coach-media/animations/happy/happy60.webp": {
-    "type": "image/webp",
-    "etag": "\"1e7f54-IoOugN/ir+60blKcpy6Kl2RuTBI\"",
-    "mtime": "2026-08-07T17:57:19.986Z",
-    "size": 1998676,
-    "path": "../public/coach-media/animations/happy/happy60.webp"
-  },
-  "/coach-media/animations/happy/happy77.webp": {
-    "type": "image/webp",
-    "etag": "\"1e10a-1aPPim9G6xum8/Hs8Ro6u3VlG6U\"",
-    "mtime": "2026-08-07T17:57:19.991Z",
-    "size": 123146,
-    "path": "../public/coach-media/animations/happy/happy77.webp"
-  },
-  "/coach-media/animations/happy/happy70.webp": {
-    "type": "image/webp",
-    "etag": "\"813fc-MRr6jjBP9Dwv9BEsHOHSRAaT2vg\"",
-    "mtime": "2026-08-07T17:57:19.990Z",
-    "size": 529404,
-    "path": "../public/coach-media/animations/happy/happy70.webp"
-  },
-  "/coach-media/animations/happy/happy78.webp": {
-    "type": "image/webp",
-    "etag": "\"17ba4-3h26xVZZTGib30A7sQhqoYBlgqs\"",
-    "mtime": "2026-08-07T17:57:19.996Z",
-    "size": 97188,
-    "path": "../public/coach-media/animations/happy/happy78.webp"
-  },
-  "/coach-media/animations/happy/happy79.webp": {
-    "type": "image/webp",
-    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
-    "mtime": "2026-08-07T17:57:19.997Z",
-    "size": 57724,
-    "path": "../public/coach-media/animations/happy/happy79.webp"
-  },
-  "/coach-media/animations/happy/happy8.webp": {
-    "type": "image/webp",
-    "etag": "\"9d5e-zP9Tu9ncCFIvZEyvVyuhVBachAE\"",
-    "mtime": "2026-08-07T17:57:19.991Z",
-    "size": 40286,
-    "path": "../public/coach-media/animations/happy/happy8.webp"
-  },
-  "/coach-media/animations/happy/happy80.webp": {
-    "type": "image/webp",
-    "etag": "\"1da90-C0sljbqRem33mzQhLpalQ7JqSpU\"",
-    "mtime": "2026-08-07T17:57:19.996Z",
-    "size": 121488,
-    "path": "../public/coach-media/animations/happy/happy80.webp"
-  },
-  "/coach-media/animations/happy/happy82.webp": {
-    "type": "image/webp",
-    "etag": "\"f1a4-tNEKunf3T9spLovIQWFozZvffw4\"",
-    "mtime": "2026-08-07T17:57:19.999Z",
-    "size": 61860,
-    "path": "../public/coach-media/animations/happy/happy82.webp"
-  },
-  "/coach-media/animations/happy/happy83.webp": {
-    "type": "image/webp",
-    "etag": "\"2fe42-Kmm0KGXV1dEPQbjoM5G8BWcNWBM\"",
-    "mtime": "2026-08-07T17:57:19.997Z",
-    "size": 196162,
-    "path": "../public/coach-media/animations/happy/happy83.webp"
-  },
-  "/coach-media/animations/happy/happy81.webp": {
-    "type": "image/webp",
-    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
-    "mtime": "2026-08-07T17:57:19.997Z",
-    "size": 566688,
-    "path": "../public/coach-media/animations/happy/happy81.webp"
-  },
-  "/coach-media/animations/happy/happy85.webp": {
-    "type": "image/webp",
-    "etag": "\"150ae-QMfLvsJpp/BJuZy4OwOXUD8OYUQ\"",
-    "mtime": "2026-08-07T17:57:19.997Z",
-    "size": 86190,
-    "path": "../public/coach-media/animations/happy/happy85.webp"
-  },
-  "/coach-media/animations/happy/happy84.webp": {
-    "type": "image/webp",
-    "etag": "\"7b984-0wPlyvPIzXRP9eIMHgiBJFl+27A\"",
-    "mtime": "2026-08-07T17:57:19.999Z",
-    "size": 506244,
-    "path": "../public/coach-media/animations/happy/happy84.webp"
-  },
-  "/coach-media/animations/happy/happy86.webp": {
-    "type": "image/webp",
-    "etag": "\"d7f8-QCvUvt2Z0TOPZeSr+n8EKTRxFUo\"",
-    "mtime": "2026-08-07T17:57:19.999Z",
-    "size": 55288,
-    "path": "../public/coach-media/animations/happy/happy86.webp"
-  },
-  "/coach-media/animations/happy/happy87.webp": {
-    "type": "image/webp",
-    "etag": "\"17dec-6w/mkYwGAw5T0lZlhGXtO5BcsZU\"",
-    "mtime": "2026-08-07T17:57:19.999Z",
-    "size": 97772,
-    "path": "../public/coach-media/animations/happy/happy87.webp"
-  },
-  "/coach-media/animations/happy/happy88.webp": {
-    "type": "image/webp",
-    "etag": "\"10722-eVPV4BPr+xXKB/m7b01HTc3BYvY\"",
-    "mtime": "2026-08-07T17:57:20.000Z",
-    "size": 67362,
-    "path": "../public/coach-media/animations/happy/happy88.webp"
-  },
-  "/coach-media/animations/happy/happy89.webp": {
-    "type": "image/webp",
-    "etag": "\"1c7e2-sUSfie0YAo/54wJ6tzJq/DwQ0Uw\"",
-    "mtime": "2026-08-07T17:57:20.000Z",
-    "size": 116706,
-    "path": "../public/coach-media/animations/happy/happy89.webp"
-  },
-  "/coach-media/animations/happy/happy9.webp": {
-    "type": "image/webp",
-    "etag": "\"48688-/orx463Bv1qJxQ1v4poLAvBrNjI\"",
-    "mtime": "2026-08-07T17:57:20.000Z",
-    "size": 296584,
-    "path": "../public/coach-media/animations/happy/happy9.webp"
-  },
-  "/coach-media/animations/happy/happy91.webp": {
-    "type": "image/webp",
-    "etag": "\"162e4-8HqkqL71/r+QJURh8ZbqNFMM6ZE\"",
-    "mtime": "2026-08-07T17:57:20.001Z",
-    "size": 90852,
-    "path": "../public/coach-media/animations/happy/happy91.webp"
-  },
-  "/coach-media/animations/happy/happy90.webp": {
-    "type": "image/webp",
-    "etag": "\"40b96-2KBRO6W19pvILapZ8+Vi3lurBCw\"",
-    "mtime": "2026-08-07T17:57:20.000Z",
-    "size": 265110,
-    "path": "../public/coach-media/animations/happy/happy90.webp"
-  },
-  "/coach-media/animations/happy/happy92.webp": {
-    "type": "image/webp",
-    "etag": "\"1eb3c-dpJ07uxpsVOLdaMyS3SOlqMT6/k\"",
-    "mtime": "2026-08-07T17:57:20.003Z",
-    "size": 125756,
-    "path": "../public/coach-media/animations/happy/happy92.webp"
-  },
-  "/coach-media/animations/surprise/surprise10.webp": {
-    "type": "image/webp",
-    "etag": "\"131a0-flDD1aRXvJm4HKE+7qPrfT2YS20\"",
-    "mtime": "2026-08-07T17:57:20.001Z",
-    "size": 78240,
-    "path": "../public/coach-media/animations/surprise/surprise10.webp"
-  },
-  "/coach-media/animations/surprise/surprise1.webp": {
-    "type": "image/webp",
-    "etag": "\"4a370-9Oi37cBTqcZsmdkv+CmJExyHBlo\"",
-    "mtime": "2026-08-07T17:57:20.003Z",
-    "size": 303984,
-    "path": "../public/coach-media/animations/surprise/surprise1.webp"
-  },
-  "/coach-media/animations/surprise/surprise11.webp": {
-    "type": "image/webp",
-    "etag": "\"226fa-Xm81GJcMlpKVokcSNJtb09zW62k\"",
-    "mtime": "2026-08-07T17:57:19.875Z",
-    "size": 141050,
-    "path": "../public/coach-media/animations/surprise/surprise11.webp"
-  },
-  "/coach-media/animations/surprise/surprise12.webp": {
-    "type": "image/webp",
-    "etag": "\"a118-ZWkYpEVwrTmfFkTwYVBVpG6odjA\"",
-    "mtime": "2026-08-07T17:57:20.001Z",
-    "size": 41240,
-    "path": "../public/coach-media/animations/surprise/surprise12.webp"
-  },
-  "/coach-media/animations/surprise/surprise13.webp": {
-    "type": "image/webp",
-    "etag": "\"289d4-B/06SsPdfqNr35A+kWV5GqsWzHg\"",
-    "mtime": "2026-08-07T17:57:20.004Z",
-    "size": 166356,
-    "path": "../public/coach-media/animations/surprise/surprise13.webp"
-  },
-  "/coach-media/animations/surprise/surprise14.webp": {
-    "type": "image/webp",
-    "etag": "\"3f97e-wtHNBTyAPcvP3sC4pqeu2CzXJMs\"",
-    "mtime": "2026-08-07T17:57:20.001Z",
-    "size": 260478,
-    "path": "../public/coach-media/animations/surprise/surprise14.webp"
-  },
-  "/coach-media/animations/surprise/surprise16.webp": {
-    "type": "image/webp",
-    "etag": "\"10334-Gb5fHOWmtfoadRAb/ahHh2AADW0\"",
-    "mtime": "2026-08-07T17:57:20.003Z",
-    "size": 66356,
-    "path": "../public/coach-media/animations/surprise/surprise16.webp"
-  },
-  "/coach-media/animations/surprise/surprise17.webp": {
-    "type": "image/webp",
-    "etag": "\"1b95e-L11+Pw+wBWHBUC/2neg+jcazG2Y\"",
-    "mtime": "2026-08-07T17:57:20.004Z",
-    "size": 112990,
-    "path": "../public/coach-media/animations/surprise/surprise17.webp"
-  },
-  "/coach-media/animations/surprise/surprise18.webp": {
-    "type": "image/webp",
-    "etag": "\"18598-xHc16X67VNu9v8+Gc1s2b0JpwDg\"",
-    "mtime": "2026-08-07T17:57:20.003Z",
-    "size": 99736,
-    "path": "../public/coach-media/animations/surprise/surprise18.webp"
-  },
-  "/coach-media/animations/surprise/surprise19.webp": {
-    "type": "image/webp",
-    "etag": "\"11b66-taP6NYs2DrSJ1/Fu0gCrYIFdJrI\"",
-    "mtime": "2026-08-07T17:57:20.004Z",
-    "size": 72550,
-    "path": "../public/coach-media/animations/surprise/surprise19.webp"
-  },
-  "/coach-media/animations/surprise/surprise2.webp": {
-    "type": "image/webp",
-    "etag": "\"1b28c-nMtO/w3tSIWPnQA/P/d7OQO8Fos\"",
-    "mtime": "2026-08-07T17:57:20.005Z",
-    "size": 111244,
-    "path": "../public/coach-media/animations/surprise/surprise2.webp"
-  },
-  "/coach-media/animations/surprise/surprise20.webp": {
-    "type": "image/webp",
-    "etag": "\"193ea-58K//9bArX9XDu0po5Lr3OMkZHg\"",
-    "mtime": "2026-08-07T17:57:20.006Z",
-    "size": 103402,
-    "path": "../public/coach-media/animations/surprise/surprise20.webp"
-  },
-  "/coach-media/animations/surprise/surprise21.webp": {
-    "type": "image/webp",
-    "etag": "\"a180-9IgNwh+Zz8BrStL5KFb1UAAyx08\"",
-    "mtime": "2026-08-07T17:57:20.004Z",
-    "size": 41344,
-    "path": "../public/coach-media/animations/surprise/surprise21.webp"
-  },
-  "/coach-media/animations/surprise/surprise15.webp": {
-    "type": "image/webp",
-    "etag": "\"83768-IbKQoFThb02i7K7OLM8NjZwMn+w\"",
-    "mtime": "2026-08-07T17:57:20.005Z",
-    "size": 538472,
-    "path": "../public/coach-media/animations/surprise/surprise15.webp"
-  },
-  "/coach-media/animations/surprise/surprise22.webp": {
-    "type": "image/webp",
-    "etag": "\"14758-fKETCESGU4TOKmR+Tq2Jt5vsZv4\"",
-    "mtime": "2026-08-07T17:57:20.004Z",
-    "size": 83800,
-    "path": "../public/coach-media/animations/surprise/surprise22.webp"
-  },
-  "/coach-media/animations/surprise/surprise23.webp": {
-    "type": "image/webp",
-    "etag": "\"309fc-vmf3IDCZQraeJiH2u5nNYnBmLE0\"",
-    "mtime": "2026-08-07T17:57:20.005Z",
-    "size": 199164,
-    "path": "../public/coach-media/animations/surprise/surprise23.webp"
-  },
-  "/coach-media/animations/surprise/surprise24.webp": {
-    "type": "image/webp",
-    "etag": "\"8ec6-3SAThVbqdRWZ2r2MmBs4qSDgNSA\"",
-    "mtime": "2026-08-07T17:57:20.005Z",
-    "size": 36550,
-    "path": "../public/coach-media/animations/surprise/surprise24.webp"
-  },
-  "/coach-media/animations/surprise/surprise25.webp": {
-    "type": "image/webp",
-    "etag": "\"34a6-dvr2Gjy94G6cfLjV7K9ojhZks7w\"",
-    "mtime": "2026-08-07T17:57:20.007Z",
-    "size": 13478,
-    "path": "../public/coach-media/animations/surprise/surprise25.webp"
-  },
-  "/coach-media/animations/surprise/surprise27.webp": {
-    "type": "image/webp",
-    "etag": "\"2fd12-RMFF8r6epFOKQpfSCriVPGTdgVU\"",
-    "mtime": "2026-08-07T17:57:20.008Z",
-    "size": 195858,
-    "path": "../public/coach-media/animations/surprise/surprise27.webp"
-  },
-  "/coach-media/animations/surprise/surprise26.webp": {
-    "type": "image/webp",
-    "etag": "\"743c6-pt6mVsMYiG3+eBL112jrgey0Gzo\"",
-    "mtime": "2026-08-07T17:57:20.006Z",
-    "size": 476102,
-    "path": "../public/coach-media/animations/surprise/surprise26.webp"
-  },
-  "/coach-media/animations/surprise/surprise28.webp": {
-    "type": "image/webp",
-    "etag": "\"ad24-FgC+hvDgvud9BCFGf28pvxl71oQ\"",
-    "mtime": "2026-08-07T17:57:20.004Z",
-    "size": 44324,
-    "path": "../public/coach-media/animations/surprise/surprise28.webp"
-  },
-  "/coach-media/animations/surprise/surprise29.webp": {
-    "type": "image/webp",
-    "etag": "\"12cd0-q0YDo94p3qYkje+5yt5zOubu2/Q\"",
-    "mtime": "2026-08-07T17:57:20.005Z",
-    "size": 77008,
-    "path": "../public/coach-media/animations/surprise/surprise29.webp"
-  },
-  "/coach-media/animations/surprise/surprise31.webp": {
-    "type": "image/webp",
-    "etag": "\"8b78-fIpPGO3WzV7KeoLiRXPR1uc7I+0\"",
-    "mtime": "2026-08-07T17:57:20.009Z",
-    "size": 35704,
-    "path": "../public/coach-media/animations/surprise/surprise31.webp"
-  },
-  "/coach-media/animations/surprise/surprise32.webp": {
-    "type": "image/webp",
-    "etag": "\"1fc6e-bll0tlhrTsQvI87il4kKbajXbMg\"",
-    "mtime": "2026-08-07T17:57:20.007Z",
-    "size": 130158,
-    "path": "../public/coach-media/animations/surprise/surprise32.webp"
-  },
-  "/coach-media/animations/surprise/surprise34.webp": {
-    "type": "image/webp",
-    "etag": "\"39c0c-gOa+85OS+P0yapBXCLgb6G4e3KY\"",
-    "mtime": "2026-08-07T17:57:20.007Z",
-    "size": 236556,
-    "path": "../public/coach-media/animations/surprise/surprise34.webp"
-  },
-  "/coach-media/animations/surprise/surprise35.webp": {
-    "type": "image/webp",
-    "etag": "\"2fdf0-P29h6puCfyWcpyj5Hiuay3K7+XI\"",
-    "mtime": "2026-08-07T17:57:20.008Z",
-    "size": 196080,
-    "path": "../public/coach-media/animations/surprise/surprise35.webp"
-  },
-  "/coach-media/animations/surprise/surprise36.webp": {
-    "type": "image/webp",
-    "etag": "\"65d6a-XLUQAUVvNKrY0Ak4xmcIhKdi+kc\"",
-    "mtime": "2026-08-07T17:57:20.008Z",
-    "size": 417130,
-    "path": "../public/coach-media/animations/surprise/surprise36.webp"
-  },
-  "/coach-media/animations/surprise/surprise37.webp": {
-    "type": "image/webp",
-    "etag": "\"1c006-O6avPzSEEE8867z/qx4SNy/2Dbs\"",
-    "mtime": "2026-08-07T17:57:20.014Z",
-    "size": 114694,
-    "path": "../public/coach-media/animations/surprise/surprise37.webp"
-  },
-  "/coach-media/animations/surprise/surprise38.webp": {
-    "type": "image/webp",
-    "etag": "\"13470-E9RJjOFPzc8oN6aIexSBkTIvvno\"",
-    "mtime": "2026-08-07T17:57:20.016Z",
-    "size": 78960,
-    "path": "../public/coach-media/animations/surprise/surprise38.webp"
-  },
-  "/coach-media/animations/surprise/surprise30.webp": {
-    "type": "image/webp",
-    "etag": "\"a5fd0-Hnpb/dNn7ssnoWT9WjuIq+4t5Qo\"",
-    "mtime": "2026-08-07T17:57:20.007Z",
-    "size": 679888,
-    "path": "../public/coach-media/animations/surprise/surprise30.webp"
-  },
-  "/coach-media/animations/surprise/surprise3.webp": {
-    "type": "image/webp",
-    "etag": "\"c1a0c-usHwa9n1ie+2Cm+CLsVeWK9PJMQ\"",
-    "mtime": "2026-08-07T17:57:20.007Z",
-    "size": 793100,
-    "path": "../public/coach-media/animations/surprise/surprise3.webp"
-  },
-  "/coach-media/animations/surprise/surprise39.webp": {
-    "type": "image/webp",
-    "etag": "\"3f126-BT2+LxctzUWG3/ThOwuDtTgAArY\"",
-    "mtime": "2026-08-07T17:57:20.018Z",
-    "size": 258342,
-    "path": "../public/coach-media/animations/surprise/surprise39.webp"
-  },
-  "/coach-media/animations/surprise/surprise40.webp": {
-    "type": "image/webp",
-    "etag": "\"39564-nIAqPe45sz0KpkAx2CKOstSaCTA\"",
-    "mtime": "2026-08-07T17:57:20.009Z",
-    "size": 234852,
-    "path": "../public/coach-media/animations/surprise/surprise40.webp"
-  },
-  "/coach-media/animations/surprise/surprise4.webp": {
-    "type": "image/webp",
-    "etag": "\"435ca-axYlJUxq0dxVUcdPGXfx7jIjOqI\"",
-    "mtime": "2026-08-07T17:57:20.009Z",
-    "size": 275914,
-    "path": "../public/coach-media/animations/surprise/surprise4.webp"
-  },
-  "/coach-media/animations/surprise/surprise41.webp": {
-    "type": "image/webp",
-    "etag": "\"a8cc-eJpn1iM/G93mG/y3J7MYZxb5oZk\"",
-    "mtime": "2026-08-07T17:57:20.015Z",
-    "size": 43212,
-    "path": "../public/coach-media/animations/surprise/surprise41.webp"
-  },
-  "/coach-media/animations/surprise/surprise42.webp": {
-    "type": "image/webp",
-    "etag": "\"646bc-7+aKS5sl1K5hY8UDNYAFM4lfo6Y\"",
-    "mtime": "2026-08-07T17:57:20.013Z",
-    "size": 411324,
-    "path": "../public/coach-media/animations/surprise/surprise42.webp"
-  },
-  "/coach-media/animations/surprise/surprise43.webp": {
-    "type": "image/webp",
-    "etag": "\"4b24-EbrAgTKhgJEIluaU9wK/fZsqFQI\"",
-    "mtime": "2026-08-07T17:57:20.016Z",
-    "size": 19236,
-    "path": "../public/coach-media/animations/surprise/surprise43.webp"
-  },
-  "/coach-media/animations/surprise/surprise46.webp": {
-    "type": "image/webp",
-    "etag": "\"b624-UVBhSbU4BcnZsHBEFLk/NJkigMs\"",
-    "mtime": "2026-08-07T17:57:20.016Z",
-    "size": 46628,
-    "path": "../public/coach-media/animations/surprise/surprise46.webp"
-  },
-  "/coach-media/animations/surprise/surprise45.webp": {
-    "type": "image/webp",
-    "etag": "\"1a680-xKF6ecJOJz07Bq3nMYUvl7ZSmJo\"",
-    "mtime": "2026-08-07T17:57:20.017Z",
-    "size": 108160,
-    "path": "../public/coach-media/animations/surprise/surprise45.webp"
-  },
-  "/coach-media/animations/surprise/surprise47.webp": {
-    "type": "image/webp",
-    "etag": "\"ed28-q4uXmQ440B/uZ44347cvninGGos\"",
-    "mtime": "2026-08-07T17:57:20.017Z",
-    "size": 60712,
-    "path": "../public/coach-media/animations/surprise/surprise47.webp"
-  },
-  "/coach-media/animations/surprise/surprise48.webp": {
-    "type": "image/webp",
-    "etag": "\"132e0-ARE5bC0A3JVvXvF646DPkIObvBU\"",
-    "mtime": "2026-08-07T17:57:20.017Z",
-    "size": 78560,
-    "path": "../public/coach-media/animations/surprise/surprise48.webp"
-  },
-  "/coach-media/animations/surprise/surprise49.webp": {
-    "type": "image/webp",
-    "etag": "\"25b6c-wCdzxaXfkdqyDcw6a8xy07JXmzE\"",
-    "mtime": "2026-08-07T17:57:20.018Z",
-    "size": 154476,
-    "path": "../public/coach-media/animations/surprise/surprise49.webp"
-  },
-  "/coach-media/animations/surprise/surprise5.webp": {
-    "type": "image/webp",
-    "etag": "\"27cfa-OX0fnlOewddMbbATr6i9i2ynE3Y\"",
-    "mtime": "2026-08-07T17:57:20.019Z",
-    "size": 163066,
-    "path": "../public/coach-media/animations/surprise/surprise5.webp"
-  },
-  "/coach-media/animations/surprise/surprise44.webp": {
-    "type": "image/webp",
-    "etag": "\"a77fc-figlb0a9uvdibEtUPy5WQ390cJ0\"",
-    "mtime": "2026-08-07T17:57:20.018Z",
-    "size": 686076,
-    "path": "../public/coach-media/animations/surprise/surprise44.webp"
-  },
-  "/coach-media/animations/surprise/surprise50.webp": {
-    "type": "image/webp",
-    "etag": "\"54ee6-utB6xrbIiRW/BR2zFsCbLOBuYQ0\"",
-    "mtime": "2026-08-07T17:57:20.019Z",
-    "size": 347878,
-    "path": "../public/coach-media/animations/surprise/surprise50.webp"
-  },
-  "/coach-media/animations/surprise/surprise33.webp": {
-    "type": "image/webp",
-    "etag": "\"1ff378-3ceZyeJGfgZwkrgPrzBv1AbDx9o\"",
-    "mtime": "2026-08-07T17:57:20.011Z",
-    "size": 2093944,
-    "path": "../public/coach-media/animations/surprise/surprise33.webp"
-  },
-  "/coach-media/animations/surprise/surprise51.webp": {
-    "type": "image/webp",
-    "etag": "\"2227a-5yeomBh1J53C2OweVlrUJRsy7d0\"",
-    "mtime": "2026-08-07T17:57:20.017Z",
-    "size": 139898,
-    "path": "../public/coach-media/animations/surprise/surprise51.webp"
-  },
-  "/coach-media/animations/surprise/surprise52.webp": {
-    "type": "image/webp",
-    "etag": "\"142aa-ez2zkO6VqB8WIkeukvxz7D7f1lU\"",
-    "mtime": "2026-08-07T17:57:20.018Z",
-    "size": 82602,
-    "path": "../public/coach-media/animations/surprise/surprise52.webp"
-  },
-  "/coach-media/animations/surprise/surprise53.webp": {
-    "type": "image/webp",
-    "etag": "\"118e2-l9zmLQtW2P6gxSkdSTudjLq2c3Q\"",
-    "mtime": "2026-08-07T17:57:20.020Z",
-    "size": 71906,
-    "path": "../public/coach-media/animations/surprise/surprise53.webp"
-  },
-  "/coach-media/animations/surprise/surprise54.webp": {
-    "type": "image/webp",
-    "etag": "\"1e178-jaNfsOInt+QvPbLkhzwWaJqG/Bs\"",
-    "mtime": "2026-08-07T17:57:20.019Z",
-    "size": 123256,
-    "path": "../public/coach-media/animations/surprise/surprise54.webp"
-  },
-  "/coach-media/animations/surprise/surprise55.webp": {
-    "type": "image/webp",
-    "etag": "\"5a896-O68fUxVUguZ0BzBxfGlXQFyP0DA\"",
-    "mtime": "2026-08-07T17:57:20.021Z",
-    "size": 370838,
-    "path": "../public/coach-media/animations/surprise/surprise55.webp"
-  },
-  "/coach-media/animations/surprise/surprise56.webp": {
-    "type": "image/webp",
-    "etag": "\"1b960-DZp5H8cTkUG7OqYKTKt0Wb41j6Y\"",
-    "mtime": "2026-08-07T17:57:20.019Z",
-    "size": 112992,
-    "path": "../public/coach-media/animations/surprise/surprise56.webp"
-  },
-  "/coach-media/animations/surprise/surprise57.webp": {
-    "type": "image/webp",
-    "etag": "\"44ab8-mSBT2ojhhuQLKvtVbnLyoP47hJY\"",
-    "mtime": "2026-08-07T17:57:20.020Z",
-    "size": 281272,
-    "path": "../public/coach-media/animations/surprise/surprise57.webp"
-  },
-  "/coach-media/animations/surprise/surprise58.webp": {
-    "type": "image/webp",
-    "etag": "\"21a8a-Yf9qQLhbyXuD9/JZ+89b4mvgAKw\"",
-    "mtime": "2026-08-07T17:57:20.019Z",
-    "size": 137866,
-    "path": "../public/coach-media/animations/surprise/surprise58.webp"
-  },
-  "/coach-media/animations/surprise/surprise59.webp": {
-    "type": "image/webp",
-    "etag": "\"ad24-FgC+hvDgvud9BCFGf28pvxl71oQ\"",
-    "mtime": "2026-08-07T17:57:20.020Z",
-    "size": 44324,
-    "path": "../public/coach-media/animations/surprise/surprise59.webp"
-  },
-  "/coach-media/animations/surprise/surprise6.webp": {
-    "type": "image/webp",
-    "etag": "\"efbe-4a9rtfMIdF2+TFeY3gBQcGq2OOY\"",
-    "mtime": "2026-08-07T17:57:20.020Z",
-    "size": 61374,
-    "path": "../public/coach-media/animations/surprise/surprise6.webp"
-  },
-  "/coach-media/animations/surprise/surprise61.webp": {
-    "type": "image/webp",
-    "etag": "\"12cd0-q0YDo94p3qYkje+5yt5zOubu2/Q\"",
-    "mtime": "2026-08-07T17:57:20.021Z",
-    "size": 77008,
-    "path": "../public/coach-media/animations/surprise/surprise61.webp"
-  },
-  "/coach-media/animations/surprise/surprise62.webp": {
-    "type": "image/webp",
-    "etag": "\"1c6a0-mXpnKRv+Hz25jP09BjR4foiD6qw\"",
-    "mtime": "2026-08-07T17:57:20.021Z",
-    "size": 116384,
-    "path": "../public/coach-media/animations/surprise/surprise62.webp"
-  },
-  "/coach-media/animations/surprise/surprise60.webp": {
-    "type": "image/webp",
-    "etag": "\"4b7a6-epNKh/4axQkdUr59kQLtvLuUWxk\"",
-    "mtime": "2026-08-07T17:57:20.021Z",
-    "size": 309158,
-    "path": "../public/coach-media/animations/surprise/surprise60.webp"
-  },
-  "/coach-media/animations/surprise/surprise63.webp": {
-    "type": "image/webp",
-    "etag": "\"1eeba-iqr/NnLNgmJCGHzVJ166UGdRB4Q\"",
-    "mtime": "2026-08-07T17:57:20.020Z",
-    "size": 126650,
-    "path": "../public/coach-media/animations/surprise/surprise63.webp"
-  },
-  "/coach-media/animations/surprise/surprise7.webp": {
-    "type": "image/webp",
-    "etag": "\"28cf0-WZKrfZgxmWudkDiNqJ2t+yttmY4\"",
-    "mtime": "2026-08-07T17:57:20.022Z",
-    "size": 167152,
-    "path": "../public/coach-media/animations/surprise/surprise7.webp"
-  },
-  "/coach-media/animations/surprise/surprise9.webp": {
-    "type": "image/webp",
-    "etag": "\"3567c-XTH6klwiC89h9A35OVWjuAEqJ5A\"",
-    "mtime": "2026-08-07T17:57:20.021Z",
-    "size": 218748,
-    "path": "../public/coach-media/animations/surprise/surprise9.webp"
+    "etag": "\"5cece-RjBisoBNjPRhvK+ndq3WET8sFcg\"",
+    "mtime": "2026-08-07T19:57:51.347Z",
+    "size": 380622,
+    "path": "../public/coach-media/animations/fail/fail4.webp"
   },
   "/coach-media/emojis/danger/danger1.png": {
     "type": "image/png",
     "etag": "\"3036-eXYZ+J7eqF26NQJZHhXFXrNgGww\"",
-    "mtime": "2026-08-07T17:57:19.873Z",
+    "mtime": "2026-08-07T19:57:51.254Z",
     "size": 12342,
     "path": "../public/coach-media/emojis/danger/danger1.png"
   },
-  "/coach-media/emojis/muet/muet1.png": {
-    "type": "image/png",
-    "etag": "\"51a6-vln2s/UdhcTRTaO8VHDa3lfz0h8\"",
-    "mtime": "2026-08-07T17:57:19.875Z",
-    "size": 20902,
-    "path": "../public/coach-media/emojis/muet/muet1.png"
-  },
-  "/coach-media/emojis/muet/muet2.png": {
-    "type": "image/png",
-    "etag": "\"4fd6-7oBC0gGyTBoUjDE6sag9tGTRXEk\"",
-    "mtime": "2026-08-07T17:57:20.022Z",
-    "size": 20438,
-    "path": "../public/coach-media/emojis/muet/muet2.png"
-  },
-  "/coach-media/emojis/muet/muet3.png": {
-    "type": "image/png",
-    "etag": "\"5287-ywn34jaL1+x0Qfo7jSf48qjMhfs\"",
-    "mtime": "2026-08-07T17:57:20.022Z",
-    "size": 21127,
-    "path": "../public/coach-media/emojis/muet/muet3.png"
-  },
-  "/coach-media/emojis/muet/muet4.png": {
-    "type": "image/png",
-    "etag": "\"56a5-+3X/CcPHmEJ0+beAZBYg2M7ZSgA\"",
-    "mtime": "2026-08-07T17:57:20.022Z",
-    "size": 22181,
-    "path": "../public/coach-media/emojis/muet/muet4.png"
+  "/coach-media/animations/fail/fail8.webp": {
+    "type": "image/webp",
+    "etag": "\"39a32-GZjK64v2UufujF0nhcGEc6ElNfk\"",
+    "mtime": "2026-08-07T19:57:51.352Z",
+    "size": 236082,
+    "path": "../public/coach-media/animations/fail/fail8.webp"
   },
   "/coach-media/emojis/heureux/heureux1.png": {
     "type": "image/png",
     "etag": "\"5091-+uAnUfC4q2tlld3BzD89z3lKd4w\"",
-    "mtime": "2026-08-07T17:57:19.876Z",
+    "mtime": "2026-08-07T19:57:51.253Z",
     "size": 20625,
     "path": "../public/coach-media/emojis/heureux/heureux1.png"
+  },
+  "/coach-media/animations/fail/fail7.webp": {
+    "type": "image/webp",
+    "etag": "\"63788-deMgnTG8ziw8Sq9HQAAG5lpmaYQ\"",
+    "mtime": "2026-08-07T19:57:51.352Z",
+    "size": 407432,
+    "path": "../public/coach-media/animations/fail/fail7.webp"
   },
   "/coach-media/emojis/heureux/heureux10.png": {
     "type": "image/png",
     "etag": "\"5bbe-8dpJHwcxgGm/L+GGIgukoN99+qw\"",
-    "mtime": "2026-08-07T17:57:20.022Z",
+    "mtime": "2026-08-07T19:57:51.353Z",
     "size": 23486,
     "path": "../public/coach-media/emojis/heureux/heureux10.png"
   },
   "/coach-media/emojis/heureux/heureux11.png": {
     "type": "image/png",
     "etag": "\"60b8-LMMAFjmB/Rwe+6qwtxB0KRRjFVE\"",
-    "mtime": "2026-08-07T17:57:20.022Z",
+    "mtime": "2026-08-07T19:57:51.353Z",
     "size": 24760,
     "path": "../public/coach-media/emojis/heureux/heureux11.png"
+  },
+  "/coach-media/animations/fail/fail10.webp": {
+    "type": "image/webp",
+    "etag": "\"ec4a8-LxdVywk4WTKCcK/Mz98lMc+PlrY\"",
+    "mtime": "2026-08-07T19:57:51.346Z",
+    "size": 967848,
+    "path": "../public/coach-media/animations/fail/fail10.webp"
   },
   "/coach-media/emojis/heureux/heureux12.png": {
     "type": "image/png",
     "etag": "\"79c6-gOXTGgNP0DRA6mU73TQkCLA2IZc\"",
-    "mtime": "2026-08-07T17:57:20.022Z",
+    "mtime": "2026-08-07T19:57:51.353Z",
     "size": 31174,
     "path": "../public/coach-media/emojis/heureux/heureux12.png"
   },
   "/coach-media/emojis/heureux/heureux2.png": {
     "type": "image/png",
     "etag": "\"54c1-7stf5vr0fIsbVKX4y+9cXcdF6Mo\"",
-    "mtime": "2026-08-07T17:57:20.022Z",
+    "mtime": "2026-08-07T19:57:51.353Z",
     "size": 21697,
     "path": "../public/coach-media/emojis/heureux/heureux2.png"
   },
   "/coach-media/emojis/heureux/heureux3.png": {
     "type": "image/png",
     "etag": "\"531f-VfeI7fmVy/9I1cJdA+JneCazNHU\"",
-    "mtime": "2026-08-07T17:57:20.022Z",
+    "mtime": "2026-08-07T19:57:51.353Z",
     "size": 21279,
     "path": "../public/coach-media/emojis/heureux/heureux3.png"
   },
   "/coach-media/emojis/heureux/heureux4.png": {
     "type": "image/png",
     "etag": "\"5885-WkglwLUYH5ALdE1dXhy9hL4kIX4\"",
-    "mtime": "2026-08-07T17:57:20.023Z",
+    "mtime": "2026-08-07T19:57:51.354Z",
     "size": 22661,
     "path": "../public/coach-media/emojis/heureux/heureux4.png"
+  },
+  "/coach-media/animations/fail/fail9.webp": {
+    "type": "image/webp",
+    "etag": "\"f5f18-OaHXpPB3qd/rQVrqz8lBFShsxjI\"",
+    "mtime": "2026-08-07T19:57:51.354Z",
+    "size": 1007384,
+    "path": "../public/coach-media/animations/fail/fail9.webp"
+  },
+  "/coach-media/animations/bravo/bravo34.webp": {
+    "type": "image/webp",
+    "etag": "\"26ccac-0lLmGbQH56H1iPHEYHxgMHzvGqg\"",
+    "mtime": "2026-08-07T19:57:51.346Z",
+    "size": 2542764,
+    "path": "../public/coach-media/animations/bravo/bravo34.webp"
   },
   "/coach-media/emojis/heureux/heureux5.png": {
     "type": "image/png",
     "etag": "\"5a47-dAmqVWfHl7YFERUDnBuBJDfdxvs\"",
-    "mtime": "2026-08-07T17:57:20.023Z",
+    "mtime": "2026-08-07T19:57:51.354Z",
     "size": 23111,
     "path": "../public/coach-media/emojis/heureux/heureux5.png"
   },
   "/coach-media/emojis/heureux/heureux6.png": {
     "type": "image/png",
     "etag": "\"536f-MLOUAyVp0bZpHOQ61BWW10gqYAk\"",
-    "mtime": "2026-08-07T17:57:20.022Z",
+    "mtime": "2026-08-07T19:57:51.354Z",
     "size": 21359,
     "path": "../public/coach-media/emojis/heureux/heureux6.png"
   },
   "/coach-media/emojis/heureux/heureux7.png": {
     "type": "image/png",
     "etag": "\"4c1e-5J3Hb2P7b9Dhw36q+lPFACHsBzo\"",
-    "mtime": "2026-08-07T17:57:20.023Z",
+    "mtime": "2026-08-07T19:57:51.356Z",
     "size": 19486,
     "path": "../public/coach-media/emojis/heureux/heureux7.png"
   },
   "/coach-media/emojis/heureux/heureux8.png": {
     "type": "image/png",
     "etag": "\"4c3d-xFJiCChiW5P5PT3dzl6b9pdUZCU\"",
-    "mtime": "2026-08-07T17:57:20.023Z",
+    "mtime": "2026-08-07T19:57:51.358Z",
     "size": 19517,
     "path": "../public/coach-media/emojis/heureux/heureux8.png"
   },
   "/coach-media/emojis/heureux/heureux9.png": {
     "type": "image/png",
     "etag": "\"53d1-nvrpEmDOGFDrOhR0CwIqhjydUqw\"",
-    "mtime": "2026-08-07T17:57:20.023Z",
+    "mtime": "2026-08-07T19:57:51.356Z",
     "size": 21457,
     "path": "../public/coach-media/emojis/heureux/heureux9.png"
+  },
+  "/coach-media/animations/fail/fail3.webp": {
+    "type": "image/webp",
+    "etag": "\"19d1a6-49q6JpI6yKtRh2mygNyjyUsItIM\"",
+    "mtime": "2026-08-07T19:57:51.352Z",
+    "size": 1692070,
+    "path": "../public/coach-media/animations/fail/fail3.webp"
+  },
+  "/coach-media/animations/surprise/surprise1.webp": {
+    "type": "image/webp",
+    "etag": "\"4a370-9Oi37cBTqcZsmdkv+CmJExyHBlo\"",
+    "mtime": "2026-08-07T19:57:51.360Z",
+    "size": 303984,
+    "path": "../public/coach-media/animations/surprise/surprise1.webp"
+  },
+  "/coach-media/animations/surprise/surprise10.webp": {
+    "type": "image/webp",
+    "etag": "\"131a0-flDD1aRXvJm4HKE+7qPrfT2YS20\"",
+    "mtime": "2026-08-07T19:57:51.360Z",
+    "size": 78240,
+    "path": "../public/coach-media/animations/surprise/surprise10.webp"
+  },
+  "/coach-media/animations/surprise/surprise11.webp": {
+    "type": "image/webp",
+    "etag": "\"226fa-Xm81GJcMlpKVokcSNJtb09zW62k\"",
+    "mtime": "2026-08-07T19:57:51.360Z",
+    "size": 141050,
+    "path": "../public/coach-media/animations/surprise/surprise11.webp"
+  },
+  "/coach-media/animations/surprise/surprise12.webp": {
+    "type": "image/webp",
+    "etag": "\"a118-ZWkYpEVwrTmfFkTwYVBVpG6odjA\"",
+    "mtime": "2026-08-07T19:57:51.361Z",
+    "size": 41240,
+    "path": "../public/coach-media/animations/surprise/surprise12.webp"
+  },
+  "/coach-media/animations/surprise/surprise13.webp": {
+    "type": "image/webp",
+    "etag": "\"289d4-B/06SsPdfqNr35A+kWV5GqsWzHg\"",
+    "mtime": "2026-08-07T19:57:51.255Z",
+    "size": 166356,
+    "path": "../public/coach-media/animations/surprise/surprise13.webp"
+  },
+  "/coach-media/animations/surprise/surprise14.webp": {
+    "type": "image/webp",
+    "etag": "\"3f97e-wtHNBTyAPcvP3sC4pqeu2CzXJMs\"",
+    "mtime": "2026-08-07T19:57:51.360Z",
+    "size": 260478,
+    "path": "../public/coach-media/animations/surprise/surprise14.webp"
+  },
+  "/coach-media/animations/surprise/surprise16.webp": {
+    "type": "image/webp",
+    "etag": "\"10334-Gb5fHOWmtfoadRAb/ahHh2AADW0\"",
+    "mtime": "2026-08-07T19:57:51.361Z",
+    "size": 66356,
+    "path": "../public/coach-media/animations/surprise/surprise16.webp"
+  },
+  "/coach-media/animations/surprise/surprise17.webp": {
+    "type": "image/webp",
+    "etag": "\"1b95e-L11+Pw+wBWHBUC/2neg+jcazG2Y\"",
+    "mtime": "2026-08-07T19:57:51.361Z",
+    "size": 112990,
+    "path": "../public/coach-media/animations/surprise/surprise17.webp"
+  },
+  "/coach-media/animations/surprise/surprise18.webp": {
+    "type": "image/webp",
+    "etag": "\"18598-xHc16X67VNu9v8+Gc1s2b0JpwDg\"",
+    "mtime": "2026-08-07T19:57:51.361Z",
+    "size": 99736,
+    "path": "../public/coach-media/animations/surprise/surprise18.webp"
+  },
+  "/coach-media/animations/surprise/surprise19.webp": {
+    "type": "image/webp",
+    "etag": "\"11b66-taP6NYs2DrSJ1/Fu0gCrYIFdJrI\"",
+    "mtime": "2026-08-07T19:57:51.362Z",
+    "size": 72550,
+    "path": "../public/coach-media/animations/surprise/surprise19.webp"
+  },
+  "/coach-media/animations/surprise/surprise2.webp": {
+    "type": "image/webp",
+    "etag": "\"1b28c-nMtO/w3tSIWPnQA/P/d7OQO8Fos\"",
+    "mtime": "2026-08-07T19:57:51.363Z",
+    "size": 111244,
+    "path": "../public/coach-media/animations/surprise/surprise2.webp"
+  },
+  "/coach-media/animations/surprise/surprise20.webp": {
+    "type": "image/webp",
+    "etag": "\"193ea-58K//9bArX9XDu0po5Lr3OMkZHg\"",
+    "mtime": "2026-08-07T19:57:51.362Z",
+    "size": 103402,
+    "path": "../public/coach-media/animations/surprise/surprise20.webp"
+  },
+  "/coach-media/animations/surprise/surprise21.webp": {
+    "type": "image/webp",
+    "etag": "\"a180-9IgNwh+Zz8BrStL5KFb1UAAyx08\"",
+    "mtime": "2026-08-07T19:57:51.361Z",
+    "size": 41344,
+    "path": "../public/coach-media/animations/surprise/surprise21.webp"
+  },
+  "/coach-media/animations/surprise/surprise22.webp": {
+    "type": "image/webp",
+    "etag": "\"14758-fKETCESGU4TOKmR+Tq2Jt5vsZv4\"",
+    "mtime": "2026-08-07T19:57:51.362Z",
+    "size": 83800,
+    "path": "../public/coach-media/animations/surprise/surprise22.webp"
+  },
+  "/coach-media/animations/surprise/surprise15.webp": {
+    "type": "image/webp",
+    "etag": "\"83768-IbKQoFThb02i7K7OLM8NjZwMn+w\"",
+    "mtime": "2026-08-07T19:57:51.361Z",
+    "size": 538472,
+    "path": "../public/coach-media/animations/surprise/surprise15.webp"
+  },
+  "/coach-media/animations/surprise/surprise23.webp": {
+    "type": "image/webp",
+    "etag": "\"309fc-vmf3IDCZQraeJiH2u5nNYnBmLE0\"",
+    "mtime": "2026-08-07T19:57:51.362Z",
+    "size": 199164,
+    "path": "../public/coach-media/animations/surprise/surprise23.webp"
+  },
+  "/coach-media/animations/surprise/surprise24.webp": {
+    "type": "image/webp",
+    "etag": "\"8ec6-3SAThVbqdRWZ2r2MmBs4qSDgNSA\"",
+    "mtime": "2026-08-07T19:57:51.363Z",
+    "size": 36550,
+    "path": "../public/coach-media/animations/surprise/surprise24.webp"
+  },
+  "/coach-media/animations/surprise/surprise25.webp": {
+    "type": "image/webp",
+    "etag": "\"34a6-dvr2Gjy94G6cfLjV7K9ojhZks7w\"",
+    "mtime": "2026-08-07T19:57:51.362Z",
+    "size": 13478,
+    "path": "../public/coach-media/animations/surprise/surprise25.webp"
+  },
+  "/coach-media/animations/surprise/surprise26.webp": {
+    "type": "image/webp",
+    "etag": "\"743c6-pt6mVsMYiG3+eBL112jrgey0Gzo\"",
+    "mtime": "2026-08-07T19:57:51.363Z",
+    "size": 476102,
+    "path": "../public/coach-media/animations/surprise/surprise26.webp"
+  },
+  "/coach-media/animations/surprise/surprise28.webp": {
+    "type": "image/webp",
+    "etag": "\"ad24-FgC+hvDgvud9BCFGf28pvxl71oQ\"",
+    "mtime": "2026-08-07T19:57:51.362Z",
+    "size": 44324,
+    "path": "../public/coach-media/animations/surprise/surprise28.webp"
+  },
+  "/coach-media/animations/surprise/surprise27.webp": {
+    "type": "image/webp",
+    "etag": "\"2fd12-RMFF8r6epFOKQpfSCriVPGTdgVU\"",
+    "mtime": "2026-08-07T19:57:51.363Z",
+    "size": 195858,
+    "path": "../public/coach-media/animations/surprise/surprise27.webp"
+  },
+  "/coach-media/animations/surprise/surprise29.webp": {
+    "type": "image/webp",
+    "etag": "\"12cd0-q0YDo94p3qYkje+5yt5zOubu2/Q\"",
+    "mtime": "2026-08-07T19:57:51.363Z",
+    "size": 77008,
+    "path": "../public/coach-media/animations/surprise/surprise29.webp"
+  },
+  "/coach-media/animations/surprise/surprise31.webp": {
+    "type": "image/webp",
+    "etag": "\"8b78-fIpPGO3WzV7KeoLiRXPR1uc7I+0\"",
+    "mtime": "2026-08-07T19:57:51.363Z",
+    "size": 35704,
+    "path": "../public/coach-media/animations/surprise/surprise31.webp"
+  },
+  "/coach-media/animations/surprise/surprise32.webp": {
+    "type": "image/webp",
+    "etag": "\"1fc6e-bll0tlhrTsQvI87il4kKbajXbMg\"",
+    "mtime": "2026-08-07T19:57:51.366Z",
+    "size": 130158,
+    "path": "../public/coach-media/animations/surprise/surprise32.webp"
+  },
+  "/coach-media/animations/surprise/surprise34.webp": {
+    "type": "image/webp",
+    "etag": "\"39c0c-gOa+85OS+P0yapBXCLgb6G4e3KY\"",
+    "mtime": "2026-08-07T19:57:51.365Z",
+    "size": 236556,
+    "path": "../public/coach-media/animations/surprise/surprise34.webp"
+  },
+  "/coach-media/animations/surprise/surprise35.webp": {
+    "type": "image/webp",
+    "etag": "\"2fdf0-P29h6puCfyWcpyj5Hiuay3K7+XI\"",
+    "mtime": "2026-08-07T19:57:51.367Z",
+    "size": 196080,
+    "path": "../public/coach-media/animations/surprise/surprise35.webp"
+  },
+  "/coach-media/animations/surprise/surprise30.webp": {
+    "type": "image/webp",
+    "etag": "\"a5fd0-Hnpb/dNn7ssnoWT9WjuIq+4t5Qo\"",
+    "mtime": "2026-08-07T19:57:51.365Z",
+    "size": 679888,
+    "path": "../public/coach-media/animations/surprise/surprise30.webp"
+  },
+  "/coach-media/animations/surprise/surprise3.webp": {
+    "type": "image/webp",
+    "etag": "\"c1a0c-usHwa9n1ie+2Cm+CLsVeWK9PJMQ\"",
+    "mtime": "2026-08-07T19:57:51.364Z",
+    "size": 793100,
+    "path": "../public/coach-media/animations/surprise/surprise3.webp"
+  },
+  "/coach-media/animations/surprise/surprise36.webp": {
+    "type": "image/webp",
+    "etag": "\"65d6a-XLUQAUVvNKrY0Ak4xmcIhKdi+kc\"",
+    "mtime": "2026-08-07T19:57:51.365Z",
+    "size": 417130,
+    "path": "../public/coach-media/animations/surprise/surprise36.webp"
+  },
+  "/coach-media/animations/surprise/surprise37.webp": {
+    "type": "image/webp",
+    "etag": "\"1c006-O6avPzSEEE8867z/qx4SNy/2Dbs\"",
+    "mtime": "2026-08-07T19:57:51.364Z",
+    "size": 114694,
+    "path": "../public/coach-media/animations/surprise/surprise37.webp"
+  },
+  "/coach-media/animations/surprise/surprise38.webp": {
+    "type": "image/webp",
+    "etag": "\"13470-E9RJjOFPzc8oN6aIexSBkTIvvno\"",
+    "mtime": "2026-08-07T19:57:51.365Z",
+    "size": 78960,
+    "path": "../public/coach-media/animations/surprise/surprise38.webp"
+  },
+  "/coach-media/animations/surprise/surprise39.webp": {
+    "type": "image/webp",
+    "etag": "\"3f126-BT2+LxctzUWG3/ThOwuDtTgAArY\"",
+    "mtime": "2026-08-07T19:57:51.367Z",
+    "size": 258342,
+    "path": "../public/coach-media/animations/surprise/surprise39.webp"
+  },
+  "/coach-media/animations/surprise/surprise4.webp": {
+    "type": "image/webp",
+    "etag": "\"435ca-axYlJUxq0dxVUcdPGXfx7jIjOqI\"",
+    "mtime": "2026-08-07T19:57:51.371Z",
+    "size": 275914,
+    "path": "../public/coach-media/animations/surprise/surprise4.webp"
+  },
+  "/coach-media/animations/surprise/surprise40.webp": {
+    "type": "image/webp",
+    "etag": "\"39564-nIAqPe45sz0KpkAx2CKOstSaCTA\"",
+    "mtime": "2026-08-07T19:57:51.367Z",
+    "size": 234852,
+    "path": "../public/coach-media/animations/surprise/surprise40.webp"
+  },
+  "/coach-media/animations/surprise/surprise41.webp": {
+    "type": "image/webp",
+    "etag": "\"a8cc-eJpn1iM/G93mG/y3J7MYZxb5oZk\"",
+    "mtime": "2026-08-07T19:57:51.369Z",
+    "size": 43212,
+    "path": "../public/coach-media/animations/surprise/surprise41.webp"
+  },
+  "/coach-media/animations/surprise/surprise42.webp": {
+    "type": "image/webp",
+    "etag": "\"646bc-7+aKS5sl1K5hY8UDNYAFM4lfo6Y\"",
+    "mtime": "2026-08-07T19:57:51.370Z",
+    "size": 411324,
+    "path": "../public/coach-media/animations/surprise/surprise42.webp"
+  },
+  "/coach-media/animations/surprise/surprise43.webp": {
+    "type": "image/webp",
+    "etag": "\"4b24-EbrAgTKhgJEIluaU9wK/fZsqFQI\"",
+    "mtime": "2026-08-07T19:57:51.369Z",
+    "size": 19236,
+    "path": "../public/coach-media/animations/surprise/surprise43.webp"
+  },
+  "/coach-media/animations/surprise/surprise45.webp": {
+    "type": "image/webp",
+    "etag": "\"1a680-xKF6ecJOJz07Bq3nMYUvl7ZSmJo\"",
+    "mtime": "2026-08-07T19:57:51.369Z",
+    "size": 108160,
+    "path": "../public/coach-media/animations/surprise/surprise45.webp"
+  },
+  "/coach-media/animations/surprise/surprise46.webp": {
+    "type": "image/webp",
+    "etag": "\"b624-UVBhSbU4BcnZsHBEFLk/NJkigMs\"",
+    "mtime": "2026-08-07T19:57:51.369Z",
+    "size": 46628,
+    "path": "../public/coach-media/animations/surprise/surprise46.webp"
+  },
+  "/coach-media/animations/surprise/surprise47.webp": {
+    "type": "image/webp",
+    "etag": "\"ed28-q4uXmQ440B/uZ44347cvninGGos\"",
+    "mtime": "2026-08-07T19:57:51.370Z",
+    "size": 60712,
+    "path": "../public/coach-media/animations/surprise/surprise47.webp"
+  },
+  "/coach-media/animations/surprise/surprise48.webp": {
+    "type": "image/webp",
+    "etag": "\"132e0-ARE5bC0A3JVvXvF646DPkIObvBU\"",
+    "mtime": "2026-08-07T19:57:51.370Z",
+    "size": 78560,
+    "path": "../public/coach-media/animations/surprise/surprise48.webp"
+  },
+  "/coach-media/animations/surprise/surprise49.webp": {
+    "type": "image/webp",
+    "etag": "\"25b6c-wCdzxaXfkdqyDcw6a8xy07JXmzE\"",
+    "mtime": "2026-08-07T19:57:51.371Z",
+    "size": 154476,
+    "path": "../public/coach-media/animations/surprise/surprise49.webp"
+  },
+  "/coach-media/animations/surprise/surprise44.webp": {
+    "type": "image/webp",
+    "etag": "\"a77fc-figlb0a9uvdibEtUPy5WQ390cJ0\"",
+    "mtime": "2026-08-07T19:57:51.371Z",
+    "size": 686076,
+    "path": "../public/coach-media/animations/surprise/surprise44.webp"
+  },
+  "/coach-media/animations/surprise/surprise5.webp": {
+    "type": "image/webp",
+    "etag": "\"27cfa-OX0fnlOewddMbbATr6i9i2ynE3Y\"",
+    "mtime": "2026-08-07T19:57:51.372Z",
+    "size": 163066,
+    "path": "../public/coach-media/animations/surprise/surprise5.webp"
+  },
+  "/coach-media/animations/surprise/surprise50.webp": {
+    "type": "image/webp",
+    "etag": "\"54ee6-utB6xrbIiRW/BR2zFsCbLOBuYQ0\"",
+    "mtime": "2026-08-07T19:57:51.373Z",
+    "size": 347878,
+    "path": "../public/coach-media/animations/surprise/surprise50.webp"
+  },
+  "/coach-media/animations/surprise/surprise33.webp": {
+    "type": "image/webp",
+    "etag": "\"1ff378-3ceZyeJGfgZwkrgPrzBv1AbDx9o\"",
+    "mtime": "2026-08-07T19:57:51.366Z",
+    "size": 2093944,
+    "path": "../public/coach-media/animations/surprise/surprise33.webp"
+  },
+  "/coach-media/animations/surprise/surprise51.webp": {
+    "type": "image/webp",
+    "etag": "\"2227a-5yeomBh1J53C2OweVlrUJRsy7d0\"",
+    "mtime": "2026-08-07T19:57:51.371Z",
+    "size": 139898,
+    "path": "../public/coach-media/animations/surprise/surprise51.webp"
+  },
+  "/coach-media/animations/surprise/surprise52.webp": {
+    "type": "image/webp",
+    "etag": "\"142aa-ez2zkO6VqB8WIkeukvxz7D7f1lU\"",
+    "mtime": "2026-08-07T19:57:51.371Z",
+    "size": 82602,
+    "path": "../public/coach-media/animations/surprise/surprise52.webp"
+  },
+  "/coach-media/animations/surprise/surprise53.webp": {
+    "type": "image/webp",
+    "etag": "\"118e2-l9zmLQtW2P6gxSkdSTudjLq2c3Q\"",
+    "mtime": "2026-08-07T19:57:51.371Z",
+    "size": 71906,
+    "path": "../public/coach-media/animations/surprise/surprise53.webp"
+  },
+  "/coach-media/animations/surprise/surprise54.webp": {
+    "type": "image/webp",
+    "etag": "\"1e178-jaNfsOInt+QvPbLkhzwWaJqG/Bs\"",
+    "mtime": "2026-08-07T19:57:51.373Z",
+    "size": 123256,
+    "path": "../public/coach-media/animations/surprise/surprise54.webp"
+  },
+  "/coach-media/animations/surprise/surprise55.webp": {
+    "type": "image/webp",
+    "etag": "\"5a896-O68fUxVUguZ0BzBxfGlXQFyP0DA\"",
+    "mtime": "2026-08-07T19:57:51.372Z",
+    "size": 370838,
+    "path": "../public/coach-media/animations/surprise/surprise55.webp"
+  },
+  "/coach-media/animations/surprise/surprise56.webp": {
+    "type": "image/webp",
+    "etag": "\"1b960-DZp5H8cTkUG7OqYKTKt0Wb41j6Y\"",
+    "mtime": "2026-08-07T19:57:51.372Z",
+    "size": 112992,
+    "path": "../public/coach-media/animations/surprise/surprise56.webp"
+  },
+  "/coach-media/animations/surprise/surprise57.webp": {
+    "type": "image/webp",
+    "etag": "\"44ab8-mSBT2ojhhuQLKvtVbnLyoP47hJY\"",
+    "mtime": "2026-08-07T19:57:51.372Z",
+    "size": 281272,
+    "path": "../public/coach-media/animations/surprise/surprise57.webp"
+  },
+  "/coach-media/animations/surprise/surprise59.webp": {
+    "type": "image/webp",
+    "etag": "\"ad24-FgC+hvDgvud9BCFGf28pvxl71oQ\"",
+    "mtime": "2026-08-07T19:57:51.373Z",
+    "size": 44324,
+    "path": "../public/coach-media/animations/surprise/surprise59.webp"
+  },
+  "/coach-media/animations/surprise/surprise58.webp": {
+    "type": "image/webp",
+    "etag": "\"21a8a-Yf9qQLhbyXuD9/JZ+89b4mvgAKw\"",
+    "mtime": "2026-08-07T19:57:51.373Z",
+    "size": 137866,
+    "path": "../public/coach-media/animations/surprise/surprise58.webp"
+  },
+  "/coach-media/animations/surprise/surprise6.webp": {
+    "type": "image/webp",
+    "etag": "\"efbe-4a9rtfMIdF2+TFeY3gBQcGq2OOY\"",
+    "mtime": "2026-08-07T19:57:51.373Z",
+    "size": 61374,
+    "path": "../public/coach-media/animations/surprise/surprise6.webp"
+  },
+  "/coach-media/animations/surprise/surprise61.webp": {
+    "type": "image/webp",
+    "etag": "\"12cd0-q0YDo94p3qYkje+5yt5zOubu2/Q\"",
+    "mtime": "2026-08-07T19:57:51.373Z",
+    "size": 77008,
+    "path": "../public/coach-media/animations/surprise/surprise61.webp"
+  },
+  "/coach-media/animations/surprise/surprise60.webp": {
+    "type": "image/webp",
+    "etag": "\"4b7a6-epNKh/4axQkdUr59kQLtvLuUWxk\"",
+    "mtime": "2026-08-07T19:57:51.374Z",
+    "size": 309158,
+    "path": "../public/coach-media/animations/surprise/surprise60.webp"
+  },
+  "/coach-media/animations/surprise/surprise62.webp": {
+    "type": "image/webp",
+    "etag": "\"1c6a0-mXpnKRv+Hz25jP09BjR4foiD6qw\"",
+    "mtime": "2026-08-07T19:57:51.374Z",
+    "size": 116384,
+    "path": "../public/coach-media/animations/surprise/surprise62.webp"
+  },
+  "/coach-media/animations/surprise/surprise63.webp": {
+    "type": "image/webp",
+    "etag": "\"1eeba-iqr/NnLNgmJCGHzVJ166UGdRB4Q\"",
+    "mtime": "2026-08-07T19:57:51.374Z",
+    "size": 126650,
+    "path": "../public/coach-media/animations/surprise/surprise63.webp"
+  },
+  "/coach-media/animations/surprise/surprise7.webp": {
+    "type": "image/webp",
+    "etag": "\"28cf0-WZKrfZgxmWudkDiNqJ2t+yttmY4\"",
+    "mtime": "2026-08-07T19:57:51.374Z",
+    "size": 167152,
+    "path": "../public/coach-media/animations/surprise/surprise7.webp"
+  },
+  "/coach-media/animations/surprise/surprise9.webp": {
+    "type": "image/webp",
+    "etag": "\"3567c-XTH6klwiC89h9A35OVWjuAEqJ5A\"",
+    "mtime": "2026-08-07T19:57:51.374Z",
+    "size": 218748,
+    "path": "../public/coach-media/animations/surprise/surprise9.webp"
+  },
+  "/coach-media/emojis/muet/muet1.png": {
+    "type": "image/png",
+    "etag": "\"51a6-vln2s/UdhcTRTaO8VHDa3lfz0h8\"",
+    "mtime": "2026-08-07T19:57:51.352Z",
+    "size": 20902,
+    "path": "../public/coach-media/emojis/muet/muet1.png"
+  },
+  "/coach-media/emojis/muet/muet2.png": {
+    "type": "image/png",
+    "etag": "\"4fd6-7oBC0gGyTBoUjDE6sag9tGTRXEk\"",
+    "mtime": "2026-08-07T19:57:51.252Z",
+    "size": 20438,
+    "path": "../public/coach-media/emojis/muet/muet2.png"
+  },
+  "/coach-media/emojis/muet/muet3.png": {
+    "type": "image/png",
+    "etag": "\"5287-ywn34jaL1+x0Qfo7jSf48qjMhfs\"",
+    "mtime": "2026-08-07T19:57:51.352Z",
+    "size": 21127,
+    "path": "../public/coach-media/emojis/muet/muet3.png"
+  },
+  "/coach-media/emojis/muet/muet4.png": {
+    "type": "image/png",
+    "etag": "\"56a5-+3X/CcPHmEJ0+beAZBYg2M7ZSgA\"",
+    "mtime": "2026-08-07T19:57:51.353Z",
+    "size": 22181,
+    "path": "../public/coach-media/emojis/muet/muet4.png"
   },
   "/coach-media/emojis/triste/triste1.png": {
     "type": "image/png",
     "etag": "\"4ad5-sZv/ngDIpKluR3uoIL+9/tVgBAk\"",
-    "mtime": "2026-08-07T17:57:19.876Z",
+    "mtime": "2026-08-07T19:57:51.255Z",
     "size": 19157,
     "path": "../public/coach-media/emojis/triste/triste1.png"
   },
   "/coach-media/emojis/triste/triste10.png": {
     "type": "image/png",
     "etag": "\"6ad7-6iFb9ksjGHu03kWI85GQAULPlgA\"",
-    "mtime": "2026-08-07T17:57:20.023Z",
+    "mtime": "2026-08-07T19:57:51.374Z",
     "size": 27351,
     "path": "../public/coach-media/emojis/triste/triste10.png"
   },
   "/coach-media/emojis/triste/triste11.png": {
     "type": "image/png",
     "etag": "\"7b07-5Y/2vAUDwkCG9yUv2xhGyKhfVv4\"",
-    "mtime": "2026-08-07T17:57:20.023Z",
+    "mtime": "2026-08-07T19:57:51.375Z",
     "size": 31495,
     "path": "../public/coach-media/emojis/triste/triste11.png"
   },
   "/coach-media/emojis/triste/triste4.png": {
     "type": "image/png",
     "etag": "\"51ea-mZrIfYhaUQQDvlUt7+NCSIE6cfI\"",
-    "mtime": "2026-08-07T17:57:20.023Z",
+    "mtime": "2026-08-07T19:57:51.375Z",
     "size": 20970,
     "path": "../public/coach-media/emojis/triste/triste4.png"
   },
   "/coach-media/emojis/triste/triste5.png": {
     "type": "image/png",
     "etag": "\"54c1-XD0mhNmrQPVAFqEXG0C1s1P3Oa4\"",
-    "mtime": "2026-08-07T17:57:20.023Z",
+    "mtime": "2026-08-07T19:57:51.375Z",
     "size": 21697,
     "path": "../public/coach-media/emojis/triste/triste5.png"
   },
   "/coach-media/emojis/triste/triste6.png": {
     "type": "image/png",
     "etag": "\"54c1-XD0mhNmrQPVAFqEXG0C1s1P3Oa4\"",
-    "mtime": "2026-08-07T17:57:20.023Z",
+    "mtime": "2026-08-07T19:57:51.375Z",
     "size": 21697,
     "path": "../public/coach-media/emojis/triste/triste6.png"
   },
   "/coach-media/emojis/triste/triste7.png": {
     "type": "image/png",
     "etag": "\"4663-GYg5O4kBtQpnNYQYt+t2VyLkYuE\"",
-    "mtime": "2026-08-07T17:57:20.023Z",
+    "mtime": "2026-08-07T19:57:51.375Z",
     "size": 18019,
     "path": "../public/coach-media/emojis/triste/triste7.png"
   },
   "/coach-media/emojis/triste/triste8.png": {
     "type": "image/png",
     "etag": "\"5281-YyJBOzW/kpn0XNWvaoOHWcnQ+0k\"",
-    "mtime": "2026-08-07T17:57:20.023Z",
+    "mtime": "2026-08-07T19:57:51.378Z",
     "size": 21121,
     "path": "../public/coach-media/emojis/triste/triste8.png"
   },
   "/coach-media/emojis/triste/triste9.png": {
     "type": "image/png",
     "etag": "\"56b5-7e4ksvafotKRdiRp4CmrqGW7UkM\"",
-    "mtime": "2026-08-07T17:57:20.023Z",
+    "mtime": "2026-08-07T19:57:51.375Z",
     "size": 22197,
     "path": "../public/coach-media/emojis/triste/triste9.png"
   },
-  "/_nuxt/builds/meta/e92d0f8a-f448-436b-829c-2a622ece2986.json": {
+  "/coach-media/animations/happy/happy10.webp": {
+    "type": "image/webp",
+    "etag": "\"13102-1AwfKNNogN0hV9N7INQr8b/L5U0\"",
+    "mtime": "2026-08-07T19:57:51.379Z",
+    "size": 78082,
+    "path": "../public/coach-media/animations/happy/happy10.webp"
+  },
+  "/coach-media/animations/happy/happy11.webp": {
+    "type": "image/webp",
+    "etag": "\"c51c-aSSJ/YerC2d+QHIzkxapjUKX1xo\"",
+    "mtime": "2026-08-07T19:57:51.380Z",
+    "size": 50460,
+    "path": "../public/coach-media/animations/happy/happy11.webp"
+  },
+  "/coach-media/animations/happy/happy14.webp": {
+    "type": "image/webp",
+    "etag": "\"2b5e-Tlk4vz7sMxW+TPrlh/TTUPVQZ64\"",
+    "mtime": "2026-08-07T19:57:51.379Z",
+    "size": 11102,
+    "path": "../public/coach-media/animations/happy/happy14.webp"
+  },
+  "/coach-media/animations/happy/happy12.webp": {
+    "type": "image/webp",
+    "etag": "\"26dd0-kEufqOKIIc4EphkqsilP8Vg0anA\"",
+    "mtime": "2026-08-07T19:57:51.380Z",
+    "size": 159184,
+    "path": "../public/coach-media/animations/happy/happy12.webp"
+  },
+  "/coach-media/animations/happy/happy13.webp": {
+    "type": "image/webp",
+    "etag": "\"1b7c8-6YwhPgMDDi09N6QaiQGvB3MESN8\"",
+    "mtime": "2026-08-07T19:57:51.379Z",
+    "size": 112584,
+    "path": "../public/coach-media/animations/happy/happy13.webp"
+  },
+  "/coach-media/animations/happy/happy15.webp": {
+    "type": "image/webp",
+    "etag": "\"1f82e-GdfVpoK+FBOph2APqZZ2ksTEi/M\"",
+    "mtime": "2026-08-07T19:57:51.379Z",
+    "size": 129070,
+    "path": "../public/coach-media/animations/happy/happy15.webp"
+  },
+  "/coach-media/animations/happy/happy16.webp": {
+    "type": "image/webp",
+    "etag": "\"39676-m3hlL8MEmfcM8A6RQ/d34G7k4z4\"",
+    "mtime": "2026-08-07T19:57:51.380Z",
+    "size": 235126,
+    "path": "../public/coach-media/animations/happy/happy16.webp"
+  },
+  "/coach-media/animations/happy/happy17.webp": {
+    "type": "image/webp",
+    "etag": "\"6c236-lcuyQg6sSZcT0+fCpGNG/JhMi7U\"",
+    "mtime": "2026-08-07T19:57:51.380Z",
+    "size": 442934,
+    "path": "../public/coach-media/animations/happy/happy17.webp"
+  },
+  "/coach-media/animations/happy/happy19.webp": {
+    "type": "image/webp",
+    "etag": "\"7340-Mvycs8QTkYX6zm7iIfL2nLfxOe8\"",
+    "mtime": "2026-08-07T19:57:51.379Z",
+    "size": 29504,
+    "path": "../public/coach-media/animations/happy/happy19.webp"
+  },
+  "/coach-media/animations/happy/happy18.webp": {
+    "type": "image/webp",
+    "etag": "\"38cca-HDXyFn4nw7hhDQ0f8voh7jHxFIU\"",
+    "mtime": "2026-08-07T19:57:51.384Z",
+    "size": 232650,
+    "path": "../public/coach-media/animations/happy/happy18.webp"
+  },
+  "/coach-media/animations/happy/happy2.webp": {
+    "type": "image/webp",
+    "etag": "\"1b638-CG1y3zibI0VpxAfTb3zZrzRaw90\"",
+    "mtime": "2026-08-07T19:57:51.381Z",
+    "size": 112184,
+    "path": "../public/coach-media/animations/happy/happy2.webp"
+  },
+  "/coach-media/animations/happy/happy1.webp": {
+    "type": "image/webp",
+    "etag": "\"9a9fe-dnJ60THXbLE/qdsCoy8mks8JEWo\"",
+    "mtime": "2026-08-07T19:57:51.263Z",
+    "size": 633342,
+    "path": "../public/coach-media/animations/happy/happy1.webp"
+  },
+  "/coach-media/animations/happy/happy21.webp": {
+    "type": "image/webp",
+    "etag": "\"d20a-nJXSMlgY3QzHwwJw2j7rW4bD6HU\"",
+    "mtime": "2026-08-07T19:57:51.385Z",
+    "size": 53770,
+    "path": "../public/coach-media/animations/happy/happy21.webp"
+  },
+  "/coach-media/animations/happy/happy20.webp": {
+    "type": "image/webp",
+    "etag": "\"31eb2-eG0f1RbiJPRwmWx1p+zVbeej7Jo\"",
+    "mtime": "2026-08-07T19:57:51.381Z",
+    "size": 204466,
+    "path": "../public/coach-media/animations/happy/happy20.webp"
+  },
+  "/coach-media/animations/happy/happy22.webp": {
+    "type": "image/webp",
+    "etag": "\"2be74-wts9jwpJqVDGud0ZifbURmTwf7g\"",
+    "mtime": "2026-08-07T19:57:51.380Z",
+    "size": 179828,
+    "path": "../public/coach-media/animations/happy/happy22.webp"
+  },
+  "/coach-media/animations/happy/happy23.webp": {
+    "type": "image/webp",
+    "etag": "\"e74a-F+BBio6AhOZ5hwHOGh8wKCLcoGA\"",
+    "mtime": "2026-08-07T19:57:51.383Z",
+    "size": 59210,
+    "path": "../public/coach-media/animations/happy/happy23.webp"
+  },
+  "/coach-media/animations/happy/happy24.webp": {
+    "type": "image/webp",
+    "etag": "\"23e02-CIi7WeJXeH8cd/GgwMtt3CFFVkM\"",
+    "mtime": "2026-08-07T19:57:51.384Z",
+    "size": 146946,
+    "path": "../public/coach-media/animations/happy/happy24.webp"
+  },
+  "/coach-media/animations/happy/happy25.webp": {
+    "type": "image/webp",
+    "etag": "\"16574-kubThW5vAMKccIZc2jswkTWLUoA\"",
+    "mtime": "2026-08-07T19:57:51.385Z",
+    "size": 91508,
+    "path": "../public/coach-media/animations/happy/happy25.webp"
+  },
+  "/coach-media/animations/happy/happy27.webp": {
+    "type": "image/webp",
+    "etag": "\"1c662-1bbHXwmlK1/Q6duQFfbU/+Wg5Fg\"",
+    "mtime": "2026-08-07T19:57:51.384Z",
+    "size": 116322,
+    "path": "../public/coach-media/animations/happy/happy27.webp"
+  },
+  "/coach-media/animations/happy/happy26.webp": {
+    "type": "image/webp",
+    "etag": "\"6c706-bOAKAMAiElDmC2MCxEJkrvr5A+k\"",
+    "mtime": "2026-08-07T19:57:51.384Z",
+    "size": 444166,
+    "path": "../public/coach-media/animations/happy/happy26.webp"
+  },
+  "/coach-media/animations/happy/happy28.webp": {
+    "type": "image/webp",
+    "etag": "\"2090a-cfPB8KwXDFTC2iWhg6Pn7kOvGeg\"",
+    "mtime": "2026-08-07T19:57:51.385Z",
+    "size": 133386,
+    "path": "../public/coach-media/animations/happy/happy28.webp"
+  },
+  "/coach-media/animations/happy/happy29.webp": {
+    "type": "image/webp",
+    "etag": "\"15a6e-F4FEHmzAIG7WW3pszvFsq0XKYGk\"",
+    "mtime": "2026-08-07T19:57:51.387Z",
+    "size": 88686,
+    "path": "../public/coach-media/animations/happy/happy29.webp"
+  },
+  "/coach-media/animations/happy/happy3.webp": {
+    "type": "image/webp",
+    "etag": "\"6438c-AQmLLI1sVtzVfySWLf8q8/SnoDQ\"",
+    "mtime": "2026-08-07T19:57:51.386Z",
+    "size": 410508,
+    "path": "../public/coach-media/animations/happy/happy3.webp"
+  },
+  "/coach-media/animations/happy/happy30.webp": {
+    "type": "image/webp",
+    "etag": "\"46140-52DID+yWWHNDhSWo2wqCW7AgztI\"",
+    "mtime": "2026-08-07T19:57:51.386Z",
+    "size": 287040,
+    "path": "../public/coach-media/animations/happy/happy30.webp"
+  },
+  "/coach-media/animations/happy/happy31.webp": {
+    "type": "image/webp",
+    "etag": "\"4d6ca-GZQfzSkO4AbRu7KJoQWgnIw6U6k\"",
+    "mtime": "2026-08-07T19:57:51.389Z",
+    "size": 317130,
+    "path": "../public/coach-media/animations/happy/happy31.webp"
+  },
+  "/coach-media/animations/happy/happy32.webp": {
+    "type": "image/webp",
+    "etag": "\"1ce94-qd5mvwxqL3x8atGLGoQ6T5SBIM8\"",
+    "mtime": "2026-08-07T19:57:51.385Z",
+    "size": 118420,
+    "path": "../public/coach-media/animations/happy/happy32.webp"
+  },
+  "/coach-media/animations/happy/happy34.webp": {
+    "type": "image/webp",
+    "etag": "\"7a6e-N4lUoynD0pY1HrZqbhKsKEJcIdY\"",
+    "mtime": "2026-08-07T19:57:51.385Z",
+    "size": 31342,
+    "path": "../public/coach-media/animations/happy/happy34.webp"
+  },
+  "/coach-media/animations/happy/happy33.webp": {
+    "type": "image/webp",
+    "etag": "\"1ca8a-w5q1HyoRf3YSX2wny1ajxC1lVTw\"",
+    "mtime": "2026-08-07T19:57:51.386Z",
+    "size": 117386,
+    "path": "../public/coach-media/animations/happy/happy33.webp"
+  },
+  "/coach-media/animations/happy/happy36.webp": {
+    "type": "image/webp",
+    "etag": "\"1480e-iU7KcSbk60IXH4CWOzNyttBsbE0\"",
+    "mtime": "2026-08-07T19:57:51.386Z",
+    "size": 83982,
+    "path": "../public/coach-media/animations/happy/happy36.webp"
+  },
+  "/coach-media/animations/happy/happy37.webp": {
+    "type": "image/webp",
+    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
+    "mtime": "2026-08-07T19:57:51.387Z",
+    "size": 57724,
+    "path": "../public/coach-media/animations/happy/happy37.webp"
+  },
+  "/coach-media/animations/happy/happy35.webp": {
+    "type": "image/webp",
+    "etag": "\"27e2a-nINbfIIzpb0aB5cQDbxz/GDwNug\"",
+    "mtime": "2026-08-07T19:57:51.387Z",
+    "size": 163370,
+    "path": "../public/coach-media/animations/happy/happy35.webp"
+  },
+  "/coach-media/animations/happy/happy38.webp": {
+    "type": "image/webp",
+    "etag": "\"20928-zE86yLQztSZEATTCxTKRuQFifnw\"",
+    "mtime": "2026-08-07T19:57:51.387Z",
+    "size": 133416,
+    "path": "../public/coach-media/animations/happy/happy38.webp"
+  },
+  "/coach-media/animations/happy/happy39.webp": {
+    "type": "image/webp",
+    "etag": "\"1031c-0I4f6s3jDJrqeEDNAVBubusuRqQ\"",
+    "mtime": "2026-08-07T19:57:51.388Z",
+    "size": 66332,
+    "path": "../public/coach-media/animations/happy/happy39.webp"
+  },
+  "/coach-media/animations/happy/happy4.webp": {
+    "type": "image/webp",
+    "etag": "\"80d8-WZGwWFCLsk3YDTm9XP5QCq8R7Es\"",
+    "mtime": "2026-08-07T19:57:51.388Z",
+    "size": 32984,
+    "path": "../public/coach-media/animations/happy/happy4.webp"
+  },
+  "/coach-media/animations/happy/happy40.webp": {
+    "type": "image/webp",
+    "etag": "\"116ba-M7X1kM6tt7dIECx3koEGYbji1us\"",
+    "mtime": "2026-08-07T19:57:51.388Z",
+    "size": 71354,
+    "path": "../public/coach-media/animations/happy/happy40.webp"
+  },
+  "/coach-media/animations/happy/happy41.webp": {
+    "type": "image/webp",
+    "etag": "\"a76a-Nmck64+pAP0tEnTHpG1mitI4ONk\"",
+    "mtime": "2026-08-07T19:57:51.397Z",
+    "size": 42858,
+    "path": "../public/coach-media/animations/happy/happy41.webp"
+  },
+  "/coach-media/animations/happy/happy42.webp": {
+    "type": "image/webp",
+    "etag": "\"7eba-Xqry0H+Qj7x/M1eDmO0CIQ+A7Mg\"",
+    "mtime": "2026-08-07T19:57:51.388Z",
+    "size": 32442,
+    "path": "../public/coach-media/animations/happy/happy42.webp"
+  },
+  "/coach-media/animations/happy/happy44.webp": {
+    "type": "image/webp",
+    "etag": "\"24e16-Y7u+Md6oQPbYSDjE0D9H77j0Z5I\"",
+    "mtime": "2026-08-07T19:57:51.389Z",
+    "size": 151062,
+    "path": "../public/coach-media/animations/happy/happy44.webp"
+  },
+  "/coach-media/animations/happy/happy43.webp": {
+    "type": "image/webp",
+    "etag": "\"55a5e-kUYTswcDoeybUYnmGXDBV0ny564\"",
+    "mtime": "2026-08-07T19:57:51.389Z",
+    "size": 350814,
+    "path": "../public/coach-media/animations/happy/happy43.webp"
+  },
+  "/coach-media/animations/happy/happy46.webp": {
+    "type": "image/webp",
+    "etag": "\"13dec-uj4sm+IwuLOmQY7lGy1JeMzt2FM\"",
+    "mtime": "2026-08-07T19:57:51.389Z",
+    "size": 81388,
+    "path": "../public/coach-media/animations/happy/happy46.webp"
+  },
+  "/coach-media/animations/happy/happy45.webp": {
+    "type": "image/webp",
+    "etag": "\"65a82-XxALJISFlOUdD3wSziHwFXHhxqc\"",
+    "mtime": "2026-08-07T19:57:51.390Z",
+    "size": 416386,
+    "path": "../public/coach-media/animations/happy/happy45.webp"
+  },
+  "/coach-media/animations/happy/happy47.webp": {
+    "type": "image/webp",
+    "etag": "\"234e4-DNBmLISLOFimd+G8XihNRgMsjGw\"",
+    "mtime": "2026-08-07T19:57:51.390Z",
+    "size": 144612,
+    "path": "../public/coach-media/animations/happy/happy47.webp"
+  },
+  "/coach-media/animations/happy/happy49.webp": {
+    "type": "image/webp",
+    "etag": "\"3123c-mf62C2iWRtx585STd9CHbYmICyM\"",
+    "mtime": "2026-08-07T19:57:51.390Z",
+    "size": 201276,
+    "path": "../public/coach-media/animations/happy/happy49.webp"
+  },
+  "/coach-media/animations/happy/happy5.webp": {
+    "type": "image/webp",
+    "etag": "\"10784-0Rzy5v92HqFbOQ0qn2Jo9XRJ1r0\"",
+    "mtime": "2026-08-07T19:57:51.389Z",
+    "size": 67460,
+    "path": "../public/coach-media/animations/happy/happy5.webp"
+  },
+  "/coach-media/animations/happy/happy50.webp": {
+    "type": "image/webp",
+    "etag": "\"2b72a-Xz8Gb2Cdj+rrnnpbXbSGBQRTFYw\"",
+    "mtime": "2026-08-07T19:57:51.392Z",
+    "size": 177962,
+    "path": "../public/coach-media/animations/happy/happy50.webp"
+  },
+  "/coach-media/animations/happy/happy51.webp": {
+    "type": "image/webp",
+    "etag": "\"29090-le1WcmrRN+RDX52joaRj6kdNQS0\"",
+    "mtime": "2026-08-07T19:57:51.391Z",
+    "size": 168080,
+    "path": "../public/coach-media/animations/happy/happy51.webp"
+  },
+  "/coach-media/animations/happy/happy48.webp": {
+    "type": "image/webp",
+    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
+    "mtime": "2026-08-07T19:57:51.391Z",
+    "size": 566688,
+    "path": "../public/coach-media/animations/happy/happy48.webp"
+  },
+  "/coach-media/animations/happy/happy52.webp": {
+    "type": "image/webp",
+    "etag": "\"4a9b0-bNgmWpmTSjuc06DQcbX6RkVvCnU\"",
+    "mtime": "2026-08-07T19:57:51.390Z",
+    "size": 305584,
+    "path": "../public/coach-media/animations/happy/happy52.webp"
+  },
+  "/coach-media/animations/happy/happy53.webp": {
+    "type": "image/webp",
+    "etag": "\"57d0-WEnplvWuFKWqXkfuwNFuk472muo\"",
+    "mtime": "2026-08-07T19:57:51.390Z",
+    "size": 22480,
+    "path": "../public/coach-media/animations/happy/happy53.webp"
+  },
+  "/coach-media/animations/happy/happy54.webp": {
+    "type": "image/webp",
+    "etag": "\"de70-7JEgp30lMgh1RT82Z43BnbOPyME\"",
+    "mtime": "2026-08-07T19:57:51.397Z",
+    "size": 56944,
+    "path": "../public/coach-media/animations/happy/happy54.webp"
+  },
+  "/coach-media/animations/happy/happy55.webp": {
+    "type": "image/webp",
+    "etag": "\"4b40a-Dq55EPJ++rGpcOm3dfVMczMYPaI\"",
+    "mtime": "2026-08-07T19:57:51.396Z",
+    "size": 308234,
+    "path": "../public/coach-media/animations/happy/happy55.webp"
+  },
+  "/coach-media/animations/happy/happy56.webp": {
+    "type": "image/webp",
+    "etag": "\"7ec86-JO0Q1vC7rgTxvmuYQZ3337jzHAM\"",
+    "mtime": "2026-08-07T19:57:51.392Z",
+    "size": 519302,
+    "path": "../public/coach-media/animations/happy/happy56.webp"
+  },
+  "/coach-media/animations/happy/happy57.webp": {
+    "type": "image/webp",
+    "etag": "\"74f88-eEN2CyUJ9rLsRvqY7OzSZS3p2IU\"",
+    "mtime": "2026-08-07T19:57:51.392Z",
+    "size": 479112,
+    "path": "../public/coach-media/animations/happy/happy57.webp"
+  },
+  "/coach-media/animations/happy/happy59.webp": {
+    "type": "image/webp",
+    "etag": "\"e290-fQb7JlOst9pysXxzv35HJTcHlpE\"",
+    "mtime": "2026-08-07T19:57:51.396Z",
+    "size": 58000,
+    "path": "../public/coach-media/animations/happy/happy59.webp"
+  },
+  "/coach-media/animations/happy/happy6.webp": {
+    "type": "image/webp",
+    "etag": "\"2f8ce-NjZdr7Vin1NbHT+GFgWzMwsZeZE\"",
+    "mtime": "2026-08-07T19:57:51.397Z",
+    "size": 194766,
+    "path": "../public/coach-media/animations/happy/happy6.webp"
+  },
+  "/coach-media/animations/happy/happy58.webp": {
+    "type": "image/webp",
+    "etag": "\"695d4-fo3c1QhJVPT0yXYAuoQyAXrIO9E\"",
+    "mtime": "2026-08-07T19:57:51.397Z",
+    "size": 431572,
+    "path": "../public/coach-media/animations/happy/happy58.webp"
+  },
+  "/coach-media/animations/happy/happy61.webp": {
+    "type": "image/webp",
+    "etag": "\"253e8-1Fqod1LG1PZNTdmri6v0gPMthaE\"",
+    "mtime": "2026-08-07T19:57:51.401Z",
+    "size": 152552,
+    "path": "../public/coach-media/animations/happy/happy61.webp"
+  },
+  "/coach-media/animations/happy/happy62.webp": {
+    "type": "image/webp",
+    "etag": "\"4f8f8-tLTO1/dtiZumcCPIDjxNhkIrS9g\"",
+    "mtime": "2026-08-07T19:57:51.401Z",
+    "size": 325880,
+    "path": "../public/coach-media/animations/happy/happy62.webp"
+  },
+  "/coach-media/animations/happy/happy63.webp": {
+    "type": "image/webp",
+    "etag": "\"2b52a-B18WnXoFNFEoRmRiTpAPD0Xw4fA\"",
+    "mtime": "2026-08-07T19:57:51.397Z",
+    "size": 177450,
+    "path": "../public/coach-media/animations/happy/happy63.webp"
+  },
+  "/coach-media/animations/happy/happy65.webp": {
+    "type": "image/webp",
+    "etag": "\"153e2-1MrE6YaWW1bqq3uRkAG3roDYdbI\"",
+    "mtime": "2026-08-07T19:57:51.398Z",
+    "size": 87010,
+    "path": "../public/coach-media/animations/happy/happy65.webp"
+  },
+  "/coach-media/animations/happy/happy67.webp": {
+    "type": "image/webp",
+    "etag": "\"26842-Ttlq6ska7bBpzXjvIXLqSUaPnIk\"",
+    "mtime": "2026-08-07T19:57:51.399Z",
+    "size": 157762,
+    "path": "../public/coach-media/animations/happy/happy67.webp"
+  },
+  "/coach-media/animations/happy/happy66.webp": {
+    "type": "image/webp",
+    "etag": "\"5aac0-EL5Dnfs0ZHXfZ2nFXHuqusIiA6U\"",
+    "mtime": "2026-08-07T19:57:51.400Z",
+    "size": 371392,
+    "path": "../public/coach-media/animations/happy/happy66.webp"
+  },
+  "/coach-media/animations/happy/happy68.webp": {
+    "type": "image/webp",
+    "etag": "\"3a9f6-uXcrvu87C4tyxdUD8qy84likyxA\"",
+    "mtime": "2026-08-07T19:57:51.398Z",
+    "size": 240118,
+    "path": "../public/coach-media/animations/happy/happy68.webp"
+  },
+  "/coach-media/animations/happy/happy69.webp": {
+    "type": "image/webp",
+    "etag": "\"1843a-+cJ0+7F0PNcalsjHJcXNkw7qRDw\"",
+    "mtime": "2026-08-07T19:57:51.399Z",
+    "size": 99386,
+    "path": "../public/coach-media/animations/happy/happy69.webp"
+  },
+  "/coach-media/animations/happy/happy64.webp": {
+    "type": "image/webp",
+    "etag": "\"8b070-7oC7TYj4LIldWg1605cOC8gYl+w\"",
+    "mtime": "2026-08-07T19:57:51.399Z",
+    "size": 569456,
+    "path": "../public/coach-media/animations/happy/happy64.webp"
+  },
+  "/coach-media/animations/happy/happy7.webp": {
+    "type": "image/webp",
+    "etag": "\"6dbe6-GIqYtKyf033a2vAUrfvCUdyYOmE\"",
+    "mtime": "2026-08-07T19:57:51.401Z",
+    "size": 449510,
+    "path": "../public/coach-media/animations/happy/happy7.webp"
+  },
+  "/coach-media/animations/happy/happy71.webp": {
+    "type": "image/webp",
+    "etag": "\"12890-iDkXNnqbnihYZd5fm+x9SogtFL0\"",
+    "mtime": "2026-08-07T19:57:51.400Z",
+    "size": 75920,
+    "path": "../public/coach-media/animations/happy/happy71.webp"
+  },
+  "/coach-media/animations/happy/happy72.webp": {
+    "type": "image/webp",
+    "etag": "\"1132e-N279XcIE77SVgWI5RK4HGZTKNNQ\"",
+    "mtime": "2026-08-07T19:57:51.400Z",
+    "size": 70446,
+    "path": "../public/coach-media/animations/happy/happy72.webp"
+  },
+  "/coach-media/animations/happy/happy73.webp": {
+    "type": "image/webp",
+    "etag": "\"12dd8-PuAHZqC2ZtYnGQM/yt5HL7w8Z5w\"",
+    "mtime": "2026-08-07T19:57:51.401Z",
+    "size": 77272,
+    "path": "../public/coach-media/animations/happy/happy73.webp"
+  },
+  "/coach-media/animations/happy/happy75.webp": {
+    "type": "image/webp",
+    "etag": "\"1cfd0-9c+pPyscG4ipyzhzbN//E8mdshQ\"",
+    "mtime": "2026-08-07T19:57:51.402Z",
+    "size": 118736,
+    "path": "../public/coach-media/animations/happy/happy75.webp"
+  },
+  "/coach-media/animations/happy/happy74.webp": {
+    "type": "image/webp",
+    "etag": "\"5deae-Nnfy+JPdNa90X/TKIQJKDHXtEDg\"",
+    "mtime": "2026-08-07T19:57:51.409Z",
+    "size": 384686,
+    "path": "../public/coach-media/animations/happy/happy74.webp"
+  },
+  "/coach-media/animations/happy/happy76.webp": {
+    "type": "image/webp",
+    "etag": "\"14a9e-d6rGydXTPMji/MdwYzCalRd2xW0\"",
+    "mtime": "2026-08-07T19:57:51.401Z",
+    "size": 84638,
+    "path": "../public/coach-media/animations/happy/happy76.webp"
+  },
+  "/coach-media/animations/happy/happy60.webp": {
+    "type": "image/webp",
+    "etag": "\"1e7f54-IoOugN/ir+60blKcpy6Kl2RuTBI\"",
+    "mtime": "2026-08-07T19:57:51.399Z",
+    "size": 1998676,
+    "path": "../public/coach-media/animations/happy/happy60.webp"
+  },
+  "/coach-media/animations/happy/happy70.webp": {
+    "type": "image/webp",
+    "etag": "\"813fc-MRr6jjBP9Dwv9BEsHOHSRAaT2vg\"",
+    "mtime": "2026-08-07T19:57:51.403Z",
+    "size": 529404,
+    "path": "../public/coach-media/animations/happy/happy70.webp"
+  },
+  "/coach-media/animations/happy/happy77.webp": {
+    "type": "image/webp",
+    "etag": "\"1e10a-1aPPim9G6xum8/Hs8Ro6u3VlG6U\"",
+    "mtime": "2026-08-07T19:57:51.401Z",
+    "size": 123146,
+    "path": "../public/coach-media/animations/happy/happy77.webp"
+  },
+  "/coach-media/animations/happy/happy78.webp": {
+    "type": "image/webp",
+    "etag": "\"17ba4-3h26xVZZTGib30A7sQhqoYBlgqs\"",
+    "mtime": "2026-08-07T19:57:51.402Z",
+    "size": 97188,
+    "path": "../public/coach-media/animations/happy/happy78.webp"
+  },
+  "/coach-media/animations/happy/happy79.webp": {
+    "type": "image/webp",
+    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
+    "mtime": "2026-08-07T19:57:51.402Z",
+    "size": 57724,
+    "path": "../public/coach-media/animations/happy/happy79.webp"
+  },
+  "/coach-media/animations/happy/happy8.webp": {
+    "type": "image/webp",
+    "etag": "\"9d5e-zP9Tu9ncCFIvZEyvVyuhVBachAE\"",
+    "mtime": "2026-08-07T19:57:51.402Z",
+    "size": 40286,
+    "path": "../public/coach-media/animations/happy/happy8.webp"
+  },
+  "/coach-media/animations/happy/happy80.webp": {
+    "type": "image/webp",
+    "etag": "\"1da90-C0sljbqRem33mzQhLpalQ7JqSpU\"",
+    "mtime": "2026-08-07T19:57:51.409Z",
+    "size": 121488,
+    "path": "../public/coach-media/animations/happy/happy80.webp"
+  },
+  "/coach-media/animations/happy/happy82.webp": {
+    "type": "image/webp",
+    "etag": "\"f1a4-tNEKunf3T9spLovIQWFozZvffw4\"",
+    "mtime": "2026-08-07T19:57:51.408Z",
+    "size": 61860,
+    "path": "../public/coach-media/animations/happy/happy82.webp"
+  },
+  "/coach-media/animations/happy/happy83.webp": {
+    "type": "image/webp",
+    "etag": "\"2fe42-Kmm0KGXV1dEPQbjoM5G8BWcNWBM\"",
+    "mtime": "2026-08-07T19:57:51.402Z",
+    "size": 196162,
+    "path": "../public/coach-media/animations/happy/happy83.webp"
+  },
+  "/coach-media/animations/happy/happy85.webp": {
+    "type": "image/webp",
+    "etag": "\"150ae-QMfLvsJpp/BJuZy4OwOXUD8OYUQ\"",
+    "mtime": "2026-08-07T19:57:51.405Z",
+    "size": 86190,
+    "path": "../public/coach-media/animations/happy/happy85.webp"
+  },
+  "/coach-media/animations/happy/happy84.webp": {
+    "type": "image/webp",
+    "etag": "\"7b984-0wPlyvPIzXRP9eIMHgiBJFl+27A\"",
+    "mtime": "2026-08-07T19:57:51.408Z",
+    "size": 506244,
+    "path": "../public/coach-media/animations/happy/happy84.webp"
+  },
+  "/coach-media/animations/happy/happy86.webp": {
+    "type": "image/webp",
+    "etag": "\"d7f8-QCvUvt2Z0TOPZeSr+n8EKTRxFUo\"",
+    "mtime": "2026-08-07T19:57:51.409Z",
+    "size": 55288,
+    "path": "../public/coach-media/animations/happy/happy86.webp"
+  },
+  "/coach-media/animations/happy/happy81.webp": {
+    "type": "image/webp",
+    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
+    "mtime": "2026-08-07T19:57:51.402Z",
+    "size": 566688,
+    "path": "../public/coach-media/animations/happy/happy81.webp"
+  },
+  "/coach-media/animations/happy/happy87.webp": {
+    "type": "image/webp",
+    "etag": "\"17dec-6w/mkYwGAw5T0lZlhGXtO5BcsZU\"",
+    "mtime": "2026-08-07T19:57:51.409Z",
+    "size": 97772,
+    "path": "../public/coach-media/animations/happy/happy87.webp"
+  },
+  "/coach-media/animations/happy/happy88.webp": {
+    "type": "image/webp",
+    "etag": "\"10722-eVPV4BPr+xXKB/m7b01HTc3BYvY\"",
+    "mtime": "2026-08-07T19:57:51.410Z",
+    "size": 67362,
+    "path": "../public/coach-media/animations/happy/happy88.webp"
+  },
+  "/coach-media/animations/happy/happy89.webp": {
+    "type": "image/webp",
+    "etag": "\"1c7e2-sUSfie0YAo/54wJ6tzJq/DwQ0Uw\"",
+    "mtime": "2026-08-07T19:57:51.409Z",
+    "size": 116706,
+    "path": "../public/coach-media/animations/happy/happy89.webp"
+  },
+  "/coach-media/animations/happy/happy9.webp": {
+    "type": "image/webp",
+    "etag": "\"48688-/orx463Bv1qJxQ1v4poLAvBrNjI\"",
+    "mtime": "2026-08-07T19:57:51.410Z",
+    "size": 296584,
+    "path": "../public/coach-media/animations/happy/happy9.webp"
+  },
+  "/coach-media/animations/happy/happy91.webp": {
+    "type": "image/webp",
+    "etag": "\"162e4-8HqkqL71/r+QJURh8ZbqNFMM6ZE\"",
+    "mtime": "2026-08-07T19:57:51.410Z",
+    "size": 90852,
+    "path": "../public/coach-media/animations/happy/happy91.webp"
+  },
+  "/coach-media/animations/happy/happy90.webp": {
+    "type": "image/webp",
+    "etag": "\"40b96-2KBRO6W19pvILapZ8+Vi3lurBCw\"",
+    "mtime": "2026-08-07T19:57:51.410Z",
+    "size": 265110,
+    "path": "../public/coach-media/animations/happy/happy90.webp"
+  },
+  "/coach-media/animations/happy/happy92.webp": {
+    "type": "image/webp",
+    "etag": "\"1eb3c-dpJ07uxpsVOLdaMyS3SOlqMT6/k\"",
+    "mtime": "2026-08-07T19:57:51.409Z",
+    "size": 125756,
+    "path": "../public/coach-media/animations/happy/happy92.webp"
+  },
+  "/_nuxt/builds/meta/08fc8e63-729d-4b9e-8001-9bf42570b3ee.json": {
     "type": "application/json",
-    "etag": "\"58-Ct9yW/peePRilAEvItANptLo76A\"",
-    "mtime": "2026-08-07T17:57:19.822Z",
+    "etag": "\"58-Wi/76s99GoSkTKmrsKH8ZsJSEhU\"",
+    "mtime": "2026-08-07T19:57:51.205Z",
     "size": 88,
-    "path": "../public/_nuxt/builds/meta/e92d0f8a-f448-436b-829c-2a622ece2986.json"
+    "path": "../public/_nuxt/builds/meta/08fc8e63-729d-4b9e-8001-9bf42570b3ee.json"
   }
 };
 
@@ -128784,5 +128796,5 @@ trapUnhandledNodeErrors();
 setupGracefulShutdown(listener, nitroApp);
 const nodeServer = {};
 
-export { setHeader as $, setResponseStatus as A, getRequestURL as B, stripLocaleFromPath as C, getRequestIP as D, getExerciseSummary as E, ExerciseSummaryInputError as F, ExerciseSummaryNotFoundError as G, saveExerciseSummary as H, getCachedCatalogue as I, setResponseHeaders as J, decodePronominalSelectionId as K, encodePronominalSelectionId as L, legacyComplementOptions as M, legacyComplementConfig as N, normalizeComplementOptions as O, DEFAULT_COMPLEMENT_OPTIONS as P, validateConjugationAnswer as Q, validateAnswer as R, diagnoseLearnerError as S, LEARNER_ERROR_DETECTOR_VERSION as T, applicableLearnerErrorTypes as U, learnerErrorDetails as V, grammarTenseCode as W, LEARNER_ERROR_TAXONOMY as X, learnerErrorDetailText as Y, CURRENT_PRIVACY_NOTICE_VERSION as Z, SUPPORTED_LOCALES as _, getQuery as a, localizePath as a0, parseQuery as a1, hasProtocol as a2, joinURL as a3, isScriptProtocol as a4, withTrailingSlash as a5, withoutTrailingSlash as a6, hash$1 as a7, challengePresetGroupLabels as a8, executeAsync as a9, conjugationAnswerPlaceholder as aA, getAlternativeCorrections as aB, impossibleSingularEndingReminderMessage as aC, localizedLearnerErrorMessage as aD, isFutureSimpleInsteadOfNearFuture as aE, findConjugationConfusions as aF, findImpossibleSingularEnding as aG, diagnoseCoachAgreement as aH, diagnoseCoachAnswer as aI, mergeLearnerErrorDetails as aJ, learnerErrorInsteadOf as aK, joinRelativeURL as aL, defineRenderHandler as aM, destr as aN, getRouteRules as aO, getResponseStatusText as aP, getResponseStatus as aQ, useNitroApp as aR, nodeServer as aS, challengePresetDefinitions as aa, challengePresetGroupOrder as ab, formatConjugationQuestion as ac, indirectRelative as ad, formatAnswer as ae, localizedLearnerErrorMessageForCode as af, localizedLearnerErrorDomain as ag, localizedLearnerErrorLabel as ah, conjugationRequiresSubjectPronoun as ai, parseURL as aj, encodePath as ak, decodePath as al, localeFromPath as am, getRequestHeaders as an, withQuery as ao, klona as ap, DEFAULT_LANGUAGE_PREFERENCES as aq, sanitizeStatusCode as ar, getContext as as, getRequestHeader as at, isEqual as au, $fetch as av, defu as aw, DEFAULT_INTERFACE_LOCALE as ax, grammarModeCode as ay, SUBJECT_PRONOUN_PLACEHOLDER as az, reorderChallengePresets as b, createError$1 as c, defineEventHandler as d, parseChallengePresetPayload as e, replaceChallengePresetSelections as f, getRouterParam as g, getCatalogue as h, listStoredChallengePresets as i, setCookie as j, deleteCookie as k, listChallengePresetCategories as l, getCookie as m, useRuntimeConfig as n, normalizeLocale as o, parseChallengePresetCategoryPayload as p, readMultipartFormData as q, readBody as r, setResponseHeader as s, getContactSettings as t, useDatabase as u, validateContactSettings as v, saveContactSettings as w, getHeader as x, deleteExpiredExerciseSummaries as y, getExerciseSummaryAdminStats as z };
+export { setHeader as $, setResponseStatus as A, getRequestURL as B, stripLocaleFromPath as C, getRequestIP as D, getExerciseSummary as E, ExerciseSummaryInputError as F, ExerciseSummaryNotFoundError as G, saveExerciseSummary as H, getCachedCatalogue as I, setResponseHeaders as J, encodePronominalSelectionId as K, decodePronominalSelectionId as L, legacyComplementOptions as M, legacyComplementConfig as N, normalizeComplementOptions as O, DEFAULT_COMPLEMENT_OPTIONS as P, validateConjugationAnswer as Q, validateAnswer as R, diagnoseLearnerError as S, LEARNER_ERROR_DETECTOR_VERSION as T, applicableLearnerErrorTypes as U, learnerErrorDetails as V, grammarTenseCode as W, LEARNER_ERROR_TAXONOMY as X, learnerErrorDetailText as Y, CURRENT_PRIVACY_NOTICE_VERSION as Z, SUPPORTED_LOCALES as _, getQuery as a, localizePath as a0, parseQuery as a1, hasProtocol as a2, joinURL as a3, isScriptProtocol as a4, withTrailingSlash as a5, withoutTrailingSlash as a6, hash$1 as a7, challengePresetGroupLabels as a8, executeAsync as a9, grammarModeCode as aA, SUBJECT_PRONOUN_PLACEHOLDER as aB, conjugationAnswerPlaceholder as aC, getAlternativeCorrections as aD, impossibleSingularEndingReminderMessage as aE, localizedLearnerErrorMessage as aF, isFutureSimpleInsteadOfNearFuture as aG, findConjugationConfusions as aH, findImpossibleSingularEnding as aI, diagnoseCoachAgreement as aJ, diagnoseCoachAnswer as aK, mergeLearnerErrorDetails as aL, learnerErrorInsteadOf as aM, joinRelativeURL as aN, defineRenderHandler as aO, destr as aP, getRouteRules as aQ, getResponseStatusText as aR, getResponseStatus as aS, useNitroApp as aT, nodeServer as aU, challengePresetDefinitions as aa, agreePastParticiple as ab, splitPastParticipleAgreement as ac, challengePresetGroupOrder as ad, formatConjugationQuestion as ae, indirectRelative as af, formatAnswer as ag, localizedLearnerErrorMessageForCode as ah, localizedLearnerErrorDomain as ai, localizedLearnerErrorLabel as aj, conjugationRequiresSubjectPronoun as ak, parseURL as al, encodePath as am, decodePath as an, localeFromPath as ao, getRequestHeaders as ap, withQuery as aq, klona as ar, DEFAULT_LANGUAGE_PREFERENCES as as, sanitizeStatusCode as at, getContext as au, getRequestHeader as av, isEqual as aw, $fetch as ax, defu as ay, DEFAULT_INTERFACE_LOCALE as az, reorderChallengePresets as b, createError$1 as c, defineEventHandler as d, parseChallengePresetPayload as e, replaceChallengePresetSelections as f, getRouterParam as g, getCatalogue as h, listStoredChallengePresets as i, setCookie as j, deleteCookie as k, listChallengePresetCategories as l, getCookie as m, useRuntimeConfig as n, normalizeLocale as o, parseChallengePresetCategoryPayload as p, readMultipartFormData as q, readBody as r, setResponseHeader as s, getContactSettings as t, useDatabase as u, validateContactSettings as v, saveContactSettings as w, getHeader as x, deleteExpiredExerciseSummaries as y, getExerciseSummaryAdminStats as z };
 //# sourceMappingURL=nitro.mjs.map

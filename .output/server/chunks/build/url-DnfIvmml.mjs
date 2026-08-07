@@ -1,4 +1,4 @@
-import { a8 as challengePresetGroupLabels, ai as conjugationRequiresSubjectPronoun, B as getRequestURL, M as legacyComplementOptions, N as legacyComplementConfig, ab as challengePresetGroupOrder } from '../nitro/nitro.mjs';
+import { a8 as challengePresetGroupLabels, ak as conjugationRequiresSubjectPronoun, B as getRequestURL, M as legacyComplementOptions, N as legacyComplementConfig, ad as challengePresetGroupOrder } from '../nitro/nitro.mjs';
 import { D as DEFAULT_SHARED_CHALLENGE_OPTIONS } from '../_/challenge-defaults.mjs';
 import { u as useState } from './state-DjsguMyT.mjs';
 import { computed, defineComponent, ref, watch, mergeProps, unref, useTemplateRef, reactive, withCtx, createTextVNode, toDisplayString, useSSRContext } from 'vue';

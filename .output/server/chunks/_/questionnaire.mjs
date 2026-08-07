@@ -1,4 +1,4 @@
-import { u as useDatabase, K as decodePronominalSelectionId, ad as indirectRelative, ac as formatConjugationQuestion, ae as formatAnswer } from '../nitro/nitro.mjs';
+import { u as useDatabase, L as decodePronominalSelectionId, af as indirectRelative, ae as formatConjugationQuestion, ag as formatAnswer } from '../nitro/nitro.mjs';
 import { b as buildRadicalReference } from './radical-reference.mjs';
 import { g as generatePronominalRow, r as resolveVariableAuxiliary } from './pronominal-formatter.mjs';
 import { i as isPassivizableInfinitive, M as MODE_IDENTIFICATION_INSTRUCTION, T as TENSE_IDENTIFICATION_INSTRUCTION } from './passive-voice.mjs';

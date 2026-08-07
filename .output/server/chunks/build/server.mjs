@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, toRef, isReadonly, isRef, isShallow, isReactive, toRaw } from 'vue';
-import { _ as SUPPORTED_LOCALES, aj as parseURL, ak as encodePath, al as decodePath, am as localeFromPath, o as normalizeLocale, an as getRequestHeaders, c as createError$1, a2 as hasProtocol, a4 as isScriptProtocol, a3 as joinURL, ao as withQuery, ap as klona, aq as DEFAULT_LANGUAGE_PREFERENCES, a0 as localizePath, ar as sanitizeStatusCode, as as getContext, at as getRequestHeader, au as isEqual, j as setCookie, m as getCookie, k as deleteCookie, av as $fetch, aw as defu, C as stripLocaleFromPath, a9 as executeAsync, ax as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { _ as SUPPORTED_LOCALES, al as parseURL, am as encodePath, an as decodePath, ao as localeFromPath, o as normalizeLocale, ap as getRequestHeaders, c as createError$1, a2 as hasProtocol, a4 as isScriptProtocol, a3 as joinURL, aq as withQuery, ar as klona, as as DEFAULT_LANGUAGE_PREFERENCES, a0 as localizePath, at as sanitizeStatusCode, au as getContext, av as getRequestHeader, aw as isEqual, j as setCookie, m as getCookie, k as deleteCookie, ax as $fetch, ay as defu, C as stripLocaleFromPath, a9 as executeAsync, az as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useSeoMeta$1, a as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -421,6 +421,10 @@ const uiMessages = {
   "Chargement du catalogue\u2026": { de: "Katalog wird geladen\u2026", en: "Loading catalogue\u2026", it: "Caricamento del catalogo\u2026", es: "Cargando cat\xE1logo\u2026" },
   "Le catalogue n\u2019a pas pu \xEAtre charg\xE9.": { de: "Der Katalog konnte nicht geladen werden.", en: "The catalogue could not be loaded.", it: "Impossibile caricare il catalogo.", es: "No se ha podido cargar el cat\xE1logo." },
   "Impossible de charger la conjugaison de ce verbe.": { de: "Die Konjugation dieses Verbs konnte nicht geladen werden.", en: "This verb\u2019s conjugation could not be loaded.", it: "Impossibile caricare la coniugazione di questo verbo.", es: "No se ha podido cargar la conjugaci\xF3n de este verbo." },
+  "Le participe pass\xE9 avec avoir": { de: "Das Partizip Perfekt mit avoir", en: "The past participle with avoir", it: "Il participio passato con avoir", es: "El participio pasado con avoir" },
+  "La place du COD change l\u2019accord": { de: "Die Position des direkten Objekts bestimmt die Angleichung", en: "The position of the direct object changes agreement", it: "La posizione del complemento oggetto cambia la concordanza", es: "La posici\xF3n del complemento directo cambia la concordancia" },
+  "Avec avoir, le participe pass\xE9 ne s\u2019accorde pas avec le COD plac\xE9 apr\xE8s.": { de: "Mit avoir wird das Partizip Perfekt nicht an ein nachgestelltes direktes Objekt angeglichen.", en: "With avoir, the past participle does not agree with a direct object placed after it.", it: "Con avoir, il participio passato non concorda con il complemento oggetto posto dopo.", es: "Con avoir, el participio pasado no concuerda con el complemento directo colocado despu\xE9s." },
+  "COD \xAB {cod} \xBB plac\xE9 avant : accord avec le COD ({gender}, {number}).": { de: "Vorangestelltes direktes Objekt \u201E{cod}\u201C: Angleichung an das direkte Objekt ({gender}, {number}).", en: "Direct object \u201C{cod}\u201D placed before the verb: agreement with the direct object ({gender}, {number}).", it: "Complemento oggetto \xAB{cod}\xBB posto prima: concordanza con il complemento oggetto ({gender}, {number}).", es: "Complemento directo \xAB{cod}\xBB colocado antes: concordancia con el complemento directo ({gender}, {number})." },
   "M\xE9thode de recherche du verbe": { de: "Methode der Verbsuche", en: "Verb search method", it: "Metodo di ricerca del verbo", es: "M\xE9todo de b\xFAsqueda del verbo" },
   "Rechercher un verbe": { de: "Ein Verb suchen", en: "Search for a verb", it: "Cerca un verbo", es: "Buscar un verbo" },
   "Liste de A \xE0 Z": { de: "Liste von A bis Z", en: "A\u2013Z list", it: "Elenco dalla A alla Z", es: "Lista de la A a la Z" },
@@ -719,6 +723,7 @@ const uiMessages = {
   "Contenu de l\u2019exercice": { de: "Inhalt der \xDCbung", en: "Exercise content", it: "Contenuto dell\u2019esercizio", es: "Contenido del ejercicio" },
   "Glisse vers le bas pour voir l\u2019aide.": { de: "Wische nach unten, um die Hilfe zu sehen.", en: "Swipe down to see the help.", it: "Scorri verso il basso per vedere l\u2019aiuto.", es: "Desliza hacia abajo para ver la ayuda." },
   "N'oublie pas le pronom !": { de: "Vergiss das Pronomen nicht!", en: "Don't forget the pronoun!", it: "Non dimenticare il pronome!", es: "\xA1No olvides el pronombre!" },
+  "\xC0 l'imp\xE9ratif, la personne est indiqu\xE9e, mais n'\xE9cris pas le pronom.": { de: "Beim Imperativ ist die Person angegeben, aber schreibe das Pronomen nicht.", en: "For the imperative, the person is shown, but don't write the pronoun.", it: "Nell\u2019imperativo la persona \xE8 indicata, ma non scrivere il pronome.", es: "En el imperativo se indica la persona, pero no escribas el pronombre." },
   "Il manque le pronom": { de: "Das Pronomen fehlt", en: "The pronoun is missing", it: "Manca il pronome", es: "Falta el pronombre" },
   "Type de faute": { de: "Fehlertyp", en: "Error type", it: "Tipo di errore", es: "Tipo de error" },
   "Types de faute": { de: "Fehlertypen", en: "Error types", it: "Tipi di errore", es: "Tipos de error" },
@@ -1477,7 +1482,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-BIrTcCn-.mjs')
+    component: () => import('./users-9356frFn.mjs')
   },
   {
     name: "modes-mode-temps",
@@ -1492,7 +1497,7 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-5s0GQRWb.mjs')
+    component: () => import('./_code_-ElRoSbio.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1507,7 +1512,7 @@ const _routes = [
   {
     name: "accueil",
     path: "/accueil",
-    component: () => import('./accueil-CK-otvZP.mjs')
+    component: () => import('./accueil-DUOf1AuD.mjs')
   },
   {
     name: "admin",
@@ -1517,12 +1522,12 @@ const _routes = [
   {
     name: "apprendre",
     path: "/apprendre",
-    component: () => import('./apprendre-BWzjdU8G.mjs')
+    component: () => import('./apprendre-DQ3ttXNZ.mjs')
   },
   {
     name: "consulter",
     path: "/consulter",
-    component: () => import('./consulter-C6E9Llru.mjs')
+    component: () => import('./consulter-CQJEw-GH.mjs')
   },
   {
     name: "exercices",
@@ -1538,12 +1543,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-BZnJQ_WC.mjs')
+    component: () => import('./my-page-DJJ1GuZt.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-D6707Awv.mjs')
+    component: () => import('./nouveau-defi-DRwxusNr.mjs')
   },
   {
     name: "signin",
@@ -1553,7 +1558,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-Dlx9eknK.mjs')
+    component: () => import('./index-ALprx07j.mjs')
   },
   {
     name: "localized-admin-admins",
@@ -1633,7 +1638,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-BIrTcCn-.mjs')
+    component: () => import('./users-9356frFn.mjs')
   },
   {
     name: "localized-modes-mode-temps",
@@ -1648,7 +1653,7 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-5s0GQRWb.mjs')
+    component: () => import('./_code_-ElRoSbio.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1663,7 +1668,7 @@ const _routes = [
   {
     name: "localized-accueil",
     path: "/:locale(fr|de|en|it|es)/accueil",
-    component: () => import('./accueil-CK-otvZP.mjs')
+    component: () => import('./accueil-DUOf1AuD.mjs')
   },
   {
     name: "localized-admin",
@@ -1673,12 +1678,12 @@ const _routes = [
   {
     name: "localized-apprendre",
     path: "/:locale(fr|de|en|it|es)/apprendre",
-    component: () => import('./apprendre-BWzjdU8G.mjs')
+    component: () => import('./apprendre-DQ3ttXNZ.mjs')
   },
   {
     name: "localized-consulter",
     path: "/:locale(fr|de|en|it|es)/consulter",
-    component: () => import('./consulter-C6E9Llru.mjs')
+    component: () => import('./consulter-CQJEw-GH.mjs')
   },
   {
     name: "localized-exercices",
@@ -1694,12 +1699,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-BZnJQ_WC.mjs')
+    component: () => import('./my-page-DJJ1GuZt.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-D6707Awv.mjs')
+    component: () => import('./nouveau-defi-DRwxusNr.mjs')
   },
   {
     name: "localized-signin",
@@ -1709,7 +1714,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-Dlx9eknK.mjs')
+    component: () => import('./index-ALprx07j.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {

@@ -1,6 +1,7 @@
-import { d as defineEventHandler, g as getRouterParam, c as createError, u as useDatabase, K as decodePronominalSelectionId } from '../../../nitro/nitro.mjs';
+import { ab as agreePastParticiple, ac as splitPastParticipleAgreement, d as defineEventHandler, g as getRouterParam, c as createError, u as useDatabase, L as decodePronominalSelectionId } from '../../../nitro/nitro.mjs';
 import { g as generatePronominalRow } from '../../../_/pronominal-formatter.mjs';
 import { b as buildNearFutureParadigm } from '../../../_/near-future.mjs';
+import { i as inferAnteposedComplement } from '../../../_/complement-placement.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -11,6 +12,59 @@ import 'node:crypto';
 import 'mysql2/promise';
 import 'node:url';
 import 'node:fs/promises';
+
+function cleanPhrase(value) {
+  return value.replace(/\s+/gu, " ").replace(/[.!?]+$/gu, "").trim();
+}
+function sentenceCase(value) {
+  return value.charAt(0).toLocaleUpperCase("fr") + value.slice(1);
+}
+function normalizedGender(value) {
+  if (!value) return null;
+  const normalized = value.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("fr");
+  if (normalized === "feminin") return "feminin";
+  if (normalized === "masculin") return "masculin";
+  return null;
+}
+function normalizedNumber(value) {
+  if (!value) return null;
+  const normalized = value.toLocaleLowerCase("fr");
+  if (normalized === "singulier" || normalized === "pluriel") return normalized;
+  return null;
+}
+function splitAnteposedComplement(value) {
+  const complement = cleanPhrase(value);
+  const match = complement.match(
+    /^(.+?)\s+((?:à\s+(?:l['’]|la\b|le\b|un\b|une\b|des\b)|au\b|aux\b|dans\b|sur\b|sous(?!-)\b|chez\b|vers\b|en\b|pour\b|par\b|avec\b|sans\b).*)$/iu
+  );
+  return match ? { cod: match[1].trim(), following: match[2].trim() } : { cod: complement, following: "" };
+}
+function buildPastParticipleAgreementExample(participle, complements) {
+  var _a, _b, _c, _d;
+  for (const complement of complements) {
+    const inferred = inferAnteposedComplement(complement.texte);
+    const gender = (_b = (_a = normalizedGender(complement.genre)) != null ? _a : inferred == null ? void 0 : inferred.gender) != null ? _b : null;
+    const number = (_d = (_c = normalizedNumber(complement.nombre)) != null ? _c : inferred == null ? void 0 : inferred.number) != null ? _d : null;
+    if (!gender || !number || gender === "masculin" && number === "singulier") continue;
+    const agreedParticiple = agreePastParticiple(participle, gender, number);
+    const splitParticiple = splitPastParticipleAgreement(participle, agreedParticiple);
+    if (!splitParticiple.agreement) continue;
+    const afterComplement = cleanPhrase(complement.texte);
+    const beforeComplement = splitAnteposedComplement(complement.texte_antepose || (inferred == null ? void 0 : inferred.text) || "");
+    if (!afterComplement || !beforeComplement.cod) continue;
+    return {
+      afterSentence: `Il a ${participle} ${afterComplement}.`,
+      beforeSentenceStart: `${sentenceCase(beforeComplement.cod)} qu\u2019il a `,
+      agreedParticipleStart: splitParticiple.unchanged,
+      agreementLetters: splitParticiple.agreement,
+      beforeSentenceEnd: `${beforeComplement.following ? ` ${beforeComplement.following}` : ""}.`,
+      cod: beforeComplement.cod,
+      gender,
+      number
+    };
+  }
+  return void 0;
+}
 
 function parseAllowedPeople(value) {
   if (Array.isArray(value)) return value.map(Number);
@@ -74,7 +128,7 @@ const _id__get = defineEventHandler(async (event) => {
   }
   const database = useDatabase();
   if (id > 0) {
-    const [[verbs], [conjugations], [nearFutureTenses2], [allerRows2]] = await Promise.all([
+    const [[verbs], [conjugations], [nearFutureTenses2], [allerRows2], [agreementComplements]] = await Promise.all([
       database.execute(`
         SELECT id, infinitif, \`participe_pr\xE9sent\` AS participe_present,
           \`participe_pass\xE9\` AS participe_passe, auxiliaire, groupe_conjugaison,
@@ -97,7 +151,20 @@ const _id__get = defineEventHandler(async (event) => {
         ORDER BY t.id, p.id
       `, [id]),
       database.execute(nearFutureTenseQuery),
-      database.execute(nearFutureAllerQuery)
+      database.execute(nearFutureAllerQuery),
+      database.execute(`
+        SELECT c.texte, c.texte_antepose, c.genre, c.nombre
+        FROM verbe_sens vs
+        INNER JOIN constructions_verbales cv ON cv.sens_id=vs.id
+        INNER JOIN complements_verbaux c ON c.construction_id=cv.id
+        WHERE vs.verbe_id=?
+          AND cv.actif=1 AND cv.statut_validation='valide' AND cv.fonction_objet='cod'
+          AND c.actif=1 AND c.statut_validation='valide'
+          AND c.nombre IS NOT NULL
+          AND (c.genre='feminin' OR c.nombre='pluriel')
+        ORDER BY (c.genre='feminin' AND c.nombre='pluriel') DESC,
+          (c.genre='feminin') DESC, c.poids DESC, c.id
+      `, [id])
     ]);
     const verb = verbs[0];
     if (!verb) throw createError({ statusCode: 404, statusMessage: "Verbe introuvable" });
@@ -124,7 +191,8 @@ const _id__get = defineEventHandler(async (event) => {
         estDefectif: Boolean(verb.est_defectif),
         typePronominal: verb.type_pronominal || "aucun"
       },
-      conjugations: [...publicConjugations(conjugations), ...nearFuture2]
+      conjugations: [...publicConjugations(conjugations), ...nearFuture2],
+      pastParticipleAgreement: verb.auxiliaire.toLocaleLowerCase("fr") === "avoir" ? buildPastParticipleAgreementExample(verb.participe_passe, agreementComplements) : void 0
     };
   }
   const useId = decodePronominalSelectionId(id);

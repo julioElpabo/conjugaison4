@@ -9,25 +9,25 @@ const MODE_ORDER = /* @__PURE__ */ new Map([
 ]);
 const TENSE_ORDER = /* @__PURE__ */ new Map([
   ["indicatif:pr\xE9sent", 10],
-  ["indicatif:futur proche", 15],
-  ["indicatif:pass\xE9 compos\xE9", 20],
-  ["indicatif:imparfait", 30],
-  ["indicatif:plus-que-parfait", 40],
-  ["indicatif:pass\xE9 simple", 50],
-  ["indicatif:pass\xE9 ant\xE9rieur", 60],
-  ["indicatif:futur", 70],
-  ["indicatif:futur ant\xE9rieur", 80],
+  ["indicatif:pass\xE9 compos\xE9", 11],
+  ["indicatif:imparfait", 20],
+  ["indicatif:plus-que-parfait", 21],
+  ["indicatif:pass\xE9 simple", 30],
+  ["indicatif:pass\xE9 ant\xE9rieur", 31],
+  ["indicatif:futur proche", 40],
+  ["indicatif:futur", 50],
+  ["indicatif:futur ant\xE9rieur", 51],
   ["subjonctif:pr\xE9sent", 10],
-  ["subjonctif:pass\xE9", 20],
-  ["subjonctif:imparfait", 30],
-  ["subjonctif:plus-que-parfait", 40],
+  ["subjonctif:pass\xE9", 11],
+  ["subjonctif:imparfait", 20],
+  ["subjonctif:plus-que-parfait", 21],
   ["conditionnel:pr\xE9sent", 10],
-  ["conditionnel:pass\xE9 1", 20],
-  ["conditionnel:pass\xE9 2", 30],
+  ["conditionnel:pass\xE9 1", 11],
+  ["conditionnel:pass\xE9 2", 20],
   ["imp\xE9ratif:pr\xE9sent", 10],
-  ["imp\xE9ratif:pass\xE9", 20],
+  ["imp\xE9ratif:pass\xE9", 11],
   ["infinitif:pr\xE9sent", 10],
-  ["infinitif:pass\xE9", 20]
+  ["infinitif:pass\xE9", 11]
 ]);
 function key(value) {
   return value.trim().toLocaleLowerCase("fr-CH");
@@ -39,6 +39,10 @@ function conjugationModeOrder(mode) {
 function conjugationTenseOrder(mode, tense) {
   var _a;
   return (_a = TENSE_ORDER.get(`${key(mode)}:${key(tense)}`)) != null ? _a : 999;
+}
+function conjugationTenseRow(mode, tense) {
+  const order = conjugationTenseOrder(mode, tense);
+  return order === 999 ? 999 : Math.floor(order / 10);
 }
 function conjugationTenseLabel(mode, tense) {
   const normalizedMode = key(mode);
@@ -52,5 +56,5 @@ function isFiniteConjugationMode(mode) {
   return ["indicatif", "subjonctif", "conditionnel", "imp\xE9ratif"].includes(key(mode));
 }
 
-export { conjugationTenseOrder as a, conjugationTenseLabel as b, conjugationModeOrder as c, isFiniteConjugationMode as i };
+export { conjugationTenseOrder as a, conjugationTenseLabel as b, conjugationModeOrder as c, conjugationTenseRow as d, isFiniteConjugationMode as i };
 //# sourceMappingURL=conjugation-display.mjs.map

@@ -378,6 +378,7 @@ const activeSection = computed(() => {
     <footer class="site-footer">
       <p>{{ ui('Un outil gratuit pour travailler la conjugaison française.') }}</p>
       <div class="site-footer__links">
+        <NuxtLink :to="localePath('/exercices')">{{ ui('Modes et temps') }}</NuxtLink>
         <button type="button" @click="contactDialog?.open()">{{ ui('Contact') }}</button>
         <NuxtLink :to="localePath('/admin')">{{ ui('Administration') }}</NuxtLink>
       </div>

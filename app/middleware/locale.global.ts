@@ -4,6 +4,7 @@ import {
   localizePath,
   normalizeLocale,
 } from '~~/shared/i18n/locales'
+import { permanentLegacyRedirect } from '~~/shared/seo/legacy-redirects'
 
 export default defineNuxtRouteMiddleware((to) => {
   const interfaceLocale = useCookie<string>('interface_locale', {
@@ -11,6 +12,21 @@ export default defineNuxtRouteMiddleware((to) => {
     path: '/',
     sameSite: 'lax',
   })
+  const legacyRedirect = permanentLegacyRedirect(to.path)
+
+  if (legacyRedirect && legacyRedirect !== to.path) {
+    const destinationLocale = localeFromPath(legacyRedirect)
+    if (destinationLocale) interfaceLocale.value = destinationLocale
+    return navigateTo({
+      path: legacyRedirect,
+      query: to.query,
+      hash: to.hash,
+    }, {
+      redirectCode: 301,
+      replace: true,
+    })
+  }
+
   const routeLocale = localeFromPath(to.path)
 
   if (routeLocale) {

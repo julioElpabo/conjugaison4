@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, toRef, isReadonly, isRef, isShallow, isReactive, toRaw } from 'vue';
-import { aj as parseURL, ak as encodePath, al as decodePath, am as localeFromPath, o as normalizeLocale, an as getRequestHeaders, c as createError$1, a2 as hasProtocol, a4 as isScriptProtocol, a3 as joinURL, ao as withQuery, ap as klona, aq as DEFAULT_LANGUAGE_PREFERENCES, a0 as localizePath, ar as sanitizeStatusCode, as as getContext, at as getRequestHeader, au as isEqual, j as setCookie, m as getCookie, k as deleteCookie, av as $fetch, aw as defu, C as stripLocaleFromPath, _ as SUPPORTED_LOCALES, a9 as executeAsync, ax as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { _ as SUPPORTED_LOCALES, aj as parseURL, ak as encodePath, al as decodePath, am as localeFromPath, o as normalizeLocale, an as getRequestHeaders, c as createError$1, a2 as hasProtocol, a4 as isScriptProtocol, a3 as joinURL, ao as withQuery, ap as klona, aq as DEFAULT_LANGUAGE_PREFERENCES, a0 as localizePath, ar as sanitizeStatusCode, as as getContext, at as getRequestHeader, au as isEqual, j as setCookie, m as getCookie, k as deleteCookie, av as $fetch, aw as defu, C as stripLocaleFromPath, a9 as executeAsync, ax as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useSeoMeta$1, a as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -190,6 +190,29 @@ var Hookable = class {
 };
 function createHooks() {
 	return new Hookable();
+}
+
+const LOCALE_PATTERN = SUPPORTED_LOCALES.join("|");
+const LOCALIZED_LEGACY_HOME = new RegExp(`^/(${LOCALE_PATTERN})/accueil/?$`, "u");
+function withoutTrailingSlash(path) {
+  return path.length > 1 ? path.replace(/\/+$/u, "") : path;
+}
+function permanentLegacyRedirect(path) {
+  const localizedHome = path.match(LOCALIZED_LEGACY_HOME);
+  if (localizedHome) return `/${localizedHome[1]}/`;
+  const normalizedPath = withoutTrailingSlash(path);
+  if (normalizedPath === "/" || normalizedPath === "/accueil") return "/fr/";
+  if (["/apprendre", "/consulter", "/exercices"].includes(normalizedPath)) {
+    return `/fr${normalizedPath}`;
+  }
+  const formerExerciseJourney = normalizedPath.match(/^\/exercices\/([^/]+)$/u);
+  if (formerExerciseJourney) {
+    return `/fr/modes/indicatif/${formerExerciseJourney[1]}`;
+  }
+  if (/^\/modes\/[^/]+(?:\/[^/]+)?$/u.test(normalizedPath)) {
+    return `/fr${normalizedPath}`;
+  }
+  return null;
 }
 
 function endIndex(str, min, len) {
@@ -1379,314 +1402,314 @@ const _routes = [
   {
     name: "admin-admins",
     path: "/admin/admins",
-    component: () => import('./admins-lbnUPg4N.mjs')
+    component: () => import('./admins-ByYqTX-l.mjs')
   },
   {
     name: "admin-caracteres",
     path: "/admin/caracteres",
-    component: () => import('./caracteres-QPSFH3UR.mjs')
+    component: () => import('./caracteres-D9si6_na.mjs')
   },
   {
     name: "admin-challenges",
     path: "/admin/challenges",
-    component: () => import('./challenges-yWE2qvq6.mjs')
+    component: () => import('./challenges-BXLbpoli.mjs')
   },
   {
     name: "admin-characters",
     path: "/admin/characters",
-    component: () => import('./characters-B2zLlH0H.mjs')
+    component: () => import('./characters-BXdrw2IO.mjs')
   },
   {
     name: "admin-charts",
     path: "/admin/charts",
-    component: () => import('./charts-03DBQJjX.mjs')
+    component: () => import('./charts-DkpYroMx.mjs')
   },
   {
     name: "admin-coaches",
     path: "/admin/coaches",
-    component: () => import('./coaches-f75aWv2g.mjs')
+    component: () => import('./coaches-DCxPVcZ4.mjs')
   },
   {
     name: "admin-contact",
     path: "/admin/contact",
-    component: () => import('./contact-BoHStb62.mjs')
+    component: () => import('./contact-CZwL-pF4.mjs')
   },
   {
     name: "admin-errors",
     path: "/admin/errors",
-    component: () => import('./errors-2xvFBdc_.mjs')
+    component: () => import('./errors-Dekuc_zf.mjs')
   },
   {
     name: "admin-feedbacks",
     path: "/admin/feedbacks",
-    component: () => import('./feedbacks-CUimwsfI.mjs')
+    component: () => import('./feedbacks-k6rekWke.mjs')
   },
   {
     name: "admin-help-verification",
     path: "/admin/help-verification",
-    component: () => import('./help-verification-CO-dWGcQ.mjs')
+    component: () => import('./help-verification-B_PySq8p.mjs')
   },
   {
     name: "admin-helps",
     path: "/admin/helps",
-    component: () => import('./helps-Dv5XZ1FJ.mjs')
+    component: () => import('./helps-ZpEAVgh5.mjs')
   },
   {
     name: "admin-literary-corpus",
     path: "/admin/literary-corpus",
-    component: () => import('./literary-corpus-BSqCHQTl.mjs')
+    component: () => import('./literary-corpus-CHWF3U9e.mjs')
   },
   {
     name: "admin-phrases",
     path: "/admin/phrases",
-    component: () => import('./phrases-Cs9YS84S.mjs')
+    component: () => import('./phrases-D36F4JmP.mjs')
   },
   {
     name: "admin-shared-summaries",
     path: "/admin/shared-summaries",
-    component: () => import('./shared-summaries-CpxG-y-x.mjs')
+    component: () => import('./shared-summaries-CFdn8Lx_.mjs')
   },
   {
     name: "admin-tests",
     path: "/admin/tests",
-    component: () => import('./tests-CtTU-zE4.mjs')
+    component: () => import('./tests-BUcIaujo.mjs')
   },
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-Di8X4b4N.mjs')
+    component: () => import('./users-BIrTcCn-.mjs')
   },
   {
     name: "modes-mode-temps",
     path: "/modes/:mode()/:temps()",
-    component: () => import('./_temps_-1n1rJlXg.mjs')
+    component: () => import('./_temps_-Ckw4-s_L.mjs')
   },
   {
     name: "bilan-token",
     path: "/bilan/:token()",
-    component: () => import('./_token_-D1GoBSp-.mjs')
+    component: () => import('./_token_-uGNw_wpn.mjs')
   },
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-BvTZOkTW.mjs')
+    component: () => import('./_code_-5s0GQRWb.mjs')
   },
   {
     name: "exercices-parcours",
     path: "/exercices/:parcours()",
-    component: () => import('./_parcours_-BHvP1Bgy.mjs')
+    component: () => import('./_parcours_-DkuDeDnk.mjs')
   },
   {
     name: "modes-mode",
     path: "/modes/:mode()",
-    component: () => import('./index-CCCw5GXE.mjs')
+    component: () => import('./index-D3n4Xe-s.mjs')
   },
   {
     name: "accueil",
     path: "/accueil",
-    component: () => import('./accueil-LjtnfWv0.mjs')
+    component: () => import('./accueil-CK-otvZP.mjs')
   },
   {
     name: "admin",
     path: "/admin",
-    component: () => import('./index-D1HbrPFF.mjs')
+    component: () => import('./index-BKMT1r5g.mjs')
   },
   {
     name: "apprendre",
     path: "/apprendre",
-    component: () => import('./apprendre-BUERm2Xf.mjs')
+    component: () => import('./apprendre-BWzjdU8G.mjs')
   },
   {
     name: "consulter",
     path: "/consulter",
-    component: () => import('./consulter-DI9YNZS_.mjs')
+    component: () => import('./consulter-C6E9Llru.mjs')
   },
   {
     name: "exercices",
     path: "/exercices",
-    component: () => import('./index-DyvMNFSj.mjs')
+    component: () => import('./index-Dfl89Tkk.mjs')
   },
   {
     name: "mon-compte",
     path: "/mon-compte",
-    component: () => import('./mon-compte-BIojvBdT.mjs')
+    component: () => import('./mon-compte-CWRsuIbV.mjs')
   },
   {
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-ApSBJ0CX.mjs')
+    component: () => import('./my-page-BZnJQ_WC.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-BYQml2Q5.mjs')
+    component: () => import('./nouveau-defi-D6707Awv.mjs')
   },
   {
     name: "signin",
     path: "/signin",
-    component: () => import('./signin-DR41Hgv5.mjs')
+    component: () => import('./signin-LSEvn-Xv.mjs')
   },
   {
     name: "index",
     path: "/",
-    component: () => import('./index-BrcP647q.mjs')
+    component: () => import('./index-Dlx9eknK.mjs')
   },
   {
     name: "localized-admin-admins",
     path: "/:locale(fr|de|en|it|es)/admin/admins",
-    component: () => import('./admins-lbnUPg4N.mjs')
+    component: () => import('./admins-ByYqTX-l.mjs')
   },
   {
     name: "localized-admin-caracteres",
     path: "/:locale(fr|de|en|it|es)/admin/caracteres",
-    component: () => import('./caracteres-QPSFH3UR.mjs')
+    component: () => import('./caracteres-D9si6_na.mjs')
   },
   {
     name: "localized-admin-challenges",
     path: "/:locale(fr|de|en|it|es)/admin/challenges",
-    component: () => import('./challenges-yWE2qvq6.mjs')
+    component: () => import('./challenges-BXLbpoli.mjs')
   },
   {
     name: "localized-admin-characters",
     path: "/:locale(fr|de|en|it|es)/admin/characters",
-    component: () => import('./characters-B2zLlH0H.mjs')
+    component: () => import('./characters-BXdrw2IO.mjs')
   },
   {
     name: "localized-admin-charts",
     path: "/:locale(fr|de|en|it|es)/admin/charts",
-    component: () => import('./charts-03DBQJjX.mjs')
+    component: () => import('./charts-DkpYroMx.mjs')
   },
   {
     name: "localized-admin-coaches",
     path: "/:locale(fr|de|en|it|es)/admin/coaches",
-    component: () => import('./coaches-f75aWv2g.mjs')
+    component: () => import('./coaches-DCxPVcZ4.mjs')
   },
   {
     name: "localized-admin-contact",
     path: "/:locale(fr|de|en|it|es)/admin/contact",
-    component: () => import('./contact-BoHStb62.mjs')
+    component: () => import('./contact-CZwL-pF4.mjs')
   },
   {
     name: "localized-admin-errors",
     path: "/:locale(fr|de|en|it|es)/admin/errors",
-    component: () => import('./errors-2xvFBdc_.mjs')
+    component: () => import('./errors-Dekuc_zf.mjs')
   },
   {
     name: "localized-admin-feedbacks",
     path: "/:locale(fr|de|en|it|es)/admin/feedbacks",
-    component: () => import('./feedbacks-CUimwsfI.mjs')
+    component: () => import('./feedbacks-k6rekWke.mjs')
   },
   {
     name: "localized-admin-help-verification",
     path: "/:locale(fr|de|en|it|es)/admin/help-verification",
-    component: () => import('./help-verification-CO-dWGcQ.mjs')
+    component: () => import('./help-verification-B_PySq8p.mjs')
   },
   {
     name: "localized-admin-helps",
     path: "/:locale(fr|de|en|it|es)/admin/helps",
-    component: () => import('./helps-Dv5XZ1FJ.mjs')
+    component: () => import('./helps-ZpEAVgh5.mjs')
   },
   {
     name: "localized-admin-literary-corpus",
     path: "/:locale(fr|de|en|it|es)/admin/literary-corpus",
-    component: () => import('./literary-corpus-BSqCHQTl.mjs')
+    component: () => import('./literary-corpus-CHWF3U9e.mjs')
   },
   {
     name: "localized-admin-phrases",
     path: "/:locale(fr|de|en|it|es)/admin/phrases",
-    component: () => import('./phrases-Cs9YS84S.mjs')
+    component: () => import('./phrases-D36F4JmP.mjs')
   },
   {
     name: "localized-admin-shared-summaries",
     path: "/:locale(fr|de|en|it|es)/admin/shared-summaries",
-    component: () => import('./shared-summaries-CpxG-y-x.mjs')
+    component: () => import('./shared-summaries-CFdn8Lx_.mjs')
   },
   {
     name: "localized-admin-tests",
     path: "/:locale(fr|de|en|it|es)/admin/tests",
-    component: () => import('./tests-CtTU-zE4.mjs')
+    component: () => import('./tests-BUcIaujo.mjs')
   },
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-Di8X4b4N.mjs')
+    component: () => import('./users-BIrTcCn-.mjs')
   },
   {
     name: "localized-modes-mode-temps",
     path: "/:locale(fr|de|en|it|es)/modes/:mode()/:temps()",
-    component: () => import('./_temps_-1n1rJlXg.mjs')
+    component: () => import('./_temps_-Ckw4-s_L.mjs')
   },
   {
     name: "localized-bilan-token",
     path: "/:locale(fr|de|en|it|es)/bilan/:token()",
-    component: () => import('./_token_-D1GoBSp-.mjs')
+    component: () => import('./_token_-uGNw_wpn.mjs')
   },
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-BvTZOkTW.mjs')
+    component: () => import('./_code_-5s0GQRWb.mjs')
   },
   {
     name: "localized-exercices-parcours",
     path: "/:locale(fr|de|en|it|es)/exercices/:parcours()",
-    component: () => import('./_parcours_-BHvP1Bgy.mjs')
+    component: () => import('./_parcours_-DkuDeDnk.mjs')
   },
   {
     name: "localized-modes-mode",
     path: "/:locale(fr|de|en|it|es)/modes/:mode()",
-    component: () => import('./index-CCCw5GXE.mjs')
+    component: () => import('./index-D3n4Xe-s.mjs')
   },
   {
     name: "localized-accueil",
     path: "/:locale(fr|de|en|it|es)/accueil",
-    component: () => import('./accueil-LjtnfWv0.mjs')
+    component: () => import('./accueil-CK-otvZP.mjs')
   },
   {
     name: "localized-admin",
     path: "/:locale(fr|de|en|it|es)/admin",
-    component: () => import('./index-D1HbrPFF.mjs')
+    component: () => import('./index-BKMT1r5g.mjs')
   },
   {
     name: "localized-apprendre",
     path: "/:locale(fr|de|en|it|es)/apprendre",
-    component: () => import('./apprendre-BUERm2Xf.mjs')
+    component: () => import('./apprendre-BWzjdU8G.mjs')
   },
   {
     name: "localized-consulter",
     path: "/:locale(fr|de|en|it|es)/consulter",
-    component: () => import('./consulter-DI9YNZS_.mjs')
+    component: () => import('./consulter-C6E9Llru.mjs')
   },
   {
     name: "localized-exercices",
     path: "/:locale(fr|de|en|it|es)/exercices",
-    component: () => import('./index-DyvMNFSj.mjs')
+    component: () => import('./index-Dfl89Tkk.mjs')
   },
   {
     name: "localized-mon-compte",
     path: "/:locale(fr|de|en|it|es)/mon-compte",
-    component: () => import('./mon-compte-BIojvBdT.mjs')
+    component: () => import('./mon-compte-CWRsuIbV.mjs')
   },
   {
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-ApSBJ0CX.mjs')
+    component: () => import('./my-page-BZnJQ_WC.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-BYQml2Q5.mjs')
+    component: () => import('./nouveau-defi-D6707Awv.mjs')
   },
   {
     name: "localized-signin",
     path: "/:locale(fr|de|en|it|es)/signin",
-    component: () => import('./signin-DR41Hgv5.mjs')
+    component: () => import('./signin-LSEvn-Xv.mjs')
   },
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-BrcP647q.mjs')
+    component: () => import('./index-Dlx9eknK.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -1983,6 +2006,19 @@ const locale_45global = /* @__PURE__ */ defineNuxtRouteMiddleware((to) => {
     path: "/",
     sameSite: "lax"
   });
+  const legacyRedirect = permanentLegacyRedirect(to.path);
+  if (legacyRedirect && legacyRedirect !== to.path) {
+    const destinationLocale = localeFromPath(legacyRedirect);
+    if (destinationLocale) interfaceLocale.value = destinationLocale;
+    return navigateTo({
+      path: legacyRedirect,
+      query: to.query,
+      hash: to.hash
+    }, {
+      redirectCode: 301,
+      replace: true
+    });
+  }
   const routeLocale = localeFromPath(to.path);
   if (routeLocale) {
     if (interfaceLocale.value !== routeLocale) interfaceLocale.value = routeLocale;
@@ -2021,7 +2057,7 @@ const globalMiddleware = [
   manifest_45route_45rule
 ];
 const namedMiddleware = {
-  "learner-auth": () => import('./learner-auth-C9dYJp58.mjs')
+  "learner-auth": () => import('./learner-auth-BlQpcSD3.mjs')
 };
 Object.assign(/* @__PURE__ */ Object.create(null), {});
 const pageIslandRoutes = Object.assign(/* @__PURE__ */ Object.create(null), {});
@@ -2281,7 +2317,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-DAHFP91_.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-sLVmB2Of.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({
@@ -2661,8 +2697,8 @@ const _sfc_main$1 = {
     const statusText = _error.statusMessage ?? (is404 ? "Page Not Found" : "Internal Server Error");
     const description = _error.message || _error.toString();
     const stack = void 0;
-    const _Error404 = defineAsyncComponent(() => import('./error-404-5msd5XjW.mjs'));
-    const _Error = defineAsyncComponent(() => import('./error-500-DSf6HZe2.mjs'));
+    const _Error404 = defineAsyncComponent(() => import('./error-404-dpVO1X5U.mjs'));
+    const _Error = defineAsyncComponent(() => import('./error-500-Or7ZOf9q.mjs'));
     const ErrorTemplate = is404 ? _Error404 : _Error;
     return (_ctx, _push, _parent, _attrs) => {
       _push(ssrRenderComponent(unref(ErrorTemplate), mergeProps({ status: unref(status), statusText: unref(statusText), statusCode: unref(status), statusMessage: unref(statusText), description: unref(description), stack: unref(stack) }, _attrs), null, _parent));

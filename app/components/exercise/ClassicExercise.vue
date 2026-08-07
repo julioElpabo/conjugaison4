@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { faArrowUpFromBracket, faPrint } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import LearnerErrorFeedback from '~/components/exercise/LearnerErrorFeedback.vue'
 import ShareExerciseSummaryDialog from '~/components/exercise/ShareExerciseSummaryDialog.vue'
 import { isModeLandingSlug, modeLandingPage } from '~~/shared/data/mode-landing-pages'
@@ -47,6 +49,7 @@ const isSmallScreen = ref(false)
 const feedback = ref<'idle' | 'correct' | 'incorrect'>('idle')
 const retryAlreadyOffered = ref(false)
 const retryMessageVisible = ref(false)
+const missingPronounMessageVisible = ref(false)
 const futureSimpleConfusion = ref(false)
 const conjugationConfusions = ref<ReturnType<typeof findConjugationConfusions>>([])
 const impossibleSingularEnding = ref<ReturnType<typeof findImpossibleSingularEnding>>(null)
@@ -378,12 +381,23 @@ function submitAnswer() {
     return
   }
 
-  const { result, shouldRetry } = evaluateExerciseAnswer(
+  const { result, shouldRetry, missingSubjectPronoun } = evaluateExerciseAnswer(
     answer.value,
     question,
     retryAlreadyOffered.value,
     !isIdentificationExercise.value,
   )
+  if (missingSubjectPronoun) {
+    missingPronounMessageVisible.value = true
+    retryMessageVisible.value = false
+    detectedErrorDetails.value = []
+    nextTick(() => {
+      answerInput.value?.focus()
+      answerInput.value?.select()
+    })
+    return
+  }
+  missingPronounMessageVisible.value = false
   lastIncorrectIdentificationAnswer.value = isIdentificationExercise.value && !result.isCorrect ? answer.value : ''
   const usedFutureSimple = !isIdentificationExercise.value && !result.isCorrect && isFutureSimpleInsteadOfNearFuture(answer.value, question)
   const otherConjugations = isIdentificationExercise.value || result.isCorrect ? [] : findConjugationConfusions(answer.value, question)
@@ -460,6 +474,7 @@ function showTourProgress() {
   feedback.value = 'idle'
   retryAlreadyOffered.value = false
   retryMessageVisible.value = false
+  missingPronounMessageVisible.value = false
   futureSimpleConfusion.value = false
   conjugationConfusions.value = []
   impossibleSingularEnding.value = null
@@ -514,6 +529,7 @@ function nextQuestion() {
   feedback.value = 'idle'
   retryAlreadyOffered.value = false
   retryMessageVisible.value = false
+  missingPronounMessageVisible.value = false
   futureSimpleConfusion.value = false
   conjugationConfusions.value = []
   impossibleSingularEnding.value = null
@@ -533,6 +549,7 @@ function restart() {
   feedback.value = 'idle'
   retryAlreadyOffered.value = false
   retryMessageVisible.value = false
+  missingPronounMessageVisible.value = false
   futureSimpleConfusion.value = false
   conjugationConfusions.value = []
   impossibleSingularEnding.value = null
@@ -658,7 +675,7 @@ onBeforeUnmount(() => {
             </p>
             <form
               class="completion-form"
-              :class="{ 'is-awaiting-retry': retryMessageVisible }"
+              :class="{ 'is-awaiting-retry': retryMessageVisible || missingPronounMessageVisible }"
               @submit.prevent="feedback === 'idle' ? submitAnswer() : nextQuestion()"
             >
               <label class="completion-form__label" for="exercise-answer">{{ ui('Ta réponse') }}</label>
@@ -679,7 +696,7 @@ onBeforeUnmount(() => {
                     'is-invalid': feedback === 'incorrect' || retryMessageVisible
                   }"
                   :aria-invalid="feedback === 'incorrect' || retryMessageVisible"
-                  :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : retryMessageVisible ? 'answer-retry' : undefined"
+                  :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : missingPronounMessageVisible ? 'answer-missing-pronoun' : retryMessageVisible ? 'answer-retry' : undefined"
                 >
                 <span v-if="currentQuestion.complementPosition !== 'before'">
                   {{ currentQuestion.complement }}{{ currentQuestion.mode?.toLocaleLowerCase('fr') === 'impératif' ? ' !' : '' }}
@@ -690,6 +707,10 @@ onBeforeUnmount(() => {
                 {{ currentIndex === questions.length - 1 ? ui('Voir mes résultats') : ui('Question suivante') }}
               </button>
             </form>
+            <div v-if="missingPronounMessageVisible" id="answer-missing-pronoun" class="answer-retry answer-retry--missing-pronoun" role="status" aria-live="polite">
+              <span class="answer-retry__icon" aria-hidden="true">i</span>
+              <div><strong>{{ ui('Il manque le pronom') }}</strong></div>
+            </div>
             <div v-if="retryMessageVisible" id="answer-retry" class="answer-retry" role="status" aria-live="polite">
               <span class="answer-retry__icon" aria-hidden="true">↻</span>
               <div>
@@ -761,7 +782,7 @@ onBeforeUnmount(() => {
           <form
             v-if="!(exerciseKind === 'conjugation' && currentQuestion.complement)"
             class="answer-form"
-            :class="{ 'is-awaiting-retry': retryMessageVisible }"
+            :class="{ 'is-awaiting-retry': retryMessageVisible || missingPronounMessageVisible }"
             @submit.prevent="feedback === 'idle' ? submitAnswer() : nextQuestion()"
           >
             <label for="exercise-answer">{{ ui('Ta réponse') }}</label>
@@ -779,7 +800,7 @@ onBeforeUnmount(() => {
                   'is-invalid': feedback === 'incorrect' || retryMessageVisible
                 }"
                 :aria-invalid="feedback === 'incorrect' || retryMessageVisible"
-                :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : retryMessageVisible ? 'answer-retry' : undefined"
+                :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : missingPronounMessageVisible ? 'answer-missing-pronoun' : retryMessageVisible ? 'answer-retry' : undefined"
               >
               <button v-if="feedback === 'idle'" class="primary-button" type="submit" :disabled="!answer.trim()"> {{ ui('Vérifier') }} </button>
               <button v-else class="primary-button" type="submit">
@@ -787,6 +808,16 @@ onBeforeUnmount(() => {
               </button>
             </div>
           </form>
+          <div
+            v-if="missingPronounMessageVisible && !(exerciseKind === 'conjugation' && currentQuestion.complement)"
+            id="answer-missing-pronoun"
+            class="answer-retry answer-retry--missing-pronoun"
+            role="status"
+            aria-live="polite"
+          >
+            <span class="answer-retry__icon" aria-hidden="true">i</span>
+            <div><strong>{{ ui('Il manque le pronom') }}</strong></div>
+          </div>
           <div
             v-if="retryMessageVisible && !(exerciseKind === 'conjugation' && currentQuestion.complement)"
             id="answer-retry"
@@ -913,8 +944,8 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="dialog-actions exercise-results__actions">
-            <button class="secondary-button exercise-result-action" type="button" @click="shareSummaryOpen = true"><span aria-hidden="true">↗</span>{{ ui('Partager mon bilan') }}</button>
-            <button class="secondary-button exercise-result-action" type="button" @click="printSummaryOpen = true"><span aria-hidden="true">⎙</span>{{ ui('Imprimer mon bilan') }}</button>
+            <button class="secondary-button exercise-result-action" type="button" @click="shareSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faArrowUpFromBracket" /></span>{{ ui('Partager mon bilan') }}</button>
+            <button class="secondary-button exercise-result-action" type="button" @click="printSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faPrint" /></span>{{ ui('Imprimer mon bilan') }}</button>
             <button class="primary-button exercise-result-action" type="button" @click="restart"><span aria-hidden="true">↻</span>{{ ui('Recommencer') }}</button>
             <button class="secondary-button exercise-results__close" type="button" @click="emit('close')">{{ ui('Fermer') }}</button>
           </div>

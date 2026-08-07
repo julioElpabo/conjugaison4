@@ -132,7 +132,27 @@ describe('pronom sujet obligatoire', () => {
   const question = { reponses: ['vient', 'il vient'], pronom: 'il', mode: 'indicatif' }
 
   it('refuse la forme verbale seule même si une ancienne question la proposait', () => {
-    assert.equal(validateConjugationAnswer('vient', question).isCorrect, false)
+    const result = validateConjugationAnswer('vient', question)
+    assert.equal(result.isCorrect, false)
+    assert.equal(result.reason, 'missing-subject-pronoun')
+  })
+
+  it('reconnaît une forme correcte privée de son pronom', () => {
+    assert.equal(validateConjugationAnswer('pourrez', {
+      reponses: ['vous pourrez'], pronom: 'vous', mode: 'indicatif',
+    }).reason, 'missing-subject-pronoun')
+    assert.equal(validateConjugationAnswer('nous sommes aperçus', {
+      reponses: ['nous nous sommes aperçus'], pronom: 'nous', mode: 'indicatif',
+    }).reason, 'missing-subject-pronoun')
+    assert.equal(validateConjugationAnswer('puissiez', {
+      reponses: ['que vous puissiez'], pronom: 'vous', mode: 'subjonctif',
+    }).reason, 'missing-subject-pronoun')
+  })
+
+  it('conserve une vraie erreur lorsque la forme verbale est fausse', () => {
+    assert.equal(validateConjugationAnswer('pourrais', {
+      reponses: ['vous pourrez'], pronom: 'vous', mode: 'indicatif',
+    }).reason, 'no-match')
   })
 
   it('accepte la réponse complète avec le pronom demandé', () => {

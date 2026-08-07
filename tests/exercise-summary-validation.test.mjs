@@ -50,6 +50,10 @@ test('monte explicitement le modal et ordonne les actions du bilan', async () =>
   for (const component of ['ClassicExercise.vue', 'ChatExercise.vue']) {
     const source = await readFile(new URL(`../app/components/exercise/${component}`, import.meta.url), 'utf8')
     assert.match(source, /import ShareExerciseSummaryDialog from/u)
+    assert.match(source, /faArrowUpFromBracket, faPrint/u)
+    assert.match(source, /<FontAwesomeIcon :icon="faArrowUpFromBracket" \/>/u)
+    assert.match(source, /<FontAwesomeIcon :icon="faPrint" \/>/u)
+    assert.doesNotMatch(source, /<span aria-hidden="true">(?:↗|⎙)<\/span>/u)
     const share = source.indexOf("ui('Partager mon bilan')")
     const print = source.indexOf("ui('Imprimer mon bilan')")
     const close = Math.max(source.indexOf("ui('Fermer')", print), source.indexOf("ui('Quitter le chat')", print))

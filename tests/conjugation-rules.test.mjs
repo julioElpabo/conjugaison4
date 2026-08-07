@@ -137,15 +137,21 @@ describe('apostrophes et élisions françaises', () => {
 })
 
 describe('accords affichés dans le corrigé', () => {
-  it('montre les formes masculine et féminine avec je et nous', () => {
+  it('montre les formes masculine et féminine avec je, tu et nous', () => {
     const singular = formatConjugationQuestion(row({
       conjugaison1: 'suis parti', conjugaison2: '', auxiliaire: 'être', participe_passe: 'parti', is_compound: 1,
     }), 'je')
+    const secondPerson = formatConjugationQuestion(row({
+      infinitif: 'aller', conjugaison1: 'es allé', conjugaison2: '', auxiliaire: 'être', participe_passe: 'allé', is_compound: 1,
+    }), 'tu')
     const plural = formatConjugationQuestion(row({
       conjugaison1: 'sommes partis', conjugaison2: '', auxiliaire: 'être', participe_passe: 'parti', is_compound: 1,
     }), 'nous')
 
     assert.deepEqual(singular.reponsesPourCorrige, ['je suis parti', 'je suis partie'])
+    assert.deepEqual(secondPerson.reponsesPourCorrige, ['tu es allé', 'tu es allée'])
+    assert.ok(secondPerson.reponses.includes('tu es allé'))
+    assert.ok(secondPerson.reponses.includes('tu es allée'))
     assert.deepEqual(plural.reponsesPourCorrige, ['nous sommes partis', 'nous sommes parties'])
   })
 

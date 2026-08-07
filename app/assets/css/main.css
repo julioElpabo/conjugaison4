@@ -2100,6 +2100,12 @@ body.dialog-open {
   line-height: 1;
 }
 
+.exercise-result-action > span svg {
+  display: block;
+  width: 1em;
+  height: 1em;
+}
+
 .exercise-results__close {
   margin-left: auto;
 }

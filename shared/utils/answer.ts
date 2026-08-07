@@ -13,6 +13,7 @@ export type AnswerValidationReason =
   | 'correct'
   | 'empty-answer'
   | 'no-expected-answer'
+  | 'missing-subject-pronoun'
   | 'no-match'
 
 export interface AnswerValidationResult {
@@ -154,6 +155,29 @@ function answerContainsSubjectPronoun(answer: unknown, pronoun: string) {
   return words.some(word => accepted.has(word))
 }
 
+function sameWords(left: readonly string[], right: readonly string[]) {
+  return left.length === right.length && left.every((word, index) => word === right[index])
+}
+
+function answerMatchesWithoutSubjectPronoun(
+  answer: unknown,
+  expectedAnswers: readonly unknown[],
+  pronoun: string,
+) {
+  const answerWords = lexicalWords(answer)
+  if (!answerWords.length) return false
+  const acceptedSubjects = pronoun === 'je' ? new Set(['je', 'j']) : new Set([pronoun])
+  return expectedAnswers.some((expected) => {
+    const expectedWords = lexicalWords(expected)
+    const subjectIndex = expectedWords.findIndex(word => acceptedSubjects.has(word))
+    if (subjectIndex < 0) return false
+    const withoutSubject = expectedWords.filter((_, index) => index !== subjectIndex)
+    if (sameWords(answerWords, withoutSubject)) return true
+    return ['que', 'qu'].includes(withoutSubject[0] || '')
+      && sameWords(answerWords, withoutSubject.slice(1))
+  })
+}
+
 export function conjugationRequiresSubjectPronoun(question: { pronom?: string, mode?: string }) {
   const mode = normalizeAnswer(question.mode || '', { ignoreWhitespace: false })
     .normalize('NFD').replace(/\p{Diacritic}/gu, '')
@@ -191,8 +215,16 @@ export function validateConjugationAnswer(
 ): AnswerValidationResult {
   const result = validateAnswer(answer, question.reponses, options)
   const pronoun = normalizedSubjectPronoun(question.pronom)
-  if (!result.isCorrect || !pronoun || !conjugationRequiresSubjectPronoun(question)) return result
-  if (answerContainsSubjectPronoun(answer, pronoun)) return result
+  if (!pronoun || !conjugationRequiresSubjectPronoun(question)) return result
+  if (result.isCorrect && answerContainsSubjectPronoun(answer, pronoun)) return result
+  if (result.isCorrect || answerMatchesWithoutSubjectPronoun(answer, question.reponses, pronoun)) {
+    return {
+      ...result,
+      isCorrect: false,
+      reason: 'missing-subject-pronoun',
+      matchedAnswer: null,
+    }
+  }
   return {
     ...result,
     isCorrect: false,

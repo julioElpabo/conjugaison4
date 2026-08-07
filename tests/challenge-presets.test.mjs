@@ -13,6 +13,13 @@ import {
   usefulAllophoneVerbInfinitives,
 } from '../shared/data/challenge-presets.ts'
 import {
+  frenchSchoolLevels,
+  frenchSchoolMissingVerbClones,
+  frenchSchoolTenseIds,
+  frenchSchoolVerbInfinitives,
+  transformFrenchSchoolVerbForm,
+} from '../shared/data/french-school-programme.ts'
+import {
   challengePresetTrackingDescription,
   challengePresetTrackingTitle,
 } from '../shared/utils/challenge-preset-tracking.ts'
@@ -51,14 +58,61 @@ describe('défis résolus par critères', () => {
     assert.equal(challengePresetTrackingDescription(5), '5 au hasard')
   })
 
-  it('expose les 29 défis avec des identifiants uniques et sans liste d’identifiants de verbes figée', () => {
-    assert.equal(challengePresetDefinitions.length, 29)
-    assert.equal(new Set(challengePresetDefinitions.map(preset => preset.id)).size, 29)
+  it('expose les 38 défis avec des identifiants uniques et sans liste d’identifiants de verbes figée', () => {
+    assert.equal(challengePresetDefinitions.length, 38)
+    assert.equal(new Set(challengePresetDefinitions.map(preset => preset.id)).size, 38)
     assert.ok(challengePresetDefinitions.every(preset => !Object.hasOwn(preset, 'verbIds')))
     assert.equal(isChallengePresetId('7H'), true)
+    assert.equal(isChallengePresetId('france-cp'), true)
     assert.equal(isChallengePresetId(usefulAllophoneChallengeId), true)
     assert.equal(isChallengePresetId('cod-avant-passe-compose'), false)
     assert.equal(isChallengePresetId('inconnu'), false)
+  })
+
+  it('reproduit cumulativement les neuf niveaux scolaires français', () => {
+    assert.deepEqual(frenchSchoolLevels, ['CP', 'CE1', 'CE2', 'CM1', 'CM2', '6e', '5e', '4e', '3e'])
+    assert.deepEqual(
+      frenchSchoolLevels.map(level => frenchSchoolVerbInfinitives[level].length),
+      [2, 16, 40, 47, 47, 47, 60, 60, 60],
+    )
+    assert.deepEqual(frenchSchoolTenseIds.CP, [1])
+    assert.deepEqual(frenchSchoolTenseIds.CE1, [1, 2, 3, 5])
+    assert.deepEqual(frenchSchoolTenseIds.CM2, [1, 2, 3, 5, 4, 7])
+    assert.deepEqual(frenchSchoolTenseIds['6e'], [1, 2, 3, 5, 4, 7, 14, 9])
+    assert.deepEqual(frenchSchoolTenseIds['5e'], [1, 2, 3, 5, 4, 7, 14, 9, 6, 8])
+    assert.deepEqual(frenchSchoolTenseIds['4e'], [1, 2, 3, 5, 4, 7, 14, 9, 6, 8, 15, 10])
+    assert.deepEqual(frenchSchoolTenseIds['3e'], [1, 2, 3, 5, 4, 7, 14, 9, 6, 8, 15, 10, 11])
+
+    const frenchDefinitions = challengePresetDefinitions.filter(preset => preset.group === 'school-france')
+    assert.deepEqual(frenchDefinitions.map(preset => preset.label), frenchSchoolLevels)
+    assert.ok(frenchDefinitions.every(preset => preset.questionCount === 10))
+  })
+
+  it('résout chaque défi français avec les verbes exacts de son niveau', () => {
+    const catalogue = frenchSchoolVerbInfinitives['3e'].map((infinitif, index) => verb(index + 1, infinitif))
+    const frenchPresets = resolveChallengePresets(catalogue).filter(preset => preset.group === 'school-france')
+
+    for (const preset of frenchPresets) {
+      const level = preset.label
+      assert.deepEqual(
+        preset.verbIds,
+        frenchSchoolVerbInfinitives[level].map(infinitif => catalogue.find(item => item.infinitif === infinitif).id),
+      )
+      assert.deepEqual(preset.tenseIds, frenchSchoolTenseIds[level])
+    }
+    assert.equal(challengePresetTrackingTitle(frenchPresets[0]), 'Niveaux scolaires français | CP')
+  })
+
+  it('dérive correctement les sept verbes absents de modèles de même famille', () => {
+    assert.equal(frenchSchoolMissingVerbClones.length, 7)
+    const clones = Object.fromEntries(frenchSchoolMissingVerbClones.map(clone => [clone.infinitive, clone]))
+    assert.equal(transformFrenchSchoolVerbForm('j’ai aimé', clones.rouler), 'j’ai roulé')
+    assert.equal(transformFrenchSchoolVerbForm('que nous pelions', clones.geler), 'que nous gelions')
+    assert.equal(transformFrenchSchoolVerbForm('il pèle', clones.geler), 'il gèle')
+    assert.equal(transformFrenchSchoolVerbForm('nous plaçons', clones.tracer), 'nous traçons')
+    assert.equal(transformFrenchSchoolVerbForm('ils emploieront', clones.aboyer), 'ils aboieront')
+    assert.equal(transformFrenchSchoolVerbForm('vous employez', clones.nettoyer), 'vous nettoyez')
+    assert.equal(transformFrenchSchoolVerbForm('ils finissent', clones.salir), 'ils salissent')
   })
 
   it('résout les groupes, les difficultés et le sens à partir des métadonnées', () => {

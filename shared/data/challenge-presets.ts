@@ -9,6 +9,11 @@ import type {
   VerbId,
 } from '../types/conjugation.ts'
 import { legacyComplementOptions } from '../utils/complement-options'
+import {
+  frenchSchoolLevels,
+  frenchSchoolTenseIds,
+  frenchSchoolVerbInfinitives,
+} from './french-school-programme'
 
 type FilterableVerbField =
   | 'infinitif'
@@ -45,6 +50,7 @@ export interface ChallengePresetDefinition {
 
 export const challengePresetGroupLabels: Record<string, string> = {
   school: 'Niveaux scolaires suisses',
+  'school-france': 'Niveaux scolaires français',
   cif: 'CIF (FLE)',
   'verb-group': 'Groupes -er, -ir, etc.',
   spelling: 'Difficultés particulières',
@@ -53,6 +59,7 @@ export const challengePresetGroupLabels: Record<string, string> = {
 
 export const challengePresetGroupOrder: readonly ChallengePresetGroup[] = [
   'school',
+  'school-france',
   'cif',
   'verb-group',
   'spelling',
@@ -87,6 +94,15 @@ export const challengePresetDefinitions = [
   { id: '9H', label: '9H', description: 'Programme de conjugaison de 9H.', group: 'school', criteria: [{ field: 'niveauxScolaires', operator: 'includes', value: '9H' }], tenseIds: secondaryTenses, questionCount: 10 },
   { id: '10H', label: '10H', description: 'Programme de conjugaison de 10H.', group: 'school', criteria: [{ field: 'niveauxScolaires', operator: 'includes', value: '10H' }], tenseIds: secondaryTenses, questionCount: 10 },
   { id: '11H', label: '11H', description: 'Programme de conjugaison de 11H.', group: 'school', criteria: [{ field: 'niveauxScolaires', operator: 'includes', value: '11H' }], tenseIds: secondaryTenses, questionCount: 10 },
+  ...frenchSchoolLevels.map(level => ({
+    id: `france-${level.toLocaleLowerCase('fr')}`,
+    label: level,
+    description: `Verbes et temps/modes attendus en ${level} dans le programme scolaire français.`,
+    group: 'school-france',
+    criteria: [{ field: 'infinitif', operator: 'in', value: frenchSchoolVerbInfinitives[level] }] as const,
+    tenseIds: frenchSchoolTenseIds[level],
+    questionCount: 10,
+  })),
   { id: 'groupe1', label: 'Premier groupe', description: 'Tous les verbes du premier groupe.', group: 'verb-group', criteria: [{ field: 'groupeConjugaison', operator: 'equals', value: 1 }], tenseIds: personalPresent, questionCount: 10 },
   { id: 'groupe2', label: 'Deuxième groupe', description: 'Tous les verbes du deuxième groupe.', group: 'verb-group', criteria: [{ field: 'groupeConjugaison', operator: 'equals', value: 2 }], tenseIds: personalPresent, questionCount: 10 },
   { id: 'groupe3', label: 'Troisième groupe', description: 'Tous les verbes du troisième groupe.', group: 'verb-group', criteria: [{ field: 'groupeConjugaison', operator: 'equals', value: 3 }], tenseIds: personalPresent, questionCount: 10 },

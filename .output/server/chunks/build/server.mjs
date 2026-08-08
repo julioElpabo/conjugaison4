@@ -665,6 +665,24 @@ const uiMessages = {
   "Niveau scolaire suisse": { de: "Schweizer Schulstufe", en: "Swiss school level", it: "Livello scolastico svizzero", es: "Nivel escolar suizo" },
   "Construire mon d\xE9fi": { de: "Meine \xDCbung erstellen", en: "Build my challenge", it: "Crea il mio esercizio", es: "Crear mi ejercicio" },
   "Exercices de conjugaison fran\xE7aise, gratuits et sans publicit\xE9": { de: "Kostenlose und werbefreie \xDCbungen zur franz\xF6sischen Konjugation", en: "Free, ad-free French conjugation exercises", it: "Esercizi gratuiti di coniugazione francese senza pubblicit\xE0", es: "Ejercicios gratuitos de conjugaci\xF3n francesa sin publicidad" },
+  "TATITOTU propose des exercices de conjugaison fran\xE7aise enti\xE8rement gratuits, interactifs et personnalisables, sans publicit\xE9.": { de: "TATITOTU bietet vollst\xE4ndig kostenlose, interaktive und anpassbare \xDCbungen zur franz\xF6sischen Konjugation \u2013 ohne Werbung.", en: "TATITOTU offers completely free, interactive and customisable French conjugation exercises, without advertising.", it: "TATITOTU propone esercizi di coniugazione francese completamente gratuiti, interattivi e personalizzabili, senza pubblicit\xE0.", es: "TATITOTU ofrece ejercicios de conjugaci\xF3n francesa totalmente gratuitos, interactivos y personalizables, sin publicidad." },
+  "Tout pour progresser": { de: "Alles, um Fortschritte zu machen", en: "Everything you need to progress", it: "Tutto per fare progressi", es: "Todo para progresar" },
+  "Des exercices de conjugaison adapt\xE9s \xE0 tes besoins": { de: "Konjugations\xFCbungen, die zu deinen Bed\xFCrfnissen passen", en: "Conjugation exercises tailored to your needs", it: "Esercizi di coniugazione adatti alle tue esigenze", es: "Ejercicios de conjugaci\xF3n adaptados a tus necesidades" },
+  "Pour les \xE9l\xE8ves": { de: "F\xFCr Sch\xFClerinnen und Sch\xFCler", en: "For students", it: "Per gli studenti", es: "Para estudiantes" },
+  "Pour les enseignants": { de: "F\xFCr Lehrpersonen", en: "For teachers", it: "Per gli insegnanti", es: "Para docentes" },
+  "Des ressources utiles": { de: "N\xFCtzliche Lernressourcen", en: "Useful resources", it: "Risorse utili", es: "Recursos \xFAtiles" },
+  "Personnalise ton exercice": { de: "Passe deine \xDCbung an", en: "Customise your exercise", it: "Personalizza il tuo esercizio", es: "Personaliza tu ejercicio" },
+  "Entra\xEEne-toi et imprime": { de: "\xDCbe und drucke", en: "Practise and print", it: "Esercitati e stampa", es: "Practica e imprime" },
+  "Apprends et r\xE9vise": { de: "Lerne und wiederhole", en: "Learn and revise", it: "Impara e ripassa", es: "Aprende y repasa" },
+  "Choisis les verbes, les modes et les temps que tu souhaites travailler, personnalise les questions, puis commence ton entra\xEEnement.": { de: "W\xE4hle die Verben, Modi und Zeitformen aus, die du \xFCben m\xF6chtest, passe die Fragen an und beginne dein Training.", en: "Choose the verbs, moods and tenses you want to practise, customise the questions, then begin your training.", it: "Scegli i verbi, i modi e i tempi che desideri esercitare, personalizza le domande e inizia l\u2019allenamento.", es: "Elige los verbos, modos y tiempos que deseas practicar, personaliza las preguntas y empieza tu entrenamiento." },
+  "Les exercices peuvent \xEAtre r\xE9alis\xE9s dans un format classique ou sous la forme d\u2019un dialogue avec un coach virtuel qui t\u2019aide pour chaque question.": { de: "Die \xDCbungen k\xF6nnen im klassischen Format oder als Dialog mit einem virtuellen Coach durchgef\xFChrt werden, der dir bei jeder Frage hilft.", en: "Exercises can be completed in a classic format or as a dialogue with a virtual coach who helps you with each question.", it: "Gli esercizi possono essere svolti in formato classico oppure sotto forma di dialogo con un coach virtuale che ti aiuta per ogni domanda.", es: "Los ejercicios pueden realizarse en un formato cl\xE1sico o mediante un di\xE1logo con un entrenador virtual que te ayuda con cada pregunta." },
+  "Tes propres exercices peuvent \xEAtre partag\xE9s avec tes \xE9l\xE8ves.": { de: "Du kannst deine eigenen \xDCbungen mit deinen Sch\xFClerinnen und Sch\xFClern teilen.", en: "You can share your own exercises with your students.", it: "Puoi condividere i tuoi esercizi con i tuoi studenti.", es: "Puedes compartir tus propios ejercicios con tus estudiantes." },
+  "Les \xE9l\xE8ves peuvent aussi te partager leurs bilans pour un meilleur suivi.": { de: "Die Sch\xFClerinnen und Sch\xFCler k\xF6nnen ihre Auswertungen ebenfalls mit dir teilen, damit du ihre Fortschritte besser verfolgen kannst.", en: "Students can also share their reports with you, so you can track their progress more effectively.", it: "Gli studenti possono anche condividere con te i loro risultati, per consentirti di seguirne meglio i progressi.", es: "Los estudiantes tambi\xE9n pueden compartir contigo sus informes para facilitar el seguimiento." },
+  "Tu peux aussi imprimer l\u2019exercice en PDF ou DOCX avec corrig\xE9.": { de: "Du kannst die \xDCbung mit den L\xF6sungen auch als PDF oder DOCX ausdrucken.", en: "You can also print the exercise as a PDF or DOCX with its answer key.", it: "Puoi anche stampare l\u2019esercizio in formato PDF o DOCX con le soluzioni.", es: "Tambi\xE9n puedes imprimir el ejercicio en PDF o DOCX con sus soluciones." },
+  "Les exercices peuvent \xEAtre r\xE9alis\xE9s dans un format classique ou sous la forme d\u2019un dialogue avec un coach virtuel qui dispense une aide contextualis\xE9e. Tu peux \xE9galement cr\xE9er une fiche PDF ou docx \xE0 imprimer avec les questions et leur corrig\xE9.": { de: "Die \xDCbungen k\xF6nnen im klassischen Format oder als Dialog mit einem virtuellen Coach durchgef\xFChrt werden, der kontextbezogene Hilfe bietet. Du kannst au\xDFerdem ein PDF- oder DOCX-Arbeitsblatt mit Fragen und L\xF6sungen zum Ausdrucken erstellen.", en: "Exercises can be completed in a classic format or as a dialogue with a virtual coach who provides contextual help. You can also create a printable PDF or DOCX worksheet containing the questions and answer key.", it: "Gli esercizi possono essere svolti in formato classico oppure sotto forma di dialogo con un coach virtuale che fornisce un aiuto contestualizzato. Puoi anche creare una scheda PDF o DOCX da stampare con le domande e le soluzioni.", es: "Los ejercicios pueden realizarse en un formato cl\xE1sico o mediante un di\xE1logo con un entrenador virtual que ofrece ayuda contextualizada. Tambi\xE9n puedes crear una ficha PDF o DOCX imprimible con las preguntas y sus soluciones." },
+  "Pour apprendre et r\xE9viser, le site propose aussi des explications sur les modes et les temps, ainsi que la conjugaison compl\xE8te des verbes fran\xE7ais, avec les accords du participe pass\xE9 et les principales difficult\xE9s \xE0 \xE9viter.": { de: "Zum Lernen und Wiederholen bietet die Website au\xDFerdem Erkl\xE4rungen zu Modi und Zeitformen sowie die vollst\xE4ndige Konjugation franz\xF6sischer Verben, einschlie\xDFlich der \xDCbereinstimmung des Partizips Perfekt und der wichtigsten zu vermeidenden Schwierigkeiten.", en: "To learn and revise, the site also provides explanations of moods and tenses, together with complete French verb conjugations, past participle agreement and the main difficulties to avoid.", it: "Per imparare e ripassare, il sito propone anche spiegazioni sui modi e sui tempi, oltre alla coniugazione completa dei verbi francesi, con gli accordi del participio passato e le principali difficolt\xE0 da evitare.", es: "Para aprender y repasar, el sitio tambi\xE9n ofrece explicaciones sobre los modos y los tiempos, adem\xE1s de la conjugaci\xF3n completa de los verbos franceses, con la concordancia del participio pasado y las principales dificultades que conviene evitar." },
+  "Pour apprendre et r\xE9viser, le site propose aussi des explications sur les modes et les temps.": { de: "Zum Lernen und Wiederholen bietet die Website au\xDFerdem Erkl\xE4rungen zu Modi und Zeitformen.", en: "To learn and revise, the site also provides explanations of moods and tenses.", it: "Per imparare e ripassare, il sito propone anche spiegazioni sui modi e sui tempi.", es: "Para aprender y repasar, el sitio tambi\xE9n ofrece explicaciones sobre los modos y los tiempos." },
+  "Tu peux \xE9galement consulter la conjugaison compl\xE8te des verbes fran\xE7ais, les r\xE8gles d\u2019accord du participe pass\xE9 et les principales difficult\xE9s \xE0 \xE9viter.": { de: "Du kannst au\xDFerdem die vollst\xE4ndige Konjugation franz\xF6sischer Verben, die Regeln zur \xDCbereinstimmung des Partizips Perfekt und die wichtigsten Schwierigkeiten nachschlagen.", en: "You can also consult complete French verb conjugations, the rules for past participle agreement and the main difficulties to avoid.", it: "Puoi inoltre consultare la coniugazione completa dei verbi francesi, le regole dell\u2019accordo del participio passato e le principali difficolt\xE0 da evitare.", es: "Tambi\xE9n puedes consultar la conjugaci\xF3n completa de los verbos franceses, las reglas de concordancia del participio pasado y las principales dificultades que conviene evitar." },
   "\xC9tapes de cr\xE9ation du d\xE9fi": { de: "Schritte zur Erstellung der \xDCbung", en: "Challenge creation steps", it: "Passaggi per creare l\u2019esercizio", es: "Pasos para crear el ejercicio" },
   "Options": { de: "Optionen", en: "Options", it: "Opzioni", es: "Opciones" },
   "Finaliser le d\xE9fi": { de: "\xDCbung fertigstellen", en: "Finish the challenge", it: "Completa l\u2019esercizio", es: "Finalizar el ejercicio" },
@@ -1546,7 +1564,7 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-DzQ2HSrX.mjs')
+    component: () => import('./_code_-fpAdLarp.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1597,7 +1615,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-BVRbn8sA.mjs')
+    component: () => import('./nouveau-defi-yoFAQxK4.mjs')
   },
   {
     name: "signin",
@@ -1607,7 +1625,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-vihwZrqJ.mjs')
+    component: () => import('./index-xKZWp33o.mjs')
   },
   {
     name: "mode-tense",
@@ -1707,7 +1725,7 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-DzQ2HSrX.mjs')
+    component: () => import('./_code_-fpAdLarp.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1758,7 +1776,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-BVRbn8sA.mjs')
+    component: () => import('./nouveau-defi-yoFAQxK4.mjs')
   },
   {
     name: "localized-signin",
@@ -1768,7 +1786,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-vihwZrqJ.mjs')
+    component: () => import('./index-xKZWp33o.mjs')
   },
   {
     name: "localized-mode-tense",

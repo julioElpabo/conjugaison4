@@ -28,7 +28,7 @@ const ACADEMIE_USES: AcademyUse[] = [
   ['commander','A9C3091'], ['communiquer','A9C3170'], ['concentrer','A9C3355'], ['conduire','A9C3472'],
   ['connaître','A9C3636'], ['corriger','A9C4351'], ['couler','A9C4538'], ['créer','A9C4870'],
   ['croire','A9C5041'], ['croiser','A9C5047'], ['cultiver','A9C5283'], ['danser','A9D0087','p'],
-  ['deborder','A9D0233'], ['découper','A9D0606'], ['découvrir','A9D0628'], ['defiler','A9D0799'],
+  ['déborder','A9D0233'], ['découper','A9D0606'], ['découvrir','A9D0628'], ['défiler','A9D0799'],
   ['déposer','A9D1558'], ['dessiner','A9D2011'], ['devoir','A9D2262'], ['disposer','A9D2723'],
   ['diviser','A9D2863','p'], ['documenter','A9D2924'], ['écrire','A9E0358','i'], ['employer','A9E1180'],
   ['enfiler','A9E1555'], ['enseigner','A9E1784','p'], ['essayer','A9E2664'], ['essuyer','A9E2693'],

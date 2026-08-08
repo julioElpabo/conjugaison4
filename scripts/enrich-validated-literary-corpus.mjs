@@ -1,5 +1,5 @@
-import { pathToFileURL } from 'node:url'
 import mysql from 'mysql2/promise'
+import { isDirectScriptExecution } from './utils/direct-execution.mjs'
 
 export const LITERARY_ENRICHMENT_MIGRATION_KEY = 'validated-literary-enrichment-v1'
 export const MAX_INFINITIVE_TARGETS = 50
@@ -313,4 +313,4 @@ async function main() {
   }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) await main()
+if (isDirectScriptExecution(import.meta.url, 'enrich-validated-literary-corpus.mjs')) await main()

@@ -23,6 +23,7 @@ import {
   validatePedagogicalPilot,
   validatedComplementGrammar,
 } from './validate-verb-pilot-pedagogy.mjs'
+import { isDirectScriptExecution } from './utils/direct-execution.mjs'
 
 const PERSON = {
   'singular|firstPerson': 4,
@@ -630,12 +631,13 @@ export async function runVerbPilotImport(options = {}) {
   const restore = options.restore ?? process.argv.includes('--restore')
   const config = options.databaseConfig || databaseConfig()
   const writeReports = options.writeReports ?? true
+  const logResult = options.logResult ?? true
   if (apply && restore) throw new Error('Choisissez soit --apply, soit --restore.')
   if (restore) {
     const connection = await mysql.createConnection(config)
     try {
       await restorePilot(connection)
-      console.log(
+      if (logResult) console.log(
         'Restauration réussie : les tables MyISAM antérieures sont de nouveau actives '
         + 'et les données pédagogiques du lot ont été retirées.',
       )
@@ -868,13 +870,13 @@ export async function runVerbPilotImport(options = {}) {
       'utf8',
     )
   }
-  console.log(
+  if (logResult) console.log(
     `${apply
       ? (repaired ? 'Réparation idempotente réussie' : alreadyApplied ? 'Contrôle idempotent réussi' : 'Application réussie')
       : 'Simulation réussie'} : `
     + `100 verbes et ${preparedForms} lignes préparés via ${mode}.`,
   )
-  if (writeReports) console.log(`Rapport : ${outputPath}`)
+  if (writeReports && logResult) console.log(`Rapport : ${outputPath}`)
   return {
     applied: apply,
     alreadyApplied,
@@ -885,7 +887,7 @@ export async function runVerbPilotImport(options = {}) {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isDirectScriptExecution(import.meta.url, 'check-verb-pilot-import.mjs')) {
   runVerbPilotImport().catch((error) => {
     console.error(error)
     process.exitCode = 1

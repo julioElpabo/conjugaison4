@@ -6,6 +6,7 @@ import { verbPilot202601Part02 } from '../shared/data/verb-pilot-2026-01-part-02
 import { verbPilot202601Part03 } from '../shared/data/verb-pilot-2026-01-part-03.mjs'
 import { verbPilot202601Part04 } from '../shared/data/verb-pilot-2026-01-part-04.mjs'
 import { verbPilot202601Part05 } from '../shared/data/verb-pilot-2026-01-part-05.mjs'
+import { isDirectScriptExecution } from './utils/direct-execution.mjs'
 
 const CEFR_LEVELS = new Set(['A1', 'A2', 'B1', 'B2'])
 const SEMANTIC_DOMAINS = new Set([
@@ -356,7 +357,7 @@ async function main() {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isDirectScriptExecution(import.meta.url, 'validate-verb-pilot-pedagogy.mjs')) {
   main().catch((error) => {
     console.error(error)
     process.exitCode = 1

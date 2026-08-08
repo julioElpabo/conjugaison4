@@ -52,4 +52,16 @@ describe('migration des anciennes URL pour le référencement', () => {
     assert.match(tensePaths, /path: `\/\$\{mode\}\/\$\{tense\.slug\}`/u)
     assert.doesNotMatch(sitemap, /MODE_LANDING_SLUGS/u)
   })
+
+  it('décrit clairement les exercices dans le contenu visible de l’accueil', async () => {
+    const wizard = await readFile(new URL('../app/components/challenge/WizardChallengeWorkspace.vue', import.meta.url), 'utf8')
+
+    assert.match(wizard, /<h1 v-if="currentStep === 0" class="wizard-hero__subtitle">\{\{ ui\('Exercices de conjugaison française, gratuits et sans publicité'\) \}\}<\/h1>/u)
+    assert.match(wizard, /class="wizard-home__seo-intro"/u)
+    assert.match(wizard, /exercices de conjugaison française entièrement gratuits, interactifs et personnalisables/u)
+    assert.match(wizard, /dialogue avec un coach virtuel qui t’aide pour chaque question/u)
+    assert.match(wizard, /Tes propres exercices peuvent être partagés avec tes élèves/u)
+    assert.match(wizard, /partager leurs bilans pour un meilleur suivi/u)
+    assert.match(wizard, /conjugaison complète des verbes français/u)
+  })
 })

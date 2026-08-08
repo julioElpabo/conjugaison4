@@ -1670,8 +1670,9 @@ async function createSharedChallenge(title: string, description: string) {
   <div class="wizard-entry-page">
     <div class="challenge-page wizard-page">
       <header class="wizard-hero">
-        <h1 :class="{ 'wizard-hero__brand': currentStep === 0, 'wizard-hero__preset': currentStep !== 0 && isPrefilledChallenge }">{{ heroTitle }}</h1>
-        <p v-if="currentStep === 0" class="wizard-hero__subtitle">{{ ui('Exercices de conjugaison française, gratuits et sans publicité') }}</p>
+        <p v-if="currentStep === 0" class="wizard-hero__brand">{{ heroTitle }}</p>
+        <h1 v-if="currentStep === 0" class="wizard-hero__subtitle">{{ ui('Exercices de conjugaison française, gratuits et sans publicité') }}</h1>
+        <h1 v-else :class="{ 'wizard-hero__preset': isPrefilledChallenge }">{{ heroTitle }}</h1>
         <button v-if="currentStep === 0" class="tour-entry-button" type="button" @click="openTourMenu">
           <span aria-hidden="true">?</span>{{ tourCopy.discover }}
         </button>
@@ -1854,6 +1855,32 @@ async function createSharedChallenge(title: string, description: string) {
                     <button class="primary-button" :class="{ 'wizard-next-pulse': !highlightChallengeLoader }" type="button" @click="startCustomChallenge">{{ ui('Construire un nouveau défi →') }}</button>
                   </article>
                 </div>
+                <div class="wizard-home__separator" aria-hidden="true"></div>
+                <section class="wizard-home__seo-intro" aria-labelledby="home-features-title">
+                  <header>
+                    <p class="wizard-home__seo-eyebrow">{{ ui('Tout pour progresser') }}</p>
+                    <h2 id="home-features-title">{{ ui('Des exercices de conjugaison adaptés à tes besoins') }}</h2>
+                    <p>{{ ui('TATITOTU propose des exercices de conjugaison française entièrement gratuits, interactifs et personnalisables, sans publicité.') }}</p>
+                  </header>
+                  <div class="wizard-home__feature-grid">
+                    <article>
+                      <h3>{{ ui('Pour les élèves') }}</h3>
+                      <p>{{ ui('Choisis les verbes, les modes et les temps que tu souhaites travailler, personnalise les questions, puis commence ton entraînement.') }}</p>
+                      <p>{{ ui('Les exercices peuvent être réalisés dans un format classique ou sous la forme d’un dialogue avec un coach virtuel qui t’aide pour chaque question.') }}</p>
+                    </article>
+                    <article>
+                      <h3>{{ ui('Pour les enseignants') }}</h3>
+                      <p>{{ ui('Tes propres exercices peuvent être partagés avec tes élèves.') }}</p>
+                      <p>{{ ui('Les élèves peuvent aussi te partager leurs bilans pour un meilleur suivi.') }}</p>
+                      <p>{{ ui('Tu peux aussi imprimer l’exercice en PDF ou DOCX avec corrigé.') }}</p>
+                    </article>
+                    <article>
+                      <h3>{{ ui('Des ressources utiles') }}</h3>
+                      <p>{{ ui('Pour apprendre et réviser, le site propose aussi des explications sur les modes et les temps.') }}</p>
+                      <p>{{ ui('Tu peux également consulter la conjugaison complète des verbes français, les règles d’accord du participe passé et les principales difficultés à éviter.') }}</p>
+                    </article>
+                  </div>
+                </section>
             </div>
 
             <div v-else-if="currentStep === 1" class="wizard-step wizard-step--selection" aria-labelledby="verbs-title">
@@ -2064,11 +2091,11 @@ async function createSharedChallenge(title: string, description: string) {
 .wizard-entry-page { font-family: "Funnel Sans", "Avenir Next", Avenir, system-ui, sans-serif; }
 .wizard-page { overflow: hidden; padding-bottom: 70px; border-radius: 26px; }
 .wizard-hero { max-width: 820px; margin: 0 auto; padding: 42px 24px 24px; text-align: center; }
-.wizard-hero h1 { margin: 0; color: #294c4b; font-size: clamp(2.2rem, 5vw, 4rem); letter-spacing: -.05em; line-height: 1; }
-.wizard-hero h1.wizard-hero__brand { letter-spacing: .18em; text-indent: .18em; }
-.wizard-hero h1:not(.wizard-hero__brand) { letter-spacing: .035em; opacity: .62; }
+.wizard-hero h1, .wizard-hero__brand { margin: 0; color: #294c4b; font-size: clamp(2.2rem, 5vw, 4rem); letter-spacing: -.05em; line-height: 1; }
+.wizard-hero__brand { letter-spacing: .18em; text-indent: .18em; }
+.wizard-hero h1:not(.wizard-hero__subtitle) { letter-spacing: .035em; opacity: .62; }
 .wizard-hero h1.wizard-hero__preset { font-size: clamp(1.75rem, 4vw, 3.15rem); line-height: 1.1; }
-.wizard-hero__subtitle { max-width: 650px; margin: 12px auto 0; color: var(--muted); font-size: 1.08rem; font-weight: 650; line-height: 1.5; }
+.wizard-hero h1.wizard-hero__subtitle { max-width: 650px; margin: 12px auto 0; color: var(--muted); font-size: 1.08rem; font-weight: 650; letter-spacing: 0; line-height: 1.5; }
 .tour-entry-button { display: inline-flex; margin-top: 13px; padding: 7px 13px 7px 8px; align-items: center; gap: 8px; color: #0b4f69; border: 2px solid #e4ad00; border-radius: 999px; background: #fff3a8; box-shadow: 0 5px 15px rgb(70 52 0 / 14%), 0 0 0 4px rgb(255 215 43 / 12%); cursor: pointer; font-size: .84rem; font-weight: 800; }
 .tour-entry-button span { display: grid; width: 22px; height: 22px; place-items: center; color: #493a08; border: 1px solid #c99500; border-radius: 50%; background: #ffd943; font-size: .75rem; font-weight: 900; }
 .tour-entry-button:hover, .tour-entry-button:focus-visible { color: #083f54; border-color: #c99500; background: #ffe978; outline: 0; box-shadow: 0 7px 20px rgb(70 52 0 / 20%), 0 0 0 5px rgb(255 215 43 / 24%); }
@@ -2177,6 +2204,17 @@ async function createSharedChallenge(title: string, description: string) {
 .wizard-content--home { padding: clamp(20px, 4vw, 42px); }
 .wizard-home { display: grid; max-width: 930px; margin: 0 auto; gap: 18px; }
 .wizard-home__choices { display: grid; grid-template-columns: 1fr; gap: 18px; }
+.wizard-home__separator { width: 72px; height: 1px; margin: 14px auto -18px; background: color-mix(in srgb, var(--brand) 30%, transparent); }
+.wizard-home__seo-intro { width: 100%; min-width: 0; margin-top: 32px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--brand) 30%, var(--line)); border-radius: 19px; color: var(--muted); background: linear-gradient(145deg, color-mix(in srgb, var(--brand-pale) 68%, var(--surface)), var(--surface) 58%); box-shadow: 0 10px 28px rgb(42 65 61 / 8%); }
+.wizard-home__seo-intro > header { max-width: 760px; margin: 0 auto; padding: 22px 24px 18px; text-align: center; }
+.wizard-home__seo-eyebrow { margin: 0 0 4px !important; color: var(--brand) !important; font-size: .7rem; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; }
+.wizard-home__seo-intro h2 { margin: 0; color: var(--brand-dark); font-size: clamp(1.3rem, 2.5vw, 1.75rem); letter-spacing: -.025em; line-height: 1.15; }
+.wizard-home__seo-intro > header > p:last-child { margin: 9px 0 0; font-size: .93rem; line-height: 1.45; }
+.wizard-home__feature-grid { display: grid; min-width: 0; padding: 0 16px 16px; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.wizard-home__feature-grid article { min-width: 0; padding: 17px; border: 1px solid color-mix(in srgb, var(--brand) 18%, var(--line)); border-radius: 14px; background: color-mix(in srgb, var(--surface) 94%, transparent); box-shadow: 0 5px 15px rgb(42 65 61 / 5%); }
+.wizard-home__feature-grid h3 { margin: 0 0 10px; color: var(--brand-dark); font-size: 1rem; line-height: 1.2; }
+.wizard-home__feature-grid p { margin: 0; font-size: .8rem; line-height: 1.43; text-align: left; }
+.wizard-home__feature-grid p + p { margin-top: 8px; }
 .wizard-home__choice { display: grid; min-height: 170px; padding: 24px; align-content: start; grid-template-columns: auto 1fr; gap: 18px; border: 1px solid #b8d3cb; border-radius: 18px; background: #f8fbfa; }
 .wizard-home__choice:is(button) { width: 100%; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .wizard-home__choice:is(button):hover { border-color: #83afa4; background: var(--brand-pale); }
@@ -2292,11 +2330,12 @@ async function createSharedChallenge(title: string, description: string) {
 
 @media (max-width: 820px) {
   .wizard-hero { padding: 28px 16px 18px; }
-  .wizard-hero__subtitle { margin-top: 9px; font-size: .98rem; }
+  .wizard-hero h1.wizard-hero__subtitle { margin-top: 9px; font-size: .98rem; }
   .wizard-shell { width: min(100% - 20px, 650px); }
   .code-loader { grid-template-columns: 1fr; gap: 10px; }
   .code-loader__error { grid-column: 1; }
   .wizard-home__choice { min-height: 190px; }
+  .wizard-home__feature-grid { grid-template-columns: 1fr; }
   .wizard-home__choice--preset.is-collapsed,
   .wizard-home__choice--custom { min-height: 0; }
   .wizard-steps { grid-template-columns: 1fr 10px 1fr 10px 1fr 10px 1fr; padding: 13px 6px; }
@@ -2326,6 +2365,8 @@ async function createSharedChallenge(title: string, description: string) {
   .code-loader__control { grid-template-columns: 1fr; }
   .code-loader__control button { width: 100%; }
   .wizard-home__choice { padding: 18px; grid-template-columns: 40px 1fr; gap: 13px; }
+  .wizard-home__seo-intro > header { padding: 20px 18px 16px; }
+  .wizard-home__feature-grid { padding: 0 10px 10px; }
   .wizard-home__choice-icon { width: 40px; height: 40px; border-radius: 11px; }
   .wizard-home__choice--preset.is-collapsed,
   .wizard-home__choice--custom { grid-template-columns: 40px 1fr; }

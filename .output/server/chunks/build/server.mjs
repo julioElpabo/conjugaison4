@@ -417,14 +417,53 @@ const uiMessages = {
   "Le conjugueur": { de: "Konjugator", en: "Conjugator", it: "Coniugatore", es: "Conjugador" },
   "Consulter un verbe": { de: "Ein Verb nachschlagen", en: "Look up a verb", it: "Consultare un verbo", es: "Consultar un verbo" },
   "Recherchez un verbe et consultez sa conjugaison \xE0 tous les modes et \xE0 tous les temps.": { de: "Suche ein Verb und sieh seine Konjugation in allen Modi und Zeitformen nach.", en: "Search for a verb and view its conjugation in every mood and tense.", it: "Cerca un verbo e consulta la coniugazione in tutti i modi e tempi.", es: "Busca un verbo y consulta su conjugaci\xF3n en todos los modos y tiempos." },
-  "\xC9cris un infinitif ou parcours le catalogue de A \xE0 Z pour afficher toute sa conjugaison.": { de: "Gib einen Infinitiv ein oder durchsuche den Katalog von A bis Z, um die vollst\xE4ndige Konjugation anzuzeigen.", en: "Enter an infinitive or browse the A\u2013Z catalogue to view its full conjugation.", it: "Scrivi un infinito o sfoglia il catalogo dalla A alla Z per visualizzare l\u2019intera coniugazione.", es: "Escribe un infinitivo o recorre el cat\xE1logo de la A a la Z para ver toda su conjugaci\xF3n." },
   "Chargement du catalogue\u2026": { de: "Katalog wird geladen\u2026", en: "Loading catalogue\u2026", it: "Caricamento del catalogo\u2026", es: "Cargando cat\xE1logo\u2026" },
   "Le catalogue n\u2019a pas pu \xEAtre charg\xE9.": { de: "Der Katalog konnte nicht geladen werden.", en: "The catalogue could not be loaded.", it: "Impossibile caricare il catalogo.", es: "No se ha podido cargar el cat\xE1logo." },
   "Impossible de charger la conjugaison de ce verbe.": { de: "Die Konjugation dieses Verbs konnte nicht geladen werden.", en: "This verb\u2019s conjugation could not be loaded.", it: "Impossibile caricare la coniugazione di questo verbo.", es: "No se ha podido cargar la conjugaci\xF3n de este verbo." },
   "Le participe pass\xE9 avec avoir": { de: "Das Partizip Perfekt mit avoir", en: "The past participle with avoir", it: "Il participio passato con avoir", es: "El participio pasado con avoir" },
   "La place du COD change l\u2019accord": { de: "Die Position des direkten Objekts bestimmt die Angleichung", en: "The position of the direct object changes agreement", it: "La posizione del complemento oggetto cambia la concordanza", es: "La posici\xF3n del complemento directo cambia la concordancia" },
+  "Voir avec un COD": { de: "Mit direktem Objekt anzeigen", en: "View with a direct object", it: "Vedi con un complemento oggetto", es: "Ver con un complemento directo" },
+  "Masquer le COD": { de: "Direktes Objekt ausblenden", en: "Hide direct object", it: "Nascondi il complemento oggetto", es: "Ocultar el complemento directo" },
+  "Avec un COD": { de: "Mit direktem Objekt", en: "With a direct object", it: "Con un complemento oggetto", es: "Con un complemento directo" },
+  "Exemple indisponible": { de: "Beispiel nicht verf\xFCgbar", en: "Example unavailable", it: "Esempio non disponibile", es: "Ejemplo no disponible" },
+  "Aucun exemple avec un COD n\u2019est disponible pour ce verbe.": { de: "F\xFCr dieses Verb ist kein Beispiel mit direktem Objekt verf\xFCgbar.", en: "No example with a direct object is available for this verb.", it: "Non \xE8 disponibile alcun esempio con complemento oggetto per questo verbo.", es: "No hay ning\xFAn ejemplo con complemento directo disponible para este verbo." },
+  "Voir les pi\xE8ges": { de: "Stolperfallen anzeigen", en: "View pitfalls", it: "Vedi le difficolt\xE0", es: "Ver las dificultades" },
+  "Masquer les pi\xE8ges": { de: "Stolperfallen ausblenden", en: "Hide pitfalls", it: "Nascondi le difficolt\xE0", es: "Ocultar las dificultades" },
+  "Exporter en PDF": { de: "Als PDF exportieren", en: "Export to PDF", it: "Esporta in PDF", es: "Exportar a PDF" },
   "Avec avoir, le participe pass\xE9 ne s\u2019accorde pas avec le COD plac\xE9 apr\xE8s.": { de: "Mit avoir wird das Partizip Perfekt nicht an ein nachgestelltes direktes Objekt angeglichen.", en: "With avoir, the past participle does not agree with a direct object placed after it.", it: "Con avoir, il participio passato non concorda con il complemento oggetto posto dopo.", es: "Con avoir, el participio pasado no concuerda con el complemento directo colocado despu\xE9s." },
   "COD \xAB {cod} \xBB plac\xE9 avant : accord avec le COD ({gender}, {number}).": { de: "Vorangestelltes direktes Objekt \u201E{cod}\u201C: Angleichung an das direkte Objekt ({gender}, {number}).", en: "Direct object \u201C{cod}\u201D placed before the verb: agreement with the direct object ({gender}, {number}).", it: "Complemento oggetto \xAB{cod}\xBB posto prima: concordanza con il complemento oggetto ({gender}, {number}).", es: "Complemento directo \xAB{cod}\xBB colocado antes: concordancia con el complemento directo ({gender}, {number})." },
+  "Difficult\xE9s rep\xE9r\xE9es": { de: "Erkannte Schwierigkeiten", en: "Detected difficulties", it: "Difficolt\xE0 rilevate", es: "Dificultades detectadas" },
+  "Consulter le verbe": { de: "Verb nachschlagen", en: "View the verb", it: "Consulta il verbo", es: "Consultar el verbo" },
+  "Conjugaison compl\xE8te": { de: "Vollst\xE4ndige Konjugation", en: "Full conjugation", it: "Coniugazione completa", es: "Conjugaci\xF3n completa" },
+  "Consulte toutes les formes du verbe {verb}.": { de: "Sieh dir alle Formen des Verbs {verb} an.", en: "View every form of the verb {verb}.", it: "Consulta tutte le forme del verbo {verb}.", es: "Consulta todas las formas del verbo {verb}." },
+  "Tu veux consulter la conjugaison du verbe {verb} ?": { de: "M\xF6chtest du die Konjugation des Verbs {verb} nachschlagen?", en: "Would you like to view the conjugation of the verb {verb}?", it: "Vuoi consultare la coniugazione del verbo {verb}?", es: "\xBFQuieres consultar la conjugaci\xF3n del verbo {verb}?" },
+  "Pi\xE8ges \xE0 surveiller pour \xAB {verb} \xBB": { de: "Stolperfallen bei \u201E{verb}\u201C", en: "Pitfalls to watch for with \u201C{verb}\u201D", it: "Difficolt\xE0 da osservare per \xAB{verb}\xBB", es: "Dificultades que debes vigilar con \xAB{verb}\xBB" },
+  "Aucun pi\xE8ge particulier n\u2019a \xE9t\xE9 d\xE9tect\xE9 dans les formes de ce verbe.": { de: "In den Formen dieses Verbs wurde keine besondere Stolperfalle erkannt.", en: "No particular pitfall was detected in this verb\u2019s forms.", it: "Non \xE8 stata rilevata alcuna difficolt\xE0 particolare nelle forme di questo verbo.", es: "No se ha detectado ninguna dificultad particular en las formas de este verbo." },
+  "C\xE9dille \xE0 ne pas oublier": { de: "Die Cedille nicht vergessen", en: "Do not forget the cedilla", it: "Non dimenticare la cediglia", es: "No olvides la cedilla" },
+  "Le \xE7 conserve le son [s] devant a, o ou u, ou appartient au radical de certaines formes.": { de: "Das \xE7 erh\xE4lt den Laut [s] vor a, o oder u oder geh\xF6rt in manchen Formen zum Stamm.", en: "The \xE7 preserves the [s] sound before a, o or u, or belongs to the stem in some forms.", it: "La \xE7 conserva il suono [s] davanti ad a, o o u, oppure appartiene alla radice di alcune forme.", es: "La \xE7 conserva el sonido [s] delante de a, o o u, o forma parte de la ra\xEDz en algunas formas." },
+  "E protecteur apr\xE8s le g": { de: "Sch\xFCtzendes e nach g", en: "Protective e after g", it: "E protettiva dopo la g", es: "E protectora despu\xE9s de la g" },
+  "Le e plac\xE9 apr\xE8s g conserve le son [\u0292] devant a ou o : mangeais, mangeons.": { de: "Das e nach g erh\xE4lt den Laut [\u0292] vor a oder o: mangeais, mangeons.", en: "The e after g preserves the [\u0292] sound before a or o: mangeais, mangeons.", it: "La e dopo g conserva il suono [\u0292] davanti ad a o o: mangeais, mangeons.", es: "La e despu\xE9s de g conserva el sonido [\u0292] delante de a u o: mangeais, mangeons." },
+  "Y remplac\xE9 par i": { de: "Y wird durch i ersetzt", en: "Y changes to i", it: "Y sostituita da i", es: "Y sustituida por i" },
+  "Dans certaines formes des verbes en -yer, le y du radical devient i.": { de: "In manchen Formen der Verben auf -yer wird das y des Stamms zu i.", en: "In some forms of -yer verbs, the y in the stem changes to i.", it: "In alcune forme dei verbi in -yer, la y della radice diventa i.", es: "En algunas formas de los verbos en -yer, la y de la ra\xEDz se convierte en i." },
+  "Accent grave dans le radical": { de: "Gravis im Stamm", en: "Grave accent in the stem", it: "Accento grave nella radice", es: "Acento grave en la ra\xEDz" },
+  "Un e ou un \xE9 du radical devient \xE8 dans certaines formes.": { de: "Ein e oder \xE9 des Stamms wird in manchen Formen zu \xE8.", en: "An e or \xE9 in the stem changes to \xE8 in some forms.", it: "Una e o una \xE9 della radice diventa \xE8 in alcune forme.", es: "Una e o una \xE9 de la ra\xEDz se convierte en \xE8 en algunas formas." },
+  "Certains verbes en -eler ou -eter doublent le l ou le t dans une partie de leur conjugaison.": { de: "Manche Verben auf -eler oder -eter verdoppeln in einem Teil ihrer Konjugation l oder t.", en: "Some -eler or -eter verbs double the l or t in part of their conjugation.", it: "Alcuni verbi in -eler o -eter raddoppiano la l o la t in parte della coniugazione.", es: "Algunos verbos en -eler o -eter duplican la l o la t en parte de su conjugaci\xF3n." },
+  "Deux i cons\xE9cutifs": { de: "Zwei aufeinanderfolgende i", en: "Two consecutive i letters", it: "Due i consecutive", es: "Dos \xEDes consecutivas" },
+  "Le premier i appartient au radical et le second \xE0 la terminaison : les deux doivent \xEAtre \xE9crits.": { de: "Das erste i geh\xF6rt zum Stamm und das zweite zur Endung: Beide m\xFCssen geschrieben werden.", en: "The first i belongs to the stem and the second to the ending: both must be written.", it: "La prima i appartiene alla radice e la seconda alla desinenza: vanno scritte entrambe.", es: "La primera i pertenece a la ra\xEDz y la segunda a la terminaci\xF3n: hay que escribir ambas." },
+  "Accent circonflexe aux temps litt\xE9raires": { de: "Zirkumflex in literarischen Zeitformen", en: "Circumflex in literary tenses", it: "Accento circonflesso nei tempi letterari", es: "Acento circunflejo en los tiempos literarios" },
+  "Le pass\xE9 simple et le subjonctif imparfait comportent parfois un accent circonflexe facile \xE0 oublier.": { de: "Pass\xE9 simple und Subjonctif imparfait enthalten manchmal einen leicht zu vergessenden Zirkumflex.", en: "The past historic and imperfect subjunctive sometimes contain an easily forgotten circumflex.", it: "Il pass\xE9 simple e il congiuntivo imperfetto contengono talvolta un accento circonflesso facile da dimenticare.", es: "El pass\xE9 simple y el subjuntivo imperfecto llevan a veces un circunflejo f\xE1cil de olvidar." },
+  "Radical du futur \xE0 m\xE9moriser": { de: "Futurstamm zum Auswendiglernen", en: "Future stem to memorise", it: "Radice del futuro da memorizzare", es: "Ra\xEDz del futuro que debes memorizar" },
+  "Le futur simple et le conditionnel utilisent ici un radical diff\xE9rent de l\u2019infinitif attendu.": { de: "Futur simple und Conditionnel verwenden hier einen anderen Stamm als den vom Infinitiv erwarteten.", en: "The future and conditional use a stem here that differs from the expected infinitive.", it: "Il futuro e il condizionale usano qui una radice diversa da quella attesa dall\u2019infinito.", es: "El futuro y el condicional usan aqu\xED una ra\xEDz distinta de la esperada a partir del infinitivo." },
+  "Futur ou conditionnel ?": { de: "Futur oder Konditional?", en: "Future or conditional?", it: "Futuro o condizionale?", es: "\xBFFuturo o condicional?" },
+  "Avec je, le futur se termine par -ai et le conditionnel par -ais.": { de: "Mit je endet das Futur auf -ai und das Konditional auf -ais.", en: "With je, the future ends in -ai and the conditional in -ais.", it: "Con je, il futuro termina in -ai e il condizionale in -ais.", es: "Con je, el futuro termina en -ai y el condicional en -ais." },
+  "Terminaison -ent muette": { de: "Stumme Endung -ent", en: "Silent -ent ending", it: "Desinenza -ent muta", es: "Terminaci\xF3n -ent muda" },
+  "\xC0 la troisi\xE8me personne du pluriel, -ent s\u2019\xE9crit mais ne se prononce g\xE9n\xE9ralement pas.": { de: "In der dritten Person Plural wird -ent geschrieben, aber meist nicht ausgesprochen.", en: "In the third person plural, -ent is written but is generally not pronounced.", it: "Alla terza persona plurale, -ent si scrive ma generalmente non si pronuncia.", es: "En la tercera persona del plural, -ent se escribe pero normalmente no se pronuncia." },
+  "Pas de s \xE0 l\u2019imp\xE9ratif": { de: "Kein s im Imperativ", en: "No s in the imperative", it: "Niente s all\u2019imperativo", es: "Sin s en el imperativo" },
+  "\xC0 l\u2019imp\xE9ratif pr\xE9sent, les verbes en -er perdent normalement le s de la forme tu.": { de: "Im Imperativ Pr\xE4sens verlieren Verben auf -er normalerweise das s der tu-Form.", en: "In the present imperative, -er verbs normally drop the s from the tu form.", it: "All\u2019imperativo presente, i verbi in -er perdono normalmente la s della forma tu.", es: "En el imperativo presente, los verbos en -er normalmente pierden la s de la forma tu." },
+  "Plusieurs formes admises": { de: "Mehrere zul\xE4ssige Formen", en: "Several accepted forms", it: "Pi\xF9 forme ammesse", es: "Varias formas admitidas" },
+  "La base contient plusieurs variantes correctes pour cette personne et ce temps.": { de: "Die Datenbank enth\xE4lt f\xFCr diese Person und Zeitform mehrere korrekte Varianten.", en: "The database contains several correct variants for this person and tense.", it: "La banca dati contiene pi\xF9 varianti corrette per questa persona e questo tempo.", es: "La base de datos contiene varias variantes correctas para esta persona y este tiempo." },
+  "Conjugaison incompl\xE8te": { de: "Unvollst\xE4ndige Konjugation", en: "Incomplete conjugation", it: "Coniugazione incompleta", es: "Conjugaci\xF3n incompleta" },
+  "Ce verbe est impersonnel ou d\xE9fectif : certaines personnes ou certains temps ne s\u2019emploient pas.": { de: "Dieses Verb ist unpers\xF6nlich oder defektiv: Manche Personen oder Zeitformen werden nicht verwendet.", en: "This verb is impersonal or defective: some persons or tenses are not used.", it: "Questo verbo \xE8 impersonale o difettivo: alcune persone o alcuni tempi non si usano.", es: "Este verbo es impersonal o defectivo: algunas personas o tiempos no se usan." },
   "M\xE9thode de recherche du verbe": { de: "Methode der Verbsuche", en: "Verb search method", it: "Metodo di ricerca del verbo", es: "M\xE9todo de b\xFAsqueda del verbo" },
   "Rechercher un verbe": { de: "Ein Verb suchen", en: "Search for a verb", it: "Cerca un verbo", es: "Buscar un verbo" },
   "Liste de A \xE0 Z": { de: "Liste von A bis Z", en: "A\u2013Z list", it: "Elenco dalla A alla Z", es: "Lista de la A a la Z" },
@@ -436,6 +475,7 @@ const uiMessages = {
   "Tous les verbes de A \xE0 Z": { de: "Alle Verben von A bis Z", en: "All verbs from A to Z", it: "Tutti i verbi dalla A alla Z", es: "Todos los verbos de la A a la Z" },
   "Acc\xE8s aux lettres": { de: "Buchstabennavigation", en: "Letter navigation", it: "Navigazione per lettera", es: "Navegaci\xF3n por letras" },
   "Retour au choix du verbe": { de: "Zur\xFCck zur Verbauswahl", en: "Back to verb selection", it: "Torna alla scelta del verbo", es: "Volver a la selecci\xF3n del verbo" },
+  "Retour au d\xE9fi": { de: "Zur\xFCck zur Aufgabe", en: "Back to the challenge", it: "Torna alla sfida", es: "Volver al reto" },
   "Chargement de la conjugaison\u2026": { de: "Konjugation wird geladen\u2026", en: "Loading conjugation\u2026", it: "Caricamento della coniugazione\u2026", es: "Cargando conjugaci\xF3n\u2026" },
   "Retour \xE0 la liste": { de: "Zur\xFCck zur Liste", en: "Back to the list", it: "Torna all\u2019elenco", es: "Volver a la lista" },
   "Conjugaison du verbe": { de: "Konjugation des Verbs", en: "Verb conjugation", it: "Coniugazione del verbo", es: "Conjugaci\xF3n del verbo" },
@@ -878,7 +918,6 @@ const uiMessages = {
   "Une synth\xE8se claire des r\xE8gles essentielles de la conjugaison fran\xE7aise.": { de: "Eine klare \xDCbersicht \xFCber die wichtigsten Regeln der franz\xF6sischen Konjugation.", en: "A clear overview of the essential rules of French conjugation.", it: "Una sintesi chiara delle regole essenziali della coniugazione francese.", es: "Un resumen claro de las reglas esenciales de la conjugaci\xF3n francesa." },
   "Les r\xE8gles essentielles": { de: "Die wichtigsten Regeln", en: "The essential rules", it: "Le regole essenziali", es: "Las reglas esenciales" },
   "Apprendre la conjugaison fran\xE7aise": { de: "Franz\xF6sische Konjugation lernen", en: "Learn French conjugation", it: "Imparare la coniugazione francese", es: "Aprender la conjugaci\xF3n francesa" },
-  "Une carte simple pour comprendre comment les verbes se construisent, choisir le bon temps et \xE9viter les erreurs les plus fr\xE9quentes.": { de: "Ein einfacher \xDCberblick, um den Aufbau der Verben zu verstehen, die richtige Zeitform zu w\xE4hlen und h\xE4ufige Fehler zu vermeiden.", en: "A simple guide to understanding how verbs are formed, choosing the right tense and avoiding the most common mistakes.", it: "Una guida semplice per capire come si formano i verbi, scegliere il tempo giusto ed evitare gli errori pi\xF9 frequenti.", es: "Una gu\xEDa sencilla para entender c\xF3mo se forman los verbos, elegir el tiempo adecuado y evitar los errores m\xE1s frecuentes." },
   "Sommaire des r\xE8gles": { de: "\xDCbersicht der Regeln", en: "Rules overview", it: "Indice delle regole", es: "\xCDndice de las reglas" },
   "Comprendre le verbe": { de: "Das Verb verstehen", en: "Understand the verb", it: "Capire il verbo", es: "Entender el verbo" },
   "Radical, terminaison, groupes et auxiliaires.": { de: "Stamm, Endung, Gruppen und Hilfsverben.", en: "Stem, ending, groups and auxiliaries.", it: "Radice, desinenza, gruppi e ausiliari.", es: "Ra\xEDz, terminaci\xF3n, grupos y auxiliares." },
@@ -1447,17 +1486,17 @@ const _routes = [
   {
     name: "admin-feedbacks",
     path: "/admin/feedbacks",
-    component: () => import('./feedbacks-k6rekWke.mjs')
+    component: () => import('./feedbacks-CJTL1j9_.mjs')
   },
   {
     name: "admin-help-verification",
     path: "/admin/help-verification",
-    component: () => import('./help-verification-B_PySq8p.mjs')
+    component: () => import('./help-verification-USdpnzJg.mjs')
   },
   {
     name: "admin-helps",
     path: "/admin/helps",
-    component: () => import('./helps-ZpEAVgh5.mjs')
+    component: () => import('./helps-x2fKobgt.mjs')
   },
   {
     name: "admin-literary-corpus",
@@ -1482,7 +1521,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-9356frFn.mjs')
+    component: () => import('./users-DQkZdi45.mjs')
   },
   {
     name: "modes-mode-temps",
@@ -1497,7 +1536,7 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-ElRoSbio.mjs')
+    component: () => import('./_code_-Dl0OfjiD.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1512,7 +1551,7 @@ const _routes = [
   {
     name: "accueil",
     path: "/accueil",
-    component: () => import('./accueil-DUOf1AuD.mjs')
+    component: () => import('./accueil-efdkK4fP.mjs')
   },
   {
     name: "admin",
@@ -1522,12 +1561,12 @@ const _routes = [
   {
     name: "apprendre",
     path: "/apprendre",
-    component: () => import('./apprendre-DQ3ttXNZ.mjs')
+    component: () => import('./apprendre-9LkPA_au.mjs')
   },
   {
     name: "consulter",
     path: "/consulter",
-    component: () => import('./consulter-CQJEw-GH.mjs')
+    component: () => import('./consulter-CjLZx07A.mjs')
   },
   {
     name: "exercices",
@@ -1543,12 +1582,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-DJJ1GuZt.mjs')
+    component: () => import('./my-page-DevXiIS6.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-DRwxusNr.mjs')
+    component: () => import('./nouveau-defi-DLbMjUG_.mjs')
   },
   {
     name: "signin",
@@ -1558,7 +1597,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-ALprx07j.mjs')
+    component: () => import('./index-DNXjslG3.mjs')
   },
   {
     name: "localized-admin-admins",
@@ -1603,17 +1642,17 @@ const _routes = [
   {
     name: "localized-admin-feedbacks",
     path: "/:locale(fr|de|en|it|es)/admin/feedbacks",
-    component: () => import('./feedbacks-k6rekWke.mjs')
+    component: () => import('./feedbacks-CJTL1j9_.mjs')
   },
   {
     name: "localized-admin-help-verification",
     path: "/:locale(fr|de|en|it|es)/admin/help-verification",
-    component: () => import('./help-verification-B_PySq8p.mjs')
+    component: () => import('./help-verification-USdpnzJg.mjs')
   },
   {
     name: "localized-admin-helps",
     path: "/:locale(fr|de|en|it|es)/admin/helps",
-    component: () => import('./helps-ZpEAVgh5.mjs')
+    component: () => import('./helps-x2fKobgt.mjs')
   },
   {
     name: "localized-admin-literary-corpus",
@@ -1638,7 +1677,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-9356frFn.mjs')
+    component: () => import('./users-DQkZdi45.mjs')
   },
   {
     name: "localized-modes-mode-temps",
@@ -1653,7 +1692,7 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-ElRoSbio.mjs')
+    component: () => import('./_code_-Dl0OfjiD.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1668,7 +1707,7 @@ const _routes = [
   {
     name: "localized-accueil",
     path: "/:locale(fr|de|en|it|es)/accueil",
-    component: () => import('./accueil-DUOf1AuD.mjs')
+    component: () => import('./accueil-efdkK4fP.mjs')
   },
   {
     name: "localized-admin",
@@ -1678,12 +1717,12 @@ const _routes = [
   {
     name: "localized-apprendre",
     path: "/:locale(fr|de|en|it|es)/apprendre",
-    component: () => import('./apprendre-DQ3ttXNZ.mjs')
+    component: () => import('./apprendre-9LkPA_au.mjs')
   },
   {
     name: "localized-consulter",
     path: "/:locale(fr|de|en|it|es)/consulter",
-    component: () => import('./consulter-CQJEw-GH.mjs')
+    component: () => import('./consulter-CjLZx07A.mjs')
   },
   {
     name: "localized-exercices",
@@ -1699,12 +1738,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-DJJ1GuZt.mjs')
+    component: () => import('./my-page-DevXiIS6.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-DRwxusNr.mjs')
+    component: () => import('./nouveau-defi-DLbMjUG_.mjs')
   },
   {
     name: "localized-signin",
@@ -1714,7 +1753,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-ALprx07j.mjs')
+    component: () => import('./index-DNXjslG3.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -2322,7 +2361,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-sLVmB2Of.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-DNzAihTP.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

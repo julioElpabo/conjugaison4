@@ -120,7 +120,7 @@ const nearFutureAllerQuery = `
   ORDER BY p.id
 `;
 const _id__get = defineEventHandler(async (event) => {
-  var _a;
+  var _a, _b;
   const rawId = (_a = getRouterParam(event, "id")) != null ? _a : "";
   const id = Number(rawId);
   if (!Number.isSafeInteger(id) || id === 0) {
@@ -160,10 +160,8 @@ const _id__get = defineEventHandler(async (event) => {
         WHERE vs.verbe_id=?
           AND cv.actif=1 AND cv.statut_validation='valide' AND cv.fonction_objet='cod'
           AND c.actif=1 AND c.statut_validation='valide'
-          AND c.nombre IS NOT NULL
-          AND (c.genre='feminin' OR c.nombre='pluriel')
         ORDER BY (c.genre='feminin' AND c.nombre='pluriel') DESC,
-          (c.genre='feminin') DESC, c.poids DESC, c.id
+          (c.genre='feminin' OR c.nombre='pluriel') DESC, c.poids DESC, c.id
       `, [id])
     ]);
     const verb = verbs[0];
@@ -192,6 +190,7 @@ const _id__get = defineEventHandler(async (event) => {
         typePronominal: verb.type_pronominal || "aucun"
       },
       conjugations: [...publicConjugations(conjugations), ...nearFuture2],
+      trapExampleComplement: (_b = agreementComplements.find((complement) => complement.texte.trim())) == null ? void 0 : _b.texte.trim(),
       pastParticipleAgreement: verb.auxiliaire.toLocaleLowerCase("fr") === "avoir" ? buildPastParticipleAgreementExample(verb.participe_passe, agreementComplements) : void 0
     };
   }

@@ -1521,7 +1521,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-kl0yRh7W.mjs')
+    component: () => import('./users-B1GNZ347.mjs')
   },
   {
     name: "modes-mode-temps",
@@ -1536,7 +1536,7 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-Bdq9xxLe.mjs')
+    component: () => import('./_code_-BM4vIv1u.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1551,7 +1551,7 @@ const _routes = [
   {
     name: "accueil",
     path: "/accueil",
-    component: () => import('./accueil-AkDe3R31.mjs')
+    component: () => import('./accueil-C8S7VS-z.mjs')
   },
   {
     name: "admin",
@@ -1561,7 +1561,7 @@ const _routes = [
   {
     name: "apprendre",
     path: "/apprendre",
-    component: () => import('./apprendre-9LkPA_au.mjs')
+    component: () => import('./apprendre-DdzGo2Cw.mjs')
   },
   {
     name: "consulter",
@@ -1582,12 +1582,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-D3XbE2Co.mjs')
+    component: () => import('./my-page-CyH7sbVL.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-Cml2Bx2W.mjs')
+    component: () => import('./nouveau-defi-CheGtuiy.mjs')
   },
   {
     name: "signin",
@@ -1597,7 +1597,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-BIdW4usX.mjs')
+    component: () => import('./index-Dsu-GoKB.mjs')
   },
   {
     name: "localized-admin-admins",
@@ -1677,7 +1677,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-kl0yRh7W.mjs')
+    component: () => import('./users-B1GNZ347.mjs')
   },
   {
     name: "localized-modes-mode-temps",
@@ -1692,7 +1692,7 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-Bdq9xxLe.mjs')
+    component: () => import('./_code_-BM4vIv1u.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1707,7 +1707,7 @@ const _routes = [
   {
     name: "localized-accueil",
     path: "/:locale(fr|de|en|it|es)/accueil",
-    component: () => import('./accueil-AkDe3R31.mjs')
+    component: () => import('./accueil-C8S7VS-z.mjs')
   },
   {
     name: "localized-admin",
@@ -1717,7 +1717,7 @@ const _routes = [
   {
     name: "localized-apprendre",
     path: "/:locale(fr|de|en|it|es)/apprendre",
-    component: () => import('./apprendre-9LkPA_au.mjs')
+    component: () => import('./apprendre-DdzGo2Cw.mjs')
   },
   {
     name: "localized-consulter",
@@ -1738,12 +1738,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-D3XbE2Co.mjs')
+    component: () => import('./my-page-CyH7sbVL.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-Cml2Bx2W.mjs')
+    component: () => import('./nouveau-defi-CheGtuiy.mjs')
   },
   {
     name: "localized-signin",
@@ -1753,7 +1753,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-BIdW4usX.mjs')
+    component: () => import('./index-Dsu-GoKB.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {

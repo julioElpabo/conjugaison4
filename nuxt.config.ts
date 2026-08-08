@@ -52,6 +52,14 @@ export default defineNuxtConfig({
   },
   hooks: {
     'pages:extend'(pages) {
+      const modeTensePage = pages.find(page => page.file?.endsWith('/app/pages/modes/[mode]/[temps].vue'))
+      if (modeTensePage?.file) {
+        pages.push({
+          name: 'mode-tense',
+          path: '/:mode(indicatif|subjonctif|conditionnel|imperatif|participe)/:temps',
+          file: modeTensePage.file,
+        })
+      }
       const localePrefix = '/:locale(fr|de|en|it|es)'
       const localizePage = (page: typeof pages[number]): typeof pages[number] => ({
         ...page,

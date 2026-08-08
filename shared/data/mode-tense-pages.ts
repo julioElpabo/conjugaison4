@@ -45,7 +45,7 @@ export function modeTensePages(mode: ModeLandingSlug): ModeTensePage[] {
   return tenseDefinitions[mode].map(tense => ({
     slug: tense.slug,
     label: tense.label,
-    path: `/modes/${mode}/${tense.slug}`,
+    path: `/${mode}/${tense.slug}`,
   }))
 }
 

@@ -2947,6 +2947,49 @@ body.dialog-open {
     margin: 0;
   }
 
+  @page verb-consultation {
+    size: A4 portrait;
+    margin: 12mm 12mm 18mm;
+
+    @bottom-center {
+      content: "conjugaison.tatitotu.ch";
+      color: #52615e;
+      font-family: "Funnel Sans", "Avenir Next", Avenir, sans-serif;
+      font-size: 8pt;
+      letter-spacing: .045em;
+    }
+  }
+
+  @page challenge-print {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  body.is-verb-consultation-print {
+    page: verb-consultation;
+  }
+
+  .print-overlay {
+    page: challenge-print;
+  }
+
+  .site-header,
+  .site-footer,
+  .contact-dialog {
+    display: none !important;
+  }
+
+  .site-shell {
+    display: block !important;
+    min-height: 0 !important;
+  }
+
+  .site-main {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
   body * {
     visibility: hidden !important;
   }

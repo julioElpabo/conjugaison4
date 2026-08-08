@@ -12,6 +12,7 @@ export default defineNitroPlugin(async () => {
     const result = await runVerbPilotImport({
       apply: true,
       writeReports: false,
+      logResult: false,
       databaseConfig: {
         host: String(config.dbHost || ''),
         port: Number(config.dbPort || 3306),

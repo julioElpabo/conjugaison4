@@ -1,6 +1,6 @@
 # Simulation d’import du lot pilote
 
-Rapport généré le 8 août 2026 à 09:52.
+Rapport généré le 8 août 2026 à 10:17.
 
 ## Résultat technique
 

@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { basename, dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import mysql from 'mysql2/promise'
+import { isDirectScriptExecution } from './utils/direct-execution.mjs'
 
 const DEFAULT_LIMIT = 100
 const PEDAGOGICAL_EXCLUSIONS = new Map([
@@ -382,9 +382,6 @@ async function main() {
   console.log(`Rapports : ${outputPath} et ${jsonOutputPath}`)
 }
 
-const isDirectExecution = process.argv[1]
-  && resolve(process.argv[1]) === fileURLToPath(import.meta.url)
-
-if (isDirectExecution) {
+if (isDirectScriptExecution(import.meta.url, 'audit-missing-french-verbs.mjs')) {
   await main()
 }

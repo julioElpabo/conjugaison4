@@ -4,6 +4,7 @@ import { createInterface } from 'node:readline'
 import { dirname, resolve } from 'node:path'
 
 import { normalizeFrench } from './audit-missing-french-verbs.mjs'
+import { isDirectScriptExecution } from './utils/direct-execution.mjs'
 
 const REQUIRED_PARADIGMS = [
   ['indicative', 'present', 6],
@@ -217,7 +218,7 @@ async function main() {
   console.log(`Rapports : ${outputPath} et ${jsonOutputPath}`)
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isDirectScriptExecution(import.meta.url, 'validate-verb-candidates-morphalou.mjs')) {
   main().catch((error) => {
     console.error(error)
     process.exitCode = 1

@@ -106,7 +106,7 @@ function withMaskedSubject(sentence: string, question: ExerciseQuestion) {
   return sentence
 }
 
-export function coachQuestionBubbles(question: ExerciseQuestion, options: { omitIndicativeMode?: boolean, modeLabel?: string, tenseLabel?: string } = {}): CoachQuestionBubbles {
+export function coachQuestionBubbles(question: ExerciseQuestion, options: { omitIndicativeMode?: boolean } = {}): CoachQuestionBubbles {
   const sentenceTemplate = templateWithInputPrefix(
     question.consigne.split('|')[0]?.trim() || '',
     question,
@@ -115,7 +115,7 @@ export function coachQuestionBubbles(question: ExerciseQuestion, options: { omit
   const answerPronoun = normalized(question.mode) === 'imperatif'
     ? ''
     : question.saisiePrefixe ?? question.pronom
-  const modeAndTense = [options.omitIndicativeMode ? '' : options.modeLabel || question.mode, options.tenseLabel || question.temps].filter(Boolean).join(' ')
+  const modeAndTense = [options.omitIndicativeMode ? '' : question.mode, question.temps].filter(Boolean).join(' ')
   const formula = [formulaPronoun, question.infinitif, modeAndTense].filter(Boolean).join(' | ')
   if (!formula) return { formula: question.consigne }
 

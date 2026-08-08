@@ -663,18 +663,18 @@ onBeforeUnmount(() => {
 
         <div v-if="!isFinished && currentQuestion" class="exercise-question">
           <p v-if="exerciseKind === 'tense-identification' || exerciseKind === 'mode-identification'" class="question-instruction">
-            {{ uiLabel(currentQuestion.instruction) }}
+            {{ currentQuestion.instruction }}
           </p>
           <template v-if="exerciseKind === 'conjugation' && currentQuestion.complement">
             <p class="question-context" :aria-label="ui('Contexte grammatical')">
-              <span>{{ ui('Verbe :') }} <strong>{{ currentQuestion.infinitif }}</strong></span>
+              <span>Verbe : <strong>{{ currentQuestion.infinitif }}</strong></span>
               <i aria-hidden="true">|</i>
-              <span>{{ ui('Mode :') }} <strong>{{ uiLabel(currentQuestion.mode) }}</strong></span>
+              <span>Mode : <strong>{{ currentQuestion.mode }}</strong></span>
               <i aria-hidden="true">|</i>
-              <span>{{ ui('Temps :') }} <strong>{{ uiLabel(currentQuestion.temps) }}</strong></span>
+              <span>Temps : <strong>{{ currentQuestion.temps }}</strong></span>
               <template v-if="currentQuestion.pronom">
                 <i aria-hidden="true">|</i>
-                <span>{{ ui('Personne :') }} <strong>{{ currentQuestion.pronom }}</strong></span>
+                <span>Personne : <strong>{{ currentQuestion.pronom }}</strong></span>
               </template>
             </p>
             <form

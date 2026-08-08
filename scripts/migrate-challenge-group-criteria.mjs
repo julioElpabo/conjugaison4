@@ -1,4 +1,5 @@
 import mysql from 'mysql2/promise'
+import { isDirectScriptExecution } from './utils/direct-execution.mjs'
 
 export const challengeGroupCriteria = new Map([
   ['groupe1', [{ field: 'groupeConjugaison', operator: 'equals', value: 1 }]],
@@ -93,7 +94,7 @@ async function run() {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isDirectScriptExecution(import.meta.url, 'migrate-challenge-group-criteria.mjs')) {
   run().catch((error) => {
     console.error(error)
     process.exitCode = 1

@@ -198,8 +198,6 @@ const omitIndicativeMode = computed(() => areOnlyIndicativeTenses(props.tenses))
 const attemptSummaries = computed(() => attempts.value.map((attempt, index) => {
   const bubbles = coachQuestionBubbles(attempt.question, {
     omitIndicativeMode: omitIndicativeMode.value,
-    modeLabel: uiLabel(attempt.question.mode),
-    tenseLabel: uiLabel(attempt.question.temps),
   })
   const formula = omitIndicativeMode.value ? withoutIndicativeMode(bubbles.formula) : bubbles.formula
   return {
@@ -546,7 +544,7 @@ async function submitIdentificationTense(tense: ConjugationTense) {
   await submit()
 }
 
-function contextFor(question?: ExerciseQuestion, hideIdentificationAnswer = false): CoachMessageContext {
+function contextFor(question?: ExerciseQuestion, hideIdentificationAnswer = false, keepGrammarFrench = false): CoachMessageContext {
   const reminder = question?.agreementReminder
   const displayedQuestion = question?.literaryCitation
     ? `${question.literaryCitation.before}【${question.literaryCitation.target}】${question.literaryCitation.after}`
@@ -560,8 +558,8 @@ function contextFor(question?: ExerciseQuestion, hideIdentificationAnswer = fals
     participle: reminder?.participle,
     gender: reminder?.gender === 'feminin' ? 'féminin' : reminder?.gender === 'masculin' ? 'masculin' : undefined,
     number: reminder?.number || undefined,
-    mode: hidesAnswer ? undefined : uiLabel(question?.mode),
-    tense: hidesAnswer ? undefined : uiLabel(question?.temps),
+    mode: hidesAnswer ? undefined : keepGrammarFrench ? question?.mode : uiLabel(question?.mode),
+    tense: hidesAnswer ? undefined : keepGrammarFrench ? question?.temps : uiLabel(question?.temps),
     expectedAnswer: hidesAnswer ? undefined : question?.reponsesPourCorrige.join(' ou '),
     questionNumber: question ? displayedQuestionNumber.value : undefined,
   }
@@ -702,8 +700,8 @@ async function askCurrentQuestion() {
   selectedIdentificationMode.value = ''
   posingQuestion.value = true
   const firstQuestionMessageId = sequence.value + 1
-  if (currentIndex.value > 0) await addCoachReaction('question', contextFor(question, true))
-  if (question.instruction) await addCoachText(uiLabel(question.instruction))
+  if (currentIndex.value > 0) await addCoachReaction('question', contextFor(question, true, true))
+  if (question.instruction) await addCoachText(question.instruction)
   if (isIdentificationExercise.value) {
     if (question.literaryCitation) {
       await enqueueCoachBubble(() => ({
@@ -730,8 +728,6 @@ async function askCurrentQuestion() {
   }
   const bubbles = coachQuestionBubbles(question, {
     omitIndicativeMode: omitIndicativeMode.value,
-    modeLabel: uiLabel(question.mode),
-    tenseLabel: uiLabel(question.temps),
   })
   await addCoachText(bubbles.formula, undefined, true)
   if (bubbles.sentence) await addCoachText(bubbles.sentence, undefined, true)

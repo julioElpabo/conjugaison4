@@ -1,9 +1,9 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { mkdir } from 'node:fs/promises'
 
 import { normalizeFrench } from './audit-missing-french-verbs.mjs'
+import { isDirectScriptExecution } from './utils/direct-execution.mjs'
 
 const SEARCH_URL = 'https://www.dictionnaire-academie.fr/search'
 const PILOT_EXCLUSIONS = new Map([
@@ -326,9 +326,6 @@ async function main() {
   console.log(`Rapports : ${outputPath} et ${jsonOutputPath}`)
 }
 
-const isDirectExecution = process.argv[1]
-  && resolve(process.argv[1]) === fileURLToPath(import.meta.url)
-
-if (isDirectExecution) {
+if (isDirectScriptExecution(import.meta.url, 'validate-verb-candidates-academie.mjs')) {
   await main()
 }

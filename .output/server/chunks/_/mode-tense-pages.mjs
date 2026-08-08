@@ -36,7 +36,7 @@ function modeTensePages(mode) {
   return tenseDefinitions[mode].map((tense) => ({
     slug: tense.slug,
     label: tense.label,
-    path: `/modes/${mode}/${tense.slug}`
+    path: `/${mode}/${tense.slug}`
   }));
 }
 function modeTensePage(mode, tenseSlug) {

@@ -1,5 +1,4 @@
 import { d as defineEventHandler, n as useRuntimeConfig, _ as SUPPORTED_LOCALES, $ as setHeader, a0 as localizePath } from '../nitro/nitro.mjs';
-import { M as MODE_LANDING_SLUGS } from '../_/mode-landing-pages.mjs';
 import { M as MODE_TENSE_PATHS } from '../_/mode-tense-pages.mjs';
 import 'node:http';
 import 'node:https';
@@ -15,9 +14,7 @@ import 'node:fs/promises';
 const PUBLIC_PATHS = [
   "/",
   "/apprendre",
-  "/exercices",
   "/consulter",
-  ...MODE_LANDING_SLUGS.map((slug) => `/modes/${slug}`),
   ...MODE_TENSE_PATHS
 ];
 function escapeXml(value) {

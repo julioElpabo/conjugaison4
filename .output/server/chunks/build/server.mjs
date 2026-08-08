@@ -194,6 +194,7 @@ function createHooks() {
 
 const LOCALE_PATTERN = SUPPORTED_LOCALES.join("|");
 const LOCALIZED_LEGACY_HOME = new RegExp(`^/(${LOCALE_PATTERN})/accueil/?$`, "u");
+const LOCALIZED_MODE_PATH = new RegExp(`^/(${LOCALE_PATTERN})/modes(?:/([^/]+)(?:/([^/]+))?)?$`, "u");
 function withoutTrailingSlash(path) {
   return path.length > 1 ? path.replace(/\/+$/u, "") : path;
 }
@@ -201,16 +202,25 @@ function permanentLegacyRedirect(path) {
   const localizedHome = path.match(LOCALIZED_LEGACY_HOME);
   if (localizedHome) return `/${localizedHome[1]}/`;
   const normalizedPath = withoutTrailingSlash(path);
+  const localizedModePath = normalizedPath.match(LOCALIZED_MODE_PATH);
+  if (localizedModePath) {
+    const [, locale, mode, tense] = localizedModePath;
+    return mode && tense ? `/${locale}/${mode}/${tense}` : `/${locale}/apprendre`;
+  }
   if (normalizedPath === "/" || normalizedPath === "/accueil") return "/fr/";
-  if (["/apprendre", "/consulter", "/exercices"].includes(normalizedPath)) {
+  if (normalizedPath === "/exercices") return "/fr/apprendre";
+  if (normalizedPath === "/modes") return "/fr/apprendre";
+  if (["/apprendre", "/consulter"].includes(normalizedPath)) {
     return `/fr${normalizedPath}`;
   }
   const formerExerciseJourney = normalizedPath.match(/^\/exercices\/([^/]+)$/u);
   if (formerExerciseJourney) {
-    return `/fr/modes/indicatif/${formerExerciseJourney[1]}`;
+    return `/fr/indicatif/${formerExerciseJourney[1]}`;
   }
-  if (/^\/modes\/[^/]+(?:\/[^/]+)?$/u.test(normalizedPath)) {
-    return `/fr${normalizedPath}`;
+  const modePath = normalizedPath.match(/^\/modes\/([^/]+)(?:\/([^/]+))?$/u);
+  if (modePath) {
+    const [, mode, tense] = modePath;
+    return tense ? `/fr/${mode}/${tense}` : "/fr/apprendre";
   }
   return null;
 }
@@ -1521,12 +1531,12 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-B1GNZ347.mjs')
+    component: () => import('./users-B6ToOjwJ.mjs')
   },
   {
     name: "modes-mode-temps",
     path: "/modes/:mode()/:temps()",
-    component: () => import('./_temps_-Ckw4-s_L.mjs')
+    component: () => import('./_temps_-BkkPpQEC.mjs')
   },
   {
     name: "bilan-token",
@@ -1536,12 +1546,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-BM4vIv1u.mjs')
+    component: () => import('./_code_-DzQ2HSrX.mjs')
   },
   {
     name: "exercices-parcours",
     path: "/exercices/:parcours()",
-    component: () => import('./_parcours_-DkuDeDnk.mjs')
+    component: () => import('./_parcours_-B1nmhSHG.mjs')
   },
   {
     name: "modes-mode",
@@ -1551,7 +1561,7 @@ const _routes = [
   {
     name: "accueil",
     path: "/accueil",
-    component: () => import('./accueil-C8S7VS-z.mjs')
+    component: () => import('./accueil-BU3oxvk-.mjs')
   },
   {
     name: "admin",
@@ -1561,7 +1571,7 @@ const _routes = [
   {
     name: "apprendre",
     path: "/apprendre",
-    component: () => import('./apprendre-DdzGo2Cw.mjs')
+    component: () => import('./apprendre-BTlT3UZi.mjs')
   },
   {
     name: "consulter",
@@ -1571,7 +1581,7 @@ const _routes = [
   {
     name: "exercices",
     path: "/exercices",
-    component: () => import('./index-Dfl89Tkk.mjs')
+    component: () => import('./index-BM0DBf8x.mjs')
   },
   {
     name: "mon-compte",
@@ -1582,12 +1592,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-CyH7sbVL.mjs')
+    component: () => import('./my-page-DHD2DSIG.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-CheGtuiy.mjs')
+    component: () => import('./nouveau-defi-BVRbn8sA.mjs')
   },
   {
     name: "signin",
@@ -1597,7 +1607,12 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-Dsu-GoKB.mjs')
+    component: () => import('./index-vihwZrqJ.mjs')
+  },
+  {
+    name: "mode-tense",
+    path: "/:mode(indicatif|subjonctif|conditionnel|imperatif|participe)/:temps",
+    component: () => import('./_temps_-BkkPpQEC.mjs')
   },
   {
     name: "localized-admin-admins",
@@ -1677,12 +1692,12 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-B1GNZ347.mjs')
+    component: () => import('./users-B6ToOjwJ.mjs')
   },
   {
     name: "localized-modes-mode-temps",
     path: "/:locale(fr|de|en|it|es)/modes/:mode()/:temps()",
-    component: () => import('./_temps_-Ckw4-s_L.mjs')
+    component: () => import('./_temps_-BkkPpQEC.mjs')
   },
   {
     name: "localized-bilan-token",
@@ -1692,12 +1707,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-BM4vIv1u.mjs')
+    component: () => import('./_code_-DzQ2HSrX.mjs')
   },
   {
     name: "localized-exercices-parcours",
     path: "/:locale(fr|de|en|it|es)/exercices/:parcours()",
-    component: () => import('./_parcours_-DkuDeDnk.mjs')
+    component: () => import('./_parcours_-B1nmhSHG.mjs')
   },
   {
     name: "localized-modes-mode",
@@ -1707,7 +1722,7 @@ const _routes = [
   {
     name: "localized-accueil",
     path: "/:locale(fr|de|en|it|es)/accueil",
-    component: () => import('./accueil-C8S7VS-z.mjs')
+    component: () => import('./accueil-BU3oxvk-.mjs')
   },
   {
     name: "localized-admin",
@@ -1717,7 +1732,7 @@ const _routes = [
   {
     name: "localized-apprendre",
     path: "/:locale(fr|de|en|it|es)/apprendre",
-    component: () => import('./apprendre-DdzGo2Cw.mjs')
+    component: () => import('./apprendre-BTlT3UZi.mjs')
   },
   {
     name: "localized-consulter",
@@ -1727,7 +1742,7 @@ const _routes = [
   {
     name: "localized-exercices",
     path: "/:locale(fr|de|en|it|es)/exercices",
-    component: () => import('./index-Dfl89Tkk.mjs')
+    component: () => import('./index-BM0DBf8x.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1738,12 +1753,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-CyH7sbVL.mjs')
+    component: () => import('./my-page-DHD2DSIG.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-CheGtuiy.mjs')
+    component: () => import('./nouveau-defi-BVRbn8sA.mjs')
   },
   {
     name: "localized-signin",
@@ -1753,7 +1768,12 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-Dsu-GoKB.mjs')
+    component: () => import('./index-vihwZrqJ.mjs')
+  },
+  {
+    name: "localized-mode-tense",
+    path: "/:locale(fr|de|en|it|es)/:mode(indicatif|subjonctif|conditionnel|imperatif|participe)/:temps",
+    component: () => import('./_temps_-BkkPpQEC.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -2361,7 +2381,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-DNzAihTP.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-DpTM6Kh9.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

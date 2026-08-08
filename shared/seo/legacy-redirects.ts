@@ -2,6 +2,7 @@ import { SUPPORTED_LOCALES } from '../i18n/locales'
 
 const LOCALE_PATTERN = SUPPORTED_LOCALES.join('|')
 const LOCALIZED_LEGACY_HOME = new RegExp(`^/(${LOCALE_PATTERN})/accueil/?$`, 'u')
+const LOCALIZED_MODE_PATH = new RegExp(`^/(${LOCALE_PATTERN})/modes(?:/([^/]+)(?:/([^/]+))?)?$`, 'u')
 
 function withoutTrailingSlash(path: string) {
   return path.length > 1 ? path.replace(/\/+$/u, '') : path
@@ -18,18 +19,28 @@ export function permanentLegacyRedirect(path: string) {
 
   const normalizedPath = withoutTrailingSlash(path)
 
+  const localizedModePath = normalizedPath.match(LOCALIZED_MODE_PATH)
+  if (localizedModePath) {
+    const [, locale, mode, tense] = localizedModePath
+    return mode && tense ? `/${locale}/${mode}/${tense}` : `/${locale}/apprendre`
+  }
+
   if (normalizedPath === '/' || normalizedPath === '/accueil') return '/fr/'
-  if (['/apprendre', '/consulter', '/exercices'].includes(normalizedPath)) {
+  if (normalizedPath === '/exercices') return '/fr/apprendre'
+  if (normalizedPath === '/modes') return '/fr/apprendre'
+  if (['/apprendre', '/consulter'].includes(normalizedPath)) {
     return `/fr${normalizedPath}`
   }
 
   const formerExerciseJourney = normalizedPath.match(/^\/exercices\/([^/]+)$/u)
   if (formerExerciseJourney) {
-    return `/fr/modes/indicatif/${formerExerciseJourney[1]}`
+    return `/fr/indicatif/${formerExerciseJourney[1]}`
   }
 
-  if (/^\/modes\/[^/]+(?:\/[^/]+)?$/u.test(normalizedPath)) {
-    return `/fr${normalizedPath}`
+  const modePath = normalizedPath.match(/^\/modes\/([^/]+)(?:\/([^/]+))?$/u)
+  if (modePath) {
+    const [, mode, tense] = modePath
+    return tense ? `/fr/${mode}/${tense}` : '/fr/apprendre'
   }
 
   return null

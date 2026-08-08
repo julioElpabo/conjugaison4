@@ -1,13 +1,10 @@
-import { MODE_LANDING_SLUGS } from '../../shared/data/mode-landing-pages'
 import { MODE_TENSE_PATHS } from '../../shared/data/mode-tense-pages'
 import { localizePath, SUPPORTED_LOCALES, type AppLocale } from '../../shared/i18n/locales'
 
 const PUBLIC_PATHS = [
   '/',
   '/apprendre',
-  '/exercices',
   '/consulter',
-  ...MODE_LANDING_SLUGS.map(slug => `/modes/${slug}`),
   ...MODE_TENSE_PATHS,
 ]
 

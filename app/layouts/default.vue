@@ -169,7 +169,7 @@ async function selectLearnerLanguage(locale: AppLocale) {
 }
 const activeSection = computed(() => {
   if (localizedSectionPath.value === '/consulter' || localizedSectionPath.value.startsWith('/consulter/')) return 'consulter'
-  if (localizedSectionPath.value === '/apprendre' || localizedSectionPath.value.startsWith('/apprendre/') || localizedSectionPath.value.startsWith('/modes/') || localizedSectionPath.value === '/exercices' || localizedSectionPath.value.startsWith('/exercices/')) return 'apprendre'
+  if (localizedSectionPath.value === '/apprendre' || localizedSectionPath.value.startsWith('/apprendre/') || /^\/(?:indicatif|subjonctif|conditionnel|imperatif|participe)\//u.test(localizedSectionPath.value) || localizedSectionPath.value === '/exercices' || localizedSectionPath.value.startsWith('/exercices/')) return 'apprendre'
   if (!isAdminRoute.value) return 'exercer'
   return ''
 })
@@ -379,7 +379,6 @@ const activeSection = computed(() => {
     <footer v-if="!embeddedConsultation" class="site-footer">
       <p>{{ ui('Un outil gratuit pour travailler la conjugaison française.') }}</p>
       <div class="site-footer__links">
-        <NuxtLink :to="localePath('/exercices')">{{ ui('Modes et temps') }}</NuxtLink>
         <button type="button" @click="contactDialog?.open()">{{ ui('Contact') }}</button>
         <NuxtLink :to="localePath('/admin')">{{ ui('Administration') }}</NuxtLink>
       </div>

@@ -16,7 +16,7 @@ import {
   shouldRemindAboutGuidedTour,
 } from '~~/shared/utils/guided-tour-reminder'
 import type { DriveStep, Driver } from 'driver.js'
-import { getChallengeErrorMessage, useChallengeBuilder, type ChallengeConfig as BuilderChallengeConfig } from '~/composables/useChallengeBuilder'
+import { createDefaultChallenge, getChallengeErrorMessage, useChallengeBuilder, type ChallengeConfig as BuilderChallengeConfig } from '~/composables/useChallengeBuilder'
 import { normalizeChallengeCode, useChallengeApi } from '~/composables/useChallengeApi'
 import ChallengeActions from './ChallengeActions.vue'
 import ChallengeOptions from './ChallengeOptions.vue'
@@ -329,6 +329,32 @@ function requestedModeTense() {
   return tenseAliases[requested] ?? requested
 }
 
+function requestedLearningIdentification() {
+  const requested = Array.isArray(route.query.identifier) ? route.query.identifier[0] : route.query.identifier
+  return requested === 'mode-temps'
+}
+
+const SIMPLE_LEARNING_VERBS = [
+  'aimer',
+  'parler',
+  'regarder',
+  'travailler',
+  'jouer',
+  'demander',
+  'donner',
+  'habiter',
+  'chercher',
+  'penser',
+] as const
+
+function commonLearningVerbIds(count = 10) {
+  const verbsByInfinitive = new Map(catalogue.value.verbes.map(verb => [verb.infinitif.toLocaleLowerCase('fr'), verb]))
+  return SIMPLE_LEARNING_VERBS
+    .slice(0, count)
+    .map(infinitive => verbsByInfinitive.get(infinitive)?.id)
+    .filter((id): id is number => id !== undefined)
+}
+
 try {
   await loadCatalogue()
   if (!wizardInitialized.value) {
@@ -339,7 +365,8 @@ try {
   const landingTense = requestedLandingTense()
   const landingMode = requestedLandingMode()
   const modeTense = requestedModeTense()
-  if ((landingTense || landingMode) && !props.initialCode) {
+  const learningIdentification = requestedLearningIdentification()
+  if ((landingTense || landingMode || learningIdentification) && !props.initialCode) {
     const indicative = catalogue.value.modes.find(mode => mode.name.toLocaleLowerCase('fr') === 'indicatif')
     const tense = landingTense ? catalogue.value.temps.find(candidate => (
       candidate.name.toLocaleLowerCase('fr') === landingTense
@@ -353,18 +380,32 @@ try {
       candidate.modeId === mode.id
       && candidate.name.toLocaleLowerCase('fr') === modeTense
     )) : undefined
-    const tenseIds = tense
-      ? [tense.id]
-      : selectedModeTense ? [selectedModeTense.id]
-      : mode ? catalogue.value.temps.filter(candidate => candidate.modeId === mode.id).map(candidate => candidate.id) : []
+    const tenseIds = learningIdentification
+      ? catalogue.value.temps.map(candidate => candidate.id)
+      : tense
+        ? [tense.id]
+        : selectedModeTense ? [selectedModeTense.id]
+        : mode ? catalogue.value.temps.filter(candidate => candidate.modeId === mode.id).map(candidate => candidate.id) : []
     if (tenseIds.length) {
-      clearVerbs()
-      applySelection({ verbIds: [], tenseIds, questionCount: 10 })
+      const defaults = createDefaultChallenge()
+      challenge.value = {
+        ...defaults,
+        verbIds: commonLearningVerbIds(),
+        tenseIds,
+        questionCount: 10,
+        exerciseKind: learningIdentification ? 'tense-identification' : defaults.exerciseKind,
+        identificationSource: learningIdentification ? 'literary-corpus' : defaults.identificationSource,
+        complementOptions: [...defaults.complementOptions],
+        printOptions: { ...defaults.printOptions },
+      }
       activePresetId.value = undefined
       sourcePresetId.value = undefined
       sourcePresetRandomCount.value = null
-      isPrefilledChallenge.value = false
-      currentStep.value = 1
+      isPrefilledChallenge.value = true
+      revealedPresetVerbIds.value = [...challenge.value.verbIds]
+      revealedPresetTenseIds.value = [...challenge.value.tenseIds]
+      currentStep.value = 4
+      showLaunchSummary.value = true
     }
   }
   if (props.initialCode) {

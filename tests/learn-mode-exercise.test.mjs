@@ -2,8 +2,9 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 
-const [learn, questionnaire, classic, chat] = await Promise.all([
+const [learn, wizard, questionnaire, classic, chat] = await Promise.all([
   readFile(new URL('../app/pages/apprendre.vue', import.meta.url), 'utf8'),
+  readFile(new URL('../app/components/challenge/WizardChallengeWorkspace.vue', import.meta.url), 'utf8'),
   readFile(new URL('../server/services/questionnaire.ts', import.meta.url), 'utf8'),
   readFile(new URL('../app/components/exercise/ClassicExercise.vue', import.meta.url), 'utf8'),
   readFile(new URL('../app/components/exercise/ChatExercise.vue', import.meta.url), 'utf8'),
@@ -11,21 +12,27 @@ const [learn, questionnaire, classic, chat] = await Promise.all([
 
 test('la page apprendre propose un accès pleine largeur à la reconnaissance des modes', () => {
   assert.match(learn, /class="mode-training-button"/u)
-  assert.match(learn, /S’entraîner à reconnaître les modes/u)
+  assert.match(learn, /S’entraîner à reconnaître les modes et les temps/u)
+  assert.match(learn, /query: \{ identifier: 'mode-temps' \}/u)
   assert.match(learn, /\.mode-training-button \{ display: flex; width: 100%/u)
 })
 
-test('le parcours propose les présentations classique et chat avec dix citations', () => {
-  assert.match(learn, /import ClassicExercise from '~\/components\/exercise\/ClassicExercise\.vue'/u)
-  assert.match(learn, /import ChatExercise from '~\/components\/exercise\/ChatExercise\.vue'/u)
-  assert.match(learn, /import CoachPicker from '~\/components\/exercise\/CoachPicker\.vue'/u)
-  assert.match(learn, /<strong>Classique<\/strong>/u)
-  assert.match(learn, /<strong>Chat<\/strong>/u)
-  assert.match(learn, /questionCount: 10/u)
-  assert.match(learn, /exerciseKind: 'mode-identification'/u)
-  assert.match(learn, /identificationSource: 'literary-corpus'/u)
-  assert.match(learn, /<ClassicExercise[\s\S]*exercise-kind="mode-identification"/u)
-  assert.match(learn, /<ChatExercise[\s\S]*exercise-kind="mode-identification"/u)
+test('les exercices venant d’apprendre arrivent à l’étape 4 avec dix verbes courants et dix questions', () => {
+  assert.match(wizard, /function commonLearningVerbIds\(count = 10\)/u)
+  for (const infinitive of ['aimer', 'parler', 'regarder', 'travailler', 'jouer', 'demander', 'donner', 'habiter', 'chercher', 'penser']) {
+    assert.match(wizard, new RegExp(`'${infinitive}'`, 'u'))
+  }
+  assert.doesNotMatch(wizard, /first\.rangFrequence \?\? Number\.POSITIVE_INFINITY/u)
+  assert.match(wizard, /verbIds: commonLearningVerbIds\(\)/u)
+  assert.match(wizard, /questionCount: 10/u)
+  assert.match(wizard, /currentStep\.value = 4/u)
+  assert.match(wizard, /showLaunchSummary\.value = true/u)
+})
+
+test('la reconnaissance préselectionne mode et temps avec les phrases littéraires', () => {
+  assert.match(wizard, /learningIdentification \? 'tense-identification' : defaults\.exerciseKind/u)
+  assert.match(wizard, /learningIdentification \? 'literary-corpus' : defaults\.identificationSource/u)
+  assert.match(wizard, /learningIdentification[\s\S]*catalogue\.value\.temps\.map\(candidate => candidate\.id\)/u)
 })
 
 test('le chat rappelle la règle du pronom adaptée au mode après la question', () => {

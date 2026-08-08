@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { MODE_LANDING_SLUGS, isModeLandingSlug, modeLandingPage } from '~~/shared/data/mode-landing-pages'
-import { modeTensePage, modeTensePages } from '~~/shared/data/mode-tense-pages'
+import { isModeLandingSlug, modeLandingPage } from '~~/shared/data/mode-landing-pages'
+import { modeTensePage } from '~~/shared/data/mode-tense-pages'
 import { modeTensePedagogy } from '~~/shared/data/mode-tense-pedagogy'
 import { modeTenseEndings } from '~~/shared/data/mode-tense-endings'
 
@@ -32,22 +32,26 @@ function endingForms(endings: string) {
 }
 const endingTableGroups = computed(() => endingsGuide.groups.filter(group => endingForms(group.endings).length === endingPronouns.value.length))
 const endingReferenceGroups = computed(() => endingsGuide.groups.filter(group => !endingTableGroups.value.includes(group)))
-const modeNavigation = computed(() => MODE_LANDING_SLUGS.map(slug => ({
-  key: slug,
-  label: modeLandingPage(slug, interfaceLocale.value).modeName,
-  to: localePath(`/modes/${slug}`),
-})))
-const tenseNavigation = computed(() => modeTensePages(modeSlug).map(item => ({
-  key: item.slug,
-  label: item.label,
-  to: localePath(item.path),
-})))
+const learnUrl = computed(() => localePath('/apprendre'))
+const frenchUseTitle = computed(() => {
+  if (modeSlug === 'participe') {
+    const form = tenseSlug === 'present'
+      ? 'le participe présent'
+      : tenseSlug === 'passe'
+        ? 'le participe passé'
+        : `${/^[aeiouyéèêàâîïôöùûü]/iu.test(tense.label) ? 'l’' : 'le '}${tense.label}`
+    return `Quand choisir ${form} ?`
+  }
+  const tenseArticle = /^[aeiouyéèêàâîïôöùûü]/iu.test(tense.label) ? 'l’' : 'le '
+  const modeArticle = /^[aeiouyéèêàâîïôöùûü]/iu.test(mode.value.modeName) ? 'de l’' : 'du '
+  return `Quand choisir ${tenseArticle}${tense.label} ${modeArticle}${mode.value.modeName} ?`
+})
 const copy = computed(() => ({
-  fr: { modes: 'Les modes', modeContext: `À quoi sert ${mode.value.modeName === 'indicatif' ? 'l’indicatif' : `le ${mode.value.modeName}`} ?`, choose: `Les temps ${mode.value.modeName === 'indicatif' ? 'de l’indicatif' : `du ${mode.value.modeName}`}`, title: `${tense.label} — ${mode.value.modeName}`, description: `${tense.label} du mode ${mode.value.modeName} : rôle, formation, terminaisons et exemples contextualisés.`, role: 'Le rôle de ce temps', formation: 'Comment le former ?', endings: 'Les terminaisons', uses: 'Quand le choisir ?', examples: 'Phrases exemples : pourquoi employer ce temps ?', examplesIntro: `Chaque phrase met en évidence un usage du ${tense.label}. Le contexte fournit les indices et la justification explique précisément pourquoi ce temps convient.`, example: 'Phrase exemple', context: 'Situation et indices', reason: 'Justification de l’usage du temps', back: `Revenir au ${mode.value.modeName}`, practise: `Créer un exercice au ${tense.label}` },
-  de: { modes: 'Die Modi', modeContext: `Wozu dient ${mode.value.modeName}?`, choose: `Zeiten: ${mode.value.modeName}`, title: `${tense.label} — ${mode.value.modeName}`, description: `Verstehe die Wahl von ${tense.label} im Modus ${mode.value.modeName} anhand konkreter Situationen.`, role: 'Die Rolle dieser Zeit', formation: 'Wie wird sie gebildet?', endings: 'Endungen', uses: 'Wann verwendet man sie?', examples: 'Beispiele: Warum diese Zeit verwenden?', examplesIntro: 'Jeder Satz zeigt eine Verwendung dieser Zeit. Der Kontext liefert die Hinweise und die Begründung erklärt die Wahl.', example: 'Beispielsatz', context: 'Situation und Hinweise', reason: 'Begründung der Zeitwahl', back: `Zurück zu ${mode.value.modeName}`, practise: `Übung: ${tense.label}` },
-  en: { modes: 'French moods', modeContext: `What is the ${mode.value.modeName} used for?`, choose: `${mode.value.modeName} tenses`, title: `${tense.label} — ${mode.value.modeName}`, description: `Understand why ${tense.label} is chosen within the ${mode.value.modeName} through concrete situations.`, role: 'The role of this tense', formation: 'How is it formed?', endings: 'Endings', uses: 'When should it be used?', examples: 'Example sentences: why use this tense?', examplesIntro: 'Each sentence illustrates one use of the tense. The context provides the clues and the explanation justifies the choice.', example: 'Example sentence', context: 'Situation and clues', reason: 'Why this tense is used', back: `Back to ${mode.value.modeName}`, practise: `Practise ${tense.label}` },
-  it: { modes: 'I modi', modeContext: `A cosa serve ${mode.value.modeName}?`, choose: `I tempi: ${mode.value.modeName}`, title: `${tense.label} — ${mode.value.modeName}`, description: `Comprendi perché si sceglie ${tense.label} nel modo ${mode.value.modeName} attraverso situazioni concrete.`, role: 'Il ruolo di questo tempo', formation: 'Come si forma?', endings: 'Desinenze', uses: 'Quando sceglierlo?', examples: 'Frasi di esempio: perché usare questo tempo?', examplesIntro: 'Ogni frase mostra un uso del tempo. Il contesto fornisce gli indizi e la spiegazione giustifica la scelta.', example: 'Frase di esempio', context: 'Situazione e indizi', reason: 'Giustificazione dell’uso del tempo', back: `Torna a ${mode.value.modeName}`, practise: `Esercitati: ${tense.label}` },
-  es: { modes: 'Los modos', modeContext: `¿Para qué sirve ${mode.value.modeName}?`, choose: `Los tiempos: ${mode.value.modeName}`, title: `${tense.label} — ${mode.value.modeName}`, description: `Comprende por qué se elige ${tense.label} en el modo ${mode.value.modeName} mediante situaciones concretas.`, role: 'La función de este tiempo', formation: '¿Cómo se forma?', endings: 'Terminaciones', uses: '¿Cuándo elegirlo?', examples: 'Frases de ejemplo: ¿por qué usar este tiempo?', examplesIntro: 'Cada frase muestra un uso del tiempo. El contexto aporta las pistas y la explicación justifica la elección.', example: 'Frase de ejemplo', context: 'Situación y pistas', reason: 'Justificación del uso del tiempo', back: `Volver a ${mode.value.modeName}`, practise: `Practicar ${tense.label}` },
+  fr: { title: `${tense.label} — ${mode.value.modeName}`, description: `${tense.label} du mode ${mode.value.modeName} : emplois, terminaisons et exemples contextualisés.`, endings: 'Les terminaisons', uses: frenchUseTitle.value, examples: 'Phrases exemples : pourquoi employer ce temps ?', examplesIntro: `Chaque phrase met en évidence un usage du ${tense.label}. Le contexte fournit les indices et la justification explique précisément pourquoi ce temps convient.`, example: 'Phrase exemple', context: 'Situation et indices', reason: 'Justification de l’usage du temps', back: 'Retour', practise: `Créer un exercice au ${tense.label}` },
+  de: { title: `${tense.label} — ${mode.value.modeName}`, description: `Verstehe die Wahl von ${tense.label} im Modus ${mode.value.modeName} anhand konkreter Situationen.`, endings: 'Endungen', uses: `Wann verwendet man ${tense.label} im ${mode.value.modeName}?`, examples: 'Beispiele: Warum diese Zeit verwenden?', examplesIntro: 'Jeder Satz zeigt eine Verwendung dieser Zeit. Der Kontext liefert die Hinweise und die Begründung erklärt die Wahl.', example: 'Beispielsatz', context: 'Situation und Hinweise', reason: 'Begründung der Zeitwahl', back: 'Zurück zu Lernen', practise: `Übung: ${tense.label}` },
+  en: { title: `${tense.label} — ${mode.value.modeName}`, description: `Understand why ${tense.label} is chosen within the ${mode.value.modeName} through concrete situations.`, endings: 'Endings', uses: `When should you use the ${tense.label} ${mode.value.modeName}?`, examples: 'Example sentences: why use this tense?', examplesIntro: 'Each sentence illustrates one use of the tense. The context provides the clues and the explanation justifies the choice.', example: 'Example sentence', context: 'Situation and clues', reason: 'Why this tense is used', back: 'Back to Learn', practise: `Practise ${tense.label}` },
+  it: { title: `${tense.label} — ${mode.value.modeName}`, description: `Comprendi perché si sceglie ${tense.label} nel modo ${mode.value.modeName} attraverso situazioni concrete.`, endings: 'Desinenze', uses: `Quando scegliere ${tense.label} del ${mode.value.modeName}?`, examples: 'Frasi di esempio: perché usare questo tempo?', examplesIntro: 'Ogni frase mostra un uso del tempo. Il contesto fornisce gli indizi e la spiegazione giustifica la scelta.', example: 'Frase di esempio', context: 'Situazione e indizi', reason: 'Giustificazione dell’uso del tempo', back: 'Torna a Imparare', practise: `Esercitati: ${tense.label}` },
+  es: { title: `${tense.label} — ${mode.value.modeName}`, description: `Comprende por qué se elige ${tense.label} en el modo ${mode.value.modeName} mediante situaciones concretas.`, endings: 'Terminaciones', uses: `¿Cuándo elegir ${tense.label} del ${mode.value.modeName}?`, examples: 'Frases de ejemplo: ¿por qué usar este tiempo?', examplesIntro: 'Cada frase muestra un uso del tiempo. El contexto aporta las pistas y la explicación justifica la elección.', example: 'Frase de ejemplo', context: 'Situación y pistas', reason: 'Justificación del uso del tiempo', back: 'Volver a Aprender', practise: `Practicar ${tense.label}` },
 }[interfaceLocale.value]))
 const exerciseUrl = computed(() => ({
   path: localePath('/'),
@@ -82,24 +86,7 @@ useHead(() => ({
 
 <template>
   <main class="tense-page">
-    <LearningSubnav :label="copy.modes" :items="modeNavigation" :active-key="modeSlug" />
-
-    <section class="tense-page__mode-context">
-      <p>01 · {{ mode.eyebrow }}</p>
-      <div>
-        <h2>{{ copy.modeContext }}</h2>
-        <p>{{ mode.purpose }}</p>
-        <NuxtLink :to="localePath(`/modes/${modeSlug}`)">{{ copy.back }} <span aria-hidden="true">→</span></NuxtLink>
-      </div>
-    </section>
-
-    <section class="tense-page__choice" :aria-labelledby="`${modeSlug}-tense-choice`">
-      <div>
-        <p>02</p>
-        <div><h2 :id="`${modeSlug}-tense-choice`">{{ copy.choose }}</h2><span>Le temps actif est mis en évidence. Choisis-en un autre pour comparer son rôle dans ce même mode.</span></div>
-      </div>
-      <LearningSubnav :label="mode.modeName" :items="tenseNavigation" :active-key="tenseSlug" />
-    </section>
+    <NuxtLink class="tense-page__back" :to="learnUrl"><span aria-hidden="true">←</span> {{ copy.back }}</NuxtLink>
 
     <header class="tense-page__hero">
       <p>{{ mode.modeName }} · {{ tense.label }}</p>
@@ -107,16 +94,6 @@ useHead(() => ({
     </header>
 
     <div class="tense-page__content">
-      <section class="tense-page__summary">
-        <p>03</p>
-        <div><h2>{{ copy.role }}</h2><p>{{ pedagogy.summary }}</p></div>
-      </section>
-
-      <section class="tense-page__panel">
-        <h2>{{ copy.formation }}</h2>
-        <p>{{ pedagogy.formation }}</p>
-      </section>
-
       <section class="tense-page__panel tense-page__panel--uses">
         <h2>{{ copy.uses }}</h2>
         <ul><li v-for="use in pedagogy.uses" :key="use">{{ use }}</li></ul>
@@ -156,7 +133,7 @@ useHead(() => ({
       </section>
 
       <section class="tense-page__examples" :aria-labelledby="`${modeSlug}-${tenseSlug}-examples`">
-        <header><p>04</p><div><h2 :id="`${modeSlug}-${tenseSlug}-examples`">{{ copy.examples }}</h2><p>{{ copy.examplesIntro }}</p></div></header>
+        <header><p>02</p><div><h2 :id="`${modeSlug}-${tenseSlug}-examples`">{{ copy.examples }}</h2><p>{{ copy.examplesIntro }}</p></div></header>
         <div>
           <article v-for="(example, index) in pedagogy.examples" :key="example.sentence">
             <p class="tense-page__example-label">{{ copy.example }} {{ String(index + 1).padStart(2, '0') }}</p>
@@ -171,7 +148,7 @@ useHead(() => ({
     </div>
 
     <footer class="tense-page__actions">
-      <NuxtLink :to="localePath(`/modes/${modeSlug}`)">{{ copy.back }}</NuxtLink>
+      <NuxtLink class="tense-page__footer-back" :to="learnUrl"><span aria-hidden="true">←</span> {{ copy.back }}</NuxtLink>
       <NuxtLink class="is-primary" :to="exerciseUrl">{{ copy.practise }} <span aria-hidden="true">→</span></NuxtLink>
     </footer>
   </main>
@@ -179,21 +156,14 @@ useHead(() => ({
 
 <style scoped>
 .tense-page { width: 100%; min-width: 0; max-width: 1120px; margin: 0 auto; color: var(--ink); font-family: "Funnel Sans", "Avenir Next", Avenir, system-ui, sans-serif; }
-.tense-page__mode-context, .tense-page__summary { display: grid; grid-template-columns: auto 1fr; padding: clamp(24px, 5vw, 40px); border: 1px solid var(--line); border-radius: 24px; gap: 22px; background: var(--surface); box-shadow: 0 16px 40px rgb(42 65 61 / 7%); }
-.tense-page__mode-context > p, .tense-page__summary > p, .tense-page__choice > div > p, .tense-page__examples > header > p { margin: 4px 0 0; color: var(--accent); font-weight: 900; }
-.tense-page__mode-context h2, .tense-page h2 { margin: 0 0 13px; color: var(--brand-dark); font-size: clamp(1.35rem, 3vw, 2rem); letter-spacing: -.025em; }
-.tense-page__mode-context div > p, .tense-page__summary div > p { max-width: 850px; margin: 0; color: var(--muted); font-size: 1.04rem; line-height: 1.7; }
-.tense-page__mode-context a { display: inline-block; margin-top: 14px; color: var(--brand-dark); font-weight: 800; text-decoration: none; }
-.tense-page__choice { margin: 18px 0 0; padding: 24px 28px 4px; border: 1px solid var(--line); border-radius: 22px; background: color-mix(in srgb, var(--surface) 94%, var(--brand)); }
-.tense-page__choice > div { display: grid; grid-template-columns: auto 1fr; gap: 22px; }
-.tense-page__choice h2 { margin-bottom: 5px; }
-.tense-page__choice span { color: var(--muted); line-height: 1.55; }
-.tense-page__choice :deep(.learning-subnav) { margin: 20px 0 16px; }
-.tense-page__hero { max-width: 850px; margin: 48px auto 44px; text-align: center; }
+.tense-page h2 { margin: 0 0 13px; color: var(--brand-dark); font-size: clamp(1.35rem, 3vw, 2rem); letter-spacing: -.025em; }
+.tense-page__back { display: inline-flex; min-height: 44px; padding: 9px 14px; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 12px; color: var(--brand-dark); background: var(--surface); font-weight: 800; text-decoration: none; box-shadow: 0 7px 18px rgb(42 65 61 / 7%); transition: border-color 150ms ease, background 150ms ease, transform 150ms ease; }
+.tense-page__back:hover, .tense-page__back:focus-visible { border-color: var(--brand); background: var(--brand-pale); outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); transform: translateX(-2px); }
+.tense-page__back span { color: var(--accent); font-size: 1.15rem; }
+.tense-page__hero { max-width: 850px; margin: 34px auto 38px; text-align: center; }
 .tense-page__hero > p:first-child { margin: 0 0 8px; color: var(--accent); font-size: .76rem; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
 .tense-page__hero h1 { margin: 0; color: #294c4b; font-size: clamp(2.2rem, 6vw, 4.55rem); letter-spacing: -.055em; line-height: 1.02; text-transform: capitalize; }
-.tense-page__content { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.tense-page__summary, .tense-page__endings, .tense-page__examples { grid-column: 1 / -1; }
+.tense-page__content { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 .tense-page__panel { padding: 27px; border: 1px solid var(--line); border-radius: 21px; background: color-mix(in srgb, var(--surface) 92%, var(--brand)); }
 .tense-page__panel--uses { background: color-mix(in srgb, var(--surface) 91%, var(--accent)); }
 .tense-page__panel p, .tense-page__panel li { color: var(--muted); line-height: 1.65; }
@@ -218,6 +188,7 @@ useHead(() => ({
 .tense-page__ending-notes strong { color: var(--brand-dark); }
 .tense-page__examples { padding: clamp(24px, 5vw, 40px); border: 1px solid var(--line); border-radius: 24px; background: var(--surface); box-shadow: 0 16px 40px rgb(42 65 61 / 7%); }
 .tense-page__examples > header { display: grid; grid-template-columns: auto 1fr; gap: 22px; }
+.tense-page__examples > header > p { margin: 4px 0 0; color: var(--accent); font-weight: 900; }
 .tense-page__examples > header h2 { margin-bottom: 7px; }
 .tense-page__examples > header div > p { max-width: 820px; margin: 0; color: var(--muted); line-height: 1.6; }
 .tense-page__examples > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 12px; gap: 13px; }
@@ -228,21 +199,19 @@ useHead(() => ({
 .tense-page__examples dt { margin-bottom: 4px; color: var(--accent); font-size: .72rem; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
 .tense-page__examples dd { margin: 0; color: var(--muted); line-height: 1.55; }
 .tense-page__examples dl div:last-child { padding-top: 14px; border-top: 1px solid var(--line); }
-.tense-page__actions { display: flex; margin-top: 18px; padding: 24px; align-items: center; justify-content: flex-end; border-radius: 20px; gap: 12px; background: #294c4b; }
+.tense-page__actions { display: flex; margin-top: 18px; padding: 24px; align-items: center; justify-content: space-between; border-radius: 20px; gap: 12px; background: #294c4b; }
 .tense-page__actions a { padding: 11px 15px; border-radius: 11px; color: white; font-weight: 800; text-align: center; text-decoration: none; }
+.tense-page__footer-back { border: 1px solid rgb(255 255 255 / 42%); }
 .tense-page__actions a.is-primary { color: #294c4b; background: #f4c943; }
 @media (max-width: 820px) {
   .tense-page__examples > div { grid-template-columns: 1fr; }
 }
 @media (max-width: 720px) {
   .tense-page { width: min(100%, calc(100vw - 20px)); }
-  .tense-page__mode-context, .tense-page__summary, .tense-page__choice > div, .tense-page__examples > header { grid-template-columns: 1fr; gap: 8px; }
-  .tense-page__mode-context > p, .tense-page__summary > p, .tense-page__choice > div > p, .tense-page__examples > header > p { margin-top: 0; }
-  .tense-page__choice { padding-inline: 20px; }
+  .tense-page__examples > header { grid-template-columns: 1fr; gap: 8px; }
+  .tense-page__examples > header > p { margin-top: 0; }
   .tense-page__hero h1 { overflow-wrap: anywhere; }
-  .tense-page__content { grid-template-columns: 1fr; }
   .tense-page__content > section { min-width: 0; }
-  .tense-page__summary, .tense-page__examples { grid-column: auto; }
   .tense-page__actions { align-items: stretch; flex-direction: column; }
 }
 </style>

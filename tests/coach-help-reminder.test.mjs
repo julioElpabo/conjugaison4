@@ -35,7 +35,7 @@ describe('rappel de l’aide dans le chat', () => {
       'utf8',
     )
     const suggestHelp = component.slice(
-      component.indexOf('async function suggestHelp()'),
+      component.indexOf('async function suggestHelp('),
       component.indexOf('function addAnswerComparison'),
     )
     assert.match(suggestHelp, /helpQuestionIndex\.value = null/u)
@@ -45,6 +45,12 @@ describe('rappel de l’aide dans le chat', () => {
     assert.ok(
       suggestHelp.indexOf('helpOpen.value = true') < suggestHelp.indexOf("addCoachReaction('help-announcement'"),
       'le panneau doit s’ouvrir avant l’annonce du coach',
+    )
+    assert.match(component, /void suggestHelp\(true\)/u)
+    assert.match(suggestHelp, /Tu veux consulter la conjugaison du verbe \{verb\} \?/u)
+    assert.ok(
+      suggestHelp.indexOf("addCoachReaction('help-announcement'") < suggestHelp.indexOf('consultVerbId: verbId'),
+      'la proposition de consultation doit suivre le message d’inactivité',
     )
   })
 })

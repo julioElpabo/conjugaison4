@@ -136,7 +136,6 @@ onMounted(() => track('feature_exposed', { feature: 'learn.content' }))
     <header class="learning-hero">
       <p class="learning-eyebrow">{{ ui('Les règles essentielles') }}</p>
       <h1>{{ ui('Apprendre la conjugaison française') }}</h1>
-      <p>{{ ui('Une carte simple pour comprendre comment les verbes se construisent, choisir le bon temps et éviter les erreurs les plus fréquentes.') }}</p>
     </header>
 
     <nav class="learning-summary" :aria-label="ui('Sommaire des règles')">
@@ -302,7 +301,6 @@ onMounted(() => track('feature_exposed', { feature: 'learn.content' }))
 .learning-hero { max-width: 850px; margin: 8px auto 36px; text-align: center; }
 .learning-eyebrow { margin: 0 0 6px; color: var(--brand); font-size: .75rem; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; }
 .learning-hero h1 { margin: 0; color: #294c4b; font-size: clamp(2.3rem, 6vw, 4.7rem); letter-spacing: -.06em; line-height: 1; }
-.learning-hero > p:last-child { max-width: 720px; margin: 20px auto 0; color: var(--muted); font-size: 1.1rem; line-height: 1.65; }
 .learning-summary { display: grid; max-width: 1080px; margin: 0 auto 32px; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 9px; }
 .learning-summary button { display: flex; min-height: 155px; flex-direction: column; padding: 16px; border: 1px solid var(--line); border-radius: 17px; color: var(--ink); background: rgb(255 255 255 / 88%); text-align: left; box-shadow: 0 10px 28px rgb(42 65 61 / 7%); transition: transform 150ms ease, border-color 150ms ease; cursor: pointer; }
 .learning-summary button:hover { transform: translateY(-3px); border-color: var(--brand); }

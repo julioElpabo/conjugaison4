@@ -103,6 +103,8 @@ interface ChatMessage {
   literaryCitation?: NonNullable<ExerciseQuestion['literaryCitation']>
   identificationForm?: IdentificationFormParts
   identificationPrompt?: boolean
+  consultVerbId?: number
+  consultVerbLabel?: string
 }
 
 const currentIndex = ref(0)
@@ -128,6 +130,7 @@ const restartError = ref('')
 const printSummaryOpen = ref(false)
 const shareSummaryOpen = ref(false)
 const closeConfirmationOpen = ref(false)
+const consultationVerbId = ref<number | null>(null)
 const helpOpen = ref(Boolean(props.tourDemo))
 const helpQuestionIndex = ref<number | null>(null)
 const tourDemoReady = ref(!props.tourDemo)
@@ -169,6 +172,8 @@ const helpVerb = computed(() => {
   return props.verbs.find(verb => verb.id === question.verbeId)
     || props.verbs.find(verb => normalizedInfinitive(verb.infinitif) === normalizedInfinitive(question.infinitif))
 })
+const helpConsultVerbId = computed(() => helpQuestion.value?.verbeId ?? helpVerb.value?.id)
+const helpConsultVerbLabel = computed(() => helpQuestion.value?.infinitif || helpVerb.value?.infinitif || '')
 const helpTense = computed(() => {
   const question = helpQuestion.value
   if (!question) return undefined
@@ -206,6 +211,8 @@ const attemptSummaries = computed(() => attempts.value.map((attempt, index) => {
     expectedAnswer: attempt.question.reponsesPourCorrige.join(` ${ui('ou')} `) || attempt.question.reponses.join(` ${ui('ou')} `),
     errorLabels: attempt.errorLabels || [],
     errorDetails: attempt.errorDetails || [],
+    verbId: attempt.question.verbeId,
+    verbLabel: attempt.question.infinitif,
     identificationForm: isIdentificationExercise.value && attempt.status === 'incorrect'
       ? identificationFormParts(attempt.question)
       : null,
@@ -221,6 +228,14 @@ const hasIncorrectMedia = computed(() => props.coach.assignments.some(assignment
 
 function normalizedInfinitive(value?: string | null) {
   return (value || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLocaleLowerCase('fr')
+}
+
+function openVerbConsultation(id: number) {
+  consultationVerbId.value = id
+}
+
+function closeVerbConsultation() {
+  consultationVerbId.value = null
 }
 
 const displayedIdentificationModeChoices = computed(() => modeAnswerChoices.value)
@@ -610,7 +625,7 @@ function restartHelpReminderTimer() {
     helpReminderTimer = null
     if (version !== conversationVersion || questionIndex !== currentIndex.value
       || waitingForNext.value || posingQuestion.value || finished.value) return
-    void suggestHelp()
+    void suggestHelp(true)
   }, CHAT_HELP_REMINDER_DELAY_MS)
 }
 
@@ -633,7 +648,7 @@ function addCoachText(text: string, tone?: ChatMessage['tone'], emphasis = false
   return enqueueCoachBubble(() => ({ text, ...(tone ? { tone } : {}), ...(emphasis ? { emphasis: true } : {}) }))
 }
 
-async function suggestHelp() {
+async function suggestHelp(offerConsultation = false) {
   const question = currentQuestion.value
   if (!question || finished.value) return
   const wasHelpOpen = helpOpen.value
@@ -644,6 +659,15 @@ async function suggestHelp() {
   }
   await nextTick()
   await addCoachReaction('help-announcement', contextFor(question))
+  const verbId = question.verbeId ?? helpVerb.value?.id
+  const verbLabel = question.infinitif || helpVerb.value?.infinitif
+  if (offerConsultation && verbId && verbLabel) {
+    await enqueueCoachBubble(() => ({
+      text: ui('Tu veux consulter la conjugaison du verbe {verb} ?', { verb: verbLabel }),
+      consultVerbId: verbId,
+      consultVerbLabel: verbLabel,
+    }))
+  }
 }
 
 function addAnswerComparison(
@@ -996,6 +1020,7 @@ async function restart() {
   finalSummaryVisible.value = false
   printSummaryOpen.value = false
   shareSummaryOpen.value = false
+  consultationVerbId.value = null
   helpOpen.value = false
   helpQuestionIndex.value = null
   lastMediaQuestion.value = -100
@@ -1023,7 +1048,8 @@ function requestClose() {
 }
 
 function handleEscapeClose() {
-  if (shareSummaryOpen.value) shareSummaryOpen.value = false
+  if (consultationVerbId.value !== null) closeVerbConsultation()
+  else if (shareSummaryOpen.value) shareSummaryOpen.value = false
   else if (printSummaryOpen.value) printSummaryOpen.value = false
   else if (closeConfirmationOpen.value) cancelClose()
   else if (helpOpen.value) closeHelp()
@@ -1159,6 +1185,14 @@ onBeforeUnmount(() => {
             />
             <strong v-else-if="message.text && message.emphasis">{{ message.text }}</strong>
             <span v-else-if="message.text">{{ message.text }}</span>
+            <button
+              v-if="message.consultVerbId"
+              type="button"
+              class="chat-consult-verb-link"
+              @click.stop="openVerbConsultation(message.consultVerbId)"
+            >
+              {{ ui('Consulter le verbe') }}
+            </button>
             <video v-if="message.media?.mediaType === 'video'" :src="message.media.filePath" :aria-label="message.media.altText" muted playsinline controls @loadedmetadata="mediaLoaded" />
             <img v-else-if="message.media" :class="{ 'chat-media--emoji': message.media.mediaType === 'emoji' }" :src="message.media.filePath" :alt="message.media.altText" @load="mediaLoaded">
             <div
@@ -1264,6 +1298,14 @@ onBeforeUnmount(() => {
                       <dd>{{ item.expectedAnswer }}</dd>
                     </div>
                   </dl>
+                  <button
+                    v-if="item.verbId"
+                    type="button"
+                    class="chat-summary-consult-link"
+                    @click.stop="openVerbConsultation(item.verbId)"
+                  >
+                    {{ ui('Consulter le verbe') }}
+                  </button>
                 </div>
               </li>
             </ol>
@@ -1341,7 +1383,10 @@ onBeforeUnmount(() => {
           :feedback-context="helpFeedbackContext"
           :include-automatic-orthography="!usesIdentificationHelp"
           :enable-automatic-audit="!usesIdentificationHelp"
+          :consult-verb-id="helpConsultVerbId"
+          :consult-verb-label="helpConsultVerbLabel"
           @content-scroll="restartHelpReminderTimer"
+          @consult-verb="openVerbConsultation"
           @close="closeHelp"
         />
       </Transition>
@@ -1362,6 +1407,11 @@ onBeforeUnmount(() => {
         :verbs="verbs.map(verb => verb.infinitif)"
         :tenses="tenses.map(tense => ({ name: tense.name, mode: tense.mode?.name }))"
         @close="shareSummaryOpen = false"
+      />
+      <VerbConsultationModal
+        v-if="consultationVerbId !== null"
+        :verb-id="consultationVerbId"
+        @close="closeVerbConsultation"
       />
     </div>
   </Teleport>
@@ -1963,6 +2013,28 @@ onBeforeUnmount(() => {
 .chat-message > strong {
   white-space: pre-line;
 }
+.chat-consult-verb-link,
+.chat-summary-consult-link {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 10px;
+  padding: 8px 12px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--coach-color) 70%, #184e60);
+  border-radius: 10px;
+  color: white;
+  background: var(--coach-color);
+  text-decoration: none;
+  font-size: .78rem;
+  font-weight: 850;
+  font-family: inherit;
+  cursor: pointer;
+}
+.chat-consult-verb-link:hover,
+.chat-consult-verb-link:focus-visible,
+.chat-summary-consult-link:hover,
+.chat-summary-consult-link:focus-visible { filter: brightness(.92); }
 
 .chat-message__text--emphasis {
   font-weight: 800;
@@ -2461,6 +2533,7 @@ onBeforeUnmount(() => {
   font-weight: 850;
   overflow-wrap: anywhere;
 }
+.chat-summary-consult-link { color: white; }
 
 .chat-summary-tool > footer {
   display: flex;

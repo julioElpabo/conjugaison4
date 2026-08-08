@@ -28,16 +28,18 @@ test('le parcours propose les présentations classique et chat avec dix citation
   assert.match(learn, /<ChatExercise[\s\S]*exercise-kind="mode-identification"/u)
 })
 
-test('le chat rappelle le pronom dans une bulle après la question à compléter', () => {
+test('le chat rappelle la règle du pronom adaptée au mode après la question', () => {
   const openingStart = chat.indexOf('async function runChatOpening')
   const welcome = chat.indexOf('await addCoachReaction(eventType, {})', openingStart)
   const mobileHint = chat.indexOf("text: ui('Glisse vers le bas pour voir l’aide.')", welcome)
   const question = chat.indexOf('await askCurrentQuestion()', mobileHint)
-  const reminder = chat.indexOf('text: ui("N\'oublie pas le pronom !")', question)
+  const reminder = chat.indexOf('const imperative =', question)
 
   assert.ok(welcome >= 0 && welcome < mobileHint)
   assert.ok(mobileHint < question && question < reminder)
-  assert.match(chat.slice(question, reminder), /eventType === 'introduction' && !isIdentificationExercise\.value[\s\S]*await enqueueCoachBubble/u)
+  assert.match(chat.slice(question), /eventType === 'introduction' && !isIdentificationExercise\.value[\s\S]*await enqueueCoachBubble/u)
+  assert.match(chat.slice(reminder), /À l'impératif, la personne est indiquée, mais n'écris pas le pronom\./u)
+  assert.match(chat.slice(reminder), /N'oublie pas le pronom !/u)
   assert.doesNotMatch(chat, /<label for="chat-answer">/u)
   assert.match(chat, /:aria-label="ui\('Ta réponse'\)"/u)
 })

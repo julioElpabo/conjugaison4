@@ -161,6 +161,10 @@ function trapToneClass(trap: ConjugationTrap) {
   return `trap-tone--${trap.tone}`
 }
 
+function isIndicativeMode(mode: string) {
+  return mode.trim().toLocaleLowerCase('fr-CH') === 'indicatif'
+}
+
 function groupLabel(group: number | null) {
   if (!group) return ui('groupe irrégulier')
   if (group === 1) return ui('1er groupe')
@@ -212,6 +216,10 @@ async function selectVerb(verb: Verb) {
 
 onMounted(() => track('feature_exposed', { feature: 'consult.verb' }))
 
+onBeforeUnmount(() => {
+  if (import.meta.client) document.body.classList.remove('is-verb-consultation-print')
+})
+
 function returnToSelection() {
   transitionDirection.value = 'back'
   query.value = ''
@@ -255,6 +263,9 @@ function scrollToMode(targetId: string) {
 
 function printConsultation() {
   if (!import.meta.client) return
+  const clearPrintMode = () => document.body.classList.remove('is-verb-consultation-print')
+  document.body.classList.add('is-verb-consultation-print')
+  window.addEventListener('afterprint', clearPrintMode, { once: true })
   window.print()
 }
 
@@ -394,7 +405,7 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
           </div>
         </div>
 
-        <div v-else key="detail" class="consultation-panel detail-panel">
+        <div v-else key="detail" class="consultation-panel detail-panel" :class="{ 'detail-panel--has-open-notes': agreementOpen || trapsOpen }">
           <div class="detail-toolbar">
             <button class="back-button" type="button" @click="returnFromConsultation">
               <span aria-hidden="true">←</span> {{ embeddedInChallenge ? ui('Retour au défi') : ui('Retour au choix du verbe') }}
@@ -521,7 +532,13 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
               <button type="button" @click="scrollToMode('consult-non-finite')">{{ ui('Formes non personnelles') }}</button>
             </nav>
 
-            <section v-for="group in groups" :id="`consult-mode-${group.mode.id}`" :key="group.mode.id" class="mode-section">
+            <section
+              v-for="group in groups"
+              :id="`consult-mode-${group.mode.id}`"
+              :key="group.mode.id"
+              class="mode-section"
+              :class="{ 'mode-section--indicative': isIndicativeMode(group.mode.name) }"
+            >
               <h2>{{ uiLabel(group.mode.name) }}</h2>
               <div class="tense-grid">
                 <div v-for="(tenseRow, rowIndex) in group.tenseRows" :key="rowIndex" class="tense-row">
@@ -699,9 +716,8 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
 }
 
 @media print {
-  @page { size: A4 portrait; margin: 12mm; }
   .reference-page, .reference-page * { visibility: visible !important; }
-  .reference-page { position: absolute; inset: 0; width: 100%; color: #111 !important; background: white !important; --ink: #111; --muted: #4b5560; --brand: #376b66; --brand-dark: #203f3e; --brand-pale: #e8f3f0; --soft: #f4f7f6; --line: #cbd3d1; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .reference-page { position: static; width: 100%; color: #111 !important; background: white !important; --ink: #111; --muted: #4b5560; --brand: #376b66; --brand-dark: #203f3e; --brand-pale: #e8f3f0; --soft: #f4f7f6; --line: #cbd3d1; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .reference-hero, .detail-toolbar, .conjugation-disclosures, .mode-nav, .consultation-return-bottom { display: none !important; }
   .consultation-container { max-width: none; margin: 0; overflow: visible; border: 0; border-radius: 0; background: white; box-shadow: none; }
   .consultation-panel, .reference-page--embedded .consultation-panel { padding: 0; }
@@ -715,13 +731,16 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
   .agreement-panel, .trap-legend { padding: 4mm; gap: 2.5mm; box-shadow: none; }
   .agreement-examples, .trap-legend ul { gap: 2mm; }
   .agreement-examples article, .trap-legend li { padding: 3mm; gap: 1.5mm; }
-  .agreement-rule, .trap-legend li p { line-height: 1.3; }
-  .trap-legend h3 { font-size: 11pt; }
-  .trap-legend li strong { font-size: 8pt; }
-  .trap-legend li p { margin: .8mm 0 1.2mm; font-size: 7.2pt; }
+  .agreement-panel h3, .trap-legend h3 { font-size: 11pt; }
+  .agreement-badge, .trap-legend li strong { font-size: 8pt; }
+  .agreement-sentence { font-size: 8pt; line-height: 1.25; }
+  .agreement-rule, .trap-legend li p { font-size: 7.2pt; line-height: 1.3; }
+  .trap-legend li p { margin: .8mm 0 1.2mm; }
   .trap-legend li small { margin-top: 1mm; font-size: 7pt; line-height: 1.25; }
   .trap-legend__empty { font-size: 8pt; }
   .mode-section { padding-top: 2.5mm; break-before: auto; break-after: auto; }
+  .detail-panel--has-open-notes .mode-section:first-of-type { break-before: page; }
+  .mode-section--indicative { break-after: page; }
   .mode-section > h2 { margin-bottom: 2mm; break-after: avoid; font-size: 14pt; }
   .tense-grid { gap: 2.5mm; }
   .tense-row { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 2.5mm; break-inside: auto; }

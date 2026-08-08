@@ -11,6 +11,7 @@ const { track } = useSiteAnalytics()
 const isDark = ref(false)
 const localizedSectionPath = computed(() => route.path.replace(/^\/(?:fr|de|en|it|es)(?=\/|$)/u, '') || '/')
 const isAdminRoute = computed(() => localizedSectionPath.value === '/admin' || localizedSectionPath.value.startsWith('/admin/'))
+const embeddedConsultation = computed(() => localizedSectionPath.value === '/consulter' && route.query.embed === 'challenge')
 const themeSwitchTitle = computed(() => isDark.value ? ui('Activer le mode clair') : ui('Activer le mode sombre'))
 const languageOptions = computed<{ value: AppLocale, label: string, flag: string }[]>(() => [
   { value: 'fr', label: ui('Français'), flag: '🇫🇷' },
@@ -175,8 +176,8 @@ const activeSection = computed(() => {
 </script>
 
 <template>
-  <div class="site-shell">
-    <header class="site-header">
+  <div class="site-shell" :class="{ 'site-shell--embedded': embeddedConsultation }">
+    <header v-if="!embeddedConsultation" class="site-header">
       <div class="site-header__inner">
         <div class="site-header__identity">
           <NuxtLink class="site-brand" :to="localePath('/')">
@@ -371,11 +372,11 @@ const activeSection = computed(() => {
       </div>
     </header>
 
-    <main :class="['site-main', { 'site-main--admin': isAdminRoute }]">
+    <main :class="['site-main', { 'site-main--admin': isAdminRoute, 'site-main--embedded': embeddedConsultation }]">
       <slot />
     </main>
 
-    <footer class="site-footer">
+    <footer v-if="!embeddedConsultation" class="site-footer">
       <p>{{ ui('Un outil gratuit pour travailler la conjugaison française.') }}</p>
       <div class="site-footer__links">
         <NuxtLink :to="localePath('/exercices')">{{ ui('Modes et temps') }}</NuxtLink>
@@ -383,7 +384,7 @@ const activeSection = computed(() => {
         <NuxtLink :to="localePath('/admin')">{{ ui('Administration') }}</NuxtLink>
       </div>
     </footer>
-    <ContactDialog ref="contactDialog" />
+    <ContactDialog v-if="!embeddedConsultation" ref="contactDialog" />
   </div>
 </template>
 
@@ -994,6 +995,12 @@ a {
 .site-main--admin {
   width: calc(100% - 24px);
   max-width: none;
+}
+
+.site-main.site-main--embedded {
+  width: 100%;
+  max-width: none;
+  padding: 0;
 }
 
 .site-footer {

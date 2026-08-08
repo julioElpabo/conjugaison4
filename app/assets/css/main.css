@@ -2189,6 +2189,25 @@ body.dialog-open {
   text-transform: uppercase;
 }
 
+.result-consult-verb {
+  display: inline-flex;
+  margin-top: 10px;
+  padding: 7px 10px;
+  border: 1px solid var(--brand);
+  border-radius: 9px;
+  color: white;
+  background: var(--brand);
+  text-decoration: none;
+  font-size: .74rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.result-consult-verb:hover,
+.result-consult-verb:focus-visible {
+  filter: brightness(.92);
+}
+
 .result-error-types {
   display: flex;
   flex-wrap: wrap;

@@ -24,7 +24,7 @@ import {
   mergeLearnerErrorDetails,
 } from '~~/shared/utils/learner-error-diagnostics'
 
-const { interfaceLocale, ui, uiLabel } = useLanguagePreferences()
+const { interfaceLocale, localePath, ui, uiLabel } = useLanguagePreferences()
 
 const props = defineProps<{
   questions: ExerciseQuestion[]
@@ -315,6 +315,10 @@ function mergeErrorLabels(...groups: string[][]) {
 
 function normalizedGrammarChoice(value?: string | null) {
   return (value || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLocaleLowerCase('fr')
+}
+
+function consultVerbPath(id: number) {
+  return `${localePath('/consulter')}?verbe=${encodeURIComponent(String(id))}`
 }
 
 function pairClassicTenseChoices(mode: string, choices: ClassicTenseChoice[]) {
@@ -923,6 +927,15 @@ onBeforeUnmount(() => {
                       :details="attempt.errorDetails"
                       compact
                     />
+                    <NuxtLink
+                      v-if="attempt.question.verbeId"
+                      class="result-consult-verb"
+                      :to="consultVerbPath(attempt.question.verbeId)"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      {{ ui('Consulter le verbe') }}
+                    </NuxtLink>
                   </td>
                   <td>{{ attempt.answer }}</td>
                   <td>{{ attempt.question.reponsesPourCorrige.join(` ${ui('ou')} `) }}</td>

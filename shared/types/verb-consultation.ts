@@ -22,6 +22,8 @@ export interface VerbConsultation {
     | 'typePronominal'
   > & { id: VerbId }
   conjugations: ConsultedConjugation[]
+  /** COD validé de la base, utilisé pour construire les phrases pédagogiques. */
+  trapExampleComplement?: string
   pastParticipleAgreement?: {
     afterSentence: string
     beforeSentenceStart: string

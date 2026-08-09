@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import { describe, it } from 'node:test'
 
 globalThis.createError = ({ statusCode, statusMessage }) => Object.assign(new Error(statusMessage), { statusCode })
@@ -42,4 +43,10 @@ describe('validation des comptes admins', () => {
       }, true), error => error.statusCode === 400)
     })
   }
+
+  it('efface les mots de passe de l’ancienne table ADMINS au démarrage', async () => {
+    const migration = await readFile(new URL('../server/plugins/admin-security-migrations.ts', import.meta.url), 'utf8')
+
+    assert.match(migration, /UPDATE `ADMINS` SET `password`='' WHERE `password`<>''/u)
+  })
 })

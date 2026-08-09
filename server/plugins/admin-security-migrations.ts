@@ -3,6 +3,10 @@ import { useDatabase } from '../utils/database'
 export default defineNitroPlugin(async () => {
   try {
     const database = useDatabase()
+    const [legacyAdminTables] = await database.query("SHOW TABLES LIKE 'ADMINS'")
+    if (Array.isArray(legacyAdminTables) && legacyAdminTables.length > 0) {
+      await database.query("UPDATE `ADMINS` SET `password`='' WHERE `password`<>''")
+    }
     await database.query(`
       CREATE TABLE IF NOT EXISTS admin_login_rate_limits (
         key_hash CHAR(64) NOT NULL PRIMARY KEY,

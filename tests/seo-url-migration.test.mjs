@@ -64,4 +64,14 @@ describe('migration des anciennes URL pour le référencement', () => {
     assert.match(wizard, /partager leurs bilans pour un meilleur suivi/u)
     assert.match(wizard, /conjugaison complète des verbes français/u)
   })
+
+  it('présente l’accueil comme une ressource internationale dans ses métadonnées', async () => {
+    const home = await readFile(new URL('../app/pages/index.vue', import.meta.url), 'utf8')
+
+    assert.match(home, /outil gratuit et multilingue/u)
+    assert.match(home, /quel que soit le pays/u)
+    assert.match(home, /'@type': 'LearningResource'/u)
+    assert.match(home, /isAccessibleForFree: true/u)
+    assert.match(home, /inLanguage: interfaceLocale\.value/u)
+  })
 })

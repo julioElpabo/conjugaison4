@@ -1,1 +1,0 @@
-import{e as n,q as r,I as s,c as o,G as c,o as _}from"./Dro8zkA5.js";const u=n({__name:"index",async setup(p){let e,a;const{localePath:t}=r();return[e,a]=s(()=>c(t("/apprendre"),{replace:!0})),await e,a(),(i,l)=>(_(),o("div"))}});export{u as default};

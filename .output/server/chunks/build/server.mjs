@@ -385,7 +385,9 @@ const uiMessages = {
   "Ouvrir et r\xE9aliser le d\xE9fi de conjugaison {code}.": { de: "Konjugations\xFCbung {code} \xF6ffnen und bearbeiten.", en: "Open and complete conjugation challenge {code}.", it: "Apri e completa l\u2019esercizio di coniugazione {code}.", es: "Abre y completa el ejercicio de conjugaci\xF3n {code}." },
   "Exercices de conjugaison fran\xE7aise gratuits et sans publicit\xE9": { de: "Kostenlose und werbefreie \xDCbungen zur franz\xF6sischen Konjugation", en: "Free, ad-free French conjugation exercises", it: "Esercizi gratuiti di coniugazione francese senza pubblicit\xE0", es: "Ejercicios gratuitos de conjugaci\xF3n francesa sin publicidad" },
   "Exercices de conjugaison fran\xE7aise": { de: "\xDCbungen zur franz\xF6sischen Konjugation", en: "French conjugation exercises", it: "Esercizi di coniugazione francese", es: "Ejercicios de conjugaci\xF3n francesa" },
+  "Conjugaison fran\xE7aise": { de: "Franz\xF6sische Konjugation", en: "French conjugation", it: "Coniugazione francese", es: "Conjugaci\xF3n francesa" },
   "Composez un d\xE9fi de conjugaison en choisissant les verbes, les modes et les temps.": { de: "Erstelle eine Konjugations\xFCbung, indem du Verben, Modi und Zeitformen ausw\xE4hlst.", en: "Create a conjugation challenge by choosing the verbs, moods and tenses.", it: "Crea un esercizio di coniugazione scegliendo verbi, modi e tempi.", es: "Crea un ejercicio de conjugaci\xF3n eligiendo verbos, modos y tiempos." },
+  "TATITOTU est un outil gratuit et multilingue pour apprendre et enseigner la conjugaison fran\xE7aise, quel que soit le pays.": { de: "TATITOTU ist ein kostenloses, mehrsprachiges Werkzeug zum Lernen und Lehren der franz\xF6sischen Konjugation \u2013 unabh\xE4ngig vom Land.", en: "TATITOTU is a free, multilingual tool for learning and teaching French conjugation, wherever you are.", it: "TATITOTU \xE8 uno strumento gratuito e multilingue per imparare e insegnare la coniugazione francese, in qualunque Paese.", es: "TATITOTU es una herramienta gratuita y multiling\xFCe para aprender y ense\xF1ar la conjugaci\xF3n francesa desde cualquier pa\xEDs." },
   "Cr\xE9ez des d\xE9fis de conjugaison, entra\xEEnez-vous et imprimez vos questionnaires.": { de: "Erstelle Konjugations\xFCbungen, \xFCbe und drucke deine Frageb\xF6gen.", en: "Create conjugation challenges, practise and print your questionnaires.", it: "Crea esercizi di coniugazione, allenati e stampa i questionari.", es: "Crea ejercicios de conjugaci\xF3n, practica e imprime tus cuestionarios." },
   "Navigation principale": { de: "Hauptnavigation", en: "Main navigation", it: "Navigazione principale", es: "Navegaci\xF3n principal" },
   "Accueil": { de: "Startseite", en: "Home", it: "Home", es: "Inicio" },
@@ -1625,7 +1627,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-xKZWp33o.mjs')
+    component: () => import('./index-90lYvAIR.mjs')
   },
   {
     name: "mode-tense",
@@ -1786,7 +1788,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-xKZWp33o.mjs')
+    component: () => import('./index-90lYvAIR.mjs')
   },
   {
     name: "localized-mode-tense",

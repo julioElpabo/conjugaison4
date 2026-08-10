@@ -134,3 +134,19 @@ test('les fiches ordinaires éloignent la première question du titre en PDF et 
   assert.match(printPreview, /return y \+ \(isTenseIdentification\.value \? 2 : 8\)/u)
   assert.match(printPreview, /spacing: \{ before: 0, after: 340 \}/u)
 })
+
+test('l’aperçu d’impression signale les questions manquantes et permet de compléter avec des répétitions', () => {
+  assert.match(printPreview, /const missingQuestionCount = computed/u)
+  assert.match(printPreview, /Seulement \{available\} questions différentes sont disponibles sur les \{requested\} demandées/u)
+  assert.match(printPreview, /@click="emit\('regenerate'\)"/u)
+  assert.match(printPreview, /@click="allowRepetitions = !allowRepetitions"/u)
+  assert.match(printPreview, /const printableQuestions = computed/u)
+  assert.match(printPreview, /exercisePages = computed\(\(\) => paginateByHeight\(\s*printableQuestions\.value/u)
+  assert.match(printPreview, /rows: printableQuestions\.value\.map/u)
+})
+
+test('une nouvelle fiche reçoit un autre numéro commun au questionnaire et au corrigé', () => {
+  assert.match(printPreview, /const sheetNumber = ref\(randomSheetNumber\(\)\)/u)
+  assert.match(printPreview, /\(\) => props\.questions,[\s\S]*sheetNumber\.value = randomSheetNumber\(sheetNumber\.value\)/u)
+  assert.equal((printPreview.match(/` n° \$\{sheetNumber\.value\}`/gu) || []).length, 2)
+})

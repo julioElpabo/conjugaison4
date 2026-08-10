@@ -22,15 +22,24 @@ const props = defineProps<{
   tenses: Tense[]
   exerciseKind: ExerciseKind
   options: PrintOptions
+  requestedQuestionCount: number
+  regenerating?: boolean
 }>()
 
 const emit = defineEmits<{
   close: []
   updateOptions: [value: PrintOptions]
+  regenerate: []
 }>()
 const { track } = useSiteAnalytics()
 
-const sheetNumber = Math.floor(Math.random() * 9000) + 1000
+function randomSheetNumber(excluding?: number) {
+  let number = Math.floor(Math.random() * 9000) + 1000
+  while (number === excluding) number = Math.floor(Math.random() * 9000) + 1000
+  return number
+}
+
+const sheetNumber = ref(randomSheetNumber())
 const dialog = useTemplateRef<HTMLElement>('print-dialog')
 const isPdfBusy = ref(false)
 const isWordBusy = ref(false)
@@ -38,6 +47,7 @@ const isPdfPreviewBusy = ref(true)
 const isPdfPreviewFrameReady = ref(false)
 const pdfPreviewUrl = ref('')
 const pdfPreviewError = ref('')
+const allowRepetitions = ref(false)
 let pdfPreviewGeneration = 0
 let pdfPreviewTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -50,6 +60,20 @@ const questionSpacingMm = computed(() => boundedOption(props.options.questionSpa
 const titleSpacingMm = computed(() => boundedOption(props.options.titleSpacingMm, 30, 8, 30))
 const isTenseIdentification = computed(() => props.exerciseKind === 'tense-identification')
 const identificationAnswerHeightMm = computed(() => 8 + Math.max(0, 5 - questionSpacingMm.value))
+const missingQuestionCount = computed(() => Math.max(0, props.requestedQuestionCount - props.questions.length))
+const printableQuestions = computed(() => {
+  if (!allowRepetitions.value || !missingQuestionCount.value || !props.questions.length) return props.questions
+  const result = [...props.questions]
+  while (result.length < props.requestedQuestionCount) {
+    const cycle = [...props.questions]
+    for (let index = cycle.length - 1; index > 0; index -= 1) {
+      const randomIndex = Math.floor(Math.random() * (index + 1))
+      ;[cycle[index], cycle[randomIndex]] = [cycle[randomIndex]!, cycle[index]!]
+    }
+    result.push(...cycle.slice(0, props.requestedQuestionCount - result.length))
+  }
+  return result
+})
 
 const exerciseFirstPageCapacity = computed(() => {
   // La zone utile commence après l'en-tête : 226 mm permet de conserver
@@ -65,7 +89,7 @@ const exerciseFirstPageCapacity = computed(() => {
   return capacity
 })
 const exercisePages = computed(() => paginateByHeight(
-  props.questions,
+  printableQuestions.value,
   exerciseFirstPageCapacity.value,
   220,
   (question) => {
@@ -77,7 +101,7 @@ const exercisePages = computed(() => paginateByHeight(
   }
 ))
 const correctionPages = computed(() => paginateByHeight(
-  props.questions,
+  printableQuestions.value,
   205,
   220,
   question => isTenseIdentification.value
@@ -135,7 +159,7 @@ async function buildPdf() {
     const left = 17
     const right = 193
     const title = pdfSafe(props.options.title || ui('Défi de conjugaison'))
-    const identifier = props.options.showRandomNumber ? ` n° ${sheetNumber}` : ''
+    const identifier = props.options.showRandomNumber ? ` n° ${sheetNumber.value}` : ''
     let pageCount = 0
 
     function addPage() {
@@ -485,7 +509,7 @@ function schedulePdfPreview() {
 
 watch(
   () => ({
-    questions: props.questions,
+    questions: printableQuestions.value,
     verbs: props.verbs,
     tenses: props.tenses,
     exerciseKind: props.exerciseKind,
@@ -493,6 +517,13 @@ watch(
   }),
   schedulePdfPreview,
   { deep: true }
+)
+
+watch(
+  () => props.questions,
+  () => {
+    sheetNumber.value = randomSheetNumber(sheetNumber.value)
+  }
 )
 
 onMounted(() => {
@@ -537,7 +568,7 @@ async function downloadWord() {
     } = await import('docx')
 
     const title = props.options.title || ui('Défi de conjugaison')
-    const identifier = props.options.showRandomNumber ? ` n° ${sheetNumber}` : ''
+    const identifier = props.options.showRandomNumber ? ` n° ${sheetNumber.value}` : ''
     const contentWidth = 9975
     const pageMargins = { top: 1020, right: 965, bottom: 850, left: 965, header: 360, footer: 360, gutter: 0 }
     const noSpacing = { before: 0, after: 0, line: 240 }
@@ -700,7 +731,7 @@ async function downloadWord() {
       columnWidths: isTenseIdentification.value ? [480, 9495] : [480, 3900, 5595],
       layout: TableLayoutType.FIXED,
       borders: TableBorders.NONE,
-      rows: props.questions.map((question, index) => {
+      rows: printableQuestions.value.map((question, index) => {
         const printable = printableQuestionParts(question, props.exerciseKind)
         const identificationCells = [
           cell([paragraph(`${index + 1}.`, { size: 21 })], 480, { margins: { top: 90, bottom: 90, left: 0, right: 40 } }),
@@ -739,7 +770,7 @@ async function downloadWord() {
         columnWidths: isTenseIdentification.value ? [480, 9495] : [480, 5100, 4395],
         layout: TableLayoutType.FIXED,
         borders: TableBorders.NONE,
-        rows: props.questions.map((question, index) => {
+        rows: printableQuestions.value.map((question, index) => {
           const identificationCorrectionCells = [
             cell([paragraph(`${index + 1}.`, { size: 19 })], 480, {
               borders: lightBottomBorder,
@@ -839,6 +870,37 @@ async function downloadWord() {
             <h2 id="print-settings-title">{{ ui('Options de la fiche') }}</h2>
             <span>{{ ui('Les changements apparaissent immédiatement dans l’aperçu.') }}</span>
           </div>
+
+          <section class="print-sheet-generation" :aria-label="ui('Questions de la fiche')">
+            <button
+              class="secondary-button print-sheet-generation__random"
+              type="button"
+              :disabled="regenerating"
+              @click="emit('regenerate')"
+            >
+              {{ regenerating ? ui('Création d’une nouvelle fiche…') : ui('Nouvelle fiche au hasard') }}
+            </button>
+
+            <div v-if="missingQuestionCount" class="print-question-shortage">
+              <strong role="status">
+                {{ ui('Seulement {available} questions différentes sont disponibles sur les {requested} demandées', {
+                  available: questions.length,
+                  requested: requestedQuestionCount,
+                }) }}
+              </strong>
+              <div class="print-question-shortage__action">
+                <span aria-hidden="true">↳</span>
+                <button
+                  type="button"
+                  :class="{ 'is-active': allowRepetitions }"
+                  :aria-pressed="allowRepetitions"
+                  @click="allowRepetitions = !allowRepetitions"
+                >
+                  {{ allowRepetitions ? ui('Répétitions autorisées') : ui('Autoriser les répétitions') }}
+                </button>
+              </div>
+            </div>
+          </section>
 
           <label class="print-settings__field" for="preview-print-title">
             <span>{{ ui('Titre de la fiche') }}</span>

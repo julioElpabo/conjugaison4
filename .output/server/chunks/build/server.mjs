@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, toRef, isReadonly, isRef, isShallow, isReactive, toRaw } from 'vue';
-import { _ as SUPPORTED_LOCALES, al as parseURL, am as encodePath, an as decodePath, ao as localeFromPath, o as normalizeLocale, ap as getRequestHeaders, c as createError$1, a2 as hasProtocol, a4 as isScriptProtocol, a3 as joinURL, aq as withQuery, ar as klona, as as DEFAULT_LANGUAGE_PREFERENCES, a0 as localizePath, at as sanitizeStatusCode, au as getContext, av as getRequestHeader, aw as isEqual, j as setCookie, m as getCookie, k as deleteCookie, ax as $fetch, ay as defu, C as stripLocaleFromPath, a9 as executeAsync, az as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { _ as SUPPORTED_LOCALES, al as parseURL, am as encodePath, an as decodePath, ao as localeFromPath, o as normalizeLocale, ap as getRequestHeaders, c as createError$1, a2 as hasProtocol, a4 as isScriptProtocol, a3 as joinURL, aq as withQuery, ar as klona, as as DEFAULT_LANGUAGE_PREFERENCES, a0 as localizePath, at as sanitizeStatusCode, au as getContext, av as getRequestHeader, aw as isEqual, j as setCookie, m as getCookie, k as deleteCookie, ax as $fetch, ay as defu, C as stripLocaleFromPath, a8 as executeAsync, az as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useSeoMeta$1, a as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -200,14 +200,18 @@ function withoutTrailingSlash(path) {
 }
 function permanentLegacyRedirect(path) {
   const localizedHome = path.match(LOCALIZED_LEGACY_HOME);
-  if (localizedHome) return `/${localizedHome[1]}/`;
+  if (localizedHome) {
+    const locale = localizedHome[1];
+    return locale === "fr" ? "/fr/exercices-de-conjugaison" : `/${locale}/`;
+  }
   const normalizedPath = withoutTrailingSlash(path);
   const localizedModePath = normalizedPath.match(LOCALIZED_MODE_PATH);
   if (localizedModePath) {
     const [, locale, mode, tense] = localizedModePath;
     return mode && tense ? `/${locale}/${mode}/${tense}` : `/${locale}/apprendre`;
   }
-  if (normalizedPath === "/" || normalizedPath === "/accueil") return "/fr/";
+  if (normalizedPath === "/") return "/fr/";
+  if (normalizedPath === "/accueil") return "/fr/exercices-de-conjugaison";
   if (normalizedPath === "/exercices") return "/fr/apprendre";
   if (normalizedPath === "/modes") return "/fr/apprendre";
   if (["/apprendre", "/consulter"].includes(normalizedPath)) {
@@ -385,6 +389,7 @@ const uiMessages = {
   "Ouvrir et r\xE9aliser le d\xE9fi de conjugaison {code}.": { de: "Konjugations\xFCbung {code} \xF6ffnen und bearbeiten.", en: "Open and complete conjugation challenge {code}.", it: "Apri e completa l\u2019esercizio di coniugazione {code}.", es: "Abre y completa el ejercicio de conjugaci\xF3n {code}." },
   "Exercices de conjugaison fran\xE7aise gratuits et sans publicit\xE9": { de: "Kostenlose und werbefreie \xDCbungen zur franz\xF6sischen Konjugation", en: "Free, ad-free French conjugation exercises", it: "Esercizi gratuiti di coniugazione francese senza pubblicit\xE0", es: "Ejercicios gratuitos de conjugaci\xF3n francesa sin publicidad" },
   "Exercices de conjugaison fran\xE7aise": { de: "\xDCbungen zur franz\xF6sischen Konjugation", en: "French conjugation exercises", it: "Esercizi di coniugazione francese", es: "Ejercicios de conjugaci\xF3n francesa" },
+  "Exercices de conjugaison fran\xE7aise gratuits, interactifs et personnalisables. Entra\xEEnez-vous aux temps et aux verbes de votre choix, sans publicit\xE9.": { de: "Kostenlose, interaktive und anpassbare \xDCbungen zur franz\xF6sischen Konjugation. \xDCben Sie die Zeitformen und Verben Ihrer Wahl, ganz ohne Werbung.", en: "Free, interactive and customisable French conjugation exercises. Practise the tenses and verbs of your choice, with no advertising.", it: "Esercizi di coniugazione francese gratuiti, interattivi e personalizzabili. Allenati con i tempi e i verbi che preferisci, senza pubblicit\xE0.", es: "Ejercicios de conjugaci\xF3n francesa gratuitos, interactivos y personalizables. Practica los tiempos y verbos que elijas, sin publicidad." },
   "Conjugaison fran\xE7aise": { de: "Franz\xF6sische Konjugation", en: "French conjugation", it: "Coniugazione francese", es: "Conjugaci\xF3n francesa" },
   "Composez un d\xE9fi de conjugaison en choisissant les verbes, les modes et les temps.": { de: "Erstelle eine Konjugations\xFCbung, indem du Verben, Modi und Zeitformen ausw\xE4hlst.", en: "Create a conjugation challenge by choosing the verbs, moods and tenses.", it: "Crea un esercizio di coniugazione scegliendo verbi, modi e tempi.", es: "Crea un ejercicio de conjugaci\xF3n eligiendo verbos, modos y tiempos." },
   "TATITOTU est un outil gratuit et multilingue pour apprendre et enseigner la conjugaison fran\xE7aise, quel que soit le pays.": { de: "TATITOTU ist ein kostenloses, mehrsprachiges Werkzeug zum Lernen und Lehren der franz\xF6sischen Konjugation \u2013 unabh\xE4ngig vom Land.", en: "TATITOTU is a free, multilingual tool for learning and teaching French conjugation, wherever you are.", it: "TATITOTU \xE8 uno strumento gratuito e multilingue per imparare e insegnare la coniugazione francese, in qualunque Paese.", es: "TATITOTU es una herramienta gratuita y multiling\xFCe para aprender y ense\xF1ar la conjugaci\xF3n francesa desde cualquier pa\xEDs." },
@@ -1562,7 +1567,7 @@ const _routes = [
   {
     name: "modes-mode-temps",
     path: "/modes/:mode()/:temps()",
-    component: () => import('./_temps_-BkkPpQEC.mjs')
+    component: () => import('./_temps_-DD6bdIEF.mjs')
   },
   {
     name: "bilan-token",
@@ -1572,22 +1577,17 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-r6VPuNIh.mjs')
+    component: () => import('./_code_-DPM2SI__.mjs')
   },
   {
     name: "exercices-parcours",
     path: "/exercices/:parcours()",
-    component: () => import('./_parcours_-B1nmhSHG.mjs')
+    component: () => import('./_parcours_-DBhy0evV.mjs')
   },
   {
     name: "modes-mode",
     path: "/modes/:mode()",
-    component: () => import('./index-D3n4Xe-s.mjs')
-  },
-  {
-    name: "accueil",
-    path: "/accueil",
-    component: () => import('./accueil-HcQz6soQ.mjs')
+    component: () => import('./index-D0mxcq0P.mjs')
   },
   {
     name: "admin",
@@ -1597,7 +1597,7 @@ const _routes = [
   {
     name: "apprendre",
     path: "/apprendre",
-    component: () => import('./apprendre-BTlT3UZi.mjs')
+    component: () => import('./apprendre-BPTEGMxZ.mjs')
   },
   {
     name: "consulter",
@@ -1608,6 +1608,11 @@ const _routes = [
     name: "exercices",
     path: "/exercices",
     component: () => import('./index-BM0DBf8x.mjs')
+  },
+  {
+    name: "exercices-de-conjugaison",
+    path: "/exercices-de-conjugaison",
+    component: () => import('./exercices-de-conjugaison-DGLfbz90.mjs')
   },
   {
     name: "mon-compte",
@@ -1623,7 +1628,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-BvQST_PF.mjs')
+    component: () => import('./nouveau-defi-BIcR8xZ1.mjs')
   },
   {
     name: "signin",
@@ -1633,12 +1638,12 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-RF5MOVyO.mjs')
+    component: () => import('./index-C1DqEPgS.mjs')
   },
   {
     name: "mode-tense",
     path: "/:mode(indicatif|subjonctif|conditionnel|imperatif|participe)/:temps",
-    component: () => import('./_temps_-BkkPpQEC.mjs')
+    component: () => import('./_temps_-DD6bdIEF.mjs')
   },
   {
     name: "localized-admin-admins",
@@ -1723,7 +1728,7 @@ const _routes = [
   {
     name: "localized-modes-mode-temps",
     path: "/:locale(fr|de|en|it|es)/modes/:mode()/:temps()",
-    component: () => import('./_temps_-BkkPpQEC.mjs')
+    component: () => import('./_temps_-DD6bdIEF.mjs')
   },
   {
     name: "localized-bilan-token",
@@ -1733,22 +1738,17 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-r6VPuNIh.mjs')
+    component: () => import('./_code_-DPM2SI__.mjs')
   },
   {
     name: "localized-exercices-parcours",
     path: "/:locale(fr|de|en|it|es)/exercices/:parcours()",
-    component: () => import('./_parcours_-B1nmhSHG.mjs')
+    component: () => import('./_parcours_-DBhy0evV.mjs')
   },
   {
     name: "localized-modes-mode",
     path: "/:locale(fr|de|en|it|es)/modes/:mode()",
-    component: () => import('./index-D3n4Xe-s.mjs')
-  },
-  {
-    name: "localized-accueil",
-    path: "/:locale(fr|de|en|it|es)/accueil",
-    component: () => import('./accueil-HcQz6soQ.mjs')
+    component: () => import('./index-D0mxcq0P.mjs')
   },
   {
     name: "localized-admin",
@@ -1758,7 +1758,7 @@ const _routes = [
   {
     name: "localized-apprendre",
     path: "/:locale(fr|de|en|it|es)/apprendre",
-    component: () => import('./apprendre-BTlT3UZi.mjs')
+    component: () => import('./apprendre-BPTEGMxZ.mjs')
   },
   {
     name: "localized-consulter",
@@ -1769,6 +1769,11 @@ const _routes = [
     name: "localized-exercices",
     path: "/:locale(fr|de|en|it|es)/exercices",
     component: () => import('./index-BM0DBf8x.mjs')
+  },
+  {
+    name: "localized-exercices-de-conjugaison",
+    path: "/:locale(fr|de|en|it|es)/exercices-de-conjugaison",
+    component: () => import('./exercices-de-conjugaison-DGLfbz90.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1784,7 +1789,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-BvQST_PF.mjs')
+    component: () => import('./nouveau-defi-BIcR8xZ1.mjs')
   },
   {
     name: "localized-signin",
@@ -1794,12 +1799,12 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-RF5MOVyO.mjs')
+    component: () => import('./index-C1DqEPgS.mjs')
   },
   {
     name: "localized-mode-tense",
     path: "/:locale(fr|de|en|it|es)/:mode(indicatif|subjonctif|conditionnel|imperatif|participe)/:temps",
-    component: () => import('./_temps_-BkkPpQEC.mjs')
+    component: () => import('./_temps_-DD6bdIEF.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -2407,7 +2412,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-CMum612V.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-D8SxKpHC.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

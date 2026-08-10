@@ -13,6 +13,7 @@ import 'node:fs/promises';
 
 const PUBLIC_PATHS = [
   "/",
+  "/exercices-de-conjugaison",
   "/apprendre",
   "/consulter",
   ...MODE_TENSE_PATHS

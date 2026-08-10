@@ -15,7 +15,10 @@ function withoutTrailingSlash(path: string) {
  */
 export function permanentLegacyRedirect(path: string) {
   const localizedHome = path.match(LOCALIZED_LEGACY_HOME)
-  if (localizedHome) return `/${localizedHome[1]}/`
+  if (localizedHome) {
+    const locale = localizedHome[1]
+    return locale === 'fr' ? '/fr/exercices-de-conjugaison' : `/${locale}/`
+  }
 
   const normalizedPath = withoutTrailingSlash(path)
 
@@ -25,7 +28,8 @@ export function permanentLegacyRedirect(path: string) {
     return mode && tense ? `/${locale}/${mode}/${tense}` : `/${locale}/apprendre`
   }
 
-  if (normalizedPath === '/' || normalizedPath === '/accueil') return '/fr/'
+  if (normalizedPath === '/') return '/fr/'
+  if (normalizedPath === '/accueil') return '/fr/exercices-de-conjugaison'
   if (normalizedPath === '/exercices') return '/fr/apprendre'
   if (normalizedPath === '/modes') return '/fr/apprendre'
   if (['/apprendre', '/consulter'].includes(normalizedPath)) {

@@ -138,11 +138,11 @@ onMounted(() => track('feature_exposed', { feature: 'learn.content' }))
 
           <div class="mode-explorer-actions">
             <p>{{ mode.ctaText }}</p>
-            <NuxtLink :to="{ path: localePath('/'), query: { mode: mode.slug } }">{{ mode.ctaLabel }} <span aria-hidden="true">→</span></NuxtLink>
+            <NuxtLink :to="{ path: localePath('/exercices-de-conjugaison'), query: { mode: mode.slug } }">{{ mode.ctaLabel }} <span aria-hidden="true">→</span></NuxtLink>
           </div>
         </div>
 
-        <NuxtLink class="mode-training-button" :to="{ path: localePath('/'), query: { identifier: 'mode-temps' } }">
+        <NuxtLink class="mode-training-button" :to="{ path: localePath('/exercices-de-conjugaison'), query: { identifier: 'mode-temps' } }">
           <span>S’entraîner à reconnaître les modes et les temps</span><span aria-hidden="true">→</span>
         </NuxtLink>
       </section>
@@ -209,7 +209,7 @@ onMounted(() => track('feature_exposed', { feature: 'learn.content' }))
 
       <section class="learning-actions" aria-labelledby="continue-title">
         <div><p class="learning-eyebrow">{{ ui('À toi de jouer') }}</p><h2 id="continue-title">{{ ui('Passe de la règle à la pratique') }}</h2><p>{{ ui('Consulte un modèle complet ou crée un exercice ciblé pour vérifier ce que tu viens d’apprendre.') }}</p></div>
-        <div><NuxtLink :to="localePath('/consulter')">{{ ui('Consulter un verbe') }}</NuxtLink><NuxtLink class="is-primary" :to="localePath('/')">{{ ui('S’exercer') }}</NuxtLink></div>
+        <div><NuxtLink :to="localePath('/consulter')">{{ ui('Consulter un verbe') }}</NuxtLink><NuxtLink class="is-primary" :to="localePath('/exercices-de-conjugaison')">{{ ui('S’exercer') }}</NuxtLink></div>
       </section>
     </main>
 

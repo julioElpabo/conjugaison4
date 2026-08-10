@@ -38,16 +38,18 @@ const loginPassword = ref('')
 const privacyAccepted = ref(false)
 const website = ref('')
 const recovery = ref<RegistrationResult | null>(null)
-const registerForm = ref<HTMLFormElement | null>(null)
 const copied = ref(false)
 const turnstileSiteKey = String(config.public.turnstileSiteKey || '')
+const {
+  container: turnstileContainer,
+  token: turnstileResponse,
+  unavailable: turnstileUnavailable,
+  reset: resetTurnstile,
+} = useTurnstileWidget(turnstileSiteKey, 'learner_register')
 
 useHead(() => ({
   title: copy.value.pageTitle,
   meta: [{ name: 'robots', content: 'noindex, nofollow' }],
-  script: turnstileSiteKey
-    ? [{ src: 'https://challenges.cloudflare.com/turnstile/v0/api.js', async: true, defer: true }]
-    : [],
 }))
 
 onMounted(async () => {
@@ -118,11 +120,6 @@ async function refreshSuggestion() {
   }
 }
 
-function turnstileToken() {
-  if (!registerForm.value) return ''
-  return String(new FormData(registerForm.value).get('cf-turnstile-response') || '')
-}
-
 async function register() {
   errorMessage.value = ''
   if (!suggestion.value) {
@@ -141,6 +138,12 @@ async function register() {
     errorMessage.value = 'Lis et accepte l’information sur les données enregistrées.'
     return
   }
+  if (turnstileSiteKey && !turnstileResponse.value) {
+    errorMessage.value = turnstileUnavailable.value
+      ? 'Le contrôle antibot n’a pas pu se charger. Recharge la page ou vérifie que ton navigateur ne le bloque pas.'
+      : 'Attends que le contrôle antibot soit terminé, puis réessaie.'
+    return
+  }
   submitting.value = true
   try {
     recovery.value = await $fetch<RegistrationResult>('/api/learner/register', {
@@ -152,7 +155,7 @@ async function register() {
         privacyAccepted: privacyAccepted.value,
         interfaceLocale: interfaceLocale.value,
         website: website.value,
-        turnstileToken: turnstileToken(),
+        turnstileToken: turnstileResponse.value,
       },
     })
     setUser(recovery.value.user)
@@ -166,6 +169,7 @@ async function register() {
       suggestion.value = candidate.data.data
     }
     errorMessage.value = humanError(error, 'Impossible de créer le compte.')
+    if (turnstileSiteKey) void resetTurnstile()
   } finally {
     submitting.value = false
   }
@@ -247,7 +251,7 @@ function downloadRecoveryCode() {
 
       <p v-if="errorMessage" class="learner-error" role="alert">{{ errorMessage }}</p>
 
-      <form v-if="mode === 'register'" ref="registerForm" @submit.prevent="register">
+      <form v-if="mode === 'register'" @submit.prevent="register">
         <div class="learner-field">
           <span>{{ copy.proposedUsername }}</span>
           <div class="username-proposal" aria-live="polite">
@@ -278,11 +282,13 @@ function downloadRecoveryCode() {
 
         <div
           v-if="turnstileSiteKey"
+          ref="turnstileContainer"
           class="cf-turnstile"
-          :data-sitekey="turnstileSiteKey"
-          data-action="learner_register"
-          data-theme="auto"
         />
+
+        <p v-if="turnstileUnavailable" class="learner-error" role="alert">
+          Le contrôle antibot n’a pas pu se charger. Recharge la page ou vérifie que ton navigateur ne le bloque pas.
+        </p>
 
         <button class="primary-button is-full" type="submit" :disabled="submitting || loadingSuggestion || !suggestion">
           {{ submitting ? copy.creating : copy.create }}

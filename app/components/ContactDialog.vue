@@ -14,6 +14,11 @@ const submitting = ref(false)
 const sent = ref(false)
 const errorMessage = ref('')
 const turnstileSiteKey = String(config.public.turnstileSiteKey || '')
+const {
+  container: turnstileContainer,
+  token: turnstileResponse,
+  reset: resetTurnstile,
+} = useTurnstileWidget(turnstileSiteKey, 'contact')
 const constraints = reactive({
   enabled: true,
   subjectMinLength: 5,
@@ -21,12 +26,6 @@ const constraints = reactive({
   messageMinLength: 20,
   messageMaxLength: 3000,
 })
-
-useHead(() => ({
-  script: turnstileSiteKey
-    ? [{ src: 'https://challenges.cloudflare.com/turnstile/v0/api.js', async: true, defer: true }]
-    : [],
-}))
 
 async function refreshConstraints() {
   try {
@@ -51,19 +50,6 @@ function close() {
 
 function closeOnBackdrop(event: MouseEvent) {
   if (event.target === dialog.value) close()
-}
-
-function turnstileToken() {
-  if (!form.value) return ''
-  return String(new FormData(form.value).get('cf-turnstile-response') || '')
-}
-
-function resetTurnstile() {
-  const turnstile = (window as Window & {
-    turnstile?: { reset: (container?: HTMLElement) => void }
-  }).turnstile
-  const container = form.value?.querySelector<HTMLElement>('.cf-turnstile')
-  if (turnstile && container) turnstile.reset(container)
 }
 
 function retryTime(seconds: number) {
@@ -116,7 +102,7 @@ async function submit() {
         subject: subject.value,
         message: message.value,
         website: website.value,
-        turnstileToken: turnstileToken(),
+        turnstileToken: turnstileResponse.value,
       },
     })
     sent.value = true
@@ -127,7 +113,7 @@ async function submit() {
   }
   catch (error) {
     errorMessage.value = humanError(error)
-    resetTurnstile()
+    void resetTurnstile()
   }
   finally {
     submitting.value = false
@@ -209,10 +195,8 @@ defineExpose({ open })
 
           <div
             v-if="turnstileSiteKey"
+            ref="turnstileContainer"
             class="cf-turnstile"
-            :data-sitekey="turnstileSiteKey"
-            data-action="contact"
-            data-theme="auto"
           />
 
           <p v-if="errorMessage" class="contact-dialog__error" role="alert">{{ errorMessage }}</p>

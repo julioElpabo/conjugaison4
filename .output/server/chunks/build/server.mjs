@@ -1622,7 +1622,7 @@ const _routes = [
   {
     name: "signin",
     path: "/signin",
-    component: () => import('./signin-LSEvn-Xv.mjs')
+    component: () => import('./signin-B3_XIrAV.mjs')
   },
   {
     name: "index",
@@ -1783,7 +1783,7 @@ const _routes = [
   {
     name: "localized-signin",
     path: "/:locale(fr|de|en|it|es)/signin",
-    component: () => import('./signin-LSEvn-Xv.mjs')
+    component: () => import('./signin-B3_XIrAV.mjs')
   },
   {
     name: "localized-index",
@@ -2401,7 +2401,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-DpTM6Kh9.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-CMum612V.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

@@ -508,7 +508,10 @@ function onToggleTense(id: number) {
       :tenses="selectedTenses"
       :exercise-kind="challenge.exerciseKind"
       :options="challenge.printOptions"
+      :requested-question-count="challenge.questionCount"
+      :regenerating="busyAction === 'print'"
       @update-options="challenge.printOptions = $event"
+      @regenerate="preparePrint"
       @close="isPrintOpen = false"
     />
 

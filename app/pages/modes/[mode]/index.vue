@@ -24,7 +24,7 @@ const tenseItems = computed(() => modeTensePages(slug).map(tense => ({
   label: tense.label,
   to: localePath(tense.path),
 })))
-const exerciseUrl = computed(() => ({ path: localePath('/'), query: { mode: slug } }))
+const exerciseUrl = computed(() => ({ path: localePath('/exercices-de-conjugaison'), query: { mode: slug } }))
 
 useHead(() => ({
   title: page.value.metaTitle,

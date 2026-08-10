@@ -34,7 +34,7 @@ const navigationLabels = computed(() => ({
   es: { modes: 'Los modos', tenses: 'indicatif' },
 }[interfaceLocale.value]))
 const exerciseUrl = computed(() => ({
-  path: localePath('/'),
+  path: localePath('/exercices-de-conjugaison'),
   query: { parcours: slug },
 }))
 

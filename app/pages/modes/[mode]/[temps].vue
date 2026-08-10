@@ -54,7 +54,7 @@ const copy = computed(() => ({
   es: { title: `${tense.label} — ${mode.value.modeName}`, description: `Comprende por qué se elige ${tense.label} en el modo ${mode.value.modeName} mediante situaciones concretas.`, endings: 'Terminaciones', uses: `¿Cuándo elegir ${tense.label} del ${mode.value.modeName}?`, examples: 'Frases de ejemplo: ¿por qué usar este tiempo?', examplesIntro: 'Cada frase muestra un uso del tiempo. El contexto aporta las pistas y la explicación justifica la elección.', example: 'Frase de ejemplo', context: 'Situación y pistas', reason: 'Justificación del uso del tiempo', back: 'Volver a Aprender', practise: `Practicar ${tense.label}` },
 }[interfaceLocale.value]))
 const exerciseUrl = computed(() => ({
-  path: localePath('/'),
+  path: localePath('/exercices-de-conjugaison'),
   query: { mode: modeSlug, temps: tense.label },
 }))
 

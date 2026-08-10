@@ -26,7 +26,8 @@ const guidedTourRequested = useState('guided-tour-requested', () => false)
 const wizardAtHome = useState('wizard-at-home', () => true)
 const tourCopy = computed(() => guidedTourCopy(interfaceLocale.value))
 const learnerCopy = computed(() => learnerSpaceCopy(interfaceLocale.value))
-const isActualHomePage = computed(() => localizedSectionPath.value === '/' && wizardAtHome.value)
+const isExerciseLandingPage = computed(() => ['/', '/exercices-de-conjugaison'].includes(localizedSectionPath.value))
+const isActualHomePage = computed(() => isExerciseLandingPage.value && wizardAtHome.value)
 const activeLanguageOption = computed(() => languageOptions.value.find(option => option.value === interfaceLocale.value) ?? languageOptions.value[0]!)
 const learnerMenu = ref<HTMLDetailsElement | null>(null)
 const learnerLanguageMenuOpen = ref(false)
@@ -124,8 +125,8 @@ function requestNewChallenge() {
 
 async function requestGuidedTour() {
   guidedTourRequested.value = true
-  if (localizedSectionPath.value !== '/') {
-    await navigateTo(localePath('/'))
+  if (!isExerciseLandingPage.value) {
+    await navigateTo(localePath('/exercices-de-conjugaison'))
   }
 }
 
@@ -253,7 +254,7 @@ const activeSection = computed(() => {
             </svg>
           </NuxtLink>
           <NuxtLink
-            :to="localePath('/')"
+            :to="localePath('/exercices-de-conjugaison')"
             :class="{ 'is-active': activeSection === 'exercer' }"
             :aria-current="activeSection === 'exercer' ? 'page' : undefined"
             @click="requestNewChallenge"

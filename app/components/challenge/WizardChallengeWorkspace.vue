@@ -33,6 +33,7 @@ import 'driver.js/dist/driver.css'
 
 const props = defineProps<{
   initialCode?: string
+  homeHeading?: string
 }>()
 
 type WizardStep = 0 | 1 | 2 | 3 | 4
@@ -1671,7 +1672,7 @@ async function createSharedChallenge(title: string, description: string) {
     <div class="challenge-page wizard-page">
       <header class="wizard-hero">
         <p v-if="currentStep === 0" class="wizard-hero__brand">{{ heroTitle }}</p>
-        <h1 v-if="currentStep === 0" class="wizard-hero__subtitle">{{ ui('Exercices de conjugaison française, gratuits et sans publicité') }}</h1>
+        <h1 v-if="currentStep === 0" class="wizard-hero__subtitle">{{ props.homeHeading || ui('Exercices de conjugaison française, gratuits et sans publicité') }}</h1>
         <h1 v-else :class="{ 'wizard-hero__preset': isPrefilledChallenge }">{{ heroTitle }}</h1>
         <button v-if="currentStep === 0" class="tour-entry-button" type="button" @click="openTourMenu">
           <span aria-hidden="true">?</span>{{ tourCopy.discover }}

@@ -3,6 +3,7 @@ import { localizePath, SUPPORTED_LOCALES, type AppLocale } from '../../shared/i1
 
 const PUBLIC_PATHS = [
   '/',
+  '/exercices-de-conjugaison',
   '/apprendre',
   '/consulter',
   ...MODE_TENSE_PATHS,

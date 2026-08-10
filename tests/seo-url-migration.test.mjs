@@ -6,7 +6,7 @@ import { permanentLegacyRedirect } from '../shared/seo/legacy-redirects.ts'
 describe('migration des anciennes URL pour le référencement', () => {
   it('redirige définitivement les anciennes pages françaises vers leur URL localisée', () => {
     assert.equal(permanentLegacyRedirect('/'), '/fr/')
-    assert.equal(permanentLegacyRedirect('/accueil'), '/fr/')
+    assert.equal(permanentLegacyRedirect('/accueil'), '/fr/exercices-de-conjugaison')
     assert.equal(permanentLegacyRedirect('/apprendre'), '/fr/apprendre')
     assert.equal(permanentLegacyRedirect('/consulter/'), '/fr/consulter')
     assert.equal(permanentLegacyRedirect('/exercices'), '/fr/apprendre')
@@ -19,11 +19,25 @@ describe('migration des anciennes URL pour le référencement', () => {
     assert.equal(permanentLegacyRedirect('/exercices/present'), '/fr/indicatif/present')
   })
 
-  it('supprime les anciennes pages accueil localisées sans toucher aux URL actuelles', () => {
-    assert.equal(permanentLegacyRedirect('/fr/accueil'), '/fr/')
+  it('redirige les anciennes pages accueil vers la page d’exercices sans toucher à la racine localisée', () => {
+    assert.equal(permanentLegacyRedirect('/fr/accueil'), '/fr/exercices-de-conjugaison')
     assert.equal(permanentLegacyRedirect('/de/accueil/'), '/de/')
+    assert.equal(permanentLegacyRedirect('/fr/'), null)
     assert.equal(permanentLegacyRedirect('/fr/exercices'), null)
     assert.equal(permanentLegacyRedirect('/signin'), null)
+  })
+
+  it('publie la nouvelle page d’exercices avec ses métadonnées SEO', async () => {
+    const page = await readFile(new URL('../app/pages/exercices-de-conjugaison.vue', import.meta.url), 'utf8')
+    const sitemap = await readFile(new URL('../server/routes/sitemap.xml.get.ts', import.meta.url), 'utf8')
+
+    assert.match(page, /Exercices de conjugaison française gratuits \| TATITOTU/u)
+    assert.match(page, /titleTemplate: null/u)
+    assert.match(page, /Exercices de conjugaison française gratuits, interactifs et personnalisables/u)
+    assert.match(page, /home-heading="ui\('Exercices de conjugaison française'\)"/u)
+    assert.match(page, /'@type': 'LearningResource'/u)
+    assert.match(sitemap, /'\/exercices-de-conjugaison'/u)
+    assert.doesNotMatch(sitemap, /['"]\/accueil['"]/u)
   })
 
   it('redirige définitivement la page exercices et la retire du pied de page et du sitemap', async () => {
@@ -56,7 +70,7 @@ describe('migration des anciennes URL pour le référencement', () => {
   it('décrit clairement les exercices dans le contenu visible de l’accueil', async () => {
     const wizard = await readFile(new URL('../app/components/challenge/WizardChallengeWorkspace.vue', import.meta.url), 'utf8')
 
-    assert.match(wizard, /<h1 v-if="currentStep === 0" class="wizard-hero__subtitle">\{\{ ui\('Exercices de conjugaison française, gratuits et sans publicité'\) \}\}<\/h1>/u)
+    assert.match(wizard, /<h1 v-if="currentStep === 0" class="wizard-hero__subtitle">\{\{ props\.homeHeading \|\| ui\('Exercices de conjugaison française, gratuits et sans publicité'\) \}\}<\/h1>/u)
     assert.match(wizard, /class="wizard-home__seo-intro"/u)
     assert.match(wizard, /exercices de conjugaison française entièrement gratuits, interactifs et personnalisables/u)
     assert.match(wizard, /dialogue avec un coach virtuel qui t’aide pour chaque question/u)

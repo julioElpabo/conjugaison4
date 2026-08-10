@@ -121,6 +121,20 @@ describe('câblage du prototype de compte pseudonyme', () => {
     assert.match(gitignore, /^learner-login\.local\.json$/mu)
   })
 
+  it('rend explicitement Turnstile lorsque le formulaire d’inscription apparaît', async () => {
+    const page = await read('../app/pages/signin.vue')
+    const contact = await read('../app/components/ContactDialog.vue')
+    const turnstile = await read('../app/composables/useTurnstileWidget.ts')
+    assert.match(page, /useTurnstileWidget\(turnstileSiteKey, 'learner_register'\)/u)
+    assert.match(page, /ref="turnstileContainer"/u)
+    assert.match(page, /turnstileToken: turnstileResponse\.value/u)
+    assert.match(contact, /useTurnstileWidget\(turnstileSiteKey, 'contact'\)/u)
+    assert.match(turnstile, /api\.js\?render=explicit/u)
+    assert.match(turnstile, /watch\(container/u)
+    assert.match(turnstile, /turnstile\.render\(target/u)
+    assert.doesNotMatch(page, /new FormData\(registerForm\.value\)/u)
+  })
+
   it('remplace les préférences de navigation par le menu de l’élève connecté', async () => {
     const layout = await read('../app/layouts/default.vue')
     const auth = await read('../app/composables/useLearnerAuth.ts')

@@ -24,6 +24,11 @@ const index_get = defineEventHandler(async (event) => {
              a.last_login_at AS lastLoginAt,
              MAX(r.last_answered_at) AS lastActivityAt,
              COUNT(CASE WHEN r.last_answered_at IS NOT NULL THEN 1 END) AS exerciseCount,
+             COUNT(CASE WHEN r.last_answered_at >= CURRENT_TIMESTAMP - INTERVAL 30 DAY THEN 1 END) AS recentExerciseCount,
+             COUNT(DISTINCT CASE
+               WHEN r.last_answered_at >= CURRENT_TIMESTAMP - INTERVAL 30 DAY
+               THEN DATE(r.last_answered_at)
+             END) AS activeDaysLast30,
              COALESCE(SUM(r.correct_count), 0) AS correctCount,
              COALESCE(SUM(r.incorrect_count), 0) AS incorrectCount
       FROM learner_accounts a
@@ -48,7 +53,9 @@ const index_get = defineEventHandler(async (event) => {
     lastActivityAt: user.lastActivityAt,
     exerciseCount: Number(user.exerciseCount),
     correctCount: Number(user.correctCount),
-    incorrectCount: Number(user.incorrectCount)
+    incorrectCount: Number(user.incorrectCount),
+    recentExerciseCount: Number(user.recentExerciseCount),
+    activeDaysLast30: Number(user.activeDaysLast30)
   }));
   return {
     users: page,

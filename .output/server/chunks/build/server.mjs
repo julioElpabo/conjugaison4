@@ -615,6 +615,12 @@ const uiMessages = {
   "Personnalisation": { de: "Anpassung", en: "Customisation", it: "Personalizzazione", es: "Personalizaci\xF3n" },
   "Options de la fiche": { de: "Arbeitsblattoptionen", en: "Worksheet options", it: "Opzioni della scheda", es: "Opciones de la ficha" },
   "Les changements apparaissent imm\xE9diatement dans l\u2019aper\xE7u.": { de: "\xC4nderungen erscheinen sofort in der Vorschau.", en: "Changes appear immediately in the preview.", it: "Le modifiche appaiono subito nell\u2019anteprima.", es: "Los cambios aparecen inmediatamente en la vista previa." },
+  "Questions de la fiche": { de: "Fragen des Arbeitsblatts", en: "Worksheet questions", it: "Domande della scheda", es: "Preguntas de la ficha" },
+  "Nouvelle fiche au hasard": { de: "Neues zuf\xE4lliges Arbeitsblatt", en: "New random worksheet", it: "Nuova scheda casuale", es: "Nueva ficha al azar" },
+  "Cr\xE9ation d\u2019une nouvelle fiche\u2026": { de: "Neues Arbeitsblatt wird erstellt\u2026", en: "Creating a new worksheet\u2026", it: "Creazione di una nuova scheda\u2026", es: "Creando una nueva ficha\u2026" },
+  "Seulement {available} questions diff\xE9rentes sont disponibles sur les {requested} demand\xE9es": { de: "Nur {available} verschiedene Fragen sind von den {requested} angeforderten verf\xFCgbar", en: "Only {available} different questions are available out of the {requested} requested", it: "Sono disponibili solo {available} domande diverse sulle {requested} richieste", es: "Solo hay {available} preguntas diferentes disponibles de las {requested} solicitadas" },
+  "Autoriser les r\xE9p\xE9titions": { de: "Wiederholungen zulassen", en: "Allow repetitions", it: "Consenti ripetizioni", es: "Permitir repeticiones" },
+  "R\xE9p\xE9titions autoris\xE9es": { de: "Wiederholungen zugelassen", en: "Repetitions allowed", it: "Ripetizioni consentite", es: "Repeticiones permitidas" },
   "Titre de la fiche": { de: "Titel des Arbeitsblatts", en: "Worksheet title", it: "Titolo della scheda", es: "T\xEDtulo de la ficha" },
   "Espace avant le titre": { de: "Abstand vor dem Titel", en: "Space before the title", it: "Spazio prima del titolo", es: "Espacio antes del t\xEDtulo" },
   "Espacement entre les questions": { de: "Abstand zwischen den Fragen", en: "Spacing between questions", it: "Spaziatura tra le domande", es: "Espacio entre las preguntas" },
@@ -1551,7 +1557,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-B6ToOjwJ.mjs')
+    component: () => import('./users-D1IBvus0.mjs')
   },
   {
     name: "modes-mode-temps",
@@ -1566,7 +1572,7 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-fpAdLarp.mjs')
+    component: () => import('./_code_-r6VPuNIh.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1581,7 +1587,7 @@ const _routes = [
   {
     name: "accueil",
     path: "/accueil",
-    component: () => import('./accueil-BU3oxvk-.mjs')
+    component: () => import('./accueil-HcQz6soQ.mjs')
   },
   {
     name: "admin",
@@ -1612,12 +1618,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-DHD2DSIG.mjs')
+    component: () => import('./my-page-DyoIvizG.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-yoFAQxK4.mjs')
+    component: () => import('./nouveau-defi-BvQST_PF.mjs')
   },
   {
     name: "signin",
@@ -1627,7 +1633,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-90lYvAIR.mjs')
+    component: () => import('./index-RF5MOVyO.mjs')
   },
   {
     name: "mode-tense",
@@ -1712,7 +1718,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-B6ToOjwJ.mjs')
+    component: () => import('./users-D1IBvus0.mjs')
   },
   {
     name: "localized-modes-mode-temps",
@@ -1727,7 +1733,7 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-fpAdLarp.mjs')
+    component: () => import('./_code_-r6VPuNIh.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1742,7 +1748,7 @@ const _routes = [
   {
     name: "localized-accueil",
     path: "/:locale(fr|de|en|it|es)/accueil",
-    component: () => import('./accueil-BU3oxvk-.mjs')
+    component: () => import('./accueil-HcQz6soQ.mjs')
   },
   {
     name: "localized-admin",
@@ -1773,12 +1779,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-DHD2DSIG.mjs')
+    component: () => import('./my-page-DyoIvizG.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-yoFAQxK4.mjs')
+    component: () => import('./nouveau-defi-BvQST_PF.mjs')
   },
   {
     name: "localized-signin",
@@ -1788,7 +1794,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-90lYvAIR.mjs')
+    component: () => import('./index-RF5MOVyO.mjs')
   },
   {
     name: "localized-mode-tense",

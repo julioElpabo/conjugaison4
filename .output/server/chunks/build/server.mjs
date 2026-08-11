@@ -1602,7 +1602,7 @@ const _routes = [
   {
     name: "consulter",
     path: "/consulter",
-    component: () => import('./consulter-eUhL7J3e.mjs')
+    component: () => import('./consulter-C8-lBncw.mjs')
   },
   {
     name: "exercices",
@@ -1763,7 +1763,7 @@ const _routes = [
   {
     name: "localized-consulter",
     path: "/:locale(fr|de|en|it|es)/consulter",
-    component: () => import('./consulter-eUhL7J3e.mjs')
+    component: () => import('./consulter-C8-lBncw.mjs')
   },
   {
     name: "localized-exercices",
@@ -2412,7 +2412,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-D8SxKpHC.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-D2H7GRrx.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

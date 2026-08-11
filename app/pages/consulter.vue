@@ -161,6 +161,10 @@ function trapToneClass(trap: ConjugationTrap) {
   return `trap-tone--${trap.tone}`
 }
 
+function acceptedFormColumnCount(rows: ConsultedConjugation[]) {
+  return Math.max(1, ...rows.map(row => row.forms.length))
+}
+
 function isIndicativeMode(mode: string) {
   return mode.trim().toLocaleLowerCase('fr-CH') === 'indicatif'
 }
@@ -543,14 +547,28 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
               <div class="tense-grid">
                 <div v-for="(tenseRow, rowIndex) in group.tenseRows" :key="rowIndex" class="tense-row">
                   <article v-for="tense in tenseRow" :key="tense.id" class="tense-consult-card">
-                    <h3>{{ uiLabel(conjugationTenseLabel(group.mode.name, tense.name)) }}</h3>
-                    <ul>
-                      <li v-for="row in tense.rows" :key="row.id">
-                        <span v-for="(form, index) in row.forms" :key="form">
-                          <template v-for="(segment, segmentIndex) in displayedFormSegments(row, form, group.mode.name)" :key="segmentIndex"><mark v-if="segment.trap && trapsOpen" class="conjugation-trap-mark" :class="trapToneClass(segment.trap)" :title="uiLabel(segment.trap.title)">{{ segment.text }}</mark><span v-else>{{ segment.text }}</span></template><small v-if="index < row.forms.length - 1"> {{ ui('ou') }} </small>
-                        </span>
-                      </li>
-                    </ul>
+                    <h3 :id="`consult-tense-${tense.id}`">{{ uiLabel(conjugationTenseLabel(group.mode.name, tense.name)) }}</h3>
+                    <table
+                      class="conjugation-table"
+                      :class="{ 'conjugation-table--alternatives': acceptedFormColumnCount(tense.rows) > 1 }"
+                      :aria-labelledby="`consult-tense-${tense.id}`"
+                    >
+                      <tbody>
+                        <tr v-for="row in tense.rows" :key="row.id">
+                          <template v-for="(form, index) in row.forms" :key="form">
+                            <td
+                              class="conjugation-form"
+                              :colspan="index === row.forms.length - 1 ? 2 * (acceptedFormColumnCount(tense.rows) - row.forms.length) + 1 : 1"
+                            >
+                              <template v-for="(segment, segmentIndex) in displayedFormSegments(row, form, group.mode.name)" :key="segmentIndex"><mark v-if="segment.trap && trapsOpen" class="conjugation-trap-mark" :class="trapToneClass(segment.trap)" :title="uiLabel(segment.trap.title)">{{ segment.text }}</mark><span v-else>{{ segment.text }}</span></template>
+                            </td>
+                            <td v-if="index < row.forms.length - 1" class="alternative-separator">
+                              <span>{{ ui('ou') }}</span>
+                            </td>
+                          </template>
+                        </tr>
+                      </tbody>
+                    </table>
                   </article>
                 </div>
               </div>
@@ -675,9 +693,12 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
 .tense-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .tense-consult-card { padding: 18px; border: 1px solid var(--line); border-radius: 17px; background: var(--soft); }
 .tense-consult-card h3 { margin: 0 0 12px; color: var(--brand); font-size: 1.05rem; text-transform: capitalize; }
-.tense-consult-card ul { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
-.tense-consult-card li { color: var(--ink); line-height: 1.45; }
-.tense-consult-card li small { color: var(--muted); }
+.conjugation-table { width: 100%; border: 0; border-collapse: separate; border-spacing: 0 7px; color: var(--ink); line-height: 1.45; }
+.conjugation-table--alternatives { table-layout: fixed; }
+.conjugation-form { padding: 0; vertical-align: middle; }
+.conjugation-table--alternatives .conjugation-form:first-child { text-align: right; }
+.alternative-separator { width: 2.8rem; padding: 0 .35rem; color: var(--muted); text-align: center; vertical-align: middle; }
+.alternative-separator span { display: inline-grid; min-width: 2rem; min-height: 1.5rem; padding: .12rem .35rem; place-items: center; border: 1px solid color-mix(in srgb, var(--line) 75%, transparent); border-radius: 999px; background: rgb(255 255 255 / 72%); font-size: .68rem; font-weight: 750; line-height: 1; }
 .non-finite-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .non-finite-grid article { padding: 14px; border: 1px solid var(--line); border-radius: 15px; background: var(--soft); }
 .non-finite-grid p { margin: 0 0 5px; color: var(--muted); font-size: .78rem; text-transform: capitalize; }
@@ -713,6 +734,14 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
   .conjugation-heading dd { font-size: .8rem; }
   .conjugation-disclosures { gap: 6px; }
   .conjugation-disclosures button { min-width: 0; padding: 8px; font-size: .78rem; }
+  .conjugation-table--alternatives,
+  .conjugation-table--alternatives tbody,
+  .conjugation-table--alternatives tr,
+  .conjugation-table--alternatives td { display: block; width: 100%; }
+  .conjugation-table--alternatives tr { padding: 5px 0; }
+  .conjugation-table--alternatives .conjugation-form:first-child { text-align: left; }
+  .conjugation-table--alternatives .alternative-separator { padding: 4px 0; text-align: left; }
+  .conjugation-table--alternatives .alternative-separator span { min-width: 0; min-height: 0; padding: 0; border: 0; background: transparent; font-size: .7rem; }
 }
 
 @media print {
@@ -746,9 +775,9 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
   .tense-row { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 2.5mm; break-inside: auto; }
   .tense-consult-card { padding: 3mm; border-radius: 3mm; background: var(--soft) !important; break-inside: avoid; box-shadow: none; }
   .tense-consult-card h3 { margin-bottom: 1.5mm; font-size: 9.5pt; }
-  .tense-consult-card ul { gap: .8mm; }
-  .tense-consult-card li { font-size: 8.5pt; line-height: 1.2; }
-  .tense-consult-card li small { font-size: 7.5pt; }
+  .conjugation-table { border-spacing: 0 .8mm; font-size: 8.5pt; line-height: 1.2; }
+  .alternative-separator { width: 7mm; padding: 0 1mm; }
+  .alternative-separator span { min-width: 5mm; min-height: 4mm; padding: 0; font-size: 7pt; }
   .non-finite-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 2mm; }
   .non-finite-grid article { padding: 2.5mm; border-radius: 3mm; background: var(--soft) !important; break-inside: avoid; }
   .non-finite-grid p { margin-bottom: 1mm; }

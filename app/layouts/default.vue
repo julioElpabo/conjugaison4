@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import mountainSvgSource from '../../public/images/site-mountains.svg?raw'
 import type { AppLocale } from '~~/shared/i18n/locales'
 import { guidedTourCopy } from '~~/shared/i18n/guided-tour'
 import { learnerSpaceCopy } from '~~/shared/i18n/learner-space'
@@ -35,6 +36,16 @@ const tabletLanguageMenu = ref<HTMLElement | null>(null)
 const tabletLanguageMenuOpen = ref(false)
 const learnerLoggingOut = ref(false)
 const contactDialog = ref<{ open: () => void } | null>(null)
+const mountainBackdrop = ref<HTMLElement | null>(null)
+let parallaxFrame = 0
+const mountainSvg = mountainSvgSource
+  .replace('<g id="OBJECTS" style="clip-path:url(#clippath)">', '<g id="OBJECTS" style="clip-path:url(#clippath)"><g class="mountain-layer mountain-layer--far">')
+  .replace('<path d="m1271.29 743.13', '</g><g class="mountain-layer mountain-layer--middle"><path d="m1271.29 743.13')
+  .replace('<path d="M481.29 871.29', '</g><g class="mountain-layer mountain-layer--near"><path d="M481.29 871.29')
+  .replace('<path d="M1129.96 997.64', '</g><g class="mountain-layer mountain-layer--front"><path d="M1129.96 997.64')
+  .replace('<path d="M1099.96 522.96', '</g><g class="mountain-layer mountain-layer--clouds"><path d="M1099.96 522.96')
+  .replace('<path d="M845.96 1050.29', '</g><g class="mountain-layer mountain-layer--trees"><path d="M845.96 1050.29')
+  .replace('</g></g></svg>', '</g></g></g></svg>')
 const learnerDisplayName = computed(() => {
   const username = learner.value?.username || ''
   return username ? username.charAt(0).toLocaleUpperCase('fr-CH') + username.slice(1) : ''
@@ -62,6 +73,9 @@ function closeLearnerMenuOnOutside(event: PointerEvent) {
 
 onMounted(() => {
   document.addEventListener('pointerdown', closeLearnerMenuOnOutside)
+  window.addEventListener('scroll', updateMountainParallax, { passive: true })
+  window.addEventListener('resize', updateMountainParallax, { passive: true })
+  updateMountainParallax()
   track('feature_exposed', { feature: 'language.change' })
   track('feature_exposed', { feature: 'theme.change' })
   const activeTheme = document.documentElement.dataset.theme
@@ -73,7 +87,27 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', closeLearnerMenuOnOutside)
+  window.removeEventListener('scroll', updateMountainParallax)
+  window.removeEventListener('resize', updateMountainParallax)
+  window.cancelAnimationFrame(parallaxFrame)
 })
+
+function updateMountainParallax() {
+  if (parallaxFrame) return
+  parallaxFrame = window.requestAnimationFrame(() => {
+    parallaxFrame = 0
+    const backdrop = mountainBackdrop.value
+    if (!backdrop || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const maximumScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+    const progress = maximumScroll > 0 ? Math.min(1, Math.max(0, window.scrollY / maximumScroll)) : 0
+    backdrop.style.setProperty('--mountain-far-y', `${progress * -22.5}px`)
+    backdrop.style.setProperty('--mountain-middle-y', `${progress * -54}px`)
+    backdrop.style.setProperty('--mountain-near-y', `${progress * -90}px`)
+    backdrop.style.setProperty('--mountain-front-y', `${progress * -126}px`)
+    backdrop.style.setProperty('--mountain-clouds-y', `${progress * -13.5}px`)
+    backdrop.style.setProperty('--mountain-trees-y', `${progress * -162}px`)
+  })
+}
 
 function toggleTheme() {
   const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
@@ -178,6 +212,12 @@ const activeSection = computed(() => {
 
 <template>
   <div class="site-shell" :class="{ 'site-shell--embedded': embeddedConsultation }">
+    <div
+      ref="mountainBackdrop"
+      class="mountain-backdrop"
+      aria-hidden="true"
+      v-html="mountainSvg"
+    />
     <header v-if="!embeddedConsultation" class="site-header">
       <div class="site-header__inner">
         <div class="site-header__identity">
@@ -452,21 +492,11 @@ body::after {
   inset: 0;
   content: "";
   pointer-events: none;
-  background-color: #dcecf3;
-  background-image:
-    linear-gradient(180deg, rgb(247 252 251 / 52%), rgb(239 247 245 / 62%)),
-    url('/images/site-mountains.svg');
-  background-blend-mode: normal;
-  background-position: center bottom;
-  background-size: cover;
+  background: linear-gradient(180deg, rgb(247 252 251 / 52%), rgb(239 247 245 / 62%));
 }
 
 body::after {
-  background-color: #081a31;
-  background-image:
-    linear-gradient(180deg, rgb(3 14 31 / 88%) 0%, rgb(5 24 38 / 78%) 42%, rgb(4 22 30 / 26%) 70%, transparent 100%),
-    url('/images/site-mountains.svg');
-  background-blend-mode: normal;
+  background: linear-gradient(180deg, rgb(3 14 31 / 88%) 0%, rgb(5 24 38 / 78%) 42%, rgb(4 22 30 / 26%) 70%, transparent 100%);
   opacity: 0;
   transition: opacity 1s ease-in-out;
 }
@@ -482,6 +512,11 @@ body::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .mountain-backdrop .mountain-layer {
+    transform: none;
+    will-change: auto;
+  }
+
   body::after {
     transition: none;
   }
@@ -512,6 +547,57 @@ a {
   display: flex;
   min-height: 100vh;
   flex-direction: column;
+}
+
+.mountain-backdrop {
+  position: fixed;
+  z-index: -2;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #dcecf3;
+  --mountain-far-y: 0px;
+  --mountain-middle-y: 0px;
+  --mountain-near-y: 0px;
+  --mountain-front-y: 0px;
+  --mountain-clouds-y: 0px;
+  --mountain-trees-y: 0px;
+}
+
+.mountain-backdrop > svg {
+  position: absolute;
+  inset: -180px -8vw;
+  width: 116vw;
+  height: calc(100vh + 360px);
+  max-width: none;
+}
+
+.mountain-backdrop .mountain-layer {
+  will-change: transform;
+}
+
+.mountain-backdrop .mountain-layer--far {
+  transform: translateY(var(--mountain-far-y));
+}
+
+.mountain-backdrop .mountain-layer--middle {
+  transform: translateY(var(--mountain-middle-y));
+}
+
+.mountain-backdrop .mountain-layer--near {
+  transform: translateY(var(--mountain-near-y));
+}
+
+.mountain-backdrop .mountain-layer--front {
+  transform: translateY(var(--mountain-front-y));
+}
+
+.mountain-backdrop .mountain-layer--clouds {
+  transform: translateY(var(--mountain-clouds-y));
+}
+
+.mountain-backdrop .mountain-layer--trees {
+  transform: translateY(var(--mountain-trees-y));
 }
 
 .site-header {

@@ -1582,12 +1582,12 @@ const _routes = [
   {
     name: "exercices-parcours",
     path: "/exercices/:parcours()",
-    component: () => import('./_parcours_-DBhy0evV.mjs')
+    component: () => import('./_parcours_-B0VhcsMH.mjs')
   },
   {
     name: "modes-mode",
     path: "/modes/:mode()",
-    component: () => import('./index-D0mxcq0P.mjs')
+    component: () => import('./index-1SMiQreI.mjs')
   },
   {
     name: "admin",
@@ -1612,7 +1612,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-DGLfbz90.mjs')
+    component: () => import('./exercices-de-conjugaison-CU1FZl5g.mjs')
   },
   {
     name: "mon-compte",
@@ -1743,12 +1743,12 @@ const _routes = [
   {
     name: "localized-exercices-parcours",
     path: "/:locale(fr|de|en|it|es)/exercices/:parcours()",
-    component: () => import('./_parcours_-DBhy0evV.mjs')
+    component: () => import('./_parcours_-B0VhcsMH.mjs')
   },
   {
     name: "localized-modes-mode",
     path: "/:locale(fr|de|en|it|es)/modes/:mode()",
-    component: () => import('./index-D0mxcq0P.mjs')
+    component: () => import('./index-1SMiQreI.mjs')
   },
   {
     name: "localized-admin",
@@ -1773,7 +1773,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-DGLfbz90.mjs')
+    component: () => import('./exercices-de-conjugaison-CU1FZl5g.mjs')
   },
   {
     name: "localized-mon-compte",

@@ -1,5 +1,6 @@
 import { d as defineEventHandler, n as useRuntimeConfig, _ as SUPPORTED_LOCALES, $ as setHeader, a0 as localizePath } from '../nitro/nitro.mjs';
 import { M as MODE_TENSE_PATHS } from '../_/mode-tense-pages.mjs';
+import { T as TENSE_EXERCISE_PATHS } from '../_/tense-exercise-pages.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -16,6 +17,7 @@ const PUBLIC_PATHS = [
   "/exercices-de-conjugaison",
   "/apprendre",
   "/consulter",
+  ...TENSE_EXERCISE_PATHS,
   ...MODE_TENSE_PATHS
 ];
 function escapeXml(value) {

@@ -1,4 +1,5 @@
 import { MODE_TENSE_PATHS } from '../../shared/data/mode-tense-pages'
+import { TENSE_EXERCISE_PATHS } from '../../shared/data/tense-exercise-pages'
 import { localizePath, SUPPORTED_LOCALES, type AppLocale } from '../../shared/i18n/locales'
 
 const PUBLIC_PATHS = [
@@ -6,6 +7,7 @@ const PUBLIC_PATHS = [
   '/exercices-de-conjugaison',
   '/apprendre',
   '/consulter',
+  ...TENSE_EXERCISE_PATHS,
   ...MODE_TENSE_PATHS,
 ]
 

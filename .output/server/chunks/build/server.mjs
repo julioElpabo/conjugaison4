@@ -414,6 +414,11 @@ const uiMessages = {
   "FALC": { de: "Leichte Sprache", en: "Easy to read", it: "Facile lettura", es: "Lectura f\xE1cil" },
   "Mode FALC": { de: "Einfacher Modus", en: "Easy-read mode", it: "Modalit\xE0 facile da leggere", es: "Modo de lectura f\xE1cil" },
   "Le mode FALC affiche seulement l\u2019essentiel. Les mots et les \xE9tapes sont plus simples.": { de: "Der einfache Modus zeigt nur das Wichtigste. W\xF6rter und Schritte sind einfacher.", en: "Easy-read mode shows only what matters. Words and steps are simpler.", it: "La modalit\xE0 facile mostra solo l\u2019essenziale. Le parole e i passaggi sono pi\xF9 semplici.", es: "El modo de lectura f\xE1cil muestra solo lo esencial. Las palabras y los pasos son m\xE1s sencillos." },
+  "Entendre la r\xE9ponse": { de: "Antwort anh\xF6ren", en: "Hear the answer", it: "Ascolta la risposta", es: "Escuchar la respuesta" },
+  "Tu peux aussi \xE9couter la r\xE9ponse.": { de: "Du kannst dir die Antwort auch anh\xF6ren.", en: "You can also listen to the answer.", it: "Puoi anche ascoltare la risposta.", es: "Tambi\xE9n puedes escuchar la respuesta." },
+  "Arr\xEAter la lecture": { de: "Wiedergabe beenden", en: "Stop reading", it: "Interrompi la lettura", es: "Detener la lectura" },
+  "R\xE9\xE9couter cette phrase": { de: "Diesen Satz erneut anh\xF6ren", en: "Listen to this sentence again", it: "Riascolta questa frase", es: "Volver a escuchar esta frase" },
+  "R\xE9ponse entendue": { de: "Antwort angeh\xF6rt", en: "Answer heard", it: "Risposta ascoltata", es: "Respuesta escuchada" },
   "Pas maintenant": { de: "Nicht jetzt", en: "Not now", it: "Non ora", es: "Ahora no" },
   "J\u2019ai un code": { de: "Ich habe einen Code", en: "I have a code", it: "Ho un codice", es: "Tengo un c\xF3digo" },
   "Choisir un d\xE9fi": { de: "Eine \xDCbung ausw\xE4hlen", en: "Choose a challenge", it: "Scegli un esercizio", es: "Elegir un ejercicio" },
@@ -1588,7 +1593,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-CmwMiP5H.mjs')
+    component: () => import('./users-DECApOL9.mjs')
   },
   {
     name: "modes-mode-temps",
@@ -1603,7 +1608,7 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-Cutn87M-.mjs')
+    component: () => import('./_code_-CwR-fIgr.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1638,7 +1643,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-DfklYqdd.mjs')
+    component: () => import('./exercices-de-conjugaison-yJSQf-77.mjs')
   },
   {
     name: "mon-compte",
@@ -1649,12 +1654,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-BfXLkOhK.mjs')
+    component: () => import('./my-page-LSaUmM1y.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-DfpK0Uk7.mjs')
+    component: () => import('./nouveau-defi-DIrIqkxd.mjs')
   },
   {
     name: "signin",
@@ -1664,7 +1669,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-cabgoNTV.mjs')
+    component: () => import('./index-BsnoccQV.mjs')
   },
   {
     name: "mode-tense",
@@ -1749,7 +1754,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-CmwMiP5H.mjs')
+    component: () => import('./users-DECApOL9.mjs')
   },
   {
     name: "localized-modes-mode-temps",
@@ -1764,7 +1769,7 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-Cutn87M-.mjs')
+    component: () => import('./_code_-CwR-fIgr.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1799,7 +1804,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-DfklYqdd.mjs')
+    component: () => import('./exercices-de-conjugaison-yJSQf-77.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1810,12 +1815,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-BfXLkOhK.mjs')
+    component: () => import('./my-page-LSaUmM1y.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-DfpK0Uk7.mjs')
+    component: () => import('./nouveau-defi-DIrIqkxd.mjs')
   },
   {
     name: "localized-signin",
@@ -1825,7 +1830,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-cabgoNTV.mjs')
+    component: () => import('./index-BsnoccQV.mjs')
   },
   {
     name: "localized-mode-tense",

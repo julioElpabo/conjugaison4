@@ -305,6 +305,7 @@ export const uiMessages = {
   'Tout supprimer': { de: 'Alle entfernen', en: 'Remove all', it: 'Rimuovi tutto', es: 'Eliminar todo' },
   'Tout cocher': { de: 'Alle auswählen', en: 'Select all', it: 'Seleziona tutto', es: 'Seleccionar todo' },
   'Tout décocher': { de: 'Alle abwählen', en: 'Clear all', it: 'Deseleziona tutto', es: 'Deseleccionar todo' },
+  'Uniquement il / ils': { de: 'Nur il / ils', en: 'Only il / ils', it: 'Solo il / ils', es: 'Solo il / ils' },
   'Exemple:': { de: 'Beispiel:', en: 'Example:', it: 'Esempio:', es: 'Ejemplo:' },
   'Voir un exemple :': { de: 'Beispiel anzeigen:', en: 'View an example:', it: 'Vedi un esempio:', es: 'Ver un ejemplo:' },
   'Exemple momentanément indisponible.': { de: 'Beispiel vorübergehend nicht verfügbar.', en: 'Example temporarily unavailable.', it: 'Esempio temporaneamente non disponibile.', es: 'Ejemplo no disponible temporalmente.' },

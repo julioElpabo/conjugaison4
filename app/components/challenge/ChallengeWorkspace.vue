@@ -418,9 +418,11 @@ function onToggleTense(id: number) {
             :tenses="catalogue.temps"
             :verbs="selectedVerbs"
             :selected-ids="challenge.tenseIds"
+            :past-simple-pronouns="challenge.pastSimplePronouns"
             @toggle="onToggleTense"
             @select-all="markAsCustom(); selectAllTenses()"
-            @clear="markAsCustom(); clearTenses()"
+            @clear="markAsCustom(); clearTenses(); challenge.pastSimplePronouns = 'all'"
+            @update-past-simple-pronouns="challenge.pastSimplePronouns = $event; markAsCustom()"
           />
 
           <ChallengeOptions

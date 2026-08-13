@@ -2,6 +2,7 @@
 const { ui, uiLabel } = useLanguagePreferences()
 import type {
   ConjugationMode,
+  PastSimplePronouns,
   Tense,
   Verb
 } from '~/composables/useChallengeBuilder'
@@ -13,15 +14,29 @@ const props = defineProps<{
   tenses: Tense[]
   verbs: Verb[]
   selectedIds: number[]
+  pastSimplePronouns: PastSimplePronouns
 }>()
 
 const emit = defineEmits<{
   toggle: [id: number]
   selectAll: []
   clear: []
+  updatePastSimplePronouns: [value: PastSimplePronouns]
 }>()
 
 const selectedSet = computed(() => new Set(props.selectedIds))
+const isPastSimple = (tense: Tense) => tense.name.toLocaleLowerCase('fr') === 'passé simple'
+
+function toggleTense(tense: Tense) {
+  const wasSelected = selectedSet.value.has(tense.id)
+  emit('toggle', tense.id)
+  if (wasSelected && isPastSimple(tense)) emit('updatePastSimplePronouns', 'all')
+}
+
+function updatePastSimplePronouns(event: Event) {
+  const checked = (event.target as HTMLInputElement).checked
+  emit('updatePastSimplePronouns', checked ? 'third-person-only' : 'all')
+}
 interface TenseExample {
   emphasis: string
   rest: string
@@ -123,12 +138,30 @@ watch(exampleRequestKey, () => void loadExamples())
                   <input
                     type="checkbox"
                     :checked="selectedSet.has(tense.id)"
-                    @change="emit('toggle', tense.id)"
+                    @change="toggleTense(tense)"
                   >
                   <span class="switch-row__control" aria-hidden="true" />
                   <span>{{ uiLabel(tense.name) }}</span>
                 </label>
               </div>
+
+              <Transition name="past-simple-option">
+                <div
+                  v-if="isPastSimple(tense) && selectedSet.has(tense.id)"
+                  class="past-simple-option"
+                >
+                  <label class="past-simple-option__choice">
+                    <input
+                      type="checkbox"
+                      :checked="pastSimplePronouns === 'third-person-only'"
+                      @change="updatePastSimplePronouns"
+                    >
+                    <span>
+                      <strong>{{ ui('Uniquement il / ils') }}</strong>
+                    </span>
+                  </label>
+                </div>
+              </Transition>
 
                 </div>
               </template>
@@ -154,7 +187,7 @@ watch(exampleRequestKey, () => void loadExamples())
                 <input
                   type="checkbox"
                   :checked="selectedSet.has(tense.id)"
-                  @change="emit('toggle', tense.id)"
+                  @change="toggleTense(tense)"
                 >
                 <span class="switch-row__control" aria-hidden="true" />
                 <span>{{ uiLabel(tense.name) }}</span>
@@ -201,6 +234,52 @@ watch(exampleRequestKey, () => void loadExamples())
 
 .tense-row .switch-row {
   flex: 1;
+}
+
+.past-simple-option {
+  overflow: hidden;
+}
+
+.past-simple-option__choice {
+  display: flex;
+  margin: 8px 0 2px 28px;
+  padding: 9px 11px;
+  align-items: flex-start;
+  gap: 9px;
+  color: #4b4433;
+  border: 1px solid color-mix(in srgb, var(--tense-accent) 55%, #d8d2c3);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--tense-accent) 12%, white);
+  cursor: pointer;
+  font-size: .78rem;
+  line-height: 1.3;
+}
+
+.past-simple-option__choice input {
+  width: 16px;
+  height: 16px;
+  margin: 1px 0 0;
+  flex: 0 0 auto;
+  accent-color: var(--brand);
+}
+
+.past-simple-option__choice span {
+  display: block;
+}
+
+.past-simple-option-enter-active,
+.past-simple-option-leave-active {
+  max-height: 76px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: max-height 240ms ease, opacity 180ms ease, transform 240ms ease;
+}
+
+.past-simple-option-enter-from,
+.past-simple-option-leave-to {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
 }
 
 .tense-info {
@@ -270,7 +349,9 @@ watch(exampleRequestKey, () => void loadExamples())
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tense-tooltip {
+  .tense-tooltip,
+  .past-simple-option-enter-active,
+  .past-simple-option-leave-active {
     transition: none;
   }
 }

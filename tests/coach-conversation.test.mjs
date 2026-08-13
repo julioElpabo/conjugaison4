@@ -43,5 +43,6 @@ describe('enchaînement du chat après une réponse', () => {
     assert.equal(chatMessageHasVisibleContent({ text: '', media: { id: 1 } }), true)
     assert.equal(chatMessageHasVisibleContent({ text: '', literaryCitation: { target: 'commencera' } }), true)
     assert.equal(chatMessageHasVisibleContent({ text: '', identificationForm: { target: 'commencera' } }), true)
+    assert.equal(chatMessageHasVisibleContent({ text: '', spokenAnswer: 'Vous faites' }), true)
   })
 })

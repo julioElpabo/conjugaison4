@@ -42,15 +42,37 @@ describe('rappel de l’aide dans le chat', () => {
     assert.match(suggestHelp, /helpOpen\.value = true/u)
     assert.doesNotMatch(component, /chat-message--help-reminder/u)
     assert.doesNotMatch(component, /addHelpReminderCard/u)
-    assert.ok(
-      suggestHelp.indexOf('helpOpen.value = true') < suggestHelp.indexOf("addCoachReaction('help-announcement'"),
-      'le panneau doit s’ouvrir avant l’annonce du coach',
-    )
+    assert.match(suggestHelp, /if \(!offerConsultation\) await addCoachReaction\('help-announcement'/u)
     assert.match(component, /void suggestHelp\(true\)/u)
     assert.match(suggestHelp, /Tu veux consulter la conjugaison du verbe \{verb\} \?/u)
-    assert.ok(
-      suggestHelp.indexOf("addCoachReaction('help-announcement'") < suggestHelp.indexOf('consultVerbId: verbId'),
-      'la proposition de consultation doit suivre le message d’inactivité',
+    assert.match(suggestHelp, /Tu peux aussi écouter la réponse\./u)
+    assert.match(suggestHelp, /spokenAnswer/u)
+    assert.match(suggestHelp, /usesDelayedAnswerAudio\.value/u)
+  })
+
+  it('place le porte-voix juste après les consignes avec les aides complètes', async () => {
+    const component = await readFile(
+      new URL('../app/components/exercise/ChatExercise.vue', import.meta.url),
+      'utf8',
     )
+    const askQuestion = component.slice(
+      component.indexOf('async function askCurrentQuestion('),
+      component.indexOf('async function runChatOpening'),
+    )
+    assert.match(component, /helpApproach === 'complete'[\s\S]*helpApproach === 'complete-avec-reponses'/u)
+    assert.match(askQuestion, /speechOnly: true/u)
+    assert.ok(
+      askQuestion.indexOf('answerLine: true') < askQuestion.indexOf('speechOnly: true'),
+      'le porte-voix doit suivre les deux bulles de consigne',
+    )
+  })
+
+  it('utilise le profil vocal de Gabriel pour tous les coachs hommes', async () => {
+    const component = await readFile(
+      new URL('../app/components/exercise/ChatExercise.vue', import.meta.url),
+      'utf8',
+    )
+    assert.match(component, /const GABRIEL_VOICE_SEED = 1_273_307_114/u)
+    assert.match(component, /if \(props\.coach\.gender === 'male'\) return GABRIEL_VOICE_SEED/u)
   })
 })

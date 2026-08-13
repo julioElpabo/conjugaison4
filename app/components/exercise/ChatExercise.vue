@@ -1,7 +1,8 @@
 <script setup lang="ts">
 const { interfaceLocale, ui, uiLabel } = useLanguagePreferences()
-import { faArrowUpFromBracket, faPrint } from '@fortawesome/free-solid-svg-icons'
+import { faArrowUpFromBracket, faBullhorn, faPrint, faStop } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { AUDIO_READING_ENABLED } from '~~/shared/config/feature-flags'
 import type { ConjugationTense, ExerciseAttempt, ExerciseKind, ExerciseQuestion, LearnerErrorDetail, LearnerExerciseTrackingContext, Verb } from '~~/shared/types/conjugation'
 import type { CoachEvent, CoachMedia, CoachMessageContext, CoachProfile } from '~~/shared/types/coach'
 import type { AnswerComparison } from '~~/shared/utils/answer-difference'
@@ -57,6 +58,7 @@ const props = defineProps<{
   requireSuccess?: boolean
   analyticsMetadata?: Record<string, string | number | boolean>
 }>()
+const audioReadingEnabled = AUDIO_READING_ENABLED
 
 const emit = defineEmits<{ close: [] }>()
 const { track } = useSiteAnalytics()
@@ -134,6 +136,8 @@ interface ChatMessage {
   instructionPrompt?: boolean
   consultVerbId?: number
   consultVerbLabel?: string
+  spokenAnswer?: string
+  speechOnly?: boolean
   answerLine?: boolean
 }
 
@@ -151,6 +155,9 @@ const deliveringFeedback = ref(false)
 const posingQuestion = ref(false)
 const consecutiveCorrectCount = ref(0)
 const consecutiveIncorrectCount = ref(0)
+const answerHeardBeforeSubmission = ref(false)
+const speechSupported = ref(false)
+const speakingMessageId = ref<number | null>(null)
 const finished = ref(false)
 const finalSummaryPreparing = ref(false)
 const finalSummaryVisible = ref(false)
@@ -180,6 +187,8 @@ let lastCoachBubbleAt = 0
 let dialogueState = createCoachDialogueState()
 let questionScrollFrame: number | null = null
 let helpReminderTimer: number | null = null
+let speechSequence = 0
+let speechPauseTimer: number | undefined
 const CHAT_HELP_OPEN_DELAY_MS = 500
 const CHAT_MESSAGES_AFTER_HELP_DELAY_MS = 1000
 
@@ -211,6 +220,10 @@ const helpTense = computed(() => {
     || props.tenses.find(tense => normalizedInfinitive(tense.name) === normalizedInfinitive(question.temps))
 })
 const usesIdentificationHelp = computed(() => isIdentificationExercise.value)
+const usesImmediateAnswerAudio = computed(() => (
+  props.coach.helpApproach === 'complete' || props.coach.helpApproach === 'complete-avec-reponses'
+))
+const usesDelayedAnswerAudio = computed(() => props.coach.helpApproach === 'tres-condensee')
 const targetedHelp = computed(() => helpQuestion.value
   ? buildTargetedConjugationHelp(helpQuestion.value, helpVerb.value, helpTense.value, {
       tense: uiLabel(helpQuestion.value.temps || helpTense.value?.name),
@@ -220,7 +233,7 @@ const targetedHelp = computed(() => helpQuestion.value
 const helpBlocks = computed(() => usesIdentificationHelp.value
   ? literaryIdentificationCoachHelpBlocks()
   : visibleCoachHelpBlocks(props.coach.helpApproach, helpQuestion.value))
-const correctCount = computed(() => attempts.value.filter(item => item.status === 'correct').length)
+const correctCount = computed(() => attempts.value.filter(item => item.status === 'correct' && !item.answerWasHeard).length)
 const score = computed(() => attempts.value.length
   ? Math.round(correctCount.value / attempts.value.length * 100)
   : 0)
@@ -234,6 +247,7 @@ const attemptSummaries = computed(() => attempts.value.map((attempt, index) => {
     index: index + 1,
     questionIndex: index,
     status: attempt.status,
+    answerWasHeard: attempt.answerWasHeard,
     questionLabel: formula,
     learnerAnswer: attempt.answer,
     expectedAnswer: attempt.question.reponsesPourCorrige.join(` ${ui('ou')} `) || attempt.question.reponses.join(` ${ui('ou')} `),
@@ -256,6 +270,100 @@ const hasIncorrectMedia = computed(() => props.coach.assignments.some(assignment
 
 function normalizedInfinitive(value?: string | null) {
   return (value || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLocaleLowerCase('fr')
+}
+
+const femaleVoiceHints = [
+  'female', 'amelie', 'audrey', 'aurelie', 'marie', 'julie', 'celine', 'virginie',
+  'hortense', 'lea', 'charlotte', 'alice', 'florence', 'sabine',
+]
+const maleVoiceHints = [
+  'male', 'thomas', 'nicolas', 'paul', 'henri', 'daniel', 'jacques', 'louis',
+  'felix', 'hugo', 'pierre',
+]
+// Fige le profil vocal actuellement associé à Gabriel (id 10, slug gabriel-rossi).
+const GABRIEL_VOICE_SEED = 1_273_307_114
+
+function coachVoiceSeed() {
+  if (props.coach.gender === 'male') return GABRIEL_VOICE_SEED
+  return [...`${props.coach.id}:${props.coach.slug}`]
+    .reduce((total, character) => ((total * 31) + character.charCodeAt(0)) >>> 0, 0)
+}
+
+function selectedCoachVoice() {
+  const voices = window.speechSynthesis.getVoices()
+  const frenchVoices = voices.filter(voice => voice.lang.toLocaleLowerCase().startsWith('fr-fr'))
+  const candidates = frenchVoices.length
+    ? frenchVoices
+    : voices.filter(voice => voice.lang.toLocaleLowerCase().startsWith('fr'))
+  const hints = props.coach.gender === 'female' ? femaleVoiceHints : maleVoiceHints
+  const genderVoices = candidates.filter((voice) => {
+    const name = normalizedInfinitive(voice.name)
+    return hints.some(hint => name.includes(hint))
+  })
+  const matchingVoices = genderVoices.length ? genderVoices : candidates
+  return matchingVoices.length ? matchingVoices[coachVoiceSeed() % matchingVoices.length]! : null
+}
+
+function stopSpeech() {
+  if (!speechSupported.value) return
+  speechSequence += 1
+  if (speechPauseTimer !== undefined) {
+    window.clearTimeout(speechPauseTimer)
+    speechPauseTimer = undefined
+  }
+  window.speechSynthesis.cancel()
+  speakingMessageId.value = null
+}
+
+function spokenAnswerParts(text: string) {
+  return text.trim().split(/\s+/u).filter(Boolean)
+}
+
+function speakCoachAnswer(message: ChatMessage) {
+  const spokenText = message.spokenAnswer?.trim()
+  if (!speechSupported.value || !spokenText) return
+  if (speakingMessageId.value === message.id) {
+    stopSpeech()
+    return
+  }
+  stopSpeech()
+  if (message.questionIndex === currentIndex.value && !waitingForNext.value && !finished.value) {
+    answerHeardBeforeSubmission.value = true
+  }
+  const activeSequence = speechSequence
+  const parts = spokenAnswerParts(spokenText)
+  const voice = selectedCoachVoice()
+  const seed = coachVoiceSeed()
+  const rate = 0.74 + (seed % 3) * 0.02
+  const pitchBase = props.coach.gender === 'female' ? 1.04 : 0.92
+  const pitch = pitchBase + ((seed % 5) - 2) * 0.025
+
+  const speakPart = (index: number) => {
+    if (speechSequence !== activeSequence || speakingMessageId.value !== message.id) return
+    const utterance = new SpeechSynthesisUtterance(parts[index]!)
+    utterance.lang = 'fr-FR'
+    utterance.rate = rate
+    utterance.pitch = pitch
+    utterance.voice = voice
+    utterance.onend = () => {
+      if (speechSequence !== activeSequence || speakingMessageId.value !== message.id) return
+      if (index >= parts.length - 1) {
+        speakingMessageId.value = null
+        return
+      }
+      speechPauseTimer = window.setTimeout(() => {
+        speechPauseTimer = undefined
+        speakPart(index + 1)
+      }, 420)
+    }
+    utterance.onerror = () => {
+      if (speechSequence === activeSequence && speakingMessageId.value === message.id) speakingMessageId.value = null
+    }
+    window.speechSynthesis.speak(utterance)
+  }
+
+  speakingMessageId.value = message.id
+  speakPart(0)
 }
 
 function answerLineParts(value: string) {
@@ -691,6 +799,7 @@ function addCoachText(text: string, tone?: ChatMessage['tone'], emphasis = false
 async function suggestHelp(offerConsultation = false) {
   const question = currentQuestion.value
   if (!question || finished.value) return
+  const questionIndex = currentIndex.value
   const wasHelpOpen = helpOpen.value
   helpQuestionIndex.value = null
   helpOpen.value = true
@@ -698,7 +807,7 @@ async function suggestHelp(offerConsultation = false) {
     track('help_opened', { ...exerciseAnalyticsMetadata.value, source: 'reminder' })
   }
   await nextTick()
-  await addCoachReaction('help-announcement', contextFor(question))
+  if (!offerConsultation) await addCoachReaction('help-announcement', contextFor(question))
   const verbId = question.verbeId ?? helpVerb.value?.id
   const verbLabel = question.infinitif || helpVerb.value?.infinitif
   if (offerConsultation && verbId && verbLabel) {
@@ -706,6 +815,14 @@ async function suggestHelp(offerConsultation = false) {
       text: ui('Tu veux consulter la conjugaison du verbe {verb} ?', { verb: verbLabel }),
       consultVerbId: verbId,
       consultVerbLabel: verbLabel,
+    }))
+  }
+  const spokenAnswer = question.reponsesPourCorrige[0] || question.reponses[0]
+  if (offerConsultation && usesDelayedAnswerAudio.value && speechSupported.value && !isIdentificationExercise.value && spokenAnswer) {
+    await enqueueCoachBubble(() => ({
+      text: ui('Tu peux aussi écouter la réponse.'),
+      spokenAnswer,
+      questionIndex,
     }))
   }
 }
@@ -780,6 +897,15 @@ async function askCurrentQuestion() {
       emphasis: true,
       answerLine: true,
       instructionPrompt: true,
+    }))
+  }
+  const spokenAnswer = question.reponsesPourCorrige[0] || question.reponses[0]
+  if (usesImmediateAnswerAudio.value && speechSupported.value && spokenAnswer) {
+    await enqueueCoachBubble(() => ({
+      text: '',
+      spokenAnswer,
+      speechOnly: true,
+      questionIndex: currentIndex.value,
     }))
   }
   posingQuestion.value = false
@@ -862,6 +988,7 @@ async function submit() {
     answer: candidate,
     status: result.isCorrect ? 'correct' : 'incorrect',
     attemptNumber: props.requireSuccess && attempts.value[currentIndex.value] ? 2 : 1,
+    ...(answerHeardBeforeSubmission.value ? { answerWasHeard: true } : {}),
     ...(result.matchedAnswer ? { matchedAnswer: result.matchedAnswer } : {}),
     ...(attemptErrorLabels.length ? { errorLabels: attemptErrorLabels } : {}),
     ...(attemptErrorDetails.length ? { errorDetails: attemptErrorDetails } : {}),
@@ -1036,6 +1163,8 @@ async function continueChat() {
   }
 
   currentIndex.value += 1
+  stopSpeech()
+  answerHeardBeforeSubmission.value = false
   pendingErrorLabels.value = []
   pendingErrorDetails.value = []
   waitingForNext.value = false
@@ -1043,6 +1172,7 @@ async function continueChat() {
 }
 
 async function restart() {
+  stopSpeech()
   conversationVersion += 1
   restartError.value = ''
   resetExerciseRunId()
@@ -1060,6 +1190,7 @@ async function restart() {
   posingQuestion.value = false
   consecutiveCorrectCount.value = 0
   consecutiveIncorrectCount.value = 0
+  answerHeardBeforeSubmission.value = false
   repeatCurrentQuestion.value = false
   finished.value = false
   track('exercise_started', exerciseAnalyticsMetadata.value)
@@ -1119,6 +1250,9 @@ function updateSmallScreen(event: MediaQueryList | MediaQueryListEvent) {
 }
 
 onMounted(async () => {
+  speechSupported.value = audioReadingEnabled
+    && 'speechSynthesis' in window
+    && 'SpeechSynthesisUtterance' in window
   smallScreenQuery = window.matchMedia('(max-width: 760px)')
   updateSmallScreen(smallScreenQuery)
   smallScreenQuery.addEventListener('change', updateSmallScreen)
@@ -1131,6 +1265,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  stopSpeech()
   smallScreenQuery?.removeEventListener('change', updateSmallScreen)
   clearHelpReminderTimer()
   if (questionScrollFrame !== null) window.cancelAnimationFrame(questionScrollFrame)
@@ -1175,6 +1310,7 @@ onBeforeUnmount(() => {
               { 'chat-message--comparison': !!message.answerComparison },
               { 'chat-message--identification-question': message.identificationPrompt },
               { 'chat-message--instruction': message.instructionPrompt },
+              { 'chat-message--speech-only': message.speechOnly },
               { 'chat-message--mobile-help-hint': message.mobileHelpHint },
               { 'chat-message--help-link': message.author === 'learner' && message.questionIndex !== undefined },
               { 'is-help-selected': helpOpen && message.questionIndex !== undefined && message.questionIndex === helpQuestionIndex },
@@ -1249,6 +1385,18 @@ onBeforeUnmount(() => {
             >
               {{ ui('Consulter le verbe') }}
             </button>
+            <button
+              v-if="audioReadingEnabled && message.spokenAnswer && speechSupported"
+              type="button"
+              class="chat-hear-answer-button"
+              :class="{ 'chat-hear-answer-button--icon-only': message.speechOnly }"
+              :aria-label="speakingMessageId === message.id ? ui('Arrêter la lecture') : ui('Entendre la réponse')"
+              :aria-pressed="speakingMessageId === message.id"
+              @click.stop="speakCoachAnswer(message)"
+            >
+              <FontAwesomeIcon :icon="speakingMessageId === message.id ? faStop : faBullhorn" aria-hidden="true" />
+              <span v-if="!message.speechOnly">{{ speakingMessageId === message.id ? ui('Arrêter la lecture') : ui('Entendre la réponse') }}</span>
+            </button>
             <video v-if="message.media?.mediaType === 'video'" :src="message.media.filePath" :aria-label="message.media.altText" muted playsinline controls @loadedmetadata="mediaLoaded" />
             <img v-else-if="message.media" :class="{ 'chat-media--emoji': message.media.mediaType === 'emoji' }" :src="message.media.filePath" :alt="message.media.altText" @load="mediaLoaded">
             <div
@@ -1316,7 +1464,7 @@ onBeforeUnmount(() => {
               <li
                 v-for="item in attemptSummaries"
                 :key="item.index"
-                :class="[`is-${item.status}`, { 'is-help-selected': helpOpen && item.questionIndex === helpQuestionIndex }]"
+                :class="[`is-${item.answerWasHeard ? 'heard' : item.status}`, { 'is-help-selected': helpOpen && item.questionIndex === helpQuestionIndex }]"
                 :style="{ '--summary-item-index': `${item.index - 1}` }"
                 role="button"
                 tabindex="0"
@@ -1325,7 +1473,7 @@ onBeforeUnmount(() => {
                 @keydown.enter.prevent="openHelpForQuestion(item.questionIndex)"
                 @keydown.space.prevent="openHelpForQuestion(item.questionIndex)"
               >
-                <span class="chat-summary-list__status" aria-hidden="true">{{ item.status === 'correct' ? '✓' : '×' }}</span>
+                <span class="chat-summary-list__status" aria-hidden="true">{{ item.answerWasHeard ? '🔊' : item.status === 'correct' ? '✓' : '×' }}</span>
                 <div>
                   <strong class="chat-summary-list__question">
                     <span>{{ ui('Question') }} {{ item.index }}</span>
@@ -1415,10 +1563,7 @@ onBeforeUnmount(() => {
         </button>
 
         <div v-if="closeConfirmationOpen" class="chat-close-confirmation" @click.self="cancelClose">
-          <section role="alertdialog" aria-modal="true" aria-labelledby="chat-close-title" aria-describedby="chat-close-description">
-            <span class="chat-close-confirmation__icon" aria-hidden="true">?</span>
-            <h3 id="chat-close-title">{{ ui('Quitter le chat ?') }}</h3>
-            <p id="chat-close-description">{{ ui('Ta progression actuelle sera perdue.') }}</p>
+          <section role="alertdialog" aria-modal="true" :aria-label="ui('Quitter le chat ?')">
             <div class="chat-close-confirmation__actions">
               <button ref="keep-chat-button" class="secondary-button" type="button" @click="cancelClose">{{ ui('Continuer l’exercice') }}</button>
               <button class="primary-button chat-close-confirmation__leave" type="button" @click="confirmClose">{{ ui('Quitter') }}</button>
@@ -1875,37 +2020,13 @@ onBeforeUnmount(() => {
 
 .chat-close-confirmation > section {
   width: min(440px, 100%);
-  padding: 30px;
+  padding: 24px;
   text-align: center;
   border: 1px solid rgb(255 255 255 / 72%);
   border-radius: 22px;
   color: #26383f;
   background: #fbfdfd;
   box-shadow: 0 26px 70px rgb(8 25 32 / 34%);
-}
-
-.chat-close-confirmation__icon {
-  display: grid;
-  width: 52px;
-  height: 52px;
-  margin: 0 auto 15px;
-  place-items: center;
-  border-radius: 16px;
-  color: white;
-  background: var(--coach-color, #295f72);
-  font-size: 1.65rem;
-  font-weight: 850;
-}
-
-.chat-close-confirmation h3 {
-  margin: 0;
-  color: #244f60;
-  font-size: 1.55rem;
-}
-
-.chat-close-confirmation p {
-  margin: 8px 0 24px;
-  color: #64777e;
 }
 
 .chat-close-confirmation__actions {
@@ -1932,14 +2053,6 @@ onBeforeUnmount(() => {
   color: #dce8ec;
   background: #17292e;
   border-color: #60777d;
-}
-
-:global(:root[data-theme='dark']) .chat-close-confirmation h3 {
-  color: #b8dfe7;
-}
-
-:global(:root[data-theme='dark']) .chat-close-confirmation p {
-  color: #b7c9cd;
 }
 
 .chat-header {
@@ -2092,6 +2205,44 @@ onBeforeUnmount(() => {
 .chat-consult-verb-link:focus-visible,
 .chat-summary-consult-link:hover,
 .chat-summary-consult-link:focus-visible { filter: brightness(.92); }
+
+.chat-hear-answer-button {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 58px;
+  margin-top: 12px;
+  padding: 12px 18px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 2px solid color-mix(in srgb, var(--coach-color) 72%, #184e60);
+  border-radius: 16px;
+  color: white;
+  background: var(--coach-color);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.chat-hear-answer-button svg { font-size: 1.65rem; }
+.chat-hear-answer-button:hover,
+.chat-hear-answer-button:focus-visible { filter: brightness(.92); }
+
+.chat-message--coach.chat-message--speech-only {
+  padding-block: 5px;
+}
+
+.chat-hear-answer-button--icon-only {
+  width: 38px;
+  height: 38px;
+  min-height: 38px;
+  margin-top: 0;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.chat-hear-answer-button--icon-only svg { font-size: 1.05rem; }
 
 .chat-message__text--emphasis {
   font-weight: 800;
@@ -2526,6 +2677,10 @@ onBeforeUnmount(() => {
   border-color: #f0c1bd;
 }
 
+.chat-summary-list li.is-heard {
+  border-color: #d9c583;
+}
+
 .chat-summary-list__status {
   display: grid;
   width: 30px;
@@ -2544,6 +2699,11 @@ onBeforeUnmount(() => {
 
 .chat-summary-list li.is-incorrect .chat-summary-list__status {
   background: #d75b52;
+}
+
+.chat-summary-list li.is-heard .chat-summary-list__status {
+  background: #8c7731;
+  font-size: .9rem;
 }
 
 .chat-summary-list__question {
@@ -2866,6 +3026,10 @@ onBeforeUnmount(() => {
 
 :global(:root[data-theme='dark']) .chat-summary-list li.is-incorrect {
   border-color: #7b443f;
+}
+
+:global(:root[data-theme='dark']) .chat-summary-list li.is-heard {
+  border-color: #71652f;
 }
 
 :global(:root[data-theme='dark']) .chat-summary-list dl > div {

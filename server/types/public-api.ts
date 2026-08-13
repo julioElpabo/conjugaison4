@@ -16,6 +16,7 @@ export interface ChallengePrintOptions {
   title: string
   questionSpacingMm: number
   titleSpacingMm: number
+  inclusiveDisplay: boolean
   showGrade: boolean
   showVerbs: boolean
   showTenses: boolean

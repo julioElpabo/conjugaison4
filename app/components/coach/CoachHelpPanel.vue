@@ -429,4 +429,5 @@ onBeforeUnmount(() => {
 @media(max-width:900px){.coach-help-panel{width:100%;min-width:0}}
 @media(max-width:680px){.coach-help-badge{top:12px;transform:translateX(-50%)}.coach-help-header{padding-top:64px}}
 @media(max-width:520px){.coach-help-consult{grid-template-columns:1fr}.coach-help-consult button{width:100%}}
+.coach-help-card h3{font-size:1rem}.coach-help-card h3>span,.coach-help-card dt,.coach-help-endings strong,.coach-help-exception strong{font-size:.875rem}.coach-help-card p{font-size:1rem;line-height:1.52}.coach-help-card li,.coach-help-endings span,.coach-help-exception span{line-height:1.5}.coach-help-footer p,.coach-help-consult p,.coach-help-consult button{font-size:.875rem;line-height:1.45}
 </style>

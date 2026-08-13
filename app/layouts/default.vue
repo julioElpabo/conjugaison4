@@ -467,6 +467,40 @@ const activeSection = computed(() => {
   --shadow: 0 18px 52px rgb(0 0 0 / 28%);
 }
 
+/* Les deux surfaces d'exercice gardent les réglages de lecture utiles,
+   indépendamment des autres pages du site. */
+:is(.exercise-overlay, .chat-overlay) {
+  font-family: Arial, Verdana, ui-sans-serif, system-ui, sans-serif;
+  font-size: 112.5%;
+  line-height: 1.5;
+}
+
+:root:not([data-theme='dark']) :is(.exercise-overlay, .chat-overlay) {
+  --surface: #fffdf5;
+  --surface-soft: #f7f3e7;
+  --line: #d8d1bf;
+}
+
+:is(.exercise-overlay, .chat-overlay) :is(p, li, dd, blockquote, figcaption, label) {
+  letter-spacing: .03em;
+  line-height: 1.5;
+  word-spacing: .08em;
+}
+
+:is(.exercise-overlay, .chat-overlay) :is(h1, h2, h3, h4, h5, h6) {
+  letter-spacing: normal;
+  line-height: 1.3;
+}
+
+:is(.exercise-overlay, .chat-overlay) :is(button, a, input, select, textarea) {
+  font-family: inherit;
+}
+
+:is(.exercise-overlay, .chat-overlay) button {
+  text-overflow: clip;
+  white-space: normal;
+}
+
 * {
   box-sizing: border-box;
 }

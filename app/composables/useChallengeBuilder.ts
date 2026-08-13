@@ -29,6 +29,7 @@ export interface PrintOptions {
   title: string
   questionSpacingMm: number
   titleSpacingMm: number
+  inclusiveDisplay: boolean
   showGrade: boolean
   showVerbs: boolean
   showTenses: boolean
@@ -66,6 +67,7 @@ export const createDefaultPrintOptions = (): PrintOptions => ({
   title: 'Défi de conjugaison',
   questionSpacingMm: 8,
   titleSpacingMm: 30,
+  inclusiveDisplay: false,
   showGrade: true,
   showVerbs: false,
   showTenses: false,

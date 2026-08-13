@@ -630,6 +630,8 @@ const uiMessages = {
   "Espace avant le titre": { de: "Abstand vor dem Titel", en: "Space before the title", it: "Spazio prima del titolo", es: "Espacio antes del t\xEDtulo" },
   "Espacement entre les questions": { de: "Abstand zwischen den Fragen", en: "Spacing between questions", it: "Spaziatura tra le domande", es: "Espacio entre las preguntas" },
   "Mise en page": { de: "Layout", en: "Layout", it: "Impaginazione", es: "Dise\xF1o" },
+  "Affichage inclusif": { de: "Barrierearme Darstellung", en: "Inclusive layout", it: "Visualizzazione inclusiva", es: "Visualizaci\xF3n inclusiva" },
+  "Texte agrandi, police Arial, interligne renforc\xE9 et mise en page plus a\xE9r\xE9e.": { de: "Gr\xF6\xDFerer Text, Arial, gr\xF6\xDFerer Zeilenabstand und ein luftigeres Layout.", en: "Larger text, Arial, increased line spacing and a more spacious layout.", it: "Testo ingrandito, carattere Arial, interlinea maggiore e impaginazione pi\xF9 ariosa.", es: "Texto ampliado, fuente Arial, mayor interlineado y dise\xF1o m\xE1s espacioso." },
   "Informations de l\u2019\xE9l\xE8ve": { de: "Angaben zum Sch\xFCler", en: "Student information", it: "Informazioni dell\u2019alunno", es: "Informaci\xF3n del alumno" },
   "Date": { de: "Datum", en: "Date", it: "Data", es: "Fecha" },
   "Espace pour la note": { de: "Platz f\xFCr die Note", en: "Space for the mark", it: "Spazio per il voto", es: "Espacio para la nota" },
@@ -1528,17 +1530,17 @@ const _routes = [
   {
     name: "admin-feedbacks",
     path: "/admin/feedbacks",
-    component: () => import('./feedbacks-CJTL1j9_.mjs')
+    component: () => import('./feedbacks-BarE-6Eo.mjs')
   },
   {
     name: "admin-help-verification",
     path: "/admin/help-verification",
-    component: () => import('./help-verification-USdpnzJg.mjs')
+    component: () => import('./help-verification-D8NoYSsG.mjs')
   },
   {
     name: "admin-helps",
     path: "/admin/helps",
-    component: () => import('./helps-x2fKobgt.mjs')
+    component: () => import('./helps-5u7xYZfw.mjs')
   },
   {
     name: "admin-literary-corpus",
@@ -1563,7 +1565,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-DOH9uobd.mjs')
+    component: () => import('./users-CSyr-Y4B.mjs')
   },
   {
     name: "modes-mode-temps",
@@ -1578,7 +1580,7 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-BCJA8U1o.mjs')
+    component: () => import('./_code_-DdBan9Xm.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1613,7 +1615,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-CI5oh-4P.mjs')
+    component: () => import('./exercices-de-conjugaison-DB2MM_Ls.mjs')
   },
   {
     name: "mon-compte",
@@ -1624,12 +1626,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-lHw0UxpW.mjs')
+    component: () => import('./my-page-Di2-gCi7.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-DRHj7mhn.mjs')
+    component: () => import('./nouveau-defi-B12zeeSa.mjs')
   },
   {
     name: "signin",
@@ -1639,7 +1641,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-Cjg1N2ga.mjs')
+    component: () => import('./index-DUkDzWQ9.mjs')
   },
   {
     name: "mode-tense",
@@ -1689,17 +1691,17 @@ const _routes = [
   {
     name: "localized-admin-feedbacks",
     path: "/:locale(fr|de|en|it|es)/admin/feedbacks",
-    component: () => import('./feedbacks-CJTL1j9_.mjs')
+    component: () => import('./feedbacks-BarE-6Eo.mjs')
   },
   {
     name: "localized-admin-help-verification",
     path: "/:locale(fr|de|en|it|es)/admin/help-verification",
-    component: () => import('./help-verification-USdpnzJg.mjs')
+    component: () => import('./help-verification-D8NoYSsG.mjs')
   },
   {
     name: "localized-admin-helps",
     path: "/:locale(fr|de|en|it|es)/admin/helps",
-    component: () => import('./helps-x2fKobgt.mjs')
+    component: () => import('./helps-5u7xYZfw.mjs')
   },
   {
     name: "localized-admin-literary-corpus",
@@ -1724,7 +1726,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-DOH9uobd.mjs')
+    component: () => import('./users-CSyr-Y4B.mjs')
   },
   {
     name: "localized-modes-mode-temps",
@@ -1739,7 +1741,7 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-BCJA8U1o.mjs')
+    component: () => import('./_code_-DdBan9Xm.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1774,7 +1776,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-CI5oh-4P.mjs')
+    component: () => import('./exercices-de-conjugaison-DB2MM_Ls.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1785,12 +1787,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-lHw0UxpW.mjs')
+    component: () => import('./my-page-Di2-gCi7.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-DRHj7mhn.mjs')
+    component: () => import('./nouveau-defi-B12zeeSa.mjs')
   },
   {
     name: "localized-signin",
@@ -1800,7 +1802,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-Cjg1N2ga.mjs')
+    component: () => import('./index-DUkDzWQ9.mjs')
   },
   {
     name: "localized-mode-tense",
@@ -2413,7 +2415,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-D2H7GRrx.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-2uj_KM_e.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

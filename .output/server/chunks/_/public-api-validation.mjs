@@ -66,6 +66,7 @@ const PRINT_OPTION_KEYS = /* @__PURE__ */ new Set([
   "title",
   "questionSpacingMm",
   "titleSpacingMm",
+  "inclusiveDisplay",
   "showGrade",
   "showVerbs",
   "showTenses",
@@ -75,6 +76,7 @@ const PRINT_OPTION_KEYS = /* @__PURE__ */ new Set([
   "showRandomNumber"
 ]);
 const BOOLEAN_PRINT_OPTION_KEYS = [
+  "inclusiveDisplay",
   "showGrade",
   "showVerbs",
   "showTenses",
@@ -87,6 +89,7 @@ const DEFAULT_PRINT_OPTIONS = {
   title: "D\xE9fi de conjugaison",
   questionSpacingMm: 8,
   titleSpacingMm: 30,
+  inclusiveDisplay: false,
   showGrade: true,
   showVerbs: false,
   showTenses: false,

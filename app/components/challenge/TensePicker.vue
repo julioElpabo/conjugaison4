@@ -25,6 +25,7 @@ const emit = defineEmits<{
 }>()
 
 const selectedSet = computed(() => new Set(props.selectedIds))
+// La restriction il / ils ne concerne que le passé simple.
 const isPastSimple = (tense: Tense) => tense.name.toLocaleLowerCase('fr') === 'passé simple'
 
 function toggleTense(tense: Tense) {

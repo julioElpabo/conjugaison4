@@ -51,6 +51,7 @@ describe('validation des défis partagés', () => {
         title: 'Ma fiche',
         questionSpacingMm: 8,
         titleSpacingMm: 18,
+        inclusiveDisplay: true,
         showGrade: false,
         showVerbs: true,
         showTenses: true,
@@ -64,6 +65,7 @@ describe('validation des défis partagés', () => {
     const parsed = parseDefiDefinition(input)
     assert.equal(parsed.identificationSource, 'literary-corpus')
     assert.equal(parsed.includeOnPronoun, true)
+    assert.equal(parsed.printOptions.inclusiveDisplay, true)
     assert.deepEqual(JSON.parse(serializeDefi(parsed)), parsed)
   })
 
@@ -78,6 +80,7 @@ describe('validation des défis partagés', () => {
       complementOptions: ['cod-before', 'coi-after'],
       printOptions: {
         title: 'Défi complet', questionSpacingMm: 6, titleSpacingMm: 20,
+        inclusiveDisplay: true,
         showGrade: false, showVerbs: true, showTenses: true, showFirstName: false,
         showLastName: true, showDate: false, showRandomNumber: false,
       },
@@ -152,6 +155,7 @@ describe('validation des défis partagés', () => {
     })
     assert.equal(challenge.printOptions.title, 'Défi de conjugaison')
     assert.equal(challenge.printOptions.showGrade, true)
+    assert.equal(challenge.printOptions.inclusiveDisplay, false)
   })
 
   it('rejette les champs inattendus', () => {

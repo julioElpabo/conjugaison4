@@ -5,6 +5,7 @@ import type { ExerciseKind, PrintOptions, Tense, Verb } from '~/composables/useC
 import { TENSE_IDENTIFICATION_INSTRUCTION } from '~~/shared/utils/exercise-instructions'
 import {
   correctionItemHeight,
+  estimatedTextLines,
   exerciseItemHeight,
   paginateByHeight,
 } from '~~/shared/utils/print-pagination'
@@ -56,8 +57,19 @@ function boundedOption(value: number | undefined, fallback: number, minimum: num
   return Number.isFinite(parsed) ? Math.min(maximum, Math.max(minimum, parsed)) : fallback
 }
 
+const GRADE_BOX_SIZE_MM = 17
+const INCLUSIVE_GRADE_TOP_MM = 26
+const INCLUSIVE_QUESTION_LINE_HEIGHT_MM = 7.5
+
 const questionSpacingMm = computed(() => boundedOption(props.options.questionSpacingMm, 8, 2, 15))
 const titleSpacingMm = computed(() => boundedOption(props.options.titleSpacingMm, 30, 8, 30))
+const inclusivePrint = computed(() => props.options.inclusiveDisplay)
+const effectiveQuestionSpacingMm = computed(() => inclusivePrint.value
+  ? Math.max(10, questionSpacingMm.value)
+  : questionSpacingMm.value)
+const pdfBodySize = computed(() => inclusivePrint.value ? 12 : 10.5)
+const pdfCorrectionSize = computed(() => inclusivePrint.value ? 12 : 9.5)
+const pdfLineHeightMm = computed(() => inclusivePrint.value ? 6.5 : 5)
 const isTenseIdentification = computed(() => props.exerciseKind === 'tense-identification')
 const identificationAnswerHeightMm = computed(() => 8 + Math.max(0, 5 - questionSpacingMm.value))
 const missingQuestionCount = computed(() => Math.max(0, props.requestedQuestionCount - props.questions.length))
@@ -82,6 +94,12 @@ const exerciseFirstPageCapacity = computed(() => {
   if (props.options.showFirstName || props.options.showLastName || props.options.showDate) {
     capacity -= Math.max(0, titleSpacingMm.value - 1)
   }
+  if (inclusivePrint.value && props.options.showGrade) {
+    const identityBottom = props.options.showFirstName || props.options.showLastName || props.options.showDate
+      ? 18 + titleSpacingMm.value
+      : 18
+    capacity -= Math.max(0, INCLUSIVE_GRADE_TOP_MM + GRADE_BOX_SIZE_MM - identityBottom)
+  }
   if (props.options.showVerbs) capacity -= 8
   if (props.options.showTenses) capacity -= 8
   if (isTenseIdentification.value) capacity -= 19
@@ -94,7 +112,13 @@ const exercisePages = computed(() => paginateByHeight(
   220,
   (question) => {
     const printable = printableQuestionParts(question, props.exerciseKind)
-    return exerciseItemHeight(printableQuestion(question, props.exerciseKind), questionSpacingMm.value)
+    const inclusiveLineCount = Math.max(
+      estimatedTextLines(printable.label, 34),
+      estimatedTextLines(printable.completion, 48),
+    )
+    return exerciseItemHeight(printableQuestion(question, props.exerciseKind), effectiveQuestionSpacingMm.value)
+      * (inclusivePrint.value ? 1.18 : 1)
+      + (inclusivePrint.value ? Math.max(0, inclusiveLineCount - 1) * (INCLUSIVE_QUESTION_LINE_HEIGHT_MM - pdfLineHeightMm.value) : 0)
       + (printable.suffixOnNextLine ? 6 : 0)
       + (isTenseIdentification.value ? identificationAnswerHeightMm.value : 0)
       + (question.literaryCitation ? 4 : 0)
@@ -105,8 +129,8 @@ const correctionPages = computed(() => paginateByHeight(
   205,
   220,
   question => isTenseIdentification.value
-    ? correctionItemHeight('', printableCorrectionText(question))
-    : correctionItemHeight(printableCorrectionLabel(question, props.exerciseKind), printableCorrectionText(question))
+    ? correctionItemHeight('', printableCorrectionText(question)) * (inclusivePrint.value ? 1.35 : 1)
+    : correctionItemHeight(printableCorrectionLabel(question, props.exerciseKind), printableCorrectionText(question)) * (inclusivePrint.value ? 1.35 : 1)
 ))
 
 useDialogFocus(dialog, () => emit('close'))
@@ -160,6 +184,11 @@ async function buildPdf() {
     const right = 193
     const title = pdfSafe(props.options.title || ui('Défi de conjugaison'))
     const identifier = props.options.showRandomNumber ? ` n° ${sheetNumber.value}` : ''
+    const bodySize = pdfBodySize.value
+    const correctionSize = pdfCorrectionSize.value
+    const lineHeight = pdfLineHeightMm.value
+    const questionLineHeight = inclusivePrint.value ? INCLUSIVE_QUESTION_LINE_HEIGHT_MM : lineHeight
+    const questionLineHeightFactor = questionLineHeight / (bodySize * 25.4 / 72)
     let pageCount = 0
 
     function addPage() {
@@ -178,13 +207,14 @@ async function buildPdf() {
     function drawExerciseHeader(continuation: boolean) {
       if (continuation) {
         pdf.setFont('helvetica', 'normal')
-        pdf.setFontSize(8.5)
+        pdf.setFontSize(inclusivePrint.value ? 12 : 8.5)
         pdf.setTextColor(90, 90, 90)
         pdf.text(`${title}${identifier}`, pageWidth / 2, 12, { align: 'center' })
         pdf.setTextColor(20, 20, 20)
         return 32
       }
       let y = 18
+      const gradeTop = inclusivePrint.value ? INCLUSIVE_GRADE_TOP_MM : 15
       const identity = [
         props.options.showFirstName ? `${ui('Prénom')} : ____________________` : '',
         props.options.showLastName ? `${ui('Nom')} : ____________________` : '',
@@ -192,30 +222,31 @@ async function buildPdf() {
       ].filter(Boolean)
       if (identity.length) {
         pdf.setFont('helvetica', 'normal')
-        pdf.setFontSize(8.5)
+        pdf.setFontSize(inclusivePrint.value ? 12 : 8.5)
         pdf.text(pdfSafe(identity.join('     ')), left, y)
         y += titleSpacingMm.value
       }
       if (props.options.showGrade) {
         pdf.setDrawColor(40, 40, 40)
-        pdf.rect(right - 17, 15, 17, 17)
+        pdf.rect(right - GRADE_BOX_SIZE_MM, gradeTop, GRADE_BOX_SIZE_MM, GRADE_BOX_SIZE_MM)
+        if (inclusivePrint.value) y = Math.max(y, gradeTop + GRADE_BOX_SIZE_MM)
       }
       pdf.setFont('helvetica', 'bold')
       pdf.setFontSize(17)
       const heading = `${title}${identifier}`
-      const titleLines = pdf.splitTextToSize(heading.toUpperCase(), 150)
+      const titleLines = pdf.splitTextToSize(inclusivePrint.value ? heading : heading.toUpperCase(), 150)
       pdf.text(titleLines, left, y + 8)
       y += titleLines.length * 7 + 10
-      pdf.setFontSize(9)
+      pdf.setFontSize(inclusivePrint.value ? 12 : 9)
       if (props.options.showVerbs) {
         const lines = pdf.splitTextToSize(`Verbes : ${pdfSafe(props.verbs.map(verb => verb.infinitif).join(', '))}`, 176)
         pdf.text(lines, left, y)
-        y += lines.length * 4.5 + 2
+        y += lines.length * (inclusivePrint.value ? 6.5 : 4.5) + 2
       }
       if (props.options.showTenses) {
         const lines = pdf.splitTextToSize(`${ui('Temps :')} ${pdfSafe(props.tenses.map(tense => uiLabel(tense.name)).join(', '))}`, 176)
         pdf.text(lines, left, y)
-        y += lines.length * 4.5 + 2
+        y += lines.length * (inclusivePrint.value ? 6.5 : 4.5) + 2
       }
       if (isTenseIdentification.value) {
         pdf.setDrawColor(120, 120, 120)
@@ -229,7 +260,7 @@ async function buildPdf() {
     function drawCorrectionHeader(continuation: boolean) {
       if (continuation) {
         pdf.setFont('helvetica', 'normal')
-        pdf.setFontSize(8.5)
+        pdf.setFontSize(inclusivePrint.value ? 12 : 8.5)
         pdf.setTextColor(90, 90, 90)
         pdf.text(`${title} - corrigé${identifier}`, pageWidth / 2, 12, { align: 'center' })
         pdf.setTextColor(20, 20, 20)
@@ -238,7 +269,10 @@ async function buildPdf() {
       pdf.setFont('helvetica', 'bold')
       pdf.setFontSize(17)
       pdf.setTextColor(20, 20, 20)
-      pdf.text(`${ui('CORRIGÉ')}${identifier}`, left, 26)
+      const correctionTitle = inclusivePrint.value
+        ? capitalizePrintLine(ui('CORRIGÉ').toLocaleLowerCase('fr-CH'))
+        : ui('CORRIGÉ')
+      pdf.text(`${correctionTitle}${identifier}`, left, 26)
       return 38
     }
 
@@ -262,7 +296,7 @@ async function buildPdf() {
       const previousSize = pdf.getFontSize()
       const previousStyle = pdf.getFont().fontStyle
       pdf.setFont('helvetica', 'italic')
-      pdf.setFontSize(8.3)
+      pdf.setFontSize(inclusivePrint.value ? 12 : 8.3)
       const sourceLines = pdf.splitTextToSize(source, width) as string[]
       pdf.setFont('helvetica', previousStyle)
       pdf.setFontSize(previousSize)
@@ -271,7 +305,7 @@ async function buildPdf() {
         sourceLines,
         targetStart,
         targetEnd,
-        height: lines.length * 5 + sourceLines.length * 4,
+        height: lines.length * questionLineHeight + sourceLines.length * (inclusivePrint.value ? 6.5 : 4),
       }
     }
 
@@ -281,7 +315,7 @@ async function buildPdf() {
       y: number,
     ) {
       citation.lines.forEach((line, lineIndex) => {
-        const baseline = y + lineIndex * 5
+        const baseline = y + lineIndex * questionLineHeight
         pdf.text(line.text, x, baseline)
         const overlapStart = Math.max(line.start, citation.targetStart)
         const overlapEnd = Math.min(line.start + line.text.length, citation.targetEnd)
@@ -296,10 +330,10 @@ async function buildPdf() {
       const previousSize = pdf.getFontSize()
       const previousStyle = pdf.getFont().fontStyle
       pdf.setFont('helvetica', 'italic')
-      pdf.setFontSize(8.3)
+      pdf.setFontSize(inclusivePrint.value ? 12 : 8.3)
       pdf.setTextColor(90, 90, 90)
       citation.sourceLines.forEach((line, lineIndex) => {
-        pdf.text(line, x, y + citation.lines.length * 5 + lineIndex * 4)
+        pdf.text(line, x, y + citation.lines.length * questionLineHeight + lineIndex * (inclusivePrint.value ? 6.5 : 4))
       })
       pdf.setTextColor(20, 20, 20)
       pdf.setFont('helvetica', previousStyle)
@@ -309,7 +343,7 @@ async function buildPdf() {
     function drawExercisePage(page: typeof exercisePages.value[number], continuation: boolean) {
       addPage()
       let y = drawExerciseHeader(continuation)
-      pdf.setFontSize(10.5)
+      pdf.setFontSize(bodySize)
       page.forEach(({ item: question, index }) => {
         const prefix = `${index + 1}. `
         const printable = printableQuestionParts(question, props.exerciseKind)
@@ -357,7 +391,7 @@ async function buildPdf() {
           : completionLines.length
         const lineCount = Math.max(labelLines.length, completionLineCount)
         pdf.text(prefix, left, y)
-        if (printable.label) pdf.text(labelLines, left + 7, y)
+        if (printable.label) pdf.text(labelLines, left + 7, y, { lineHeightFactor: questionLineHeightFactor })
         if (printable.fillBlank) {
           if (before) pdf.text(before, completionX, y)
           if (after && !printable.suffixOnNextLine) pdf.text(after, right, y, { align: 'right' })
@@ -368,21 +402,21 @@ async function buildPdf() {
           if (printable.suffixOnNextLine) {
             if (firstSuffixLine) pdf.text(firstSuffixLine, lineEnd + 2, y)
             remainingSuffixLines.forEach((line: string, lineIndex: number) => {
-              pdf.text(line, completionX, y + 5 + lineIndex * 5)
+              pdf.text(line, completionX, y + questionLineHeight + lineIndex * questionLineHeight)
             })
           }
         } else if (literaryCitation) {
           drawPdfLiteraryCitation(literaryCitation, completionX, y)
         } else {
-          pdf.text(completionLines, completionX, y)
+          pdf.text(completionLines, completionX, y, { lineHeightFactor: questionLineHeightFactor })
         }
         if (isTenseIdentification.value) {
-          const questionHeight = literaryCitation ? literaryCitation.height : lineCount * 5
+          const questionHeight = literaryCitation ? literaryCitation.height : lineCount * questionLineHeight
           const answerY = y + questionHeight + 2
           const modeLabel = pdfSafe(ui('Mode :'))
           const tenseLabel = pdfSafe(ui('Temps :'))
           pdf.setFont('helvetica', 'bold')
-          pdf.setFontSize(9.5)
+          pdf.setFontSize(inclusivePrint.value ? 12 : 9.5)
           pdf.setTextColor(70, 70, 70)
           pdf.text(modeLabel, left + 7, answerY)
           pdf.text(tenseLabel, 108, answerY)
@@ -390,10 +424,10 @@ async function buildPdf() {
           pdf.line(left + 7 + pdf.getTextWidth(modeLabel) + 2, answerY + .7, 101, answerY + .7)
           pdf.line(108 + pdf.getTextWidth(tenseLabel) + 2, answerY + .7, right, answerY + .7)
           pdf.setTextColor(20, 20, 20)
-          pdf.setFontSize(10.5)
-          y += questionHeight + 8 + Math.max(5, questionSpacingMm.value)
+          pdf.setFontSize(bodySize)
+          y += questionHeight + 8 + Math.max(5, effectiveQuestionSpacingMm.value)
         } else {
-          y += Math.max(5 + questionSpacingMm.value, lineCount * 5 + questionSpacingMm.value)
+          y += Math.max(questionLineHeight + effectiveQuestionSpacingMm.value, lineCount * questionLineHeight + effectiveQuestionSpacingMm.value)
         }
       })
       drawFooter()
@@ -402,16 +436,16 @@ async function buildPdf() {
     function drawCorrectionPage(page: typeof correctionPages.value[number], continuation: boolean) {
       addPage()
       let y = drawCorrectionHeader(continuation)
-      pdf.setFontSize(9.5)
+      pdf.setFontSize(correctionSize)
       page.forEach(({ item: question, index }) => {
         const answer = printableCorrectionAnswers(question)
           .flatMap(value => pdf.splitTextToSize(
             pdfSafe(capitalizePrintText(value)),
             isTenseIdentification.value ? 169 : 82,
           ))
-        const answerHeight = answer.length * 5
+        const answerHeight = answer.length * lineHeight
         if (isTenseIdentification.value) {
-          const rowHeight = Math.max(9, answerHeight + 4)
+          const rowHeight = Math.max(inclusivePrint.value ? 13 : 9, answerHeight + 4)
           const textY = y + Math.max(0, (rowHeight - answerHeight) / 2)
           pdf.setFont('helvetica', 'normal')
           pdf.text(`${index + 1}.`, left, textY, { baseline: 'top' })
@@ -426,9 +460,9 @@ async function buildPdf() {
           pdfSafe(capitalizePrintLine(printableCorrectionLabel(question, props.exerciseKind))),
           79,
         )
-        const promptHeight = prompt.length * 5
-        const rowHeight = Math.max(8, Math.max(promptHeight, answerHeight) + 3)
-        const numberY = y + Math.max(0, (rowHeight - 5) / 2)
+        const promptHeight = prompt.length * lineHeight
+        const rowHeight = Math.max(inclusivePrint.value ? 13 : 8, Math.max(promptHeight, answerHeight) + 3)
+        const numberY = y + Math.max(0, (rowHeight - lineHeight) / 2)
         const promptY = y + Math.max(0, (rowHeight - promptHeight) / 2)
         const answerY = y + Math.max(0, (rowHeight - answerHeight) / 2)
         pdf.setFont('helvetica', 'normal')
@@ -567,28 +601,32 @@ async function downloadWord() {
     const identifier = props.options.showRandomNumber ? ` n° ${sheetNumber.value}` : ''
     const contentWidth = 9975
     const pageMargins = { top: 1020, right: 965, bottom: 850, left: 965, header: 360, footer: 360, gutter: 0 }
-    const noSpacing = { before: 0, after: 0, line: 240 }
+    const wordBodySize = inclusivePrint.value ? 24 : 21
+    const wordSecondarySize = inclusivePrint.value ? 24 : 19
+    const wordLineSpacing = inclusivePrint.value ? 360 : 240
+    const wordQuestionSpacingMm = inclusivePrint.value ? Math.max(10, questionSpacingMm.value) : questionSpacingMm.value
+    const noSpacing = { before: 0, after: 0, line: wordLineSpacing }
     const footer = new Footer({
       children: [new Paragraph({
         alignment: AlignmentType.CENTER,
         spacing: noSpacing,
-        children: [new TextRun({ text: 'conjugaison.tatitotu.ch', size: 16, color: '666666' })]
+        children: [new TextRun({ text: 'conjugaison.tatitotu.ch', size: inclusivePrint.value ? 20 : 16, color: '666666' })]
       })]
     })
     const runningHeader = (text: string) => new Header({
       children: [new Paragraph({
         alignment: AlignmentType.CENTER,
         spacing: noSpacing,
-        children: [new TextRun({ text, size: 17, color: '666666' })]
+        children: [new TextRun({ text, size: inclusivePrint.value ? 20 : 17, color: '666666' })]
       })]
     })
     const emptyHeader = new Header({ children: [new Paragraph({ spacing: noSpacing })] })
     const paragraph = (text: string, options: { bold?: boolean, size?: number, alignment?: typeof AlignmentType[keyof typeof AlignmentType] } = {}) => new Paragraph({
       alignment: options.alignment,
       spacing: noSpacing,
-      children: [new TextRun({ text, bold: options.bold, size: options.size ?? 21, font: 'Arial' })]
+      children: [new TextRun({ text, bold: options.bold, size: options.size ?? wordBodySize, font: 'Arial' })]
     })
-    const identificationQuestionParagraphs = (question: ExerciseQuestion, size = 21) => {
+    const identificationQuestionParagraphs = (question: ExerciseQuestion, size = wordBodySize) => {
       const citation = question.literaryCitation
       if (!citation) {
         return [paragraph(capitalizePrintLine(printableQuestionParts(question, props.exerciseKind).completion), { size })]
@@ -605,11 +643,11 @@ async function downloadWord() {
           ],
         }),
         new Paragraph({
-          spacing: { before: 50, after: 0, line: 220 },
+          spacing: { before: 50, after: 0, line: inclusivePrint.value ? wordLineSpacing : 220 },
           children: [
             new TextRun({
               text: `— ${citation.author}, ${citation.work}`,
-              size: Math.max(15, size - 3),
+              size: inclusivePrint.value ? wordBodySize : Math.max(15, size - 3),
               italics: true,
               color: '666666',
               font: 'Arial',
@@ -620,7 +658,7 @@ async function downloadWord() {
     }
     const completionParagraphs = (question: ExerciseQuestion) => {
       const printable = printableQuestionParts(question, props.exerciseKind)
-      if (!printable.fillBlank) return [paragraph(capitalizePrintLine(printable.completion), { size: 21 })]
+      if (!printable.fillBlank) return [paragraph(capitalizePrintLine(printable.completion), { size: wordBodySize })]
 
       const prefix = capitalizePrintLine(printable.completionPrefix)
       const suffix = printable.completionSuffix
@@ -632,7 +670,7 @@ async function downloadWord() {
           leader: LeaderType.UNDERSCORE,
         }],
         children: [new TextRun({
-          size: 21,
+          size: wordBodySize,
           font: 'Arial',
           children: [
             ...(prefix ? [prefix, ' '] : []),
@@ -643,16 +681,16 @@ async function downloadWord() {
       })]
     }
     const identificationAnswerParagraph = () => new Paragraph({
-      spacing: { before: 150, after: 40, line: 240 },
+      spacing: { before: 150, after: 40, line: wordLineSpacing },
       tabStops: [
         { type: TabStopType.RIGHT, position: 4300, leader: LeaderType.UNDERSCORE },
         { type: TabStopType.RIGHT, position: 9250, leader: LeaderType.UNDERSCORE },
       ],
       children: [
-        new TextRun({ text: `${ui('Mode :')} `, bold: true, size: 19, color: '555555', font: 'Arial' }),
-        new TextRun({ children: [new Tab()], size: 19, font: 'Arial' }),
-        new TextRun({ text: `   ${ui('Temps :')} `, bold: true, size: 19, color: '555555', font: 'Arial' }),
-        new TextRun({ children: [new Tab()], size: 19, font: 'Arial' }),
+        new TextRun({ text: `${ui('Mode :')} `, bold: true, size: wordSecondarySize, color: '555555', font: 'Arial' }),
+        new TextRun({ children: [new Tab()], size: wordSecondarySize, font: 'Arial' }),
+        new TextRun({ text: `   ${ui('Temps :')} `, bold: true, size: wordSecondarySize, color: '555555', font: 'Arial' }),
+        new TextRun({ children: [new Tab()], size: wordSecondarySize, font: 'Arial' }),
       ],
     })
     const cell = (children: InstanceType<typeof Paragraph>[], width: number, options: { borders?: Record<string, unknown>, margins?: Record<string, number> } = {}) => new TableCell({
@@ -674,7 +712,7 @@ async function downloadWord() {
     ].filter(Boolean)
     const gradeWidth = props.options.showGrade ? 965 : 0
     const identityWidth = identityValues.length > 0 ? Math.floor((contentWidth - gradeWidth) / identityValues.length) : contentWidth - gradeWidth
-    identityValues.forEach(value => identityCells.push(cell([paragraph(value, { size: 18 })], identityWidth)))
+    identityValues.forEach(value => identityCells.push(cell([paragraph(value, { size: inclusivePrint.value ? wordBodySize : 18 })], identityWidth)))
     if (identityValues.length === 0 && props.options.showGrade) {
       identityCells.push(cell([paragraph('')], contentWidth - gradeWidth))
     }
@@ -703,17 +741,17 @@ async function downloadWord() {
     exerciseChildren.push(new Paragraph({
       spacing: { before: Math.round(titleSpacingMm.value * 56.7), after: 260 },
       children: [
-        new TextRun({ text: title.toUpperCase(), bold: true, size: 34, font: 'Arial' }),
-        new TextRun({ text: identifier, size: 18, font: 'Arial' })
+        new TextRun({ text: inclusivePrint.value ? title : title.toUpperCase(), bold: true, size: 34, font: 'Arial' }),
+        new TextRun({ text: identifier, size: inclusivePrint.value ? wordBodySize : 18, font: 'Arial' })
       ]
     }))
-    if (props.options.showVerbs) exerciseChildren.push(paragraph(`Verbes : ${props.verbs.map(verb => verb.infinitif).join(', ')}`, { bold: true, size: 19 }))
-    if (props.options.showTenses) exerciseChildren.push(paragraph(`${ui('Temps :')} ${props.tenses.map(tense => uiLabel(tense.name)).join(', ')}`, { bold: true, size: 19 }))
+    if (props.options.showVerbs) exerciseChildren.push(paragraph(`Verbes : ${props.verbs.map(verb => verb.infinitif).join(', ')}`, { bold: true, size: wordSecondarySize }))
+    if (props.options.showTenses) exerciseChildren.push(paragraph(`${ui('Temps :')} ${props.tenses.map(tense => uiLabel(tense.name)).join(', ')}`, { bold: true, size: wordSecondarySize }))
     if (isTenseIdentification.value) {
       exerciseChildren.push(new Paragraph({
         spacing: { before: 160, after: 480 },
         border: { top: { style: BorderStyle.SINGLE, size: 4, color: '777777' }, bottom: { style: BorderStyle.SINGLE, size: 4, color: '777777' }, left: { style: BorderStyle.SINGLE, size: 4, color: '777777' }, right: { style: BorderStyle.SINGLE, size: 4, color: '777777' } },
-        children: [new TextRun({ text: TENSE_IDENTIFICATION_INSTRUCTION, size: 19, font: 'Arial' })]
+        children: [new TextRun({ text: TENSE_IDENTIFICATION_INSTRUCTION, size: wordSecondarySize, font: 'Arial' })]
       }))
     }
     else {
@@ -730,22 +768,22 @@ async function downloadWord() {
       rows: printableQuestions.value.map((question, index) => {
         const printable = printableQuestionParts(question, props.exerciseKind)
         const identificationCells = [
-          cell([paragraph(`${index + 1}.`, { size: 21 })], 480, { margins: { top: 90, bottom: 90, left: 0, right: 40 } }),
+          cell([paragraph(`${index + 1}.`, { size: wordBodySize })], 480, { margins: { top: 90, bottom: 90, left: 0, right: 40 } }),
           cell([
             ...identificationQuestionParagraphs(question),
             identificationAnswerParagraph(),
           ], 9495, { margins: { top: 90, bottom: 100, left: 70, right: 70 } }),
         ]
         const conjugationCells = [
-          cell([paragraph(`${index + 1}.`, { size: 21 })], 480, { margins: { top: 70, bottom: 70, left: 0, right: 40 } }),
-          cell([paragraph(capitalizePrintLine(printable.label), { size: 21 })], 3900),
+          cell([paragraph(`${index + 1}.`, { size: wordBodySize })], 480, { margins: { top: 70, bottom: 70, left: 0, right: 40 } }),
+          cell([paragraph(capitalizePrintLine(printable.label), { size: wordBodySize })], 3900),
           cell(completionParagraphs(question), 5595),
         ]
         return new TableRow({
           cantSplit: true,
           height: {
             value: Math.round(((isTenseIdentification.value ? 13 : 5)
-              + Math.max(isTenseIdentification.value ? 5 : 0, questionSpacingMm.value)) * 56.7),
+              + Math.max(isTenseIdentification.value ? 5 : 0, wordQuestionSpacingMm)) * 56.7),
             rule: HeightRule.ATLEAST,
           },
           children: isTenseIdentification.value ? identificationCells : conjugationCells,
@@ -757,8 +795,8 @@ async function downloadWord() {
       new Paragraph({
         spacing: { before: 0, after: 260 },
         children: [
-          new TextRun({ text: ui('CORRIGÉ'), bold: true, size: 34, font: 'Arial' }),
-          new TextRun({ text: identifier, size: 18, font: 'Arial' })
+          new TextRun({ text: inclusivePrint.value ? capitalizePrintLine(ui('CORRIGÉ').toLocaleLowerCase('fr-CH')) : ui('CORRIGÉ'), bold: true, size: 34, font: 'Arial' }),
+          new TextRun({ text: identifier, size: inclusivePrint.value ? wordBodySize : 18, font: 'Arial' })
         ]
       }),
       new Table({
@@ -768,24 +806,24 @@ async function downloadWord() {
         borders: TableBorders.NONE,
         rows: printableQuestions.value.map((question, index) => {
           const identificationCorrectionCells = [
-            cell([paragraph(`${index + 1}.`, { size: 19 })], 480, {
+            cell([paragraph(`${index + 1}.`, { size: wordSecondarySize })], 480, {
               borders: lightBottomBorder,
               margins: { top: 70, bottom: 70, left: 0, right: 40 },
             }),
             cell(
-              printableCorrectionAnswers(question).map(answer => paragraph(capitalizePrintText(answer), { bold: true, size: 19 })),
+              printableCorrectionAnswers(question).map(answer => paragraph(capitalizePrintText(answer), { bold: true, size: wordSecondarySize })),
               9495,
               { borders: lightBottomBorder, margins: { top: 70, bottom: 70, left: 70, right: 70 } },
             ),
           ]
           const conjugationCorrectionCells = [
-            cell([paragraph(`${index + 1}.`, { size: 19 })], 480, { borders: lightBottomBorder, margins: { top: 55, bottom: 55, left: 0, right: 40 } }),
+            cell([paragraph(`${index + 1}.`, { size: wordSecondarySize })], 480, { borders: lightBottomBorder, margins: { top: 55, bottom: 55, left: 0, right: 40 } }),
             cell(
-              [paragraph(capitalizePrintLine(printableCorrectionLabel(question, props.exerciseKind)), { size: 19 })],
+              [paragraph(capitalizePrintLine(printableCorrectionLabel(question, props.exerciseKind)), { size: wordSecondarySize })],
               5100,
               { borders: lightBottomBorder, margins: { top: 55, bottom: 55, left: 70, right: 70 } },
             ),
-            cell(printableCorrectionAnswers(question).map(answer => paragraph(capitalizePrintText(answer), { bold: true, size: 19 })), 4395, { borders: lightBottomBorder, margins: { top: 55, bottom: 55, left: 70, right: 70 } }),
+            cell(printableCorrectionAnswers(question).map(answer => paragraph(capitalizePrintText(answer), { bold: true, size: wordSecondarySize })), 4395, { borders: lightBottomBorder, margins: { top: 55, bottom: 55, left: 70, right: 70 } }),
           ]
           return new TableRow({
             cantSplit: true,
@@ -801,7 +839,7 @@ async function downloadWord() {
     const wordDocument = new Document({
       styles: {
         default: {
-          document: { run: { font: 'Arial', size: 21 }, paragraph: { spacing: noSpacing } }
+          document: { run: { font: 'Arial', size: wordBodySize }, paragraph: { spacing: noSpacing } }
         }
       },
       sections: [
@@ -910,6 +948,13 @@ async function downloadWord() {
 
           <fieldset class="print-settings__group">
             <legend>{{ ui('Mise en page') }}</legend>
+            <label class="print-settings__inclusive">
+              <input type="checkbox" :checked="options.inclusiveDisplay" @change="setPrintOption('inclusiveDisplay', ($event.target as HTMLInputElement).checked)">
+              <span>
+                <strong>{{ ui('Affichage inclusif') }}</strong>
+                <small>{{ ui('Texte agrandi, police Arial, interligne renforcé et mise en page plus aérée.') }}</small>
+              </span>
+            </label>
             <label class="print-settings__number-field" for="preview-title-spacing">
               <span>{{ ui('Espace avant le titre') }}</span>
               <span>

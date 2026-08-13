@@ -264,6 +264,8 @@ export const uiMessages = {
   'Espace avant le titre': { de: 'Abstand vor dem Titel', en: 'Space before the title', it: 'Spazio prima del titolo', es: 'Espacio antes del título' },
   'Espacement entre les questions': { de: 'Abstand zwischen den Fragen', en: 'Spacing between questions', it: 'Spaziatura tra le domande', es: 'Espacio entre las preguntas' },
   'Mise en page': { de: 'Layout', en: 'Layout', it: 'Impaginazione', es: 'Diseño' },
+  'Affichage inclusif': { de: 'Barrierearme Darstellung', en: 'Inclusive layout', it: 'Visualizzazione inclusiva', es: 'Visualización inclusiva' },
+  'Texte agrandi, police Arial, interligne renforcé et mise en page plus aérée.': { de: 'Größerer Text, Arial, größerer Zeilenabstand und ein luftigeres Layout.', en: 'Larger text, Arial, increased line spacing and a more spacious layout.', it: 'Testo ingrandito, carattere Arial, interlinea maggiore e impaginazione più ariosa.', es: 'Texto ampliado, fuente Arial, mayor interlineado y diseño más espacioso.' },
   'Informations de l’élève': { de: 'Angaben zum Schüler', en: 'Student information', it: 'Informazioni dell’alunno', es: 'Información del alumno' },
   'Date': { de: 'Datum', en: 'Date', it: 'Data', es: 'Fecha' },
   'Espace pour la note': { de: 'Platz für die Note', en: 'Space for the mark', it: 'Spazio per il voto', es: 'Espacio para la nota' },

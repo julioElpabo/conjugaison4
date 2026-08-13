@@ -100,8 +100,8 @@ test('les fiches PDF et Word réservent une réponse séparée au mode et au tem
   assert.match(printPreview, /const modeLabel = pdfSafe\(ui\('Mode :'\)\)/u)
   assert.match(printPreview, /const tenseLabel = pdfSafe\(ui\('Temps :'\)\)/u)
   assert.match(printPreview, /identificationAnswerParagraph/u)
-  assert.match(printPreview, /LeaderType\.DOT/u)
-  assert.match(printPreview, /Math\.max\(5, questionSpacingMm\.value\)/u)
+  assert.match(printPreview, /LeaderType\.UNDERSCORE/u)
+  assert.match(printPreview, /Math\.max\(5, effectiveQuestionSpacingMm\.value\)/u)
 })
 
 test('les fiches PDF et Word soulignent la forme ciblée sans afficher de crochets', () => {
@@ -115,10 +115,10 @@ test('les fiches PDF et Word soulignent la forme ciblée sans afficher de croche
 test('la provenance est isolée sur une ligne plus petite et italique dans les deux formats', () => {
   assert.match(printPreview, /sourceLines/u)
   assert.match(printPreview, /pdf\.setFont\('helvetica', 'italic'\)/u)
-  assert.match(printPreview, /pdf\.setFontSize\(8\.3\)/u)
+  assert.match(printPreview, /pdf\.setFontSize\(inclusivePrint\.value \? 12 : 8\.3\)/u)
   assert.match(printPreview, /identificationQuestionParagraphs/u)
   assert.match(printPreview, /italics: true/u)
-  assert.match(printPreview, /size: Math\.max\(15, size - 3\)/u)
+  assert.match(printPreview, /inclusivePrint\.value \? wordBodySize : Math\.max\(15, size - 3\)/u)
 })
 
 test('le corrigé d’identification ne contient que les réponses de mode et de temps', () => {

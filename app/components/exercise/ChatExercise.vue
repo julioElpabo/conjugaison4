@@ -90,6 +90,33 @@ const chatAnswerPlaceholder = computed(() => isSmallScreen.value
         ? ui('Écris ta réponse…')
         : ui('Écris ta réponse ou « Aide »…'))
 
+function coachColorHue(hexColor: string) {
+  const match = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/iu.exec(hexColor.trim())
+  if (!match) return 195
+  const [red, green, blue] = match.slice(1).map(value => Number.parseInt(value!, 16) / 255) as [number, number, number]
+  const maximum = Math.max(red, green, blue)
+  const minimum = Math.min(red, green, blue)
+  const delta = maximum - minimum
+  if (delta === 0) return 195
+  const hue = maximum === red
+    ? ((green - blue) / delta) % 6
+    : maximum === green
+      ? (blue - red) / delta + 2
+      : (red - green) / delta + 4
+  return Math.round((hue * 60 + 360) % 360)
+}
+
+const coachChatStyle = computed(() => {
+  const hue = coachColorHue(props.coach.themeColor)
+  return {
+    '--coach-color': props.coach.themeColor,
+    '--coach-message-bg': `hsl(${hue} 62% 89%)`,
+    '--coach-message-border': `hsl(${hue} 50% 76%)`,
+    '--coach-message-text': `hsl(${hue} 38% 24%)`,
+    '--coach-instruction-accent': `hsl(${hue} 58% 43%)`,
+  }
+})
+
 interface ChatMessage {
   id: number
   author: 'coach' | 'learner'
@@ -104,6 +131,7 @@ interface ChatMessage {
   literaryCitation?: NonNullable<ExerciseQuestion['literaryCitation']>
   identificationForm?: IdentificationFormParts
   identificationPrompt?: boolean
+  instructionPrompt?: boolean
   consultVerbId?: number
   consultVerbLabel?: string
   answerLine?: boolean
@@ -651,8 +679,13 @@ function enqueueCoachBubble(createMessage: () => Omit<ChatMessage, 'id' | 'autho
   return coachQueue
 }
 
-function addCoachText(text: string, tone?: ChatMessage['tone'], emphasis = false) {
-  return enqueueCoachBubble(() => ({ text, ...(tone ? { tone } : {}), ...(emphasis ? { emphasis: true } : {}) }))
+function addCoachText(text: string, tone?: ChatMessage['tone'], emphasis = false, instructionPrompt = false) {
+  return enqueueCoachBubble(() => ({
+    text,
+    ...(tone ? { tone } : {}),
+    ...(emphasis ? { emphasis: true } : {}),
+    ...(instructionPrompt ? { instructionPrompt: true } : {}),
+  }))
 }
 
 async function suggestHelp(offerConsultation = false) {
@@ -710,7 +743,7 @@ async function askCurrentQuestion() {
   posingQuestion.value = true
   const firstQuestionMessageId = sequence.value + 1
   if (currentIndex.value > 0) await addCoachReaction('question', contextFor(question, true, true))
-  if (question.instruction) await addCoachText(question.instruction)
+  if (question.instruction) await addCoachText(question.instruction, undefined, false, true)
   if (isIdentificationExercise.value) {
     if (question.literaryCitation) {
       await enqueueCoachBubble(() => ({
@@ -718,6 +751,7 @@ async function askCurrentQuestion() {
         literaryCitation: question.literaryCitation,
         questionIndex: currentIndex.value,
         identificationPrompt: true,
+        instructionPrompt: true,
       }))
     } else {
       const formParts = identificationFormParts(question)
@@ -727,6 +761,7 @@ async function askCurrentQuestion() {
         identificationForm: formParts || undefined,
         questionIndex: currentIndex.value,
         identificationPrompt: true,
+        instructionPrompt: true,
       }))
     }
     posingQuestion.value = false
@@ -738,12 +773,13 @@ async function askCurrentQuestion() {
   const bubbles = coachQuestionBubbles(question, {
     omitIndicativeMode: omitIndicativeMode.value,
   })
-  await addCoachText(bubbles.formula, undefined, true)
+  await addCoachText(bubbles.formula, undefined, true, true)
   if (bubbles.sentence) {
     await enqueueCoachBubble(() => ({
       text: bubbles.sentence!,
       emphasis: true,
       answerLine: true,
+      instructionPrompt: true,
     }))
   }
   posingQuestion.value = false
@@ -1106,7 +1142,7 @@ onBeforeUnmount(() => {
 <template>
   <Teleport to="body">
     <div v-show="tourDemoReady" class="chat-overlay" data-tour="chat-exercise" @click.self="requestClose">
-      <div ref="chat-dialogs" class="chat-dialogs" :class="{ 'chat-dialogs--with-help': helpOpen, 'chat-dialogs--confirming': closeConfirmationOpen }" :style="{ '--coach-color': coach.themeColor }" role="dialog" aria-modal="true" aria-labelledby="chat-title" tabindex="-1" @click.self="requestClose">
+      <div ref="chat-dialogs" class="chat-dialogs" :class="{ 'chat-dialogs--with-help': helpOpen, 'chat-dialogs--confirming': closeConfirmationOpen }" :style="coachChatStyle" role="dialog" aria-modal="true" aria-labelledby="chat-title" tabindex="-1" @click.self="requestClose">
       <section class="chat-dialog" data-tour="chat-dialog" role="region" aria-labelledby="chat-title">
         <header class="chat-header">
           <img class="coach-avatar" :src="coach.avatarPath" alt="">
@@ -1138,6 +1174,7 @@ onBeforeUnmount(() => {
               message.tone ? `chat-message--${message.tone}` : '',
               { 'chat-message--comparison': !!message.answerComparison },
               { 'chat-message--identification-question': message.identificationPrompt },
+              { 'chat-message--instruction': message.instructionPrompt },
               { 'chat-message--mobile-help-hint': message.mobileHelpHint },
               { 'chat-message--help-link': message.author === 'learner' && message.questionIndex !== undefined },
               { 'is-help-selected': helpOpen && message.questionIndex !== undefined && message.questionIndex === helpQuestionIndex },
@@ -2003,7 +2040,7 @@ onBeforeUnmount(() => {
 .chat-instruction span {
   flex: 0 0 auto;
   color: #59717d;
-  font-size: .78rem;
+  font-size: .875rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .04em;
@@ -2046,7 +2083,7 @@ onBeforeUnmount(() => {
   color: white;
   background: var(--coach-color);
   text-decoration: none;
-  font-size: .78rem;
+  font-size: .875rem;
   font-weight: 850;
   font-family: inherit;
   cursor: pointer;
@@ -2069,7 +2106,7 @@ onBeforeUnmount(() => {
 .chat-literary-citation { display: grid; max-width: 100%; margin: 0; gap: 7px; }
 .chat-literary-citation p { margin: 0; font-size: 1rem; line-height: 1.55; }
 .chat-literary-citation mark { padding: 1px 4px; border-radius: 4px; color: #4b3563; background: #eadcf8; box-decoration-break: clone; font-weight: 900; }
-.chat-literary-citation footer { color: #637a84; font-size: .7rem; font-weight: 700; }
+.chat-literary-citation footer { color: #637a84; font-size: .875rem; font-weight: 700; }
 .chat-literary-question { display: grid; gap: 12px; }
 .chat-identification-form { margin: 0; font-weight: 800; }
 .chat-identification-form mark { padding: 1px 4px; border-radius: 4px; color: #4b3563; background: #eadcf8; box-decoration-break: clone; font-weight: 900; }
@@ -2078,11 +2115,11 @@ onBeforeUnmount(() => {
 .chat-mode-choices { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .chat-tense-choices { display: grid; gap: 6px; }
 .chat-tense-choice-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-.chat-mode-choices button, .chat-tense-choices button, .chat-tense-choice-step__header button { min-width: 0; padding: 8px 5px; overflow: hidden; color: #1d6378; border: 1px solid #9fc6cf; border-radius: 10px; background: #edf8fa; cursor: pointer; font: inherit; font-size: clamp(.64rem, 1.4vw, .76rem); font-weight: 850; text-overflow: ellipsis; white-space: nowrap; }
+.chat-mode-choices button, .chat-tense-choices button, .chat-tense-choice-step__header button { min-width: 0; min-height: 42px; padding: 8px 7px; overflow: visible; color: #1d6378; border: 1px solid #9fc6cf; border-radius: 10px; background: #edf8fa; cursor: pointer; font: inherit; font-size: clamp(.875rem, 1.4vw, 1rem); font-weight: 800; line-height: 1.3; overflow-wrap: anywhere; white-space: normal; }
 .chat-mode-choices button:hover, .chat-mode-choices button:focus-visible, .chat-tense-choices button:hover, .chat-tense-choices button:focus-visible, .chat-tense-choice-step__header button:hover, .chat-tense-choice-step__header button:focus-visible { color: white; border-color: #27758e; background: #27758e; outline: 2px solid rgb(39 117 142 / 22%); outline-offset: 1px; }
 .chat-mode-choices button:disabled, .chat-tense-choices button:disabled { color: #87979b; border-color: #d2dbdd; background: #f1f4f4; cursor: not-allowed; opacity: 1; }
 .chat-tense-choice-step { display: grid; gap: 7px; }
-.chat-tense-choice-step__header { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: #375d68; font-size: .75rem; }
+.chat-tense-choice-step__header { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: #375d68; font-size: .875rem; }
 .chat-tense-choice-step__header button { padding-inline: 9px; }
 :global(:root[data-theme='dark']) :is(.chat-mode-choices, .chat-tense-choices, .chat-tense-choice-step__header) button { color: #bce6ee; border-color: #426d77; background: #1b3a42; }
 :global(:root[data-theme='dark']) :is(.chat-mode-choices, .chat-tense-choices, .chat-tense-choice-step__header) button:hover, :global(:root[data-theme='dark']) :is(.chat-mode-choices, .chat-tense-choices, .chat-tense-choice-step__header) button:focus-visible { color: white; border-color: #65b7c8; background: #286f80; }
@@ -2205,6 +2242,36 @@ onBeforeUnmount(() => {
 .chat-message--error {
   color: #8b312b;
   background: #ffebe9;
+}
+
+.chat-message--coach {
+  color: var(--coach-message-text, #263b43);
+  border: 1px solid var(--coach-message-border, #a9cbd4);
+  background: var(--coach-message-bg, #dceff4);
+  box-shadow: none;
+}
+
+.chat-message--coach.chat-message--instruction {
+  color: #263b43;
+  border-color: var(--coach-message-border, #a9cbd4);
+  border-left: 6px solid var(--coach-instruction-accent, #28758a);
+  background: white;
+  box-shadow:
+    0 3px 7px rgb(18 40 49 / 22%),
+    0 10px 26px rgb(18 40 49 / 30%);
+}
+
+:global(:root[data-theme='dark']) .chat-message--coach {
+  color: var(--coach-message-text, #263b43);
+  border-color: var(--coach-message-border, #a9cbd4);
+  background: var(--coach-message-bg, #dceff4);
+}
+
+:global(:root[data-theme='dark']) .chat-message--coach.chat-message--instruction {
+  color: #263b43;
+  border-color: var(--coach-message-border, #a9cbd4);
+  border-left-color: var(--coach-instruction-accent, #28758a);
+  background: white;
 }
 
 .chat-message--comparison {

@@ -88,7 +88,9 @@ const homeResetRequested = useState('home-reset-requested', () => false)
 const newChallengeRequested = useState('new-challenge-requested', () => false)
 const guidedTourRequested = useState('guided-tour-requested', () => false)
 const wizardAtHome = useState('wizard-at-home', () => true)
+const falcMode = useState<boolean>('falc-mode', () => false)
 const currentStep = ref<WizardStep>(0)
+const falcHomePanel = ref<'code' | 'presets' | null>(null)
 const isPreparingStep4 = ref(false)
 const highlightChallengeLoader = ref(false)
 const presetStage = ref<'groups' | 'presets'>('groups')
@@ -464,7 +466,7 @@ onMounted(() => {
 
     if (!completed && !reminderState) {
       tourPromptTimer = setTimeout(() => {
-        if (currentStep.value === 0 && !tourActive.value && !isTourWelcomeOpen.value) {
+        if (!falcMode.value && currentStep.value === 0 && !tourActive.value && !isTourWelcomeOpen.value) {
           tourWelcomeSource.value = 'initial'
           isTourWelcomeOpen.value = true
         }
@@ -475,7 +477,7 @@ onMounted(() => {
       localStorage.setItem(GUIDED_TOUR_REMINDER_STORAGE_KEY, JSON.stringify(reminderState))
       if (shouldRemindAboutGuidedTour(reminderState)) {
         tourPromptTimer = setTimeout(() => {
-          if (currentStep.value !== 0 || tourActive.value || isTourWelcomeOpen.value) return
+          if (falcMode.value || currentStep.value !== 0 || tourActive.value || isTourWelcomeOpen.value) return
           try {
             localStorage.setItem(GUIDED_TOUR_REMINDER_STORAGE_KEY, JSON.stringify({
               ...reminderState,
@@ -538,6 +540,7 @@ function markAsCustom() {
 
 function goToStep(step: WizardStep) {
   if (isPreparingStep4.value) return
+  if (falcMode.value && step === 4) return
   showLaunchSummary.value = false
   if (step === 0) {
     currentStep.value = 0
@@ -574,10 +577,30 @@ async function startCustomChallenge() {
   document.getElementById('verb-search-input')?.focus({ preventScroll: true })
 }
 
+function applyFalcTenseDefaults() {
+  const defaultNames = new Set(['présent', 'imparfait', 'passé composé', 'futur', 'futur simple'])
+  const indicativeModeIds = new Set(catalogue.value.modes
+    .filter(mode => mode.name.toLocaleLowerCase('fr') === 'indicatif')
+    .map(mode => mode.id))
+  challenge.value.tenseIds = catalogue.value.temps
+    .filter(tense => indicativeModeIds.has(tense.modeId) && defaultNames.has(tense.name.toLocaleLowerCase('fr')))
+    .map(tense => tense.id)
+}
+
+function applyFalcExerciseDefaults() {
+  challenge.value.exerciseKind = 'conjugation'
+  challenge.value.voiceMode = 'active'
+  challenge.value.includeComplements = false
+  challenge.value.complementOptions = []
+}
+
 function nextStep() {
   if (currentStep.value === 1 && selectedVerbs.value.length) goToStep(2)
   else if (currentStep.value === 2 && selectedTenses.value.length) goToStep(3)
-  else if (currentStep.value === 3) void prepareStep4()
+  else if (currentStep.value === 3) {
+    if (falcMode.value) void prepareExercise('classic')
+    else void prepareStep4()
+  }
 }
 
 async function prepareStep4() {
@@ -608,6 +631,7 @@ function restartChallenge() {
   cancelPresetReveal()
   clearVerbs()
   clearTenses()
+  if (falcMode.value) applyFalcTenseDefaults()
   challenge.value.questionCount = 10
   challenge.value.exerciseKind = 'conjugation'
   challenge.value.pastSimplePronouns = 'all'
@@ -617,6 +641,7 @@ function restartChallenge() {
   challenge.value.includeComplements = true
   challenge.value.complementPlacement = 'after'
   challenge.value.complementOptions = ['cod-after', 'coi-after']
+  if (falcMode.value) applyFalcExerciseDefaults()
   activePresetId.value = undefined
   sourcePresetId.value = undefined
   sourcePresetRandomCount.value = null
@@ -1021,6 +1046,16 @@ function tourSteps(format: TourFormat): DriveStep[] {
       },
     },
     {
+      element: '[data-tour="falc-mode"]',
+      title: copy.falcTitle,
+      description: copy.falcDescription,
+      activate: async () => {
+        closeTourWindows()
+        currentStep.value = 0
+        await nextTick()
+      },
+    },
+    {
       element: '[data-tour="learner-account"]',
       title: copy.accountTitle,
       description: copy.accountDescription,
@@ -1041,7 +1076,7 @@ function tourSteps(format: TourFormat): DriveStep[] {
     },
   ]
 
-  const quickSceneIndexes = [0, 1, 2, 3, 4, 7, 8, 9, 11, 13, 14, 15, 16]
+  const quickSceneIndexes = [0, 1, 2, 3, 4, 7, 8, 9, 11, 13, 14, 16, 17]
   const activeScenes = format === 'quick'
     ? quickSceneIndexes.map(index => scenes[index]!)
     : scenes
@@ -1230,7 +1265,7 @@ function postponeTour() {
 }
 
 function openTourMenu() {
-  if (tourActive.value) return
+  if (falcMode.value || tourActive.value) return
   tourWelcomeSource.value = 'manual'
   isTourWelcomeOpen.value = true
 }
@@ -1564,6 +1599,10 @@ function beginExerciseTracking(presentation: 'classic' | 'chat') {
 
 async function prepareExercise(mode: 'classic' | 'chat') {
   if (!isReady.value) return
+  if (falcMode.value) {
+    mode = 'classic'
+    applyFalcExerciseDefaults()
+  }
   if (mode === 'chat') {
     track('feature_selected', exerciseUsageMetadata('chat'))
     isCoachPickerOpen.value = true
@@ -1587,8 +1626,33 @@ async function prepareExercise(mode: 'classic' | 'chat') {
   }
 }
 
+watch(falcMode, (enabled) => {
+  falcHomePanel.value = null
+  if (!enabled) return
+  if (tourPromptTimer) clearTimeout(tourPromptTimer)
+  isTourWelcomeOpen.value = false
+  if (tourActive.value) tourDriver?.destroy()
+  isCoachPickerOpen.value = false
+  isPrintOpen.value = false
+  isShareOpen.value = false
+  if (exercisePresentation.value === 'chat') isExerciseOpen.value = false
+  exercisePresentation.value = 'classic'
+  if (currentStep.value === 4) currentStep.value = 3
+  applyFalcExerciseDefaults()
+  if (currentStep.value <= 2) applyFalcTenseDefaults()
+})
+
+function closeClassicExercise() {
+  if (falcMode.value) {
+    restartChallenge()
+    void navigateTo(localePath('/'))
+    return
+  }
+  isExerciseOpen.value = false
+}
+
 async function launchWithCoach(coach: CoachProfile) {
-  if (!isReady.value) return
+  if (!isReady.value || falcMode.value) return
   selectedCoach.value = coach
   track('coach_selected', { coach: coach.id })
   isCoachPickerOpen.value = false
@@ -1616,7 +1680,7 @@ async function regenerateChatQuestions() {
 }
 
 async function preparePrint() {
-  if (!isReady.value) return
+  if (!isReady.value || falcMode.value) return
   track('feature_selected', {
     feature: 'print.preview',
     source: sourcePresetId.value ? 'preset' : challengeCode.value ? 'code' : 'custom',
@@ -1637,7 +1701,7 @@ async function preparePrint() {
 }
 
 function saveChallenge() {
-  if (!isReady.value) return
+  if (!isReady.value || falcMode.value) return
   track('feature_selected', { feature: 'challenge.share' })
   shareCode.value = ''
   shareError.value = ''
@@ -1671,10 +1735,10 @@ async function createSharedChallenge(title: string, description: string) {
   <div class="wizard-entry-page">
     <div class="challenge-page wizard-page">
       <header class="wizard-hero">
-        <p v-if="currentStep === 0" class="wizard-hero__brand">{{ heroTitle }}</p>
-        <h1 v-if="currentStep === 0" class="wizard-hero__subtitle">{{ props.homeHeading || ui('Exercices de conjugaison française, gratuits et sans publicité') }}</h1>
-        <h1 v-else :class="{ 'wizard-hero__preset': isPrefilledChallenge }">{{ heroTitle }}</h1>
-        <button v-if="currentStep === 0" class="tour-entry-button" type="button" @click="openTourMenu">
+        <p v-if="currentStep === 0 && !falcMode" class="wizard-hero__brand">{{ heroTitle }}</p>
+        <h1 v-if="currentStep === 0 && !falcMode" class="wizard-hero__subtitle">{{ props.homeHeading || ui('Exercices de conjugaison française, gratuits et sans publicité') }}</h1>
+        <h1 v-if="currentStep !== 0 && !falcMode" :class="{ 'wizard-hero__preset': isPrefilledChallenge }">{{ heroTitle }}</h1>
+        <button v-if="currentStep === 0 && !falcMode" class="tour-entry-button" type="button" @click="openTourMenu">
           <span aria-hidden="true">?</span>{{ tourCopy.discover }}
         </button>
       </header>
@@ -1701,7 +1765,7 @@ async function createSharedChallenge(title: string, description: string) {
         >
           <h2 id="wizard-title" class="sr-only">{{ ui('Composer un défi personnalisé') }}</h2>
 
-          <nav v-if="currentStep !== 0" class="wizard-steps" data-tour="wizard-steps" :aria-label="ui('Étapes de création du défi')">
+          <nav v-if="currentStep !== 0" class="wizard-steps" :class="{ 'wizard-steps--falc': falcMode }" data-tour="wizard-steps" :aria-label="ui('Étapes de création du défi')">
             <button
               class="wizard-step-tab wizard-step-tab--verbs"
               data-tour-wizard-step="1"
@@ -1713,7 +1777,7 @@ async function createSharedChallenge(title: string, description: string) {
               type="button"
               @click="goToStep(1)"
             >
-              <span>1</span><span><strong>{{ ui('Verbes') }}</strong><small>{{ stepStatus.verbs ? ui(stepStatus.verbs > 1 ? '{count} choisis' : '{count} choisi', { count: stepStatus.verbs }) : ui('À choisir') }}</small></span>
+              <span>1</span><span><strong>{{ ui('Verbes') }}</strong><small v-if="!falcMode">{{ stepStatus.verbs ? ui(stepStatus.verbs > 1 ? '{count} choisis' : '{count} choisi', { count: stepStatus.verbs }) : ui('À choisir') }}</small></span>
             </button>
             <span class="wizard-steps__line" aria-hidden="true" />
             <button
@@ -1728,7 +1792,7 @@ async function createSharedChallenge(title: string, description: string) {
               :disabled="stepStatus.verbs === 0"
               @click="goToStep(2)"
             >
-              <span>2</span><span><strong><span class="mobile-label-hidden">{{ ui('Modes et temps') }}</span><span class="mobile-label-only">{{ ui('Temps') }}</span></strong><small>{{ stepStatus.tenses ? ui(stepStatus.tenses > 1 ? '{count} choisis' : '{count} choisi', { count: stepStatus.tenses }) : ui('À choisir') }}</small></span>
+              <span>2</span><span><strong><span class="mobile-label-hidden">{{ falcMode ? ui('Temps') : ui('Modes et temps') }}</span><span class="mobile-label-only">{{ ui('Temps') }}</span></strong><small v-if="!falcMode">{{ stepStatus.tenses ? ui(stepStatus.tenses > 1 ? '{count} choisis' : '{count} choisi', { count: stepStatus.tenses }) : ui('À choisir') }}</small></span>
             </button>
             <span class="wizard-steps__line" aria-hidden="true" />
             <button
@@ -1742,10 +1806,11 @@ async function createSharedChallenge(title: string, description: string) {
               :disabled="!isReady"
               @click="goToStep(3)"
             >
-              <span>3</span><span><strong>{{ ui('Options') }}</strong><small>{{ ui('Finaliser le défi') }}</small></span>
+              <span>3</span><span><strong>{{ ui('Options') }}</strong><small v-if="!falcMode">{{ ui('Finaliser le défi') }}</small></span>
             </button>
-            <span class="wizard-steps__line" aria-hidden="true" />
+            <span v-if="!falcMode" class="wizard-steps__line" aria-hidden="true" />
             <button
+              v-if="!falcMode"
               data-tour-wizard-step="4"
               :class="{
                 'is-active': currentStep === 4,
@@ -1771,7 +1836,33 @@ async function createSharedChallenge(title: string, description: string) {
               <strong>{{ ui('Préparation de ton défi…') }}</strong>
             </div>
 
-            <div v-else-if="currentStep === 0" class="wizard-home" data-tour="home">
+            <div v-else-if="currentStep === 0" class="wizard-home" :class="{ 'wizard-home--falc': falcMode }" data-tour="home">
+              <template v-if="falcMode">
+                <div
+                  v-if="falcHomePanel === null"
+                  class="falc-home-actions"
+                  style="display: flex; flex-direction: column"
+                >
+                  <button class="falc-home-action" type="button" @click="falcHomePanel = 'code'">{{ ui('J’ai un code') }}</button>
+                  <button class="falc-home-action" type="button" @click="falcHomePanel = 'presets'">{{ ui('Choisir un défi') }}</button>
+                  <button class="falc-home-action falc-home-action--primary" type="button" @click="startCustomChallenge">{{ ui('Créer mon exercice') }}</button>
+                </div>
+                <div v-else-if="falcHomePanel === 'code'" class="falc-home-panel code-loader" role="search" :aria-label="ui('Charger un défi avec son code')">
+                  <button class="falc-panel-back" type="button" :aria-label="ui('Retour')" @click="falcHomePanel = null">←</button>
+                  <label id="wizard-falc-code-label" for="wizard-falc-code">{{ ui('Écris le code du défi') }}</label>
+                  <div class="code-loader__control">
+                    <div id="wizard-falc-code" class="code-loader__code-entry" role="textbox" contenteditable="plaintext-only" aria-labelledby="wizard-falc-code-label" data-placeholder="AB-CD-EF-23" :aria-invalid="Boolean(codeError)" @input="onChallengeCodeInput" @keydown.enter.prevent="restoreChallenge"></div>
+                    <button class="primary-button" type="button" :disabled="busyAction === 'load'" @click="restoreChallenge">{{ busyAction === 'load' ? ui('Chargement…') : ui('Ouvrir le défi') }}</button>
+                  </div>
+                  <p v-if="codeError" class="code-loader__error" role="alert">{{ codeError }}</p>
+                </div>
+                <div v-else class="falc-home-panel">
+                  <button class="falc-panel-back" type="button" :aria-label="ui('Retour')" @click="falcHomePanel = null">←</button>
+                  <h2>{{ ui('Choisis un défi') }}</h2>
+                  <PresetPicker compact :presets="catalogue.presets" :verbs="catalogue.verbes" :modes="catalogue.modes" :tenses="catalogue.temps" :active-preset-id="activePresetId" @select="selectPreset" @stage-change="presetStage = $event" />
+                </div>
+              </template>
+              <template v-else>
                 <div
                   class="code-loader"
                   data-tour="code-loader"
@@ -1882,13 +1973,14 @@ async function createSharedChallenge(title: string, description: string) {
                     </article>
                   </div>
                 </section>
+              </template>
             </div>
 
             <div v-else-if="currentStep === 1" class="wizard-step wizard-step--selection" aria-labelledby="verbs-title">
               <div class="wizard-step__actions wizard-step__actions--split">
-                <button class="secondary-button" type="button" @click="previousStep">{{ ui('← Nouveau défi') }}</button>
+                <button class="secondary-button" type="button" :aria-label="ui('Étape précédente')" @click="previousStep">{{ falcMode ? '←' : ui('← Nouveau défi') }}</button>
                 <div class="wizard-step__controls">
-                  <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedVerbs.length" @click="nextStep"> {{ ui('Choisir les temps →') }} </button>
+                  <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :aria-label="ui('Étape suivante')" :disabled="!selectedVerbs.length" @click="nextStep"> {{ falcMode ? '→' : ui('Choisir les temps →') }} </button>
                 </div>
               </div>
               <div v-if="activePreset && !isPresetVerbEditing" class="wizard-step__intro wizard-step__intro--selection">
@@ -1913,25 +2005,26 @@ async function createSharedChallenge(title: string, description: string) {
                   data-tour="verbs"
                   :verbs="catalogue.verbes"
                   :selected-ids="displayedVerbIds"
+                  :falc-mode="falcMode"
                   @add="onAddVerb"
                   @remove="onRemoveVerb"
                   @clear="markAsCustom(); clearVerbs()"
                 />
               </template>
               <div class="wizard-step__bottom-actions">
-                <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedVerbs.length" @click="nextStep"> {{ ui('Choisir les temps →') }} </button>
+                <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :aria-label="ui('Étape suivante')" :disabled="!selectedVerbs.length" @click="nextStep"> {{ falcMode ? '→' : ui('Choisir les temps →') }} </button>
               </div>
             </div>
 
             <div v-else-if="currentStep === 2" class="wizard-step wizard-step--selection" aria-labelledby="tenses-title">
               <div class="wizard-step__actions wizard-step__actions--split">
-                <button class="secondary-button" type="button" @click="previousStep">{{ ui('← Verbes') }}</button>
+                <button class="secondary-button" type="button" :aria-label="ui('Étape précédente')" @click="previousStep">{{ falcMode ? '←' : ui('← Verbes') }}</button>
                 <div class="wizard-step__controls">
-                  <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedTenses.length" @click="nextStep"> {{ ui('Choisir les options →') }} </button>
+                  <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :aria-label="ui('Étape suivante')" :disabled="!selectedTenses.length" @click="nextStep"> {{ falcMode ? '→' : ui('Choisir les options →') }} </button>
                 </div>
               </div>
               <div class="wizard-step__intro wizard-step__intro--selection">
-                <h2>{{ isPrefilledChallenge ? ui('Modes et temps') : ui('Choisis les modes et les temps') }}</h2>
+                <h2>{{ falcMode ? ui('Choisis les temps') : isPrefilledChallenge ? ui('Modes et temps') : ui('Choisis les modes et les temps') }}</h2>
               </div>
               <TensePicker
                 data-tour="tenses"
@@ -1940,26 +2033,27 @@ async function createSharedChallenge(title: string, description: string) {
                 :verbs="selectedVerbs"
                 :selected-ids="displayedTenseIds"
                 :past-simple-pronouns="challenge.pastSimplePronouns"
+                :falc-mode="falcMode"
                 @toggle="onToggleTense"
                 @select-all="markAsCustom(); selectAllTenses()"
                 @clear="markAsCustom(); clearTenses(); challenge.pastSimplePronouns = 'all'"
                 @update-past-simple-pronouns="challenge.pastSimplePronouns = $event; markAsCustom()"
               />
               <div class="wizard-step__bottom-actions">
-                <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedTenses.length" @click="nextStep"> {{ ui('Choisir les options →') }} </button>
+                <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :aria-label="ui('Étape suivante')" :disabled="!selectedTenses.length" @click="nextStep"> {{ falcMode ? '→' : ui('Choisir les options →') }} </button>
               </div>
             </div>
 
             <div v-else-if="currentStep === 3" class="wizard-step wizard-review">
               <div class="wizard-step__actions wizard-step__actions--split">
-                <button class="secondary-button" type="button" @click="previousStep">
-                  ← <span class="mobile-label-hidden">{{ ui('Modes et temps') }}</span><span class="mobile-label-only">{{ ui('Temps') }}</span>
+                <button class="secondary-button" type="button" :aria-label="ui('Étape précédente')" @click="previousStep">
+                  ← <template v-if="!falcMode"><span class="mobile-label-hidden">{{ ui('Modes et temps') }}</span><span class="mobile-label-only">{{ ui('Temps') }}</span></template>
                 </button>
                 <div class="wizard-step__controls">
-                  <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" @click="nextStep">{{ ui('Créer le défi') }}</button>
+                  <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" @click="nextStep">{{ falcMode ? ui('Commencer') : ui('Créer le défi') }}</button>
                 </div>
               </div>
-              <div class="wizard-step__intro wizard-step__intro--selection">
+              <div v-if="!falcMode" class="wizard-step__intro wizard-step__intro--selection">
                 <h2>{{ ui('Options du défi') }}</h2>
               </div>
 
@@ -1983,7 +2077,8 @@ async function createSharedChallenge(title: string, description: string) {
                 :conjugation-literary-citation="conjugationLiteraryCitationRaw"
                 :conjugation-example-loading="conjugationExampleLoading"
                 :reveal-prefilled-options="prefilledOptionsRevealPending"
-                grid-layout
+                :grid-layout="!falcMode"
+                :falc-mode="falcMode"
                 id-prefix="wizard-step-options"
                 @prefilled-options-reveal-start="prefilledOptionsRevealPending = false"
                 @update-question-count="challenge.questionCount = $event; markAsCustom()"
@@ -1995,8 +2090,8 @@ async function createSharedChallenge(title: string, description: string) {
                 @update-complement-options="updateComplementOptions"
               />
 
-              <div class="wizard-step__bottom-actions">
-                <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" @click="nextStep">{{ ui('Créer le défi') }}</button>
+              <div v-if="!falcMode" class="wizard-step__bottom-actions">
+                <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" @click="nextStep">{{ falcMode ? ui('Commencer') : ui('Créer le défi') }}</button>
               </div>
 
             </div>
@@ -2034,12 +2129,12 @@ async function createSharedChallenge(title: string, description: string) {
       </template>
       </main>
 
-      <ClassicExercise ref="classic-exercise" v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" :identification-tenses="identificationTenses" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('classic')" @close="isExerciseOpen = false" />
+      <ClassicExercise ref="classic-exercise" v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" :identification-tenses="identificationTenses" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('classic')" @close="closeClassicExercise" />
       <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :exercise-kind="challenge.exerciseKind" :coach="selectedCoach" :verbs="chatExerciseVerbs" :tenses="selectedTenses" :identification-tenses="identificationTenses" :regenerate-questions="regenerateChatQuestions" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('chat')" :tour-demo="tourActive" @close="isExerciseOpen = false" />
-      <CoachPicker v-if="isCoachPickerOpen" :tour-demo="tourActive" @close="isCoachPickerOpen = false" @select="launchWithCoach" />
-      <PrintPreview v-if="isPrintOpen" :questions="printQuestions" :verbs="selectedVerbs" :tenses="selectedTenses" :exercise-kind="challenge.exerciseKind" :options="challenge.printOptions" :requested-question-count="challenge.questionCount" :regenerating="busyAction === 'print'" @update-options="challenge.printOptions = $event" @regenerate="preparePrint" @close="isPrintOpen = false" />
+      <CoachPicker v-if="isCoachPickerOpen && !falcMode" :tour-demo="tourActive" @close="isCoachPickerOpen = false" @select="launchWithCoach" />
+      <PrintPreview v-if="isPrintOpen && !falcMode" :questions="printQuestions" :verbs="selectedVerbs" :tenses="selectedTenses" :exercise-kind="challenge.exerciseKind" :options="challenge.printOptions" :requested-question-count="challenge.questionCount" :regenerating="busyAction === 'print'" @update-options="challenge.printOptions = $event" @regenerate="preparePrint" @close="isPrintOpen = false" />
       <ShareChallengeDialog
-        v-if="isShareOpen"
+        v-if="isShareOpen && !falcMode"
         :code="shareCode"
         :url="shareUrl"
         :busy="busyAction === 'save'"
@@ -2186,6 +2281,40 @@ async function createSharedChallenge(title: string, description: string) {
 .wizard-panel { overflow: hidden; border: 1px solid rgba(174, 199, 191, .95); border-radius: 24px; background: rgb(255 255 255 / 94%); box-shadow: var(--shadow); outline: 0; }
 .wizard-panel--autocomplete-open { overflow: visible; }
 .wizard-steps { position: relative; display: grid; grid-template-columns: minmax(125px, 1fr) 50px minmax(165px, 1.15fr) 50px minmax(120px, 1fr) 50px minmax(115px, .9fr); align-items: center; padding: 17px 24px; border-bottom: 1px solid var(--line); background: #f6faf8; }
+.wizard-steps--falc { grid-template-columns: minmax(125px, 1fr) 50px minmax(165px, 1.15fr) 50px minmax(120px, 1fr); }
+.wizard-home--falc {
+  display: grid;
+  min-height: 470px;
+  padding: 0 !important;
+  place-items: center;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.wizard-home--falc .falc-home-actions {
+  width: min(620px, 100%);
+  padding: 0 !important;
+  gap: 18px;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.wizard-home--falc .falc-home-actions > .falc-home-action {
+  display: block;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  flex: 0 0 auto;
+}
+.falc-home-action { min-height: 82px; padding: 18px 24px; color: var(--brand-dark); border: 2px solid #8ebbc7; border-radius: 18px; background: white; box-shadow: 0 8px 20px rgb(24 73 85 / 10%); cursor: pointer; font-size: clamp(1.15rem, 3vw, 1.45rem); font-weight: 850; }
+.falc-home-action:hover, .falc-home-action:focus-visible { border-color: var(--brand); outline: 4px solid rgb(23 107 135 / 15%); }
+.falc-home-action--primary { color: white; background: var(--brand); }
+.falc-home-panel { position: relative; width: min(760px, 100%); padding: 28px; border: 1px solid var(--line); border-radius: 18px; background: white; }
+.falc-home-panel.code-loader { grid-template-columns: 1fr; }
+.falc-home-panel .code-loader__error { grid-column: 1; }
+.falc-panel-back { width: 44px; height: 44px; margin-bottom: 16px; color: var(--brand-dark); border: 1px solid var(--line); border-radius: 50%; background: var(--surface-soft); cursor: pointer; font-size: 1.4rem; font-weight: 900; }
 .wizard-steps button { display: flex; min-width: 0; padding: 7px; align-items: center; gap: 10px; text-align: left; color: #71817d; background: transparent; border: 0; }
 .wizard-steps button > span:first-child { display: grid; width: 35px; height: 35px; flex: 0 0 35px; place-items: center; border: 2px solid #b8c7c3; border-radius: 50%; background: white; font-weight: 850; }
 .wizard-steps button > span:last-child { display: grid; min-width: 0; }
@@ -2342,6 +2471,7 @@ async function createSharedChallenge(title: string, description: string) {
   .wizard-home__choice--preset.is-collapsed,
   .wizard-home__choice--custom { min-height: 0; }
   .wizard-steps { grid-template-columns: 1fr 10px 1fr 10px 1fr 10px 1fr; padding: 13px 6px; }
+  .wizard-steps--falc { grid-template-columns: 1fr 10px 1fr 10px 1fr; }
   .wizard-steps__line { width: 8px; margin: 0; }
   .wizard-steps__line::after { width: 5px; height: 5px; }
   .wizard-steps button { justify-content: center; padding: 5px 2px; }

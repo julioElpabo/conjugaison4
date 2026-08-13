@@ -26,6 +26,7 @@ const props = defineProps<{
   conjugationLiteraryCitation?: ExerciseQuestion['literaryCitation']
   conjugationExampleLoading?: boolean
   revealPrefilledOptions?: boolean
+  falcMode?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -240,10 +241,10 @@ watch(passiveAvailable, (available) => {
 <template>
   <section
     class="builder-card options-card"
-    :class="{ 'options-card--grid': gridLayout, 'options-card--revealing': prefilledRevealRunning }"
+    :class="{ 'options-card--grid': gridLayout, 'options-card--revealing': prefilledRevealRunning, 'options-card--falc': falcMode }"
     :aria-labelledby="optionsTitleId"
   >
-    <div class="builder-card__header">
+    <div v-if="!falcMode" class="builder-card__header">
       <div>
         <p class="builder-card__eyebrow">{{ eyebrow ?? 'Étape 3' }}</p>
         <h2 :id="optionsTitleId">{{ ui('Mes options') }}</h2>
@@ -269,7 +270,7 @@ watch(passiveAvailable, (available) => {
           </label>
         </div>
 
-        <fieldset class="option-fieldset option-group-card option-group-card--pronouns">
+        <fieldset v-if="!falcMode" class="option-fieldset option-group-card option-group-card--pronouns">
           <legend>{{ ui('Pronoms') }}</legend>
           <label class="check-row">
             <input
@@ -294,7 +295,7 @@ watch(passiveAvailable, (available) => {
           </label>
         </fieldset>
 
-        <fieldset class="option-fieldset option-group-card option-group-card--exercise">
+        <fieldset v-if="!falcMode" class="option-fieldset option-group-card option-group-card--exercise">
           <legend>{{ ui('Type d’exercice') }}</legend>
           <div class="segmented-control">
             <label>
@@ -357,6 +358,7 @@ watch(passiveAvailable, (available) => {
         </fieldset>
 
         <fieldset
+          v-if="!falcMode"
           class="option-fieldset option-group-card option-group-card--voice voice-mode-fieldset"
           :class="{ 'option-group-card--disabled': exerciseKind !== 'conjugation' }"
           :disabled="exerciseKind !== 'conjugation'"
@@ -408,6 +410,7 @@ watch(passiveAvailable, (available) => {
       </div>
 
       <div
+        v-if="!falcMode"
         class="complement-options"
         data-tour="options-complements"
         :class="{
@@ -461,7 +464,7 @@ watch(passiveAvailable, (available) => {
     </div>
 
     <div
-      v-if="gridLayout && (conjugationExampleLoading || hasConjugationExample)"
+      v-if="!falcMode && gridLayout && (conjugationExampleLoading || hasConjugationExample)"
       class="conjugation-example"
       data-tour="options-preview"
       :class="{ 'conjugation-example--wide': exerciseKind === 'tense-identification' }"
@@ -532,6 +535,45 @@ watch(passiveAvailable, (available) => {
 
 <style scoped>
 .options-card--grid { padding-bottom: 0; }
+.options-card--falc {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.options-card--falc .options-main-column { padding: 0; }
+.options-card--falc .option-group-card--questions {
+  width: max-content;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.options-card--falc .question-count-field {
+  grid-template-columns: max-content 86px;
+  grid-template-rows: 64px;
+  gap: 22px;
+}
+.options-card--falc .question-count-field > span:first-child {
+  height: auto;
+  margin: 0;
+  color: var(--brand-dark);
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: .035em;
+  line-height: normal;
+}
+.options-card--falc .question-count-field > input {
+  width: 86px;
+  height: 58px;
+  font-size: 1.3rem;
+  font-weight: 750;
+}
 .options-layout--columns { display: grid; padding: 24px; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-flow: row dense; grid-auto-rows: 1px; column-gap: 16px; }
 .options-layout--columns > .options-fields { display: contents; }
 .options-layout--columns > .options-fields > .options-main-column { display: contents; }
@@ -634,6 +676,13 @@ watch(passiveAvailable, (available) => {
   .options-layout--columns { padding: 19px 14px; grid-template-columns: 1fr; }
   .options-layout--columns :is(.option-group-card, .complement-options, .conjugation-example) { grid-column: 1; }
   .options-layout--columns > .conjugation-example { padding: 15px; }
+}
+@media (max-width: 420px) {
+  .options-card--falc .question-count-field {
+    grid-template-columns: max-content 72px;
+    gap: 12px;
+  }
+  .options-card--falc .question-count-field > input { width: 72px; }
 }
 @media (min-width: 621px) and (max-width: 820px) {
   .options-layout--columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }

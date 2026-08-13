@@ -6,6 +6,7 @@ import { matchingVerbs, normalizeVerbSearch } from '~~/shared/utils/verb-search'
 const props = defineProps<{
   verbs: Verb[]
   selectedIds: number[]
+  falcMode?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -91,7 +92,7 @@ function addFirstSuggestion() {
     </div>
 
     <div class="verb-search">
-      <label for="verb-search-input">{{ ui('Ajouter un verbe') }}</label>
+      <label for="verb-search-input">{{ ui('Écris un verbe pour l’ajouter') }}</label>
       <div class="verb-search__control">
         <input
           id="verb-search-input"
@@ -137,7 +138,7 @@ function addFirstSuggestion() {
     </div>
 
     <div class="selection-toolbar">
-      <p>{{ selectedVerbs.length ? ui('Verbes retenus') : ui('Aucun verbe sélectionné') }}</p>
+      <p v-if="!falcMode">{{ selectedVerbs.length ? ui('Verbes retenus') : ui('Aucun verbe sélectionné') }}</p>
       <button
         v-if="selectedVerbs.length"
         class="text-button text-button--danger"

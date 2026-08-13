@@ -15,6 +15,7 @@ const props = defineProps<{
   verbs: Verb[]
   selectedIds: number[]
   pastSimplePronouns: PastSimplePronouns
+  falcMode?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -25,6 +26,7 @@ const emit = defineEmits<{
 }>()
 
 const selectedSet = computed(() => new Set(props.selectedIds))
+const advancedModesOpen = ref(false)
 // La restriction il / ils ne concerne que le passé simple.
 const isPastSimple = (tense: Tense) => tense.name.toLocaleLowerCase('fr') === 'passé simple'
 
@@ -70,6 +72,14 @@ const groups = computed(() => props.modes
     }
   })
   .filter(group => group.tenses.length > 0))
+const basicModeNames = new Set(['indicatif', 'impératif'])
+const basicGroups = computed(() => groups.value.filter(group => basicModeNames.has(group.mode.name.toLocaleLowerCase('fr'))))
+const advancedGroups = computed(() => groups.value.filter(group => !basicModeNames.has(group.mode.name.toLocaleLowerCase('fr'))))
+const visibleGroups = computed(() => props.falcMode
+  ? [...basicGroups.value, ...(advancedModesOpen.value ? advancedGroups.value : [])]
+  : groups.value)
+
+watch(() => props.falcMode, () => { advancedModesOpen.value = false })
 
 let exampleRequest = 0
 async function loadExamples() {
@@ -109,13 +119,13 @@ watch(exampleRequestKey, () => void loadExamples())
       </span>
     </div>
 
-    <div class="selection-toolbar">
+    <div v-if="!falcMode" class="selection-toolbar">
       <button class="text-button" type="button" @click="emit('selectAll')"> {{ ui('Tout cocher') }} </button>
       <button class="text-button text-button--danger" type="button" @click="emit('clear')"> {{ ui('Tout décocher') }} </button>
     </div>
 
     <div class="tense-groups">
-      <section v-for="group in groups" :key="group.mode.id" class="tense-group" role="group" :aria-labelledby="`tense-mode-${group.mode.id}`">
+      <section v-for="group in visibleGroups" :key="group.mode.id" class="tense-group" role="group" :aria-labelledby="`tense-mode-${group.mode.id}`">
         <h3 :id="`tense-mode-${group.mode.id}`" class="tense-group__title">{{ uiLabel(group.mode.name) }}</h3>
         <div class="tense-group__columns" :class="{ 'tense-group__columns--single': group.columns.length === 1 }">
           <div v-for="(column, columnIndex) in group.columns" :key="columnIndex" class="tense-group__column">
@@ -197,6 +207,15 @@ watch(exampleRequestKey, () => void loadExamples())
           </div>
         </div>
       </section>
+      <button
+        v-if="falcMode && advancedGroups.length"
+        class="advanced-modes-button"
+        type="button"
+        :aria-expanded="advancedModesOpen"
+        @click="advancedModesOpen = !advancedModesOpen"
+      >
+        {{ advancedModesOpen ? ui('Masquer les autres modes') : ui('Voir les autres modes') }}
+      </button>
     </div>
   </section>
 </template>
@@ -210,6 +229,18 @@ watch(exampleRequestKey, () => void loadExamples())
 }
 
 .tense-group__columns--single { grid-template-columns: 1fr; }
+
+.advanced-modes-button {
+  justify-self: center;
+  padding: 7px 12px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  cursor: pointer;
+  font-size: .8rem;
+  font-weight: 750;
+}
 
 .tense-group__trailing {
   margin-top: 10px;

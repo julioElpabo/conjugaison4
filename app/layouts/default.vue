@@ -10,10 +10,14 @@ const route = useRoute()
 const { applyTheme } = useColorTheme()
 const { track } = useSiteAnalytics()
 const isDark = ref(false)
+const falcMode = useState<boolean>('falc-mode', () => false)
+const falcConfirmationOpen = ref(false)
+const falcCancelButton = ref<HTMLButtonElement | null>(null)
 const localizedSectionPath = computed(() => route.path.replace(/^\/(?:fr|de|en|it|es)(?=\/|$)/u, '') || '/')
 const isAdminRoute = computed(() => localizedSectionPath.value === '/admin' || localizedSectionPath.value.startsWith('/admin/'))
 const embeddedConsultation = computed(() => localizedSectionPath.value === '/consulter' && route.query.embed === 'challenge')
 const themeSwitchTitle = computed(() => isDark.value ? ui('Activer le mode clair') : ui('Activer le mode sombre'))
+const falcSwitchTitle = computed(() => falcMode.value ? ui('Désactiver le mode FALC') : ui('Activer le mode FALC'))
 const languageOptions = computed<{ value: AppLocale, label: string, flag: string }[]>(() => [
   { value: 'fr', label: ui('Français'), flag: '🇫🇷' },
   { value: 'de', label: ui('Allemand'), flag: '🇩🇪' },
@@ -32,12 +36,13 @@ const isActualHomePage = computed(() => isExerciseLandingPage.value && wizardAtH
 const activeLanguageOption = computed(() => languageOptions.value.find(option => option.value === interfaceLocale.value) ?? languageOptions.value[0]!)
 const learnerMenu = ref<HTMLDetailsElement | null>(null)
 const learnerLanguageMenuOpen = ref(false)
-const tabletLanguageMenu = ref<HTMLElement | null>(null)
-const tabletLanguageMenuOpen = ref(false)
+const headerLanguageMenu = ref<HTMLElement | null>(null)
+const headerLanguageMenuOpen = ref(false)
 const learnerLoggingOut = ref(false)
 const contactDialog = ref<{ open: () => void } | null>(null)
 const mountainBackdrop = ref<HTMLElement | null>(null)
 let parallaxFrame = 0
+let headerLanguageCloseTimer: number | undefined
 const mountainSvg = mountainSvgSource
   .replace('<g id="OBJECTS" style="clip-path:url(#clippath)">', '<g id="OBJECTS" style="clip-path:url(#clippath)"><g class="mountain-layer mountain-layer--far">')
   .replace('<path d="m1271.29 743.13', '</g><g class="mountain-layer mountain-layer--middle"><path d="m1271.29 743.13')
@@ -56,8 +61,32 @@ await checkSession()
 watch(() => route.fullPath, () => {
   learnerMenu.value?.removeAttribute('open')
   learnerLanguageMenuOpen.value = false
-  tabletLanguageMenuOpen.value = false
+  closeHeaderLanguageMenu()
 })
+
+function cancelHeaderLanguageMenuClose() {
+  if (headerLanguageCloseTimer === undefined) return
+  window.clearTimeout(headerLanguageCloseTimer)
+  headerLanguageCloseTimer = undefined
+}
+
+function closeHeaderLanguageMenu() {
+  cancelHeaderLanguageMenuClose()
+  headerLanguageMenuOpen.value = false
+}
+
+function scheduleHeaderLanguageMenuClose() {
+  cancelHeaderLanguageMenuClose()
+  headerLanguageCloseTimer = window.setTimeout(() => {
+    headerLanguageCloseTimer = undefined
+    headerLanguageMenuOpen.value = false
+  }, 1_000)
+}
+
+function toggleHeaderLanguageMenu() {
+  cancelHeaderLanguageMenuClose()
+  headerLanguageMenuOpen.value = !headerLanguageMenuOpen.value
+}
 
 function closeLearnerMenuOnOutside(event: PointerEvent) {
   const target = event.target
@@ -66,13 +95,18 @@ function closeLearnerMenuOnOutside(event: PointerEvent) {
     learnerMenu.value.removeAttribute('open')
     learnerLanguageMenuOpen.value = false
   }
-  if (tabletLanguageMenuOpen.value && tabletLanguageMenu.value && !tabletLanguageMenu.value.contains(target)) {
-    tabletLanguageMenuOpen.value = false
+  if (headerLanguageMenuOpen.value && headerLanguageMenu.value && !headerLanguageMenu.value.contains(target)) {
+    closeHeaderLanguageMenu()
   }
+}
+
+function handleFalcConfirmationKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape' && falcConfirmationOpen.value) closeFalcConfirmation()
 }
 
 onMounted(() => {
   document.addEventListener('pointerdown', closeLearnerMenuOnOutside)
+  document.addEventListener('keydown', handleFalcConfirmationKeydown)
   window.addEventListener('scroll', updateMountainParallax, { passive: true })
   window.addEventListener('resize', updateMountainParallax, { passive: true })
   updateMountainParallax()
@@ -83,13 +117,16 @@ onMounted(() => {
     isDark.value = activeTheme === 'dark'
     applyTheme(activeTheme, false)
   }
+  falcMode.value = document.documentElement.dataset.falcMode === 'true'
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', closeLearnerMenuOnOutside)
+  document.removeEventListener('keydown', handleFalcConfirmationKeydown)
   window.removeEventListener('scroll', updateMountainParallax)
   window.removeEventListener('resize', updateMountainParallax)
   window.cancelAnimationFrame(parallaxFrame)
+  cancelHeaderLanguageMenuClose()
 })
 
 function updateMountainParallax() {
@@ -127,6 +164,27 @@ function toggleTheme() {
   updateTheme()
 }
 
+function toggleFalcMode() {
+  if (falcMode.value) {
+    setFalcMode(false)
+    return
+  }
+  falcConfirmationOpen.value = true
+  nextTick(() => falcCancelButton.value?.focus())
+}
+
+function setFalcMode(enabled: boolean) {
+  falcMode.value = enabled
+  falcConfirmationOpen.value = false
+  document.documentElement.dataset.falcMode = enabled ? 'true' : 'false'
+  localStorage.setItem('conjugaison.falc-mode', String(enabled))
+  track('feature_selected', { feature: 'accessibility.falc', item: enabled ? 'enabled' : 'disabled' })
+}
+
+function closeFalcConfirmation() {
+  falcConfirmationOpen.value = false
+}
+
 function trackLanguageChoice(locale: AppLocale, source: string) {
   if (locale === interfaceLocale.value) return false
   track('language_tested', {
@@ -144,9 +202,16 @@ function selectPublicLanguage(locale: AppLocale, source: string) {
   track('feature_completed', { feature: 'language.change', item: locale })
 }
 
-function selectTabletLanguage(locale: AppLocale) {
-  tabletLanguageMenuOpen.value = false
-  selectPublicLanguage(locale, 'tablet-menu')
+function selectHeaderLanguage(locale: AppLocale) {
+  closeHeaderLanguageMenu()
+  selectPublicLanguage(locale, 'header-menu')
+}
+
+function closeHeaderLanguageMenuOnFocusOut(event: FocusEvent) {
+  const nextTarget = event.relatedTarget
+  if (!(nextTarget instanceof Node) || !headerLanguageMenu.value?.contains(nextTarget)) {
+    closeHeaderLanguageMenu()
+  }
 }
 
 function requestHomeReset() {
@@ -211,7 +276,7 @@ const activeSection = computed(() => {
 </script>
 
 <template>
-  <div class="site-shell" :class="{ 'site-shell--embedded': embeddedConsultation }">
+  <div class="site-shell" :class="{ 'site-shell--embedded': embeddedConsultation, 'site-shell--falc': falcMode }">
     <div
       ref="mountainBackdrop"
       class="mountain-backdrop"
@@ -223,60 +288,10 @@ const activeSection = computed(() => {
         <div class="site-header__identity">
           <NuxtLink class="site-brand" :to="localePath('/')">
             <strong>TATITOTU</strong>
-            <span>{{ ui('Défis de conjugaison') }}</span>
+            <span v-if="isActualHomePage">{{ ui('Défis de conjugaison') }}</span>
           </NuxtLink>
-          <div v-if="isActualHomePage" class="language-selector language-selector--tablet" role="group" :aria-label="ui('Langue de l’interface')">
-            <button
-              v-for="option in languageOptions"
-              :key="option.value"
-              type="button"
-              :class="{ 'is-active': interfaceLocale === option.value }"
-              :aria-label="option.label"
-              :aria-pressed="interfaceLocale === option.value"
-              :title="option.label"
-              @click="selectPublicLanguage(option.value, 'homepage-tablet')"
-            >
-              <span aria-hidden="true">{{ option.flag }}</span>
-            </button>
-          </div>
-          <div
-            v-else
-            ref="tabletLanguageMenu"
-            class="tablet-language-menu"
-            :class="{ 'is-open': tabletLanguageMenuOpen }"
-          >
-            <button
-              class="tablet-language-menu__trigger"
-              type="button"
-              :aria-label="ui('Langue de l’interface')"
-              :aria-expanded="tabletLanguageMenuOpen"
-              :title="activeLanguageOption.label"
-              @click="tabletLanguageMenuOpen = !tabletLanguageMenuOpen"
-            >
-              <span aria-hidden="true">{{ activeLanguageOption.flag }}</span>
-            </button>
-            <div
-              class="language-selector tablet-language-menu__panel"
-              role="group"
-              :aria-label="ui('Langue de l’interface')"
-              :aria-hidden="!tabletLanguageMenuOpen"
-            >
-              <button
-                v-for="option in languageOptions"
-                :key="option.value"
-                type="button"
-                :class="{ 'is-active': interfaceLocale === option.value }"
-                :aria-label="option.label"
-                :aria-pressed="interfaceLocale === option.value"
-                :title="option.label"
-                @click="selectTabletLanguage(option.value)"
-              >
-                <span aria-hidden="true">{{ option.flag }}</span>
-              </button>
-            </div>
-          </div>
           <button
-            v-if="!isActualHomePage"
+            v-if="!isActualHomePage && !falcMode"
             class="site-tour-button"
             type="button"
             :title="tourCopy.navLabel"
@@ -303,6 +318,74 @@ const activeSection = computed(() => {
           </NuxtLink>
           <NuxtLink :to="localePath('/consulter')" :class="{ 'is-active': activeSection === 'consulter' }" :aria-current="activeSection === 'consulter' ? 'page' : undefined"> {{ ui('Consulter') }} </NuxtLink>
           <NuxtLink :to="localePath('/apprendre')" :class="{ 'is-active': activeSection === 'apprendre' }" :aria-current="activeSection === 'apprendre' ? 'page' : undefined"> {{ ui('Apprendre') }} </NuxtLink>
+          <div class="display-mode-switches">
+            <button
+              class="theme-switch"
+              :class="{ 'is-dark': isDark }"
+              type="button"
+              role="switch"
+              :aria-checked="isDark"
+              :aria-label="themeSwitchTitle"
+              :title="themeSwitchTitle"
+              @click="toggleTheme"
+            >
+              <span class="theme-switch__icon theme-switch__icon--moon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M20.1 15.4A8.7 8.7 0 0 1 8.6 3.9 8.8 8.8 0 1 0 20.1 15.4Z" /></svg>
+              </span>
+              <span class="theme-switch__icon theme-switch__icon--sun" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+              </span>
+            </button>
+            <button
+              class="falc-switch"
+              data-tour="falc-mode"
+              :class="{ 'is-active': falcMode }"
+              type="button"
+              role="switch"
+              :aria-checked="falcMode"
+              :aria-label="falcSwitchTitle"
+              :title="falcSwitchTitle"
+              @click="toggleFalcMode"
+            >{{ ui('FALC') }}</button>
+          <div
+            ref="headerLanguageMenu"
+            class="header-language-menu"
+            :class="{ 'is-open': headerLanguageMenuOpen }"
+            @mouseenter="cancelHeaderLanguageMenuClose"
+            @mouseleave="scheduleHeaderLanguageMenuClose"
+            @focusout="closeHeaderLanguageMenuOnFocusOut"
+          >
+            <button
+              class="header-language-menu__trigger"
+              type="button"
+              :aria-label="ui('Langue de l’interface')"
+              :aria-expanded="headerLanguageMenuOpen"
+              :title="activeLanguageOption.label"
+              @click="toggleHeaderLanguageMenu"
+            >
+              <span aria-hidden="true">{{ activeLanguageOption.flag }}</span>
+            </button>
+            <div
+              class="language-selector header-language-menu__panel"
+              role="group"
+              :aria-label="ui('Langue de l’interface')"
+              :aria-hidden="!headerLanguageMenuOpen"
+            >
+              <button
+                v-for="option in languageOptions"
+                :key="option.value"
+                type="button"
+                :class="{ 'is-active': interfaceLocale === option.value }"
+                :aria-label="option.label"
+                :aria-pressed="interfaceLocale === option.value"
+                :title="option.label"
+                @click="selectHeaderLanguage(option.value)"
+              >
+                <span aria-hidden="true">{{ option.flag }}</span>
+              </button>
+            </div>
+          </div>
+          </div>
           <details v-if="learner" ref="learnerMenu" class="learner-menu" data-tour="learner-account">
             <summary>
               <span class="learner-menu__avatar" aria-hidden="true">{{ learnerDisplayName.charAt(0) }}</span>
@@ -374,37 +457,6 @@ const activeSection = computed(() => {
             </div>
           </details>
           <template v-else>
-            <button
-              class="theme-switch"
-              :class="{ 'is-dark': isDark }"
-              type="button"
-              role="switch"
-              :aria-checked="isDark"
-              :aria-label="themeSwitchTitle"
-              :title="themeSwitchTitle"
-              @click="toggleTheme"
-            >
-              <span class="theme-switch__icon theme-switch__icon--moon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M20.1 15.4A8.7 8.7 0 0 1 8.6 3.9 8.8 8.8 0 1 0 20.1 15.4Z" /></svg>
-              </span>
-              <span class="theme-switch__icon theme-switch__icon--sun" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
-              </span>
-            </button>
-            <div class="language-selector language-selector--navigation" role="group" :aria-label="ui('Langue de l’interface')">
-              <button
-                v-for="option in languageOptions"
-                :key="option.value"
-                type="button"
-                :class="{ 'is-active': interfaceLocale === option.value }"
-                :aria-label="option.label"
-                :aria-pressed="interfaceLocale === option.value"
-                :title="option.label"
-                @click="selectPublicLanguage(option.value, 'navigation')"
-              >
-                <span aria-hidden="true">{{ option.flag }}</span>
-              </button>
-            </div>
             <NuxtLink class="site-login-button" data-tour="learner-account" :to="localePath('/signin')">
               {{ ui('Connexion') }}
             </NuxtLink>
@@ -424,6 +476,18 @@ const activeSection = computed(() => {
         <NuxtLink :to="localePath('/admin')">{{ ui('Administration') }}</NuxtLink>
       </div>
     </footer>
+    <Teleport to="body">
+      <div v-if="falcConfirmationOpen" class="falc-confirmation" @click.self="closeFalcConfirmation">
+        <section role="dialog" aria-modal="true" aria-labelledby="falc-confirmation-title" aria-describedby="falc-confirmation-description">
+          <h2 id="falc-confirmation-title">{{ ui('Mode FALC') }}</h2>
+          <p id="falc-confirmation-description">{{ ui('Le mode FALC affiche seulement l’essentiel. Les mots et les étapes sont plus simples.') }}</p>
+          <div class="falc-confirmation__actions">
+            <button ref="falcCancelButton" type="button" class="falc-confirmation__cancel" @click="closeFalcConfirmation">← {{ ui('Pas maintenant') }}</button>
+            <button type="button" class="falc-confirmation__confirm" @click="setFalcMode(true)">{{ ui('Mode FALC') }} →</button>
+          </div>
+        </section>
+      </div>
+    </Teleport>
     <ContactDialog v-if="!embeddedConsultation" ref="contactDialog" />
   </div>
 </template>
@@ -555,8 +619,8 @@ body::after {
     transition: none;
   }
 
-  .tablet-language-menu__panel,
-  .tablet-language-menu__panel button {
+  .header-language-menu__panel,
+  .header-language-menu__panel button {
     transition: none !important;
   }
 }
@@ -769,12 +833,82 @@ a {
   border-radius: 999px;
 }
 
-.language-selector--tablet {
-  display: none;
+.header-language-menu {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
 }
 
-.tablet-language-menu {
-  display: none;
+.header-language-menu.is-open::after {
+  position: absolute;
+  z-index: 9;
+  top: calc(100% - 4px);
+  right: -12px;
+  width: max(100%, 12.5rem);
+  height: 60px;
+  content: "";
+}
+
+.header-language-menu__trigger {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  place-items: center;
+  color: white;
+  border: 1px solid rgb(255 255 255 / 22%);
+  border-radius: 50%;
+  background: #455b6c;
+  cursor: pointer;
+}
+
+.header-language-menu__trigger:hover,
+.header-language-menu.is-open .header-language-menu__trigger {
+  background: #526a7c;
+}
+
+.header-language-menu__trigger:focus-visible {
+  outline: 3px solid rgb(112 210 232 / 55%);
+  outline-offset: 2px;
+}
+
+.header-language-menu__trigger > span {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.header-language-menu__panel {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 7px);
+  right: 0;
+  width: max-content;
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: 0 8px 22px rgb(14 31 43 / 28%);
+  transform: translateY(-8px);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    visibility 0s linear 180ms;
+}
+
+.header-language-menu__panel button {
+  transform: translateY(-4px);
+  transition: transform 180ms ease;
+}
+
+.header-language-menu.is-open .header-language-menu__panel {
+  visibility: visible;
+  pointer-events: auto;
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0s;
+}
+
+.header-language-menu.is-open .header-language-menu__panel button {
+  transform: translateY(0);
 }
 
 .language-selector button {
@@ -1087,6 +1221,55 @@ a {
 .theme-switch.is-dark .theme-switch__icon--moon { opacity: 0; }
 .theme-switch.is-dark .theme-switch__icon--sun { opacity: 1; }
 
+.display-mode-switches { display: inline-flex; align-items: center; gap: 5px; }
+
+.falc-switch {
+  min-height: 1.75rem;
+  padding: 3px 9px;
+  color: white;
+  border: 1px solid rgb(255 255 255 / 28%);
+  border-radius: 999px;
+  background: #596b78;
+  cursor: pointer;
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .035em;
+}
+
+.falc-switch:hover { background: #657987; }
+.falc-switch.is-active { color: #173d49; border-color: #b8e5ef; background: #dff7fb; }
+.falc-switch:focus-visible { outline: 3px solid rgb(112 210 232 / 55%); outline-offset: 3px; }
+
+.falc-confirmation {
+  position: fixed;
+  z-index: 5000;
+  inset: 0;
+  display: grid;
+  padding: 20px;
+  place-items: center;
+  background: rgb(18 38 46 / 62%);
+  backdrop-filter: blur(5px);
+}
+
+.falc-confirmation > section {
+  width: min(520px, 100%);
+  padding: clamp(28px, 6vw, 44px);
+  color: var(--ink);
+  border: 2px solid #9bcbd5;
+  border-radius: 24px;
+  background: white;
+  box-shadow: 0 28px 80px rgb(8 28 35 / 38%);
+  text-align: center;
+}
+
+.falc-confirmation h2 { margin: 0; color: var(--brand-dark); font-size: clamp(1.8rem, 5vw, 2.4rem); }
+.falc-confirmation p { margin: 18px 0 30px; color: #43566a; font-size: 1.2rem; font-weight: 650; line-height: 1.55; }
+.falc-confirmation__actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+.falc-confirmation__actions button { min-height: 52px; padding: 12px 18px; border-radius: 12px; cursor: pointer; font: inherit; font-weight: 850; }
+.falc-confirmation__cancel { color: var(--brand-dark); border: 2px solid #b7cacd; background: white; }
+.falc-confirmation__confirm { color: white; border: 2px solid var(--brand); background: var(--brand); }
+.falc-confirmation__actions button:focus-visible { outline: 4px solid rgb(229 139 43 / 50%); outline-offset: 3px; }
+
 .site-navigation .site-login-button {
   min-height: 2rem;
   padding: 5px 12px;
@@ -1169,80 +1352,6 @@ a {
     white-space: nowrap;
   }
 
-  .language-selector--tablet {
-    display: inline-flex;
-    margin-left: auto;
-  }
-
-  .tablet-language-menu {
-    position: relative;
-    display: block;
-    margin-left: auto;
-  }
-
-  .tablet-language-menu__trigger {
-    display: grid;
-    width: 34px;
-    height: 34px;
-    padding: 0;
-    place-items: center;
-    border: 1px solid rgb(255 255 255 / 22%);
-    border-radius: 50%;
-    background: #455b6c;
-    cursor: pointer;
-    list-style: none;
-  }
-
-  .tablet-language-menu__trigger:focus-visible {
-    outline: 3px solid rgb(112 210 232 / 55%);
-    outline-offset: 2px;
-  }
-
-  .tablet-language-menu__trigger > span {
-    font-size: 1.05rem;
-    line-height: 1;
-  }
-
-  .tablet-language-menu__panel {
-    position: absolute;
-    z-index: 10;
-    top: 0;
-    right: calc(100% + 7px);
-    width: max-content;
-    overflow: hidden;
-    visibility: hidden;
-    pointer-events: none;
-    clip-path: inset(0 0 0 100% round 999px);
-    transform: translateX(20px);
-    transform-origin: right center;
-    box-shadow: 0 8px 22px rgb(14 31 43 / 28%);
-    transition:
-      clip-path 300ms cubic-bezier(.22, 1, .36, 1),
-      transform 300ms cubic-bezier(.22, 1, .36, 1),
-      visibility 0s linear 300ms;
-  }
-
-  .tablet-language-menu__panel button {
-    transform: translateX(150px);
-    transition: transform 300ms cubic-bezier(.22, 1, .36, 1);
-  }
-
-  .tablet-language-menu.is-open .tablet-language-menu__panel {
-    visibility: visible;
-    pointer-events: auto;
-    clip-path: inset(0 round 999px);
-    transform: translateX(0);
-    transition-delay: 0s;
-  }
-
-  .tablet-language-menu.is-open .tablet-language-menu__panel button {
-    transform: translateX(0);
-  }
-
-  .language-selector--navigation {
-    display: none;
-  }
-
   .site-tour-button {
     width: 34px;
     height: 34px;
@@ -1321,9 +1430,13 @@ a {
   }
 
   .theme-switch {
-    grid-column: 1;
     justify-self: start;
     margin-left: 0;
+  }
+
+  .display-mode-switches {
+    grid-column: 1 / -1;
+    justify-self: start;
   }
 
   .site-navigation .site-login-button {

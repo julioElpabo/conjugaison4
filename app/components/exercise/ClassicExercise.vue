@@ -26,6 +26,7 @@ import {
 } from '~~/shared/utils/learner-error-diagnostics'
 
 const { interfaceLocale, ui, uiLabel } = useLanguagePreferences()
+const falcMode = useState<boolean>('falc-mode', () => false)
 
 const props = defineProps<{
   questions: ExerciseQuestion[]
@@ -77,6 +78,18 @@ const exerciseAnalyticsMetadata = computed(() => ({
 useDialogFocus(dialog, handleEscapeClose, answerInput)
 
 const currentQuestion = computed(() => props.questions[currentIndex.value])
+const falcOnlyIndicative = computed(() => props.questions.length > 0 && props.questions.every(question => (
+  normalizedGrammarChoice(question.mode) === 'indicatif'
+)))
+const falcQuestionPrompt = computed(() => {
+  const question = currentQuestion.value
+  if (!question) return ''
+  const tense = uiLabel(question.temps || '')
+  const tenseAndMode = falcOnlyIndicative.value || !question.mode
+    ? tense
+    : `${tense} (${uiLabel(question.mode)})`
+  return [question.pronom, question.infinitif, tenseAndMode].filter(Boolean).join(' | ')
+})
 const currentSubjectMustBeTyped = computed(() => Boolean(
   currentQuestion.value && props.exerciseKind === 'conjugation'
   && conjugationRequiresSubjectPronoun(currentQuestion.value),
@@ -394,10 +407,10 @@ function submitAnswer() {
   const { result, shouldRetry, missingSubjectPronoun } = evaluateExerciseAnswer(
     answer.value,
     question,
-    retryAlreadyOffered.value,
+    falcMode.value || retryAlreadyOffered.value,
     !isIdentificationExercise.value,
   )
-  if (missingSubjectPronoun) {
+  if (missingSubjectPronoun && !falcMode.value) {
     missingPronounMessageVisible.value = true
     retryMessageVisible.value = false
     detectedErrorDetails.value = []
@@ -639,13 +652,15 @@ onBeforeUnmount(() => {
       <section
         ref="exercise-dialog"
         class="exercise-dialog"
+        :class="{ 'exercise-dialog--falc': falcMode }"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="exercise-title"
+        :aria-label="falcMode ? ui('Exercice de conjugaison') : undefined"
+        :aria-labelledby="falcMode ? undefined : 'exercise-title'"
         tabindex="-1"
       >
-        <header class="exercise-header">
-          <div>
+        <header class="exercise-header" :class="{ 'exercise-header--falc': falcMode }">
+          <div v-if="!falcMode">
             <p class="dialog-kicker">{{ ui('Questionnaire') }}</p>
             <h2 id="exercise-title">
               {{ isFinished ? ui('Résultats') : ui('Question {current} sur {total}', { current: displayedQuestionNumber, total: displayedQuestionCount }) }}
@@ -671,7 +686,29 @@ onBeforeUnmount(() => {
           <p v-if="exerciseKind === 'tense-identification' || exerciseKind === 'mode-identification'" class="question-instruction">
             {{ currentQuestion.instruction }}
           </p>
-          <template v-if="exerciseKind === 'conjugation' && currentQuestion.complement">
+          <template v-if="falcMode && exerciseKind === 'conjugation'">
+            <p class="falc-question-prompt">{{ falcQuestionPrompt }}</p>
+            <form class="falc-answer-form" @submit.prevent="feedback === 'idle' ? submitAnswer() : nextQuestion()">
+              <input
+                id="exercise-answer"
+                ref="answer-input"
+                v-model="answer"
+                type="text"
+                autocomplete="off"
+                :placeholder="currentSubjectMustBeTyped ? currentAnswerPlaceholder : undefined"
+                :aria-label="ui('Forme conjuguée de {verb}', { verb: currentQuestion.infinitif || '' })"
+                :disabled="feedback !== 'idle'"
+                :class="{ 'is-valid': feedback === 'correct', 'is-invalid': feedback === 'incorrect' }"
+                :aria-invalid="feedback === 'incorrect'"
+                :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : undefined"
+              >
+              <button v-if="feedback === 'idle'" class="primary-button" type="submit" :disabled="!answer.trim()">{{ ui('Vérifier') }}</button>
+              <button v-else class="primary-button" type="submit">
+                {{ currentIndex === questions.length - 1 ? ui('Voir mes résultats') : ui('Question suivante') }}
+              </button>
+            </form>
+          </template>
+          <template v-else-if="exerciseKind === 'conjugation' && currentQuestion.complement">
             <p class="question-context" :aria-label="ui('Contexte grammatical')">
               <span>Verbe : <strong>{{ currentQuestion.infinitif }}</strong></span>
               <i aria-hidden="true">|</i>
@@ -790,7 +827,7 @@ onBeforeUnmount(() => {
           </div>
 
           <form
-            v-if="!(exerciseKind === 'conjugation' && currentQuestion.complement)"
+            v-if="!falcMode && !(exerciseKind === 'conjugation' && currentQuestion.complement)"
             class="answer-form"
             :class="{ 'is-awaiting-retry': retryMessageVisible || missingPronounMessageVisible }"
             @submit.prevent="feedback === 'idle' ? submitAnswer() : nextQuestion()"
@@ -861,35 +898,43 @@ onBeforeUnmount(() => {
             :class="`answer-feedback--${feedback}`"
             aria-live="polite"
           >
-            <strong>{{ feedback === 'correct' ? ui('Bravo, c’est juste !') : ui('Pas tout à fait.') }}</strong>
-            <p v-if="feedback === 'incorrect'">{{ ui('La réponse attendue était :') }} <strong>{{ correction }}</strong>.</p>
-            <p v-else-if="alternativeCorrections.length"> {{ ui('On peut aussi répondre :') }} <strong>{{ alternativeText }}</strong>{{ alternativePunctuation }}
-            </p>
-            <p v-else>{{ ui('Tu peux passer à la question suivante.') }}</p>
+            <template v-if="falcMode">
+              <strong v-if="feedback === 'correct'" class="falc-feedback-correct"><span aria-hidden="true">✓</span> {{ ui('Juste !') }}</strong>
+              <template v-else>
+                <strong>{{ ui('Faux.') }}</strong>
+                <p>{{ ui('Bonne réponse :') }} <strong>{{ correction }}</strong></p>
+              </template>
+            </template>
+            <template v-else>
+              <strong>{{ feedback === 'correct' ? ui('Bravo, c’est juste !') : ui('Pas tout à fait.') }}</strong>
+              <p v-if="feedback === 'incorrect'">{{ ui('La réponse attendue était :') }} <strong>{{ correction }}</strong>.</p>
+              <p v-else-if="alternativeCorrections.length"> {{ ui('On peut aussi répondre :') }} <strong>{{ alternativeText }}</strong>{{ alternativePunctuation }}</p>
+              <p v-else>{{ ui('Tu peux passer à la question suivante.') }}</p>
+            </template>
 
-            <LearnerErrorFeedback v-if="detectedErrorDetails.length" :details="detectedErrorDetails" />
+            <LearnerErrorFeedback v-if="!falcMode && detectedErrorDetails.length" :details="detectedErrorDetails" />
 
-            <aside v-if="futureSimpleConfusion" class="grammar-reminder">
+            <aside v-if="!falcMode && futureSimpleConfusion" class="grammar-reminder">
               <strong>{{ ui('Futur proche ou futur simple ?') }}</strong>
               <p>{{ ui('Ta conjugaison est correcte au futur simple, mais la question demande le futur proche. Au futur simple, le verbe est conjugué en un seul mot (« tu mangeras »). Au futur proche, on utilise « aller » au présent suivi de l’infinitif (« tu vas manger »).') }}</p>
             </aside>
 
-            <aside v-else-if="conjugationConfusionText" class="grammar-reminder">
+            <aside v-else-if="!falcMode && conjugationConfusionText" class="grammar-reminder">
               <strong>{{ ui('Attention au temps et au mode') }}</strong>
               <p>{{ conjugationConfusionText }}</p>
             </aside>
 
-            <aside v-if="impossibleSingularEndingText" class="grammar-reminder">
+            <aside v-if="!falcMode && impossibleSingularEndingText" class="grammar-reminder">
               <strong>{{ ui('Attention à la personne') }}</strong>
               <p>{{ impossibleSingularEndingText }}</p>
             </aside>
 
-            <aside v-if="auxiliaryErrorText" class="grammar-reminder">
+            <aside v-if="!falcMode && auxiliaryErrorText" class="grammar-reminder">
               <strong>{{ ui('Attention à l’auxiliaire') }}</strong>
               <p>{{ auxiliaryErrorText }}</p>
             </aside>
 
-            <aside v-if="agreementReminder || agreementError" class="grammar-reminder">
+            <aside v-if="!falcMode && (agreementReminder || agreementError)" class="grammar-reminder">
               <strong>{{ ui('Rappel de la règle') }}</strong>
 
               <p>{{ agreementExplanation }}</p>
@@ -962,20 +1007,27 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="dialog-actions exercise-results__actions">
-            <button class="secondary-button exercise-result-action" type="button" @click="shareSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faArrowUpFromBracket" /></span>{{ ui('Partager mon bilan') }}</button>
-            <button class="secondary-button exercise-result-action" type="button" @click="printSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faPrint" /></span>{{ ui('Imprimer mon bilan') }}</button>
+            <button v-if="!falcMode" class="secondary-button exercise-result-action" type="button" @click="shareSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faArrowUpFromBracket" /></span>{{ ui('Partager mon bilan') }}</button>
+            <button v-if="!falcMode" class="secondary-button exercise-result-action" type="button" @click="printSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faPrint" /></span>{{ ui('Imprimer mon bilan') }}</button>
             <button class="primary-button exercise-result-action" type="button" @click="restart"><span aria-hidden="true">↻</span>{{ ui('Recommencer') }}</button>
             <button class="secondary-button exercise-results__close" type="button" @click="emit('close')">{{ ui('Fermer') }}</button>
           </div>
         </div>
 
         <div v-if="closeConfirmationOpen" class="exercise-close-confirmation" @click.self="cancelClose">
-          <section role="alertdialog" aria-modal="true" aria-labelledby="close-confirmation-title" aria-describedby="close-confirmation-description">
-            <span class="exercise-close-confirmation__icon" aria-hidden="true">?</span>
-            <h3 id="close-confirmation-title">{{ ui('Quitter l’exercice ?') }}</h3>
-            <p id="close-confirmation-description">{{ ui('Ta progression actuelle sera perdue.') }}</p>
+          <section
+            role="alertdialog"
+            aria-modal="true"
+            :class="{ 'exercise-close-confirmation__dialog--falc': falcMode }"
+            :aria-label="falcMode ? ui('Quitter l’exercice') : undefined"
+            :aria-labelledby="falcMode ? undefined : 'close-confirmation-title'"
+            :aria-describedby="falcMode ? undefined : 'close-confirmation-description'"
+          >
+            <span v-if="!falcMode" class="exercise-close-confirmation__icon" aria-hidden="true">?</span>
+            <h3 v-if="!falcMode" id="close-confirmation-title">{{ ui('Quitter l’exercice ?') }}</h3>
+            <p v-if="!falcMode" id="close-confirmation-description">{{ ui('Ta progression actuelle sera perdue.') }}</p>
             <div class="exercise-close-confirmation__actions">
-              <button ref="keep-exercise-button" class="secondary-button" type="button" @click="cancelClose">{{ ui('Continuer l’exercice') }}</button>
+              <button ref="keep-exercise-button" class="secondary-button" type="button" @click="cancelClose">{{ falcMode ? ui('Continuer') : ui('Continuer l’exercice') }}</button>
               <button class="primary-button exercise-close-confirmation__leave" type="button" @click="confirmClose">{{ ui('Quitter') }}</button>
             </div>
           </section>

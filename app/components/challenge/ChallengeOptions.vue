@@ -569,7 +569,7 @@ watch(passiveAvailable, (available) => {
 .question-count-field > span:first-child { display: flex; height: 46px; align-items: center; line-height: 1.2; }
 .question-count-field > input { width: 62px; min-width: 0; height: 46px; padding-inline: 8px 5px; align-self: center; text-align: center; }
 .field-hint { display: block; margin-top: 6px; color: var(--muted); font-size: .72rem; }
-.conjugation-example { margin: 10px 24px 28px; padding: 20px; overflow: hidden; border: 2px dashed #aa94c5; border-radius: 20px; background: linear-gradient(145deg, #f6f2fb, #f0eaf8 62%, #eae2f4); box-shadow: 0 12px 30px rgb(77 55 105 / 12%); color: var(--brand-dark); }
+.conjugation-example { margin: 10px 24px 28px; padding: 20px; overflow: hidden; border: 2px solid #aa94c5; border-radius: 20px; background: linear-gradient(145deg, #f6f2fb, #f0eaf8 62%, #eae2f4); box-shadow: 0 12px 30px rgb(77 55 105 / 12%); color: var(--brand-dark); }
 .options-layout--columns > .conjugation-example { border-radius: 15px; }
 .conjugation-example__header { display: grid; min-height: 62px; margin-bottom: 17px; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 13px; }
 .conjugation-example__preview-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; color: #695284; background: #e3d9f0; box-shadow: 0 0 0 6px rgb(105 82 132 / 8%); font-size: 1.05rem; }

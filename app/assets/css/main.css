@@ -235,7 +235,7 @@ body.dialog-open {
 }
 
 .action-button--share {
-  border: 2px dashed rgb(105 82 132 / 42%);
+  border: 2px solid rgb(105 82 132 / 42%);
   background: rgb(246 242 251 / 58%);
   color: var(--ink);
 }
@@ -2191,6 +2191,8 @@ body.dialog-open {
 
 .result-consult-verb {
   display: inline-flex;
+  font-family: inherit;
+  cursor: pointer;
   margin-top: 10px;
   padding: 7px 10px;
   border: 1px solid var(--brand);
@@ -2689,7 +2691,7 @@ body.dialog-open {
 
 .print-question-completion__dots {
   min-width: 20mm;
-  border-bottom: 1px dotted #333;
+  border-bottom: 1px solid #333;
   transform: translateY(-1mm);
 }
 

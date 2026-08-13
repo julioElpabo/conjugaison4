@@ -7,6 +7,7 @@ import type { CoachEvent, CoachMedia, CoachMessageContext, CoachProfile } from '
 import type { AnswerComparison } from '~~/shared/utils/answer-difference'
 import LearnerErrorFeedback from '~/components/exercise/LearnerErrorFeedback.vue'
 import ShareExerciseSummaryDialog from '~/components/exercise/ShareExerciseSummaryDialog.vue'
+import VerbConsultationModal from '~/components/exercise/VerbConsultationModal.vue'
 import {
   conjugationRequiresSubjectPronoun,
   findConjugationConfusions,
@@ -105,6 +106,7 @@ interface ChatMessage {
   identificationPrompt?: boolean
   consultVerbId?: number
   consultVerbLabel?: string
+  answerLine?: boolean
 }
 
 const currentIndex = ref(0)
@@ -226,6 +228,13 @@ const hasIncorrectMedia = computed(() => props.coach.assignments.some(assignment
 
 function normalizedInfinitive(value?: string | null) {
   return (value || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLocaleLowerCase('fr')
+}
+
+function answerLineParts(value: string) {
+  return value.split(/(_{2,})/gu).filter(Boolean).map(text => ({
+    text,
+    isLine: /^_{2,}$/u.test(text),
+  }))
 }
 
 function openVerbConsultation(id: number) {
@@ -730,7 +739,13 @@ async function askCurrentQuestion() {
     omitIndicativeMode: omitIndicativeMode.value,
   })
   await addCoachText(bubbles.formula, undefined, true)
-  if (bubbles.sentence) await addCoachText(bubbles.sentence, undefined, true)
+  if (bubbles.sentence) {
+    await enqueueCoachBubble(() => ({
+      text: bubbles.sentence!,
+      emphasis: true,
+      answerLine: true,
+    }))
+  }
   posingQuestion.value = false
   restartHelpReminderTimer()
   scrollThreadToMessage(firstQuestionMessageId)
@@ -1174,6 +1189,14 @@ onBeforeUnmount(() => {
               <small v-if="message.answerComparison.mode === 'full'" class="answer-comparison__guidance"> {{ ui('Les deux réponses sont très différentes : observe d’abord la construction complète.') }} </small>
             </div>
             <span
+              v-else-if="message.text && message.author === 'coach' && message.answerLine"
+              class="chat-message__text chat-message__text--emphasis"
+            ><span
+              v-for="(part, partIndex) in answerLineParts(message.text)"
+              :key="partIndex"
+              :class="{ 'chat-answer-line': part.isLine }"
+            >{{ part.text }}</span></span>
+            <span
               v-else-if="message.text && message.author === 'coach'"
               class="chat-message__text"
               :class="{ 'chat-message__text--emphasis': message.emphasis }"
@@ -1407,6 +1430,7 @@ onBeforeUnmount(() => {
       <VerbConsultationModal
         v-if="consultationVerbId !== null"
         :verb-id="consultationVerbId"
+        :header-color="coach.themeColor"
         @close="closeVerbConsultation"
       />
     </div>
@@ -2034,6 +2058,12 @@ onBeforeUnmount(() => {
 
 .chat-message__text--emphasis {
   font-weight: 800;
+}
+
+.chat-answer-line {
+  color: #aab9bf;
+  font-weight: 400;
+  letter-spacing: -.035em;
 }
 
 .chat-literary-citation { display: grid; max-width: 100%; margin: 0; gap: 7px; }
@@ -2672,7 +2702,7 @@ onBeforeUnmount(() => {
   min-height: 38px;
   grid-column: 1 / -1;
   color: #174f61;
-  border-style: dashed;
+  border-style: solid;
   background: #f5fafb;
 }
 

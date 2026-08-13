@@ -2,12 +2,12 @@ import type { ExerciseQuestion } from '../types/conjugation'
 import { SUBJECT_PRONOUN_PLACEHOLDER } from './answer'
 import { withoutIndicativeMode } from './chat-mode-display'
 
-export const SIMPLE_TENSE_BLANK = '........................'
+export const SIMPLE_TENSE_BLANK = '________________________'
 export const SUBJECT_PRONOUN_BLANK = SUBJECT_PRONOUN_PLACEHOLDER
-export const COMPOUND_TENSE_GAP = '\u00a0\u00a0\u00a0\u00a0'
-export const COMPOUND_TENSE_BLANK = `............${COMPOUND_TENSE_GAP}.......................`
+export const COMPOUND_TENSE_GAP = '\u00a0'.repeat(8)
+export const COMPOUND_TENSE_BLANK = `____________${COMPOUND_TENSE_GAP}_______________________`
 export const PRESENT_GERUND_BLANK = COMPOUND_TENSE_BLANK
-export const PAST_GERUND_BLANK = `............${COMPOUND_TENSE_GAP}............${COMPOUND_TENSE_GAP}.......................`
+export const PAST_GERUND_BLANK = `____________${COMPOUND_TENSE_GAP}____________${COMPOUND_TENSE_GAP}_______________________`
 
 export interface CoachQuestionBubbles {
   formula: string
@@ -65,7 +65,7 @@ function expectedAnswerWordCount(question: ExerciseQuestion) {
 function answerBlank(wordCount: number) {
   if (wordCount <= 1) return SIMPLE_TENSE_BLANK
   return Array.from({ length: wordCount }, (_, index) => (
-    index === wordCount - 1 ? '.......................' : '............'
+    index === wordCount - 1 ? '_______________________' : '____________'
   )).join(COMPOUND_TENSE_GAP)
 }
 
@@ -124,7 +124,7 @@ export function coachQuestionBubbles(question: ExerciseQuestion, options: { omit
   const hasBlank = /(?:…|\.{3,})/u.test(sentenceTemplate)
   const normalizedSentenceTemplate = sentenceTemplate.replace(/\s+/gu, ' ').trim()
   const blankPrefix = answerPronoun
-    ? answerWordCount > 1 ? COMPOUND_TENSE_GAP : ' '
+    ? COMPOUND_TENSE_GAP
     : ''
   let sentence = hasBlank
     ? normalizedSentenceTemplate.replace(/\s*(?:…|\.{3,})/gu, `${blankPrefix}${blank}`).trimStart()

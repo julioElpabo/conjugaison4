@@ -27,7 +27,8 @@ export interface AnswerValidationResult {
 }
 
 const SUBJECT_PRONOUNS = new Set(['je', 'tu', 'il', 'elle', 'iel', 'on', 'nous', 'vous', 'ils', 'elles', 'iels'])
-export const SUBJECT_PRONOUN_PLACEHOLDER = '......'
+export const SUBJECT_PRONOUN_PLACEHOLDER = '______'
+const ANSWER_PLACEHOLDER_GAP = '\u00a0'.repeat(8)
 
 export interface ImpossibleSingularEndingReminder {
   personGroup: 'first-or-second-singular' | 'third-singular'
@@ -185,7 +186,7 @@ export function conjugationRequiresSubjectPronoun(question: { pronom?: string, m
     && !['imperatif', 'infinitif', 'participe', 'gerondif'].includes(mode)
 }
 
-/** Produit un groupe de pointillés pour chaque mot que l’élève doit saisir. */
+/** Produit un trait continu pour chaque mot que l’élève doit saisir. */
 export function conjugationAnswerPlaceholder(question: {
   conjugaison1?: string
   pronom?: string
@@ -195,12 +196,12 @@ export function conjugationAnswerPlaceholder(question: {
   const prefixWords = prefix.split(/\s+/u).filter(Boolean)
   const conjugationWords = (question.conjugaison1 || '').trim().split(/\s+/u).filter(Boolean)
   const prefixBlanks = prefixWords.map((_, index) => (
-    index === prefixWords.length - 1 ? SUBJECT_PRONOUN_PLACEHOLDER : '............'
+    index === prefixWords.length - 1 ? SUBJECT_PRONOUN_PLACEHOLDER : '____________'
   ))
   const conjugationBlanks = conjugationWords.map((_, index) => (
-    index === conjugationWords.length - 1 ? '........................' : '............'
+    index === conjugationWords.length - 1 ? '________________________' : '____________'
   ))
-  return [...prefixBlanks, ...conjugationBlanks].join(' ')
+  return [...prefixBlanks, ...conjugationBlanks].join(ANSWER_PLACEHOLDER_GAP)
 }
 
 /** Valide une réponse de conjugaison finie en exigeant le pronom sujet demandé. */

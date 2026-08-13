@@ -12,7 +12,7 @@ import {
 import { formatConjugationQuestion } from '../server/services/question-formatter.ts'
 
 function blankGroups(sentence) {
-  return sentence.match(/\.{3,}/gu) || []
+  return sentence.match(/_{3,}/gu) || []
 }
 
 describe('questions affichées dans le chat', () => {
@@ -78,8 +78,8 @@ describe('questions affichées dans le chat', () => {
       isCompound: true,
     })
 
-    assert.equal(COMPOUND_TENSE_GAP, '\u00a0'.repeat(4))
-    assert.equal(COMPOUND_TENSE_BLANK, `............${COMPOUND_TENSE_GAP}.......................`)
+    assert.equal(COMPOUND_TENSE_GAP, '\u00a0'.repeat(8))
+    assert.equal(COMPOUND_TENSE_BLANK, `____________${COMPOUND_TENSE_GAP}_______________________`)
     assert.equal(result.sentence, `${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK}`)
   })
 
@@ -123,7 +123,7 @@ describe('questions affichées dans le chat', () => {
       conjugaison1: 'prend',
     })
 
-    assert.equal(result.sentence, `${SUBJECT_PRONOUN_BLANK} ${SIMPLE_TENSE_BLANK}`)
+    assert.equal(result.sentence, `${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${SIMPLE_TENSE_BLANK}`)
     assert.deepEqual(blankGroups(result.sentence), [SUBJECT_PRONOUN_BLANK, SIMPLE_TENSE_BLANK])
   })
 
@@ -149,8 +149,8 @@ describe('questions affichées dans le chat', () => {
       conjugaison1: 'vais me réveiller',
     })
 
-    assert.deepEqual(blankGroups(simple.sentence), [SUBJECT_PRONOUN_BLANK, '............', '.......................'])
-    assert.deepEqual(blankGroups(pronominal.sentence), [SUBJECT_PRONOUN_BLANK, '............', '............', '.......................'])
+    assert.deepEqual(blankGroups(simple.sentence), [SUBJECT_PRONOUN_BLANK, '____________', '_______________________'])
+    assert.deepEqual(blankGroups(pronominal.sentence), [SUBJECT_PRONOUN_BLANK, '____________', '____________', '_______________________'])
   })
 
   it('réserve quatre champs pour « nous nous sommes aperçus »', () => {
@@ -166,9 +166,9 @@ describe('questions affichées dans le chat', () => {
 
     assert.deepEqual(blankGroups(result.sentence), [
       SUBJECT_PRONOUN_BLANK,
-      '............',
-      '............',
-      '.......................',
+      '____________',
+      '____________',
+      '_______________________',
     ])
   })
 
@@ -197,7 +197,7 @@ describe('questions affichées dans le chat', () => {
     })
 
     assert.equal(result.sentence, PRESENT_GERUND_BLANK)
-    assert.deepEqual(blankGroups(result.sentence), ['............', '.......................'])
+    assert.deepEqual(blankGroups(result.sentence), ['____________', '_______________________'])
   })
 
   it('affiche trois champs séparés pour « en ayant pris » au gérondif passé', () => {
@@ -211,7 +211,7 @@ describe('questions affichées dans le chat', () => {
     })
 
     assert.equal(result.sentence, PAST_GERUND_BLANK)
-    assert.deepEqual(blankGroups(result.sentence), ['............', '............', '.......................'])
+    assert.deepEqual(blankGroups(result.sentence), ['____________', '____________', '_______________________'])
   })
 
   it('compte aussi les mots d’une forme pronominale comme « en se lavant »', () => {
@@ -224,7 +224,7 @@ describe('questions affichées dans le chat', () => {
       conjugaison1: 'En se lavant',
     })
 
-    assert.deepEqual(blankGroups(result.sentence), ['............', '............', '.......................'])
+    assert.deepEqual(blankGroups(result.sentence), ['____________', '____________', '_______________________'])
   })
 
   it('garde les deux champs verbaux et ajoute celui du pronom pour « il a pris »', () => {
@@ -239,7 +239,7 @@ describe('questions affichées dans le chat', () => {
     })
 
     assert.equal(result.sentence, `${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK}`)
-    assert.deepEqual(blankGroups(result.sentence), [SUBJECT_PRONOUN_BLANK, '............', '.......................'])
+    assert.deepEqual(blankGroups(result.sentence), [SUBJECT_PRONOUN_BLANK, '____________', '_______________________'])
   })
 
   it('introduit le subjonctif présent avec « Il faut que »', () => {
@@ -253,7 +253,7 @@ describe('questions affichées dans le chat', () => {
       conjugaison1: 'prenne',
     })
 
-    assert.equal(result.sentence, `Il faut que ${SUBJECT_PRONOUN_BLANK} ${SIMPLE_TENSE_BLANK}`)
+    assert.equal(result.sentence, `Il faut que ${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${SIMPLE_TENSE_BLANK}`)
   })
 
   it('introduit le subjonctif passé avec « Il faut qu’il » et deux champs', () => {
@@ -281,7 +281,7 @@ describe('questions affichées dans le chat', () => {
       conjugaison1: 'prît',
     })
 
-    assert.equal(result.sentence, `Il fallait que ${SUBJECT_PRONOUN_BLANK} ${SIMPLE_TENSE_BLANK}`)
+    assert.equal(result.sentence, `Il fallait que ${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${SIMPLE_TENSE_BLANK}`)
   })
 
   it('introduit le subjonctif plus-que-parfait avec « Il fallait que »', () => {

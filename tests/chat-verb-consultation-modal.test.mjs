@@ -13,13 +13,35 @@ describe('consultation du verbe depuis le chat', () => {
     ])
 
     assert.match(chat, /<VerbConsultationModal/u)
+    assert.match(chat, /import VerbConsultationModal from '~\/components\/exercise\/VerbConsultationModal\.vue'/u)
     assert.match(chat, /@consult-verb="openVerbConsultation"/u)
     assert.match(chat, /@click\.stop="openVerbConsultation\(message\.consultVerbId\)"/u)
     assert.match(chat, /@click\.stop="openVerbConsultation\(item\.verbId\)"/u)
+    assert.match(chat, /:header-color="coach\.themeColor"/u)
     assert.doesNotMatch(help, /target="_blank"/u)
     assert.match(help, /emit\('consultVerb', consultVerbId\)/u)
-    assert.match(modal, /embed=challenge/u)
-    assert.match(modal, /event\.source !== frame\.value\?\.contentWindow/u)
+    assert.match(modal, /\/api\/conjugaisons\/\$\{id\}/u)
+    assert.match(modal, /\/api\/catalogue/u)
+    assert.match(modal, /v-for="group in groups"/u)
+    assert.doesNotMatch(modal, /<iframe/u)
+    assert.doesNotMatch(modal, /ui\('Conjugaison complète'\)/u)
+    assert.match(modal, /<strong>\{\{ ui\('Consulter le verbe'\) \}\}<\/strong>/u)
+  })
+
+  it('ouvre aussi la consultation du mode classique dans la même modale', async () => {
+    const classic = await read('../app/components/exercise/ClassicExercise.vue')
+
+    assert.match(classic, /<VerbConsultationModal/u)
+    assert.match(classic, /import VerbConsultationModal from '~\/components\/exercise\/VerbConsultationModal\.vue'/u)
+    assert.match(classic, /@click="openVerbConsultation\(attempt\.question\.verbeId\)"/u)
+    assert.doesNotMatch(classic, /target="_blank"/u)
+  })
+
+  it('conserve la protection anti-iframe du reste du site', async () => {
+    const security = await read('../server/middleware/security.ts')
+
+    assert.match(security, /frame-ancestors 'none'/u)
+    assert.match(security, /'X-Frame-Options': 'DENY'/u)
   })
 
   it('ferme la modale avec Retour au défi en haut comme en bas', async () => {

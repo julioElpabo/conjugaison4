@@ -409,6 +409,27 @@ const uiMessages = {
   "Me d\xE9connecter": { de: "Abmelden", en: "Sign out", it: "Disconnettermi", es: "Cerrar sesi\xF3n" },
   "Activer le mode clair": { de: "Hellen Modus aktivieren", en: "Switch to light mode", it: "Attiva la modalit\xE0 chiara", es: "Activar el modo claro" },
   "Activer le mode sombre": { de: "Dunklen Modus aktivieren", en: "Switch to dark mode", it: "Attiva la modalit\xE0 scura", es: "Activar el modo oscuro" },
+  "Activer le mode FALC": { de: "Einfachen Modus aktivieren", en: "Enable easy-read mode", it: "Attiva la modalit\xE0 facile da leggere", es: "Activar el modo de lectura f\xE1cil" },
+  "D\xE9sactiver le mode FALC": { de: "Einfachen Modus deaktivieren", en: "Disable easy-read mode", it: "Disattiva la modalit\xE0 facile da leggere", es: "Desactivar el modo de lectura f\xE1cil" },
+  "FALC": { de: "Leichte Sprache", en: "Easy to read", it: "Facile lettura", es: "Lectura f\xE1cil" },
+  "Mode FALC": { de: "Einfacher Modus", en: "Easy-read mode", it: "Modalit\xE0 facile da leggere", es: "Modo de lectura f\xE1cil" },
+  "Le mode FALC affiche seulement l\u2019essentiel. Les mots et les \xE9tapes sont plus simples.": { de: "Der einfache Modus zeigt nur das Wichtigste. W\xF6rter und Schritte sind einfacher.", en: "Easy-read mode shows only what matters. Words and steps are simpler.", it: "La modalit\xE0 facile mostra solo l\u2019essenziale. Le parole e i passaggi sono pi\xF9 semplici.", es: "El modo de lectura f\xE1cil muestra solo lo esencial. Las palabras y los pasos son m\xE1s sencillos." },
+  "Pas maintenant": { de: "Nicht jetzt", en: "Not now", it: "Non ora", es: "Ahora no" },
+  "J\u2019ai un code": { de: "Ich habe einen Code", en: "I have a code", it: "Ho un codice", es: "Tengo un c\xF3digo" },
+  "Choisir un d\xE9fi": { de: "Eine \xDCbung ausw\xE4hlen", en: "Choose a challenge", it: "Scegli un esercizio", es: "Elegir un ejercicio" },
+  "Cr\xE9er mon exercice": { de: "Meine \xDCbung erstellen", en: "Create my exercise", it: "Crea il mio esercizio", es: "Crear mi ejercicio" },
+  "\xC9cris le code du d\xE9fi": { de: "Gib den \xDCbungscode ein", en: "Enter the challenge code", it: "Scrivi il codice dell\u2019esercizio", es: "Escribe el c\xF3digo del ejercicio" },
+  "Ouvrir le d\xE9fi": { de: "\xDCbung \xF6ffnen", en: "Open challenge", it: "Apri l\u2019esercizio", es: "Abrir el ejercicio" },
+  "Choisis un d\xE9fi": { de: "W\xE4hle eine \xDCbung", en: "Choose a challenge", it: "Scegli un esercizio", es: "Elige un ejercicio" },
+  "\xC9tape pr\xE9c\xE9dente": { de: "Vorheriger Schritt", en: "Previous step", it: "Passaggio precedente", es: "Paso anterior" },
+  "\xC9tape suivante": { de: "N\xE4chster Schritt", en: "Next step", it: "Passaggio successivo", es: "Paso siguiente" },
+  "Commencer": { de: "Starten", en: "Start", it: "Inizia", es: "Empezar" },
+  "Exercice de conjugaison": { de: "Konjugations\xFCbung", en: "Conjugation exercise", it: "Esercizio di coniugazione", es: "Ejercicio de conjugaci\xF3n" },
+  "Juste !": { de: "Richtig!", en: "Correct!", it: "Giusto!", es: "\xA1Correcto!" },
+  "Faux.": { de: "Falsch.", en: "Incorrect.", it: "Sbagliato.", es: "Incorrecto." },
+  "Bonne r\xE9ponse :": { de: "Richtige Antwort:", en: "Correct answer:", it: "Risposta corretta:", es: "Respuesta correcta:" },
+  "Voir les autres modes": { de: "Andere Modi anzeigen", en: "Show other moods", it: "Mostra gli altri modi", es: "Ver otros modos" },
+  "Masquer les autres modes": { de: "Andere Modi ausblenden", en: "Hide other moods", it: "Nascondi gli altri modi", es: "Ocultar otros modos" },
   "Langue de l\u2019interface": { de: "Sprache der Benutzeroberfl\xE4che", en: "Interface language", it: "Lingua dell\u2019interfaccia", es: "Idioma de la interfaz" },
   "Fran\xE7ais": { de: "Franz\xF6sisch", en: "French", it: "Francese", es: "Franc\xE9s" },
   "Allemand": { de: "Deutsch", en: "German", it: "Tedesco", es: "Alem\xE1n" },
@@ -664,6 +685,7 @@ const uiMessages = {
   "Mes verbes": { de: "Meine Verben", en: "My verbs", it: "I miei verbi", es: "Mis verbos" },
   "Mes temps": { de: "Meine Zeitformen", en: "My tenses", it: "I miei tempi", es: "Mis tiempos" },
   "Ajouter un verbe": { de: "Verb hinzuf\xFCgen", en: "Add a verb", it: "Aggiungi un verbo", es: "A\xF1adir un verbo" },
+  "\xC9cris un verbe pour l\u2019ajouter": { de: "Schreibe ein Verb, um es hinzuzuf\xFCgen", en: "Type a verb to add it", it: "Scrivi un verbo per aggiungerlo", es: "Escribe un verbo para a\xF1adirlo" },
   "Ex. aller, \xEAtre, finir\u2026": { de: "Z. B. aller, \xEAtre, finir\u2026", en: "E.g. aller, \xEAtre, finir\u2026", it: "Es. aller, \xEAtre, finir\u2026", es: "P. ej. aller, \xEAtre, finir\u2026" },
   "Ajouter le premier verbe propos\xE9": { de: "Erstes vorgeschlagenes Verb hinzuf\xFCgen", en: "Add the first suggested verb", it: "Aggiungi il primo verbo suggerito", es: "A\xF1adir el primer verbo sugerido" },
   "Verbes propos\xE9s": { de: "Vorgeschlagene Verben", en: "Suggested verbs", it: "Verbi suggeriti", es: "Verbos sugeridos" },
@@ -883,6 +905,7 @@ const uiMessages = {
   "Choisis les verbes": { de: "W\xE4hle die Verben", en: "Choose the verbs", it: "Scegli i verbi", es: "Elige los verbos" },
   "Verbes du d\xE9fi": { de: "Verben der \xDCbung", en: "Challenge verbs", it: "Verbi dell\u2019esercizio", es: "Verbos del ejercicio" },
   "Choisis les modes et les temps": { de: "W\xE4hle Modi und Zeitformen", en: "Choose moods and tenses", it: "Scegli modi e tempi", es: "Elige modos y tiempos" },
+  "Choisis les temps": { de: "W\xE4hle die Zeitformen", en: "Choose the tenses", it: "Scegli i tempi", es: "Elige los tiempos" },
   "\xC0 choisir": { de: "Auszuw\xE4hlen", en: "To choose", it: "Da scegliere", es: "Por elegir" },
   "{count} choisi": { de: "{count} ausgew\xE4hlt", en: "{count} selected", it: "{count} selezionato", es: "{count} seleccionado" },
   "{count} choisis": { de: "{count} ausgew\xE4hlt", en: "{count} selected", it: "{count} selezionati", es: "{count} seleccionados" },
@@ -1565,7 +1588,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-CSyr-Y4B.mjs')
+    component: () => import('./users-CmwMiP5H.mjs')
   },
   {
     name: "modes-mode-temps",
@@ -1580,7 +1603,7 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-DdBan9Xm.mjs')
+    component: () => import('./_code_-Cutn87M-.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1600,7 +1623,7 @@ const _routes = [
   {
     name: "apprendre",
     path: "/apprendre",
-    component: () => import('./apprendre-BPTEGMxZ.mjs')
+    component: () => import('./apprendre-D6ogLyP_.mjs')
   },
   {
     name: "consulter",
@@ -1615,7 +1638,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-DB2MM_Ls.mjs')
+    component: () => import('./exercices-de-conjugaison-DfklYqdd.mjs')
   },
   {
     name: "mon-compte",
@@ -1626,12 +1649,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-Di2-gCi7.mjs')
+    component: () => import('./my-page-BfXLkOhK.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-B12zeeSa.mjs')
+    component: () => import('./nouveau-defi-DfpK0Uk7.mjs')
   },
   {
     name: "signin",
@@ -1641,7 +1664,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-DUkDzWQ9.mjs')
+    component: () => import('./index-cabgoNTV.mjs')
   },
   {
     name: "mode-tense",
@@ -1726,7 +1749,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-CSyr-Y4B.mjs')
+    component: () => import('./users-CmwMiP5H.mjs')
   },
   {
     name: "localized-modes-mode-temps",
@@ -1741,7 +1764,7 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-DdBan9Xm.mjs')
+    component: () => import('./_code_-Cutn87M-.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1761,7 +1784,7 @@ const _routes = [
   {
     name: "localized-apprendre",
     path: "/:locale(fr|de|en|it|es)/apprendre",
-    component: () => import('./apprendre-BPTEGMxZ.mjs')
+    component: () => import('./apprendre-D6ogLyP_.mjs')
   },
   {
     name: "localized-consulter",
@@ -1776,7 +1799,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-DB2MM_Ls.mjs')
+    component: () => import('./exercices-de-conjugaison-DfklYqdd.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1787,12 +1810,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-Di2-gCi7.mjs')
+    component: () => import('./my-page-BfXLkOhK.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-B12zeeSa.mjs')
+    component: () => import('./nouveau-defi-DfpK0Uk7.mjs')
   },
   {
     name: "localized-signin",
@@ -1802,7 +1825,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-DUkDzWQ9.mjs')
+    component: () => import('./index-cabgoNTV.mjs')
   },
   {
     name: "localized-mode-tense",
@@ -2415,7 +2438,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-2uj_KM_e.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-Mj1GSfoT.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

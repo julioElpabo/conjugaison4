@@ -5,6 +5,7 @@ import { modeTensePages } from '~~/shared/data/mode-tense-pages'
 
 const { ui, localePath, interfaceLocale } = useLanguagePreferences()
 const { track } = useSiteAnalytics()
+const falcMode = useState<boolean>('falc-mode', () => false)
 useHead(() => ({
   title: ui('Apprendre la conjugaison'),
   meta: [{ name: 'description', content: ui('Une synthèse claire des règles essentielles de la conjugaison française.') }],
@@ -53,6 +54,9 @@ onMounted(() => track('feature_exposed', { feature: 'learn.content' }))
 
 <template>
   <div class="learning-page">
+    <LearningFalcLearningPage v-if="falcMode" />
+
+    <template v-else>
     <header class="learning-hero">
       <p class="learning-eyebrow">{{ ui('Les règles essentielles') }}</p>
       <h1>{{ ui('Apprendre la conjugaison française') }}</h1>
@@ -212,6 +216,7 @@ onMounted(() => track('feature_exposed', { feature: 'learn.content' }))
         <div><NuxtLink :to="localePath('/consulter')">{{ ui('Consulter un verbe') }}</NuxtLink><NuxtLink class="is-primary" :to="localePath('/exercices-de-conjugaison')">{{ ui('S’exercer') }}</NuxtLink></div>
       </section>
     </main>
+    </template>
 
   </div>
 </template>

@@ -15,21 +15,21 @@ import {
 } from '../shared/utils/answer.ts'
 
 describe('conjugationAnswerPlaceholder', () => {
-  it('affiche un groupe de pointillés pour chaque mot à saisir', () => {
+  it('affiche un trait continu pour chaque mot à saisir', () => {
     assert.equal(
       conjugationAnswerPlaceholder({ pronom: 'nous', conjugaison1: 'nous sommes aperçus' }),
-      '...... ............ ............ ........................',
+      `______${'\u00a0'.repeat(8)}____________${'\u00a0'.repeat(8)}____________${'\u00a0'.repeat(8)}________________________`,
     )
     assert.equal(
       conjugationAnswerPlaceholder({ pronom: 'il', conjugaison1: 'vient' }),
-      '...... ........................',
+      `______${'\u00a0'.repeat(8)}________________________`,
     )
   })
 
   it('compte aussi les mots du préfixe d’une proposition relative', () => {
     assert.equal(
       conjugationAnswerPlaceholder({ saisiePrefixe: 'que vous', conjugaison1: 'avez mangées' }),
-      '............ ...... ............ ........................',
+      `____________${'\u00a0'.repeat(8)}______${'\u00a0'.repeat(8)}____________${'\u00a0'.repeat(8)}________________________`,
     )
   })
 })

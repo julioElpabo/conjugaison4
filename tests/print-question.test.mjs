@@ -19,7 +19,7 @@ describe('questions imprimables', () => {
         reponsesPourCorrige: ['La mission est abandonnée par quelqu’un.'],
         voice: 'passive',
       }, 'conjugation'),
-      'abandonner | présent (indicatif) : La mission ................................. par quelqu’un',
+      'abandonner | présent (indicatif) : La mission _________________________________ par quelqu’un',
     )
   })
 
@@ -31,7 +31,7 @@ describe('questions imprimables', () => {
         reponses: [],
         reponsesPourCorrige: [],
       }, 'conjugation'),
-      'danser | présent (conditionnel) : elles ................................. sa ronde',
+      'danser | présent (conditionnel) : elles _________________________________ sa ronde',
     )
   })
 
@@ -45,7 +45,7 @@ describe('questions imprimables', () => {
       }, 'conjugation'),
       {
         label: 'danser | présent (conditionnel) :',
-        completion: 'elles ................................. sa ronde',
+        completion: 'elles _________________________________ sa ronde',
         completionPrefix: 'elles',
         completionSuffix: 'sa ronde',
         fillBlank: true,
@@ -63,7 +63,7 @@ describe('questions imprimables', () => {
         reponses: [],
         reponsesPourCorrige: [],
       }, 'conjugation'),
-      "s'affaiblir | présent (indicatif) : je .................................",
+      "s'affaiblir | présent (indicatif) : je _________________________________",
     )
   })
 
@@ -82,7 +82,7 @@ describe('questions imprimables', () => {
       }, 'conjugation'),
       {
         label: 'vous | payer | imparfait (indicatif) :',
-        completion: '.................................',
+        completion: '_________________________________',
         completionPrefix: '',
         completionSuffix: '',
         fillBlank: true,
@@ -106,7 +106,7 @@ describe('questions imprimables', () => {
     }, 'conjugation')
 
     assert.equal(parts.completionPrefix, "j'")
-    assert.equal(parts.completion, "j' ................................. ce morceau")
+    assert.equal(parts.completion, "j' _________________________________ ce morceau")
   })
 
   it('conserve je devant un h aspiré', () => {
@@ -139,7 +139,7 @@ describe('questions imprimables', () => {
     }, 'conjugation')
 
     assert.equal(parts.completionSuffix, 'une pomme !')
-    assert.equal(parts.completion, '................................. une pomme !')
+    assert.equal(parts.completion, '_________________________________ une pomme !')
   })
 
   it('conserve la consigne pour l’identification du temps', () => {
@@ -210,7 +210,7 @@ describe('questions imprimables', () => {
     }
     assert.deepEqual(printableQuestionParts(question, 'conjugation'), {
       label: 'aimer | présent (gérondif) :',
-      completion: 'en ......................................',
+      completion: 'en ______________________________________',
       completionPrefix: 'en',
       completionSuffix: '',
       fillBlank: true,
@@ -232,7 +232,7 @@ describe('questions imprimables', () => {
     }
     assert.deepEqual(printableQuestionParts(question, 'conjugation'), {
       label: 'décaler | présent (participe) :',
-      completion: '.................................',
+      completion: '_________________________________',
       completionPrefix: '',
       completionSuffix: '',
       fillBlank: true,
@@ -256,7 +256,7 @@ describe('questions imprimables', () => {
       }, 'conjugation'),
       {
         label: 'lire | présent (subjonctif) :',
-        completion: 'que je ................................. ces lettres',
+        completion: 'que je _________________________________ ces lettres',
         completionPrefix: 'que je',
         completionSuffix: 'ces lettres',
         fillBlank: true,
@@ -280,7 +280,7 @@ describe('questions imprimables', () => {
     assert.equal(parts.completionPrefix, "les lettres que j'")
   })
 
-  it('place un complément long sous une ligne pointillée plus longue', () => {
+  it('place un complément long sous une ligne continue plus longue', () => {
     const parts = printableQuestionParts({
       titre: 'ranger',
       consigne: 'il … nos livres par ordre alphabétique d’auteurs | ranger | futur (indicatif)',

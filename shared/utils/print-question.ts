@@ -1,8 +1,8 @@
 import type { ExerciseQuestion } from '../types/conjugation'
 import { conjugationRequiresSubjectPronoun } from './answer'
 
-const ANSWER_DOTS = '.................................'
-const GERUND_ANSWER_DOTS = '......................................'
+const ANSWER_LINE = '_________________________________'
+const GERUND_ANSWER_LINE = '______________________________________'
 
 export interface PrintableQuestionParts {
   label: string
@@ -58,7 +58,7 @@ function completionParts(sentence: string, question: ExerciseQuestion) {
     : question.complementPosition !== 'before' && question.saisiePrefixe !== undefined
     ? question.saisiePrefixe.trim()
     : prefix.trim()
-  const dots = ANSWER_DOTS
+  const answerLine = ANSWER_LINE
   const suffixOnNextLine = suffix.length > LONG_COMPLETION_SUFFIX_LENGTH
   const blankWidthPercent = suffixOnNextLine
     ? Math.max(32, Math.min(58, 72 - Math.round(suffix.length * .65)))
@@ -69,7 +69,7 @@ function completionParts(sentence: string, question: ExerciseQuestion) {
     fillBlank: promptedSentence.includes('…') || suffixParts.length === 0,
     suffixOnNextLine,
     blankWidthPercent,
-    completion: [completionPrefix, dots, suffix].filter(Boolean).join(' '),
+    completion: [completionPrefix, answerLine, suffix].filter(Boolean).join(' '),
   }
 }
 
@@ -94,7 +94,7 @@ export function printableQuestionParts(question: ExerciseQuestion, exerciseKind:
     const tenseAndMode = [question.temps, `(${question.mode})`].filter(Boolean).join(' ')
     return {
       label: `${infinitive} | ${tenseAndMode} :`,
-      completion: `en ${GERUND_ANSWER_DOTS}`,
+      completion: `en ${GERUND_ANSWER_LINE}`,
       completionPrefix: 'en',
       completionSuffix: '',
       fillBlank: true,
@@ -108,7 +108,7 @@ export function printableQuestionParts(question: ExerciseQuestion, exerciseKind:
     const tenseAndMode = [question.temps, `(${question.mode})`].filter(Boolean).join(' ')
     return {
       label: `${infinitive} | ${tenseAndMode} :`,
-      completion: ANSWER_DOTS,
+      completion: ANSWER_LINE,
       completionPrefix: '',
       completionSuffix: '',
       fillBlank: true,

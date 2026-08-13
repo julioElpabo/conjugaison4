@@ -362,10 +362,8 @@ async function buildPdf() {
           if (before) pdf.text(before, completionX, y)
           if (after && !printable.suffixOnNextLine) pdf.text(after, right, y, { align: 'right' })
           if (lineEnd > lineStart) {
-            pdf.setLineDashPattern([.7, .7], 0)
             pdf.setDrawColor(55, 55, 55)
             pdf.line(lineStart, y + .8, lineEnd, y + .8)
-            pdf.setLineDashPattern([], 0)
           }
           if (printable.suffixOnNextLine) {
             if (firstSuffixLine) pdf.text(firstSuffixLine, lineEnd + 2, y)
@@ -388,11 +386,9 @@ async function buildPdf() {
           pdf.setTextColor(70, 70, 70)
           pdf.text(modeLabel, left + 7, answerY)
           pdf.text(tenseLabel, 108, answerY)
-          pdf.setLineDashPattern([.65, .65], 0)
           pdf.setDrawColor(105, 105, 105)
           pdf.line(left + 7 + pdf.getTextWidth(modeLabel) + 2, answerY + .7, 101, answerY + .7)
           pdf.line(108 + pdf.getTextWidth(tenseLabel) + 2, answerY + .7, right, answerY + .7)
-          pdf.setLineDashPattern([], 0)
           pdf.setTextColor(20, 20, 20)
           pdf.setFontSize(10.5)
           y += questionHeight + 8 + Math.max(5, questionSpacingMm.value)
@@ -633,7 +629,7 @@ async function downloadWord() {
         tabStops: [{
           type: TabStopType.RIGHT,
           position: 5300,
-          leader: LeaderType.DOT,
+          leader: LeaderType.UNDERSCORE,
         }],
         children: [new TextRun({
           size: 21,
@@ -649,8 +645,8 @@ async function downloadWord() {
     const identificationAnswerParagraph = () => new Paragraph({
       spacing: { before: 150, after: 40, line: 240 },
       tabStops: [
-        { type: TabStopType.RIGHT, position: 4300, leader: LeaderType.DOT },
-        { type: TabStopType.RIGHT, position: 9250, leader: LeaderType.DOT },
+        { type: TabStopType.RIGHT, position: 4300, leader: LeaderType.UNDERSCORE },
+        { type: TabStopType.RIGHT, position: 9250, leader: LeaderType.UNDERSCORE },
       ],
       children: [
         new TextRun({ text: `${ui('Mode :')} `, bold: true, size: 19, color: '555555', font: 'Arial' }),

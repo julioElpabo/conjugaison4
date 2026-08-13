@@ -3,6 +3,7 @@ import { faArrowUpFromBracket, faPrint } from '@fortawesome/free-solid-svg-icons
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import LearnerErrorFeedback from '~/components/exercise/LearnerErrorFeedback.vue'
 import ShareExerciseSummaryDialog from '~/components/exercise/ShareExerciseSummaryDialog.vue'
+import VerbConsultationModal from '~/components/exercise/VerbConsultationModal.vue'
 import { isModeLandingSlug, modeLandingPage } from '~~/shared/data/mode-landing-pages'
 import { modeTensePedagogy } from '~~/shared/data/mode-tense-pedagogy'
 import type { ConjugationTense, ExerciseAttempt, ExerciseKind, ExerciseQuestion, LearnerErrorDetail, LearnerExerciseTrackingContext } from '~~/shared/types/conjugation'
@@ -24,7 +25,7 @@ import {
   mergeLearnerErrorDetails,
 } from '~~/shared/utils/learner-error-diagnostics'
 
-const { interfaceLocale, localePath, ui, uiLabel } = useLanguagePreferences()
+const { interfaceLocale, ui, uiLabel } = useLanguagePreferences()
 
 const props = defineProps<{
   questions: ExerciseQuestion[]
@@ -63,6 +64,7 @@ const isFinished = ref(false)
 const printSummaryOpen = ref(false)
 const shareSummaryOpen = ref(false)
 const closeConfirmationOpen = ref(false)
+const consultationVerbId = ref<number | null>(null)
 const answerInput = useTemplateRef<HTMLInputElement>('answer-input')
 const keepExerciseButton = useTemplateRef<HTMLButtonElement>('keep-exercise-button')
 const dialog = useTemplateRef<HTMLElement>('exercise-dialog')
@@ -317,8 +319,12 @@ function normalizedGrammarChoice(value?: string | null) {
   return (value || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLocaleLowerCase('fr')
 }
 
-function consultVerbPath(id: number) {
-  return `${localePath('/consulter')}?verbe=${encodeURIComponent(String(id))}`
+function openVerbConsultation(id: number) {
+  consultationVerbId.value = id
+}
+
+function closeVerbConsultation() {
+  consultationVerbId.value = null
 }
 
 function pairClassicTenseChoices(mode: string, choices: ClassicTenseChoice[]) {
@@ -927,15 +933,14 @@ onBeforeUnmount(() => {
                       :details="attempt.errorDetails"
                       compact
                     />
-                    <NuxtLink
+                    <button
                       v-if="attempt.question.verbeId"
+                      type="button"
                       class="result-consult-verb"
-                      :to="consultVerbPath(attempt.question.verbeId)"
-                      target="_blank"
-                      rel="noopener"
+                      @click="openVerbConsultation(attempt.question.verbeId)"
                     >
                       {{ ui('Consulter le verbe') }}
-                    </NuxtLink>
+                    </button>
                   </td>
                   <td>{{ attempt.answer }}</td>
                   <td>{{ attempt.question.reponsesPourCorrige.join(` ${ui('ou')} `) }}</td>
@@ -992,6 +997,11 @@ onBeforeUnmount(() => {
         :verbs="summaryVerbs"
         :tenses="summaryTenses"
         @close="shareSummaryOpen = false"
+      />
+      <VerbConsultationModal
+        v-if="consultationVerbId !== null"
+        :verb-id="consultationVerbId"
+        @close="closeVerbConsultation"
       />
     </div>
   </Teleport>

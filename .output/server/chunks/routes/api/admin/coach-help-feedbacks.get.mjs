@@ -25,6 +25,7 @@ const coachHelpFeedbacks_get = defineEventHandler(async (event) => {
   const query = getQuery(event);
   const limit = Math.min(500, Math.max(1, Number.parseInt(String(query.limit || "250"), 10) || 250));
   const origin = query.origin === "automatic" ? "automatic" : "user";
+  const sortDirection = query.sort === "desc" ? "DESC" : "ASC";
   const [rows] = await database.execute(`
     SELECT
       id,
@@ -69,7 +70,7 @@ const coachHelpFeedbacks_get = defineEventHandler(async (event) => {
       created_at AS createdAt
     FROM coach_help_feedback
     WHERE origin=?
-    ORDER BY created_at ASC, id ASC
+    ORDER BY created_at ${sortDirection}, id ${sortDirection}
     LIMIT ${limit}
   `, [origin]);
   return {

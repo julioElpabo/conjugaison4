@@ -18,6 +18,7 @@ export function chatMessageHasVisibleContent(message: {
   answerComparison?: unknown
   literaryCitation?: unknown
   identificationForm?: unknown
+  spokenAnswer?: string
   errorDetails?: readonly unknown[]
 }): boolean {
   return Boolean(
@@ -26,6 +27,7 @@ export function chatMessageHasVisibleContent(message: {
     || message.answerComparison
     || message.literaryCitation
     || message.identificationForm
+    || message.spokenAnswer?.trim()
     || message.errorDetails?.length,
   )
 }

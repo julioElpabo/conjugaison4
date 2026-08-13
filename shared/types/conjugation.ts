@@ -234,6 +234,8 @@ export interface ExerciseAttempt {
   question: ExerciseQuestion
   answer: string
   status: ExerciseAttemptStatus
+  /** La réponse a été écoutée avant la validation de cette tentative. */
+  answerWasHeard?: boolean
   attemptNumber?: 1 | 2
   matchedAnswer?: string
   errorLabels?: string[]

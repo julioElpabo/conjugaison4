@@ -126,7 +126,7 @@ export function useLearnerProgress() {
             attemptNumber: attempt.attemptNumber || 1,
             question: compactQuestion(attempt.question),
             answer: attempt.answer,
-            correct: attempt.status === 'correct',
+            correct: attempt.status === 'correct' && !attempt.answerWasHeard,
           },
         })
         return true

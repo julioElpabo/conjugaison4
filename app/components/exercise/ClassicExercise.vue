@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { faArrowUpFromBracket, faPrint } from '@fortawesome/free-solid-svg-icons'
+import { faArrowUpFromBracket, faPrint, faStop, faVolumeHigh } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import LearnerErrorFeedback from '~/components/exercise/LearnerErrorFeedback.vue'
 import ShareExerciseSummaryDialog from '~/components/exercise/ShareExerciseSummaryDialog.vue'
 import VerbConsultationModal from '~/components/exercise/VerbConsultationModal.vue'
 import { isModeLandingSlug, modeLandingPage } from '~~/shared/data/mode-landing-pages'
 import { modeTensePedagogy } from '~~/shared/data/mode-tense-pedagogy'
+import { AUDIO_READING_ENABLED } from '~~/shared/config/feature-flags'
 import type { ConjugationTense, ExerciseAttempt, ExerciseKind, ExerciseQuestion, LearnerErrorDetail, LearnerExerciseTrackingContext } from '~~/shared/types/conjugation'
 import { grammarTenseCode } from '~~/shared/utils/grammar-codes'
 import {
@@ -36,6 +37,7 @@ const props = defineProps<{
   requireSuccess?: boolean
   analyticsMetadata?: Record<string, string | number | boolean>
 }>()
+const audioReadingEnabled = AUDIO_READING_ENABLED
 const { track } = useSiteAnalytics()
 const { recordAttempt, recordQuestionPlan } = useLearnerProgress()
 
@@ -49,6 +51,11 @@ const selectedIdentificationMode = ref('')
 const lastIncorrectIdentificationAnswer = ref('')
 const isSmallScreen = ref(false)
 const feedback = ref<'idle' | 'correct' | 'incorrect'>('idle')
+const answerHeardBeforeSubmission = ref(false)
+const speechSupported = ref(false)
+const speakingKey = ref('')
+let speechSequence = 0
+let speechPauseTimer: number | undefined
 const retryAlreadyOffered = ref(false)
 const retryMessageVisible = ref(false)
 const missingPronounMessageVisible = ref(false)
@@ -152,11 +159,14 @@ const displayedQuestionNumber = computed(() => questionNumberOffset.value + curr
 const displayedQuestionCount = computed(() => questionNumberOffset.value
   ? props.trackingContext?.challenge.questionCount || props.questions.length
   : props.questions.length)
-const correctCount = computed(() => attempts.value.filter(attempt => attempt.status === 'correct').length)
+const correctCount = computed(() => attempts.value.filter(attempt => attempt.status === 'correct' && !attempt.answerWasHeard).length)
 const scorePercent = computed(() => attempts.value.length
   ? Math.round(correctCount.value / attempts.value.length * 100)
   : 0)
 const correction = computed(() => currentQuestion.value?.reponsesPourCorrige.join(` ${ui('ou')} `) ?? '')
+const currentSpokenAnswer = computed(() => currentQuestion.value?.reponsesPourCorrige[0]
+  || currentQuestion.value?.reponses[0]
+  || '')
 const alternativeCorrections = computed(() => currentQuestion.value
   ? getAlternativeCorrections(answer.value, currentQuestion.value.reponsesPourCorrige)
   : [])
@@ -332,6 +342,64 @@ function normalizedGrammarChoice(value?: string | null) {
   return (value || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLocaleLowerCase('fr')
 }
 
+function stopSpeech() {
+  if (!speechSupported.value) return
+  speechSequence += 1
+  if (speechPauseTimer !== undefined) {
+    window.clearTimeout(speechPauseTimer)
+    speechPauseTimer = undefined
+  }
+  window.speechSynthesis.cancel()
+  speakingKey.value = ''
+}
+
+function spokenAnswerParts(text: string) {
+  return text.trim().split(/\s+/u).filter(Boolean)
+}
+
+function speakAnswer(text: string, key: string, beforeSubmission = false) {
+  const spokenText = text.trim()
+  if (!speechSupported.value || !spokenText) return
+  if (speakingKey.value === key) {
+    stopSpeech()
+    return
+  }
+  stopSpeech()
+  if (beforeSubmission) answerHeardBeforeSubmission.value = true
+  const activeSequence = speechSequence
+  const parts = spokenAnswerParts(spokenText)
+  const voices = window.speechSynthesis.getVoices()
+  const voice = voices.find(voice => voice.lang.toLocaleLowerCase().startsWith('fr-fr'))
+    || voices.find(voice => voice.lang.toLocaleLowerCase().startsWith('fr'))
+    || null
+
+  const speakPart = (index: number) => {
+    if (speechSequence !== activeSequence || speakingKey.value !== key) return
+    const utterance = new SpeechSynthesisUtterance(parts[index]!)
+    utterance.lang = 'fr-FR'
+    utterance.rate = falcMode.value ? 0.68 : 0.78
+    utterance.voice = voice
+    utterance.onend = () => {
+      if (speechSequence !== activeSequence || speakingKey.value !== key) return
+      if (index >= parts.length - 1) {
+        speakingKey.value = ''
+        return
+      }
+      speechPauseTimer = window.setTimeout(() => {
+        speechPauseTimer = undefined
+        speakPart(index + 1)
+      }, 420)
+    }
+    utterance.onerror = () => {
+      if (speechSequence === activeSequence && speakingKey.value === key) speakingKey.value = ''
+    }
+    window.speechSynthesis.speak(utterance)
+  }
+
+  speakingKey.value = key
+  speakPart(0)
+}
+
 function openVerbConsultation(id: number) {
   consultationVerbId.value = id
 }
@@ -442,6 +510,7 @@ function submitAnswer() {
     answer: answer.value,
     status: result.isCorrect ? 'correct' : 'incorrect',
     attemptNumber: retryAlreadyOffered.value ? 2 : 1,
+    ...(answerHeardBeforeSubmission.value ? { answerWasHeard: true } : {}),
     ...(result.matchedAnswer ? { matchedAnswer: result.matchedAnswer } : {}),
     ...(attemptErrorLabels.length ? { errorLabels: attemptErrorLabels } : {}),
     ...(attemptErrorDetails.length ? { errorDetails: attemptErrorDetails } : {}),
@@ -489,6 +558,7 @@ function showDemoCorrection() {
 }
 
 function showTourProgress() {
+  stopSpeech()
   if (props.questions.length < 6) return
   currentIndex.value = 5
   answer.value = ''
@@ -496,6 +566,7 @@ function showTourProgress() {
   lastIncorrectIdentificationAnswer.value = ''
   feedback.value = 'idle'
   retryAlreadyOffered.value = false
+  answerHeardBeforeSubmission.value = false
   retryMessageVisible.value = false
   missingPronounMessageVisible.value = false
   futureSimpleConfusion.value = false
@@ -525,6 +596,7 @@ function nextQuestion() {
   }
 
   if (props.requireSuccess && feedback.value === 'incorrect') {
+    stopSpeech()
     answer.value = ''
     feedback.value = 'idle'
     retryAlreadyOffered.value = true
@@ -539,6 +611,7 @@ function nextQuestion() {
   }
 
   if (currentIndex.value >= props.questions.length - 1) {
+    stopSpeech()
     isFinished.value = true
     track('exercise_completed', exerciseAnalyticsMetadata.value)
     nextTick(() => dialog.value?.focus())
@@ -546,6 +619,8 @@ function nextQuestion() {
   }
 
   currentIndex.value += 1
+  stopSpeech()
+  answerHeardBeforeSubmission.value = false
   answer.value = ''
   selectedIdentificationMode.value = ''
   lastIncorrectIdentificationAnswer.value = ''
@@ -565,12 +640,14 @@ function nextQuestion() {
 }
 
 function restart() {
+  stopSpeech()
   currentIndex.value = 0
   answer.value = ''
   selectedIdentificationMode.value = ''
   lastIncorrectIdentificationAnswer.value = ''
   feedback.value = 'idle'
   retryAlreadyOffered.value = false
+  answerHeardBeforeSubmission.value = false
   retryMessageVisible.value = false
   missingPronounMessageVisible.value = false
   futureSimpleConfusion.value = false
@@ -632,6 +709,9 @@ function updateSmallScreen(event: MediaQueryList | MediaQueryListEvent) {
 }
 
 onMounted(() => {
+  speechSupported.value = audioReadingEnabled
+    && 'speechSynthesis' in window
+    && 'SpeechSynthesisUtterance' in window
   smallScreenQuery = window.matchMedia('(max-width: 760px)')
   updateSmallScreen(smallScreenQuery)
   smallScreenQuery.addEventListener('change', updateSmallScreen)
@@ -639,6 +719,7 @@ onMounted(() => {
   void recordQuestionPlan(props.trackingContext, props.questions)
 })
 onBeforeUnmount(() => {
+  stopSpeech()
   smallScreenQuery?.removeEventListener('change', updateSmallScreen)
   document.removeEventListener('keydown', onDocumentKeydown)
   if (!isFinished.value && attempts.value.length) track('exercise_abandoned', exerciseAnalyticsMetadata.value)
@@ -698,7 +779,7 @@ onBeforeUnmount(() => {
                 :placeholder="currentSubjectMustBeTyped ? currentAnswerPlaceholder : undefined"
                 :aria-label="ui('Forme conjuguée de {verb}', { verb: currentQuestion.infinitif || '' })"
                 :disabled="feedback !== 'idle'"
-                :class="{ 'is-valid': feedback === 'correct', 'is-invalid': feedback === 'incorrect' }"
+                :class="{ 'is-valid': feedback === 'correct', 'is-invalid': feedback === 'incorrect', 'is-being-read': speakingKey === 'current-feedback' }"
                 :aria-invalid="feedback === 'incorrect'"
                 :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : undefined"
               >
@@ -740,7 +821,8 @@ onBeforeUnmount(() => {
                   :disabled="feedback !== 'idle'"
                   :class="{
                     'is-valid': feedback === 'correct',
-                    'is-invalid': feedback === 'incorrect' || retryMessageVisible
+                    'is-invalid': feedback === 'incorrect' || retryMessageVisible,
+                    'is-being-read': speakingKey === 'current-feedback'
                   }"
                   :aria-invalid="feedback === 'incorrect' || retryMessageVisible"
                   :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : missingPronounMessageVisible ? 'answer-missing-pronoun' : retryMessageVisible ? 'answer-retry' : undefined"
@@ -762,7 +844,6 @@ onBeforeUnmount(() => {
               <span class="answer-retry__icon" aria-hidden="true">↻</span>
               <div>
                 <strong>{{ ui('Pas encore. Essaie une deuxième fois.') }}</strong>
-                <small>{{ ui('Modifie ta réponse ci-dessus, puis clique à nouveau sur « Vérifier ».') }}</small>
               </div>
             </div>
             <aside v-if="retryMessageVisible && retryGuidanceMessages.length" class="answer-retry-hint">
@@ -844,7 +925,8 @@ onBeforeUnmount(() => {
                 :disabled="feedback !== 'idle'"
                 :class="{
                   'is-valid': feedback === 'correct',
-                  'is-invalid': feedback === 'incorrect' || retryMessageVisible
+                  'is-invalid': feedback === 'incorrect' || retryMessageVisible,
+                  'is-being-read': speakingKey === 'current-feedback'
                 }"
                 :aria-invalid="feedback === 'incorrect' || retryMessageVisible"
                 :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : missingPronounMessageVisible ? 'answer-missing-pronoun' : retryMessageVisible ? 'answer-retry' : undefined"
@@ -875,7 +957,6 @@ onBeforeUnmount(() => {
             <span class="answer-retry__icon" aria-hidden="true">↻</span>
             <div>
               <strong>{{ ui('Pas encore. Essaie une deuxième fois.') }}</strong>
-              <small>{{ ui('Modifie ta réponse ci-dessus, puis clique à nouveau sur « Vérifier ».') }}</small>
             </div>
           </div>
           <aside
@@ -889,6 +970,16 @@ onBeforeUnmount(() => {
             v-if="retryMessageVisible && detectedErrorDetails.length && !(exerciseKind === 'conjugation' && currentQuestion.complement)"
             :details="detectedErrorDetails"
           />
+          <button
+            v-if="audioReadingEnabled && speechSupported && retryMessageVisible && currentSpokenAnswer"
+            class="speech-answer-button"
+            type="button"
+            :aria-pressed="speakingKey === 'current-retry'"
+            @click="speakAnswer(currentSpokenAnswer, 'current-retry', true)"
+          >
+            <FontAwesomeIcon :icon="speakingKey === 'current-retry' ? faStop : faVolumeHigh" aria-hidden="true" />
+            {{ speakingKey === 'current-retry' ? ui('Arrêter la lecture') : ui('Entendre la réponse') }}
+          </button>
 
           <div
             v-if="feedback !== 'idle'"
@@ -902,15 +993,26 @@ onBeforeUnmount(() => {
               <strong v-if="feedback === 'correct'" class="falc-feedback-correct"><span aria-hidden="true">✓</span> {{ ui('Juste !') }}</strong>
               <template v-else>
                 <strong>{{ ui('Faux.') }}</strong>
-                <p>{{ ui('Bonne réponse :') }} <strong>{{ correction }}</strong></p>
+                <p>{{ ui('Bonne réponse :') }} <strong :class="{ 'spoken-text-active': speakingKey === 'current-feedback' }">{{ correction }}</strong></p>
               </template>
             </template>
             <template v-else>
               <strong>{{ feedback === 'correct' ? ui('Bravo, c’est juste !') : ui('Pas tout à fait.') }}</strong>
-              <p v-if="feedback === 'incorrect'">{{ ui('La réponse attendue était :') }} <strong>{{ correction }}</strong>.</p>
+              <p v-if="feedback === 'incorrect'">{{ ui('La réponse attendue était :') }} <strong :class="{ 'spoken-text-active': speakingKey === 'current-feedback' }">{{ correction }}</strong>.</p>
               <p v-else-if="alternativeCorrections.length"> {{ ui('On peut aussi répondre :') }} <strong>{{ alternativeText }}</strong>{{ alternativePunctuation }}</p>
               <p v-else>{{ ui('Tu peux passer à la question suivante.') }}</p>
             </template>
+
+            <button
+              v-if="audioReadingEnabled && speechSupported && currentSpokenAnswer"
+              class="speech-answer-button speech-answer-button--feedback"
+              type="button"
+              :aria-pressed="speakingKey === 'current-feedback'"
+              @click="speakAnswer(currentSpokenAnswer, 'current-feedback')"
+            >
+              <FontAwesomeIcon :icon="speakingKey === 'current-feedback' ? faStop : faVolumeHigh" aria-hidden="true" />
+              {{ speakingKey === 'current-feedback' ? ui('Arrêter la lecture') : ui('Entendre la réponse') }}
+            </button>
 
             <LearnerErrorFeedback v-if="!falcMode && detectedErrorDetails.length" :details="detectedErrorDetails" />
 
@@ -988,17 +1090,38 @@ onBeforeUnmount(() => {
                     </button>
                   </td>
                   <td>{{ attempt.answer }}</td>
-                  <td>{{ attempt.question.reponsesPourCorrige.join(` ${ui('ou')} `) }}</td>
+                  <td>
+                    <div class="result-spoken-answers">
+                      <div
+                        v-for="(expectedAnswer, answerIndex) in (attempt.question.reponsesPourCorrige.length ? attempt.question.reponsesPourCorrige : attempt.question.reponses)"
+                        :key="expectedAnswer"
+                      >
+                        <span :class="{ 'spoken-text-active': speakingKey === `summary-${index}-${answerIndex}` }">{{ expectedAnswer }}</span>
+                        <button
+                          v-if="audioReadingEnabled && speechSupported"
+                          type="button"
+                          class="result-speech-button"
+                          :aria-label="speakingKey === `summary-${index}-${answerIndex}` ? ui('Arrêter la lecture') : ui('Réécouter cette phrase')"
+                          :title="speakingKey === `summary-${index}-${answerIndex}` ? ui('Arrêter la lecture') : ui('Réécouter cette phrase')"
+                          :aria-pressed="speakingKey === `summary-${index}-${answerIndex}`"
+                          @click="speakAnswer(expectedAnswer, `summary-${index}-${answerIndex}`)"
+                        >
+                          <FontAwesomeIcon :icon="speakingKey === `summary-${index}-${answerIndex}` ? faStop : faVolumeHigh" aria-hidden="true" />
+                        </button>
+                      </div>
+                    </div>
+                  </td>
                   <td>
                     <span
                       :class="{
-                        'result-good': attempt.status === 'correct' && attempt.attemptNumber !== 2,
-                        'result-good--retry': attempt.status === 'correct' && attempt.attemptNumber === 2,
-                        'result-bad': attempt.status === 'incorrect'
+                        'result-heard': attempt.answerWasHeard,
+                        'result-good': !attempt.answerWasHeard && attempt.status === 'correct' && attempt.attemptNumber !== 2,
+                        'result-good--retry': !attempt.answerWasHeard && attempt.status === 'correct' && attempt.attemptNumber === 2,
+                        'result-bad': !attempt.answerWasHeard && attempt.status === 'incorrect'
                       }"
-                      :aria-label="attempt.status === 'correct' && attempt.attemptNumber === 2 ? ui('Juste au deuxième essai') : undefined"
+                      :aria-label="attempt.answerWasHeard ? ui('Réponse entendue') : attempt.status === 'correct' && attempt.attemptNumber === 2 ? ui('Juste au deuxième essai') : undefined"
                     >
-                      {{ attempt.status === 'correct' ? ui('Juste') : ui('À revoir') }}
+                      {{ attempt.answerWasHeard ? ui('Réponse entendue') : attempt.status === 'correct' ? ui('Juste') : ui('À revoir') }}
                     </span>
                   </td>
                 </tr>
@@ -1018,16 +1141,10 @@ onBeforeUnmount(() => {
           <section
             role="alertdialog"
             aria-modal="true"
-            :class="{ 'exercise-close-confirmation__dialog--falc': falcMode }"
-            :aria-label="falcMode ? ui('Quitter l’exercice') : undefined"
-            :aria-labelledby="falcMode ? undefined : 'close-confirmation-title'"
-            :aria-describedby="falcMode ? undefined : 'close-confirmation-description'"
+            :aria-label="ui('Quitter l’exercice')"
           >
-            <span v-if="!falcMode" class="exercise-close-confirmation__icon" aria-hidden="true">?</span>
-            <h3 v-if="!falcMode" id="close-confirmation-title">{{ ui('Quitter l’exercice ?') }}</h3>
-            <p v-if="!falcMode" id="close-confirmation-description">{{ ui('Ta progression actuelle sera perdue.') }}</p>
             <div class="exercise-close-confirmation__actions">
-              <button ref="keep-exercise-button" class="secondary-button" type="button" @click="cancelClose">{{ falcMode ? ui('Continuer') : ui('Continuer l’exercice') }}</button>
+              <button ref="keep-exercise-button" class="secondary-button" type="button" @click="cancelClose">{{ ui('Continuer l’exercice') }}</button>
               <button class="primary-button exercise-close-confirmation__leave" type="button" @click="confirmClose">{{ ui('Quitter') }}</button>
             </div>
           </section>

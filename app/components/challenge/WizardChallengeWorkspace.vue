@@ -1939,9 +1939,11 @@ async function createSharedChallenge(title: string, description: string) {
                 :tenses="catalogue.temps"
                 :verbs="selectedVerbs"
                 :selected-ids="displayedTenseIds"
+                :past-simple-pronouns="challenge.pastSimplePronouns"
                 @toggle="onToggleTense"
                 @select-all="markAsCustom(); selectAllTenses()"
-                @clear="markAsCustom(); clearTenses()"
+                @clear="markAsCustom(); clearTenses(); challenge.pastSimplePronouns = 'all'"
+                @update-past-simple-pronouns="challenge.pastSimplePronouns = $event; markAsCustom()"
               />
               <div class="wizard-step__bottom-actions">
                 <button class="primary-button wizard-step__cta wizard-next-pulse" type="button" :disabled="!selectedTenses.length" @click="nextStep"> {{ ui('Choisir les options →') }} </button>

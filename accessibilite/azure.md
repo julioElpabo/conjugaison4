@@ -1,4 +1,4 @@
-# Prompt — intégrer Azure Speech avec Ariane et Fabrice
+# Prompt — intégrer Azure Speech avec Yvette et Jérôme
 
 Utilise ce document comme prompt autonome pour reprendre ultérieurement l’intégration de la synthèse vocale Azure dans le projet `conjugaison4`.
 

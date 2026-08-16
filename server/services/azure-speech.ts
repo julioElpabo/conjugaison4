@@ -69,12 +69,20 @@ function classicSpeechCharacterCount(payload: AzureSpeechPayload) {
 
 function speechConfiguration() {
   const config = useRuntimeConfig()
-  const voice = String(config.azureSpeechClassicVoice || 'fr-FR-VivienneMultilingualNeural')
+  const voice = String(
+    process.env.AZURE_SPEECH_CLASSIC_VOICE
+      || config.azureSpeechClassicVoice
+      || 'fr-FR-YvetteNeural',
+  )
   if (!ALLOWED_VOICES.has(voice)) throw new Error(`Voix Azure non autorisée : ${voice}`)
-  const region = String(config.azureSpeechRegion || 'switzerlandnorth').trim().toLocaleLowerCase('en')
+  const region = String(
+    process.env.AZURE_SPEECH_REGION
+      || config.azureSpeechRegion
+      || 'switzerlandnorth',
+  ).trim().toLocaleLowerCase('en')
   return {
-    key: String(config.azureSpeechKey || ''),
-    secondaryKey: String(config.azureSpeechKeySecondary || ''),
+    key: String(process.env.AZURE_SPEECH_KEY || process.env.AZURE_SPEECH_KEY1 || config.azureSpeechKey || ''),
+    secondaryKey: String(process.env.AZURE_SPEECH_KEY_SECONDARY || process.env.AZURE_SPEECH_KEY2 || config.azureSpeechKeySecondary || ''),
     region,
     voice,
     url: `https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`,
@@ -96,8 +104,8 @@ function monthKey() {
 
 function fileCacheConfiguration() {
   const config = useRuntimeConfig()
-  const configuredDirectory = String(config.azureSpeechCacheDir || '../conjugaison4-cache-audio').trim()
-  const configuredMaxGb = Number(config.azureSpeechCacheMaxGb || 2)
+  const configuredDirectory = String(process.env.AZURE_SPEECH_CACHE_DIR || config.azureSpeechCacheDir || '../conjugaison4-cache-audio').trim()
+  const configuredMaxGb = Number(process.env.AZURE_SPEECH_CACHE_MAX_GB || config.azureSpeechCacheMaxGb || 2)
   if (!configuredDirectory) throw new Error('AZURE_SPEECH_CACHE_DIR est vide.')
   if (!Number.isFinite(configuredMaxGb) || configuredMaxGb <= 0) throw new Error('AZURE_SPEECH_CACHE_MAX_GB doit être un nombre positif.')
   return {

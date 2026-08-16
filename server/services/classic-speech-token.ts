@@ -12,7 +12,15 @@ export interface ClassicSpeechPayload {
 
 function tokenKey() {
   const config = useRuntimeConfig()
-  const secret = String(config.classicSpeechTokenSecret || '')
+  const secret = String(
+    process.env.CLASSIC_SPEECH_TOKEN_SECRET
+      || process.env.SESSION_SECRET
+      || process.env.AZURE_SPEECH_KEY
+      || process.env.AZURE_SPEECH_KEY1
+      || process.env.DB_PASSWORD
+      || config.classicSpeechTokenSecret
+      || '',
+  )
   if (secret.length < 16) throw new Error('Un secret serveur robuste est requis pour sécuriser les jetons audio.')
   return createHash('sha256').update(`classic-speech:${secret}`).digest()
 }

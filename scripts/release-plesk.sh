@@ -117,6 +117,8 @@ npm --prefix "$repository_root" ci
 
 printf '\n[6/8] Construction du paquet Nuxt\n'
 npm --prefix "$repository_root" run build
+node --env-file-if-exists="$repository_root/.env" \
+  "$repository_root/scripts/assert-no-azure-secrets-in-build.mjs"
 
 # Le bundlage de la migration du lot pilote régénère ces rapports avec un
 # nouvel horodatage. Leur contenu validé est déjà dans Git : on annule

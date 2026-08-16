@@ -28,9 +28,28 @@ export default defineNuxtPlugin(() => {
     }
     analyticsWindow.gtag('js', new Date())
     analyticsWindow.gtag('config', measurementId, { send_page_view: false })
-    useHead({
-      script: [{ src: `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`, async: true }],
-    })
+
+    let googleLoadTimer: number | undefined
+    const interactionEvents = ['pointerdown', 'keydown'] as const
+    const loadGoogleAnalytics = () => {
+      if (document.querySelector('script[data-google-analytics]')) return
+      if (googleLoadTimer) window.clearTimeout(googleLoadTimer)
+      for (const eventName of interactionEvents) {
+        window.removeEventListener(eventName, loadGoogleAnalytics)
+      }
+      const script = document.createElement('script')
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`
+      script.async = true
+      script.dataset.googleAnalytics = 'true'
+      document.head.appendChild(script)
+    }
+
+    // Les événements restent dans dataLayer. Le réseau Google démarre après le
+    // rendu initial, ou dès la première interaction réelle de la personne.
+    googleLoadTimer = window.setTimeout(loadGoogleAnalytics, 8_000)
+    for (const eventName of interactionEvents) {
+      window.addEventListener(eventName, loadGoogleAnalytics, { once: true, passive: true })
+    }
   }
 
   function isAdministration() {

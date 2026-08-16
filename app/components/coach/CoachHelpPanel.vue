@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import type { CoachHelpBlock } from '~~/shared/types/coach'
+import type { CoachHelpBlock, CoachHelpEngineKey, CoachProfile } from '~~/shared/types/coach'
 import type { ConjugationTense, ExerciseQuestion, Verb } from '~~/shared/types/conjugation'
 import { auditRenderedCoachHelp } from '~~/shared/utils/coach-help-audit'
 import type { CoachHelpContentValues } from '~~/shared/utils/coach-help'
 import { conditionalCoachHelpBlocks, renderCoachHelpContent } from '~~/shared/utils/coach-help'
 import { sanitizeCoachHtml } from '~~/shared/utils/safe-html'
 import { coachHelpProfile } from '~~/shared/data/coach-help-profiles'
+import { coachPairForPicker } from '~~/shared/utils/coach-picker-groups'
 
 const { ui, uiLabel } = useLanguagePreferences()
 const props = withDefaults(defineProps<{
@@ -49,6 +50,7 @@ const emit = defineEmits<{
   previewScroll: [position: PreviewScrollPosition]
   userScroll: []
   consultVerb: [verbId: number]
+  changeCoach: [coach: CoachProfile]
 }>()
 const content = useTemplateRef<HTMLElement>('content')
 const feedbackTextarea = useTemplateRef<HTMLTextAreaElement>('feedbackTextarea')
@@ -63,6 +65,25 @@ const feedbackOptions = computed<Array<{ type: HelpFeedbackType, label: string, 
   { type: 'remark', label: ui('Remarque'), icon: '✎' },
 ])
 const activeProfile = computed(() => coachHelpProfile(props.blocks.find(block => block.profileId)?.profileId))
+interface RecommendedCoachGroup {
+  approach: RecommendedCoachApproach
+  title: 'Approfondir sans voir la réponse' | 'Être guidé jusqu’à la réponse'
+  description:
+    | 'Ces coaches analysent la question plus précisément et te guident étape par étape, sans révéler la réponse.'
+    | 'Ces coaches reprennent chaque étape avec toi et montrent la réponse en l’expliquant.'
+  coaches: CoachProfile[]
+}
+
+type RecommendedCoachApproach = Extract<CoachHelpEngineKey, 'complete' | 'complete-avec-reponses'>
+
+const recommendedApproaches = computed<RecommendedCoachApproach[]>(() => {
+  if (activeProfile.value.id === 'tres-condensee') return ['complete', 'complete-avec-reponses']
+  if (activeProfile.value.id === 'complete') return ['complete-avec-reponses']
+  return []
+})
+const recommendedCoachGroups = ref<RecommendedCoachGroup[]>([])
+const recommendationLoading = ref(false)
+let recommendationRequest = 0
 const renderedBlocks = computed(() => [
   ...props.blocks
     .map((block, blockIndex) => ({ block, blockIndex: blockIndex as number | null }))
@@ -241,6 +262,43 @@ async function reportAutomaticErrors() {
   }
 }
 
+async function loadRecommendedCoaches() {
+  const approaches = recommendedApproaches.value
+  const request = ++recommendationRequest
+  recommendedCoachGroups.value = []
+  if (!approaches.length || props.embedded) return
+  recommendationLoading.value = true
+  try {
+    const response = await $fetch<{ coaches: CoachProfile[] }>('/api/coaches')
+    if (request !== recommendationRequest) return
+    recommendedCoachGroups.value = approaches.map((approach): RecommendedCoachGroup => {
+      const available = response.coaches
+        .filter(coach => coach.status === 'published' && coach.helpApproach === approach)
+        .sort((left, right) => left.sortOrder - right.sortOrder || left.firstName.localeCompare(right.firstName, 'fr'))
+      const coaches = coachPairForPicker(available, () => 0)
+      return approach === 'complete'
+        ? {
+            approach,
+            title: 'Approfondir sans voir la réponse',
+            description: 'Ces coaches analysent la question plus précisément et te guident étape par étape, sans révéler la réponse.',
+            coaches,
+          }
+        : {
+            approach,
+            title: 'Être guidé jusqu’à la réponse',
+            description: 'Ces coaches reprennent chaque étape avec toi et montrent la réponse en l’expliquant.',
+            coaches,
+          }
+    }).filter(group => group.coaches.length === 2)
+  }
+  catch {
+    if (request === recommendationRequest) recommendedCoachGroups.value = []
+  }
+  finally {
+    if (request === recommendationRequest) recommendationLoading.value = false
+  }
+}
+
 function currentUiContext() {
   if (typeof window === 'undefined') return {}
   const container = content.value
@@ -355,9 +413,14 @@ watch(sourceRenderedHtml, () => {
   void reportAutomaticErrors()
 }, { flush: 'post' })
 
+watch(() => recommendedApproaches.value.join(','), () => {
+  void loadRecommendedCoaches()
+})
+
 onMounted(() => {
   scrollContentToTop()
   void reportAutomaticErrors()
+  void loadRecommendedCoaches()
 })
 
 onBeforeUnmount(() => {
@@ -444,6 +507,33 @@ onBeforeUnmount(() => {
         <p v-if="feedbackStatus === 'sent'" class="coach-help-feedback__status">{{ ui('Retour enregistré.') }}</p>
         <p v-else-if="feedbackError" class="coach-help-feedback__error">{{ feedbackError }}</p>
       </section>
+
+      <section v-if="recommendedApproaches.length && !embedded" class="coach-help-feedback coach-help-recommendation" aria-labelledby="coach-help-recommendation-title">
+        <strong id="coach-help-recommendation-title">{{ ui('Changer de niveau d’aide') }}</strong>
+        <p v-if="recommendationLoading">{{ ui('Chargement des coaches…') }}</p>
+        <div v-else-if="recommendedCoachGroups.length" class="coach-help-recommendation__groups">
+          <section v-for="group in recommendedCoachGroups" :key="group.approach" class="coach-help-recommendation__group">
+            <header>
+              <strong>{{ ui(group.title) }}</strong>
+              <p>{{ ui(group.description) }}</p>
+            </header>
+            <div class="coach-help-recommendation__coaches">
+              <button
+                v-for="recommendedCoach in group.coaches"
+                :key="recommendedCoach.id"
+                type="button"
+                :style="{ '--recommended-coach-color': recommendedCoach.themeColor }"
+                :aria-label="ui('Choisir {name}', { name: recommendedCoach.firstName })"
+                @click="emit('changeCoach', recommendedCoach)"
+              >
+                <img :src="recommendedCoach.avatarPath" :alt="ui('Avatar de {name}', { name: recommendedCoach.firstName })">
+                <span><strong>{{ recommendedCoach.firstName }}</strong><small>{{ recommendedCoach.pedagogicalStyle }}</small></span>
+              </button>
+            </div>
+          </section>
+          <p class="coach-help-recommendation__note">{{ ui('Le changement s’applique immédiatement à cette question.') }}</p>
+        </div>
+      </section>
     </div>
 
     <footer class="coach-help-footer"><button type="button" @click="emit('close')">{{ ui('Fermer') }}</button></footer>
@@ -456,10 +546,12 @@ onBeforeUnmount(() => {
 .coach-help-header__description{margin-top:7px;color:rgb(255 255 255 / 84%);font-size:.9rem;line-height:1.45}.coach-help-header__description :deep(> :first-child){margin-top:0}.coach-help-header__description :deep(> :last-child){margin-bottom:0}
 .coach-help-consult{display:grid;padding:14px;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;border:1px solid color-mix(in srgb,var(--coach-color,#295f72) 32%,#cfe0dc);border-radius:15px;background:color-mix(in srgb,var(--coach-color,#295f72) 7%,white)}.coach-help-consult strong{color:#17566a;font-size:.9rem}.coach-help-consult p{margin:3px 0 0;color:#567078;font-size:.78rem;line-height:1.4}.coach-help-consult button{display:inline-flex;padding:9px 11px;justify-content:center;border:0;border-radius:10px;color:white;background:var(--coach-color,#295f72);cursor:pointer;font:inherit;font-size:.78rem;font-weight:850;white-space:nowrap}.coach-help-consult button:hover,.coach-help-consult button:focus-visible{filter:brightness(.92)}
 .coach-help-feedback{position:relative;display:grid;margin-top:26px;padding:12px 12px 13px;gap:10px;border:1px dashed #b8cdd1;border-radius:14px;background:rgb(241 247 247 / 52%);color:#5a7076}.coach-help-feedback::before{content:"";position:absolute;top:-20px;left:22px;right:22px;border-top:1px solid #d5e3e5}.coach-help-feedback p{margin:0;color:#6a7e83;font-size:.76rem;line-height:1.38}.coach-help-feedback__actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.coach-help-feedback__actions button,.coach-help-feedback__form button{border:1px solid #cbdadd;border-radius:12px;color:#5d7278;background:rgb(255 255 255 / 58%);cursor:pointer;font-weight:750}.coach-help-feedback__actions button{display:flex;min-height:36px;padding:6px 8px;align-items:center;justify-content:center;gap:6px;font-size:.78rem}.coach-help-feedback__actions button span{display:inline-grid;width:18px;height:18px;place-items:center;border-radius:999px;color:#6d858b;background:rgb(228 239 241 / 70%);font-size:.72rem}.coach-help-feedback__actions button:hover,.coach-help-feedback__actions button:focus-visible,.coach-help-feedback__actions button.is-selected{border-color:#7aa5ad;color:#255a66;background:#e9f5f6}.coach-help-feedback__actions button:hover span,.coach-help-feedback__actions button:focus-visible span,.coach-help-feedback__actions button.is-selected span{color:#255a66;background:white}.coach-help-feedback__actions button:disabled,.coach-help-feedback__form button:disabled{cursor:progress;opacity:.72}.coach-help-feedback__form{display:grid;gap:7px}.coach-help-feedback__form label{color:#6a7e83;font-size:.74rem;font-weight:800}.coach-help-feedback__form textarea{width:100%;resize:vertical;padding:9px 10px;border:1px solid #b8cdd1;border-radius:12px;color:#263b43;background:rgb(255 255 255 / 72%);font:inherit;font-size:.82rem;line-height:1.38}.coach-help-feedback__form button{justify-self:start;padding:8px 11px;border-color:#a8c2c7;color:#3f5960;background:rgb(255 255 255 / 72%);font-size:.78rem}.coach-help-feedback__status{color:#46765f;font-size:.8rem;font-weight:800}.coach-help-feedback__error{color:#9f514b;font-size:.8rem;font-weight:800}
+.coach-help-recommendation>strong{color:#375c65;font-size:.86rem}.coach-help-recommendation__groups{display:grid;gap:14px}.coach-help-recommendation__group{display:grid;gap:8px}.coach-help-recommendation__group+.coach-help-recommendation__group{padding-top:14px;border-top:1px solid #d1e0e2}.coach-help-recommendation__group header{display:grid;gap:4px}.coach-help-recommendation__group header strong{color:#275562;font-size:.84rem}.coach-help-recommendation__coaches{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.coach-help-recommendation__coaches button{display:grid;min-width:0;padding:8px;grid-template-columns:38px minmax(0,1fr);align-items:center;gap:8px;border:1px solid #cbdadd;border-radius:12px;color:#375c65;background:rgb(255 255 255 / 58%);cursor:pointer;font:inherit;font-size:.8rem;text-align:left}.coach-help-recommendation__coaches button:hover,.coach-help-recommendation__coaches button:focus-visible{border-color:var(--recommended-coach-color,#7aa5ad);outline:2px solid color-mix(in srgb,var(--recommended-coach-color,#7aa5ad) 24%,transparent);background:#fff}.coach-help-recommendation__coaches img{width:38px;height:38px;object-fit:cover;border:2px solid var(--recommended-coach-color,#7aa5ad);border-radius:50%}.coach-help-recommendation__coaches span{display:grid;min-width:0;gap:2px}.coach-help-recommendation__coaches span strong{overflow:hidden;font-size:.8rem;text-overflow:ellipsis;white-space:nowrap}.coach-help-recommendation__coaches small{color:#687e84;font-size:.67rem;font-weight:550;line-height:1.25}.coach-help-recommendation__note{padding-top:2px;font-style:italic}
 :global(:root[data-theme='dark'] .coach-help-panel){color:#dce8e9;border-color:#60777d;background:#13262b}:global(:root[data-theme='dark'] .coach-help-card),:global(:root[data-theme='dark'] .coach-help-footer){border-color:#3e595d;background:#1b3035}:global(:root[data-theme='dark'] .coach-help-card h3),:global(:root[data-theme='dark'] .coach-help-requested-form){color:#b5e4e7}:global(:root[data-theme='dark'] .coach-help-meaning),:global(:root[data-theme='dark'] .coach-help-footer p),:global(:root[data-theme='dark'] .coach-help-custom-content){color:#bfd0d2}:global(:root[data-theme='dark'] .coach-help-card dl>div){background:#243e42}:global(:root[data-theme='dark'] .coach-help-card dt){color:#a8bdc0}:global(:root[data-theme='dark'] .coach-help-card dd){color:#edf5f5}:global(:root[data-theme='dark'] .coach-help-endings){color:#f4e4bb;background:#3b321b}:global(:root[data-theme='dark'] .coach-help-endings strong){color:#f1cb71}:global(:root[data-theme='dark'] .coach-help-exception){color:#f3d1bd;border-color:#b96c3b;background:#3c271e}:global(:root[data-theme='dark'] .coach-help-card--warning){color:#f0e3c2;border-color:#665631;background:#332c1c}:global(:root[data-theme='dark'] .coach-help-card--warning h3){color:#f1ce78}
 :global(:root[data-theme='dark'] .coach-help-badge){color:#dce8e9;border-color:#71878c;background:#20363b}
 :global(:root[data-theme='dark'] .coach-help-consult){border-color:#47666d;background:#1b3035}:global(:root[data-theme='dark'] .coach-help-consult strong){color:#b5e4e7}:global(:root[data-theme='dark'] .coach-help-consult p){color:#bfd0d2}
 :global(:root[data-theme='dark'] .coach-help-feedback){border-color:#486268;background:rgb(18 43 49 / 42%);color:#aebfc2}:global(:root[data-theme='dark'] .coach-help-feedback::before){border-top-color:#405a5f}:global(:root[data-theme='dark'] .coach-help-feedback p){color:#9fb1b4}:global(:root[data-theme='dark'] .coach-help-feedback__actions button){border-color:#405a60;color:#aebfc2;background:rgb(16 35 40 / 48%)}:global(:root[data-theme='dark'] .coach-help-feedback__actions button span){color:#9fbfc5;background:rgb(36 62 67 / 64%)}:global(:root[data-theme='dark'] .coach-help-feedback__actions button:hover),:global(:root[data-theme='dark'] .coach-help-feedback__actions button:focus-visible),:global(:root[data-theme='dark'] .coach-help-feedback__actions button.is-selected){border-color:#6b9aa3;color:#dce8e9;background:#243e43}:global(:root[data-theme='dark'] .coach-help-feedback__actions button:hover span),:global(:root[data-theme='dark'] .coach-help-feedback__actions button:focus-visible span),:global(:root[data-theme='dark'] .coach-help-feedback__actions button.is-selected span){color:#dce8e9;background:#31565d}:global(:root[data-theme='dark'] .coach-help-feedback__form label){color:#aebfc2}:global(:root[data-theme='dark'] .coach-help-feedback__form textarea){border-color:#4a666b;color:#e8f2f3;background:rgb(16 35 40 / 72%)}:global(:root[data-theme='dark'] .coach-help-feedback__form button){border-color:#4f747b;color:#dce8e9;background:rgb(16 35 40 / 72%)}:global(:root[data-theme='dark'] .coach-help-feedback__status){color:#89c9aa}:global(:root[data-theme='dark'] .coach-help-feedback__error){color:#e3a19c}
+:global(:root[data-theme='dark'] .coach-help-recommendation>strong),:global(:root[data-theme='dark'] .coach-help-recommendation__group header strong){color:#c8e7e9}:global(:root[data-theme='dark'] .coach-help-recommendation__group+.coach-help-recommendation__group){border-top-color:#405a5f}:global(:root[data-theme='dark'] .coach-help-recommendation__coaches button){color:#dce8e9;border-color:#405a60;background:rgb(16 35 40 / 48%)}:global(:root[data-theme='dark'] .coach-help-recommendation__coaches small){color:#9fb1b4}:global(:root[data-theme='dark'] .coach-help-recommendation__coaches button:hover),:global(:root[data-theme='dark'] .coach-help-recommendation__coaches button:focus-visible){background:#243e43}
 @media(max-width:900px){.coach-help-panel{width:100%;min-width:0}}
 @media(max-width:680px){.coach-help-badge{top:12px;transform:translateX(-50%)}.coach-help-header{padding-top:64px}}
 @media(max-width:520px){.coach-help-consult{grid-template-columns:1fr}.coach-help-consult button{width:100%}}

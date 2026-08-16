@@ -10,6 +10,7 @@ const route = useRoute()
 const { applyTheme } = useColorTheme()
 const { track } = useSiteAnalytics()
 const isDark = ref(false)
+const isPhoneViewport = ref(false)
 const falcMode = useState<boolean>('falc-mode', () => false)
 const falcConfirmationOpen = ref(false)
 const falcCancelButton = ref<HTMLButtonElement | null>(null)
@@ -43,6 +44,7 @@ const contactDialog = ref<{ open: () => void } | null>(null)
 const mountainBackdrop = ref<HTMLElement | null>(null)
 let parallaxFrame = 0
 let headerLanguageCloseTimer: number | undefined
+let phoneMediaQuery: MediaQueryList | undefined
 const nightStarsSvg = `<g class="night-stars night-stars--a">
   <circle cx="548" cy="565" r="1.15"/><circle cx="614" cy="618" r=".75"/><circle cx="690" cy="554" r="1.05"/><circle cx="774" cy="644" r=".7"/><circle cx="853" cy="578" r="1.2"/><circle cx="951" cy="625" r=".8"/><circle cx="1042" cy="557" r=".65"/><circle cx="1148" cy="604" r="1.05"/><circle cx="1220" cy="566" r=".8"/>
 </g><g class="night-stars night-stars--b">
@@ -139,7 +141,14 @@ function handleFalcConfirmationKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape' && falcConfirmationOpen.value) closeFalcConfirmation()
 }
 
+function syncPhoneViewport() {
+  isPhoneViewport.value = phoneMediaQuery?.matches === true
+}
+
 onMounted(() => {
+  phoneMediaQuery = window.matchMedia('(max-width: 640px)')
+  syncPhoneViewport()
+  phoneMediaQuery.addEventListener('change', syncPhoneViewport)
   document.addEventListener('pointerdown', closeLearnerMenuOnOutside)
   document.addEventListener('keydown', handleFalcConfirmationKeydown)
   window.addEventListener('scroll', updateMountainParallax, { passive: true })
@@ -156,6 +165,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  phoneMediaQuery?.removeEventListener('change', syncPhoneViewport)
   document.removeEventListener('pointerdown', closeLearnerMenuOnOutside)
   document.removeEventListener('keydown', handleFalcConfirmationKeydown)
   window.removeEventListener('scroll', updateMountainParallax)
@@ -326,7 +336,7 @@ const activeSection = computed(() => {
             <span v-if="isActualHomePage">{{ ui('Défis de conjugaison') }}</span>
           </NuxtLink>
           <button
-            v-if="!isActualHomePage && !falcMode"
+            v-if="!isActualHomePage && !falcMode && !isPhoneViewport"
             class="site-tour-button"
             type="button"
             :title="tourCopy.navLabel"
@@ -1655,6 +1665,10 @@ a {
 }
 
 @media (max-width: 640px) {
+  .site-tour-button {
+    display: none;
+  }
+
   .site-header__inner {
     width: min(100% - 20px, 1180px);
     min-height: 62px;

@@ -22,10 +22,11 @@ describe('statistiques des comptes utilisateurs', () => {
     assert.match(endpoint, /runs\.last_answered_at>=\?/u)
   })
 
-  it('affiche l’onglet, le sélecteur, le fromage des langues et la courbe des inscriptions', async () => {
+  it('affiche l’onglet Comptes, le sélecteur, le fromage des langues et la courbe des inscriptions', async () => {
     const page = await read('../app/pages/admin/charts.vue')
     const dashboard = await read('../app/components/admin/AdminUserUsageDashboard.vue')
-    assert.match(page, />\s*Utilisateurs\s*</u)
+    assert.match(page, /\{ id: 'accounts', label: 'Comptes', short: 'Connexions et fonctions' \}/u)
+    assert.match(page, /activeTab === 'accounts'/u)
     assert.match(page, /analytics-users/u)
     assert.match(dashboard, /id="user-activity-window"/u)
     assert.match(dashboard, /Langue choisie par les utilisateurs/u)

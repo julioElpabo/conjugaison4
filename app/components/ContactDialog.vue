@@ -17,8 +17,9 @@ const turnstileSiteKey = String(config.public.turnstileSiteKey || '')
 const {
   container: turnstileContainer,
   token: turnstileResponse,
+  render: renderTurnstile,
   reset: resetTurnstile,
-} = useTurnstileWidget(turnstileSiteKey, 'contact')
+} = useTurnstileWidget(turnstileSiteKey, 'contact', { autoRender: false })
 const constraints = reactive({
   enabled: true,
   subjectMinLength: 5,
@@ -36,11 +37,13 @@ async function refreshConstraints() {
   }
 }
 
-function open() {
+async function open() {
   sent.value = false
   errorMessage.value = ''
   dialog.value?.showModal()
   void refreshConstraints()
+  await nextTick()
+  void renderTurnstile()
 }
 
 function close() {

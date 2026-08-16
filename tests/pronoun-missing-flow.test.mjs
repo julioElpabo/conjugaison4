@@ -8,11 +8,12 @@ const [classic, chat] = await Promise.all([
 ])
 
 test('le classique affiche une bulle sans enregistrer une faute de pronom', () => {
-  const missing = classic.indexOf('if (missingSubjectPronoun)')
+  const missing = classic.indexOf('if (missingSubjectPronoun && !falcMode.value)')
   const earlyReturn = classic.indexOf('return', missing)
   const tracking = classic.indexOf("track('answer_submitted'", missing)
 
   assert.ok(missing >= 0 && missing < earlyReturn && earlyReturn < tracking)
+  assert.match(classic.slice(missing, tracking), /missingSubjectPronoun && !falcMode\.value/u)
   assert.match(classic, /missingPronounMessageVisible[\s\S]*ui\('Il manque le pronom'\)/u)
 })
 

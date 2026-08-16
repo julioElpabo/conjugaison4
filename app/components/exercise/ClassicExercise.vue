@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Component, ShallowRef } from 'vue'
 import { faArrowUpFromBracket, faPrint, faStop, faVolumeHigh } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import LearnerErrorFeedback from '~/components/exercise/LearnerErrorFeedback.vue'
@@ -25,6 +26,7 @@ import {
   learnerErrorDetails,
   mergeLearnerErrorDetails,
 } from '~~/shared/utils/learner-error-diagnostics'
+
 
 const { interfaceLocale, ui, uiLabel } = useLanguagePreferences()
 const falcMode = useState<boolean>('falc-mode', () => false)
@@ -70,6 +72,12 @@ const pendingErrorDetails = ref<LearnerErrorDetail[]>([])
 const detectedErrorDetails = ref<LearnerErrorDetail[]>([])
 const isFinished = ref(false)
 const printSummaryOpen = ref(false)
+const printSummaryComponent: ShallowRef<Component | null> = shallowRef(null)
+
+watch(printSummaryOpen, async (open) => {
+  if (!open || printSummaryComponent.value) return
+  printSummaryComponent.value = markRaw((await import('./ExerciseSummaryPrintPreview.vue')).default)
+})
 const shareSummaryOpen = ref(false)
 const closeConfirmationOpen = ref(false)
 const consultationVerbId = ref<number | null>(null)
@@ -1150,8 +1158,9 @@ onBeforeUnmount(() => {
           </section>
         </div>
       </section>
-      <ExerciseSummaryPrintPreview
-        v-if="printSummaryOpen"
+      <component
+        :is="printSummaryComponent"
+        v-if="printSummaryOpen && printSummaryComponent"
         :items="summaryItems"
         :score="scorePercent"
         :correct-count="correctCount"

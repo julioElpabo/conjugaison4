@@ -9,6 +9,13 @@ export default defineNuxtConfig({
     },
   },
   css: ['~/assets/css/dark-theme.css'],
+  routeRules: {
+    '/_nuxt/**': {
+      headers: {
+        'cache-control': 'public, max-age=31536000, immutable',
+      },
+    },
+  },
   devtools: { enabled: true },
   runtimeConfig: {
     dbHost: process.env.NUXT_DB_HOST || process.env.DB_HOST,
@@ -51,6 +58,13 @@ export default defineNuxtConfig({
     },
   },
   hooks: {
+    'build:manifest'(manifest) {
+      // Les outils optionnels (impression, visite, administration) restent
+      // importés à la demande sans être téléchargés spéculativement à l'accueil.
+      for (const entry of Object.values(manifest)) {
+        if (entry.dynamicImports) entry.dynamicImports = []
+      }
+    },
     'pages:extend'(pages) {
       const modeTensePage = pages.find(page => page.file?.endsWith('/app/pages/modes/[mode]/[temps].vue'))
       if (modeTensePage?.file) {

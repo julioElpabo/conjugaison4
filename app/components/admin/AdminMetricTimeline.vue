@@ -24,7 +24,7 @@ const metricOptions: MetricOption[] = [
   { value: 'answer_submitted', label: 'Réponses envoyées', group: 'Apprentissage', color: '#d28a2d' },
   { value: 'answer_correct', label: 'Réponses correctes', group: 'Apprentissage', color: '#2b9767' },
   { value: 'answer_retry', label: 'Nouvelles tentatives', group: 'Apprentissage', color: '#168eaa' },
-  { value: 'help_opened', label: 'Aides ouvertes', group: 'Apprentissage', color: '#6251a5' },
+  { value: 'help_scrolled', label: 'Aides parcourues', group: 'Apprentissage', color: '#6251a5' },
   { value: 'challenge_preset_selected', label: 'Défis tout faits choisis', group: 'Défis et outils', color: '#7351a6' },
   { value: 'challenge_load', label: 'Défis chargés', group: 'Défis et outils', color: '#168eaa' },
   { value: 'challenge_save', label: 'Défis enregistrés', group: 'Défis et outils', color: '#d28a2d' },

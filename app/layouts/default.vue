@@ -43,8 +43,31 @@ const contactDialog = ref<{ open: () => void } | null>(null)
 const mountainBackdrop = ref<HTMLElement | null>(null)
 let parallaxFrame = 0
 let headerLanguageCloseTimer: number | undefined
+const nightStarsSvg = `<g class="night-stars night-stars--a">
+  <circle cx="548" cy="565" r="1.15"/><circle cx="614" cy="618" r=".75"/><circle cx="690" cy="554" r="1.05"/><circle cx="774" cy="644" r=".7"/><circle cx="853" cy="578" r="1.2"/><circle cx="951" cy="625" r=".8"/><circle cx="1042" cy="557" r=".65"/><circle cx="1148" cy="604" r="1.05"/><circle cx="1220" cy="566" r=".8"/>
+</g><g class="night-stars night-stars--b">
+  <circle cx="570" cy="674" r=".65"/><circle cx="646" cy="584" r=".85"/><circle cx="731" cy="610" r="1.15"/><circle cx="812" cy="550" r=".7"/><circle cx="895" cy="667" r=".9"/><circle cx="985" cy="583" r="1.1"/><circle cx="1080" cy="647" r=".7"/><circle cx="1178" cy="548" r="1.2"/><circle cx="1241" cy="652" r=".65"/>
+</g><g class="night-stars night-stars--c">
+  <circle cx="532" cy="629" r=".8"/><circle cx="596" cy="545" r=".65"/><circle cx="667" cy="690" r="1.1"/><circle cx="752" cy="571" r=".8"/><circle cx="835" cy="615" r=".65"/><circle cx="922" cy="546" r="1"/><circle cx="1011" cy="689" r=".75"/><circle cx="1105" cy="577" r=".9"/><circle cx="1204" cy="621" r="1.15"/><circle cx="1252" cy="590" r=".65"/>
+</g>`
 const mountainSvg = mountainSvgSource
-  .replace('<g id="OBJECTS" style="clip-path:url(#clippath)">', '<g id="OBJECTS" style="clip-path:url(#clippath)"><g class="mountain-layer mountain-layer--far">')
+  .replace('<defs>', `<defs>
+    <linearGradient id="night-far-gradient" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#5f8295"/><stop offset="1" stop-color="#294359"/>
+    </linearGradient>
+    <linearGradient id="night-middle-gradient" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#4b7083"/><stop offset="1" stop-color="#1e3a50"/>
+    </linearGradient>
+    <linearGradient id="night-near-gradient" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#3b6174"/><stop offset="1" stop-color="#153044"/>
+    </linearGradient>
+    <linearGradient id="night-front-gradient" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#2c5264"/><stop offset="1" stop-color="#0c2638"/>
+    </linearGradient>
+    <linearGradient id="night-trees-gradient" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#153746"/><stop offset="1" stop-color="#040e17"/>
+    </linearGradient>`)
+  .replace('<g id="OBJECTS" style="clip-path:url(#clippath)">', `${nightStarsSvg}<g id="OBJECTS" style="clip-path:url(#clippath)"><g class="mountain-layer mountain-layer--far">`)
   .replace('<path d="m1271.29 743.13', '</g><g class="mountain-layer mountain-layer--middle"><path d="m1271.29 743.13')
   .replace('<path d="M481.29 871.29', '</g><g class="mountain-layer mountain-layer--near"><path d="M481.29 871.29')
   .replace('<path d="M1129.96 997.64', '</g><g class="mountain-layer mountain-layer--front"><path d="M1129.96 997.64')
@@ -276,7 +299,7 @@ const activeSection = computed(() => {
 </script>
 
 <template>
-  <div class="site-shell" :class="{ 'site-shell--embedded': embeddedConsultation, 'site-shell--falc': falcMode }">
+  <div class="site-shell" :class="{ 'site-shell--embedded': embeddedConsultation, 'site-shell--falc': falcMode, 'site-shell--home': isActualHomePage }">
     <div
       ref="mountainBackdrop"
       class="mountain-backdrop"
@@ -593,6 +616,11 @@ body::after {
   background: linear-gradient(180deg, rgb(247 252 251 / 52%), rgb(239 247 245 / 62%));
 }
 
+body::before {
+  opacity:1;
+  transition:opacity 1s ease-in-out;
+}
+
 body::after {
   background: linear-gradient(180deg, rgb(3 14 31 / 88%) 0%, rgb(5 24 38 / 78%) 42%, rgb(4 22 30 / 26%) 70%, transparent 100%);
   opacity: 0;
@@ -600,7 +628,14 @@ body::after {
 }
 
 :root[data-theme='dark'] body::after {
+  background:
+    radial-gradient(ellipse at 78% 12%,transparent 0 18%,rgb(1 7 15 / 7%) 52%,rgb(0 4 9 / 28%) 100%),
+    linear-gradient(180deg,rgb(0 5 13 / 3%) 0%,rgb(1 9 17 / 10%) 58%,rgb(0 5 10 / 31%) 100%);
   opacity: 1;
+}
+
+:root[data-theme='dark'] body::before {
+  opacity:0;
 }
 
 ::view-transition-old(root),
@@ -615,8 +650,19 @@ body::after {
     will-change: auto;
   }
 
+  :root[data-theme='dark'] .site-shell--home .mountain-backdrop .night-stars circle {
+    opacity: .78;
+    animation: none;
+    filter: drop-shadow(0 0 2px rgb(205 238 255 / 65%));
+  }
+
   body::after {
     transition: none;
+  }
+
+
+  body::before {
+    transition:none;
   }
 
   .header-language-menu__panel,
@@ -662,8 +708,45 @@ a {
   --mountain-trees-y: 0px;
 }
 
+.mountain-backdrop::before,
+.mountain-backdrop::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.mountain-backdrop::before {
+  z-index: 0;
+  background:
+    radial-gradient(circle at 80% 11%,rgb(226 238 246 / 92%) 0 17px,rgb(171 202 223 / 52%) 18px 20px,transparent 22px),
+    radial-gradient(circle at 11% 14%, rgb(210 231 255 / 72%) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 29% 8%, rgb(190 220 255 / 55%) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 47% 19%, rgb(225 239 255 / 58%) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 68% 9%, rgb(203 229 255 / 68%) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 86% 22%, rgb(181 216 255 / 48%) 0 1px, transparent 1.6px),
+    radial-gradient(ellipse at 80% 13%,rgb(145 187 218 / 28%) 0,transparent 34%),
+    linear-gradient(180deg,#07111f 0%,#102536 50%,#183744 100%);
+}
+
+.mountain-backdrop::after {
+  z-index: 2;
+  background:
+    radial-gradient(ellipse at 79% 23%,rgb(157 197 220 / 13%) 0,transparent 43%),
+    linear-gradient(180deg,transparent 24%,rgb(116 157 174 / 5%) 46%,rgb(101 153 164 / 14%) 68%,transparent 94%),
+    radial-gradient(ellipse at 50% 69%,rgb(122 171 178 / 12%) 0,transparent 65%);
+}
+
+:root[data-theme='dark'] .mountain-backdrop::before,
+:root[data-theme='dark'] .mountain-backdrop::after {
+  opacity: 1;
+}
+
 .mountain-backdrop > svg {
   position: absolute;
+  z-index: 1;
   inset: -180px -8vw;
   width: 116vw;
   height: calc(100vh + 360px);
@@ -672,6 +755,47 @@ a {
 
 .mountain-backdrop .mountain-layer {
   will-change: transform;
+}
+
+.mountain-backdrop .night-stars { opacity: 0; }
+
+:root[data-theme='dark'] .site-shell--home .mountain-backdrop .night-stars {
+  opacity: 1;
+}
+
+:root[data-theme='dark'] .site-shell--home .mountain-backdrop .night-stars circle {
+  fill: #d8efff;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: night-star-twinkle 3.8s ease-in-out infinite alternate;
+}
+
+:root[data-theme='dark'] .site-shell--home .mountain-backdrop .night-stars--b circle {
+  fill: #b9deef;
+  animation-duration: 5.1s;
+  animation-delay: -2.3s;
+}
+
+:root[data-theme='dark'] .site-shell--home .mountain-backdrop .night-stars--c circle {
+  fill: #e8f5ff;
+  animation-duration: 4.4s;
+  animation-delay: -3.1s;
+}
+
+:root[data-theme='dark'] .site-shell--home .mountain-backdrop .night-stars circle:nth-child(3n + 2) {
+  animation-duration: 2.9s;
+  animation-delay: -1.7s;
+}
+
+:root[data-theme='dark'] .site-shell--home .mountain-backdrop .night-stars circle:nth-child(3n) {
+  animation-duration: 6.2s;
+  animation-delay: -4.1s;
+}
+
+@keyframes night-star-twinkle {
+  0%, 24% { opacity: .24; transform: scale(.72); filter: drop-shadow(0 0 0 transparent); }
+  58% { opacity: .62; transform: scale(1); filter: drop-shadow(0 0 1px rgb(190 229 255 / 52%)); }
+  100% { opacity: 1; transform: scale(1.28); filter: drop-shadow(0 0 3px rgb(205 238 255 / 88%)); }
 }
 
 .mountain-backdrop .mountain-layer--far {
@@ -696,6 +820,108 @@ a {
 
 .mountain-backdrop .mountain-layer--trees {
   transform: translateY(var(--mountain-trees-y));
+}
+
+/* La nuit est construite par plans de luminance. Les facettes internes du SVG
+   prennent la couleur de leur plan : aucun faux contour ne subsiste. */
+:root[data-theme='dark'] .mountain-backdrop {
+  background:#07111f;
+}
+
+:root[data-theme='dark'] .mountain-backdrop #BACKGROUND {
+  fill:transparent !important;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer path {
+  stroke:none !important;
+  stroke-width:0 !important;
+  mix-blend-mode:normal !important;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer circle {
+  display:none;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--far {
+  opacity:.82;
+  filter:none;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--far path {
+  fill:url(#night-far-gradient) !important;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--far path:nth-child(2) {
+  fill:url(#night-far-gradient) !important;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--far .st15 {
+  fill:#172e42 !important;
+  opacity:.14 !important;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--middle {
+  opacity:.88;
+  filter:none;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--middle path {
+  fill:url(#night-middle-gradient) !important;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--middle .st3 {
+  fill:#adc5d2 !important;
+  opacity:.08 !important;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--middle .st15 {
+  fill:#102638 !important;
+  opacity:.13 !important;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--near {
+  opacity:.94;
+  filter:blur(.22px);
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--near path {
+  fill:url(#night-near-gradient) !important;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--near path:nth-of-type(2) {
+  fill:#10283b !important;
+  opacity:.32 !important;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--near .st3 {
+  fill:#9fb9c7 !important;
+  opacity:.07 !important;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--front path {
+  fill:url(#night-front-gradient) !important;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--front path:nth-of-type(2) {
+  fill:#91aeba !important;
+  opacity:.06 !important;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--front path:nth-of-type(3) {
+  fill:url(#night-front-gradient) !important;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--clouds {
+  opacity:.12;
+  filter:blur(2.6px);
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--clouds path {
+  fill:#abc6d7 !important;
+}
+
+:root[data-theme='dark'] .mountain-backdrop .mountain-layer--trees path {
+  fill:url(#night-trees-gradient) !important;
 }
 
 .site-header {
@@ -1269,6 +1495,36 @@ a {
 .falc-confirmation__cancel { color: var(--brand-dark); border: 2px solid #b7cacd; background: white; }
 .falc-confirmation__confirm { color: white; border: 2px solid var(--brand); background: var(--brand); }
 .falc-confirmation__actions button:focus-visible { outline: 4px solid rgb(229 139 43 / 50%); outline-offset: 3px; }
+
+:root[data-theme='dark'] .falc-confirmation {
+  background: rgb(2 12 19 / 78%);
+}
+
+:root[data-theme='dark'] .falc-confirmation > section {
+  color: #dce8e6;
+  border-color: #527b7d;
+  background: #172725;
+  box-shadow: 0 30px 90px rgb(0 0 0 / 62%), 0 0 36px rgb(91 173 172 / 8%);
+}
+
+:root[data-theme='dark'] .falc-confirmation h2 { color: #b9e5df; }
+:root[data-theme='dark'] .falc-confirmation p { color: #b5c7c5; }
+
+:root[data-theme='dark'] .falc-confirmation__cancel {
+  color: #d1e4e2;
+  border-color: #52706d;
+  background: #223432;
+}
+
+:root[data-theme='dark'] .falc-confirmation__cancel:hover { border-color: #75aaa6; background: #2b403d; }
+
+:root[data-theme='dark'] .falc-confirmation__confirm {
+  color: #092d2b;
+  border-color: #82c9c0;
+  background: #82c9c0;
+}
+
+:root[data-theme='dark'] .falc-confirmation__confirm:hover { border-color: #a2ddd6; background: #9ad8d0; }
 
 .site-navigation .site-login-button {
   min-height: 2rem;

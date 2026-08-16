@@ -1,529 +1,138 @@
 <script setup lang="ts">
-import type {
-  AnalyticsActorFilter,
-  AnalyticsResponse,
-  AnalyticsUserActivityWindow,
-  AnalyticsUsersResponse,
-  AnalyticsUsageResponse,
-  AnalyticsWindow,
-} from '../../../shared/types/analytics'
-import AdminStatsProgression from '~/components/admin/AdminStatsProgression.vue'
+import type { AnalyticsActorFilter, AnalyticsProductResponse, AnalyticsResponse, AnalyticsUserActivityWindow, AnalyticsUsersResponse, AnalyticsUsageResponse } from '../../../shared/types/analytics'
 import { getAdminErrorMessage } from '~/composables/useAdminAuth'
 
-const { ui } = useLanguagePreferences()
+type StatsTab = 'now' | 'overview' | 'challenges' | 'exercises' | 'print' | 'accessibility' | 'accounts' | 'usage'
+type ProductTab = Extract<StatsTab, 'challenges' | 'exercises' | 'print' | 'accessibility'>
 const { user, handleUnauthorized } = useAdminAuth()
+const activeTab = ref<StatsTab>('overview')
 const stats = ref<AnalyticsResponse | null>(null)
 const usage = ref<AnalyticsUsageResponse | null>(null)
-const userUsage = ref<AnalyticsUsersResponse | null>(null)
+const users = ref<AnalyticsUsersResponse | null>(null)
+const product = ref<AnalyticsProductResponse | null>(null)
 const loading = ref(false)
-const dashboardLoading = ref(false)
-const usageLoading = ref(false)
-const userUsageLoading = ref(false)
 const error = ref('')
-const dashboardError = ref('')
-const usageError = ref('')
-const userUsageError = ref('')
-const usageActor = ref<AnalyticsActorFilter>('all')
-const usageView = ref<'product' | 'users'>('product')
+const actor = ref<AnalyticsActorFilter>('all')
 const userActivityWindow = ref<AnalyticsUserActivityWindow>('month')
-const activeTab = ref<'dashboard' | 'realtime' | 'range' | 'usage'>('dashboard')
-const rangeView = ref<'summary' | 'progression'>('summary')
-type StatsTheme = 'summary' | 'audience' | 'pedagogy' | 'usage'
-const activeTheme = ref<StatsTheme>('summary')
-const timelineMetric = ref('page_view')
-const realtimeWindow = ref<Exclude<AnalyticsWindow, 'range'>>('30m')
-const selectedWindow = ref<AnalyticsWindow>('30m')
-const realtimeMenuOpen = ref(false)
-const realtimeMenu = ref<HTMLElement | null>(null)
-const visibleStats = computed(() => stats.value?.window === selectedWindow.value ? stats.value : null)
-const dashboardReady = computed(() => (
-  stats.value?.window === 'range'
-  && stats.value.startDate === startDate.value
-  && stats.value.endDate === endDate.value
-  && usage.value?.startDate === startDate.value
-  && usage.value.endDate === endDate.value
-  && userUsage.value?.startDate === startDate.value
-  && userUsage.value.endDate === endDate.value
-  && userUsage.value.activityWindow === userActivityWindow.value
-))
-const realtimeOptions: Array<{ value: Exclude<AnalyticsWindow, 'range' | '5m'>, label: string }> = [
-  { value: 'now', label: 'Maintenant' },
-  { value: '3m', label: '3 dernières minutes' },
-  { value: '30m', label: '30 dernières minutes' },
-]
-const selectedRealtimeLabel = computed(() => (
-  realtimeOptions.find(option => option.value === realtimeWindow.value)?.label || '30 dernières minutes'
-))
-const statsThemes: Array<{ id: StatsTheme, label: string, number: string }> = [
-  { id: 'summary', label: 'Synthèse générale', number: '01' },
-  { id: 'audience', label: 'Audience et géographie', number: '02' },
-  { id: 'pedagogy', label: 'Analyse pédagogique', number: '03' },
-  { id: 'usage', label: 'Usage des fonctionnalités', number: '04' },
-]
 const today = new Date().toISOString().slice(0, 10)
-const startDate = ref(offsetDate(-6))
+const startDate = ref(offsetDate(-29))
 const endDate = ref(today)
-const rangePresets = [
-  { days: 1, label: 'Aujourd’hui' },
-  { days: 7, label: '7 jours' },
-  { days: 30, label: '30 jours' },
-  { days: 183, label: '6 mois' },
-  { days: 365, label: '1 an' },
-] as const
-const activePresetDays = computed(() => (
-  endDate.value === today
-    ? rangePresets.find(preset => startDate.value === offsetDate(-(preset.days - 1)))?.days
-    : undefined
-))
-let loadedForUserId: number | null = null
+let requestId = 0
 let refreshTimer: ReturnType<typeof setInterval> | undefined
-let statsRequest = 0
-let dashboardRequest = 0
-let usageRequest = 0
-let userUsageRequest = 0
+let loadedForUserId: number | null = null
 
-useHead(() => ({ title: ui('Statistiques') }))
+const tabs: Array<{ id: StatsTab, label: string, short: string }> = [
+  { id: 'now', label: 'Maintenant', short: '30 dernières minutes' },
+  { id: 'overview', label: 'Vue d’ensemble', short: 'Audience et parcours' },
+  { id: 'challenges', label: 'Défis et options', short: 'Création et habitudes' },
+  { id: 'exercises', label: 'Exercices et chat', short: 'Pratique et coachs' },
+  { id: 'print', label: 'Impression', short: 'PDF, Word et options' },
+  { id: 'accessibility', label: 'Accessibilité', short: 'Langues, FALC et visite' },
+  { id: 'accounts', label: 'Comptes', short: 'Connexions et fonctions' },
+  { id: 'usage', label: 'Usages', short: 'Section conservée' },
+]
+const rangePresets = [{ days: 7, label: '7 jours' }, { days: 30, label: '30 jours' }, { days: 90, label: '90 jours' }, { days: 365, label: '1 an' }]
+const activePreset = computed(() => endDate.value === today ? rangePresets.find(item => startDate.value === offsetDate(-(item.days - 1)))?.days : undefined)
+const isProductTab = (tab: StatsTab): tab is ProductTab => ['challenges', 'exercises', 'print', 'accessibility'].includes(tab)
+const periodReady = computed(() => stats.value?.window === 'range' && stats.value.startDate === startDate.value && stats.value.endDate === endDate.value)
+const productReady = computed(() => product.value?.startDate === startDate.value && product.value.endDate === endDate.value && product.value.actor === actor.value)
+useHead({ title: 'Statistiques' })
 
-function offsetDate(days: number) {
-  const date = new Date()
-  date.setDate(date.getDate() + days)
-  return date.toISOString().slice(0, 10)
+function offsetDate(days: number) { const date = new Date(); date.setDate(date.getDate() + days); return date.toISOString().slice(0, 10) }
+function choosePreset(days: number) { startDate.value = offsetDate(-(days - 1)); endDate.value = today; void loadActiveTab() }
+function chooseTab(tab: StatsTab) { activeTab.value = tab; void loadActiveTab(); configureRefresh() }
+
+async function loadRangeOverview() {
+  const [statsResponse, usageResponse, usersResponse] = await Promise.all([
+    $fetch<AnalyticsResponse>('/api/admin/analytics', { credentials: 'same-origin', query: { window: 'range', start: startDate.value, end: endDate.value }, timeout: 20_000 }),
+    $fetch<AnalyticsUsageResponse>('/api/admin/analytics-usage', { credentials: 'same-origin', query: { start: startDate.value, end: endDate.value, actor: 'all' }, timeout: 20_000 }),
+    $fetch<AnalyticsUsersResponse>('/api/admin/analytics-users', { credentials: 'same-origin', query: { start: startDate.value, end: endDate.value, activity: userActivityWindow.value }, timeout: 20_000 }),
+  ])
+  return { statsResponse, usageResponse, usersResponse }
 }
 
-function choosePreset(days: number) {
-  startDate.value = offsetDate(-(days - 1))
-  endDate.value = today
-  if (activeTab.value === 'dashboard') void loadDashboard()
-  else if (activeTab.value === 'usage') void loadActiveUsageView()
-  else showWindow('range')
-}
-
-function chooseTab(tab: 'dashboard' | 'realtime' | 'range' | 'usage') {
-  if (tab !== 'dashboard') {
-    dashboardRequest += 1
-    dashboardLoading.value = false
-  }
-  activeTab.value = tab
-  realtimeMenuOpen.value = false
-  if (tab === 'dashboard') void loadDashboard()
-  else if (tab === 'usage') void loadActiveUsageView()
-  else showWindow(tab === 'realtime' ? realtimeWindow.value : 'range')
-}
-
-function chooseRealtimeWindow(window: Exclude<AnalyticsWindow, 'range'>) {
-  realtimeWindow.value = window
-  activeTab.value = 'realtime'
-  realtimeMenuOpen.value = false
-  showWindow(window)
-}
-
-function toggleRealtimeMenu() {
-  if (activeTab.value !== 'realtime') {
-    activeTab.value = 'realtime'
-    showWindow(realtimeWindow.value)
-  }
-  realtimeMenuOpen.value = !realtimeMenuOpen.value
-}
-
-function showWindow(window: AnalyticsWindow) {
-  if (selectedWindow.value === window) void loadStats()
-  else selectedWindow.value = window
-}
-
-function showCustomRange() {
-  if (activeTab.value === 'dashboard') void loadDashboard()
-  else if (activeTab.value === 'usage') void loadActiveUsageView()
-  else {
-    activeTab.value = 'range'
-    showWindow('range')
-  }
-}
-
-async function loadUsage() {
+async function loadActiveTab() {
   if (!user.value) return
-  const request = ++usageRequest
-  usageLoading.value = true
-  usageError.value = ''
-  try {
-    const response = await $fetch<AnalyticsUsageResponse>('/api/admin/analytics-usage', {
-      credentials: 'same-origin',
-      query: { start: startDate.value, end: endDate.value, actor: usageActor.value },
-      timeout: 20_000,
-    })
-    if (request === usageRequest) usage.value = response
-  }
-  catch (caught) {
-    if (request === usageRequest && !handleUnauthorized(caught)) {
-      usageError.value = getAdminErrorMessage(caught, 'Impossible de charger les usages.')
-    }
-  }
-  finally {
-    if (request === usageRequest) usageLoading.value = false
-  }
-}
-
-async function loadUserUsage() {
-  if (!user.value) return
-  const request = ++userUsageRequest
-  userUsageLoading.value = true
-  userUsageError.value = ''
-  try {
-    const response = await $fetch<AnalyticsUsersResponse>('/api/admin/analytics-users', {
-      credentials: 'same-origin',
-      query: {
-        start: startDate.value,
-        end: endDate.value,
-        activity: userActivityWindow.value,
-      },
-      timeout: 20_000,
-    })
-    if (request === userUsageRequest) userUsage.value = response
-  }
-  catch (caught) {
-    if (request === userUsageRequest && !handleUnauthorized(caught)) {
-      userUsageError.value = getAdminErrorMessage(caught, 'Impossible de charger les statistiques des utilisateurs.')
-    }
-  }
-  finally {
-    if (request === userUsageRequest) userUsageLoading.value = false
-  }
-}
-
-async function loadDashboard() {
-  if (!user.value) return
-  // Invalide une éventuelle réponse du minuteur temps réel encore en vol.
-  statsRequest += 1
-  const request = ++dashboardRequest
-  dashboardLoading.value = true
-  dashboardError.value = ''
-  try {
-    const [statsResponse, usageResponse, usersResponse] = await Promise.all([
-      $fetch<AnalyticsResponse>('/api/admin/analytics', {
-        credentials: 'same-origin',
-        query: { window: 'range', start: startDate.value, end: endDate.value },
-        timeout: 20_000,
-      }),
-      $fetch<AnalyticsUsageResponse>('/api/admin/analytics-usage', {
-        credentials: 'same-origin',
-        query: { start: startDate.value, end: endDate.value, actor: 'all' },
-        timeout: 20_000,
-      }),
-      $fetch<AnalyticsUsersResponse>('/api/admin/analytics-users', {
-        credentials: 'same-origin',
-        query: {
-          start: startDate.value,
-          end: endDate.value,
-          activity: userActivityWindow.value,
-        },
-        timeout: 20_000,
-      }),
-    ])
-    if (request === dashboardRequest) {
-      stats.value = statsResponse
-      usage.value = usageResponse
-      userUsage.value = usersResponse
-    }
-  }
-  catch (caught) {
-    if (request === dashboardRequest && !handleUnauthorized(caught)) {
-      dashboardError.value = getAdminErrorMessage(caught, 'Impossible de charger le dashboard.')
-    }
-  }
-  finally {
-    if (request === dashboardRequest) dashboardLoading.value = false
-  }
-}
-
-function loadActiveUsageView() {
-  if (usageView.value === 'users') return loadUserUsage()
-  return loadUsage()
-}
-
-function chooseUsageView(view: 'product' | 'users') {
-  usageView.value = view
-  void loadActiveUsageView()
-}
-
-function refreshActiveTab() {
-  if (activeTab.value === 'dashboard') void loadDashboard()
-  else if (activeTab.value === 'usage') void loadActiveUsageView()
-  else void loadStats()
-}
-
-async function loadStats() {
-  if (!user.value) return
-  const request = ++statsRequest
+  const request = ++requestId
   loading.value = true
   error.value = ''
   try {
-    const response = await $fetch<AnalyticsResponse>('/api/admin/analytics', {
-      credentials: 'same-origin',
-      query: { window: selectedWindow.value, start: startDate.value, end: endDate.value },
-      timeout: 20_000,
-    })
-    if (request === statsRequest) stats.value = response
-  }
-  catch (caught) {
-    if (request === statsRequest && !handleUnauthorized(caught)) error.value = getAdminErrorMessage(caught, ui('Impossible de charger les statistiques.'))
-  }
-  finally {
-    if (request === statsRequest) loading.value = false
-  }
+    if (activeTab.value === 'now') {
+      const response = await $fetch<AnalyticsResponse>('/api/admin/analytics', { credentials: 'same-origin', query: { window: '30m' }, timeout: 20_000 })
+      if (request === requestId) stats.value = response
+    } else if (activeTab.value === 'overview') {
+      const response = await loadRangeOverview()
+      if (request === requestId) { stats.value = response.statsResponse; usage.value = response.usageResponse; users.value = response.usersResponse }
+    } else if (isProductTab(activeTab.value)) {
+      const response = await $fetch<AnalyticsProductResponse>('/api/admin/analytics-product', { credentials: 'same-origin', query: { start: startDate.value, end: endDate.value, actor: actor.value }, timeout: 20_000 })
+      if (request === requestId) product.value = response
+    } else if (activeTab.value === 'accounts') {
+      const response = await $fetch<AnalyticsUsersResponse>('/api/admin/analytics-users', { credentials: 'same-origin', query: { start: startDate.value, end: endDate.value, activity: userActivityWindow.value }, timeout: 20_000 })
+      if (request === requestId) users.value = response
+    } else {
+      const response = await $fetch<AnalyticsUsageResponse>('/api/admin/analytics-usage', { credentials: 'same-origin', query: { start: startDate.value, end: endDate.value, actor: actor.value }, timeout: 20_000 })
+      if (request === requestId) usage.value = response
+    }
+  } catch (caught) {
+    if (request === requestId && !handleUnauthorized(caught)) error.value = getAdminErrorMessage(caught, 'Impossible de charger ces statistiques.')
+  } finally { if (request === requestId) loading.value = false }
 }
 
 function configureRefresh() {
   if (refreshTimer) clearInterval(refreshTimer)
   refreshTimer = undefined
-  if (activeTab.value === 'realtime' && (!import.meta.client || !document.hidden)) {
-    refreshTimer = setInterval(() => void loadStats(), 30_000)
-  }
+  if (activeTab.value === 'now' && (!import.meta.client || !document.hidden)) refreshTimer = setInterval(() => void loadActiveTab(), 60_000)
 }
-
-function handleVisibilityChange() {
-  configureRefresh()
-  if (!document.hidden && activeTab.value === 'realtime') void loadStats()
-}
-
-function handleDocumentPointerDown(event: PointerEvent) {
-  if (realtimeMenuOpen.value && !realtimeMenu.value?.contains(event.target as Node)) realtimeMenuOpen.value = false
-}
-
-function handleDocumentKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') realtimeMenuOpen.value = false
-}
-
-watch(selectedWindow, () => { configureRefresh(); void loadStats() })
-watch(activeTab, configureRefresh)
-watch(usageActor, () => {
-  if (activeTab.value === 'usage' && usageView.value === 'product') void loadUsage()
-})
-watch(userActivityWindow, () => {
-  if (activeTab.value === 'dashboard') void loadDashboard()
-  else if (activeTab.value === 'usage' && usageView.value === 'users') void loadUserUsage()
-})
-watch(user, (currentUser) => {
-  if (!currentUser) { loadedForUserId = null; return }
-  if (loadedForUserId !== currentUser.id) {
-    loadedForUserId = currentUser.id
-    refreshActiveTab()
-  }
-}, { immediate: true })
-onMounted(() => {
-  configureRefresh()
-  document.addEventListener('visibilitychange', handleVisibilityChange)
-  document.addEventListener('pointerdown', handleDocumentPointerDown)
-  document.addEventListener('keydown', handleDocumentKeydown)
-})
-onBeforeUnmount(() => {
-  if (refreshTimer) clearInterval(refreshTimer)
-  document.removeEventListener('visibilitychange', handleVisibilityChange)
-  document.removeEventListener('pointerdown', handleDocumentPointerDown)
-  document.removeEventListener('keydown', handleDocumentKeydown)
-})
+function handleVisibility() { configureRefresh(); if (!document.hidden && activeTab.value === 'now') void loadActiveTab() }
+watch(actor, () => { if (isProductTab(activeTab.value) || activeTab.value === 'usage') void loadActiveTab() })
+watch(userActivityWindow, () => { if (activeTab.value === 'accounts' || activeTab.value === 'overview') void loadActiveTab() })
+watch(user, (current) => { if (!current) { loadedForUserId = null; return }; if (loadedForUserId !== current.id) { loadedForUserId = current.id; void loadActiveTab() } }, { immediate: true })
+onMounted(() => { configureRefresh(); document.addEventListener('visibilitychange', handleVisibility) })
+onBeforeUnmount(() => { if (refreshTimer) clearInterval(refreshTimer); document.removeEventListener('visibilitychange', handleVisibility) })
 </script>
 
 <template>
-  <AdminAuthBoundary>
-    <AdminShell>
-      <div class="charts-page">
-        <header class="admin-section-heading charts-page__heading">
-          <h1>Statistiques</h1>
-          <div class="stats-tabs" role="tablist" aria-label="Type de statistiques">
-            <button id="stats-tab-dashboard" type="button" role="tab" :aria-selected="activeTab === 'dashboard'" aria-controls="stats-panel-dashboard" :class="{ active: activeTab === 'dashboard' }" @click="chooseTab('dashboard')">
-              <strong>Dashboard</strong>
-              <small>Indicateurs et constats à suivre</small>
-            </button>
-            <div ref="realtimeMenu" class="stats-tabs__dropdown">
-              <button
-                id="stats-tab-realtime"
-                type="button"
-                role="tab"
-                :aria-selected="activeTab === 'realtime'"
-                aria-controls="stats-panel-realtime"
-                aria-haspopup="menu"
-                :aria-expanded="realtimeMenuOpen"
-                :class="{ active: activeTab === 'realtime' }"
-                @click="toggleRealtimeMenu"
-              >
-                <span class="stats-tabs__pulse" aria-hidden="true" />
-                <span><strong>Aperçu en temps réel</strong><small>{{ selectedRealtimeLabel }}</small></span>
-                <span class="stats-tabs__chevron" aria-hidden="true">⌄</span>
-              </button>
-              <div v-if="realtimeMenuOpen" class="realtime-menu" role="menu" aria-label="Période du temps réel">
-                <button
-                  v-for="option in realtimeOptions"
-                  :key="option.value"
-                  type="button"
-                  role="menuitemradio"
-                  :aria-checked="realtimeWindow === option.value"
-                  :class="{ active: realtimeWindow === option.value }"
-                  @click="chooseRealtimeWindow(option.value)"
-                >
-                  <span>{{ option.label }}</span><i aria-hidden="true">{{ realtimeWindow === option.value ? '✓' : '' }}</i>
-                </button>
-              </div>
-            </div>
-            <button id="stats-tab-range" type="button" role="tab" :aria-selected="activeTab === 'range'" aria-controls="stats-panel-range" :class="{ active: activeTab === 'range' }" @click="chooseTab('range')">
-              <strong>Durée particulière</strong>
-              <small>Semaine, mois, année ou dates libres</small>
-            </button>
-            <button id="stats-tab-usage" type="button" role="tab" :aria-selected="activeTab === 'usage'" aria-controls="stats-panel-usage" :class="{ active: activeTab === 'usage' }" @click="chooseTab('usage')">
-              <strong>Usages</strong>
-              <small>Fonctions et défis à conserver ou retirer</small>
-            </button>
-          </div>
-          <button class="admin-button" type="button" :disabled="loading || dashboardLoading || usageLoading || userUsageLoading" @click="refreshActiveTab">
-            {{ loading || dashboardLoading || usageLoading || userUsageLoading ? 'Actualisation…' : 'Actualiser' }}
-          </button>
-        </header>
-
-        <div
-          :id="`stats-panel-${activeTab}`"
-          class="stats-workspace"
-          :class="`stats-workspace--${activeTab}`"
-          role="tabpanel"
-          :aria-labelledby="`stats-tab-${activeTab}`"
-        >
-          <aside v-if="activeTab === 'realtime'" class="stats-sidebar stats-sidebar--realtime">
-            <div class="stats-sidebar__status">
-              <p class="admin-eyebrow">Temps réel</p>
-              <strong>{{ selectedRealtimeLabel }}</strong>
-              <p class="live-status"><i /> Actualisation toutes les 30 secondes</p>
-            </div>
-            <nav class="stats-theme-menu" role="tablist" aria-label="Thèmes du temps réel" aria-orientation="vertical">
-              <button
-                v-for="theme in statsThemes"
-                :id="`realtime-theme-tab-${theme.id}`"
-                :key="theme.id"
-                type="button"
-                role="tab"
-                :aria-selected="activeTheme === theme.id"
-                :class="{ active: activeTheme === theme.id }"
-                @click="activeTheme = theme.id"
-              >
-                <span>{{ theme.number }}</span><strong>{{ theme.label }}</strong>
-              </button>
-            </nav>
-          </aside>
-
-          <main class="stats-content">
-            <template v-if="activeTab === 'dashboard'">
-              <div v-if="dashboardLoading && !dashboardReady" class="charts-page__loading" role="status"><span class="admin-spinner" aria-hidden="true" /><p>Préparation du dashboard…</p></div>
-              <div v-else-if="dashboardError && !dashboardReady" class="charts-page__loading"><p class="admin-notice admin-notice--error" role="alert">{{ dashboardError }}</p><button class="admin-button" type="button" @click="loadDashboard">Réessayer</button></div>
-              <template v-else-if="dashboardReady && stats && usage && userUsage">
-                <p v-if="dashboardError" class="admin-notice admin-notice--error" role="alert">{{ dashboardError }}</p>
-                <AdminIntelligentDashboard :stats="stats" :usage="usage" :users="userUsage" />
-                <p class="updated-at">Dernière actualisation : {{ new Date(stats.local.generatedAt).toLocaleTimeString('fr-CH') }}</p>
-              </template>
-              <div v-else class="charts-page__loading">
-                <p>Les données du dashboard doivent être actualisées.</p>
-                <button class="admin-button" type="button" @click="loadDashboard">Actualiser le dashboard</button>
-              </div>
-            </template>
-            <template v-else-if="activeTab === 'usage'">
-              <nav class="usage-view-tabs" role="tablist" aria-label="Type d’usage analysé">
-                <button type="button" role="tab" :aria-selected="usageView === 'product'" :class="{ active: usageView === 'product' }" @click="chooseUsageView('product')">
-                  Défis et fonctionnalités
-                </button>
-                <button type="button" role="tab" :aria-selected="usageView === 'users'" :class="{ active: usageView === 'users' }" @click="chooseUsageView('users')">
-                  Utilisateurs
-                </button>
-              </nav>
-              <template v-if="usageView === 'users'">
-                <div v-if="userUsageLoading && !userUsage" class="charts-page__loading" role="status"><span class="admin-spinner" aria-hidden="true" /><p>Analyse des utilisateurs…</p></div>
-                <div v-else-if="userUsageError && !userUsage" class="charts-page__loading"><p class="admin-notice admin-notice--error" role="alert">{{ userUsageError }}</p><button class="admin-button" type="button" @click="loadUserUsage">Réessayer</button></div>
-                <template v-else-if="userUsage">
-                  <p v-if="userUsageError" class="admin-notice admin-notice--error" role="alert">{{ userUsageError }}</p>
-                  <AdminUserUsageDashboard v-model:activity-window="userActivityWindow" :users="userUsage" />
-                  <p class="updated-at">Dernière actualisation : {{ new Date(userUsage.generatedAt).toLocaleTimeString('fr-CH') }}</p>
-                </template>
-              </template>
-              <template v-else>
-                <div v-if="usageLoading && !usage" class="charts-page__loading" role="status"><span class="admin-spinner" aria-hidden="true" /><p>Analyse des usages…</p></div>
-                <div v-else-if="usageError && !usage" class="charts-page__loading"><p class="admin-notice admin-notice--error" role="alert">{{ usageError }}</p><button class="admin-button" type="button" @click="loadUsage">Réessayer</button></div>
-                <template v-else-if="usage">
-                  <p v-if="usageError" class="admin-notice admin-notice--error" role="alert">{{ usageError }}</p>
-                  <AdminUsageDashboard v-model:actor="usageActor" :usage="usage" />
-                  <p class="updated-at">Dernière actualisation : {{ new Date(usage.generatedAt).toLocaleTimeString('fr-CH') }}</p>
-                </template>
-              </template>
-            </template>
-            <div v-else-if="loading && !visibleStats" class="charts-page__loading" role="status"><span class="admin-spinner" aria-hidden="true" /><p>Chargement des statistiques…</p></div>
-            <div v-else-if="error && !visibleStats" class="charts-page__loading"><p class="admin-notice admin-notice--error" role="alert">{{ error }}</p><button class="admin-button" type="button" @click="loadStats">Réessayer</button></div>
-            <template v-else-if="visibleStats">
-              <p v-if="error" class="admin-notice admin-notice--error" role="alert">{{ error }}</p>
-              <AdminMetricTimeline v-model:metric="timelineMetric" :stats="visibleStats" />
-              <AdminStatsProgression v-if="activeTab === 'range' && rangeView === 'progression'" v-model:theme="activeTheme" :stats="visibleStats" />
-              <AdminStatsDashboard v-else v-model:theme="activeTheme" :stats="visibleStats" />
-              <p class="updated-at">Dernière actualisation : {{ new Date(visibleStats.local.generatedAt).toLocaleTimeString('fr-CH') }}</p>
-            </template>
-          </main>
-
-          <aside v-if="activeTab === 'dashboard' || activeTab === 'range' || activeTab === 'usage'" class="stats-sidebar stats-sidebar--range">
-            <section class="period-picker">
-              <div>
-                <p class="admin-eyebrow">Plage de temps</p>
-                <h2>Durée analysée</h2>
-              </div>
-              <div class="period-picker__presets">
-                <button
-                  v-for="preset in rangePresets"
-                  :key="preset.days"
-                  type="button"
-                  :class="{ active: activePresetDays === preset.days }"
-                  :aria-pressed="activePresetDays === preset.days"
-                  @click="choosePreset(preset.days)"
-                >
-                  {{ preset.label }}
-                </button>
-              </div>
-              <form class="period-picker__custom" @submit.prevent="showCustomRange">
-                <label><span>Du</span><input v-model="startDate" type="date" :max="endDate"></label>
-                <label><span>Au</span><input v-model="endDate" type="date" :min="startDate" :max="today"></label>
-                <button class="admin-button" type="submit">Afficher</button>
-              </form>
-              <div v-if="activeTab === 'range'" class="range-view" role="group" aria-label="Présentation des statistiques">
-                <button type="button" :class="{ active: rangeView === 'summary' }" :aria-pressed="rangeView === 'summary'" @click="rangeView = 'summary'">
-                  <strong>Synthèse</strong><small>Totaux de la durée</small>
-                </button>
-                <button type="button" :class="{ active: rangeView === 'progression' }" :aria-pressed="rangeView === 'progression'" @click="rangeView = 'progression'">
-                  <strong>Progression</strong><small>Évolution temporelle</small>
-                </button>
-              </div>
-            </section>
-            <nav v-if="activeTab === 'range'" class="stats-theme-menu" role="tablist" aria-label="Thèmes de la période" aria-orientation="vertical">
-              <button
-                v-for="theme in statsThemes"
-                :id="`range-theme-tab-${theme.id}`"
-                :key="theme.id"
-                type="button"
-                role="tab"
-                :aria-selected="activeTheme === theme.id"
-                :class="{ active: activeTheme === theme.id }"
-                @click="activeTheme = theme.id"
-              >
-                <span>{{ theme.number }}</span><strong>{{ theme.label }}</strong>
-              </button>
-            </nav>
-          </aside>
-        </div>
-      </div>
-    </AdminShell>
-  </AdminAuthBoundary>
+  <AdminAuthBoundary><AdminShell><div class="analytics-page">
+    <header class="analytics-heading"><h1>Statistiques</h1><button class="admin-button" type="button" :disabled="loading" @click="loadActiveTab">{{ loading ? 'Actualisation…' : 'Actualiser' }}</button></header>
+    <nav class="analytics-tabs" role="tablist" aria-label="Sections statistiques">
+      <button v-for="tab in tabs" :id="`analytics-tab-${tab.id}`" :key="tab.id" type="button" role="tab" :aria-selected="activeTab === tab.id" :aria-controls="`analytics-panel-${tab.id}`" :class="{ active: activeTab === tab.id }" @click="chooseTab(tab.id)"><strong>{{ tab.label }}</strong><small>{{ tab.short }}</small></button>
+    </nav>
+    <section v-if="activeTab !== 'now'" class="analytics-filters admin-card" aria-label="Filtres statistiques">
+      <div class="analytics-presets"><button v-for="preset in rangePresets" :key="preset.days" type="button" :class="{ active: activePreset === preset.days }" @click="choosePreset(preset.days)">{{ preset.label }}</button></div>
+      <label><span>Du</span><input v-model="startDate" type="date" :max="endDate" @change="loadActiveTab"></label><label><span>Au</span><input v-model="endDate" type="date" :min="startDate" :max="today" @change="loadActiveTab"></label>
+      <label v-if="isProductTab(activeTab) || activeTab === 'usage'"><span>Population</span><select v-model="actor"><option value="all">Tous</option><option value="anonymous">Anonymes</option><option value="learner">Connectés</option></select></label>
+    </section>
+    <p v-if="error" class="admin-notice admin-notice--error" role="alert">{{ error }} <button class="admin-button admin-button--small" type="button" @click="loadActiveTab">Réessayer</button></p>
+    <div v-if="loading && !error" class="analytics-loading" role="status"><span class="admin-spinner"/><p>Chargement des données…</p></div>
+    <main v-show="!loading || Boolean(error)" :id="`analytics-panel-${activeTab}`" role="tabpanel" :aria-labelledby="`analytics-tab-${activeTab}`">
+      <template v-if="activeTab === 'now'"><div v-if="stats?.window === '30m'" class="analytics-live-status"><i/><strong>30 dernières minutes</strong><span>Actualisation toutes les 60 secondes · {{ new Date(stats.local.generatedAt).toLocaleTimeString('fr-CH') }}</span></div><AdminStatsDashboard v-if="stats?.window === '30m'" :stats="stats" theme="audience" geo-map-comparison /></template>
+      <template v-else-if="activeTab === 'overview' && periodReady && stats && usage && users"><AdminStatsDashboard class="analytics-overview-audience" :stats="stats" theme="audience" geo-map-comparison audience-display="maps" /><AdminIntelligentDashboard :stats="stats" :usage="usage" :users="users" /><AdminStatsDashboard class="analytics-overview-audience" :stats="stats" theme="audience" audience-display="details" /></template>
+      <AdminProductAnalyticsDashboard v-else-if="isProductTab(activeTab) && productReady && product" :product="product" :view="activeTab" />
+      <AdminUserUsageDashboard v-else-if="activeTab === 'accounts' && users" v-model:activity-window="userActivityWindow" :users="users" />
+      <AdminUsageDashboard v-else-if="activeTab === 'usage' && usage" v-model:actor="actor" :usage="usage" />
+      <div v-else class="analytics-empty"><p>Actualisez cet onglet pour afficher ses données.</p><button class="admin-button" type="button" @click="loadActiveTab">Actualiser</button></div>
+    </main>
+  </div></AdminShell></AdminAuthBoundary>
 </template>
 
 <style scoped>
-.charts-page{display:grid;gap:20px}.charts-page__heading{display:grid;grid-template-columns:auto minmax(460px,720px) auto;align-items:center;gap:24px}.charts-page__heading h1{margin:0}.stats-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-self:center;width:100%;gap:8px}.stats-tabs__dropdown{position:relative;min-width:0}.stats-tabs>button,.stats-tabs__dropdown>button{display:grid;position:relative;width:100%;min-height:62px;padding:9px 16px;align-content:center;gap:1px;border:2px solid #cfdee2;border-radius:13px;color:var(--admin-navy);background:#fff;text-align:left;cursor:pointer;transition:border-color .15s,background .15s,transform .15s}.stats-tabs__dropdown>button{grid-template-columns:1fr auto;align-items:center}.stats-tabs>button:hover,.stats-tabs__dropdown>button:hover{border-color:#76adba;transform:translateY(-1px)}.stats-tabs>button.active,.stats-tabs__dropdown>button.active{color:#fff;border-color:#08758b;background:linear-gradient(135deg,#08758b,#125c70);box-shadow:0 7px 18px rgb(8 117 139 / 18%)}.stats-tabs strong{display:block;font-size:.9rem}.stats-tabs small{display:block;color:var(--admin-muted);font-size:.67rem}.stats-tabs button.active small{color:#d7eff4}.stats-tabs__pulse{position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:#43d58c;box-shadow:0 0 0 3px rgb(67 213 140 / 18%)}.stats-tabs__chevron{padding-right:5px;font-size:1.2rem;line-height:1}.realtime-menu{position:absolute;z-index:20;top:calc(100% + 7px);left:0;right:0;display:grid;padding:6px;gap:3px;border:1px solid #bfd3d8;border-radius:13px;background:#fff;box-shadow:0 15px 35px rgb(19 55 65 / 20%)}.realtime-menu button{display:flex;padding:10px 11px;align-items:center;justify-content:space-between;gap:12px;border:0;border-radius:9px;color:var(--admin-navy);background:transparent;font:inherit;font-size:.78rem;font-weight:800;cursor:pointer}.realtime-menu button:hover{background:#edf6f7}.realtime-menu button.active{color:#08758b;background:#e4f3f5}.realtime-menu i{font-style:normal}
-.stats-workspace{display:grid;min-width:0;align-items:start;gap:20px}.stats-workspace--realtime{grid-template-columns:minmax(190px,230px) minmax(0,1fr)}.stats-workspace--range{grid-template-columns:minmax(235px,280px) minmax(0,1fr)}.stats-workspace--range .stats-content{grid-column:2;grid-row:1}.stats-sidebar--range{grid-column:1;grid-row:1}.stats-content{min-width:0;display:grid;gap:16px}.stats-sidebar{position:sticky;top:148px;display:grid;padding:13px;gap:14px;border:1px solid #cbdde2;border-radius:16px;background:#f4f9fa}.stats-sidebar__status{display:grid;padding:7px 8px 12px;gap:4px;border-bottom:1px solid #d8e6e9}.stats-sidebar__status p,.stats-sidebar__status strong{margin:0}.stats-sidebar__status>strong{color:var(--admin-navy);font-size:.9rem}.stats-theme-menu{display:grid;gap:5px}.stats-theme-menu button{display:grid;grid-template-columns:31px minmax(0,1fr);min-height:48px;padding:7px 9px;align-items:center;gap:9px;border:0;border-radius:10px;color:#49636c;background:transparent;text-align:left;font:inherit;cursor:pointer}.stats-theme-menu button:hover{color:var(--admin-navy);background:#fff}.stats-theme-menu button.active{color:#fff;background:#08758b;box-shadow:0 5px 13px rgb(8 117 139 / 18%)}.stats-theme-menu button>span{display:grid;width:29px;height:29px;place-items:center;border-radius:8px;color:#08758b;background:#dceff2;font-size:.67rem;font-weight:900}.stats-theme-menu button.active>span{color:#08758b;background:#fff}.stats-theme-menu strong{font-size:.75rem;line-height:1.2}
-.period-picker{display:grid;gap:13px}.period-picker h2{margin:2px 0 0;color:var(--admin-navy);font-size:1rem}.period-picker__presets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.period-picker__presets button:first-child{grid-column:1/-1}.period-picker button:not(.admin-button),.range-view button{padding:8px 9px;border:1px solid #bdd2d7;border-radius:9px;background:#fff;color:var(--admin-navy);font:inherit;font-size:.75rem;font-weight:750;cursor:pointer}.period-picker button.active,.range-view button.active{color:#fff;border-color:#08758b;background:#08758b}.period-picker__custom{display:grid;gap:8px}.period-picker__custom label{display:grid;gap:4px;color:var(--admin-muted);font-size:.72rem;font-weight:800}.period-picker__custom input{min-width:0;width:100%;padding:8px 9px;border:1px solid #bdd2d7;border-radius:8px;color:var(--admin-navy);background:#fff;font:inherit}.period-picker__custom .admin-button{justify-content:center}.range-view{display:grid;grid-template-columns:1fr 1fr;padding-top:12px;gap:6px;border-top:1px solid #d8e6e9}.range-view button{display:grid;padding:9px;gap:2px;text-align:left}.range-view button strong{font-size:.78rem}.range-view button small{color:var(--admin-muted);font-size:.62rem;font-weight:600}.range-view button.active small{color:#d7eff4}.live-status{margin:5px 0 0!important;color:#47717a;font-size:.67rem;line-height:1.35}.live-status i{display:inline-block;width:7px;height:7px;margin-right:4px;border-radius:50%;background:#2ba96c;box-shadow:0 0 0 3px #dff5e9}.charts-page__loading{display:flex;min-height:260px;padding:28px;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:var(--admin-muted);background:#f7fafb;border-radius:12px}.charts-page__loading p,.updated-at{margin:0}.updated-at{text-align:right;color:var(--admin-muted);font-size:.75rem}
-:global(:root[data-theme='dark']) .stats-tabs>button,:global(:root[data-theme='dark']) .stats-tabs__dropdown>button,:global(:root[data-theme='dark']) .period-picker button:not(.admin-button),:global(:root[data-theme='dark']) .range-view button,:global(:root[data-theme='dark']) .period-picker__custom input{color:var(--admin-navy);border-color:#49616a;background:#192b30}:global(:root[data-theme='dark']) .stats-tabs button.active,:global(:root[data-theme='dark']) .period-picker button.active,:global(:root[data-theme='dark']) .range-view button.active{color:#fff;border-color:#4ba4b9;background:linear-gradient(135deg,#176b7f,#174b5b)}:global(:root[data-theme='dark']) .stats-sidebar{border-color:#3c555d;background:#182c31}:global(:root[data-theme='dark']) .stats-sidebar__status{border-color:#3c555d}:global(:root[data-theme='dark']) .stats-theme-menu button:hover{background:#263e45}:global(:root[data-theme='dark']) .realtime-menu{border-color:#49616a;background:#192b30}:global(:root[data-theme='dark']) .realtime-menu button:hover{background:#263e45}:global(:root[data-theme='dark']) .realtime-menu button.active{color:#a6dce7;background:#24434b}:global(:root[data-theme='dark']) .live-status{color:#a9c8cf}
-@media(max-width:1100px){.charts-page__heading{grid-template-columns:auto 1fr}.charts-page__heading>.admin-button{grid-column:1/-1;justify-self:end}.stats-tabs{min-width:0}.stats-workspace--realtime{grid-template-columns:190px minmax(0,1fr)}.stats-workspace--range{grid-template-columns:240px minmax(0,1fr)}}
-@media(max-width:820px){.charts-page__heading{grid-template-columns:1fr}.charts-page__heading>.admin-button{grid-column:auto}.stats-tabs{justify-self:stretch}.stats-workspace--realtime,.stats-workspace--range{grid-template-columns:1fr}.stats-workspace--range .stats-content{grid-column:1;grid-row:2}.stats-sidebar{position:static}.stats-sidebar--range{grid-column:1;grid-row:1}.stats-theme-menu{grid-template-columns:repeat(2,minmax(0,1fr))}.period-picker__custom{grid-template-columns:1fr 1fr}.period-picker__custom .admin-button{grid-column:1/-1}}
-@media(max-width:650px){.charts-page__heading{align-items:stretch}.stats-tabs{grid-template-columns:1fr}.stats-tabs>button,.stats-tabs__dropdown>button{min-height:56px}.stats-theme-menu,.period-picker__custom{grid-template-columns:1fr}.period-picker__custom .admin-button{grid-column:auto}}
-.charts-page__heading{grid-template-columns:auto minmax(760px,1040px) auto}.stats-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}.stats-workspace--dashboard,.stats-workspace--usage{grid-template-columns:minmax(235px,280px) minmax(0,1fr)}.stats-workspace--dashboard .stats-content,.stats-workspace--usage .stats-content{grid-column:2;grid-row:1}
-.usage-view-tabs{display:flex;padding:5px;gap:5px;border:1px solid #c9dce0;border-radius:12px;background:#edf4f5}.usage-view-tabs button{padding:9px 14px;border:0;border-radius:8px;color:#49636c;background:transparent;font:inherit;font-size:.76rem;font-weight:850;cursor:pointer}.usage-view-tabs button.active{color:#fff;background:#08758b;box-shadow:0 4px 10px rgb(8 117 139 / 16%)}:global(:root[data-theme='dark']) .usage-view-tabs{border-color:#3d565e;background:#172a30}:global(:root[data-theme='dark']) .usage-view-tabs button{color:#b7ccd1}:global(:root[data-theme='dark']) .usage-view-tabs button.active{color:#fff;background:#08758b}
-@media(max-width:1250px){.charts-page__heading{grid-template-columns:1fr}.charts-page__heading>.admin-button{justify-self:end}}
-@media(max-width:1100px){.charts-page__heading{grid-template-columns:1fr}.stats-workspace--dashboard,.stats-workspace--usage{grid-template-columns:240px minmax(0,1fr)}}
-@media(max-width:820px){.charts-page__heading{grid-template-columns:1fr}.stats-workspace--dashboard,.stats-workspace--usage{grid-template-columns:1fr}.stats-workspace--dashboard .stats-content,.stats-workspace--usage .stats-content{grid-column:1;grid-row:2}}
-@media(max-width:650px){.stats-tabs{grid-template-columns:1fr}}
+.analytics-overview-audience{margin-top:18px}
+.analytics-page{display:grid;gap:18px}.analytics-heading{display:flex;align-items:end;justify-content:space-between;gap:20px}.analytics-heading h1{margin:2px 0 5px;color:var(--admin-navy);font-size:clamp(1.8rem,4vw,2.6rem)}.analytics-heading p{margin:0;color:var(--admin-muted)}.analytics-tabs{display:flex;overflow-x:auto;gap:4px;padding:4px;border:1px solid #c9dce0;border-radius:13px;background:#edf4f5;scrollbar-width:thin}.analytics-tabs button{display:grid;min-width:105px;min-height:54px;padding:7px 8px;flex:1 0 105px;align-content:center;gap:1px;color:#47616a;border:1px solid transparent;border-radius:9px;background:transparent;font:inherit;text-align:left;cursor:pointer}.analytics-tabs button strong{font-size:.72rem;white-space:nowrap}.analytics-tabs button small{overflow:hidden;font-size:.57rem;text-overflow:ellipsis;white-space:nowrap}.analytics-tabs button:hover{background:#fff}.analytics-tabs button.active{color:#fff;border-color:#08758b;background:#08758b;box-shadow:0 5px 12px rgb(8 117 139 / 18%)}.analytics-tabs button.active small{color:#d7f0f2}.analytics-filters{display:flex;padding:10px 12px;align-items:end;flex-wrap:wrap;gap:9px;box-shadow:none}.analytics-presets{display:flex;padding:3px;gap:3px;border-radius:9px;background:#edf4f5}.analytics-presets button{padding:8px 10px;color:#47616a;border:0;border-radius:7px;background:transparent;font:inherit;font-size:.7rem;font-weight:800;cursor:pointer}.analytics-presets button.active{color:#fff;background:#08758b}.analytics-filters label{display:grid;gap:3px}.analytics-filters label span{color:#647a82;font-size:.61rem;font-weight:850;text-transform:uppercase}.analytics-filters input,.analytics-filters select{min-height:35px;padding:6px 9px;color:#173f4a;border:1px solid #bdd2d7;border-radius:8px;background:#fff;font:inherit;font-size:.72rem}.analytics-loading,.analytics-empty{display:grid;min-height:260px;place-items:center;align-content:center;gap:12px;color:var(--admin-muted)}.analytics-live-status{display:flex;margin-bottom:14px;padding:10px 13px;align-items:center;gap:9px;color:#35616a;border:1px solid #bce0d0;border-radius:11px;background:#eaf8f1;font-size:.72rem}.analytics-live-status i{width:9px;height:9px;border-radius:50%;background:#22a06b;box-shadow:0 0 0 5px rgb(34 160 107 / 14%)}.analytics-live-status span{margin-left:auto}:global(:root[data-theme='dark']) .analytics-tabs,:global(:root[data-theme='dark']) .analytics-filters{border-color:#3d565e;background:#172a30}:global(:root[data-theme='dark']) .analytics-tabs button{color:#bad0d5}:global(:root[data-theme='dark']) .analytics-tabs button:hover{background:#20383f}:global(:root[data-theme='dark']) .analytics-tabs button.active{color:#fff;background:#08758b}@media(max-width:650px){.analytics-heading{align-items:flex-start;flex-direction:column}.analytics-filters{align-items:stretch;flex-direction:column}.analytics-presets{display:grid;grid-template-columns:repeat(2,1fr)}.analytics-live-status{align-items:flex-start;flex-wrap:wrap}.analytics-live-status span{width:100%;margin-left:18px}}
+:global(:root[data-theme='dark'] .analytics-tabs) {
+  border-color: #3d565e;
+  background: #172a30;
+}
+
+:global(:root[data-theme='dark'] .analytics-tabs button) { color: #bad0d5; }
+:global(:root[data-theme='dark'] .analytics-tabs button:hover) { background: #20383f; }
+:global(:root[data-theme='dark'] .analytics-tabs button.active) { color: #fff; border-color: #1595aa; background: #08758b; }
+
+:global(:root[data-theme='dark'] .analytics-presets) {
+  border: 1px solid #3d565e;
+  background: #20343a;
+}
+
+:global(:root[data-theme='dark'] .analytics-presets button) { color: #bad0d5; }
+:global(:root[data-theme='dark'] .analytics-presets button:hover) { background: #29434a; }
+:global(:root[data-theme='dark'] .analytics-presets button.active) { color: #fff; background: #08758b; }
 </style>

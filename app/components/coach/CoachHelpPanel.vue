@@ -47,6 +47,7 @@ const emit = defineEmits<{
   close: []
   contentScroll: []
   previewScroll: [position: PreviewScrollPosition]
+  userScroll: []
   consultVerb: [verbId: number]
 }>()
 const content = useTemplateRef<HTMLElement>('content')
@@ -126,7 +127,26 @@ const displayedHelpSnapshot = computed(() => ({
   values: props.values,
 }))
 let previewScrollFrame: number | null = null
+let userScrollIntentUntil = 0
+let userScrollReported = false
 let lastAutomaticErrorReport = ''
+
+function markUserScrollIntent() {
+  if (typeof window === 'undefined') return
+  userScrollIntentUntil = window.performance.now() + 1_500
+}
+
+function markScrollbarDragIntent(event: PointerEvent) {
+  const container = event.currentTarget as HTMLElement | null
+  if (!container || event.pointerType !== 'mouse') return
+  const { right } = container.getBoundingClientRect()
+  if (right - event.clientX <= 24) markUserScrollIntent()
+}
+
+function markKeyboardScrollIntent(event: KeyboardEvent) {
+  if (!['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key)) return
+  markUserScrollIntent()
+}
 
 function resetFeedback() {
   feedbackType.value = ''
@@ -257,6 +277,10 @@ function currentUiContext() {
 
 function reportPreviewScroll() {
   emit('contentScroll')
+  if (!userScrollReported && typeof window !== 'undefined' && window.performance.now() <= userScrollIntentUntil) {
+    userScrollReported = true
+    emit('userScroll')
+  }
   if (previewScrollFrame !== null) window.cancelAnimationFrame(previewScrollFrame)
   previewScrollFrame = window.requestAnimationFrame(() => {
     previewScrollFrame = null
@@ -360,7 +384,17 @@ onBeforeUnmount(() => {
       <button v-if="showClose" type="button" :aria-label="ui('Fermer l’aide')" @click="emit('close')">×</button>
     </header>
 
-    <div ref="content" class="coach-help-content" @scroll.passive="reportPreviewScroll">
+    <div
+      ref="content"
+      class="coach-help-content"
+      tabindex="0"
+      :aria-label="renderedHeaderTitle"
+      @wheel.passive="markUserScrollIntent"
+      @touchmove.passive="markUserScrollIntent"
+      @pointerdown="markScrollbarDragIntent"
+      @keydown="markKeyboardScrollIntent"
+      @scroll.passive="reportPreviewScroll"
+    >
       <section v-if="consultVerbId" class="coach-help-consult">
         <div>
           <strong>{{ ui('Conjugaison complète') }}</strong>

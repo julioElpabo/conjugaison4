@@ -8,9 +8,15 @@ export function useSiteAnalytics() {
   const usedLanguagesStorageKey = 'tatitotu.analytics.used-languages'
 
   function sendEvent(name: AnalyticsEventName, metadata?: Record<string, string | number | boolean>) {
+    const observedMetadata = {
+      ...(metadata || {}),
+      locale: interfaceLocale.value,
+      theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light',
+      falc: document.documentElement.dataset.falcMode === 'true',
+    }
     void $fetch('/api/analytics/event', {
       method: 'POST',
-      body: { name, path: route.fullPath, metadata },
+      body: { name, path: route.fullPath, metadata: observedMetadata },
     }).catch(() => {})
     const gtag = (globalThis as typeof globalThis & { gtag?: (...args: unknown[]) => void }).gtag
     const normalized = stripLocaleFromPath(route.path)
@@ -19,7 +25,7 @@ export function useSiteAnalytics() {
     const isAdministration = normalized === '/admin' || normalized.startsWith('/admin/')
     if (!isSignIn && !isAdministration) {
       gtag?.('event', name, {
-        ...(metadata || {}),
+        ...observedMetadata,
         ...(isLearnerSpace ? { user_type: 'learner' } : {}),
       })
     }

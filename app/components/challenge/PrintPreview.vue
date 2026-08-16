@@ -25,6 +25,7 @@ const props = defineProps<{
   options: PrintOptions
   requestedQuestionCount: number
   regenerating?: boolean
+  analyticsMetadata?: Record<string, string | number | boolean>
 }>()
 
 const emit = defineEmits<{
@@ -33,6 +34,27 @@ const emit = defineEmits<{
   regenerate: []
 }>()
 const { track } = useSiteAnalytics()
+
+function spacingBand(value: number, small: number, large: number) {
+  return value <= small ? 'compact' : value >= large ? 'large' : 'standard'
+}
+
+function printAnalyticsMetadata(format: 'pdf' | 'word') {
+  return {
+    ...props.analyticsMetadata,
+    format,
+    inclusiveDisplay: props.options.inclusiveDisplay,
+    showGrade: props.options.showGrade,
+    showVerbs: props.options.showVerbs,
+    showTenses: props.options.showTenses,
+    showFirstName: props.options.showFirstName,
+    showLastName: props.options.showLastName,
+    showDate: props.options.showDate,
+    showRandomNumber: props.options.showRandomNumber,
+    questionSpacingBand: spacingBand(props.options.questionSpacingMm, 5, 11),
+    titleSpacingBand: spacingBand(props.options.titleSpacingMm, 14, 25),
+  }
+}
 
 function randomSheetNumber(excluding?: number) {
   let number = Math.floor(Math.random() * 9000) + 1000
@@ -491,7 +513,7 @@ async function downloadPdf() {
   try {
     const pdf = await buildPdf()
     pdf.save(pdfFileName())
-    track('pdf_downloaded', { exerciseKind: props.exerciseKind })
+    track('pdf_downloaded', printAnalyticsMetadata('pdf'))
   }
   catch {
     track('feature_failed', { feature: 'download.pdf' })
@@ -866,7 +888,7 @@ async function downloadWord() {
     link.download = `${safeTitle || 'defi-conjugaison'}.docx`
     document.body.appendChild(link)
     link.click()
-    track('word_downloaded', { exerciseKind: props.exerciseKind })
+    track('word_downloaded', printAnalyticsMetadata('word'))
     link.remove()
     URL.revokeObjectURL(url)
   }

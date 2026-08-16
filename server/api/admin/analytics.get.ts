@@ -34,9 +34,10 @@ function emptyOverview(notice?: string): AnalyticsOverview {
   return {
     source: 'local', configured: true, activeUsers: 0, sessions: 0, newUsers: 0, returningUsers: 0,
     events: 0, exerciseStarted: 0, exerciseCompleted: 0, completionRate: 0,
-    correctAnswers: 0, submittedAnswers: 0, successRate: 0, helpOpened: 0, pdfDownloads: 0,
+    correctAnswers: 0, submittedAnswers: 0, successRate: 0, helpScrolled: 0, pdfDownloads: 0,
     wordDownloads: 0, challengeLoads: 0, challengeSaves: 0, devices: [], languages: [],
-    countries: [], regions: [], cities: [], featureUsage: [], eventBreakdown: [], activity: [], series: {},
+    countries: [], regions: [], cities: [], acquisition: [], landingPages: [], browsers: [], operatingSystems: [],
+    featureUsage: [], eventBreakdown: [], activity: [], series: {},
     generatedAt: new Date().toISOString(), notice,
   }
 }
@@ -124,7 +125,7 @@ export default defineEventHandler(async (event) => {
       completionRate: started ? Math.round(completed / started * 1000) / 10 : 0,
       correctAnswers: correct, submittedAnswers: submitted,
       successRate: submitted ? Math.round(correct / submitted * 1000) / 10 : 0,
-      helpOpened: count('help_opened'), pdfDownloads: count('pdf_downloaded'), wordDownloads: count('word_downloaded'),
+      helpScrolled: count('help_scrolled'), pdfDownloads: count('pdf_downloaded'), wordDownloads: count('word_downloaded'),
       challengeLoads: count('challenge_load'), challengeSaves: count('challenge_save'),
       devices: breakdown(devices), languages: breakdown(languages), countries: [], regions: [], cities: [],
       featureUsage: [
@@ -179,9 +180,6 @@ export default defineEventHandler(async (event) => {
       }
       local.completionRate = local.exerciseStarted ? Math.round(local.exerciseCompleted / local.exerciseStarted * 1000) / 10 : 0
       if (legacyPrints) local.eventBreakdown.push({ label: 'legacy_print_opened', value: legacyPrints })
-      if (legacyRows.length) {
-        local.notice = 'Les totaux historiques incluent les anciens compteurs. Les détails fins commencent à partir de la mise en service de ce tableau de bord.'
-      }
     }
   }
   catch (error) {

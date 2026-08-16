@@ -46,6 +46,10 @@ const props = defineProps<{
   cities: CityItem[]
   realtime?: boolean
   notice?: string
+  initialView?: 'auto' | 'world' | 'central-europe' | 'switzerland'
+  mapLabel?: string
+  displayMode?: 'count' | 'activity'
+  activityRadiusScale?: number
 }>()
 
 const mapRoot = useTemplateRef<HTMLElement>('map-root')
@@ -67,16 +71,22 @@ const worldRegionMapError = ref('')
 const worldRegionPoints = ref<Record<string, WorldRegionPoint[]>>({})
 const cityLocations = ref<Record<string, CityLocation>>({})
 const worldCityLocations = ref<Record<string, WorldCityLocation>>({})
-const zoomLevel = ref(1)
 const animatedViewBox = ref<string | null>(null)
 const isZooming = ref(false)
-const panOffset = ref({ x: 0, y: 0 })
 const isPanning = ref(false)
 const didPan = ref(false)
 const showLabels = ref(false)
+const activityGradientId = `geo-activity-${useId().replace(/:/gu, '')}`
+const isActivityMode = computed(() => props.displayMode === 'activity')
+const realtimeLayerDelay = computed(() => ({
+  world: '-0.35s',
+  'central-europe': '-1.25s',
+  switzerland: '-2.1s',
+  auto: '-0.7s',
+}[props.initialView || 'auto']))
 let panStart = { clientX: 0, clientY: 0, x: 0, y: 0, width: 1, height: 1 }
 const MIN_ZOOM = 1
-const MAX_ZOOM = 5
+const MAX_ZOOM = 40
 const ZOOM_STEP = 1.45
 const MAP_ASPECT_RATIO = 1.85
 const MAX_AUTOMATIC_ZOOM = 4
@@ -85,9 +95,19 @@ const DETAILED_WORLD_COUNTRIES = new Set([
   'af', 'ao', 'ar', 'au', 'bo', 'br', 'bw', 'ca', 'cf', 'cd', 'cl', 'cm', 'cn', 'co', 'dz', 'eg',
   'es', 'et', 'fr', 'gl', 'id', 'in', 'ir', 'kz', 'ly', 'ma', 'mg', 'ml', 'mn', 'mr', 'mx', 'mm',
   'mz', 'na', 'ne', 'ng', 'pe', 'pk', 'pg', 'ru', 'sa', 'sd', 'so', 'ss', 'td', 'th', 'tm', 'tr',
-  'tz', 'ua', 'us', 'uz', 've', 'ye', 'za', 'zm',
+  'ch', 'tz', 'ua', 'us', 'uz', 've', 'ye', 'za', 'zm',
 ])
 const WORLD_GEO_BOUNDS = { left: -169.110266, top: 83.600842, right: 190.486279, bottom: -58.508473 }
+const initialWorldZoom = props.initialView === 'central-europe' ? 7 : 1
+const worldBounds = viewBoxValues(worldMap.viewBox) || [0, 0, 1010, 666]
+const switzerlandCenter = projectWorldPoint(8.2275, 46.8182)
+const zoomLevel = ref(initialWorldZoom)
+const panOffset = ref(props.initialView === 'central-europe'
+  ? {
+      x: switzerlandCenter.x - (worldBounds[0] + worldBounds[2] / 2),
+      y: switzerlandCenter.y - (worldBounds[1] + worldBounds[3] / 2),
+    }
+  : { x: 0, y: 0 })
 let worldRegionRequest = 0
 let worldCityLocationRequest = 0
 const worldRegionPointRequests = new Set<string>()
@@ -245,6 +265,7 @@ function fitMarkersViewBox(
   return `${x} ${y} ${width} ${height}`
 }
 const defaultViewBox = computed(() => {
+  if (level.value === 'world' && props.initialView && props.initialView !== 'auto') return worldMap.viewBox
   return fitMarkersViewBox(
     geographicViewBox.value,
     visibleMarkers.value,
@@ -590,6 +611,22 @@ function markerRadius(marker: MapMarker) {
   return baseRadius / displayZoom.value
 }
 
+function displayedMarkerRadius(marker: MapMarker) {
+  if (!isActivityMode.value) return markerRadius(marker)
+  const unitRatio = Math.sqrt(1 / maximumMarkerValue.value)
+  return (11 + unitRatio * 12) / displayZoom.value * (props.activityRadiusScale || 1)
+}
+
+function markerStyle(marker: MapMarker) {
+  return isActivityMode.value
+    ? {
+        fill: `url(#${activityGradientId})`,
+        fillOpacity: 1,
+        stroke: 'none',
+      }
+    : undefined
+}
+
 function markerLabelSize() {
   return 17 / displayZoom.value
 }
@@ -603,11 +640,6 @@ function markerRank(marker: MapMarker) {
   return [...visibleMarkers.value]
     .sort((left, right) => right.value - left.value)
     .findIndex(item => item.id === marker.id) + 1
-}
-
-function markerAnimationDelay(marker: MapMarker) {
-  const offset = [...marker.id].reduce((sum, character) => sum + character.codePointAt(0)!, 0) % 12
-  return `${offset * -150}ms`
 }
 
 function zoomIn() {
@@ -710,7 +742,10 @@ function measureCountryCenters() {
 }
 
 onMounted(() => {
-  void nextTick(measureCountryCenters)
+  void nextTick(() => {
+    measureCountryCenters()
+    if (props.initialView === 'switzerland' && countryData.value.has('ch')) void selectCountry('ch', false)
+  })
   void loadVisibleWorldRegionPoints()
   void loadWorldCityLocations()
 })
@@ -843,7 +878,7 @@ async function loadVisibleWorldRegionPoints() {
   )))
 }
 
-async function selectCountry(code: string) {
+async function selectCountry(code: string, animate = true) {
   if (isZooming.value) return
   const normalizedCode = code.toLowerCase()
   const country = countryData.value.get(normalizedCode)
@@ -868,7 +903,7 @@ async function selectCountry(code: string) {
   else {
     void loadWorldRegions(normalizedCode, country.label)
   }
-  await animateToViewBox(String(selectedViewBox.value))
+  if (animate) await animateToViewBox(String(selectedViewBox.value))
   selectedCode.value = normalizedCode
   selectedRegionLabel.value = ''
   selectedCityLabel.value = ''
@@ -969,6 +1004,14 @@ function goRegion() {
 
 <template>
   <div ref="map-root" class="geo-zoom">
+    <svg class="geo-zoom__defs" width="0" height="0" aria-hidden="true">
+      <defs>
+        <radialGradient :id="activityGradientId" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="var(--geo-trace-color, #087f98)" :stop-opacity="realtime ? 0.2 : 0.1" />
+          <stop offset="100%" stop-color="var(--geo-trace-color, #087f98)" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+    </svg>
     <nav class="geo-zoom__breadcrumb" aria-label="Navigation géographique">
       <button type="button" :aria-current="level === 'world' ? 'page' : undefined" @click="goWorld">Monde</button>
       <template v-if="selectedCountry">
@@ -985,7 +1028,10 @@ function goRegion() {
       </template>
     </nav>
 
-    <div class="geo-zoom__canvas" :class="{ 'is-zooming': isZooming }">
+    <div
+      class="geo-zoom__canvas"
+      :class="{ 'is-zooming': isZooming }"
+    >
       <div class="geo-zoom__controls" aria-label="Contrôles de zoom">
         <button type="button" aria-label="Zoomer" title="Zoomer" :disabled="isZooming || zoomLevel >= MAX_ZOOM" @click="zoomIn">+</button>
         <button type="button" aria-label="Dézoomer" title="Dézoomer" :disabled="isZooming || zoomLevel <= MIN_ZOOM" @click="zoomOut">−</button>
@@ -1006,7 +1052,7 @@ function goRegion() {
         :viewBox="displayViewBox"
         :class="{ 'is-panning': isPanning }"
         role="img"
-        aria-label="Carte mondiale des visiteurs"
+        :aria-label="mapLabel || 'Carte mondiale des visiteurs'"
         @pointerdown="startPan"
         @pointermove="movePan"
         @pointerup="stopPan"
@@ -1025,26 +1071,29 @@ function goRegion() {
           @click="countryData.has(location.id) && activateCountry(location.id)"
           @keydown.enter.prevent="countryData.has(location.id) && activateCountry(location.id)"
         />
-        <circle
-          v-for="marker in worldMarkers"
-          :key="marker.id"
-          class="geo-zoom__marker"
-          :cx="marker.x"
-          :cy="marker.y"
-          :r="markerRadius(marker)"
-          :style="{ animationDelay: markerAnimationDelay(marker) }"
-          tabindex="0"
-          role="button"
-          :aria-label="`${marker.label} : ${marker.value} visiteurs`"
-          @mouseenter="showMarker(marker, $event)"
-          @mousemove="showMarker(marker, $event)"
-          @mouseleave="hoveredMarker = null"
-          @focus="showMarker(marker)"
-          @blur="hoveredMarker = null"
-          @click="activateMarker(marker, $event)"
-          @keydown.enter.prevent="activateMarker(marker)"
-        />
+        <g class="geo-zoom__marker-layer" :class="{ 'is-pulsing': realtime, 'is-additive': isActivityMode }" :style="{ animationDelay: realtimeLayerDelay }">
+          <circle
+            v-for="marker in worldMarkers"
+            :key="marker.id"
+            class="geo-zoom__marker"
+            :cx="marker.x"
+            :cy="marker.y"
+            :r="displayedMarkerRadius(marker)"
+            :style="markerStyle(marker)"
+            tabindex="0"
+            role="button"
+            :aria-label="`${marker.label} : ${marker.value} visiteurs`"
+            @mouseenter="showMarker(marker, $event)"
+            @mousemove="showMarker(marker, $event)"
+            @mouseleave="hoveredMarker = null"
+            @focus="showMarker(marker)"
+            @blur="hoveredMarker = null"
+            @click="activateMarker(marker, $event)"
+            @keydown.enter.prevent="activateMarker(marker)"
+          />
+        </g>
         <text
+          v-if="!isActivityMode"
           v-for="marker in worldMarkers"
           :key="`value-${marker.id}`"
           class="geo-zoom__marker-value"
@@ -1087,26 +1136,29 @@ function goRegion() {
           @click="activateCanton(canton)"
           @keydown.enter.prevent="activateCanton(canton)"
         />
-        <circle
-          v-for="marker in countryMarkers"
-          :key="marker.id"
-          class="geo-zoom__marker"
-          :cx="marker.x"
-          :cy="marker.y"
-          :r="markerRadius(marker)"
-          :style="{ animationDelay: markerAnimationDelay(marker) }"
-          tabindex="0"
-          role="button"
-          :aria-label="`${marker.label} : ${marker.value} visiteurs`"
-          @mouseenter="showMarker(marker, $event)"
-          @mousemove="showMarker(marker, $event)"
-          @mouseleave="hoveredMarker = null"
-          @focus="showMarker(marker)"
-          @blur="hoveredMarker = null"
-          @click="activateMarker(marker, $event)"
-          @keydown.enter.prevent="activateMarker(marker)"
-        />
+        <g class="geo-zoom__marker-layer" :class="{ 'is-pulsing': realtime, 'is-additive': isActivityMode }" :style="{ animationDelay: realtimeLayerDelay }">
+          <circle
+            v-for="marker in countryMarkers"
+            :key="marker.id"
+            class="geo-zoom__marker"
+            :cx="marker.x"
+            :cy="marker.y"
+            :r="displayedMarkerRadius(marker)"
+            :style="markerStyle(marker)"
+            tabindex="0"
+            role="button"
+            :aria-label="`${marker.label} : ${marker.value} visiteurs`"
+            @mouseenter="showMarker(marker, $event)"
+            @mousemove="showMarker(marker, $event)"
+            @mouseleave="hoveredMarker = null"
+            @focus="showMarker(marker)"
+            @blur="hoveredMarker = null"
+            @click="activateMarker(marker, $event)"
+            @keydown.enter.prevent="activateMarker(marker)"
+          />
+        </g>
         <text
+          v-if="!isActivityMode"
           v-for="marker in countryMarkers"
           :key="`value-${marker.id}`"
           class="geo-zoom__marker-value"
@@ -1149,26 +1201,29 @@ function goRegion() {
           @click="activateWorldRegion(region)"
           @keydown.enter.prevent="activateWorldRegion(region)"
         />
-        <circle
-          v-for="marker in countryMarkers"
-          :key="marker.id"
-          class="geo-zoom__marker"
-          :cx="marker.x"
-          :cy="marker.y"
-          :r="markerRadius(marker)"
-          :style="{ animationDelay: markerAnimationDelay(marker) }"
-          tabindex="0"
-          role="button"
-          :aria-label="`${marker.label} : ${marker.value} visiteurs`"
-          @mouseenter="showMarker(marker, $event)"
-          @mousemove="showMarker(marker, $event)"
-          @mouseleave="hoveredMarker = null"
-          @focus="showMarker(marker)"
-          @blur="hoveredMarker = null"
-          @click="activateMarker(marker, $event)"
-          @keydown.enter.prevent="activateMarker(marker)"
-        />
+        <g class="geo-zoom__marker-layer" :class="{ 'is-pulsing': realtime, 'is-additive': isActivityMode }" :style="{ animationDelay: realtimeLayerDelay }">
+          <circle
+            v-for="marker in countryMarkers"
+            :key="marker.id"
+            class="geo-zoom__marker"
+            :cx="marker.x"
+            :cy="marker.y"
+            :r="displayedMarkerRadius(marker)"
+            :style="markerStyle(marker)"
+            tabindex="0"
+            role="button"
+            :aria-label="`${marker.label} : ${marker.value} visiteurs`"
+            @mouseenter="showMarker(marker, $event)"
+            @mousemove="showMarker(marker, $event)"
+            @mouseleave="hoveredMarker = null"
+            @focus="showMarker(marker)"
+            @blur="hoveredMarker = null"
+            @click="activateMarker(marker, $event)"
+            @keydown.enter.prevent="activateMarker(marker)"
+          />
+        </g>
         <text
+          v-if="!isActivityMode"
           v-for="marker in countryMarkers"
           :key="`value-${marker.id}`"
           class="geo-zoom__marker-value"
@@ -1199,26 +1254,29 @@ function goRegion() {
         @pointercancel="stopPan"
       >
         <path :d="selectedLocation.path" class="geo-zoom__area" />
-        <circle
-          v-for="marker in countryMarkers"
-          :key="marker.id"
-          class="geo-zoom__marker"
-          :cx="marker.x"
-          :cy="marker.y"
-          :r="markerRadius(marker)"
-          :style="{ animationDelay: markerAnimationDelay(marker) }"
-          tabindex="0"
-          role="button"
-          :aria-label="`${marker.label} : ${marker.value} visiteurs`"
-          @mouseenter="showMarker(marker, $event)"
-          @mousemove="showMarker(marker, $event)"
-          @mouseleave="hoveredMarker = null"
-          @focus="showMarker(marker)"
-          @blur="hoveredMarker = null"
-          @click="activateMarker(marker, $event)"
-          @keydown.enter.prevent="activateMarker(marker)"
-        />
+        <g class="geo-zoom__marker-layer" :class="{ 'is-pulsing': realtime, 'is-additive': isActivityMode }" :style="{ animationDelay: realtimeLayerDelay }">
+          <circle
+            v-for="marker in countryMarkers"
+            :key="marker.id"
+            class="geo-zoom__marker"
+            :cx="marker.x"
+            :cy="marker.y"
+            :r="displayedMarkerRadius(marker)"
+            :style="markerStyle(marker)"
+            tabindex="0"
+            role="button"
+            :aria-label="`${marker.label} : ${marker.value} visiteurs`"
+            @mouseenter="showMarker(marker, $event)"
+            @mousemove="showMarker(marker, $event)"
+            @mouseleave="hoveredMarker = null"
+            @focus="showMarker(marker)"
+            @blur="hoveredMarker = null"
+            @click="activateMarker(marker, $event)"
+            @keydown.enter.prevent="activateMarker(marker)"
+          />
+        </g>
         <text
+          v-if="!isActivityMode"
           v-for="marker in countryMarkers"
           :key="`value-${marker.id}`"
           class="geo-zoom__marker-value"
@@ -1249,26 +1307,29 @@ function goRegion() {
         @pointercancel="stopPan"
       >
         <path :d="selectedWorldRegion.path" class="geo-zoom__area" fill-rule="evenodd" />
-        <circle
-          v-for="marker in regionMarkers"
-          :key="marker.id"
-          class="geo-zoom__marker"
-          :cx="marker.x"
-          :cy="marker.y"
-          :r="markerRadius(marker)"
-          :style="{ animationDelay: markerAnimationDelay(marker) }"
-          tabindex="0"
-          role="button"
-          :aria-label="`${marker.label} : ${marker.value} visiteurs`"
-          @mouseenter="showMarker(marker, $event)"
-          @mousemove="showMarker(marker, $event)"
-          @mouseleave="hoveredMarker = null"
-          @focus="showMarker(marker)"
-          @blur="hoveredMarker = null"
-          @click="activateMarker(marker, $event)"
-          @keydown.enter.prevent="activateMarker(marker)"
-        />
+        <g class="geo-zoom__marker-layer" :class="{ 'is-pulsing': realtime, 'is-additive': isActivityMode }" :style="{ animationDelay: realtimeLayerDelay }">
+          <circle
+            v-for="marker in regionMarkers"
+            :key="marker.id"
+            class="geo-zoom__marker"
+            :cx="marker.x"
+            :cy="marker.y"
+            :r="displayedMarkerRadius(marker)"
+            :style="markerStyle(marker)"
+            tabindex="0"
+            role="button"
+            :aria-label="`${marker.label} : ${marker.value} visiteurs`"
+            @mouseenter="showMarker(marker, $event)"
+            @mousemove="showMarker(marker, $event)"
+            @mouseleave="hoveredMarker = null"
+            @focus="showMarker(marker)"
+            @blur="hoveredMarker = null"
+            @click="activateMarker(marker, $event)"
+            @keydown.enter.prevent="activateMarker(marker)"
+          />
+        </g>
         <text
+          v-if="!isActivityMode"
           v-for="marker in regionMarkers"
           :key="`value-${marker.id}`"
           class="geo-zoom__marker-value"
@@ -1299,26 +1360,29 @@ function goRegion() {
         @pointercancel="stopPan"
       >
         <path :d="selectedCanton.path" class="geo-zoom__area" fill-rule="evenodd" />
-        <circle
-          v-for="marker in visibleMarkers"
-          :key="marker.id"
-          class="geo-zoom__marker"
-          :cx="marker.x"
-          :cy="marker.y"
-          :r="markerRadius(marker)"
-          :style="{ animationDelay: markerAnimationDelay(marker) }"
-          :tabindex="marker.kind === 'city' ? 0 : undefined"
-          :role="marker.kind === 'city' ? 'button' : undefined"
-          :aria-label="`${marker.label} : ${marker.value} visiteurs`"
-          @mouseenter="showMarker(marker, $event)"
-          @mousemove="showMarker(marker, $event)"
-          @mouseleave="hoveredMarker = null"
-          @focus="showMarker(marker)"
-          @blur="hoveredMarker = null"
-          @click="activateMarker(marker, $event)"
-          @keydown.enter.prevent="activateMarker(marker)"
-        />
+        <g class="geo-zoom__marker-layer" :class="{ 'is-pulsing': realtime, 'is-additive': isActivityMode }" :style="{ animationDelay: realtimeLayerDelay }">
+          <circle
+            v-for="marker in visibleMarkers"
+            :key="marker.id"
+            class="geo-zoom__marker"
+            :cx="marker.x"
+            :cy="marker.y"
+            :r="displayedMarkerRadius(marker)"
+            :style="markerStyle(marker)"
+            :tabindex="marker.kind === 'city' ? 0 : undefined"
+            :role="marker.kind === 'city' ? 'button' : undefined"
+            :aria-label="`${marker.label} : ${marker.value} visiteurs`"
+            @mouseenter="showMarker(marker, $event)"
+            @mousemove="showMarker(marker, $event)"
+            @mouseleave="hoveredMarker = null"
+            @focus="showMarker(marker)"
+            @blur="hoveredMarker = null"
+            @click="activateMarker(marker, $event)"
+            @keydown.enter.prevent="activateMarker(marker)"
+          />
+        </g>
         <text
+          v-if="!isActivityMode"
           v-for="marker in visibleMarkers"
           :key="`value-${marker.id}`"
           class="geo-zoom__marker-value"
@@ -1390,10 +1454,29 @@ function goRegion() {
 </template>
 
 <style scoped>
-.geo-zoom{position:relative;min-width:0;margin-top:16px;overflow:hidden;border:1px solid var(--admin-border);border-radius:16px;background:linear-gradient(160deg,#edf8fa,#dceff2)}.geo-zoom__breadcrumb{display:flex;min-height:52px;padding:9px 13px;align-items:center;gap:7px;border-bottom:1px solid var(--admin-border);background:var(--admin-surface,#fff)}.geo-zoom__breadcrumb button{padding:6px 9px;border:0;border-radius:8px;color:var(--admin-blue);background:transparent;cursor:pointer;font:inherit;font-weight:800}.geo-zoom__breadcrumb button:hover,.geo-zoom__breadcrumb button:focus-visible{background:#e5f3f6;outline:none}.geo-zoom__breadcrumb button[aria-current='page']{color:var(--admin-navy);background:#edf5f6}.geo-zoom__breadcrumb span{color:var(--admin-muted)}.geo-zoom__canvas{position:relative;display:grid;min-height:520px;place-items:center}.geo-zoom__canvas>svg{display:block;width:100%;height:520px;padding:20px}.geo-zoom__controls{position:absolute;z-index:4;top:14px;right:14px;display:grid;overflow:hidden;border:1px solid #b7ccd2;border-radius:9px;background:#fff;box-shadow:0 3px 12px rgb(18 63 75 / 16%)}.geo-zoom__controls button{display:grid;width:38px;height:38px;padding:0;place-items:center;color:#173f4b;background:#fff;border:0;font:700 1.45rem/1 sans-serif;cursor:pointer}.geo-zoom__controls button+button{border-top:1px solid #d3e0e3}.geo-zoom__controls button:hover:not(:disabled),.geo-zoom__controls button:focus-visible{z-index:1;color:#fff;background:#087f98;outline:none}.geo-zoom__controls button:disabled{color:#aab8bc;cursor:not-allowed;background:#f3f6f7}.geo-zoom__area{fill:#d8e7e9;stroke:#fff;stroke-width:1;vector-effect:non-scaling-stroke;transition:fill .15s ease}.geo-zoom__area:focus{outline:none}.geo-zoom__area.has-data{cursor:pointer}.geo-zoom__area.has-data:hover,.geo-zoom__area.has-data:focus{fill:#c4dde1;stroke:#087f98;stroke-width:3}.geo-zoom__marker{fill:#087f98;fill-opacity:.78;stroke:#fff;stroke-width:2.5;vector-effect:non-scaling-stroke;cursor:pointer;transform-box:fill-box;transform-origin:center;animation:geo-marker-pulse 1.8s ease-in-out infinite;transition:fill .15s ease,fill-opacity .15s ease,stroke-width .15s ease}.geo-zoom__marker:hover,.geo-zoom__marker:focus{fill:#005f76;fill-opacity:.95;stroke-width:4;outline:none;animation-play-state:paused;transform:scale(1.08)}.geo-zoom__tooltip{position:absolute;z-index:10;display:grid;min-width:165px;padding:9px 12px;gap:2px;border-radius:9px;color:#fff;background:rgb(9 43 52 / 95%);box-shadow:0 5px 18px rgb(0 0 0 / 18%);pointer-events:none}.geo-zoom__tooltip span,.geo-zoom__tooltip b{font-size:.77rem}.geo-zoom__loader{width:34px;height:34px;border:4px solid #b8dce2;border-top-color:#087f98;border-radius:50%;animation:geo-spin .8s linear infinite}.geo-zoom__empty{margin:0;padding:20px;color:var(--admin-muted);text-align:center}.geo-zoom__credit{display:block;margin:6px 2px 0;color:var(--admin-muted);font-size:.66rem;text-align:right}.geo-zoom__credit a{color:inherit}@keyframes geo-spin{to{transform:rotate(360deg)}}@keyframes geo-marker-pulse{0%,100%{transform:scale(.9);fill-opacity:.68;stroke-opacity:.72}50%{transform:scale(1.12);fill-opacity:.95;stroke-opacity:1}}:global(:root[data-theme='dark']) .geo-zoom{background:linear-gradient(160deg,#203a42,#172b31)}:global(:root[data-theme='dark']) .geo-zoom__breadcrumb{background:#1a2c31}:global(:root[data-theme='dark']) .geo-zoom__breadcrumb button:hover,:global(:root[data-theme='dark']) .geo-zoom__breadcrumb button:focus-visible,:global(:root[data-theme='dark']) .geo-zoom__breadcrumb button[aria-current='page']{background:#294149}:global(:root[data-theme='dark']) .geo-zoom__controls{border-color:#49646c;background:#1b3036}:global(:root[data-theme='dark']) .geo-zoom__controls button{color:#d7edf1;background:#1b3036}:global(:root[data-theme='dark']) .geo-zoom__controls button+button{border-color:#49646c}:global(:root[data-theme='dark']) .geo-zoom__controls button:hover:not(:disabled),:global(:root[data-theme='dark']) .geo-zoom__controls button:focus-visible{color:#fff;background:#087f98}:global(:root[data-theme='dark']) .geo-zoom__controls button:disabled{color:#63777c;background:#15272c}:global(:root[data-theme='dark']) .geo-zoom__area{fill:#31484e;stroke:#17292e}
+.geo-zoom__defs{position:absolute;width:0;height:0;overflow:hidden;pointer-events:none}
+.geo-zoom{position:relative;min-width:0;margin-top:16px;overflow:hidden;border:1px solid var(--admin-border);border-radius:16px;background:linear-gradient(160deg,#edf8fa,#dceff2)}.geo-zoom__breadcrumb{display:flex;min-height:52px;padding:9px 13px;align-items:center;gap:7px;border-bottom:1px solid var(--admin-border);background:var(--admin-surface,#fff)}.geo-zoom__breadcrumb button{padding:6px 9px;border:0;border-radius:8px;color:var(--admin-blue);background:transparent;cursor:pointer;font:inherit;font-weight:800}.geo-zoom__breadcrumb button:hover,.geo-zoom__breadcrumb button:focus-visible{background:#e5f3f6;outline:none}.geo-zoom__breadcrumb button[aria-current='page']{color:var(--admin-navy);background:#edf5f6}.geo-zoom__breadcrumb span{color:var(--admin-muted)}.geo-zoom__canvas{position:relative;display:grid;min-height:520px;place-items:center}.geo-zoom__canvas>svg{display:block;width:100%;height:520px;padding:20px}.geo-zoom__controls{position:absolute;z-index:4;top:14px;right:14px;display:grid;overflow:hidden;border:1px solid #b7ccd2;border-radius:9px;background:#fff;box-shadow:0 3px 12px rgb(18 63 75 / 16%)}.geo-zoom__controls button{display:grid;width:38px;height:38px;padding:0;place-items:center;color:#173f4b;background:#fff;border:0;font:700 1.45rem/1 sans-serif;cursor:pointer}.geo-zoom__controls button+button{border-top:1px solid #d3e0e3}.geo-zoom__controls button:hover:not(:disabled),.geo-zoom__controls button:focus-visible{z-index:1;color:#fff;background:#087f98;outline:none}.geo-zoom__controls button:disabled{color:#aab8bc;cursor:not-allowed;background:#f3f6f7}.geo-zoom__area{fill:#d8e7e9;stroke:#fff;stroke-width:1;vector-effect:non-scaling-stroke;transition:fill .15s ease}.geo-zoom__area:focus{outline:none}.geo-zoom__area.has-data{cursor:pointer}.geo-zoom__area.has-data:hover,.geo-zoom__area.has-data:focus{fill:#c4dde1;stroke:#087f98;stroke-width:3}.geo-zoom__marker{fill:#087f98;fill-opacity:.78;stroke:#fff;stroke-width:2.5;vector-effect:non-scaling-stroke;cursor:pointer;transform-box:fill-box;transform-origin:center;animation:geo-marker-pulse 1.8s ease-in-out infinite;transition:fill .15s ease,fill-opacity .15s ease,stroke-width .15s ease}.geo-zoom__marker:hover,.geo-zoom__marker:focus{fill:#005f76;fill-opacity:.95;stroke-width:4;outline:none;animation-play-state:paused;transform:scale(1.08)}.geo-zoom__tooltip{position:absolute;z-index:10;display:grid;min-width:165px;padding:9px 12px;gap:2px;border-radius:9px;color:#fff;background:rgb(9 43 52 / 95%);box-shadow:0 5px 18px rgb(0 0 0 / 18%);pointer-events:none}.geo-zoom__tooltip span,.geo-zoom__tooltip b{font-size:.77rem}.geo-zoom__loader{width:34px;height:34px;border:4px solid #b8dce2;border-top-color:#087f98;border-radius:50%;animation:geo-spin .8s linear infinite}.geo-zoom__empty{margin:0;padding:20px;color:var(--admin-muted);text-align:center}.geo-zoom__credit{display:block;margin:6px 2px 0;color:var(--admin-muted);font-size:.66rem;text-align:right}.geo-zoom__credit a{color:inherit}@keyframes geo-spin{to{transform:rotate(360deg)}}@keyframes geo-marker-pulse{0%,100%{transform:scale(.9);fill-opacity:.68;stroke-opacity:.72}50%{transform:scale(1.12);fill-opacity:.95;stroke-opacity:1}}@keyframes geo-activity-pulse{0%,100%{transform:scale(.72);opacity:.52}44%{transform:scale(1.16);opacity:1}72%{transform:scale(.9);opacity:.72}}:global(:root[data-theme='dark']) .geo-zoom{background:linear-gradient(160deg,#203a42,#172b31)}:global(:root[data-theme='dark']) .geo-zoom__breadcrumb{background:#1a2c31}:global(:root[data-theme='dark']) .geo-zoom__breadcrumb button:hover,:global(:root[data-theme='dark']) .geo-zoom__breadcrumb button:focus-visible,:global(:root[data-theme='dark']) .geo-zoom__breadcrumb button[aria-current='page']{background:#294149}:global(:root[data-theme='dark']) .geo-zoom__controls{border-color:#49646c;background:#1b3036}:global(:root[data-theme='dark']) .geo-zoom__controls button{color:#d7edf1;background:#1b3036}:global(:root[data-theme='dark']) .geo-zoom__controls button+button{border-color:#49646c}:global(:root[data-theme='dark']) .geo-zoom__controls button:hover:not(:disabled),:global(:root[data-theme='dark']) .geo-zoom__controls button:focus-visible{color:#fff;background:#087f98}:global(:root[data-theme='dark']) .geo-zoom__controls button:disabled{color:#63777c;background:#15272c}:global(:root[data-theme='dark']) .geo-zoom__area{fill:#31484e;stroke:#17292e}
 .geo-zoom__canvas.is-zooming{cursor:progress}.geo-zoom__canvas.is-zooming>svg{pointer-events:none}
+.geo-zoom__canvas .geo-zoom__marker{animation:none}
+.geo-zoom__canvas>svg{isolation:isolate}
+.geo-zoom__marker-layer.is-additive{mix-blend-mode:screen}
+@supports(mix-blend-mode:plus-lighter){.geo-zoom__marker-layer.is-additive{mix-blend-mode:plus-lighter}}
+.geo-zoom__marker-layer.is-pulsing{will-change:opacity;animation:geo-marker-layer-pulse 3.2s ease-in-out infinite}
+@keyframes geo-marker-layer-pulse{0%,100%{opacity:.52}50%{opacity:1}}
 .geo-zoom__canvas>svg{cursor:grab;touch-action:none;user-select:none}.geo-zoom__canvas>svg.is-panning{cursor:grabbing}.geo-zoom__display-controls{position:absolute;z-index:4;right:14px;bottom:14px;display:grid;justify-items:end;gap:8px}.geo-zoom__display-toggle{padding:9px 12px;border:1px solid #b7ccd2;border-radius:9px;color:#173f4b;background:#fff;box-shadow:0 3px 12px rgb(18 63 75 / 16%);font:inherit;font-size:.78rem;font-weight:800;cursor:pointer}.geo-zoom__display-toggle:hover,.geo-zoom__display-toggle:focus-visible{color:#fff;background:#087f98;outline:none}.geo-zoom__marker-value{fill:#fff;stroke:#05657a;stroke-width:.7px;paint-order:stroke;vector-effect:non-scaling-stroke;text-anchor:middle;dominant-baseline:central;font-weight:850;pointer-events:none}.geo-zoom__label{fill:#2d3439;stroke:#edf8fa;stroke-width:3px;paint-order:stroke;stroke-linejoin:round;vector-effect:non-scaling-stroke;font-weight:750;letter-spacing:-.02em;pointer-events:none}.geo-zoom__tooltip{grid-template-columns:auto minmax(0,1fr) auto;min-width:290px;padding:16px 18px;align-items:baseline;gap:5px 12px;border:1px solid #d5dce0;border-radius:14px;color:#20262b;background:#fff;box-shadow:0 8px 24px rgb(17 36 43 / 22%)}.geo-zoom__tooltip strong{overflow:hidden;font-size:1rem;text-overflow:ellipsis;white-space:nowrap}.geo-zoom__tooltip b{font-size:1rem}.geo-zoom__tooltip-rank{font-size:.88rem;font-weight:800;white-space:nowrap}.geo-zoom__tooltip small{grid-column:2/-1;color:#607078;font-size:.72rem;font-weight:650}:global(:root[data-theme='dark']) .geo-zoom__display-toggle{border-color:#49646c;color:#d7edf1;background:#1b3036}:global(:root[data-theme='dark']) .geo-zoom__display-toggle:hover,:global(:root[data-theme='dark']) .geo-zoom__display-toggle:focus-visible{color:#fff;background:#087f98}:global(:root[data-theme='dark']) .geo-zoom__label{fill:#e7f0f2;stroke:#203a42}:global(:root[data-theme='dark']) .geo-zoom__tooltip{border-color:#71848a;color:#17292e;background:#f7fbfc}
 .geo-zoom__region-details{position:absolute;z-index:5;left:14px;bottom:14px;display:grid;width:min(320px,calc(100% - 28px));max-height:calc(100% - 28px);padding:15px;gap:11px;overflow:auto;border:1px solid #b7ccd2;border-radius:13px;color:#173f4b;background:rgb(255 255 255 / 96%);box-shadow:0 7px 24px rgb(18 63 75 / 20%)}.geo-zoom__region-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.geo-zoom__region-heading>div{display:grid}.geo-zoom__region-heading small{color:#66808a;font-size:.68rem;font-weight:850;text-transform:uppercase;letter-spacing:.06em}.geo-zoom__region-heading strong{font-size:1.05rem}.geo-zoom__region-heading>b{font-size:1.7rem;color:#087f98}.geo-zoom__region-details dl,.geo-zoom__region-details ol{margin:0}.geo-zoom__region-details dl{display:grid;gap:5px}.geo-zoom__region-details dl>div,.geo-zoom__region-details li{display:flex;align-items:center;justify-content:space-between;gap:12px}.geo-zoom__region-details dl>div{padding:5px 0;border-bottom:1px solid #e0eaed}.geo-zoom__region-details dt{color:#5b737c}.geo-zoom__region-details dd{margin:0;font-weight:850}.geo-zoom__region-details ol{display:grid;padding:0;list-style:none}.geo-zoom__region-details li{padding:6px 0;border-bottom:1px solid #e7eef0}.geo-zoom__region-details li:last-child{border:0}.geo-zoom__region-details p{margin:0;color:#5b737c;font-size:.78rem}:global(:root[data-theme='dark']) .geo-zoom__region-details{border-color:#49646c;color:#d7edf1;background:rgb(27 48 54 / 96%)}:global(:root[data-theme='dark']) .geo-zoom__region-details small,:global(:root[data-theme='dark']) .geo-zoom__region-details dt,:global(:root[data-theme='dark']) .geo-zoom__region-details p{color:#aac0c6}:global(:root[data-theme='dark']) .geo-zoom__region-details dl>div,:global(:root[data-theme='dark']) .geo-zoom__region-details li{border-color:#3d5860}
-@media(prefers-reduced-motion:reduce){.geo-zoom__marker{animation:none}.geo-zoom__marker:hover,.geo-zoom__marker:focus{transform:none}}
+:global(:root[data-theme='dark'] .geo-zoom){--geo-trace-color:#62efff;--geo-trace-glow:rgb(64 226 255 / 85%);border-color:#263b42;background:#02080b}
+:global(:root[data-theme='dark'] .geo-zoom__canvas){background:radial-gradient(circle at 50% 45%,#102128 0%,#071216 56%,#02070a 100%)}
+:global(:root[data-theme='dark'] .geo-zoom__breadcrumb){color:#c7e2e7;border-color:#263b42;background:#050d11}
+:global(:root[data-theme='dark'] .geo-zoom__breadcrumb button){color:#9dd8e2;background:#0b1a1f}
+:global(:root[data-theme='dark'] .geo-zoom__controls){border-color:#34515a;background:#081419}
+:global(:root[data-theme='dark'] .geo-zoom__controls button){color:#bdebf1;background:#081419}
+:global(:root[data-theme='dark'] .geo-zoom__controls button+button){border-color:#34515a}
+:global(:root[data-theme='dark'] .geo-zoom__display-toggle){color:#bdebf1;border-color:#34515a;background:#081419}
+:global(:root[data-theme='dark'] .geo-zoom__area){fill:#101d22;stroke:#34474e}
+:global(:root[data-theme='dark'] .geo-zoom__area.has-data:hover),:global(:root[data-theme='dark'] .geo-zoom__area.has-data:focus){fill:#173039;stroke:#62efff}
+:global(:root[data-theme='dark'] .geo-zoom__marker){fill:#62efff;filter:drop-shadow(0 0 5px var(--geo-trace-glow));stroke:#d9fbff}
+@media(prefers-reduced-motion:reduce){.geo-zoom__marker,.geo-zoom__canvas.has-realtime-activity .geo-zoom__marker{animation:none}.geo-zoom__marker:hover,.geo-zoom__marker:focus{transform:none}}
+@media(prefers-reduced-motion:reduce){.geo-zoom__marker-layer.is-pulsing{opacity:1;animation:none}}
 @media(max-width:650px){.geo-zoom__canvas,.geo-zoom__canvas>svg{min-height:410px;height:410px}.geo-zoom__canvas>svg{padding:8px}.geo-zoom__breadcrumb{overflow-x:auto;white-space:nowrap}}
 </style>

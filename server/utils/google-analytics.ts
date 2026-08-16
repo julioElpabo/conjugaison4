@@ -144,7 +144,7 @@ export async function googleAnalyticsOverview(options: {
     }
     throw error
   }
-  const [devices, languages, countries, regions, cities, cityRegions, events, activity, audienceTrend] = await Promise.all([
+  const [devices, languages, countries, regions, cities, cityRegions, events, activity, audienceTrend, acquisition, landingPages, browsers, operatingSystems] = await Promise.all([
     optionalRequest('appareils', ['deviceCategory'], ['activeUsers']),
     realtime ? Promise.resolve({ rows: [] } satisfies GaResponse) : optionalRequest('langues', ['language'], ['activeUsers']),
     optionalRequest('pays', ['countryId', 'country'], ['activeUsers'], 250),
@@ -160,6 +160,10 @@ export async function googleAnalyticsOverview(options: {
     realtime
       ? Promise.resolve({ rows: [] } satisfies GaResponse)
       : optionalRequest('progression de l’audience', ['date'], ['activeUsers', 'sessions', 'newUsers'], 400),
+    realtime ? Promise.resolve({ rows: [] } satisfies GaResponse) : optionalRequest('acquisition', ['sessionSourceMedium'], ['sessions'], 20),
+    realtime ? Promise.resolve({ rows: [] } satisfies GaResponse) : optionalRequest('pages d’entrée', ['landingPagePlusQueryString'], ['sessions'], 20),
+    optionalRequest('navigateurs', ['browser'], ['activeUsers'], 10),
+    optionalRequest('systèmes', ['operatingSystem'], ['activeUsers'], 10),
   ])
   const summaryValues = summary.rows?.[0]?.metricValues || []
   const metric = (index: number) => Number(summaryValues[index]?.value) || 0
@@ -201,7 +205,7 @@ export async function googleAnalyticsOverview(options: {
     completionRate: exerciseStarted ? Math.round(exerciseCompleted / exerciseStarted * 1000) / 10 : 0,
     correctAnswers, submittedAnswers,
     successRate: submittedAnswers ? Math.round(correctAnswers / submittedAnswers * 1000) / 10 : 0,
-    helpOpened: eventValue('help_opened'), pdfDownloads: eventValue('pdf_downloaded'),
+    helpScrolled: eventValue('help_scrolled'), pdfDownloads: eventValue('pdf_downloaded'),
     wordDownloads: eventValue('word_downloaded'), challengeLoads: eventValue('challenge_load'),
     challengeSaves: eventValue('challenge_save'),
     devices: rows(devices), languages: rows(languages), countries: countryRows,
@@ -219,6 +223,7 @@ export async function googleAnalyticsOverview(options: {
       country: row.dimensionValues?.[realtime ? 3 : 4]?.value,
       value: Number(row.metricValues?.[0]?.value) || 0,
     })),
+    acquisition: rows(acquisition), landingPages: rows(landingPages), browsers: rows(browsers), operatingSystems: rows(operatingSystems),
     featureUsage: [], eventBreakdown: eventRows, activity: activityRows, series: audienceSeries,
     generatedAt: new Date().toISOString(),
   }

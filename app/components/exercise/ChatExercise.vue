@@ -375,6 +375,15 @@ function answerLineParts(value: string) {
 
 function openVerbConsultation(id: number) {
   consultationVerbId.value = id
+  track('chat_conjugation_opened', exerciseAnalyticsMetadata.value)
+}
+
+const helpScrollTracked = ref(false)
+
+function trackHelpScroll() {
+  if (helpScrollTracked.value) return
+  helpScrollTracked.value = true
+  track('help_scrolled', exerciseAnalyticsMetadata.value)
 }
 
 function closeVerbConsultation() {
@@ -542,7 +551,6 @@ function openHelp(candidate: string) {
   answer.value = ''
   helpQuestionIndex.value = null
   helpOpen.value = true
-  track('help_opened', exerciseAnalyticsMetadata.value)
   restartHelpReminderTimer()
   scrollToHelpOnSmallScreen()
 }
@@ -551,7 +559,6 @@ function openHelpForQuestion(questionIndex: number) {
   if (!Number.isInteger(questionIndex) || !props.questions[questionIndex]) return
   helpQuestionIndex.value = questionIndex
   helpOpen.value = true
-  track('help_opened', exerciseAnalyticsMetadata.value)
   restartHelpReminderTimer()
   scrollToHelpOnSmallScreen()
 }
@@ -559,7 +566,6 @@ function openHelpForQuestion(questionIndex: number) {
 function showLatestHelp() {
   helpQuestionIndex.value = null
   helpOpen.value = true
-  track('help_opened', exerciseAnalyticsMetadata.value)
   restartHelpReminderTimer()
   scrollThreadToBottom()
   scrollToHelpOnSmallScreen()
@@ -800,12 +806,8 @@ async function suggestHelp(offerConsultation = false) {
   const question = currentQuestion.value
   if (!question || finished.value) return
   const questionIndex = currentIndex.value
-  const wasHelpOpen = helpOpen.value
   helpQuestionIndex.value = null
   helpOpen.value = true
-  if (!wasHelpOpen) {
-    track('help_opened', { ...exerciseAnalyticsMetadata.value, source: 'reminder' })
-  }
   await nextTick()
   if (!offerConsultation) await addCoachReaction('help-announcement', contextFor(question))
   const verbId = question.verbeId ?? helpVerb.value?.id
@@ -1587,6 +1589,7 @@ onBeforeUnmount(() => {
           :consult-verb-id="helpConsultVerbId"
           :consult-verb-label="helpConsultVerbLabel"
           @content-scroll="restartHelpReminderTimer"
+          @user-scroll="trackHelpScroll"
           @consult-verb="openVerbConsultation"
           @close="closeHelp"
         />

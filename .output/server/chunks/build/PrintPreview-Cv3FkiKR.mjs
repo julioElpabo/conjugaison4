@@ -1,7 +1,7 @@
 import { defineComponent, ref, useTemplateRef, computed, watch, unref, useSSRContext } from 'vue';
 import { ssrRenderTeleport, ssrInterpolate, ssrIncludeBooleanAttr, ssrRenderAttr, ssrRenderClass } from 'vue/server-renderer';
 import { T as TENSE_IDENTIFICATION_INSTRUCTION } from '../_/exercise-instructions.mjs';
-import { al as conjugationRequiresSubjectPronoun } from '../nitro/nitro.mjs';
+import { ah as conjugationRequiresSubjectPronoun } from '../nitro/nitro.mjs';
 import { f as useLanguagePreferences } from './server.mjs';
 import { u as useSiteAnalytics } from './useSiteAnalytics-D1wpWTOZ.mjs';
 import 'node:http';

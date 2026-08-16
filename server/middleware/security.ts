@@ -8,6 +8,7 @@ function isProtectedMutation(path: string, method: string) {
     || path === '/api/auth/logout'
     || path === '/api/learner'
     || path.startsWith('/api/learner/')
+    || path.startsWith('/api/speech/')
     || path === '/api/admin'
     || path.startsWith('/api/admin/')
 }

@@ -6,6 +6,7 @@ import type {
   ExerciseKind,
   IdentificationSource,
   LiteraryRegister,
+  LearningSupportMode,
   ComplementPlacement,
   ComplementOption,
   PastSimplePronouns,
@@ -15,7 +16,7 @@ import type {
 import { legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils/complement-options'
 import { DEFAULT_SHARED_CHALLENGE_OPTIONS } from '~~/shared/utils/challenge-defaults'
 
-export type { ComplementOption, ComplementPlacement, ConjugationMode, ExerciseKind, IdentificationSource, LiteraryRegister, PastSimplePronouns, VoiceMode, Verb }
+export type { ComplementOption, ComplementPlacement, ConjugationMode, ExerciseKind, IdentificationSource, LearningSupportMode, LiteraryRegister, PastSimplePronouns, VoiceMode, Verb }
 export type Tense = ConjugationTense
 
 export interface Catalogue {
@@ -56,6 +57,7 @@ export interface SharedChallenge {
   pastSimplePronouns?: PastSimplePronouns
   inclusivePronouns?: boolean
   includeOnPronoun?: boolean
+  learningSupportMode?: LearningSupportMode
   voiceMode?: VoiceMode
   includeComplements?: boolean
   complementPlacement?: ComplementPlacement
@@ -233,6 +235,7 @@ export function useChallengeBuilder() {
       pastSimplePronouns: shared.pastSimplePronouns ?? defaults.pastSimplePronouns,
       inclusivePronouns: shared.inclusivePronouns ?? defaults.inclusivePronouns,
       includeOnPronoun: shared.includeOnPronoun ?? defaults.includeOnPronoun,
+      learningSupportMode: shared.learningSupportMode ?? defaults.learningSupportMode,
       voiceMode: shared.voiceMode ?? defaults.voiceMode,
       includeComplements: legacy.includeComplements,
       complementPlacement: legacy.complementPlacement,

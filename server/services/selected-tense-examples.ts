@@ -83,6 +83,7 @@ function questionnaireRequest(verbIds: number[], tenseIds: number[], questionCou
     pastSimplePronouns: 'all' as const,
     inclusivePronouns: false,
     includeOnPronoun: false,
+    learningSupportMode: 'normal' as const,
     voiceMode: 'active' as const,
     includeComplements: true,
     complementPlacement: 'after' as const,

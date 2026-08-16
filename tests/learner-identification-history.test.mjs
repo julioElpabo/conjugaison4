@@ -27,10 +27,18 @@ test('enregistre le type et la source des défis de reconnaissance', () => {
   assert.match(wizardWorkspace, /identificationSource: challenge\.value\.identificationSource/u)
 })
 
+test('conserve le mode CIF/FLE dans les reprises et normalise les anciens historiques', () => {
+  const base = { verbIds: [1], tenseIds: [1], questionCount: 10, exerciseKind: 'conjugation' }
+  assert.equal(learnerChallengeSnapshot(base).learningSupportMode, 'normal')
+  assert.equal(learnerChallengeSnapshot({ ...base, learningSupportMode: 'cif-fle' }).learningSupportMode, 'cif-fle')
+  assert.match(classicWorkspace, /learningSupportMode: challenge\.value\.learningSupportMode/u)
+  assert.match(wizardWorkspace, /learningSupportMode: challenge\.value\.learningSupportMode/u)
+})
+
 test('la reprise en chat conserve l’aide d’identification sans révéler la réponse', () => {
   assert.match(chat, /const usesIdentificationHelp = computed\(\(\) => isIdentificationExercise\.value\)/u)
   assert.match(chat, /usesIdentificationHelp\.value[\s\S]*literaryIdentificationCoachHelpBlocks/u)
-  assert.match(chat, /:enable-automatic-audit="!usesIdentificationHelp"/u)
+  assert.match(chat, /:enable-automatic-audit="!usesIdentificationHelp && !usesAllophoneHelp"/u)
   assert.doesNotMatch(chat, /isIdentificationExercise\.value && Boolean\(helpQuestion\.value\?\.literaryCitation\)/u)
   assert.match(space, /reviewQuestions\.value\.map\(question => Number\(question\.verbeId\)\)/u)
 })

@@ -24,6 +24,19 @@ export default defineNuxtConfig({
     dbUser: process.env.NUXT_DB_USER || process.env.DB_USER,
     dbPassword: process.env.NUXT_DB_PASSWORD || process.env.DB_PASSWORD,
     sessionSecret: process.env.NUXT_SESSION_SECRET || process.env.SESSION_SECRET || process.env.DB_PASSWORD,
+    azureSpeechKey: process.env.NUXT_AZURE_SPEECH_KEY || process.env.AZURE_SPEECH_KEY || process.env.AZURE_SPEECH_KEY1,
+    azureSpeechKeySecondary: process.env.NUXT_AZURE_SPEECH_KEY_SECONDARY || process.env.AZURE_SPEECH_KEY_SECONDARY || process.env.AZURE_SPEECH_KEY2,
+    azureSpeechRegion: process.env.NUXT_AZURE_SPEECH_REGION || process.env.AZURE_SPEECH_REGION || 'switzerlandnorth',
+    azureSpeechEndpoint: process.env.NUXT_AZURE_SPEECH_ENDPOINT || process.env.AZURE_SPEECH_ENDPOINT,
+    azureSpeechClassicVoice: process.env.NUXT_AZURE_SPEECH_CLASSIC_VOICE || process.env.AZURE_SPEECH_CLASSIC_VOICE || 'fr-FR-YvetteNeural',
+    azureSpeechCacheDir: process.env.NUXT_AZURE_SPEECH_CACHE_DIR || process.env.AZURE_SPEECH_CACHE_DIR || '../conjugaison4-cache-audio',
+    azureSpeechCacheMaxGb: Number(process.env.NUXT_AZURE_SPEECH_CACHE_MAX_GB || process.env.AZURE_SPEECH_CACHE_MAX_GB || 2),
+    classicSpeechTokenSecret: process.env.NUXT_CLASSIC_SPEECH_TOKEN_SECRET
+      || process.env.CLASSIC_SPEECH_TOKEN_SECRET
+      || process.env.SESSION_SECRET
+      || process.env.AZURE_SPEECH_KEY
+      || process.env.AZURE_SPEECH_KEY1
+      || process.env.DB_PASSWORD,
     learnerSessionSecret: process.env.NUXT_LEARNER_SESSION_SECRET || process.env.LEARNER_SESSION_SECRET,
     turnstileSecretKey: process.env.NUXT_TURNSTILE_SECRET_KEY || process.env.TURNSTILE_SECRET_KEY,
     contactEmail: process.env.NUXT_CONTACT_EMAIL || process.env.CONTACT_EMAIL || 'christophe.roulet@edu-vd.ch',

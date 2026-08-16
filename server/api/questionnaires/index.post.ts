@@ -2,6 +2,7 @@ import { generateQuestionnaire, QuestionnaireSelectionError } from '../../servic
 import { parseQuestionnaireRequest, PublicInputError } from '../../services/public-api-validation'
 import { assertPublicApiRateLimit, PUBLIC_RATE_LIMITS } from '../../services/public-api-rate-limit'
 import { readLimitedJsonBody } from '../../utils/limited-json-body'
+import { addClassicSpeechTokens } from '../../services/classic-speech-token'
 
 export default defineEventHandler(async (event) => {
   await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.questionnaire)
@@ -24,7 +25,9 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'Aucune question disponible pour cette sélection'
       })
     }
-    return questions
+    return request.exerciseKind === 'conjugation' && request.learningSupportMode === 'cif-fle'
+      ? questions.map(addClassicSpeechTokens)
+      : questions
   } catch (error) {
     if (error instanceof QuestionnaireSelectionError) {
       throw createError({ statusCode: 400, statusMessage: error.message })

@@ -4,6 +4,7 @@ import type {
   ComplementPlacement,
   DefiDefinition,
   ExerciseKind,
+  LearningSupportMode,
   PastSimplePronouns,
   QuestionnaireRequest,
   VoiceMode,
@@ -26,6 +27,7 @@ const QUESTIONNAIRE_KEYS = new Set([
   'pastSimplePronouns',
   'inclusivePronouns',
   'includeOnPronoun',
+  'learningSupportMode',
   'voiceMode',
   'includeComplements',
   'complementPlacement',
@@ -45,6 +47,7 @@ const DEFI_KEYS = new Set([
   'pastSimplePronouns',
   'inclusivePronouns',
   'includeOnPronoun',
+  'learningSupportMode',
   'voiceMode',
   'includeComplements',
   'complementPlacement',
@@ -188,6 +191,11 @@ function parseVoiceMode(value: unknown): VoiceMode {
   throw new PublicInputError('voiceMode doit valoir active, passive ou mixed')
 }
 
+function parseLearningSupportMode(value: unknown): LearningSupportMode {
+  if (value === 'normal' || value === 'cif-fle') return value
+  throw new PublicInputError('learningSupportMode doit valoir normal ou cif-fle')
+}
+
 function parseComplementPlacement(value: unknown): ComplementPlacement {
   if (value === 'after' || value === 'mixed' || value === 'before') return value
   throw new PublicInputError('complementPlacement doit valoir after, mixed ou before')
@@ -258,6 +266,9 @@ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest 
   const voiceMode = value.voiceMode === undefined
     ? DEFAULT_SHARED_CHALLENGE_OPTIONS.voiceMode
     : parseVoiceMode(value.voiceMode)
+  const learningSupportMode = value.learningSupportMode === undefined
+    ? DEFAULT_SHARED_CHALLENGE_OPTIONS.learningSupportMode
+    : parseLearningSupportMode(value.learningSupportMode)
   const includeComplements = value.includeComplements ?? false
   if (typeof includeComplements !== 'boolean') {
     throw new PublicInputError('includeComplements doit être un booléen')
@@ -284,6 +295,7 @@ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest 
     pastSimplePronouns: parsePastSimplePronouns(value.pastSimplePronouns),
     inclusivePronouns: value.inclusivePronouns,
     includeOnPronoun,
+    learningSupportMode,
     voiceMode,
     includeComplements: resolvedLegacy.includeComplements,
     complementPlacement: resolvedLegacy.complementPlacement,
@@ -338,6 +350,9 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
   const voiceMode = modernValue.voiceMode === undefined
     ? DEFAULT_SHARED_CHALLENGE_OPTIONS.voiceMode
     : parseVoiceMode(modernValue.voiceMode)
+  const learningSupportMode = modernValue.learningSupportMode === undefined
+    ? DEFAULT_SHARED_CHALLENGE_OPTIONS.learningSupportMode
+    : parseLearningSupportMode(modernValue.learningSupportMode)
 
   if (typeof inclusivePronouns !== 'boolean') {
     throw new PublicInputError('inclusivePronouns doit être un booléen')
@@ -372,6 +387,7 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
     pastSimplePronouns,
     inclusivePronouns,
     includeOnPronoun,
+    learningSupportMode,
     voiceMode,
     includeComplements: resolvedLegacy.includeComplements,
     complementPlacement: resolvedLegacy.complementPlacement,

@@ -19,6 +19,7 @@ describe('administration des défis pré-enregistrés', () => {
       exerciseKind: 'tense-identification',
       pastSimplePronouns: 'third-person-only',
       inclusivePronouns: true,
+      learningSupportMode: 'cif-fle',
       complementOptions: ['cod-after', 'cod-before', 'coi-after', 'coi-before'],
       verbIds: [12, -7, 12],
       tenseIds: [1, 5, 5],
@@ -32,6 +33,7 @@ describe('administration des défis pré-enregistrés', () => {
     assert.equal(parsed.exerciseKind, 'tense-identification')
     assert.equal(parsed.pastSimplePronouns, 'third-person-only')
     assert.equal(parsed.inclusivePronouns, true)
+    assert.equal(parsed.learningSupportMode, 'cif-fle')
     assert.equal(parsed.isActive, false)
     assert.equal(parsed.verbSelectionMode, 'explicit')
     assert.deepEqual(parsed.criteria, [])
@@ -57,9 +59,19 @@ describe('administration des défis pré-enregistrés', () => {
     })
 
     assert.equal(parsed.verbSelectionMode, 'criteria')
+    assert.equal(parsed.learningSupportMode, 'normal')
     assert.deepEqual(parsed.criteria, [
       { field: 'groupeConjugaison', operator: 'equals', value: 2 },
     ])
+  })
+
+  it('refuse un mode CIF/FLE inconnu', () => {
+    assert.throws(() => parseChallengePresetPayload({
+      id: 'mode-invalide', label: 'Mode invalide', description: '', categoryId: 3,
+      questionCount: 10, exerciseKind: 'conjugation', pastSimplePronouns: 'all',
+      inclusivePronouns: false, learningSupportMode: 'audio', complementOptions: [],
+      verbIds: [12], tenseIds: [1], sortOrder: 1, isActive: true,
+    }))
   })
 
   it('normalise l’identifiant d’une nouvelle catégorie', () => {
@@ -87,6 +99,7 @@ describe('administration des défis pré-enregistrés', () => {
             categorySlug: 'personnalises', categoryName: 'Personnalisés', categoryOrder: 2,
             name: 'Sur mesure', description: 'Configuration administrée', questionCount: 14,
             exerciseKind: 'conjugation', pastSimplePronouns: 'all', inclusivePronouns: 1,
+            learningSupportMode: 'cif-fle',
             complementOptions: JSON.stringify(['cod-before', 'coi-after']),
             verbSelectionMode: 'explicit', criteriaJson: '[]', sortOrder: 4, isActive: 1,
           },
@@ -110,6 +123,7 @@ describe('administration des défis pré-enregistrés', () => {
     assert.deepEqual(preset.complementOptions, ['cod-before', 'coi-after'])
     assert.equal(preset.includeComplements, true)
     assert.equal(preset.complementPlacement, 'mixed')
+    assert.equal(preset.learningSupportMode, 'cif-fle')
   })
 
   it('reconstruit un ordre continu propre à la catégorie', async () => {

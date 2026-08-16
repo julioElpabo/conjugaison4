@@ -388,6 +388,17 @@
   background: #22332f;
   border-color: #566d67;
 }
+:root[data-theme='dark'] :is(.question-speech-button, .answer-listen-row button) {
+  color: #bde9e2;
+  background: #22332f;
+  border-color: #566d67;
+}
+:root[data-theme='dark'] :is(.question-speech-button, .answer-listen-row button):hover:not(:disabled) {
+  color: #102724;
+  background: #8bd7cc;
+  border-color: #8bd7cc;
+}
+:root[data-theme='dark'] .answer-listen-row { color: #b9d0cb; }
 :root[data-theme='dark'] .exercise-close-confirmation { background: rgb(7 19 23 / 72%); }
 :root[data-theme='dark'] .exercise-close-confirmation > section {
   color: #dce8e6;

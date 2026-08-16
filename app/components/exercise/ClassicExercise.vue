@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import type { Component, ShallowRef } from 'vue'
-import { faArrowUpFromBracket, faPrint, faStop, faVolumeHigh } from '@fortawesome/free-solid-svg-icons'
+import { faArrowUpFromBracket, faCirclePlay, faPrint, faSpinner, faStop, faVolume } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import LearnerErrorFeedback from '~/components/exercise/LearnerErrorFeedback.vue'
 import ShareExerciseSummaryDialog from '~/components/exercise/ShareExerciseSummaryDialog.vue'
 import VerbConsultationModal from '~/components/exercise/VerbConsultationModal.vue'
 import { isModeLandingSlug, modeLandingPage } from '~~/shared/data/mode-landing-pages'
 import { modeTensePedagogy } from '~~/shared/data/mode-tense-pedagogy'
-import { AUDIO_READING_ENABLED } from '~~/shared/config/feature-flags'
 import type { ConjugationTense, ExerciseAttempt, ExerciseKind, ExerciseQuestion, LearnerErrorDetail, LearnerExerciseTrackingContext } from '~~/shared/types/conjugation'
 import { grammarTenseCode } from '~~/shared/utils/grammar-codes'
 import {
@@ -18,6 +17,7 @@ import {
   getAlternativeCorrections,
   impossibleSingularEndingReminderMessage,
   isFutureSimpleInsteadOfNearFuture,
+  providedSubjunctiveInputPrefix,
 } from '~~/shared/utils/answer'
 import { diagnoseCoachAgreement, diagnoseCoachAnswer } from '~~/shared/utils/coach-feedback'
 import { evaluateExerciseAnswer } from '~~/shared/utils/exercise-attempt'
@@ -39,7 +39,6 @@ const props = defineProps<{
   requireSuccess?: boolean
   analyticsMetadata?: Record<string, string | number | boolean>
 }>()
-const audioReadingEnabled = AUDIO_READING_ENABLED
 const { track } = useSiteAnalytics()
 const { recordAttempt, recordQuestionPlan } = useLearnerProgress()
 
@@ -54,10 +53,11 @@ const lastIncorrectIdentificationAnswer = ref('')
 const isSmallScreen = ref(false)
 const feedback = ref<'idle' | 'correct' | 'incorrect'>('idle')
 const answerHeardBeforeSubmission = ref(false)
-const speechSupported = ref(false)
+const audioLoadingKey = ref('')
+const audioError = ref('')
 const speakingKey = ref('')
-let speechSequence = 0
-let speechPauseTimer: number | undefined
+let currentAudio: HTMLAudioElement | null = null
+let currentAudioUrl = ''
 const retryAlreadyOffered = ref(false)
 const retryMessageVisible = ref(false)
 const missingPronounMessageVisible = ref(false)
@@ -111,6 +111,9 @@ const currentSubjectMustBeTyped = computed(() => Boolean(
 ))
 const currentAnswerPlaceholder = computed(() => currentQuestion.value
   ? conjugationAnswerPlaceholder(currentQuestion.value)
+  : '')
+const providedAnswerPrefix = computed(() => currentQuestion.value && props.exerciseKind === 'conjugation'
+  ? providedSubjunctiveInputPrefix(currentQuestion.value)
   : '')
 const isModeIdentificationExercise = computed(() => props.exerciseKind === 'mode-identification')
 const isTenseIdentificationExercise = computed(() => props.exerciseKind === 'tense-identification')
@@ -172,9 +175,6 @@ const scorePercent = computed(() => attempts.value.length
   ? Math.round(correctCount.value / attempts.value.length * 100)
   : 0)
 const correction = computed(() => currentQuestion.value?.reponsesPourCorrige.join(` ${ui('ou')} `) ?? '')
-const currentSpokenAnswer = computed(() => currentQuestion.value?.reponsesPourCorrige[0]
-  || currentQuestion.value?.reponses[0]
-  || '')
 const alternativeCorrections = computed(() => currentQuestion.value
   ? getAlternativeCorrections(answer.value, currentQuestion.value.reponsesPourCorrige)
   : [])
@@ -351,61 +351,44 @@ function normalizedGrammarChoice(value?: string | null) {
 }
 
 function stopSpeech() {
-  if (!speechSupported.value) return
-  speechSequence += 1
-  if (speechPauseTimer !== undefined) {
-    window.clearTimeout(speechPauseTimer)
-    speechPauseTimer = undefined
-  }
-  window.speechSynthesis.cancel()
+  currentAudio?.pause()
+  currentAudio = null
+  if (currentAudioUrl) URL.revokeObjectURL(currentAudioUrl)
+  currentAudioUrl = ''
+  audioLoadingKey.value = ''
   speakingKey.value = ''
 }
 
-function spokenAnswerParts(text: string) {
-  return text.trim().split(/\s+/u).filter(Boolean)
-}
-
-function speakAnswer(text: string, key: string, beforeSubmission = false) {
-  const spokenText = text.trim()
-  if (!speechSupported.value || !spokenText) return
+async function playSpeech(token: string | undefined, key: string, beforeSubmission = false) {
+  if (!token) return
   if (speakingKey.value === key) {
     stopSpeech()
     return
   }
   stopSpeech()
+  audioError.value = ''
   if (beforeSubmission) answerHeardBeforeSubmission.value = true
-  const activeSequence = speechSequence
-  const parts = spokenAnswerParts(spokenText)
-  const voices = window.speechSynthesis.getVoices()
-  const voice = voices.find(voice => voice.lang.toLocaleLowerCase().startsWith('fr-fr'))
-    || voices.find(voice => voice.lang.toLocaleLowerCase().startsWith('fr'))
-    || null
-
-  const speakPart = (index: number) => {
-    if (speechSequence !== activeSequence || speakingKey.value !== key) return
-    const utterance = new SpeechSynthesisUtterance(parts[index]!)
-    utterance.lang = 'fr-FR'
-    utterance.rate = falcMode.value ? 0.68 : 0.78
-    utterance.voice = voice
-    utterance.onend = () => {
-      if (speechSequence !== activeSequence || speakingKey.value !== key) return
-      if (index >= parts.length - 1) {
-        speakingKey.value = ''
-        return
-      }
-      speechPauseTimer = window.setTimeout(() => {
-        speechPauseTimer = undefined
-        speakPart(index + 1)
-      }, 420)
-    }
-    utterance.onerror = () => {
-      if (speechSequence === activeSequence && speakingKey.value === key) speakingKey.value = ''
-    }
-    window.speechSynthesis.speak(utterance)
+  audioLoadingKey.value = key
+  try {
+    const response = await fetch('/api/speech/classic', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    })
+    if (!response.ok) throw new Error(`Lecture indisponible (${response.status})`)
+    currentAudioUrl = URL.createObjectURL(await response.blob())
+    currentAudio = new Audio(currentAudioUrl)
+    speakingKey.value = key
+    currentAudio.onended = stopSpeech
+    currentAudio.onerror = stopSpeech
+    await currentAudio.play()
+  } catch (error) {
+    stopSpeech()
+    audioError.value = ui('Lecture audio momentanément indisponible.')
+    console.warn('[speech] Lecture impossible.', error)
+  } finally {
+    audioLoadingKey.value = ''
   }
-
-  speakingKey.value = key
-  speakPart(0)
 }
 
 function openVerbConsultation(id: number) {
@@ -717,9 +700,6 @@ function updateSmallScreen(event: MediaQueryList | MediaQueryListEvent) {
 }
 
 onMounted(() => {
-  speechSupported.value = audioReadingEnabled
-    && 'speechSynthesis' in window
-    && 'SpeechSynthesisUtterance' in window
   smallScreenQuery = window.matchMedia('(max-width: 760px)')
   updateSmallScreen(smallScreenQuery)
   smallScreenQuery.addEventListener('change', updateSmallScreen)
@@ -755,7 +735,9 @@ onBeforeUnmount(() => {
               {{ isFinished ? ui('Résultats') : ui('Question {current} sur {total}', { current: displayedQuestionNumber, total: displayedQuestionCount }) }}
             </h2>
           </div>
-          <button class="dialog-close" type="button" :aria-label="ui('Quitter l’exercice')" @click="requestClose">×</button>
+          <div class="exercise-header__actions">
+            <button class="dialog-close" type="button" :aria-label="ui('Quitter l’exercice')" @click="requestClose">×</button>
+          </div>
         </header>
 
         <div class="exercise-progress" :aria-label="ui('Progression du questionnaire')">
@@ -778,19 +760,22 @@ onBeforeUnmount(() => {
           <template v-if="falcMode && exerciseKind === 'conjugation'">
             <p class="falc-question-prompt">{{ falcQuestionPrompt }}</p>
             <form class="falc-answer-form" @submit.prevent="feedback === 'idle' ? submitAnswer() : nextQuestion()">
-              <input
-                id="exercise-answer"
-                ref="answer-input"
-                v-model="answer"
-                type="text"
-                autocomplete="off"
-                :placeholder="currentSubjectMustBeTyped ? currentAnswerPlaceholder : undefined"
-                :aria-label="ui('Forme conjuguée de {verb}', { verb: currentQuestion.infinitif || '' })"
-                :disabled="feedback !== 'idle'"
-                :class="{ 'is-valid': feedback === 'correct', 'is-invalid': feedback === 'incorrect', 'is-being-read': speakingKey === 'current-feedback' }"
-                :aria-invalid="feedback === 'incorrect'"
-                :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : undefined"
-              >
+              <div class="prefixed-answer-control" :class="{ 'has-prefix': providedAnswerPrefix }">
+                <span v-if="providedAnswerPrefix" class="prefixed-answer-control__prefix">{{ providedAnswerPrefix }}</span>
+                <input
+                  id="exercise-answer"
+                  ref="answer-input"
+                  v-model="answer"
+                  type="text"
+                  autocomplete="off"
+                  :placeholder="currentSubjectMustBeTyped ? currentAnswerPlaceholder : undefined"
+                  :aria-label="ui('Forme conjuguée de {verb}', { verb: currentQuestion.infinitif || '' })"
+                  :disabled="feedback !== 'idle'"
+                  :class="{ 'is-valid': feedback === 'correct', 'is-invalid': feedback === 'incorrect', 'is-being-read': speakingKey === 'current-feedback' }"
+                  :aria-invalid="feedback === 'incorrect'"
+                  :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : undefined"
+                >
+              </div>
               <button v-if="feedback === 'idle'" class="primary-button" type="submit" :disabled="!answer.trim()">{{ ui('Vérifier') }}</button>
               <button v-else class="primary-button" type="submit">
                 {{ currentIndex === questions.length - 1 ? ui('Voir mes résultats') : ui('Question suivante') }}
@@ -818,23 +803,26 @@ onBeforeUnmount(() => {
               <div class="completion-sentence">
                 <span v-if="currentQuestion.complementPosition === 'before'">{{ currentQuestion.complement }}</span>
                 <span v-if="currentQuestion.saisiePrefixe && !currentSubjectMustBeTyped" class="completion-sentence__prefix">{{ currentQuestion.saisiePrefixe }}</span>
-                <input
-                  id="exercise-answer"
-                  ref="answer-input"
-                  v-model="answer"
-                  type="text"
-                  autocomplete="off"
-                  :placeholder="currentSubjectMustBeTyped ? currentAnswerPlaceholder : undefined"
-                  :aria-label="ui('Forme conjuguée de {verb}', { verb: currentQuestion.infinitif || '' })"
-                  :disabled="feedback !== 'idle'"
-                  :class="{
-                    'is-valid': feedback === 'correct',
-                    'is-invalid': feedback === 'incorrect' || retryMessageVisible,
-                    'is-being-read': speakingKey === 'current-feedback'
-                  }"
-                  :aria-invalid="feedback === 'incorrect' || retryMessageVisible"
-                  :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : missingPronounMessageVisible ? 'answer-missing-pronoun' : retryMessageVisible ? 'answer-retry' : undefined"
-                >
+                <div class="prefixed-answer-control prefixed-answer-control--completion" :class="{ 'has-prefix': providedAnswerPrefix }">
+                  <span v-if="providedAnswerPrefix" class="prefixed-answer-control__prefix">{{ providedAnswerPrefix }}</span>
+                  <input
+                    id="exercise-answer"
+                    ref="answer-input"
+                    v-model="answer"
+                    type="text"
+                    autocomplete="off"
+                    :placeholder="currentSubjectMustBeTyped ? currentAnswerPlaceholder : undefined"
+                    :aria-label="ui('Forme conjuguée de {verb}', { verb: currentQuestion.infinitif || '' })"
+                    :disabled="feedback !== 'idle'"
+                    :class="{
+                      'is-valid': feedback === 'correct',
+                      'is-invalid': feedback === 'incorrect' || retryMessageVisible,
+                      'is-being-read': speakingKey === 'current-feedback'
+                    }"
+                    :aria-invalid="feedback === 'incorrect' || retryMessageVisible"
+                    :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : missingPronounMessageVisible ? 'answer-missing-pronoun' : retryMessageVisible ? 'answer-retry' : undefined"
+                  >
+                </div>
                 <span v-if="currentQuestion.complementPosition !== 'before'">
                   {{ currentQuestion.complement }}{{ currentQuestion.mode?.toLocaleLowerCase('fr') === 'impératif' ? ' !' : '' }}
                 </span>
@@ -873,6 +861,23 @@ onBeforeUnmount(() => {
             </small>
           </div>
           <p v-else class="question-text">{{ currentQuestion.consigne }}</p>
+          <button
+            v-if="exerciseKind === 'conjugation' && currentQuestion.speech?.questionToken"
+            class="question-speech-button"
+            type="button"
+            :disabled="audioLoadingKey === 'question'"
+            :aria-label="audioLoadingKey === 'question' ? ui('Chargement de l’audio…') : speakingKey === 'question' ? ui('Arrêter la lecture') : ui('Écouter la question')"
+            :title="audioLoadingKey === 'question' ? ui('Chargement de l’audio…') : speakingKey === 'question' ? ui('Arrêter la lecture') : ui('Écouter la question')"
+            :aria-pressed="speakingKey === 'question'"
+            :aria-busy="audioLoadingKey === 'question'"
+            @click="playSpeech(currentQuestion.speech.questionToken, 'question')"
+          >
+            <FontAwesomeIcon
+              :icon="audioLoadingKey === 'question' ? faSpinner : speakingKey === 'question' ? faStop : faVolume"
+              :spin="audioLoadingKey === 'question'"
+              aria-hidden="true"
+            />
+          </button>
           <div v-if="isIdentificationExercise" class="classic-identification-choices">
             <div v-if="isTenseIdentificationExercise && selectedIdentificationMode" class="classic-tense-choice-step">
               <div class="classic-tense-choice-step__header">
@@ -923,28 +928,50 @@ onBeforeUnmount(() => {
           >
             <label for="exercise-answer">{{ ui('Ta réponse') }}</label>
             <div class="answer-form__row">
-              <input
-                id="exercise-answer"
-                ref="answer-input"
-                v-model="answer"
-                type="text"
-                autocomplete="off"
-                :placeholder="currentSubjectMustBeTyped ? currentAnswerPlaceholder : answerPlaceholder"
-                :disabled="feedback !== 'idle'"
-                :class="{
-                  'is-valid': feedback === 'correct',
-                  'is-invalid': feedback === 'incorrect' || retryMessageVisible,
-                  'is-being-read': speakingKey === 'current-feedback'
-                }"
-                :aria-invalid="feedback === 'incorrect' || retryMessageVisible"
-                :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : missingPronounMessageVisible ? 'answer-missing-pronoun' : retryMessageVisible ? 'answer-retry' : undefined"
-              >
+              <div class="prefixed-answer-control" :class="{ 'has-prefix': providedAnswerPrefix }">
+                <span v-if="providedAnswerPrefix" class="prefixed-answer-control__prefix">{{ providedAnswerPrefix }}</span>
+                <input
+                  id="exercise-answer"
+                  ref="answer-input"
+                  v-model="answer"
+                  type="text"
+                  autocomplete="off"
+                  :placeholder="currentSubjectMustBeTyped ? currentAnswerPlaceholder : answerPlaceholder"
+                  :disabled="feedback !== 'idle'"
+                  :class="{
+                    'is-valid': feedback === 'correct',
+                    'is-invalid': feedback === 'incorrect' || retryMessageVisible,
+                    'is-being-read': speakingKey === 'current-feedback'
+                  }"
+                  :aria-invalid="feedback === 'incorrect' || retryMessageVisible"
+                  :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : missingPronounMessageVisible ? 'answer-missing-pronoun' : retryMessageVisible ? 'answer-retry' : undefined"
+                >
+              </div>
               <button v-if="feedback === 'idle'" class="primary-button" type="submit" :disabled="!answer.trim()"> {{ ui('Vérifier') }} </button>
               <button v-else class="primary-button" type="submit">
                 {{ currentIndex === questions.length - 1 ? ui('Voir mes résultats') : ui('Question suivante') }}
               </button>
             </div>
           </form>
+          <div v-if="exerciseKind === 'conjugation' && currentQuestion.speech?.answerToken" class="answer-listen-row">
+            <span>{{ ui('Entendre la réponse') }}</span>
+            <button
+              type="button"
+              :disabled="audioLoadingKey === 'answer'"
+              :aria-label="audioLoadingKey === 'answer' ? ui('Chargement de l’audio…') : speakingKey === 'answer' ? ui('Arrêter la lecture') : ui('Entendre la réponse')"
+              :title="audioLoadingKey === 'answer' ? ui('Chargement de l’audio…') : speakingKey === 'answer' ? ui('Arrêter la lecture') : ui('Entendre la réponse')"
+              :aria-pressed="speakingKey === 'answer'"
+              :aria-busy="audioLoadingKey === 'answer'"
+              @click="playSpeech(currentQuestion.speech.answerToken, 'answer', true)"
+            >
+              <FontAwesomeIcon
+                :icon="audioLoadingKey === 'answer' ? faSpinner : speakingKey === 'answer' ? faStop : faCirclePlay"
+                :spin="audioLoadingKey === 'answer'"
+                aria-hidden="true"
+              />
+            </button>
+          </div>
+          <p v-if="audioError" class="audio-error" role="status">{{ audioError }}</p>
           <div
             v-if="missingPronounMessageVisible && !(exerciseKind === 'conjugation' && currentQuestion.complement)"
             id="answer-missing-pronoun"
@@ -978,17 +1005,6 @@ onBeforeUnmount(() => {
             v-if="retryMessageVisible && detectedErrorDetails.length && !(exerciseKind === 'conjugation' && currentQuestion.complement)"
             :details="detectedErrorDetails"
           />
-          <button
-            v-if="audioReadingEnabled && speechSupported && retryMessageVisible && currentSpokenAnswer"
-            class="speech-answer-button"
-            type="button"
-            :aria-pressed="speakingKey === 'current-retry'"
-            @click="speakAnswer(currentSpokenAnswer, 'current-retry', true)"
-          >
-            <FontAwesomeIcon :icon="speakingKey === 'current-retry' ? faStop : faVolumeHigh" aria-hidden="true" />
-            {{ speakingKey === 'current-retry' ? ui('Arrêter la lecture') : ui('Entendre la réponse') }}
-          </button>
-
           <div
             v-if="feedback !== 'idle'"
             id="answer-feedback"
@@ -1010,17 +1026,6 @@ onBeforeUnmount(() => {
               <p v-else-if="alternativeCorrections.length"> {{ ui('On peut aussi répondre :') }} <strong>{{ alternativeText }}</strong>{{ alternativePunctuation }}</p>
               <p v-else>{{ ui('Tu peux passer à la question suivante.') }}</p>
             </template>
-
-            <button
-              v-if="audioReadingEnabled && speechSupported && currentSpokenAnswer"
-              class="speech-answer-button speech-answer-button--feedback"
-              type="button"
-              :aria-pressed="speakingKey === 'current-feedback'"
-              @click="speakAnswer(currentSpokenAnswer, 'current-feedback')"
-            >
-              <FontAwesomeIcon :icon="speakingKey === 'current-feedback' ? faStop : faVolumeHigh" aria-hidden="true" />
-              {{ speakingKey === 'current-feedback' ? ui('Arrêter la lecture') : ui('Entendre la réponse') }}
-            </button>
 
             <LearnerErrorFeedback v-if="!falcMode && detectedErrorDetails.length" :details="detectedErrorDetails" />
 
@@ -1101,22 +1106,9 @@ onBeforeUnmount(() => {
                   <td>
                     <div class="result-spoken-answers">
                       <div
-                        v-for="(expectedAnswer, answerIndex) in (attempt.question.reponsesPourCorrige.length ? attempt.question.reponsesPourCorrige : attempt.question.reponses)"
+                        v-for="expectedAnswer in (attempt.question.reponsesPourCorrige.length ? attempt.question.reponsesPourCorrige : attempt.question.reponses)"
                         :key="expectedAnswer"
-                      >
-                        <span :class="{ 'spoken-text-active': speakingKey === `summary-${index}-${answerIndex}` }">{{ expectedAnswer }}</span>
-                        <button
-                          v-if="audioReadingEnabled && speechSupported"
-                          type="button"
-                          class="result-speech-button"
-                          :aria-label="speakingKey === `summary-${index}-${answerIndex}` ? ui('Arrêter la lecture') : ui('Réécouter cette phrase')"
-                          :title="speakingKey === `summary-${index}-${answerIndex}` ? ui('Arrêter la lecture') : ui('Réécouter cette phrase')"
-                          :aria-pressed="speakingKey === `summary-${index}-${answerIndex}`"
-                          @click="speakAnswer(expectedAnswer, `summary-${index}-${answerIndex}`)"
-                        >
-                          <FontAwesomeIcon :icon="speakingKey === `summary-${index}-${answerIndex}` ? faStop : faVolumeHigh" aria-hidden="true" />
-                        </button>
-                      </div>
+                      >{{ expectedAnswer }}</div>
                     </div>
                   </td>
                   <td>

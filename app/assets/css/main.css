@@ -1552,9 +1552,66 @@ body.dialog-open {
   font-size: 1.65rem;
 }
 
-.exercise-dialog .dialog-close {
+.exercise-header__actions {
+  position: absolute;
+  z-index: 1;
   top: 25px;
   right: 25px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.question-speech-button,
+.answer-listen-row button {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  place-items: center;
+  color: var(--brand-dark);
+  border: 1px solid #b7cbc6;
+  border-radius: 50%;
+  background: #eef5f3;
+  cursor: pointer;
+  transition: color 150ms ease, background 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.audio-error {
+  margin: 10px 0 0;
+  color: var(--danger);
+  font-size: .9rem;
+  font-weight: 700;
+}
+
+.question-speech-button:hover:not(:disabled),
+.answer-listen-row button:hover:not(:disabled) {
+  color: white;
+  border-color: var(--brand);
+  background: var(--brand);
+  transform: translateY(-1px);
+}
+
+.question-speech-button:focus-visible,
+.answer-listen-row button:focus-visible {
+  outline: 3px solid rgb(23 107 135 / 28%);
+  outline-offset: 2px;
+}
+
+.question-speech-button:disabled,
+.answer-listen-row button:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
+
+.question-speech-button[aria-busy='true']:disabled,
+.answer-listen-row button[aria-busy='true']:disabled {
+  cursor: wait;
+  opacity: 1;
+}
+
+.exercise-dialog .dialog-close {
+  position: static;
 }
 
 .exercise-dialog--falc .exercise-header {
@@ -1641,10 +1698,23 @@ body.dialog-open {
 }
 
 .exercise-question {
+  position: relative;
   max-width: 770px;
   margin: 0 auto;
   padding: 24px 0 36px;
   text-align: center;
+}
+
+.question-speech-button {
+  position: absolute;
+  top: 32px;
+  right: 0;
+}
+
+.question-text,
+.falc-question-prompt,
+.question-context {
+  padding-right: 54px;
 }
 
 .question-instruction {
@@ -1687,6 +1757,19 @@ body.dialog-open {
   font-size: clamp(1.3rem, 3vw, 1.8rem);
   font-weight: 750;
   text-align: left;
+}
+
+.falc-answer-form .prefixed-answer-control {
+  width: min(520px, 100%);
+  flex: none;
+}
+
+.falc-answer-form .prefixed-answer-control input {
+  width: 100%;
+}
+
+.falc-answer-form .prefixed-answer-control__prefix {
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
 }
 
 .falc-answer-form input:focus {
@@ -1885,6 +1968,46 @@ body.dialog-open {
   transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
 }
 
+.prefixed-answer-control {
+  position: relative;
+  min-width: 0;
+  flex: 1;
+}
+
+.prefixed-answer-control input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.prefixed-answer-control__prefix {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 18px;
+  color: #405853;
+  font-size: 1.18rem;
+  font-weight: 800;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.prefixed-answer-control.has-prefix input {
+  padding-inline-start: 5rem;
+}
+
+.prefixed-answer-control--completion {
+  width: clamp(220px, 34vw, 360px);
+  flex: 0 1 clamp(220px, 34vw, 360px);
+}
+
+.completion-sentence .prefixed-answer-control--completion input {
+  width: 100%;
+}
+
+:root[data-theme='dark'] .prefixed-answer-control__prefix {
+  color: #c3d8d3;
+}
+
 .completion-sentence input:focus {
   border-color: var(--brand);
   outline: 0;
@@ -1925,6 +2048,24 @@ body.dialog-open {
 .answer-form input.is-invalid {
   border-color: var(--danger);
   background: var(--danger-pale);
+}
+
+.answer-listen-row {
+  display: flex;
+  max-width: 420px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 14px auto 0;
+  color: #405853;
+  font-size: .96rem;
+  font-weight: 720;
+}
+
+.answer-listen-row button {
+  width: 38px;
+  height: 38px;
+  font-size: 1.1rem;
 }
 
 .answer-retry {
@@ -3043,12 +3184,20 @@ body.dialog-open {
   }
 
   .exercise-dialog .dialog-close {
+    position: static;
+  }
+
+  .exercise-header__actions {
     top: 17px;
     right: 17px;
   }
 
   .exercise-question {
     padding-top: 10px;
+  }
+
+  .question-speech-button {
+    top: 8px;
   }
 
   .question-context {
@@ -3063,6 +3212,11 @@ body.dialog-open {
   .completion-sentence input {
     width: min(230px, 65vw);
     min-height: 54px;
+  }
+
+  .completion-sentence .prefixed-answer-control--completion {
+    width: min(230px, 65vw);
+    flex-basis: min(230px, 65vw);
   }
 
   .answer-form__row,

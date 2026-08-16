@@ -10,12 +10,12 @@ export default defineEventHandler(async (event) => {
     const [result] = await connection.execute<ResultSetHeader>(`INSERT INTO challenge_presets
       (preset_key,category_id,name,description,question_count,exercise_kind,
        past_simple_pronouns,inclusive_pronouns,complement_options,
-       verb_selection_mode,criteria_json,sort_order,is_active)
-      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+       learning_support_mode,verb_selection_mode,criteria_json,sort_order,is_active)
+      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
       payload.presetKey, payload.categoryId, payload.name, payload.description,
       payload.questionCount, payload.exerciseKind, payload.pastSimplePronouns,
       payload.inclusivePronouns ? 1 : 0, JSON.stringify(payload.complementOptions),
-      payload.verbSelectionMode, JSON.stringify(payload.criteria),
+      payload.learningSupportMode, payload.verbSelectionMode, JSON.stringify(payload.criteria),
       payload.sortOrder, payload.isActive ? 1 : 0,
     ])
     await replaceChallengePresetSelections(connection, result.insertId, payload.verbIds, payload.tenseIds)

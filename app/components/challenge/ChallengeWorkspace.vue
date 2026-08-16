@@ -101,10 +101,31 @@ function logUsage(event: 'homepage' | 'print' | 'challenge-save' | 'challenge-lo
   track(detailedEvent[event], event === 'exercise' ? { presentation: exercisePresentation.value, exerciseKind: challenge.value.exerciseKind } : undefined)
 }
 
-function exerciseUsageMetadata(presentation: 'classic' | 'chat') {
+function complementAnalyticsValue() {
+  const options = challenge.value.complementOptions
+  const hasCod = options.some(option => option.startsWith('cod-'))
+  const hasCoi = options.some(option => option.startsWith('coi-'))
+  return hasCod && hasCoi ? 'cod-coi' : hasCod ? 'cod' : hasCoi ? 'coi' : 'none'
+}
+
+function questionCountBand() {
+  const count = challenge.value.questionCount
+  return count <= 5 ? '1-5' : count <= 10 ? '6-10' : count <= 20 ? '11-20' : '21+'
+}
+
+function exerciseUsageMetadata(presentation: 'classic' | 'chat' | 'print') {
   return {
-    feature: presentation === 'chat' ? 'exercise.chat' : 'exercise.classic',
+    feature: presentation === 'chat' ? 'exercise.chat' : presentation === 'print' ? 'print.preview' : 'exercise.classic',
+    presentation,
+    exerciseKind: challenge.value.exerciseKind,
     source: sourcePresetId.value ? 'preset' : props.initialCode ? 'code' : 'custom',
+    voiceMode: challenge.value.voiceMode,
+    complements: complementAnalyticsValue(),
+    complementPlacement: challenge.value.complementPlacement,
+    questionCountBand: questionCountBand(),
+    inclusivePronouns: challenge.value.inclusivePronouns,
+    includeOnPronoun: challenge.value.includeOnPronoun,
+    identificationSource: challenge.value.identificationSource,
     ...(sourcePresetId.value ? { preset: sourcePresetId.value } : {}),
   }
 }
@@ -231,7 +252,6 @@ async function prepareExercise(mode: 'classic' | 'chat') {
     }
     exercisePresentation.value = mode
     beginExerciseTracking(mode)
-    track('exercise_started', exerciseUsageMetadata(mode))
     isExerciseOpen.value = true
   } catch (error) {
     track('feature_failed', exerciseUsageMetadata('classic'))
@@ -253,7 +273,6 @@ async function launchWithCoach(coach: CoachProfile) {
     if (!questions.value.length) throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     exercisePresentation.value = 'chat'
     beginExerciseTracking('chat')
-    track('exercise_started', exerciseUsageMetadata('chat'))
     isExerciseOpen.value = true
   } catch (error) {
     track('feature_failed', exerciseUsageMetadata('chat'))
@@ -271,7 +290,7 @@ async function regenerateChatQuestions() {
 
 async function preparePrint() {
   if (!isReady.value) return
-  track('feature_selected', { feature: 'print.preview' })
+  track('feature_selected', exerciseUsageMetadata('print'))
   busyAction.value = 'print'
   clearMessages()
   try {
@@ -280,7 +299,7 @@ async function preparePrint() {
       throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     }
     isPrintOpen.value = true
-    logUsage('print')
+    track('print_opened', exerciseUsageMetadata('print'))
   } catch (error) {
     track('feature_failed', { feature: 'print.preview' })
     actionError.value = getChallengeErrorMessage(error, ui('Impossible de préparer la fiche à imprimer.'))
@@ -512,6 +531,7 @@ function onToggleTense(id: number) {
       :options="challenge.printOptions"
       :requested-question-count="challenge.questionCount"
       :regenerating="busyAction === 'print'"
+      :analytics-metadata="exerciseUsageMetadata('print')"
       @update-options="challenge.printOptions = $event"
       @regenerate="preparePrint"
       @close="isPrintOpen = false"

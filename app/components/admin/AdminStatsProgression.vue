@@ -202,7 +202,7 @@ const periodLabel = computed(() => {
           y-unit="Actions"
           kind="bar"
           :series="[
-            { label: 'Aides ouvertes', color: '#6251a5', points: localSeries('help_opened') },
+            { label: 'Aides parcourues', color: '#6251a5', points: localSeries('help_scrolled') },
             { label: 'Nouvelles tentatives', color: '#168eaa', points: localSeries('answer_retry') },
           ]"
         />

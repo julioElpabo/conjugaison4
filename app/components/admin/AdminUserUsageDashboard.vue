@@ -49,6 +49,9 @@ function number(value: number) {
         <strong>{{ number(users.errorReviewUsers) }}</strong>
         <small>utilisateurs distincts sur la période affichée</small>
       </article>
+      <article><span>Comptes connectés</span><strong>{{ number(users.loggedInAccounts) }}</strong><small>personnes distinctes sur la période</small></article>
+      <article><span>Connexions réussies</span><strong>{{ number(users.successfulLogins) }}</strong><small>ouvertures de session</small></article>
+      <article><span>Échecs de connexion</span><strong>{{ number(users.failedLogins) }}</strong><small>tentatives suivies localement</small></article>
     </section>
 
     <p v-if="users.notice" class="user-usage__notice">{{ users.notice }}</p>
@@ -71,6 +74,14 @@ function number(value: number) {
         y-unit="Nouveaux comptes"
       />
     </div>
+    <AdminFeatureUsageChart
+      :items="users.connectedFeatures"
+      :max-items="12"
+      eyebrow="Après connexion"
+      title="Fonctions propres aux comptes"
+      insight="Sessions connectées ayant utilisé l’historique, les bilans, la progression ou la reprise des erreurs."
+      center-label="sessions"
+    />
     <p class="user-usage__definition">
       <strong>{{ number(users.activeAccounts) }}</strong> utilisateur{{ users.activeAccounts > 1 ? 's' : '' }}
       actif{{ users.activeAccounts > 1 ? 's' : '' }} sur les {{ activityLabel.toLocaleLowerCase('fr-CH') }}.

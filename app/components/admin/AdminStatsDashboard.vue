@@ -3,22 +3,21 @@ import type { AnalyticsOverview, AnalyticsResponse } from '../../../shared/types
 import AdminFeatureUsageChart from './AdminFeatureUsageChart.vue'
 import AdminTrendChart from './AdminTrendChart.vue'
 
-const props = defineProps<{ stats: AnalyticsResponse }>()
+const props = defineProps<{
+  stats: AnalyticsResponse
+  geoMapComparison?: boolean
+  audienceDisplay?: 'all' | 'maps' | 'details'
+}>()
 type DashboardTheme = 'summary' | 'audience' | 'pedagogy' | 'usage'
 const activeTheme = defineModel<DashboardTheme>('theme', { default: 'summary' })
+const dashboardInstanceId = useId()
+const geoDisplayMode = ref<'count' | 'activity'>('activity')
 const audience = computed<AnalyticsOverview>(() => {
   const ga4 = props.stats.ga4
   if (props.stats.window !== 'range') {
     const local = props.stats.local
-    return {
-      ...(ga4 || local),
-      source: 'local',
-      activeUsers: local.activeUsers,
-      sessions: local.sessions,
-      devices: local.devices,
-      languages: local.languages,
-      activity: local.activity,
-    }
+    const hasGa4Audience = Boolean(ga4 && (ga4.activeUsers || ga4.countries.length || ga4.activity.length))
+    return hasGa4Audience ? ga4! : local
   }
   const hasCachedGa4Data = Boolean(ga4?.countries.length || ga4?.activity.length || ga4?.activeUsers)
   return ga4?.configured && (!ga4.notice || hasCachedGa4Data) ? ga4 : props.stats.local
@@ -86,7 +85,7 @@ const learningMetrics = computed(() => [
 ])
 
 const usageMetrics = computed(() => [
-  { label: 'Aides ouvertes', value: pedagogy.value.helpOpened },
+  { label: 'Aides parcourues', value: pedagogy.value.helpScrolled },
   { label: 'Défis chargés', value: pedagogy.value.challengeLoads },
   { label: 'Défis créés', value: pedagogy.value.challengeSaves },
   { label: 'PDF', value: pedagogy.value.pdfDownloads },
@@ -109,14 +108,14 @@ const eventLabels: Record<string, string> = {
   challenge_preset_selected: 'Défis prédéfinis',
   challenge_load: 'Défis chargés', challenge_save: 'Défis créés', exercise_started: 'Exercices lancés',
   exercise_completed: 'Exercices terminés', answer_submitted: 'Réponses envoyées', answer_correct: 'Bonnes réponses',
-  answer_retry: 'Nouvelles tentatives', help_opened: 'Aides ouvertes', coach_selected: 'Coachs choisis',
+  answer_retry: 'Nouvelles tentatives', help_opened: 'Aides affichées (historique)', help_scrolled: 'Aides parcourues', coach_selected: 'Coachs choisis',
   print_opened: 'Aperçus impression', pdf_downloaded: 'PDF téléchargés', word_downloaded: 'Word téléchargés',
   legacy_print_opened: 'Aperçus impression (historique)',
   client_error: 'Erreurs côté navigateur',
 }
 const pedagogicalEventNames = new Set([
   'exercise_started', 'exercise_completed', 'answer_submitted', 'answer_correct',
-  'answer_retry', 'help_opened', 'coach_selected',
+  'answer_retry', 'help_scrolled', 'coach_selected',
 ])
 const actionRows = computed(() => pedagogy.value.eventBreakdown
   .filter(item => item.label !== 'page_view' && item.label !== 'homepage'))
@@ -161,12 +160,12 @@ function showActivityLabel(index: number) {
 
 <template>
   <div class="stats-dashboard">
-    <p v-if="pedagogy.notice" class="admin-notice">{{ pedagogy.notice }}</p>
-    <p v-if="stats.ga4?.notice" class="admin-notice admin-notice--warning">{{ stats.ga4.notice }}</p>
+    <p v-if="audienceDisplay !== 'maps' && pedagogy.notice" class="admin-notice">{{ pedagogy.notice }}</p>
+    <p v-if="audienceDisplay !== 'maps' && stats.ga4?.notice" class="admin-notice admin-notice--warning">{{ stats.ga4.notice }}</p>
 
     <section
       v-show="activeTheme === 'summary'"
-      id="summary-theme-panel-summary"
+      :id="`summary-theme-panel-summary-${dashboardInstanceId}`"
       class="dashboard-theme"
       role="tabpanel"
     >
@@ -181,21 +180,65 @@ function showActivityLabel(index: number) {
 
     <section
       v-show="activeTheme === 'audience'"
-      id="summary-theme-panel-audience"
+      :id="`summary-theme-panel-audience-${dashboardInstanceId}`"
       class="dashboard-theme"
       role="tabpanel"
     >
-      <AdminGeoActivityMap
-        :countries="stats.ga4?.countries || []"
-        :regions="stats.ga4?.regions || []"
-        :cities="stats.ga4?.cities || []"
-        :realtime="isRealtime"
-        :notice="stats.ga4?.notice"
-      />
+      <div v-if="audienceDisplay !== 'details' && geoMapComparison" class="geo-map-mode">
+        <span>Affichage des connexions</span>
+        <div role="group" aria-label="Mode d’affichage des connexions">
+          <button type="button" :class="{ active: geoDisplayMode === 'count' }" :aria-pressed="geoDisplayMode === 'count'" @click="geoDisplayMode = 'count'">Nombre</button>
+          <button type="button" :class="{ active: geoDisplayMode === 'activity' }" :aria-pressed="geoDisplayMode === 'activity'" @click="geoDisplayMode = 'activity'">Traces</button>
+        </div>
+      </div>
+      <div v-if="audienceDisplay !== 'details'" class="geo-map-grid" :class="{ 'geo-map-grid--single': !geoMapComparison }">
+        <section class="geo-map-column">
+          <header v-if="geoMapComparison"><span>Vue mondiale</span><strong>Monde entier</strong></header>
+          <AdminGeoActivityMap
+            :countries="stats.ga4?.countries || []"
+            :regions="stats.ga4?.regions || []"
+            :cities="stats.ga4?.cities || []"
+            :realtime="isRealtime"
+            :notice="stats.ga4?.notice"
+            initial-view="world"
+            map-label="Carte mondiale des visiteurs"
+            :display-mode="geoDisplayMode"
+            :activity-radius-scale="0.65"
+          />
+        </section>
+        <section v-if="geoMapComparison" class="geo-map-column">
+          <header><span>Vue régionale</span><strong>Europe centrale · Suisse au centre</strong></header>
+          <AdminGeoActivityMap
+            :countries="stats.ga4?.countries || []"
+            :regions="stats.ga4?.regions || []"
+            :cities="stats.ga4?.cities || []"
+            :realtime="isRealtime"
+            :notice="stats.ga4?.notice"
+            initial-view="central-europe"
+            map-label="Carte des visiteurs en Europe centrale, centrée sur la Suisse"
+            :display-mode="geoDisplayMode"
+            :activity-radius-scale="1"
+          />
+        </section>
+        <section v-if="geoMapComparison" class="geo-map-column">
+          <header><span>Vue locale</span><strong>Suisse</strong></header>
+          <AdminGeoActivityMap
+            :countries="stats.ga4?.countries || []"
+            :regions="stats.ga4?.regions || []"
+            :cities="stats.ga4?.cities || []"
+            :realtime="isRealtime"
+            :notice="stats.ga4?.notice"
+            initial-view="switzerland"
+            map-label="Carte des visiteurs centrée et zoomée sur la Suisse"
+            :display-mode="geoDisplayMode"
+            :activity-radius-scale="1.45"
+          />
+        </section>
+      </div>
 
-      <section class="admin-card dashboard-context">
+      <section v-if="audienceDisplay !== 'maps'" class="admin-card dashboard-context">
         <div class="section-heading">
-          <div><p class="admin-eyebrow">En un coup d’œil</p><h2>Répartition géographique</h2></div>
+          <div><p class="admin-eyebrow">En un coup d’œil</p></div>
           <span class="source-badge">{{ audience.source === 'ga4' ? 'GA4' : 'Locale' }}</span>
         </div>
         <div class="fact-grid">
@@ -207,7 +250,7 @@ function showActivityLabel(index: number) {
         </div>
       </section>
 
-      <div class="audience-donuts">
+      <div v-if="audienceDisplay !== 'maps'" class="audience-donuts">
         <AdminFeatureUsageChart
           v-if="audience.devices.length"
           :items="audience.devices"
@@ -227,9 +270,12 @@ function showActivityLabel(index: number) {
           center-label="visiteurs"
           insight="Indique si l’audience de la période vient surtout de nouvelles découvertes ou d’utilisateurs qui reviennent."
         />
+        <AdminFeatureUsageChart v-if="!isRealtime && audience.acquisition.length" :items="audience.acquisition" title="Origine des sessions" eyebrow="Acquisition GA4" center-label="sessions" insight="Sources et supports qui amènent les visiteurs sur le site." :max-items="8" />
+        <AdminFeatureUsageChart v-if="audience.browsers.length" :items="audience.browsers" title="Navigateurs" eyebrow="Technique GA4" center-label="visiteurs" insight="Environnements réellement utilisés pour prioriser les vérifications d’interface." :max-items="8" />
+        <AdminFeatureUsageChart v-if="!isRealtime && audience.landingPages.length" :items="audience.landingPages" title="Pages d’entrée" eyebrow="Parcours GA4" center-label="sessions" insight="Premières pages consultées lors de l’arrivée sur le site." :max-items="8" />
       </div>
 
-      <div class="dashboard-row dashboard-row--activity">
+      <div v-if="audienceDisplay !== 'maps'" class="dashboard-row dashboard-row--activity">
         <section v-if="isRealtime" class="activity admin-card">
           <div class="section-heading">
             <div><p class="admin-eyebrow">Fréquentation</p><h2>{{ isRealtime ? 'Activité minute par minute' : 'Évolution sur la période' }}</h2></div>
@@ -270,7 +316,7 @@ function showActivityLabel(index: number) {
 
     <section
       v-show="activeTheme === 'pedagogy'"
-      id="summary-theme-panel-pedagogy"
+      :id="`summary-theme-panel-pedagogy-${dashboardInstanceId}`"
       class="dashboard-theme"
       role="tabpanel"
     >
@@ -296,7 +342,7 @@ function showActivityLabel(index: number) {
 
     <section
       v-show="activeTheme === 'usage'"
-      id="summary-theme-panel-usage"
+      :id="`summary-theme-panel-usage-${dashboardInstanceId}`"
       class="dashboard-theme"
       role="tabpanel"
     >
@@ -329,7 +375,25 @@ function showActivityLabel(index: number) {
 <style scoped>
 .stats-dashboard{display:grid;gap:18px}.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.kpi{position:relative;display:grid;min-height:118px;padding:17px 19px;align-content:center;gap:3px;overflow:hidden;box-shadow:none}.kpi::after{position:absolute;content:'';right:-24px;bottom:-34px;width:92px;height:92px;border-radius:50%;background:rgb(39 158 181 / 8%)}.kpi span,.kpi small{position:relative;z-index:1;color:var(--admin-muted)}.kpi span{font-size:.72rem;font-weight:850;text-transform:uppercase;letter-spacing:.055em}.kpi strong{position:relative;z-index:1;color:var(--admin-navy);font-size:clamp(1.65rem,3vw,2.35rem);line-height:1.12}.dashboard-context,.activity,.panel{min-width:0;padding:clamp(17px,2vw,23px);box-shadow:none}.section-heading{display:flex;align-items:start;justify-content:space-between;gap:15px}.section-heading h2{margin:3px 0 16px;color:var(--admin-navy);font-size:1.12rem}.source-badge{padding:5px 9px;border-radius:999px;background:#e8f5f7;color:#176b7e;font-size:.72rem;font-weight:900}.fact-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.fact-grid article{display:grid;min-height:76px;padding:11px 13px;align-content:center;gap:2px;border:1px solid #dce9ec;border-radius:11px;background:#f6fafb}.fact-grid span{color:var(--admin-muted);font-size:.68rem;font-weight:800;text-transform:uppercase}.fact-grid strong{overflow:hidden;color:var(--admin-navy);font-size:1.05rem;text-overflow:ellipsis;white-space:nowrap}.fact-grid small{color:var(--admin-muted);font-size:.7rem}.dashboard-row{display:grid;gap:18px}.dashboard-row--activity{grid-template-columns:minmax(0,2fr) minmax(280px,1fr)}.dashboard-row--details{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}.activity__plot{height:238px;display:flex;gap:clamp(3px,1vw,12px);align-items:end;overflow-x:auto;padding:28px 4px 8px;margin-top:8px;border-bottom:1px solid #d8e3e7}.activity__column{height:100%;min-width:28px;flex:1;display:grid;grid-template-rows:20px 1fr 39px;align-items:end;text-align:center;color:var(--admin-muted);font-size:.65rem}.activity__column b{font-size:.68rem}.activity__column i{display:block;width:min(100%,30px);min-height:3px;margin:auto;background:linear-gradient(#32a9bf,#08758b);border-radius:6px 6px 0 0}.activity__column time{align-self:center;white-space:nowrap;transform:rotate(-35deg);transform-origin:center;font-size:.61rem}.activity__column time.hidden{visibility:hidden}.activity__axes{display:flex;justify-content:space-between;gap:12px;padding-top:7px;color:var(--admin-muted);font-size:.64rem;font-weight:800}.metric-list{display:grid;margin:0;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.metric-list>div{display:grid;min-height:70px;padding:10px 12px;align-content:center;gap:3px;border-radius:10px;background:#f2f8f9}.metric-list dt{color:var(--admin-muted);font-size:.7rem;font-weight:750}.metric-list dd{margin:0;color:var(--admin-navy);font-size:1.2rem;font-weight:900}.metric-list--compact>div{min-height:60px}.ranking{display:grid;margin:0;padding:0;list-style:none}.ranking li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #e7eef0}.ranking li:last-child{border:0}.ranking span{overflow-wrap:anywhere;color:#344d58}.ranking strong{color:var(--admin-navy)}.ranking--compact li{padding:5px 0;font-size:.82rem}.audience-panel h3{margin:14px 0 5px;color:var(--admin-muted);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase}.empty{color:var(--admin-muted);margin:14px 0 0}.audience-split{display:grid;grid-template-columns:1fr 1fr;gap:8px}.audience-split div{display:grid;padding:11px;border-radius:10px;background:#f2f8f9}.audience-split strong{font-size:1.3rem;color:var(--admin-navy)}.audience-split span{color:var(--admin-muted);font-size:.72rem}
 .dashboard-theme{display:grid;gap:15px}.dashboard-row--two{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.geo-map-mode{display:flex;padding:10px 12px;align-items:center;justify-content:space-between;gap:14px;border:1px solid var(--admin-border);border-radius:13px;background:var(--admin-surface,#fff)}.geo-map-mode>span{color:var(--admin-navy);font-size:.76rem;font-weight:850}.geo-map-mode>div{display:flex;padding:3px;gap:3px;border-radius:9px;background:#e5eff1}.geo-map-mode button{min-width:88px;padding:7px 12px;border:0;border-radius:7px;color:#47616a;background:transparent;font:inherit;font-size:.72rem;font-weight:850;cursor:pointer}.geo-map-mode button.active{color:#fff;background:#08758b;box-shadow:0 3px 9px rgb(8 117 139 / 20%)}
+.geo-map-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.geo-map-grid--single{grid-template-columns:1fr}.geo-map-column{min-width:0}.geo-map-column>header{display:grid;padding:0 3px;gap:2px}.geo-map-column>header span{color:var(--admin-muted);font-size:.66rem;font-weight:850;text-transform:uppercase;letter-spacing:.055em}.geo-map-column>header strong{color:var(--admin-navy);font-size:.92rem}.geo-map-grid:not(.geo-map-grid--single) .geo-map-column>:deep(.geo-zoom){margin-top:8px}
 .audience-donuts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:15px}
 :global(:root[data-theme='dark']) .fact-grid article,:global(:root[data-theme='dark']) .metric-list>div,:global(:root[data-theme='dark']) .audience-split div{border-color:#3f5961;background:#20373d}
-@media(max-width:1050px){.kpi-grid,.fact-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:780px){.dashboard-row--activity,.dashboard-row--two{grid-template-columns:1fr}}@media(max-width:650px){.kpi-grid,.fact-grid{grid-template-columns:1fr}.activity__plot{height:190px}.metric-list{grid-template-columns:1fr 1fr}}
+:global(:root[data-theme='dark']) .geo-map-mode{border-color:#3f5961;background:#172a30}:global(:root[data-theme='dark']) .geo-map-mode>div{background:#20373d}:global(:root[data-theme='dark']) .geo-map-mode button{color:#bad0d5}:global(:root[data-theme='dark']) .geo-map-mode button.active{color:#fff}
+@media(max-width:1050px){.kpi-grid,.fact-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:780px){.dashboard-row--activity,.dashboard-row--two,.geo-map-grid{grid-template-columns:1fr}}@media(max-width:650px){.kpi-grid,.fact-grid{grid-template-columns:1fr}.activity__plot{height:190px}.metric-list{grid-template-columns:1fr 1fr}}
+:global(:root[data-theme='dark'] .geo-map-mode) {
+  border-color: #3f5961;
+  background: #172a30;
+}
+
+:global(:root[data-theme='dark'] .geo-map-mode > span) { color: #c5dce0; }
+:global(:root[data-theme='dark'] .geo-map-mode > div) { border: 1px solid #3d565e; background: #20373d; }
+:global(:root[data-theme='dark'] .geo-map-mode button) { color: #bad0d5; }
+:global(:root[data-theme='dark'] .geo-map-mode button:hover) { background: #29464d; }
+:global(:root[data-theme='dark'] .geo-map-mode button.active) { color: #fff; background: #08758b; }
+
+.activity__column i {
+  align-self: end;
+  margin: 0 auto;
+}
 </style>

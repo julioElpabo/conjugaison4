@@ -49,10 +49,15 @@ export function safeAnalyticsMetadata(value: unknown) {
   const allowed = [
     'presentation', 'exerciseKind', 'coach', 'preset', 'mode', 'tense', 'status',
     'feature', 'item', 'source', 'scope', 'step', 'action', 'repeat', 'questions',
+    'locale', 'theme', 'falc', 'format', 'tourFormat', 'voiceMode', 'complements',
+    'complementPlacement', 'questionCountBand', 'inclusivePronouns', 'includeOnPronoun',
+    'identificationSource', 'helpSource', 'printSource', 'inclusiveDisplay', 'showGrade',
+    'showVerbs', 'showTenses', 'showFirstName', 'showLastName', 'showDate',
+    'showRandomNumber', 'questionSpacingBand', 'titleSpacingBand',
   ]
   const entries = Object.entries(value as Record<string, unknown>)
     .filter(([key, item]) => allowed.includes(key) && ['string', 'number', 'boolean'].includes(typeof item))
-    .slice(0, 8)
+    .slice(0, 24)
     .map(([key, item]) => [key, String(item).slice(0, 100)])
   return entries.length ? Object.fromEntries(entries) : null
 }

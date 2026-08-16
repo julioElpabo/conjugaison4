@@ -9,6 +9,7 @@ import type {
 interface CountRow extends RowDataPacket { value: number }
 interface LanguageRow extends RowDataPacket { locale: string, value: number }
 interface SeriesRow extends RowDataPacket { date: string, value: number }
+interface FeatureRow extends RowDataPacket { feature: string, value: number }
 
 const activityDays: Record<AnalyticsUserActivityWindow, number> = {
   week: 7,
@@ -21,6 +22,14 @@ const localeLabels: Record<string, string> = {
   en: 'Anglais',
   it: 'Italien',
   es: 'Espagnol',
+}
+const connectedFeatureLabels: Record<string, string> = {
+  'learner.history': 'Historique', 'learner.summary': 'Bilan de séance', 'learner.finish': 'Reprendre une séance',
+  'learner.relaunch.same': 'Relancer dans le même ordre', 'learner.relaunch.random': 'Relancer au hasard',
+  'learner.errors.session': 'Reprendre les erreurs de la séance', 'learner.errors.challenge': 'Reprendre les erreurs du défi',
+  'learner.errors.targeted': 'Défi ciblé par erreur', 'learner.progress': 'Comprendre ses erreurs',
+  'learner.training': 'Progression par défi', 'learner.training.analysis': 'Analyse de progression',
+  'learner.preferences': 'Préférences', 'learner.account': 'Réglages du compte',
 }
 
 function isoDate(value: unknown, fallback: Date) {
@@ -89,7 +98,7 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsersResponse>
   const cutoffSql = cutoff.toISOString().slice(0, 19).replace('T', ' ')
   const database = useDatabase()
 
-  const [[[total]], [[active]], [languageRows], [anonymousLanguageRows], [registrationRows], [[errorReviews]]] = await Promise.all([
+  const [[[total]], [[active]], [languageRows], [anonymousLanguageRows], [registrationRows], [[errorReviews]], [[loginSummary]], [[failedLogins]], [connectedFeatureRows]] = await Promise.all([
     database.execute<CountRow[]>(`
       SELECT COUNT(*) AS value
       FROM learner_accounts
@@ -148,6 +157,26 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsersResponse>
         AND runs.last_answered_at>=?
         AND runs.last_answered_at<DATE_ADD(?, INTERVAL 1 DAY)
     `, [startDate, endDate]),
+    database.execute<(CountRow & { accounts: number })[]>(`
+      SELECT COUNT(*) AS value, COUNT(DISTINCT account_id) AS accounts
+      FROM learner_login_events
+      WHERE event_type='login' AND occurred_at>=? AND occurred_at<DATE_ADD(?, INTERVAL 1 DAY)
+    `, [startDate, endDate]),
+    database.execute<CountRow[]>(`
+      SELECT COUNT(*) AS value FROM analytics_events
+      WHERE event_name='feature_failed'
+        AND JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.feature'))='auth.login'
+        AND created_at>=? AND created_at<DATE_ADD(?, INTERVAL 1 DAY)
+    `, [startDate, endDate]),
+    database.execute<FeatureRow[]>(`
+      SELECT JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.feature')) AS feature,
+             COUNT(DISTINCT session_id) AS value
+      FROM analytics_events
+      WHERE actor_type='learner' AND event_name IN ('feature_selected','feature_completed')
+        AND created_at>=? AND created_at<DATE_ADD(?, INTERVAL 1 DAY)
+        AND JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.feature')) LIKE 'learner.%'
+      GROUP BY feature ORDER BY value DESC
+    `, [startDate, endDate]),
   ])
 
   const languages: AnalyticsBreakdownItem[] = languageRows.map(row => ({
@@ -161,6 +190,11 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsersResponse>
     value: Number(row.value) || 0,
   }))
   const anonymousExerciseSessions = anonymousExerciseLanguages.reduce((sum, row) => sum + row.value, 0)
+  const connectedFeatures = connectedFeatureRows.map(row => ({
+    code: String(row.feature),
+    label: connectedFeatureLabels[String(row.feature)] || String(row.feature),
+    value: Number(row.value) || 0,
+  }))
   const registrations = filledRegistrationSeries(
     registrationRows,
     startDate,
@@ -175,8 +209,12 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsersResponse>
     activityDays: activityDays[activityWindow],
     totalAccounts: Number(total?.value) || 0,
     activeAccounts: Number(active?.value) || 0,
+    loggedInAccounts: Number(loginSummary?.accounts) || 0,
+    successfulLogins: Number(loginSummary?.value) || 0,
+    failedLogins: Number(failedLogins?.value) || 0,
     errorReviewUsers: Number(errorReviews?.value) || 0,
     languages,
+    connectedFeatures,
     anonymousExerciseSessions,
     anonymousExerciseLanguages,
     registrations,

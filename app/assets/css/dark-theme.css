@@ -24,6 +24,11 @@
   color: #c2e2dc;
 }
 
+:root[data-theme='dark'] .wizard-hero__brand {
+  color: #a7d8d3;
+  text-shadow: 0 0 26px rgb(143 211 205 / 18%);
+}
+
 :root[data-theme='dark'] :is(
   .page-state, .challenge-launch, .workspace-message, .builder-card, .wizard-panel,
   .reference-state, .consultation-container, .rule-section, .learning-summary button
@@ -528,6 +533,181 @@
 :root[data-theme='dark'] :is(.account-note, .repair-prompt) { color: #edc78d; background: #3b3021; border-color: #80643c; }
 :root[data-theme='dark'] .admin-notice--error { color: #f2aaa4; background: #422725; border-color: #85504b; }
 :root[data-theme='dark'] .admin-notice--success { color: #9eddb9; background: #20382b; border-color: #4b7e61; }
+
+/* Statistiques : les composants sont encapsulés, les variantes sombres sont donc
+   centralisées ici pour couvrir tous les onglets et leurs graphiques imbriqués. */
+:root[data-theme='dark'] .analytics-page :is(
+  .analytics-tabs, .analytics-filters, .geo-map-mode,
+  .dashboard-kpis article, .dashboard-insights, .dashboard-insights article,
+  .dashboard-main-grid .admin-card, .dashboard-chart-grid .admin-card,
+  .dashboard-features, .product-dashboard__grid .admin-card,
+  .product-funnel, .product-ranking, .user-usage__kpis article,
+  .user-usage__charts .admin-card, .usage-kpis article, .usage-table-card,
+  .feature-card, .preset-usage__browser, .preset-usage__column
+) {
+  color: #d9e9ec;
+  border-color: #3d565e;
+  background: #172a30;
+}
+
+:root[data-theme='dark'] .analytics-page :is(
+  .analytics-presets, .geo-map-mode > div,
+  .fact-grid article, .metric-list > div, .audience-split div,
+  .dashboard-features article,
+  .user-usage__notice, .user-usage__definition,
+  .category-tabs button, .usage-controls select,
+  .feature-area-tabs button, .feature-card__site-element,
+  .feature-card__metrics div, .preset-usage__metrics div
+) {
+  color: #d5e8eb;
+  border-color: #48636b;
+  background: #20383f;
+}
+
+:root[data-theme='dark'] .analytics-page :is(
+  .analytics-tabs button, .analytics-presets button, .geo-map-mode button
+) { color: #bad0d5; }
+
+:root[data-theme='dark'] .analytics-page :is(
+  .analytics-tabs button:hover, .analytics-presets button:hover,
+  .geo-map-mode button:hover, .category-tabs button:hover,
+  .feature-area-tabs button:hover
+) { background: #29464d; }
+
+:root[data-theme='dark'] .analytics-page :is(
+  .analytics-tabs button.active, .analytics-presets button.active,
+  .geo-map-mode button.active, .category-tabs button.active,
+  .feature-area-tabs button.active
+) {
+  color: #fff;
+  border-color: #1595aa;
+  background: #08758b;
+}
+
+:root[data-theme='dark'] .analytics-page .analytics-live-status {
+  color: #b9d8d1;
+  border-color: #3f6b5b;
+  background: #19342d;
+}
+
+:root[data-theme='dark'] .analytics-page .admin-notice--warning {
+  color: #e6c88f;
+  border-color: #80643c;
+  background: #3b3021;
+}
+
+:root[data-theme='dark'] .analytics-page :is(
+  .dashboard-kpis strong, .dashboard-insights h3, .dashboard-features h3,
+  .dashboard-funnel h3, .dashboard-insights article strong,
+  .dashboard-features article strong, .product-funnel h3,
+  .product-ranking h3, .product-funnel li > span strong,
+  .product-ranking li strong, .user-usage__kpis strong,
+  .usage-kpis strong, tbody th > strong, .feature-card__body h3,
+  .preset-usage__heading h3, .feature-chart h2,
+  .feature-chart li b, .feature-chart li > strong,
+  .trend-chart h3, .trend-chart__axis .trend-chart__unit
+) { color: #dff5f7; }
+
+:root[data-theme='dark'] .analytics-page :is(
+  .dashboard-kpis span, .dashboard-kpis small,
+  .dashboard-insights header small, .dashboard-insights article small,
+  .dashboard-features header > span, .dashboard-features article small,
+  .dashboard-funnel header small, .dashboard-funnel li > span,
+  .product-ranking header small, .product-ranking > p,
+  .product-ranking li, .user-usage__kpis span,
+  .user-usage__kpis label, .user-usage__kpis small,
+  .usage-kpis span, .usage-kpis small, tbody th > small, td,
+  .feature-card__preview > small, .feature-card__site-element div span,
+  .feature-card__body header small, .feature-card__body > p,
+  .feature-card__metrics dt, .feature-card__rates small,
+  .preset-usage__heading p, .preset-usage__description,
+  .preset-usage__column h4, .preset-usage__column footer small,
+  .feature-chart__insight, .feature-chart li small,
+  .trend-chart__legend, .trend-chart__insight
+) { color: #a9c1c7; }
+
+:root[data-theme='dark'] .analytics-page :is(
+  .dashboard-funnel li > i, .product-funnel li > i,
+  .country-ranking li > i
+) { background: #314950; }
+
+:root[data-theme='dark'] .analytics-page :is(
+  .product-ranking__head, .usage-legend, thead th
+) { color: #aac2c8; background: #1c3238; }
+
+:root[data-theme='dark'] .analytics-page :is(
+  .product-ranking li, .ranking li, .feature-chart li,
+  .usage-controls, th, td, .feature-area-tabs,
+  .feature-card__rates, .feature-card__rates span,
+  .feature-card__body > p, .preset-usage__column,
+  .preset-usage__column footer
+) { border-color: #334b52; }
+
+:root[data-theme='dark'] .analytics-page :is(.feature-area-tabs, .feature-cards) {
+  border-color: #334b52;
+  background: #13262c;
+}
+
+:root[data-theme='dark'] .analytics-page .feature-card__preview { background: #1c3238; }
+:root[data-theme='dark'] .analytics-page .feature-card__metrics dd { color: #8ed6df; }
+:root[data-theme='dark'] .analytics-page .feature-card__rates strong { color: #c8dfe3; }
+:root[data-theme='dark'] .analytics-page .source-badge { color: #9ddde6; background: #203c43; }
+
+:root[data-theme='dark'] .analytics-page .dashboard-insights .is-positive > i { color: #91d9b1; background: #214436; }
+:root[data-theme='dark'] .analytics-page .dashboard-insights .is-attention > i { color: #efb28f; background: #493126; }
+:root[data-theme='dark'] .analytics-page .dashboard-insights .is-neutral > i { color: #9bcce8; background: #233d4b; }
+
+:root[data-theme='dark'] .analytics-page .preset-usage__total {
+  color: #b8cdd1;
+  border-color: #476169;
+  background: #20383f;
+}
+:root[data-theme='dark'] .analytics-page .preset-usage__total strong { color: #8ed6df; }
+:root[data-theme='dark'] .analytics-page .preset-usage__list button { color: #dff5f7; }
+:root[data-theme='dark'] .analytics-page .preset-usage__list button:hover { border-color: #49656d; background: #20383f; }
+:root[data-theme='dark'] .analytics-page :is(.preset-usage__count, .preset-usage__list button.active .preset-usage__count) {
+  color: #a2e1e7;
+  border-color: #52727a;
+  background: #20383f;
+}
+:root[data-theme='dark'] .analytics-page .preset-usage__metrics dd {
+  color: #9ce3ea;
+  border-color: #52727a;
+  background: #172a30;
+}
+
+:root[data-theme='dark'] .analytics-page .usage-notice {
+  color: #e6c88f;
+  border-color: #9b7540;
+  background: #3a3021;
+}
+:root[data-theme='dark'] .analytics-page .usage-kpis .is-alert {
+  border-color: #80524a;
+  background: #3b2826;
+}
+:root[data-theme='dark'] .analytics-page .usage-kpis .is-alert strong { color: #f1aaa1; }
+
+:root[data-theme='dark'] .analytics-page :is(.usage-legend, .feature-cards) { background-color: #13262c; }
+:root[data-theme='dark'] .analytics-page thead th { background: #1a3036; }
+:root[data-theme='dark'] .analytics-page .diagnostic { color: #b9d0d4; background: #294047; }
+:root[data-theme='dark'] .analytics-page .feature-area-tabs button span { color: #a2e1e7; background: #294047; }
+:root[data-theme='dark'] .analytics-page .feature-area-tabs button.active span { color: #fff; background: #176a7b; }
+:root[data-theme='dark'] .analytics-page .actor-filter button.active { color: #dff5f7; background: #174859; }
+:root[data-theme='dark'] .analytics-page .dashboard-hero > span.is-limited { color: #f0d59a; background: #4a3b20; }
+
+:root[data-theme='dark'] .analytics-page .trend-chart__grid line { stroke: #3d555d; }
+:root[data-theme='dark'] .analytics-page .trend-chart__point { stroke: #20353b; }
+:root[data-theme='dark'] .analytics-page .feature-chart__pie::before {
+  background: #1d3238;
+  box-shadow: 0 0 0 1px #40575e;
+}
+
+@media (max-width: 650px) {
+  :root[data-theme='dark'] .analytics-page .usage-table-card tbody tr {
+    border-color: #3d565e;
+    background: #172a30;
+  }
+}
 
 /* Éditeur des verbes : surfaces imbriquées lisibles sans éblouissement. */
 :root[data-theme='dark'] :is(

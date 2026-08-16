@@ -10,6 +10,7 @@ export const ANALYTICS_EVENTS = [
   'answer_correct',
   'answer_retry',
   'help_opened',
+  'help_scrolled',
   'coach_selected',
   'print_opened',
   'pdf_downloaded',
@@ -23,6 +24,12 @@ export const ANALYTICS_EVENTS = [
   'account_login',
   'language_tested',
   'language_used',
+  'tour_started',
+  'tour_step',
+  'tour_completed',
+  'tour_abandoned',
+  'chat_conjugation_opened',
+  'browser_printed',
   'client_error',
 ] as const
 
@@ -97,12 +104,39 @@ export interface AnalyticsUsersResponse {
   activityDays: number
   totalAccounts: number
   activeAccounts: number
+  loggedInAccounts: number
+  successfulLogins: number
+  failedLogins: number
   errorReviewUsers: number
   languages: AnalyticsBreakdownItem[]
+  connectedFeatures: AnalyticsBreakdownItem[]
   anonymousExerciseSessions: number
   anonymousExerciseLanguages: AnalyticsBreakdownItem[]
   registrations: AnalyticsSeriesPoint[]
   registrationUnit: 'Jours' | 'Semaines' | 'Mois'
+  generatedAt: string
+  notice?: string
+}
+
+export interface AnalyticsProductItem {
+  key: string
+  label: string
+  events: number
+  uniqueSessions: number
+}
+
+export interface AnalyticsFunnelStage {
+  key: string
+  label: string
+  value: number
+}
+
+export interface AnalyticsProductResponse {
+  startDate: string
+  endDate: string
+  actor: AnalyticsActorFilter
+  dimensions: Record<string, AnalyticsProductItem[]>
+  funnels: Record<string, AnalyticsFunnelStage[]>
   generatedAt: string
   notice?: string
 }
@@ -126,7 +160,7 @@ export interface AnalyticsOverview {
   correctAnswers: number
   submittedAnswers: number
   successRate: number
-  helpOpened: number
+  helpScrolled: number
   pdfDownloads: number
   wordDownloads: number
   challengeLoads: number
@@ -136,6 +170,10 @@ export interface AnalyticsOverview {
   countries: AnalyticsBreakdownItem[]
   regions: Array<AnalyticsBreakdownItem & { country?: string }>
   cities: Array<AnalyticsBreakdownItem & { cityId?: string, country?: string, countryCode?: string, region?: string }>
+  acquisition: AnalyticsBreakdownItem[]
+  landingPages: AnalyticsBreakdownItem[]
+  browsers: AnalyticsBreakdownItem[]
+  operatingSystems: AnalyticsBreakdownItem[]
   featureUsage: AnalyticsBreakdownItem[]
   eventBreakdown: AnalyticsBreakdownItem[]
   activity: AnalyticsSeriesPoint[]

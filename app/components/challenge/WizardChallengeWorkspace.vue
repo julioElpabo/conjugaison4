@@ -167,6 +167,7 @@ let presetRevealTimers: ReturnType<typeof setTimeout>[] = []
 let tourDriver: Driver | null = null
 let tourSnapshot: TourSnapshot | null = null
 let tourCompleted = false
+let trackedTourFormat: TourFormat | null = null
 let tourPromptTimer: ReturnType<typeof setTimeout> | undefined
 
 const displayedVerbIds = computed(() => tourActive.value || isPrefilledChallenge.value ? revealedPresetVerbIds.value : challenge.value.verbIds)
@@ -431,10 +432,31 @@ function exposeUsageFeature(feature: string) {
   track('feature_exposed', { feature })
 }
 
-function exerciseUsageMetadata(presentation: 'classic' | 'chat') {
+function complementAnalyticsValue() {
+  const options = challenge.value.complementOptions
+  const hasCod = options.some(option => option.startsWith('cod-'))
+  const hasCoi = options.some(option => option.startsWith('coi-'))
+  return hasCod && hasCoi ? 'cod-coi' : hasCod ? 'cod' : hasCoi ? 'coi' : 'none'
+}
+
+function questionCountBand() {
+  const count = challenge.value.questionCount
+  return count <= 5 ? '1-5' : count <= 10 ? '6-10' : count <= 20 ? '11-20' : '21+'
+}
+
+function exerciseUsageMetadata(presentation: 'classic' | 'chat' | 'print') {
   return {
-    feature: presentation === 'chat' ? 'exercise.chat' : 'exercise.classic',
+    feature: presentation === 'chat' ? 'exercise.chat' : presentation === 'print' ? 'print.preview' : 'exercise.classic',
+    presentation,
+    exerciseKind: challenge.value.exerciseKind,
     source: sourcePresetId.value ? 'preset' : challengeCode.value ? 'code' : 'custom',
+    voiceMode: challenge.value.voiceMode,
+    complements: complementAnalyticsValue(),
+    complementPlacement: challenge.value.complementPlacement,
+    questionCountBand: questionCountBand(),
+    inclusivePronouns: challenge.value.inclusivePronouns,
+    includeOnPronoun: challenge.value.includeOnPronoun,
+    identificationSource: challenge.value.identificationSource,
     ...(sourcePresetId.value ? { preset: sourcePresetId.value } : {}),
   }
 }
@@ -1099,6 +1121,7 @@ function tourSteps(format: TourFormat): DriveStep[] {
 
   const moveToScene = async (index: number, activeDriver: Driver) => {
     if (moving || !tourActive.value || !activeScenes[index]) return
+    track('tour_step', { tourFormat: format, step: index + 1 })
     moving = true
     document.body.classList.add('guided-tour-transitioning')
     try {
@@ -1154,6 +1177,7 @@ function tourSteps(format: TourFormat): DriveStep[] {
 }
 
 function restoreAfterTour() {
+  if (trackedTourFormat && !tourCompleted) track('tour_abandoned', { tourFormat: trackedTourFormat })
   cancelPresetReveal()
   closeTourWindows()
   tourSecondaryWizardStep.value = null
@@ -1192,6 +1216,7 @@ function restoreAfterTour() {
     }
   }
   tourCompleted = false
+  trackedTourFormat = null
 }
 
 async function startGuidedTour(format: TourFormat) {
@@ -1214,12 +1239,15 @@ async function startGuidedTour(format: TourFormat) {
   prepareTourChallenge()
   tourActive.value = true
   tourCompleted = false
+  trackedTourFormat = format
+  track('tour_started', { tourFormat: format })
   document.body.classList.add('guided-tour-active')
   await nextTick()
 
   try {
     const { driver } = await import('driver.js')
     const copy = tourCopy.value
+    const steps = tourSteps(format)
     tourDriver = driver({
       animate: false,
       smoothScroll: false,
@@ -1234,18 +1262,20 @@ async function startGuidedTour(format: TourFormat) {
       prevBtnText: copy.previous,
       doneBtnText: copy.finish,
       progressText: copy.progress,
-      steps: tourSteps(format),
+      steps,
       onPopoverRender: (popover) => {
         popover.closeButton.setAttribute('aria-label', copy.close)
         popover.closeButton.title = copy.close
       },
       onDoneClick: (_element, _step, { driver: activeDriver }) => {
         tourCompleted = true
+        track('tour_completed', { tourFormat: format, step: steps.length })
         activeDriver.destroy()
       },
       onDestroyed: restoreAfterTour,
     })
     tourDriver.drive()
+    track('tour_step', { tourFormat: format, step: 1 })
   } catch {
     restoreAfterTour()
     isTourWelcomeOpen.value = true
@@ -1616,7 +1646,6 @@ async function prepareExercise(mode: 'classic' | 'chat') {
     if (!questions.value.length) throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     exercisePresentation.value = 'classic'
     beginExerciseTracking('classic')
-    track('exercise_started', exerciseUsageMetadata('classic'))
     isExerciseOpen.value = true
   } catch (error) {
     track('feature_failed', exerciseUsageMetadata('classic'))
@@ -1663,7 +1692,6 @@ async function launchWithCoach(coach: CoachProfile) {
     if (!questions.value.length) throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     exercisePresentation.value = 'chat'
     beginExerciseTracking('chat')
-    track('exercise_started', exerciseUsageMetadata('chat'))
     isExerciseOpen.value = true
   } catch (error) {
     track('feature_failed', exerciseUsageMetadata('chat'))
@@ -1681,17 +1709,14 @@ async function regenerateChatQuestions() {
 
 async function preparePrint() {
   if (!isReady.value || falcMode.value) return
-  track('feature_selected', {
-    feature: 'print.preview',
-    source: sourcePresetId.value ? 'preset' : challengeCode.value ? 'code' : 'custom',
-  })
+  track('feature_selected', exerciseUsageMetadata('print'))
   busyAction.value = 'print'
   clearMessages()
   try {
     printQuestions.value = await api.generateQuestions(challenge.value)
     if (!printQuestions.value.length) throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     isPrintOpen.value = true
-    logUsage('print')
+    track('print_opened', exerciseUsageMetadata('print'))
   } catch (error) {
     track('feature_failed', { feature: 'print.preview' })
     actionError.value = getChallengeErrorMessage(error, ui('Impossible de préparer la fiche à imprimer.'))
@@ -2132,7 +2157,7 @@ async function createSharedChallenge(title: string, description: string) {
       <ClassicExercise ref="classic-exercise" v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" :identification-tenses="identificationTenses" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('classic')" @close="closeClassicExercise" />
       <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :exercise-kind="challenge.exerciseKind" :coach="selectedCoach" :verbs="chatExerciseVerbs" :tenses="selectedTenses" :identification-tenses="identificationTenses" :regenerate-questions="regenerateChatQuestions" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('chat')" :tour-demo="tourActive" @close="isExerciseOpen = false" />
       <CoachPicker v-if="isCoachPickerOpen && !falcMode" :tour-demo="tourActive" @close="isCoachPickerOpen = false" @select="launchWithCoach" />
-      <PrintPreview v-if="isPrintOpen && !falcMode" :questions="printQuestions" :verbs="selectedVerbs" :tenses="selectedTenses" :exercise-kind="challenge.exerciseKind" :options="challenge.printOptions" :requested-question-count="challenge.questionCount" :regenerating="busyAction === 'print'" @update-options="challenge.printOptions = $event" @regenerate="preparePrint" @close="isPrintOpen = false" />
+      <PrintPreview v-if="isPrintOpen && !falcMode" :questions="printQuestions" :verbs="selectedVerbs" :tenses="selectedTenses" :exercise-kind="challenge.exerciseKind" :options="challenge.printOptions" :requested-question-count="challenge.questionCount" :regenerating="busyAction === 'print'" :analytics-metadata="exerciseUsageMetadata('print')" @update-options="challenge.printOptions = $event" @regenerate="preparePrint" @close="isPrintOpen = false" />
       <ShareChallengeDialog
         v-if="isShareOpen && !falcMode"
         :code="shareCode"

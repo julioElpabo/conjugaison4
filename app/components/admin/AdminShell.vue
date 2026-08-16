@@ -12,7 +12,7 @@ const menuGroups = [
     id: 'verbs',
     label: 'Verbes',
     links: [
-      { label: 'Verbes', path: '/admin' },
+      { label: 'Verbes', path: '/admin/verbes' },
       { label: 'Défis', path: '/admin/challenges' },
       { label: 'Phrases', path: '/admin/phrases' },
     ],

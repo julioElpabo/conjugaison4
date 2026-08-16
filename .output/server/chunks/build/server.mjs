@@ -2453,7 +2453,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-BdKtR9AY.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-_ftikT4u.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

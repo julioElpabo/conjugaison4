@@ -50,7 +50,19 @@ const nightStarsSvg = `<g class="night-stars night-stars--a">
 </g><g class="night-stars night-stars--c">
   <circle cx="532" cy="629" r=".8"/><circle cx="596" cy="545" r=".65"/><circle cx="667" cy="690" r="1.1"/><circle cx="752" cy="571" r=".8"/><circle cx="835" cy="615" r=".65"/><circle cx="922" cy="546" r="1"/><circle cx="1011" cy="689" r=".75"/><circle cx="1105" cy="577" r=".9"/><circle cx="1204" cy="621" r="1.15"/><circle cx="1252" cy="590" r=".65"/>
 </g>`
-const mountainSvg = mountainSvgSource
+// Prolonge uniquement les fermetures inférieures des silhouettes. Les crêtes et
+// les translations de parallaxe restent intactes, mais aucun fond de calque ne
+// peut remonter dans le cadre lorsque la page atteint le bas du défilement.
+const mountainSvgWithExtendedBottoms = mountainSvgSource
+  .replace('169.33 81.75v40.02H502.29l6.53-98.77Z', '169.33 81.75v340.02H502.29l6.53-398.77Z')
+  .replace('51.34 41.29 36 112.03H793.29z', '51.34 41.29 36 112.03v300H793.29z')
+  .replace('-98.67 19.47v85.36h781.33z', '-98.67 19.47v385.36h781.33z')
+  .replace('22 17.5l44 47v194h-801z', '22 17.5l44 47v494h-801z')
+  .replace('-35.33 33.56v89.1h632z', '-35.33 33.56v389.1h632z')
+  .replace('l26.67 13h36v152h-777.8v-31.33Z', 'l26.67 13h36v452h-777.8v-31.33Z')
+  .replace('l-4.05-5.5-9.55-9.71v114.51h337.13Z', 'l-4.05-5.5-9.55-9.71v414.51h337.13Z')
+  .replace('h497.33l2.92-65.75Z', 'v300h497.33l2.92-365.75Z')
+const mountainSvg = mountainSvgWithExtendedBottoms
   .replace('<defs>', `<defs>
     <linearGradient id="night-far-gradient" x1="0" y1="1" x2="0" y2="0">
       <stop offset="0" stop-color="#5f8295"/><stop offset="1" stop-color="#294359"/>

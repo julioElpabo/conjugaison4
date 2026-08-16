@@ -25,9 +25,6 @@ import PresetPicker from './PresetPicker.vue'
 import ShareChallengeDialog from './ShareChallengeDialog.vue'
 import TensePicker from './TensePicker.vue'
 import VerbPicker from './VerbPicker.vue'
-import ChatExercise from '../exercise/ChatExercise.vue'
-import ClassicExercise from '../exercise/ClassicExercise.vue'
-import CoachPicker from '../exercise/CoachPicker.vue'
 import '~/assets/css/main.css'
 
 
@@ -47,6 +44,45 @@ type ChatExerciseExposed = {
   hideDemoHelp: () => void
   waitUntilTourReady: () => Promise<void>
 }
+
+let classicExercisePromise: Promise<Component> | undefined
+let chatExercisePromise: Promise<Component> | undefined
+let coachPickerPromise: Promise<Component> | undefined
+
+function loadClassicExercise() {
+  classicExercisePromise ??= import('../exercise/ClassicExercise.vue')
+    .then(module => module.default)
+    .catch((error) => {
+      classicExercisePromise = undefined
+      throw error
+    })
+  return classicExercisePromise
+}
+
+function loadChatExercise() {
+  chatExercisePromise ??= import('../exercise/ChatExercise.vue')
+    .then(module => module.default)
+    .catch((error) => {
+      chatExercisePromise = undefined
+      throw error
+    })
+  return chatExercisePromise
+}
+
+function loadCoachPicker() {
+  coachPickerPromise ??= import('../exercise/CoachPicker.vue')
+    .then(module => module.default)
+    .catch((error) => {
+      coachPickerPromise = undefined
+      throw error
+    })
+  return coachPickerPromise
+}
+
+const ClassicExercise = defineAsyncComponent(loadClassicExercise)
+const ChatExercise = defineAsyncComponent(loadChatExercise)
+const CoachPicker = defineAsyncComponent(loadCoachPicker)
+
 interface TourSnapshot {
   challenge: BuilderChallengeConfig
   currentStep: WizardStep
@@ -172,6 +208,32 @@ let tourCompleted = false
 let trackedTourFormat: TourFormat | null = null
 let tourPromptTimer: ReturnType<typeof setTimeout> | undefined
 let guidedTourMediaQuery: MediaQueryList | undefined
+let exercisePreloadIdleId: number | undefined
+let exercisePreloadTimer: ReturnType<typeof setTimeout> | undefined
+let exercisePreloadStarted = false
+
+async function preloadExerciseSurfaces() {
+  if (!import.meta.client || exercisePreloadStarted) return
+  exercisePreloadStarted = true
+  // Les téléchargements sont séquentiels pour ne pas concurrencer l'affichage de l'étape en cours.
+  for (const loader of [loadClassicExercise, loadCoachPicker, loadChatExercise]) {
+    await Promise.allSettled([loader()])
+  }
+}
+
+function scheduleExercisePreload() {
+  if (!import.meta.client || exercisePreloadStarted || exercisePreloadIdleId !== undefined || exercisePreloadTimer) return
+  const start = () => {
+    exercisePreloadIdleId = undefined
+    exercisePreloadTimer = undefined
+    void preloadExerciseSurfaces()
+  }
+  if ('requestIdleCallback' in window) {
+    exercisePreloadIdleId = window.requestIdleCallback(start, { timeout: 2_000 })
+    return
+  }
+  exercisePreloadTimer = setTimeout(start, 650)
+}
 
 watch(isPrintOpen, async (open) => {
   if (!open || printPreviewComponent.value) return
@@ -917,6 +979,7 @@ async function openTourChat(showHelp: boolean) {
   currentStep.value = 4
   selectedCoach.value ??= await loadTourCoach()
   if (!tourActive.value) return
+  await loadChatExercise()
   exercisePresentation.value = 'chat'
   isExerciseOpen.value = true
   await nextTick()
@@ -1021,6 +1084,7 @@ function tourSteps(format: TourFormat): DriveStep[] {
       activate: async () => {
         closeTourWindows()
         currentStep.value = 4
+        await loadClassicExercise()
         exercisePresentation.value = 'classic'
         isExerciseOpen.value = true
         await nextTick()
@@ -1034,6 +1098,7 @@ function tourSteps(format: TourFormat): DriveStep[] {
       activate: async () => {
         closeTourWindows()
         currentStep.value = 4
+        await loadCoachPicker()
         isCoachPickerOpen.value = true
         await nextTick()
       },
@@ -1263,6 +1328,7 @@ async function startGuidedTour(format: TourFormat) {
   trackedTourFormat = format
   track('tour_started', { tourFormat: format })
   document.body.classList.add('guided-tour-active')
+  void preloadExerciseSurfaces()
   await nextTick()
 
   try {
@@ -1606,16 +1672,19 @@ watch(
   },
 )
 
-watch(currentStep, async () => {
+watch(currentStep, async (step) => {
   if (import.meta.server) return
-  wizardAtHome.value = currentStep.value === 0
+  wizardAtHome.value = step === 0
   await nextTick()
+  if (step > 0) scheduleExercisePreload()
   document.querySelector<HTMLElement>('.wizard-panel')?.focus({ preventScroll: true })
   window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
 })
 
 onBeforeUnmount(() => {
   guidedTourMediaQuery?.removeEventListener('change', syncGuidedTourAvailability)
+  if (exercisePreloadIdleId !== undefined && 'cancelIdleCallback' in window) window.cancelIdleCallback(exercisePreloadIdleId)
+  if (exercisePreloadTimer) clearTimeout(exercisePreloadTimer)
   cancelPresetReveal()
   if (tourPromptTimer) clearTimeout(tourPromptTimer)
   tourDriver?.destroy()
@@ -1660,14 +1729,29 @@ async function prepareExercise(mode: 'classic' | 'chat') {
   }
   if (mode === 'chat') {
     track('feature_selected', exerciseUsageMetadata('chat'))
-    isCoachPickerOpen.value = true
+    busyAction.value = 'exercise'
+    clearMessages()
+    try {
+      await loadCoachPicker()
+      void loadChatExercise()
+      isCoachPickerOpen.value = true
+    } catch (error) {
+      track('feature_failed', exerciseUsageMetadata('chat'))
+      actionError.value = getChallengeErrorMessage(error, ui('Impossible de préparer le questionnaire.'))
+    } finally {
+      busyAction.value = null
+    }
     return
   }
   track('feature_selected', exerciseUsageMetadata('classic'))
   busyAction.value = 'exercise'
   clearMessages()
   try {
-    questions.value = await api.generateQuestions(challenge.value)
+    const [generated] = await Promise.all([
+      api.generateQuestions(challenge.value),
+      loadClassicExercise(),
+    ])
+    questions.value = generated
     if (!questions.value.length) throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     exercisePresentation.value = 'classic'
     beginExerciseTracking('classic')
@@ -1713,7 +1797,11 @@ async function launchWithCoach(coach: CoachProfile) {
   busyAction.value = 'exercise'
   clearMessages()
   try {
-    questions.value = await api.generateQuestions(challenge.value)
+    const [generated] = await Promise.all([
+      api.generateQuestions(challenge.value),
+      loadChatExercise(),
+    ])
+    questions.value = generated
     if (!questions.value.length) throw new Error(ui('Aucune question ne correspond à cette sélection.'))
     exercisePresentation.value = 'chat'
     beginExerciseTracking('chat')

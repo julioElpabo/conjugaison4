@@ -10,8 +10,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:url';
 import 'node:fs/promises';
+import 'node:url';
 
 function normalizeComplement(value) {
   return typeof value === "string" ? value.replace(/\s+/g, " ").trim() : "";

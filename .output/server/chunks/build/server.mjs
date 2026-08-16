@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, toRef, isReadonly, isRef, isShallow, isReactive, toRaw } from 'vue';
-import { $ as SUPPORTED_LOCALES, ay as parseURL, az as encodePath, aA as decodePath, aB as localeFromPath, o as normalizeLocale, aC as getRequestHeaders, c as createError$1, a3 as hasProtocol, a5 as isScriptProtocol, a4 as joinURL, aD as withQuery, aE as klona, aF as DEFAULT_LANGUAGE_PREFERENCES, a1 as localizePath, aG as sanitizeStatusCode, aH as getContext, aI as getRequestHeader, aJ as isEqual, j as setCookie, m as getCookie, k as deleteCookie, aK as $fetch, aL as defu, D as stripLocaleFromPath, a9 as executeAsync, aM as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { a0 as SUPPORTED_LOCALES, aA as parseURL, aB as encodePath, aC as decodePath, aD as localeFromPath, o as normalizeLocale, aE as getRequestHeaders, c as createError$1, a4 as hasProtocol, a6 as isScriptProtocol, a5 as joinURL, aF as withQuery, aG as klona, aH as DEFAULT_LANGUAGE_PREFERENCES, a2 as localizePath, aI as sanitizeStatusCode, aJ as getContext, aK as getRequestHeader, aL as isEqual, j as setCookie, m as getCookie, k as deleteCookie, aM as $fetch, aN as defu, D as stripLocaleFromPath, ac as executeAsync, aO as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useSeoMeta$1, a as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -11,8 +11,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:url';
 import 'node:fs/promises';
+import 'node:url';
 import 'vue-bundle-renderer/runtime';
 import 'unhead/server';
 import 'devalue';
@@ -415,8 +415,18 @@ const uiMessages = {
   "Mode FALC": { de: "Einfacher Modus", en: "Easy-read mode", it: "Modalit\xE0 facile da leggere", es: "Modo de lectura f\xE1cil" },
   "Le mode FALC affiche seulement l\u2019essentiel. Les mots et les \xE9tapes sont plus simples.": { de: "Der einfache Modus zeigt nur das Wichtigste. W\xF6rter und Schritte sind einfacher.", en: "Easy-read mode shows only what matters. Words and steps are simpler.", it: "La modalit\xE0 facile mostra solo l\u2019essenziale. Le parole e i passaggi sono pi\xF9 semplici.", es: "El modo de lectura f\xE1cil muestra solo lo esencial. Las palabras y los pasos son m\xE1s sencillos." },
   "Entendre la r\xE9ponse": { de: "Antwort anh\xF6ren", en: "Hear the answer", it: "Ascolta la risposta", es: "Escuchar la respuesta" },
+  "\xC9couter la question": { de: "Frage anh\xF6ren", en: "Listen to the question", it: "Ascolta la domanda", es: "Escuchar la pregunta" },
+  "\xC9couter la d\xE9finition": { de: "Definition anh\xF6ren", en: "Listen to the definition", it: "Ascolta la definizione", es: "Escuchar la definici\xF3n" },
+  "\xC9couter cette ligne": { de: "Diese Zeile anh\xF6ren", en: "Listen to this line", it: "Ascolta questa riga", es: "Escuchar esta l\xEDnea" },
+  "\xC9couter le nom du temps": { de: "Name der Zeitform anh\xF6ren", en: "Listen to the tense name", it: "Ascolta il nome del tempo", es: "Escuchar el nombre del tiempo" },
+  "\xC9couter le message du coach": { de: "Nachricht des Coaches anh\xF6ren", en: "Listen to the coach message", it: "Ascolta il messaggio del coach", es: "Escuchar el mensaje del coach" },
+  "Couper le son": { de: "Ton ausschalten", en: "Mute sound", it: "Disattiva audio", es: "Silenciar" },
+  "Activer le son": { de: "Ton einschalten", en: "Enable sound", it: "Attiva audio", es: "Activar sonido" },
+  "Lecture audio momentan\xE9ment indisponible.": { de: "Audiowiedergabe ist momentan nicht verf\xFCgbar.", en: "Audio playback is temporarily unavailable.", it: "La riproduzione audio non \xE8 momentaneamente disponibile.", es: "La reproducci\xF3n de audio no est\xE1 disponible temporalmente." },
+  "Chargement de l\u2019audio\u2026": { de: "Audio wird geladen\u2026", en: "Loading audio\u2026", it: "Caricamento audio\u2026", es: "Cargando audio\u2026" },
   "Tu peux aussi \xE9couter la r\xE9ponse.": { de: "Du kannst dir die Antwort auch anh\xF6ren.", en: "You can also listen to the answer.", it: "Puoi anche ascoltare la risposta.", es: "Tambi\xE9n puedes escuchar la respuesta." },
   "Arr\xEAter la lecture": { de: "Wiedergabe beenden", en: "Stop reading", it: "Interrompi la lettura", es: "Detener la lectura" },
+  "La lecture audio a \xE9chou\xE9. R\xE9essayer.": { de: "Die Audiowiedergabe ist fehlgeschlagen. Erneut versuchen.", en: "Audio playback failed. Try again.", it: "La riproduzione audio non \xE8 riuscita. Riprova.", es: "La reproducci\xF3n de audio fall\xF3. Int\xE9ntalo de nuevo." },
   "R\xE9\xE9couter cette phrase": { de: "Diesen Satz erneut anh\xF6ren", en: "Listen to this sentence again", it: "Riascolta questa frase", es: "Volver a escuchar esta frase" },
   "R\xE9ponse entendue": { de: "Antwort angeh\xF6rt", en: "Answer heard", it: "Risposta ascoltata", es: "Respuesta escuchada" },
   "Pas maintenant": { de: "Nicht jetzt", en: "Not now", it: "Non ora", es: "Ahora no" },
@@ -550,6 +560,10 @@ const uiMessages = {
   "Les questions et le corrig\xE9": { de: "Fragen und L\xF6sungen", en: "Questions and answer key", it: "Domande e soluzioni", es: "Preguntas y soluciones" },
   "Partager ce d\xE9fi avec d\u2019autres personnes": { de: "Diese \xDCbung mit anderen teilen", en: "Share this challenge with others", it: "Condividi questo esercizio con altre persone", es: "Compartir este ejercicio con otras personas" },
   "Mes options": { de: "Meine Optionen", en: "My options", it: "Le mie opzioni", es: "Mis opciones" },
+  "Aide audio": { de: "Audiohilfe", en: "Audio support", it: "Aiuto audio", es: "Ayuda de audio" },
+  "Normal": { de: "Normal", en: "Normal", it: "Normale", es: "Normal" },
+  "CIF / FLE": { de: "CIF / FLE", en: "CIF / FLE", it: "CIF / FLE", es: "CIF / FLE" },
+  "Aide \xE0 l\u2019\xE9coute pour les personnes allophones.": { de: "H\xF6rhilfe f\xFCr fremdsprachige Lernende.", en: "Listening support for learners of French.", it: "Aiuto all\u2019ascolto per persone allofone.", es: "Ayuda auditiva para personas al\xF3fonas." },
   "Nombre de questions": { de: "Anzahl der Fragen", en: "Number of questions", it: "Numero di domande", es: "N\xFAmero de preguntas" },
   "Pronoms": { de: "Pronomen", en: "Pronouns", it: "Pronomi", es: "Pronombres" },
   "Inclure les pronoms": { de: "Pronomen einbeziehen", en: "Include pronouns", it: "Includi i pronomi", es: "Incluir pronombres" },
@@ -1535,7 +1549,7 @@ const _routes = [
   {
     name: "admin-challenges",
     path: "/admin/challenges",
-    component: () => import('./challenges-9fU6g_8V.mjs')
+    component: () => import('./challenges-N0JcczZY.mjs')
   },
   {
     name: "admin-characters",
@@ -1565,17 +1579,17 @@ const _routes = [
   {
     name: "admin-feedbacks",
     path: "/admin/feedbacks",
-    component: () => import('./feedbacks-BH2yw9tf.mjs')
+    component: () => import('./feedbacks-p4F0ribq.mjs')
   },
   {
     name: "admin-help-verification",
     path: "/admin/help-verification",
-    component: () => import('./help-verification-BGkjX6BZ.mjs')
+    component: () => import('./help-verification-COpufu0D.mjs')
   },
   {
     name: "admin-helps",
     path: "/admin/helps",
-    component: () => import('./helps-DFO7SBck.mjs')
+    component: () => import('./helps-h7ATP8PW.mjs')
   },
   {
     name: "admin-literary-corpus",
@@ -1600,7 +1614,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-_9SCxhs8.mjs')
+    component: () => import('./users-sjWP3U9-.mjs')
   },
   {
     name: "admin-verbes",
@@ -1620,7 +1634,7 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-DMVr2h8o.mjs')
+    component: () => import('./_code_-Ub32uouP.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1655,7 +1669,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-BVXGdt84.mjs')
+    component: () => import('./exercices-de-conjugaison-DbM9s0i5.mjs')
   },
   {
     name: "mon-compte",
@@ -1666,12 +1680,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-ADdRSiuW.mjs')
+    component: () => import('./my-page-ya-NlbVK.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-BlhqfDfj.mjs')
+    component: () => import('./nouveau-defi-ifuH6mBx.mjs')
   },
   {
     name: "signin",
@@ -1681,7 +1695,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-BPQZjPuP.mjs')
+    component: () => import('./index-Ck0yje31.mjs')
   },
   {
     name: "mode-tense",
@@ -1701,7 +1715,7 @@ const _routes = [
   {
     name: "localized-admin-challenges",
     path: "/:locale(fr|de|en|it|es)/admin/challenges",
-    component: () => import('./challenges-9fU6g_8V.mjs')
+    component: () => import('./challenges-N0JcczZY.mjs')
   },
   {
     name: "localized-admin-characters",
@@ -1731,17 +1745,17 @@ const _routes = [
   {
     name: "localized-admin-feedbacks",
     path: "/:locale(fr|de|en|it|es)/admin/feedbacks",
-    component: () => import('./feedbacks-BH2yw9tf.mjs')
+    component: () => import('./feedbacks-p4F0ribq.mjs')
   },
   {
     name: "localized-admin-help-verification",
     path: "/:locale(fr|de|en|it|es)/admin/help-verification",
-    component: () => import('./help-verification-BGkjX6BZ.mjs')
+    component: () => import('./help-verification-COpufu0D.mjs')
   },
   {
     name: "localized-admin-helps",
     path: "/:locale(fr|de|en|it|es)/admin/helps",
-    component: () => import('./helps-DFO7SBck.mjs')
+    component: () => import('./helps-h7ATP8PW.mjs')
   },
   {
     name: "localized-admin-literary-corpus",
@@ -1766,7 +1780,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-_9SCxhs8.mjs')
+    component: () => import('./users-sjWP3U9-.mjs')
   },
   {
     name: "localized-admin-verbes",
@@ -1786,7 +1800,7 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-DMVr2h8o.mjs')
+    component: () => import('./_code_-Ub32uouP.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1821,7 +1835,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-BVXGdt84.mjs')
+    component: () => import('./exercices-de-conjugaison-DbM9s0i5.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1832,12 +1846,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-ADdRSiuW.mjs')
+    component: () => import('./my-page-ya-NlbVK.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-BlhqfDfj.mjs')
+    component: () => import('./nouveau-defi-ifuH6mBx.mjs')
   },
   {
     name: "localized-signin",
@@ -1847,7 +1861,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-BPQZjPuP.mjs')
+    component: () => import('./index-Ck0yje31.mjs')
   },
   {
     name: "localized-mode-tense",

@@ -1,7 +1,7 @@
 import { defineComponent, ref, useTemplateRef, computed, watch, unref, useSSRContext } from 'vue';
 import { ssrRenderTeleport, ssrInterpolate, ssrIncludeBooleanAttr, ssrRenderAttr, ssrRenderClass } from 'vue/server-renderer';
 import { T as TENSE_IDENTIFICATION_INSTRUCTION } from '../_/exercise-instructions.mjs';
-import { ah as conjugationRequiresSubjectPronoun } from '../nitro/nitro.mjs';
+import { ai as conjugationRequiresSubjectPronoun } from '../nitro/nitro.mjs';
 import { f as useLanguagePreferences } from './server.mjs';
 import { u as useSiteAnalytics } from './useSiteAnalytics-D1wpWTOZ.mjs';
 import 'node:http';
@@ -12,8 +12,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:url';
 import 'node:fs/promises';
+import 'node:url';
 import '../routes/renderer.mjs';
 import 'vue-bundle-renderer/runtime';
 import 'unhead/server';

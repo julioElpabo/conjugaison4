@@ -1,0 +1,1 @@
+import e from"./DLU2Sehr.js";import{e as o,g as r,o as t}from"./CyTjafht.js";import"./LTXbpgCs.js";import"./Czx93Wwm.js";import"./DlAUqK2U.js";const f=o({__name:"phrases",setup(a){return(p,s)=>(t(),r(e))}});export{f as default};

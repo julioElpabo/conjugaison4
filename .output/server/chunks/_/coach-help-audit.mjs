@@ -1270,7 +1270,7 @@ const COACH_HELP_PROFILES = {
   allophone: {
     id: "allophone",
     label: "Allophone",
-    description: "Pour l\u2019instant identique \xE0 l\u2019aide compl\xE8te avec r\xE9ponses.",
+    description: "Une aide pas \xE0 pas, avec les r\xE9ponses, pens\xE9e pour les personnes qui apprennent le fran\xE7ais et le parlent depuis peu.",
     blocks: ["definition", "complete-with-answers"],
     revealsAnswers: true,
     highlightsTarget: true,

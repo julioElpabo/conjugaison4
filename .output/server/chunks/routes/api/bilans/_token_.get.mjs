@@ -8,8 +8,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:url';
 import 'node:fs/promises';
+import 'node:url';
 
 const _token__get = defineEventHandler(async (event) => {
   await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.summaryRead);

@@ -3,6 +3,7 @@ import { g as generateQuestionnaire, Q as QuestionnaireSelectionError } from '..
 import { a as parseQuestionnaireRequest, P as PublicInputError } from '../../_/public-api-validation.mjs';
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../_/public-api-rate-limit.mjs';
 import { r as readLimitedJsonBody } from '../../_/limited-json-body.mjs';
+import { a as addClassicSpeechTokens } from '../../_/classic-speech-token.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -11,8 +12,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:url';
 import 'node:fs/promises';
+import 'node:url';
 import '../../_/radical-reference.mjs';
 import '../../_/pronominal-formatter.mjs';
 import '../../_/exercise-instructions.mjs';
@@ -40,7 +41,7 @@ const index_post = defineEventHandler(async (event) => {
         statusMessage: "Aucune question disponible pour cette s\xE9lection"
       });
     }
-    return questions;
+    return request.exerciseKind === "conjugation" && request.learningSupportMode === "cif-fle" ? questions.map(addClassicSpeechTokens) : questions;
   } catch (error) {
     if (error instanceof QuestionnaireSelectionError) {
       throw createError({ statusCode: 400, statusMessage: error.message });

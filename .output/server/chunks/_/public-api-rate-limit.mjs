@@ -10,7 +10,8 @@ const PUBLIC_RATE_LIMITS = {
   summaryCreate: { bucket: "summary-create", maximum: 30, windowSeconds: 60 * 60 },
   summaryRead: { bucket: "summary-read", maximum: 180, windowSeconds: 60 },
   feedback: { bucket: "feedback", maximum: 12, windowSeconds: 10 * 60 },
-  automaticHelpError: { bucket: "automatic-help-error", maximum: 30, windowSeconds: 10 * 60 }
+  automaticHelpError: { bucket: "automatic-help-error", maximum: 30, windowSeconds: 10 * 60 },
+  speech: { bucket: "speech", maximum: 40, windowSeconds: 60 }
 };
 function clientKey(event, bucket) {
   const ip = getRequestIP(event, { xForwardedFor: true }) || "unknown";

@@ -1,4 +1,4 @@
-import { d as defineEventHandler, n as useRuntimeConfig, $ as SUPPORTED_LOCALES, a0 as setHeader, a1 as localizePath } from '../nitro/nitro.mjs';
+import { d as defineEventHandler, n as useRuntimeConfig, a0 as SUPPORTED_LOCALES, a1 as setHeader, a2 as localizePath } from '../nitro/nitro.mjs';
 import { M as MODE_TENSE_PATHS } from '../_/mode-tense-pages.mjs';
 import { T as TENSE_EXERCISE_PATHS } from '../_/tense-exercise-pages.mjs';
 import 'node:http';
@@ -9,8 +9,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:url';
 import 'node:fs/promises';
+import 'node:url';
 
 const PUBLIC_PATHS = [
   "/",

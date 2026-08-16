@@ -8,8 +8,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:url';
 import 'node:fs/promises';
+import 'node:url';
 
 const _id__put = defineEventHandler(async (event) => {
   requireAdministrator(event);
@@ -27,7 +27,7 @@ const _id__put = defineEventHandler(async (event) => {
     const [result] = await connection.execute(`UPDATE challenge_presets SET
       preset_key=?,category_id=?,name=?,description=?,question_count=?,exercise_kind=?,
       past_simple_pronouns=?,inclusive_pronouns=?,complement_options=?,
-      verb_selection_mode=?,criteria_json=?,sort_order=?,is_active=?
+      learning_support_mode=?,verb_selection_mode=?,criteria_json=?,sort_order=?,is_active=?
       WHERE id=?`, [
       payload.presetKey,
       payload.categoryId,
@@ -38,6 +38,7 @@ const _id__put = defineEventHandler(async (event) => {
       payload.pastSimplePronouns,
       payload.inclusivePronouns ? 1 : 0,
       JSON.stringify(payload.complementOptions),
+      payload.learningSupportMode,
       payload.verbSelectionMode,
       JSON.stringify(payload.criteria),
       payload.sortOrder,

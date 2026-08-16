@@ -10,8 +10,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:url';
 import 'node:fs/promises';
+import 'node:url';
 import '../../_/radical-reference.mjs';
 import '../../_/pronominal-formatter.mjs';
 import '../../_/exercise-instructions.mjs';
@@ -80,6 +80,7 @@ function questionnaireRequest(verbIds, tenseIds, questionCount) {
     pastSimplePronouns: "all",
     inclusivePronouns: false,
     includeOnPronoun: false,
+    learningSupportMode: "normal",
     voiceMode: "active",
     includeComplements: true,
     complementPlacement: "after",

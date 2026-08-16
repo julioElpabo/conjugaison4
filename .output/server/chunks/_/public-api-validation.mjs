@@ -15,6 +15,7 @@ const QUESTIONNAIRE_KEYS = /* @__PURE__ */ new Set([
   "pastSimplePronouns",
   "inclusivePronouns",
   "includeOnPronoun",
+  "learningSupportMode",
   "voiceMode",
   "includeComplements",
   "complementPlacement",
@@ -33,6 +34,7 @@ const DEFI_KEYS = /* @__PURE__ */ new Set([
   "pastSimplePronouns",
   "inclusivePronouns",
   "includeOnPronoun",
+  "learningSupportMode",
   "voiceMode",
   "includeComplements",
   "complementPlacement",
@@ -159,6 +161,10 @@ function parseVoiceMode(value) {
   if (value === "active" || value === "passive" || value === "mixed") return value;
   throw new PublicInputError("voiceMode doit valoir active, passive ou mixed");
 }
+function parseLearningSupportMode(value) {
+  if (value === "normal" || value === "cif-fle") return value;
+  throw new PublicInputError("learningSupportMode doit valoir normal ou cif-fle");
+}
 function parseComplementPlacement(value) {
   if (value === "after" || value === "mixed" || value === "before") return value;
   throw new PublicInputError("complementPlacement doit valoir after, mixed ou before");
@@ -219,6 +225,7 @@ function parseQuestionnaireRequest(value) {
     throw new PublicInputError("includeOnPronoun doit \xEAtre un bool\xE9en");
   }
   const voiceMode = value.voiceMode === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.voiceMode : parseVoiceMode(value.voiceMode);
+  const learningSupportMode = value.learningSupportMode === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.learningSupportMode : parseLearningSupportMode(value.learningSupportMode);
   const includeComplements = (_b = value.includeComplements) != null ? _b : false;
   if (typeof includeComplements !== "boolean") {
     throw new PublicInputError("includeComplements doit \xEAtre un bool\xE9en");
@@ -236,6 +243,7 @@ function parseQuestionnaireRequest(value) {
     pastSimplePronouns: parsePastSimplePronouns(value.pastSimplePronouns),
     inclusivePronouns: value.inclusivePronouns,
     includeOnPronoun,
+    learningSupportMode,
     voiceMode,
     includeComplements: resolvedLegacy.includeComplements,
     complementPlacement: resolvedLegacy.complementPlacement,
@@ -274,6 +282,7 @@ function parseDefiDefinition(value) {
   const inclusivePronouns = modernValue.inclusivePronouns === void 0 ? legacyInclusive === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.inclusivePronouns : legacyInclusive === "afficherIel" : modernValue.inclusivePronouns;
   const includeOnPronoun = (_a = modernValue.includeOnPronoun) != null ? _a : DEFAULT_SHARED_CHALLENGE_OPTIONS.includeOnPronoun;
   const voiceMode = modernValue.voiceMode === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.voiceMode : parseVoiceMode(modernValue.voiceMode);
+  const learningSupportMode = modernValue.learningSupportMode === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.learningSupportMode : parseLearningSupportMode(modernValue.learningSupportMode);
   if (typeof inclusivePronouns !== "boolean") {
     throw new PublicInputError("inclusivePronouns doit \xEAtre un bool\xE9en");
   }
@@ -302,6 +311,7 @@ function parseDefiDefinition(value) {
     pastSimplePronouns,
     inclusivePronouns,
     includeOnPronoun,
+    learningSupportMode,
     voiceMode,
     includeComplements: resolvedLegacy.includeComplements,
     complementPlacement: resolvedLegacy.complementPlacement,

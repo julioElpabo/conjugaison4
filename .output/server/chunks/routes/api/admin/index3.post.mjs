@@ -8,8 +8,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:url';
 import 'node:fs/promises';
+import 'node:url';
 
 const index_post = defineEventHandler(async (event) => {
   requireAdministrator(event);
@@ -20,8 +20,8 @@ const index_post = defineEventHandler(async (event) => {
     const [result] = await connection.execute(`INSERT INTO challenge_presets
       (preset_key,category_id,name,description,question_count,exercise_kind,
        past_simple_pronouns,inclusive_pronouns,complement_options,
-       verb_selection_mode,criteria_json,sort_order,is_active)
-      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+       learning_support_mode,verb_selection_mode,criteria_json,sort_order,is_active)
+      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
       payload.presetKey,
       payload.categoryId,
       payload.name,
@@ -31,6 +31,7 @@ const index_post = defineEventHandler(async (event) => {
       payload.pastSimplePronouns,
       payload.inclusivePronouns ? 1 : 0,
       JSON.stringify(payload.complementOptions),
+      payload.learningSupportMode,
       payload.verbSelectionMode,
       JSON.stringify(payload.criteria),
       payload.sortOrder,

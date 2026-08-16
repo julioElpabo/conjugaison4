@@ -56,5 +56,5 @@ function isFiniteConjugationMode(mode) {
   return ["indicatif", "subjonctif", "conditionnel", "imp\xE9ratif"].includes(key(mode));
 }
 
-export { conjugationTenseOrder as a, conjugationTenseLabel as b, conjugationModeOrder as c, conjugationTenseRow as d, isFiniteConjugationMode as i };
+export { conjugationTenseOrder as a, conjugationTenseRow as b, conjugationModeOrder as c, conjugationTenseLabel as d, isFiniteConjugationMode as i };
 //# sourceMappingURL=conjugation-display.mjs.map

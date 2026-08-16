@@ -9,8 +9,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:url';
 import 'node:fs/promises';
+import 'node:url';
 
 const WIDTH = 1e3;
 const HEIGHT = 600;

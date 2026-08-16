@@ -4,7 +4,7 @@ import { ssrRenderComponent, ssrInterpolate, ssrRenderAttrs, ssrRenderAttr, ssrR
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 import { m as matchingVerbs, n as normalizeVerbSearch } from '../_/verb-search.mjs';
 import { u as useHead } from './server.mjs';
-import { i as isFiniteConjugationMode, c as conjugationModeOrder, a as conjugationTenseOrder, b as conjugationTenseLabel } from '../_/conjugation-display.mjs';
+import { i as isFiniteConjugationMode, c as conjugationModeOrder, a as conjugationTenseOrder, d as conjugationTenseLabel } from '../_/conjugation-display.mjs';
 import { w as withComplementPreposition, n as normalizeComplementPreposition } from '../_/complement-preposition.mjs';
 import './nuxt-link-icjx6oE7.mjs';
 import '../nitro/nitro.mjs';
@@ -16,8 +16,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:url';
 import 'node:fs/promises';
+import 'node:url';
 import './state-DjsguMyT.mjs';
 import '../routes/renderer.mjs';
 import 'vue-bundle-renderer/runtime';

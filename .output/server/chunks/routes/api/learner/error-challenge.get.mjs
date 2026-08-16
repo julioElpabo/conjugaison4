@@ -9,8 +9,8 @@ import 'node:fs';
 import 'node:path';
 import 'node:crypto';
 import 'mysql2/promise';
-import 'node:url';
 import 'node:fs/promises';
+import 'node:url';
 import '../../../_/radical-reference.mjs';
 import '../../../_/pronominal-formatter.mjs';
 import '../../../_/exercise-instructions.mjs';
@@ -164,6 +164,7 @@ const errorChallenge_get = defineEventHandler(async (event) => {
     pastSimplePronouns,
     inclusivePronouns,
     includeOnPronoun,
+    learningSupportMode: "normal",
     voiceMode: voiceModes.size > 1 ? "mixed" : voiceModes.has("passive") ? "passive" : "active",
     includeComplements: includeComplements || targetedOptions.length > 0,
     complementPlacement: targetedOptions.some((option) => option.endsWith("-before")) ? targetedOptions.some((option) => option.endsWith("-after")) ? "mixed" : "before" : "after",

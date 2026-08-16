@@ -1,7 +1,8 @@
-import { u as useDatabase, L as decodePronominalSelectionId, af as indirectRelative, ae as formatConjugationQuestion, ag as formatAnswer } from '../nitro/nitro.mjs';
+import { u as useDatabase, M as decodePronominalSelectionId, ag as indirectRelative, af as formatConjugationQuestion, ah as formatAnswer } from '../nitro/nitro.mjs';
 import { b as buildRadicalReference } from './radical-reference.mjs';
 import { g as generatePronominalRow, r as resolveVariableAuxiliary } from './pronominal-formatter.mjs';
-import { i as isPassivizableInfinitive, M as MODE_IDENTIFICATION_INSTRUCTION, T as TENSE_IDENTIFICATION_INSTRUCTION } from './passive-voice.mjs';
+import { M as MODE_IDENTIFICATION_INSTRUCTION, T as TENSE_IDENTIFICATION_INSTRUCTION } from './exercise-instructions.mjs';
+import { i as isPassivizableInfinitive } from './passive-voice.mjs';
 import { i as isNearFutureTense, b as buildNearFutureParadigm, c as isPronominalNearFutureInfinitive, n as nearFutureReflexivePronoun } from './near-future.mjs';
 
 function normalized$2(value) {

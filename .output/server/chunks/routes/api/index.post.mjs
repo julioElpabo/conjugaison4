@@ -1,4 +1,4 @@
-import { d as defineEventHandler, H as saveExerciseSummary, F as ExerciseSummaryInputError, c as createError } from '../../nitro/nitro.mjs';
+import { d as defineEventHandler, I as saveExerciseSummary, G as ExerciseSummaryInputError, c as createError } from '../../nitro/nitro.mjs';
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../_/public-api-rate-limit.mjs';
 import { r as readLimitedJsonBody } from '../../_/limited-json-body.mjs';
 import 'node:http';

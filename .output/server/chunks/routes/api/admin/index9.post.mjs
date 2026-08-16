@@ -1,6 +1,5 @@
-import { d as defineEventHandler, r as readBody, c as createError, u as useDatabase } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, r as readBody, c as createError, u as useDatabase, B as refreshVerbMetadata } from '../../../nitro/nitro.mjs';
 import { r as requireAdministrator } from '../../../_/session.mjs';
-import { r as refreshVerbMetadata } from '../../../_/verb-metadata.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';

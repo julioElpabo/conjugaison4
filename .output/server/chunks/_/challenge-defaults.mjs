@@ -1,4 +1,4 @@
-import { P as DEFAULT_COMPLEMENT_OPTIONS } from '../nitro/nitro.mjs';
+import { Q as DEFAULT_COMPLEMENT_OPTIONS } from '../nitro/nitro.mjs';
 
 const DEFAULT_SHARED_CHALLENGE_OPTIONS = {
   exerciseKind: "conjugation",

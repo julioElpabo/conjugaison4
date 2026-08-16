@@ -14,6 +14,7 @@ import 'node:url';
 import 'node:fs/promises';
 import '../../_/radical-reference.mjs';
 import '../../_/pronominal-formatter.mjs';
+import '../../_/exercise-instructions.mjs';
 import '../../_/passive-voice.mjs';
 import '../../_/near-future.mjs';
 

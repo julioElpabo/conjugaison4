@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, a as getQuery, X as LEARNER_ERROR_TAXONOMY, c as createError, u as useDatabase, S as diagnoseLearnerError, U as applicableLearnerErrorTypes } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, a as getQuery, Y as LEARNER_ERROR_TAXONOMY, c as createError, u as useDatabase, T as diagnoseLearnerError, V as applicableLearnerErrorTypes } from '../../../nitro/nitro.mjs';
 import { g as generateQuestionnaire } from '../../../_/questionnaire.mjs';
 import { r as requireLearnerDataSubject } from '../../../_/learner-data-subject.mjs';
 import 'node:http';
@@ -13,6 +13,7 @@ import 'node:url';
 import 'node:fs/promises';
 import '../../../_/radical-reference.mjs';
 import '../../../_/pronominal-formatter.mjs';
+import '../../../_/exercise-instructions.mjs';
 import '../../../_/passive-voice.mjs';
 import '../../../_/near-future.mjs';
 import '../../../_/session.mjs';

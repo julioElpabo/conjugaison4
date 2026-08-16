@@ -76,6 +76,7 @@ describe('validation des défis partagés', () => {
       identificationSource: 'literary-corpus',
       literaryRegister: 'courant',
       inclusivePronouns: true, includeOnPronoun: true, includeComplements: true, complementPlacement: 'mixed',
+      learningSupportMode: 'cif-fle',
       voiceMode: 'mixed',
       complementOptions: ['cod-before', 'coi-after'],
       printOptions: {
@@ -223,6 +224,17 @@ describe('validation des questionnaires', () => {
     assert.equal(request.includeComplements, false)
     assert.equal(request.complementPlacement, 'after')
     assert.deepEqual(request.complementOptions, [])
+    assert.equal(request.learningSupportMode, 'normal')
+  })
+
+  it('valide le mode d’aide CIF/FLE et garde les anciens défis en mode normal', () => {
+    const base = {
+      verbIds: [1], tenseIds: [1], questionCount: 5,
+      exerciseKind: 'conjugation', pastSimplePronouns: 'all', inclusivePronouns: false,
+    }
+    assert.equal(parseQuestionnaireRequest({ ...base, learningSupportMode: 'cif-fle' }).learningSupportMode, 'cif-fle')
+    assert.equal(parseDefiDefinition(base).learningSupportMode, 'normal')
+    assert.throws(() => parseQuestionnaireRequest({ ...base, learningSupportMode: 'audio' }), PublicInputError)
   })
 
   it('valide les options de présence et de position des compléments', () => {

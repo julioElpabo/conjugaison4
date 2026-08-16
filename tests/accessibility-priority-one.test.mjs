@@ -19,11 +19,12 @@ describe('priorité 1 de l’audit d’accessibilité', () => {
   })
 
   it('conserve les réglages de lecture dans les exercices classique et avec coach', async () => {
-    const [layout, initializer, classic, chat] = await Promise.all([
+    const [layout, initializer, classic, chat, azureSpeech] = await Promise.all([
       read('../app/layouts/default.vue'),
       read('../public/theme-init.js'),
       read('../app/components/exercise/ClassicExercise.vue'),
       read('../app/components/exercise/ChatExercise.vue'),
+      read('../server/services/azure-speech.ts'),
     ])
 
     assert.doesNotMatch(layout, /reading-comfort-switch|toggleReadingComfort|data-reading-comfort/u)
@@ -31,10 +32,11 @@ describe('priorité 1 de l’audit d’accessibilité', () => {
     assert.match(layout, /:is\(\.exercise-overlay, \.chat-overlay\) \{[\s\S]*font-family: Arial,[\s\S]*font-size: 112\.5%;[\s\S]*line-height: 1\.5;/u)
     assert.match(layout, /:is\(\.exercise-overlay, \.chat-overlay\) :is\(p, li, dd, blockquote, figcaption, label\)/u)
     assert.match(layout, /:is\(\.exercise-overlay, \.chat-overlay\) button \{[\s\S]*white-space: normal;/u)
-    for (const exercise of [classic, chat]) {
-      assert.match(exercise, /function spokenAnswerParts\(text: string\) \{\s+return text\.trim\(\)\.split\(\/\\s\+\/u\)\.filter\(Boolean\)/u)
-      assert.ok(exercise.includes('}, 420)'))
-    }
+    assert.match(classic, /class="answer-listen-row"/u)
+    assert.match(classic, /fetch\('\/api\/speech\/classic'/u)
+    assert.match(azureSpeech, /payload\.purpose === 'question' \? 520 : 420/u)
+    assert.match(chat, /function spokenAnswerParts\(text: string\) \{\s+return text\.trim\(\)\.split\(\/\\s\+\/u\)\.filter\(Boolean\)/u)
+    assert.ok(chat.includes('}, 420)'))
   })
 
   it('garde l’impression ordinaire par défaut et offre un profil inclusif pour PDF et Word', async () => {

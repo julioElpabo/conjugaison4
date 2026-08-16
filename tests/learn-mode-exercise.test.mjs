@@ -64,8 +64,8 @@ test('les questions sont équilibrées par mode et les deux interfaces savent le
 test('le chat littéraire utilise une aide dédiée aux modes', () => {
   assert.match(chat, /const usesIdentificationHelp = computed\(\(\) => isIdentificationExercise\.value\)/u)
   assert.match(chat, /literaryIdentificationCoachHelpBlocks/u)
-  assert.match(chat, /:include-automatic-orthography="!usesIdentificationHelp"/u)
-  assert.match(chat, /:enable-automatic-audit="!usesIdentificationHelp"/u)
+  assert.match(chat, /:include-automatic-orthography="!usesIdentificationHelp && !usesAllophoneHelp"/u)
+  assert.match(chat, /:enable-automatic-audit="!usesIdentificationHelp && !usesAllophoneHelp"/u)
 })
 
 test('le chat de reconnaissance propose les cinq modes après la citation', () => {

@@ -186,13 +186,25 @@ export function conjugationRequiresSubjectPronoun(question: { pronom?: string, m
     && !['imperatif', 'infinitif', 'participe', 'gerondif'].includes(mode)
 }
 
+/** Mot de liaison fourni devant la zone de saisie au subjonctif. */
+export function providedSubjunctiveInputPrefix(question: { pronom?: string, mode?: string }) {
+  const mode = normalizeAnswer(question.mode || '', { ignoreWhitespace: false })
+    .normalize('NFD').replace(/\p{Diacritic}/gu, '')
+  const pronoun = normalizedSubjectPronoun(question.pronom)
+  if (mode !== 'subjonctif' || !pronoun) return ''
+  return /^[aeiouy]/u.test(pronoun) ? 'qu’' : 'que'
+}
+
 /** Produit un trait continu pour chaque mot que l’élève doit saisir. */
 export function conjugationAnswerPlaceholder(question: {
   conjugaison1?: string
   pronom?: string
   saisiePrefixe?: string
+  mode?: string
 }) {
-  const prefix = question.saisiePrefixe?.trim() || question.pronom?.trim() || ''
+  const prefix = providedSubjunctiveInputPrefix(question)
+    ? question.pronom?.trim() || ''
+    : question.saisiePrefixe?.trim() || question.pronom?.trim() || ''
   const prefixWords = prefix.split(/\s+/u).filter(Boolean)
   const conjugationWords = (question.conjugaison1 || '').trim().split(/\s+/u).filter(Boolean)
   const prefixBlanks = prefixWords.map((_, index) => (

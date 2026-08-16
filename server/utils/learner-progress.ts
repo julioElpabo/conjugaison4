@@ -55,6 +55,7 @@ export function learnerChallengeSnapshot(value: unknown): LearnerChallengeSnapsh
       : 'all',
     inclusivePronouns: candidate.inclusivePronouns === true,
     includeOnPronoun: candidate.includeOnPronoun === true,
+    learningSupportMode: candidate.learningSupportMode === 'cif-fle' ? 'cif-fle' : 'normal',
     voiceMode: ['active', 'passive', 'mixed'].includes(String(candidate.voiceMode))
       ? candidate.voiceMode as LearnerChallengeSnapshot['voiceMode']
       : 'active',

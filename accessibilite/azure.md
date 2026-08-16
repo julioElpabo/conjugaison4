@@ -1,4 +1,4 @@
-# Prompt — intégrer Azure Speech avec Ariane et Fabrice
+# Prompt — intégrer Azure Speech avec Yvette et Jérôme
 
 Utilise ce document comme prompt autonome pour reprendre ultérieurement l’intégration de la synthèse vocale Azure dans le projet `conjugaison4`.
 
@@ -6,8 +6,8 @@ Utilise ce document comme prompt autonome pour reprendre ultérieurement l’int
 
 Remplacer, dans les exercices, la synthèse vocale variable du navigateur par les voix neuronales suisses de Microsoft Azure Speech :
 
-- toutes les coachs femmes utilisent `fr-CH-ArianeNeural` ;
-- tous les coachs hommes utilisent `fr-CH-FabriceNeural`.
+- toutes les coachs femmes utilisent `fr-FR-YvetteNeural` ;
+- tous les coachs hommes utilisent `fr-FR-JeromeNeural`.
 
 La génération doit fonctionner à la demande, mettre durablement les fichiers audio en cache et rester strictement dans le niveau gratuit Azure Speech F0. Le passage au niveau payant S0 ne doit jamais être automatique.
 
@@ -109,13 +109,24 @@ Lorsqu’une réponse est écoutée avant sa validation :
 - Lire les secrets depuis des variables d’environnement serveur clairement documentées, par exemple :
   - `AZURE_SPEECH_KEY` ;
   - `AZURE_SPEECH_REGION` ou un endpoint équivalent ;
-  - `AZURE_SPEECH_CACHE_DIR` si un cache fichier persistant est retenu.
+  - `AZURE_SPEECH_CLASSIC_VOICE` pour choisir la voix de l’exercice classique (`fr-FR-YvetteNeural` par défaut, ou `fr-FR-JeromeNeural`) ;
+  - `AZURE_SPEECH_CACHE_DIR` pour le cache fichier persistant ; en production Plesk, `../conjugaison4-cache-audio` désigne un dossier frère de `conjugaison-production` ;
+  - `AZURE_SPEECH_CACHE_MAX_GB` pour la taille maximale du cache en gigaoctets ;
+  - `CLASSIC_SPEECH_TOKEN_SECRET` est facultatif : s’il manque, le serveur utilise `SESSION_SECRET`, puis la clé Azure, sans jamais les exposer au navigateur.
 - Valider et limiter la longueur des textes reçus par les routes serveur.
 - Ne pas permettre au client de choisir arbitrairement une voix Azure ou de transformer la route en service public de synthèse de texte libre.
 - La route doit accepter une question/réponse autorisée par l’application ou une référence signée, puis reconstruire le texte côté serveur autant que possible.
 - Ajouter une limitation de débit et tenir compte de la limite de concurrence du niveau F0.
 
 ## Stockage et déploiement Plesk
+
+Le stockage retenu sépare les fichiers et les métadonnées :
+
+- les MP3 sont placés dans le dossier persistant indiqué par `AZURE_SPEECH_CACHE_DIR`, répartis dans des sous-dossiers selon les deux premiers caractères de leur clé SHA-256 ;
+- MySQL conserve uniquement la clé, la voix, l’usage, la taille et les dates d’accès ;
+- les éventuels anciens MP3 stockés en BLOB sont déplacés progressivement vers le dossier lors de leur première consultation ;
+- lorsque la taille `AZURE_SPEECH_CACHE_MAX_GB` serait dépassée, les fichiers les moins récemment consultés sont supprimés en premier ;
+- le dossier est créé au démarrage normal et son chemin absolu résolu est écrit dans les journaux, sans exposer de secret.
 
 Respecter impérativement les règles permanentes du projet :
 
@@ -184,4 +195,3 @@ Exécuter au minimum :
 4. Donner les résultats des tests.
 5. Expliquer précisément le comportement lorsque le quota est épuisé.
 6. Ne proposer aucune action ou aucun script supplémentaire après le déploiement Plesk ; demander uniquement le déploiement normal, le redémarrage normal et la vérification des journaux.
-

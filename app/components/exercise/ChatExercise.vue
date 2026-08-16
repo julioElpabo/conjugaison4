@@ -1,22 +1,24 @@
 <script setup lang="ts">
 import type { Component, ShallowRef } from 'vue'
 const { interfaceLocale, ui, uiLabel } = useLanguagePreferences()
-import { faArrowUpFromBracket, faBullhorn, faPrint, faStop } from '@fortawesome/free-solid-svg-icons'
+import { faArrowUpFromBracket, faBullhorn, faPrint, faSpinner, faStop, faVolume } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { AUDIO_READING_ENABLED } from '~~/shared/config/feature-flags'
-import type { ConjugationTense, ExerciseAttempt, ExerciseKind, ExerciseQuestion, LearnerErrorDetail, LearnerExerciseTrackingContext, Verb } from '~~/shared/types/conjugation'
+import type { ConjugationTense, ExerciseAttempt, ExerciseKind, ExerciseQuestion, LearnerErrorDetail, LearnerExerciseTrackingContext, LearningSupportMode, Verb } from '~~/shared/types/conjugation'
 import type { CoachEvent, CoachMedia, CoachMessageContext, CoachProfile } from '~~/shared/types/coach'
 import type { AnswerComparison } from '~~/shared/utils/answer-difference'
 import LearnerErrorFeedback from '~/components/exercise/LearnerErrorFeedback.vue'
 import ShareExerciseSummaryDialog from '~/components/exercise/ShareExerciseSummaryDialog.vue'
 import VerbConsultationModal from '~/components/exercise/VerbConsultationModal.vue'
 import {
+  conjugationAnswerPlaceholder,
   conjugationRequiresSubjectPronoun,
   findConjugationConfusions,
   findImpossibleSingularEnding,
   getAlternativeCorrections,
   impossibleSingularEndingReminderMessage,
   isFutureSimpleInsteadOfNearFuture,
+  providedSubjunctiveInputPrefix,
   validateAnswer,
   validateConjugationAnswer,
 } from '~~/shared/utils/answer'
@@ -57,10 +59,20 @@ const props = defineProps<{
   regenerateQuestions: () => Promise<void>
   tourDemo?: boolean
   trackingContext?: LearnerExerciseTrackingContext
+  learningSupportMode?: LearningSupportMode
   requireSuccess?: boolean
   analyticsMetadata?: Record<string, string | number | boolean>
 }>()
 const audioReadingEnabled = AUDIO_READING_ENABLED
+const coachMessageAudioEnabled = computed(() => (
+  props.learningSupportMode === 'cif-fle'
+  || props.trackingContext?.challenge.learningSupportMode === 'cif-fle'
+))
+const restartCoachMessage = computed<ChatMessage>(() => ({
+  id: -1,
+  author: 'coach',
+  text: ui('Tu veux refaire ce défi ?'),
+}))
 
 const emit = defineEmits<{ close: [], changeCoach: [coach: CoachProfile] }>()
 const { track } = useSiteAnalytics()
@@ -144,6 +156,7 @@ interface ChatMessage {
   consultVerbId?: number
   consultVerbLabel?: string
   spokenAnswer?: string
+  speechToken?: string
   speechOnly?: boolean
   answerLine?: boolean
 }
@@ -165,6 +178,9 @@ const consecutiveIncorrectCount = ref(0)
 const answerHeardBeforeSubmission = ref(false)
 const speechSupported = ref(false)
 const speakingMessageId = ref<number | null>(null)
+const coachAudioLoadingMessageId = ref<number | null>(null)
+const coachAudioPlayingMessageId = ref<number | null>(null)
+const coachAudioErrorMessageId = ref<number | null>(null)
 const finished = ref(false)
 const finalSummaryPreparing = ref(false)
 const finalSummaryVisible = ref(false)
@@ -183,6 +199,7 @@ const closeConfirmationOpen = ref(false)
 const consultationVerbId = ref<number | null>(null)
 const helpOpen = ref(Boolean(props.tourDemo))
 const helpQuestionIndex = ref<number | null>(null)
+const helpConsultationOfferedQuestions = new Set<number>()
 const tourDemoReady = ref(!props.tourDemo)
 const sequence = ref(0)
 const lastMediaQuestion = ref(-100)
@@ -202,6 +219,9 @@ let questionScrollFrame: number | null = null
 let helpReminderTimer: number | null = null
 let speechSequence = 0
 let speechPauseTimer: number | undefined
+let coachAudio: HTMLAudioElement | null = null
+let coachAudioObjectUrl = ''
+let coachAudioAbortController: AbortController | null = null
 const CHAT_HELP_OPEN_DELAY_MS = 500
 const CHAT_MESSAGES_AFTER_HELP_DELAY_MS = 1000
 
@@ -212,6 +232,12 @@ const currentSubjectMustBeTyped = computed(() => Boolean(
   currentQuestion.value && !isIdentificationExercise.value
   && conjugationRequiresSubjectPronoun(currentQuestion.value),
 ))
+const providedAnswerPrefix = computed(() => currentQuestion.value && !isIdentificationExercise.value
+  ? providedSubjunctiveInputPrefix(currentQuestion.value)
+  : '')
+const currentAnswerPlaceholder = computed(() => currentQuestion.value
+  ? conjugationAnswerPlaceholder(currentQuestion.value)
+  : '')
 const questionNumberOffset = computed(() => props.trackingContext?.questionIndexOffset || 0)
 const displayedQuestionNumber = computed(() => questionNumberOffset.value + currentIndex.value + 1)
 const displayedQuestionCount = computed(() => questionNumberOffset.value
@@ -233,6 +259,10 @@ const helpTense = computed(() => {
     || props.tenses.find(tense => normalizedInfinitive(tense.name) === normalizedInfinitive(question.temps))
 })
 const usesIdentificationHelp = computed(() => isIdentificationExercise.value)
+const usesAllophoneHelp = computed(() => (
+  props.coach.helpApproach === 'allophone'
+  && !usesIdentificationHelp.value
+))
 const usesImmediateAnswerAudio = computed(() => (
   props.coach.helpApproach === 'complete' || props.coach.helpApproach === 'complete-avec-reponses'
 ))
@@ -379,6 +409,98 @@ function speakCoachAnswer(message: ChatMessage) {
   speakPart(0)
 }
 
+function coachMessageSpeechText(message: ChatMessage) {
+  if (message.errorDetails?.length) {
+    return message.errorDetails.map(detail => learnerErrorDetailText(detail, interfaceLocale.value)).join(' ')
+  }
+  if (message.literaryCitation) {
+    const citation = message.literaryCitation
+    return `${citation.before}${citation.target}${citation.after}. ${citation.author}, ${citation.work}.`
+  }
+  if (message.identificationForm) {
+    return `${message.identificationForm.before}${message.identificationForm.target}${message.identificationForm.after}`
+  }
+  if (message.answerComparison) {
+    const introduction = message.answerComparison.mode === 'focused'
+      ? ui('Regarde où ça change :')
+      : ui('Repars de la correction complète :')
+    return `${introduction} ${ui('Correction')} : ${message.answerComparison.expectedAnswer}`
+  }
+  return message.text || message.media?.altText || ''
+}
+
+function coachMessageCanBeRead(message: ChatMessage) {
+  if (message.author !== 'coach' || message.mobileHelpHint || message.speechOnly) return false
+  if (message.answerLine) return Boolean(message.speechToken)
+  return Boolean(message.speechToken || coachMessageSpeechText(message).trim())
+}
+
+function clearCoachAudio() {
+  coachAudio?.pause()
+  if (coachAudio) {
+    coachAudio.onended = null
+    coachAudio.onerror = null
+  }
+  coachAudio = null
+  if (coachAudioObjectUrl) URL.revokeObjectURL(coachAudioObjectUrl)
+  coachAudioObjectUrl = ''
+  coachAudioPlayingMessageId.value = null
+}
+
+function stopCoachAudio() {
+  coachAudioAbortController?.abort()
+  coachAudioAbortController = null
+  coachAudioLoadingMessageId.value = null
+  clearCoachAudio()
+}
+
+async function toggleCoachMessageAudio(message: ChatMessage) {
+  if (!coachMessageAudioEnabled.value || message.author !== 'coach') return
+  if (coachAudioPlayingMessageId.value === message.id || coachAudioLoadingMessageId.value === message.id) {
+    stopCoachAudio()
+    return
+  }
+  const text = coachMessageSpeechText(message).trim()
+  if (!message.speechToken && !text) return
+
+  stopCoachAudio()
+  coachAudioErrorMessageId.value = null
+  coachAudioLoadingMessageId.value = message.id
+  const controller = new AbortController()
+  coachAudioAbortController = controller
+  try {
+    const response = await fetch(message.speechToken ? '/api/speech/classic' : '/api/speech/coach', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(message.speechToken
+        ? { token: message.speechToken, coachId: props.coach.id, voiceGender: props.coach.gender }
+        : { text, coachId: props.coach.id, voiceGender: props.coach.gender }),
+      signal: controller.signal,
+    })
+    if (!response.ok) throw new Error(`Lecture audio indisponible (${response.status}).`)
+    const blob = await response.blob()
+    if (controller.signal.aborted) return
+    coachAudioAbortController = null
+    coachAudioLoadingMessageId.value = null
+    coachAudioObjectUrl = URL.createObjectURL(blob)
+    coachAudio = new Audio(coachAudioObjectUrl)
+    coachAudioPlayingMessageId.value = message.id
+    coachAudio.onended = clearCoachAudio
+    coachAudio.onerror = () => {
+      coachAudioErrorMessageId.value = message.id
+      clearCoachAudio()
+    }
+    await coachAudio.play()
+  } catch (error) {
+    if (controller.signal.aborted) return
+    coachAudioAbortController = null
+    coachAudioLoadingMessageId.value = null
+    coachAudioErrorMessageId.value = message.id
+    clearCoachAudio()
+    console.error('[chat] Lecture du message du coach impossible.', error)
+  }
+}
+
 function answerLineParts(value: string) {
   return value.split(/(_{2,})/gu).filter(Boolean).map(text => ({
     text,
@@ -504,6 +626,9 @@ const helpValues = computed(() => helpQuestion.value ? {
   helpTitle: usesIdentificationHelp.value ? ui('Reconnaître les modes') : targetedHelp.value?.title || '',
   omitIndicativeMode: omitIndicativeMode.value,
 } : { coach: props.coach })
+const helpDefinition = computed(() => helpQuestion.value
+  ? localizedCoachVerbDefinition(helpVerb.value, interfaceLocale.value) || targetedHelp.value?.meaning || ''
+  : '')
 const helpFeedbackContext = computed(() => {
   const questionIndex = helpQuestionIndex.value ?? currentIndex.value
   const question = helpQuestion.value
@@ -819,6 +944,12 @@ async function suggestHelp(offerConsultation = false) {
   const question = currentQuestion.value
   if (!question || finished.value) return
   const questionIndex = currentIndex.value
+  if (offerConsultation && helpConsultationOfferedQuestions.has(questionIndex)) {
+    helpQuestionIndex.value = null
+    helpOpen.value = true
+    return
+  }
+  if (offerConsultation) helpConsultationOfferedQuestions.add(questionIndex)
   helpQuestionIndex.value = null
   helpOpen.value = true
   await nextTick()
@@ -846,10 +977,16 @@ function addAnswerComparison(
   learnerAnswer: string,
   expectedAnswers: readonly string[],
   displayExpectedAnswers: readonly string[],
+  speechToken?: string,
 ) {
   const answerComparison = buildAnswerComparison(learnerAnswer, expectedAnswers, displayExpectedAnswers)
   if (!answerComparison) return Promise.resolve()
-  return enqueueCoachBubble(() => ({ text: '', tone: 'error', answerComparison }))
+  return enqueueCoachBubble(() => ({
+    text: '',
+    tone: 'error',
+    answerComparison,
+    ...(speechToken ? { speechToken } : {}),
+  }))
 }
 
 async function addCoachReaction(eventType: CoachEvent, context: CoachMessageContext, tone?: ChatMessage['tone']) {
@@ -905,13 +1042,19 @@ async function askCurrentQuestion() {
   const bubbles = coachQuestionBubbles(question, {
     omitIndicativeMode: omitIndicativeMode.value,
   })
-  await addCoachText(bubbles.formula, undefined, true, true)
+  await enqueueCoachBubble(() => ({
+    text: bubbles.formula,
+    emphasis: true,
+    instructionPrompt: true,
+    ...(question.speech?.questionToken ? { speechToken: question.speech.questionToken } : {}),
+  }))
   if (bubbles.sentence) {
     await enqueueCoachBubble(() => ({
       text: bubbles.sentence!,
       emphasis: true,
       answerLine: true,
       instructionPrompt: true,
+      ...(question.speech?.answerToken ? { speechToken: question.speech.answerToken } : {}),
     }))
   }
   const spokenAnswer = question.reponsesPourCorrige[0] || question.reponses[0]
@@ -973,7 +1116,10 @@ async function submit() {
   }
   const version = conversationVersion
 
-  addMessage('learner', candidate, undefined, currentIndex.value)
+  const displayedCandidate = providedAnswerPrefix.value
+    ? `${providedAnswerPrefix.value}${providedAnswerPrefix.value.endsWith('’') ? '' : ' '}${candidate}`
+    : candidate
+  addMessage('learner', displayedCandidate, undefined, currentIndex.value)
   lastCoachBubbleAt = Date.now()
   const result = isIdentificationExercise.value
     ? validateAnswer(candidate, question.reponses)
@@ -1136,7 +1282,7 @@ async function submit() {
         // (« Ce sont… que j’… »), alors que l'élève ne saisit que les blancs.
         // On compare donc en priorité avec les formes réellement validées.
         const officialAnswers = question.reponses.length ? question.reponses : question.reponsesPourCorrige
-        await addAnswerComparison(candidate, officialAnswers, question.reponsesPourCorrige)
+        await addAnswerComparison(candidate, officialAnswers, question.reponsesPourCorrige, question.speech?.answerToken)
         comparisonDisplayed = true
       }
       if (step.eventType === 'streak') consecutiveCorrectCount.value = 0
@@ -1188,6 +1334,7 @@ async function continueChat() {
 
 async function restart() {
   stopSpeech()
+  stopCoachAudio()
   conversationVersion += 1
   restartError.value = ''
   resetExerciseRunId()
@@ -1216,6 +1363,7 @@ async function restart() {
   consultationVerbId.value = null
   helpOpen.value = false
   helpQuestionIndex.value = null
+  helpConsultationOfferedQuestions.clear()
   lastMediaQuestion.value = -100
   await runChatOpening('restart')
 }
@@ -1281,6 +1429,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   stopSpeech()
+  stopCoachAudio()
   smallScreenQuery?.removeEventListener('change', updateSmallScreen)
   clearHelpReminderTimer()
   if (questionScrollFrame !== null) window.cancelAnimationFrame(questionScrollFrame)
@@ -1317,10 +1466,14 @@ onBeforeUnmount(() => {
           <div
             v-for="message in visibleMessages"
             :key="message.id"
-            class="chat-message"
-            :data-chat-message-id="message.id"
-            :class="[
-              `chat-message--${message.author}`,
+            class="chat-message-row"
+            :class="`chat-message-row--${message.author}`"
+          >
+            <div
+              class="chat-message"
+              :data-chat-message-id="message.id"
+              :class="[
+                `chat-message--${message.author}`,
               message.tone ? `chat-message--${message.tone}` : '',
               { 'chat-message--comparison': !!message.answerComparison },
               { 'chat-message--identification-question': message.identificationPrompt },
@@ -1333,10 +1486,10 @@ onBeforeUnmount(() => {
             :role="message.author === 'learner' && message.questionIndex !== undefined ? 'button' : undefined"
             :tabindex="message.author === 'learner' && message.questionIndex !== undefined ? 0 : undefined"
             :aria-label="message.author === 'learner' && message.questionIndex !== undefined ? ui('Voir l’aide de la question {number} pour la réponse {answer}', { number: message.questionIndex + 1, answer: message.text }) : undefined"
-            @click="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
-            @keydown.enter.prevent="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
-            @keydown.space.prevent="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
-          >
+              @click="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
+              @keydown.enter.prevent="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
+              @keydown.space.prevent="message.author === 'learner' && message.questionIndex !== undefined && openHelpForQuestion(message.questionIndex)"
+            >
             <LearnerErrorFeedback
               v-if="message.errorDetails?.length"
               :details="message.errorDetails"
@@ -1461,6 +1614,23 @@ onBeforeUnmount(() => {
                 </button>
               </div>
             </div>
+            </div>
+            <button
+              v-if="coachMessageAudioEnabled && coachMessageCanBeRead(message)"
+              type="button"
+              class="chat-message-audio-button"
+              :class="{ 'is-error': coachAudioErrorMessageId === message.id }"
+              :aria-label="coachAudioPlayingMessageId === message.id || coachAudioLoadingMessageId === message.id ? ui('Arrêter la lecture') : ui('Écouter le message du coach')"
+              :aria-pressed="coachAudioPlayingMessageId === message.id"
+              :title="coachAudioErrorMessageId === message.id ? ui('La lecture audio a échoué. Réessayer.') : undefined"
+              @click.stop="toggleCoachMessageAudio(message)"
+            >
+              <FontAwesomeIcon
+                :icon="coachAudioLoadingMessageId === message.id ? faSpinner : coachAudioPlayingMessageId === message.id ? faStop : faVolume"
+                :spin="coachAudioLoadingMessageId === message.id"
+                aria-hidden="true"
+              />
+            </button>
           </div>
 
           <div v-if="finalSummaryPreparing" class="chat-summary-loading" role="status" aria-live="polite">
@@ -1534,32 +1704,53 @@ onBeforeUnmount(() => {
             </footer>
           </section>
 
-          <div v-if="finalSummaryVisible" class="chat-message chat-message--coach chat-restart-prompt">
-            <span>{{ ui('Tu veux refaire ce défi ?') }}</span>
-            <div class="chat-restart-prompt__actions">
-              <button type="button" class="chat-restart-prompt__same" :disabled="regeneratingQuestions" @click="restart"><span aria-hidden="true">↻</span>{{ ui('Avec les mêmes questions') }}</button>
-              <button type="button" class="chat-restart-prompt__new" :disabled="regeneratingQuestions" @click="restartWithNewQuestions">
-                <span aria-hidden="true">↻</span>{{ regeneratingQuestions ? ui('Préparation…') : ui('Avec d’autres questions') }}
-              </button>
-              <button type="button" class="chat-restart-prompt__share" :disabled="regeneratingQuestions" @click="shareSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faArrowUpFromBracket" /></span>{{ ui('Partager mon bilan') }}</button>
-              <button type="button" class="chat-restart-prompt__print" :disabled="regeneratingQuestions" @click="printSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faPrint" /></span>{{ ui('Imprimer mon bilan') }}</button>
-              <button type="button" class="chat-restart-prompt__quit" :disabled="regeneratingQuestions" @click="emit('close')">{{ ui('Quitter le chat') }}</button>
+          <div v-if="finalSummaryVisible" class="chat-message-row chat-message-row--coach">
+            <div class="chat-message chat-message--coach chat-restart-prompt">
+              <span>{{ restartCoachMessage.text }}</span>
+              <div class="chat-restart-prompt__actions">
+                <button type="button" class="chat-restart-prompt__same" :disabled="regeneratingQuestions" @click="restart"><span aria-hidden="true">↻</span>{{ ui('Avec les mêmes questions') }}</button>
+                <button type="button" class="chat-restart-prompt__new" :disabled="regeneratingQuestions" @click="restartWithNewQuestions">
+                  <span aria-hidden="true">↻</span>{{ regeneratingQuestions ? ui('Préparation…') : ui('Avec d’autres questions') }}
+                </button>
+                <button type="button" class="chat-restart-prompt__share" :disabled="regeneratingQuestions" @click="shareSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faArrowUpFromBracket" /></span>{{ ui('Partager mon bilan') }}</button>
+                <button type="button" class="chat-restart-prompt__print" :disabled="regeneratingQuestions" @click="printSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faPrint" /></span>{{ ui('Imprimer mon bilan') }}</button>
+                <button type="button" class="chat-restart-prompt__quit" :disabled="regeneratingQuestions" @click="emit('close')">{{ ui('Quitter le chat') }}</button>
+              </div>
+              <small v-if="restartError" class="chat-restart-prompt__error" role="alert">{{ restartError }}</small>
             </div>
-            <small v-if="restartError" class="chat-restart-prompt__error" role="alert">{{ restartError }}</small>
+            <button
+              v-if="coachMessageAudioEnabled"
+              type="button"
+              class="chat-message-audio-button"
+              :class="{ 'is-error': coachAudioErrorMessageId === restartCoachMessage.id }"
+              :aria-label="coachAudioPlayingMessageId === restartCoachMessage.id || coachAudioLoadingMessageId === restartCoachMessage.id ? ui('Arrêter la lecture') : ui('Écouter le message du coach')"
+              :aria-pressed="coachAudioPlayingMessageId === restartCoachMessage.id"
+              :title="coachAudioErrorMessageId === restartCoachMessage.id ? ui('La lecture audio a échoué. Réessayer.') : undefined"
+              @click.stop="toggleCoachMessageAudio(restartCoachMessage)"
+            >
+              <FontAwesomeIcon
+                :icon="coachAudioLoadingMessageId === restartCoachMessage.id ? faSpinner : coachAudioPlayingMessageId === restartCoachMessage.id ? faStop : faVolume"
+                :spin="coachAudioLoadingMessageId === restartCoachMessage.id"
+                aria-hidden="true"
+              />
+            </button>
           </div>
         </div>
 
         <form v-if="!finished" class="chat-composer" @submit.prevent="submit">
-          <input
-            id="chat-answer"
-            ref="chat-answer"
-            v-model="answer"
-            type="text"
-            autocomplete="off"
-            :aria-label="ui('Ta réponse')"
-            :disabled="waitingForNext"
-            :placeholder="chatAnswerPlaceholder"
-          >
+          <div class="chat-answer-control" :class="{ 'has-prefix': providedAnswerPrefix }">
+            <span v-if="providedAnswerPrefix" class="chat-answer-control__prefix">{{ providedAnswerPrefix }}</span>
+            <input
+              id="chat-answer"
+              ref="chat-answer"
+              v-model="answer"
+              type="text"
+              autocomplete="off"
+              :aria-label="ui('Ta réponse')"
+              :disabled="waitingForNext"
+              :placeholder="currentSubjectMustBeTyped ? currentAnswerPlaceholder : chatAnswerPlaceholder"
+            >
+          </div>
           <button type="submit" :disabled="waitingForNext || posingQuestion || deliveringFeedback || !answer.trim()">
             {{ posingQuestion ? ui('Question…') : deliveringFeedback ? ui('Réponse…') : waitingForNext ? ui('Suite…') : ui('Envoyer') }}
           </button>
@@ -1597,10 +1788,15 @@ onBeforeUnmount(() => {
           :question-number="(helpQuestionIndex ?? currentIndex) + 1"
           :coach-color="coach.themeColor"
           :feedback-context="helpFeedbackContext"
-          :include-automatic-orthography="!usesIdentificationHelp"
-          :enable-automatic-audit="!usesIdentificationHelp"
+          :include-automatic-orthography="!usesIdentificationHelp && !usesAllophoneHelp"
+          :enable-automatic-audit="!usesIdentificationHelp && !usesAllophoneHelp"
           :consult-verb-id="helpConsultVerbId"
           :consult-verb-label="helpConsultVerbLabel"
+          :allophone-mode="usesAllophoneHelp"
+          :allophone-definition="helpDefinition"
+          :allophone-tenses="tenses"
+          :allophone-coach-id="coach.id"
+          :allophone-audio-enabled="coachMessageAudioEnabled"
           @content-scroll="restartHelpReminderTimer"
           @user-scroll="trackHelpScroll"
           @consult-verb="openVerbConsultation"
@@ -2183,6 +2379,60 @@ onBeforeUnmount(() => {
   flex-direction: column;
   gap: 10px;
   padding: 24px;
+}
+
+.chat-message-row {
+  display: flex;
+  flex: 0 0 auto;
+  width: fit-content;
+  max-width: min(88%, 600px);
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.chat-message-row--coach { align-self: flex-start; }
+.chat-message-row--learner { align-self: flex-end; }
+.chat-message-row > .chat-message { max-width: 100%; }
+
+.chat-message-audio-button {
+  display: grid;
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  margin-bottom: 2px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--coach-color) 48%, #7c969e);
+  border-radius: 50%;
+  color: color-mix(in srgb, var(--coach-color) 76%, #174c5d);
+  background: rgb(255 255 255 / 78%);
+  box-shadow: 0 2px 7px rgb(27 66 80 / 12%);
+  cursor: pointer;
+  transition: color .15s ease, background-color .15s ease, transform .15s ease;
+}
+
+.chat-message-audio-button svg { font-size: .72rem; }
+.chat-message-audio-button:hover,
+.chat-message-audio-button:focus-visible {
+  color: white;
+  background: var(--coach-color);
+  outline: 2px solid color-mix(in srgb, var(--coach-color) 35%, transparent);
+  outline-offset: 2px;
+  transform: translateY(-1px);
+}
+.chat-message-audio-button.is-error { color: #a3352e; border-color: #cf8d87; }
+
+:global(:root[data-theme='dark']) .chat-message-audio-button {
+  color: #bceaf1;
+  border-color: color-mix(in srgb, var(--coach-color) 68%, #6c8d96);
+  background: rgb(11 39 47 / 88%);
+  box-shadow: 0 0 9px color-mix(in srgb, var(--coach-color) 30%, transparent);
+}
+
+:global(:root[data-theme='dark']) .chat-message-audio-button:hover,
+:global(:root[data-theme='dark']) .chat-message-audio-button:focus-visible {
+  color: white;
+  background: var(--coach-color);
 }
 
 .chat-message {
@@ -3120,12 +3370,38 @@ onBeforeUnmount(() => {
   background: white;
 }
 
-.chat-composer input {
+.chat-answer-control {
+  position: relative;
   min-width: 0;
   flex: 1;
+}
+
+.chat-composer input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 12px 14px;
   border: 1px solid #bfd0d7;
   border-radius: 12px;
+}
+
+.chat-answer-control__prefix {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 14px;
+  color: #405853;
+  font-weight: 800;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.chat-answer-control.has-prefix input {
+  padding-inline-start: 4.4rem;
+}
+
+:global(:root[data-theme='dark']) .chat-answer-control__prefix {
+  color: #c3d8d3;
 }
 
 .chat-composer button {

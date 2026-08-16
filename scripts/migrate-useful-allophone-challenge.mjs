@@ -20,12 +20,13 @@ export async function migrateUsefulAllophoneChallenge(connection) {
   await connection.execute(`INSERT INTO challenge_presets
     (preset_key,category_id,name,description,question_count,exercise_kind,
      past_simple_pronouns,inclusive_pronouns,complement_options,
-     verb_selection_mode,criteria_json,sort_order,is_active)
-    VALUES (?,?,?,?,?,'conjugation','all',0,'[]','criteria',?,32767,1)
+     learning_support_mode,verb_selection_mode,criteria_json,sort_order,is_active)
+    VALUES (?,?,?,?,?,'conjugation','all',0,'[]','cif-fle','criteria',?,32767,1)
     ON DUPLICATE KEY UPDATE
       category_id=VALUES(category_id),name=VALUES(name),description=VALUES(description),
       question_count=VALUES(question_count),exercise_kind='conjugation',
       past_simple_pronouns='all',inclusive_pronouns=0,complement_options='[]',
+      learning_support_mode='cif-fle',
       verb_selection_mode='criteria',criteria_json=VALUES(criteria_json),sort_order=32767,is_active=1`, [
     definition.id,
     category.id,

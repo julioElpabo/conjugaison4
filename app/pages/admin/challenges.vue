@@ -168,6 +168,7 @@ async function createPreset() {
     pastSimplePronouns: 'all',
     inclusivePronouns: false,
     includeOnPronoun: false,
+    learningSupportMode: 'normal',
     voiceMode: 'active',
     includeComplements: true,
     complementPlacement: 'mixed',
@@ -687,6 +688,7 @@ watch(user, (currentUser) => {
               <div class="field-grid">
                 <label class="admin-field"><span>Nombre de questions</span><input v-model.number="presetDraft.questionCount" type="number" min="1" max="100" required></label>
                 <label class="admin-field"><span>Type d’exercice</span><select v-model="presetDraft.exerciseKind"><option value="conjugation">Conjugaison</option><option value="tense-identification">Identifier le temps</option></select></label>
+                <label class="admin-field"><span>Mode CIF / FLE</span><select v-model="presetDraft.learningSupportMode"><option value="normal">Non</option><option value="cif-fle">Oui — aide audio pour personnes allophones</option></select></label>
                 <label class="admin-field"><span>Pronoms au passé simple</span><select v-model="presetDraft.pastSimplePronouns"><option value="all">Tous les pronoms</option><option value="third-person-only">3e personnes seulement</option></select></label>
                 <label class="check-line"><input v-model="presetDraft.inclusivePronouns" type="checkbox"><span>Inclure les pronoms « iel / iels »</span></label>
               </div>

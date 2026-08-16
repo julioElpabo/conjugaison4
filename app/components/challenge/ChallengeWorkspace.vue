@@ -127,6 +127,7 @@ function exerciseUsageMetadata(presentation: 'classic' | 'chat' | 'print') {
     exerciseKind: challenge.value.exerciseKind,
     source: sourcePresetId.value ? 'preset' : props.initialCode ? 'code' : 'custom',
     voiceMode: challenge.value.voiceMode,
+    learningSupportMode: challenge.value.learningSupportMode,
     complements: complementAnalyticsValue(),
     complementPlacement: challenge.value.complementPlacement,
     questionCountBand: questionCountBand(),
@@ -200,6 +201,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   challenge.value.pastSimplePronouns = preset.pastSimplePronouns
   challenge.value.inclusivePronouns = preset.inclusivePronouns
   challenge.value.includeOnPronoun = preset.includeOnPronoun
+  challenge.value.learningSupportMode = preset.learningSupportMode
   challenge.value.voiceMode = preset.voiceMode
   challenge.value.includeComplements = preset.includeComplements
   challenge.value.complementPlacement = preset.complementPlacement
@@ -233,6 +235,7 @@ function beginExerciseTracking(presentation: 'classic' | 'chat') {
       pastSimplePronouns: challenge.value.pastSimplePronouns,
       inclusivePronouns: challenge.value.inclusivePronouns,
       includeOnPronoun: challenge.value.includeOnPronoun,
+      learningSupportMode: challenge.value.learningSupportMode,
       voiceMode: challenge.value.voiceMode,
       includeComplements: challenge.value.includeComplements,
       complementPlacement: challenge.value.complementPlacement,
@@ -457,6 +460,7 @@ function onToggleTense(id: number) {
             :identification-source="challenge.identificationSource"
             :inclusive-pronouns="challenge.inclusivePronouns"
             :include-on-pronoun="challenge.includeOnPronoun"
+            :learning-support-mode="challenge.learningSupportMode"
             :voice-mode="challenge.voiceMode"
             :complement-options="challenge.complementOptions"
             :complement-verbs="selectedVerbs"
@@ -465,6 +469,7 @@ function onToggleTense(id: number) {
             @update-identification-source="challenge.identificationSource = $event"
             @update-inclusive-pronouns="challenge.inclusivePronouns = $event"
             @update-include-on-pronoun="challenge.includeOnPronoun = $event"
+            @update-learning-support-mode="challenge.learningSupportMode = $event; markAsCustom()"
             @update-voice-mode="challenge.voiceMode = $event"
             @update-complement-options="updateComplementOptions"
           />
@@ -519,6 +524,7 @@ function onToggleTense(id: number) {
       :identification-tenses="identificationTenses"
       :regenerate-questions="regenerateChatQuestions"
       :tracking-context="exerciseTracking"
+      :learning-support-mode="challenge.learningSupportMode"
       :analytics-metadata="exerciseUsageMetadata('chat')"
       @change-coach="selectedCoach = $event"
       @close="isExerciseOpen = false"
@@ -526,6 +532,7 @@ function onToggleTense(id: number) {
 
     <CoachPicker
       v-if="isCoachPickerOpen"
+      :learning-support-mode="challenge.learningSupportMode"
       @close="isCoachPickerOpen = false"
       @select="launchWithCoach"
     />

@@ -4,6 +4,10 @@ import { describe, it } from 'node:test'
 import { coachPairForPicker, coachPickerGroups } from '../shared/utils/coach-picker-groups.ts'
 
 const picker = await readFile(new URL('../app/components/exercise/CoachPicker.vue', import.meta.url), 'utf8')
+const challengeWorkspace = await readFile(new URL('../app/components/challenge/ChallengeWorkspace.vue', import.meta.url), 'utf8')
+const wizardWorkspace = await readFile(new URL('../app/components/challenge/WizardChallengeWorkspace.vue', import.meta.url), 'utf8')
+const learnerSpace = await readFile(new URL('../app/components/learner/LearnerSpace.vue', import.meta.url), 'utf8')
+const helpProfiles = await readFile(new URL('../shared/data/coach-help-profiles.ts', import.meta.url), 'utf8')
 
 function coach(id, firstName, helpApproach, sortOrder) {
   return { id, firstName, helpApproach, sortOrder }
@@ -14,6 +18,22 @@ describe('regroupement des coaches du sélecteur', () => {
     assert.doesNotMatch(picker, /coach-help-menu|scrollToCoachGroup|aria-controls/u)
     assert.match(picker, /class="coach-picker__groups"/u)
     assert.doesNotMatch(picker, /\{count\} coaches|coach-caractere-group__header > small/u)
+  })
+
+  it('ne propose que l’aide allophone en mode CIF/FLE et masque son en-tête redondant', () => {
+    assert.match(picker, /props\.learningSupportMode === 'cif-fle'/u)
+    assert.match(picker, /filter\(group => !allophoneOnly\.value \|\| group\.approach === 'allophone'\)/u)
+    assert.match(picker, /<header v-if="!allophoneOnly" class="coach-caractere-group__header">/u)
+    assert.match(challengeWorkspace, /:learning-support-mode="challenge\.learningSupportMode"/u)
+    assert.match(wizardWorkspace, /:learning-support-mode="challenge\.learningSupportMode"/u)
+    assert.match(learnerSpace, /:learning-support-mode="selectedWork\?\.challenge\.challenge\.learningSupportMode \|\| 'normal'"/u)
+  })
+
+  it('simplifie les cartes au prénom et décrit clairement l’aide allophone', () => {
+    assert.match(picker, /<strong>\{\{ coach\.firstName \}\}<\/strong>/u)
+    assert.doesNotMatch(picker, /coach\.pedagogicalStyle|coach\.description|coach\.likes/u)
+    assert.match(helpProfiles, /pensée pour les personnes qui apprennent le français et le parlent depuis peu/u)
+    assert.doesNotMatch(helpProfiles, /Pour l’instant identique/u)
   })
 
   it('retient un homme et une femme par type dans l’ordre administré', () => {

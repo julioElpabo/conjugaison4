@@ -54,7 +54,7 @@ export const COACH_HELP_PROFILES: Record<CoachHelpEngineKey, CoachHelpProfile> =
   allophone: {
     id: 'allophone',
     label: 'Allophone',
-    description: 'Pour l’instant identique à l’aide complète avec réponses.',
+    description: 'Une aide pas à pas, avec les réponses, pensée pour les personnes qui apprennent le français et le parlent depuis peu.',
     blocks: ['definition', 'complete-with-answers'],
     revealsAnswers: true,
     highlightsTarget: true,

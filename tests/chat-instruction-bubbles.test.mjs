@@ -9,7 +9,7 @@ describe('repérage des consignes dans le chat', () => {
     const chat = await read('../app/components/exercise/ChatExercise.vue')
 
     assert.match(chat, /if \(question\.instruction\) await addCoachText\(question\.instruction, undefined, false, true\)/u)
-    assert.match(chat, /await addCoachText\(bubbles\.formula, undefined, true, true\)/u)
+    assert.match(chat, /text: bubbles\.formula,\s+emphasis: true,\s+instructionPrompt: true,\s+\.\.\.\(question\.speech\?\.questionToken/u)
     assert.match(chat, /answerLine: true,\s+instructionPrompt: true,/u)
     assert.match(chat, /identificationPrompt: true,\s+instructionPrompt: true,/u)
   })

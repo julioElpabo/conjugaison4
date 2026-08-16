@@ -24,6 +24,11 @@ const props = withDefaults(defineProps<{
   feedbackContext?: Record<string, unknown>
   consultVerbId?: number
   consultVerbLabel?: string
+  allophoneMode?: boolean
+  allophoneDefinition?: string
+  allophoneTenses?: ConjugationTense[]
+  allophoneCoachId?: number
+  allophoneAudioEnabled?: boolean
 }>(), {
   questionNumber: 1,
   coachColor: '#295f72',
@@ -34,6 +39,9 @@ const props = withDefaults(defineProps<{
   enableAutomaticAudit: true,
   headerTitle: '{helpTitle}',
   headerDescription: '',
+  allophoneMode: false,
+  allophoneTenses: () => [],
+  allophoneAudioEnabled: false,
 })
 
 interface PreviewScrollPosition {
@@ -458,21 +466,33 @@ onBeforeUnmount(() => {
       @keydown="markKeyboardScrollIntent"
       @scroll.passive="reportPreviewScroll"
     >
-      <section v-if="consultVerbId" class="coach-help-consult">
-        <div>
-          <strong>{{ ui('Conjugaison complète') }}</strong>
-          <p>{{ ui('Consulte toutes les formes du verbe {verb}.', { verb: consultVerbLabel || '' }) }}</p>
-        </div>
-        <button type="button" @click="emit('consultVerb', consultVerbId)">{{ ui('Consulter le verbe') }}</button>
-      </section>
-
-      <CoachHelpBlockView
-        v-for="item in displayedBlocks"
-        :key="`${item.block.id}-${item.blockIndex ?? 'automatic'}`"
-        :data-help-block-index="item.blockIndex"
-        :block="item.block"
-        :values="values"
+      <CoachAllophoneHelpContent
+        v-if="allophoneMode"
+        :verb-id="consultVerbId"
+        :verb-label="consultVerbLabel"
+        :definition="allophoneDefinition"
+        :tenses="allophoneTenses"
+        :coach-id="allophoneCoachId"
+        :audio-enabled="allophoneAudioEnabled"
       />
+
+      <template v-else>
+        <section v-if="consultVerbId" class="coach-help-consult">
+          <div>
+            <strong>{{ ui('Conjugaison complète') }}</strong>
+            <p>{{ ui('Consulte toutes les formes du verbe {verb}.', { verb: consultVerbLabel || '' }) }}</p>
+          </div>
+          <button type="button" @click="emit('consultVerb', consultVerbId)">{{ ui('Consulter le verbe') }}</button>
+        </section>
+
+        <CoachHelpBlockView
+          v-for="item in displayedBlocks"
+          :key="`${item.block.id}-${item.blockIndex ?? 'automatic'}`"
+          :data-help-block-index="item.blockIndex"
+          :block="item.block"
+          :values="values"
+        />
+      </template>
 
       <section v-if="showFeedback" class="coach-help-feedback" aria-labelledby="coach-help-feedback-title">
         <h3 id="coach-help-feedback-title" class="sr-only">{{ ui('Retour sur l’aide automatique') }}</h3>

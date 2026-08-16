@@ -24,6 +24,16 @@ export default defineNuxtConfig({
     dbUser: process.env.NUXT_DB_USER || process.env.DB_USER,
     dbPassword: process.env.NUXT_DB_PASSWORD || process.env.DB_PASSWORD,
     sessionSecret: process.env.NUXT_SESSION_SECRET || process.env.SESSION_SECRET || process.env.DB_PASSWORD,
+    // Les secrets Azure sont lus dans process.env par les services serveur.
+    // Une valeur définie ici serait sérialisée dans le paquet Nuxt au build.
+    azureSpeechKey: '',
+    azureSpeechKeySecondary: '',
+    azureSpeechRegion: 'switzerlandnorth',
+    azureSpeechEndpoint: '',
+    azureSpeechClassicVoice: 'fr-FR-YvetteNeural',
+    azureSpeechCacheDir: '../conjugaison4-cache-audio',
+    azureSpeechCacheMaxGb: 2,
+    classicSpeechTokenSecret: '',
     learnerSessionSecret: process.env.NUXT_LEARNER_SESSION_SECRET || process.env.LEARNER_SESSION_SECRET,
     turnstileSecretKey: process.env.NUXT_TURNSTILE_SECRET_KEY || process.env.TURNSTILE_SECRET_KEY,
     contactEmail: process.env.NUXT_CONTACT_EMAIL || process.env.CONTACT_EMAIL || 'christophe.roulet@edu-vd.ch',

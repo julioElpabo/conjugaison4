@@ -158,6 +158,12 @@ describe('défis résolus par critères', () => {
     assert.ok(cifPresets.every(preset => preset.tenseIds.includes(24)))
   })
 
+  it('active l’aide audio uniquement pour les défis CIF/FLE', () => {
+    const presets = resolveChallengePresets(verbs)
+    assert.ok(presets.filter(preset => preset.group === 'cif').every(preset => preset.learningSupportMode === 'cif-fle'))
+    assert.ok(presets.filter(preset => preset.group !== 'cif').every(preset => preset.learningSupportMode === 'normal'))
+  })
+
   it('produit des configurations valides', () => {
     for (const preset of resolveChallengePresets(verbs)) {
       const definition = challengePresetDefinitions.find(candidate => candidate.id === preset.id)
@@ -206,6 +212,7 @@ describe('conversion du format historique', () => {
       pastSimplePronouns: 'all',
       inclusivePronouns: false,
       includeOnPronoun: false,
+      learningSupportMode: 'normal',
       voiceMode: 'active',
       includeComplements: false,
       complementPlacement: 'after',

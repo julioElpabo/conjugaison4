@@ -10,6 +10,7 @@ import {
   isAnswerCorrect,
   isFutureSimpleInsteadOfNearFuture,
   normalizeAnswer,
+  providedSubjunctiveInputPrefix,
   validateAnswer,
   validateConjugationAnswer,
 } from '../shared/utils/answer.ts'
@@ -30,6 +31,21 @@ describe('conjugationAnswerPlaceholder', () => {
     assert.equal(
       conjugationAnswerPlaceholder({ saisiePrefixe: 'que vous', conjugaison1: 'avez mangées' }),
       `____________${'\u00a0'.repeat(8)}______${'\u00a0'.repeat(8)}____________${'\u00a0'.repeat(8)}________________________`,
+    )
+  })
+
+  it('fournit que ou qu’ et ne laisse à saisir que le pronom et le verbe au subjonctif', () => {
+    const gap = '\u00a0'.repeat(8)
+    assert.equal(providedSubjunctiveInputPrefix({ pronom: 'vous', mode: 'subjonctif' }), 'que')
+    assert.equal(providedSubjunctiveInputPrefix({ pronom: 'elle', mode: 'subjonctif' }), 'qu’')
+    assert.equal(providedSubjunctiveInputPrefix({ pronom: 'elle', mode: 'indicatif' }), '')
+    assert.equal(
+      conjugationAnswerPlaceholder({ pronom: 'elle', saisiePrefixe: "qu'elle", conjugaison1: 'sache', mode: 'subjonctif' }),
+      `______${gap}________________________`,
+    )
+    assert.equal(
+      conjugationAnswerPlaceholder({ pronom: 'vous', saisiePrefixe: 'que vous', conjugaison1: 'ayez su', mode: 'subjonctif' }),
+      `______${gap}____________${gap}________________________`,
     )
   })
 })

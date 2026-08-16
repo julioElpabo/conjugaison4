@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { faVolume } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 const { ui } = useLanguagePreferences()
 import type { ExerciseQuestion } from '~~/shared/types/conjugation'
 import { isPassivizableInfinitive } from '~~/shared/utils/passive-voice'
-import type { ComplementOption, ExerciseKind, IdentificationSource, VoiceMode, Verb } from '~/composables/useChallengeBuilder'
+import type { ComplementOption, ExerciseKind, IdentificationSource, LearningSupportMode, VoiceMode, Verb } from '~/composables/useChallengeBuilder'
 
 const props = defineProps<{
   questionCount: number
@@ -10,6 +12,7 @@ const props = defineProps<{
   identificationSource: IdentificationSource
   inclusivePronouns: boolean
   includeOnPronoun: boolean
+  learningSupportMode: LearningSupportMode
   voiceMode: VoiceMode
   complementOptions: ComplementOption[]
   complementVerbs?: Verb[]
@@ -35,6 +38,7 @@ const emit = defineEmits<{
   updateIdentificationSource: [value: IdentificationSource]
   updateInclusivePronouns: [value: boolean]
   updateIncludeOnPronoun: [value: boolean]
+  updateLearningSupportMode: [value: LearningSupportMode]
   updateVoiceMode: [value: VoiceMode]
   updateComplementOptions: [value: ComplementOption[]]
   prefilledOptionsRevealStart: []
@@ -61,6 +65,7 @@ const optionsTitleId = computed(() => `${idPrefix.value}-title`)
 const questionCountId = computed(() => `${idPrefix.value}-question-count`)
 const exerciseKindName = computed(() => `${idPrefix.value}-exercise-kind`)
 const voiceModeName = computed(() => `${idPrefix.value}-voice-mode`)
+const learningSupportModeName = computed(() => `${idPrefix.value}-learning-support-mode`)
 const identificationSourceName = computed(() => `${idPrefix.value}-identification-source`)
 const complementPanelId = computed(() => `${idPrefix.value}-complement-panel`)
 const hasConjugationExample = computed(() => Boolean(
@@ -219,6 +224,10 @@ function onExerciseKindChange(event: Event) {
   emit('updateExerciseKind', exerciseKind)
 }
 
+function onLearningSupportModeChange(event: Event) {
+  emit('updateLearningSupportMode', (event.target as HTMLInputElement).value as LearningSupportMode)
+}
+
 function toggleComplementOption(option: ComplementOption, checked: boolean) {
   if (prefilledRevealRunning.value) finishPrefilledReveal()
   const next = new Set(props.complementOptions)
@@ -293,6 +302,38 @@ watch(passiveAvailable, (available) => {
               <small>{{ ui('Il apparaîtra ponctuellement dans les questions à la troisième personne du singulier.') }}</small>
             </span>
           </label>
+        </fieldset>
+
+        <fieldset v-if="!falcMode" class="option-fieldset option-group-card option-group-card--learning-support">
+          <legend class="option-group-card__icon-legend">
+            <FontAwesomeIcon :icon="faVolume" aria-hidden="true" />
+            <span>{{ ui('Aide audio') }}</span>
+          </legend>
+          <div class="segmented-control segmented-control--stacked">
+            <label>
+              <input
+                type="radio"
+                :name="learningSupportModeName"
+                value="normal"
+                :checked="learningSupportMode === 'normal'"
+                @change="onLearningSupportModeChange"
+              >
+              <span><strong>{{ ui('Normal') }}</strong></span>
+            </label>
+            <label>
+              <input
+                type="radio"
+                :name="learningSupportModeName"
+                value="cif-fle"
+                :checked="learningSupportMode === 'cif-fle'"
+                @change="onLearningSupportModeChange"
+              >
+              <span>
+                <strong>{{ ui('CIF / FLE') }}</strong>
+                <small>{{ ui('Aide à l’écoute pour les personnes allophones.') }}</small>
+              </span>
+            </label>
+          </div>
         </fieldset>
 
         <fieldset v-if="!falcMode" class="option-fieldset option-group-card option-group-card--exercise">
@@ -583,12 +624,14 @@ watch(passiveAvailable, (available) => {
 .options-layout--columns :is(.option-group-card, .complement-options, .conjugation-example) { display: block; width: 100%; min-width: 0; margin: 0 0 16px; align-self: start; }
 .options-layout--columns .option-group-card--questions,
 .options-layout--columns .option-group-card--voice { grid-column: 1; }
+.options-layout--columns .option-group-card--learning-support { grid-column: 1; }
 .options-layout--columns .option-group-card--pronouns,
 .options-layout--columns > .conjugation-example { grid-column: 2; }
 .options-layout--columns .option-group-card--exercise,
 .options-layout--columns .complement-options { grid-column: 3; }
 .option-group-card { min-width: 0; padding: 15px; border: 1px solid #c8d8d3; border-radius: 13px; background: #fbfdfc; box-shadow: 0 3px 10px rgb(46 67 62 / 5%); }
 .option-group-card > legend { padding: 0 5px; color: var(--brand-dark); font-size: .875rem; font-weight: 800; letter-spacing: .035em; text-transform: uppercase; }
+.option-group-card__icon-legend { display: inline-flex; align-items: center; gap: 7px; }
 .option-group-card .check-row { margin: 0; padding: 9px 0; }
 .option-group-card .check-row + .check-row { margin-top: 5px; padding-top: 14px; border-top: 1px solid #dce6e2; }
 .option-group-card .segmented-control { margin-top: 4px; }
@@ -691,6 +734,7 @@ watch(passiveAvailable, (available) => {
   .options-layout--columns .complement-options { grid-column: 1; }
   .options-layout--columns .option-group-card--pronouns,
   .options-layout--columns .option-group-card--voice,
+  .options-layout--columns .option-group-card--learning-support,
   .options-layout--columns > .conjugation-example { grid-column: 2; }
 }
 @media (max-width: 520px) { .complement-options__panel { grid-template-columns: 1fr; } }

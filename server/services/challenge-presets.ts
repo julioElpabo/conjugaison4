@@ -3,6 +3,7 @@ import type {
   ChallengePreset,
   ComplementOption,
   ExerciseKind,
+  LearningSupportMode,
   PastSimplePronouns,
   Verb,
 } from '../../shared/types/conjugation'
@@ -34,6 +35,7 @@ interface PresetRow extends RowDataPacket {
   exerciseKind: ExerciseKind
   pastSimplePronouns: PastSimplePronouns
   inclusivePronouns: number
+  learningSupportMode: LearningSupportMode
   complementOptions: string | ComplementOption[]
   verbSelectionMode: 'criteria' | 'explicit'
   criteriaJson: string | VerbCriterion[]
@@ -95,7 +97,8 @@ export async function listStoredChallengePresets(
       p.category_id AS categoryId,category.slug AS categorySlug,category.name AS categoryName,
       category.sort_order AS categoryOrder,p.name,p.description,p.question_count AS questionCount,
       p.exercise_kind AS exerciseKind,p.past_simple_pronouns AS pastSimplePronouns,
-      p.inclusive_pronouns AS inclusivePronouns,p.complement_options AS complementOptions,
+      p.inclusive_pronouns AS inclusivePronouns,p.learning_support_mode AS learningSupportMode,
+      p.complement_options AS complementOptions,
       p.verb_selection_mode AS verbSelectionMode,p.criteria_json AS criteriaJson,
       p.sort_order AS sortOrder,p.is_active AS isActive
       FROM challenge_presets p
@@ -153,6 +156,7 @@ export async function listStoredChallengePresets(
       pastSimplePronouns: row.pastSimplePronouns,
       inclusivePronouns: Boolean(row.inclusivePronouns),
       includeOnPronoun: false,
+      learningSupportMode: row.learningSupportMode === 'cif-fle' ? 'cif-fle' : 'normal',
       voiceMode: 'active',
       includeComplements: legacy.includeComplements,
       complementPlacement: legacy.complementPlacement,
@@ -215,6 +219,7 @@ export function parseChallengePresetPayload(value: unknown) {
   const tenseIds = uniqueIds(body.tenseIds)
   const exerciseKind = body.exerciseKind
   const pastSimplePronouns = body.pastSimplePronouns
+  const learningSupportMode = body.learningSupportMode ?? 'normal'
   const complementOptions = normalizeComplementOptions(body.complementOptions)
   const verbSelectionMode = body.verbSelectionMode === 'criteria' ? 'criteria' : 'explicit'
   const criteria = parseCriteria(body.criteria ?? [])
@@ -223,6 +228,7 @@ export function parseChallengePresetPayload(value: unknown) {
     || criteria === null
     || !['conjugation', 'tense-identification'].includes(String(exerciseKind))
     || !['all', 'third-person-only'].includes(String(pastSimplePronouns))
+    || !['normal', 'cif-fle'].includes(String(learningSupportMode))
     || !Array.isArray(body.complementOptions) || complementOptions.length !== body.complementOptions.length
     || typeof body.inclusivePronouns !== 'boolean' || typeof body.isActive !== 'boolean') {
     throw createError({ statusCode: 400, statusMessage: 'Défi pré-enregistré invalide' })
@@ -236,6 +242,7 @@ export function parseChallengePresetPayload(value: unknown) {
     exerciseKind: exerciseKind as ExerciseKind,
     pastSimplePronouns: pastSimplePronouns as PastSimplePronouns,
     inclusivePronouns: body.inclusivePronouns,
+    learningSupportMode: learningSupportMode as LearningSupportMode,
     complementOptions,
     verbIds,
     tenseIds,

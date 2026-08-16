@@ -2723,6 +2723,7 @@ async function confirmAccountAction() {
       :identification-tenses="identificationTenses"
       :regenerate-questions="regenerateChatQuestions"
       :tracking-context="reviewTracking"
+      :learning-support-mode="reviewTracking.challenge.learningSupportMode || 'normal'"
       :require-success="reviewRequireSuccess"
       :analytics-metadata="reviewAnalyticsMetadata"
       @close="closeReview"
@@ -2731,6 +2732,7 @@ async function confirmAccountAction() {
       v-if="coachPickerOpen"
       :selection-pending="Boolean(challengeStarting)"
       :selection-error="challengeStartError"
+      :learning-support-mode="selectedWork?.challenge.challenge.learningSupportMode || 'normal'"
       @close="coachPickerOpen = false"
       @select="launchWithCoach"
     />

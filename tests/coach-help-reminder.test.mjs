@@ -48,6 +48,8 @@ describe('rappel de l’aide dans le chat', () => {
     assert.match(suggestHelp, /Tu peux aussi écouter la réponse\./u)
     assert.match(suggestHelp, /spokenAnswer/u)
     assert.match(suggestHelp, /usesDelayedAnswerAudio\.value/u)
+    assert.match(suggestHelp, /helpConsultationOfferedQuestions\.has\(questionIndex\)/u)
+    assert.match(suggestHelp, /helpConsultationOfferedQuestions\.add\(questionIndex\)/u)
   })
 
   it('place le porte-voix juste après les consignes avec les aides complètes', async () => {

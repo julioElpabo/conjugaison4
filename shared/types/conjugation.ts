@@ -83,6 +83,7 @@ export type ComplementPlacement = 'after' | 'mixed' | 'before'
 export type ClassicComplementChoice = 'none' | ComplementPlacement
 export type ComplementOption = 'cod-after' | 'cod-before' | 'coi-after' | 'coi-before'
 export type VoiceMode = 'active' | 'passive' | 'mixed'
+export type LearningSupportMode = 'normal' | 'cif-fle'
 
 /**
  * Configuration moderne d'un exercice. Les listes sont en lecture seule afin
@@ -98,6 +99,7 @@ export interface ChallengeConfig {
   pastSimplePronouns: PastSimplePronouns
   inclusivePronouns: boolean
   includeOnPronoun: boolean
+  learningSupportMode: LearningSupportMode
   voiceMode: VoiceMode
   includeComplements: boolean
   complementPlacement: ComplementPlacement
@@ -131,6 +133,11 @@ export interface ExerciseQuestion {
   consigne: string
   reponses: readonly string[]
   reponsesPourCorrige: readonly string[]
+  /** Jetons opaques autorisant uniquement les lectures préparées par le serveur. */
+  speech?: {
+    questionToken?: string
+    answerToken?: string
+  }
   /** Formes admises au futur simple, utilisées pour expliquer cette confusion dans une question au futur proche. */
   futureSimpleAnswers?: readonly string[]
   /** Formes correctes du même verbe et de la même personne, mais à un autre temps ou mode. */
@@ -261,6 +268,7 @@ export interface LearnerChallengeSnapshot {
   pastSimplePronouns?: PastSimplePronouns
   inclusivePronouns?: boolean
   includeOnPronoun?: boolean
+  learningSupportMode?: LearningSupportMode
   voiceMode?: VoiceMode
   includeComplements?: boolean
   complementPlacement?: ComplementPlacement

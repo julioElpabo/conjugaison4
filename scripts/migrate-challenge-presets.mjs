@@ -37,6 +37,7 @@ try {
     exercise_kind VARCHAR(40) NOT NULL DEFAULT 'conjugation',
     past_simple_pronouns VARCHAR(40) NOT NULL DEFAULT 'all',
     inclusive_pronouns TINYINT(1) NOT NULL DEFAULT 0,
+    learning_support_mode ENUM('normal','cif-fle') NOT NULL DEFAULT 'normal',
     complement_options JSON NOT NULL,
     verb_selection_mode ENUM('criteria','explicit') NOT NULL DEFAULT 'criteria',
     criteria_json JSON NOT NULL,
@@ -89,8 +90,8 @@ try {
     await database.execute(`INSERT INTO challenge_presets
       (preset_key,category_id,name,description,question_count,exercise_kind,
        past_simple_pronouns,inclusive_pronouns,complement_options,
-       verb_selection_mode,criteria_json,sort_order,is_active)
-      VALUES (?,?,?,?,?,'conjugation','all',0,?,'criteria',?,?,1)
+       learning_support_mode,verb_selection_mode,criteria_json,sort_order,is_active)
+      VALUES (?,?,?,?,?,'conjugation','all',0,?,?,'criteria',?,?,1)
       ON DUPLICATE KEY UPDATE preset_key=preset_key`, [
       definition.id,
       category.id,
@@ -98,6 +99,7 @@ try {
       definition.description,
       definition.questionCount,
       JSON.stringify(legacyComplementOptions(includeComplements, placement)),
+      definition.group === 'cif' ? 'cif-fle' : 'normal',
       JSON.stringify(definition.criteria),
       sortOrder,
     ])

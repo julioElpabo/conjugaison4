@@ -23,6 +23,7 @@ export const PUBLIC_RATE_LIMITS = {
   summaryRead: { bucket: 'summary-read', maximum: 180, windowSeconds: 60 },
   feedback: { bucket: 'feedback', maximum: 12, windowSeconds: 10 * 60 },
   automaticHelpError: { bucket: 'automatic-help-error', maximum: 30, windowSeconds: 10 * 60 },
+  speech: { bucket: 'speech', maximum: 40, windowSeconds: 60 },
 } as const satisfies Record<string, PublicRateLimit>
 
 function clientKey(event: H3Event, bucket: string) {

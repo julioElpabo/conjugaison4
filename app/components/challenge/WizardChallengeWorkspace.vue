@@ -521,6 +521,7 @@ function exerciseUsageMetadata(presentation: 'classic' | 'chat' | 'print') {
     exerciseKind: challenge.value.exerciseKind,
     source: sourcePresetId.value ? 'preset' : challengeCode.value ? 'code' : 'custom',
     voiceMode: challenge.value.voiceMode,
+    learningSupportMode: challenge.value.learningSupportMode,
     complements: complementAnalyticsValue(),
     complementPlacement: challenge.value.complementPlacement,
     questionCountBand: questionCountBand(),
@@ -1429,6 +1430,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   challenge.value.pastSimplePronouns = preset.pastSimplePronouns
   challenge.value.inclusivePronouns = preset.inclusivePronouns
   challenge.value.includeOnPronoun = preset.includeOnPronoun
+  challenge.value.learningSupportMode = preset.learningSupportMode
   challenge.value.voiceMode = preset.voiceMode
   challenge.value.includeComplements = preset.includeComplements
   challenge.value.complementPlacement = preset.complementPlacement
@@ -1713,6 +1715,7 @@ function beginExerciseTracking(presentation: 'classic' | 'chat') {
       pastSimplePronouns: challenge.value.pastSimplePronouns,
       inclusivePronouns: challenge.value.inclusivePronouns,
       includeOnPronoun: challenge.value.includeOnPronoun,
+      learningSupportMode: challenge.value.learningSupportMode,
       voiceMode: challenge.value.voiceMode,
       includeComplements: challenge.value.includeComplements,
       complementPlacement: challenge.value.complementPlacement,
@@ -2202,6 +2205,7 @@ async function createSharedChallenge(title: string, description: string) {
                 :identification-source="challenge.identificationSource"
                 :inclusive-pronouns="challenge.inclusivePronouns"
                 :include-on-pronoun="challenge.includeOnPronoun"
+                :learning-support-mode="challenge.learningSupportMode"
                 :voice-mode="challenge.voiceMode"
                 :complement-options="challenge.complementOptions"
                 :complement-verbs="selectedVerbs"
@@ -2224,6 +2228,7 @@ async function createSharedChallenge(title: string, description: string) {
                 @update-identification-source="challenge.identificationSource = $event; markAsCustom()"
                 @update-inclusive-pronouns="challenge.inclusivePronouns = $event; markAsCustom()"
                 @update-include-on-pronoun="challenge.includeOnPronoun = $event; markAsCustom()"
+                @update-learning-support-mode="challenge.learningSupportMode = $event; markAsCustom()"
                 @update-voice-mode="challenge.voiceMode = $event; markAsCustom()"
                 @update-complement-options="updateComplementOptions"
               />
@@ -2268,8 +2273,8 @@ async function createSharedChallenge(title: string, description: string) {
       </main>
 
       <ClassicExercise ref="classic-exercise" v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" :identification-tenses="identificationTenses" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('classic')" @close="closeClassicExercise" />
-      <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :exercise-kind="challenge.exerciseKind" :coach="selectedCoach" :verbs="chatExerciseVerbs" :tenses="selectedTenses" :identification-tenses="identificationTenses" :regenerate-questions="regenerateChatQuestions" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('chat')" :tour-demo="tourActive" @change-coach="selectedCoach = $event" @close="isExerciseOpen = false" />
-      <CoachPicker v-if="isCoachPickerOpen && !falcMode" :tour-demo="tourActive" @close="isCoachPickerOpen = false" @select="launchWithCoach" />
+      <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :exercise-kind="challenge.exerciseKind" :coach="selectedCoach" :verbs="chatExerciseVerbs" :tenses="selectedTenses" :identification-tenses="identificationTenses" :regenerate-questions="regenerateChatQuestions" :tracking-context="exerciseTracking" :learning-support-mode="challenge.learningSupportMode" :analytics-metadata="exerciseUsageMetadata('chat')" :tour-demo="tourActive" @change-coach="selectedCoach = $event" @close="isExerciseOpen = false" />
+      <CoachPicker v-if="isCoachPickerOpen && !falcMode" :tour-demo="tourActive" :learning-support-mode="challenge.learningSupportMode" @close="isCoachPickerOpen = false" @select="launchWithCoach" />
       <component :is="printPreviewComponent" v-if="isPrintOpen && !falcMode && printPreviewComponent" :questions="printQuestions" :verbs="selectedVerbs" :tenses="selectedTenses" :exercise-kind="challenge.exerciseKind" :options="challenge.printOptions" :requested-question-count="challenge.questionCount" :regenerating="busyAction === 'print'" :analytics-metadata="exerciseUsageMetadata('print')" @update-options="challenge.printOptions = $event" @regenerate="preparePrint" @close="isPrintOpen = false" />
       <ShareChallengeDialog
         v-if="isShareOpen && !falcMode"

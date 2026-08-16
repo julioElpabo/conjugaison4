@@ -201,6 +201,7 @@ export default defineEventHandler(async (event) => {
     pastSimplePronouns,
     inclusivePronouns,
     includeOnPronoun,
+    learningSupportMode: 'normal',
     voiceMode: voiceModes.size > 1 ? 'mixed' : voiceModes.has('passive') ? 'passive' : 'active',
     includeComplements: includeComplements || targetedOptions.length > 0,
     complementPlacement: targetedOptions.some(option => option.endsWith('-before'))

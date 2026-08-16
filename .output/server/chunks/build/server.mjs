@@ -1620,7 +1620,7 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-CTbC5dNw.mjs')
+    component: () => import('./_code_-1BVg_Dpm.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1655,7 +1655,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-CqSO4kJZ.mjs')
+    component: () => import('./exercices-de-conjugaison-2Kh2MSAP.mjs')
   },
   {
     name: "mon-compte",
@@ -1671,7 +1671,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-CKENPXDv.mjs')
+    component: () => import('./nouveau-defi-llRmu8sz.mjs')
   },
   {
     name: "signin",
@@ -1681,7 +1681,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-CXFYvjYL.mjs')
+    component: () => import('./index-QnC-ZogR.mjs')
   },
   {
     name: "mode-tense",
@@ -1786,7 +1786,7 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-CTbC5dNw.mjs')
+    component: () => import('./_code_-1BVg_Dpm.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1821,7 +1821,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-CqSO4kJZ.mjs')
+    component: () => import('./exercices-de-conjugaison-2Kh2MSAP.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1837,7 +1837,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-CKENPXDv.mjs')
+    component: () => import('./nouveau-defi-llRmu8sz.mjs')
   },
   {
     name: "localized-signin",
@@ -1847,7 +1847,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-CXFYvjYL.mjs')
+    component: () => import('./index-QnC-ZogR.mjs')
   },
   {
     name: "localized-mode-tense",

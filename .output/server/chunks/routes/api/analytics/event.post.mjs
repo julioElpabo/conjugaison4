@@ -26,6 +26,7 @@ const ANALYTICS_EVENTS = [
   "answer_correct",
   "answer_retry",
   "help_opened",
+  "help_scrolled",
   "coach_selected",
   "print_opened",
   "pdf_downloaded",
@@ -39,6 +40,12 @@ const ANALYTICS_EVENTS = [
   "account_login",
   "language_tested",
   "language_used",
+  "tour_started",
+  "tour_step",
+  "tour_completed",
+  "tour_abandoned",
+  "chat_conjugation_opened",
+  "browser_printed",
   "client_error"
 ];
 

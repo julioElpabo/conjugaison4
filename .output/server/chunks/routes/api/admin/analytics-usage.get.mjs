@@ -149,7 +149,7 @@ const analyticsUsage_get = defineEventHandler(async (event) => {
         'feature_exposed','feature_selected','feature_completed','feature_failed',
         'challenge_preset_selected','challenge_load','challenge_save',
         'exercise_started','exercise_completed','exercise_abandoned',
-        'help_opened','coach_selected','print_opened','pdf_downloaded','word_downloaded',
+        'help_opened','help_scrolled','coach_selected','print_opened','pdf_downloaded','word_downloaded',
         'account_registered','account_login'
       )
     GROUP BY event_name,actorType,session_id,feature,item,preset,presentation,source
@@ -243,7 +243,7 @@ const analyticsUsage_get = defineEventHandler(async (event) => {
       if (row.eventName === "print_opened") return "print.preview";
       if (row.eventName === "pdf_downloaded") return "download.pdf";
       if (row.eventName === "word_downloaded") return "download.word";
-      if (row.eventName === "help_opened") return "exercise.chat";
+      if (row.eventName === "help_opened" || row.eventName === "help_scrolled") return "exercise.chat";
       if (row.eventName === "coach_selected") return "exercise.chat";
       if (row.eventName === "account_registered") return "auth.register";
       if (row.eventName === "account_login") return "auth.login";

@@ -136,7 +136,7 @@ async function googleAnalyticsOverview(options) {
     }
     throw error;
   }
-  const [devices, languages, countries, regions, cities, cityRegions, events, activity, audienceTrend] = await Promise.all([
+  const [devices, languages, countries, regions, cities, cityRegions, events, activity, audienceTrend, acquisition, landingPages, browsers, operatingSystems] = await Promise.all([
     optionalRequest("appareils", ["deviceCategory"], ["activeUsers"]),
     realtime ? Promise.resolve({ rows: [] }) : optionalRequest("langues", ["language"], ["activeUsers"]),
     optionalRequest("pays", ["countryId", "country"], ["activeUsers"], 250),
@@ -145,7 +145,11 @@ async function googleAnalyticsOverview(options) {
     realtime ? optionalRequest("r\xE9gions des villes", ["cityId", "region", "countryId", "country"], ["activeUsers"], 1e3) : Promise.resolve({ rows: [] }),
     Promise.resolve({ rows: [] }),
     optionalRequest("activit\xE9", [realtime ? "minutesAgo" : "date"], [realtime ? "activeUsers" : "sessions"], realtime ? 30 : 400),
-    realtime ? Promise.resolve({ rows: [] }) : optionalRequest("progression de l\u2019audience", ["date"], ["activeUsers", "sessions", "newUsers"], 400)
+    realtime ? Promise.resolve({ rows: [] }) : optionalRequest("progression de l\u2019audience", ["date"], ["activeUsers", "sessions", "newUsers"], 400),
+    realtime ? Promise.resolve({ rows: [] }) : optionalRequest("acquisition", ["sessionSourceMedium"], ["sessions"], 20),
+    realtime ? Promise.resolve({ rows: [] }) : optionalRequest("pages d\u2019entr\xE9e", ["landingPagePlusQueryString"], ["sessions"], 20),
+    optionalRequest("navigateurs", ["browser"], ["activeUsers"], 10),
+    optionalRequest("syst\xE8mes", ["operatingSystem"], ["activeUsers"], 10)
   ]);
   const summaryValues = ((_b = (_a = summary.rows) == null ? void 0 : _a[0]) == null ? void 0 : _b.metricValues) || [];
   const metric = (index) => {
@@ -208,7 +212,7 @@ async function googleAnalyticsOverview(options) {
     correctAnswers,
     submittedAnswers,
     successRate: submittedAnswers ? Math.round(correctAnswers / submittedAnswers * 1e3) / 10 : 0,
-    helpOpened: eventValue("help_opened"),
+    helpScrolled: eventValue("help_scrolled"),
     pdfDownloads: eventValue("pdf_downloaded"),
     wordDownloads: eventValue("word_downloaded"),
     challengeLoads: eventValue("challenge_load"),
@@ -231,6 +235,10 @@ async function googleAnalyticsOverview(options) {
         value: Number((_n = (_m = row.metricValues) == null ? void 0 : _m[0]) == null ? void 0 : _n.value) || 0
       };
     }),
+    acquisition: rows(acquisition),
+    landingPages: rows(landingPages),
+    browsers: rows(browsers),
+    operatingSystems: rows(operatingSystems),
     featureUsage: [],
     eventBreakdown: eventRows,
     activity: activityRows,
@@ -264,7 +272,7 @@ function emptyOverview(notice) {
     correctAnswers: 0,
     submittedAnswers: 0,
     successRate: 0,
-    helpOpened: 0,
+    helpScrolled: 0,
     pdfDownloads: 0,
     wordDownloads: 0,
     challengeLoads: 0,
@@ -274,6 +282,10 @@ function emptyOverview(notice) {
     countries: [],
     regions: [],
     cities: [],
+    acquisition: [],
+    landingPages: [],
+    browsers: [],
+    operatingSystems: [],
     featureUsage: [],
     eventBreakdown: [],
     activity: [],
@@ -367,7 +379,7 @@ const analytics_get = defineEventHandler(async (event) => {
       correctAnswers: correct,
       submittedAnswers: submitted,
       successRate: submitted ? Math.round(correct / submitted * 1e3) / 10 : 0,
-      helpOpened: count("help_opened"),
+      helpScrolled: count("help_scrolled"),
       pdfDownloads: count("pdf_downloaded"),
       wordDownloads: count("word_downloaded"),
       challengeLoads: count("challenge_load"),
@@ -429,9 +441,6 @@ const analytics_get = defineEventHandler(async (event) => {
       }
       local.completionRate = local.exerciseStarted ? Math.round(local.exerciseCompleted / local.exerciseStarted * 1e3) / 10 : 0;
       if (legacyPrints) local.eventBreakdown.push({ label: "legacy_print_opened", value: legacyPrints });
-      if (legacyRows.length) {
-        local.notice = "Les totaux historiques incluent les anciens compteurs. Les d\xE9tails fins commencent \xE0 partir de la mise en service de ce tableau de bord.";
-      }
     }
   } catch (error) {
     console.error("[analytics] Lecture des statistiques locales impossible.", error);

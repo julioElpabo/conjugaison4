@@ -23,6 +23,21 @@ const localeLabels = {
   it: "Italien",
   es: "Espagnol"
 };
+const connectedFeatureLabels = {
+  "learner.history": "Historique",
+  "learner.summary": "Bilan de s\xE9ance",
+  "learner.finish": "Reprendre une s\xE9ance",
+  "learner.relaunch.same": "Relancer dans le m\xEAme ordre",
+  "learner.relaunch.random": "Relancer au hasard",
+  "learner.errors.session": "Reprendre les erreurs de la s\xE9ance",
+  "learner.errors.challenge": "Reprendre les erreurs du d\xE9fi",
+  "learner.errors.targeted": "D\xE9fi cibl\xE9 par erreur",
+  "learner.progress": "Comprendre ses erreurs",
+  "learner.training": "Progression par d\xE9fi",
+  "learner.training.analysis": "Analyse de progression",
+  "learner.preferences": "Pr\xE9f\xE9rences",
+  "learner.account": "R\xE9glages du compte"
+};
 function isoDate(value, fallback) {
   const text = String(value || "");
   return /^\d{4}-\d{2}-\d{2}$/u.test(text) && !Number.isNaN(Date.parse(`${text}T12:00:00Z`)) ? text : fallback.toISOString().slice(0, 10);
@@ -70,7 +85,7 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
   cutoff.setDate(cutoff.getDate() - activityDays[activityWindow]);
   const cutoffSql = cutoff.toISOString().slice(0, 19).replace("T", " ");
   const database = useDatabase();
-  const [[[total]], [[active]], [languageRows], [anonymousLanguageRows], [registrationRows], [[errorReviews]]] = await Promise.all([
+  const [[[total]], [[active]], [languageRows], [anonymousLanguageRows], [registrationRows], [[errorReviews]], [[loginSummary]], [[failedLogins]], [connectedFeatureRows]] = await Promise.all([
     database.execute(`
       SELECT COUNT(*) AS value
       FROM learner_accounts
@@ -128,6 +143,26 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
         AND runs.is_review=1
         AND runs.last_answered_at>=?
         AND runs.last_answered_at<DATE_ADD(?, INTERVAL 1 DAY)
+    `, [startDate, endDate]),
+    database.execute(`
+      SELECT COUNT(*) AS value, COUNT(DISTINCT account_id) AS accounts
+      FROM learner_login_events
+      WHERE event_type='login' AND occurred_at>=? AND occurred_at<DATE_ADD(?, INTERVAL 1 DAY)
+    `, [startDate, endDate]),
+    database.execute(`
+      SELECT COUNT(*) AS value FROM analytics_events
+      WHERE event_name='feature_failed'
+        AND JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.feature'))='auth.login'
+        AND created_at>=? AND created_at<DATE_ADD(?, INTERVAL 1 DAY)
+    `, [startDate, endDate]),
+    database.execute(`
+      SELECT JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.feature')) AS feature,
+             COUNT(DISTINCT session_id) AS value
+      FROM analytics_events
+      WHERE actor_type='learner' AND event_name IN ('feature_selected','feature_completed')
+        AND created_at>=? AND created_at<DATE_ADD(?, INTERVAL 1 DAY)
+        AND JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.feature')) LIKE 'learner.%'
+      GROUP BY feature ORDER BY value DESC
     `, [startDate, endDate])
   ]);
   const languages = languageRows.map((row) => ({
@@ -141,6 +176,11 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
     value: Number(row.value) || 0
   }));
   const anonymousExerciseSessions = anonymousExerciseLanguages.reduce((sum, row) => sum + row.value, 0);
+  const connectedFeatures = connectedFeatureRows.map((row) => ({
+    code: String(row.feature),
+    label: connectedFeatureLabels[String(row.feature)] || String(row.feature),
+    value: Number(row.value) || 0
+  }));
   const registrations = filledRegistrationSeries(
     registrationRows,
     startDate,
@@ -154,8 +194,12 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
     activityDays: activityDays[activityWindow],
     totalAccounts: Number(total == null ? void 0 : total.value) || 0,
     activeAccounts: Number(active == null ? void 0 : active.value) || 0,
+    loggedInAccounts: Number(loginSummary == null ? void 0 : loginSummary.accounts) || 0,
+    successfulLogins: Number(loginSummary == null ? void 0 : loginSummary.value) || 0,
+    failedLogins: Number(failedLogins == null ? void 0 : failedLogins.value) || 0,
     errorReviewUsers: Number(errorReviews == null ? void 0 : errorReviews.value) || 0,
     languages,
+    connectedFeatures,
     anonymousExerciseSessions,
     anonymousExerciseLanguages,
     registrations,

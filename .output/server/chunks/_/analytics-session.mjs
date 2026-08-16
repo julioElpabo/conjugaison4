@@ -54,9 +54,33 @@ function safeAnalyticsMetadata(value) {
     "step",
     "action",
     "repeat",
-    "questions"
+    "questions",
+    "locale",
+    "theme",
+    "falc",
+    "format",
+    "tourFormat",
+    "voiceMode",
+    "complements",
+    "complementPlacement",
+    "questionCountBand",
+    "inclusivePronouns",
+    "includeOnPronoun",
+    "identificationSource",
+    "helpSource",
+    "printSource",
+    "inclusiveDisplay",
+    "showGrade",
+    "showVerbs",
+    "showTenses",
+    "showFirstName",
+    "showLastName",
+    "showDate",
+    "showRandomNumber",
+    "questionSpacingBand",
+    "titleSpacingBand"
   ];
-  const entries = Object.entries(value).filter(([key, item]) => allowed.includes(key) && ["string", "number", "boolean"].includes(typeof item)).slice(0, 8).map(([key, item]) => [key, String(item).slice(0, 100)]);
+  const entries = Object.entries(value).filter(([key, item]) => allowed.includes(key) && ["string", "number", "boolean"].includes(typeof item)).slice(0, 24).map(([key, item]) => [key, String(item).slice(0, 100)]);
   return entries.length ? Object.fromEntries(entries) : null;
 }
 

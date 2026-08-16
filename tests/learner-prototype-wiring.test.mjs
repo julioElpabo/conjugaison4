@@ -470,6 +470,21 @@ describe('câblage du prototype de compte pseudonyme', () => {
     assert.match(migration, /preset_key<>'100-verbes-utiles-allophones'/u)
   })
 
+  it('charge les interfaces d’exercice pendant la construction du défi', async () => {
+    const wizard = await read('../app/components/challenge/WizardChallengeWorkspace.vue')
+    assert.doesNotMatch(wizard, /import ChatExercise from '\.\.\/exercise\/ChatExercise\.vue'/u)
+    assert.doesNotMatch(wizard, /import ClassicExercise from '\.\.\/exercise\/ClassicExercise\.vue'/u)
+    assert.doesNotMatch(wizard, /import CoachPicker from '\.\.\/exercise\/CoachPicker\.vue'/u)
+    assert.match(wizard, /defineAsyncComponent\(loadClassicExercise\)/u)
+    assert.match(wizard, /defineAsyncComponent\(loadChatExercise\)/u)
+    assert.match(wizard, /defineAsyncComponent\(loadCoachPicker\)/u)
+    assert.match(wizard, /requestIdleCallback\(start, \{ timeout: 2_000 \}\)/u)
+    assert.match(wizard, /if \(step > 0\) scheduleExercisePreload\(\)/u)
+    assert.match(wizard, /\[loadClassicExercise, loadCoachPicker, loadChatExercise\]/u)
+    assert.match(wizard, /api\.generateQuestions\(challenge\.value\),\s*loadClassicExercise\(\)/u)
+    assert.match(wizard, /api\.generateQuestions\(challenge\.value\),\s*loadChatExercise\(\)/u)
+  })
+
   it('synthétise toutes les formes mais ne détaille que les erreurs', async () => {
     const page = await read('../app/components/learner/LearnerSpace.vue')
     const classic = await read('../app/components/exercise/ClassicExercise.vue')

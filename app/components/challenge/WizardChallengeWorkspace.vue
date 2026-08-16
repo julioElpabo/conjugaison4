@@ -2417,6 +2417,7 @@ async function createSharedChallenge(title: string, description: string) {
 .wizard-home__choice p { margin: 0; color: var(--muted); line-height: 1.45; }
 .wizard-home__choice button { grid-column: 1 / -1; align-self: end; justify-self: start; margin-top: auto; }
 .wizard-home__inline-presets { grid-column: 1 / -1; }
+.wizard-hero__subtitle, .tour-entry-button, .wizard-content--home :is(h1, h2, h3, h4, h5, h6, strong, b, button) { letter-spacing: .045em; }
 .wizard-step { max-width: 930px; margin: 0 auto; }
 .wizard-step-preparing { display: grid; min-height: 420px; place-content: center; justify-items: center; gap: 15px; color: var(--brand-dark); text-align: center; }
 .wizard-step-preparing__spinner { width: 42px; height: 42px; border-width: 5px; }

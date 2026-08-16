@@ -5,6 +5,7 @@ import {
   transformFrenchSchoolVerbForm,
 } from '../../shared/data/french-school-programme'
 import { useDatabase } from '../utils/database'
+import { refreshVerbMetadata } from '../services/verb-metadata'
 
 interface CountRow extends RowDataPacket { count: number }
 interface IdRow extends RowDataPacket { id: number }
@@ -45,7 +46,10 @@ async function ensureMissingVerbs(connection: PoolConnection) {
       'SELECT id FROM verbes WHERE infinitif=? LIMIT 1 FOR UPDATE',
       [clone.infinitive],
     )
-    if (existing?.id) continue
+    if (existing?.id) {
+      await refreshVerbMetadata(connection, Number(existing.id))
+      continue
+    }
 
     const [[model]] = await connection.query<StoredVerbRow[]>(
       'SELECT * FROM verbes WHERE infinitif=? LIMIT 1 FOR UPDATE',
@@ -107,6 +111,7 @@ async function ensureMissingVerbs(connection: PoolConnection) {
         transformFrenchSchoolVerbForm(form.conjugaison3 || '', clone),
       ])
     }
+    await refreshVerbMetadata(connection, verbId)
     inserted += 1
   }
   return inserted
@@ -183,10 +188,11 @@ export default defineNitroPlugin(async () => {
       SELECT COUNT(*) AS count FROM information_schema.tables
       WHERE table_schema=DATABASE() AND table_name IN (
         'verbes','verbesconjugues','challenge_preset_categories',
-        'challenge_presets','challenge_preset_tenses'
+        'challenge_presets','challenge_preset_tenses','familles_conjugaison',
+        'temps','modes','verbe_sens','verbe_sens_categories','categories_semantiques'
       )
     `)
-    if (Number(tables?.count) !== 5) {
+    if (Number(tables?.count) !== 11) {
       console.info('[database] Défis scolaires français différés : tables prérequises absentes.')
       return
     }

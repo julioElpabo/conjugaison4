@@ -80,9 +80,9 @@ export function localizedCondensedTenseRule(
 }
 
 export const condensedExampleLabel: Record<AppLocale, string> = {
-  fr: 'Exemple :',
-  de: 'Beispiel:',
-  en: 'Example:',
-  it: 'Esempio:',
-  es: 'Ejemplo:',
+  fr: 'Exemple avec le verbe « chanter » :',
+  de: 'Beispiel mit dem Verb « chanter »:',
+  en: 'Example with the verb “chanter”:',
+  it: 'Esempio con il verbo « chanter »:',
+  es: 'Ejemplo con el verbo « chanter »:',
 }

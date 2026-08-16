@@ -2710,6 +2710,7 @@ async function confirmAccountAction() {
       :tracking-context="reviewTracking"
       :require-success="reviewRequireSuccess"
       :analytics-metadata="reviewAnalyticsMetadata"
+      @change-coach="selectedCoach = $event"
       @close="closeReview"
     />
     <ChatExercise

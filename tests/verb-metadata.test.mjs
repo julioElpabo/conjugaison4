@@ -63,9 +63,12 @@ async function classifiedVerbs() {
 }
 
 describe('métadonnées grammaticales des verbes', () => {
-  it('classe chacun des 588 verbes sans dépendre de son identifiant', async () => {
+  it('classe tous les verbes disponibles sans dépendre de leur identifiant', async () => {
     const verbs = await classifiedVerbs()
-    assert.equal(verbs.length, 588)
+    const [[count]] = await database.execute('SELECT COUNT(*) AS total FROM verbes')
+    assert.equal(verbs.length, Number(count.total))
+    assert.ok(verbs.length >= 588, 'le catalogue ne doit perdre aucun des 588 verbes de référence')
+    assert.equal(new Set(verbs.map(verb => verb.infinitif)).size, verbs.length)
     assert.ok(verbs.every(verb => [1, 2, 3].includes(verb.groupeConjugaison)))
     assert.ok(verbs.every(verb => verb.familleConjugaison && verb.terminaison && verb.formeCanonique))
     assert.ok(verbs.every(verb => verb.categoriesSemantiques.length > 0))

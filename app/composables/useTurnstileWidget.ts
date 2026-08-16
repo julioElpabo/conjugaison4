@@ -52,7 +52,7 @@ function loadTurnstileApi() {
   return turnstileApiPromise
 }
 
-export function useTurnstileWidget(siteKey: string, action: string) {
+export function useTurnstileWidget(siteKey: string, action: string, options: { autoRender?: boolean } = {}) {
   const container = ref<HTMLElement | null>(null)
   const token = ref('')
   const unavailable = ref(false)
@@ -100,7 +100,7 @@ export function useTurnstileWidget(siteKey: string, action: string) {
   }
 
   watch(container, (element) => {
-    if (element) void render()
+    if (element && options.autoRender !== false) void render()
   }, { flush: 'post' })
 
   onBeforeUnmount(() => {

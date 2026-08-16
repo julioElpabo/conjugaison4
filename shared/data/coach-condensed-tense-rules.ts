@@ -78,7 +78,7 @@ export const COACH_CONDENSED_TENSE_RULES = {
     label: 'Subjonctif imparfait',
     rule: 'Prends la forme avec « il » au passé simple.',
     notes: ['Enlève le « t » final s’il y en a.', 'Puis ajoute la terminaison du subjonctif imparfait.'],
-    example: 'il finit → fini- + -sse = que je finisse',
+    example: 'il chanta → chanta- + -sse = que je chantasse',
   },
   'subjonctif:plus-que-parfait': {
     label: 'Subjonctif plus-que-parfait',

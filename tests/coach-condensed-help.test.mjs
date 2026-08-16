@@ -16,6 +16,7 @@ describe('aide très condensée par mode et temps', () => {
   it('couvre tous les 22 couples proposés dans les exercices', () => {
     assert.deepEqual(Object.keys(COACH_CONDENSED_TENSE_RULES).sort(), expectedKeys.sort())
     assert.ok(Object.values(COACH_CONDENSED_TENSE_RULES).every(item => item.rule && item.example))
+    assert.ok(Object.values(COACH_CONDENSED_TENSE_RULES).every(item => /chant/u.test(item.example)))
   })
 
   it('explique la construction du futur proche et la place du pronom réfléchi', () => {
@@ -44,7 +45,7 @@ describe('aide très condensée par mode et temps', () => {
     assert.match(germanGroup, /Die Konjugation ist normalerweise regelmäßig/u)
     assert.doesNotMatch(germanGroup, /appartient|Conjugaison|Attention/u)
     assert.match(germanFuture, /Futurstamm/u)
-    assert.match(germanFuture, /<strong>Beispiel:<\/strong>/u)
+    assert.match(germanFuture, /<strong>Beispiel mit dem Verb « chanter »:<\/strong>/u)
     assert.match(germanFuture, /chanter- \+ -ons = chanterons/u)
     assert.doesNotMatch(germanFuture, /Radical du futur|Exemple :/u)
 
@@ -63,15 +64,15 @@ describe('aide très condensée par mode et temps', () => {
 
   it('sépare chaque notion et les remarques particulières dans des paragraphes', () => {
     const imperfect = buildCondensedTenseRuleHtml('indicatif', 'imparfait')
-    assert.match(imperfect, /<p>Forme avec « nous »[^<]+<\/p><p>Exception : être → ét-\.<\/p><p><strong>Exemple :<\/strong>/u)
+    assert.match(imperfect, /<p>Forme avec « nous »[^<]+<\/p><p>Exception : être → ét-\.<\/p><p><strong>Exemple avec le verbe « chanter » :<\/strong>/u)
 
     const imperative = buildCondensedTenseRuleHtml('impératif', 'présent')
-    assert.match(imperative, /<p>Forme du présent[^<]+<\/p><p>Avec « tu »[^<]+<\/p><p><strong>Exemple :<\/strong>/u)
+    assert.match(imperative, /<p>Forme du présent[^<]+<\/p><p>Avec « tu »[^<]+<\/p><p><strong>Exemple avec le verbe « chanter » :<\/strong>/u)
   })
 
   it('décompose clairement la formation du subjonctif imparfait', () => {
     const html = buildCondensedTenseRuleHtml('subjonctif', 'imparfait')
     assert.match(html, /<p>Prends la forme avec « il » au passé simple\.<\/p><p>Enlève le « t » final s’il y en a\.<\/p><p>Puis ajoute la terminaison du subjonctif imparfait\.<\/p>/u)
-    assert.match(html, /il finit → fini- \+ -sse = que je finisse/u)
+    assert.match(html, /il chanta → chanta- \+ -sse = que je chantasse/u)
   })
 })

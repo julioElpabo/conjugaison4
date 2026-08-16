@@ -5,22 +5,22 @@ import { describe, it } from 'node:test'
 const read = path => readFile(new URL(path, import.meta.url), 'utf8')
 
 describe('dashboard intelligent des statistiques', () => {
-  it('place le dashboard avant le temps réel et charge les trois sources locales', async () => {
+  it('place Maintenant avant la vue d’ensemble et charge les trois sources de cette dernière', async () => {
     const page = await read('../app/pages/admin/charts.vue')
-    const dashboardIndex = page.indexOf('id="stats-tab-dashboard"')
-    const realtimeIndex = page.indexOf('id="stats-tab-realtime"')
-    assert.ok(dashboardIndex >= 0)
-    assert.ok(realtimeIndex > dashboardIndex)
+    const nowIndex = page.indexOf("{ id: 'now', label: 'Maintenant'")
+    const overviewIndex = page.indexOf("{ id: 'overview', label: 'Vue d’ensemble'")
+    assert.ok(nowIndex >= 0)
+    assert.ok(overviewIndex > nowIndex)
     assert.match(page, /Promise\.all/u)
     assert.match(page, /analytics-usage/u)
     assert.match(page, /analytics-users/u)
     assert.match(page, /window: 'range'/u)
   })
 
-  it('ouvre le dashboard par défaut et charge ses données après authentification', async () => {
+  it('ouvre la vue d’ensemble par défaut et charge ses données après authentification', async () => {
     const page = await read('../app/pages/admin/charts.vue')
-    assert.match(page, /const activeTab = ref<[^>]+>\('dashboard'\)/u)
-    assert.match(page, /loadedForUserId = currentUser\.id\s+refreshActiveTab\(\)/u)
+    assert.match(page, /const activeTab = ref<[^>]+>\('overview'\)/u)
+    assert.match(page, /loadedForUserId = current\.id; void loadActiveTab\(\)/u)
   })
 
   it('présente les indicateurs, le parcours, les tendances et les signaux automatiques', async () => {
@@ -60,9 +60,11 @@ describe('dashboard intelligent des statistiques', () => {
 
   it('arrête le rafraîchissement temps réel et ignore ses réponses tardives', async () => {
     const page = await read('../app/pages/admin/charts.vue')
-    assert.match(page, /watch\(activeTab, configureRefresh\)/u)
-    assert.match(page, /statsRequest \+= 1/u)
-    assert.match(page, /tab !== 'dashboard'/u)
-    assert.match(page, /Actualiser le dashboard/u)
+    assert.match(page, /function chooseTab\(tab: StatsTab\) \{ activeTab\.value = tab; void loadActiveTab\(\); configureRefresh\(\) \}/u)
+    assert.match(page, /const request = \+\+requestId/u)
+    assert.match(page, /if \(request === requestId\)/u)
+    assert.match(page, /if \(refreshTimer\) clearInterval\(refreshTimer\)/u)
+    assert.match(page, /activeTab\.value === 'now'/u)
+    assert.match(page, /Actualiser/u)
   })
 })

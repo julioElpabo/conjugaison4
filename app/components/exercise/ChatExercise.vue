@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Component, ShallowRef } from 'vue'
 const { interfaceLocale, ui, uiLabel } = useLanguagePreferences()
 import { faArrowUpFromBracket, faBullhorn, faPrint, faStop } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
@@ -45,6 +46,7 @@ import { sanitizeCoachHtml } from '~~/shared/utils/safe-html'
 import { areOnlyIndicativeTenses, withoutIndicativeMode } from '~~/shared/utils/chat-mode-display'
 import { identificationFormParts, type IdentificationFormParts } from '~~/shared/utils/identification-form'
 
+
 const props = defineProps<{
   questions: ExerciseQuestion[]
   exerciseKind?: ExerciseKind
@@ -60,7 +62,7 @@ const props = defineProps<{
 }>()
 const audioReadingEnabled = AUDIO_READING_ENABLED
 
-const emit = defineEmits<{ close: [] }>()
+const emit = defineEmits<{ close: [], changeCoach: [coach: CoachProfile] }>()
 const { track } = useSiteAnalytics()
 const { recordAttempt, recordQuestionPlan } = useLearnerProgress()
 const exerciseAnalyticsMetadata = computed(() => ({
@@ -69,6 +71,11 @@ const exerciseAnalyticsMetadata = computed(() => ({
   exerciseKind: props.exerciseKind || props.trackingContext?.challenge.exerciseKind || 'conjugation',
   coach: props.coach.id,
 }))
+
+function changeCoachFromHelp(coach: CoachProfile) {
+  track('coach_selected', { coach: coach.id, previousCoach: props.coach.id, source: 'help_recommendation' })
+  emit('changeCoach', coach)
+}
 const activeExerciseKind = computed(() => props.exerciseKind || props.trackingContext?.challenge.exerciseKind)
 const isModeIdentificationExercise = computed(() => activeExerciseKind.value === 'mode-identification')
 const isIdentificationExercise = computed(() => (
@@ -165,6 +172,12 @@ const regeneratingQuestions = ref(false)
 const repeatCurrentQuestion = ref(false)
 const restartError = ref('')
 const printSummaryOpen = ref(false)
+const printSummaryComponent: ShallowRef<Component | null> = shallowRef(null)
+
+watch(printSummaryOpen, async (open) => {
+  if (!open || printSummaryComponent.value) return
+  printSummaryComponent.value = markRaw((await import('./ExerciseSummaryPrintPreview.vue')).default)
+})
 const shareSummaryOpen = ref(false)
 const closeConfirmationOpen = ref(false)
 const consultationVerbId = ref<number | null>(null)
@@ -1591,12 +1604,14 @@ onBeforeUnmount(() => {
           @content-scroll="restartHelpReminderTimer"
           @user-scroll="trackHelpScroll"
           @consult-verb="openVerbConsultation"
+          @change-coach="changeCoachFromHelp"
           @close="closeHelp"
         />
       </Transition>
       </div>
-      <ExerciseSummaryPrintPreview
-        v-if="printSummaryOpen"
+      <component
+        :is="printSummaryComponent"
+        v-if="printSummaryOpen && printSummaryComponent"
         :items="attemptSummaries"
         :score="score"
         :correct-count="correctCount"

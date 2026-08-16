@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Component, ShallowRef } from 'vue'
 const { ui, localePath, interfaceLocale, setInterfaceLocale } = useLanguagePreferences()
 import type { ChallengePreset, ComplementOption, ExerciseQuestion, LearnerExerciseTrackingContext } from '~~/shared/types/conjugation'
 import { challengePresetGroupLabels } from '~~/shared/data/challenge-presets'
@@ -21,7 +22,6 @@ import { normalizeChallengeCode, useChallengeApi } from '~/composables/useChalle
 import ChallengeActions from './ChallengeActions.vue'
 import ChallengeOptions from './ChallengeOptions.vue'
 import PresetPicker from './PresetPicker.vue'
-import PrintPreview from './PrintPreview.vue'
 import ShareChallengeDialog from './ShareChallengeDialog.vue'
 import TensePicker from './TensePicker.vue'
 import VerbPicker from './VerbPicker.vue'
@@ -29,7 +29,7 @@ import ChatExercise from '../exercise/ChatExercise.vue'
 import ClassicExercise from '../exercise/ClassicExercise.vue'
 import CoachPicker from '../exercise/CoachPicker.vue'
 import '~/assets/css/main.css'
-import 'driver.js/dist/driver.css'
+
 
 const props = defineProps<{
   initialCode?: string
@@ -87,6 +87,7 @@ const wizardInitialized = useState('wizard-challenge-initialized', () => false)
 const homeResetRequested = useState('home-reset-requested', () => false)
 const newChallengeRequested = useState('new-challenge-requested', () => false)
 const guidedTourRequested = useState('guided-tour-requested', () => false)
+const guidedTourDisabled = ref(false)
 const wizardAtHome = useState('wizard-at-home', () => true)
 const falcMode = useState<boolean>('falc-mode', () => false)
 const currentStep = ref<WizardStep>(0)
@@ -117,6 +118,7 @@ const exerciseTracking = ref<LearnerExerciseTrackingContext>()
 const isExerciseOpen = ref(false)
 const exercisePresentation = ref<'classic' | 'chat'>('classic')
 const isPrintOpen = ref(false)
+const printPreviewComponent: ShallowRef<Component | null> = shallowRef(null)
 const isShareOpen = ref(false)
 const isCoachPickerOpen = ref(false)
 const selectedCoach = ref<CoachProfile | null>(null)
@@ -169,6 +171,12 @@ let tourSnapshot: TourSnapshot | null = null
 let tourCompleted = false
 let trackedTourFormat: TourFormat | null = null
 let tourPromptTimer: ReturnType<typeof setTimeout> | undefined
+let guidedTourMediaQuery: MediaQueryList | undefined
+
+watch(isPrintOpen, async (open) => {
+  if (!open || printPreviewComponent.value) return
+  printPreviewComponent.value = markRaw((await import('./PrintPreview.vue')).default)
+})
 
 const displayedVerbIds = computed(() => tourActive.value || isPrefilledChallenge.value ? revealedPresetVerbIds.value : challenge.value.verbIds)
 const displayedTenseIds = computed(() => tourActive.value || isPrefilledChallenge.value ? revealedPresetTenseIds.value : challenge.value.tenseIds)
@@ -461,7 +469,19 @@ function exerciseUsageMetadata(presentation: 'classic' | 'chat' | 'print') {
   }
 }
 
+function syncGuidedTourAvailability() {
+  guidedTourDisabled.value = guidedTourMediaQuery?.matches === true
+  if (!guidedTourDisabled.value) return
+  if (tourPromptTimer) clearTimeout(tourPromptTimer)
+  isTourWelcomeOpen.value = false
+  guidedTourRequested.value = false
+  if (tourActive.value) tourDriver?.destroy()
+}
+
 onMounted(() => {
+  guidedTourMediaQuery = window.matchMedia('(max-width: 640px)')
+  syncGuidedTourAvailability()
+  guidedTourMediaQuery.addEventListener('change', syncGuidedTourAvailability)
   wizardAtHome.value = currentStep.value === 0
   logUsage('homepage')
   exposeUsageFeature('preset.library')
@@ -475,6 +495,7 @@ onMounted(() => {
   } catch {
     // L'accueil fonctionne normalement si le stockage du navigateur est indisponible.
   }
+  if (guidedTourDisabled.value) return
   try {
     const completed = localStorage.getItem(GUIDED_TOUR_COMPLETED_STORAGE_KEY) === 'completed'
     let reminderState = parseGuidedTourReminderState(localStorage.getItem(GUIDED_TOUR_REMINDER_STORAGE_KEY))
@@ -1220,7 +1241,7 @@ function restoreAfterTour() {
 }
 
 async function startGuidedTour(format: TourFormat) {
-  if (tourActive.value || catalogueStatus.value !== 'success') return
+  if (guidedTourDisabled.value || tourActive.value || catalogueStatus.value !== 'success') return
   isTourWelcomeOpen.value = false
   tourWelcomeSource.value = null
   tourSnapshot = {
@@ -1245,7 +1266,10 @@ async function startGuidedTour(format: TourFormat) {
   await nextTick()
 
   try {
-    const { driver } = await import('driver.js')
+    const [{ driver }] = await Promise.all([
+      import('driver.js'),
+      import('driver.js/dist/driver.css'),
+    ])
     const copy = tourCopy.value
     const steps = tourSteps(format)
     tourDriver = driver({
@@ -1295,7 +1319,7 @@ function postponeTour() {
 }
 
 function openTourMenu() {
-  if (falcMode.value || tourActive.value) return
+  if (guidedTourDisabled.value || falcMode.value || tourActive.value) return
   tourWelcomeSource.value = 'manual'
   isTourWelcomeOpen.value = true
 }
@@ -1591,6 +1615,7 @@ watch(currentStep, async () => {
 })
 
 onBeforeUnmount(() => {
+  guidedTourMediaQuery?.removeEventListener('change', syncGuidedTourAvailability)
   cancelPresetReveal()
   if (tourPromptTimer) clearTimeout(tourPromptTimer)
   tourDriver?.destroy()
@@ -1763,7 +1788,7 @@ async function createSharedChallenge(title: string, description: string) {
         <p v-if="currentStep === 0 && !falcMode" class="wizard-hero__brand">{{ heroTitle }}</p>
         <h1 v-if="currentStep === 0 && !falcMode" class="wizard-hero__subtitle">{{ props.homeHeading || ui('Exercices de conjugaison française, gratuits et sans publicité') }}</h1>
         <h1 v-if="currentStep !== 0 && !falcMode" :class="{ 'wizard-hero__preset': isPrefilledChallenge }">{{ heroTitle }}</h1>
-        <button v-if="currentStep === 0 && !falcMode" class="tour-entry-button" type="button" @click="openTourMenu">
+        <button v-if="currentStep === 0 && !falcMode && !guidedTourDisabled" class="tour-entry-button" type="button" @click="openTourMenu">
           <span aria-hidden="true">?</span>{{ tourCopy.discover }}
         </button>
       </header>
@@ -2155,9 +2180,9 @@ async function createSharedChallenge(title: string, description: string) {
       </main>
 
       <ClassicExercise ref="classic-exercise" v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" :identification-tenses="identificationTenses" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('classic')" @close="closeClassicExercise" />
-      <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :exercise-kind="challenge.exerciseKind" :coach="selectedCoach" :verbs="chatExerciseVerbs" :tenses="selectedTenses" :identification-tenses="identificationTenses" :regenerate-questions="regenerateChatQuestions" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('chat')" :tour-demo="tourActive" @close="isExerciseOpen = false" />
+      <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :exercise-kind="challenge.exerciseKind" :coach="selectedCoach" :verbs="chatExerciseVerbs" :tenses="selectedTenses" :identification-tenses="identificationTenses" :regenerate-questions="regenerateChatQuestions" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('chat')" :tour-demo="tourActive" @change-coach="selectedCoach = $event" @close="isExerciseOpen = false" />
       <CoachPicker v-if="isCoachPickerOpen && !falcMode" :tour-demo="tourActive" @close="isCoachPickerOpen = false" @select="launchWithCoach" />
-      <PrintPreview v-if="isPrintOpen && !falcMode" :questions="printQuestions" :verbs="selectedVerbs" :tenses="selectedTenses" :exercise-kind="challenge.exerciseKind" :options="challenge.printOptions" :requested-question-count="challenge.questionCount" :regenerating="busyAction === 'print'" :analytics-metadata="exerciseUsageMetadata('print')" @update-options="challenge.printOptions = $event" @regenerate="preparePrint" @close="isPrintOpen = false" />
+      <component :is="printPreviewComponent" v-if="isPrintOpen && !falcMode && printPreviewComponent" :questions="printQuestions" :verbs="selectedVerbs" :tenses="selectedTenses" :exercise-kind="challenge.exerciseKind" :options="challenge.printOptions" :requested-question-count="challenge.questionCount" :regenerating="busyAction === 'print'" :analytics-metadata="exerciseUsageMetadata('print')" @update-options="challenge.printOptions = $event" @regenerate="preparePrint" @close="isPrintOpen = false" />
       <ShareChallengeDialog
         v-if="isShareOpen && !falcMode"
         :code="shareCode"
@@ -2170,7 +2195,7 @@ async function createSharedChallenge(title: string, description: string) {
         @save="createSharedChallenge"
       />
       <Teleport to="body">
-        <div v-if="isTourWelcomeOpen" class="tour-welcome-backdrop" @click.self="postponeTour">
+        <div v-if="isTourWelcomeOpen && !guidedTourDisabled" class="tour-welcome-backdrop" @click.self="postponeTour">
           <section class="tour-welcome-dialog" role="dialog" aria-modal="true" aria-labelledby="tour-welcome-title">
             <div class="tour-welcome-dialog__languages" role="group" :aria-label="ui('Langue de l’interface')">
               <button
@@ -2218,7 +2243,7 @@ async function createSharedChallenge(title: string, description: string) {
 .wizard-hero__brand { letter-spacing: .18em; text-indent: .18em; }
 .wizard-hero h1:not(.wizard-hero__subtitle) { letter-spacing: .035em; opacity: .62; }
 .wizard-hero h1.wizard-hero__preset { font-size: clamp(1.75rem, 4vw, 3.15rem); line-height: 1.1; }
-.wizard-hero h1.wizard-hero__subtitle { max-width: 650px; margin: 12px auto 0; color: var(--muted); font-size: 1.08rem; font-weight: 650; letter-spacing: 0; line-height: 1.5; }
+.wizard-hero h1.wizard-hero__subtitle { max-width: 650px; margin: 12px auto 0; color: var(--ink); font-size: 1.08rem; font-weight: 650; letter-spacing: 0; line-height: 1.5; }
 .tour-entry-button { display: inline-flex; margin-top: 13px; padding: 7px 13px 7px 8px; align-items: center; gap: 8px; color: #0b4f69; border: 2px solid #e4ad00; border-radius: 999px; background: #fff3a8; box-shadow: 0 5px 15px rgb(70 52 0 / 14%), 0 0 0 4px rgb(255 215 43 / 12%); cursor: pointer; font-size: .84rem; font-weight: 800; }
 .tour-entry-button span { display: grid; width: 22px; height: 22px; place-items: center; color: #493a08; border: 1px solid #c99500; border-radius: 50%; background: #ffd943; font-size: .75rem; font-weight: 900; }
 .tour-entry-button:hover, .tour-entry-button:focus-visible { color: #083f54; border-color: #c99500; background: #ffe978; outline: 0; box-shadow: 0 7px 20px rgb(70 52 0 / 20%), 0 0 0 5px rgb(255 215 43 / 24%); }
@@ -2483,6 +2508,10 @@ async function createSharedChallenge(title: string, description: string) {
     animation: none;
   }
   .preset-verb-enter-active { transition: none; }
+}
+
+@media (max-width: 640px) {
+  .tour-entry-button { display: none; }
 }
 
 @media (max-width: 820px) {

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Component, ShallowRef } from 'vue'
 const { ui, localePath } = useLanguagePreferences()
 import type { ChallengePreset, ComplementOption, ExerciseQuestion, LearnerExerciseTrackingContext } from '~~/shared/types/conjugation'
 import { legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils/complement-options'
@@ -7,7 +8,6 @@ import ChallengeActions from './ChallengeActions.vue'
 import ChallengeOptions from './ChallengeOptions.vue'
 import LoadChallengeDialog from './LoadChallengeDialog.vue'
 import PresetPicker from './PresetPicker.vue'
-import PrintPreview from './PrintPreview.vue'
 import ShareChallengeDialog from './ShareChallengeDialog.vue'
 import TensePicker from './TensePicker.vue'
 import VerbPicker from './VerbPicker.vue'
@@ -18,6 +18,7 @@ import type { CoachProfile } from '~~/shared/types/coach'
 import { getChallengeErrorMessage, useChallengeBuilder } from '~/composables/useChallengeBuilder'
 import { useChallengeApi } from '~/composables/useChallengeApi'
 import '~/assets/css/main.css'
+
 
 const props = defineProps<{
   initialCode?: string
@@ -63,11 +64,17 @@ const savedChallengeDescription = ref('')
 const isExerciseOpen = ref(false)
 const exercisePresentation = ref<'classic' | 'chat'>('classic')
 const isPrintOpen = ref(false)
+const printPreviewComponent: ShallowRef<Component | null> = shallowRef(null)
 const isShareOpen = ref(false)
 const isLoadOpen = ref(false)
 const isCoachPickerOpen = ref(false)
 const selectedCoach = ref<CoachProfile | null>(null)
 const exerciseTracking = ref<LearnerExerciseTrackingContext>()
+
+watch(isPrintOpen, async (open) => {
+  if (!open || printPreviewComponent.value) return
+  printPreviewComponent.value = markRaw((await import('./PrintPreview.vue')).default)
+})
 const chatExerciseVerbs = computed(() => {
   if (challenge.value.identificationSource !== 'literary-corpus'
     || challenge.value.exerciseKind !== 'tense-identification') return selectedVerbs.value
@@ -513,6 +520,7 @@ function onToggleTense(id: number) {
       :regenerate-questions="regenerateChatQuestions"
       :tracking-context="exerciseTracking"
       :analytics-metadata="exerciseUsageMetadata('chat')"
+      @change-coach="selectedCoach = $event"
       @close="isExerciseOpen = false"
     />
 
@@ -522,8 +530,9 @@ function onToggleTense(id: number) {
       @select="launchWithCoach"
     />
 
-    <PrintPreview
-      v-if="isPrintOpen"
+    <component
+      :is="printPreviewComponent"
+      v-if="isPrintOpen && printPreviewComponent"
       :questions="printQuestions"
       :verbs="selectedVerbs"
       :tenses="selectedTenses"

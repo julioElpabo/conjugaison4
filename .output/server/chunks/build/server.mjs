@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, toRef, isReadonly, isRef, isShallow, isReactive, toRaw } from 'vue';
-import { a0 as SUPPORTED_LOCALES, aA as parseURL, aB as encodePath, aC as decodePath, aD as localeFromPath, o as normalizeLocale, aE as getRequestHeaders, c as createError$1, a4 as hasProtocol, a6 as isScriptProtocol, a5 as joinURL, aF as withQuery, aG as klona, aH as DEFAULT_LANGUAGE_PREFERENCES, a2 as localizePath, aI as sanitizeStatusCode, aJ as getContext, aK as getRequestHeader, aL as isEqual, j as setCookie, m as getCookie, k as deleteCookie, aM as $fetch, aN as defu, D as stripLocaleFromPath, ac as executeAsync, aO as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { a0 as SUPPORTED_LOCALES, aA as parseURL, aB as encodePath, aC as decodePath, aD as localeFromPath, o as normalizeLocale, aE as getRequestHeaders, c as createError$1, a4 as hasProtocol, a6 as isScriptProtocol, a5 as joinURL, aF as withQuery, aG as klona, aH as DEFAULT_LANGUAGE_PREFERENCES, a2 as localizePath, aI as sanitizeStatusCode, aJ as getContext, aK as getRequestHeader, aL as isEqual, k as setCookie, n as getCookie, m as deleteCookie, aM as $fetch, aN as defu, D as stripLocaleFromPath, ac as executeAsync, aO as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useSeoMeta$1, a as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -1559,7 +1559,7 @@ const _routes = [
   {
     name: "admin-charts",
     path: "/admin/charts",
-    component: () => import('./charts-DXu3JzSk.mjs')
+    component: () => import('./charts-b67-5Wmy.mjs')
   },
   {
     name: "admin-coaches",
@@ -1725,7 +1725,7 @@ const _routes = [
   {
     name: "localized-admin-charts",
     path: "/:locale(fr|de|en|it|es)/admin/charts",
-    component: () => import('./charts-DXu3JzSk.mjs')
+    component: () => import('./charts-b67-5Wmy.mjs')
   },
   {
     name: "localized-admin-coaches",

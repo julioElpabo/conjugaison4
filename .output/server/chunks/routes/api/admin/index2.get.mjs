@@ -1,4 +1,4 @@
-import { d as defineEventHandler, u as useDatabase, h as getCatalogue, l as listChallengePresetCategories, i as listStoredChallengePresets } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, u as useDatabase, i as getCatalogue, l as listChallengePresetCategories, j as listStoredChallengePresets } from '../../../nitro/nitro.mjs';
 import { r as requireAdministrator } from '../../../_/session.mjs';
 import 'node:http';
 import 'node:https';

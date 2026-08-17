@@ -1007,7 +1007,10 @@ function goRegion() {
     <svg class="geo-zoom__defs" width="0" height="0" aria-hidden="true">
       <defs>
         <radialGradient :id="activityGradientId" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="var(--geo-trace-color, #087f98)" :stop-opacity="realtime ? 0.2 : 0.1" />
+          <stop offset="0%" stop-color="var(--geo-trace-color, #087f98)" :stop-opacity="realtime ? 0.9 : 0.72" />
+          <stop offset="9%" stop-color="var(--geo-trace-color, #087f98)" :stop-opacity="realtime ? 0.72 : 0.56" />
+          <stop offset="24%" stop-color="var(--geo-trace-color, #087f98)" :stop-opacity="realtime ? 0.26 : 0.2" />
+          <stop offset="48%" stop-color="var(--geo-trace-color, #087f98)" :stop-opacity="realtime ? 0.06 : 0.04" />
           <stop offset="100%" stop-color="var(--geo-trace-color, #087f98)" stop-opacity="0" />
         </radialGradient>
       </defs>
@@ -1092,6 +1095,14 @@ function goRegion() {
             @keydown.enter.prevent="activateMarker(marker)"
           />
         </g>
+        <g class="geo-zoom__boundary-layer" aria-hidden="true">
+          <path
+            v-for="location in worldMap.locations"
+            :key="`boundary-${location.id}`"
+            :d="location.path"
+            class="geo-zoom__boundary"
+          />
+        </g>
         <text
           v-if="!isActivityMode"
           v-for="marker in worldMarkers"
@@ -1155,6 +1166,15 @@ function goRegion() {
             @blur="hoveredMarker = null"
             @click="activateMarker(marker, $event)"
             @keydown.enter.prevent="activateMarker(marker)"
+          />
+        </g>
+        <g class="geo-zoom__boundary-layer" aria-hidden="true">
+          <path
+            v-for="canton in cantonMap.cantons"
+            :key="`boundary-${canton.code}`"
+            :d="canton.path"
+            class="geo-zoom__boundary"
+            fill-rule="evenodd"
           />
         </g>
         <text
@@ -1222,6 +1242,15 @@ function goRegion() {
             @keydown.enter.prevent="activateMarker(marker)"
           />
         </g>
+        <g class="geo-zoom__boundary-layer" aria-hidden="true">
+          <path
+            v-for="region in worldRegionMap.regions"
+            :key="`boundary-${region.id}`"
+            :d="region.path"
+            class="geo-zoom__boundary"
+            fill-rule="evenodd"
+          />
+        </g>
         <text
           v-if="!isActivityMode"
           v-for="marker in countryMarkers"
@@ -1274,6 +1303,9 @@ function goRegion() {
             @click="activateMarker(marker, $event)"
             @keydown.enter.prevent="activateMarker(marker)"
           />
+        </g>
+        <g class="geo-zoom__boundary-layer" aria-hidden="true">
+          <path :d="selectedLocation.path" class="geo-zoom__boundary" />
         </g>
         <text
           v-if="!isActivityMode"
@@ -1328,6 +1360,9 @@ function goRegion() {
             @keydown.enter.prevent="activateMarker(marker)"
           />
         </g>
+        <g class="geo-zoom__boundary-layer" aria-hidden="true">
+          <path :d="selectedWorldRegion.path" class="geo-zoom__boundary" fill-rule="evenodd" />
+        </g>
         <text
           v-if="!isActivityMode"
           v-for="marker in regionMarkers"
@@ -1380,6 +1415,9 @@ function goRegion() {
             @click="activateMarker(marker, $event)"
             @keydown.enter.prevent="activateMarker(marker)"
           />
+        </g>
+        <g class="geo-zoom__boundary-layer" aria-hidden="true">
+          <path :d="selectedCanton.path" class="geo-zoom__boundary" fill-rule="evenodd" />
         </g>
         <text
           v-if="!isActivityMode"
@@ -1460,6 +1498,9 @@ function goRegion() {
 .geo-zoom__canvas .geo-zoom__marker{animation:none}
 .geo-zoom__canvas>svg{isolation:isolate}
 .geo-zoom__marker-layer.is-additive{mix-blend-mode:multiply}
+.geo-zoom__boundary-layer{pointer-events:none;mix-blend-mode:screen}
+.geo-zoom__boundary{fill:none;stroke:rgb(57 143 106 / 62%);stroke-width:.9;vector-effect:non-scaling-stroke}
+@supports(mix-blend-mode:plus-lighter){.geo-zoom__boundary-layer{mix-blend-mode:plus-lighter}}
 .geo-zoom__marker-layer.is-pulsing{will-change:opacity;animation:geo-marker-layer-pulse 3.2s ease-in-out infinite}
 @keyframes geo-marker-layer-pulse{0%,100%{opacity:.52}50%{opacity:1}}
 .geo-zoom__canvas>svg{cursor:grab;touch-action:none;user-select:none}.geo-zoom__canvas>svg.is-panning{cursor:grabbing}.geo-zoom__display-controls{position:absolute;z-index:4;right:14px;bottom:14px;display:grid;justify-items:end;gap:8px}.geo-zoom__display-toggle{padding:9px 12px;border:1px solid #b7ccd2;border-radius:9px;color:#173f4b;background:#fff;box-shadow:0 3px 12px rgb(18 63 75 / 16%);font:inherit;font-size:.78rem;font-weight:800;cursor:pointer}.geo-zoom__display-toggle:hover,.geo-zoom__display-toggle:focus-visible{color:#fff;background:#087f98;outline:none}.geo-zoom__marker-value{fill:#fff;stroke:#05657a;stroke-width:.7px;paint-order:stroke;vector-effect:non-scaling-stroke;text-anchor:middle;dominant-baseline:central;font-weight:850;pointer-events:none}.geo-zoom__label{fill:#2d3439;stroke:#edf8fa;stroke-width:3px;paint-order:stroke;stroke-linejoin:round;vector-effect:non-scaling-stroke;font-weight:750;letter-spacing:-.02em;pointer-events:none}.geo-zoom__tooltip{grid-template-columns:auto minmax(0,1fr) auto;min-width:290px;padding:16px 18px;align-items:baseline;gap:5px 12px;border:1px solid #d5dce0;border-radius:14px;color:#20262b;background:#fff;box-shadow:0 8px 24px rgb(17 36 43 / 22%)}.geo-zoom__tooltip strong{overflow:hidden;font-size:1rem;text-overflow:ellipsis;white-space:nowrap}.geo-zoom__tooltip b{font-size:1rem}.geo-zoom__tooltip-rank{font-size:.88rem;font-weight:800;white-space:nowrap}.geo-zoom__tooltip small{grid-column:2/-1;color:#607078;font-size:.72rem;font-weight:650}:global(:root[data-theme='dark']) .geo-zoom__display-toggle{border-color:#49646c;color:#d7edf1;background:#1b3036}:global(:root[data-theme='dark']) .geo-zoom__display-toggle:hover,:global(:root[data-theme='dark']) .geo-zoom__display-toggle:focus-visible{color:#fff;background:#087f98}:global(:root[data-theme='dark']) .geo-zoom__label{fill:#e7f0f2;stroke:#203a42}:global(:root[data-theme='dark']) .geo-zoom__tooltip{border-color:#71848a;color:#17292e;background:#f7fbfc}

@@ -231,7 +231,7 @@ function showActivityLabel(index: number) {
             initial-view="switzerland"
             map-label="Carte des visiteurs centrée et zoomée sur la Suisse"
             :display-mode="geoDisplayMode"
-            :activity-radius-scale="1.45"
+            :activity-radius-scale="2.8"
           />
         </section>
       </div>

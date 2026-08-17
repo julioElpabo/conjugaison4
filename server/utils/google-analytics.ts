@@ -1,16 +1,23 @@
 import { createSign } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
-import type { AnalyticsBreakdownItem, AnalyticsOverview, AnalyticsSeriesPoint, AnalyticsWindow } from '../../shared/types/analytics'
+import type { AnalyticsBreakdownItem, AnalyticsGeoTimelineResponse, AnalyticsOverview, AnalyticsSeriesPoint, AnalyticsWindow } from '../../shared/types/analytics'
 
 interface GaResponse {
   rows?: Array<{ dimensionValues?: Array<{ value?: string }>, metricValues?: Array<{ value?: string }> }>
+  rowCount?: number
+  metadata?: { timeZone?: string, dataLossFromOtherRow?: boolean }
 }
 
 let tokenCache: { value: string, expiresAt: number } | undefined
 const reportCache = new Map<string, { value: AnalyticsOverview, expiresAt: number }>()
+const timelineCache = new Map<string, { value: AnalyticsGeoTimelineResponse, expiresAt: number }>()
 const quotaBackoff = new Map<string, number>()
 const GOOGLE_AUTH_TIMEOUT_MS = 10_000
 const GOOGLE_REPORT_TIMEOUT_MS = 12_000
+
+function currentZurichDate() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Zurich', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
+}
 
 function privateKeyFromEnvironment() {
   const parts: string[] = []
@@ -54,18 +61,7 @@ async function accessToken(email: string, privateKey: string) {
   return tokenCache.value
 }
 
-function rows(response: GaResponse, dimensionCount = 1): AnalyticsBreakdownItem[] {
-  return (response.rows || []).map(row => ({
-    label: row.dimensionValues?.slice(0, dimensionCount).map(item => item.value || '—').join(' · ') || '—',
-    value: Number(row.metricValues?.[0]?.value) || 0,
-  }))
-}
-
-export async function googleAnalyticsOverview(options: {
-  window: AnalyticsWindow
-  startDate: string
-  endDate: string
-}): Promise<AnalyticsOverview | null> {
+async function googleAnalyticsCredentials() {
   const config = useRuntimeConfig()
   const propertyId = String(config.ga4PropertyId || '').trim()
   let email = String(config.ga4ClientEmail || '').trim()
@@ -81,7 +77,24 @@ export async function googleAnalyticsOverview(options: {
       console.error('[analytics] Impossible de lire le fichier du compte de service GA4.', error)
     }
   }
-  if (!propertyId || !email || !privateKey) return null
+  return propertyId && email && privateKey ? { propertyId, email, privateKey } : null
+}
+
+function rows(response: GaResponse, dimensionCount = 1): AnalyticsBreakdownItem[] {
+  return (response.rows || []).map(row => ({
+    label: row.dimensionValues?.slice(0, dimensionCount).map(item => item.value || '—').join(' · ') || '—',
+    value: Number(row.metricValues?.[0]?.value) || 0,
+  }))
+}
+
+export async function googleAnalyticsOverview(options: {
+  window: AnalyticsWindow
+  startDate: string
+  endDate: string
+}): Promise<AnalyticsOverview | null> {
+  const credentials = await googleAnalyticsCredentials()
+  if (!credentials) return null
+  const { propertyId, email, privateKey } = credentials
   const cacheKey = `geo-v7:${propertyId}:${options.window}:${options.startDate}:${options.endDate}`
   const cached = reportCache.get(cacheKey)
   if (cached && cached.expiresAt > Date.now()) return cached.value
@@ -229,4 +242,90 @@ export async function googleAnalyticsOverview(options: {
   }
   reportCache.set(cacheKey, { value: result, expiresAt: Date.now() + (realtime ? 5 * 60_000 : 30 * 60_000) })
   return result
+}
+
+export async function googleAnalyticsGeoTimeline(date: string): Promise<AnalyticsGeoTimelineResponse | null> {
+  const credentials = await googleAnalyticsCredentials()
+  if (!credentials) return null
+  const { propertyId, email, privateKey } = credentials
+  const cacheKey = `${propertyId}:${date}`
+  const cached = timelineCache.get(cacheKey)
+  if (cached && cached.expiresAt > Date.now()) return cached.value
+
+  const quotaKey = `${propertyId}:core`
+  if ((quotaBackoff.get(quotaKey) || 0) > Date.now()) {
+    throw new Error('Lecture GA4 impossible (429) : quota horaire temporairement atteint.')
+  }
+
+  const token = await accessToken(email, privateKey)
+  const endpoint = `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`
+  const rows: NonNullable<GaResponse['rows']> = []
+  let offset = 0
+  let metadata: GaResponse['metadata']
+
+  do {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        dateRanges: [{ startDate: date, endDate: date }],
+        dimensions: ['dateHourMinute', 'cityId', 'city', 'region', 'countryId', 'country'].map(name => ({ name })),
+        metrics: [{ name: 'eventCount' }],
+        dimensionFilter: { filter: { fieldName: 'eventName', stringFilter: { matchType: 'EXACT', value: 'session_start', caseSensitive: true } } },
+        orderBys: [{ dimension: { dimensionName: 'dateHourMinute', orderType: 'ALPHANUMERIC' }, desc: false }],
+        limit: 250_000,
+        offset,
+        returnPropertyQuota: true,
+      }),
+      signal: AbortSignal.timeout(GOOGLE_REPORT_TIMEOUT_MS),
+    })
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null) as { error?: { message?: string } } | null
+      if (response.status === 429) quotaBackoff.set(quotaKey, Date.now() + 15 * 60_000)
+      throw new Error(`Lecture GA4 impossible (${response.status})${payload?.error?.message ? ` : ${payload.error.message}` : ''}`)
+    }
+    const page = await response.json() as GaResponse
+    rows.push(...(page.rows || []))
+    metadata ||= page.metadata
+    offset = rows.length
+    if (!page.rowCount || offset >= page.rowCount) break
+  } while (offset < 1_000_000)
+
+  const points = rows.flatMap((row) => {
+    const dimensions = row.dimensionValues || []
+    const compactMinute = dimensions[0]?.value || ''
+    const city = dimensions[2]?.value || ''
+    const countryCode = (dimensions[4]?.value || '').toUpperCase()
+    const sessions = Number(row.metricValues?.[0]?.value) || 0
+    if (!/^\d{12}$/u.test(compactMinute) || !city || city === '(not set)' || !/^[A-Z]{2}$/u.test(countryCode) || sessions <= 0) return []
+    const minute = `${compactMinute.slice(0, 4)}-${compactMinute.slice(4, 6)}-${compactMinute.slice(6, 8)}T${compactMinute.slice(8, 10)}:${compactMinute.slice(10, 12)}:00`
+    return [{
+      minute,
+      cityId: dimensions[1]?.value || undefined,
+      city,
+      region: dimensions[3]?.value && dimensions[3]?.value !== '(not set)' ? dimensions[3].value : undefined,
+      countryCode,
+      country: dimensions[5]?.value || countryCode,
+      sessions,
+    }]
+  })
+  const sessions = points.reduce((sum, point) => sum + point.sessions, 0)
+  const today = currentZurichDate()
+  const notices = [
+    date === today ? 'Les données GA4 de la journée en cours peuvent encore être complétées pendant plusieurs heures.' : '',
+    metadata?.dataLossFromOtherRow ? 'GA4 signale que certaines lignes à forte cardinalité ont été regroupées.' : '',
+  ].filter(Boolean)
+  const value: AnalyticsGeoTimelineResponse = {
+    date,
+    configured: true,
+    points,
+    sessions,
+    firstMinute: points[0]?.minute,
+    lastMinute: points.at(-1)?.minute,
+    timeZone: metadata?.timeZone,
+    generatedAt: new Date().toISOString(),
+    notice: notices.join(' ') || undefined,
+  }
+  timelineCache.set(cacheKey, { value, expiresAt: Date.now() + (date === today ? 5 * 60_000 : 6 * 60 * 60_000) })
+  return value
 }

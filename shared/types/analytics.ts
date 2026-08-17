@@ -53,6 +53,28 @@ export interface AnalyticsResponse {
   ga4: AnalyticsOverview | null
 }
 
+export interface AnalyticsGeoTimelinePoint {
+  minute: string
+  cityId?: string
+  city: string
+  region?: string
+  countryCode: string
+  country: string
+  sessions: number
+}
+
+export interface AnalyticsGeoTimelineResponse {
+  date: string
+  configured: boolean
+  points: AnalyticsGeoTimelinePoint[]
+  sessions: number
+  firstMinute?: string
+  lastMinute?: string
+  timeZone?: string
+  generatedAt: string
+  notice?: string
+}
+
 export type AnalyticsUsageDiagnostic =
   | 'keep'
   | 'improve'

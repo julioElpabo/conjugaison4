@@ -24,4 +24,4 @@ export default defineNitroPlugin(async () => {
   finally {
     connection.release()
   }
-})
+}) 

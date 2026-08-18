@@ -1706,7 +1706,7 @@ const _routes = [
   {
     name: "mon-compte",
     path: "/mon-compte",
-    component: () => import('./mon-compte-CUaHBeHf.mjs')
+    component: () => import('./mon-compte-DV8UHKQL.mjs')
   },
   {
     name: "my-page",
@@ -1887,7 +1887,7 @@ const _routes = [
   {
     name: "localized-mon-compte",
     path: "/:locale(fr|de|en|it|es)/mon-compte",
-    component: () => import('./mon-compte-CUaHBeHf.mjs')
+    component: () => import('./mon-compte-DV8UHKQL.mjs')
   },
   {
     name: "localized-my-page",

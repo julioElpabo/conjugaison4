@@ -116,7 +116,7 @@ const insights = computed<DashboardInsight[]>(() => {
   if (props.users.totalAccounts) {
     values.push({
       title: `${percentage(activeAccountRate.value)} des comptes sont actifs`,
-      detail: `${number(props.users.activeAccounts)} compte${props.users.activeAccounts > 1 ? 's' : ''} actif${props.users.activeAccounts > 1 ? 's' : ''} durant les ${props.users.activityDays} derniers jours, sur ${number(props.users.totalAccounts)} comptes.`,
+      detail: `${number(props.users.activeAccounts)} compte${props.users.activeAccounts > 1 ? 's' : ''} actif${props.users.activeAccounts > 1 ? 's' : ''} durant la période sélectionnée, sur ${number(props.users.totalAccounts)} comptes.`,
       tone: activeAccountRate.value >= 25 ? 'positive' : 'neutral',
     })
   }
@@ -187,7 +187,7 @@ const registrationSeries = computed(() => [
     </header>
 
     <section class="dashboard-kpis" aria-label="Indicateurs essentiels">
-      <article><span>Apprenants actifs</span><strong>{{ number(users.activeAccounts) }}</strong><small>sur {{ users.activityDays }} jours</small></article>
+      <article><span>Apprenants actifs</span><strong>{{ number(users.activeAccounts) }}</strong><small>sur la période sélectionnée</small></article>
       <article><span>Exercices lancés</span><strong>{{ number(stats.local.exerciseStarted) }}</strong><small>{{ trendDetail('L’activité', exerciseTrend) }}</small></article>
       <article><span>Exercices terminés</span><strong>{{ percentage(stats.local.completionRate) }}</strong><small>des exercices commencés</small></article>
       <article><span>Réussite</span><strong>{{ percentage(stats.local.successRate) }}</strong><small>{{ number(stats.local.correctAnswers) }} réponses correctes</small></article>

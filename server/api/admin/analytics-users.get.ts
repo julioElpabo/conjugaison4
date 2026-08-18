@@ -2,7 +2,6 @@ import type { RowDataPacket } from 'mysql2/promise'
 import type {
   AnalyticsBreakdownItem,
   AnalyticsSeriesPoint,
-  AnalyticsUserActivityWindow,
   AnalyticsUsersResponse,
 } from '../../../shared/types/analytics'
 
@@ -11,11 +10,6 @@ interface LanguageRow extends RowDataPacket { locale: string, value: number }
 interface SeriesRow extends RowDataPacket { date: string, value: number }
 interface FeatureRow extends RowDataPacket { feature: string, value: number }
 
-const activityDays: Record<AnalyticsUserActivityWindow, number> = {
-  week: 7,
-  month: 30,
-  year: 365,
-}
 const localeLabels: Record<string, string> = {
   fr: 'Français',
   de: 'Allemand',
@@ -68,8 +62,6 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsersResponse>
   requireAdministrator(event)
   setResponseHeader(event, 'Cache-Control', 'no-store')
   const query = getQuery(event)
-  const requestedWindow = String(query.activity || 'month') as AnalyticsUserActivityWindow
-  const activityWindow = Object.hasOwn(activityDays, requestedWindow) ? requestedWindow : 'month'
   const today = new Date()
   const defaultStart = new Date(today)
   defaultStart.setDate(defaultStart.getDate() - 29)
@@ -93,9 +85,6 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsersResponse>
       ? 'DATE_FORMAT(DATE_SUB(DATE(a.created_at), INTERVAL WEEKDAY(a.created_at) DAY), \'%Y-%m-%d\')'
       : `DATE_FORMAT(a.created_at, '${registrationFormat}')`
   const registrationUnit = rangeDays <= 45 ? 'Jours' : rangeDays <= 210 ? 'Semaines' : 'Mois'
-  const cutoff = new Date()
-  cutoff.setDate(cutoff.getDate() - activityDays[activityWindow])
-  const cutoffSql = cutoff.toISOString().slice(0, 19).replace('T', ' ')
   const database = useDatabase()
 
   const [[[total]], [[active]], [languageRows], [anonymousLanguageRows], [registrationRows], [[errorReviews]], [[loginSummary]], [[failedLogins]], [connectedFeatureRows]] = await Promise.all([
@@ -108,17 +97,17 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsersResponse>
       SELECT COUNT(DISTINCT activity.account_id) AS value
       FROM (
         SELECT account_id FROM learner_login_events
-        WHERE event_type='login' AND occurred_at>=?
+        WHERE event_type='login' AND occurred_at>=? AND occurred_at<DATE_ADD(?, INTERVAL 1 DAY)
         UNION
         SELECT account_id FROM learner_sessions
-        WHERE last_seen_at>=?
+        WHERE last_seen_at>=? AND last_seen_at<DATE_ADD(?, INTERVAL 1 DAY)
         UNION
         SELECT account_id FROM learner_challenge_runs
-        WHERE last_answered_at>=?
+        WHERE last_answered_at>=? AND last_answered_at<DATE_ADD(?, INTERVAL 1 DAY)
       ) activity
       INNER JOIN learner_accounts accounts ON accounts.id=activity.account_id
       WHERE accounts.deleted_at IS NULL
-    `, [cutoffSql, cutoffSql, cutoffSql]),
+    `, [startDate, endDate, startDate, endDate, startDate, endDate]),
     database.execute<LanguageRow[]>(`
       SELECT COALESCE(NULLIF(preferences.interface_locale, ''), 'fr') AS locale,
              COUNT(*) AS value
@@ -205,8 +194,6 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsersResponse>
   return {
     startDate,
     endDate,
-    activityWindow,
-    activityDays: activityDays[activityWindow],
     totalAccounts: Number(total?.value) || 0,
     activeAccounts: Number(active?.value) || 0,
     loggedInAccounts: Number(loginSummary?.accounts) || 0,

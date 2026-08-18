@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, a as getQuery, o as normalizeLocale, Y as LEARNER_ERROR_TAXONOMY, c as createError, u as useDatabase, W as learnerErrorDetails, Z as learnerErrorDetailText } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, a as getQuery, y as normalizeLocale, a5 as LEARNER_ERROR_TAXONOMY, c as createError, u as useDatabase, a3 as learnerErrorDetails, a6 as learnerErrorDetailText } from '../../../nitro/nitro.mjs';
 import { r as requireLearnerDataSubject } from '../../../_/learner-data-subject.mjs';
 import 'node:http';
 import 'node:https';

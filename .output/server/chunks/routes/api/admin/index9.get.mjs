@@ -1,4 +1,4 @@
-import { d as defineEventHandler, z as getExerciseSummaryAdminStats } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, G as getExerciseSummaryAdminStats } from '../../../nitro/nitro.mjs';
 import { r as requireAdministrator } from '../../../_/session.mjs';
 import 'node:http';
 import 'node:https';

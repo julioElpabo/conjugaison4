@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, t as getContactSettings } from '../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, A as getContactSettings } from '../../nitro/nitro.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';

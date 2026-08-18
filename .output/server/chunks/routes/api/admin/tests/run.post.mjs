@@ -1,4 +1,4 @@
-import { d as defineEventHandler, r as readBody, A as setResponseStatus } from '../../../../nitro/nitro.mjs';
+import { d as defineEventHandler, r as readBody, H as setResponseStatus } from '../../../../nitro/nitro.mjs';
 import { r as requireAdministrator } from '../../../../_/session.mjs';
 import { s as startAdminTestJob } from '../../../../_/admin-test-jobs.mjs';
 import 'node:http';

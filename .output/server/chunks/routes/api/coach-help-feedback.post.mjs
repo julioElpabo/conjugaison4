@@ -1,4 +1,4 @@
-import { d as defineEventHandler, c as createError, x as getHeader, u as useDatabase } from '../../nitro/nitro.mjs';
+import { d as defineEventHandler, c as createError, E as getHeader, u as useDatabase } from '../../nitro/nitro.mjs';
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../_/public-api-rate-limit.mjs';
 import { r as readLimitedJsonBody } from '../../_/limited-json-body.mjs';
 import 'node:http';

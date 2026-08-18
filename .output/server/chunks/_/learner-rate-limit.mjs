@@ -1,4 +1,4 @@
-import { u as useDatabase, s as setResponseHeader, c as createError, E as getRequestIP } from '../nitro/nitro.mjs';
+import { u as useDatabase, s as setResponseHeader, c as createError, L as getRequestIP } from '../nitro/nitro.mjs';
 import { createHash } from 'node:crypto';
 
 async function assertLearnerRateLimit(event, limit) {

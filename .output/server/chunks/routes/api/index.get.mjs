@@ -1,4 +1,4 @@
-import { d as defineEventHandler, J as getCachedCatalogue, K as setResponseHeaders, c as createError } from '../../nitro/nitro.mjs';
+import { d as defineEventHandler, Q as getCachedCatalogue, R as setResponseHeaders, c as createError } from '../../nitro/nitro.mjs';
 import { e as explanationLocaleForEvent } from '../../_/locale.mjs';
 import 'node:http';
 import 'node:https';

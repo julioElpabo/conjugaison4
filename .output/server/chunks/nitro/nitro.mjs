@@ -4465,7 +4465,7 @@ function _expandFromEnv(value) {
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "3352e7fc-49f7-4485-a916-3d141a02dc7b",
+    "buildId": "aa1878c1-1f21-4b7e-9051-7ac444a2e261",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -7072,6 +7072,70 @@ const __XhcuSx1Fo8FfgcfsoaX0dhzsV5g5sN3hIvWYmQn0sg = defineNitroPlugin(async () 
   }
 });
 
+async function migrateChallengePublications(database) {
+  await database.query(`
+    CREATE TABLE IF NOT EXISTS challenge_preset_publications (
+      id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      preset_id INT UNSIGNED NOT NULL,
+      locale CHAR(2) NOT NULL,
+      slug VARCHAR(120) NULL,
+      title VARCHAR(180) NOT NULL DEFAULT '',
+      meta_title VARCHAR(180) NOT NULL DEFAULT '',
+      description TEXT NOT NULL,
+      meta_description VARCHAR(320) NOT NULL DEFAULT '',
+      is_published TINYINT(1) NOT NULL DEFAULT 0,
+      is_indexable TINYINT(1) NOT NULL DEFAULT 0,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      UNIQUE KEY uq_challenge_publication_preset_locale (preset_id, locale),
+      UNIQUE KEY uq_challenge_publication_locale_slug (locale, slug),
+      KEY idx_challenge_publication_visibility (is_published, is_indexable, locale),
+      CONSTRAINT fk_challenge_publication_preset
+        FOREIGN KEY (preset_id) REFERENCES challenge_presets(id) ON DELETE CASCADE,
+      CONSTRAINT chk_challenge_publication_locale
+        CHECK (locale IN ('fr','de','en','it','es')),
+      CONSTRAINT chk_challenge_publication_indexable
+        CHECK (is_indexable=0 OR is_published=1)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+  await database.query(`
+    CREATE TABLE IF NOT EXISTS challenge_preset_publication_redirects (
+      id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      publication_id INT UNSIGNED NOT NULL,
+      locale CHAR(2) NOT NULL,
+      old_slug VARCHAR(120) NOT NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE KEY uq_challenge_publication_redirect_locale_slug (locale, old_slug),
+      KEY idx_challenge_publication_redirect_publication (publication_id),
+      CONSTRAINT fk_challenge_publication_redirect_publication
+        FOREIGN KEY (publication_id) REFERENCES challenge_preset_publications(id) ON DELETE CASCADE,
+      CONSTRAINT chk_challenge_publication_redirect_locale
+        CHECK (locale IN ('fr','de','en','it','es'))
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+  await database.query(`
+    CREATE TABLE IF NOT EXISTS challenge_preset_publication_deployments (
+      batch_id VARCHAR(120) NOT NULL PRIMARY KEY,
+      checksum CHAR(64) NOT NULL,
+      applied_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+  await database.query(`
+    UPDATE challenge_preset_publications
+    SET is_indexable=is_published
+    WHERE is_indexable<>is_published
+  `);
+}
+const _dsA3mm0wgxsXi_t2yUL8f2Ubn4s4XW6EVMR_TtTqE = defineNitroPlugin(async () => {
+  try {
+    const database = useDatabase();
+    await migrateChallengePublications(database);
+    console.info("[database] Tables des publications SEO de d\xE9fis pr\xEAtes.");
+  } catch (error) {
+    console.error("[database] \xC9chec de la migration des publications SEO de d\xE9fis.", error);
+  }
+});
+
 const _aCMECTWiwhQ_cHUZU9mps2K8n7GsVqimroMp6HH1F8 = defineNitroPlugin(async () => {
   try {
     const database = useDatabase();
@@ -7318,7 +7382,7 @@ class ExerciseSummaryNotFoundError extends Error {
 }
 class ExerciseSummaryStorageError extends Error {
 }
-function record(value) {
+function record$1(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new ExerciseSummaryInputError("Bilan invalide");
   }
@@ -7333,7 +7397,7 @@ function stringList(value, maximumItems, maximumLength) {
   return [...new Set(value.map((item) => text$1(item, maximumLength)).filter(Boolean))].slice(0, maximumItems);
 }
 function parseItem(value, index) {
-  const item = record(value);
+  const item = record$1(value);
   const status = item.status === "correct" ? "correct" : item.status === "incorrect" ? "incorrect" : null;
   const questionLabel = text$1(item.questionLabel, 1e3);
   const expectedAnswer = text$1(item.expectedAnswer, 1e3);
@@ -7350,14 +7414,14 @@ function parseItem(value, index) {
   };
 }
 function parseTense(value) {
-  const tense = record(value);
+  const tense = record$1(value);
   const name = text$1(tense.name, 120);
   if (!name) return null;
   const mode = text$1(tense.mode, 120);
   return { name, ...mode ? { mode } : {} };
 }
 function parseExerciseSummaryShareRequest(value) {
-  const input = record(value);
+  const input = record$1(value);
   if (input.version !== 1) throw new ExerciseSummaryInputError("Version de bilan invalide");
   if (!SUPPORTED_LOCALES.includes(input.locale)) {
     throw new ExerciseSummaryInputError("Langue du bilan invalide");
@@ -84069,7 +84133,7 @@ const coletteCorpus = {
 	sentences: sentences
 };
 
-var schemaVersion = 2;
+var schemaVersion$1 = 2;
 var checksum = "7718ae06b4e7725636c1fb5117bc056774a2d434407b8ace9183973477a65263";
 var counts = {
 	sources: 6,
@@ -119911,7 +119975,7 @@ var sources = [
 	}
 ];
 const productionCorpus = {
-	schemaVersion: schemaVersion,
+	schemaVersion: schemaVersion$1,
 	checksum: checksum,
 	counts: counts,
 	sources: sources
@@ -125465,6 +125529,2722 @@ const _0T1W4DkA4XhxQ3mqRSifwqf7ZnOeJX9jNfES0b6RQ = defineNitroPlugin(async () =>
   }
 });
 
+var schemaVersion = 1;
+var batchId = "challenge-publications-fle-20260818-003";
+var publications = [
+	{
+		presetKey: "5P",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-le-programme-suisse-de-5p",
+		title: "Exercice de conjugaison : le programme suisse de 5P",
+		metaTitle: "Exercice de conjugaison sur le programme suisse de 5P",
+		description: "Travaille les verbes et les temps attendus en 5P dans le programme scolaire suisse. Cet entraînement aide à consolider les notions de l’année et à conjuguer avec davantage d’assurance.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur le programme suisse de 5P. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "5P",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-schweizer-lehrplan-5p",
+		title: "Französische Konjugationsübung: Schweizer Lehrplan 5P",
+		metaTitle: "Französische Konjugation: Schweizer Lehrplan 5P üben",
+		description: "Übe die französischen Verben und Zeitformen des Schweizer Lehrplans für die Stufe 5P. So festigst du den Jahresstoff und konjugierst beim Schreiben und Sprechen sicherer.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: Schweizer Lehrplan 5P. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "5P",
+		locale: "en",
+		slug: "french-conjugation-exercise-swiss-5p-curriculum",
+		title: "French conjugation exercise: Swiss 5P curriculum",
+		metaTitle: "French conjugation practice: Swiss 5P curriculum",
+		description: "Practise the French verbs and tenses expected at 5P in the Swiss curriculum. This exercise reinforces the year’s key skills and builds confidence in spoken and written French.",
+		metaDescription: "Customisable French conjugation exercises on Swiss 5P curriculum. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "5P",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-programma-svizzero-di-5p",
+		title: "Esercizio di coniugazione francese: programma svizzero di 5P",
+		metaTitle: "Coniugazione francese: esercizi su programma svizzero di 5P",
+		description: "Esercitati con i verbi e i tempi previsti in 5P dal programma scolastico svizzero. Consoliderai le nozioni dell’anno e coniugherai con maggiore sicurezza.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su programma svizzero di 5P. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "5P",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-programa-suizo-de-5p",
+		title: "Ejercicio de conjugación francesa: programa suizo de 5P",
+		metaTitle: "Conjugación francesa: ejercicios de programa suizo de 5P",
+		description: "Practica los verbos y tiempos previstos en 5P por el programa escolar suizo. Este ejercicio consolida los contenidos del curso y mejora la seguridad al conjugar.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa suizo de 5P. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "6P",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-le-programme-suisse-de-6p",
+		title: "Exercice de conjugaison : le programme suisse de 6P",
+		metaTitle: "Exercice de conjugaison sur le programme suisse de 6P",
+		description: "Travaille les verbes et les temps attendus en 6P dans le programme scolaire suisse. Cet entraînement aide à consolider les notions de l’année et à conjuguer avec davantage d’assurance.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur le programme suisse de 6P. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "6P",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-schweizer-lehrplan-6p",
+		title: "Französische Konjugationsübung: Schweizer Lehrplan 6P",
+		metaTitle: "Französische Konjugation: Schweizer Lehrplan 6P üben",
+		description: "Übe die französischen Verben und Zeitformen des Schweizer Lehrplans für die Stufe 6P. So festigst du den Jahresstoff und konjugierst beim Schreiben und Sprechen sicherer.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: Schweizer Lehrplan 6P. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "6P",
+		locale: "en",
+		slug: "french-conjugation-exercise-swiss-6p-curriculum",
+		title: "French conjugation exercise: Swiss 6P curriculum",
+		metaTitle: "French conjugation practice: Swiss 6P curriculum",
+		description: "Practise the French verbs and tenses expected at 6P in the Swiss curriculum. This exercise reinforces the year’s key skills and builds confidence in spoken and written French.",
+		metaDescription: "Customisable French conjugation exercises on Swiss 6P curriculum. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "6P",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-programma-svizzero-di-6p",
+		title: "Esercizio di coniugazione francese: programma svizzero di 6P",
+		metaTitle: "Coniugazione francese: esercizi su programma svizzero di 6P",
+		description: "Esercitati con i verbi e i tempi previsti in 6P dal programma scolastico svizzero. Consoliderai le nozioni dell’anno e coniugherai con maggiore sicurezza.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su programma svizzero di 6P. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "6P",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-programa-suizo-de-6p",
+		title: "Ejercicio de conjugación francesa: programa suizo de 6P",
+		metaTitle: "Conjugación francesa: ejercicios de programa suizo de 6P",
+		description: "Practica los verbos y tiempos previstos en 6P por el programa escolar suizo. Este ejercicio consolida los contenidos del curso y mejora la seguridad al conjugar.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa suizo de 6P. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "7H",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-le-programme-suisse-de-7h",
+		title: "Exercice de conjugaison : le programme suisse de 7H",
+		metaTitle: "Exercice de conjugaison sur le programme suisse de 7H",
+		description: "Travaille les verbes et les temps attendus en 7H dans le programme scolaire suisse. Cet entraînement aide à consolider les notions de l’année et à conjuguer avec davantage d’assurance.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur le programme suisse de 7H. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "7H",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-schweizer-lehrplan-7h",
+		title: "Französische Konjugationsübung: Schweizer Lehrplan 7H",
+		metaTitle: "Französische Konjugation: Schweizer Lehrplan 7H üben",
+		description: "Übe die französischen Verben und Zeitformen des Schweizer Lehrplans für die Stufe 7H. So festigst du den Jahresstoff und konjugierst beim Schreiben und Sprechen sicherer.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: Schweizer Lehrplan 7H. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "7H",
+		locale: "en",
+		slug: "french-conjugation-exercise-swiss-7h-curriculum",
+		title: "French conjugation exercise: Swiss 7H curriculum",
+		metaTitle: "French conjugation practice: Swiss 7H curriculum",
+		description: "Practise the French verbs and tenses expected at 7H in the Swiss curriculum. This exercise reinforces the year’s key skills and builds confidence in spoken and written French.",
+		metaDescription: "Customisable French conjugation exercises on Swiss 7H curriculum. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "7H",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-programma-svizzero-di-7h",
+		title: "Esercizio di coniugazione francese: programma svizzero di 7H",
+		metaTitle: "Coniugazione francese: esercizi su programma svizzero di 7H",
+		description: "Esercitati con i verbi e i tempi previsti in 7H dal programma scolastico svizzero. Consoliderai le nozioni dell’anno e coniugherai con maggiore sicurezza.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su programma svizzero di 7H. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "7H",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-programa-suizo-de-7h",
+		title: "Ejercicio de conjugación francesa: programa suizo de 7H",
+		metaTitle: "Conjugación francesa: ejercicios de programa suizo de 7H",
+		description: "Practica los verbos y tiempos previstos en 7H por el programa escolar suizo. Este ejercicio consolida los contenidos del curso y mejora la seguridad al conjugar.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa suizo de 7H. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "8H",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-le-programme-suisse-de-8h",
+		title: "Exercice de conjugaison : le programme suisse de 8H",
+		metaTitle: "Exercice de conjugaison sur le programme suisse de 8H",
+		description: "Travaille les verbes et les temps attendus en 8H dans le programme scolaire suisse. Cet entraînement aide à consolider les notions de l’année et à conjuguer avec davantage d’assurance.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur le programme suisse de 8H. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "8H",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-schweizer-lehrplan-8h",
+		title: "Französische Konjugationsübung: Schweizer Lehrplan 8H",
+		metaTitle: "Französische Konjugation: Schweizer Lehrplan 8H üben",
+		description: "Übe die französischen Verben und Zeitformen des Schweizer Lehrplans für die Stufe 8H. So festigst du den Jahresstoff und konjugierst beim Schreiben und Sprechen sicherer.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: Schweizer Lehrplan 8H. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "8H",
+		locale: "en",
+		slug: "french-conjugation-exercise-swiss-8h-curriculum",
+		title: "French conjugation exercise: Swiss 8H curriculum",
+		metaTitle: "French conjugation practice: Swiss 8H curriculum",
+		description: "Practise the French verbs and tenses expected at 8H in the Swiss curriculum. This exercise reinforces the year’s key skills and builds confidence in spoken and written French.",
+		metaDescription: "Customisable French conjugation exercises on Swiss 8H curriculum. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "8H",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-programma-svizzero-di-8h",
+		title: "Esercizio di coniugazione francese: programma svizzero di 8H",
+		metaTitle: "Coniugazione francese: esercizi su programma svizzero di 8H",
+		description: "Esercitati con i verbi e i tempi previsti in 8H dal programma scolastico svizzero. Consoliderai le nozioni dell’anno e coniugherai con maggiore sicurezza.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su programma svizzero di 8H. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "8H",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-programa-suizo-de-8h",
+		title: "Ejercicio de conjugación francesa: programa suizo de 8H",
+		metaTitle: "Conjugación francesa: ejercicios de programa suizo de 8H",
+		description: "Practica los verbos y tiempos previstos en 8H por el programa escolar suizo. Este ejercicio consolida los contenidos del curso y mejora la seguridad al conjugar.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa suizo de 8H. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "9H",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-le-programme-suisse-de-9h",
+		title: "Exercice de conjugaison : le programme suisse de 9H",
+		metaTitle: "Exercice de conjugaison sur le programme suisse de 9H",
+		description: "Travaille les verbes et les temps attendus en 9H dans le programme scolaire suisse. Cet entraînement aide à consolider les notions de l’année et à conjuguer avec davantage d’assurance.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur le programme suisse de 9H. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "9H",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-schweizer-lehrplan-9h",
+		title: "Französische Konjugationsübung: Schweizer Lehrplan 9H",
+		metaTitle: "Französische Konjugation: Schweizer Lehrplan 9H üben",
+		description: "Übe die französischen Verben und Zeitformen des Schweizer Lehrplans für die Stufe 9H. So festigst du den Jahresstoff und konjugierst beim Schreiben und Sprechen sicherer.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: Schweizer Lehrplan 9H. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "9H",
+		locale: "en",
+		slug: "french-conjugation-exercise-swiss-9h-curriculum",
+		title: "French conjugation exercise: Swiss 9H curriculum",
+		metaTitle: "French conjugation practice: Swiss 9H curriculum",
+		description: "Practise the French verbs and tenses expected at 9H in the Swiss curriculum. This exercise reinforces the year’s key skills and builds confidence in spoken and written French.",
+		metaDescription: "Customisable French conjugation exercises on Swiss 9H curriculum. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "9H",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-programma-svizzero-di-9h",
+		title: "Esercizio di coniugazione francese: programma svizzero di 9H",
+		metaTitle: "Coniugazione francese: esercizi su programma svizzero di 9H",
+		description: "Esercitati con i verbi e i tempi previsti in 9H dal programma scolastico svizzero. Consoliderai le nozioni dell’anno e coniugherai con maggiore sicurezza.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su programma svizzero di 9H. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "9H",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-programa-suizo-de-9h",
+		title: "Ejercicio de conjugación francesa: programa suizo de 9H",
+		metaTitle: "Conjugación francesa: ejercicios de programa suizo de 9H",
+		description: "Practica los verbos y tiempos previstos en 9H por el programa escolar suizo. Este ejercicio consolida los contenidos del curso y mejora la seguridad al conjugar.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa suizo de 9H. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "10H",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-le-programme-suisse-de-10h",
+		title: "Exercice de conjugaison : le programme suisse de 10H",
+		metaTitle: "Exercice de conjugaison sur le programme suisse de 10H",
+		description: "Travaille les verbes et les temps attendus en 10H dans le programme scolaire suisse. Cet entraînement aide à consolider les notions de l’année et à conjuguer avec davantage d’assurance.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur le programme suisse de 10H. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "10H",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-schweizer-lehrplan-10h",
+		title: "Französische Konjugationsübung: Schweizer Lehrplan 10H",
+		metaTitle: "Französische Konjugation: Schweizer Lehrplan 10H üben",
+		description: "Übe die französischen Verben und Zeitformen des Schweizer Lehrplans für die Stufe 10H. So festigst du den Jahresstoff und konjugierst beim Schreiben und Sprechen sicherer.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: Schweizer Lehrplan 10H. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "10H",
+		locale: "en",
+		slug: "french-conjugation-exercise-swiss-10h-curriculum",
+		title: "French conjugation exercise: Swiss 10H curriculum",
+		metaTitle: "French conjugation practice: Swiss 10H curriculum",
+		description: "Practise the French verbs and tenses expected at 10H in the Swiss curriculum. This exercise reinforces the year’s key skills and builds confidence in spoken and written French.",
+		metaDescription: "Customisable French conjugation exercises on Swiss 10H curriculum. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "10H",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-programma-svizzero-di-10h",
+		title: "Esercizio di coniugazione francese: programma svizzero di 10H",
+		metaTitle: "Coniugazione francese: esercizi su programma svizzero di 10H",
+		description: "Esercitati con i verbi e i tempi previsti in 10H dal programma scolastico svizzero. Consoliderai le nozioni dell’anno e coniugherai con maggiore sicurezza.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su programma svizzero di 10H. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "10H",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-programa-suizo-de-10h",
+		title: "Ejercicio de conjugación francesa: programa suizo de 10H",
+		metaTitle: "Conjugación francesa: ejercicios de programa suizo de 10H",
+		description: "Practica los verbos y tiempos previstos en 10H por el programa escolar suizo. Este ejercicio consolida los contenidos del curso y mejora la seguridad al conjugar.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa suizo de 10H. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "11H",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-le-programme-suisse-de-11h",
+		title: "Exercice de conjugaison : le programme suisse de 11H",
+		metaTitle: "Exercice de conjugaison sur le programme suisse de 11H",
+		description: "Travaille les verbes et les temps attendus en 11H dans le programme scolaire suisse. Cet entraînement aide à consolider les notions de l’année et à conjuguer avec davantage d’assurance.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur le programme suisse de 11H. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "11H",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-schweizer-lehrplan-11h",
+		title: "Französische Konjugationsübung: Schweizer Lehrplan 11H",
+		metaTitle: "Französische Konjugation: Schweizer Lehrplan 11H üben",
+		description: "Übe die französischen Verben und Zeitformen des Schweizer Lehrplans für die Stufe 11H. So festigst du den Jahresstoff und konjugierst beim Schreiben und Sprechen sicherer.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: Schweizer Lehrplan 11H. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "11H",
+		locale: "en",
+		slug: "french-conjugation-exercise-swiss-11h-curriculum",
+		title: "French conjugation exercise: Swiss 11H curriculum",
+		metaTitle: "French conjugation practice: Swiss 11H curriculum",
+		description: "Practise the French verbs and tenses expected at 11H in the Swiss curriculum. This exercise reinforces the year’s key skills and builds confidence in spoken and written French.",
+		metaDescription: "Customisable French conjugation exercises on Swiss 11H curriculum. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "11H",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-programma-svizzero-di-11h",
+		title: "Esercizio di coniugazione francese: programma svizzero di 11H",
+		metaTitle: "Coniugazione francese: esercizi su programma svizzero di 11H",
+		description: "Esercitati con i verbi e i tempi previsti in 11H dal programma scolastico svizzero. Consoliderai le nozioni dell’anno e coniugherai con maggiore sicurezza.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su programma svizzero di 11H. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "11H",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-programa-suizo-de-11h",
+		title: "Ejercicio de conjugación francesa: programa suizo de 11H",
+		metaTitle: "Conjugación francesa: ejercicios de programa suizo de 11H",
+		description: "Practica los verbos y tiempos previstos en 11H por el programa escolar suizo. Este ejercicio consolida los contenidos del curso y mejora la seguridad al conjugar.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa suizo de 11H. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cp",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-le-programme-francais-de-cp",
+		title: "Exercice de conjugaison : le programme français de CP",
+		metaTitle: "Exercice de conjugaison sur le programme français de CP",
+		description: "Révise les verbes, les temps et les modes attendus en CP dans le programme scolaire français. Cet entraînement permet de consolider les acquis utiles en classe et dans les productions écrites.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur le programme français de CP. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cp",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosischer-lehrplan-cp",
+		title: "Französische Konjugationsübung: französischer Lehrplan CP",
+		metaTitle: "Französische Konjugation: französischer Lehrplan CP üben",
+		description: "Übe die französischen Verben, Zeitformen und Modi, die im französischen Lehrplan der Stufe CP vorgesehen sind. So festigst du gezielt die im Unterricht und beim Schreiben benötigten Kenntnisse.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französischer Lehrplan CP. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cp",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-cp-curriculum",
+		title: "French conjugation exercise: French CP curriculum",
+		metaTitle: "French conjugation practice: French CP curriculum",
+		description: "Review the verbs, tenses and moods required at CP in the French school curriculum. This practice strengthens the conjugation skills needed in class and in written work.",
+		metaDescription: "Customisable French conjugation exercises on French CP curriculum. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cp",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-programma-scolastico-francese-di-cp",
+		title: "Esercizio di coniugazione francese: programma scolastico francese di CP",
+		metaTitle: "Coniugazione francese: esercizi su programma scolastico francese di CP",
+		description: "Ripassa i verbi, i tempi e i modi previsti in CP dal programma scolastico francese. L’esercizio consolida le competenze utili in classe e nella produzione scritta.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su programma scolastico francese di CP. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cp",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-programa-escolar-frances-de-cp",
+		title: "Ejercicio de conjugación francesa: programa escolar francés de CP",
+		metaTitle: "Conjugación francesa: ejercicios de programa escolar francés de CP",
+		description: "Repasa los verbos, tiempos y modos previstos en CP por el programa escolar francés. Este ejercicio consolida los conocimientos necesarios en clase y en la expresión escrita.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa escolar francés de CP. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-ce1",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-le-programme-francais-de-ce1",
+		title: "Exercice de conjugaison : le programme français de CE1",
+		metaTitle: "Exercice de conjugaison sur le programme français de CE1",
+		description: "Révise les verbes, les temps et les modes attendus en CE1 dans le programme scolaire français. Cet entraînement permet de consolider les acquis utiles en classe et dans les productions écrites.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur le programme français de CE1. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-ce1",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosischer-lehrplan-ce1",
+		title: "Französische Konjugationsübung: französischer Lehrplan CE1",
+		metaTitle: "Französische Konjugation: französischer Lehrplan CE1 üben",
+		description: "Übe die französischen Verben, Zeitformen und Modi, die im französischen Lehrplan der Stufe CE1 vorgesehen sind. So festigst du gezielt die im Unterricht und beim Schreiben benötigten Kenntnisse.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französischer Lehrplan CE1. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-ce1",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-ce1-curriculum",
+		title: "French conjugation exercise: French CE1 curriculum",
+		metaTitle: "French conjugation practice: French CE1 curriculum",
+		description: "Review the verbs, tenses and moods required at CE1 in the French school curriculum. This practice strengthens the conjugation skills needed in class and in written work.",
+		metaDescription: "Customisable French conjugation exercises on French CE1 curriculum. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-ce1",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-programma-scolastico-francese-di-ce1",
+		title: "Esercizio di coniugazione francese: programma scolastico francese di CE1",
+		metaTitle: "Coniugazione francese: esercizi su programma scolastico francese di CE1",
+		description: "Ripassa i verbi, i tempi e i modi previsti in CE1 dal programma scolastico francese. L’esercizio consolida le competenze utili in classe e nella produzione scritta.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su programma scolastico francese di CE1. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-ce1",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-programa-escolar-frances-de-ce1",
+		title: "Ejercicio de conjugación francesa: programa escolar francés de CE1",
+		metaTitle: "Conjugación francesa: ejercicios de programa escolar francés de CE1",
+		description: "Repasa los verbos, tiempos y modos previstos en CE1 por el programa escolar francés. Este ejercicio consolida los conocimientos necesarios en clase y en la expresión escrita.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa escolar francés de CE1. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-ce2",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-le-programme-francais-de-ce2",
+		title: "Exercice de conjugaison : le programme français de CE2",
+		metaTitle: "Exercice de conjugaison sur le programme français de CE2",
+		description: "Révise les verbes, les temps et les modes attendus en CE2 dans le programme scolaire français. Cet entraînement permet de consolider les acquis utiles en classe et dans les productions écrites.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur le programme français de CE2. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-ce2",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosischer-lehrplan-ce2",
+		title: "Französische Konjugationsübung: französischer Lehrplan CE2",
+		metaTitle: "Französische Konjugation: französischer Lehrplan CE2 üben",
+		description: "Übe die französischen Verben, Zeitformen und Modi, die im französischen Lehrplan der Stufe CE2 vorgesehen sind. So festigst du gezielt die im Unterricht und beim Schreiben benötigten Kenntnisse.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französischer Lehrplan CE2. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-ce2",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-ce2-curriculum",
+		title: "French conjugation exercise: French CE2 curriculum",
+		metaTitle: "French conjugation practice: French CE2 curriculum",
+		description: "Review the verbs, tenses and moods required at CE2 in the French school curriculum. This practice strengthens the conjugation skills needed in class and in written work.",
+		metaDescription: "Customisable French conjugation exercises on French CE2 curriculum. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-ce2",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-programma-scolastico-francese-di-ce2",
+		title: "Esercizio di coniugazione francese: programma scolastico francese di CE2",
+		metaTitle: "Coniugazione francese: esercizi su programma scolastico francese di CE2",
+		description: "Ripassa i verbi, i tempi e i modi previsti in CE2 dal programma scolastico francese. L’esercizio consolida le competenze utili in classe e nella produzione scritta.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su programma scolastico francese di CE2. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-ce2",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-programa-escolar-frances-de-ce2",
+		title: "Ejercicio de conjugación francesa: programa escolar francés de CE2",
+		metaTitle: "Conjugación francesa: ejercicios de programa escolar francés de CE2",
+		description: "Repasa los verbos, tiempos y modos previstos en CE2 por el programa escolar francés. Este ejercicio consolida los conocimientos necesarios en clase y en la expresión escrita.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa escolar francés de CE2. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cm1",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-le-programme-francais-de-cm1",
+		title: "Exercice de conjugaison : le programme français de CM1",
+		metaTitle: "Exercice de conjugaison sur le programme français de CM1",
+		description: "Révise les verbes, les temps et les modes attendus en CM1 dans le programme scolaire français. Cet entraînement permet de consolider les acquis utiles en classe et dans les productions écrites.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur le programme français de CM1. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cm1",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosischer-lehrplan-cm1",
+		title: "Französische Konjugationsübung: französischer Lehrplan CM1",
+		metaTitle: "Französische Konjugation: französischer Lehrplan CM1 üben",
+		description: "Übe die französischen Verben, Zeitformen und Modi, die im französischen Lehrplan der Stufe CM1 vorgesehen sind. So festigst du gezielt die im Unterricht und beim Schreiben benötigten Kenntnisse.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französischer Lehrplan CM1. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cm1",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-cm1-curriculum",
+		title: "French conjugation exercise: French CM1 curriculum",
+		metaTitle: "French conjugation practice: French CM1 curriculum",
+		description: "Review the verbs, tenses and moods required at CM1 in the French school curriculum. This practice strengthens the conjugation skills needed in class and in written work.",
+		metaDescription: "Customisable French conjugation exercises on French CM1 curriculum. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cm1",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-programma-scolastico-francese-di-cm1",
+		title: "Esercizio di coniugazione francese: programma scolastico francese di CM1",
+		metaTitle: "Coniugazione francese: esercizi su programma scolastico francese di CM1",
+		description: "Ripassa i verbi, i tempi e i modi previsti in CM1 dal programma scolastico francese. L’esercizio consolida le competenze utili in classe e nella produzione scritta.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su programma scolastico francese di CM1. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cm1",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-programa-escolar-frances-de-cm1",
+		title: "Ejercicio de conjugación francesa: programa escolar francés de CM1",
+		metaTitle: "Conjugación francesa: ejercicios de programa escolar francés de CM1",
+		description: "Repasa los verbos, tiempos y modos previstos en CM1 por el programa escolar francés. Este ejercicio consolida los conocimientos necesarios en clase y en la expresión escrita.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa escolar francés de CM1. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cm2",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-le-programme-francais-de-cm2",
+		title: "Exercice de conjugaison : le programme français de CM2",
+		metaTitle: "Exercice de conjugaison sur le programme français de CM2",
+		description: "Révise les verbes, les temps et les modes attendus en CM2 dans le programme scolaire français. Cet entraînement permet de consolider les acquis utiles en classe et dans les productions écrites.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur le programme français de CM2. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cm2",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosischer-lehrplan-cm2",
+		title: "Französische Konjugationsübung: französischer Lehrplan CM2",
+		metaTitle: "Französische Konjugation: französischer Lehrplan CM2 üben",
+		description: "Übe die französischen Verben, Zeitformen und Modi, die im französischen Lehrplan der Stufe CM2 vorgesehen sind. So festigst du gezielt die im Unterricht und beim Schreiben benötigten Kenntnisse.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französischer Lehrplan CM2. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cm2",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-cm2-curriculum",
+		title: "French conjugation exercise: French CM2 curriculum",
+		metaTitle: "French conjugation practice: French CM2 curriculum",
+		description: "Review the verbs, tenses and moods required at CM2 in the French school curriculum. This practice strengthens the conjugation skills needed in class and in written work.",
+		metaDescription: "Customisable French conjugation exercises on French CM2 curriculum. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cm2",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-programma-scolastico-francese-di-cm2",
+		title: "Esercizio di coniugazione francese: programma scolastico francese di CM2",
+		metaTitle: "Coniugazione francese: esercizi su programma scolastico francese di CM2",
+		description: "Ripassa i verbi, i tempi e i modi previsti in CM2 dal programma scolastico francese. L’esercizio consolida le competenze utili in classe e nella produzione scritta.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su programma scolastico francese di CM2. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cm2",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-programa-escolar-frances-de-cm2",
+		title: "Ejercicio de conjugación francesa: programa escolar francés de CM2",
+		metaTitle: "Conjugación francesa: ejercicios de programa escolar francés de CM2",
+		description: "Repasa los verbos, tiempos y modos previstos en CM2 por el programa escolar francés. Este ejercicio consolida los conocimientos necesarios en clase y en la expresión escrita.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa escolar francés de CM2. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-6e",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-le-programme-francais-de-6e",
+		title: "Exercice de conjugaison : le programme français de 6e",
+		metaTitle: "Exercice de conjugaison sur le programme français de 6e",
+		description: "Révise les verbes, les temps et les modes attendus en 6e dans le programme scolaire français. Cet entraînement permet de consolider les acquis utiles en classe et dans les productions écrites.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur le programme français de 6e. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-6e",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosischer-lehrplan-6e",
+		title: "Französische Konjugationsübung: französischer Lehrplan 6e",
+		metaTitle: "Französische Konjugation: französischer Lehrplan 6e üben",
+		description: "Übe die französischen Verben, Zeitformen und Modi, die im französischen Lehrplan der Stufe 6e vorgesehen sind. So festigst du gezielt die im Unterricht und beim Schreiben benötigten Kenntnisse.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französischer Lehrplan 6e. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-6e",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-6e-curriculum",
+		title: "French conjugation exercise: French 6e curriculum",
+		metaTitle: "French conjugation practice: French 6e curriculum",
+		description: "Review the verbs, tenses and moods required at 6e in the French school curriculum. This practice strengthens the conjugation skills needed in class and in written work.",
+		metaDescription: "Customisable French conjugation exercises on French 6e curriculum. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-6e",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-programma-scolastico-francese-di-6e",
+		title: "Esercizio di coniugazione francese: programma scolastico francese di 6e",
+		metaTitle: "Coniugazione francese: esercizi su programma scolastico francese di 6e",
+		description: "Ripassa i verbi, i tempi e i modi previsti in 6e dal programma scolastico francese. L’esercizio consolida le competenze utili in classe e nella produzione scritta.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su programma scolastico francese di 6e. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-6e",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-programa-escolar-frances-de-6e",
+		title: "Ejercicio de conjugación francesa: programa escolar francés de 6e",
+		metaTitle: "Conjugación francesa: ejercicios de programa escolar francés de 6e",
+		description: "Repasa los verbos, tiempos y modos previstos en 6e por el programa escolar francés. Este ejercicio consolida los conocimientos necesarios en clase y en la expresión escrita.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa escolar francés de 6e. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-5e",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-le-programme-francais-de-5e",
+		title: "Exercice de conjugaison : le programme français de 5e",
+		metaTitle: "Exercice de conjugaison sur le programme français de 5e",
+		description: "Révise les verbes, les temps et les modes attendus en 5e dans le programme scolaire français. Cet entraînement permet de consolider les acquis utiles en classe et dans les productions écrites.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur le programme français de 5e. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-5e",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosischer-lehrplan-5e",
+		title: "Französische Konjugationsübung: französischer Lehrplan 5e",
+		metaTitle: "Französische Konjugation: französischer Lehrplan 5e üben",
+		description: "Übe die französischen Verben, Zeitformen und Modi, die im französischen Lehrplan der Stufe 5e vorgesehen sind. So festigst du gezielt die im Unterricht und beim Schreiben benötigten Kenntnisse.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französischer Lehrplan 5e. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-5e",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-5e-curriculum",
+		title: "French conjugation exercise: French 5e curriculum",
+		metaTitle: "French conjugation practice: French 5e curriculum",
+		description: "Review the verbs, tenses and moods required at 5e in the French school curriculum. This practice strengthens the conjugation skills needed in class and in written work.",
+		metaDescription: "Customisable French conjugation exercises on French 5e curriculum. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-5e",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-programma-scolastico-francese-di-5e",
+		title: "Esercizio di coniugazione francese: programma scolastico francese di 5e",
+		metaTitle: "Coniugazione francese: esercizi su programma scolastico francese di 5e",
+		description: "Ripassa i verbi, i tempi e i modi previsti in 5e dal programma scolastico francese. L’esercizio consolida le competenze utili in classe e nella produzione scritta.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su programma scolastico francese di 5e. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-5e",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-programa-escolar-frances-de-5e",
+		title: "Ejercicio de conjugación francesa: programa escolar francés de 5e",
+		metaTitle: "Conjugación francesa: ejercicios de programa escolar francés de 5e",
+		description: "Repasa los verbos, tiempos y modos previstos en 5e por el programa escolar francés. Este ejercicio consolida los conocimientos necesarios en clase y en la expresión escrita.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa escolar francés de 5e. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-4e",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-le-programme-francais-de-4e",
+		title: "Exercice de conjugaison : le programme français de 4e",
+		metaTitle: "Exercice de conjugaison sur le programme français de 4e",
+		description: "Révise les verbes, les temps et les modes attendus en 4e dans le programme scolaire français. Cet entraînement permet de consolider les acquis utiles en classe et dans les productions écrites.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur le programme français de 4e. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-4e",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosischer-lehrplan-4e",
+		title: "Französische Konjugationsübung: französischer Lehrplan 4e",
+		metaTitle: "Französische Konjugation: französischer Lehrplan 4e üben",
+		description: "Übe die französischen Verben, Zeitformen und Modi, die im französischen Lehrplan der Stufe 4e vorgesehen sind. So festigst du gezielt die im Unterricht und beim Schreiben benötigten Kenntnisse.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französischer Lehrplan 4e. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-4e",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-4e-curriculum",
+		title: "French conjugation exercise: French 4e curriculum",
+		metaTitle: "French conjugation practice: French 4e curriculum",
+		description: "Review the verbs, tenses and moods required at 4e in the French school curriculum. This practice strengthens the conjugation skills needed in class and in written work.",
+		metaDescription: "Customisable French conjugation exercises on French 4e curriculum. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-4e",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-programma-scolastico-francese-di-4e",
+		title: "Esercizio di coniugazione francese: programma scolastico francese di 4e",
+		metaTitle: "Coniugazione francese: esercizi su programma scolastico francese di 4e",
+		description: "Ripassa i verbi, i tempi e i modi previsti in 4e dal programma scolastico francese. L’esercizio consolida le competenze utili in classe e nella produzione scritta.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su programma scolastico francese di 4e. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-4e",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-programa-escolar-frances-de-4e",
+		title: "Ejercicio de conjugación francesa: programa escolar francés de 4e",
+		metaTitle: "Conjugación francesa: ejercicios de programa escolar francés de 4e",
+		description: "Repasa los verbos, tiempos y modos previstos en 4e por el programa escolar francés. Este ejercicio consolida los conocimientos necesarios en clase y en la expresión escrita.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa escolar francés de 4e. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-3e",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-le-programme-francais-de-3e",
+		title: "Exercice de conjugaison : le programme français de 3e",
+		metaTitle: "Exercice de conjugaison sur le programme français de 3e",
+		description: "Révise les verbes, les temps et les modes attendus en 3e dans le programme scolaire français. Cet entraînement permet de consolider les acquis utiles en classe et dans les productions écrites.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur le programme français de 3e. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-3e",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosischer-lehrplan-3e",
+		title: "Französische Konjugationsübung: französischer Lehrplan 3e",
+		metaTitle: "Französische Konjugation: französischer Lehrplan 3e üben",
+		description: "Übe die französischen Verben, Zeitformen und Modi, die im französischen Lehrplan der Stufe 3e vorgesehen sind. So festigst du gezielt die im Unterricht und beim Schreiben benötigten Kenntnisse.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französischer Lehrplan 3e. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-3e",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-3e-curriculum",
+		title: "French conjugation exercise: French 3e curriculum",
+		metaTitle: "French conjugation practice: French 3e curriculum",
+		description: "Review the verbs, tenses and moods required at 3e in the French school curriculum. This practice strengthens the conjugation skills needed in class and in written work.",
+		metaDescription: "Customisable French conjugation exercises on French 3e curriculum. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-3e",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-programma-scolastico-francese-di-3e",
+		title: "Esercizio di coniugazione francese: programma scolastico francese di 3e",
+		metaTitle: "Coniugazione francese: esercizi su programma scolastico francese di 3e",
+		description: "Ripassa i verbi, i tempi e i modi previsti in 3e dal programma scolastico francese. L’esercizio consolida le competenze utili in classe e nella produzione scritta.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su programma scolastico francese di 3e. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-3e",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-programa-escolar-frances-de-3e",
+		title: "Ejercicio de conjugación francesa: programa escolar francés de 3e",
+		metaTitle: "Conjugación francesa: ejercicios de programa escolar francés de 3e",
+		description: "Repasa los verbos, tiempos y modos previstos en 3e por el programa escolar francés. Este ejercicio consolida los conocimientos necesarios en clase y en la expresión escrita.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa escolar francés de 3e. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe1",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-les-verbes-du-premier-groupe",
+		title: "Exercice de conjugaison : les verbes du premier groupe",
+		metaTitle: "Exercice de conjugaison sur les verbes du premier groupe",
+		description: "Les verbes réguliers en -er constituent la base de nombreuses phrases en français. Maîtriser leurs terminaisons permet de conjuguer rapidement des centaines de verbes courants.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur les verbes du premier groupe. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe1",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-verben-der-ersten-gruppe",
+		title: "Französische Konjugationsübung: Verben der ersten Gruppe",
+		metaTitle: "Französische Konjugation: Verben der ersten Gruppe üben",
+		description: "Regelmäßige Verben auf -er bilden die Grundlage vieler französischer Sätze. Wer ihre Endungen beherrscht, kann Hunderte häufige Verben sicher konjugieren.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: Verben der ersten Gruppe. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe1",
+		locale: "en",
+		slug: "french-conjugation-exercise-first-group-verbs",
+		title: "French conjugation exercise: first-group verbs",
+		metaTitle: "French conjugation practice: first-group verbs",
+		description: "Regular -er verbs are the foundation of countless French sentences. Mastering their endings helps you conjugate hundreds of common verbs with confidence.",
+		metaDescription: "Customisable French conjugation exercises on first-group verbs. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe1",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-verbi-del-primo-gruppo",
+		title: "Esercizio di coniugazione francese: verbi del primo gruppo",
+		metaTitle: "Coniugazione francese: esercizi su verbi del primo gruppo",
+		description: "I verbi regolari in -er sono alla base di moltissime frasi francesi. Padroneggiarne le desinenze permette di coniugare con sicurezza centinaia di verbi comuni.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su verbi del primo gruppo. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe1",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-verbos-del-primer-grupo",
+		title: "Ejercicio de conjugación francesa: verbos del primer grupo",
+		metaTitle: "Conjugación francesa: ejercicios de verbos del primer grupo",
+		description: "Los verbos regulares en -er son la base de muchísimas frases en francés. Dominar sus terminaciones permite conjugar con seguridad cientos de verbos frecuentes.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos del primer grupo. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe2",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-les-verbes-du-deuxieme-groupe",
+		title: "Exercice de conjugaison : les verbes du deuxième groupe",
+		metaTitle: "Exercice de conjugaison sur les verbes du deuxième groupe",
+		description: "Les verbes réguliers en -ir comme finir ou choisir suivent un modèle stable. Reconnaître ce modèle permet d’utiliser sans hésiter des formes comme nous finissons ou ils choisissaient.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur les verbes du deuxième groupe. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe2",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-verben-der-zweiten-gruppe",
+		title: "Französische Konjugationsübung: Verben der zweiten Gruppe",
+		metaTitle: "Französische Konjugation: Verben der zweiten Gruppe üben",
+		description: "Regelmäßige Verben auf -ir wie finir oder choisir folgen einem festen Muster. Wenn du es erkennst, bildest du Formen wie nous finissons oder ils choisissaient sicher.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: Verben der zweiten Gruppe. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe2",
+		locale: "en",
+		slug: "french-conjugation-exercise-second-group-verbs",
+		title: "French conjugation exercise: second-group verbs",
+		metaTitle: "French conjugation practice: second-group verbs",
+		description: "Regular -ir verbs such as finir and choisir follow a reliable pattern. Recognising it helps you form verbs such as nous finissons and ils choisissaient accurately.",
+		metaDescription: "Customisable French conjugation exercises on second-group verbs. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe2",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-verbi-del-secondo-gruppo",
+		title: "Esercizio di coniugazione francese: verbi del secondo gruppo",
+		metaTitle: "Coniugazione francese: esercizi su verbi del secondo gruppo",
+		description: "I verbi regolari in -ir come finir e choisir seguono un modello stabile. Riconoscerlo aiuta a formare correttamente forme come nous finissons e ils choisissaient.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su verbi del secondo gruppo. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe2",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-verbos-del-segundo-grupo",
+		title: "Ejercicio de conjugación francesa: verbos del segundo grupo",
+		metaTitle: "Conjugación francesa: ejercicios de verbos del segundo grupo",
+		description: "Los verbos regulares en -ir como finir y choisir siguen un modelo estable. Reconocerlo ayuda a formar correctamente formas como nous finissons e ils choisissaient.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos del segundo grupo. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-les-verbes-du-troisieme-groupe",
+		title: "Exercice de conjugaison : les verbes du troisième groupe",
+		metaTitle: "Exercice de conjugaison sur les verbes du troisième groupe",
+		description: "Les verbes du troisième groupe sont très fréquents mais souvent irréguliers. Les travailler ensemble aide à mémoriser leurs radicaux et leurs terminaisons sans les confondre.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur les verbes du troisième groupe. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-verben-der-dritten-gruppe",
+		title: "Französische Konjugationsübung: Verben der dritten Gruppe",
+		metaTitle: "Französische Konjugation: Verben der dritten Gruppe üben",
+		description: "Verben der dritten Gruppe sind sehr häufig, aber oft unregelmäßig. Gemeinsames Üben hilft dir, ihre Stämme und Endungen zu behalten und nicht zu verwechseln.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: Verben der dritten Gruppe. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3",
+		locale: "en",
+		slug: "french-conjugation-exercise-third-group-verbs",
+		title: "French conjugation exercise: third-group verbs",
+		metaTitle: "French conjugation practice: third-group verbs",
+		description: "Third-group verbs are extremely common but often irregular. Practising them together helps you remember their stems and endings without mixing them up.",
+		metaDescription: "Customisable French conjugation exercises on third-group verbs. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-verbi-del-terzo-gruppo",
+		title: "Esercizio di coniugazione francese: verbi del terzo gruppo",
+		metaTitle: "Coniugazione francese: esercizi su verbi del terzo gruppo",
+		description: "I verbi del terzo gruppo sono molto frequenti ma spesso irregolari. Allenarli insieme aiuta a ricordarne radici e desinenze senza confonderli.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su verbi del terzo gruppo. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-verbos-del-tercer-grupo",
+		title: "Ejercicio de conjugación francesa: verbos del tercer grupo",
+		metaTitle: "Conjugación francesa: ejercicios de verbos del tercer grupo",
+		description: "Los verbos del tercer grupo son muy frecuentes, pero a menudo irregulares. Practicarlos juntos ayuda a recordar sus raíces y terminaciones sin confundirlos.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos del tercer grupo. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3ir",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-les-verbes-du-troisieme-groupe-en-ir",
+		title: "Exercice de conjugaison : les verbes du troisième groupe en -ir",
+		metaTitle: "Exercice de conjugaison sur les verbes du troisième groupe en -ir",
+		description: "Partir, venir, dormir ou sortir se terminent en -ir sans suivre le modèle de finir. Les comparer permet de reconnaître leurs changements de radical et d’éviter les fausses régularités.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur les verbes du troisième groupe en -ir. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3ir",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-unregelmassige-verben-auf-ir",
+		title: "Französische Konjugationsübung: unregelmäßige Verben auf -ir",
+		metaTitle: "Französische Konjugation: unregelmäßige Verben auf -ir üben",
+		description: "Partir, venir, dormir und sortir enden auf -ir, folgen aber nicht dem Muster von finir. Durch den Vergleich erkennst du Stammwechsel und vermeidest falsche Regelbildungen.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: unregelmäßige Verben auf -ir. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3ir",
+		locale: "en",
+		slug: "french-conjugation-exercise-irregular-ir-verbs",
+		title: "French conjugation exercise: irregular -ir verbs",
+		metaTitle: "French conjugation practice: irregular -ir verbs",
+		description: "Partir, venir, dormir and sortir end in -ir without following the finir pattern. Comparing them helps you recognise stem changes and avoid false regular forms.",
+		metaDescription: "Customisable French conjugation exercises on irregular -ir verbs. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3ir",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-verbi-irregolari-in-ir",
+		title: "Esercizio di coniugazione francese: verbi irregolari in -ir",
+		metaTitle: "Coniugazione francese: esercizi su verbi irregolari in -ir",
+		description: "Partir, venir, dormir e sortir terminano in -ir ma non seguono il modello di finir. Confrontarli aiuta a riconoscere i cambiamenti di radice ed evitare false regolarità.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su verbi irregolari in -ir. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3ir",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-verbos-irregulares-en-ir",
+		title: "Ejercicio de conjugación francesa: verbos irregulares en -ir",
+		metaTitle: "Conjugación francesa: ejercicios de verbos irregulares en -ir",
+		description: "Partir, venir, dormir y sortir terminan en -ir, pero no siguen el modelo de finir. Compararlos ayuda a reconocer los cambios de raíz y evitar falsas regularidades.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos irregulares en -ir. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3oir",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-les-verbes-du-troisieme-groupe-en-oir",
+		title: "Exercice de conjugaison : les verbes du troisième groupe en -oir",
+		metaTitle: "Exercice de conjugaison sur les verbes du troisième groupe en -oir",
+		description: "Pouvoir, vouloir, devoir ou recevoir sont indispensables dans la vie quotidienne. Travailler leurs formes irrégulières permet d’exprimer une possibilité, une volonté ou une obligation avec précision.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur les verbes du troisième groupe en -oir. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3oir",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-verben-der-dritten-gruppe-auf-oir",
+		title: "Französische Konjugationsübung: Verben der dritten Gruppe auf -oir",
+		metaTitle: "Französische Konjugation: Verben der dritten Gruppe auf -oir üben",
+		description: "Pouvoir, vouloir, devoir und recevoir brauchst du im Alltag ständig. Wer ihre unregelmäßigen Formen beherrscht, drückt Möglichkeit, Wunsch und Pflicht genau aus.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: Verben der dritten Gruppe auf -oir. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3oir",
+		locale: "en",
+		slug: "french-conjugation-exercise-third-group-oir-verbs",
+		title: "French conjugation exercise: third-group -oir verbs",
+		metaTitle: "French conjugation practice: third-group -oir verbs",
+		description: "Pouvoir, vouloir, devoir and recevoir are essential in everyday French. Mastering their irregular forms lets you express possibility, intention and obligation precisely.",
+		metaDescription: "Customisable French conjugation exercises on third-group -oir verbs. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3oir",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-verbi-del-terzo-gruppo-in-oir",
+		title: "Esercizio di coniugazione francese: verbi del terzo gruppo in -oir",
+		metaTitle: "Coniugazione francese: esercizi su verbi del terzo gruppo in -oir",
+		description: "Pouvoir, vouloir, devoir e recevoir sono indispensabili nella vita quotidiana. Conoscerne le forme irregolari permette di esprimere possibilità, volontà e obbligo con precisione.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su verbi del terzo gruppo in -oir. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3oir",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-verbos-del-tercer-grupo-en-oir",
+		title: "Ejercicio de conjugación francesa: verbos del tercer grupo en -oir",
+		metaTitle: "Conjugación francesa: ejercicios de verbos del tercer grupo en -oir",
+		description: "Pouvoir, vouloir, devoir y recevoir son esenciales en la vida cotidiana. Dominar sus formas irregulares permite expresar posibilidad, voluntad y obligación con precisión.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos del tercer grupo en -oir. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3autres",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-les-autres-verbes-du-troisieme-groupe",
+		title: "Exercice de conjugaison : les autres verbes du troisième groupe",
+		metaTitle: "Exercice de conjugaison sur les autres verbes du troisième groupe",
+		description: "Prendre, mettre, lire, écrire ou conduire ont des modèles particuliers très utilisés. Les entraîner aide à repérer leurs familles et à mieux mémoriser leurs formes irrégulières.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur les autres verbes du troisième groupe. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3autres",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-weitere-verben-der-dritten-gruppe",
+		title: "Französische Konjugationsübung: weitere Verben der dritten Gruppe",
+		metaTitle: "Französische Konjugation: weitere Verben der dritten Gruppe üben",
+		description: "Prendre, mettre, lire, écrire und conduire haben eigene, sehr häufige Muster. Durch Übung erkennst du ihre Verbgruppen und merkst dir unregelmäßige Formen leichter.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: weitere Verben der dritten Gruppe. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3autres",
+		locale: "en",
+		slug: "french-conjugation-exercise-other-third-group-verbs",
+		title: "French conjugation exercise: other third-group verbs",
+		metaTitle: "French conjugation practice: other third-group verbs",
+		description: "Prendre, mettre, lire, écrire and conduire use distinctive, common patterns. Practising them helps you recognise verb families and remember irregular forms more easily.",
+		metaDescription: "Customisable French conjugation exercises on other third-group verbs. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3autres",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-altri-verbi-del-terzo-gruppo",
+		title: "Esercizio di coniugazione francese: altri verbi del terzo gruppo",
+		metaTitle: "Coniugazione francese: esercizi su altri verbi del terzo gruppo",
+		description: "Prendre, mettre, lire, écrire e conduire seguono modelli particolari e molto usati. Allenarli aiuta a riconoscerne le famiglie e a memorizzare le forme irregolari.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su altri verbi del terzo gruppo. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3autres",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-otros-verbos-del-tercer-grupo",
+		title: "Ejercicio de conjugación francesa: otros verbos del tercer grupo",
+		metaTitle: "Conjugación francesa: ejercicios de otros verbos del tercer grupo",
+		description: "Prendre, mettre, lire, écrire y conduire siguen modelos particulares muy frecuentes. Practicarlos ayuda a reconocer sus familias y memorizar mejor las formas irregulares.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre otros verbos del tercer grupo. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "ger",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-les-verbes-en-ger",
+		title: "Exercice de conjugaison : les verbes en -ger",
+		metaTitle: "Exercice de conjugaison sur les verbes en -ger",
+		description: "Une lettre suffit parfois à transformer une bonne réponse en faute. Maîtriser les verbes en -ger permet d’écrire correctement nous mangeons ou je voyageais et de comprendre leurs changements orthographiques.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur les verbes en -ger. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "ger",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosische-verben-auf-ger",
+		title: "Französische Konjugationsübung: französische Verben auf -ger",
+		metaTitle: "Französische Konjugation: französische Verben auf -ger üben",
+		description: "Ein einziger Buchstabe kann eine richtige Form in einen Fehler verwandeln. Wer Verben auf -ger beherrscht, schreibt nous mangeons und je voyageais korrekt und versteht ihre Rechtschreibänderungen.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französische Verben auf -ger. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "ger",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-verbs-ending-in-ger",
+		title: "French conjugation exercise: French verbs ending in -ger",
+		metaTitle: "French conjugation practice: French verbs ending in -ger",
+		description: "A single letter can turn a correct form into a spelling mistake. Mastering -ger verbs helps you write nous mangeons and je voyageais correctly and understand their spelling changes.",
+		metaDescription: "Customisable French conjugation exercises on French verbs ending in -ger. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "ger",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-verbi-francesi-in-ger",
+		title: "Esercizio di coniugazione francese: verbi francesi in -ger",
+		metaTitle: "Coniugazione francese: esercizi su verbi francesi in -ger",
+		description: "Una sola lettera può trasformare una forma corretta in un errore. Padroneggiare i verbi in -ger aiuta a scrivere nous mangeons e je voyageais e a capirne i cambiamenti ortografici.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su verbi francesi in -ger. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "ger",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-verbos-franceses-en-ger",
+		title: "Ejercicio de conjugación francesa: verbos franceses en -ger",
+		metaTitle: "Conjugación francesa: ejercicios de verbos franceses en -ger",
+		description: "Una sola letra puede convertir una forma correcta en un error. Dominar los verbos en -ger ayuda a escribir nous mangeons y je voyageais correctamente y a entender sus cambios ortográficos.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos franceses en -ger. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "cer",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-les-verbes-en-cer",
+		title: "Exercice de conjugaison : les verbes en -cer",
+		metaTitle: "Exercice de conjugaison sur les verbes en -cer",
+		description: "Commencer, avancer ou remplacer demandent parfois une cédille pour conserver le son doux du c. Savoir quand écrire nous commençons ou je plaçais évite une erreur fréquente.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur les verbes en -cer. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "cer",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosische-verben-auf-cer",
+		title: "Französische Konjugationsübung: französische Verben auf -cer",
+		metaTitle: "Französische Konjugation: französische Verben auf -cer üben",
+		description: "Bei commencer, avancer oder remplacer ist manchmal eine Cedille nötig, damit das c weich klingt. Wer weiß, wann nous commençons oder je plaçais geschrieben wird, vermeidet häufige Fehler.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französische Verben auf -cer. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "cer",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-verbs-ending-in-cer",
+		title: "French conjugation exercise: French verbs ending in -cer",
+		metaTitle: "French conjugation practice: French verbs ending in -cer",
+		description: "Commencer, avancer and remplacer sometimes need a cedilla to keep the soft c sound. Knowing when to write nous commençons or je plaçais prevents a frequent spelling error.",
+		metaDescription: "Customisable French conjugation exercises on French verbs ending in -cer. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "cer",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-verbi-francesi-in-cer",
+		title: "Esercizio di coniugazione francese: verbi francesi in -cer",
+		metaTitle: "Coniugazione francese: esercizi su verbi francesi in -cer",
+		description: "Commencer, avancer e remplacer richiedono a volte la cediglia per conservare il suono dolce della c. Sapere quando scrivere nous commençons o je plaçais evita un errore frequente.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su verbi francesi in -cer. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "cer",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-verbos-franceses-en-cer",
+		title: "Ejercicio de conjugación francesa: verbos franceses en -cer",
+		metaTitle: "Conjugación francesa: ejercicios de verbos franceses en -cer",
+		description: "Commencer, avancer y remplacer necesitan a veces cedilla para mantener el sonido suave de la c. Saber cuándo escribir nous commençons o je plaçais evita un error frecuente.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos franceses en -cer. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "ger-cer",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-les-verbes-en-ger-et-en-cer",
+		title: "Exercice de conjugaison : les verbes en -ger et en -cer",
+		metaTitle: "Exercice de conjugaison sur les verbes en -ger et en -cer",
+		description: "Les verbes en -ger et en -cer modifient leur orthographe pour conserver leur prononciation. Les comparer aide à choisir rapidement entre le e protecteur et la cédille.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur les verbes en -ger et en -cer. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "ger-cer",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosische-verben-auf-ger-und-cer",
+		title: "Französische Konjugationsübung: französische Verben auf -ger und -cer",
+		metaTitle: "Französische Konjugation: französische Verben auf -ger und -cer üben",
+		description: "Verben auf -ger und -cer ändern ihre Schreibweise, damit die Aussprache erhalten bleibt. Der direkte Vergleich hilft dir, schnell zwischen zusätzlichem e und Cedille zu wählen.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französische Verben auf -ger und -cer. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "ger-cer",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-ger-and-cer-verbs",
+		title: "French conjugation exercise: French -ger and -cer verbs",
+		metaTitle: "French conjugation practice: French -ger and -cer verbs",
+		description: "French -ger and -cer verbs change their spelling to preserve pronunciation. Comparing both patterns helps you choose quickly between the protective e and the cedilla.",
+		metaDescription: "Customisable French conjugation exercises on French -ger and -cer verbs. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "ger-cer",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-verbi-francesi-in-ger-e-cer",
+		title: "Esercizio di coniugazione francese: verbi francesi in -ger e -cer",
+		metaTitle: "Coniugazione francese: esercizi su verbi francesi in -ger e -cer",
+		description: "I verbi in -ger e -cer cambiano ortografia per conservare la pronuncia. Confrontare i due modelli aiuta a scegliere rapidamente tra la e protettiva e la cediglia.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su verbi francesi in -ger e -cer. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "ger-cer",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-verbos-franceses-en-ger-y-cer",
+		title: "Ejercicio de conjugación francesa: verbos franceses en -ger y -cer",
+		metaTitle: "Conjugación francesa: ejercicios de verbos franceses en -ger y -cer",
+		description: "Los verbos en -ger y -cer cambian su ortografía para conservar la pronunciación. Comparar ambos modelos ayuda a elegir entre la e protectora y la cedilla.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos franceses en -ger y -cer. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-mouvement",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-les-verbes-de-mouvement-en-francais",
+		title: "Exercice de conjugaison : les verbes de mouvement en français",
+		metaTitle: "Exercice de conjugaison sur les verbes de mouvement en français",
+		description: "Aller, venir, partir, arriver, entrer ou sortir sont essentiels pour raconter un déplacement, expliquer son trajet ou parler de ses projets. Bien les conjuguer permet de s’exprimer plus précisément à l’oral comme à l’écrit.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur les verbes de mouvement en français. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-mouvement",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosische-bewegungsverben",
+		title: "Französische Konjugationsübung: französische Bewegungsverben",
+		metaTitle: "Französische Konjugation: französische Bewegungsverben üben",
+		description: "Aller, venir, partir, arriver, entrer und sortir brauchst du, um Wege, Reisen und Pläne zu beschreiben. Sicher konjugiert machen diese Verben dein gesprochenes und geschriebenes Französisch genauer.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französische Bewegungsverben. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-mouvement",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-movement-verbs",
+		title: "French conjugation exercise: French movement verbs",
+		metaTitle: "French conjugation practice: French movement verbs",
+		description: "Aller, venir, partir, arriver, entrer and sortir are essential for describing journeys, routes and plans. Conjugating them confidently makes your spoken and written French more precise.",
+		metaDescription: "Customisable French conjugation exercises on French movement verbs. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-mouvement",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-verbi-francesi-di-movimento",
+		title: "Esercizio di coniugazione francese: verbi francesi di movimento",
+		metaTitle: "Coniugazione francese: esercizi su verbi francesi di movimento",
+		description: "Aller, venir, partir, arriver, entrer e sortir sono essenziali per raccontare spostamenti, percorsi e progetti. Coniugarli bene rende il francese orale e scritto più preciso.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su verbi francesi di movimento. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-mouvement",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-verbos-franceses-de-movimiento",
+		title: "Ejercicio de conjugación francesa: verbos franceses de movimiento",
+		metaTitle: "Conjugación francesa: ejercicios de verbos franceses de movimiento",
+		description: "Aller, venir, partir, arriver, entrer y sortir son esenciales para hablar de desplazamientos, trayectos y proyectos. Conjugarlos bien mejora la precisión oral y escrita.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos franceses de movimiento. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-communication",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-les-verbes-de-communication",
+		title: "Exercice de conjugaison : les verbes de communication",
+		metaTitle: "Exercice de conjugaison sur les verbes de communication",
+		description: "Dire, parler, répondre, expliquer ou raconter permettent de transmettre une idée et de participer à une conversation. Bien les conjuguer rend les échanges plus clairs et plus naturels.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur les verbes de communication. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-communication",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosische-kommunikationsverben",
+		title: "Französische Konjugationsübung: französische Kommunikationsverben",
+		metaTitle: "Französische Konjugation: französische Kommunikationsverben üben",
+		description: "Dire, parler, répondre, expliquer und raconter helfen dir, Gedanken auszudrücken und Gespräche zu führen. Sicher konjugiert machen sie deine Kommunikation klarer und natürlicher.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französische Kommunikationsverben. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-communication",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-communication-verbs",
+		title: "French conjugation exercise: French communication verbs",
+		metaTitle: "French conjugation practice: French communication verbs",
+		description: "Dire, parler, répondre, expliquer and raconter let you share ideas and take part in conversations. Conjugating them accurately makes communication clearer and more natural.",
+		metaDescription: "Customisable French conjugation exercises on French communication verbs. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-communication",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-verbi-francesi-della-comunicazione",
+		title: "Esercizio di coniugazione francese: verbi francesi della comunicazione",
+		metaTitle: "Coniugazione francese: esercizi su verbi francesi della comunicazione",
+		description: "Dire, parler, répondre, expliquer e raconter permettono di comunicare idee e partecipare a una conversazione. Coniugarli bene rende gli scambi più chiari e naturali.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su verbi francesi della comunicazione. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-communication",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-verbos-franceses-de-comunicacion",
+		title: "Ejercicio de conjugación francesa: verbos franceses de comunicación",
+		metaTitle: "Conjugación francesa: ejercicios de verbos franceses de comunicación",
+		description: "Dire, parler, répondre, expliquer y raconter permiten compartir ideas y participar en conversaciones. Conjugarlos bien hace que la comunicación sea más clara y natural.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos franceses de comunicación. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-cognition",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-les-verbes-de-pensee-et-de-connaissance",
+		title: "Exercice de conjugaison : les verbes de pensée et de connaissance",
+		metaTitle: "Exercice de conjugaison sur les verbes de pensée et de connaissance",
+		description: "Penser, savoir, comprendre, apprendre ou décider servent à exprimer une opinion, une connaissance ou un choix. Les maîtriser aide à formuler une pensée précise et nuancée.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur les verbes de pensée et de connaissance. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-cognition",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosische-verben-des-denkens-und-wissens",
+		title: "Französische Konjugationsübung: französische Verben des Denkens und Wissens",
+		metaTitle: "Französische Konjugation: französische Verben des Denkens und Wissens üben",
+		description: "Penser, savoir, comprendre, apprendre und décider drücken Meinung, Wissen und Entscheidungen aus. Wer sie beherrscht, kann Gedanken genauer und differenzierter formulieren.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französische Verben des Denkens und Wissens. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-cognition",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-thinking-and-knowledge-verbs",
+		title: "French conjugation exercise: French thinking and knowledge verbs",
+		metaTitle: "French conjugation practice: French thinking and knowledge verbs",
+		description: "Penser, savoir, comprendre, apprendre and décider express opinions, knowledge and choices. Mastering them helps you communicate ideas precisely and with nuance.",
+		metaDescription: "Customisable French conjugation exercises on French thinking and knowledge verbs. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-cognition",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-verbi-francesi-del-pensiero-e-della-conoscenza",
+		title: "Esercizio di coniugazione francese: verbi francesi del pensiero e della conoscenza",
+		metaTitle: "Coniugazione francese: esercizi su verbi francesi del pensiero e della conoscenza",
+		description: "Penser, savoir, comprendre, apprendre e décider esprimono opinioni, conoscenze e scelte. Padroneggiarli aiuta a formulare un pensiero preciso e sfumato.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su verbi francesi del pensiero e della conoscenza. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-cognition",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-verbos-franceses-de-pensamiento-y-conocimiento",
+		title: "Ejercicio de conjugación francesa: verbos franceses de pensamiento y conocimiento",
+		metaTitle: "Conjugación francesa: ejercicios de verbos franceses de pensamiento y conocimiento",
+		description: "Penser, savoir, comprendre, apprendre y décider expresan opiniones, conocimientos y decisiones. Dominarlos ayuda a formular ideas precisas y matizadas.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos franceses de pensamiento y conocimiento. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-emotion",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-les-verbes-des-emotions",
+		title: "Exercice de conjugaison : les verbes des émotions",
+		metaTitle: "Exercice de conjugaison sur les verbes des émotions",
+		description: "Aimer, préférer, craindre, rire ou ressentir permettent de parler de ses goûts et de ses émotions. Bien les conjuguer aide à exprimer ce que l’on éprouve avec justesse.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur les verbes des émotions. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-emotion",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosische-verben-der-gefuhle",
+		title: "Französische Konjugationsübung: französische Verben der Gefühle",
+		metaTitle: "Französische Konjugation: französische Verben der Gefühle üben",
+		description: "Aimer, préférer, craindre, rire und ressentir helfen dir, über Vorlieben und Gefühle zu sprechen. Sicher konjugiert kannst du genauer ausdrücken, was du empfindest.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französische Verben der Gefühle. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-emotion",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-emotion-verbs",
+		title: "French conjugation exercise: French emotion verbs",
+		metaTitle: "French conjugation practice: French emotion verbs",
+		description: "Aimer, préférer, craindre, rire and ressentir help you talk about preferences and emotions. Accurate conjugation lets you express how you feel more precisely.",
+		metaDescription: "Customisable French conjugation exercises on French emotion verbs. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-emotion",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-verbi-francesi-delle-emozioni",
+		title: "Esercizio di coniugazione francese: verbi francesi delle emozioni",
+		metaTitle: "Coniugazione francese: esercizi su verbi francesi delle emozioni",
+		description: "Aimer, préférer, craindre, rire e ressentir permettono di parlare di gusti ed emozioni. Coniugarli bene aiuta a esprimere con precisione ciò che si prova.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su verbi francesi delle emozioni. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-emotion",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-verbos-franceses-de-emocion",
+		title: "Ejercicio de conjugación francesa: verbos franceses de emoción",
+		metaTitle: "Conjugación francesa: ejercicios de verbos franceses de emoción",
+		description: "Aimer, préférer, craindre, rire y ressentir permiten hablar de gustos y emociones. Conjugarlos bien ayuda a expresar con precisión lo que se siente.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos franceses de emoción. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-corps",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-les-verbes-du-corps-et-des-besoins",
+		title: "Exercice de conjugaison : les verbes du corps et des besoins",
+		metaTitle: "Exercice de conjugaison sur les verbes du corps et des besoins",
+		description: "Manger, boire, dormir, respirer ou se soigner sont indispensables pour parler de la santé et de la vie quotidienne. Les conjuguer correctement permet de décrire clairement ses besoins et ses habitudes.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur les verbes du corps et des besoins. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-corps",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosische-verben-fur-korper-und-bedurfnisse",
+		title: "Französische Konjugationsübung: französische Verben für Körper und Bedürfnisse",
+		metaTitle: "Französische Konjugation: französische Verben für Körper und Bedürfnisse üben",
+		description: "Manger, boire, dormir, respirer und se soigner brauchst du für Gesundheit und Alltag. Richtig konjugiert helfen sie dir, Bedürfnisse und Gewohnheiten klar zu beschreiben.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französische Verben für Körper und Bedürfnisse. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-corps",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-body-and-needs-verbs",
+		title: "French conjugation exercise: French body and needs verbs",
+		metaTitle: "French conjugation practice: French body and needs verbs",
+		description: "Manger, boire, dormir, respirer and se soigner are essential for discussing health and daily life. Conjugating them correctly helps you describe needs and habits clearly.",
+		metaDescription: "Customisable French conjugation exercises on French body and needs verbs. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-corps",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-verbi-francesi-del-corpo-e-dei-bisogni",
+		title: "Esercizio di coniugazione francese: verbi francesi del corpo e dei bisogni",
+		metaTitle: "Coniugazione francese: esercizi su verbi francesi del corpo e dei bisogni",
+		description: "Manger, boire, dormir, respirer e se soigner sono essenziali per parlare di salute e vita quotidiana. Coniugarli correttamente aiuta a descrivere bisogni e abitudini.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su verbi francesi del corpo e dei bisogni. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-corps",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-verbos-franceses-del-cuerpo-y-las-necesidades",
+		title: "Ejercicio de conjugación francesa: verbos franceses del cuerpo y las necesidades",
+		metaTitle: "Conjugación francesa: ejercicios de verbos franceses del cuerpo y las necesidades",
+		description: "Manger, boire, dormir, respirer y se soigner son esenciales para hablar de salud y vida cotidiana. Conjugarlos correctamente ayuda a describir necesidades y hábitos.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos franceses del cuerpo y las necesidades. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "rares",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-les-verbes-rares-ou-litteraires",
+		title: "Exercice de conjugaison : les verbes rares ou littéraires",
+		metaTitle: "Exercice de conjugaison sur les verbes rares ou littéraires",
+		description: "Les verbes rares ou littéraires enrichissent la compréhension des textes et le vocabulaire. Les conjuguer permet de mieux lire la littérature et d’explorer les nuances du français.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur les verbes rares ou littéraires. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "rares",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-seltene-und-literarische-franzosische-verben",
+		title: "Französische Konjugationsübung: seltene und literarische französische Verben",
+		metaTitle: "Französische Konjugation: seltene und literarische französische Verben üben",
+		description: "Seltene und literarische Verben erweitern Wortschatz und Textverständnis. Ihre Konjugation hilft dir, Literatur besser zu lesen und sprachliche Nuancen zu entdecken.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: seltene und literarische französische Verben. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "rares",
+		locale: "en",
+		slug: "french-conjugation-exercise-rare-and-literary-french-verbs",
+		title: "French conjugation exercise: rare and literary French verbs",
+		metaTitle: "French conjugation practice: rare and literary French verbs",
+		description: "Rare and literary verbs broaden vocabulary and improve reading comprehension. Conjugating them helps you understand literature and explore the nuances of French.",
+		metaDescription: "Customisable French conjugation exercises on rare and literary French verbs. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "rares",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-verbi-francesi-rari-e-letterari",
+		title: "Esercizio di coniugazione francese: verbi francesi rari e letterari",
+		metaTitle: "Coniugazione francese: esercizi su verbi francesi rari e letterari",
+		description: "I verbi rari e letterari arricchiscono il vocabolario e la comprensione dei testi. Coniugarli aiuta a leggere meglio la letteratura e a scoprire le sfumature del francese.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su verbi francesi rari e letterari. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "rares",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-verbos-franceses-raros-y-literarios",
+		title: "Ejercicio de conjugación francesa: verbos franceses raros y literarios",
+		metaTitle: "Conjugación francesa: ejercicios de verbos franceses raros y literarios",
+		description: "Los verbos raros y literarios amplían el vocabulario y la comprensión lectora. Conjugarlos ayuda a entender mejor la literatura y descubrir los matices del francés.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos franceses raros y literarios. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "difficiles",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-les-verbes-francais-difficiles",
+		title: "Exercice de conjugaison : les verbes français difficiles",
+		metaTitle: "Exercice de conjugaison sur les verbes français difficiles",
+		description: "Les verbes les plus difficiles cumulent souvent changements de radical et terminaisons irrégulières. Un entraînement ciblé aide à repérer leurs modèles et à réduire les erreurs persistantes.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur les verbes français difficiles. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "difficiles",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-schwierige-franzosische-verben",
+		title: "Französische Konjugationsübung: schwierige französische Verben",
+		metaTitle: "Französische Konjugation: schwierige französische Verben üben",
+		description: "Schwierige französische Verben verbinden oft Stammwechsel mit unregelmäßigen Endungen. Gezieltes Üben hilft, ihre Muster zu erkennen und hartnäckige Fehler abzubauen.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: schwierige französische Verben. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "difficiles",
+		locale: "en",
+		slug: "french-conjugation-exercise-difficult-french-verbs",
+		title: "French conjugation exercise: difficult French verbs",
+		metaTitle: "French conjugation practice: difficult French verbs",
+		description: "The hardest French verbs often combine stem changes with irregular endings. Focused practice helps you identify their patterns and eliminate recurring mistakes.",
+		metaDescription: "Customisable French conjugation exercises on difficult French verbs. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "difficiles",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-verbi-francesi-difficili",
+		title: "Esercizio di coniugazione francese: verbi francesi difficili",
+		metaTitle: "Coniugazione francese: esercizi su verbi francesi difficili",
+		description: "I verbi francesi più difficili combinano spesso cambiamenti di radice e desinenze irregolari. Un allenamento mirato aiuta a riconoscerne i modelli e ridurre gli errori ricorrenti.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su verbi francesi difficili. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "difficiles",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-verbos-franceses-dificiles",
+		title: "Ejercicio de conjugación francesa: verbos franceses difíciles",
+		metaTitle: "Conjugación francesa: ejercicios de verbos franceses difíciles",
+		description: "Los verbos franceses más difíciles suelen combinar cambios de raíz y terminaciones irregulares. Una práctica específica ayuda a reconocer sus modelos y reducir errores persistentes.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos franceses difíciles. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "pronominaux",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-les-verbes-pronominaux-francais",
+		title: "Exercice de conjugaison : les verbes pronominaux français",
+		metaTitle: "Exercice de conjugaison sur les verbes pronominaux français",
+		description: "Se lever, s’habiller, se souvenir ou se rencontrer sont indispensables dans la vie quotidienne. Les maîtriser aide à placer le pronom réfléchi, choisir l’auxiliaire et construire les temps composés.",
+		metaDescription: "Exercices personnalisables de conjugaison française sur les verbes pronominaux français. Choisis les verbes et les temps à travailler.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "pronominaux",
+		locale: "de",
+		slug: "franzosische-konjugationsubung-franzosische-reflexive-verben",
+		title: "Französische Konjugationsübung: französische reflexive Verben",
+		metaTitle: "Französische Konjugation: französische reflexive Verben üben",
+		description: "Se lever, s’habiller, se souvenir und se rencontrer brauchst du im Alltag. Wer sie beherrscht, setzt das Reflexivpronomen richtig, wählt das Hilfsverb und bildet zusammengesetzte Zeiten.",
+		metaDescription: "Anpassbare Übungen zur französischen Konjugation: französische reflexive Verben. Wähle Verben und Zeitformen passend zu deinem Lernziel.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "pronominaux",
+		locale: "en",
+		slug: "french-conjugation-exercise-french-reflexive-verbs",
+		title: "French conjugation exercise: French reflexive verbs",
+		metaTitle: "French conjugation practice: French reflexive verbs",
+		description: "Se lever, s’habiller, se souvenir and se rencontrer are essential in daily life. Mastering them helps you place the reflexive pronoun, choose the auxiliary and form compound tenses.",
+		metaDescription: "Customisable French conjugation exercises on French reflexive verbs. Choose the verbs and tenses that match your learning goal.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "pronominaux",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-francese-verbi-pronominali-francesi",
+		title: "Esercizio di coniugazione francese: verbi pronominali francesi",
+		metaTitle: "Coniugazione francese: esercizi su verbi pronominali francesi",
+		description: "Se lever, s’habiller, se souvenir e se rencontrer sono indispensabili ogni giorno. Padroneggiarli aiuta a collocare il pronome riflessivo, scegliere l’ausiliare e formare i tempi composti.",
+		metaDescription: "Esercizi personalizzabili di coniugazione francese su verbi pronominali francesi. Scegli i verbi e i tempi adatti al tuo obiettivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "pronominaux",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-francesa-verbos-pronominales-franceses",
+		title: "Ejercicio de conjugación francesa: verbos pronominales franceses",
+		metaTitle: "Conjugación francesa: ejercicios de verbos pronominales franceses",
+		description: "Se lever, s’habiller, se souvenir y se rencontrer son esenciales a diario. Dominarlos ayuda a colocar el pronombre reflexivo, elegir el auxiliar y formar los tiempos compuestos.",
+		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos pronominales franceses. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "CIF1",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-fle-4-verbes-essentiels-niveau-cif-1",
+		title: "Exercice de conjugaison FLE : 4 verbes essentiels – niveau CIF 1",
+		metaTitle: "Conjugaison FLE : exercice sur 4 verbes essentiels – niveau CIF 1",
+		description: "4 verbes essentiels – niveau CIF 1 forment un exercice de conjugaison FLE progressif. Tu consolides les formes nécessaires pour comprendre, parler et écrire en français dans les situations courantes.",
+		metaDescription: "Exercice interactif de conjugaison FLE sur 4 verbes essentiels – niveau CIF 1. Choisis les verbes et les temps adaptés à ton apprentissage du français.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF1",
+		locale: "de",
+		slug: "fle-ubung-zur-franzosischen-konjugation-4-wichtige-verben-niveau-cif-1",
+		title: "FLE-Übung zur französischen Konjugation: 4 wichtige Verben – Niveau CIF 1",
+		metaTitle: "FLE-Konjugation üben: 4 wichtige Verben – Niveau CIF 1",
+		description: "4 wichtige Verben – Niveau CIF 1 bilden eine progressive FLE-Konjugationsübung. Du festigst die Formen, die du zum Verstehen, Sprechen und Schreiben in typischen Alltagssituationen brauchst.",
+		metaDescription: "Interaktive FLE-Übung zur französischen Konjugation: 4 wichtige Verben – Niveau CIF 1. Wähle passende Verben und Zeitformen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF1",
+		locale: "en",
+		slug: "fle-french-conjugation-exercise-4-essential-verbs-cif-level-1",
+		title: "FLE French conjugation exercise: 4 essential verbs – CIF level 1",
+		metaTitle: "French as a foreign language: 4 essential verbs – CIF level 1",
+		description: "4 essential verbs – CIF level 1 form a progressive FLE French conjugation exercise. Learners build the forms needed to understand, speak and write French in common real-life situations.",
+		metaDescription: "Interactive French as a foreign language (FLE) conjugation exercise on 4 essential verbs – CIF level 1. Choose the verbs and tenses you need.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF1",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-fle-4-verbi-essenziali-livello-cif-1",
+		title: "Esercizio di coniugazione FLE: 4 verbi essenziali – livello CIF 1",
+		metaTitle: "Coniugazione FLE: esercizio su 4 verbi essenziali – livello CIF 1",
+		description: "4 verbi essenziali – livello CIF 1 propongono un esercizio progressivo di coniugazione FLE. Consolidi le forme necessarie per capire, parlare e scrivere in francese nella vita quotidiana.",
+		metaDescription: "Esercizio interattivo di coniugazione FLE su 4 verbi essenziali – livello CIF 1. Scegli i verbi e i tempi adatti al tuo apprendimento.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF1",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-fle-4-verbos-esenciales-nivel-cif-1",
+		title: "Ejercicio de conjugación FLE: 4 verbos esenciales – nivel CIF 1",
+		metaTitle: "Conjugación FLE: ejercicio de 4 verbos esenciales – nivel CIF 1",
+		description: "4 verbos esenciales – nivel CIF 1 forman un ejercicio progresivo de conjugación FLE. Consolidas las formas necesarias para comprender, hablar y escribir francés en situaciones cotidianas.",
+		metaDescription: "Ejercicio interactivo de conjugación FLE sobre 4 verbos esenciales – nivel CIF 1. Elige los verbos y tiempos adecuados para aprender francés.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF2",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-fle-12-verbes-utiles-niveau-cif-2",
+		title: "Exercice de conjugaison FLE : 12 verbes utiles – niveau CIF 2",
+		metaTitle: "Conjugaison FLE : exercice sur 12 verbes utiles – niveau CIF 2",
+		description: "12 verbes utiles – niveau CIF 2 forment un exercice de conjugaison FLE progressif. Tu consolides les formes nécessaires pour comprendre, parler et écrire en français dans les situations courantes.",
+		metaDescription: "Exercice interactif de conjugaison FLE sur 12 verbes utiles – niveau CIF 2. Choisis les verbes et les temps adaptés à ton apprentissage du français.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF2",
+		locale: "de",
+		slug: "fle-ubung-zur-franzosischen-konjugation-12-wichtige-verben-niveau-cif-2",
+		title: "FLE-Übung zur französischen Konjugation: 12 wichtige Verben – Niveau CIF 2",
+		metaTitle: "FLE-Konjugation üben: 12 wichtige Verben – Niveau CIF 2",
+		description: "12 wichtige Verben – Niveau CIF 2 bilden eine progressive FLE-Konjugationsübung. Du festigst die Formen, die du zum Verstehen, Sprechen und Schreiben in typischen Alltagssituationen brauchst.",
+		metaDescription: "Interaktive FLE-Übung zur französischen Konjugation: 12 wichtige Verben – Niveau CIF 2. Wähle passende Verben und Zeitformen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF2",
+		locale: "en",
+		slug: "fle-french-conjugation-exercise-12-useful-verbs-cif-level-2",
+		title: "FLE French conjugation exercise: 12 useful verbs – CIF level 2",
+		metaTitle: "French as a foreign language: 12 useful verbs – CIF level 2",
+		description: "12 useful verbs – CIF level 2 form a progressive FLE French conjugation exercise. Learners build the forms needed to understand, speak and write French in common real-life situations.",
+		metaDescription: "Interactive French as a foreign language (FLE) conjugation exercise on 12 useful verbs – CIF level 2. Choose the verbs and tenses you need.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF2",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-fle-12-verbi-utili-livello-cif-2",
+		title: "Esercizio di coniugazione FLE: 12 verbi utili – livello CIF 2",
+		metaTitle: "Coniugazione FLE: esercizio su 12 verbi utili – livello CIF 2",
+		description: "12 verbi utili – livello CIF 2 propongono un esercizio progressivo di coniugazione FLE. Consolidi le forme necessarie per capire, parlare e scrivere in francese nella vita quotidiana.",
+		metaDescription: "Esercizio interattivo di coniugazione FLE su 12 verbi utili – livello CIF 2. Scegli i verbi e i tempi adatti al tuo apprendimento.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF2",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-fle-12-verbos-utiles-nivel-cif-2",
+		title: "Ejercicio de conjugación FLE: 12 verbos útiles – nivel CIF 2",
+		metaTitle: "Conjugación FLE: ejercicio de 12 verbos útiles – nivel CIF 2",
+		description: "12 verbos útiles – nivel CIF 2 forman un ejercicio progresivo de conjugación FLE. Consolidas las formas necesarias para comprender, hablar y escribir francés en situaciones cotidianas.",
+		metaDescription: "Ejercicio interactivo de conjugación FLE sobre 12 verbos útiles – nivel CIF 2. Elige los verbos y tiempos adecuados para aprender francés.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF3",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-fle-12-verbes-en-er-niveau-cif-3",
+		title: "Exercice de conjugaison FLE : 12 verbes en -er – niveau CIF 3",
+		metaTitle: "Conjugaison FLE : exercice sur 12 verbes en -er – niveau CIF 3",
+		description: "12 verbes en -er – niveau CIF 3 forment un exercice de conjugaison FLE progressif. Tu consolides les formes nécessaires pour comprendre, parler et écrire en français dans les situations courantes.",
+		metaDescription: "Exercice interactif de conjugaison FLE sur 12 verbes en -er – niveau CIF 3. Choisis les verbes et les temps adaptés à ton apprentissage du français.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF3",
+		locale: "de",
+		slug: "fle-ubung-zur-franzosischen-konjugation-12-verben-auf-er-niveau-cif-3",
+		title: "FLE-Übung zur französischen Konjugation: 12 Verben auf -er – Niveau CIF 3",
+		metaTitle: "FLE-Konjugation üben: 12 Verben auf -er – Niveau CIF 3",
+		description: "12 Verben auf -er – Niveau CIF 3 bilden eine progressive FLE-Konjugationsübung. Du festigst die Formen, die du zum Verstehen, Sprechen und Schreiben in typischen Alltagssituationen brauchst.",
+		metaDescription: "Interaktive FLE-Übung zur französischen Konjugation: 12 Verben auf -er – Niveau CIF 3. Wähle passende Verben und Zeitformen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF3",
+		locale: "en",
+		slug: "fle-french-conjugation-exercise-12-er-verbs-cif-level-3",
+		title: "FLE French conjugation exercise: 12 -er verbs – CIF level 3",
+		metaTitle: "French as a foreign language: 12 -er verbs – CIF level 3",
+		description: "12 -er verbs – CIF level 3 form a progressive FLE French conjugation exercise. Learners build the forms needed to understand, speak and write French in common real-life situations.",
+		metaDescription: "Interactive French as a foreign language (FLE) conjugation exercise on 12 -er verbs – CIF level 3. Choose the verbs and tenses you need.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF3",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-fle-12-verbi-in-er-livello-cif-3",
+		title: "Esercizio di coniugazione FLE: 12 verbi in -er – livello CIF 3",
+		metaTitle: "Coniugazione FLE: esercizio su 12 verbi in -er – livello CIF 3",
+		description: "12 verbi in -er – livello CIF 3 propongono un esercizio progressivo di coniugazione FLE. Consolidi le forme necessarie per capire, parlare e scrivere in francese nella vita quotidiana.",
+		metaDescription: "Esercizio interattivo di coniugazione FLE su 12 verbi in -er – livello CIF 3. Scegli i verbi e i tempi adatti al tuo apprendimento.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF3",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-fle-12-verbos-en-er-nivel-cif-3",
+		title: "Ejercicio de conjugación FLE: 12 verbos en -er – nivel CIF 3",
+		metaTitle: "Conjugación FLE: ejercicio de 12 verbos en -er – nivel CIF 3",
+		description: "12 verbos en -er – nivel CIF 3 forman un ejercicio progresivo de conjugación FLE. Consolidas las formas necesarias para comprender, hablar y escribir francés en situaciones cotidianas.",
+		metaDescription: "Ejercicio interactivo de conjugación FLE sobre 12 verbos en -er – nivel CIF 3. Elige los verbos y tiempos adecuados para aprender francés.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF4",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-fle-20-verbes-utiles-niveau-cif-4",
+		title: "Exercice de conjugaison FLE : 20 verbes utiles – niveau CIF 4",
+		metaTitle: "Conjugaison FLE : exercice sur 20 verbes utiles – niveau CIF 4",
+		description: "20 verbes utiles – niveau CIF 4 forment un exercice de conjugaison FLE progressif. Tu consolides les formes nécessaires pour comprendre, parler et écrire en français dans les situations courantes.",
+		metaDescription: "Exercice interactif de conjugaison FLE sur 20 verbes utiles – niveau CIF 4. Choisis les verbes et les temps adaptés à ton apprentissage du français.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF4",
+		locale: "de",
+		slug: "fle-ubung-zur-franzosischen-konjugation-20-wichtige-verben-niveau-cif-4",
+		title: "FLE-Übung zur französischen Konjugation: 20 wichtige Verben – Niveau CIF 4",
+		metaTitle: "FLE-Konjugation üben: 20 wichtige Verben – Niveau CIF 4",
+		description: "20 wichtige Verben – Niveau CIF 4 bilden eine progressive FLE-Konjugationsübung. Du festigst die Formen, die du zum Verstehen, Sprechen und Schreiben in typischen Alltagssituationen brauchst.",
+		metaDescription: "Interaktive FLE-Übung zur französischen Konjugation: 20 wichtige Verben – Niveau CIF 4. Wähle passende Verben und Zeitformen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF4",
+		locale: "en",
+		slug: "fle-french-conjugation-exercise-20-useful-verbs-cif-level-4",
+		title: "FLE French conjugation exercise: 20 useful verbs – CIF level 4",
+		metaTitle: "French as a foreign language: 20 useful verbs – CIF level 4",
+		description: "20 useful verbs – CIF level 4 form a progressive FLE French conjugation exercise. Learners build the forms needed to understand, speak and write French in common real-life situations.",
+		metaDescription: "Interactive French as a foreign language (FLE) conjugation exercise on 20 useful verbs – CIF level 4. Choose the verbs and tenses you need.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF4",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-fle-20-verbi-utili-livello-cif-4",
+		title: "Esercizio di coniugazione FLE: 20 verbi utili – livello CIF 4",
+		metaTitle: "Coniugazione FLE: esercizio su 20 verbi utili – livello CIF 4",
+		description: "20 verbi utili – livello CIF 4 propongono un esercizio progressivo di coniugazione FLE. Consolidi le forme necessarie per capire, parlare e scrivere in francese nella vita quotidiana.",
+		metaDescription: "Esercizio interattivo di coniugazione FLE su 20 verbi utili – livello CIF 4. Scegli i verbi e i tempi adatti al tuo apprendimento.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "CIF4",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-fle-20-verbos-utiles-nivel-cif-4",
+		title: "Ejercicio de conjugación FLE: 20 verbos útiles – nivel CIF 4",
+		metaTitle: "Conjugación FLE: ejercicio de 20 verbos útiles – nivel CIF 4",
+		description: "20 verbos útiles – nivel CIF 4 forman un ejercicio progresivo de conjugación FLE. Consolidas las formas necesarias para comprender, hablar y escribir francés en situaciones cotidianas.",
+		metaDescription: "Ejercicio interactivo de conjugación FLE sobre 20 verbos útiles – nivel CIF 4. Elige los verbos y tiempos adecuados para aprender francés.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "100-verbes-utiles-allophones",
+		locale: "fr",
+		slug: "exercice-de-conjugaison-fle-100-verbes-francais-utiles-au-quotidien",
+		title: "Exercice de conjugaison FLE : 100 verbes français utiles au quotidien",
+		metaTitle: "Conjugaison FLE : exercice sur 100 verbes français utiles au quotidien",
+		description: "100 verbes français utiles au quotidien forment un exercice de conjugaison FLE progressif. Tu consolides les formes nécessaires pour comprendre, parler et écrire en français dans les situations courantes.",
+		metaDescription: "Exercice interactif de conjugaison FLE sur 100 verbes français utiles au quotidien. Choisis les verbes et les temps adaptés à ton apprentissage du français.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "100-verbes-utiles-allophones",
+		locale: "de",
+		slug: "fle-ubung-zur-franzosischen-konjugation-100-wichtige-franzosische-alltagsverben",
+		title: "FLE-Übung zur französischen Konjugation: 100 wichtige französische Alltagsverben",
+		metaTitle: "FLE-Konjugation üben: 100 wichtige französische Alltagsverben",
+		description: "100 wichtige französische Alltagsverben bilden eine progressive FLE-Konjugationsübung. Du festigst die Formen, die du zum Verstehen, Sprechen und Schreiben in typischen Alltagssituationen brauchst.",
+		metaDescription: "Interaktive FLE-Übung zur französischen Konjugation: 100 wichtige französische Alltagsverben. Wähle passende Verben und Zeitformen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "100-verbes-utiles-allophones",
+		locale: "en",
+		slug: "fle-french-conjugation-exercise-100-useful-everyday-french-verbs",
+		title: "FLE French conjugation exercise: 100 useful everyday French verbs",
+		metaTitle: "French as a foreign language: 100 useful everyday French verbs",
+		description: "100 useful everyday French verbs form a progressive FLE French conjugation exercise. Learners build the forms needed to understand, speak and write French in common real-life situations.",
+		metaDescription: "Interactive French as a foreign language (FLE) conjugation exercise on 100 useful everyday French verbs. Choose the verbs and tenses you need.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "100-verbes-utiles-allophones",
+		locale: "it",
+		slug: "esercizio-di-coniugazione-fle-100-verbi-francesi-utili-ogni-giorno",
+		title: "Esercizio di coniugazione FLE: 100 verbi francesi utili ogni giorno",
+		metaTitle: "Coniugazione FLE: esercizio su 100 verbi francesi utili ogni giorno",
+		description: "100 verbi francesi utili ogni giorno propongono un esercizio progressivo di coniugazione FLE. Consolidi le forme necessarie per capire, parlare e scrivere in francese nella vita quotidiana.",
+		metaDescription: "Esercizio interattivo di coniugazione FLE su 100 verbi francesi utili ogni giorno. Scegli i verbi e i tempi adatti al tuo apprendimento.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	},
+	{
+		presetKey: "100-verbes-utiles-allophones",
+		locale: "es",
+		slug: "ejercicio-de-conjugacion-fle-100-verbos-franceses-utiles-para-cada-dia",
+		title: "Ejercicio de conjugación FLE: 100 verbos franceses útiles para cada día",
+		metaTitle: "Conjugación FLE: ejercicio de 100 verbos franceses útiles para cada día",
+		description: "100 verbos franceses útiles para cada día forman un ejercicio progresivo de conjugación FLE. Consolidas las formas necesarias para comprender, hablar y escribir francés en situaciones cotidianas.",
+		metaDescription: "Ejercicio interactivo de conjugación FLE sobre 100 verbos franceses útiles para cada día. Elige los verbos y tiempos adecuados para aprender francés.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: true
+	}
+];
+const publicationDeployment = {
+	schemaVersion: schemaVersion,
+	batchId: batchId,
+	publications: publications
+};
+
+class ChallengePublicationInputError extends Error {
+}
+class ChallengePublicationConflictError extends Error {
+}
+class ChallengePublicationNotFoundError extends Error {
+}
+const PAYLOAD_KEYS = /* @__PURE__ */ new Set([
+  "slug",
+  "title",
+  "metaTitle",
+  "description",
+  "metaDescription",
+  "isPublished",
+  "isIndexable"
+]);
+const PUBLIC_CATEGORY_NAMES = {
+  school: {
+    fr: "Niveaux scolaires suisses",
+    de: "Schweizer Schulstufen",
+    en: "Swiss school levels",
+    it: "Livelli scolastici svizzeri",
+    es: "Niveles escolares suizos"
+  },
+  "school-france": {
+    fr: "Niveaux scolaires fran\xE7ais",
+    de: "Franz\xF6sische Schulstufen",
+    en: "French school levels",
+    it: "Livelli scolastici francesi",
+    es: "Niveles escolares franceses"
+  },
+  cif: {
+    fr: "Conjugaison FLE (fran\xE7ais langue \xE9trang\xE8re)",
+    de: "FLE-Konjugation (Franz\xF6sisch als Fremdsprache)",
+    en: "FLE conjugation (French as a foreign language)",
+    it: "Coniugazione FLE (francese lingua straniera)",
+    es: "Conjugaci\xF3n FLE (franc\xE9s como lengua extranjera)"
+  },
+  "verb-group": {
+    fr: "Groupes de verbes",
+    de: "Verbgruppen",
+    en: "Verb groups",
+    it: "Gruppi verbali",
+    es: "Grupos verbales"
+  },
+  spelling: {
+    fr: "Difficult\xE9s particuli\xE8res",
+    de: "Besondere Schwierigkeiten",
+    en: "Special difficulties",
+    it: "Difficolt\xE0 particolari",
+    es: "Dificultades particulares"
+  },
+  semantic: {
+    fr: "Sens des verbes",
+    de: "Bedeutung der Verben",
+    en: "Verb meanings",
+    it: "Significato dei verbi",
+    es: "Significado de los verbos"
+  }
+};
+function publicChallengeCategoryName(categorySlug, locale, fallback) {
+  var _a, _b;
+  return (_b = (_a = PUBLIC_CATEGORY_NAMES[categorySlug]) == null ? void 0 : _a[locale]) != null ? _b : fallback;
+}
+function record(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new ChallengePublicationInputError("Publication invalide.");
+  }
+  const body = value;
+  const unexpected = Object.keys(body).filter((key) => !PAYLOAD_KEYS.has(key));
+  if (unexpected.length) throw new ChallengePublicationInputError(`Champs inconnus : ${unexpected.join(", ")}.`);
+  return body;
+}
+function inputText(value, label, maximum) {
+  if (typeof value !== "string") throw new ChallengePublicationInputError(`${label} doit \xEAtre du texte.`);
+  const normalized = value.trim();
+  if (normalized.length > maximum) {
+    throw new ChallengePublicationInputError(`${label} ne peut pas d\xE9passer ${maximum} caract\xE8res.`);
+  }
+  return normalized;
+}
+function inputBoolean(value, label) {
+  if (typeof value !== "boolean") throw new ChallengePublicationInputError(`${label} doit \xEAtre un bool\xE9en.`);
+  return value;
+}
+function parsePublicationLocale(value) {
+  if (typeof value !== "string" || !SUPPORTED_LOCALES.includes(value)) {
+    throw new ChallengePublicationInputError("Langue de publication invalide.");
+  }
+  return value;
+}
+function normalizeChallengePublicationSlug(value) {
+  if (typeof value !== "string") return "";
+  return value.trim().toLocaleLowerCase("fr").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/[^a-z0-9]+/gu, "-").replace(/^-+|-+$/gu, "").slice(0, 120).replace(/-+$/gu, "");
+}
+function parseChallengePublicationPayload(value) {
+  var _a;
+  const body = record(value);
+  const rawSlug = inputText((_a = body.slug) != null ? _a : "", "Le slug", 160);
+  const slug = normalizeChallengePublicationSlug(rawSlug) || null;
+  const title = inputText(body.title, "Le titre", 180);
+  const metaTitle = inputText(body.metaTitle, "Le titre SEO", 180);
+  const description = inputText(body.description, "La description", 2e3);
+  const metaDescription = inputText(body.metaDescription, "La meta description", 320);
+  const isPublished = inputBoolean(body.isPublished, "Publi\xE9");
+  const isIndexable = isPublished;
+  if (isPublished && (!slug || !title || !metaTitle || !description || !metaDescription)) {
+    throw new ChallengePublicationInputError("Un slug, un titre, un titre SEO, une description et une meta description sont obligatoires pour publier.");
+  }
+  return { slug, title, metaTitle, description, metaDescription, isPublished, isIndexable };
+}
+function groupChallengePublicationAlternates(rows) {
+  return rows.flatMap((row) => {
+    if (!row.slug || !row.isPublished) return [];
+    const locale = parsePublicationLocale(row.locale);
+    return [{ locale, path: `/${locale}/defis/${row.slug}` }];
+  });
+}
+function isoDate(value) {
+  return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+}
+function adminPublication(row) {
+  return {
+    id: Number(row.id),
+    presetId: Number(row.presetId),
+    locale: parsePublicationLocale(row.locale),
+    slug: row.slug || "",
+    title: row.title,
+    metaTitle: row.metaTitle,
+    description: row.description,
+    metaDescription: row.metaDescription,
+    isPublished: Boolean(row.isPublished),
+    isIndexable: Boolean(row.isPublished),
+    createdAt: isoDate(row.createdAt),
+    updatedAt: isoDate(row.updatedAt)
+  };
+}
+const PUBLICATION_SELECT = `SELECT publication.id,publication.preset_id AS presetId,
+  preset.preset_key AS presetKey,publication.locale,publication.slug,publication.title,
+  publication.meta_title AS metaTitle,publication.description,
+  publication.meta_description AS metaDescription,publication.is_published AS isPublished,
+  publication.is_indexable AS isIndexable,category.slug AS categorySlug,
+  category.name AS categoryName,publication.created_at AS createdAt,
+  publication.updated_at AS updatedAt
+  FROM challenge_preset_publications publication
+  INNER JOIN challenge_presets preset ON preset.id=publication.preset_id
+  INNER JOIN challenge_preset_categories category ON category.id=preset.category_id`;
+async function listAdminChallengePublications(executor, presetId) {
+  const [rows] = await executor.execute(`${PUBLICATION_SELECT}
+    WHERE publication.preset_id=? ORDER BY FIELD(publication.locale,'fr','de','en','it','es')`, [presetId]);
+  return rows.map(adminPublication);
+}
+async function assertPresetExists(executor, presetId) {
+  const [rows] = await executor.execute("SELECT id FROM challenge_presets WHERE id=? LIMIT 1", [presetId]);
+  if (!rows.length) throw new ChallengePublicationNotFoundError("D\xE9fi officiel introuvable.");
+}
+async function saveChallengePublication(connection, presetId, locale, input) {
+  await assertPresetExists(connection, presetId);
+  const [currentRows] = await connection.execute(`${PUBLICATION_SELECT}
+    WHERE publication.preset_id=? AND publication.locale=? FOR UPDATE`, [presetId, locale]);
+  const current = currentRows[0];
+  if (input.slug) {
+    const [redirects] = await connection.execute(`
+      SELECT redirect.publication_id AS publicationId,redirect.locale,
+             publication.slug
+      FROM challenge_preset_publication_redirects redirect
+      INNER JOIN challenge_preset_publications publication ON publication.id=redirect.publication_id
+      WHERE redirect.locale=? AND redirect.old_slug=? FOR UPDATE
+    `, [locale, input.slug]);
+    const redirect = redirects[0];
+    if (redirect && Number(redirect.publicationId) !== Number((current == null ? void 0 : current.id) || 0)) {
+      throw new ChallengePublicationConflictError("Ce slug est d\xE9j\xE0 utilis\xE9 comme ancienne adresse.");
+    }
+    if (redirect) {
+      await connection.execute("DELETE FROM challenge_preset_publication_redirects WHERE publication_id=? AND locale=? AND old_slug=?", [current.id, locale, input.slug]);
+    }
+  }
+  try {
+    await connection.execute(`
+      INSERT INTO challenge_preset_publications
+        (preset_id,locale,slug,title,meta_title,description,meta_description,is_published,is_indexable)
+      VALUES (?,?,?,?,?,?,?,?,?)
+      ON DUPLICATE KEY UPDATE slug=VALUES(slug),title=VALUES(title),meta_title=VALUES(meta_title),
+        description=VALUES(description),meta_description=VALUES(meta_description),
+        is_published=VALUES(is_published),is_indexable=VALUES(is_indexable)
+    `, [
+      presetId,
+      locale,
+      input.slug,
+      input.title,
+      input.metaTitle,
+      input.description,
+      input.metaDescription,
+      input.isPublished ? 1 : 0,
+      input.isPublished ? 1 : 0
+    ]);
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "ER_DUP_ENTRY") {
+      throw new ChallengePublicationConflictError("Ce slug est d\xE9j\xE0 utilis\xE9 dans cette langue.");
+    }
+    throw error;
+  }
+  const [savedRows] = await connection.execute(`${PUBLICATION_SELECT}
+    WHERE publication.preset_id=? AND publication.locale=? LIMIT 1`, [presetId, locale]);
+  const saved = savedRows[0];
+  if ((current == null ? void 0 : current.slug) && current.isPublished && input.slug && current.slug !== input.slug) {
+    await connection.execute(`INSERT INTO challenge_preset_publication_redirects
+      (publication_id,locale,old_slug) VALUES (?,?,?)
+      ON DUPLICATE KEY UPDATE publication_id=VALUES(publication_id)`, [saved.id, locale, current.slug]);
+  }
+  return adminPublication(saved);
+}
+async function translationsForPreset(executor, presetId) {
+  const [rows] = await executor.execute(`SELECT preset_id AS presetId,locale,slug,
+    is_published AS isPublished,is_indexable AS isIndexable
+    FROM challenge_preset_publications WHERE preset_id=? ORDER BY FIELD(locale,'fr','de','en','it','es')`, [presetId]);
+  return groupChallengePublicationAlternates(rows);
+}
+async function resolveChallengePublication(executor, locale, slug) {
+  const [rows] = await executor.execute(`${PUBLICATION_SELECT}
+    WHERE publication.locale=? AND publication.slug=? AND publication.is_published=1
+      AND preset.is_active=1 AND category.is_active=1 LIMIT 1`, [locale, slug]);
+  const row = rows[0];
+  if (row) {
+    const catalogue = await getCatalogue(locale);
+    const preset = catalogue.presets.find((candidate) => candidate.id === row.presetKey);
+    if (!preset) return null;
+    const translations = await translationsForPreset(executor, Number(row.presetId));
+    const publication = {
+      id: Number(row.id),
+      presetId: Number(row.presetId),
+      presetKey: row.presetKey,
+      locale,
+      slug: row.slug,
+      title: row.title,
+      metaTitle: row.metaTitle,
+      description: row.description,
+      metaDescription: row.metaDescription,
+      isIndexable: Boolean(row.isPublished),
+      updatedAt: isoDate(row.updatedAt),
+      categorySlug: row.categorySlug,
+      categoryName: publicChallengeCategoryName(row.categorySlug, locale, row.categoryName),
+      translations,
+      preset
+    };
+    return { kind: "publication", publication };
+  }
+  const [redirects] = await executor.execute(`
+    SELECT redirect.publication_id AS publicationId,publication.locale,publication.slug
+    FROM challenge_preset_publication_redirects redirect
+    INNER JOIN challenge_preset_publications publication ON publication.id=redirect.publication_id
+    INNER JOIN challenge_presets preset ON preset.id=publication.preset_id
+    INNER JOIN challenge_preset_categories category ON category.id=preset.category_id
+    WHERE redirect.locale=? AND redirect.old_slug=? AND publication.is_published=1
+      AND publication.slug IS NOT NULL AND preset.is_active=1 AND category.is_active=1 LIMIT 1
+  `, [locale, slug]);
+  const redirect = redirects[0];
+  return redirect ? { kind: "redirect", locale: parsePublicationLocale(redirect.locale), slug: redirect.slug } : null;
+}
+async function listPublicChallengePublications(executor, locale) {
+  const [rows] = await executor.execute(`${PUBLICATION_SELECT}
+    WHERE publication.locale=? AND publication.is_published=1
+      AND publication.slug IS NOT NULL AND preset.is_active=1 AND category.is_active=1
+    ORDER BY category.sort_order,preset.sort_order,publication.title`, [locale]);
+  return rows.map((row) => ({
+    id: Number(row.id),
+    presetId: Number(row.presetId),
+    presetKey: row.presetKey,
+    locale,
+    slug: row.slug,
+    title: row.title,
+    description: row.description,
+    categorySlug: row.categorySlug,
+    categoryName: publicChallengeCategoryName(row.categorySlug, locale, row.categoryName)
+  }));
+}
+async function listPublishedChallengePublications(executor) {
+  const [rows] = await executor.execute(`${PUBLICATION_SELECT}
+    WHERE publication.is_published=1
+      AND publication.slug IS NOT NULL AND preset.is_active=1 AND category.is_active=1
+    ORDER BY publication.preset_id,FIELD(publication.locale,'fr','de','en','it','es')`);
+  return rows.map((row) => ({
+    presetId: Number(row.presetId),
+    locale: parsePublicationLocale(row.locale),
+    slug: row.slug,
+    updatedAt: isoDate(row.updatedAt)
+  }));
+}
+
+function parseDeploymentEntry(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("Entr\xE9e de d\xE9ploiement SEO invalide.");
+  }
+  const entry = value;
+  const presetKey = typeof entry.presetKey === "string" ? entry.presetKey.trim() : "";
+  if (!presetKey || presetKey.length > 80 || !/^[a-z0-9][a-z0-9_-]*$/iu.test(presetKey)) {
+    throw new Error("Cl\xE9 stable de d\xE9fi invalide dans le d\xE9ploiement SEO.");
+  }
+  if (typeof entry.overwriteExisting !== "boolean") {
+    throw new Error(`overwriteExisting doit \xEAtre un bool\xE9en pour ${presetKey}.`);
+  }
+  const input = parseChallengePublicationPayload({
+    slug: entry.slug,
+    title: entry.title,
+    metaTitle: entry.metaTitle,
+    description: entry.description,
+    metaDescription: entry.metaDescription,
+    isPublished: entry.isPublished,
+    isIndexable: entry.isIndexable
+  });
+  return {
+    presetKey,
+    locale: parsePublicationLocale(entry.locale),
+    overwriteExisting: entry.overwriteExisting,
+    ...input
+  };
+}
+function parseChallengePublicationDeployment(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("Paquet de d\xE9ploiement SEO invalide.");
+  }
+  const batch = value;
+  if (batch.batchId !== null && (typeof batch.batchId !== "string" || !/^[a-z0-9._-]{1,120}$/iu.test(batch.batchId))) {
+    throw new Error("Identifiant de paquet SEO invalide.");
+  }
+  if (!Array.isArray(batch.publications)) throw new Error("Liste des publications SEO invalide.");
+  const publications = batch.publications.map(parseDeploymentEntry);
+  const identities = /* @__PURE__ */ new Set();
+  for (const publication of publications) {
+    const identity = `${publication.presetKey}:${publication.locale}`;
+    if (identities.has(identity)) throw new Error(`Publication SEO dupliqu\xE9e dans le paquet : ${identity}.`);
+    identities.add(identity);
+  }
+  if (publications.length && !batch.batchId) {
+    throw new Error("Un paquet SEO non vide doit poss\xE9der un identifiant.");
+  }
+  return { schemaVersion: 1, batchId: batch.batchId, publications };
+}
+function deploymentChecksum(batch) {
+  return createHash("sha256").update(JSON.stringify(batch)).digest("hex");
+}
+async function applyChallengePublicationDeployment(database, value) {
+  const batch = parseChallengePublicationDeployment(value);
+  if (!batch.batchId || !batch.publications.length) {
+    return { status: "empty", inserted: 0, replaced: 0, preserved: 0 };
+  }
+  const checksum = deploymentChecksum(batch);
+  const connection = await database.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [appliedRows] = await connection.execute(`
+      SELECT checksum FROM challenge_preset_publication_deployments
+      WHERE batch_id=? FOR UPDATE
+    `, [batch.batchId]);
+    if (appliedRows[0]) {
+      if (appliedRows[0].checksum !== checksum) {
+        throw new Error(`Le paquet SEO ${batch.batchId} a chang\xE9 apr\xE8s son application.`);
+      }
+      await connection.rollback();
+      return { status: "already-applied", inserted: 0, replaced: 0, preserved: 0 };
+    }
+    let inserted = 0;
+    let replaced = 0;
+    let preserved = 0;
+    for (const publication of batch.publications) {
+      const [presetRows] = await connection.execute(
+        "SELECT id FROM challenge_presets WHERE preset_key=? LIMIT 1 FOR UPDATE",
+        [publication.presetKey]
+      );
+      const preset = presetRows[0];
+      if (!preset) throw new Error(`D\xE9fi officiel introuvable : ${publication.presetKey}.`);
+      const [existingRows] = await connection.execute(`
+        SELECT id FROM challenge_preset_publications
+        WHERE preset_id=? AND locale=? LIMIT 1 FOR UPDATE
+      `, [preset.id, publication.locale]);
+      const exists = Boolean(existingRows[0]);
+      if (exists && !publication.overwriteExisting) {
+        preserved += 1;
+        continue;
+      }
+      await saveChallengePublication(connection, Number(preset.id), publication.locale, publication);
+      if (exists) replaced += 1;
+      else inserted += 1;
+    }
+    await connection.execute(`
+      INSERT INTO challenge_preset_publication_deployments (batch_id,checksum)
+      VALUES (?,?)
+    `, [batch.batchId, checksum]);
+    await connection.commit();
+    return { status: "applied", inserted, replaced, preserved };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+const _0p9Qn2cgjufTUhq54tYFqiT9LNizSEnuaVDP0lL0mM = defineNitroPlugin((nitroApp) => {
+  let deploymentPromise = null;
+  let isReady = false;
+  const ensureDeployment = () => {
+    if (isReady) return Promise.resolve();
+    if (deploymentPromise) return deploymentPromise;
+    deploymentPromise = applyChallengePublicationDeployment(
+      useDatabase(),
+      publicationDeployment
+    ).then((deployment) => {
+      isReady = true;
+      console.info("[database] Publications des d\xE9fis officiels pr\xEAtes.", deployment);
+    }).catch((error) => {
+      deploymentPromise = null;
+      throw error;
+    });
+    return deploymentPromise;
+  };
+  const reportFailure = (error) => {
+    console.error("[database] \xC9chec du d\xE9ploiement des publications de d\xE9fis.", error);
+  };
+  setTimeout(() => {
+    void ensureDeployment().catch(reportFailure);
+  }, 0);
+  nitroApp.hooks.hook("request", async () => {
+    await ensureDeployment().catch(reportFailure);
+  });
+});
+
 const plugins = [
   _j6rhVa9vazQwWAo6ZokRIRcXkdzpBcvA9Sds0tqpZaM,
 _vhFGPFvO8EKtdDe4kgkbSwBVRUNaMr_wjhK6lGNYDAY,
@@ -125472,6 +128252,7 @@ _Z45CxtDWqkkKjVCKLRFEp9iVHa4rBcfVi8IP4zGS48,
 _v0PgyO3yqOGIf_mwl_7PH_OwB0DFq3HPuCgCxb8_k,
 _tfOtJNAOlHYSBAoNhgJlF4qW4RlJtE_4zzODYwG3H8,
 __XhcuSx1Fo8FfgcfsoaX0dhzsV5g5sN3hIvWYmQn0sg,
+_dsA3mm0wgxsXi_t2yUL8f2Ubn4s4XW6EVMR_TtTqE,
 _aCMECTWiwhQ_cHUZU9mps2K8n7GsVqimroMp6HH1F8,
 _QQ3_jm_M8WHw8h_XJhiQZi3NFofRBeGDgShBG2LW_8,
 _W6EmE61CNpKiO0DniMnORvCS4gw0wKBQ2elDKHwm3Vk,
@@ -125487,3103 +128268,3146 @@ _DsNS3JEJlnvrCCIjdkld6dzfoTqGONHrJMrPWhd60,
 _Qvt69RZj56eCkoAFoZ87Qax4PcSt9omNAJjJjfRESY,
 _cJS8fUHbWPAFEGMrZY0adbH3sscbwPp1lUW6TfGNu0,
 _LWTxJ9fVHK_pU1jweRMv5kXnmrienJVgJyNp7a_45Bo,
-_0T1W4DkA4XhxQ3mqRSifwqf7ZnOeJX9jNfES0b6RQ
+_0T1W4DkA4XhxQ3mqRSifwqf7ZnOeJX9jNfES0b6RQ,
+_0p9Qn2cgjufTUhq54tYFqiT9LNizSEnuaVDP0lL0mM
 ];
 
 const assets = {
   "/.htaccess": {
     "type": "text/plain; charset=utf-8",
     "etag": "\"e7-hG2groYZxk6L7QIuDysXtOp31qQ\"",
-    "mtime": "2026-08-17T22:08:43.432Z",
+    "mtime": "2026-08-18T12:51:49.934Z",
     "size": 231,
     "path": "../public/.htaccess"
   },
   "/favicon.ico": {
     "type": "image/vnd.microsoft.icon",
     "etag": "\"10be-n8egyE9tcb7sKGr/pYCaQ4uWqxI\"",
-    "mtime": "2026-08-17T22:08:43.433Z",
+    "mtime": "2026-08-18T12:51:49.934Z",
     "size": 4286,
     "path": "../public/favicon.ico"
   },
   "/favicon.svg": {
     "type": "image/svg+xml",
     "etag": "\"74-WyA9ZQw0VL+p5r20HpGPoXfXkds\"",
-    "mtime": "2026-08-17T22:08:43.431Z",
+    "mtime": "2026-08-18T12:51:49.936Z",
     "size": 116,
     "path": "../public/favicon.svg"
   },
   "/robots.txt": {
     "type": "text/plain; charset=utf-8",
     "etag": "\"194-zYMBBhB4q/jcC5o0BldfXliaHug\"",
-    "mtime": "2026-08-17T22:08:43.432Z",
+    "mtime": "2026-08-18T12:51:49.932Z",
     "size": 404,
     "path": "../public/robots.txt"
   },
   "/theme-init.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1d9-trb/vp5w6iznW8QPXyFTu4zLuZs\"",
-    "mtime": "2026-08-17T22:08:43.433Z",
+    "mtime": "2026-08-18T12:51:49.936Z",
     "size": 473,
     "path": "../public/theme-init.js"
   },
   "/images/ancien-site.webp": {
     "type": "image/webp",
     "etag": "\"3746-e734D11Dqjfh5NlFidUXIfqJ//8\"",
-    "mtime": "2026-08-17T22:08:43.422Z",
+    "mtime": "2026-08-18T12:51:49.925Z",
     "size": 14150,
     "path": "../public/images/ancien-site.webp"
-  },
-  "/images/recharger-defi.svg": {
-    "type": "image/svg+xml",
-    "etag": "\"7da-sW4Yx/P5X4Hs5bsLkaNr7fae5Cw\"",
-    "mtime": "2026-08-17T22:08:43.422Z",
-    "size": 2010,
-    "path": "../public/images/recharger-defi.svg"
   },
   "/images/site-mountains.svg": {
     "type": "image/svg+xml",
     "etag": "\"2fdd-Kp0xCymtx14aH6SsI0yTF9+0o2s\"",
-    "mtime": "2026-08-17T22:08:43.422Z",
+    "mtime": "2026-08-18T12:51:49.926Z",
     "size": 12253,
     "path": "../public/images/site-mountains.svg"
   },
-  "/_nuxt/12rBPAEU.js": {
+  "/_nuxt/5ZOE5Mub.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"ba5-VwDrfwpqrKGBgN2mkB2JR1ND/ms\"",
-    "mtime": "2026-08-17T22:08:43.389Z",
-    "size": 2981,
-    "path": "../public/_nuxt/12rBPAEU.js"
+    "etag": "\"fc-C42Bh2Kb3JId2YJo9wsJ5GmGaFU\"",
+    "mtime": "2026-08-18T12:51:49.890Z",
+    "size": 252,
+    "path": "../public/_nuxt/5ZOE5Mub.js"
   },
-  "/_nuxt/9HVXZUTo.js": {
+  "/images/recharger-defi.svg": {
+    "type": "image/svg+xml",
+    "etag": "\"7da-sW4Yx/P5X4Hs5bsLkaNr7fae5Cw\"",
+    "mtime": "2026-08-18T12:51:49.926Z",
+    "size": 2010,
+    "path": "../public/images/recharger-defi.svg"
+  },
+  "/_nuxt/6Jf08q3q.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"e2-NdURdS2eAhV1wWVXyJ4hhkatJmg\"",
-    "mtime": "2026-08-17T22:08:43.389Z",
-    "size": 226,
-    "path": "../public/_nuxt/9HVXZUTo.js"
+    "etag": "\"b2d-hWm6bOz0iYg8jKFPLy5iQbSb/1I\"",
+    "mtime": "2026-08-18T12:51:49.890Z",
+    "size": 2861,
+    "path": "../public/_nuxt/6Jf08q3q.js"
   },
   "/_nuxt/AdminAuthBoundary.DHoXYhWa.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1c12-XEnUtETb6UD7RNyeKpm3ySK5CEs\"",
-    "mtime": "2026-08-17T22:08:43.389Z",
+    "mtime": "2026-08-18T12:51:49.891Z",
     "size": 7186,
     "path": "../public/_nuxt/AdminAuthBoundary.DHoXYhWa.css"
   },
-  "/_nuxt/B1adEwqC.js": {
+  "/_nuxt/AnEY6rrl.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"b2d-/vfXGZsfjuljBGJqE+yywgVoQFc\"",
-    "mtime": "2026-08-17T22:08:43.389Z",
-    "size": 2861,
-    "path": "../public/_nuxt/B1adEwqC.js"
+    "etag": "\"dc6-SMgCGmxvxOnxOXDLX2cUJYZp8Wk\"",
+    "mtime": "2026-08-18T12:51:49.891Z",
+    "size": 3526,
+    "path": "../public/_nuxt/AnEY6rrl.js"
   },
-  "/_nuxt/B5uIYGkf.js": {
+  "/_nuxt/B05-JLZO.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"8edc-ThZ18pzdHmhtSlVWG1aSw+WA46k\"",
-    "mtime": "2026-08-17T22:08:43.390Z",
-    "size": 36572,
-    "path": "../public/_nuxt/B5uIYGkf.js"
+    "etag": "\"ecf-9ByXoeGJ9508sW1UR5pzsdqY9Ko\"",
+    "mtime": "2026-08-18T12:51:49.892Z",
+    "size": 3791,
+    "path": "../public/_nuxt/B05-JLZO.js"
+  },
+  "/_nuxt/B29aZhU2.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1d80-bOGq3DO259KTvu+jBpv/BJNaHXI\"",
+    "mtime": "2026-08-18T12:51:49.892Z",
+    "size": 7552,
+    "path": "../public/_nuxt/B29aZhU2.js"
+  },
+  "/_nuxt/B2UFoc3T.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"165a-nIiPJ007v2V1wLGTNWgVX3PVHJM\"",
+    "mtime": "2026-08-18T12:51:49.892Z",
+    "size": 5722,
+    "path": "../public/_nuxt/B2UFoc3T.js"
+  },
+  "/_nuxt/B329ZxKN.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"9971-L3xcKxhyxjIHJMW3D2VwnpAziec\"",
+    "mtime": "2026-08-18T12:51:49.892Z",
+    "size": 39281,
+    "path": "../public/_nuxt/B329ZxKN.js"
+  },
+  "/_nuxt/B5-jiSxJ.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"24c-E52ZNfPPe3qMpsE2O1JEWQJJ2gw\"",
+    "mtime": "2026-08-18T12:51:49.892Z",
+    "size": 588,
+    "path": "../public/_nuxt/B5-jiSxJ.js"
   },
   "/_nuxt/B8Nt-ERl.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"5a49-ESbUzwq0WOLhq2HY+Y3PhM254ME\"",
-    "mtime": "2026-08-17T22:08:43.390Z",
+    "mtime": "2026-08-18T12:51:49.892Z",
     "size": 23113,
     "path": "../public/_nuxt/B8Nt-ERl.js"
   },
-  "/_nuxt/BA-chD6O.js": {
+  "/_nuxt/BGuX9y-D.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"849-lX8PDNfgE/Go7tnGLfoo0gKJEVc\"",
-    "mtime": "2026-08-17T22:08:43.390Z",
-    "size": 2121,
-    "path": "../public/_nuxt/BA-chD6O.js"
+    "etag": "\"791b-ePExPK8w6Z3kbWxIoVcjloVplQk\"",
+    "mtime": "2026-08-18T12:51:49.892Z",
+    "size": 31003,
+    "path": "../public/_nuxt/BGuX9y-D.js"
   },
   "/_nuxt/BFRtefY3.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"44b-lO6eNchT+yYq+Hz3UbSAPMdsRh4\"",
-    "mtime": "2026-08-17T22:08:43.389Z",
+    "mtime": "2026-08-18T12:51:49.892Z",
     "size": 1099,
     "path": "../public/_nuxt/BFRtefY3.js"
   },
-  "/_nuxt/BJ6-K5Vt.js": {
+  "/_nuxt/BJmB6Kr7.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"24c-GDnojs1UhAI9VZCrgL+vW4KFo6Q\"",
-    "mtime": "2026-08-17T22:08:43.390Z",
-    "size": 588,
-    "path": "../public/_nuxt/BJ6-K5Vt.js"
+    "etag": "\"160-e0uZIcsWAlA7S+8My8EE02e8F3Q\"",
+    "mtime": "2026-08-18T12:51:49.892Z",
+    "size": 352,
+    "path": "../public/_nuxt/BJmB6Kr7.js"
   },
-  "/_nuxt/BL4NJ6w3.js": {
+  "/_nuxt/BO0naSbb.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"8302-Zp92HmRW4S8F/WVrBYphozoAIbA\"",
-    "mtime": "2026-08-17T22:08:43.390Z",
-    "size": 33538,
-    "path": "../public/_nuxt/BL4NJ6w3.js"
+    "etag": "\"849-KuC39D5fporNR6Km3VDOTXnH2I4\"",
+    "mtime": "2026-08-18T12:51:49.893Z",
+    "size": 2121,
+    "path": "../public/_nuxt/BO0naSbb.js"
   },
-  "/_nuxt/BP2bye-f.js": {
+  "/_nuxt/BMLmJxm9.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"7c6-JbryJ4daKofDyACV46yJzu1R0Ho\"",
-    "mtime": "2026-08-17T22:08:43.390Z",
-    "size": 1990,
-    "path": "../public/_nuxt/BP2bye-f.js"
+    "etag": "\"195ce-jYw5EPNW0sqr1/lTefmB4UL+ZIc\"",
+    "mtime": "2026-08-18T12:51:49.893Z",
+    "size": 103886,
+    "path": "../public/_nuxt/BMLmJxm9.js"
   },
-  "/_nuxt/BQNrQIpa.js": {
+  "/_nuxt/BQ0DaFig.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"402-NIYP6a/O0aA21YozIDs5z0qtzQI\"",
-    "mtime": "2026-08-17T22:08:43.390Z",
-    "size": 1026,
-    "path": "../public/_nuxt/BQNrQIpa.js"
-  },
-  "/_nuxt/BRJ-Bmaj.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1c3-+ceDLI3oMBnysq0NFhT1lLgABv4\"",
-    "mtime": "2026-08-17T22:08:43.390Z",
-    "size": 451,
-    "path": "../public/_nuxt/BRJ-Bmaj.js"
-  },
-  "/_nuxt/BWMI4X6G.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"d96-2pECLnLFmtkklBhpZvi7QvbuZog\"",
-    "mtime": "2026-08-17T22:08:43.390Z",
-    "size": 3478,
-    "path": "../public/_nuxt/BWMI4X6G.js"
-  },
-  "/_nuxt/B_3a7-QU.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"2df-XESteiIbIEp+pvX1JlCMww2Yk3I\"",
-    "mtime": "2026-08-17T22:08:43.390Z",
-    "size": 735,
-    "path": "../public/_nuxt/B_3a7-QU.js"
-  },
-  "/_nuxt/B_FD6dXT.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"46e3-NGc2kwinUu9V+CQHivE/K3cZexQ\"",
-    "mtime": "2026-08-17T22:08:43.391Z",
-    "size": 18147,
-    "path": "../public/_nuxt/B_FD6dXT.js"
+    "etag": "\"8da0-QAZ/KYQKu+fRVvK59pwLaQEQ4z0\"",
+    "mtime": "2026-08-18T12:51:49.893Z",
+    "size": 36256,
+    "path": "../public/_nuxt/BQ0DaFig.js"
   },
   "/_nuxt/BOF6v8rb.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"643fd-4eAFzvIrVx6RBdakASdECPaZDE0\"",
-    "mtime": "2026-08-17T22:08:43.390Z",
+    "mtime": "2026-08-18T12:51:49.894Z",
     "size": 410621,
     "path": "../public/_nuxt/BOF6v8rb.js"
   },
-  "/_nuxt/BeqNwlSf.js": {
+  "/_nuxt/BRJ-Bmaj.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"adea-igrFPH4ycB6nJ2vj3QRvQ6CemXQ\"",
-    "mtime": "2026-08-17T22:08:43.391Z",
-    "size": 44522,
-    "path": "../public/_nuxt/BeqNwlSf.js"
+    "etag": "\"1c3-+ceDLI3oMBnysq0NFhT1lLgABv4\"",
+    "mtime": "2026-08-18T12:51:49.893Z",
+    "size": 451,
+    "path": "../public/_nuxt/BRJ-Bmaj.js"
   },
-  "/_nuxt/BgeB4vGF.js": {
+  "/_nuxt/BSmuoOJI.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"12a-OH9MwU+yLeZHNjftmGq000/M7pk\"",
-    "mtime": "2026-08-17T22:08:43.391Z",
-    "size": 298,
-    "path": "../public/_nuxt/BgeB4vGF.js"
+    "etag": "\"353c-/EOjiblfOsJecxNhHoTx13kgbhQ\"",
+    "mtime": "2026-08-18T12:51:49.893Z",
+    "size": 13628,
+    "path": "../public/_nuxt/BSmuoOJI.js"
+  },
+  "/_nuxt/B_FD6dXT.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"46e3-NGc2kwinUu9V+CQHivE/K3cZexQ\"",
+    "mtime": "2026-08-18T12:51:49.893Z",
+    "size": 18147,
+    "path": "../public/_nuxt/B_FD6dXT.js"
+  },
+  "/_nuxt/BagWkrVz.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"ba5-3qj4fifSxxfQ+NZA5soCbD1nwXw\"",
+    "mtime": "2026-08-18T12:51:49.893Z",
+    "size": 2981,
+    "path": "../public/_nuxt/BagWkrVz.js"
+  },
+  "/_nuxt/BXEDgBM6.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"adea-393lNsZxwzxTTPK+Vw1OEnPSHPY\"",
+    "mtime": "2026-08-18T12:51:49.893Z",
+    "size": 44522,
+    "path": "../public/_nuxt/BXEDgBM6.js"
+  },
+  "/_nuxt/BdjE5QGs.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"402-BhXyBrAJlvDHkJGs6Eek3+ILMK0\"",
+    "mtime": "2026-08-18T12:51:49.894Z",
+    "size": 1026,
+    "path": "../public/_nuxt/BdjE5QGs.js"
+  },
+  "/_nuxt/Bij1HzbN.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"2bb-8qoj6EZgLd9Nbzd5wUxRocuwjfA\"",
+    "mtime": "2026-08-18T12:51:49.893Z",
+    "size": 699,
+    "path": "../public/_nuxt/Bij1HzbN.js"
   },
   "/_nuxt/Bj01ViQf.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"2216-c0Zm6//isqmlt6l79YGuGsuetPg\"",
-    "mtime": "2026-08-17T22:08:43.391Z",
+    "mtime": "2026-08-18T12:51:49.894Z",
     "size": 8726,
     "path": "../public/_nuxt/Bj01ViQf.js"
   },
-  "/_nuxt/BjSMxzit.js": {
+  "/_nuxt/Bx-a1Cjx.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"353c-PTBiiQEiJdfBoyB3MH2mw3es7Mk\"",
-    "mtime": "2026-08-17T22:08:43.391Z",
-    "size": 13628,
-    "path": "../public/_nuxt/BjSMxzit.js"
-  },
-  "/_nuxt/BpFJ-zxH.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"e5-7/7doVzh07C4E88VVylABwZ4UNs\"",
-    "mtime": "2026-08-17T22:08:43.391Z",
-    "size": 229,
-    "path": "../public/_nuxt/BpFJ-zxH.js"
-  },
-  "/_nuxt/BxOw_Y8e.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1f80-ApKnz3RGq69sPu3NgXtraCtqSXI\"",
-    "mtime": "2026-08-17T22:08:43.391Z",
-    "size": 8064,
-    "path": "../public/_nuxt/BxOw_Y8e.js"
+    "etag": "\"373e-gWoS6jbgPL1eUIz6gCLMODvVQTQ\"",
+    "mtime": "2026-08-18T12:51:49.894Z",
+    "size": 14142,
+    "path": "../public/_nuxt/Bx-a1Cjx.js"
   },
   "/_nuxt/C-EF7JVS.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"bb0-q+sSNxfSFWDK/5T/IrkS20Q0R68\"",
-    "mtime": "2026-08-17T22:08:43.391Z",
+    "mtime": "2026-08-18T12:51:49.895Z",
     "size": 2992,
     "path": "../public/_nuxt/C-EF7JVS.js"
   },
-  "/_nuxt/BkgipONM.js": {
+  "/_nuxt/C3jPOYxt.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"26d1e-xxqDNgX8sw1Jc8LoKYO5Sb6l9gI\"",
-    "mtime": "2026-08-17T22:08:43.391Z",
-    "size": 159006,
-    "path": "../public/_nuxt/BkgipONM.js"
+    "etag": "\"137a-RLFfqoH/mQIZXoIcO6MoB7q6zWc\"",
+    "mtime": "2026-08-18T12:51:49.894Z",
+    "size": 4986,
+    "path": "../public/_nuxt/C3jPOYxt.js"
   },
-  "/_nuxt/C1fteqHH.js": {
+  "/_nuxt/C3y3l2Sj.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"2aeb-+073tYCXAd5S+yNpoOq6mP3MjBA\"",
-    "mtime": "2026-08-17T22:08:43.391Z",
-    "size": 10987,
-    "path": "../public/_nuxt/C1fteqHH.js"
+    "etag": "\"bb2-JpMhQGPX+8waEEYO5atQmxN74dY\"",
+    "mtime": "2026-08-18T12:51:49.895Z",
+    "size": 2994,
+    "path": "../public/_nuxt/C3y3l2Sj.js"
   },
-  "/_nuxt/C5Va7NDW.js": {
+  "/_nuxt/BklnxIze.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"fc-wySx0kAmoo/pvhcV5pNYBaigmss\"",
-    "mtime": "2026-08-17T22:08:43.392Z",
-    "size": 252,
-    "path": "../public/_nuxt/C5Va7NDW.js"
+    "etag": "\"24445-+TVTPF623fKg8AaWOFos6+N9Lrs\"",
+    "mtime": "2026-08-18T12:51:49.895Z",
+    "size": 148549,
+    "path": "../public/_nuxt/BklnxIze.js"
   },
   "/_nuxt/C4Sdh6yL.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"5ff2-f4vTi+HR1Pej53qOpSTifGhzh9A\"",
-    "mtime": "2026-08-17T22:08:43.392Z",
+    "mtime": "2026-08-18T12:51:49.895Z",
     "size": 24562,
     "path": "../public/_nuxt/C4Sdh6yL.js"
   },
-  "/_nuxt/C1LlBCxz.js": {
+  "/_nuxt/C6A8nzgq.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"2306-fXHsCphSwHoA9p3sS7nTHZ5kjYQ\"",
-    "mtime": "2026-08-17T22:08:43.391Z",
-    "size": 8966,
-    "path": "../public/_nuxt/C1LlBCxz.js"
+    "etag": "\"ed4-jAzX6IUmot2kOx/sSTK+BFhrRVA\"",
+    "mtime": "2026-08-18T12:51:49.895Z",
+    "size": 3796,
+    "path": "../public/_nuxt/C6A8nzgq.js"
+  },
+  "/_nuxt/CAOciK9P.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"40-e8AkzzYkCaydf7OFUpOd17foZtM\"",
+    "mtime": "2026-08-18T12:51:49.895Z",
+    "size": 64,
+    "path": "../public/_nuxt/CAOciK9P.js"
+  },
+  "/_nuxt/C6tAgFzH.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"9ed3-Tp5SDnwhq4cTqOmfRxDdzC9Olo4\"",
+    "mtime": "2026-08-18T12:51:49.895Z",
+    "size": 40659,
+    "path": "../public/_nuxt/C6tAgFzH.js"
+  },
+  "/_nuxt/C8j6Tflt.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1f80-GK7z8oKvxrPWKbqVbUZec60fp9o\"",
+    "mtime": "2026-08-18T12:51:49.896Z",
+    "size": 8064,
+    "path": "../public/_nuxt/C8j6Tflt.js"
+  },
+  "/_nuxt/C6c-1tk1.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1b569-53H1aDATONTeUcwNqt+FL5cHG0M\"",
+    "mtime": "2026-08-18T12:51:49.895Z",
+    "size": 111977,
+    "path": "../public/_nuxt/C6c-1tk1.js"
+  },
+  "/_nuxt/CHg-xDgD.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"6d2c-gamubnx3ML+QDn+EoiQLUaTmkak\"",
+    "mtime": "2026-08-18T12:51:49.896Z",
+    "size": 27948,
+    "path": "../public/_nuxt/CHg-xDgD.js"
   },
   "/_nuxt/CHsGr-GB.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"50b-5U6LLVkjislDAYgLVllQCAhmXm4\"",
-    "mtime": "2026-08-17T22:08:43.392Z",
+    "mtime": "2026-08-18T12:51:49.896Z",
     "size": 1291,
     "path": "../public/_nuxt/CHsGr-GB.js"
   },
-  "/_nuxt/CI5ihdsg.js": {
+  "/_nuxt/CNxq0e6N.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"9e07-0N6Z0TQTh53qO8riCrw08aGv+7Q\"",
-    "mtime": "2026-08-17T22:08:43.392Z",
-    "size": 40455,
-    "path": "../public/_nuxt/CI5ihdsg.js"
+    "etag": "\"549-6nXIfKFwdU412S4jvSN6H8LhgQI\"",
+    "mtime": "2026-08-18T12:51:49.896Z",
+    "size": 1353,
+    "path": "../public/_nuxt/CNxq0e6N.js"
   },
-  "/_nuxt/CAW8ZRcl.js": {
+  "/_nuxt/COG8YYdZ.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"bae5-TNSCAmYwib5lLZ3V0HhvHjONOPM\"",
-    "mtime": "2026-08-17T22:08:43.392Z",
-    "size": 47845,
-    "path": "../public/_nuxt/CAW8ZRcl.js"
-  },
-  "/_nuxt/CLw0p4PE.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1be8-g1uFdhVyAuRNHjlm4Cihqq6hSzI\"",
-    "mtime": "2026-08-17T22:08:43.392Z",
-    "size": 7144,
-    "path": "../public/_nuxt/CLw0p4PE.js"
-  },
-  "/_nuxt/CQRsQa47.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"bad-gYmhh0Onh2bRdE3BcyslOjf+Ho8\"",
-    "mtime": "2026-08-17T22:08:43.392Z",
-    "size": 2989,
-    "path": "../public/_nuxt/CQRsQa47.js"
+    "etag": "\"4cf-6afn/h06pHm93kWnCGWe6FZ4AYo\"",
+    "mtime": "2026-08-18T12:51:49.896Z",
+    "size": 1231,
+    "path": "../public/_nuxt/COG8YYdZ.js"
   },
   "/_nuxt/CR73arlb.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"79d0-ADJQWfaUv9HgWbLN4DgHI6iWzNs\"",
-    "mtime": "2026-08-17T22:08:43.392Z",
+    "mtime": "2026-08-18T12:51:49.896Z",
     "size": 31184,
     "path": "../public/_nuxt/CR73arlb.js"
   },
-  "/_nuxt/CRI8VVEA.js": {
+  "/_nuxt/CSGdxwnu.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"137a-U4llQeQGL1KlfCtfIOIugT5PpeI\"",
-    "mtime": "2026-08-17T22:08:43.392Z",
-    "size": 4986,
-    "path": "../public/_nuxt/CRI8VVEA.js"
-  },
-  "/_nuxt/CTOfXNBI.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"195ce-XtlG6n0d8z4ajG7LWfPReyvNCbY\"",
-    "mtime": "2026-08-17T22:08:43.392Z",
-    "size": 103886,
-    "path": "../public/_nuxt/CTOfXNBI.js"
+    "etag": "\"570ed-QnReR1yZU+XqkufkWB7zg7gG6Mg\"",
+    "mtime": "2026-08-18T12:51:49.898Z",
+    "size": 356589,
+    "path": "../public/_nuxt/CSGdxwnu.js"
   },
   "/_nuxt/CXlf8-D_.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"4bc-30DqI+ldm3I4v5fArgEYxpHU7+o\"",
-    "mtime": "2026-08-17T22:08:43.392Z",
+    "mtime": "2026-08-18T12:51:49.896Z",
     "size": 1212,
     "path": "../public/_nuxt/CXlf8-D_.js"
   },
-  "/_nuxt/CYoyzUPE.js": {
+  "/_nuxt/Cg2z7Mx0.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"2bb-VboIsO/h3sRTmwcOxc6CA3xu04U\"",
-    "mtime": "2026-08-17T22:08:43.392Z",
-    "size": 699,
-    "path": "../public/_nuxt/CYoyzUPE.js"
-  },
-  "/_nuxt/CfrtfY10.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1f8d-+G23fGx//KMfVezbChpcPsHfYYI\"",
-    "mtime": "2026-08-17T22:08:43.393Z",
-    "size": 8077,
-    "path": "../public/_nuxt/CfrtfY10.js"
-  },
-  "/_nuxt/CcA-J44z.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"56ab5-dpx6uepcZuejbm4KbbenqXDqBJg\"",
-    "mtime": "2026-08-17T22:08:43.393Z",
-    "size": 354997,
-    "path": "../public/_nuxt/CcA-J44z.js"
-  },
-  "/_nuxt/CgAcok4E.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1627-iYZhI6fFcG9p+S9gRVN5UW9Z494\"",
-    "mtime": "2026-08-17T22:08:43.393Z",
-    "size": 5671,
-    "path": "../public/_nuxt/CgAcok4E.js"
-  },
-  "/_nuxt/ChatExercise.D7q7U-sb.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"88bb-Td9+m68oQv8DCR31cpOf3GeHDVs\"",
-    "mtime": "2026-08-17T22:08:43.393Z",
-    "size": 35003,
-    "path": "../public/_nuxt/ChatExercise.D7q7U-sb.css"
+    "etag": "\"225f-86bHvx0sT54WelmxULhox3Kqu4c\"",
+    "mtime": "2026-08-18T12:51:49.897Z",
+    "size": 8799,
+    "path": "../public/_nuxt/Cg2z7Mx0.js"
   },
   "/_nuxt/CjoFa3Ch.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"24e6-QKCNrjBirvyHs0Ti8hOrhjx2vpM\"",
-    "mtime": "2026-08-17T22:08:43.393Z",
+    "mtime": "2026-08-18T12:51:49.897Z",
     "size": 9446,
     "path": "../public/_nuxt/CjoFa3Ch.js"
   },
-  "/_nuxt/Cl3HFa1U.js": {
+  "/_nuxt/ChatExercise.D7q7U-sb.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"88bb-Td9+m68oQv8DCR31cpOf3GeHDVs\"",
+    "mtime": "2026-08-18T12:51:49.897Z",
+    "size": 35003,
+    "path": "../public/_nuxt/ChatExercise.D7q7U-sb.css"
+  },
+  "/_nuxt/CalmRjFm.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"8da0-/ajeP6ydCTG1R81/XRH8M2cgbGo\"",
-    "mtime": "2026-08-17T22:08:43.393Z",
-    "size": 36256,
-    "path": "../public/_nuxt/Cl3HFa1U.js"
+    "etag": "\"26d1e-ZWdMe+nLPz3N2jl1WYNCXJjC8tM\"",
+    "mtime": "2026-08-18T12:51:49.897Z",
+    "size": 159006,
+    "path": "../public/_nuxt/CalmRjFm.js"
   },
   "/_nuxt/CoYRKfuD.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"35-VNA0DjxaxUUvg8NcaUbo2abQ+oU\"",
-    "mtime": "2026-08-17T22:08:43.393Z",
+    "mtime": "2026-08-18T12:51:49.897Z",
     "size": 53,
     "path": "../public/_nuxt/CoYRKfuD.js"
+  },
+  "/_nuxt/CkijclYT.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1001b-64wg9WCr8gIzWPD39HGdpqLwG98\"",
+    "mtime": "2026-08-18T12:51:49.898Z",
+    "size": 65563,
+    "path": "../public/_nuxt/CkijclYT.js"
+  },
+  "/_nuxt/CoachPicker.BeoHit2C.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"ea2-5PhSLh3GexXFt2n4xW1A61s7PK8\"",
+    "mtime": "2026-08-18T12:51:49.898Z",
+    "size": 3746,
+    "path": "../public/_nuxt/CoachPicker.BeoHit2C.css"
   },
   "/_nuxt/CoachHelpPanel.C-4W_GKM.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"9810-9J0zMMH7+82gFBJse1xGUOF2U+I\"",
-    "mtime": "2026-08-17T22:08:43.393Z",
+    "mtime": "2026-08-18T12:51:49.898Z",
     "size": 38928,
     "path": "../public/_nuxt/CoachHelpPanel.C-4W_GKM.css"
   },
-  "/_nuxt/CoachPicker.BmxliCqJ.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"ea3-Kz8/eiurgGf1nnSGFJ55nMP3iWc\"",
-    "mtime": "2026-08-17T22:08:43.393Z",
-    "size": 3747,
-    "path": "../public/_nuxt/CoachPicker.BmxliCqJ.css"
-  },
-  "/_nuxt/CsFmDTCA.js": {
+  "/_nuxt/CyyvAVYB.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"3dbf-1iUdmgcK2O2LVXpMmp97DIf3jFE\"",
-    "mtime": "2026-08-17T22:08:43.393Z",
-    "size": 15807,
-    "path": "../public/_nuxt/CsFmDTCA.js"
+    "etag": "\"1731-CaoXjuYT10MXQ3s1mEAxPxQmfGo\"",
+    "mtime": "2026-08-18T12:51:49.898Z",
+    "size": 5937,
+    "path": "../public/_nuxt/CyyvAVYB.js"
   },
-  "/_nuxt/CphXdS_j.js": {
+  "/_nuxt/D5yq1cYe.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"9bd8-M8iYYhNAEZDxDzejirSgPbvzJgE\"",
-    "mtime": "2026-08-17T22:08:43.393Z",
-    "size": 39896,
-    "path": "../public/_nuxt/CphXdS_j.js"
+    "etag": "\"12a-wM0ujcVELZ5Rd6wqL4UJhDmdcOk\"",
+    "mtime": "2026-08-18T12:51:49.898Z",
+    "size": 298,
+    "path": "../public/_nuxt/D5yq1cYe.js"
   },
-  "/_nuxt/CsyYWOLX.js": {
+  "/_nuxt/D98Fnf1u.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"549-gCsfe47aYZYWvhBSzAIvBOI5wbc\"",
-    "mtime": "2026-08-17T22:08:43.394Z",
-    "size": 1353,
-    "path": "../public/_nuxt/CsyYWOLX.js"
-  },
-  "/_nuxt/CuOfYUM2.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"5df-YWxUb0tOyR5R+Iqm6f2Q/l5vbkU\"",
-    "mtime": "2026-08-17T22:08:43.394Z",
-    "size": 1503,
-    "path": "../public/_nuxt/CuOfYUM2.js"
-  },
-  "/_nuxt/Cv9XDUK1.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"5f6e-hK92DViCJoh6ZQZAIGif2n9Jyg0\"",
-    "mtime": "2026-08-17T22:08:43.394Z",
-    "size": 24430,
-    "path": "../public/_nuxt/Cv9XDUK1.js"
-  },
-  "/_nuxt/D1U3ScPb.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"ed4-IiiBsb1CaweHfcdKsaLsmEzAnjk\"",
-    "mtime": "2026-08-17T22:08:43.394Z",
-    "size": 3796,
-    "path": "../public/_nuxt/D1U3ScPb.js"
-  },
-  "/_nuxt/D3_6HOqZ.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1d7f-VdWyAoNxjoE/De+xdLRnqtPZmbI\"",
-    "mtime": "2026-08-17T22:08:43.394Z",
-    "size": 7551,
-    "path": "../public/_nuxt/D3_6HOqZ.js"
-  },
-  "/_nuxt/CvvXL-XG.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"24445-rEPlGUlbJ2+fbtw1ToCG44T5Z3Y\"",
-    "mtime": "2026-08-17T22:08:43.394Z",
-    "size": 148549,
-    "path": "../public/_nuxt/CvvXL-XG.js"
-  },
-  "/_nuxt/DAf0cEV_.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"ecf-Gf+CAqfmYA4iiy1dz0MnHFqCNDg\"",
-    "mtime": "2026-08-17T22:08:43.394Z",
-    "size": 3791,
-    "path": "../public/_nuxt/DAf0cEV_.js"
-  },
-  "/_nuxt/DFTTysf0.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"2f40-c8OwqOF0+LOSTnZVCGA66pPWLiQ\"",
-    "mtime": "2026-08-17T22:08:43.394Z",
+    "etag": "\"2f40-ILBT41hd4tXrLrecqeGGLbgxtLo\"",
+    "mtime": "2026-08-18T12:51:49.898Z",
     "size": 12096,
-    "path": "../public/_nuxt/DFTTysf0.js"
+    "path": "../public/_nuxt/D98Fnf1u.js"
   },
-  "/_nuxt/DPxMKtuI.js": {
+  "/_nuxt/D9OJyDyj.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"6d2c-vE5sE++nDk5i6CDXgPoUZd5gI90\"",
-    "mtime": "2026-08-17T22:08:43.394Z",
-    "size": 27948,
-    "path": "../public/_nuxt/DPxMKtuI.js"
+    "etag": "\"9bd8-KOo1XCdSn43XLUbkZHF2DjcmdTQ\"",
+    "mtime": "2026-08-18T12:51:49.898Z",
+    "size": 39896,
+    "path": "../public/_nuxt/D9OJyDyj.js"
   },
-  "/_nuxt/DZ6o3Zka.js": {
+  "/_nuxt/DA5zPx3T.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"60aa-sdc31fxObo010ErZccye7WZYFM4\"",
-    "mtime": "2026-08-17T22:08:43.394Z",
-    "size": 24746,
-    "path": "../public/_nuxt/DZ6o3Zka.js"
+    "etag": "\"e20-J9l/T7lw8TKoQdApWo/Xr4CP9sQ\"",
+    "mtime": "2026-08-18T12:51:49.898Z",
+    "size": 3616,
+    "path": "../public/_nuxt/DA5zPx3T.js"
   },
-  "/_nuxt/DZsroXYq.js": {
+  "/_nuxt/DBkjjTQJ.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"373e-Tckne6KkJewymMscbdgfRpbHjLQ\"",
-    "mtime": "2026-08-17T22:08:43.394Z",
-    "size": 14142,
-    "path": "../public/_nuxt/DZsroXYq.js"
+    "etag": "\"7c6-MOXnTen9HMainGSXkyTBuh/G3RU\"",
+    "mtime": "2026-08-18T12:51:49.898Z",
+    "size": 1990,
+    "path": "../public/_nuxt/DBkjjTQJ.js"
   },
-  "/_nuxt/DgE54-H9.js": {
+  "/_nuxt/DF_UnjrX.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"160-cN2k+WWNb7Xd9+FbnAugH/XLvGE\"",
-    "mtime": "2026-08-17T22:08:43.395Z",
-    "size": 352,
-    "path": "../public/_nuxt/DgE54-H9.js"
+    "etag": "\"bae5-yqSp6UFvj/HVWXZ4HK5QEZzD8XY\"",
+    "mtime": "2026-08-18T12:51:49.899Z",
+    "size": 47845,
+    "path": "../public/_nuxt/DF_UnjrX.js"
   },
-  "/_nuxt/Dj4CfABu.js": {
+  "/_nuxt/DHnM0ZMQ.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"6345-RnYNDiaKvisSouzs1GSYqwk0FRo\"",
-    "mtime": "2026-08-17T22:08:43.395Z",
-    "size": 25413,
-    "path": "../public/_nuxt/Dj4CfABu.js"
+    "etag": "\"1627-TQA7cT+KQ2HcwDD5BYghlQILRC0\"",
+    "mtime": "2026-08-18T12:51:49.899Z",
+    "size": 5671,
+    "path": "../public/_nuxt/DHnM0ZMQ.js"
+  },
+  "/_nuxt/DKrIhdMG.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"d96-Q/zhC5RIqoDSNarseOt9o5iixfo\"",
+    "mtime": "2026-08-18T12:51:49.899Z",
+    "size": 3478,
+    "path": "../public/_nuxt/DKrIhdMG.js"
+  },
+  "/_nuxt/DNhw7Jza.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"2306-caTGNCIcySUCEu7rnnQG2bC6qdg\"",
+    "mtime": "2026-08-18T12:51:49.899Z",
+    "size": 8966,
+    "path": "../public/_nuxt/DNhw7Jza.js"
+  },
+  "/_nuxt/DOZWgGyj.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1be8-kzbOddO3cOh0N3lJXPa075Lq7/A\"",
+    "mtime": "2026-08-18T12:51:49.899Z",
+    "size": 7144,
+    "path": "../public/_nuxt/DOZWgGyj.js"
+  },
+  "/_nuxt/DR2cTPv3.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"3dbf-ri/lvJLAOJbDBVYWneCsFyUyFJM\"",
+    "mtime": "2026-08-18T12:51:49.899Z",
+    "size": 15807,
+    "path": "../public/_nuxt/DR2cTPv3.js"
+  },
+  "/_nuxt/DUwfX9KM.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"5f6e-t+76AScPxbZr2fdE4pmtrxe/jCE\"",
+    "mtime": "2026-08-18T12:51:49.899Z",
+    "size": 24430,
+    "path": "../public/_nuxt/DUwfX9KM.js"
   },
   "/_nuxt/DXEQVQnt.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"31151-TyUyRNm9rR2JDwpyAxcruTmmr6A\"",
-    "mtime": "2026-08-17T22:08:43.394Z",
+    "mtime": "2026-08-18T12:51:49.900Z",
     "size": 201041,
     "path": "../public/_nuxt/DXEQVQnt.js"
+  },
+  "/_nuxt/Dj4CfABu.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"6345-RnYNDiaKvisSouzs1GSYqwk0FRo\"",
+    "mtime": "2026-08-18T12:51:49.899Z",
+    "size": 25413,
+    "path": "../public/_nuxt/Dj4CfABu.js"
+  },
+  "/_nuxt/Df-CSH4S.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"148c63-NnSItLtsUY6ZsVuHe4BTB34Ilz8\"",
+    "mtime": "2026-08-18T12:51:49.903Z",
+    "size": 1346659,
+    "path": "../public/_nuxt/Df-CSH4S.js"
   },
   "/_nuxt/DlAUqK2U.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"5b-eFCz/UrraTh721pgAl0VxBNR1es\"",
-    "mtime": "2026-08-17T22:08:43.395Z",
+    "mtime": "2026-08-18T12:51:49.900Z",
     "size": 91,
     "path": "../public/_nuxt/DlAUqK2U.js"
   },
-  "/_nuxt/DmxPVz7o.js": {
+  "/_nuxt/Do0MY7py.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"9971-Qj38t4QVM/Rew4TKQ/bkXa719PY\"",
-    "mtime": "2026-08-17T22:08:43.395Z",
-    "size": 39281,
-    "path": "../public/_nuxt/DmxPVz7o.js"
+    "etag": "\"2aeb-Q8grIZevs614CW1yTCNTH42VU+A\"",
+    "mtime": "2026-08-18T12:51:49.899Z",
+    "size": 10987,
+    "path": "../public/_nuxt/Do0MY7py.js"
   },
-  "/_nuxt/D7U3Kp8z.js": {
+  "/_nuxt/Dt1OMJfh.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"148c63-WQAoIfHMizvs1IWKkZI1NjJiss4\"",
-    "mtime": "2026-08-17T22:08:43.395Z",
-    "size": 1346659,
-    "path": "../public/_nuxt/D7U3Kp8z.js"
-  },
-  "/_nuxt/DrOeNu25.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"490c-5qy6iEuW5UKgwrbL1hAMEr3XSDw\"",
-    "mtime": "2026-08-17T22:08:43.395Z",
+    "etag": "\"490c-d2h52aYb/6csAqgKLxOkpm+q+I0\"",
+    "mtime": "2026-08-18T12:51:49.900Z",
     "size": 18700,
-    "path": "../public/_nuxt/DrOeNu25.js"
+    "path": "../public/_nuxt/Dt1OMJfh.js"
   },
-  "/_nuxt/DnoX9RUw.js": {
+  "/_nuxt/DtlzCfSB.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1001b-Rufavbr6pk51Wyj3PQInciv/lQg\"",
-    "mtime": "2026-08-17T22:08:43.395Z",
-    "size": 65563,
-    "path": "../public/_nuxt/DnoX9RUw.js"
-  },
-  "/_nuxt/DsNhoJeY.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"4cf-y0bY7FGw2Ib4OHAZ7Fj2gweoTbs\"",
-    "mtime": "2026-08-17T22:08:43.395Z",
-    "size": 1231,
-    "path": "../public/_nuxt/DsNhoJeY.js"
-  },
-  "/_nuxt/Dv__Xd-H.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"40-1udMUN2PWoItYPJiMzm+Q1R38OE\"",
-    "mtime": "2026-08-17T22:08:43.395Z",
-    "size": 64,
-    "path": "../public/_nuxt/Dv__Xd-H.js"
-  },
-  "/_nuxt/DzcCXjv1.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"39f7-xPd2Y9pBubxRChxsCmaIiBa9wRg\"",
-    "mtime": "2026-08-17T22:08:43.395Z",
-    "size": 14839,
-    "path": "../public/_nuxt/DzcCXjv1.js"
-  },
-  "/_nuxt/ENn_EXS3.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"378d-KQH6SlNgxG0RWTvHjm0O9sTDdGU\"",
-    "mtime": "2026-08-17T22:08:43.395Z",
-    "size": 14221,
-    "path": "../public/_nuxt/ENn_EXS3.js"
+    "etag": "\"3ed5-fptGPxrz/U5ge26jEvmDxfUXQJs\"",
+    "mtime": "2026-08-18T12:51:49.900Z",
+    "size": 16085,
+    "path": "../public/_nuxt/DtlzCfSB.js"
   },
   "/_nuxt/ExerciseSummaryPrintPreview.CV1rLozs.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"950-ohKXNC6dVIGXC4iuEM3Tp5pGctE\"",
-    "mtime": "2026-08-17T22:08:43.396Z",
+    "mtime": "2026-08-18T12:51:49.900Z",
     "size": 2384,
     "path": "../public/_nuxt/ExerciseSummaryPrintPreview.CV1rLozs.css"
+  },
+  "/_nuxt/M5_kApZl.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"e2-RDBg5hR2Jc1lsvpBLemGTePtohw\"",
+    "mtime": "2026-08-18T12:51:49.900Z",
+    "size": 226,
+    "path": "../public/_nuxt/M5_kApZl.js"
+  },
+  "/_nuxt/MFkBtq_Y.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"e5-slVnQIG79BCCHxqaPRh3DLDFaqA\"",
+    "mtime": "2026-08-18T12:51:49.900Z",
+    "size": 229,
+    "path": "../public/_nuxt/MFkBtq_Y.js"
+  },
+  "/_nuxt/LearnerSpace.CyP_FafN.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"113e2-drN9CofdcHpfLMkXKshe5iAtmsQ\"",
+    "mtime": "2026-08-18T12:51:49.901Z",
+    "size": 70626,
+    "path": "../public/_nuxt/LearnerSpace.CyP_FafN.css"
+  },
+  "/_nuxt/N_XjJiTg.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"8edc-C/onMRD5DXEEPFrUGRFgMpcBxok\"",
+    "mtime": "2026-08-18T12:51:49.900Z",
+    "size": 36572,
+    "path": "../public/_nuxt/N_XjJiTg.js"
+  },
+  "/_nuxt/SbJ5d3iY.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1f8d-Kq1COd1+4I2nnZBUhZ8hRQWAM7o\"",
+    "mtime": "2026-08-18T12:51:49.901Z",
+    "size": 8077,
+    "path": "../public/_nuxt/SbJ5d3iY.js"
+  },
+  "/_nuxt/Te57x7hB.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"378d-oEKiWWA/SkkeKzTR3vcvNcX1uDY\"",
+    "mtime": "2026-08-18T12:51:49.901Z",
+    "size": 14221,
+    "path": "../public/_nuxt/Te57x7hB.js"
+  },
+  "/_nuxt/Upk0pkvk.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"39f7-4WJ4hk4LNQj366+fSgI/FM+oSKo\"",
+    "mtime": "2026-08-18T12:51:49.901Z",
+    "size": 14839,
+    "path": "../public/_nuxt/Upk0pkvk.js"
   },
   "/_nuxt/VaSPOPhr.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"7032-uZQ20bhcE4YqMv2bJ83N97r01ek\"",
-    "mtime": "2026-08-17T22:08:43.396Z",
+    "mtime": "2026-08-18T12:51:49.901Z",
     "size": 28722,
     "path": "../public/_nuxt/VaSPOPhr.js"
   },
-  "/_nuxt/LearnerSpace.BaoPnbZN.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"11380-5TpcDL0uW0e2Ksera3ni1EhXslQ\"",
-    "mtime": "2026-08-17T22:08:43.396Z",
-    "size": 70528,
-    "path": "../public/_nuxt/LearnerSpace.BaoPnbZN.css"
-  },
-  "/_nuxt/WizardChallengeWorkspace.CurH2zsv.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"ce64-Gc5i++QMZbjAbXAaxlkSfNbInbk\"",
-    "mtime": "2026-08-17T22:08:43.396Z",
-    "size": 52836,
-    "path": "../public/_nuxt/WizardChallengeWorkspace.CurH2zsv.css"
-  },
-  "/_nuxt/Oe1BiII5.js": {
+  "/_nuxt/WYV66b3W.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1aeeb-KnKrIbtbsqjBVDpC1jTtgPc8r1s\"",
-    "mtime": "2026-08-17T22:08:43.396Z",
-    "size": 110315,
-    "path": "../public/_nuxt/Oe1BiII5.js"
+    "etag": "\"5df-FGobyKJGub1hRknwIlQq35RbqXg\"",
+    "mtime": "2026-08-18T12:51:49.901Z",
+    "size": 1503,
+    "path": "../public/_nuxt/WYV66b3W.js"
+  },
+  "/_nuxt/WizardChallengeWorkspace.DT5dkNms.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"d8a6-c4P5sOzyjIOVujnqx+r7DsNmSiE\"",
+    "mtime": "2026-08-18T12:51:49.902Z",
+    "size": 55462,
+    "path": "../public/_nuxt/WizardChallengeWorkspace.DT5dkNms.css"
   },
   "/_nuxt/ZrBg3W11.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"b5f-wlshUgtoEorvnPQ8nir4mcnBK2A\"",
-    "mtime": "2026-08-17T22:08:43.396Z",
+    "mtime": "2026-08-18T12:51:49.902Z",
     "size": 2911,
     "path": "../public/_nuxt/ZrBg3W11.js"
   },
-  "/_nuxt/_parcours_.BH2LH4om.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"d53-r39JjhEa/S8y2RbhfZc2O3hvuvc\"",
-    "mtime": "2026-08-17T22:08:43.396Z",
-    "size": 3411,
-    "path": "../public/_nuxt/_parcours_.BH2LH4om.css"
+  "/_nuxt/_KXgARpf.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"2d4a-n1vY7epMYb84dJ80OOFHJ0p5dvc\"",
+    "mtime": "2026-08-18T12:51:49.902Z",
+    "size": 11594,
+    "path": "../public/_nuxt/_KXgARpf.js"
   },
-  "/_nuxt/_temps_.DNDQSPdF.css": {
+  "/_nuxt/_parcours_.Cq2EBnsY.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"1a24-r282U6zNQM1irZMPejhVAhhP57o\"",
-    "mtime": "2026-08-17T22:08:43.396Z",
-    "size": 6692,
-    "path": "../public/_nuxt/_temps_.DNDQSPdF.css"
+    "etag": "\"d51-Y1nkHkKjv3B/qb7m0liupiPIOGU\"",
+    "mtime": "2026-08-18T12:51:49.902Z",
+    "size": 3409,
+    "path": "../public/_nuxt/_parcours_.Cq2EBnsY.css"
   },
-  "/_nuxt/_token_.DJ8z344i.css": {
+  "/_nuxt/_slug_.BLOOk21-.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"dc9-IUF9q98uusqkH67ica0HBPs1f0E\"",
-    "mtime": "2026-08-17T22:08:43.396Z",
+    "etag": "\"45-PGpppsSKUPDHgbCes9GdwTlNFJU\"",
+    "mtime": "2026-08-18T12:51:49.902Z",
+    "size": 69,
+    "path": "../public/_nuxt/_slug_.BLOOk21-.css"
+  },
+  "/_nuxt/_temps_.ClMUGZN1.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"1a22-wZE3L27yd2DBgMg6tZnV/Fmlxjk\"",
+    "mtime": "2026-08-18T12:51:49.902Z",
+    "size": 6690,
+    "path": "../public/_nuxt/_temps_.ClMUGZN1.css"
+  },
+  "/_nuxt/_token_.B7F0uY3n.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"dc9-gKIpdDDyfCaflWpIWoY9wtu9kx0\"",
+    "mtime": "2026-08-18T12:51:49.903Z",
     "size": 3529,
-    "path": "../public/_nuxt/_token_.DJ8z344i.css"
+    "path": "../public/_nuxt/_token_.B7F0uY3n.css"
+  },
+  "/_nuxt/YPh2kaUF.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"5e478-GfXzc7//ME3BdJnP+Yb1oi1S/u4\"",
+    "mtime": "2026-08-18T12:51:49.903Z",
+    "size": 386168,
+    "path": "../public/_nuxt/YPh2kaUF.js"
   },
   "/_nuxt/admins.dzDkGKEv.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"919-IcW5l1f9k07twX9+HuwUcwEj4n0\"",
-    "mtime": "2026-08-17T22:08:43.396Z",
+    "mtime": "2026-08-18T12:51:49.903Z",
     "size": 2329,
     "path": "../public/_nuxt/admins.dzDkGKEv.css"
   },
-  "/_nuxt/bKFau-C-.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"2d4a-xiro7xxp0esjOGPhm5k4RhIXCm4\"",
-    "mtime": "2026-08-17T22:08:43.396Z",
-    "size": 11594,
-    "path": "../public/_nuxt/bKFau-C-.js"
-  },
-  "/_nuxt/apprendre.ChZfJZfP.css": {
+  "/_nuxt/apprendre.Dz6zW_x0.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"3e25-NBx1vYx5+C7buh4hy5X0VtXeyPQ\"",
-    "mtime": "2026-08-17T22:08:43.396Z",
-    "size": 15909,
-    "path": "../public/_nuxt/apprendre.ChZfJZfP.css"
-  },
-  "/_nuxt/challenges.CgOmUN0u.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"2be1-fItofunUFI4Kl8QGUxjAXhLp0Rs\"",
-    "mtime": "2026-08-17T22:08:43.396Z",
-    "size": 11233,
-    "path": "../public/_nuxt/challenges.CgOmUN0u.css"
+    "etag": "\"3e28-UCYw18Tf88kcBmZIu2qYrBjP0OE\"",
+    "mtime": "2026-08-18T12:51:49.903Z",
+    "size": 15912,
+    "path": "../public/_nuxt/apprendre.Dz6zW_x0.css"
   },
   "/_nuxt/caracteres.BcNkZVio.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"5ed6-eQ6eNeASOetd0aeTsNNXynTuNLo\"",
-    "mtime": "2026-08-17T22:08:43.396Z",
+    "mtime": "2026-08-18T12:51:49.903Z",
     "size": 24278,
     "path": "../public/_nuxt/caracteres.BcNkZVio.css"
+  },
+  "/_nuxt/challenges.D2wNsxIZ.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"303a-En3vl/y59ORpzpzx7nw5t9MZeS4\"",
+    "mtime": "2026-08-18T12:51:49.903Z",
+    "size": 12346,
+    "path": "../public/_nuxt/challenges.D2wNsxIZ.css"
   },
   "/_nuxt/charts.Bu6S9nnD.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"e2ce-T3jSC30FcBMT7uJ9bgK16OZKcWY\"",
-    "mtime": "2026-08-17T22:08:43.397Z",
+    "mtime": "2026-08-18T12:51:49.904Z",
     "size": 58062,
     "path": "../public/_nuxt/charts.Bu6S9nnD.css"
   },
   "/_nuxt/coaches.BaDV-bQP.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"2220-x9RcJK5uh5+VaoyG5f2pdZ3z28E\"",
-    "mtime": "2026-08-17T22:08:43.396Z",
+    "mtime": "2026-08-18T12:51:49.903Z",
     "size": 8736,
     "path": "../public/_nuxt/coaches.BaDV-bQP.css"
   },
-  "/_nuxt/consulter.BJ1nOMHX.css": {
+  "/_nuxt/conjugaison-fle._JTH5P1i.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"4ee1-vPeEkrYdbmQ+MIMEf45QfN5C6h8\"",
-    "mtime": "2026-08-17T22:08:43.397Z",
-    "size": 20193,
-    "path": "../public/_nuxt/consulter.BJ1nOMHX.css"
+    "etag": "\"b59-NB5C2blBkI2RUmCO3TsJjAPMivY\"",
+    "mtime": "2026-08-18T12:51:49.903Z",
+    "size": 2905,
+    "path": "../public/_nuxt/conjugaison-fle._JTH5P1i.css"
+  },
+  "/_nuxt/consulter.CKEeJjlW.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"4ee2-10rzcvn48oeTMxAFBa9g6fu10w8\"",
+    "mtime": "2026-08-18T12:51:49.904Z",
+    "size": 20194,
+    "path": "../public/_nuxt/consulter.CKEeJjlW.css"
   },
   "/_nuxt/contact.CEAlz-zn.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"8f4-ykOUqzOkUVv5IJI3yhju5VrDLdo\"",
-    "mtime": "2026-08-17T22:08:43.397Z",
+    "mtime": "2026-08-18T12:51:49.904Z",
     "size": 2292,
     "path": "../public/_nuxt/contact.CEAlz-zn.css"
   },
-  "/_nuxt/default.nDlh41ai.css": {
+  "/_nuxt/default.BYfnmKok.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"6517-9YDqeNAS2S4xOVQ90vZgQCVewZo\"",
-    "mtime": "2026-08-17T22:08:43.397Z",
-    "size": 25879,
-    "path": "../public/_nuxt/default.nDlh41ai.css"
+    "etag": "\"654c-pb9ARHvwjz37yB6LHOlwh2Kt7v4\"",
+    "mtime": "2026-08-18T12:51:49.904Z",
+    "size": 25932,
+    "path": "../public/_nuxt/default.BYfnmKok.css"
   },
   "/_nuxt/driver.BndHJ0Kk.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"bdc-pZVw+h6Z7S/VWJ2Rk//0/Yz+nYE\"",
-    "mtime": "2026-08-17T22:08:43.397Z",
+    "mtime": "2026-08-18T12:51:49.904Z",
     "size": 3036,
     "path": "../public/_nuxt/driver.BndHJ0Kk.css"
   },
   "/_nuxt/e-ekCQbG.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"27a4-Mc2X3tIOv3VhU7DMVGV77BjV2E8\"",
-    "mtime": "2026-08-17T22:08:43.397Z",
+    "mtime": "2026-08-18T12:51:49.904Z",
     "size": 10148,
     "path": "../public/_nuxt/e-ekCQbG.js"
-  },
-  "/_nuxt/entry.E3DmMn17.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"67bd-VdUUh9/FEVclyXgy76xfd0Fet3c\"",
-    "mtime": "2026-08-17T22:08:43.397Z",
-    "size": 26557,
-    "path": "../public/_nuxt/entry.E3DmMn17.css"
   },
   "/_nuxt/error-404.C3kT2QX-.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"97e-Xk26Nv4oQLpK3PtofolSggS9Z1M\"",
-    "mtime": "2026-08-17T22:08:43.397Z",
+    "mtime": "2026-08-18T12:51:49.904Z",
     "size": 2430,
     "path": "../public/_nuxt/error-404.C3kT2QX-.css"
+  },
+  "/_nuxt/entry.E3DmMn17.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"67bd-VdUUh9/FEVclyXgy76xfd0Fet3c\"",
+    "mtime": "2026-08-18T12:51:49.904Z",
+    "size": 26557,
+    "path": "../public/_nuxt/entry.E3DmMn17.css"
   },
   "/_nuxt/error-500.BW0Y54Of.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"773-NSoEX19gPmM2NozVKWotHuvxtho\"",
-    "mtime": "2026-08-17T22:08:43.397Z",
+    "mtime": "2026-08-18T12:51:49.904Z",
     "size": 1907,
     "path": "../public/_nuxt/error-500.BW0Y54Of.css"
   },
   "/_nuxt/errors.BjGnDVcv.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1362-+l8lZeseXcg1LBBZAI84EJMTHAg\"",
-    "mtime": "2026-08-17T22:08:43.397Z",
+    "mtime": "2026-08-18T12:51:49.904Z",
     "size": 4962,
     "path": "../public/_nuxt/errors.BjGnDVcv.css"
   },
   "/_nuxt/exercices-de-conjugaison.CWnJzGFA.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"2c0-3DaIH0BELF7UhQS5/+mWD49tRks\"",
-    "mtime": "2026-08-17T22:08:43.397Z",
+    "mtime": "2026-08-18T12:51:49.904Z",
     "size": 704,
     "path": "../public/_nuxt/exercices-de-conjugaison.CWnJzGFA.css"
   },
   "/_nuxt/feedbacks.BYXr9sWT.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1ad1-ovHUGBZAQ17xB4rJWgPrkJg0l6o\"",
-    "mtime": "2026-08-17T22:08:43.397Z",
+    "mtime": "2026-08-18T12:51:49.904Z",
     "size": 6865,
     "path": "../public/_nuxt/feedbacks.BYXr9sWT.css"
   },
   "/_nuxt/g6ucs01C.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"160-gtb4LsLA85Vn+6lu9juD+DKhlTM\"",
-    "mtime": "2026-08-17T22:08:43.397Z",
+    "mtime": "2026-08-18T12:51:49.904Z",
     "size": 352,
     "path": "../public/_nuxt/g6ucs01C.js"
   },
   "/_nuxt/help-verification.DODWt3zK.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1e41-GtHymoSAF4psafTipM39PN7Xytg\"",
-    "mtime": "2026-08-17T22:08:43.397Z",
+    "mtime": "2026-08-18T12:51:49.905Z",
     "size": 7745,
     "path": "../public/_nuxt/help-verification.DODWt3zK.css"
   },
   "/_nuxt/helps.DZJ6t0nO.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"2207-jtfvJZDC3TYKKO8XFRnFINfGF8k\"",
-    "mtime": "2026-08-17T22:08:43.397Z",
+    "mtime": "2026-08-18T12:51:49.905Z",
     "size": 8711,
     "path": "../public/_nuxt/helps.DZJ6t0nO.css"
   },
   "/_nuxt/identification-form.BDx_5Ry0.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"25d1-lUKfXAhmiVzTZhIYChlIJMc25H0\"",
-    "mtime": "2026-08-17T22:08:43.397Z",
+    "mtime": "2026-08-18T12:51:49.905Z",
     "size": 9681,
     "path": "../public/_nuxt/identification-form.BDx_5Ry0.css"
   },
-  "/_nuxt/index.DJbYwlOL.css": {
+  "/_nuxt/index.BGxLiiss.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"1447-Zpaid7/EH46rvHbrBH/2X0i9/JU\"",
-    "mtime": "2026-08-17T22:08:43.398Z",
-    "size": 5191,
-    "path": "../public/_nuxt/index.DJbYwlOL.css"
+    "etag": "\"1445-4v2QEq6LaAcRoVOLkzxOtkLv184\"",
+    "mtime": "2026-08-18T12:51:49.905Z",
+    "size": 5189,
+    "path": "../public/_nuxt/index.BGxLiiss.css"
   },
-  "/_nuxt/jv64hm1X.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1731-69jeQLx996Ay4+XOMR3ZZVr26II\"",
-    "mtime": "2026-08-17T22:08:43.398Z",
-    "size": 5937,
-    "path": "../public/_nuxt/jv64hm1X.js"
-  },
-  "/_nuxt/jf_75Aq7.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"3ed5-vOi+bFl8wTFZhkaewnPj0cPgM8U\"",
-    "mtime": "2026-08-17T22:08:43.398Z",
-    "size": 16085,
-    "path": "../public/_nuxt/jf_75Aq7.js"
+  "/_nuxt/index.CZerw0aR.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"159e-4TMv0JRbkFsCZRtnWpWJzelyUK8\"",
+    "mtime": "2026-08-18T12:51:49.905Z",
+    "size": 5534,
+    "path": "../public/_nuxt/index.CZerw0aR.css"
   },
   "/_nuxt/literary-corpus.B2DRjof-.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1d49-4rT2LXp/VIU3wxeTP6DJcMLavx4\"",
-    "mtime": "2026-08-17T22:08:43.398Z",
+    "mtime": "2026-08-18T12:51:49.905Z",
     "size": 7497,
     "path": "../public/_nuxt/literary-corpus.B2DRjof-.css"
   },
-  "/_nuxt/m-j08LWE.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"dc6-dkGTd+qIz3kqc4ASH64eKH4RVKc\"",
-    "mtime": "2026-08-17T22:08:43.398Z",
-    "size": 3526,
-    "path": "../public/_nuxt/m-j08LWE.js"
-  },
-  "/_nuxt/gHh9M1_Y.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"5e478-ghSjKO4NIVobSl4gtG+UU1FhvRY\"",
-    "mtime": "2026-08-17T22:08:43.398Z",
-    "size": 386168,
-    "path": "../public/_nuxt/gHh9M1_Y.js"
+  "/_nuxt/main.C-b0zPyV.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"c5c8-eEO/dW27n+KvF4EGyGf4fxA1e4Y\"",
+    "mtime": "2026-08-18T12:51:49.906Z",
+    "size": 50632,
+    "path": "../public/_nuxt/main.C-b0zPyV.css"
   },
   "/_nuxt/mon-compte.BfHrW1fD.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"81f-qRXMInFEyvge+C3tRZgg5uCaXx4\"",
-    "mtime": "2026-08-17T22:08:43.398Z",
+    "mtime": "2026-08-18T12:51:49.905Z",
     "size": 2079,
     "path": "../public/_nuxt/mon-compte.BfHrW1fD.css"
-  },
-  "/_nuxt/main.LMkf9irk.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"c5cb-EStuVOawGeZhj9u8/AUJsknw+Vo\"",
-    "mtime": "2026-08-17T22:08:43.398Z",
-    "size": 50635,
-    "path": "../public/_nuxt/main.LMkf9irk.css"
   },
   "/_nuxt/shared-summaries.ByFL8yZh.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"65b-PFjai3xJO+fBrqQOoI5SsmPeBzQ\"",
-    "mtime": "2026-08-17T22:08:43.398Z",
+    "mtime": "2026-08-18T12:51:49.905Z",
     "size": 1627,
     "path": "../public/_nuxt/shared-summaries.ByFL8yZh.css"
   },
-  "/_nuxt/signin.EFfIRxI1.css": {
+  "/_nuxt/signin.BkYtiZnW.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"100e-SiUXaoYOG53PmcjcZRva9qMz8SE\"",
-    "mtime": "2026-08-17T22:08:43.398Z",
+    "etag": "\"100e-MFJ17C5OG0lZ693QfLNbuo8wKZQ\"",
+    "mtime": "2026-08-18T12:51:49.905Z",
     "size": 4110,
-    "path": "../public/_nuxt/signin.EFfIRxI1.css"
+    "path": "../public/_nuxt/signin.BkYtiZnW.css"
   },
-  "/_nuxt/tests.BqPF9Zsa.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"39e7-GxuNd1OxNpLv+j5qgLOQuuK6myU\"",
-    "mtime": "2026-08-17T22:08:43.398Z",
-    "size": 14823,
-    "path": "../public/_nuxt/tests.BqPF9Zsa.css"
+  "/_nuxt/tMBrrOP5.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"2df-FiFpyfVzEb8da6UkQV0orsDktlQ\"",
+    "mtime": "2026-08-18T12:51:49.905Z",
+    "size": 735,
+    "path": "../public/_nuxt/tMBrrOP5.js"
   },
   "/_nuxt/u_Szh-r1.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"13ec-1hSrButRL9HlsgYj1tHJ6Tteo/g\"",
-    "mtime": "2026-08-17T22:08:43.399Z",
+    "mtime": "2026-08-18T12:51:49.905Z",
     "size": 5100,
     "path": "../public/_nuxt/u_Szh-r1.js"
+  },
+  "/_nuxt/tests.BqPF9Zsa.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"39e7-GxuNd1OxNpLv+j5qgLOQuuK6myU\"",
+    "mtime": "2026-08-18T12:51:49.906Z",
+    "size": 14823,
+    "path": "../public/_nuxt/tests.BqPF9Zsa.css"
+  },
+  "/_nuxt/umIWu9Z0.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"8302-uVZjVgNrtWwfm+irSt7pX05YFuY\"",
+    "mtime": "2026-08-18T12:51:49.906Z",
+    "size": 33538,
+    "path": "../public/_nuxt/umIWu9Z0.js"
   },
   "/_nuxt/users.B1RX_mTk.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"24a0-GchT/cDiux2NRCiZ+VQBSZU7Iac\"",
-    "mtime": "2026-08-17T22:08:43.399Z",
+    "mtime": "2026-08-18T12:51:49.906Z",
     "size": 9376,
     "path": "../public/_nuxt/users.B1RX_mTk.css"
   },
   "/_nuxt/verbes.C567BY1t.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"488d-NTJnWUvJgIIojzRhFHQB1ji+PC0\"",
-    "mtime": "2026-08-17T22:08:43.399Z",
+    "mtime": "2026-08-18T12:51:49.906Z",
     "size": 18573,
     "path": "../public/_nuxt/verbes.C567BY1t.css"
+  },
+  "/coach-media/avatars-cartoon/Defi-de-conjugaison.pdf": {
+    "type": "application/pdf",
+    "etag": "\"1971-GvyCFxsExS5nnjCoRJihmJWjW1Y\"",
+    "mtime": "2026-08-18T12:51:49.955Z",
+    "size": 6513,
+    "path": "../public/coach-media/avatars-cartoon/Defi-de-conjugaison.pdf"
   },
   "/coach-media/avatars/amel.jpg": {
     "type": "image/jpeg",
     "etag": "\"bdc2-XpfseHXprhgQ2kOwJnuzEG4Szrk\"",
-    "mtime": "2026-08-17T22:08:43.424Z",
+    "mtime": "2026-08-18T12:51:49.936Z",
     "size": 48578,
     "path": "../public/coach-media/avatars/amel.jpg"
-  },
-  "/coach-media/avatars/camille.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"8236-iF9IFpUQ41mOrk3DW4giaY2v1A4\"",
-    "mtime": "2026-08-17T22:08:43.433Z",
-    "size": 33334,
-    "path": "../public/coach-media/avatars/camille.jpg"
-  },
-  "/coach-media/avatars/claire.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"c54e-brF3vVSmHDKtuq1fWp3D7oFg51M\"",
-    "mtime": "2026-08-17T22:08:43.433Z",
-    "size": 50510,
-    "path": "../public/coach-media/avatars/claire.jpg"
-  },
-  "/coach-media/avatars/gabriel.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"bcf0-Gm00KTQi4TW4IfPKJlSbLvra1vY\"",
-    "mtime": "2026-08-17T22:08:43.434Z",
-    "size": 48368,
-    "path": "../public/coach-media/avatars/gabriel.jpg"
-  },
-  "/coach-media/avatars/hugo.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e0ab-BgIuErDh4c6iTXJy8Qw9D1fV2Y4\"",
-    "mtime": "2026-08-17T22:08:43.433Z",
-    "size": 57515,
-    "path": "../public/coach-media/avatars/hugo.jpg"
-  },
-  "/coach-media/avatars/karim.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"f507-Nj981GfUvc5eTvpZtyN0ieyiCHU\"",
-    "mtime": "2026-08-17T22:08:43.434Z",
-    "size": 62727,
-    "path": "../public/coach-media/avatars/karim.jpg"
-  },
-  "/coach-media/avatars/lea.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"f9f5-I+UeknSzltKnBgxau2s+TTvCXzM\"",
-    "mtime": "2026-08-17T22:08:43.435Z",
-    "size": 63989,
-    "path": "../public/coach-media/avatars/lea.jpg"
-  },
-  "/coach-media/avatars/lucas.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"10f02-mIKj8itqNevLJJvdMQvCLra5sZs\"",
-    "mtime": "2026-08-17T22:08:43.438Z",
-    "size": 69378,
-    "path": "../public/coach-media/avatars/lucas.jpg"
-  },
-  "/coach-media/avatars/nora.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"f434-vbQD186KDkY42S4uGz7cixTeM3Y\"",
-    "mtime": "2026-08-17T22:08:43.434Z",
-    "size": 62516,
-    "path": "../public/coach-media/avatars/nora.jpg"
-  },
-  "/coach-media/avatars/sami.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"b13e-AVASgC2NUl9cEqNeVXQZf710AtI\"",
-    "mtime": "2026-08-17T22:08:43.434Z",
-    "size": 45374,
-    "path": "../public/coach-media/avatars/sami.jpg"
-  },
-  "/coach-media/avatars/thomas.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"cf97-C0nHicl9/0pZcc6nPoN1AK6qGxg\"",
-    "mtime": "2026-08-17T22:08:43.434Z",
-    "size": 53143,
-    "path": "../public/coach-media/avatars/thomas.jpg"
-  },
-  "/coach-media/avatars/zoe.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"c393-S8Ro+/yzyBY+cBCNNh6M59U1lLI\"",
-    "mtime": "2026-08-17T22:08:43.434Z",
-    "size": 50067,
-    "path": "../public/coach-media/avatars/zoe.jpg"
-  },
-  "/coach-media/avatars-cartoon/42f6c648-e545-4d49-8f0b-518fb3a2d186.png": {
-    "type": "image/png",
-    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
-    "mtime": "2026-08-17T22:08:43.438Z",
-    "size": 1500823,
-    "path": "../public/coach-media/avatars-cartoon/42f6c648-e545-4d49-8f0b-518fb3a2d186.png"
   },
   "/coach-media/avatars-cartoon/4f7a8330-834e-44e0-ad17-397d1e2a5891.png": {
     "type": "image/png",
     "etag": "\"15dca6-tSDm1naznyFNYIkdupEaTCi//zk\"",
-    "mtime": "2026-08-17T22:08:43.445Z",
+    "mtime": "2026-08-18T12:51:49.945Z",
     "size": 1432742,
     "path": "../public/coach-media/avatars-cartoon/4f7a8330-834e-44e0-ad17-397d1e2a5891.png"
+  },
+  "/coach-media/avatars-cartoon/42f6c648-e545-4d49-8f0b-518fb3a2d186.png": {
+    "type": "image/png",
+    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
+    "mtime": "2026-08-18T12:51:49.944Z",
+    "size": 1500823,
+    "path": "../public/coach-media/avatars-cartoon/42f6c648-e545-4d49-8f0b-518fb3a2d186.png"
   },
   "/coach-media/avatars-cartoon/732fe1f9-b633-4261-bdf8-542b99b2a98c.png": {
     "type": "image/png",
     "etag": "\"172bf9-bwNVo0D3pGzvGYiYtpjtpXMEyow\"",
-    "mtime": "2026-08-17T22:08:43.446Z",
+    "mtime": "2026-08-18T12:51:49.953Z",
     "size": 1518585,
     "path": "../public/coach-media/avatars-cartoon/732fe1f9-b633-4261-bdf8-542b99b2a98c.png"
   },
-  "/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png": {
+  "/coach-media/avatars-cartoon/8f23428e-ed2c-4938-9186-44447f1efcbe.png": {
     "type": "image/png",
-    "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
-    "mtime": "2026-08-17T22:08:43.437Z",
-    "size": 1745848,
-    "path": "../public/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png"
+    "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
+    "mtime": "2026-08-18T12:51:49.953Z",
+    "size": 1562456,
+    "path": "../public/coach-media/avatars-cartoon/8f23428e-ed2c-4938-9186-44447f1efcbe.png"
+  },
+  "/coach-media/avatars/camille.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"8236-iF9IFpUQ41mOrk3DW4giaY2v1A4\"",
+    "mtime": "2026-08-18T12:51:49.936Z",
+    "size": 33334,
+    "path": "../public/coach-media/avatars/camille.jpg"
+  },
+  "/coach-media/avatars-cartoon/db266268-397e-4920-93bb-f134a85cd8b7.png": {
+    "type": "image/png",
+    "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
+    "mtime": "2026-08-18T12:51:49.969Z",
+    "size": 1416623,
+    "path": "../public/coach-media/avatars-cartoon/db266268-397e-4920-93bb-f134a85cd8b7.png"
   },
   "/coach-media/avatars-cartoon/19f352b5-75f2-449a-b441-7b8203da9e6f.png": {
     "type": "image/png",
     "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
-    "mtime": "2026-08-17T22:08:43.437Z",
+    "mtime": "2026-08-18T12:51:49.929Z",
     "size": 1696814,
     "path": "../public/coach-media/avatars-cartoon/19f352b5-75f2-449a-b441-7b8203da9e6f.png"
   },
   "/coach-media/avatars-cartoon/10f80bed-4250-41d9-8a65-fbaa5deba408.png": {
     "type": "image/png",
     "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
-    "mtime": "2026-08-17T22:08:43.429Z",
+    "mtime": "2026-08-18T12:51:49.942Z",
     "size": 1882140,
     "path": "../public/coach-media/avatars-cartoon/10f80bed-4250-41d9-8a65-fbaa5deba408.png"
-  },
-  "/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png": {
-    "type": "image/png",
-    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
-    "mtime": "2026-08-17T22:08:43.446Z",
-    "size": 1578337,
-    "path": "../public/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png"
   },
   "/coach-media/avatars-cartoon/1af3afdd-5c5a-41ef-b639-d2e415aaa4fd.png": {
     "type": "image/png",
     "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
-    "mtime": "2026-08-17T22:08:43.437Z",
+    "mtime": "2026-08-18T12:51:49.942Z",
     "size": 1993248,
     "path": "../public/coach-media/avatars-cartoon/1af3afdd-5c5a-41ef-b639-d2e415aaa4fd.png"
   },
-  "/coach-media/avatars-cartoon/5da085b6-2b23-4338-bc79-31f5e9a4b5bc.png": {
+  "/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png": {
     "type": "image/png",
-    "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-08-17T22:08:43.446Z",
-    "size": 1993166,
-    "path": "../public/coach-media/avatars-cartoon/5da085b6-2b23-4338-bc79-31f5e9a4b5bc.png"
+    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
+    "mtime": "2026-08-18T12:51:49.942Z",
+    "size": 1578337,
+    "path": "../public/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png"
   },
   "/coach-media/avatars-cartoon/830a8cdd-fb26-4191-a673-42c5f28f2e73.png": {
     "type": "image/png",
     "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
-    "mtime": "2026-08-17T22:08:43.453Z",
+    "mtime": "2026-08-18T12:51:49.945Z",
     "size": 1602205,
     "path": "../public/coach-media/avatars-cartoon/830a8cdd-fb26-4191-a673-42c5f28f2e73.png"
+  },
+  "/coach-media/avatars-cartoon/5da085b6-2b23-4338-bc79-31f5e9a4b5bc.png": {
+    "type": "image/png",
+    "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
+    "mtime": "2026-08-18T12:51:49.951Z",
+    "size": 1993166,
+    "path": "../public/coach-media/avatars-cartoon/5da085b6-2b23-4338-bc79-31f5e9a4b5bc.png"
+  },
+  "/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png": {
+    "type": "image/png",
+    "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
+    "mtime": "2026-08-18T12:51:49.941Z",
+    "size": 1745848,
+    "path": "../public/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png"
   },
   "/coach-media/avatars-cartoon/8ced5816-480d-4d64-8e16-a33a743d155c.png": {
     "type": "image/png",
     "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
-    "mtime": "2026-08-17T22:08:43.464Z",
+    "mtime": "2026-08-18T12:51:49.953Z",
     "size": 1785490,
     "path": "../public/coach-media/avatars-cartoon/8ced5816-480d-4d64-8e16-a33a743d155c.png"
-  },
-  "/coach-media/avatars-cartoon/Defi-de-conjugaison.pdf": {
-    "type": "application/pdf",
-    "etag": "\"1971-GvyCFxsExS5nnjCoRJihmJWjW1Y\"",
-    "mtime": "2026-08-17T22:08:43.446Z",
-    "size": 6513,
-    "path": "../public/coach-media/avatars-cartoon/Defi-de-conjugaison.pdf"
-  },
-  "/coach-media/avatars-cartoon/8f23428e-ed2c-4938-9186-44447f1efcbe.png": {
-    "type": "image/png",
-    "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
-    "mtime": "2026-08-17T22:08:43.453Z",
-    "size": 1562456,
-    "path": "../public/coach-media/avatars-cartoon/8f23428e-ed2c-4938-9186-44447f1efcbe.png"
-  },
-  "/coach-media/avatars-cartoon/db266268-397e-4920-93bb-f134a85cd8b7.png": {
-    "type": "image/png",
-    "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
-    "mtime": "2026-08-17T22:08:43.453Z",
-    "size": 1416623,
-    "path": "../public/coach-media/avatars-cartoon/db266268-397e-4920-93bb-f134a85cd8b7.png"
-  },
-  "/coach-media/uploads/538b12dc-7f77-437e-a281-3db72a0a987c.png": {
-    "type": "image/png",
-    "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
-    "mtime": "2026-08-17T22:08:43.471Z",
-    "size": 1562456,
-    "path": "../public/coach-media/uploads/538b12dc-7f77-437e-a281-3db72a0a987c.png"
-  },
-  "/coach-media/uploads/58a1f2ac-9ac5-4c89-9453-f96b177e021a.png": {
-    "type": "image/png",
-    "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
-    "mtime": "2026-08-17T22:08:43.458Z",
-    "size": 1416623,
-    "path": "../public/coach-media/uploads/58a1f2ac-9ac5-4c89-9453-f96b177e021a.png"
   },
   "/coach-media/avatars-cartoon/b970ff06-9199-44c9-90d3-4adf29466ef2.png": {
     "type": "image/png",
     "etag": "\"191b76-HQFygNHbvhIArIsnfMO1th0D4OU\"",
-    "mtime": "2026-08-17T22:08:43.454Z",
+    "mtime": "2026-08-18T12:51:49.962Z",
     "size": 1645430,
     "path": "../public/coach-media/avatars-cartoon/b970ff06-9199-44c9-90d3-4adf29466ef2.png"
   },
   "/coach-media/avatars-cartoon/fad8cab6-7cd9-454b-a967-00de62cdde32.png": {
     "type": "image/png",
     "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
-    "mtime": "2026-08-17T22:08:43.456Z",
+    "mtime": "2026-08-18T12:51:49.956Z",
     "size": 1665643,
     "path": "../public/coach-media/avatars-cartoon/fad8cab6-7cd9-454b-a967-00de62cdde32.png"
+  },
+  "/coach-media/avatars/claire.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"c54e-brF3vVSmHDKtuq1fWp3D7oFg51M\"",
+    "mtime": "2026-08-18T12:51:49.936Z",
+    "size": 50510,
+    "path": "../public/coach-media/avatars/claire.jpg"
+  },
+  "/coach-media/avatars/gabriel.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"bcf0-Gm00KTQi4TW4IfPKJlSbLvra1vY\"",
+    "mtime": "2026-08-18T12:51:49.927Z",
+    "size": 48368,
+    "path": "../public/coach-media/avatars/gabriel.jpg"
+  },
+  "/coach-media/avatars/hugo.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e0ab-BgIuErDh4c6iTXJy8Qw9D1fV2Y4\"",
+    "mtime": "2026-08-18T12:51:49.936Z",
+    "size": 57515,
+    "path": "../public/coach-media/avatars/hugo.jpg"
+  },
+  "/coach-media/avatars/karim.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"f507-Nj981GfUvc5eTvpZtyN0ieyiCHU\"",
+    "mtime": "2026-08-18T12:51:49.937Z",
+    "size": 62727,
+    "path": "../public/coach-media/avatars/karim.jpg"
+  },
+  "/coach-media/avatars/lea.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"f9f5-I+UeknSzltKnBgxau2s+TTvCXzM\"",
+    "mtime": "2026-08-18T12:51:49.937Z",
+    "size": 63989,
+    "path": "../public/coach-media/avatars/lea.jpg"
+  },
+  "/coach-media/avatars/lucas.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"10f02-mIKj8itqNevLJJvdMQvCLra5sZs\"",
+    "mtime": "2026-08-18T12:51:49.937Z",
+    "size": 69378,
+    "path": "../public/coach-media/avatars/lucas.jpg"
+  },
+  "/coach-media/avatars/nora.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"f434-vbQD186KDkY42S4uGz7cixTeM3Y\"",
+    "mtime": "2026-08-18T12:51:49.937Z",
+    "size": 62516,
+    "path": "../public/coach-media/avatars/nora.jpg"
+  },
+  "/coach-media/avatars/sami.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"b13e-AVASgC2NUl9cEqNeVXQZf710AtI\"",
+    "mtime": "2026-08-18T12:51:49.938Z",
+    "size": 45374,
+    "path": "../public/coach-media/avatars/sami.jpg"
+  },
+  "/coach-media/avatars/thomas.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"cf97-C0nHicl9/0pZcc6nPoN1AK6qGxg\"",
+    "mtime": "2026-08-18T12:51:49.938Z",
+    "size": 53143,
+    "path": "../public/coach-media/avatars/thomas.jpg"
+  },
+  "/coach-media/avatars/zoe.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"c393-S8Ro+/yzyBY+cBCNNh6M59U1lLI\"",
+    "mtime": "2026-08-18T12:51:49.940Z",
+    "size": 50067,
+    "path": "../public/coach-media/avatars/zoe.jpg"
+  },
+  "/coach-media/uploads/538b12dc-7f77-437e-a281-3db72a0a987c.png": {
+    "type": "image/png",
+    "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
+    "mtime": "2026-08-18T12:51:49.962Z",
+    "size": 1562456,
+    "path": "../public/coach-media/uploads/538b12dc-7f77-437e-a281-3db72a0a987c.png"
+  },
+  "/coach-media/uploads/58a1f2ac-9ac5-4c89-9453-f96b177e021a.png": {
+    "type": "image/png",
+    "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
+    "mtime": "2026-08-18T12:51:49.969Z",
+    "size": 1416623,
+    "path": "../public/coach-media/uploads/58a1f2ac-9ac5-4c89-9453-f96b177e021a.png"
   },
   "/coach-media/uploads/06e4101b-298e-4352-bf66-f4ea7a350500.png": {
     "type": "image/png",
     "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
-    "mtime": "2026-08-17T22:08:43.430Z",
+    "mtime": "2026-08-18T12:51:49.930Z",
     "size": 1785490,
     "path": "../public/coach-media/uploads/06e4101b-298e-4352-bf66-f4ea7a350500.png"
+  },
+  "/coach-media/uploads/7c2bbc4c-d63f-430b-a18d-fcee64d2ee27.png": {
+    "type": "image/png",
+    "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
+    "mtime": "2026-08-18T12:51:49.977Z",
+    "size": 1416623,
+    "path": "../public/coach-media/uploads/7c2bbc4c-d63f-430b-a18d-fcee64d2ee27.png"
   },
   "/coach-media/uploads/2f16e10d-f885-45d1-9208-7faac71a6577.png": {
     "type": "image/png",
     "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
-    "mtime": "2026-08-17T22:08:43.456Z",
+    "mtime": "2026-08-18T12:51:49.961Z",
     "size": 1696814,
     "path": "../public/coach-media/uploads/2f16e10d-f885-45d1-9208-7faac71a6577.png"
+  },
+  "/coach-media/uploads/841d5131-04ff-427b-893a-847773422907.png": {
+    "type": "image/png",
+    "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
+    "mtime": "2026-08-18T12:51:49.976Z",
+    "size": 1562456,
+    "path": "../public/coach-media/uploads/841d5131-04ff-427b-893a-847773422907.png"
   },
   "/coach-media/uploads/30fdf4c2-bf1e-492d-b2ee-e4c920be3e28.png": {
     "type": "image/png",
     "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
-    "mtime": "2026-08-17T22:08:43.464Z",
+    "mtime": "2026-08-18T12:51:49.968Z",
     "size": 1602205,
     "path": "../public/coach-media/uploads/30fdf4c2-bf1e-492d-b2ee-e4c920be3e28.png"
   },
   "/coach-media/uploads/4f43eb0e-1591-4688-9a04-ad786c1ed617.png": {
     "type": "image/png",
     "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-08-17T22:08:43.457Z",
+    "mtime": "2026-08-18T12:51:49.962Z",
     "size": 1993166,
     "path": "../public/coach-media/uploads/4f43eb0e-1591-4688-9a04-ad786c1ed617.png"
   },
-  "/coach-media/uploads/5c10171b-755c-4d43-aa06-52e70ee0c28e.png": {
+  "/coach-media/uploads/c92ca73c-2c4e-4f00-8d40-78323ecc6d1d.png": {
     "type": "image/png",
-    "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
-    "mtime": "2026-08-17T22:08:43.474Z",
-    "size": 1696814,
-    "path": "../public/coach-media/uploads/5c10171b-755c-4d43-aa06-52e70ee0c28e.png"
+    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
+    "mtime": "2026-08-18T12:51:49.999Z",
+    "size": 1500823,
+    "path": "../public/coach-media/uploads/c92ca73c-2c4e-4f00-8d40-78323ecc6d1d.png"
   },
   "/coach-media/uploads/5b59b65b-55d0-4b8a-a0d0-37bf9385ba24.png": {
     "type": "image/png",
     "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
-    "mtime": "2026-08-17T22:08:43.465Z",
+    "mtime": "2026-08-18T12:51:49.976Z",
     "size": 1745848,
     "path": "../public/coach-media/uploads/5b59b65b-55d0-4b8a-a0d0-37bf9385ba24.png"
+  },
+  "/coach-media/uploads/5c10171b-755c-4d43-aa06-52e70ee0c28e.png": {
+    "type": "image/png",
+    "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
+    "mtime": "2026-08-18T12:51:49.976Z",
+    "size": 1696814,
+    "path": "../public/coach-media/uploads/5c10171b-755c-4d43-aa06-52e70ee0c28e.png"
   },
   "/coach-media/uploads/5d410305-96e0-4e99-ae37-0ad0346d2834.png": {
     "type": "image/png",
     "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
-    "mtime": "2026-08-17T22:08:43.465Z",
+    "mtime": "2026-08-18T12:51:49.969Z",
     "size": 1785490,
     "path": "../public/coach-media/uploads/5d410305-96e0-4e99-ae37-0ad0346d2834.png"
-  },
-  "/coach-media/uploads/7c2bbc4c-d63f-430b-a18d-fcee64d2ee27.png": {
-    "type": "image/png",
-    "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
-    "mtime": "2026-08-17T22:08:43.471Z",
-    "size": 1416623,
-    "path": "../public/coach-media/uploads/7c2bbc4c-d63f-430b-a18d-fcee64d2ee27.png"
-  },
-  "/coach-media/uploads/841d5131-04ff-427b-893a-847773422907.png": {
-    "type": "image/png",
-    "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
-    "mtime": "2026-08-17T22:08:43.471Z",
-    "size": 1562456,
-    "path": "../public/coach-media/uploads/841d5131-04ff-427b-893a-847773422907.png"
   },
   "/coach-media/uploads/5fef96f4-0377-4736-b0e0-f084e8c0acb1.png": {
     "type": "image/png",
     "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
-    "mtime": "2026-08-17T22:08:43.472Z",
+    "mtime": "2026-08-18T12:51:49.972Z",
     "size": 1602205,
     "path": "../public/coach-media/uploads/5fef96f4-0377-4736-b0e0-f084e8c0acb1.png"
+  },
+  "/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png": {
+    "type": "image/png",
+    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
+    "mtime": "2026-08-18T12:51:50.000Z",
+    "size": 1500823,
+    "path": "../public/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png"
   },
   "/coach-media/uploads/849249ef-60fe-497d-a0cc-1ff6224e1035.png": {
     "type": "image/png",
     "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
-    "mtime": "2026-08-17T22:08:43.474Z",
+    "mtime": "2026-08-18T12:51:49.984Z",
     "size": 1993248,
     "path": "../public/coach-media/uploads/849249ef-60fe-497d-a0cc-1ff6224e1035.png"
   },
   "/coach-media/uploads/9e91555a-0c28-4378-8797-391dee96076d.png": {
     "type": "image/png",
     "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
-    "mtime": "2026-08-17T22:08:43.475Z",
+    "mtime": "2026-08-18T12:51:49.985Z",
     "size": 1993248,
     "path": "../public/coach-media/uploads/9e91555a-0c28-4378-8797-391dee96076d.png"
   },
   "/coach-media/uploads/a09d1eae-bb31-49b6-9b87-2f6b14cc7720.png": {
     "type": "image/png",
     "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
-    "mtime": "2026-08-17T22:08:43.483Z",
+    "mtime": "2026-08-18T12:51:49.984Z",
     "size": 1665643,
     "path": "../public/coach-media/uploads/a09d1eae-bb31-49b6-9b87-2f6b14cc7720.png"
   },
   "/coach-media/uploads/a1ec228e-1055-4648-9252-fb2dd6fb5a02.png": {
     "type": "image/png",
     "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-08-17T22:08:43.483Z",
+    "mtime": "2026-08-18T12:51:49.985Z",
     "size": 1993166,
     "path": "../public/coach-media/uploads/a1ec228e-1055-4648-9252-fb2dd6fb5a02.png"
-  },
-  "/coach-media/uploads/aed28159-a121-45cb-9dd1-16ecc349b84d.png": {
-    "type": "image/png",
-    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
-    "mtime": "2026-08-17T22:08:43.489Z",
-    "size": 1578337,
-    "path": "../public/coach-media/uploads/aed28159-a121-45cb-9dd1-16ecc349b84d.png"
-  },
-  "/coach-media/uploads/a2a433ff-1b21-482b-a9d9-6cb0da8146f4.png": {
-    "type": "image/png",
-    "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
-    "mtime": "2026-08-17T22:08:43.475Z",
-    "size": 1745848,
-    "path": "../public/coach-media/uploads/a2a433ff-1b21-482b-a9d9-6cb0da8146f4.png"
   },
   "/coach-media/uploads/ab818ee2-0431-430e-a9af-e78936417633.png": {
     "type": "image/png",
     "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
-    "mtime": "2026-08-17T22:08:43.481Z",
+    "mtime": "2026-08-18T12:51:49.992Z",
     "size": 1665643,
     "path": "../public/coach-media/uploads/ab818ee2-0431-430e-a9af-e78936417633.png"
+  },
+  "/coach-media/uploads/a2a433ff-1b21-482b-a9d9-6cb0da8146f4.png": {
+    "type": "image/png",
+    "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
+    "mtime": "2026-08-18T12:51:49.993Z",
+    "size": 1745848,
+    "path": "../public/coach-media/uploads/a2a433ff-1b21-482b-a9d9-6cb0da8146f4.png"
+  },
+  "/coach-media/uploads/aed28159-a121-45cb-9dd1-16ecc349b84d.png": {
+    "type": "image/png",
+    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
+    "mtime": "2026-08-18T12:51:49.994Z",
+    "size": 1578337,
+    "path": "../public/coach-media/uploads/aed28159-a121-45cb-9dd1-16ecc349b84d.png"
+  },
+  "/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png": {
+    "type": "image/png",
+    "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
+    "mtime": "2026-08-18T12:51:49.998Z",
+    "size": 1882140,
+    "path": "../public/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png"
   },
   "/coach-media/uploads/bf6f3f5e-efca-4554-9963-44587811c0f8.png": {
     "type": "image/png",
     "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-08-17T22:08:43.502Z",
+    "mtime": "2026-08-18T12:51:49.994Z",
     "size": 1993166,
     "path": "../public/coach-media/uploads/bf6f3f5e-efca-4554-9963-44587811c0f8.png"
   },
-  "/coach-media/uploads/c92ca73c-2c4e-4f00-8d40-78323ecc6d1d.png": {
+  "/coach-media/uploads/e5108547-b1b3-4c96-89ca-6e00c0d1c60a.png": {
     "type": "image/png",
-    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
-    "mtime": "2026-08-17T22:08:43.490Z",
-    "size": 1500823,
-    "path": "../public/coach-media/uploads/c92ca73c-2c4e-4f00-8d40-78323ecc6d1d.png"
+    "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
+    "mtime": "2026-08-18T12:51:50.003Z",
+    "size": 1882140,
+    "path": "../public/coach-media/uploads/e5108547-b1b3-4c96-89ca-6e00c0d1c60a.png"
+  },
+  "/coach-media/uploads/f8346f58-2678-4a95-aaa8-d37ba71ecb3b.png": {
+    "type": "image/png",
+    "etag": "\"191b76-HQFygNHbvhIArIsnfMO1th0D4OU\"",
+    "mtime": "2026-08-18T12:51:50.007Z",
+    "size": 1645430,
+    "path": "../public/coach-media/uploads/f8346f58-2678-4a95-aaa8-d37ba71ecb3b.png"
   },
   "/coach-media/people/200.webp": {
     "type": "image/webp",
     "etag": "\"1d696-kiyalxZWWq76I5xPP32p65sny50\"",
-    "mtime": "2026-08-17T22:08:43.499Z",
+    "mtime": "2026-08-18T12:51:50.005Z",
     "size": 120470,
     "path": "../public/coach-media/people/200.webp"
   },
   "/coach-media/people/T01.06.01.xlsx": {
     "type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     "etag": "\"dcc6-yJKLWkGDw+a72V9Ge5nDtMengWg\"",
-    "mtime": "2026-08-17T22:08:43.425Z",
+    "mtime": "2026-08-18T12:51:50.005Z",
     "size": 56518,
     "path": "../public/coach-media/people/T01.06.01.xlsx"
   },
   "/coach-media/people/portrait1.jpg": {
     "type": "image/jpeg",
     "etag": "\"8236-iF9IFpUQ41mOrk3DW4giaY2v1A4\"",
-    "mtime": "2026-08-17T22:08:43.497Z",
+    "mtime": "2026-08-18T12:51:49.928Z",
     "size": 33334,
     "path": "../public/coach-media/people/portrait1.jpg"
-  },
-  "/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png": {
-    "type": "image/png",
-    "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
-    "mtime": "2026-08-17T22:08:43.483Z",
-    "size": 1882140,
-    "path": "../public/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png"
   },
   "/coach-media/people/portrait10.jpg": {
     "type": "image/jpeg",
     "etag": "\"13242-oU9sw67fXaoOhBCspE1ufcKQVJk\"",
-    "mtime": "2026-08-17T22:08:43.499Z",
+    "mtime": "2026-08-18T12:51:50.000Z",
     "size": 78402,
     "path": "../public/coach-media/people/portrait10.jpg"
   },
   "/coach-media/people/portrait11.jpg": {
     "type": "image/jpeg",
     "etag": "\"122fb-lSrwI6GnjcqOU7p9bL3eLB6zbPk\"",
-    "mtime": "2026-08-17T22:08:43.501Z",
+    "mtime": "2026-08-18T12:51:50.004Z",
     "size": 74491,
     "path": "../public/coach-media/people/portrait11.jpg"
   },
   "/coach-media/people/portrait12.jpg": {
     "type": "image/jpeg",
     "etag": "\"f434-vbQD186KDkY42S4uGz7cixTeM3Y\"",
-    "mtime": "2026-08-17T22:08:43.501Z",
+    "mtime": "2026-08-18T12:51:50.005Z",
     "size": 62516,
     "path": "../public/coach-media/people/portrait12.jpg"
   },
   "/coach-media/people/portrait13.jpg": {
     "type": "image/jpeg",
     "etag": "\"e0ab-BgIuErDh4c6iTXJy8Qw9D1fV2Y4\"",
-    "mtime": "2026-08-17T22:08:43.499Z",
+    "mtime": "2026-08-18T12:51:50.005Z",
     "size": 57515,
     "path": "../public/coach-media/people/portrait13.jpg"
   },
   "/coach-media/people/portrait14.jpg": {
     "type": "image/jpeg",
     "etag": "\"10f02-mIKj8itqNevLJJvdMQvCLra5sZs\"",
-    "mtime": "2026-08-17T22:08:43.505Z",
+    "mtime": "2026-08-18T12:51:50.006Z",
     "size": 69378,
     "path": "../public/coach-media/people/portrait14.jpg"
-  },
-  "/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png": {
-    "type": "image/png",
-    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
-    "mtime": "2026-08-17T22:08:43.498Z",
-    "size": 1500823,
-    "path": "../public/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png"
   },
   "/coach-media/people/portrait15.jpg": {
     "type": "image/jpeg",
     "etag": "\"e76c-vSk8fJrHyAqX+V28777ha8WbgNQ\"",
-    "mtime": "2026-08-17T22:08:43.500Z",
+    "mtime": "2026-08-18T12:51:50.006Z",
     "size": 59244,
     "path": "../public/coach-media/people/portrait15.jpg"
   },
   "/coach-media/people/portrait16.jpg": {
     "type": "image/jpeg",
     "etag": "\"cf97-C0nHicl9/0pZcc6nPoN1AK6qGxg\"",
-    "mtime": "2026-08-17T22:08:43.500Z",
+    "mtime": "2026-08-18T12:51:50.006Z",
     "size": 53143,
     "path": "../public/coach-media/people/portrait16.jpg"
-  },
-  "/coach-media/uploads/e5108547-b1b3-4c96-89ca-6e00c0d1c60a.png": {
-    "type": "image/png",
-    "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
-    "mtime": "2026-08-17T22:08:43.491Z",
-    "size": 1882140,
-    "path": "../public/coach-media/uploads/e5108547-b1b3-4c96-89ca-6e00c0d1c60a.png"
   },
   "/coach-media/people/portrait17.jpg": {
     "type": "image/jpeg",
     "etag": "\"bcf0-Gm00KTQi4TW4IfPKJlSbLvra1vY\"",
-    "mtime": "2026-08-17T22:08:43.500Z",
+    "mtime": "2026-08-18T12:51:50.007Z",
     "size": 48368,
     "path": "../public/coach-media/people/portrait17.jpg"
-  },
-  "/coach-media/uploads/f8346f58-2678-4a95-aaa8-d37ba71ecb3b.png": {
-    "type": "image/png",
-    "etag": "\"191b76-HQFygNHbvhIArIsnfMO1th0D4OU\"",
-    "mtime": "2026-08-17T22:08:43.494Z",
-    "size": 1645430,
-    "path": "../public/coach-media/uploads/f8346f58-2678-4a95-aaa8-d37ba71ecb3b.png"
-  },
-  "/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png": {
-    "type": "image/png",
-    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
-    "mtime": "2026-08-17T22:08:43.491Z",
-    "size": 1578337,
-    "path": "../public/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png"
   },
   "/coach-media/people/portrait18.jpg": {
     "type": "image/jpeg",
     "etag": "\"c54e-brF3vVSmHDKtuq1fWp3D7oFg51M\"",
-    "mtime": "2026-08-17T22:08:43.503Z",
+    "mtime": "2026-08-18T12:51:50.008Z",
     "size": 50510,
     "path": "../public/coach-media/people/portrait18.jpg"
   },
   "/coach-media/people/portrait19.jpg": {
     "type": "image/jpeg",
     "etag": "\"c393-S8Ro+/yzyBY+cBCNNh6M59U1lLI\"",
-    "mtime": "2026-08-17T22:08:43.504Z",
+    "mtime": "2026-08-18T12:51:50.007Z",
     "size": 50067,
     "path": "../public/coach-media/people/portrait19.jpg"
   },
   "/coach-media/people/portrait2.jpg": {
     "type": "image/jpeg",
     "etag": "\"bcdc-0QQ4XzMu+rYTbqYvpc9NTeUA8tY\"",
-    "mtime": "2026-08-17T22:08:43.503Z",
+    "mtime": "2026-08-18T12:51:50.007Z",
     "size": 48348,
     "path": "../public/coach-media/people/portrait2.jpg"
   },
   "/coach-media/people/portrait20.jpg": {
     "type": "image/jpeg",
     "etag": "\"b13e-AVASgC2NUl9cEqNeVXQZf710AtI\"",
-    "mtime": "2026-08-17T22:08:43.501Z",
+    "mtime": "2026-08-18T12:51:50.008Z",
     "size": 45374,
     "path": "../public/coach-media/people/portrait20.jpg"
-  },
-  "/coach-media/people/portrait22.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"bdc2-XpfseHXprhgQ2kOwJnuzEG4Szrk\"",
-    "mtime": "2026-08-17T22:08:43.502Z",
-    "size": 48578,
-    "path": "../public/coach-media/people/portrait22.jpg"
   },
   "/coach-media/people/portrait21.jpg": {
     "type": "image/jpeg",
     "etag": "\"f9f5-I+UeknSzltKnBgxau2s+TTvCXzM\"",
-    "mtime": "2026-08-17T22:08:43.501Z",
+    "mtime": "2026-08-18T12:51:50.008Z",
     "size": 63989,
     "path": "../public/coach-media/people/portrait21.jpg"
+  },
+  "/coach-media/people/portrait22.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"bdc2-XpfseHXprhgQ2kOwJnuzEG4Szrk\"",
+    "mtime": "2026-08-18T12:51:50.008Z",
+    "size": 48578,
+    "path": "../public/coach-media/people/portrait22.jpg"
   },
   "/coach-media/people/portrait23.jpg": {
     "type": "image/jpeg",
     "etag": "\"be4c-P8CT4CrVwbEaeQLat0jhjTQMjxo\"",
-    "mtime": "2026-08-17T22:08:43.501Z",
+    "mtime": "2026-08-18T12:51:50.008Z",
     "size": 48716,
     "path": "../public/coach-media/people/portrait23.jpg"
   },
   "/coach-media/people/portrait24.jpg": {
     "type": "image/jpeg",
     "etag": "\"abed-vXR8pegbgVS9EPJiKC3ZDRQ4dJg\"",
-    "mtime": "2026-08-17T22:08:43.503Z",
+    "mtime": "2026-08-18T12:51:50.008Z",
     "size": 44013,
     "path": "../public/coach-media/people/portrait24.jpg"
   },
   "/coach-media/people/portrait25.jpg": {
     "type": "image/jpeg",
     "etag": "\"e0a7-8029IuA0LaQ6Vf6lujX/+UuHaV0\"",
-    "mtime": "2026-08-17T22:08:43.503Z",
+    "mtime": "2026-08-18T12:51:50.008Z",
     "size": 57511,
     "path": "../public/coach-media/people/portrait25.jpg"
   },
   "/coach-media/people/portrait27.jpg": {
     "type": "image/jpeg",
     "etag": "\"e758-fcjR+RePqA6Bh1Ol6SdhNalWKxo\"",
-    "mtime": "2026-08-17T22:08:43.505Z",
+    "mtime": "2026-08-18T12:51:50.009Z",
     "size": 59224,
     "path": "../public/coach-media/people/portrait27.jpg"
-  },
-  "/coach-media/people/portrait28.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"ab15-QtgsG93oCrKL2cWD/M5wqljszjg\"",
-    "mtime": "2026-08-17T22:08:43.504Z",
-    "size": 43797,
-    "path": "../public/coach-media/people/portrait28.jpg"
   },
   "/coach-media/people/portrait26.jpg": {
     "type": "image/jpeg",
     "etag": "\"10adb-Y2avzIjFtKDJtMnigpGDItgDIK4\"",
-    "mtime": "2026-08-17T22:08:43.504Z",
+    "mtime": "2026-08-18T12:51:50.009Z",
     "size": 68315,
     "path": "../public/coach-media/people/portrait26.jpg"
+  },
+  "/coach-media/people/portrait28.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"ab15-QtgsG93oCrKL2cWD/M5wqljszjg\"",
+    "mtime": "2026-08-18T12:51:50.009Z",
+    "size": 43797,
+    "path": "../public/coach-media/people/portrait28.jpg"
+  },
+  "/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png": {
+    "type": "image/png",
+    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
+    "mtime": "2026-08-18T12:51:50.000Z",
+    "size": 1578337,
+    "path": "../public/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png"
   },
   "/coach-media/people/portrait29.jpg": {
     "type": "image/jpeg",
     "etag": "\"f507-Nj981GfUvc5eTvpZtyN0ieyiCHU\"",
-    "mtime": "2026-08-17T22:08:43.504Z",
+    "mtime": "2026-08-18T12:51:50.009Z",
     "size": 62727,
     "path": "../public/coach-media/people/portrait29.jpg"
   },
   "/coach-media/people/portrait3.jpg": {
     "type": "image/jpeg",
     "etag": "\"ce90-1wGjSDgtEHb8AUpH3znLDA47jOw\"",
-    "mtime": "2026-08-17T22:08:43.504Z",
+    "mtime": "2026-08-18T12:51:50.009Z",
     "size": 52880,
     "path": "../public/coach-media/people/portrait3.jpg"
   },
   "/coach-media/people/portrait30.jpg": {
     "type": "image/jpeg",
     "etag": "\"91aa-41JiP0aXvZq9y9u/b4pTIbC5DeU\"",
-    "mtime": "2026-08-17T22:08:43.504Z",
+    "mtime": "2026-08-18T12:51:50.009Z",
     "size": 37290,
     "path": "../public/coach-media/people/portrait30.jpg"
   },
   "/coach-media/people/portrait31.jpg": {
     "type": "image/jpeg",
     "etag": "\"ee72-6mKQvP6WUZZaZuh//G3t4u0EMBg\"",
-    "mtime": "2026-08-17T22:08:43.506Z",
+    "mtime": "2026-08-18T12:51:50.010Z",
     "size": 61042,
     "path": "../public/coach-media/people/portrait31.jpg"
   },
   "/coach-media/people/portrait32.jpg": {
     "type": "image/jpeg",
     "etag": "\"c2cc-IStqzFyonefLZL/ubYviGC+lI+w\"",
-    "mtime": "2026-08-17T22:08:43.505Z",
+    "mtime": "2026-08-18T12:51:50.010Z",
     "size": 49868,
     "path": "../public/coach-media/people/portrait32.jpg"
   },
   "/coach-media/people/portrait33.jpg": {
     "type": "image/jpeg",
     "etag": "\"e86f-wCIX8Pwsa0GqVd/2WH5WG1WSyNs\"",
-    "mtime": "2026-08-17T22:08:43.505Z",
+    "mtime": "2026-08-18T12:51:50.010Z",
     "size": 59503,
     "path": "../public/coach-media/people/portrait33.jpg"
-  },
-  "/coach-media/people/portrait34.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"1002d-6T6Xf9AX5UafZW2vbYEzj+5xvO0\"",
-    "mtime": "2026-08-17T22:08:43.505Z",
-    "size": 65581,
-    "path": "../public/coach-media/people/portrait34.jpg"
   },
   "/coach-media/people/portrait4.jpg": {
     "type": "image/jpeg",
     "etag": "\"d171-TlrBkVdDwxLYUzqOqRWUkbkpkAo\"",
-    "mtime": "2026-08-17T22:08:43.506Z",
+    "mtime": "2026-08-18T12:51:50.010Z",
     "size": 53617,
     "path": "../public/coach-media/people/portrait4.jpg"
   },
-  "/coach-media/people/portrait5.jpg": {
+  "/coach-media/people/portrait34.jpg": {
     "type": "image/jpeg",
-    "etag": "\"c82f-tvc7CKCgsthto9vLFPf7pJndf5o\"",
-    "mtime": "2026-08-17T22:08:43.507Z",
-    "size": 51247,
-    "path": "../public/coach-media/people/portrait5.jpg"
+    "etag": "\"1002d-6T6Xf9AX5UafZW2vbYEzj+5xvO0\"",
+    "mtime": "2026-08-18T12:51:50.010Z",
+    "size": 65581,
+    "path": "../public/coach-media/people/portrait34.jpg"
   },
   "/coach-media/people/portrait6.jpg": {
     "type": "image/jpeg",
     "etag": "\"10235-GkA1z8RzeZJIqSW/DgPAy8/3Vj0\"",
-    "mtime": "2026-08-17T22:08:43.506Z",
+    "mtime": "2026-08-18T12:51:50.011Z",
     "size": 66101,
     "path": "../public/coach-media/people/portrait6.jpg"
+  },
+  "/coach-media/people/portrait5.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"c82f-tvc7CKCgsthto9vLFPf7pJndf5o\"",
+    "mtime": "2026-08-18T12:51:50.011Z",
+    "size": 51247,
+    "path": "../public/coach-media/people/portrait5.jpg"
   },
   "/coach-media/people/portrait7.jpg": {
     "type": "image/jpeg",
     "etag": "\"e4ac-HYcziHIjoK0r/C0hUk1bV4NjrUM\"",
-    "mtime": "2026-08-17T22:08:43.505Z",
+    "mtime": "2026-08-18T12:51:50.010Z",
     "size": 58540,
     "path": "../public/coach-media/people/portrait7.jpg"
   },
   "/coach-media/people/portrait8.jpg": {
     "type": "image/jpeg",
     "etag": "\"e800-jIBzhW7XT+HESqFyHPtIW1HuZc4\"",
-    "mtime": "2026-08-17T22:08:43.506Z",
+    "mtime": "2026-08-18T12:51:50.011Z",
     "size": 59392,
     "path": "../public/coach-media/people/portrait8.jpg"
   },
   "/coach-media/people/portrait9.jpg": {
     "type": "image/jpeg",
     "etag": "\"e386-JbEwT6JqpTHkIY1qDgk1a5zOrIc\"",
-    "mtime": "2026-08-17T22:08:43.506Z",
+    "mtime": "2026-08-18T12:51:50.011Z",
     "size": 58246,
     "path": "../public/coach-media/people/portrait9.jpg"
   },
   "/_nuxt/builds/latest.json": {
     "type": "application/json",
-    "etag": "\"47-2LIUCyW+bwspODcRAREU7RLiA4o\"",
-    "mtime": "2026-08-17T22:08:43.378Z",
+    "etag": "\"47-JhFLFU82H+/i4QAXVxJr0lzvNjE\"",
+    "mtime": "2026-08-18T12:51:49.876Z",
     "size": 71,
     "path": "../public/_nuxt/builds/latest.json"
   },
   "/coach-media/animations/fail/fail1.webp": {
     "type": "image/webp",
     "etag": "\"3e6cc-CLBekLwBwSBNLCxvb1eKJT9+wZU\"",
-    "mtime": "2026-08-17T22:08:43.430Z",
+    "mtime": "2026-08-18T12:51:49.929Z",
     "size": 255692,
     "path": "../public/coach-media/animations/fail/fail1.webp"
   },
   "/coach-media/animations/fail/fail2.webp": {
     "type": "image/webp",
     "etag": "\"5e028-RHwRc2cf0IvG2H9MS53ShV8XyoY\"",
-    "mtime": "2026-08-17T22:08:43.525Z",
+    "mtime": "2026-08-18T12:51:50.028Z",
     "size": 385064,
     "path": "../public/coach-media/animations/fail/fail2.webp"
-  },
-  "/coach-media/animations/fail/fail5.webp": {
-    "type": "image/webp",
-    "etag": "\"3418c-nUcgdhefQjLBbi5YPrFDciGNe1I\"",
-    "mtime": "2026-08-17T22:08:43.526Z",
-    "size": 213388,
-    "path": "../public/coach-media/animations/fail/fail5.webp"
   },
   "/coach-media/animations/fail/fail4.webp": {
     "type": "image/webp",
     "etag": "\"5cece-RjBisoBNjPRhvK+ndq3WET8sFcg\"",
-    "mtime": "2026-08-17T22:08:43.520Z",
+    "mtime": "2026-08-18T12:51:50.029Z",
     "size": 380622,
     "path": "../public/coach-media/animations/fail/fail4.webp"
   },
   "/coach-media/animations/fail/fail6.webp": {
     "type": "image/webp",
     "etag": "\"31e86-st4q2D401jTAQjaB6fQJge0HiLk\"",
-    "mtime": "2026-08-17T22:08:43.525Z",
+    "mtime": "2026-08-18T12:51:50.029Z",
     "size": 204422,
     "path": "../public/coach-media/animations/fail/fail6.webp"
+  },
+  "/coach-media/animations/fail/fail5.webp": {
+    "type": "image/webp",
+    "etag": "\"3418c-nUcgdhefQjLBbi5YPrFDciGNe1I\"",
+    "mtime": "2026-08-18T12:51:50.030Z",
+    "size": 213388,
+    "path": "../public/coach-media/animations/fail/fail5.webp"
   },
   "/coach-media/animations/fail/fail7.webp": {
     "type": "image/webp",
     "etag": "\"63788-deMgnTG8ziw8Sq9HQAAG5lpmaYQ\"",
-    "mtime": "2026-08-17T22:08:43.525Z",
+    "mtime": "2026-08-18T12:51:50.030Z",
     "size": 407432,
     "path": "../public/coach-media/animations/fail/fail7.webp"
   },
   "/coach-media/animations/fail/fail8.webp": {
     "type": "image/webp",
     "etag": "\"39a32-GZjK64v2UufujF0nhcGEc6ElNfk\"",
-    "mtime": "2026-08-17T22:08:43.525Z",
+    "mtime": "2026-08-18T12:51:50.030Z",
     "size": 236082,
     "path": "../public/coach-media/animations/fail/fail8.webp"
+  },
+  "/coach-media/animations/fail/fail10.webp": {
+    "type": "image/webp",
+    "etag": "\"ec4a8-LxdVywk4WTKCcK/Mz98lMc+PlrY\"",
+    "mtime": "2026-08-18T12:51:50.028Z",
+    "size": 967848,
+    "path": "../public/coach-media/animations/fail/fail10.webp"
   },
   "/coach-media/animations/bravo/bravo1.webp": {
     "type": "image/webp",
     "etag": "\"44738-4QhsLfUd9XIbDTSNeKIP8/efIFU\"",
-    "mtime": "2026-08-17T22:08:43.513Z",
+    "mtime": "2026-08-18T12:51:50.013Z",
     "size": 280376,
     "path": "../public/coach-media/animations/bravo/bravo1.webp"
+  },
+  "/coach-media/animations/fail/fail9.webp": {
+    "type": "image/webp",
+    "etag": "\"f5f18-OaHXpPB3qd/rQVrqz8lBFShsxjI\"",
+    "mtime": "2026-08-18T12:51:50.034Z",
+    "size": 1007384,
+    "path": "../public/coach-media/animations/fail/fail9.webp"
   },
   "/coach-media/animations/bravo/bravo11.webp": {
     "type": "image/webp",
     "etag": "\"1a216-3xX4QCqG7FtxwZvgt1PBqgFlbzg\"",
-    "mtime": "2026-08-17T22:08:43.507Z",
+    "mtime": "2026-08-18T12:51:49.927Z",
     "size": 107030,
     "path": "../public/coach-media/animations/bravo/bravo11.webp"
   },
   "/coach-media/animations/bravo/bravo12.webp": {
     "type": "image/webp",
     "etag": "\"1205a-/7k+Wui1IgWSv4DPL8QXZSf1p2U\"",
-    "mtime": "2026-08-17T22:08:43.507Z",
+    "mtime": "2026-08-18T12:51:50.012Z",
     "size": 73818,
     "path": "../public/coach-media/animations/bravo/bravo12.webp"
+  },
+  "/coach-media/animations/bravo/bravo15.webp": {
+    "type": "image/webp",
+    "etag": "\"2b0e2-qaGuoSfLeg5vXhKMrtg/rxugwqA\"",
+    "mtime": "2026-08-18T12:51:50.013Z",
+    "size": 176354,
+    "path": "../public/coach-media/animations/bravo/bravo15.webp"
   },
   "/coach-media/animations/bravo/bravo14.webp": {
     "type": "image/webp",
     "etag": "\"34da4-cRZ9lyimIePouzhUvQ/mHfvEtuY\"",
-    "mtime": "2026-08-17T22:08:43.510Z",
+    "mtime": "2026-08-18T12:51:50.013Z",
     "size": 216484,
     "path": "../public/coach-media/animations/bravo/bravo14.webp"
   },
   "/coach-media/animations/bravo/bravo13.webp": {
     "type": "image/webp",
     "etag": "\"56106-bhB3PYpSVxWys8XQ9pz9OrU7QBA\"",
-    "mtime": "2026-08-17T22:08:43.515Z",
+    "mtime": "2026-08-18T12:51:50.013Z",
     "size": 352518,
     "path": "../public/coach-media/animations/bravo/bravo13.webp"
-  },
-  "/coach-media/animations/bravo/bravo15.webp": {
-    "type": "image/webp",
-    "etag": "\"2b0e2-qaGuoSfLeg5vXhKMrtg/rxugwqA\"",
-    "mtime": "2026-08-17T22:08:43.507Z",
-    "size": 176354,
-    "path": "../public/coach-media/animations/bravo/bravo15.webp"
-  },
-  "/coach-media/animations/fail/fail10.webp": {
-    "type": "image/webp",
-    "etag": "\"ec4a8-LxdVywk4WTKCcK/Mz98lMc+PlrY\"",
-    "mtime": "2026-08-17T22:08:43.520Z",
-    "size": 967848,
-    "path": "../public/coach-media/animations/fail/fail10.webp"
-  },
-  "/coach-media/animations/fail/fail9.webp": {
-    "type": "image/webp",
-    "etag": "\"f5f18-OaHXpPB3qd/rQVrqz8lBFShsxjI\"",
-    "mtime": "2026-08-17T22:08:43.527Z",
-    "size": 1007384,
-    "path": "../public/coach-media/animations/fail/fail9.webp"
-  },
-  "/coach-media/animations/bravo/bravo10.webp": {
-    "type": "image/webp",
-    "etag": "\"adbd4-UywgFHyHGzDijqz6jodwTseMtkI\"",
-    "mtime": "2026-08-17T22:08:43.425Z",
-    "size": 711636,
-    "path": "../public/coach-media/animations/bravo/bravo10.webp"
   },
   "/coach-media/animations/bravo/bravo16.webp": {
     "type": "image/webp",
     "etag": "\"203f8-jg0MLG/nBqRrdnyLW65UaerRQNM\"",
-    "mtime": "2026-08-17T22:08:43.508Z",
+    "mtime": "2026-08-18T12:51:50.016Z",
     "size": 132088,
     "path": "../public/coach-media/animations/bravo/bravo16.webp"
   },
   "/coach-media/animations/bravo/bravo17.webp": {
     "type": "image/webp",
     "etag": "\"241a0-uyZNtAYraFvIQXIqjMvyOPE1jTw\"",
-    "mtime": "2026-08-17T22:08:43.508Z",
+    "mtime": "2026-08-18T12:51:50.014Z",
     "size": 147872,
     "path": "../public/coach-media/animations/bravo/bravo17.webp"
+  },
+  "/coach-media/animations/fail/fail3.webp": {
+    "type": "image/webp",
+    "etag": "\"19d1a6-49q6JpI6yKtRh2mygNyjyUsItIM\"",
+    "mtime": "2026-08-18T12:51:50.029Z",
+    "size": 1692070,
+    "path": "../public/coach-media/animations/fail/fail3.webp"
+  },
+  "/coach-media/animations/bravo/bravo10.webp": {
+    "type": "image/webp",
+    "etag": "\"adbd4-UywgFHyHGzDijqz6jodwTseMtkI\"",
+    "mtime": "2026-08-18T12:51:50.012Z",
+    "size": 711636,
+    "path": "../public/coach-media/animations/bravo/bravo10.webp"
   },
   "/coach-media/animations/bravo/bravo18.webp": {
     "type": "image/webp",
     "etag": "\"a01a-cps+HXxadKCjeKKYWHbwcIGk6hU\"",
-    "mtime": "2026-08-17T22:08:43.514Z",
+    "mtime": "2026-08-18T12:51:50.017Z",
     "size": 40986,
     "path": "../public/coach-media/animations/bravo/bravo18.webp"
   },
   "/coach-media/animations/bravo/bravo19.webp": {
     "type": "image/webp",
     "etag": "\"13352-7XcYb6ke3l0xF2LCw/KR+dXmc7Q\"",
-    "mtime": "2026-08-17T22:08:43.513Z",
+    "mtime": "2026-08-18T12:51:50.014Z",
     "size": 78674,
     "path": "../public/coach-media/animations/bravo/bravo19.webp"
   },
   "/coach-media/animations/bravo/bravo2.webp": {
     "type": "image/webp",
     "etag": "\"d0ca-uTre9Wq69Wtq99T7Vn3/dRXQFkg\"",
-    "mtime": "2026-08-17T22:08:43.508Z",
+    "mtime": "2026-08-18T12:51:50.016Z",
     "size": 53450,
     "path": "../public/coach-media/animations/bravo/bravo2.webp"
   },
   "/coach-media/animations/bravo/bravo20.webp": {
     "type": "image/webp",
     "etag": "\"233b2-LlDa1c9jqNgHkGB9k+cU7ap5b0Y\"",
-    "mtime": "2026-08-17T22:08:43.514Z",
+    "mtime": "2026-08-18T12:51:50.016Z",
     "size": 144306,
     "path": "../public/coach-media/animations/bravo/bravo20.webp"
-  },
-  "/coach-media/animations/fail/fail3.webp": {
-    "type": "image/webp",
-    "etag": "\"19d1a6-49q6JpI6yKtRh2mygNyjyUsItIM\"",
-    "mtime": "2026-08-17T22:08:43.524Z",
-    "size": 1692070,
-    "path": "../public/coach-media/animations/fail/fail3.webp"
   },
   "/coach-media/animations/bravo/bravo21.webp": {
     "type": "image/webp",
     "etag": "\"3da68-ISHGzxh2cgKoQraDg+pa1TIB3Eo\"",
-    "mtime": "2026-08-17T22:08:43.508Z",
+    "mtime": "2026-08-18T12:51:50.016Z",
     "size": 252520,
     "path": "../public/coach-media/animations/bravo/bravo21.webp"
   },
   "/coach-media/animations/bravo/bravo22.webp": {
     "type": "image/webp",
     "etag": "\"695d4-fo3c1QhJVPT0yXYAuoQyAXrIO9E\"",
-    "mtime": "2026-08-17T22:08:43.514Z",
+    "mtime": "2026-08-18T12:51:50.020Z",
     "size": 431572,
     "path": "../public/coach-media/animations/bravo/bravo22.webp"
   },
   "/coach-media/animations/bravo/bravo23.webp": {
     "type": "image/webp",
     "etag": "\"203f8-jg0MLG/nBqRrdnyLW65UaerRQNM\"",
-    "mtime": "2026-08-17T22:08:43.512Z",
+    "mtime": "2026-08-18T12:51:50.016Z",
     "size": 132088,
     "path": "../public/coach-media/animations/bravo/bravo23.webp"
-  },
-  "/coach-media/animations/bravo/bravo26.webp": {
-    "type": "image/webp",
-    "etag": "\"30b4-3zSDRUC/kfpm2SrLPRZXdNLOLHk\"",
-    "mtime": "2026-08-17T22:08:43.514Z",
-    "size": 12468,
-    "path": "../public/coach-media/animations/bravo/bravo26.webp"
   },
   "/coach-media/animations/bravo/bravo24.webp": {
     "type": "image/webp",
     "etag": "\"21c1c-BCPPzQaqjCgONCZQqIz0MRfkhnk\"",
-    "mtime": "2026-08-17T22:08:43.513Z",
+    "mtime": "2026-08-18T12:51:50.020Z",
     "size": 138268,
     "path": "../public/coach-media/animations/bravo/bravo24.webp"
   },
   "/coach-media/animations/bravo/bravo25.webp": {
     "type": "image/webp",
     "etag": "\"6e646-B09j5zbOGx/pB/KUZrJkPccQvk0\"",
-    "mtime": "2026-08-17T22:08:43.515Z",
+    "mtime": "2026-08-18T12:51:50.020Z",
     "size": 452166,
     "path": "../public/coach-media/animations/bravo/bravo25.webp"
+  },
+  "/coach-media/animations/bravo/bravo26.webp": {
+    "type": "image/webp",
+    "etag": "\"30b4-3zSDRUC/kfpm2SrLPRZXdNLOLHk\"",
+    "mtime": "2026-08-18T12:51:50.020Z",
+    "size": 12468,
+    "path": "../public/coach-media/animations/bravo/bravo26.webp"
   },
   "/coach-media/animations/bravo/bravo27.webp": {
     "type": "image/webp",
     "etag": "\"18b24-qcCeJs9S6OXbNHnCNtW2ImrJbvY\"",
-    "mtime": "2026-08-17T22:08:43.515Z",
+    "mtime": "2026-08-18T12:51:50.021Z",
     "size": 101156,
     "path": "../public/coach-media/animations/bravo/bravo27.webp"
   },
   "/coach-media/animations/bravo/bravo28.webp": {
     "type": "image/webp",
     "etag": "\"18612-7Zj+YVZPRJ6CKyZAwrxfXIc7fjI\"",
-    "mtime": "2026-08-17T22:08:43.515Z",
+    "mtime": "2026-08-18T12:51:50.019Z",
     "size": 99858,
     "path": "../public/coach-media/animations/bravo/bravo28.webp"
   },
   "/coach-media/animations/bravo/bravo29.webp": {
     "type": "image/webp",
     "etag": "\"163a6-ViRk6UjMsrG8Il8pS7HYT3/WiFk\"",
-    "mtime": "2026-08-17T22:08:43.516Z",
+    "mtime": "2026-08-18T12:51:50.020Z",
     "size": 91046,
     "path": "../public/coach-media/animations/bravo/bravo29.webp"
   },
   "/coach-media/animations/bravo/bravo3.webp": {
     "type": "image/webp",
     "etag": "\"80d8-WZGwWFCLsk3YDTm9XP5QCq8R7Es\"",
-    "mtime": "2026-08-17T22:08:43.516Z",
+    "mtime": "2026-08-18T12:51:50.021Z",
     "size": 32984,
     "path": "../public/coach-media/animations/bravo/bravo3.webp"
-  },
-  "/coach-media/animations/bravo/bravo31.webp": {
-    "type": "image/webp",
-    "etag": "\"2154c-mTHroY9VN55S8jkoGrrtwcul4rs\"",
-    "mtime": "2026-08-17T22:08:43.517Z",
-    "size": 136524,
-    "path": "../public/coach-media/animations/bravo/bravo31.webp"
   },
   "/coach-media/animations/bravo/bravo30.webp": {
     "type": "image/webp",
     "etag": "\"2be66-2mV/o9/SR26sBGn1HK62usspEXM\"",
-    "mtime": "2026-08-17T22:08:43.516Z",
+    "mtime": "2026-08-18T12:51:50.023Z",
     "size": 179814,
     "path": "../public/coach-media/animations/bravo/bravo30.webp"
   },
-  "/coach-media/animations/bravo/bravo32.webp": {
+  "/coach-media/animations/bravo/bravo31.webp": {
     "type": "image/webp",
-    "etag": "\"3ddf2-eZeHr4gLF4RNVRJoLdRkGG/wq/4\"",
-    "mtime": "2026-08-17T22:08:43.519Z",
-    "size": 253426,
-    "path": "../public/coach-media/animations/bravo/bravo32.webp"
+    "etag": "\"2154c-mTHroY9VN55S8jkoGrrtwcul4rs\"",
+    "mtime": "2026-08-18T12:51:50.023Z",
+    "size": 136524,
+    "path": "../public/coach-media/animations/bravo/bravo31.webp"
   },
   "/coach-media/animations/bravo/bravo33.webp": {
     "type": "image/webp",
     "etag": "\"19ec0-c95YrxMrzqQW4G9FjU0ykKQ7V9o\"",
-    "mtime": "2026-08-17T22:08:43.516Z",
+    "mtime": "2026-08-18T12:51:50.023Z",
     "size": 106176,
     "path": "../public/coach-media/animations/bravo/bravo33.webp"
   },
-  "/coach-media/animations/bravo/bravo4.webp": {
+  "/coach-media/animations/bravo/bravo32.webp": {
     "type": "image/webp",
-    "etag": "\"301b0-kZdjup76tUvXnUsAqLJ/bPOuJLQ\"",
-    "mtime": "2026-08-17T22:08:43.516Z",
-    "size": 197040,
-    "path": "../public/coach-media/animations/bravo/bravo4.webp"
+    "etag": "\"3ddf2-eZeHr4gLF4RNVRJoLdRkGG/wq/4\"",
+    "mtime": "2026-08-18T12:51:50.023Z",
+    "size": 253426,
+    "path": "../public/coach-media/animations/bravo/bravo32.webp"
   },
   "/coach-media/animations/bravo/bravo5.webp": {
     "type": "image/webp",
     "etag": "\"120aa-WQCZmq2H4iAmCwkgGz0jbhroUMU\"",
-    "mtime": "2026-08-17T22:08:43.516Z",
+    "mtime": "2026-08-18T12:51:50.024Z",
     "size": 73898,
     "path": "../public/coach-media/animations/bravo/bravo5.webp"
+  },
+  "/coach-media/animations/bravo/bravo4.webp": {
+    "type": "image/webp",
+    "etag": "\"301b0-kZdjup76tUvXnUsAqLJ/bPOuJLQ\"",
+    "mtime": "2026-08-18T12:51:50.026Z",
+    "size": 197040,
+    "path": "../public/coach-media/animations/bravo/bravo4.webp"
   },
   "/coach-media/animations/bravo/bravo6.webp": {
     "type": "image/webp",
     "etag": "\"1a95c-STnlzMe66YjYqbDuY5yLt9ADvzM\"",
-    "mtime": "2026-08-17T22:08:43.517Z",
+    "mtime": "2026-08-18T12:51:50.026Z",
     "size": 108892,
     "path": "../public/coach-media/animations/bravo/bravo6.webp"
   },
   "/coach-media/animations/bravo/bravo7.webp": {
     "type": "image/webp",
     "etag": "\"29fa6-QguGsOjUTD8OjKKTZfpb9dijR5g\"",
-    "mtime": "2026-08-17T22:08:43.517Z",
+    "mtime": "2026-08-18T12:51:50.026Z",
     "size": 171942,
     "path": "../public/coach-media/animations/bravo/bravo7.webp"
   },
   "/coach-media/animations/bravo/bravo8.webp": {
     "type": "image/webp",
     "etag": "\"1d8b4-xhvLiSPfxFlQsAeh/JU1EhCyKtQ\"",
-    "mtime": "2026-08-17T22:08:43.518Z",
+    "mtime": "2026-08-18T12:51:50.027Z",
     "size": 121012,
     "path": "../public/coach-media/animations/bravo/bravo8.webp"
   },
   "/coach-media/animations/bravo/bravo9.webp": {
     "type": "image/webp",
     "etag": "\"1105e-m+/rIlVAaoiD3hxFGIcC7Skzq0k\"",
-    "mtime": "2026-08-17T22:08:43.518Z",
+    "mtime": "2026-08-18T12:51:50.027Z",
     "size": 69726,
     "path": "../public/coach-media/animations/bravo/bravo9.webp"
   },
   "/coach-media/emojis/danger/danger1.png": {
     "type": "image/png",
     "etag": "\"3036-eXYZ+J7eqF26NQJZHhXFXrNgGww\"",
-    "mtime": "2026-08-17T22:08:43.424Z",
+    "mtime": "2026-08-18T12:51:49.930Z",
     "size": 12342,
     "path": "../public/coach-media/emojis/danger/danger1.png"
   },
   "/coach-media/animations/surprise/surprise10.webp": {
     "type": "image/webp",
     "etag": "\"131a0-flDD1aRXvJm4HKE+7qPrfT2YS20\"",
-    "mtime": "2026-08-17T22:08:43.526Z",
+    "mtime": "2026-08-18T12:51:50.033Z",
     "size": 78240,
     "path": "../public/coach-media/animations/surprise/surprise10.webp"
   },
   "/coach-media/animations/surprise/surprise1.webp": {
     "type": "image/webp",
     "etag": "\"4a370-9Oi37cBTqcZsmdkv+CmJExyHBlo\"",
-    "mtime": "2026-08-17T22:08:43.526Z",
+    "mtime": "2026-08-18T12:51:49.929Z",
     "size": 303984,
     "path": "../public/coach-media/animations/surprise/surprise1.webp"
   },
   "/coach-media/animations/surprise/surprise11.webp": {
     "type": "image/webp",
     "etag": "\"226fa-Xm81GJcMlpKVokcSNJtb09zW62k\"",
-    "mtime": "2026-08-17T22:08:43.430Z",
+    "mtime": "2026-08-18T12:51:50.033Z",
     "size": 141050,
     "path": "../public/coach-media/animations/surprise/surprise11.webp"
   },
   "/coach-media/animations/surprise/surprise12.webp": {
     "type": "image/webp",
     "etag": "\"a118-ZWkYpEVwrTmfFkTwYVBVpG6odjA\"",
-    "mtime": "2026-08-17T22:08:43.532Z",
+    "mtime": "2026-08-18T12:51:50.034Z",
     "size": 41240,
     "path": "../public/coach-media/animations/surprise/surprise12.webp"
   },
   "/coach-media/animations/surprise/surprise13.webp": {
     "type": "image/webp",
     "etag": "\"289d4-B/06SsPdfqNr35A+kWV5GqsWzHg\"",
-    "mtime": "2026-08-17T22:08:43.527Z",
+    "mtime": "2026-08-18T12:51:50.034Z",
     "size": 166356,
     "path": "../public/coach-media/animations/surprise/surprise13.webp"
   },
   "/coach-media/animations/surprise/surprise14.webp": {
     "type": "image/webp",
     "etag": "\"3f97e-wtHNBTyAPcvP3sC4pqeu2CzXJMs\"",
-    "mtime": "2026-08-17T22:08:43.533Z",
+    "mtime": "2026-08-18T12:51:50.033Z",
     "size": 260478,
     "path": "../public/coach-media/animations/surprise/surprise14.webp"
   },
   "/coach-media/animations/surprise/surprise16.webp": {
     "type": "image/webp",
     "etag": "\"10334-Gb5fHOWmtfoadRAb/ahHh2AADW0\"",
-    "mtime": "2026-08-17T22:08:43.527Z",
+    "mtime": "2026-08-18T12:51:50.035Z",
     "size": 66356,
     "path": "../public/coach-media/animations/surprise/surprise16.webp"
   },
   "/coach-media/animations/surprise/surprise17.webp": {
     "type": "image/webp",
     "etag": "\"1b95e-L11+Pw+wBWHBUC/2neg+jcazG2Y\"",
-    "mtime": "2026-08-17T22:08:43.527Z",
+    "mtime": "2026-08-18T12:51:50.035Z",
     "size": 112990,
     "path": "../public/coach-media/animations/surprise/surprise17.webp"
   },
   "/coach-media/animations/surprise/surprise18.webp": {
     "type": "image/webp",
     "etag": "\"18598-xHc16X67VNu9v8+Gc1s2b0JpwDg\"",
-    "mtime": "2026-08-17T22:08:43.532Z",
+    "mtime": "2026-08-18T12:51:50.036Z",
     "size": 99736,
     "path": "../public/coach-media/animations/surprise/surprise18.webp"
   },
   "/coach-media/animations/surprise/surprise19.webp": {
     "type": "image/webp",
     "etag": "\"11b66-taP6NYs2DrSJ1/Fu0gCrYIFdJrI\"",
-    "mtime": "2026-08-17T22:08:43.528Z",
+    "mtime": "2026-08-18T12:51:50.035Z",
     "size": 72550,
     "path": "../public/coach-media/animations/surprise/surprise19.webp"
   },
   "/coach-media/animations/surprise/surprise2.webp": {
     "type": "image/webp",
     "etag": "\"1b28c-nMtO/w3tSIWPnQA/P/d7OQO8Fos\"",
-    "mtime": "2026-08-17T22:08:43.531Z",
+    "mtime": "2026-08-18T12:51:50.035Z",
     "size": 111244,
     "path": "../public/coach-media/animations/surprise/surprise2.webp"
   },
   "/coach-media/animations/surprise/surprise20.webp": {
     "type": "image/webp",
     "etag": "\"193ea-58K//9bArX9XDu0po5Lr3OMkZHg\"",
-    "mtime": "2026-08-17T22:08:43.533Z",
+    "mtime": "2026-08-18T12:51:50.036Z",
     "size": 103402,
     "path": "../public/coach-media/animations/surprise/surprise20.webp"
   },
   "/coach-media/animations/surprise/surprise21.webp": {
     "type": "image/webp",
     "etag": "\"a180-9IgNwh+Zz8BrStL5KFb1UAAyx08\"",
-    "mtime": "2026-08-17T22:08:43.531Z",
+    "mtime": "2026-08-18T12:51:50.036Z",
     "size": 41344,
     "path": "../public/coach-media/animations/surprise/surprise21.webp"
-  },
-  "/coach-media/animations/surprise/surprise22.webp": {
-    "type": "image/webp",
-    "etag": "\"14758-fKETCESGU4TOKmR+Tq2Jt5vsZv4\"",
-    "mtime": "2026-08-17T22:08:43.532Z",
-    "size": 83800,
-    "path": "../public/coach-media/animations/surprise/surprise22.webp"
-  },
-  "/coach-media/animations/surprise/surprise24.webp": {
-    "type": "image/webp",
-    "etag": "\"8ec6-3SAThVbqdRWZ2r2MmBs4qSDgNSA\"",
-    "mtime": "2026-08-17T22:08:43.532Z",
-    "size": 36550,
-    "path": "../public/coach-media/animations/surprise/surprise24.webp"
-  },
-  "/coach-media/animations/surprise/surprise23.webp": {
-    "type": "image/webp",
-    "etag": "\"309fc-vmf3IDCZQraeJiH2u5nNYnBmLE0\"",
-    "mtime": "2026-08-17T22:08:43.534Z",
-    "size": 199164,
-    "path": "../public/coach-media/animations/surprise/surprise23.webp"
   },
   "/coach-media/animations/surprise/surprise15.webp": {
     "type": "image/webp",
     "etag": "\"83768-IbKQoFThb02i7K7OLM8NjZwMn+w\"",
-    "mtime": "2026-08-17T22:08:43.529Z",
+    "mtime": "2026-08-18T12:51:50.035Z",
     "size": 538472,
     "path": "../public/coach-media/animations/surprise/surprise15.webp"
+  },
+  "/coach-media/animations/surprise/surprise22.webp": {
+    "type": "image/webp",
+    "etag": "\"14758-fKETCESGU4TOKmR+Tq2Jt5vsZv4\"",
+    "mtime": "2026-08-18T12:51:50.036Z",
+    "size": 83800,
+    "path": "../public/coach-media/animations/surprise/surprise22.webp"
+  },
+  "/coach-media/animations/surprise/surprise23.webp": {
+    "type": "image/webp",
+    "etag": "\"309fc-vmf3IDCZQraeJiH2u5nNYnBmLE0\"",
+    "mtime": "2026-08-18T12:51:50.036Z",
+    "size": 199164,
+    "path": "../public/coach-media/animations/surprise/surprise23.webp"
+  },
+  "/coach-media/animations/surprise/surprise24.webp": {
+    "type": "image/webp",
+    "etag": "\"8ec6-3SAThVbqdRWZ2r2MmBs4qSDgNSA\"",
+    "mtime": "2026-08-18T12:51:50.035Z",
+    "size": 36550,
+    "path": "../public/coach-media/animations/surprise/surprise24.webp"
   },
   "/coach-media/animations/surprise/surprise25.webp": {
     "type": "image/webp",
     "etag": "\"34a6-dvr2Gjy94G6cfLjV7K9ojhZks7w\"",
-    "mtime": "2026-08-17T22:08:43.532Z",
+    "mtime": "2026-08-18T12:51:50.036Z",
     "size": 13478,
     "path": "../public/coach-media/animations/surprise/surprise25.webp"
-  },
-  "/coach-media/animations/bravo/bravo34.webp": {
-    "type": "image/webp",
-    "etag": "\"26ccac-0lLmGbQH56H1iPHEYHxgMHzvGqg\"",
-    "mtime": "2026-08-17T22:08:43.520Z",
-    "size": 2542764,
-    "path": "../public/coach-media/animations/bravo/bravo34.webp"
   },
   "/coach-media/animations/surprise/surprise26.webp": {
     "type": "image/webp",
     "etag": "\"743c6-pt6mVsMYiG3+eBL112jrgey0Gzo\"",
-    "mtime": "2026-08-17T22:08:43.533Z",
+    "mtime": "2026-08-18T12:51:50.039Z",
     "size": 476102,
     "path": "../public/coach-media/animations/surprise/surprise26.webp"
   },
   "/coach-media/animations/surprise/surprise27.webp": {
     "type": "image/webp",
     "etag": "\"2fd12-RMFF8r6epFOKQpfSCriVPGTdgVU\"",
-    "mtime": "2026-08-17T22:08:43.534Z",
+    "mtime": "2026-08-18T12:51:50.037Z",
     "size": 195858,
     "path": "../public/coach-media/animations/surprise/surprise27.webp"
   },
   "/coach-media/animations/surprise/surprise28.webp": {
     "type": "image/webp",
     "etag": "\"ad24-FgC+hvDgvud9BCFGf28pvxl71oQ\"",
-    "mtime": "2026-08-17T22:08:43.532Z",
+    "mtime": "2026-08-18T12:51:50.036Z",
     "size": 44324,
     "path": "../public/coach-media/animations/surprise/surprise28.webp"
+  },
+  "/coach-media/animations/bravo/bravo34.webp": {
+    "type": "image/webp",
+    "etag": "\"26ccac-0lLmGbQH56H1iPHEYHxgMHzvGqg\"",
+    "mtime": "2026-08-18T12:51:50.027Z",
+    "size": 2542764,
+    "path": "../public/coach-media/animations/bravo/bravo34.webp"
   },
   "/coach-media/animations/surprise/surprise29.webp": {
     "type": "image/webp",
     "etag": "\"12cd0-q0YDo94p3qYkje+5yt5zOubu2/Q\"",
-    "mtime": "2026-08-17T22:08:43.533Z",
+    "mtime": "2026-08-18T12:51:50.037Z",
     "size": 77008,
     "path": "../public/coach-media/animations/surprise/surprise29.webp"
   },
   "/coach-media/animations/surprise/surprise31.webp": {
     "type": "image/webp",
     "etag": "\"8b78-fIpPGO3WzV7KeoLiRXPR1uc7I+0\"",
-    "mtime": "2026-08-17T22:08:43.534Z",
+    "mtime": "2026-08-18T12:51:50.037Z",
     "size": 35704,
     "path": "../public/coach-media/animations/surprise/surprise31.webp"
   },
   "/coach-media/animations/surprise/surprise32.webp": {
     "type": "image/webp",
     "etag": "\"1fc6e-bll0tlhrTsQvI87il4kKbajXbMg\"",
-    "mtime": "2026-08-17T22:08:43.535Z",
+    "mtime": "2026-08-18T12:51:50.038Z",
     "size": 130158,
     "path": "../public/coach-media/animations/surprise/surprise32.webp"
-  },
-  "/coach-media/animations/surprise/surprise3.webp": {
-    "type": "image/webp",
-    "etag": "\"c1a0c-usHwa9n1ie+2Cm+CLsVeWK9PJMQ\"",
-    "mtime": "2026-08-17T22:08:43.535Z",
-    "size": 793100,
-    "path": "../public/coach-media/animations/surprise/surprise3.webp"
-  },
-  "/coach-media/animations/surprise/surprise30.webp": {
-    "type": "image/webp",
-    "etag": "\"a5fd0-Hnpb/dNn7ssnoWT9WjuIq+4t5Qo\"",
-    "mtime": "2026-08-17T22:08:43.539Z",
-    "size": 679888,
-    "path": "../public/coach-media/animations/surprise/surprise30.webp"
   },
   "/coach-media/animations/surprise/surprise34.webp": {
     "type": "image/webp",
     "etag": "\"39c0c-gOa+85OS+P0yapBXCLgb6G4e3KY\"",
-    "mtime": "2026-08-17T22:08:43.535Z",
+    "mtime": "2026-08-18T12:51:50.039Z",
     "size": 236556,
     "path": "../public/coach-media/animations/surprise/surprise34.webp"
   },
   "/coach-media/animations/surprise/surprise35.webp": {
     "type": "image/webp",
     "etag": "\"2fdf0-P29h6puCfyWcpyj5Hiuay3K7+XI\"",
-    "mtime": "2026-08-17T22:08:43.535Z",
+    "mtime": "2026-08-18T12:51:50.044Z",
     "size": 196080,
     "path": "../public/coach-media/animations/surprise/surprise35.webp"
   },
   "/coach-media/animations/surprise/surprise36.webp": {
     "type": "image/webp",
     "etag": "\"65d6a-XLUQAUVvNKrY0Ak4xmcIhKdi+kc\"",
-    "mtime": "2026-08-17T22:08:43.536Z",
+    "mtime": "2026-08-18T12:51:50.043Z",
     "size": 417130,
     "path": "../public/coach-media/animations/surprise/surprise36.webp"
-  },
-  "/coach-media/animations/surprise/surprise37.webp": {
-    "type": "image/webp",
-    "etag": "\"1c006-O6avPzSEEE8867z/qx4SNy/2Dbs\"",
-    "mtime": "2026-08-17T22:08:43.537Z",
-    "size": 114694,
-    "path": "../public/coach-media/animations/surprise/surprise37.webp"
   },
   "/coach-media/animations/surprise/surprise38.webp": {
     "type": "image/webp",
     "etag": "\"13470-E9RJjOFPzc8oN6aIexSBkTIvvno\"",
-    "mtime": "2026-08-17T22:08:43.536Z",
+    "mtime": "2026-08-18T12:51:50.045Z",
     "size": 78960,
     "path": "../public/coach-media/animations/surprise/surprise38.webp"
+  },
+  "/coach-media/animations/surprise/surprise37.webp": {
+    "type": "image/webp",
+    "etag": "\"1c006-O6avPzSEEE8867z/qx4SNy/2Dbs\"",
+    "mtime": "2026-08-18T12:51:50.044Z",
+    "size": 114694,
+    "path": "../public/coach-media/animations/surprise/surprise37.webp"
   },
   "/coach-media/animations/surprise/surprise39.webp": {
     "type": "image/webp",
     "etag": "\"3f126-BT2+LxctzUWG3/ThOwuDtTgAArY\"",
-    "mtime": "2026-08-17T22:08:43.537Z",
+    "mtime": "2026-08-18T12:51:50.042Z",
     "size": 258342,
     "path": "../public/coach-media/animations/surprise/surprise39.webp"
   },
   "/coach-media/animations/surprise/surprise4.webp": {
     "type": "image/webp",
     "etag": "\"435ca-axYlJUxq0dxVUcdPGXfx7jIjOqI\"",
-    "mtime": "2026-08-17T22:08:43.538Z",
+    "mtime": "2026-08-18T12:51:50.045Z",
     "size": 275914,
     "path": "../public/coach-media/animations/surprise/surprise4.webp"
-  },
-  "/coach-media/animations/surprise/surprise41.webp": {
-    "type": "image/webp",
-    "etag": "\"a8cc-eJpn1iM/G93mG/y3J7MYZxb5oZk\"",
-    "mtime": "2026-08-17T22:08:43.543Z",
-    "size": 43212,
-    "path": "../public/coach-media/animations/surprise/surprise41.webp"
   },
   "/coach-media/animations/surprise/surprise40.webp": {
     "type": "image/webp",
     "etag": "\"39564-nIAqPe45sz0KpkAx2CKOstSaCTA\"",
-    "mtime": "2026-08-17T22:08:43.540Z",
+    "mtime": "2026-08-18T12:51:50.043Z",
     "size": 234852,
     "path": "../public/coach-media/animations/surprise/surprise40.webp"
   },
-  "/coach-media/animations/surprise/surprise43.webp": {
+  "/coach-media/animations/surprise/surprise30.webp": {
     "type": "image/webp",
-    "etag": "\"4b24-EbrAgTKhgJEIluaU9wK/fZsqFQI\"",
-    "mtime": "2026-08-17T22:08:43.542Z",
-    "size": 19236,
-    "path": "../public/coach-media/animations/surprise/surprise43.webp"
+    "etag": "\"a5fd0-Hnpb/dNn7ssnoWT9WjuIq+4t5Qo\"",
+    "mtime": "2026-08-18T12:51:50.043Z",
+    "size": 679888,
+    "path": "../public/coach-media/animations/surprise/surprise30.webp"
+  },
+  "/coach-media/animations/surprise/surprise3.webp": {
+    "type": "image/webp",
+    "etag": "\"c1a0c-usHwa9n1ie+2Cm+CLsVeWK9PJMQ\"",
+    "mtime": "2026-08-18T12:51:50.038Z",
+    "size": 793100,
+    "path": "../public/coach-media/animations/surprise/surprise3.webp"
+  },
+  "/coach-media/animations/surprise/surprise41.webp": {
+    "type": "image/webp",
+    "etag": "\"a8cc-eJpn1iM/G93mG/y3J7MYZxb5oZk\"",
+    "mtime": "2026-08-18T12:51:50.044Z",
+    "size": 43212,
+    "path": "../public/coach-media/animations/surprise/surprise41.webp"
   },
   "/coach-media/animations/surprise/surprise42.webp": {
     "type": "image/webp",
     "etag": "\"646bc-7+aKS5sl1K5hY8UDNYAFM4lfo6Y\"",
-    "mtime": "2026-08-17T22:08:43.538Z",
+    "mtime": "2026-08-18T12:51:50.044Z",
     "size": 411324,
     "path": "../public/coach-media/animations/surprise/surprise42.webp"
+  },
+  "/coach-media/animations/surprise/surprise43.webp": {
+    "type": "image/webp",
+    "etag": "\"4b24-EbrAgTKhgJEIluaU9wK/fZsqFQI\"",
+    "mtime": "2026-08-18T12:51:50.044Z",
+    "size": 19236,
+    "path": "../public/coach-media/animations/surprise/surprise43.webp"
   },
   "/coach-media/animations/surprise/surprise45.webp": {
     "type": "image/webp",
     "etag": "\"1a680-xKF6ecJOJz07Bq3nMYUvl7ZSmJo\"",
-    "mtime": "2026-08-17T22:08:43.543Z",
+    "mtime": "2026-08-18T12:51:50.045Z",
     "size": 108160,
     "path": "../public/coach-media/animations/surprise/surprise45.webp"
   },
   "/coach-media/animations/surprise/surprise46.webp": {
     "type": "image/webp",
     "etag": "\"b624-UVBhSbU4BcnZsHBEFLk/NJkigMs\"",
-    "mtime": "2026-08-17T22:08:43.543Z",
+    "mtime": "2026-08-18T12:51:50.050Z",
     "size": 46628,
     "path": "../public/coach-media/animations/surprise/surprise46.webp"
   },
   "/coach-media/animations/surprise/surprise47.webp": {
     "type": "image/webp",
     "etag": "\"ed28-q4uXmQ440B/uZ44347cvninGGos\"",
-    "mtime": "2026-08-17T22:08:43.546Z",
+    "mtime": "2026-08-18T12:51:50.046Z",
     "size": 60712,
     "path": "../public/coach-media/animations/surprise/surprise47.webp"
-  },
-  "/coach-media/animations/surprise/surprise48.webp": {
-    "type": "image/webp",
-    "etag": "\"132e0-ARE5bC0A3JVvXvF646DPkIObvBU\"",
-    "mtime": "2026-08-17T22:08:43.544Z",
-    "size": 78560,
-    "path": "../public/coach-media/animations/surprise/surprise48.webp"
-  },
-  "/coach-media/animations/surprise/surprise49.webp": {
-    "type": "image/webp",
-    "etag": "\"25b6c-wCdzxaXfkdqyDcw6a8xy07JXmzE\"",
-    "mtime": "2026-08-17T22:08:43.544Z",
-    "size": 154476,
-    "path": "../public/coach-media/animations/surprise/surprise49.webp"
-  },
-  "/coach-media/animations/surprise/surprise5.webp": {
-    "type": "image/webp",
-    "etag": "\"27cfa-OX0fnlOewddMbbATr6i9i2ynE3Y\"",
-    "mtime": "2026-08-17T22:08:43.544Z",
-    "size": 163066,
-    "path": "../public/coach-media/animations/surprise/surprise5.webp"
-  },
-  "/coach-media/animations/surprise/surprise50.webp": {
-    "type": "image/webp",
-    "etag": "\"54ee6-utB6xrbIiRW/BR2zFsCbLOBuYQ0\"",
-    "mtime": "2026-08-17T22:08:43.546Z",
-    "size": 347878,
-    "path": "../public/coach-media/animations/surprise/surprise50.webp"
-  },
-  "/coach-media/animations/surprise/surprise51.webp": {
-    "type": "image/webp",
-    "etag": "\"2227a-5yeomBh1J53C2OweVlrUJRsy7d0\"",
-    "mtime": "2026-08-17T22:08:43.545Z",
-    "size": 139898,
-    "path": "../public/coach-media/animations/surprise/surprise51.webp"
   },
   "/coach-media/animations/surprise/surprise44.webp": {
     "type": "image/webp",
     "etag": "\"a77fc-figlb0a9uvdibEtUPy5WQ390cJ0\"",
-    "mtime": "2026-08-17T22:08:43.545Z",
+    "mtime": "2026-08-18T12:51:50.047Z",
     "size": 686076,
     "path": "../public/coach-media/animations/surprise/surprise44.webp"
   },
   "/coach-media/animations/surprise/surprise33.webp": {
     "type": "image/webp",
     "etag": "\"1ff378-3ceZyeJGfgZwkrgPrzBv1AbDx9o\"",
-    "mtime": "2026-08-17T22:08:43.537Z",
+    "mtime": "2026-08-18T12:51:50.042Z",
     "size": 2093944,
     "path": "../public/coach-media/animations/surprise/surprise33.webp"
+  },
+  "/coach-media/animations/surprise/surprise48.webp": {
+    "type": "image/webp",
+    "etag": "\"132e0-ARE5bC0A3JVvXvF646DPkIObvBU\"",
+    "mtime": "2026-08-18T12:51:50.045Z",
+    "size": 78560,
+    "path": "../public/coach-media/animations/surprise/surprise48.webp"
+  },
+  "/coach-media/animations/surprise/surprise49.webp": {
+    "type": "image/webp",
+    "etag": "\"25b6c-wCdzxaXfkdqyDcw6a8xy07JXmzE\"",
+    "mtime": "2026-08-18T12:51:50.045Z",
+    "size": 154476,
+    "path": "../public/coach-media/animations/surprise/surprise49.webp"
+  },
+  "/coach-media/animations/surprise/surprise5.webp": {
+    "type": "image/webp",
+    "etag": "\"27cfa-OX0fnlOewddMbbATr6i9i2ynE3Y\"",
+    "mtime": "2026-08-18T12:51:50.049Z",
+    "size": 163066,
+    "path": "../public/coach-media/animations/surprise/surprise5.webp"
+  },
+  "/coach-media/animations/surprise/surprise50.webp": {
+    "type": "image/webp",
+    "etag": "\"54ee6-utB6xrbIiRW/BR2zFsCbLOBuYQ0\"",
+    "mtime": "2026-08-18T12:51:50.047Z",
+    "size": 347878,
+    "path": "../public/coach-media/animations/surprise/surprise50.webp"
   },
   "/coach-media/animations/surprise/surprise52.webp": {
     "type": "image/webp",
     "etag": "\"142aa-ez2zkO6VqB8WIkeukvxz7D7f1lU\"",
-    "mtime": "2026-08-17T22:08:43.547Z",
+    "mtime": "2026-08-18T12:51:50.047Z",
     "size": 82602,
     "path": "../public/coach-media/animations/surprise/surprise52.webp"
+  },
+  "/coach-media/animations/surprise/surprise51.webp": {
+    "type": "image/webp",
+    "etag": "\"2227a-5yeomBh1J53C2OweVlrUJRsy7d0\"",
+    "mtime": "2026-08-18T12:51:50.046Z",
+    "size": 139898,
+    "path": "../public/coach-media/animations/surprise/surprise51.webp"
   },
   "/coach-media/animations/surprise/surprise53.webp": {
     "type": "image/webp",
     "etag": "\"118e2-l9zmLQtW2P6gxSkdSTudjLq2c3Q\"",
-    "mtime": "2026-08-17T22:08:43.546Z",
+    "mtime": "2026-08-18T12:51:50.051Z",
     "size": 71906,
     "path": "../public/coach-media/animations/surprise/surprise53.webp"
   },
   "/coach-media/animations/surprise/surprise54.webp": {
     "type": "image/webp",
     "etag": "\"1e178-jaNfsOInt+QvPbLkhzwWaJqG/Bs\"",
-    "mtime": "2026-08-17T22:08:43.545Z",
+    "mtime": "2026-08-18T12:51:50.050Z",
     "size": 123256,
     "path": "../public/coach-media/animations/surprise/surprise54.webp"
-  },
-  "/coach-media/animations/surprise/surprise56.webp": {
-    "type": "image/webp",
-    "etag": "\"1b960-DZp5H8cTkUG7OqYKTKt0Wb41j6Y\"",
-    "mtime": "2026-08-17T22:08:43.545Z",
-    "size": 112992,
-    "path": "../public/coach-media/animations/surprise/surprise56.webp"
   },
   "/coach-media/animations/surprise/surprise55.webp": {
     "type": "image/webp",
     "etag": "\"5a896-O68fUxVUguZ0BzBxfGlXQFyP0DA\"",
-    "mtime": "2026-08-17T22:08:43.547Z",
+    "mtime": "2026-08-18T12:51:50.052Z",
     "size": 370838,
     "path": "../public/coach-media/animations/surprise/surprise55.webp"
   },
-  "/coach-media/animations/surprise/surprise57.webp": {
+  "/coach-media/animations/surprise/surprise56.webp": {
     "type": "image/webp",
-    "etag": "\"44ab8-mSBT2ojhhuQLKvtVbnLyoP47hJY\"",
-    "mtime": "2026-08-17T22:08:43.547Z",
-    "size": 281272,
-    "path": "../public/coach-media/animations/surprise/surprise57.webp"
+    "etag": "\"1b960-DZp5H8cTkUG7OqYKTKt0Wb41j6Y\"",
+    "mtime": "2026-08-18T12:51:50.050Z",
+    "size": 112992,
+    "path": "../public/coach-media/animations/surprise/surprise56.webp"
   },
   "/coach-media/animations/surprise/surprise58.webp": {
     "type": "image/webp",
     "etag": "\"21a8a-Yf9qQLhbyXuD9/JZ+89b4mvgAKw\"",
-    "mtime": "2026-08-17T22:08:43.547Z",
+    "mtime": "2026-08-18T12:51:50.050Z",
     "size": 137866,
     "path": "../public/coach-media/animations/surprise/surprise58.webp"
+  },
+  "/coach-media/animations/surprise/surprise57.webp": {
+    "type": "image/webp",
+    "etag": "\"44ab8-mSBT2ojhhuQLKvtVbnLyoP47hJY\"",
+    "mtime": "2026-08-18T12:51:50.050Z",
+    "size": 281272,
+    "path": "../public/coach-media/animations/surprise/surprise57.webp"
   },
   "/coach-media/animations/surprise/surprise59.webp": {
     "type": "image/webp",
     "etag": "\"ad24-FgC+hvDgvud9BCFGf28pvxl71oQ\"",
-    "mtime": "2026-08-17T22:08:43.549Z",
+    "mtime": "2026-08-18T12:51:50.051Z",
     "size": 44324,
     "path": "../public/coach-media/animations/surprise/surprise59.webp"
   },
   "/coach-media/animations/surprise/surprise6.webp": {
     "type": "image/webp",
     "etag": "\"efbe-4a9rtfMIdF2+TFeY3gBQcGq2OOY\"",
-    "mtime": "2026-08-17T22:08:43.547Z",
+    "mtime": "2026-08-18T12:51:50.052Z",
     "size": 61374,
     "path": "../public/coach-media/animations/surprise/surprise6.webp"
-  },
-  "/coach-media/animations/surprise/surprise60.webp": {
-    "type": "image/webp",
-    "etag": "\"4b7a6-epNKh/4axQkdUr59kQLtvLuUWxk\"",
-    "mtime": "2026-08-17T22:08:43.551Z",
-    "size": 309158,
-    "path": "../public/coach-media/animations/surprise/surprise60.webp"
   },
   "/coach-media/animations/surprise/surprise61.webp": {
     "type": "image/webp",
     "etag": "\"12cd0-q0YDo94p3qYkje+5yt5zOubu2/Q\"",
-    "mtime": "2026-08-17T22:08:43.551Z",
+    "mtime": "2026-08-18T12:51:50.051Z",
     "size": 77008,
     "path": "../public/coach-media/animations/surprise/surprise61.webp"
   },
   "/coach-media/animations/surprise/surprise62.webp": {
     "type": "image/webp",
     "etag": "\"1c6a0-mXpnKRv+Hz25jP09BjR4foiD6qw\"",
-    "mtime": "2026-08-17T22:08:43.549Z",
+    "mtime": "2026-08-18T12:51:50.052Z",
     "size": 116384,
     "path": "../public/coach-media/animations/surprise/surprise62.webp"
+  },
+  "/coach-media/animations/surprise/surprise60.webp": {
+    "type": "image/webp",
+    "etag": "\"4b7a6-epNKh/4axQkdUr59kQLtvLuUWxk\"",
+    "mtime": "2026-08-18T12:51:50.051Z",
+    "size": 309158,
+    "path": "../public/coach-media/animations/surprise/surprise60.webp"
   },
   "/coach-media/animations/surprise/surprise63.webp": {
     "type": "image/webp",
     "etag": "\"1eeba-iqr/NnLNgmJCGHzVJ166UGdRB4Q\"",
-    "mtime": "2026-08-17T22:08:43.551Z",
+    "mtime": "2026-08-18T12:51:50.051Z",
     "size": 126650,
     "path": "../public/coach-media/animations/surprise/surprise63.webp"
   },
   "/coach-media/animations/surprise/surprise7.webp": {
     "type": "image/webp",
     "etag": "\"28cf0-WZKrfZgxmWudkDiNqJ2t+yttmY4\"",
-    "mtime": "2026-08-17T22:08:43.551Z",
+    "mtime": "2026-08-18T12:51:50.054Z",
     "size": 167152,
     "path": "../public/coach-media/animations/surprise/surprise7.webp"
   },
   "/coach-media/animations/surprise/surprise9.webp": {
     "type": "image/webp",
     "etag": "\"3567c-XTH6klwiC89h9A35OVWjuAEqJ5A\"",
-    "mtime": "2026-08-17T22:08:43.552Z",
+    "mtime": "2026-08-18T12:51:50.053Z",
     "size": 218748,
     "path": "../public/coach-media/animations/surprise/surprise9.webp"
-  },
-  "/coach-media/emojis/muet/muet1.png": {
-    "type": "image/png",
-    "etag": "\"51a6-vln2s/UdhcTRTaO8VHDa3lfz0h8\"",
-    "mtime": "2026-08-17T22:08:43.585Z",
-    "size": 20902,
-    "path": "../public/coach-media/emojis/muet/muet1.png"
-  },
-  "/coach-media/emojis/muet/muet2.png": {
-    "type": "image/png",
-    "etag": "\"4fd6-7oBC0gGyTBoUjDE6sag9tGTRXEk\"",
-    "mtime": "2026-08-17T22:08:43.433Z",
-    "size": 20438,
-    "path": "../public/coach-media/emojis/muet/muet2.png"
-  },
-  "/coach-media/emojis/muet/muet3.png": {
-    "type": "image/png",
-    "etag": "\"5287-ywn34jaL1+x0Qfo7jSf48qjMhfs\"",
-    "mtime": "2026-08-17T22:08:43.585Z",
-    "size": 21127,
-    "path": "../public/coach-media/emojis/muet/muet3.png"
-  },
-  "/coach-media/emojis/muet/muet4.png": {
-    "type": "image/png",
-    "etag": "\"56a5-+3X/CcPHmEJ0+beAZBYg2M7ZSgA\"",
-    "mtime": "2026-08-17T22:08:43.585Z",
-    "size": 22181,
-    "path": "../public/coach-media/emojis/muet/muet4.png"
-  },
-  "/coach-media/animations/happy/happy10.webp": {
-    "type": "image/webp",
-    "etag": "\"13102-1AwfKNNogN0hV9N7INQr8b/L5U0\"",
-    "mtime": "2026-08-17T22:08:43.554Z",
-    "size": 78082,
-    "path": "../public/coach-media/animations/happy/happy10.webp"
-  },
-  "/coach-media/animations/happy/happy11.webp": {
-    "type": "image/webp",
-    "etag": "\"c51c-aSSJ/YerC2d+QHIzkxapjUKX1xo\"",
-    "mtime": "2026-08-17T22:08:43.553Z",
-    "size": 50460,
-    "path": "../public/coach-media/animations/happy/happy11.webp"
-  },
-  "/coach-media/animations/happy/happy12.webp": {
-    "type": "image/webp",
-    "etag": "\"26dd0-kEufqOKIIc4EphkqsilP8Vg0anA\"",
-    "mtime": "2026-08-17T22:08:43.553Z",
-    "size": 159184,
-    "path": "../public/coach-media/animations/happy/happy12.webp"
-  },
-  "/coach-media/animations/happy/happy13.webp": {
-    "type": "image/webp",
-    "etag": "\"1b7c8-6YwhPgMDDi09N6QaiQGvB3MESN8\"",
-    "mtime": "2026-08-17T22:08:43.554Z",
-    "size": 112584,
-    "path": "../public/coach-media/animations/happy/happy13.webp"
-  },
-  "/coach-media/animations/happy/happy14.webp": {
-    "type": "image/webp",
-    "etag": "\"2b5e-Tlk4vz7sMxW+TPrlh/TTUPVQZ64\"",
-    "mtime": "2026-08-17T22:08:43.553Z",
-    "size": 11102,
-    "path": "../public/coach-media/animations/happy/happy14.webp"
-  },
-  "/coach-media/animations/happy/happy1.webp": {
-    "type": "image/webp",
-    "etag": "\"9a9fe-dnJ60THXbLE/qdsCoy8mks8JEWo\"",
-    "mtime": "2026-08-17T22:08:43.433Z",
-    "size": 633342,
-    "path": "../public/coach-media/animations/happy/happy1.webp"
-  },
-  "/coach-media/animations/happy/happy15.webp": {
-    "type": "image/webp",
-    "etag": "\"1f82e-GdfVpoK+FBOph2APqZZ2ksTEi/M\"",
-    "mtime": "2026-08-17T22:08:43.554Z",
-    "size": 129070,
-    "path": "../public/coach-media/animations/happy/happy15.webp"
-  },
-  "/coach-media/animations/happy/happy16.webp": {
-    "type": "image/webp",
-    "etag": "\"39676-m3hlL8MEmfcM8A6RQ/d34G7k4z4\"",
-    "mtime": "2026-08-17T22:08:43.554Z",
-    "size": 235126,
-    "path": "../public/coach-media/animations/happy/happy16.webp"
-  },
-  "/coach-media/animations/happy/happy17.webp": {
-    "type": "image/webp",
-    "etag": "\"6c236-lcuyQg6sSZcT0+fCpGNG/JhMi7U\"",
-    "mtime": "2026-08-17T22:08:43.555Z",
-    "size": 442934,
-    "path": "../public/coach-media/animations/happy/happy17.webp"
-  },
-  "/coach-media/animations/happy/happy19.webp": {
-    "type": "image/webp",
-    "etag": "\"7340-Mvycs8QTkYX6zm7iIfL2nLfxOe8\"",
-    "mtime": "2026-08-17T22:08:43.553Z",
-    "size": 29504,
-    "path": "../public/coach-media/animations/happy/happy19.webp"
-  },
-  "/coach-media/animations/happy/happy18.webp": {
-    "type": "image/webp",
-    "etag": "\"38cca-HDXyFn4nw7hhDQ0f8voh7jHxFIU\"",
-    "mtime": "2026-08-17T22:08:43.555Z",
-    "size": 232650,
-    "path": "../public/coach-media/animations/happy/happy18.webp"
-  },
-  "/coach-media/animations/happy/happy2.webp": {
-    "type": "image/webp",
-    "etag": "\"1b638-CG1y3zibI0VpxAfTb3zZrzRaw90\"",
-    "mtime": "2026-08-17T22:08:43.555Z",
-    "size": 112184,
-    "path": "../public/coach-media/animations/happy/happy2.webp"
-  },
-  "/coach-media/animations/happy/happy20.webp": {
-    "type": "image/webp",
-    "etag": "\"31eb2-eG0f1RbiJPRwmWx1p+zVbeej7Jo\"",
-    "mtime": "2026-08-17T22:08:43.556Z",
-    "size": 204466,
-    "path": "../public/coach-media/animations/happy/happy20.webp"
-  },
-  "/coach-media/animations/happy/happy21.webp": {
-    "type": "image/webp",
-    "etag": "\"d20a-nJXSMlgY3QzHwwJw2j7rW4bD6HU\"",
-    "mtime": "2026-08-17T22:08:43.556Z",
-    "size": 53770,
-    "path": "../public/coach-media/animations/happy/happy21.webp"
-  },
-  "/coach-media/animations/happy/happy22.webp": {
-    "type": "image/webp",
-    "etag": "\"2be74-wts9jwpJqVDGud0ZifbURmTwf7g\"",
-    "mtime": "2026-08-17T22:08:43.555Z",
-    "size": 179828,
-    "path": "../public/coach-media/animations/happy/happy22.webp"
-  },
-  "/coach-media/animations/happy/happy23.webp": {
-    "type": "image/webp",
-    "etag": "\"e74a-F+BBio6AhOZ5hwHOGh8wKCLcoGA\"",
-    "mtime": "2026-08-17T22:08:43.557Z",
-    "size": 59210,
-    "path": "../public/coach-media/animations/happy/happy23.webp"
-  },
-  "/coach-media/animations/happy/happy24.webp": {
-    "type": "image/webp",
-    "etag": "\"23e02-CIi7WeJXeH8cd/GgwMtt3CFFVkM\"",
-    "mtime": "2026-08-17T22:08:43.556Z",
-    "size": 146946,
-    "path": "../public/coach-media/animations/happy/happy24.webp"
-  },
-  "/coach-media/animations/happy/happy25.webp": {
-    "type": "image/webp",
-    "etag": "\"16574-kubThW5vAMKccIZc2jswkTWLUoA\"",
-    "mtime": "2026-08-17T22:08:43.560Z",
-    "size": 91508,
-    "path": "../public/coach-media/animations/happy/happy25.webp"
-  },
-  "/coach-media/animations/happy/happy27.webp": {
-    "type": "image/webp",
-    "etag": "\"1c662-1bbHXwmlK1/Q6duQFfbU/+Wg5Fg\"",
-    "mtime": "2026-08-17T22:08:43.558Z",
-    "size": 116322,
-    "path": "../public/coach-media/animations/happy/happy27.webp"
-  },
-  "/coach-media/animations/happy/happy26.webp": {
-    "type": "image/webp",
-    "etag": "\"6c706-bOAKAMAiElDmC2MCxEJkrvr5A+k\"",
-    "mtime": "2026-08-17T22:08:43.557Z",
-    "size": 444166,
-    "path": "../public/coach-media/animations/happy/happy26.webp"
-  },
-  "/coach-media/animations/happy/happy28.webp": {
-    "type": "image/webp",
-    "etag": "\"2090a-cfPB8KwXDFTC2iWhg6Pn7kOvGeg\"",
-    "mtime": "2026-08-17T22:08:43.557Z",
-    "size": 133386,
-    "path": "../public/coach-media/animations/happy/happy28.webp"
-  },
-  "/coach-media/animations/happy/happy29.webp": {
-    "type": "image/webp",
-    "etag": "\"15a6e-F4FEHmzAIG7WW3pszvFsq0XKYGk\"",
-    "mtime": "2026-08-17T22:08:43.558Z",
-    "size": 88686,
-    "path": "../public/coach-media/animations/happy/happy29.webp"
-  },
-  "/coach-media/animations/happy/happy3.webp": {
-    "type": "image/webp",
-    "etag": "\"6438c-AQmLLI1sVtzVfySWLf8q8/SnoDQ\"",
-    "mtime": "2026-08-17T22:08:43.557Z",
-    "size": 410508,
-    "path": "../public/coach-media/animations/happy/happy3.webp"
-  },
-  "/coach-media/animations/happy/happy30.webp": {
-    "type": "image/webp",
-    "etag": "\"46140-52DID+yWWHNDhSWo2wqCW7AgztI\"",
-    "mtime": "2026-08-17T22:08:43.558Z",
-    "size": 287040,
-    "path": "../public/coach-media/animations/happy/happy30.webp"
-  },
-  "/coach-media/animations/happy/happy31.webp": {
-    "type": "image/webp",
-    "etag": "\"4d6ca-GZQfzSkO4AbRu7KJoQWgnIw6U6k\"",
-    "mtime": "2026-08-17T22:08:43.559Z",
-    "size": 317130,
-    "path": "../public/coach-media/animations/happy/happy31.webp"
-  },
-  "/coach-media/animations/happy/happy32.webp": {
-    "type": "image/webp",
-    "etag": "\"1ce94-qd5mvwxqL3x8atGLGoQ6T5SBIM8\"",
-    "mtime": "2026-08-17T22:08:43.558Z",
-    "size": 118420,
-    "path": "../public/coach-media/animations/happy/happy32.webp"
-  },
-  "/coach-media/animations/happy/happy34.webp": {
-    "type": "image/webp",
-    "etag": "\"7a6e-N4lUoynD0pY1HrZqbhKsKEJcIdY\"",
-    "mtime": "2026-08-17T22:08:43.558Z",
-    "size": 31342,
-    "path": "../public/coach-media/animations/happy/happy34.webp"
-  },
-  "/coach-media/animations/happy/happy33.webp": {
-    "type": "image/webp",
-    "etag": "\"1ca8a-w5q1HyoRf3YSX2wny1ajxC1lVTw\"",
-    "mtime": "2026-08-17T22:08:43.559Z",
-    "size": 117386,
-    "path": "../public/coach-media/animations/happy/happy33.webp"
-  },
-  "/coach-media/animations/happy/happy35.webp": {
-    "type": "image/webp",
-    "etag": "\"27e2a-nINbfIIzpb0aB5cQDbxz/GDwNug\"",
-    "mtime": "2026-08-17T22:08:43.560Z",
-    "size": 163370,
-    "path": "../public/coach-media/animations/happy/happy35.webp"
-  },
-  "/coach-media/animations/happy/happy36.webp": {
-    "type": "image/webp",
-    "etag": "\"1480e-iU7KcSbk60IXH4CWOzNyttBsbE0\"",
-    "mtime": "2026-08-17T22:08:43.559Z",
-    "size": 83982,
-    "path": "../public/coach-media/animations/happy/happy36.webp"
-  },
-  "/coach-media/animations/happy/happy37.webp": {
-    "type": "image/webp",
-    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
-    "mtime": "2026-08-17T22:08:43.560Z",
-    "size": 57724,
-    "path": "../public/coach-media/animations/happy/happy37.webp"
-  },
-  "/coach-media/animations/happy/happy38.webp": {
-    "type": "image/webp",
-    "etag": "\"20928-zE86yLQztSZEATTCxTKRuQFifnw\"",
-    "mtime": "2026-08-17T22:08:43.559Z",
-    "size": 133416,
-    "path": "../public/coach-media/animations/happy/happy38.webp"
-  },
-  "/coach-media/animations/happy/happy39.webp": {
-    "type": "image/webp",
-    "etag": "\"1031c-0I4f6s3jDJrqeEDNAVBubusuRqQ\"",
-    "mtime": "2026-08-17T22:08:43.560Z",
-    "size": 66332,
-    "path": "../public/coach-media/animations/happy/happy39.webp"
-  },
-  "/coach-media/animations/happy/happy4.webp": {
-    "type": "image/webp",
-    "etag": "\"80d8-WZGwWFCLsk3YDTm9XP5QCq8R7Es\"",
-    "mtime": "2026-08-17T22:08:43.567Z",
-    "size": 32984,
-    "path": "../public/coach-media/animations/happy/happy4.webp"
-  },
-  "/coach-media/animations/happy/happy40.webp": {
-    "type": "image/webp",
-    "etag": "\"116ba-M7X1kM6tt7dIECx3koEGYbji1us\"",
-    "mtime": "2026-08-17T22:08:43.563Z",
-    "size": 71354,
-    "path": "../public/coach-media/animations/happy/happy40.webp"
-  },
-  "/coach-media/animations/happy/happy41.webp": {
-    "type": "image/webp",
-    "etag": "\"a76a-Nmck64+pAP0tEnTHpG1mitI4ONk\"",
-    "mtime": "2026-08-17T22:08:43.561Z",
-    "size": 42858,
-    "path": "../public/coach-media/animations/happy/happy41.webp"
-  },
-  "/coach-media/animations/happy/happy42.webp": {
-    "type": "image/webp",
-    "etag": "\"7eba-Xqry0H+Qj7x/M1eDmO0CIQ+A7Mg\"",
-    "mtime": "2026-08-17T22:08:43.561Z",
-    "size": 32442,
-    "path": "../public/coach-media/animations/happy/happy42.webp"
-  },
-  "/coach-media/animations/happy/happy43.webp": {
-    "type": "image/webp",
-    "etag": "\"55a5e-kUYTswcDoeybUYnmGXDBV0ny564\"",
-    "mtime": "2026-08-17T22:08:43.567Z",
-    "size": 350814,
-    "path": "../public/coach-media/animations/happy/happy43.webp"
-  },
-  "/coach-media/animations/happy/happy44.webp": {
-    "type": "image/webp",
-    "etag": "\"24e16-Y7u+Md6oQPbYSDjE0D9H77j0Z5I\"",
-    "mtime": "2026-08-17T22:08:43.567Z",
-    "size": 151062,
-    "path": "../public/coach-media/animations/happy/happy44.webp"
-  },
-  "/coach-media/animations/happy/happy45.webp": {
-    "type": "image/webp",
-    "etag": "\"65a82-XxALJISFlOUdD3wSziHwFXHhxqc\"",
-    "mtime": "2026-08-17T22:08:43.567Z",
-    "size": 416386,
-    "path": "../public/coach-media/animations/happy/happy45.webp"
-  },
-  "/coach-media/animations/happy/happy46.webp": {
-    "type": "image/webp",
-    "etag": "\"13dec-uj4sm+IwuLOmQY7lGy1JeMzt2FM\"",
-    "mtime": "2026-08-17T22:08:43.566Z",
-    "size": 81388,
-    "path": "../public/coach-media/animations/happy/happy46.webp"
-  },
-  "/coach-media/animations/happy/happy47.webp": {
-    "type": "image/webp",
-    "etag": "\"234e4-DNBmLISLOFimd+G8XihNRgMsjGw\"",
-    "mtime": "2026-08-17T22:08:43.568Z",
-    "size": 144612,
-    "path": "../public/coach-media/animations/happy/happy47.webp"
-  },
-  "/coach-media/animations/happy/happy5.webp": {
-    "type": "image/webp",
-    "etag": "\"10784-0Rzy5v92HqFbOQ0qn2Jo9XRJ1r0\"",
-    "mtime": "2026-08-17T22:08:43.568Z",
-    "size": 67460,
-    "path": "../public/coach-media/animations/happy/happy5.webp"
-  },
-  "/coach-media/animations/happy/happy49.webp": {
-    "type": "image/webp",
-    "etag": "\"3123c-mf62C2iWRtx585STd9CHbYmICyM\"",
-    "mtime": "2026-08-17T22:08:43.569Z",
-    "size": 201276,
-    "path": "../public/coach-media/animations/happy/happy49.webp"
-  },
-  "/coach-media/animations/happy/happy50.webp": {
-    "type": "image/webp",
-    "etag": "\"2b72a-Xz8Gb2Cdj+rrnnpbXbSGBQRTFYw\"",
-    "mtime": "2026-08-17T22:08:43.568Z",
-    "size": 177962,
-    "path": "../public/coach-media/animations/happy/happy50.webp"
-  },
-  "/coach-media/animations/happy/happy51.webp": {
-    "type": "image/webp",
-    "etag": "\"29090-le1WcmrRN+RDX52joaRj6kdNQS0\"",
-    "mtime": "2026-08-17T22:08:43.569Z",
-    "size": 168080,
-    "path": "../public/coach-media/animations/happy/happy51.webp"
-  },
-  "/coach-media/animations/happy/happy52.webp": {
-    "type": "image/webp",
-    "etag": "\"4a9b0-bNgmWpmTSjuc06DQcbX6RkVvCnU\"",
-    "mtime": "2026-08-17T22:08:43.569Z",
-    "size": 305584,
-    "path": "../public/coach-media/animations/happy/happy52.webp"
-  },
-  "/coach-media/animations/happy/happy53.webp": {
-    "type": "image/webp",
-    "etag": "\"57d0-WEnplvWuFKWqXkfuwNFuk472muo\"",
-    "mtime": "2026-08-17T22:08:43.569Z",
-    "size": 22480,
-    "path": "../public/coach-media/animations/happy/happy53.webp"
-  },
-  "/coach-media/animations/happy/happy54.webp": {
-    "type": "image/webp",
-    "etag": "\"de70-7JEgp30lMgh1RT82Z43BnbOPyME\"",
-    "mtime": "2026-08-17T22:08:43.570Z",
-    "size": 56944,
-    "path": "../public/coach-media/animations/happy/happy54.webp"
-  },
-  "/coach-media/animations/happy/happy48.webp": {
-    "type": "image/webp",
-    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
-    "mtime": "2026-08-17T22:08:43.569Z",
-    "size": 566688,
-    "path": "../public/coach-media/animations/happy/happy48.webp"
-  },
-  "/coach-media/animations/happy/happy55.webp": {
-    "type": "image/webp",
-    "etag": "\"4b40a-Dq55EPJ++rGpcOm3dfVMczMYPaI\"",
-    "mtime": "2026-08-17T22:08:43.571Z",
-    "size": 308234,
-    "path": "../public/coach-media/animations/happy/happy55.webp"
-  },
-  "/coach-media/animations/happy/happy56.webp": {
-    "type": "image/webp",
-    "etag": "\"7ec86-JO0Q1vC7rgTxvmuYQZ3337jzHAM\"",
-    "mtime": "2026-08-17T22:08:43.572Z",
-    "size": 519302,
-    "path": "../public/coach-media/animations/happy/happy56.webp"
-  },
-  "/coach-media/animations/happy/happy57.webp": {
-    "type": "image/webp",
-    "etag": "\"74f88-eEN2CyUJ9rLsRvqY7OzSZS3p2IU\"",
-    "mtime": "2026-08-17T22:08:43.574Z",
-    "size": 479112,
-    "path": "../public/coach-media/animations/happy/happy57.webp"
-  },
-  "/coach-media/animations/happy/happy58.webp": {
-    "type": "image/webp",
-    "etag": "\"695d4-fo3c1QhJVPT0yXYAuoQyAXrIO9E\"",
-    "mtime": "2026-08-17T22:08:43.571Z",
-    "size": 431572,
-    "path": "../public/coach-media/animations/happy/happy58.webp"
-  },
-  "/coach-media/animations/happy/happy59.webp": {
-    "type": "image/webp",
-    "etag": "\"e290-fQb7JlOst9pysXxzv35HJTcHlpE\"",
-    "mtime": "2026-08-17T22:08:43.573Z",
-    "size": 58000,
-    "path": "../public/coach-media/animations/happy/happy59.webp"
-  },
-  "/coach-media/animations/happy/happy6.webp": {
-    "type": "image/webp",
-    "etag": "\"2f8ce-NjZdr7Vin1NbHT+GFgWzMwsZeZE\"",
-    "mtime": "2026-08-17T22:08:43.571Z",
-    "size": 194766,
-    "path": "../public/coach-media/animations/happy/happy6.webp"
-  },
-  "/coach-media/animations/happy/happy61.webp": {
-    "type": "image/webp",
-    "etag": "\"253e8-1Fqod1LG1PZNTdmri6v0gPMthaE\"",
-    "mtime": "2026-08-17T22:08:43.574Z",
-    "size": 152552,
-    "path": "../public/coach-media/animations/happy/happy61.webp"
-  },
-  "/coach-media/animations/happy/happy62.webp": {
-    "type": "image/webp",
-    "etag": "\"4f8f8-tLTO1/dtiZumcCPIDjxNhkIrS9g\"",
-    "mtime": "2026-08-17T22:08:43.578Z",
-    "size": 325880,
-    "path": "../public/coach-media/animations/happy/happy62.webp"
-  },
-  "/coach-media/animations/happy/happy63.webp": {
-    "type": "image/webp",
-    "etag": "\"2b52a-B18WnXoFNFEoRmRiTpAPD0Xw4fA\"",
-    "mtime": "2026-08-17T22:08:43.572Z",
-    "size": 177450,
-    "path": "../public/coach-media/animations/happy/happy63.webp"
-  },
-  "/coach-media/animations/happy/happy65.webp": {
-    "type": "image/webp",
-    "etag": "\"153e2-1MrE6YaWW1bqq3uRkAG3roDYdbI\"",
-    "mtime": "2026-08-17T22:08:43.571Z",
-    "size": 87010,
-    "path": "../public/coach-media/animations/happy/happy65.webp"
-  },
-  "/coach-media/animations/happy/happy66.webp": {
-    "type": "image/webp",
-    "etag": "\"5aac0-EL5Dnfs0ZHXfZ2nFXHuqusIiA6U\"",
-    "mtime": "2026-08-17T22:08:43.576Z",
-    "size": 371392,
-    "path": "../public/coach-media/animations/happy/happy66.webp"
-  },
-  "/coach-media/animations/happy/happy67.webp": {
-    "type": "image/webp",
-    "etag": "\"26842-Ttlq6ska7bBpzXjvIXLqSUaPnIk\"",
-    "mtime": "2026-08-17T22:08:43.578Z",
-    "size": 157762,
-    "path": "../public/coach-media/animations/happy/happy67.webp"
-  },
-  "/coach-media/animations/happy/happy69.webp": {
-    "type": "image/webp",
-    "etag": "\"1843a-+cJ0+7F0PNcalsjHJcXNkw7qRDw\"",
-    "mtime": "2026-08-17T22:08:43.578Z",
-    "size": 99386,
-    "path": "../public/coach-media/animations/happy/happy69.webp"
-  },
-  "/coach-media/animations/happy/happy68.webp": {
-    "type": "image/webp",
-    "etag": "\"3a9f6-uXcrvu87C4tyxdUD8qy84likyxA\"",
-    "mtime": "2026-08-17T22:08:43.574Z",
-    "size": 240118,
-    "path": "../public/coach-media/animations/happy/happy68.webp"
-  },
-  "/coach-media/animations/happy/happy7.webp": {
-    "type": "image/webp",
-    "etag": "\"6dbe6-GIqYtKyf033a2vAUrfvCUdyYOmE\"",
-    "mtime": "2026-08-17T22:08:43.578Z",
-    "size": 449510,
-    "path": "../public/coach-media/animations/happy/happy7.webp"
-  },
-  "/coach-media/animations/happy/happy71.webp": {
-    "type": "image/webp",
-    "etag": "\"12890-iDkXNnqbnihYZd5fm+x9SogtFL0\"",
-    "mtime": "2026-08-17T22:08:43.580Z",
-    "size": 75920,
-    "path": "../public/coach-media/animations/happy/happy71.webp"
-  },
-  "/coach-media/animations/happy/happy72.webp": {
-    "type": "image/webp",
-    "etag": "\"1132e-N279XcIE77SVgWI5RK4HGZTKNNQ\"",
-    "mtime": "2026-08-17T22:08:43.579Z",
-    "size": 70446,
-    "path": "../public/coach-media/animations/happy/happy72.webp"
-  },
-  "/coach-media/animations/happy/happy64.webp": {
-    "type": "image/webp",
-    "etag": "\"8b070-7oC7TYj4LIldWg1605cOC8gYl+w\"",
-    "mtime": "2026-08-17T22:08:43.573Z",
-    "size": 569456,
-    "path": "../public/coach-media/animations/happy/happy64.webp"
-  },
-  "/coach-media/animations/happy/happy73.webp": {
-    "type": "image/webp",
-    "etag": "\"12dd8-PuAHZqC2ZtYnGQM/yt5HL7w8Z5w\"",
-    "mtime": "2026-08-17T22:08:43.579Z",
-    "size": 77272,
-    "path": "../public/coach-media/animations/happy/happy73.webp"
-  },
-  "/coach-media/animations/happy/happy74.webp": {
-    "type": "image/webp",
-    "etag": "\"5deae-Nnfy+JPdNa90X/TKIQJKDHXtEDg\"",
-    "mtime": "2026-08-17T22:08:43.580Z",
-    "size": 384686,
-    "path": "../public/coach-media/animations/happy/happy74.webp"
-  },
-  "/coach-media/animations/happy/happy75.webp": {
-    "type": "image/webp",
-    "etag": "\"1cfd0-9c+pPyscG4ipyzhzbN//E8mdshQ\"",
-    "mtime": "2026-08-17T22:08:43.579Z",
-    "size": 118736,
-    "path": "../public/coach-media/animations/happy/happy75.webp"
-  },
-  "/coach-media/animations/happy/happy76.webp": {
-    "type": "image/webp",
-    "etag": "\"14a9e-d6rGydXTPMji/MdwYzCalRd2xW0\"",
-    "mtime": "2026-08-17T22:08:43.584Z",
-    "size": 84638,
-    "path": "../public/coach-media/animations/happy/happy76.webp"
-  },
-  "/coach-media/animations/happy/happy77.webp": {
-    "type": "image/webp",
-    "etag": "\"1e10a-1aPPim9G6xum8/Hs8Ro6u3VlG6U\"",
-    "mtime": "2026-08-17T22:08:43.581Z",
-    "size": 123146,
-    "path": "../public/coach-media/animations/happy/happy77.webp"
-  },
-  "/coach-media/animations/happy/happy70.webp": {
-    "type": "image/webp",
-    "etag": "\"813fc-MRr6jjBP9Dwv9BEsHOHSRAaT2vg\"",
-    "mtime": "2026-08-17T22:08:43.580Z",
-    "size": 529404,
-    "path": "../public/coach-media/animations/happy/happy70.webp"
-  },
-  "/coach-media/animations/happy/happy78.webp": {
-    "type": "image/webp",
-    "etag": "\"17ba4-3h26xVZZTGib30A7sQhqoYBlgqs\"",
-    "mtime": "2026-08-17T22:08:43.580Z",
-    "size": 97188,
-    "path": "../public/coach-media/animations/happy/happy78.webp"
-  },
-  "/coach-media/animations/happy/happy79.webp": {
-    "type": "image/webp",
-    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
-    "mtime": "2026-08-17T22:08:43.581Z",
-    "size": 57724,
-    "path": "../public/coach-media/animations/happy/happy79.webp"
-  },
-  "/coach-media/animations/happy/happy8.webp": {
-    "type": "image/webp",
-    "etag": "\"9d5e-zP9Tu9ncCFIvZEyvVyuhVBachAE\"",
-    "mtime": "2026-08-17T22:08:43.580Z",
-    "size": 40286,
-    "path": "../public/coach-media/animations/happy/happy8.webp"
-  },
-  "/coach-media/animations/happy/happy80.webp": {
-    "type": "image/webp",
-    "etag": "\"1da90-C0sljbqRem33mzQhLpalQ7JqSpU\"",
-    "mtime": "2026-08-17T22:08:43.581Z",
-    "size": 121488,
-    "path": "../public/coach-media/animations/happy/happy80.webp"
-  },
-  "/coach-media/animations/happy/happy60.webp": {
-    "type": "image/webp",
-    "etag": "\"1e7f54-IoOugN/ir+60blKcpy6Kl2RuTBI\"",
-    "mtime": "2026-08-17T22:08:43.572Z",
-    "size": 1998676,
-    "path": "../public/coach-media/animations/happy/happy60.webp"
-  },
-  "/coach-media/animations/happy/happy82.webp": {
-    "type": "image/webp",
-    "etag": "\"f1a4-tNEKunf3T9spLovIQWFozZvffw4\"",
-    "mtime": "2026-08-17T22:08:43.584Z",
-    "size": 61860,
-    "path": "../public/coach-media/animations/happy/happy82.webp"
-  },
-  "/coach-media/animations/happy/happy83.webp": {
-    "type": "image/webp",
-    "etag": "\"2fe42-Kmm0KGXV1dEPQbjoM5G8BWcNWBM\"",
-    "mtime": "2026-08-17T22:08:43.582Z",
-    "size": 196162,
-    "path": "../public/coach-media/animations/happy/happy83.webp"
-  },
-  "/coach-media/animations/happy/happy84.webp": {
-    "type": "image/webp",
-    "etag": "\"7b984-0wPlyvPIzXRP9eIMHgiBJFl+27A\"",
-    "mtime": "2026-08-17T22:08:43.583Z",
-    "size": 506244,
-    "path": "../public/coach-media/animations/happy/happy84.webp"
-  },
-  "/coach-media/animations/happy/happy81.webp": {
-    "type": "image/webp",
-    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
-    "mtime": "2026-08-17T22:08:43.582Z",
-    "size": 566688,
-    "path": "../public/coach-media/animations/happy/happy81.webp"
-  },
-  "/coach-media/animations/happy/happy85.webp": {
-    "type": "image/webp",
-    "etag": "\"150ae-QMfLvsJpp/BJuZy4OwOXUD8OYUQ\"",
-    "mtime": "2026-08-17T22:08:43.583Z",
-    "size": 86190,
-    "path": "../public/coach-media/animations/happy/happy85.webp"
-  },
-  "/coach-media/animations/happy/happy86.webp": {
-    "type": "image/webp",
-    "etag": "\"d7f8-QCvUvt2Z0TOPZeSr+n8EKTRxFUo\"",
-    "mtime": "2026-08-17T22:08:43.581Z",
-    "size": 55288,
-    "path": "../public/coach-media/animations/happy/happy86.webp"
-  },
-  "/coach-media/animations/happy/happy87.webp": {
-    "type": "image/webp",
-    "etag": "\"17dec-6w/mkYwGAw5T0lZlhGXtO5BcsZU\"",
-    "mtime": "2026-08-17T22:08:43.582Z",
-    "size": 97772,
-    "path": "../public/coach-media/animations/happy/happy87.webp"
-  },
-  "/coach-media/animations/happy/happy88.webp": {
-    "type": "image/webp",
-    "etag": "\"10722-eVPV4BPr+xXKB/m7b01HTc3BYvY\"",
-    "mtime": "2026-08-17T22:08:43.585Z",
-    "size": 67362,
-    "path": "../public/coach-media/animations/happy/happy88.webp"
-  },
-  "/coach-media/animations/happy/happy89.webp": {
-    "type": "image/webp",
-    "etag": "\"1c7e2-sUSfie0YAo/54wJ6tzJq/DwQ0Uw\"",
-    "mtime": "2026-08-17T22:08:43.582Z",
-    "size": 116706,
-    "path": "../public/coach-media/animations/happy/happy89.webp"
-  },
-  "/coach-media/animations/happy/happy9.webp": {
-    "type": "image/webp",
-    "etag": "\"48688-/orx463Bv1qJxQ1v4poLAvBrNjI\"",
-    "mtime": "2026-08-17T22:08:43.584Z",
-    "size": 296584,
-    "path": "../public/coach-media/animations/happy/happy9.webp"
-  },
-  "/coach-media/animations/happy/happy90.webp": {
-    "type": "image/webp",
-    "etag": "\"40b96-2KBRO6W19pvILapZ8+Vi3lurBCw\"",
-    "mtime": "2026-08-17T22:08:43.584Z",
-    "size": 265110,
-    "path": "../public/coach-media/animations/happy/happy90.webp"
-  },
-  "/coach-media/animations/happy/happy91.webp": {
-    "type": "image/webp",
-    "etag": "\"162e4-8HqkqL71/r+QJURh8ZbqNFMM6ZE\"",
-    "mtime": "2026-08-17T22:08:43.582Z",
-    "size": 90852,
-    "path": "../public/coach-media/animations/happy/happy91.webp"
-  },
-  "/coach-media/animations/happy/happy92.webp": {
-    "type": "image/webp",
-    "etag": "\"1eb3c-dpJ07uxpsVOLdaMyS3SOlqMT6/k\"",
-    "mtime": "2026-08-17T22:08:43.583Z",
-    "size": 125756,
-    "path": "../public/coach-media/animations/happy/happy92.webp"
   },
   "/coach-media/emojis/heureux/heureux1.png": {
     "type": "image/png",
     "etag": "\"5091-+uAnUfC4q2tlld3BzD89z3lKd4w\"",
-    "mtime": "2026-08-17T22:08:43.551Z",
+    "mtime": "2026-08-18T12:51:49.927Z",
     "size": 20625,
     "path": "../public/coach-media/emojis/heureux/heureux1.png"
   },
   "/coach-media/emojis/heureux/heureux10.png": {
     "type": "image/png",
     "etag": "\"5bbe-8dpJHwcxgGm/L+GGIgukoN99+qw\"",
-    "mtime": "2026-08-17T22:08:43.430Z",
+    "mtime": "2026-08-18T12:51:50.085Z",
     "size": 23486,
     "path": "../public/coach-media/emojis/heureux/heureux10.png"
   },
   "/coach-media/emojis/heureux/heureux11.png": {
     "type": "image/png",
     "etag": "\"60b8-LMMAFjmB/Rwe+6qwtxB0KRRjFVE\"",
-    "mtime": "2026-08-17T22:08:43.551Z",
+    "mtime": "2026-08-18T12:51:50.085Z",
     "size": 24760,
     "path": "../public/coach-media/emojis/heureux/heureux11.png"
   },
   "/coach-media/emojis/heureux/heureux12.png": {
     "type": "image/png",
     "etag": "\"79c6-gOXTGgNP0DRA6mU73TQkCLA2IZc\"",
-    "mtime": "2026-08-17T22:08:43.551Z",
+    "mtime": "2026-08-18T12:51:50.085Z",
     "size": 31174,
     "path": "../public/coach-media/emojis/heureux/heureux12.png"
   },
   "/coach-media/emojis/heureux/heureux2.png": {
     "type": "image/png",
     "etag": "\"54c1-7stf5vr0fIsbVKX4y+9cXcdF6Mo\"",
-    "mtime": "2026-08-17T22:08:43.551Z",
+    "mtime": "2026-08-18T12:51:50.086Z",
     "size": 21697,
     "path": "../public/coach-media/emojis/heureux/heureux2.png"
   },
   "/coach-media/emojis/heureux/heureux3.png": {
     "type": "image/png",
     "etag": "\"531f-VfeI7fmVy/9I1cJdA+JneCazNHU\"",
-    "mtime": "2026-08-17T22:08:43.552Z",
+    "mtime": "2026-08-18T12:51:50.086Z",
     "size": 21279,
     "path": "../public/coach-media/emojis/heureux/heureux3.png"
   },
   "/coach-media/emojis/heureux/heureux4.png": {
     "type": "image/png",
     "etag": "\"5885-WkglwLUYH5ALdE1dXhy9hL4kIX4\"",
-    "mtime": "2026-08-17T22:08:43.552Z",
+    "mtime": "2026-08-18T12:51:50.085Z",
     "size": 22661,
     "path": "../public/coach-media/emojis/heureux/heureux4.png"
   },
   "/coach-media/emojis/heureux/heureux5.png": {
     "type": "image/png",
     "etag": "\"5a47-dAmqVWfHl7YFERUDnBuBJDfdxvs\"",
-    "mtime": "2026-08-17T22:08:43.552Z",
+    "mtime": "2026-08-18T12:51:50.086Z",
     "size": 23111,
     "path": "../public/coach-media/emojis/heureux/heureux5.png"
   },
   "/coach-media/emojis/heureux/heureux6.png": {
     "type": "image/png",
     "etag": "\"536f-MLOUAyVp0bZpHOQ61BWW10gqYAk\"",
-    "mtime": "2026-08-17T22:08:43.551Z",
+    "mtime": "2026-08-18T12:51:50.086Z",
     "size": 21359,
     "path": "../public/coach-media/emojis/heureux/heureux6.png"
   },
   "/coach-media/emojis/heureux/heureux7.png": {
     "type": "image/png",
     "etag": "\"4c1e-5J3Hb2P7b9Dhw36q+lPFACHsBzo\"",
-    "mtime": "2026-08-17T22:08:43.552Z",
+    "mtime": "2026-08-18T12:51:50.086Z",
     "size": 19486,
     "path": "../public/coach-media/emojis/heureux/heureux7.png"
   },
   "/coach-media/emojis/heureux/heureux8.png": {
     "type": "image/png",
     "etag": "\"4c3d-xFJiCChiW5P5PT3dzl6b9pdUZCU\"",
-    "mtime": "2026-08-17T22:08:43.552Z",
+    "mtime": "2026-08-18T12:51:50.086Z",
     "size": 19517,
     "path": "../public/coach-media/emojis/heureux/heureux8.png"
   },
   "/coach-media/emojis/heureux/heureux9.png": {
     "type": "image/png",
     "etag": "\"53d1-nvrpEmDOGFDrOhR0CwIqhjydUqw\"",
-    "mtime": "2026-08-17T22:08:43.552Z",
+    "mtime": "2026-08-18T12:51:50.086Z",
     "size": 21457,
     "path": "../public/coach-media/emojis/heureux/heureux9.png"
+  },
+  "/coach-media/emojis/muet/muet1.png": {
+    "type": "image/png",
+    "etag": "\"51a6-vln2s/UdhcTRTaO8VHDa3lfz0h8\"",
+    "mtime": "2026-08-18T12:51:49.932Z",
+    "size": 20902,
+    "path": "../public/coach-media/emojis/muet/muet1.png"
+  },
+  "/coach-media/emojis/muet/muet2.png": {
+    "type": "image/png",
+    "etag": "\"4fd6-7oBC0gGyTBoUjDE6sag9tGTRXEk\"",
+    "mtime": "2026-08-18T12:51:50.087Z",
+    "size": 20438,
+    "path": "../public/coach-media/emojis/muet/muet2.png"
+  },
+  "/coach-media/emojis/muet/muet3.png": {
+    "type": "image/png",
+    "etag": "\"5287-ywn34jaL1+x0Qfo7jSf48qjMhfs\"",
+    "mtime": "2026-08-18T12:51:50.086Z",
+    "size": 21127,
+    "path": "../public/coach-media/emojis/muet/muet3.png"
+  },
+  "/coach-media/emojis/muet/muet4.png": {
+    "type": "image/png",
+    "etag": "\"56a5-+3X/CcPHmEJ0+beAZBYg2M7ZSgA\"",
+    "mtime": "2026-08-18T12:51:50.087Z",
+    "size": 22181,
+    "path": "../public/coach-media/emojis/muet/muet4.png"
+  },
+  "/coach-media/animations/happy/happy10.webp": {
+    "type": "image/webp",
+    "etag": "\"13102-1AwfKNNogN0hV9N7INQr8b/L5U0\"",
+    "mtime": "2026-08-18T12:51:49.930Z",
+    "size": 78082,
+    "path": "../public/coach-media/animations/happy/happy10.webp"
+  },
+  "/coach-media/animations/happy/happy11.webp": {
+    "type": "image/webp",
+    "etag": "\"c51c-aSSJ/YerC2d+QHIzkxapjUKX1xo\"",
+    "mtime": "2026-08-18T12:51:50.052Z",
+    "size": 50460,
+    "path": "../public/coach-media/animations/happy/happy11.webp"
+  },
+  "/coach-media/animations/happy/happy12.webp": {
+    "type": "image/webp",
+    "etag": "\"26dd0-kEufqOKIIc4EphkqsilP8Vg0anA\"",
+    "mtime": "2026-08-18T12:51:50.054Z",
+    "size": 159184,
+    "path": "../public/coach-media/animations/happy/happy12.webp"
+  },
+  "/coach-media/animations/happy/happy13.webp": {
+    "type": "image/webp",
+    "etag": "\"1b7c8-6YwhPgMDDi09N6QaiQGvB3MESN8\"",
+    "mtime": "2026-08-18T12:51:50.052Z",
+    "size": 112584,
+    "path": "../public/coach-media/animations/happy/happy13.webp"
+  },
+  "/coach-media/animations/happy/happy14.webp": {
+    "type": "image/webp",
+    "etag": "\"2b5e-Tlk4vz7sMxW+TPrlh/TTUPVQZ64\"",
+    "mtime": "2026-08-18T12:51:50.052Z",
+    "size": 11102,
+    "path": "../public/coach-media/animations/happy/happy14.webp"
+  },
+  "/coach-media/animations/happy/happy15.webp": {
+    "type": "image/webp",
+    "etag": "\"1f82e-GdfVpoK+FBOph2APqZZ2ksTEi/M\"",
+    "mtime": "2026-08-18T12:51:50.055Z",
+    "size": 129070,
+    "path": "../public/coach-media/animations/happy/happy15.webp"
+  },
+  "/coach-media/animations/happy/happy16.webp": {
+    "type": "image/webp",
+    "etag": "\"39676-m3hlL8MEmfcM8A6RQ/d34G7k4z4\"",
+    "mtime": "2026-08-18T12:51:50.058Z",
+    "size": 235126,
+    "path": "../public/coach-media/animations/happy/happy16.webp"
+  },
+  "/coach-media/animations/happy/happy17.webp": {
+    "type": "image/webp",
+    "etag": "\"6c236-lcuyQg6sSZcT0+fCpGNG/JhMi7U\"",
+    "mtime": "2026-08-18T12:51:50.057Z",
+    "size": 442934,
+    "path": "../public/coach-media/animations/happy/happy17.webp"
+  },
+  "/coach-media/animations/happy/happy1.webp": {
+    "type": "image/webp",
+    "etag": "\"9a9fe-dnJ60THXbLE/qdsCoy8mks8JEWo\"",
+    "mtime": "2026-08-18T12:51:50.054Z",
+    "size": 633342,
+    "path": "../public/coach-media/animations/happy/happy1.webp"
+  },
+  "/coach-media/animations/happy/happy19.webp": {
+    "type": "image/webp",
+    "etag": "\"7340-Mvycs8QTkYX6zm7iIfL2nLfxOe8\"",
+    "mtime": "2026-08-18T12:51:50.055Z",
+    "size": 29504,
+    "path": "../public/coach-media/animations/happy/happy19.webp"
+  },
+  "/coach-media/animations/happy/happy18.webp": {
+    "type": "image/webp",
+    "etag": "\"38cca-HDXyFn4nw7hhDQ0f8voh7jHxFIU\"",
+    "mtime": "2026-08-18T12:51:50.055Z",
+    "size": 232650,
+    "path": "../public/coach-media/animations/happy/happy18.webp"
+  },
+  "/coach-media/animations/happy/happy2.webp": {
+    "type": "image/webp",
+    "etag": "\"1b638-CG1y3zibI0VpxAfTb3zZrzRaw90\"",
+    "mtime": "2026-08-18T12:51:50.055Z",
+    "size": 112184,
+    "path": "../public/coach-media/animations/happy/happy2.webp"
+  },
+  "/coach-media/animations/happy/happy20.webp": {
+    "type": "image/webp",
+    "etag": "\"31eb2-eG0f1RbiJPRwmWx1p+zVbeej7Jo\"",
+    "mtime": "2026-08-18T12:51:50.056Z",
+    "size": 204466,
+    "path": "../public/coach-media/animations/happy/happy20.webp"
+  },
+  "/coach-media/animations/happy/happy21.webp": {
+    "type": "image/webp",
+    "etag": "\"d20a-nJXSMlgY3QzHwwJw2j7rW4bD6HU\"",
+    "mtime": "2026-08-18T12:51:50.056Z",
+    "size": 53770,
+    "path": "../public/coach-media/animations/happy/happy21.webp"
+  },
+  "/coach-media/animations/happy/happy22.webp": {
+    "type": "image/webp",
+    "etag": "\"2be74-wts9jwpJqVDGud0ZifbURmTwf7g\"",
+    "mtime": "2026-08-18T12:51:50.056Z",
+    "size": 179828,
+    "path": "../public/coach-media/animations/happy/happy22.webp"
+  },
+  "/coach-media/animations/happy/happy23.webp": {
+    "type": "image/webp",
+    "etag": "\"e74a-F+BBio6AhOZ5hwHOGh8wKCLcoGA\"",
+    "mtime": "2026-08-18T12:51:50.056Z",
+    "size": 59210,
+    "path": "../public/coach-media/animations/happy/happy23.webp"
+  },
+  "/coach-media/animations/happy/happy24.webp": {
+    "type": "image/webp",
+    "etag": "\"23e02-CIi7WeJXeH8cd/GgwMtt3CFFVkM\"",
+    "mtime": "2026-08-18T12:51:50.057Z",
+    "size": 146946,
+    "path": "../public/coach-media/animations/happy/happy24.webp"
+  },
+  "/coach-media/animations/happy/happy25.webp": {
+    "type": "image/webp",
+    "etag": "\"16574-kubThW5vAMKccIZc2jswkTWLUoA\"",
+    "mtime": "2026-08-18T12:51:50.058Z",
+    "size": 91508,
+    "path": "../public/coach-media/animations/happy/happy25.webp"
+  },
+  "/coach-media/animations/happy/happy27.webp": {
+    "type": "image/webp",
+    "etag": "\"1c662-1bbHXwmlK1/Q6duQFfbU/+Wg5Fg\"",
+    "mtime": "2026-08-18T12:51:50.062Z",
+    "size": 116322,
+    "path": "../public/coach-media/animations/happy/happy27.webp"
+  },
+  "/coach-media/animations/happy/happy28.webp": {
+    "type": "image/webp",
+    "etag": "\"2090a-cfPB8KwXDFTC2iWhg6Pn7kOvGeg\"",
+    "mtime": "2026-08-18T12:51:50.064Z",
+    "size": 133386,
+    "path": "../public/coach-media/animations/happy/happy28.webp"
+  },
+  "/coach-media/animations/happy/happy26.webp": {
+    "type": "image/webp",
+    "etag": "\"6c706-bOAKAMAiElDmC2MCxEJkrvr5A+k\"",
+    "mtime": "2026-08-18T12:51:50.058Z",
+    "size": 444166,
+    "path": "../public/coach-media/animations/happy/happy26.webp"
+  },
+  "/coach-media/animations/happy/happy29.webp": {
+    "type": "image/webp",
+    "etag": "\"15a6e-F4FEHmzAIG7WW3pszvFsq0XKYGk\"",
+    "mtime": "2026-08-18T12:51:50.063Z",
+    "size": 88686,
+    "path": "../public/coach-media/animations/happy/happy29.webp"
+  },
+  "/coach-media/animations/happy/happy3.webp": {
+    "type": "image/webp",
+    "etag": "\"6438c-AQmLLI1sVtzVfySWLf8q8/SnoDQ\"",
+    "mtime": "2026-08-18T12:51:50.060Z",
+    "size": 410508,
+    "path": "../public/coach-media/animations/happy/happy3.webp"
+  },
+  "/coach-media/animations/happy/happy30.webp": {
+    "type": "image/webp",
+    "etag": "\"46140-52DID+yWWHNDhSWo2wqCW7AgztI\"",
+    "mtime": "2026-08-18T12:51:50.063Z",
+    "size": 287040,
+    "path": "../public/coach-media/animations/happy/happy30.webp"
+  },
+  "/coach-media/animations/happy/happy31.webp": {
+    "type": "image/webp",
+    "etag": "\"4d6ca-GZQfzSkO4AbRu7KJoQWgnIw6U6k\"",
+    "mtime": "2026-08-18T12:51:50.063Z",
+    "size": 317130,
+    "path": "../public/coach-media/animations/happy/happy31.webp"
+  },
+  "/coach-media/animations/happy/happy32.webp": {
+    "type": "image/webp",
+    "etag": "\"1ce94-qd5mvwxqL3x8atGLGoQ6T5SBIM8\"",
+    "mtime": "2026-08-18T12:51:50.063Z",
+    "size": 118420,
+    "path": "../public/coach-media/animations/happy/happy32.webp"
+  },
+  "/coach-media/animations/happy/happy33.webp": {
+    "type": "image/webp",
+    "etag": "\"1ca8a-w5q1HyoRf3YSX2wny1ajxC1lVTw\"",
+    "mtime": "2026-08-18T12:51:50.064Z",
+    "size": 117386,
+    "path": "../public/coach-media/animations/happy/happy33.webp"
+  },
+  "/coach-media/animations/happy/happy34.webp": {
+    "type": "image/webp",
+    "etag": "\"7a6e-N4lUoynD0pY1HrZqbhKsKEJcIdY\"",
+    "mtime": "2026-08-18T12:51:50.063Z",
+    "size": 31342,
+    "path": "../public/coach-media/animations/happy/happy34.webp"
+  },
+  "/coach-media/animations/happy/happy35.webp": {
+    "type": "image/webp",
+    "etag": "\"27e2a-nINbfIIzpb0aB5cQDbxz/GDwNug\"",
+    "mtime": "2026-08-18T12:51:50.064Z",
+    "size": 163370,
+    "path": "../public/coach-media/animations/happy/happy35.webp"
+  },
+  "/coach-media/animations/happy/happy36.webp": {
+    "type": "image/webp",
+    "etag": "\"1480e-iU7KcSbk60IXH4CWOzNyttBsbE0\"",
+    "mtime": "2026-08-18T12:51:50.064Z",
+    "size": 83982,
+    "path": "../public/coach-media/animations/happy/happy36.webp"
+  },
+  "/coach-media/animations/happy/happy37.webp": {
+    "type": "image/webp",
+    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
+    "mtime": "2026-08-18T12:51:50.065Z",
+    "size": 57724,
+    "path": "../public/coach-media/animations/happy/happy37.webp"
+  },
+  "/coach-media/animations/happy/happy38.webp": {
+    "type": "image/webp",
+    "etag": "\"20928-zE86yLQztSZEATTCxTKRuQFifnw\"",
+    "mtime": "2026-08-18T12:51:50.065Z",
+    "size": 133416,
+    "path": "../public/coach-media/animations/happy/happy38.webp"
+  },
+  "/coach-media/animations/happy/happy39.webp": {
+    "type": "image/webp",
+    "etag": "\"1031c-0I4f6s3jDJrqeEDNAVBubusuRqQ\"",
+    "mtime": "2026-08-18T12:51:50.067Z",
+    "size": 66332,
+    "path": "../public/coach-media/animations/happy/happy39.webp"
+  },
+  "/coach-media/animations/happy/happy4.webp": {
+    "type": "image/webp",
+    "etag": "\"80d8-WZGwWFCLsk3YDTm9XP5QCq8R7Es\"",
+    "mtime": "2026-08-18T12:51:50.067Z",
+    "size": 32984,
+    "path": "../public/coach-media/animations/happy/happy4.webp"
+  },
+  "/coach-media/animations/happy/happy40.webp": {
+    "type": "image/webp",
+    "etag": "\"116ba-M7X1kM6tt7dIECx3koEGYbji1us\"",
+    "mtime": "2026-08-18T12:51:50.064Z",
+    "size": 71354,
+    "path": "../public/coach-media/animations/happy/happy40.webp"
+  },
+  "/coach-media/animations/happy/happy41.webp": {
+    "type": "image/webp",
+    "etag": "\"a76a-Nmck64+pAP0tEnTHpG1mitI4ONk\"",
+    "mtime": "2026-08-18T12:51:50.068Z",
+    "size": 42858,
+    "path": "../public/coach-media/animations/happy/happy41.webp"
+  },
+  "/coach-media/animations/happy/happy42.webp": {
+    "type": "image/webp",
+    "etag": "\"7eba-Xqry0H+Qj7x/M1eDmO0CIQ+A7Mg\"",
+    "mtime": "2026-08-18T12:51:50.067Z",
+    "size": 32442,
+    "path": "../public/coach-media/animations/happy/happy42.webp"
+  },
+  "/coach-media/animations/happy/happy44.webp": {
+    "type": "image/webp",
+    "etag": "\"24e16-Y7u+Md6oQPbYSDjE0D9H77j0Z5I\"",
+    "mtime": "2026-08-18T12:51:50.068Z",
+    "size": 151062,
+    "path": "../public/coach-media/animations/happy/happy44.webp"
+  },
+  "/coach-media/animations/happy/happy43.webp": {
+    "type": "image/webp",
+    "etag": "\"55a5e-kUYTswcDoeybUYnmGXDBV0ny564\"",
+    "mtime": "2026-08-18T12:51:50.067Z",
+    "size": 350814,
+    "path": "../public/coach-media/animations/happy/happy43.webp"
+  },
+  "/coach-media/animations/happy/happy46.webp": {
+    "type": "image/webp",
+    "etag": "\"13dec-uj4sm+IwuLOmQY7lGy1JeMzt2FM\"",
+    "mtime": "2026-08-18T12:51:50.068Z",
+    "size": 81388,
+    "path": "../public/coach-media/animations/happy/happy46.webp"
+  },
+  "/coach-media/animations/happy/happy45.webp": {
+    "type": "image/webp",
+    "etag": "\"65a82-XxALJISFlOUdD3wSziHwFXHhxqc\"",
+    "mtime": "2026-08-18T12:51:50.067Z",
+    "size": 416386,
+    "path": "../public/coach-media/animations/happy/happy45.webp"
+  },
+  "/coach-media/animations/happy/happy47.webp": {
+    "type": "image/webp",
+    "etag": "\"234e4-DNBmLISLOFimd+G8XihNRgMsjGw\"",
+    "mtime": "2026-08-18T12:51:50.069Z",
+    "size": 144612,
+    "path": "../public/coach-media/animations/happy/happy47.webp"
+  },
+  "/coach-media/animations/happy/happy49.webp": {
+    "type": "image/webp",
+    "etag": "\"3123c-mf62C2iWRtx585STd9CHbYmICyM\"",
+    "mtime": "2026-08-18T12:51:50.068Z",
+    "size": 201276,
+    "path": "../public/coach-media/animations/happy/happy49.webp"
+  },
+  "/coach-media/animations/happy/happy5.webp": {
+    "type": "image/webp",
+    "etag": "\"10784-0Rzy5v92HqFbOQ0qn2Jo9XRJ1r0\"",
+    "mtime": "2026-08-18T12:51:50.068Z",
+    "size": 67460,
+    "path": "../public/coach-media/animations/happy/happy5.webp"
+  },
+  "/coach-media/animations/happy/happy50.webp": {
+    "type": "image/webp",
+    "etag": "\"2b72a-Xz8Gb2Cdj+rrnnpbXbSGBQRTFYw\"",
+    "mtime": "2026-08-18T12:51:50.072Z",
+    "size": 177962,
+    "path": "../public/coach-media/animations/happy/happy50.webp"
+  },
+  "/coach-media/animations/happy/happy51.webp": {
+    "type": "image/webp",
+    "etag": "\"29090-le1WcmrRN+RDX52joaRj6kdNQS0\"",
+    "mtime": "2026-08-18T12:51:50.069Z",
+    "size": 168080,
+    "path": "../public/coach-media/animations/happy/happy51.webp"
+  },
+  "/coach-media/animations/happy/happy52.webp": {
+    "type": "image/webp",
+    "etag": "\"4a9b0-bNgmWpmTSjuc06DQcbX6RkVvCnU\"",
+    "mtime": "2026-08-18T12:51:50.069Z",
+    "size": 305584,
+    "path": "../public/coach-media/animations/happy/happy52.webp"
+  },
+  "/coach-media/animations/happy/happy53.webp": {
+    "type": "image/webp",
+    "etag": "\"57d0-WEnplvWuFKWqXkfuwNFuk472muo\"",
+    "mtime": "2026-08-18T12:51:50.070Z",
+    "size": 22480,
+    "path": "../public/coach-media/animations/happy/happy53.webp"
+  },
+  "/coach-media/animations/happy/happy48.webp": {
+    "type": "image/webp",
+    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
+    "mtime": "2026-08-18T12:51:50.070Z",
+    "size": 566688,
+    "path": "../public/coach-media/animations/happy/happy48.webp"
+  },
+  "/coach-media/animations/happy/happy54.webp": {
+    "type": "image/webp",
+    "etag": "\"de70-7JEgp30lMgh1RT82Z43BnbOPyME\"",
+    "mtime": "2026-08-18T12:51:50.069Z",
+    "size": 56944,
+    "path": "../public/coach-media/animations/happy/happy54.webp"
+  },
+  "/coach-media/animations/happy/happy55.webp": {
+    "type": "image/webp",
+    "etag": "\"4b40a-Dq55EPJ++rGpcOm3dfVMczMYPaI\"",
+    "mtime": "2026-08-18T12:51:50.070Z",
+    "size": 308234,
+    "path": "../public/coach-media/animations/happy/happy55.webp"
+  },
+  "/coach-media/animations/happy/happy56.webp": {
+    "type": "image/webp",
+    "etag": "\"7ec86-JO0Q1vC7rgTxvmuYQZ3337jzHAM\"",
+    "mtime": "2026-08-18T12:51:50.070Z",
+    "size": 519302,
+    "path": "../public/coach-media/animations/happy/happy56.webp"
+  },
+  "/coach-media/animations/happy/happy57.webp": {
+    "type": "image/webp",
+    "etag": "\"74f88-eEN2CyUJ9rLsRvqY7OzSZS3p2IU\"",
+    "mtime": "2026-08-18T12:51:50.071Z",
+    "size": 479112,
+    "path": "../public/coach-media/animations/happy/happy57.webp"
+  },
+  "/coach-media/animations/happy/happy58.webp": {
+    "type": "image/webp",
+    "etag": "\"695d4-fo3c1QhJVPT0yXYAuoQyAXrIO9E\"",
+    "mtime": "2026-08-18T12:51:50.072Z",
+    "size": 431572,
+    "path": "../public/coach-media/animations/happy/happy58.webp"
+  },
+  "/coach-media/animations/happy/happy59.webp": {
+    "type": "image/webp",
+    "etag": "\"e290-fQb7JlOst9pysXxzv35HJTcHlpE\"",
+    "mtime": "2026-08-18T12:51:50.071Z",
+    "size": 58000,
+    "path": "../public/coach-media/animations/happy/happy59.webp"
+  },
+  "/coach-media/animations/happy/happy6.webp": {
+    "type": "image/webp",
+    "etag": "\"2f8ce-NjZdr7Vin1NbHT+GFgWzMwsZeZE\"",
+    "mtime": "2026-08-18T12:51:50.071Z",
+    "size": 194766,
+    "path": "../public/coach-media/animations/happy/happy6.webp"
+  },
+  "/coach-media/animations/happy/happy61.webp": {
+    "type": "image/webp",
+    "etag": "\"253e8-1Fqod1LG1PZNTdmri6v0gPMthaE\"",
+    "mtime": "2026-08-18T12:51:50.080Z",
+    "size": 152552,
+    "path": "../public/coach-media/animations/happy/happy61.webp"
+  },
+  "/coach-media/animations/happy/happy62.webp": {
+    "type": "image/webp",
+    "etag": "\"4f8f8-tLTO1/dtiZumcCPIDjxNhkIrS9g\"",
+    "mtime": "2026-08-18T12:51:50.074Z",
+    "size": 325880,
+    "path": "../public/coach-media/animations/happy/happy62.webp"
+  },
+  "/coach-media/animations/happy/happy63.webp": {
+    "type": "image/webp",
+    "etag": "\"2b52a-B18WnXoFNFEoRmRiTpAPD0Xw4fA\"",
+    "mtime": "2026-08-18T12:51:50.072Z",
+    "size": 177450,
+    "path": "../public/coach-media/animations/happy/happy63.webp"
+  },
+  "/coach-media/animations/happy/happy65.webp": {
+    "type": "image/webp",
+    "etag": "\"153e2-1MrE6YaWW1bqq3uRkAG3roDYdbI\"",
+    "mtime": "2026-08-18T12:51:50.073Z",
+    "size": 87010,
+    "path": "../public/coach-media/animations/happy/happy65.webp"
+  },
+  "/coach-media/animations/happy/happy66.webp": {
+    "type": "image/webp",
+    "etag": "\"5aac0-EL5Dnfs0ZHXfZ2nFXHuqusIiA6U\"",
+    "mtime": "2026-08-18T12:51:50.079Z",
+    "size": 371392,
+    "path": "../public/coach-media/animations/happy/happy66.webp"
+  },
+  "/coach-media/animations/happy/happy67.webp": {
+    "type": "image/webp",
+    "etag": "\"26842-Ttlq6ska7bBpzXjvIXLqSUaPnIk\"",
+    "mtime": "2026-08-18T12:51:50.073Z",
+    "size": 157762,
+    "path": "../public/coach-media/animations/happy/happy67.webp"
+  },
+  "/coach-media/animations/happy/happy69.webp": {
+    "type": "image/webp",
+    "etag": "\"1843a-+cJ0+7F0PNcalsjHJcXNkw7qRDw\"",
+    "mtime": "2026-08-18T12:51:50.079Z",
+    "size": 99386,
+    "path": "../public/coach-media/animations/happy/happy69.webp"
+  },
+  "/coach-media/animations/happy/happy68.webp": {
+    "type": "image/webp",
+    "etag": "\"3a9f6-uXcrvu87C4tyxdUD8qy84likyxA\"",
+    "mtime": "2026-08-18T12:51:50.073Z",
+    "size": 240118,
+    "path": "../public/coach-media/animations/happy/happy68.webp"
+  },
+  "/coach-media/animations/happy/happy7.webp": {
+    "type": "image/webp",
+    "etag": "\"6dbe6-GIqYtKyf033a2vAUrfvCUdyYOmE\"",
+    "mtime": "2026-08-18T12:51:50.081Z",
+    "size": 449510,
+    "path": "../public/coach-media/animations/happy/happy7.webp"
+  },
+  "/coach-media/animations/happy/happy71.webp": {
+    "type": "image/webp",
+    "etag": "\"12890-iDkXNnqbnihYZd5fm+x9SogtFL0\"",
+    "mtime": "2026-08-18T12:51:50.074Z",
+    "size": 75920,
+    "path": "../public/coach-media/animations/happy/happy71.webp"
+  },
+  "/coach-media/animations/happy/happy64.webp": {
+    "type": "image/webp",
+    "etag": "\"8b070-7oC7TYj4LIldWg1605cOC8gYl+w\"",
+    "mtime": "2026-08-18T12:51:50.074Z",
+    "size": 569456,
+    "path": "../public/coach-media/animations/happy/happy64.webp"
+  },
+  "/coach-media/animations/happy/happy72.webp": {
+    "type": "image/webp",
+    "etag": "\"1132e-N279XcIE77SVgWI5RK4HGZTKNNQ\"",
+    "mtime": "2026-08-18T12:51:50.079Z",
+    "size": 70446,
+    "path": "../public/coach-media/animations/happy/happy72.webp"
+  },
+  "/coach-media/animations/happy/happy73.webp": {
+    "type": "image/webp",
+    "etag": "\"12dd8-PuAHZqC2ZtYnGQM/yt5HL7w8Z5w\"",
+    "mtime": "2026-08-18T12:51:50.081Z",
+    "size": 77272,
+    "path": "../public/coach-media/animations/happy/happy73.webp"
+  },
+  "/coach-media/animations/happy/happy75.webp": {
+    "type": "image/webp",
+    "etag": "\"1cfd0-9c+pPyscG4ipyzhzbN//E8mdshQ\"",
+    "mtime": "2026-08-18T12:51:50.080Z",
+    "size": 118736,
+    "path": "../public/coach-media/animations/happy/happy75.webp"
+  },
+  "/coach-media/animations/happy/happy74.webp": {
+    "type": "image/webp",
+    "etag": "\"5deae-Nnfy+JPdNa90X/TKIQJKDHXtEDg\"",
+    "mtime": "2026-08-18T12:51:50.081Z",
+    "size": 384686,
+    "path": "../public/coach-media/animations/happy/happy74.webp"
+  },
+  "/coach-media/animations/happy/happy76.webp": {
+    "type": "image/webp",
+    "etag": "\"14a9e-d6rGydXTPMji/MdwYzCalRd2xW0\"",
+    "mtime": "2026-08-18T12:51:50.081Z",
+    "size": 84638,
+    "path": "../public/coach-media/animations/happy/happy76.webp"
+  },
+  "/coach-media/animations/happy/happy60.webp": {
+    "type": "image/webp",
+    "etag": "\"1e7f54-IoOugN/ir+60blKcpy6Kl2RuTBI\"",
+    "mtime": "2026-08-18T12:51:50.074Z",
+    "size": 1998676,
+    "path": "../public/coach-media/animations/happy/happy60.webp"
+  },
+  "/coach-media/animations/happy/happy77.webp": {
+    "type": "image/webp",
+    "etag": "\"1e10a-1aPPim9G6xum8/Hs8Ro6u3VlG6U\"",
+    "mtime": "2026-08-18T12:51:50.081Z",
+    "size": 123146,
+    "path": "../public/coach-media/animations/happy/happy77.webp"
+  },
+  "/coach-media/animations/happy/happy78.webp": {
+    "type": "image/webp",
+    "etag": "\"17ba4-3h26xVZZTGib30A7sQhqoYBlgqs\"",
+    "mtime": "2026-08-18T12:51:50.082Z",
+    "size": 97188,
+    "path": "../public/coach-media/animations/happy/happy78.webp"
+  },
+  "/coach-media/animations/happy/happy79.webp": {
+    "type": "image/webp",
+    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
+    "mtime": "2026-08-18T12:51:50.082Z",
+    "size": 57724,
+    "path": "../public/coach-media/animations/happy/happy79.webp"
+  },
+  "/coach-media/animations/happy/happy70.webp": {
+    "type": "image/webp",
+    "etag": "\"813fc-MRr6jjBP9Dwv9BEsHOHSRAaT2vg\"",
+    "mtime": "2026-08-18T12:51:50.080Z",
+    "size": 529404,
+    "path": "../public/coach-media/animations/happy/happy70.webp"
+  },
+  "/coach-media/animations/happy/happy8.webp": {
+    "type": "image/webp",
+    "etag": "\"9d5e-zP9Tu9ncCFIvZEyvVyuhVBachAE\"",
+    "mtime": "2026-08-18T12:51:50.082Z",
+    "size": 40286,
+    "path": "../public/coach-media/animations/happy/happy8.webp"
+  },
+  "/coach-media/animations/happy/happy80.webp": {
+    "type": "image/webp",
+    "etag": "\"1da90-C0sljbqRem33mzQhLpalQ7JqSpU\"",
+    "mtime": "2026-08-18T12:51:50.083Z",
+    "size": 121488,
+    "path": "../public/coach-media/animations/happy/happy80.webp"
+  },
+  "/coach-media/animations/happy/happy82.webp": {
+    "type": "image/webp",
+    "etag": "\"f1a4-tNEKunf3T9spLovIQWFozZvffw4\"",
+    "mtime": "2026-08-18T12:51:50.082Z",
+    "size": 61860,
+    "path": "../public/coach-media/animations/happy/happy82.webp"
+  },
+  "/coach-media/animations/happy/happy83.webp": {
+    "type": "image/webp",
+    "etag": "\"2fe42-Kmm0KGXV1dEPQbjoM5G8BWcNWBM\"",
+    "mtime": "2026-08-18T12:51:50.084Z",
+    "size": 196162,
+    "path": "../public/coach-media/animations/happy/happy83.webp"
+  },
+  "/coach-media/animations/happy/happy84.webp": {
+    "type": "image/webp",
+    "etag": "\"7b984-0wPlyvPIzXRP9eIMHgiBJFl+27A\"",
+    "mtime": "2026-08-18T12:51:50.083Z",
+    "size": 506244,
+    "path": "../public/coach-media/animations/happy/happy84.webp"
+  },
+  "/coach-media/animations/happy/happy81.webp": {
+    "type": "image/webp",
+    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
+    "mtime": "2026-08-18T12:51:50.083Z",
+    "size": 566688,
+    "path": "../public/coach-media/animations/happy/happy81.webp"
+  },
+  "/coach-media/animations/happy/happy85.webp": {
+    "type": "image/webp",
+    "etag": "\"150ae-QMfLvsJpp/BJuZy4OwOXUD8OYUQ\"",
+    "mtime": "2026-08-18T12:51:50.084Z",
+    "size": 86190,
+    "path": "../public/coach-media/animations/happy/happy85.webp"
+  },
+  "/coach-media/animations/happy/happy86.webp": {
+    "type": "image/webp",
+    "etag": "\"d7f8-QCvUvt2Z0TOPZeSr+n8EKTRxFUo\"",
+    "mtime": "2026-08-18T12:51:50.083Z",
+    "size": 55288,
+    "path": "../public/coach-media/animations/happy/happy86.webp"
+  },
+  "/coach-media/animations/happy/happy87.webp": {
+    "type": "image/webp",
+    "etag": "\"17dec-6w/mkYwGAw5T0lZlhGXtO5BcsZU\"",
+    "mtime": "2026-08-18T12:51:50.083Z",
+    "size": 97772,
+    "path": "../public/coach-media/animations/happy/happy87.webp"
+  },
+  "/coach-media/animations/happy/happy88.webp": {
+    "type": "image/webp",
+    "etag": "\"10722-eVPV4BPr+xXKB/m7b01HTc3BYvY\"",
+    "mtime": "2026-08-18T12:51:50.083Z",
+    "size": 67362,
+    "path": "../public/coach-media/animations/happy/happy88.webp"
+  },
+  "/coach-media/animations/happy/happy89.webp": {
+    "type": "image/webp",
+    "etag": "\"1c7e2-sUSfie0YAo/54wJ6tzJq/DwQ0Uw\"",
+    "mtime": "2026-08-18T12:51:50.084Z",
+    "size": 116706,
+    "path": "../public/coach-media/animations/happy/happy89.webp"
+  },
+  "/coach-media/animations/happy/happy9.webp": {
+    "type": "image/webp",
+    "etag": "\"48688-/orx463Bv1qJxQ1v4poLAvBrNjI\"",
+    "mtime": "2026-08-18T12:51:50.085Z",
+    "size": 296584,
+    "path": "../public/coach-media/animations/happy/happy9.webp"
+  },
+  "/coach-media/animations/happy/happy90.webp": {
+    "type": "image/webp",
+    "etag": "\"40b96-2KBRO6W19pvILapZ8+Vi3lurBCw\"",
+    "mtime": "2026-08-18T12:51:50.085Z",
+    "size": 265110,
+    "path": "../public/coach-media/animations/happy/happy90.webp"
+  },
+  "/coach-media/animations/happy/happy91.webp": {
+    "type": "image/webp",
+    "etag": "\"162e4-8HqkqL71/r+QJURh8ZbqNFMM6ZE\"",
+    "mtime": "2026-08-18T12:51:50.084Z",
+    "size": 90852,
+    "path": "../public/coach-media/animations/happy/happy91.webp"
+  },
+  "/coach-media/animations/happy/happy92.webp": {
+    "type": "image/webp",
+    "etag": "\"1eb3c-dpJ07uxpsVOLdaMyS3SOlqMT6/k\"",
+    "mtime": "2026-08-18T12:51:50.085Z",
+    "size": 125756,
+    "path": "../public/coach-media/animations/happy/happy92.webp"
   },
   "/coach-media/emojis/triste/triste1.png": {
     "type": "image/png",
     "etag": "\"4ad5-sZv/ngDIpKluR3uoIL+9/tVgBAk\"",
-    "mtime": "2026-08-17T22:08:43.584Z",
+    "mtime": "2026-08-18T12:51:50.087Z",
     "size": 19157,
     "path": "../public/coach-media/emojis/triste/triste1.png"
   },
   "/coach-media/emojis/triste/triste10.png": {
     "type": "image/png",
     "etag": "\"6ad7-6iFb9ksjGHu03kWI85GQAULPlgA\"",
-    "mtime": "2026-08-17T22:08:43.584Z",
+    "mtime": "2026-08-18T12:51:50.087Z",
     "size": 27351,
     "path": "../public/coach-media/emojis/triste/triste10.png"
   },
   "/coach-media/emojis/triste/triste11.png": {
     "type": "image/png",
     "etag": "\"7b07-5Y/2vAUDwkCG9yUv2xhGyKhfVv4\"",
-    "mtime": "2026-08-17T22:08:43.584Z",
+    "mtime": "2026-08-18T12:51:49.934Z",
     "size": 31495,
     "path": "../public/coach-media/emojis/triste/triste11.png"
   },
   "/coach-media/emojis/triste/triste4.png": {
     "type": "image/png",
     "etag": "\"51ea-mZrIfYhaUQQDvlUt7+NCSIE6cfI\"",
-    "mtime": "2026-08-17T22:08:43.432Z",
+    "mtime": "2026-08-18T12:51:50.087Z",
     "size": 20970,
     "path": "../public/coach-media/emojis/triste/triste4.png"
   },
   "/coach-media/emojis/triste/triste5.png": {
     "type": "image/png",
     "etag": "\"54c1-XD0mhNmrQPVAFqEXG0C1s1P3Oa4\"",
-    "mtime": "2026-08-17T22:08:43.584Z",
+    "mtime": "2026-08-18T12:51:50.087Z",
     "size": 21697,
     "path": "../public/coach-media/emojis/triste/triste5.png"
   },
   "/coach-media/emojis/triste/triste6.png": {
     "type": "image/png",
     "etag": "\"54c1-XD0mhNmrQPVAFqEXG0C1s1P3Oa4\"",
-    "mtime": "2026-08-17T22:08:43.584Z",
+    "mtime": "2026-08-18T12:51:50.087Z",
     "size": 21697,
     "path": "../public/coach-media/emojis/triste/triste6.png"
   },
   "/coach-media/emojis/triste/triste7.png": {
     "type": "image/png",
     "etag": "\"4663-GYg5O4kBtQpnNYQYt+t2VyLkYuE\"",
-    "mtime": "2026-08-17T22:08:43.585Z",
+    "mtime": "2026-08-18T12:51:50.087Z",
     "size": 18019,
     "path": "../public/coach-media/emojis/triste/triste7.png"
   },
   "/coach-media/emojis/triste/triste8.png": {
     "type": "image/png",
     "etag": "\"5281-YyJBOzW/kpn0XNWvaoOHWcnQ+0k\"",
-    "mtime": "2026-08-17T22:08:43.585Z",
+    "mtime": "2026-08-18T12:51:50.087Z",
     "size": 21121,
     "path": "../public/coach-media/emojis/triste/triste8.png"
-  },
-  "/_nuxt/builds/meta/3352e7fc-49f7-4485-a916-3d141a02dc7b.json": {
-    "type": "application/json",
-    "etag": "\"58-KbRz5qpBkYB71WUvDOkETnTiobY\"",
-    "mtime": "2026-08-17T22:08:43.375Z",
-    "size": 88,
-    "path": "../public/_nuxt/builds/meta/3352e7fc-49f7-4485-a916-3d141a02dc7b.json"
   },
   "/coach-media/emojis/triste/triste9.png": {
     "type": "image/png",
     "etag": "\"56b5-7e4ksvafotKRdiRp4CmrqGW7UkM\"",
-    "mtime": "2026-08-17T22:08:43.585Z",
+    "mtime": "2026-08-18T12:51:50.087Z",
     "size": 22197,
     "path": "../public/coach-media/emojis/triste/triste9.png"
+  },
+  "/_nuxt/builds/meta/aa1878c1-1f21-4b7e-9051-7ac444a2e261.json": {
+    "type": "application/json",
+    "etag": "\"58-K9clWi7FJ2/SqdEdjmF8j2bI+cc\"",
+    "mtime": "2026-08-18T12:51:49.873Z",
+    "size": 88,
+    "path": "../public/_nuxt/builds/meta/aa1878c1-1f21-4b7e-9051-7ac444a2e261.json"
   }
 };
 
@@ -128872,6 +131696,8 @@ const _lazy_iGUuSi = () => import('../routes/api/admin/index2.post.mjs');
 const _lazy_vHbftk = () => import('../routes/api/admin/challenge-preset-categories/reorder.put.mjs');
 const _lazy_JkIfL6 = () => import('../routes/api/admin/challenge-presets/_id_.delete.mjs');
 const _lazy_jQYunH = () => import('../routes/api/admin/challenge-presets/_id_.put.mjs');
+const _lazy_NlvPpA = () => import('../routes/api/admin/challenge-presets/_id/publications/_locale_.put.mjs');
+const _lazy_lO04s3 = () => import('../routes/api/admin/challenge-presets/_id/index.get.mjs');
 const _lazy_dwuZ6z = () => import('../routes/api/admin/index2.get.mjs');
 const _lazy_S4QTtl = () => import('../routes/api/admin/index3.post.mjs');
 const _lazy_YFy3TG = () => import('../routes/api/admin/challenge-presets/reorder.put.mjs');
@@ -128944,9 +131770,11 @@ const _lazy_SoKXsN = () => import('../routes/api/auth/me.get.mjs');
 const _lazy_bcbU0w = () => import('../routes/api/bilans/_token_.get.mjs');
 const _lazy_7RbItC = () => import('../routes/api/index.post.mjs');
 const _lazy_gyqS83 = () => import('../routes/api/index.get.mjs');
+const _lazy_3LOFgM = () => import('../routes/api/challenge-publications/_slug_.get.mjs');
+const _lazy_wkV1wk = () => import('../routes/api/index2.get.mjs');
 const _lazy_MzvSN6 = () => import('../routes/api/coach-help-errors.post.mjs');
 const _lazy_IpB7QQ = () => import('../routes/api/coach-help-feedback.post.mjs');
-const _lazy_VIC0vM = () => import('../routes/api/index2.get.mjs');
+const _lazy_VIC0vM = () => import('../routes/api/index3.get.mjs');
 const _lazy_h_prsr = () => import('../routes/api/conjugaisons/_id_.get.mjs');
 const _lazy_d0MdWr = () => import('../routes/api/contact-settings.get.mjs');
 const _lazy_IzEzBk = () => import('../routes/api/contact.post.mjs');
@@ -129006,6 +131834,8 @@ const handlers = [
   { route: '/api/admin/challenge-preset-categories/reorder', handler: _lazy_vHbftk, lazy: true, middleware: false, method: "put" },
   { route: '/api/admin/challenge-presets/:id', handler: _lazy_JkIfL6, lazy: true, middleware: false, method: "delete" },
   { route: '/api/admin/challenge-presets/:id', handler: _lazy_jQYunH, lazy: true, middleware: false, method: "put" },
+  { route: '/api/admin/challenge-presets/:id/publications/:locale', handler: _lazy_NlvPpA, lazy: true, middleware: false, method: "put" },
+  { route: '/api/admin/challenge-presets/:id/publications', handler: _lazy_lO04s3, lazy: true, middleware: false, method: "get" },
   { route: '/api/admin/challenge-presets', handler: _lazy_dwuZ6z, lazy: true, middleware: false, method: "get" },
   { route: '/api/admin/challenge-presets', handler: _lazy_S4QTtl, lazy: true, middleware: false, method: "post" },
   { route: '/api/admin/challenge-presets/reorder', handler: _lazy_YFy3TG, lazy: true, middleware: false, method: "put" },
@@ -129078,6 +131908,8 @@ const handlers = [
   { route: '/api/bilans/:token', handler: _lazy_bcbU0w, lazy: true, middleware: false, method: "get" },
   { route: '/api/bilans', handler: _lazy_7RbItC, lazy: true, middleware: false, method: "post" },
   { route: '/api/catalogue', handler: _lazy_gyqS83, lazy: true, middleware: false, method: "get" },
+  { route: '/api/challenge-publications/:slug', handler: _lazy_3LOFgM, lazy: true, middleware: false, method: "get" },
+  { route: '/api/challenge-publications', handler: _lazy_wkV1wk, lazy: true, middleware: false, method: "get" },
   { route: '/api/coach-help-errors', handler: _lazy_MzvSN6, lazy: true, middleware: false, method: "post" },
   { route: '/api/coach-help-feedback', handler: _lazy_IpB7QQ, lazy: true, middleware: false, method: "post" },
   { route: '/api/coaches', handler: _lazy_VIC0vM, lazy: true, middleware: false, method: "get" },
@@ -129576,5 +132408,5 @@ trapUnhandledNodeErrors();
 setupGracefulShutdown(listener, nitroApp);
 const nodeServer = {};
 
-export { synthesizeClassicSpeech as $, setResponseStatus as A, refreshVerbMetadata as B, getRequestURL as C, stripLocaleFromPath as D, getRequestIP as E, getExerciseSummary as F, ExerciseSummaryInputError as G, ExerciseSummaryNotFoundError as H, saveExerciseSummary as I, getCachedCatalogue as J, setResponseHeaders as K, encodePronominalSelectionId as L, decodePronominalSelectionId as M, legacyComplementOptions as N, legacyComplementConfig as O, normalizeComplementOptions as P, DEFAULT_COMPLEMENT_OPTIONS as Q, validateConjugationAnswer as R, validateAnswer as S, diagnoseLearnerError as T, LEARNER_ERROR_DETECTOR_VERSION as U, applicableLearnerErrorTypes as V, learnerErrorDetails as W, grammarTenseCode as X, LEARNER_ERROR_TAXONOMY as Y, learnerErrorDetailText as Z, CURRENT_PRIVACY_NOTICE_VERSION as _, getQuery as a, SUPPORTED_LOCALES as a0, setHeader as a1, localizePath as a2, parseQuery as a3, hasProtocol as a4, joinURL as a5, isScriptProtocol as a6, withTrailingSlash as a7, withoutTrailingSlash as a8, localizedLearnerErrorMessage as a9, parseURL as aA, encodePath as aB, decodePath as aC, localeFromPath as aD, getRequestHeaders as aE, withQuery as aF, klona as aG, DEFAULT_LANGUAGE_PREFERENCES as aH, sanitizeStatusCode as aI, getContext as aJ, getRequestHeader as aK, isEqual as aL, $fetch as aM, defu as aN, DEFAULT_INTERFACE_LOCALE as aO, grammarModeCode as aP, joinRelativeURL as aQ, defineRenderHandler as aR, destr as aS, getRouteRules as aT, getResponseStatusText as aU, getResponseStatus as aV, useNitroApp as aW, nodeServer as aX, learnerErrorInsteadOf as aa, hash$1 as ab, executeAsync as ac, challengePresetDefinitions as ad, agreePastParticiple as ae, splitPastParticipleAgreement as af, challengePresetGroupOrder as ag, challengePresetGroupLabels as ah, conjugationRequiresSubjectPronoun as ai, conjugationAnswerPlaceholder as aj, providedSubjunctiveInputPrefix as ak, getAlternativeCorrections as al, impossibleSingularEndingReminderMessage as am, isFutureSimpleInsteadOfNearFuture as an, findConjugationConfusions as ao, findImpossibleSingularEnding as ap, diagnoseCoachAgreement as aq, diagnoseCoachAnswer as ar, mergeLearnerErrorDetails as as, formatConjugationQuestion as at, indirectRelative as au, formatAnswer as av, localizedLearnerErrorMessageForCode as aw, localizedLearnerErrorDomain as ax, localizedLearnerErrorLabel as ay, SUBJECT_PRONOUN_PLACEHOLDER as az, useRuntimeConfig as b, createError$1 as c, defineEventHandler as d, reorderChallengePresets as e, parseChallengePresetPayload as f, getRouterParam as g, replaceChallengePresetSelections as h, getCatalogue as i, listStoredChallengePresets as j, setCookie as k, listChallengePresetCategories as l, deleteCookie as m, getCookie as n, normalizeLocale as o, parseChallengePresetCategoryPayload as p, readMultipartFormData as q, readBody as r, setResponseHeader as s, getContactSettings as t, useDatabase as u, validateContactSettings as v, saveContactSettings as w, getHeader as x, deleteExpiredExerciseSummaries as y, getExerciseSummaryAdminStats as z };
+export { validateAnswer as $, getContactSettings as A, validateContactSettings as B, ChallengePublicationInputError as C, saveContactSettings as D, getHeader as E, deleteExpiredExerciseSummaries as F, getExerciseSummaryAdminStats as G, setResponseStatus as H, refreshVerbMetadata as I, getRequestURL as J, stripLocaleFromPath as K, getRequestIP as L, getExerciseSummary as M, ExerciseSummaryInputError as N, ExerciseSummaryNotFoundError as O, saveExerciseSummary as P, getCachedCatalogue as Q, setResponseHeaders as R, resolveChallengePublication as S, listPublicChallengePublications as T, encodePronominalSelectionId as U, decodePronominalSelectionId as V, legacyComplementOptions as W, legacyComplementConfig as X, normalizeComplementOptions as Y, DEFAULT_COMPLEMENT_OPTIONS as Z, validateConjugationAnswer as _, getQuery as a, defineRenderHandler as a$, diagnoseLearnerError as a0, LEARNER_ERROR_DETECTOR_VERSION as a1, applicableLearnerErrorTypes as a2, learnerErrorDetails as a3, grammarTenseCode as a4, LEARNER_ERROR_TAXONOMY as a5, learnerErrorDetailText as a6, CURRENT_PRIVACY_NOTICE_VERSION as a7, synthesizeClassicSpeech as a8, SUPPORTED_LOCALES as a9, diagnoseCoachAgreement as aA, diagnoseCoachAnswer as aB, mergeLearnerErrorDetails as aC, formatConjugationQuestion as aD, indirectRelative as aE, formatAnswer as aF, localizedLearnerErrorMessageForCode as aG, localizedLearnerErrorDomain as aH, localizedLearnerErrorLabel as aI, SUBJECT_PRONOUN_PLACEHOLDER as aJ, parseURL as aK, encodePath as aL, decodePath as aM, localeFromPath as aN, getRequestHeaders as aO, withQuery as aP, klona as aQ, DEFAULT_LANGUAGE_PREFERENCES as aR, sanitizeStatusCode as aS, getContext as aT, getRequestHeader as aU, isEqual as aV, $fetch as aW, defu as aX, DEFAULT_INTERFACE_LOCALE as aY, grammarModeCode as aZ, joinRelativeURL as a_, listPublishedChallengePublications as aa, setHeader as ab, localizePath as ac, parseQuery as ad, hasProtocol as ae, joinURL as af, isScriptProtocol as ag, withTrailingSlash as ah, withoutTrailingSlash as ai, localizedLearnerErrorMessage as aj, learnerErrorInsteadOf as ak, hash$1 as al, executeAsync as am, challengePresetDefinitions as an, agreePastParticiple as ao, splitPastParticipleAgreement as ap, challengePresetGroupOrder as aq, challengePresetGroupLabels as ar, conjugationRequiresSubjectPronoun as as, conjugationAnswerPlaceholder as at, providedSubjunctiveInputPrefix as au, getAlternativeCorrections as av, impossibleSingularEndingReminderMessage as aw, isFutureSimpleInsteadOfNearFuture as ax, findConjugationConfusions as ay, findImpossibleSingularEnding as az, useRuntimeConfig as b, destr as b0, getRouteRules as b1, getResponseStatusText as b2, getResponseStatus as b3, useNitroApp as b4, nodeServer as b5, createError$1 as c, defineEventHandler as d, reorderChallengePresets as e, parseChallengePresetPayload as f, getRouterParam as g, replaceChallengePresetSelections as h, parsePublicationLocale as i, parseChallengePublicationPayload as j, saveChallengePublication as k, ChallengePublicationConflictError as l, ChallengePublicationNotFoundError as m, listAdminChallengePublications as n, getCatalogue as o, parseChallengePresetCategoryPayload as p, listChallengePresetCategories as q, readBody as r, setResponseHeader as s, listStoredChallengePresets as t, useDatabase as u, setCookie as v, deleteCookie as w, getCookie as x, normalizeLocale as y, readMultipartFormData as z };
 //# sourceMappingURL=nitro.mjs.map

@@ -11,11 +11,6 @@ import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
 
-const activityDays = {
-  week: 7,
-  month: 30,
-  year: 365
-};
 const localeLabels = {
   fr: "Fran\xE7ais",
   de: "Allemand",
@@ -65,8 +60,6 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
   requireAdministrator(event);
   setResponseHeader(event, "Cache-Control", "no-store");
   const query = getQuery(event);
-  const requestedWindow = String(query.activity || "month");
-  const activityWindow = Object.hasOwn(activityDays, requestedWindow) ? requestedWindow : "month";
   const today = /* @__PURE__ */ new Date();
   const defaultStart = new Date(today);
   defaultStart.setDate(defaultStart.getDate() - 29);
@@ -81,9 +74,6 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
   const registrationFormat = rangeDays <= 45 ? "%Y-%m-%d" : rangeDays <= 210 ? "%Y-%m-%d" : "%Y-%m-01";
   const registrationDate = rangeDays <= 45 ? `DATE_FORMAT(a.created_at, '${registrationFormat}')` : rangeDays <= 210 ? "DATE_FORMAT(DATE_SUB(DATE(a.created_at), INTERVAL WEEKDAY(a.created_at) DAY), '%Y-%m-%d')" : `DATE_FORMAT(a.created_at, '${registrationFormat}')`;
   const registrationUnit = rangeDays <= 45 ? "Jours" : rangeDays <= 210 ? "Semaines" : "Mois";
-  const cutoff = /* @__PURE__ */ new Date();
-  cutoff.setDate(cutoff.getDate() - activityDays[activityWindow]);
-  const cutoffSql = cutoff.toISOString().slice(0, 19).replace("T", " ");
   const database = useDatabase();
   const [[[total]], [[active]], [languageRows], [anonymousLanguageRows], [registrationRows], [[errorReviews]], [[loginSummary]], [[failedLogins]], [connectedFeatureRows]] = await Promise.all([
     database.execute(`
@@ -95,17 +85,17 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
       SELECT COUNT(DISTINCT activity.account_id) AS value
       FROM (
         SELECT account_id FROM learner_login_events
-        WHERE event_type='login' AND occurred_at>=?
+        WHERE event_type='login' AND occurred_at>=? AND occurred_at<DATE_ADD(?, INTERVAL 1 DAY)
         UNION
         SELECT account_id FROM learner_sessions
-        WHERE last_seen_at>=?
+        WHERE last_seen_at>=? AND last_seen_at<DATE_ADD(?, INTERVAL 1 DAY)
         UNION
         SELECT account_id FROM learner_challenge_runs
-        WHERE last_answered_at>=?
+        WHERE last_answered_at>=? AND last_answered_at<DATE_ADD(?, INTERVAL 1 DAY)
       ) activity
       INNER JOIN learner_accounts accounts ON accounts.id=activity.account_id
       WHERE accounts.deleted_at IS NULL
-    `, [cutoffSql, cutoffSql, cutoffSql]),
+    `, [startDate, endDate, startDate, endDate, startDate, endDate]),
     database.execute(`
       SELECT COALESCE(NULLIF(preferences.interface_locale, ''), 'fr') AS locale,
              COUNT(*) AS value
@@ -190,8 +180,6 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
   return {
     startDate,
     endDate,
-    activityWindow,
-    activityDays: activityDays[activityWindow],
     totalAccounts: Number(total == null ? void 0 : total.value) || 0,
     activeAccounts: Number(active == null ? void 0 : active.value) || 0,
     loggedInAccounts: Number(loginSummary == null ? void 0 : loginSummary.accounts) || 0,

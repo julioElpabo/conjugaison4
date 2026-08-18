@@ -1,1 +1,0 @@
-import{e as n,q as s,I as r,G as o}from"./CSGdxwnu.js";const i=n({__name:"index",async setup(_){let e,a;const{localePath:t}=s();return[e,a]=r(()=>o(t("/admin/charts"),{replace:!0})),await e,a(),()=>{}}});export{i as default};

@@ -7,6 +7,7 @@ import {
 import { permanentLegacyRedirect } from '~~/shared/seo/legacy-redirects'
 
 export default defineNuxtRouteMiddleware((to) => {
+  usePageSeoOverride().setPageSeoOverride(null)
   const interfaceLocale = useCookie<string>('interface_locale', {
     maxAge: 60 * 60 * 24 * 365,
     path: '/',

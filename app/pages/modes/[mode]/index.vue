@@ -107,11 +107,11 @@ useSeoMeta({ twitterCard: 'summary' })
 .mode-landing__navigation :deep(.learning-subnav:first-child) { margin-bottom: 10px; }
 .mode-landing__hero { max-width: 850px; margin: 14px auto 50px; text-align: center; }
 .mode-landing__hero > p:first-child, .mode-cta p { margin: 0 0 8px; color: var(--accent); font-size: .76rem; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
-.mode-landing__hero h1 { margin: 0; color: #294c4b; font-size: clamp(2.2rem, 6vw, 4.55rem); letter-spacing: -.055em; line-height: 1.02; }
+.mode-landing__hero h1 { margin: 0; color: #294c4b; font-size: clamp(2.2rem, 6vw, 4.55rem); letter-spacing: .015em; line-height: 1.06; }
 .mode-landing__hero > a, .mode-cta a { display: inline-flex; max-width: 100%; padding: 13px 19px; align-items: center; justify-content: center; border-radius: 12px; color: white; background: var(--brand); font-weight: 820; text-align: center; text-decoration: none; white-space: normal; box-shadow: 0 12px 28px rgb(41 76 75 / 18%); }
 .mode-landing__hero > a { margin-top: 26px; }
 .mode-landing__content { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.mode-landing h2 { margin: 0 0 13px; color: var(--brand-dark); font-size: clamp(1.35rem, 3vw, 2rem); letter-spacing: -.025em; }
+.mode-landing h2 { margin: 0 0 13px; color: var(--brand-dark); font-size: clamp(1.35rem, 3vw, 2rem); letter-spacing: .015em; }
 .mode-purpose { display: grid; grid-column: 1 / -1; padding: clamp(24px, 5vw, 40px); border: 1px solid var(--line); border-radius: 24px; background: var(--surface); box-shadow: 0 16px 40px rgb(42 65 61 / 7%); }
 .mode-purpose { grid-template-columns: auto 1fr; gap: 22px; }
 .mode-purpose > span { color: var(--accent); font-weight: 900; }

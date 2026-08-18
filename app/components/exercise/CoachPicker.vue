@@ -99,7 +99,7 @@ onMounted(async () => {
 .coach-caractere-group:nth-child(4n + 4) { --caractere-accent: #4b846f; --caractere-tint: #ebf4f0; }
 .coach-caractere-group__header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 3px; }
 .coach-caractere-group__header > div { display: grid; gap: 2px; }
-.coach-caractere-group__header h3 { margin: 2px 0 3px; color: #173f55; font-size: clamp(1.65rem, 3vw, 2.2rem); letter-spacing: -.025em; line-height: 1.05; }
+.coach-caractere-group__header h3 { margin: 2px 0 3px; color: #173f55; font-size: clamp(1.65rem, 3vw, 2.2rem); letter-spacing: .015em; line-height: 1.08; }
 .coach-picker .coach-caractere-group__header p { margin: 2px 0 0; color: #49636d; font-size: .78rem; font-weight: 500; letter-spacing: normal; line-height: 1.35; text-transform: none; }
 .coach-picker__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .coach-card { display: grid; padding: 17px; grid-template-columns: 66px 1fr; align-items: center; gap: 14px; color: #284650; text-align: left; background: white; border: 2px solid transparent; border-radius: 16px; cursor: pointer; box-shadow: 0 6px 20px rgb(24 61 73 / 8%); }

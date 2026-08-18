@@ -67,7 +67,7 @@ useHead(() => ({
 .shared-summary-hero>p{margin:0;color:var(--brand);font-size:.72rem;font-weight:900;letter-spacing:.16em}
 .shared-summary-hero h1{margin:7px 0 20px;color:var(--brand-dark);font-size:clamp(1.8rem,5vw,3rem)}
 .shared-summary-score{display:grid;justify-items:center}
-.shared-summary-score strong{color:var(--success);font-size:clamp(3.5rem,10vw,6.5rem);letter-spacing:-.06em;line-height:.95}
+.shared-summary-score strong{color:var(--success);font-size:clamp(3.5rem,10vw,6.5rem);letter-spacing:.012em;line-height:.95}
 .shared-summary-score span{margin-top:8px;color:var(--muted);font-weight:750}
 .shared-summary-hero small{margin-top:16px;color:var(--muted)}
 .shared-summary-context{display:grid;margin:18px 0;padding:18px 22px;gap:8px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}

@@ -5629,4 +5629,9 @@ async function confirmAccountAction() {
     width: 100%;
   }
 }
+
+.learner-space__hero h1,
+.learner-panel h2 {
+  letter-spacing: .018em;
+}
 </style>

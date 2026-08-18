@@ -34,6 +34,8 @@
     "data:add-ecrire-coi": "node --env-file=.env scripts/add-ecrire-coi.mjs",
     "data:migrate-coaches": "node --env-file=.env scripts/migrate-coaches.mjs",
     "data:migrate-challenge-presets": "node --env-file=.env --import tsx scripts/migrate-challenge-presets.mjs",
+    "data:generate-challenge-publications": "node --import tsx scripts/generate-challenge-publications.mjs",
+    "data:export-challenge-publications": "node --env-file=.env scripts/export-challenge-publications.mjs",
     "data:migrate-coach-media-frequencies": "node --env-file-if-exists=.env scripts/migrate-coach-media-frequencies.mjs",
     "data:remove-character-feminine-names": "node --env-file=.env scripts/remove-character-feminine-names.mjs",
     "data:remove-character-presentations": "node --env-file=.env scripts/remove-character-presentations.mjs",

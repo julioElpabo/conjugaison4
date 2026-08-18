@@ -272,7 +272,7 @@ defineExpose({ open })
   margin: 5px 44px 10px 0;
   color: var(--brand-dark);
   font-size: clamp(1.7rem, 5vw, 2.35rem);
-  letter-spacing: -.035em;
+  letter-spacing: .015em;
 }
 
 .contact-dialog__header p,

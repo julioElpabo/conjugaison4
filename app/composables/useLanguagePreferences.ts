@@ -34,7 +34,9 @@ export function useLanguagePreferences() {
   function setInterfaceLocale(locale: AppLocale) {
     const normalizedLocale = normalizeLocale(locale)
     interfaceLocale.value = normalizedLocale
-    const path = localizePath(route.path, normalizedLocale)
+    const seoOverride = usePageSeoOverride().pageSeoOverride.value
+    const seoAlternate = seoOverride?.alternates.find(alternate => alternate.locale === normalizedLocale)
+    const path = seoAlternate?.path ?? (seoOverride ? localizePath('/defis', normalizedLocale) : localizePath(route.path, normalizedLocale))
     if (path !== route.path) {
       void navigateTo({ path, query: route.query, hash: route.hash })
     }

@@ -225,14 +225,14 @@ onMounted(() => track('feature_exposed', { feature: 'learn.content' }))
 .learning-page { max-width: 100%; min-width: 0; overflow-x: clip; color: var(--ink); font-family: "Funnel Sans", "Avenir Next", Avenir, system-ui, sans-serif; }
 .learning-hero { max-width: 850px; margin: 8px auto 36px; text-align: center; }
 .learning-eyebrow { margin: 0 0 6px; color: var(--brand); font-size: .75rem; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; }
-.learning-hero h1 { margin: 0; color: #294c4b; font-size: clamp(2.3rem, 6vw, 4.7rem); letter-spacing: -.06em; line-height: 1; }
+.learning-hero h1 { margin: 0; color: #294c4b; font-size: clamp(2.3rem, 6vw, 4.7rem); letter-spacing: .015em; line-height: 1.05; }
 .learning-summary { display: grid; max-width: 1080px; margin: 0 auto 32px; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
 .learning-summary button { display: flex; min-height: 155px; flex-direction: column; padding: 16px; border: 1px solid var(--line); border-radius: 17px; color: var(--ink); background: rgb(255 255 255 / 88%); text-align: left; box-shadow: 0 10px 28px rgb(42 65 61 / 7%); transition: transform 150ms ease, border-color 150ms ease; cursor: pointer; }
 .learning-summary button:hover { transform: translateY(-3px); border-color: var(--brand); }
 .learning-summary span { color: var(--accent); font-size: .76rem; font-weight: 850; }
 .learning-journeys { max-width: 1080px; margin: 42px auto 20px; }
 .learning-journeys > header { margin-bottom: 17px; text-align: center; }
-.learning-journeys h2 { margin: 0; color: #294c4b; font-size: clamp(1.7rem, 4vw, 2.6rem); letter-spacing: -.04em; }
+.learning-journeys h2 { margin: 0; color: #294c4b; font-size: clamp(1.7rem, 4vw, 2.6rem); letter-spacing: .015em; }
 .learning-journeys > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .learning-journeys a { display: flex; min-height: 190px; padding: 21px; flex-direction: column; border: 1px solid var(--line); border-radius: 18px; gap: 8px; color: var(--ink); background: var(--surface); text-decoration: none; box-shadow: 0 10px 28px rgb(42 65 61 / 7%); transition: transform 150ms ease, border-color 150ms ease; }
 .learning-journeys a:hover { transform: translateY(-3px); border-color: var(--brand); }
@@ -246,7 +246,7 @@ onMounted(() => track('feature_exposed', { feature: 'learn.content' }))
 .rule-section > header { display: flex; align-items: center; gap: 16px; margin-bottom: 23px; }
 .rule-section > header > div { min-width: 0; }
 .rule-section > header > span { display: grid; flex: 0 0 48px; width: 48px; height: 48px; place-items: center; border-radius: 14px; color: var(--brand-dark); background: var(--brand-pale); font-weight: 850; }
-.rule-section h2 { margin: 0; color: var(--brand-dark); font-size: clamp(1.65rem, 4vw, 2.4rem); letter-spacing: -.04em; overflow-wrap: anywhere; }
+.rule-section h2 { margin: 0; color: var(--brand-dark); font-size: clamp(1.65rem, 4vw, 2.4rem); letter-spacing: .015em; overflow-wrap: anywhere; }
 .rule-section h3 { margin: 0 0 9px; color: var(--brand-dark); font-size: 1.08rem; }
 .rule-section article p, .rule-section li { color: var(--muted); line-height: 1.55; }
 .rule-grid { display: grid; gap: 13px; }

@@ -156,13 +156,13 @@ useHead(() => ({
 
 <style scoped>
 .tense-page { width: 100%; min-width: 0; max-width: 1120px; margin: 0 auto; color: var(--ink); font-family: "Funnel Sans", "Avenir Next", Avenir, system-ui, sans-serif; }
-.tense-page h2 { margin: 0 0 13px; color: var(--brand-dark); font-size: clamp(1.35rem, 3vw, 2rem); letter-spacing: -.025em; }
+.tense-page h2 { margin: 0 0 13px; color: var(--brand-dark); font-size: clamp(1.35rem, 3vw, 2rem); letter-spacing: .015em; }
 .tense-page__back { display: inline-flex; min-height: 44px; padding: 9px 14px; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 12px; color: var(--brand-dark); background: var(--surface); font-weight: 800; text-decoration: none; box-shadow: 0 7px 18px rgb(42 65 61 / 7%); transition: border-color 150ms ease, background 150ms ease, transform 150ms ease; }
 .tense-page__back:hover, .tense-page__back:focus-visible { border-color: var(--brand); background: var(--brand-pale); outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); transform: translateX(-2px); }
 .tense-page__back span { color: var(--accent); font-size: 1.15rem; }
 .tense-page__hero { max-width: 850px; margin: 34px auto 38px; text-align: center; }
 .tense-page__hero > p:first-child { margin: 0 0 8px; color: var(--accent); font-size: .76rem; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
-.tense-page__hero h1 { margin: 0; color: #294c4b; font-size: clamp(2.2rem, 6vw, 4.55rem); letter-spacing: -.055em; line-height: 1.02; text-transform: capitalize; }
+.tense-page__hero h1 { margin: 0; color: #294c4b; font-size: clamp(2.2rem, 6vw, 4.55rem); letter-spacing: .015em; line-height: 1.06; text-transform: capitalize; }
 .tense-page__content { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 .tense-page__panel { padding: 27px; border: 1px solid var(--line); border-radius: 21px; background: color-mix(in srgb, var(--surface) 92%, var(--brand)); }
 .tense-page__panel--uses { background: color-mix(in srgb, var(--surface) 91%, var(--accent)); }

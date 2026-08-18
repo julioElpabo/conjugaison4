@@ -39,7 +39,7 @@ describe('dashboard intelligent des statistiques', () => {
     const accountLanguagesIndex = component.indexOf('Langues préférées')
     assert.ok(anonymousLanguagesIndex > funnelIndex)
     assert.ok(accountLanguagesIndex > anonymousLanguagesIndex)
-    assert.match(component, /Créations de comptes/u)
+    assert.match(component, /Évolution du total des comptes/u)
   })
 
   it('compte les sessions anonymes ayant réellement lancé un exercice par langue', async () => {

@@ -23,7 +23,7 @@ describe('statistiques des comptes utilisateurs', () => {
     assert.match(endpoint, /runs\.last_answered_at>=\?/u)
   })
 
-  it('affiche l’onglet Comptes sans sélecteur redondant et les inscriptions en barres verticales', async () => {
+  it('affiche l’onglet Comptes sans sélecteur redondant et l’évolution du total en courbe', async () => {
     const page = await read('../app/pages/admin/charts.vue')
     const dashboard = await read('../app/components/admin/AdminUserUsageDashboard.vue')
     assert.match(page, /\{ id: 'accounts', label: 'Comptes', short: 'Connexions et fonctions' \}/u)
@@ -31,9 +31,10 @@ describe('statistiques des comptes utilisateurs', () => {
     assert.match(page, /analytics-users/u)
     assert.doesNotMatch(dashboard, /id="user-activity-window"/u)
     assert.match(dashboard, /Langue choisie par les utilisateurs/u)
-    assert.match(dashboard, /title="Créations de comptes"/u)
-    assert.match(dashboard, /kind="bar"/u)
-    assert.match(dashboard, /y-unit="Nombre de comptes créés"/u)
+    assert.match(dashboard, /title="Évolution du total des comptes"/u)
+    assert.doesNotMatch(dashboard, /kind="bar"/u)
+    assert.match(dashboard, /users\.accountTotals/u)
+    assert.match(dashboard, /y-unit="Total des comptes"/u)
     assert.match(dashboard, /Reprise de leurs erreurs/u)
   })
 })

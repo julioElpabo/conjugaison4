@@ -363,7 +363,7 @@ async function deleteAdminPushSubscription(administratorId, endpoint) {
     await database.execute("DELETE FROM admin_push_subscriptions WHERE id=?", [subscriptionId]);
   }
 }
-async function sendAdminPushTest(administratorId, endpoint) {
+async function sendAdminPushTest(administratorId, endpoint, testId) {
   const database = useDatabase();
   const endpointHash = createHash("sha256").update(endpoint).digest("hex");
   const [subscriptions] = await database.query(`
@@ -377,15 +377,37 @@ async function sendAdminPushTest(administratorId, endpoint) {
   if (!vapid) throw createError({ statusCode: 503, statusMessage: "Web Push indisponible" });
   const contactEmail = String(useRuntimeConfig().contactEmail || "admin@tatitotu.ch").trim();
   webPush.setVapidDetails(`mailto:${contactEmail}`, vapid.public_key, vapid.private_key);
-  await webPush.sendNotification({
-    endpoint: subscription.endpoint,
-    keys: { p256dh: subscription.p256dh, auth: subscription.auth_secret }
-  }, JSON.stringify({
-    title: "Tatitotu \xB7 Notifications activ\xE9es",
-    body: "Les alertes administrateur arriveront bien sur cet appareil.",
-    tag: "tatitotu-push-test",
-    url: "/mon-compte"
-  }), { TTL: 60 });
+  try {
+    const receipt = await webPush.sendNotification({
+      endpoint: subscription.endpoint,
+      keys: { p256dh: subscription.p256dh, auth: subscription.auth_secret }
+    }, JSON.stringify({
+      title: "Tatitotu \xB7 Notifications activ\xE9es",
+      body: "Les alertes administrateur arriveront bien sur cet appareil.",
+      tag: "tatitotu-push-test",
+      url: "/mon-compte",
+      testId
+    }), { TTL: 5 * 60, urgency: "high" });
+    await database.execute(
+      "UPDATE admin_push_subscriptions SET last_success_at=CURRENT_TIMESTAMP, last_error=NULL WHERE id=?",
+      [subscription.id]
+    );
+    return { statusCode: receipt.statusCode };
+  } catch (error) {
+    const statusCode = Number(error == null ? void 0 : error.statusCode) || 502;
+    const providerMessage = error instanceof Error ? error.message.slice(0, 255) : "\xC9chec de livraison Web Push";
+    await database.execute(
+      "UPDATE admin_push_subscriptions SET last_error=? WHERE id=?",
+      [providerMessage, subscription.id]
+    );
+    if (statusCode === 404 || statusCode === 410) {
+      await database.execute("UPDATE admin_push_subscriptions SET enabled=0 WHERE id=?", [subscription.id]);
+    }
+    throw createError({
+      statusCode: statusCode >= 400 && statusCode < 600 ? statusCode : 502,
+      statusMessage: `Service Push : ${providerMessage}`
+    });
+  }
 }
 
 export { ADMIN_PUSH_PREFERENCE_KEYS as A, sendAdminPushTest as a, recordFalcModeUsed as b, deleteAdminPushSubscription as d, evaluateAdminPushAlerts as e, getAdminPushPublicKey as g, initializeAdminPushBaseline as i, recordLearnerAccountCreated as r, saveAdminPushSubscription as s, updateAdminPushPreferences as u };

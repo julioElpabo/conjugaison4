@@ -19,9 +19,13 @@ const test_post = defineEventHandler(async (event) => {
   const administrator = requireAdministrator(event);
   const body = await readLimitedJsonBody(event, 8 * 1024);
   const endpoint = typeof (body == null ? void 0 : body.endpoint) === "string" ? body.endpoint.trim() : "";
+  const testId = typeof (body == null ? void 0 : body.testId) === "string" ? body.testId.trim() : "";
   if (!endpoint) throw createError({ statusCode: 400, statusMessage: "Abonnement manquant" });
-  await sendAdminPushTest(administrator.id, endpoint);
-  return { ok: true };
+  if (!/^[a-zA-Z0-9-]{8,80}$/u.test(testId)) {
+    throw createError({ statusCode: 400, statusMessage: "Identifiant de test invalide" });
+  }
+  const receipt = await sendAdminPushTest(administrator.id, endpoint, testId);
+  return { ok: true, accepted: true, pushServiceStatus: receipt.statusCode };
 });
 
 export { test_post as default };

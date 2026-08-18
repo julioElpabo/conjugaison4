@@ -14,6 +14,7 @@ import { createLearnerSession } from '../../utils/learner-session'
 import { readLimitedJsonBody } from '../../utils/limited-json-body'
 import { normalizeLocale } from '../../../shared/i18n/locales'
 import { CURRENT_PRIVACY_NOTICE_VERSION } from '../../../shared/data/privacy-notice'
+import { recordLearnerAccountCreated } from '../../services/admin-push-notifications'
 
 interface RegistrationBody {
   username?: unknown
@@ -92,6 +93,7 @@ export default defineEventHandler(async (event) => {
     await connection.commit()
     await createLearnerSession(event, result.insertId, 1)
     clearLearnerRegistrationFlow(event)
+    await recordLearnerAccountCreated()
     return {
       ok: true,
       username,

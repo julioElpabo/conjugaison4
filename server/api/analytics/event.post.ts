@@ -3,6 +3,18 @@ import { analyticsSessionId, safeAnalyticsMetadata, safeAnalyticsPath } from '..
 import { assertPublicApiRateLimit, PUBLIC_RATE_LIMITS } from '../../services/public-api-rate-limit'
 import { readLimitedJsonBody } from '../../utils/limited-json-body'
 import { getLearnerSession } from '../../utils/learner-session'
+import { recordFalcModeUsed } from '../../services/admin-push-notifications'
+
+const FALC_USAGE_EVENTS = new Set<AnalyticsEventName>([
+  'challenge_preset_selected',
+  'challenge_load',
+  'challenge_save',
+  'exercise_started',
+  'help_opened',
+  'print_opened',
+  'pdf_downloaded',
+  'word_downloaded',
+])
 
 export default defineEventHandler(async (event) => {
   await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.telemetry)
@@ -21,5 +33,8 @@ export default defineEventHandler(async (event) => {
   await database.execute('INSERT INTO analytics_events (session_id, event_name, path, actor_type, metadata) VALUES (?, ?, ?, ?, ?)', [
     sessionId, name, path, actorType, JSON.stringify(storedMetadata),
   ])
+  if (metadata?.falc === 'true' && FALC_USAGE_EVENTS.has(name)) {
+    await recordFalcModeUsed(sessionId)
+  }
   return { ok: true }
 })

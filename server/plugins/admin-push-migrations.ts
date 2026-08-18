@@ -55,6 +55,21 @@ export default defineNitroPlugin(async () => {
         updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `)
+    await database.query(`
+      CREATE TABLE IF NOT EXISTS admin_push_subscription_preferences (
+        subscription_id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
+        learner_registration TINYINT(1) NOT NULL DEFAULT 1,
+        learner_accounts TINYINT(1) NOT NULL DEFAULT 1,
+        daily_sessions TINYINT(1) NOT NULL DEFAULT 1,
+        foreign_country TINYINT(1) NOT NULL DEFAULT 1,
+        falc_usage TINYINT(1) NOT NULL DEFAULT 1,
+        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `)
+    await database.query(`
+      INSERT IGNORE INTO admin_push_subscription_preferences (subscription_id)
+      SELECT id FROM admin_push_subscriptions
+    `)
     const [learnerTables] = await database.query<RowDataPacket[]>("SHOW TABLES LIKE 'learner_accounts'")
     if (learnerTables.length) {
       await database.query(`

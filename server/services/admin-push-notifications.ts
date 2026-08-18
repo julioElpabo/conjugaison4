@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import webPush from 'web-push'
 import type { ResultSetHeader, RowDataPacket } from 'mysql2/promise'
+import { googleAnalyticsRealtimeCountries } from '../utils/google-analytics'
 
 interface VapidRow extends RowDataPacket { public_key: string, private_key: string }
 interface SubscriptionRow extends RowDataPacket {
@@ -8,9 +9,28 @@ interface SubscriptionRow extends RowDataPacket {
   endpoint: string
   p256dh: string
   auth_secret: string
+  learner_registration: number
+  learner_accounts: number
+  daily_sessions: number
+  foreign_country: number
+  falc_usage: number
 }
 interface CountRow extends RowDataPacket { value: number, date?: string }
-interface AlertRow extends RowDataPacket { alert_key: string, payload_json: string | Record<string, unknown> }
+interface AlertRow extends RowDataPacket {
+  alert_key: string
+  alert_type: AdminPushPreferenceKey
+  payload_json: string | Record<string, unknown>
+}
+
+export const ADMIN_PUSH_PREFERENCE_KEYS = [
+  'learner_registration',
+  'learner_accounts',
+  'daily_sessions',
+  'foreign_country',
+  'falc_usage',
+] as const
+export type AdminPushPreferenceKey = typeof ADMIN_PUSH_PREFERENCE_KEYS[number]
+export type AdminPushPreferences = Record<AdminPushPreferenceKey, boolean>
 
 export interface BrowserPushSubscription {
   endpoint: string
@@ -90,6 +110,52 @@ async function currentCandidates(): Promise<AlertCandidate[]> {
   ]
 }
 
+async function hasEnabledPreference(preference: AdminPushPreferenceKey) {
+  const [[row]] = await useDatabase().query<CountRow[]>(`
+    SELECT COUNT(*) AS value
+    FROM admin_push_subscriptions subscriptions
+    LEFT JOIN admin_push_subscription_preferences preferences ON preferences.subscription_id=subscriptions.id
+    INNER JOIN users administrator
+      ON administrator.id=subscriptions.administrator_id AND administrator.privilege_id=1
+    WHERE subscriptions.enabled=1 AND COALESCE(preferences.${preference}, 1)=1
+  `)
+  return Number(row?.value) > 0
+}
+
+async function insertForeignCountryCandidates() {
+  if (!await hasEnabledPreference('foreign_country')) return
+  try {
+    const countries = await googleAnalyticsRealtimeCountries()
+    if (!countries) return
+    const date = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/Zurich', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).format(new Date())
+    const database = useDatabase()
+    for (const country of countries) {
+      const code = String(country.code || '').toUpperCase()
+      if (code === 'CH' || !/^[A-Z]{2}$/u.test(code) || country.value <= 5) continue
+      const label = String(country.label || code).slice(0, 100)
+      await database.execute(`
+        INSERT IGNORE INTO admin_push_alerts
+          (alert_key, alert_type, threshold_value, observed_value, payload_json, status)
+        VALUES (?, 'foreign_country', 6, ?, ?, 'pending')
+      `, [
+        `foreign-country:${date}:${code}`,
+        country.value,
+        JSON.stringify({
+          title: 'Tatitotu · Audience internationale',
+          body: `Pays : ${label} · ${country.value.toLocaleString('fr-CH')} personnes actives en même temps.`,
+          tag: `tatitotu-foreign-country-${date}-${code}`,
+          url: '/admin/charts',
+        }),
+      ])
+    }
+  }
+  catch (error) {
+    console.error('[push] Lecture des pays actifs impossible.', error)
+  }
+}
+
 async function insertCandidates(status: 'pending' | 'skipped') {
   const database = useDatabase()
   for (const candidate of await currentCandidates()) {
@@ -105,13 +171,20 @@ async function insertCandidates(status: 'pending' | 'skipped') {
 async function sendAlert(alert: AlertRow) {
   const database = useDatabase()
   const [subscriptions] = await database.query<SubscriptionRow[]>(`
-    SELECT subscriptions.id, subscriptions.endpoint, subscriptions.p256dh, subscriptions.auth_secret
+    SELECT subscriptions.id, subscriptions.endpoint, subscriptions.p256dh, subscriptions.auth_secret,
+      COALESCE(preferences.learner_registration, 1) AS learner_registration,
+      COALESCE(preferences.learner_accounts, 1) AS learner_accounts,
+      COALESCE(preferences.daily_sessions, 1) AS daily_sessions,
+      COALESCE(preferences.foreign_country, 1) AS foreign_country,
+      COALESCE(preferences.falc_usage, 1) AS falc_usage
     FROM admin_push_subscriptions subscriptions
+    LEFT JOIN admin_push_subscription_preferences preferences ON preferences.subscription_id=subscriptions.id
     INNER JOIN users administrator
       ON administrator.id=subscriptions.administrator_id AND administrator.privilege_id=1
     WHERE subscriptions.enabled=1
   `)
-  if (!subscriptions.length) {
+  const enabledSubscriptions = subscriptions.filter(subscription => Boolean(subscription[alert.alert_type]))
+  if (!enabledSubscriptions.length) {
     await database.execute(
       "UPDATE admin_push_alerts SET status='skipped', last_error='Aucun appareil administrateur abonné' WHERE alert_key=?",
       [alert.alert_key],
@@ -128,7 +201,7 @@ async function sendAlert(alert: AlertRow) {
   let delivered = 0
   let transientErrors = 0
 
-  await Promise.all(subscriptions.map(async (subscription) => {
+  await Promise.all(enabledSubscriptions.map(async (subscription) => {
     try {
       await webPush.sendNotification({
         endpoint: subscription.endpoint,
@@ -180,7 +253,7 @@ async function sendAlert(alert: AlertRow) {
 async function deliverPendingAlerts() {
   const database = useDatabase()
   const [alerts] = await database.query<AlertRow[]>(`
-    SELECT alert_key, payload_json FROM admin_push_alerts
+    SELECT alert_key, alert_type, payload_json FROM admin_push_alerts
     WHERE status='pending'
       OR (status='failed' AND (next_attempt_at IS NULL OR next_attempt_at<=CURRENT_TIMESTAMP))
       OR (status='sending' AND next_attempt_at<CURRENT_TIMESTAMP - INTERVAL 5 MINUTE)
@@ -202,6 +275,7 @@ async function deliverPendingAlerts() {
 
 async function evaluate() {
   await insertCandidates('pending')
+  await insertForeignCountryCandidates()
   await deliverPendingAlerts()
 }
 
@@ -215,17 +289,61 @@ export function evaluateAdminPushAlerts(options: { force?: boolean } = {}) {
   return evaluationPromise
 }
 
-export async function recordLearnerAccountCreated() {
+export async function recordLearnerAccountCreated(accountId: number) {
   try {
-    await useDatabase().query(`
+    const database = useDatabase()
+    await database.query(`
       INSERT INTO admin_push_metrics (metric_name, metric_value)
       SELECT 'learner_accounts_created', COUNT(*) FROM learner_accounts
       ON DUPLICATE KEY UPDATE metric_value=metric_value+1
     `)
+    const [[metric]] = await database.query<CountRow[]>(
+      "SELECT metric_value AS value FROM admin_push_metrics WHERE metric_name='learner_accounts_created'",
+    )
+    const total = Number(metric?.value) || 0
+    await database.execute(`
+      INSERT IGNORE INTO admin_push_alerts
+        (alert_key, alert_type, threshold_value, observed_value, payload_json, status)
+      VALUES (?, 'learner_registration', ?, ?, ?, 'pending')
+    `, [
+      `learner-registration:${accountId}`,
+      total,
+      total,
+      JSON.stringify({
+        title: 'Tatitotu · Nouvelle inscription',
+        body: `Un nouveau compte vient d’être créé. Total : ${total.toLocaleString('fr-CH')}.`,
+        tag: `tatitotu-registration-${accountId}`,
+        url: '/admin/users',
+      }),
+    ])
     await evaluateAdminPushAlerts({ force: true })
   }
   catch (error) {
     console.error('[push] Le nouveau compte n’a pas pu être ajouté au compteur de notifications.', error)
+  }
+}
+
+export async function recordFalcModeUsed(sessionId: string) {
+  try {
+    if (!await hasEnabledPreference('falc_usage')) return
+    const database = useDatabase()
+    await database.execute(`
+      INSERT IGNORE INTO admin_push_alerts
+        (alert_key, alert_type, threshold_value, observed_value, payload_json, status)
+      VALUES (?, 'falc_usage', 1, 1, ?, 'pending')
+    `, [
+      `falc-usage:${sessionId}`,
+      JSON.stringify({
+        title: 'Tatitotu · Mode FALC utilisé',
+        body: 'Une personne utilise réellement le mode FALC.',
+        tag: `tatitotu-falc-usage-${sessionId}`,
+        url: '/admin/charts',
+      }),
+    ])
+    await deliverPendingAlerts()
+  }
+  catch (error) {
+    console.error('[push] Notification d’utilisation du mode FALC impossible.', error)
   }
 }
 
@@ -251,14 +369,64 @@ export async function saveAdminPushSubscription(administratorId: number, subscri
     ON DUPLICATE KEY UPDATE administrator_id=VALUES(administrator_id), endpoint=VALUES(endpoint),
       p256dh=VALUES(p256dh), auth_secret=VALUES(auth_secret), enabled=1, last_error=NULL
   `, [administratorId, endpointHash, subscription.endpoint, subscription.keys.p256dh, subscription.keys.auth])
+  const [rows] = await database.query<Array<RowDataPacket & { id: number }>>(
+    'SELECT id FROM admin_push_subscriptions WHERE endpoint_hash=? AND administrator_id=?',
+    [endpointHash, administratorId],
+  )
+  const subscriptionId = Number(rows[0]?.id)
+  if (!subscriptionId) throw new Error('Abonnement Web Push introuvable après enregistrement')
+  await database.execute(
+    'INSERT IGNORE INTO admin_push_subscription_preferences (subscription_id) VALUES (?)',
+    [subscriptionId],
+  )
+  return getAdminPushPreferences(subscriptionId)
+}
+
+async function getAdminPushPreferences(subscriptionId: number): Promise<AdminPushPreferences> {
+  const [rows] = await useDatabase().query<Array<RowDataPacket & Record<AdminPushPreferenceKey, number>>>(`
+    SELECT learner_registration, learner_accounts, daily_sessions, foreign_country, falc_usage
+    FROM admin_push_subscription_preferences WHERE subscription_id=?
+  `, [subscriptionId])
+  const row = rows[0]
+  return Object.fromEntries(ADMIN_PUSH_PREFERENCE_KEYS.map(key => [key, row ? Boolean(row[key]) : true])) as AdminPushPreferences
+}
+
+export async function updateAdminPushPreferences(
+  administratorId: number,
+  endpoint: string,
+  preferences: AdminPushPreferences,
+) {
+  const database = useDatabase()
+  const endpointHash = createHash('sha256').update(endpoint).digest('hex')
+  const [rows] = await database.query<Array<RowDataPacket & { id: number }>>(`
+    SELECT id FROM admin_push_subscriptions
+    WHERE administrator_id=? AND endpoint_hash=? AND enabled=1
+  `, [administratorId, endpointHash])
+  const subscriptionId = Number(rows[0]?.id)
+  if (!subscriptionId) throw createError({ statusCode: 404, statusMessage: 'Abonnement introuvable' })
+  await database.execute(`
+    INSERT INTO admin_push_subscription_preferences
+      (subscription_id, learner_registration, learner_accounts, daily_sessions, foreign_country, falc_usage)
+    VALUES (?, ?, ?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE learner_registration=VALUES(learner_registration),
+      learner_accounts=VALUES(learner_accounts), daily_sessions=VALUES(daily_sessions),
+      foreign_country=VALUES(foreign_country), falc_usage=VALUES(falc_usage)
+  `, [subscriptionId, ...ADMIN_PUSH_PREFERENCE_KEYS.map(key => preferences[key] ? 1 : 0)])
+  return getAdminPushPreferences(subscriptionId)
 }
 
 export async function deleteAdminPushSubscription(administratorId: number, endpoint: string) {
   const endpointHash = createHash('sha256').update(endpoint).digest('hex')
-  await useDatabase().execute(
-    'DELETE FROM admin_push_subscriptions WHERE administrator_id=? AND endpoint_hash=?',
+  const database = useDatabase()
+  const [rows] = await database.query<Array<RowDataPacket & { id: number }>>(
+    'SELECT id FROM admin_push_subscriptions WHERE administrator_id=? AND endpoint_hash=?',
     [administratorId, endpointHash],
   )
+  const subscriptionId = Number(rows[0]?.id)
+  if (subscriptionId) {
+    await database.execute('DELETE FROM admin_push_subscription_preferences WHERE subscription_id=?', [subscriptionId])
+    await database.execute('DELETE FROM admin_push_subscriptions WHERE id=?', [subscriptionId])
+  }
 }
 
 export async function sendAdminPushTest(administratorId: number, endpoint: string) {

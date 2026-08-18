@@ -93,7 +93,7 @@ export default defineEventHandler(async (event) => {
     await connection.commit()
     await createLearnerSession(event, result.insertId, 1)
     clearLearnerRegistrationFlow(event)
-    await recordLearnerAccountCreated()
+    await recordLearnerAccountCreated(result.insertId)
     return {
       ok: true,
       username,

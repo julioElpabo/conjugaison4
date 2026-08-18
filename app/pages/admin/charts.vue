@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AnalyticsActorFilter, AnalyticsProductResponse, AnalyticsResponse, AnalyticsUserActivityWindow, AnalyticsUsersResponse, AnalyticsUsageResponse } from '../../../shared/types/analytics'
+import type { AnalyticsActorFilter, AnalyticsProductResponse, AnalyticsResponse, AnalyticsUsersResponse, AnalyticsUsageResponse } from '../../../shared/types/analytics'
 import { getAdminErrorMessage } from '~/composables/useAdminAuth'
 
 type StatsTab = 'now' | 'overview' | 'challenges' | 'exercises' | 'print' | 'accessibility' | 'accounts' | 'usage'
@@ -13,7 +13,6 @@ const product = ref<AnalyticsProductResponse | null>(null)
 const loading = ref(false)
 const error = ref('')
 const actor = ref<AnalyticsActorFilter>('all')
-const userActivityWindow = ref<AnalyticsUserActivityWindow>('month')
 const timelineMetric = ref('page_view')
 const today = new Date().toISOString().slice(0, 10)
 const startDate = ref(offsetDate(-29))
@@ -47,7 +46,7 @@ async function loadRangeOverview() {
   const [statsResponse, usageResponse, usersResponse] = await Promise.all([
     $fetch<AnalyticsResponse>('/api/admin/analytics', { credentials: 'same-origin', query: { window: 'range', start: startDate.value, end: endDate.value }, timeout: 20_000 }),
     $fetch<AnalyticsUsageResponse>('/api/admin/analytics-usage', { credentials: 'same-origin', query: { start: startDate.value, end: endDate.value, actor: 'all' }, timeout: 20_000 }),
-    $fetch<AnalyticsUsersResponse>('/api/admin/analytics-users', { credentials: 'same-origin', query: { start: startDate.value, end: endDate.value, activity: userActivityWindow.value }, timeout: 20_000 }),
+    $fetch<AnalyticsUsersResponse>('/api/admin/analytics-users', { credentials: 'same-origin', query: { start: startDate.value, end: endDate.value }, timeout: 20_000 }),
   ])
   return { statsResponse, usageResponse, usersResponse }
 }
@@ -68,7 +67,7 @@ async function loadActiveTab() {
       const response = await $fetch<AnalyticsProductResponse>('/api/admin/analytics-product', { credentials: 'same-origin', query: { start: startDate.value, end: endDate.value, actor: actor.value }, timeout: 20_000 })
       if (request === requestId) product.value = response
     } else if (activeTab.value === 'accounts') {
-      const response = await $fetch<AnalyticsUsersResponse>('/api/admin/analytics-users', { credentials: 'same-origin', query: { start: startDate.value, end: endDate.value, activity: userActivityWindow.value }, timeout: 20_000 })
+      const response = await $fetch<AnalyticsUsersResponse>('/api/admin/analytics-users', { credentials: 'same-origin', query: { start: startDate.value, end: endDate.value }, timeout: 20_000 })
       if (request === requestId) users.value = response
     } else {
       const response = await $fetch<AnalyticsUsageResponse>('/api/admin/analytics-usage', { credentials: 'same-origin', query: { start: startDate.value, end: endDate.value, actor: actor.value }, timeout: 20_000 })
@@ -86,7 +85,6 @@ function configureRefresh() {
 }
 function handleVisibility() { configureRefresh(); if (!document.hidden && activeTab.value === 'now') void loadActiveTab() }
 watch(actor, () => { if (isProductTab(activeTab.value) || activeTab.value === 'usage') void loadActiveTab() })
-watch(userActivityWindow, () => { if (activeTab.value === 'accounts' || activeTab.value === 'overview') void loadActiveTab() })
 watch(user, (current) => { if (!current) { loadedForUserId = null; return }; if (loadedForUserId !== current.id) { loadedForUserId = current.id; void loadActiveTab() } }, { immediate: true })
 onMounted(() => { configureRefresh(); document.addEventListener('visibilitychange', handleVisibility) })
 onBeforeUnmount(() => { if (refreshTimer) clearInterval(refreshTimer); document.removeEventListener('visibilitychange', handleVisibility) })
@@ -109,7 +107,7 @@ onBeforeUnmount(() => { if (refreshTimer) clearInterval(refreshTimer); document.
       <template v-if="activeTab === 'now'"><div v-if="stats?.window === '30m'" class="analytics-live-status"><i/><strong>30 dernières minutes</strong><span>Actualisation toutes les 60 secondes · {{ new Date(stats.local.generatedAt).toLocaleTimeString('fr-CH') }}</span></div><template v-if="stats?.window === '30m'"><AdminStatsDashboard :stats="stats" theme="audience" geo-map-comparison /><AdminMetricTimeline v-model:metric="timelineMetric" class="analytics-timeline" :stats="stats" /></template></template>
       <template v-else-if="activeTab === 'overview' && periodReady && stats && usage && users"><AdminStatsDashboard class="analytics-overview-audience" :stats="stats" theme="audience" geo-map-comparison audience-display="maps" /><AdminGeoAnimationExport class="analytics-overview-audience" /><AdminIntelligentDashboard :stats="stats" :usage="usage" :users="users" /><AdminStatsDashboard class="analytics-overview-audience" :stats="stats" theme="audience" audience-display="details" /><AdminMetricTimeline v-model:metric="timelineMetric" class="analytics-timeline" :stats="stats" /></template>
       <AdminProductAnalyticsDashboard v-else-if="isProductTab(activeTab) && productReady && product" :product="product" :view="activeTab" />
-      <AdminUserUsageDashboard v-else-if="activeTab === 'accounts' && users" v-model:activity-window="userActivityWindow" :users="users" />
+      <AdminUserUsageDashboard v-else-if="activeTab === 'accounts' && users" :users="users" />
       <AdminUsageDashboard v-else-if="activeTab === 'usage' && usage" v-model:actor="actor" :usage="usage" />
       <div v-else class="analytics-empty"><p>Actualisez cet onglet pour afficher ses données.</p><button class="admin-button" type="button" @click="loadActiveTab">Actualiser</button></div>
     </main>

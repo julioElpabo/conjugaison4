@@ -12,7 +12,8 @@ describe('statistiques des comptes utilisateurs', () => {
     assert.match(endpoint, /FROM learner_sessions/u)
     assert.match(endpoint, /FROM learner_challenge_runs/u)
     assert.match(endpoint, /learner_preferences/u)
-    assert.match(endpoint, /activityDays/u)
+    assert.doesNotMatch(endpoint, /query\.activity/u)
+    assert.match(endpoint, /occurred_at<DATE_ADD\(\?, INTERVAL 1 DAY\)/u)
   })
 
   it('compte une seule fois les utilisateurs ayant retravaillé uniquement leurs erreurs', async () => {
@@ -22,15 +23,17 @@ describe('statistiques des comptes utilisateurs', () => {
     assert.match(endpoint, /runs\.last_answered_at>=\?/u)
   })
 
-  it('affiche l’onglet Comptes, le sélecteur, le fromage des langues et la courbe des inscriptions', async () => {
+  it('affiche l’onglet Comptes sans sélecteur redondant et les inscriptions en barres verticales', async () => {
     const page = await read('../app/pages/admin/charts.vue')
     const dashboard = await read('../app/components/admin/AdminUserUsageDashboard.vue')
     assert.match(page, /\{ id: 'accounts', label: 'Comptes', short: 'Connexions et fonctions' \}/u)
     assert.match(page, /activeTab === 'accounts'/u)
     assert.match(page, /analytics-users/u)
-    assert.match(dashboard, /id="user-activity-window"/u)
+    assert.doesNotMatch(dashboard, /id="user-activity-window"/u)
     assert.match(dashboard, /Langue choisie par les utilisateurs/u)
     assert.match(dashboard, /title="Créations de comptes"/u)
+    assert.match(dashboard, /kind="bar"/u)
+    assert.match(dashboard, /y-unit="Nombre de comptes créés"/u)
     assert.match(dashboard, /Reprise de leurs erreurs/u)
   })
 })

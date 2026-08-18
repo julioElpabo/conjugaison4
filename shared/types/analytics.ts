@@ -37,7 +37,6 @@ export type AnalyticsEventName = typeof ANALYTICS_EVENTS[number]
 export type AnalyticsWindow = 'now' | '3m' | '5m' | '30m' | 'range'
 export type AnalyticsActorType = 'anonymous' | 'learner'
 export type AnalyticsActorFilter = 'all' | AnalyticsActorType
-export type AnalyticsUserActivityWindow = 'week' | 'month' | 'year'
 
 export interface AnalyticsBreakdownItem {
   label: string
@@ -122,8 +121,6 @@ export interface AnalyticsUsageResponse {
 export interface AnalyticsUsersResponse {
   startDate: string
   endDate: string
-  activityWindow: AnalyticsUserActivityWindow
-  activityDays: number
   totalAccounts: number
   activeAccounts: number
   loggedInAccounts: number

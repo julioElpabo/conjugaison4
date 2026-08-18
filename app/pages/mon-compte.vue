@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { getAdminErrorMessage } from '~/composables/useAdminAuth'
+
 const { ui } = useLanguagePreferences()
 const { user } = useAdminAuth()
 const pushSupported = ref(false)
@@ -7,8 +9,25 @@ const pushEnabled = ref(false)
 const pushBusy = ref(false)
 const pushMessage = ref('')
 const pushError = ref('')
+const windowSecureContext = ref(true)
 let pushRegistration: ServiceWorkerRegistration | null = null
 let pushSubscription: PushSubscription | null = null
+type PushPreferenceKey = 'learner_registration' | 'learner_accounts' | 'daily_sessions' | 'foreign_country' | 'falc_usage'
+type PushPreferences = Record<PushPreferenceKey, boolean>
+const pushPreferences = reactive<PushPreferences>({
+  learner_registration: true,
+  learner_accounts: true,
+  daily_sessions: true,
+  foreign_country: true,
+  falc_usage: true,
+})
+const pushPreferenceOptions = [
+  { key: 'learner_registration', label: 'Chaque nouvelle inscription, avec le total de comptes créés.' },
+  { key: 'learner_accounts', label: 'Comptes créés : 40, 50, 60, puis chaque dizaine.' },
+  { key: 'daily_sessions', label: 'Sessions quotidiennes : 1 000, 1 500, puis chaque centaine.' },
+  { key: 'foreign_country', label: 'Plus de 5 personnes actives simultanément dans un pays hors de Suisse.' },
+  { key: 'falc_usage', label: 'Une personne utilise réellement le mode FALC.' },
+] as const
 
 useHead(() => ({ title: ui('Mon compte') }))
 
@@ -30,14 +49,43 @@ async function pushConfiguration() {
 }
 
 async function synchronizeSubscription(subscription: PushSubscription) {
-  await $fetch('/api/admin/push-subscriptions', {
+  const response = await $fetch<{ preferences: PushPreferences }>('/api/admin/push-subscriptions', {
     method: 'POST',
     body: subscription.toJSON(),
   })
+  Object.assign(pushPreferences, response.preferences)
+}
+
+async function savePushPreference(key: PushPreferenceKey, enabled: boolean) {
+  if (!pushSubscription || pushBusy.value) return
+  const previous = pushPreferences[key]
+  pushPreferences[key] = enabled
+  pushBusy.value = true
+  pushMessage.value = ''
+  pushError.value = ''
+  try {
+    const response = await $fetch<{ preferences: PushPreferences }>('/api/admin/push-subscriptions/preferences', {
+      method: 'PUT',
+      body: { endpoint: pushSubscription.endpoint, preferences: { ...pushPreferences } },
+    })
+    Object.assign(pushPreferences, response.preferences)
+    pushMessage.value = 'Préférences de notifications enregistrées.'
+  }
+  catch (error) {
+    pushPreferences[key] = previous
+    pushError.value = getAdminErrorMessage(error, 'Impossible d’enregistrer cette préférence.')
+  }
+  finally {
+    pushBusy.value = false
+  }
 }
 
 onMounted(async () => {
-  pushSupported.value = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
+  windowSecureContext.value = window.isSecureContext
+  pushSupported.value = window.isSecureContext
+    && 'serviceWorker' in navigator
+    && 'PushManager' in window
+    && 'Notification' in window
   pushCapabilityChecked.value = true
   if (!pushSupported.value) return
   try {
@@ -46,8 +94,9 @@ onMounted(async () => {
     pushEnabled.value = Boolean(pushSubscription)
     if (pushSubscription) await synchronizeSubscription(pushSubscription)
   }
-  catch {
-    pushError.value = 'Impossible de vérifier les notifications sur cet appareil.'
+  catch (error) {
+    const detail = getAdminErrorMessage(error, '')
+    pushError.value = `Impossible de vérifier les notifications sur cet appareil.${detail ? ` ${detail}` : ''}`
   }
 })
 
@@ -56,26 +105,32 @@ async function enablePush() {
   pushBusy.value = true
   pushMessage.value = ''
   pushError.value = ''
+  let step = 'autorisation du navigateur'
   try {
     const permission = await Notification.requestPermission()
     if (permission !== 'granted') {
       pushError.value = 'Les notifications ont été refusées dans les réglages du navigateur.'
       return
     }
+    step = 'enregistrement du service worker'
     pushRegistration ||= await navigator.serviceWorker.register('/admin-push-sw.js', { scope: '/' })
+    step = 'lecture de la configuration serveur'
     const { publicKey } = await pushConfiguration()
     if (!publicKey) throw new Error('Clé Web Push indisponible')
+    step = 'création de l’abonnement navigateur'
     pushSubscription = await pushRegistration.pushManager.getSubscription()
       || await pushRegistration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: applicationServerKey(publicKey),
       })
+    step = 'enregistrement de l’abonnement en base'
     await synchronizeSubscription(pushSubscription)
     pushEnabled.value = true
     pushMessage.value = 'Notifications activées sur cet appareil.'
   }
-  catch {
-    pushError.value = 'L’activation des notifications a échoué.'
+  catch (error) {
+    const detail = getAdminErrorMessage(error, '')
+    pushError.value = `L’activation a échoué pendant l’étape « ${step} ».${detail ? ` ${detail}` : ''}`
   }
   finally {
     pushBusy.value = false
@@ -206,15 +261,24 @@ async function testPush() {
             </template>
           </div>
           <p v-else-if="pushCapabilityChecked" class="admin-notice admin-notice--error" role="status">
-            {{ ui('Ce navigateur ne prend pas en charge les notifications Web Push.') }}
+            {{ windowSecureContext
+              ? ui('Ce navigateur ne prend pas en charge les notifications Web Push.')
+              : ui('Les notifications nécessitent une connexion HTTPS sécurisée.') }}
           </p>
           <p v-if="pushMessage" class="admin-notice admin-notice--success" role="status">{{ pushMessage }}</p>
           <p v-if="pushError" class="admin-notice admin-notice--error" role="alert">{{ pushError }}</p>
 
-          <ul>
-            <li>{{ ui('Comptes créés : 40, 50, 60, puis chaque dizaine.') }}</li>
-            <li>{{ ui('Sessions quotidiennes : 1 000, 1 500, puis chaque centaine.') }}</li>
-          </ul>
+          <fieldset class="push-preferences" :disabled="!pushEnabled || pushBusy">
+            <legend>{{ ui('Messages à recevoir sur cet appareil') }}</legend>
+            <label v-for="option in pushPreferenceOptions" :key="option.key">
+              <input
+                type="checkbox"
+                :checked="pushPreferences[option.key]"
+                @change="savePushPreference(option.key, ($event.target as HTMLInputElement).checked)"
+              >
+              <span>{{ ui(option.label) }}</span>
+            </label>
+          </fieldset>
         </section>
 
         <aside class="account-note">
@@ -358,11 +422,40 @@ async function testPush() {
   font-weight: 800;
 }
 
-.push-card ul {
+.push-preferences {
+  display: grid;
   margin: 0;
-  padding-left: 20px;
-  color: var(--admin-muted);
-  line-height: 1.7;
+  padding: 16px;
+  gap: 11px;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+}
+
+.push-preferences legend {
+  padding: 0 7px;
+  color: var(--admin-navy);
+  font-weight: 850;
+}
+
+.push-preferences label {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 10px;
+  color: var(--admin-navy);
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.push-preferences input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--admin-blue);
+}
+
+.push-preferences:disabled {
+  opacity: .58;
 }
 
 @media (max-width: 590px) {

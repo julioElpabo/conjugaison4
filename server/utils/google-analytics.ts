@@ -11,6 +11,7 @@ interface GaResponse {
 let tokenCache: { value: string, expiresAt: number } | undefined
 const reportCache = new Map<string, { value: AnalyticsOverview, expiresAt: number }>()
 const timelineCache = new Map<string, { value: AnalyticsGeoTimelineResponse, expiresAt: number }>()
+let realtimeCountryCache: { value: AnalyticsBreakdownItem[], expiresAt: number } | undefined
 const quotaBackoff = new Map<string, number>()
 const GOOGLE_AUTH_TIMEOUT_MS = 10_000
 const GOOGLE_REPORT_TIMEOUT_MS = 12_000
@@ -242,6 +243,40 @@ export async function googleAnalyticsOverview(options: {
   }
   reportCache.set(cacheKey, { value: result, expiresAt: Date.now() + (realtime ? 5 * 60_000 : 30 * 60_000) })
   return result
+}
+
+export async function googleAnalyticsRealtimeCountries(): Promise<AnalyticsBreakdownItem[] | null> {
+  const credentials = await googleAnalyticsCredentials()
+  if (!credentials) return null
+  if (realtimeCountryCache && realtimeCountryCache.expiresAt > Date.now()) return realtimeCountryCache.value
+  const { propertyId, email, privateKey } = credentials
+  const quotaKey = `${propertyId}:realtime-countries`
+  if ((quotaBackoff.get(quotaKey) || 0) > Date.now()) return realtimeCountryCache?.value || []
+  const token = await accessToken(email, privateKey)
+  const response = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runRealtimeReport`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+    body: JSON.stringify({
+      minuteRanges: [{ name: 'active-30m', startMinutesAgo: 29, endMinutesAgo: 0 }],
+      dimensions: [{ name: 'countryId' }, { name: 'country' }],
+      metrics: [{ name: 'activeUsers' }],
+      limit: 250,
+      orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
+    }),
+    signal: AbortSignal.timeout(GOOGLE_REPORT_TIMEOUT_MS),
+  })
+  if (!response.ok) {
+    if (response.status === 429) quotaBackoff.set(quotaKey, Date.now() + 15 * 60_000)
+    throw new Error(`Lecture GA4 des pays impossible (${response.status})`)
+  }
+  const report = await response.json() as GaResponse
+  const value = (report.rows || []).map(row => ({
+    code: (row.dimensionValues?.[0]?.value || '').toUpperCase(),
+    label: row.dimensionValues?.[1]?.value || '—',
+    value: Number(row.metricValues?.[0]?.value) || 0,
+  }))
+  realtimeCountryCache = { value, expiresAt: Date.now() + 5 * 60_000 }
+  return value
 }
 
 export async function googleAnalyticsGeoTimeline(date: string): Promise<AnalyticsGeoTimelineResponse | null> {

@@ -16,6 +16,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Abonnement Web Push invalide' })
   }
   await initializeAdminPushBaseline()
-  await saveAdminPushSubscription(administrator.id, { endpoint, keys: { p256dh, auth } })
-  return { ok: true }
+  const preferences = await saveAdminPushSubscription(administrator.id, { endpoint, keys: { p256dh, auth } })
+  return { ok: true, preferences }
 })

@@ -1,4 +1,4 @@
-import { d as defineEventHandler, b as useRuntimeConfig, a9 as SUPPORTED_LOCALES, aa as listPublishedChallengePublications, u as useDatabase, ab as setHeader, ac as localizePath } from '../nitro/nitro.mjs';
+import { d as defineEventHandler, x as useRuntimeConfig, a9 as SUPPORTED_LOCALES, aa as listPublishedChallengePublications, u as useDatabase, ab as setHeader, ac as localizePath } from '../nitro/nitro.mjs';
 import { M as MODE_TENSE_PATHS } from '../_/mode-tense-pages.mjs';
 import { T as TENSE_EXERCISE_PATHS } from '../_/tense-exercise-pages.mjs';
 import 'node:http';

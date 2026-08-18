@@ -18,6 +18,7 @@ import 'web-push';
 import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
+import '../../../_/google-analytics.mjs';
 
 function recoveryCode() {
   var _a;
@@ -77,7 +78,7 @@ const register_post = defineEventHandler(async (event) => {
     await connection.commit();
     await createLearnerSession(event, result.insertId, 1);
     clearLearnerRegistrationFlow(event);
-    await recordLearnerAccountCreated();
+    await recordLearnerAccountCreated(result.insertId);
     return {
       ok: true,
       username,

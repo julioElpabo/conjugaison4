@@ -3,6 +3,7 @@ import { a as analyticsSessionId, s as safeAnalyticsPath, c as safeAnalyticsMeta
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../../_/public-api-rate-limit.mjs';
 import { r as readLimitedJsonBody } from '../../../_/limited-json-body.mjs';
 import { g as getLearnerSession } from '../../../_/learner-session.mjs';
+import { b as recordFalcModeUsed } from '../../../_/admin-push-notifications.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -14,6 +15,7 @@ import 'web-push';
 import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
+import '../../../_/google-analytics.mjs';
 
 const ANALYTICS_EVENTS = [
   "page_view",
@@ -50,6 +52,16 @@ const ANALYTICS_EVENTS = [
   "client_error"
 ];
 
+const FALC_USAGE_EVENTS = /* @__PURE__ */ new Set([
+  "challenge_preset_selected",
+  "challenge_load",
+  "challenge_save",
+  "exercise_started",
+  "help_opened",
+  "print_opened",
+  "pdf_downloaded",
+  "word_downloaded"
+]);
 const event_post = defineEventHandler(async (event) => {
   await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.telemetry);
   const body = await readLimitedJsonBody(event, 8 * 1024);
@@ -71,6 +83,9 @@ const event_post = defineEventHandler(async (event) => {
     actorType,
     JSON.stringify(storedMetadata)
   ]);
+  if ((metadata == null ? void 0 : metadata.falc) === "true" && FALC_USAGE_EVENTS.has(name)) {
+    await recordFalcModeUsed(sessionId);
+  }
   return { ok: true };
 });
 

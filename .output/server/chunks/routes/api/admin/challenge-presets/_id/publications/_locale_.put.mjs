@@ -1,4 +1,4 @@
-import { d as defineEventHandler, g as getRouterParam, c as createError, i as parsePublicationLocale, j as parseChallengePublicationPayload, r as readBody, C as ChallengePublicationInputError, u as useDatabase, k as saveChallengePublication, l as ChallengePublicationConflictError, m as ChallengePublicationNotFoundError } from '../../../../../../nitro/nitro.mjs';
+import { d as defineEventHandler, g as getRouterParam, c as createError, h as parsePublicationLocale, i as parseChallengePublicationPayload, r as readBody, C as ChallengePublicationInputError, u as useDatabase, j as saveChallengePublication, k as ChallengePublicationConflictError, l as ChallengePublicationNotFoundError } from '../../../../../../nitro/nitro.mjs';
 import { r as requireAdministrator } from '../../../../../../_/session.mjs';
 import 'node:http';
 import 'node:https';

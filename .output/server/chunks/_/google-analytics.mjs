@@ -1,10 +1,11 @@
-import { b as useRuntimeConfig } from '../nitro/nitro.mjs';
+import { x as useRuntimeConfig } from '../nitro/nitro.mjs';
 import { createSign } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 
 let tokenCache;
 const reportCache = /* @__PURE__ */ new Map();
 const timelineCache = /* @__PURE__ */ new Map();
+let realtimeCountryCache;
 const quotaBackoff = /* @__PURE__ */ new Map();
 const GOOGLE_AUTH_TIMEOUT_MS = 1e4;
 const GOOGLE_REPORT_TIMEOUT_MS = 12e3;
@@ -248,6 +249,42 @@ async function googleAnalyticsOverview(options) {
   reportCache.set(cacheKey, { value: result, expiresAt: Date.now() + (realtime ? 5 * 6e4 : 30 * 6e4) });
   return result;
 }
+async function googleAnalyticsRealtimeCountries() {
+  const credentials = await googleAnalyticsCredentials();
+  if (!credentials) return null;
+  if (realtimeCountryCache && realtimeCountryCache.expiresAt > Date.now()) return realtimeCountryCache.value;
+  const { propertyId, email, privateKey } = credentials;
+  const quotaKey = `${propertyId}:realtime-countries`;
+  if ((quotaBackoff.get(quotaKey) || 0) > Date.now()) return (realtimeCountryCache == null ? void 0 : realtimeCountryCache.value) || [];
+  const token = await accessToken(email, privateKey);
+  const response = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runRealtimeReport`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+    body: JSON.stringify({
+      minuteRanges: [{ name: "active-30m", startMinutesAgo: 29, endMinutesAgo: 0 }],
+      dimensions: [{ name: "countryId" }, { name: "country" }],
+      metrics: [{ name: "activeUsers" }],
+      limit: 250,
+      orderBys: [{ metric: { metricName: "activeUsers" }, desc: true }]
+    }),
+    signal: AbortSignal.timeout(GOOGLE_REPORT_TIMEOUT_MS)
+  });
+  if (!response.ok) {
+    if (response.status === 429) quotaBackoff.set(quotaKey, Date.now() + 15 * 6e4);
+    throw new Error(`Lecture GA4 des pays impossible (${response.status})`);
+  }
+  const report = await response.json();
+  const value = (report.rows || []).map((row) => {
+    var _a, _b, _c, _d, _e, _f;
+    return {
+      code: (((_b = (_a = row.dimensionValues) == null ? void 0 : _a[0]) == null ? void 0 : _b.value) || "").toUpperCase(),
+      label: ((_d = (_c = row.dimensionValues) == null ? void 0 : _c[1]) == null ? void 0 : _d.value) || "\u2014",
+      value: Number((_f = (_e = row.metricValues) == null ? void 0 : _e[0]) == null ? void 0 : _f.value) || 0
+    };
+  });
+  realtimeCountryCache = { value, expiresAt: Date.now() + 5 * 6e4 };
+  return value;
+}
 async function googleAnalyticsGeoTimeline(date) {
   var _a, _b, _c;
   const credentials = await googleAnalyticsCredentials();
@@ -332,5 +369,5 @@ async function googleAnalyticsGeoTimeline(date) {
   return value;
 }
 
-export { googleAnalyticsOverview as a, googleAnalyticsGeoTimeline as g };
+export { googleAnalyticsOverview as a, googleAnalyticsRealtimeCountries as b, googleAnalyticsGeoTimeline as g };
 //# sourceMappingURL=google-analytics.mjs.map

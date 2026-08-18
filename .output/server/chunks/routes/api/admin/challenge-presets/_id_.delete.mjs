@@ -1,4 +1,4 @@
-import { d as defineEventHandler, g as getRouterParam, c as createError, u as useDatabase, e as reorderChallengePresets } from '../../../../nitro/nitro.mjs';
+import { d as defineEventHandler, g as getRouterParam, c as createError, u as useDatabase, b as reorderChallengePresets } from '../../../../nitro/nitro.mjs';
 import { r as requireAdministrator } from '../../../../_/session.mjs';
 import 'node:http';
 import 'node:https';

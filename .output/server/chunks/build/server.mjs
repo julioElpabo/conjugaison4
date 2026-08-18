@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { toRef, isRef, computed, hasInjectionContext, inject, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, isReadonly, isShallow, isReactive, toRaw } from 'vue';
-import { a9 as SUPPORTED_LOCALES, aK as parseURL, aL as encodePath, aM as decodePath, aN as localeFromPath, y as normalizeLocale, aO as getRequestHeaders, c as createError$1, ae as hasProtocol, ag as isScriptProtocol, af as joinURL, aP as withQuery, aQ as klona, aR as DEFAULT_LANGUAGE_PREFERENCES, ac as localizePath, aS as sanitizeStatusCode, aT as getContext, aU as getRequestHeader, aV as isEqual, v as setCookie, x as getCookie, w as deleteCookie, aW as $fetch, aX as defu, K as stripLocaleFromPath, am as executeAsync, aY as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { a9 as SUPPORTED_LOCALES, aK as parseURL, aL as encodePath, aM as decodePath, aN as localeFromPath, y as normalizeLocale, aO as getRequestHeaders, c as createError$1, ae as hasProtocol, ag as isScriptProtocol, af as joinURL, aP as withQuery, aQ as klona, aR as DEFAULT_LANGUAGE_PREFERENCES, ac as localizePath, aS as sanitizeStatusCode, aT as getContext, aU as getRequestHeader, aV as isEqual, t as setCookie, w as getCookie, v as deleteCookie, aW as $fetch, aX as defu, K as stripLocaleFromPath, am as executeAsync, aY as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useSeoMeta$1, a as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -561,7 +561,12 @@ const uiMessages = {
   "Envoyer un test": { de: "Test senden", en: "Send a test", it: "Invia un test", es: "Enviar una prueba" },
   "D\xE9sactiver": { de: "Deaktivieren", en: "Disable", it: "Disattiva", es: "Desactivar" },
   "Ce navigateur ne prend pas en charge les notifications Web Push.": { de: "Dieser Browser unterst\xFCtzt keine Web-Push-Benachrichtigungen.", en: "This browser does not support Web Push notifications.", it: "Questo browser non supporta le notifiche Web Push.", es: "Este navegador no admite notificaciones Web Push." },
+  "Les notifications n\xE9cessitent une connexion HTTPS s\xE9curis\xE9e.": { de: "Benachrichtigungen ben\xF6tigen eine sichere HTTPS-Verbindung.", en: "Notifications require a secure HTTPS connection.", it: "Le notifiche richiedono una connessione HTTPS sicura.", es: "Las notificaciones requieren una conexi\xF3n HTTPS segura." },
   "Comptes cr\xE9\xE9s : 40, 50, 60, puis chaque dizaine.": { de: "Erstellte Konten: 40, 50, 60, dann alle zehn.", en: "Accounts created: 40, 50, 60, then every ten.", it: "Account creati: 40, 50, 60, poi ogni dieci.", es: "Cuentas creadas: 40, 50, 60 y despu\xE9s cada diez." },
+  "Chaque nouvelle inscription, avec le total de comptes cr\xE9\xE9s.": { de: "Jede neue Registrierung mit der Gesamtzahl der erstellten Konten.", en: "Every new registration, with the total number of accounts created.", it: "Ogni nuova registrazione, con il totale degli account creati.", es: "Cada nuevo registro, con el total de cuentas creadas." },
+  "Messages \xE0 recevoir sur cet appareil": { de: "Nachrichten auf diesem Ger\xE4t", en: "Messages to receive on this device", it: "Messaggi da ricevere su questo dispositivo", es: "Mensajes que recibir en este dispositivo" },
+  "Plus de 5 personnes actives simultan\xE9ment dans un pays hors de Suisse.": { de: "Mehr als 5 gleichzeitig aktive Personen in einem Land ausserhalb der Schweiz.", en: "More than 5 people active at the same time in a country outside Switzerland.", it: "Pi\xF9 di 5 persone attive contemporaneamente in un Paese diverso dalla Svizzera.", es: "M\xE1s de 5 personas activas al mismo tiempo en un pa\xEDs fuera de Suiza." },
+  "Une personne utilise r\xE9ellement le mode FALC.": { de: "Eine Person verwendet den Modus Leichte Sprache tats\xE4chlich.", en: "Someone is actively using easy-read mode.", it: "Una persona utilizza realmente la modalit\xE0 di facile lettura.", es: "Una persona est\xE1 utilizando realmente el modo de lectura f\xE1cil." },
   "Sessions quotidiennes : 1 000, 1 500, puis chaque centaine.": { de: "T\xE4gliche Sitzungen: 1.000, 1.500, dann alle hundert.", en: "Daily sessions: 1,000, 1,500, then every hundred.", it: "Sessioni giornaliere: 1.000, 1.500, poi ogni cento.", es: "Sesiones diarias: 1000, 1500 y despu\xE9s cada cien." },
   "Cette version permet de consulter le compte. Aucune API de modification du profil ou du mot de passe n\u2019est disponible.": { de: "In dieser Version kann das Konto eingesehen werden. Eine Schnittstelle zum \xC4ndern des Profils oder Passworts ist nicht verf\xFCgbar.", en: "This version lets you view the account. No API is available for changing the profile or password.", it: "Questa versione permette di consultare l\u2019account. Non \xE8 disponibile un\u2019API per modificare il profilo o la password.", es: "Esta versi\xF3n permite consultar la cuenta. No hay disponible una API para modificar el perfil o la contrase\xF1a." },
   "Ton d\xE9fi est pr\xEAt": { de: "Deine \xDCbung ist bereit", en: "Your challenge is ready", it: "Il tuo esercizio \xE8 pronto", es: "Tu ejercicio est\xE1 listo" },
@@ -1701,7 +1706,7 @@ const _routes = [
   {
     name: "mon-compte",
     path: "/mon-compte",
-    component: () => import('./mon-compte-DX8vUwYq.mjs')
+    component: () => import('./mon-compte-CUaHBeHf.mjs')
   },
   {
     name: "my-page",
@@ -1882,7 +1887,7 @@ const _routes = [
   {
     name: "localized-mon-compte",
     path: "/:locale(fr|de|en|it|es)/mon-compte",
-    component: () => import('./mon-compte-DX8vUwYq.mjs')
+    component: () => import('./mon-compte-CUaHBeHf.mjs')
   },
   {
     name: "localized-my-page",

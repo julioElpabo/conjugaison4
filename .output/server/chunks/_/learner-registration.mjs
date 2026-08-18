@@ -1,4 +1,4 @@
-import { x as getCookie, c as createError, w as deleteCookie, v as setCookie, J as getRequestURL, b as useRuntimeConfig } from '../nitro/nitro.mjs';
+import { w as getCookie, c as createError, v as deleteCookie, t as setCookie, J as getRequestURL, x as useRuntimeConfig } from '../nitro/nitro.mjs';
 import { randomBytes, timingSafeEqual, createHmac } from 'node:crypto';
 
 const COOKIE_NAME = "learner_registration";

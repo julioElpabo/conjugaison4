@@ -1,4 +1,4 @@
-import { d as defineEventHandler, i as parsePublicationLocale, a as getQuery, c as createError, g as getRouterParam, S as resolveChallengePublication, u as useDatabase } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, h as parsePublicationLocale, a as getQuery, c as createError, g as getRouterParam, S as resolveChallengePublication, u as useDatabase } from '../../../nitro/nitro.mjs';
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../../_/public-api-rate-limit.mjs';
 import 'node:http';
 import 'node:https';

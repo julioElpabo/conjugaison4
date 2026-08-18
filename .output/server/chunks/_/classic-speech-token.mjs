@@ -1,4 +1,4 @@
-import { b as useRuntimeConfig } from '../nitro/nitro.mjs';
+import { x as useRuntimeConfig } from '../nitro/nitro.mjs';
 import { createDecipheriv, randomBytes, createCipheriv, createHash } from 'node:crypto';
 
 function tokenKey() {

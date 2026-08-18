@@ -1,7 +1,15 @@
-import { u as useDatabase, c as createError, b as useRuntimeConfig } from '../nitro/nitro.mjs';
+import { u as useDatabase, c as createError, x as useRuntimeConfig } from '../nitro/nitro.mjs';
 import { createHash } from 'node:crypto';
 import webPush from 'web-push';
+import { b as googleAnalyticsRealtimeCountries } from './google-analytics.mjs';
 
+const ADMIN_PUSH_PREFERENCE_KEYS = [
+  "learner_registration",
+  "learner_accounts",
+  "daily_sessions",
+  "foreign_country",
+  "falc_usage"
+];
 let evaluationPromise = null;
 let lastSessionEvaluationAt = 0;
 function accountAlertThresholds(value) {
@@ -58,6 +66,52 @@ async function currentCandidates() {
     }))
   ];
 }
+async function hasEnabledPreference(preference) {
+  const [[row]] = await useDatabase().query(`
+    SELECT COUNT(*) AS value
+    FROM admin_push_subscriptions subscriptions
+    LEFT JOIN admin_push_subscription_preferences preferences ON preferences.subscription_id=subscriptions.id
+    INNER JOIN users administrator
+      ON administrator.id=subscriptions.administrator_id AND administrator.privilege_id=1
+    WHERE subscriptions.enabled=1 AND COALESCE(preferences.${preference}, 1)=1
+  `);
+  return Number(row == null ? void 0 : row.value) > 0;
+}
+async function insertForeignCountryCandidates() {
+  if (!await hasEnabledPreference("foreign_country")) return;
+  try {
+    const countries = await googleAnalyticsRealtimeCountries();
+    if (!countries) return;
+    const date = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Zurich",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).format(/* @__PURE__ */ new Date());
+    const database = useDatabase();
+    for (const country of countries) {
+      const code = String(country.code || "").toUpperCase();
+      if (code === "CH" || !/^[A-Z]{2}$/u.test(code) || country.value <= 5) continue;
+      const label = String(country.label || code).slice(0, 100);
+      await database.execute(`
+        INSERT IGNORE INTO admin_push_alerts
+          (alert_key, alert_type, threshold_value, observed_value, payload_json, status)
+        VALUES (?, 'foreign_country', 6, ?, ?, 'pending')
+      `, [
+        `foreign-country:${date}:${code}`,
+        country.value,
+        JSON.stringify({
+          title: "Tatitotu \xB7 Audience internationale",
+          body: `Pays : ${label} \xB7 ${country.value.toLocaleString("fr-CH")} personnes actives en m\xEAme temps.`,
+          tag: `tatitotu-foreign-country-${date}-${code}`,
+          url: "/admin/charts"
+        })
+      ]);
+    }
+  } catch (error) {
+    console.error("[push] Lecture des pays actifs impossible.", error);
+  }
+}
 async function insertCandidates(status) {
   const database = useDatabase();
   for (const candidate of await currentCandidates()) {
@@ -72,13 +126,20 @@ async function insertCandidates(status) {
 async function sendAlert(alert) {
   const database = useDatabase();
   const [subscriptions] = await database.query(`
-    SELECT subscriptions.id, subscriptions.endpoint, subscriptions.p256dh, subscriptions.auth_secret
+    SELECT subscriptions.id, subscriptions.endpoint, subscriptions.p256dh, subscriptions.auth_secret,
+      COALESCE(preferences.learner_registration, 1) AS learner_registration,
+      COALESCE(preferences.learner_accounts, 1) AS learner_accounts,
+      COALESCE(preferences.daily_sessions, 1) AS daily_sessions,
+      COALESCE(preferences.foreign_country, 1) AS foreign_country,
+      COALESCE(preferences.falc_usage, 1) AS falc_usage
     FROM admin_push_subscriptions subscriptions
+    LEFT JOIN admin_push_subscription_preferences preferences ON preferences.subscription_id=subscriptions.id
     INNER JOIN users administrator
       ON administrator.id=subscriptions.administrator_id AND administrator.privilege_id=1
     WHERE subscriptions.enabled=1
   `);
-  if (!subscriptions.length) {
+  const enabledSubscriptions = subscriptions.filter((subscription) => Boolean(subscription[alert.alert_type]));
+  if (!enabledSubscriptions.length) {
     await database.execute(
       "UPDATE admin_push_alerts SET status='skipped', last_error='Aucun appareil administrateur abonn\xE9' WHERE alert_key=?",
       [alert.alert_key]
@@ -93,7 +154,7 @@ async function sendAlert(alert) {
   const payload = typeof alert.payload_json === "string" ? alert.payload_json : JSON.stringify(alert.payload_json);
   let delivered = 0;
   let transientErrors = 0;
-  await Promise.all(subscriptions.map(async (subscription) => {
+  await Promise.all(enabledSubscriptions.map(async (subscription) => {
     try {
       await webPush.sendNotification({
         endpoint: subscription.endpoint,
@@ -139,7 +200,7 @@ async function sendAlert(alert) {
 async function deliverPendingAlerts() {
   const database = useDatabase();
   const [alerts] = await database.query(`
-    SELECT alert_key, payload_json FROM admin_push_alerts
+    SELECT alert_key, alert_type, payload_json FROM admin_push_alerts
     WHERE status='pending'
       OR (status='failed' AND (next_attempt_at IS NULL OR next_attempt_at<=CURRENT_TIMESTAMP))
       OR (status='sending' AND next_attempt_at<CURRENT_TIMESTAMP - INTERVAL 5 MINUTE)
@@ -160,6 +221,7 @@ async function deliverPendingAlerts() {
 }
 async function evaluate() {
   await insertCandidates("pending");
+  await insertForeignCountryCandidates();
   await deliverPendingAlerts();
 }
 function evaluateAdminPushAlerts(options = {}) {
@@ -171,16 +233,58 @@ function evaluateAdminPushAlerts(options = {}) {
   });
   return evaluationPromise;
 }
-async function recordLearnerAccountCreated() {
+async function recordLearnerAccountCreated(accountId) {
   try {
-    await useDatabase().query(`
+    const database = useDatabase();
+    await database.query(`
       INSERT INTO admin_push_metrics (metric_name, metric_value)
       SELECT 'learner_accounts_created', COUNT(*) FROM learner_accounts
       ON DUPLICATE KEY UPDATE metric_value=metric_value+1
     `);
+    const [[metric]] = await database.query(
+      "SELECT metric_value AS value FROM admin_push_metrics WHERE metric_name='learner_accounts_created'"
+    );
+    const total = Number(metric == null ? void 0 : metric.value) || 0;
+    await database.execute(`
+      INSERT IGNORE INTO admin_push_alerts
+        (alert_key, alert_type, threshold_value, observed_value, payload_json, status)
+      VALUES (?, 'learner_registration', ?, ?, ?, 'pending')
+    `, [
+      `learner-registration:${accountId}`,
+      total,
+      total,
+      JSON.stringify({
+        title: "Tatitotu \xB7 Nouvelle inscription",
+        body: `Un nouveau compte vient d\u2019\xEAtre cr\xE9\xE9. Total : ${total.toLocaleString("fr-CH")}.`,
+        tag: `tatitotu-registration-${accountId}`,
+        url: "/admin/users"
+      })
+    ]);
     await evaluateAdminPushAlerts({ force: true });
   } catch (error) {
     console.error("[push] Le nouveau compte n\u2019a pas pu \xEAtre ajout\xE9 au compteur de notifications.", error);
+  }
+}
+async function recordFalcModeUsed(sessionId) {
+  try {
+    if (!await hasEnabledPreference("falc_usage")) return;
+    const database = useDatabase();
+    await database.execute(`
+      INSERT IGNORE INTO admin_push_alerts
+        (alert_key, alert_type, threshold_value, observed_value, payload_json, status)
+      VALUES (?, 'falc_usage', 1, 1, ?, 'pending')
+    `, [
+      `falc-usage:${sessionId}`,
+      JSON.stringify({
+        title: "Tatitotu \xB7 Mode FALC utilis\xE9",
+        body: "Une personne utilise r\xE9ellement le mode FALC.",
+        tag: `tatitotu-falc-usage-${sessionId}`,
+        url: "/admin/charts"
+      })
+    ]);
+    await deliverPendingAlerts();
+  } catch (error) {
+    console.error("[push] Notification d\u2019utilisation du mode FALC impossible.", error);
   }
 }
 async function initializeAdminPushBaseline() {
@@ -195,6 +299,7 @@ async function getAdminPushPublicKey() {
   return ((_a = rows[0]) == null ? void 0 : _a.public_key) || "";
 }
 async function saveAdminPushSubscription(administratorId, subscription) {
+  var _a;
   const database = useDatabase();
   const endpointHash = createHash("sha256").update(subscription.endpoint).digest("hex");
   await database.execute(`
@@ -204,13 +309,59 @@ async function saveAdminPushSubscription(administratorId, subscription) {
     ON DUPLICATE KEY UPDATE administrator_id=VALUES(administrator_id), endpoint=VALUES(endpoint),
       p256dh=VALUES(p256dh), auth_secret=VALUES(auth_secret), enabled=1, last_error=NULL
   `, [administratorId, endpointHash, subscription.endpoint, subscription.keys.p256dh, subscription.keys.auth]);
+  const [rows] = await database.query(
+    "SELECT id FROM admin_push_subscriptions WHERE endpoint_hash=? AND administrator_id=?",
+    [endpointHash, administratorId]
+  );
+  const subscriptionId = Number((_a = rows[0]) == null ? void 0 : _a.id);
+  if (!subscriptionId) throw new Error("Abonnement Web Push introuvable apr\xE8s enregistrement");
+  await database.execute(
+    "INSERT IGNORE INTO admin_push_subscription_preferences (subscription_id) VALUES (?)",
+    [subscriptionId]
+  );
+  return getAdminPushPreferences(subscriptionId);
+}
+async function getAdminPushPreferences(subscriptionId) {
+  const [rows] = await useDatabase().query(`
+    SELECT learner_registration, learner_accounts, daily_sessions, foreign_country, falc_usage
+    FROM admin_push_subscription_preferences WHERE subscription_id=?
+  `, [subscriptionId]);
+  const row = rows[0];
+  return Object.fromEntries(ADMIN_PUSH_PREFERENCE_KEYS.map((key) => [key, row ? Boolean(row[key]) : true]));
+}
+async function updateAdminPushPreferences(administratorId, endpoint, preferences) {
+  var _a;
+  const database = useDatabase();
+  const endpointHash = createHash("sha256").update(endpoint).digest("hex");
+  const [rows] = await database.query(`
+    SELECT id FROM admin_push_subscriptions
+    WHERE administrator_id=? AND endpoint_hash=? AND enabled=1
+  `, [administratorId, endpointHash]);
+  const subscriptionId = Number((_a = rows[0]) == null ? void 0 : _a.id);
+  if (!subscriptionId) throw createError({ statusCode: 404, statusMessage: "Abonnement introuvable" });
+  await database.execute(`
+    INSERT INTO admin_push_subscription_preferences
+      (subscription_id, learner_registration, learner_accounts, daily_sessions, foreign_country, falc_usage)
+    VALUES (?, ?, ?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE learner_registration=VALUES(learner_registration),
+      learner_accounts=VALUES(learner_accounts), daily_sessions=VALUES(daily_sessions),
+      foreign_country=VALUES(foreign_country), falc_usage=VALUES(falc_usage)
+  `, [subscriptionId, ...ADMIN_PUSH_PREFERENCE_KEYS.map((key) => preferences[key] ? 1 : 0)]);
+  return getAdminPushPreferences(subscriptionId);
 }
 async function deleteAdminPushSubscription(administratorId, endpoint) {
+  var _a;
   const endpointHash = createHash("sha256").update(endpoint).digest("hex");
-  await useDatabase().execute(
-    "DELETE FROM admin_push_subscriptions WHERE administrator_id=? AND endpoint_hash=?",
+  const database = useDatabase();
+  const [rows] = await database.query(
+    "SELECT id FROM admin_push_subscriptions WHERE administrator_id=? AND endpoint_hash=?",
     [administratorId, endpointHash]
   );
+  const subscriptionId = Number((_a = rows[0]) == null ? void 0 : _a.id);
+  if (subscriptionId) {
+    await database.execute("DELETE FROM admin_push_subscription_preferences WHERE subscription_id=?", [subscriptionId]);
+    await database.execute("DELETE FROM admin_push_subscriptions WHERE id=?", [subscriptionId]);
+  }
 }
 async function sendAdminPushTest(administratorId, endpoint) {
   const database = useDatabase();
@@ -237,5 +388,5 @@ async function sendAdminPushTest(administratorId, endpoint) {
   }), { TTL: 60 });
 }
 
-export { sendAdminPushTest as a, deleteAdminPushSubscription as d, evaluateAdminPushAlerts as e, getAdminPushPublicKey as g, initializeAdminPushBaseline as i, recordLearnerAccountCreated as r, saveAdminPushSubscription as s };
+export { ADMIN_PUSH_PREFERENCE_KEYS as A, sendAdminPushTest as a, recordFalcModeUsed as b, deleteAdminPushSubscription as d, evaluateAdminPushAlerts as e, getAdminPushPublicKey as g, initializeAdminPushBaseline as i, recordLearnerAccountCreated as r, saveAdminPushSubscription as s, updateAdminPushPreferences as u };
 //# sourceMappingURL=admin-push-notifications.mjs.map

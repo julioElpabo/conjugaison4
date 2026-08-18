@@ -13,6 +13,7 @@ import 'web-push';
 import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
+import '../../../_/google-analytics.mjs';
 
 const index_post = defineEventHandler(async (event) => {
   var _a, _b;
@@ -25,8 +26,8 @@ const index_post = defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "Abonnement Web Push invalide" });
   }
   await initializeAdminPushBaseline();
-  await saveAdminPushSubscription(administrator.id, { endpoint, keys: { p256dh, auth } });
-  return { ok: true };
+  const preferences = await saveAdminPushSubscription(administrator.id, { endpoint, keys: { p256dh, auth } });
+  return { ok: true, preferences };
 });
 
 export { index_post as default };

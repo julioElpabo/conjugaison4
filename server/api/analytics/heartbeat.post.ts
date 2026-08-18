@@ -2,6 +2,7 @@ import { analyticsDeviceCategory, analyticsSessionId, safeAnalyticsPath } from '
 import { assertPublicApiRateLimit, PUBLIC_RATE_LIMITS } from '../../services/public-api-rate-limit'
 import { readLimitedJsonBody } from '../../utils/limited-json-body'
 import { getLearnerSession } from '../../utils/learner-session'
+import { evaluateAdminPushAlerts } from '../../services/admin-push-notifications'
 
 export default defineEventHandler(async (event) => {
   await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.telemetry)
@@ -28,5 +29,6 @@ export default defineEventHandler(async (event) => {
     await database.execute(`INSERT INTO analytics_events (session_id, event_name, path, actor_type, metadata)
       VALUES (?, 'page_view', ?, ?, ?)`, [sessionId, path, actorType, JSON.stringify({ actor: actorType })])
   }
+  await evaluateAdminPushAlerts()
   return { ok: true }
 })

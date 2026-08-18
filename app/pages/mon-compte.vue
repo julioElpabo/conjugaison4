@@ -1,6 +1,14 @@
 <script setup lang="ts">
 const { ui } = useLanguagePreferences()
 const { user } = useAdminAuth()
+const pushSupported = ref(false)
+const pushCapabilityChecked = ref(false)
+const pushEnabled = ref(false)
+const pushBusy = ref(false)
+const pushMessage = ref('')
+const pushError = ref('')
+let pushRegistration: ServiceWorkerRegistration | null = null
+let pushSubscription: PushSubscription | null = null
 
 useHead(() => ({ title: ui('Mon compte') }))
 
@@ -10,6 +18,112 @@ const displayName = computed(() => {
   }
   return [user.value.prenom, user.value.nom].filter(Boolean).join(' ')
 })
+
+function applicationServerKey(value: string) {
+  const padding = '='.repeat((4 - value.length % 4) % 4)
+  const raw = atob((value + padding).replace(/-/gu, '+').replace(/_/gu, '/'))
+  return Uint8Array.from(raw, character => character.charCodeAt(0))
+}
+
+async function pushConfiguration() {
+  return await $fetch<{ publicKey: string }>('/api/admin/push-subscriptions')
+}
+
+async function synchronizeSubscription(subscription: PushSubscription) {
+  await $fetch('/api/admin/push-subscriptions', {
+    method: 'POST',
+    body: subscription.toJSON(),
+  })
+}
+
+onMounted(async () => {
+  pushSupported.value = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
+  pushCapabilityChecked.value = true
+  if (!pushSupported.value) return
+  try {
+    pushRegistration = await navigator.serviceWorker.register('/admin-push-sw.js', { scope: '/' })
+    pushSubscription = await pushRegistration.pushManager.getSubscription()
+    pushEnabled.value = Boolean(pushSubscription)
+    if (pushSubscription) await synchronizeSubscription(pushSubscription)
+  }
+  catch {
+    pushError.value = 'Impossible de vérifier les notifications sur cet appareil.'
+  }
+})
+
+async function enablePush() {
+  if (!pushSupported.value || pushBusy.value) return
+  pushBusy.value = true
+  pushMessage.value = ''
+  pushError.value = ''
+  try {
+    const permission = await Notification.requestPermission()
+    if (permission !== 'granted') {
+      pushError.value = 'Les notifications ont été refusées dans les réglages du navigateur.'
+      return
+    }
+    pushRegistration ||= await navigator.serviceWorker.register('/admin-push-sw.js', { scope: '/' })
+    const { publicKey } = await pushConfiguration()
+    if (!publicKey) throw new Error('Clé Web Push indisponible')
+    pushSubscription = await pushRegistration.pushManager.getSubscription()
+      || await pushRegistration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: applicationServerKey(publicKey),
+      })
+    await synchronizeSubscription(pushSubscription)
+    pushEnabled.value = true
+    pushMessage.value = 'Notifications activées sur cet appareil.'
+  }
+  catch {
+    pushError.value = 'L’activation des notifications a échoué.'
+  }
+  finally {
+    pushBusy.value = false
+  }
+}
+
+async function disablePush() {
+  if (!pushSubscription || pushBusy.value) return
+  pushBusy.value = true
+  pushMessage.value = ''
+  pushError.value = ''
+  try {
+    await $fetch('/api/admin/push-subscriptions', {
+      method: 'DELETE',
+      body: { endpoint: pushSubscription.endpoint },
+    })
+    await pushSubscription.unsubscribe()
+    pushSubscription = null
+    pushEnabled.value = false
+    pushMessage.value = 'Notifications désactivées sur cet appareil.'
+  }
+  catch {
+    pushError.value = 'La désactivation des notifications a échoué.'
+  }
+  finally {
+    pushBusy.value = false
+  }
+}
+
+async function testPush() {
+  if (!pushSubscription || pushBusy.value) return
+  pushBusy.value = true
+  pushMessage.value = ''
+  pushError.value = ''
+  try {
+    await $fetch('/api/admin/push-subscriptions/test', {
+      method: 'POST',
+      body: { endpoint: pushSubscription.endpoint },
+    })
+    pushMessage.value = 'Notification de test envoyée.'
+  }
+  catch {
+    pushError.value = 'La notification de test n’a pas pu être envoyée.'
+  }
+  finally {
+    pushBusy.value = false
+  }
+}
 </script>
 
 <template>
@@ -60,6 +174,47 @@ const displayName = computed(() => {
               <dd>{{ ui('Administration') }}</dd>
             </div>
           </dl>
+        </section>
+
+        <section class="push-card admin-card" aria-labelledby="push-notifications-title">
+          <div>
+            <p class="admin-eyebrow">{{ ui('Alertes privées') }}</p>
+            <h2 id="push-notifications-title">{{ ui('Notifications Tatitotu') }}</h2>
+            <p class="admin-muted">
+              {{ ui('Recevez les paliers de comptes créés et de sessions quotidiennes, même lorsque le site n’est pas ouvert.') }}
+            </p>
+          </div>
+
+          <div v-if="pushSupported" class="push-card__actions">
+            <button
+              v-if="!pushEnabled"
+              class="admin-button"
+              type="button"
+              :disabled="pushBusy"
+              @click="enablePush"
+            >
+              {{ pushBusy ? ui('Activation…') : ui('Activer sur cet appareil') }}
+            </button>
+            <template v-else>
+              <span class="push-card__status">{{ ui('Activées sur cet appareil') }}</span>
+              <button class="admin-button" type="button" :disabled="pushBusy" @click="testPush">
+                {{ ui('Envoyer un test') }}
+              </button>
+              <button class="admin-button admin-button--secondary" type="button" :disabled="pushBusy" @click="disablePush">
+                {{ ui('Désactiver') }}
+              </button>
+            </template>
+          </div>
+          <p v-else-if="pushCapabilityChecked" class="admin-notice admin-notice--error" role="status">
+            {{ ui('Ce navigateur ne prend pas en charge les notifications Web Push.') }}
+          </p>
+          <p v-if="pushMessage" class="admin-notice admin-notice--success" role="status">{{ pushMessage }}</p>
+          <p v-if="pushError" class="admin-notice admin-notice--error" role="alert">{{ pushError }}</p>
+
+          <ul>
+            <li>{{ ui('Comptes créés : 40, 50, 60, puis chaque dizaine.') }}</li>
+            <li>{{ ui('Sessions quotidiennes : 1 000, 1 500, puis chaque centaine.') }}</li>
+          </ul>
         </section>
 
         <aside class="account-note">
@@ -169,6 +324,45 @@ const displayName = computed(() => {
 .account-note p {
   margin: 5px 0 0;
   line-height: 1.55;
+}
+
+.push-card {
+  display: grid;
+  padding: clamp(20px, 4vw, 28px);
+  gap: 18px;
+  box-shadow: none;
+}
+
+.push-card h2,
+.push-card p {
+  margin: 0;
+}
+
+.push-card .admin-muted {
+  margin-top: 7px;
+  line-height: 1.55;
+}
+
+.push-card__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.push-card__status {
+  padding: 8px 12px;
+  color: #25603a;
+  background: #eaf7ee;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.push-card ul {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--admin-muted);
+  line-height: 1.7;
 }
 
 @media (max-width: 590px) {

@@ -209,14 +209,31 @@ async function testPush() {
   pushMessage.value = ''
   pushError.value = ''
   try {
-    await $fetch('/api/admin/push-subscriptions/test', {
-      method: 'POST',
-      body: { endpoint: pushSubscription.endpoint },
+    const testId = crypto.randomUUID()
+    const browserReceipt = new Promise<boolean>((resolve) => {
+      const timeout = window.setTimeout(() => {
+        navigator.serviceWorker.removeEventListener('message', receive)
+        resolve(false)
+      }, 10000)
+      function receive(event: MessageEvent) {
+        if (event.data?.type !== 'tatitotu-admin-push-test-received' || event.data?.testId !== testId) return
+        window.clearTimeout(timeout)
+        navigator.serviceWorker.removeEventListener('message', receive)
+        resolve(true)
+      }
+      navigator.serviceWorker.addEventListener('message', receive)
     })
-    pushMessage.value = 'Notification de test envoyée.'
+    const response = await $fetch<{ pushServiceStatus: number }>('/api/admin/push-subscriptions/test', {
+      method: 'POST',
+      body: { endpoint: pushSubscription.endpoint, testId },
+    })
+    const received = await browserReceipt
+    pushMessage.value = received
+      ? 'Notification de test reçue et affichée par ce navigateur.'
+      : `Notification acceptée par le service Push (${response.pushServiceStatus}), mais sa réception n’a pas été confirmée sous 10 secondes. Vérifiez le centre de notifications et les réglages système.`
   }
-  catch {
-    pushError.value = 'La notification de test n’a pas pu être envoyée.'
+  catch (error) {
+    pushError.value = getAdminErrorMessage(error, 'La notification de test n’a pas pu être envoyée.')
   }
   finally {
     pushBusy.value = false

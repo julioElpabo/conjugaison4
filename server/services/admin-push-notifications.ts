@@ -429,7 +429,7 @@ export async function deleteAdminPushSubscription(administratorId: number, endpo
   }
 }
 
-export async function sendAdminPushTest(administratorId: number, endpoint: string) {
+export async function sendAdminPushTest(administratorId: number, endpoint: string, testId: string) {
   const database = useDatabase()
   const endpointHash = createHash('sha256').update(endpoint).digest('hex')
   const [subscriptions] = await database.query<SubscriptionRow[]>(`
@@ -443,13 +443,36 @@ export async function sendAdminPushTest(administratorId: number, endpoint: strin
   if (!vapid) throw createError({ statusCode: 503, statusMessage: 'Web Push indisponible' })
   const contactEmail = String(useRuntimeConfig().contactEmail || 'admin@tatitotu.ch').trim()
   webPush.setVapidDetails(`mailto:${contactEmail}`, vapid.public_key, vapid.private_key)
-  await webPush.sendNotification({
-    endpoint: subscription.endpoint,
-    keys: { p256dh: subscription.p256dh, auth: subscription.auth_secret },
-  }, JSON.stringify({
-    title: 'Tatitotu · Notifications activées',
-    body: 'Les alertes administrateur arriveront bien sur cet appareil.',
-    tag: 'tatitotu-push-test',
-    url: '/mon-compte',
-  }), { TTL: 60 })
+  try {
+    const receipt = await webPush.sendNotification({
+      endpoint: subscription.endpoint,
+      keys: { p256dh: subscription.p256dh, auth: subscription.auth_secret },
+    }, JSON.stringify({
+      title: 'Tatitotu · Notifications activées',
+      body: 'Les alertes administrateur arriveront bien sur cet appareil.',
+      tag: 'tatitotu-push-test',
+      url: '/mon-compte',
+      testId,
+    }), { TTL: 5 * 60, urgency: 'high' })
+    await database.execute(
+      'UPDATE admin_push_subscriptions SET last_success_at=CURRENT_TIMESTAMP, last_error=NULL WHERE id=?',
+      [subscription.id],
+    )
+    return { statusCode: receipt.statusCode }
+  }
+  catch (error) {
+    const statusCode = Number((error as { statusCode?: unknown })?.statusCode) || 502
+    const providerMessage = error instanceof Error ? error.message.slice(0, 255) : 'Échec de livraison Web Push'
+    await database.execute(
+      'UPDATE admin_push_subscriptions SET last_error=? WHERE id=?',
+      [providerMessage, subscription.id],
+    )
+    if (statusCode === 404 || statusCode === 410) {
+      await database.execute('UPDATE admin_push_subscriptions SET enabled=0 WHERE id=?', [subscription.id])
+    }
+    throw createError({
+      statusCode: statusCode >= 400 && statusCode < 600 ? statusCode : 502,
+      statusMessage: `Service Push : ${providerMessage}`,
+    })
+  }
 }

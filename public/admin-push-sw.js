@@ -1,3 +1,11 @@
+self.addEventListener('install', () => {
+  self.skipWaiting()
+})
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim())
+})
+
 self.addEventListener('push', (event) => {
   let data = {}
   try {
@@ -7,14 +15,24 @@ self.addEventListener('push', (event) => {
     data = {}
   }
   const title = data.title || 'Tatitotu'
-  event.waitUntil(self.registration.showNotification(title, {
-    body: data.body || 'Nouvelle alerte administrateur.',
-    icon: '/favicon.ico',
-    badge: '/favicon.ico',
-    tag: data.tag || 'tatitotu-admin-alert',
-    renotify: true,
-    data: { url: data.url || '/admin/charts' },
-  }))
+  event.waitUntil((async () => {
+    await self.registration.showNotification(title, {
+      body: data.body || 'Nouvelle alerte administrateur.',
+      icon: '/favicon.ico',
+      badge: '/favicon.ico',
+      tag: data.tag || 'tatitotu-admin-alert',
+      renotify: true,
+      data: { url: data.url || '/admin/charts' },
+    })
+
+    if (data.testId) {
+      const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+      await Promise.all(windows.map(client => client.postMessage({
+        type: 'tatitotu-admin-push-test-received',
+        testId: data.testId,
+      })))
+    }
+  })())
 })
 
 self.addEventListener('notificationclick', (event) => {

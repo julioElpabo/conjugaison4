@@ -1559,7 +1559,7 @@ const _routes = [
   {
     name: "admin-charts",
     path: "/admin/charts",
-    component: () => import('./charts-BUDwTbZ9.mjs')
+    component: () => import('./charts-YAjG5-Jd.mjs')
   },
   {
     name: "admin-coaches",
@@ -1740,7 +1740,7 @@ const _routes = [
   {
     name: "localized-admin-charts",
     path: "/:locale(fr|de|en|it|es)/admin/charts",
-    component: () => import('./charts-BUDwTbZ9.mjs')
+    component: () => import('./charts-YAjG5-Jd.mjs')
   },
   {
     name: "localized-admin-coaches",

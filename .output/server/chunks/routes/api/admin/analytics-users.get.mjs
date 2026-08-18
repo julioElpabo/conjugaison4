@@ -37,7 +37,7 @@ function isoDate(value, fallback) {
   const text = String(value || "");
   return /^\d{4}-\d{2}-\d{2}$/u.test(text) && !Number.isNaN(Date.parse(`${text}T12:00:00Z`)) ? text : fallback.toISOString().slice(0, 10);
 }
-function filledRegistrationSeries(rows, startDate, endDate, unit) {
+function cumulativeAccountSeries(rows, startDate, endDate, unit, initialTotal) {
   const values = new Map(rows.map((row) => [String(row.date), Number(row.value) || 0]));
   const cursor = /* @__PURE__ */ new Date(`${startDate}T12:00:00Z`);
   const end = /* @__PURE__ */ new Date(`${endDate}T12:00:00Z`);
@@ -47,9 +47,11 @@ function filledRegistrationSeries(rows, startDate, endDate, unit) {
   }
   if (unit === "Mois") cursor.setUTCDate(1);
   const points = [];
+  let total = initialTotal;
   while (cursor <= end) {
     const date = cursor.toISOString().slice(0, 10);
-    points.push({ date, value: values.get(date) || 0 });
+    total += values.get(date) || 0;
+    points.push({ date, value: total });
     if (unit === "Jours") cursor.setUTCDate(cursor.getUTCDate() + 1);
     else if (unit === "Semaines") cursor.setUTCDate(cursor.getUTCDate() + 7);
     else cursor.setUTCMonth(cursor.getUTCMonth() + 1);
@@ -75,12 +77,17 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
   const registrationDate = rangeDays <= 45 ? `DATE_FORMAT(a.created_at, '${registrationFormat}')` : rangeDays <= 210 ? "DATE_FORMAT(DATE_SUB(DATE(a.created_at), INTERVAL WEEKDAY(a.created_at) DAY), '%Y-%m-%d')" : `DATE_FORMAT(a.created_at, '${registrationFormat}')`;
   const registrationUnit = rangeDays <= 45 ? "Jours" : rangeDays <= 210 ? "Semaines" : "Mois";
   const database = useDatabase();
-  const [[[total]], [[active]], [languageRows], [anonymousLanguageRows], [registrationRows], [[errorReviews]], [[loginSummary]], [[failedLogins]], [connectedFeatureRows]] = await Promise.all([
+  const [[[total]], [[initialTotal]], [[active]], [languageRows], [anonymousLanguageRows], [registrationRows], [[errorReviews]], [[loginSummary]], [[failedLogins]], [connectedFeatureRows]] = await Promise.all([
     database.execute(`
       SELECT COUNT(*) AS value
       FROM learner_accounts
       WHERE deleted_at IS NULL
     `),
+    database.execute(`
+      SELECT COUNT(*) AS value
+      FROM learner_accounts
+      WHERE deleted_at IS NULL AND created_at<?
+    `, [startDate]),
     database.execute(`
       SELECT COUNT(DISTINCT activity.account_id) AS value
       FROM (
@@ -171,11 +178,12 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
     label: connectedFeatureLabels[String(row.feature)] || String(row.feature),
     value: Number(row.value) || 0
   }));
-  const registrations = filledRegistrationSeries(
+  const accountTotals = cumulativeAccountSeries(
     registrationRows,
     startDate,
     endDate,
-    registrationUnit
+    registrationUnit,
+    Number(initialTotal == null ? void 0 : initialTotal.value) || 0
   );
   return {
     startDate,
@@ -190,7 +198,7 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
     connectedFeatures,
     anonymousExerciseSessions,
     anonymousExerciseLanguages,
-    registrations,
+    accountTotals,
     registrationUnit,
     generatedAt: (/* @__PURE__ */ new Date()).toISOString(),
     notice: "L\u2019activit\xE9 regroupe les connexions, les sessions de compte et les r\xE9ponses enregistr\xE9es. La reprise des erreurs compte chaque utilisateur une seule fois sur la p\xE9riode."

@@ -7,12 +7,14 @@ import { a as assertTurnstile } from '../../../_/turnstile.mjs';
 import { r as requireLearnerRegistrationFlow, a as assertUsernameProof, c as clearLearnerRegistrationFlow, b as createUsernameProof } from '../../../_/learner-registration.mjs';
 import { a as createLearnerSession } from '../../../_/learner-session.mjs';
 import { r as readLimitedJsonBody } from '../../../_/limited-json-body.mjs';
+import { r as recordLearnerAccountCreated } from '../../../_/admin-push-notifications.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
 import 'node:buffer';
 import 'node:fs';
 import 'node:path';
+import 'web-push';
 import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
@@ -75,6 +77,7 @@ const register_post = defineEventHandler(async (event) => {
     await connection.commit();
     await createLearnerSession(event, result.insertId, 1);
     clearLearnerRegistrationFlow(event);
+    await recordLearnerAccountCreated();
     return {
       ok: true,
       username,

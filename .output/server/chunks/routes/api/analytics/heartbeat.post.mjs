@@ -3,6 +3,7 @@ import { a as analyticsSessionId, s as safeAnalyticsPath, b as analyticsDeviceCa
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../../_/public-api-rate-limit.mjs';
 import { r as readLimitedJsonBody } from '../../../_/limited-json-body.mjs';
 import { g as getLearnerSession } from '../../../_/learner-session.mjs';
+import { e as evaluateAdminPushAlerts } from '../../../_/admin-push-notifications.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -10,6 +11,7 @@ import 'node:buffer';
 import 'node:fs';
 import 'node:path';
 import 'node:crypto';
+import 'web-push';
 import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
@@ -37,6 +39,7 @@ const heartbeat_post = defineEventHandler(async (event) => {
     await database.execute(`INSERT INTO analytics_events (session_id, event_name, path, actor_type, metadata)
       VALUES (?, 'page_view', ?, ?, ?)`, [sessionId, path, actorType, JSON.stringify({ actor: actorType })]);
   }
+  await evaluateAdminPushAlerts();
   return { ok: true };
 });
 

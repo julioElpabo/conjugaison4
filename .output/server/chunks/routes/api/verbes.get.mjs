@@ -6,6 +6,7 @@ import 'node:buffer';
 import 'node:fs';
 import 'node:path';
 import 'node:crypto';
+import 'web-push';
 import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';

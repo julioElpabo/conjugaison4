@@ -9,6 +9,7 @@ import 'node:events';
 import 'node:buffer';
 import 'node:fs';
 import 'node:path';
+import 'web-push';
 import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';

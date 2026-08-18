@@ -10,6 +10,7 @@ import 'node:buffer';
 import 'node:fs';
 import 'node:path';
 import 'node:crypto';
+import 'web-push';
 import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
@@ -551,6 +552,17 @@ const uiMessages = {
   "Identifiant": { de: "Kennung", en: "Identifier", it: "Identificativo", es: "Identificador" },
   "Niveau d\u2019acc\xE8s": { de: "Zugriffsebene", en: "Access level", it: "Livello di accesso", es: "Nivel de acceso" },
   "Modification du profil": { de: "Profil bearbeiten", en: "Edit profile", it: "Modifica del profilo", es: "Editar perfil" },
+  "Alertes priv\xE9es": { de: "Private Benachrichtigungen", en: "Private alerts", it: "Avvisi privati", es: "Alertas privadas" },
+  "Notifications Tatitotu": { de: "Tatitotu-Benachrichtigungen", en: "Tatitotu notifications", it: "Notifiche Tatitotu", es: "Notificaciones de Tatitotu" },
+  "Recevez les paliers de comptes cr\xE9\xE9s et de sessions quotidiennes, m\xEAme lorsque le site n\u2019est pas ouvert.": { de: "Erhalten Sie Meldungen zu Meilensteinen bei erstellten Konten und t\xE4glichen Sitzungen, auch wenn die Website nicht ge\xF6ffnet ist.", en: "Receive milestones for created accounts and daily sessions, even when the site is not open.", it: "Ricevi gli avvisi sui traguardi degli account creati e delle sessioni giornaliere, anche quando il sito non \xE8 aperto.", es: "Recibe avisos de los hitos de cuentas creadas y sesiones diarias, incluso cuando el sitio no est\xE1 abierto." },
+  "Activation\u2026": { de: "Aktivierung\u2026", en: "Enabling\u2026", it: "Attivazione\u2026", es: "Activando\u2026" },
+  "Activer sur cet appareil": { de: "Auf diesem Ger\xE4t aktivieren", en: "Enable on this device", it: "Attiva su questo dispositivo", es: "Activar en este dispositivo" },
+  "Activ\xE9es sur cet appareil": { de: "Auf diesem Ger\xE4t aktiviert", en: "Enabled on this device", it: "Attivate su questo dispositivo", es: "Activadas en este dispositivo" },
+  "Envoyer un test": { de: "Test senden", en: "Send a test", it: "Invia un test", es: "Enviar una prueba" },
+  "D\xE9sactiver": { de: "Deaktivieren", en: "Disable", it: "Disattiva", es: "Desactivar" },
+  "Ce navigateur ne prend pas en charge les notifications Web Push.": { de: "Dieser Browser unterst\xFCtzt keine Web-Push-Benachrichtigungen.", en: "This browser does not support Web Push notifications.", it: "Questo browser non supporta le notifiche Web Push.", es: "Este navegador no admite notificaciones Web Push." },
+  "Comptes cr\xE9\xE9s : 40, 50, 60, puis chaque dizaine.": { de: "Erstellte Konten: 40, 50, 60, dann alle zehn.", en: "Accounts created: 40, 50, 60, then every ten.", it: "Account creati: 40, 50, 60, poi ogni dieci.", es: "Cuentas creadas: 40, 50, 60 y despu\xE9s cada diez." },
+  "Sessions quotidiennes : 1 000, 1 500, puis chaque centaine.": { de: "T\xE4gliche Sitzungen: 1.000, 1.500, dann alle hundert.", en: "Daily sessions: 1,000, 1,500, then every hundred.", it: "Sessioni giornaliere: 1.000, 1.500, poi ogni cento.", es: "Sesiones diarias: 1000, 1500 y despu\xE9s cada cien." },
   "Cette version permet de consulter le compte. Aucune API de modification du profil ou du mot de passe n\u2019est disponible.": { de: "In dieser Version kann das Konto eingesehen werden. Eine Schnittstelle zum \xC4ndern des Profils oder Passworts ist nicht verf\xFCgbar.", en: "This version lets you view the account. No API is available for changing the profile or password.", it: "Questa versione permette di consultare l\u2019account. Non \xE8 disponibile un\u2019API per modificare il profilo o la password.", es: "Esta versi\xF3n permite consultar la cuenta. No hay disponible una API para modificar el perfil o la contrase\xF1a." },
   "Ton d\xE9fi est pr\xEAt": { de: "Deine \xDCbung ist bereit", en: "Your challenge is ready", it: "Il tuo esercizio \xE8 pronto", es: "Tu ejercicio est\xE1 listo" },
   "Comment veux-tu l\u2019utiliser ?": { de: "Wie m\xF6chtest du sie verwenden?", en: "How would you like to use it?", it: "Come vuoi usarlo?", es: "\xBFC\xF3mo quieres utilizarlo?" },
@@ -1689,7 +1701,7 @@ const _routes = [
   {
     name: "mon-compte",
     path: "/mon-compte",
-    component: () => import('./mon-compte-DRcwf3xe.mjs')
+    component: () => import('./mon-compte-DX8vUwYq.mjs')
   },
   {
     name: "my-page",
@@ -1870,7 +1882,7 @@ const _routes = [
   {
     name: "localized-mon-compte",
     path: "/:locale(fr|de|en|it|es)/mon-compte",
-    component: () => import('./mon-compte-DRcwf3xe.mjs')
+    component: () => import('./mon-compte-DX8vUwYq.mjs')
   },
   {
     name: "localized-my-page",

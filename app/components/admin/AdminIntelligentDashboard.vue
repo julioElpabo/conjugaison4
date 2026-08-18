@@ -169,7 +169,7 @@ const exerciseSeries = computed(() => [
   { label: 'Fins', color: '#2b9767', points: local.value.series.exercise_completed || [] },
 ])
 const registrationSeries = computed(() => [
-  { label: 'Nouveaux comptes', color: '#7351a6', points: props.users.registrations as AnalyticsSeriesPoint[] },
+  { label: 'Total des comptes', color: '#7351a6', points: props.users.accountTotals as AnalyticsSeriesPoint[] },
 ])
 </script>
 
@@ -244,12 +244,12 @@ const registrationSeries = computed(() => [
         y-unit="Exercices"
       />
       <AdminTrendChart
-        title="Créations de comptes"
+        title="Évolution du total des comptes"
         eyebrow="Fidélisation"
         :series="registrationSeries"
-        insight="Montre quand de nouveaux utilisateurs ont créé leur espace personnel."
+        insight="Montre l’évolution du nombre total de comptes sur la période."
         :x-unit="users.registrationUnit"
-        y-unit="Nouveaux comptes"
+        y-unit="Total des comptes"
       />
     </div>
 

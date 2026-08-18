@@ -131,7 +131,7 @@ export interface AnalyticsUsersResponse {
   connectedFeatures: AnalyticsBreakdownItem[]
   anonymousExerciseSessions: number
   anonymousExerciseLanguages: AnalyticsBreakdownItem[]
-  registrations: AnalyticsSeriesPoint[]
+  accountTotals: AnalyticsSeriesPoint[]
   registrationUnit: 'Jours' | 'Semaines' | 'Mois'
   generatedAt: string
   notice?: string

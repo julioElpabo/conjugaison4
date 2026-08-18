@@ -45,13 +45,12 @@ function number(value: number) {
         center-label="comptes"
       />
       <AdminTrendChart
-        title="Créations de comptes"
-        eyebrow="Évolution"
-        kind="bar"
-        :series="[{ label: 'Nouveaux comptes', color: '#08758b', points: users.registrations }]"
-        :insight="`Comptes créés entre le ${new Date(`${users.startDate}T12:00:00`).toLocaleDateString('fr-CH')} et le ${new Date(`${users.endDate}T12:00:00`).toLocaleDateString('fr-CH')}.`"
+        title="Évolution du total des comptes"
+        eyebrow="Comptes"
+        :series="[{ label: 'Total des comptes', color: '#08758b', points: users.accountTotals }]"
+        :insight="`Évolution du nombre total de comptes entre le ${new Date(`${users.startDate}T12:00:00`).toLocaleDateString('fr-CH')} et le ${new Date(`${users.endDate}T12:00:00`).toLocaleDateString('fr-CH')}.`"
         :x-unit="users.registrationUnit"
-        y-unit="Nombre de comptes créés"
+        y-unit="Total des comptes"
       />
     </div>
     <AdminFeatureUsageChart

@@ -92,7 +92,7 @@ body.dialog-open {
   color: #294c4b;
   font-size: clamp(2.35rem, 6vw, 4.8rem);
   font-weight: 760;
-  letter-spacing: -0.055em;
+  letter-spacing: 0.018em;
   line-height: 0.98;
 }
 
@@ -458,7 +458,7 @@ body.dialog-open {
   margin: 0;
   color: #31544f;
   font-size: 1.45rem;
-  letter-spacing: -0.025em;
+  letter-spacing: 0.018em;
 }
 
 .preset-panel__intro > p {
@@ -1950,7 +1950,7 @@ body.dialog-open {
   color: #264b46;
   font-size: clamp(1.45rem, 3.5vw, 2.25rem);
   font-weight: 760;
-  letter-spacing: -0.025em;
+  letter-spacing: 0.018em;
   line-height: 1.2;
 }
 
@@ -2326,7 +2326,7 @@ body.dialog-open {
 .results-hero strong {
   color: var(--success);
   font-size: clamp(3.5rem, 9vw, 6.4rem);
-  letter-spacing: -0.07em;
+  letter-spacing: 0.012em;
   line-height: 1;
 }
 

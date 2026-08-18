@@ -93,10 +93,10 @@ useSeoMeta({ twitterCard: 'summary' })
 
 <style scoped>
 .tense-exercise-page { display: grid; width: 100%; max-width: 980px; min-width: 0; margin: 0 auto; gap: 18px; color: var(--ink); font-family: "Funnel Sans", "Avenir Next", Avenir, system-ui, sans-serif; }
-.tense-exercise-page h2 { margin: 0 0 12px; color: var(--brand-dark); font-size: clamp(1.35rem, 3vw, 2rem); letter-spacing: -.025em; }
+.tense-exercise-page h2 { margin: 0 0 12px; color: var(--brand-dark); font-size: clamp(1.35rem, 3vw, 2rem); letter-spacing: .015em; }
 .tense-exercise-page__hero { max-width: 820px; margin: 18px auto 30px; text-align: center; }
 .tense-exercise-page__hero > p:first-child, .tense-exercise-page__practice p { margin: 0 0 8px; color: var(--accent); font-size: .76rem; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; }
-.tense-exercise-page__hero h1 { margin: 0; color: #294c4b; font-size: clamp(2.3rem, 6vw, 4.5rem); letter-spacing: -.055em; line-height: 1.03; }
+.tense-exercise-page__hero h1 { margin: 0; color: #294c4b; font-size: clamp(2.3rem, 6vw, 4.5rem); letter-spacing: .015em; line-height: 1.06; }
 .tense-exercise-page__hero > p:nth-of-type(2) { max-width: 730px; margin: 22px auto 28px; color: var(--muted); font-size: 1.08rem; line-height: 1.7; }
 .exercise-landing__primary, .tense-exercise-page__practice a { display: inline-flex; max-width: 100%; padding: 13px 19px; align-items: center; justify-content: center; border-radius: 12px; color: white; background: var(--brand); font-weight: 820; text-align: center; text-decoration: none; box-shadow: 0 12px 28px rgb(41 76 75 / 18%); }
 .exercise-landing__primary:hover, .tense-exercise-page__practice a:hover { background: var(--brand-dark); transform: translateY(-1px); }

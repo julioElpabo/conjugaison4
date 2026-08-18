@@ -600,7 +600,7 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
 .reference-page { color: var(--ink); font-family: "Funnel Sans", "Avenir Next", Avenir, system-ui, sans-serif; }
 .reference-page--embedded { min-height: 100%; }
 .reference-hero { max-width: 760px; margin: 8px auto 34px; text-align: center; }
-.reference-hero h1 { margin: 4px 0 12px; color: #294c4b; font-size: clamp(2.3rem, 6vw, 4.6rem); letter-spacing: -.055em; line-height: 1; }
+.reference-hero h1 { margin: 4px 0 12px; color: #294c4b; font-size: clamp(2.3rem, 6vw, 4.6rem); letter-spacing: .015em; line-height: 1.05; }
 .reference-eyebrow { margin: 0 0 5px; color: var(--brand); font-size: .76rem; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; }
 .reference-state { display: grid; min-height: 180px; place-items: center; padding: 28px; border: 1px solid var(--line); border-radius: 22px; background: rgb(255 255 255 / 88%); color: var(--muted); text-align: center; }
 .reference-state--error { color: var(--danger); }
@@ -615,7 +615,7 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
 .consultation-tabs button { min-height: 45px; padding: 8px 14px; border: 0; border-radius: 11px; color: var(--muted); background: transparent; font-weight: 800; cursor: pointer; }
 .consultation-tabs button:hover { color: var(--brand-dark); }
 .consultation-tabs button.is-active { color: white; background: var(--brand); box-shadow: 0 5px 14px rgb(36 73 66 / 18%); }
-.tab-panel h2, .alphabet-heading h2 { margin: 0; color: var(--brand-dark); font-size: clamp(1.35rem, 3vw, 2rem); letter-spacing: -.03em; }
+.tab-panel h2, .alphabet-heading h2 { margin: 0; color: var(--brand-dark); font-size: clamp(1.35rem, 3vw, 2rem); letter-spacing: .015em; }
 .search-tab-panel { display: grid; min-height: 300px; grid-template-columns: minmax(340px, .8fr) minmax(300px, 1.2fr); align-items: center; gap: 38px; padding: 20px 28px 42px; }
 .search-tab-panel > div:first-child > p:last-child { max-width: 390px; margin: 10px 0 0; color: var(--muted); line-height: 1.55; }
 .verb-combobox { position: relative; }
@@ -648,7 +648,7 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
 .print-consultation-button:hover { background: var(--brand-dark); }
 .print-consultation-button:focus-visible { outline: 3px solid rgb(217 130 50 / 24%); outline-offset: 2px; }
 .print-consultation-button svg { width: 21px; height: 21px; flex: 0 0 auto; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.conjugation-heading h2 { margin: 0; color: #294c4b; font-size: clamp(2.2rem, 5vw, 3.8rem); letter-spacing: -.05em; }
+.conjugation-heading h2 { margin: 0; color: #294c4b; font-size: clamp(2.2rem, 5vw, 3.8rem); letter-spacing: .015em; }
 .conjugation-heading { align-items: center; }
 .conjugation-disclosures { display: grid; width: 100%; margin-top: 15px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .conjugation-disclosures button { display: inline-flex; width: 100%; min-height: 44px; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; border: 1px solid #a9bdb7; border-radius: 11px; color: var(--brand-dark); background: white; font: inherit; font-size: .86rem; font-weight: 800; cursor: pointer; transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease; }
@@ -664,7 +664,7 @@ if (Number.isSafeInteger(initialId) && initialId !== 0) {
 .detail-disclosure.is-open { margin: 22px 0; grid-template-rows: 1fr; opacity: 1; }
 .detail-disclosure__inner { min-height: 0; overflow: hidden; }
 .agreement-panel { display: grid; padding: clamp(18px, 3vw, 26px); border: 1px solid #bad4cc; border-radius: 19px; background: linear-gradient(135deg, #f5faf8, #edf6f3); gap: 17px; }
-.agreement-panel h3 { margin: 0; color: var(--brand-dark); font-size: clamp(1.25rem, 3vw, 1.65rem); letter-spacing: -.025em; }
+.agreement-panel h3 { margin: 0; color: var(--brand-dark); font-size: clamp(1.25rem, 3vw, 1.65rem); letter-spacing: .015em; }
 .agreement-examples { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .agreement-examples article { display: grid; align-content: start; padding: 16px; border: 1px solid rgb(62 112 99 / 18%); border-radius: 14px; background: rgb(255 255 255 / 82%); gap: 10px; }
 .agreement-badge { justify-self: start; padding: 5px 9px; border-radius: 999px; color: #76511d; background: #f7e8c8; font-size: .73rem; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }

@@ -32,6 +32,9 @@ const guidedTourRequested = useState('guided-tour-requested', () => false)
 const wizardAtHome = useState('wizard-at-home', () => true)
 const tourCopy = computed(() => guidedTourCopy(interfaceLocale.value))
 const learnerCopy = computed(() => learnerSpaceCopy(interfaceLocale.value))
+const publicChallengesLabel = computed(() => ({
+  fr: 'Défis officiels', de: 'Offizielle Aufgaben', en: 'Official challenges', it: 'Sfide ufficiali', es: 'Retos oficiales',
+})[interfaceLocale.value])
 const isExerciseLandingPage = computed(() => ['/', '/exercices-de-conjugaison'].includes(localizedSectionPath.value))
 const isActualHomePage = computed(() => isExerciseLandingPage.value && wizardAtHome.value)
 const activeLanguageOption = computed(() => languageOptions.value.find(option => option.value === interfaceLocale.value) ?? languageOptions.value[0]!)
@@ -517,6 +520,7 @@ const activeSection = computed(() => {
     <footer v-if="!embeddedConsultation" class="site-footer">
       <p>{{ ui('Un outil gratuit pour travailler la conjugaison française.') }}</p>
       <div class="site-footer__links">
+        <NuxtLink :to="localePath('/defis')">{{ publicChallengesLabel }}</NuxtLink>
         <button type="button" @click="contactDialog?.open()">{{ ui('Contact') }}</button>
         <NuxtLink :to="localePath('/admin')">{{ ui('Administration') }}</NuxtLink>
       </div>
@@ -574,6 +578,11 @@ const activeSection = computed(() => {
   --danger-pale: #452725;
   --blue: #78b6d3;
   --shadow: 0 18px 52px rgb(0 0 0 / 28%);
+}
+
+/* Les titres et graisses restent volontairement aérés sur l’ensemble du site. */
+:is(h1, h2, h3, h4, h5, h6, strong, b) {
+  letter-spacing: .018em;
 }
 
 /* Les deux surfaces d'exercice gardent les réglages de lecture utiles,

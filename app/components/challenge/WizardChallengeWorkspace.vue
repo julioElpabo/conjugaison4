@@ -27,10 +27,24 @@ import TensePicker from './TensePicker.vue'
 import VerbPicker from './VerbPicker.vue'
 import '~/assets/css/main.css'
 
+interface LaunchEditHint {
+  before: string
+  between: string
+  after: string
+  verbsLabel: string
+  tensesLabel: string
+}
 
 const props = defineProps<{
   initialCode?: string
+  initialPresetId?: string
   homeHeading?: string
+  embedded?: boolean
+  startAtLaunch?: boolean
+  launchCategory?: string
+  launchTitle?: string
+  launchDescription?: string
+  launchEditHint?: LaunchEditHint
 }>()
 
 type WizardStep = 0 | 1 | 2 | 3 | 4
@@ -264,6 +278,10 @@ function refreshTourHighlight() {
 function revealIds(ids: number[], target: Ref<number[]>, duration = 1_000) {
   target.value = []
   if (!ids.length) return
+  if (import.meta.server) {
+    target.value = [...ids]
+    return
+  }
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     target.value = [...ids]
     refreshTourHighlight()
@@ -480,6 +498,21 @@ try {
       revealedPresetTenseIds.value = [...challenge.value.tenseIds]
       currentStep.value = 4
       showLaunchSummary.value = true
+    }
+  }
+  if (props.initialPresetId && !props.initialCode && !landingTense && !landingMode && !learningIdentification) {
+    const preset = catalogue.value.presets.find(candidate => candidate.id === props.initialPresetId)
+    if (preset) {
+      selectPreset(preset)
+      if (props.startAtLaunch && isReady.value) {
+        cancelPresetReveal()
+        revealedPresetVerbIds.value = [...challenge.value.verbIds]
+        revealedPresetTenseIds.value = [...challenge.value.tenseIds]
+        presetTenseRevealPending.value = false
+        prefilledOptionsRevealPending.value = false
+        goToStep(4)
+        showLaunchSummary.value = true
+      }
     }
   }
   if (props.initialCode) {
@@ -1875,10 +1908,12 @@ async function createSharedChallenge(title: string, description: string) {
 <template>
   <div class="wizard-entry-page">
     <div class="challenge-page wizard-page">
-      <header class="wizard-hero">
+      <header v-if="!props.startAtLaunch" class="wizard-hero">
         <p v-if="currentStep === 0 && !falcMode" class="wizard-hero__brand">{{ heroTitle }}</p>
-        <h1 v-if="currentStep === 0 && !falcMode" class="wizard-hero__subtitle">{{ props.homeHeading || ui('Exercices de conjugaison française, gratuits et sans publicité') }}</h1>
-        <h1 v-if="currentStep !== 0 && !falcMode" :class="{ 'wizard-hero__preset': isPrefilledChallenge }">{{ heroTitle }}</h1>
+        <h1 v-if="currentStep === 0 && !falcMode && !props.embedded" class="wizard-hero__subtitle">{{ props.homeHeading || ui('Exercices de conjugaison française, gratuits et sans publicité') }}</h1>
+        <h2 v-if="currentStep === 0 && !falcMode && props.embedded" class="wizard-hero__subtitle">{{ props.homeHeading || ui('Exercices de conjugaison française, gratuits et sans publicité') }}</h2>
+        <h1 v-if="currentStep !== 0 && !falcMode && !props.embedded" :class="{ 'wizard-hero__preset': isPrefilledChallenge }">{{ heroTitle }}</h1>
+        <h2 v-if="currentStep !== 0 && !falcMode && props.embedded" :class="{ 'wizard-hero__preset': isPrefilledChallenge }">{{ heroTitle }}</h2>
         <button v-if="currentStep === 0 && !falcMode && !guidedTourDisabled" class="tour-entry-button" type="button" @click="openTourMenu">
           <span aria-hidden="true">?</span>{{ tourCopy.discover }}
         </button>
@@ -1961,7 +1996,7 @@ async function createSharedChallenge(title: string, description: string) {
               :disabled="!isReady || isPreparingStep4"
               @click="prepareStep4"
             >
-              <span>4</span><span><strong>{{ ui('Créer') }}</strong><small>{{ ui('Utiliser le défi') }}</small></span>
+              <span>4</span><span><strong>{{ props.startAtLaunch ? ui('Commencer') : ui('Créer') }}</strong><small>{{ ui('Utiliser le défi') }}</small></span>
             </button>
             <span
               v-if="tourSecondaryWizardStep !== null"
@@ -2240,21 +2275,29 @@ async function createSharedChallenge(title: string, description: string) {
             </div>
 
             <div v-else class="wizard-step wizard-launch-step">
-              <div class="wizard-step__actions wizard-step__actions--split">
+              <div v-if="!props.startAtLaunch" class="wizard-step__actions wizard-step__actions--split">
                 <button class="secondary-button" type="button" @click="previousStep">{{ ui('← Options') }}</button>
               </div>
-              <section v-if="showLaunchSummary || showSavedChallengeSummary" class="launch-summary" :aria-labelledby="activePreset || savedChallengeTitle ? 'launch-challenge-title' : undefined">
-                <div class="launch-summary__heading">
+              <section v-if="showLaunchSummary || showSavedChallengeSummary" class="launch-summary" :aria-labelledby="launchTitle || activePreset || savedChallengeTitle ? 'launch-challenge-title' : undefined">
+                <div class="launch-summary__heading" :class="{ 'launch-summary__heading--public': launchTitle }">
                   <div>
-                    <p v-if="activePreset" class="builder-card__eyebrow">{{ activePresetGroupLabel }}</p>
-                    <h2 v-if="activePreset || savedChallengeTitle" id="launch-challenge-title">{{ activePreset?.label || savedChallengeTitle }}</h2>
+                    <p v-if="launchCategory || activePreset" class="builder-card__eyebrow">{{ launchCategory || activePresetGroupLabel }}</p>
+                    <h1 v-if="launchTitle" id="launch-challenge-title">{{ launchTitle }}</h1>
+                    <h2 v-else-if="activePreset || savedChallengeTitle" id="launch-challenge-title">{{ activePreset?.label || savedChallengeTitle }}</h2>
                   </div>
                   <div class="launch-summary__counts">
                     <span>{{ ui(selectedVerbs.length > 1 ? '{count} verbes' : '{count} verbe', { count: selectedVerbs.length }) }}</span>
                     <span>{{ ui('{count} temps', { count: selectedTenses.length }) }}</span>
                   </div>
                 </div>
-                <p v-if="activePreset?.description || savedChallengeDescription" class="launch-summary__description">{{ activePreset?.description || savedChallengeDescription }}</p>
+                <p v-if="launchDescription || activePreset?.description || savedChallengeDescription" class="launch-summary__description">{{ launchDescription || activePreset?.description || savedChallengeDescription }}</p>
+                <p v-if="launchEditHint" class="launch-summary__edit-hint">
+                  <span>{{ launchEditHint.before }}</span>
+                  <button class="launch-summary__step launch-summary__step--verbs" type="button" :aria-label="launchEditHint.verbsLabel" @click="goToStep(1)">1</button>
+                  <span>{{ launchEditHint.between }}</span>
+                  <button class="launch-summary__step launch-summary__step--tenses" type="button" :aria-label="launchEditHint.tensesLabel" @click="goToStep(2)">2</button>
+                  <span>{{ launchEditHint.after }}</span>
+                </p>
               </section>
               <ChallengeActions
                 data-tour="actions"
@@ -2332,7 +2375,7 @@ async function createSharedChallenge(title: string, description: string) {
 .wizard-entry-page { font-family: "Funnel Sans", "Avenir Next", Avenir, system-ui, sans-serif; }
 .wizard-page { overflow: hidden; padding-bottom: 70px; border-radius: 26px; }
 .wizard-hero { max-width: 820px; margin: 0 auto; padding: 42px 24px 24px; text-align: center; }
-.wizard-hero h1, .wizard-hero__brand { margin: 0; color: #294c4b; font-size: clamp(2.2rem, 5vw, 4rem); letter-spacing: -.05em; line-height: 1; }
+.wizard-hero h1, .wizard-hero__brand { margin: 0; color: #294c4b; font-size: clamp(2.2rem, 5vw, 4rem); letter-spacing: .018em; line-height: 1.05; }
 .wizard-hero__brand { letter-spacing: .18em; text-indent: .18em; }
 .wizard-hero h1:not(.wizard-hero__subtitle) { letter-spacing: .035em; opacity: .62; }
 .wizard-hero h1.wizard-hero__preset { font-size: clamp(1.75rem, 4vw, 3.15rem); line-height: 1.1; }
@@ -2463,13 +2506,15 @@ async function createSharedChallenge(title: string, description: string) {
 .wizard-steps button > span:last-child { display: grid; min-width: 0; }
 .wizard-steps button strong { color: currentColor; font-size: .93rem; }
 .wizard-steps button small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.wizard-steps button.is-active { color: var(--brand-dark); }
-.wizard-steps button.is-active > span:first-child { color: white; border-color: var(--brand); background: var(--brand); box-shadow: 0 0 0 5px var(--brand-pale); }
+.wizard-steps button.is-active { position: relative; z-index: 2; color: var(--brand-dark); }
+.wizard-steps button.is-active > span:first-child { position: relative; z-index: 1; color: white; border-color: var(--brand); background: var(--brand); box-shadow: 0 0 0 5px var(--brand-pale); transform: scale(1.16); animation: wizard-step-active-pulse 1.55s ease-in-out infinite; will-change: box-shadow, transform; }
 .wizard-steps button.is-complete:not(.is-active) > span:first-child { color: var(--success); border-color: #83b39b; background: var(--success-pale); }
 .wizard-steps button.wizard-step-tab--verbs:not(.is-active) > span:first-child { color: var(--verb-accent); border-color: color-mix(in srgb, var(--verb-accent) 58%, transparent); background: var(--verb-accent-soft); }
+.wizard-steps button.wizard-step-tab--verbs { --wizard-step-pulse-color: var(--verb-accent); }
 .wizard-steps .wizard-step-tab--verbs.is-active > span:first-child { color: white; border-color: var(--verb-accent); background: var(--verb-accent); }
 .wizard-steps .wizard-step-tab--verbs.is-active > span:first-child { box-shadow: 0 0 0 5px color-mix(in srgb, var(--verb-accent) 18%, transparent); }
 .wizard-steps button.wizard-step-tab--tenses:not(.is-active) > span:first-child { color: var(--tense-accent); border-color: color-mix(in srgb, var(--tense-accent) 58%, transparent); background: var(--tense-accent-soft); }
+.wizard-steps button.wizard-step-tab--tenses { --wizard-step-pulse-color: var(--tense-accent); }
 .wizard-steps .wizard-step-tab--tenses.is-active > span:first-child { color: #302711; border-color: var(--tense-accent); background: var(--tense-accent); }
 .wizard-steps .wizard-step-tab--tenses.is-active > span:first-child { box-shadow: 0 0 0 5px color-mix(in srgb, var(--tense-accent) 18%, transparent); }
 .wizard-steps button:disabled { cursor: default; opacity: .5; }
@@ -2483,7 +2528,7 @@ async function createSharedChallenge(title: string, description: string) {
 .wizard-home__seo-intro { width: 100%; min-width: 0; margin-top: 32px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--brand) 30%, var(--line)); border-radius: 19px; color: var(--muted); background: linear-gradient(145deg, color-mix(in srgb, var(--brand-pale) 68%, var(--surface)), var(--surface) 58%); box-shadow: 0 10px 28px rgb(42 65 61 / 8%); }
 .wizard-home__seo-intro > header { max-width: 760px; margin: 0 auto; padding: 22px 24px 18px; text-align: center; }
 .wizard-home__seo-eyebrow { margin: 0 0 4px !important; color: var(--brand) !important; font-size: .7rem; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; }
-.wizard-home__seo-intro h2 { margin: 0; color: var(--brand-dark); font-size: clamp(1.3rem, 2.5vw, 1.75rem); letter-spacing: -.025em; line-height: 1.15; }
+.wizard-home__seo-intro h2 { margin: 0; color: var(--brand-dark); font-size: clamp(1.3rem, 2.5vw, 1.75rem); letter-spacing: .018em; line-height: 1.18; }
 .wizard-home__seo-intro > header > p:last-child { margin: 9px 0 0; font-size: .93rem; line-height: 1.45; }
 .wizard-home__feature-grid { display: grid; min-width: 0; padding: 0 16px 16px; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .wizard-home__feature-grid article { min-width: 0; padding: 17px; border: 1px solid color-mix(in srgb, var(--brand) 18%, var(--line)); border-radius: 14px; background: color-mix(in srgb, var(--surface) 94%, transparent); box-shadow: 0 5px 15px rgb(42 65 61 / 5%); }
@@ -2534,7 +2579,7 @@ async function createSharedChallenge(title: string, description: string) {
 .wizard-step :deep(.verb-search) { padding-top: 23px; }
 .preset-verb-overview { display: grid; padding: clamp(20px, 4vw, 30px); border: 1px solid var(--line); border-radius: 18px; gap: 22px; background: color-mix(in srgb, var(--surface) 92%, var(--verb-accent-soft)); }
 .preset-verb-overview > header { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
-.preset-verb-overview h2 { margin: 0; color: var(--brand-dark); font-size: clamp(1.55rem, 3vw, 2.2rem); letter-spacing: -.03em; }
+.preset-verb-overview h2 { margin: 0; color: var(--brand-dark); font-size: clamp(1.55rem, 3vw, 2.2rem); letter-spacing: .018em; }
 .preset-verb-overview p { margin: 5px 0 0; color: var(--muted); }
 .preset-verb-overview__edit { margin: 7px 0 0; padding: 0; color: var(--brand-dark); border: 0; background: transparent; cursor: pointer; font: inherit; font-size: .9rem; font-weight: 400; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 .preset-verb-overview__edit:hover { color: var(--brand); }
@@ -2548,12 +2593,23 @@ async function createSharedChallenge(title: string, description: string) {
 .wizard-review :deep(.options-card) { margin: 0 0 18px; box-shadow: none; }
 .wizard-review :deep(.challenge-launch) { margin-top: 18px; box-shadow: none; }
 .wizard-launch-step :deep(.challenge-launch) { margin-top: 0; box-shadow: none; }
-.launch-summary { margin-bottom: 18px; padding: 22px; border: 1px solid var(--line); border-radius: 17px; background: #f8fbfa; }
+.launch-summary { margin-bottom: 18px; padding: clamp(22px, 2vw, 32px); border: 1px solid var(--line); border-radius: 17px; background: #f8fbfa; }
 .launch-summary__heading { display: flex; align-items: start; justify-content: space-between; gap: 18px; }
-.launch-summary__heading h2 { margin: 2px 0 0; color: var(--brand-dark); font-size: clamp(1.35rem, 2.5vw, 1.8rem); }
+.launch-summary__heading :is(h1, h2) { margin: 2px 0 0; color: var(--brand-dark); font-size: clamp(1.35rem, 2.5vw, 1.8rem); letter-spacing: .018em; line-height: 1.18; }
+.launch-summary__heading--public { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'category counts' 'title title'; align-items: center; }
+.launch-summary__heading--public > div:first-child { display: contents; }
+.launch-summary__heading--public .builder-card__eyebrow { grid-area: category; }
+.launch-summary__heading--public h1 { min-width: 0; max-width: 100%; grid-area: title; overflow-wrap: break-word; text-wrap: balance; white-space: normal; }
+.launch-summary__heading--public .launch-summary__counts { grid-area: counts; }
 .launch-summary__counts { display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .launch-summary__counts span { padding: 6px 10px; border-radius: 999px; color: var(--brand-dark); background: var(--brand-pale); font-size: .82rem; font-weight: 800; }
 .launch-summary__description { margin: 9px 0 16px; color: var(--muted); line-height: 1.45; }
+.launch-summary__edit-hint { display: block; margin: 0; color: var(--muted); line-height: 1.8; }
+.launch-summary__step { display: inline-grid; width: 23px; height: 23px; margin: 0 3px; padding: 0; place-items: center; vertical-align: middle; border: 1.5px solid; border-radius: 50%; cursor: pointer; font: inherit; font-size: .76em; font-weight: 850; line-height: 1; transition: box-shadow 160ms ease, transform 160ms ease; }
+.launch-summary__step--verbs { color: var(--verb-accent); border-color: color-mix(in srgb, var(--verb-accent) 58%, transparent); background: var(--verb-accent-soft); }
+.launch-summary__step--tenses { color: #7d5c06; border-color: color-mix(in srgb, var(--tense-accent) 72%, transparent); background: color-mix(in srgb, var(--tense-accent) 22%, var(--surface)); }
+.launch-summary__step:hover { transform: translateY(-1px); }
+.launch-summary__step:focus-visible { outline: 3px solid color-mix(in srgb, currentColor 25%, transparent); outline-offset: 2px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 @keyframes wizard-next-pulse {
   0%, 6% {
@@ -2569,6 +2625,17 @@ async function createSharedChallenge(title: string, description: string) {
   62%, 100% {
     box-shadow: 0 0 0 0 rgb(31 123 145 / 0%);
     transform: scale(1);
+  }
+}
+
+@keyframes wizard-step-active-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--wizard-step-pulse-color, var(--brand)) 25%, transparent);
+    transform: scale(1.12);
+  }
+  50% {
+    box-shadow: 0 0 0 11px color-mix(in srgb, var(--wizard-step-pulse-color, var(--brand)) 9%, transparent);
+    transform: scale(1.24);
   }
 }
 
@@ -2595,6 +2662,7 @@ async function createSharedChallenge(title: string, description: string) {
 
 @media (prefers-reduced-motion: reduce) {
   .wizard-next-pulse:not(:disabled) { animation: none; }
+  .wizard-steps button.is-active > span:first-child { box-shadow: 0 0 0 6px color-mix(in srgb, var(--wizard-step-pulse-color, var(--brand)) 18%, transparent); transform: scale(1.16); animation: none; }
   .tour-wizard-step-indicator { transition: none; }
   .code-loader.is-arrival-highlighted {
     border-color: #42a8bd;
@@ -2631,6 +2699,7 @@ async function createSharedChallenge(title: string, description: string) {
   .wizard-step--selection { padding-top: 0; }
   .preset-verb-overview > header { align-items: stretch; flex-direction: column; }
   .wizard-review, .wizard-launch-step { padding-top: 0; }
+  .launch-summary__heading--public h1 { white-space: normal; }
   .wizard-step__actions { margin-bottom: 22px; }
   .wizard-step__intro { padding: 0 8px; }
   .wizard-step__controls { justify-content: flex-end; flex-wrap: wrap; }

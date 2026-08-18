@@ -14,7 +14,18 @@ const route = useRoute()
 const config = useRuntimeConfig()
 const siteUrl = computed(() => String(config.public.siteUrl).replace(/\/$/u, ''))
 const routeWithoutLocale = computed(() => stripLocaleFromPath(route.path))
-const canonicalUrl = computed(() => `${siteUrl.value}${localizePath(routeWithoutLocale.value, interfaceLocale.value)}`)
+const { pageSeoOverride } = usePageSeoOverride()
+const canonicalUrl = computed(() => `${siteUrl.value}${pageSeoOverride.value?.canonicalPath ?? localizePath(routeWithoutLocale.value, interfaceLocale.value)}`)
+const alternateLinks = computed(() => pageSeoOverride.value?.alternates.map(alternate => ({
+  rel: 'alternate',
+  hreflang: alternate.locale,
+  href: `${siteUrl.value}${alternate.path}`,
+})) ?? SUPPORTED_LOCALES.map(locale => ({
+  rel: 'alternate',
+  hreflang: locale,
+  href: `${siteUrl.value}${localizePath(routeWithoutLocale.value, locale)}`,
+})))
+const xDefaultPath = computed(() => pageSeoOverride.value?.xDefaultPath ?? localizePath(routeWithoutLocale.value, 'fr'))
 const privatePath = computed(() => /^(?:\/admin(?:\/|$)|\/(?:signin|my-page|mon-compte|nouveau-defi)(?:\/|$)|\/(?:defi|bilan)(?:\/|$))/u.test(routeWithoutLocale.value))
 
 function localizedPageKey(route: RouteLocationNormalizedLoaded) {
@@ -25,7 +36,7 @@ useHead(() => ({
   titleTemplate: title => title ? `${title} · ${ui('Défis de conjugaison')}` : ui('Défis de conjugaison'),
   meta: [
     { name: 'theme-color', content: '#344758' },
-    { name: 'robots', content: privatePath.value ? 'noindex, nofollow' : 'index, follow' },
+    { name: 'robots', content: pageSeoOverride.value?.robots ?? (privatePath.value ? 'noindex, nofollow' : 'index, follow') },
     { property: 'og:site_name', content: 'TATITOTU' },
     { property: 'og:url', content: canonicalUrl.value },
     {
@@ -35,15 +46,11 @@ useHead(() => ({
   ],
   link: [
     { rel: 'canonical', href: canonicalUrl.value },
-    ...SUPPORTED_LOCALES.map(locale => ({
-      rel: 'alternate',
-      hreflang: locale,
-      href: `${siteUrl.value}${localizePath(routeWithoutLocale.value, locale)}`,
-    })),
+    ...alternateLinks.value,
     {
       rel: 'alternate',
       hreflang: 'x-default',
-      href: `${siteUrl.value}${localizePath(routeWithoutLocale.value, 'fr')}`,
+      href: `${siteUrl.value}${xDefaultPath.value}`,
     },
   ],
   script: [{

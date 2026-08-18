@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { ChallengePreset, ComplementOption, ConjugationMode, ConjugationTense, Verb } from '~~/shared/types/conjugation'
+import type { AdminChallengePublication } from '~~/shared/types/challenge-publication'
+import type { AppLocale } from '~~/shared/i18n/locales'
 import { getAdminErrorMessage } from '~/composables/useAdminAuth'
 
 interface PresetCategory {
@@ -33,6 +35,13 @@ const COMPLEMENT_OPTIONS: Array<{ value: ComplementOption, label: string }> = [
   { value: 'coi-after', label: 'COI après le verbe' },
   { value: 'coi-before', label: 'COI avant le verbe' },
 ]
+const PUBLICATION_LOCALES: Array<{ value: AppLocale, label: string }> = [
+  { value: 'fr', label: 'Français' },
+  { value: 'de', label: 'Deutsch' },
+  { value: 'en', label: 'English' },
+  { value: 'it', label: 'Italiano' },
+  { value: 'es', label: 'Español' },
+]
 
 const { user, handleUnauthorized } = useAdminAuth()
 const tab = ref<'presets' | 'categories'>('presets')
@@ -43,6 +52,9 @@ const modes = ref<ConjugationMode[]>([])
 const tenses = ref<ConjugationTense[]>([])
 const presetDraft = ref<AdminPreset | null>(null)
 const categoryDraft = ref<PresetCategory | null>(null)
+const publications = ref<AdminChallengePublication[]>([])
+const publicationDraft = ref<AdminChallengePublication | null>(null)
+const publicationLocale = ref<AppLocale>('fr')
 const openPresetCategoryId = ref<number | null>(null)
 const draggedPresetId = ref<number | null>(null)
 const dragOverPresetId = ref<number | null>(null)
@@ -52,16 +64,22 @@ const verbSearch = ref('')
 const loading = ref(false)
 const presetSaving = ref(false)
 const categorySaving = ref(false)
-const saving = computed(() => presetSaving.value || categorySaving.value)
+const publicationSaving = ref(false)
+const publicationReloading = ref(false)
+const saving = computed(() => presetSaving.value || categorySaving.value || publicationSaving.value)
 const presetAutosaveState = ref<'idle' | 'dirty' | 'saving' | 'saved' | 'error'>('idle')
 const categoryAutosaveState = ref<'idle' | 'dirty' | 'saving' | 'saved' | 'error'>('idle')
+const publicationAutosaveState = ref<'idle' | 'dirty' | 'saving' | 'saved' | 'error'>('idle')
 const error = ref('')
 const success = ref('')
 let loadedForUserId: number | null = null
 let presetAutosaveTimer: ReturnType<typeof setTimeout> | null = null
 let categoryAutosaveTimer: ReturnType<typeof setTimeout> | null = null
+let publicationAutosaveTimer: ReturnType<typeof setTimeout> | null = null
 let lastPresetSnapshot = ''
 let lastCategorySnapshot = ''
+let lastPublicationSnapshot = ''
+let originalPublishedSlug = ''
 let suspendAutosave = false
 
 useHead({ title: 'Défis — Administration' })
@@ -112,6 +130,20 @@ const categoryAutosaveLabel = computed(() => {
   if (categoryAutosaveState.value === 'error') return 'Échec de l’enregistrement automatique.'
   return 'Toutes les modifications sont enregistrées.'
 })
+const publicationAutosaveLabel = computed(() => {
+  if (publicationAutosaveState.value === 'saving') return 'Enregistrement de la publication…'
+  if (publicationAutosaveState.value === 'dirty') return 'Publication modifiée — complète les champs requis avant de la publier.'
+  if (publicationAutosaveState.value === 'error') return 'Échec de l’enregistrement de la publication.'
+  return 'Publication enregistrée.'
+})
+const publicationUrl = computed(() => publicationDraft.value?.slug
+  ? `/${publicationDraft.value.locale}/defis/${publicationDraft.value.slug}`
+  : '')
+const publishedSlugChanged = computed(() => Boolean(
+  originalPublishedSlug
+  && publicationDraft.value?.slug
+  && originalPublishedSlug !== publicationDraft.value.slug,
+))
 
 function setPresetDraft(preset: AdminPreset | null) {
   suspendAutosave = true
@@ -129,6 +161,78 @@ function setCategoryDraft(category: PresetCategory | null) {
   suspendAutosave = false
 }
 
+function emptyPublication(presetId: number, locale: AppLocale): AdminChallengePublication {
+  return {
+    id: 0,
+    presetId,
+    locale,
+    slug: '',
+    title: '',
+    metaTitle: '',
+    description: '',
+    metaDescription: '',
+    isPublished: false,
+    isIndexable: false,
+    createdAt: '',
+    updatedAt: '',
+  }
+}
+
+function setPublicationDraft(locale: AppLocale) {
+  suspendAutosave = true
+  publicationLocale.value = locale
+  publicationDraft.value = clone(
+    publications.value.find(publication => publication.locale === locale)
+      ?? emptyPublication(presetDraft.value?.databaseId ?? 0, locale),
+  )
+  originalPublishedSlug = publicationDraft.value.isPublished ? publicationDraft.value.slug : ''
+  lastPublicationSnapshot = JSON.stringify(publicationDraft.value)
+  publicationAutosaveState.value = 'saved'
+  suspendAutosave = false
+}
+
+async function loadPublications(presetId: number) {
+  cancelPublicationAutosave()
+  if (!presetId) {
+    publications.value = []
+    publicationDraft.value = null
+    return
+  }
+  try {
+    const response = await $fetch<{ publications: AdminChallengePublication[] }>(`/api/admin/challenge-presets/${presetId}/publications`)
+    publications.value = response.publications
+    setPublicationDraft(publicationLocale.value)
+  } catch (caught) {
+    if (!handleUnauthorized(caught)) error.value = getAdminErrorMessage(caught, 'Impossible de charger les publications de ce défi.')
+  }
+}
+
+async function reloadPublicationsFromDatabase() {
+  const presetId = presetDraft.value?.databaseId ?? 0
+  if (!presetId || publicationReloading.value) return
+  cancelPublicationAutosave()
+  publicationReloading.value = true
+  error.value = ''
+  try {
+    await loadPublications(presetId)
+  }
+  finally {
+    publicationReloading.value = false
+  }
+}
+
+async function selectPublicationLocale(locale: AppLocale) {
+  await flushPublicationAutosave()
+  setPublicationDraft(locale)
+}
+
+function publicationState(locale: AppLocale) {
+  const publication = publications.value.find(item => item.locale === locale)
+  if (!publication) return 'Absente'
+  if (!publication.isPublished) return 'Brouillon'
+  return 'Publiée'
+}
+
 function nextPresetOrder(categoryId: number) {
   return presets.value
     .filter(preset => preset.categoryId === categoryId && preset.databaseId !== presetDraft.value?.databaseId)
@@ -141,7 +245,9 @@ function assignNextPresetOrder() {
 
 async function selectPreset(preset: AdminPreset) {
   await flushPresetAutosave()
+  await flushPublicationAutosave()
   setPresetDraft(preset)
+  await loadPublications(preset.databaseId)
   openPresetCategoryId.value = preset.categoryId
   verbSearch.value = ''
   error.value = ''
@@ -150,6 +256,7 @@ async function selectPreset(preset: AdminPreset) {
 
 async function createPreset() {
   await flushPresetAutosave()
+  await flushPublicationAutosave()
   const category = sortedCategories.value[0]
   openPresetCategoryId.value = category?.id ?? null
   setPresetDraft({
@@ -179,6 +286,8 @@ async function createPreset() {
   })
   lastPresetSnapshot = ''
   presetAutosaveState.value = 'dirty'
+  publications.value = []
+  publicationDraft.value = null
   error.value = ''
   success.value = ''
 }
@@ -392,6 +501,7 @@ async function load(preferredPresetId?: number, preferredCategoryId?: number) {
     const selectedPresetId = preferredPresetId ?? presetDraft.value?.databaseId
     const selectedPreset = presets.value.find(item => item.databaseId === selectedPresetId) ?? presets.value[0]
     setPresetDraft(selectedPreset ?? null)
+    await loadPublications(selectedPreset?.databaseId ?? 0)
     openPresetCategoryId.value = null
     const selectedCategoryId = preferredCategoryId ?? categoryDraft.value?.id
     const selectedCategory = categories.value.find(item => item.id === selectedCategoryId) ?? sortedCategories.value[0]
@@ -412,6 +522,13 @@ function categoryCanBeSaved(draft: PresetCategory) {
   return Boolean(draft.slug.trim() && draft.name.trim())
 }
 
+function publicationCanBeSaved(draft: AdminChallengePublication) {
+  if (!draft.presetId) return false
+  if (!draft.isPublished) return true
+  return Boolean(draft.slug.trim() && draft.title.trim() && draft.metaTitle.trim()
+    && draft.description.trim() && draft.metaDescription.trim())
+}
+
 function cancelPresetAutosave() {
   if (presetAutosaveTimer) clearTimeout(presetAutosaveTimer)
   presetAutosaveTimer = null
@@ -420,6 +537,11 @@ function cancelPresetAutosave() {
 function cancelCategoryAutosave() {
   if (categoryAutosaveTimer) clearTimeout(categoryAutosaveTimer)
   categoryAutosaveTimer = null
+}
+
+function cancelPublicationAutosave() {
+  if (publicationAutosaveTimer) clearTimeout(publicationAutosaveTimer)
+  publicationAutosaveTimer = null
 }
 
 function schedulePresetAutosave() {
@@ -440,6 +562,15 @@ function scheduleCategoryAutosave() {
   categoryAutosaveTimer = setTimeout(() => { void saveCategory() }, 650)
 }
 
+function schedulePublicationAutosave() {
+  cancelPublicationAutosave()
+  const draft = publicationDraft.value
+  if (!draft || JSON.stringify(draft) === lastPublicationSnapshot) return
+  publicationAutosaveState.value = 'dirty'
+  if (!publicationCanBeSaved(draft)) return
+  publicationAutosaveTimer = setTimeout(() => { void savePublication() }, 650)
+}
+
 async function flushPresetAutosave() {
   cancelPresetAutosave()
   const draft = presetDraft.value
@@ -450,6 +581,56 @@ async function flushCategoryAutosave() {
   cancelCategoryAutosave()
   const draft = categoryDraft.value
   if (draft && JSON.stringify(draft) !== lastCategorySnapshot && categoryCanBeSaved(draft)) await saveCategory()
+}
+
+async function flushPublicationAutosave() {
+  cancelPublicationAutosave()
+  const draft = publicationDraft.value
+  if (draft && JSON.stringify(draft) !== lastPublicationSnapshot && publicationCanBeSaved(draft)) await savePublication()
+}
+
+function updatePublicationVisibility() {
+  if (publicationDraft.value) publicationDraft.value.isIndexable = publicationDraft.value.isPublished
+}
+
+async function savePublication() {
+  const draft = publicationDraft.value
+  if (!draft || publicationSaving.value || !publicationCanBeSaved(draft)) return
+  cancelPublicationAutosave()
+  error.value = ''
+  publicationSaving.value = true
+  publicationAutosaveState.value = 'saving'
+  const submitted = clone(draft)
+  try {
+    const response = await $fetch<{ ok: true, publication: AdminChallengePublication }>(`/api/admin/challenge-presets/${draft.presetId}/publications/${draft.locale}`, {
+      method: 'PUT',
+      body: {
+        slug: submitted.slug || null,
+        title: submitted.title,
+        metaTitle: submitted.metaTitle,
+        description: submitted.description,
+        metaDescription: submitted.metaDescription,
+        isPublished: submitted.isPublished,
+      },
+    })
+    const saved = response.publication
+    const changedDuringSave = JSON.stringify(draft) !== JSON.stringify(submitted)
+    const index = publications.value.findIndex(publication => publication.locale === saved.locale)
+    if (index >= 0) publications.value[index] = clone(saved)
+    else publications.value.push(clone(saved))
+    if (publicationDraft.value === draft) {
+      Object.assign(draft, saved)
+      lastPublicationSnapshot = JSON.stringify(saved)
+      originalPublishedSlug = saved.isPublished ? saved.slug : ''
+      publicationAutosaveState.value = changedDuringSave ? 'dirty' : 'saved'
+    }
+  } catch (caught) {
+    publicationAutosaveState.value = 'error'
+    if (!handleUnauthorized(caught)) error.value = getAdminErrorMessage(caught, 'Impossible d’enregistrer cette publication.')
+  } finally {
+    publicationSaving.value = false
+    if (publicationDraft.value && JSON.stringify(publicationDraft.value) !== lastPublicationSnapshot) schedulePublicationAutosave()
+  }
 }
 
 async function savePreset() {
@@ -513,10 +694,13 @@ async function deletePreset() {
   const draft = presetDraft.value
   if (!draft?.databaseId || saving.value || !confirm(`Supprimer le défi « ${draft.label} » ?`)) return
   cancelPresetAutosave()
+  cancelPublicationAutosave()
   presetSaving.value = true
   try {
     await $fetch(`/api/admin/challenge-presets/${draft.databaseId}`, { method: 'DELETE' })
     setPresetDraft(null)
+    publications.value = []
+    publicationDraft.value = null
     await load()
     success.value = 'Défi supprimé.'
   } catch (caught) {
@@ -587,9 +771,14 @@ watch(categoryDraft, () => {
   if (!suspendAutosave) scheduleCategoryAutosave()
 }, { deep: true })
 
+watch(publicationDraft, () => {
+  if (!suspendAutosave) schedulePublicationAutosave()
+}, { deep: true })
+
 onBeforeUnmount(() => {
   cancelPresetAutosave()
   cancelCategoryAutosave()
+  cancelPublicationAutosave()
 })
 
 watch(user, (currentUser) => {
@@ -695,6 +884,35 @@ watch(user, (currentUser) => {
               <div><strong class="option-title">Compléments proposés</strong><div class="choice-grid complement-grid"><label v-for="option in COMPLEMENT_OPTIONS" :key="option.value" :class="{ selected: presetDraft.complementOptions.includes(option.value) }"><input type="checkbox" :checked="presetDraft.complementOptions.includes(option.value)" @change="setComplementOption(option.value, inputChecked($event))"><span>{{ option.label }}</span></label></div></div>
             </section>
 
+            <section id="seo-publications" class="editor-section publication-editor">
+              <div class="section-heading">
+                <div><h3>Publication SEO</h3><small>Pages publiques multilingues rattachées à ce défi officiel</small></div>
+                <button v-if="presetDraft.databaseId" type="button" class="admin-button admin-button--small" :disabled="publicationReloading" @click="reloadPublicationsFromDatabase">
+                  {{ publicationReloading ? 'Rechargement…' : 'Recharger les textes' }}
+                </button>
+              </div>
+              <p v-if="!presetDraft.databaseId" class="admin-notice">Enregistre d’abord le défi pour pouvoir préparer ses pages publiques.</p>
+              <template v-else-if="publicationDraft">
+                <div class="publication-tabs" role="tablist" aria-label="Langue de la publication">
+                  <button v-for="localeOption in PUBLICATION_LOCALES" :key="localeOption.value" type="button" role="tab" :aria-selected="publicationLocale === localeOption.value" :class="{ active: publicationLocale === localeOption.value, ready: publications.some(publication => publication.locale === localeOption.value && publication.isPublished) }" @click="selectPublicationLocale(localeOption.value)"><span>{{ localeOption.label }}</span><small>{{ publicationState(localeOption.value) }}</small></button>
+                </div>
+                <div class="publication-switches">
+                  <label class="switch"><input v-model="publicationDraft.isPublished" type="checkbox" @change="updatePublicationVisibility"><span>Publiée</span></label>
+                </div>
+                <p class="admin-muted">Une publication peut rester en brouillon. Lorsqu’elle est publiée, elle apparaît sur le site, devient indexable et est ajoutée au sitemap.</p>
+                <div class="field-grid">
+                  <label class="admin-field"><span>Slug *</span><input v-model="publicationDraft.slug" placeholder="defi-verbes-en-ger" pattern="[a-z0-9]+(?:-[a-z0-9]+)*"></label>
+                  <label class="admin-field"><span>Titre visible (H1) *</span><input v-model="publicationDraft.title" maxlength="160"></label>
+                  <label class="admin-field wide"><span>Meta title *</span><input v-model="publicationDraft.metaTitle" maxlength="160"></label>
+                  <label class="admin-field wide"><span>Description visible *</span><textarea v-model="publicationDraft.description" rows="3" maxlength="1000" /></label>
+                  <label class="admin-field wide"><span>Meta description *</span><textarea v-model="publicationDraft.metaDescription" rows="3" maxlength="320" /></label>
+                </div>
+                <p v-if="publicationUrl" class="publication-url"><strong>URL :</strong> {{ publicationUrl }}</p>
+                <p v-if="publishedSlugChanged" class="admin-notice admin-notice--warning">Le slug publié a changé. L’ancienne URL sera conservée comme redirection permanente lors de l’enregistrement.</p>
+                <p class="autosave-status publication-status" :class="`is-${publicationAutosaveState}`" aria-live="polite"><i aria-hidden="true" />{{ publicationAutosaveLabel }} <button v-if="publicationAutosaveState === 'error'" type="button" @click="savePublication">Réessayer</button></p>
+              </template>
+            </section>
+
             <footer class="editor-actions"><button v-if="presetDraft.databaseId" type="button" class="admin-button danger" :disabled="saving" @click="deletePreset">Supprimer</button><span /><p class="autosave-status" :class="`is-${presetAutosaveState}`" aria-live="polite"><i aria-hidden="true" />{{ presetAutosaveLabel }} <button v-if="presetAutosaveState === 'error'" type="button" @click="savePreset">Réessayer</button></p></footer>
           </form>
           <div v-else class="empty admin-card"><p>Sélectionne un défi ou crée-en un nouveau.</p></div>
@@ -728,4 +946,5 @@ watch(user, (currentUser) => {
 .category-list>button{cursor:grab}.category-list>button:active{cursor:grabbing}.category-list>button.dragging{opacity:.38}.category-list>button.drag-over{border-color:var(--admin-blue);box-shadow:0 3px 0 var(--admin-blue)}.category-list>button:hover .drag-handle{color:var(--admin-blue)}
 .challenge-list__group h2>button{min-height:44px}.challenge-list__group h2>button>span:first-child{justify-self:start;align-self:center;text-align:left}.category-list>button>span{flex:1;align-self:center;text-align:left}
 .challenge-list__items>button>span{flex:1;align-items:start;text-align:left}.challenge-list__items>button>span>strong{justify-self:start;text-align:left}
+.publication-editor{gap:16px}.publication-tabs{display:flex;padding:4px;gap:4px;border:1px solid var(--admin-border);border-radius:11px;background:#edf3f5;flex-wrap:wrap}.publication-tabs button{display:grid;padding:7px 12px;border:0;border-radius:8px;color:var(--admin-muted);background:transparent;font-weight:800;cursor:pointer}.publication-tabs button small{font-size:.62rem;font-weight:700;opacity:.78}.publication-tabs button.active{color:#fff;background:var(--admin-blue)}.publication-tabs button.ready:not(.active){color:#27715a}.publication-switches{display:flex;gap:9px;flex-wrap:wrap}.publication-url{margin:0;padding:10px 12px;border-radius:8px;background:#edf6f7;color:var(--admin-navy);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8rem}.publication-status{justify-content:flex-start;text-align:left}:global(:root[data-theme='dark'] .publication-tabs),:global(:root[data-theme='dark'] .publication-url){border-color:rgb(128 181 190 / 30%);background:rgb(24 46 51 / 36%)}
 </style>

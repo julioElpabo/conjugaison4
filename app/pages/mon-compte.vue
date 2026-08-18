@@ -39,9 +39,53 @@ const displayName = computed(() => {
 })
 
 function applicationServerKey(value: string) {
-  const padding = '='.repeat((4 - value.length % 4) % 4)
-  const raw = atob((value + padding).replace(/-/gu, '+').replace(/_/gu, '/'))
-  return Uint8Array.from(raw, character => character.charCodeAt(0))
+  const normalized = value.trim()
+  const padding = '='.repeat((4 - normalized.length % 4) % 4)
+  const raw = atob((normalized + padding).replace(/-/gu, '+').replace(/_/gu, '/'))
+  const key = Uint8Array.from(raw, character => character.charCodeAt(0))
+  if (key.length !== 65 || key[0] !== 4) {
+    throw new Error('La clé Web Push fournie par le serveur est invalide.')
+  }
+  return key
+}
+
+async function readyPushRegistration() {
+  await navigator.serviceWorker.register('/admin-push-sw.js', {
+    scope: '/',
+    updateViaCache: 'none',
+  })
+  const registration = await navigator.serviceWorker.ready
+  if (!registration.active) {
+    throw new Error('Le service worker de notifications ne s’est pas activé.')
+  }
+  return registration
+}
+
+function isPushServiceError(error: unknown) {
+  const detail = getAdminErrorMessage(error, '').toLocaleLowerCase('en')
+  return detail.includes('push service') || detail.includes('registration failed')
+}
+
+async function createPushSubscription(registration: ServiceWorkerRegistration, publicKey: string) {
+  const existing = await registration.pushManager.getSubscription()
+  if (existing) return existing
+
+  const options: PushSubscriptionOptionsInit = {
+    userVisibleOnly: true,
+    applicationServerKey: applicationServerKey(publicKey),
+  }
+  try {
+    return await registration.pushManager.subscribe(options)
+  }
+  catch (error) {
+    if (!isPushServiceError(error)) throw error
+    // Chrome, Edge et Firefox peuvent échouer transitoirement pendant
+    // l'initialisation de leur service Push. Une mise à jour du worker suivie
+    // d'une seule nouvelle tentative évite de laisser l'appareil bloqué.
+    await registration.update()
+    await new Promise(resolve => setTimeout(resolve, 750))
+    return await registration.pushManager.subscribe(options)
+  }
 }
 
 async function pushConfiguration() {
@@ -89,7 +133,7 @@ onMounted(async () => {
   pushCapabilityChecked.value = true
   if (!pushSupported.value) return
   try {
-    pushRegistration = await navigator.serviceWorker.register('/admin-push-sw.js', { scope: '/' })
+    pushRegistration = await readyPushRegistration()
     pushSubscription = await pushRegistration.pushManager.getSubscription()
     pushEnabled.value = Boolean(pushSubscription)
     if (pushSubscription) await synchronizeSubscription(pushSubscription)
@@ -113,16 +157,12 @@ async function enablePush() {
       return
     }
     step = 'enregistrement du service worker'
-    pushRegistration ||= await navigator.serviceWorker.register('/admin-push-sw.js', { scope: '/' })
+    pushRegistration ||= await readyPushRegistration()
     step = 'lecture de la configuration serveur'
     const { publicKey } = await pushConfiguration()
     if (!publicKey) throw new Error('Clé Web Push indisponible')
     step = 'création de l’abonnement navigateur'
-    pushSubscription = await pushRegistration.pushManager.getSubscription()
-      || await pushRegistration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: applicationServerKey(publicKey),
-      })
+    pushSubscription = await createPushSubscription(pushRegistration, publicKey)
     step = 'enregistrement de l’abonnement en base'
     await synchronizeSubscription(pushSubscription)
     pushEnabled.value = true
@@ -130,7 +170,10 @@ async function enablePush() {
   }
   catch (error) {
     const detail = getAdminErrorMessage(error, '')
-    pushError.value = `L’activation a échoué pendant l’étape « ${step} ».${detail ? ` ${detail}` : ''}`
+    const serviceHint = isPushServiceError(error)
+      ? ' Le navigateur n’arrive pas à joindre son propre service Push. Vérifiez qu’un VPN, pare-feu ou bloqueur DNS ne bloque pas ce service, puis relancez le navigateur.'
+      : ''
+    pushError.value = `L’activation a échoué pendant l’étape « ${step} ».${detail ? ` ${detail}` : ''}${serviceHint}`
   }
   finally {
     pushBusy.value = false

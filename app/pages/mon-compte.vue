@@ -228,9 +228,15 @@ async function testPush() {
       body: { endpoint: pushSubscription.endpoint, testId },
     })
     const received = await browserReceipt
-    pushMessage.value = received
-      ? 'Notification de test reçue et affichée par ce navigateur.'
-      : `Notification acceptée par le service Push (${response.pushServiceStatus}), mais sa réception n’a pas été confirmée sous 10 secondes. Vérifiez le centre de notifications et les réglages système.`
+    if (received) {
+      const notifications = await pushRegistration?.getNotifications({ tag: 'tatitotu-push-test' }) || []
+      pushMessage.value = notifications.length
+        ? 'Notification de test reçue et créée par le navigateur. Si aucune bannière n’apparaît, elle est masquée par les réglages de notifications ou un mode Concentration du système.'
+        : 'Push reçu par le navigateur, mais aucune notification active n’est visible. Vérifiez les autorisations de notifications du navigateur dans les réglages système.'
+    }
+    else {
+      pushMessage.value = `Notification acceptée par le service Push (${response.pushServiceStatus}), mais sa réception n’a pas été confirmée sous 10 secondes. Vérifiez le centre de notifications et les réglages système.`
+    }
   }
   catch (error) {
     pushError.value = getAdminErrorMessage(error, 'La notification de test n’a pas pu être envoyée.')

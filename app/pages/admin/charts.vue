@@ -31,7 +31,7 @@ const tabs: Array<{ id: StatsTab, label: string, short: string }> = [
   { id: 'accounts', label: 'Comptes', short: 'Connexions et fonctions' },
   { id: 'usage', label: 'Usages', short: 'Section conservée' },
 ]
-const rangePresets = [{ days: 7, label: '7 jours' }, { days: 30, label: '30 jours' }, { days: 90, label: '90 jours' }, { days: 365, label: '1 an' }]
+const rangePresets = [{ days: 1, label: 'Aujourd’hui' }, { days: 7, label: '7 jours' }, { days: 30, label: '30 jours' }, { days: 90, label: '90 jours' }, { days: 365, label: '1 an' }]
 const activePreset = computed(() => endDate.value === today ? rangePresets.find(item => startDate.value === offsetDate(-(item.days - 1)))?.days : undefined)
 const isProductTab = (tab: StatsTab): tab is ProductTab => ['challenges', 'exercises', 'print', 'accessibility'].includes(tab)
 const periodReady = computed(() => stats.value?.window === 'range' && stats.value.startDate === startDate.value && stats.value.endDate === endDate.value)

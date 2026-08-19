@@ -32,6 +32,14 @@ test('les sessions déclenchent 1000, 1500, puis chaque centaine', () => {
   assert.deepEqual(dailySessionAlertThresholds(1724), [1000, 1500, 1600, 1700])
 })
 
+test('les alertes de sessions indiquent la mesure et la date, et expirent le lendemain', async () => {
+  const service = await read('../server/services/admin-push-notifications.ts')
+  assert.match(service, /\$\{sessionCount\.toLocaleString\('fr-CH'\)\} sessions le \$\{date\}/u)
+  assert.match(service, /palier de \$\{threshold\.toLocaleString\('fr-CH'\)\} atteint/u)
+  assert.match(service, /Alerte quotidienne expirée/u)
+  assert.match(service, /daily-sessions:\$\{today\}:%/u)
+})
+
 test('les abonnements push restent réservés aux administrateurs', async () => {
   const endpoints = await Promise.all([
     read('../server/api/admin/push-subscriptions/index.get.ts'),

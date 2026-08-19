@@ -22,6 +22,8 @@ self.addEventListener('push', (event) => {
       badge: '/favicon.ico',
       tag: data.tag || 'tatitotu-admin-alert',
       renotify: true,
+      requireInteraction: true,
+      silent: false,
       data: { url: data.url || '/admin/charts' },
     })
 

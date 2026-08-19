@@ -338,6 +338,7 @@ const activeSection = computed(() => {
             <strong>TATITOTU</strong>
             <span v-if="isActualHomePage">{{ ui('Défis de conjugaison') }}</span>
           </NuxtLink>
+          <AdminDailySessionsBadge />
           <button
             v-if="!isActualHomePage && !falcMode && !isPhoneViewport"
             class="site-tour-button"

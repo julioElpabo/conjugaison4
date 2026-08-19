@@ -12,6 +12,7 @@ let tokenCache: { value: string, expiresAt: number } | undefined
 const reportCache = new Map<string, { value: AnalyticsOverview, expiresAt: number }>()
 const timelineCache = new Map<string, { value: AnalyticsGeoTimelineResponse, expiresAt: number }>()
 let realtimeCountryCache: { value: AnalyticsBreakdownItem[], expiresAt: number } | undefined
+let todaySessionsCache: { value: number, date: string, expiresAt: number } | undefined
 const quotaBackoff = new Map<string, number>()
 const GOOGLE_AUTH_TIMEOUT_MS = 10_000
 const GOOGLE_REPORT_TIMEOUT_MS = 12_000
@@ -277,6 +278,49 @@ export async function googleAnalyticsRealtimeCountries(): Promise<AnalyticsBreak
   }))
   realtimeCountryCache = { value, expiresAt: Date.now() + 5 * 60_000 }
   return value
+}
+
+export async function googleAnalyticsTodaySessions(): Promise<{ count: number, date: string } | null> {
+  const credentials = await googleAnalyticsCredentials()
+  if (!credentials) return null
+  const date = currentZurichDate()
+  if (todaySessionsCache?.date === date && todaySessionsCache.expiresAt > Date.now()) {
+    return { count: todaySessionsCache.value, date }
+  }
+
+  const { propertyId, email, privateKey } = credentials
+  const quotaKey = `${propertyId}:today-sessions`
+  if ((quotaBackoff.get(quotaKey) || 0) > Date.now()) {
+    return todaySessionsCache ? { count: todaySessionsCache.value, date: todaySessionsCache.date } : null
+  }
+
+  const token = await accessToken(email, privateKey)
+  const response = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+    body: JSON.stringify({
+      dateRanges: [{ startDate: date, endDate: date }],
+      metrics: [{ name: 'eventCount' }],
+      dimensionFilter: {
+        filter: {
+          fieldName: 'eventName',
+          stringFilter: { matchType: 'EXACT', value: 'session_start', caseSensitive: true },
+        },
+      },
+      limit: 1,
+    }),
+    signal: AbortSignal.timeout(GOOGLE_REPORT_TIMEOUT_MS),
+  })
+  if (!response.ok) {
+    if (response.status === 429) quotaBackoff.set(quotaKey, Date.now() + 15 * 60_000)
+    const payload = await response.json().catch(() => null) as { error?: { message?: string } } | null
+    throw new Error(`Lecture GA4 des sessions du jour impossible (${response.status})${payload?.error?.message ? ` : ${payload.error.message}` : ''}`)
+  }
+
+  const report = await response.json() as GaResponse
+  const count = Number(report.rows?.[0]?.metricValues?.[0]?.value) || 0
+  todaySessionsCache = { value: count, date, expiresAt: Date.now() + 2 * 60_000 }
+  return { count, date }
 }
 
 export async function googleAnalyticsGeoTimeline(date: string): Promise<AnalyticsGeoTimelineResponse | null> {

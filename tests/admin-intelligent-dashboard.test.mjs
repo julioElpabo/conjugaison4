@@ -23,6 +23,15 @@ describe('dashboard intelligent des statistiques', () => {
     assert.match(page, /loadedForUserId = current\.id; void loadActiveTab\(\)/u)
   })
 
+  it('propose Aujourd’hui avant 7 jours et le traduit en une période d’un jour', async () => {
+    const page = await read('../app/pages/admin/charts.vue')
+    const todayIndex = page.indexOf("{ days: 1, label: 'Aujourd’hui' }")
+    const sevenDaysIndex = page.indexOf("{ days: 7, label: '7 jours' }")
+    assert.ok(todayIndex >= 0)
+    assert.ok(sevenDaysIndex > todayIndex)
+    assert.match(page, /offsetDate\(-\(days - 1\)\)/u)
+  })
+
   it('présente les indicateurs, le parcours, les tendances et les signaux automatiques', async () => {
     const component = await read('../app/components/admin/AdminIntelligentDashboard.vue')
     assert.match(component, /Apprenants actifs/u)

@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import webPush from 'web-push'
 import type { ResultSetHeader, RowDataPacket } from 'mysql2/promise'
 import { googleAnalyticsRealtimeCountries } from '../utils/google-analytics'
+import { dailySessionSnapshot } from './daily-sessions'
 
 interface VapidRow extends RowDataPacket { public_key: string, private_key: string }
 interface SubscriptionRow extends RowDataPacket {
@@ -15,7 +16,7 @@ interface SubscriptionRow extends RowDataPacket {
   foreign_country: number
   falc_usage: number
 }
-interface CountRow extends RowDataPacket { value: number, date?: string }
+interface CountRow extends RowDataPacket { value: number }
 interface AlertRow extends RowDataPacket {
   alert_key: string
   alert_type: AdminPushPreferenceKey
@@ -72,16 +73,16 @@ async function currentCandidates(): Promise<AlertCandidate[]> {
     INSERT IGNORE INTO admin_push_metrics (metric_name, metric_value)
     SELECT 'learner_accounts_created', COUNT(*) FROM learner_accounts
   `)
-  const [[[accounts]], [[sessions]]] = await Promise.all([
+  const [accountResult, sessions] = await Promise.all([
     database.query<CountRow[]>(
       "SELECT metric_value AS value FROM admin_push_metrics WHERE metric_name='learner_accounts_created'",
     ),
-    database.query<CountRow[]>(`SELECT COUNT(*) AS value, DATE_FORMAT(CURRENT_DATE, '%Y-%m-%d') AS date
-      FROM analytics_sessions WHERE first_seen >= CURRENT_DATE AND first_seen < CURRENT_DATE + INTERVAL 1 DAY`),
+    dailySessionSnapshot(database),
   ])
+  const [accounts] = accountResult[0]
   const accountCount = Number(accounts?.value) || 0
-  const sessionCount = Number(sessions?.value) || 0
-  const date = String(sessions?.date || new Date().toISOString().slice(0, 10))
+  const sessionCount = sessions.count
+  const date = sessions.date || new Date().toISOString().slice(0, 10)
   return [
     ...accountAlertThresholds(accountCount).map(threshold => ({
       key: `learner-accounts:${threshold}`,
@@ -102,7 +103,7 @@ async function currentCandidates(): Promise<AlertCandidate[]> {
       observed: sessionCount,
       payload: {
         title: 'Tatitotu · Forte activité',
-        body: `${threshold.toLocaleString('fr-CH')} sessions depuis le début de la journée.`,
+        body: `${sessionCount.toLocaleString('fr-CH')} sessions le ${date} · palier de ${threshold.toLocaleString('fr-CH')} atteint.`,
         tag: `tatitotu-sessions-${date}-${threshold}`,
         url: '/admin/charts',
       },
@@ -252,6 +253,21 @@ async function sendAlert(alert: AlertRow) {
 
 async function deliverPendingAlerts() {
   const database = useDatabase()
+  const today = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Zurich', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(new Date())
+
+  // Une notification quotidienne n'a plus de sens le lendemain. Sans cette
+  // expiration, une panne Web Push peut faire apparaître un ancien palier comme
+  // s'il décrivait l'activité du jour.
+  await database.execute(`
+    UPDATE admin_push_alerts
+    SET status='skipped', last_error='Alerte quotidienne expirée'
+    WHERE alert_type='daily_sessions'
+      AND status IN ('pending', 'failed', 'sending')
+      AND alert_key NOT LIKE ?
+  `, [`daily-sessions:${today}:%`])
+
   const [alerts] = await database.query<AlertRow[]>(`
     SELECT alert_key, alert_type, payload_json FROM admin_push_alerts
     WHERE status='pending'

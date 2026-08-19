@@ -13,6 +13,7 @@ import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
 import '../../../_/google-analytics.mjs';
+import '../../../_/daily-sessions.mjs';
 
 const index_get = defineEventHandler(async (event) => {
   requireAdministrator(event);

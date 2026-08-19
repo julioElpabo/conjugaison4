@@ -19,6 +19,7 @@ import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
 import '../../../_/google-analytics.mjs';
+import '../../../_/daily-sessions.mjs';
 
 function recoveryCode() {
   var _a;

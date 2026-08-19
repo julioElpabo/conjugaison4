@@ -14,6 +14,7 @@ import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
 import '../../../_/google-analytics.mjs';
+import '../../../_/daily-sessions.mjs';
 
 const index_delete = defineEventHandler(async (event) => {
   const administrator = requireAdministrator(event);

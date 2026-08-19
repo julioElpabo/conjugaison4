@@ -16,6 +16,7 @@ import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
 import '../../../_/google-analytics.mjs';
+import '../../../_/daily-sessions.mjs';
 
 const heartbeat_post = defineEventHandler(async (event) => {
   await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.telemetry);

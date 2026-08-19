@@ -1,7 +1,8 @@
 import { u as useDatabase, c as createError, x as useRuntimeConfig } from '../nitro/nitro.mjs';
 import { createHash } from 'node:crypto';
 import webPush from 'web-push';
-import { b as googleAnalyticsRealtimeCountries } from './google-analytics.mjs';
+import { c as googleAnalyticsRealtimeCountries } from './google-analytics.mjs';
+import { d as dailySessionSnapshot } from './daily-sessions.mjs';
 
 const ADMIN_PUSH_PREFERENCE_KEYS = [
   "learner_registration",
@@ -29,16 +30,16 @@ async function currentCandidates() {
     INSERT IGNORE INTO admin_push_metrics (metric_name, metric_value)
     SELECT 'learner_accounts_created', COUNT(*) FROM learner_accounts
   `);
-  const [[[accounts]], [[sessions]]] = await Promise.all([
+  const [accountResult, sessions] = await Promise.all([
     database.query(
       "SELECT metric_value AS value FROM admin_push_metrics WHERE metric_name='learner_accounts_created'"
     ),
-    database.query(`SELECT COUNT(*) AS value, DATE_FORMAT(CURRENT_DATE, '%Y-%m-%d') AS date
-      FROM analytics_sessions WHERE first_seen >= CURRENT_DATE AND first_seen < CURRENT_DATE + INTERVAL 1 DAY`)
+    dailySessionSnapshot(database)
   ]);
+  const [accounts] = accountResult[0];
   const accountCount = Number(accounts == null ? void 0 : accounts.value) || 0;
-  const sessionCount = Number(sessions == null ? void 0 : sessions.value) || 0;
-  const date = String((sessions == null ? void 0 : sessions.date) || (/* @__PURE__ */ new Date()).toISOString().slice(0, 10));
+  const sessionCount = sessions.count;
+  const date = sessions.date || (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
   return [
     ...accountAlertThresholds(accountCount).map((threshold) => ({
       key: `learner-accounts:${threshold}`,
@@ -59,7 +60,7 @@ async function currentCandidates() {
       observed: sessionCount,
       payload: {
         title: "Tatitotu \xB7 Forte activit\xE9",
-        body: `${threshold.toLocaleString("fr-CH")} sessions depuis le d\xE9but de la journ\xE9e.`,
+        body: `${sessionCount.toLocaleString("fr-CH")} sessions le ${date} \xB7 palier de ${threshold.toLocaleString("fr-CH")} atteint.`,
         tag: `tatitotu-sessions-${date}-${threshold}`,
         url: "/admin/charts"
       }
@@ -199,6 +200,19 @@ async function sendAlert(alert) {
 }
 async function deliverPendingAlerts() {
   const database = useDatabase();
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Zurich",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(/* @__PURE__ */ new Date());
+  await database.execute(`
+    UPDATE admin_push_alerts
+    SET status='skipped', last_error='Alerte quotidienne expir\xE9e'
+    WHERE alert_type='daily_sessions'
+      AND status IN ('pending', 'failed', 'sending')
+      AND alert_key NOT LIKE ?
+  `, [`daily-sessions:${today}:%`]);
   const [alerts] = await database.query(`
     SELECT alert_key, alert_type, payload_json FROM admin_push_alerts
     WHERE status='pending'

@@ -6,6 +6,7 @@ let tokenCache;
 const reportCache = /* @__PURE__ */ new Map();
 const timelineCache = /* @__PURE__ */ new Map();
 let realtimeCountryCache;
+let todaySessionsCache;
 const quotaBackoff = /* @__PURE__ */ new Map();
 const GOOGLE_AUTH_TIMEOUT_MS = 1e4;
 const GOOGLE_REPORT_TIMEOUT_MS = 12e3;
@@ -285,6 +286,46 @@ async function googleAnalyticsRealtimeCountries() {
   realtimeCountryCache = { value, expiresAt: Date.now() + 5 * 6e4 };
   return value;
 }
+async function googleAnalyticsTodaySessions() {
+  var _a, _b, _c, _d, _e;
+  const credentials = await googleAnalyticsCredentials();
+  if (!credentials) return null;
+  const date = currentZurichDate();
+  if ((todaySessionsCache == null ? void 0 : todaySessionsCache.date) === date && todaySessionsCache.expiresAt > Date.now()) {
+    return { count: todaySessionsCache.value, date };
+  }
+  const { propertyId, email, privateKey } = credentials;
+  const quotaKey = `${propertyId}:today-sessions`;
+  if ((quotaBackoff.get(quotaKey) || 0) > Date.now()) {
+    return todaySessionsCache ? { count: todaySessionsCache.value, date: todaySessionsCache.date } : null;
+  }
+  const token = await accessToken(email, privateKey);
+  const response = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+    body: JSON.stringify({
+      dateRanges: [{ startDate: date, endDate: date }],
+      metrics: [{ name: "eventCount" }],
+      dimensionFilter: {
+        filter: {
+          fieldName: "eventName",
+          stringFilter: { matchType: "EXACT", value: "session_start", caseSensitive: true }
+        }
+      },
+      limit: 1
+    }),
+    signal: AbortSignal.timeout(GOOGLE_REPORT_TIMEOUT_MS)
+  });
+  if (!response.ok) {
+    if (response.status === 429) quotaBackoff.set(quotaKey, Date.now() + 15 * 6e4);
+    const payload = await response.json().catch(() => null);
+    throw new Error(`Lecture GA4 des sessions du jour impossible (${response.status})${((_a = payload == null ? void 0 : payload.error) == null ? void 0 : _a.message) ? ` : ${payload.error.message}` : ""}`);
+  }
+  const report = await response.json();
+  const count = Number((_e = (_d = (_c = (_b = report.rows) == null ? void 0 : _b[0]) == null ? void 0 : _c.metricValues) == null ? void 0 : _d[0]) == null ? void 0 : _e.value) || 0;
+  todaySessionsCache = { value: count, date, expiresAt: Date.now() + 2 * 6e4 };
+  return { count, date };
+}
 async function googleAnalyticsGeoTimeline(date) {
   var _a, _b, _c;
   const credentials = await googleAnalyticsCredentials();
@@ -369,5 +410,5 @@ async function googleAnalyticsGeoTimeline(date) {
   return value;
 }
 
-export { googleAnalyticsOverview as a, googleAnalyticsRealtimeCountries as b, googleAnalyticsGeoTimeline as g };
+export { googleAnalyticsOverview as a, googleAnalyticsTodaySessions as b, googleAnalyticsRealtimeCountries as c, googleAnalyticsGeoTimeline as g };
 //# sourceMappingURL=google-analytics.mjs.map

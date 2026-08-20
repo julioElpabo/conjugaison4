@@ -43,6 +43,7 @@ function printAnalyticsMetadata(format: 'pdf' | 'word') {
   return {
     ...props.analyticsMetadata,
     format,
+    questionLayout: props.options.questionLayout,
     inclusiveDisplay: props.options.inclusiveDisplay,
     showGrade: props.options.showGrade,
     showVerbs: props.options.showVerbs,
@@ -93,6 +94,7 @@ const pdfBodySize = computed(() => inclusivePrint.value ? 12 : 10.5)
 const pdfCorrectionSize = computed(() => inclusivePrint.value ? 12 : 9.5)
 const pdfLineHeightMm = computed(() => inclusivePrint.value ? 6.5 : 5)
 const isTenseIdentification = computed(() => props.exerciseKind === 'tense-identification')
+const isTableLayout = computed(() => props.options.questionLayout === 'table' && props.exerciseKind === 'conjugation')
 const identificationAnswerHeightMm = computed(() => 8 + Math.max(0, 5 - questionSpacingMm.value))
 const missingQuestionCount = computed(() => Math.max(0, props.requestedQuestionCount - props.questions.length))
 const printableQuestions = computed(() => {
@@ -108,6 +110,28 @@ const printableQuestions = computed(() => {
   }
   return result
 })
+
+function tableQuestionParts(question: ExerciseQuestion) {
+  const infinitive = capitalizePrintLine(question.infinitif || question.titre)
+  const tense = capitalizePrintLine([uiLabel(question.temps), question.mode ? `(${uiLabel(question.mode)})` : ''].filter(Boolean).join(' '))
+  return {
+    infinitive,
+    tense,
+    pronoun: capitalizePrintLine(question.pronom || '—'),
+  }
+}
+
+function tableQuestionHeight(question: ExerciseQuestion, correction = false) {
+  const parts = tableQuestionParts(question)
+  const lineCount = Math.max(
+    estimatedTextLines(parts.infinitive, 15),
+    estimatedTextLines(parts.tense, 20),
+    estimatedTextLines(parts.pronoun, 12),
+    correction ? estimatedTextLines(printableCorrectionText(question), 19) : 1,
+  )
+  return Math.max(inclusivePrint.value ? 15 : 11, lineCount * pdfLineHeightMm.value + 5)
+    + Math.max(0, effectiveQuestionSpacingMm.value - 6)
+}
 
 const exerciseFirstPageCapacity = computed(() => {
   // La zone utile commence après l'en-tête : 226 mm permet de conserver
@@ -133,6 +157,7 @@ const exercisePages = computed(() => paginateByHeight(
   exerciseFirstPageCapacity.value,
   220,
   (question) => {
+    if (isTableLayout.value) return tableQuestionHeight(question)
     const printable = printableQuestionParts(question, props.exerciseKind)
     const inclusiveLineCount = Math.max(
       estimatedTextLines(printable.label, 34),
@@ -150,7 +175,9 @@ const correctionPages = computed(() => paginateByHeight(
   printableQuestions.value,
   205,
   220,
-  question => isTenseIdentification.value
+  question => isTableLayout.value
+    ? tableQuestionHeight(question, true)
+    : isTenseIdentification.value
     ? correctionItemHeight('', printableCorrectionText(question)) * (inclusivePrint.value ? 1.35 : 1)
     : correctionItemHeight(printableCorrectionLabel(question, props.exerciseKind), printableCorrectionText(question)) * (inclusivePrint.value ? 1.35 : 1)
 ))
@@ -362,10 +389,70 @@ async function buildPdf() {
       pdf.setFontSize(previousSize)
     }
 
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(bodySize)
+    const naturalTableWidths = [
+      Math.max(...printableQuestions.value.map(question => pdf.getTextWidth(pdfSafe(tableQuestionParts(question).infinitive))), 0) + 5,
+      Math.max(...printableQuestions.value.map(question => pdf.getTextWidth(pdfSafe(tableQuestionParts(question).tense))), 0) + 10,
+      Math.max(...printableQuestions.value.map(question => pdf.getTextWidth(pdfSafe(tableQuestionParts(question).pronoun))), 0) + 5,
+    ]
+    const tableColumns = [
+      left,
+      left + naturalTableWidths[0]!,
+      left + naturalTableWidths[0]! + naturalTableWidths[1]!,
+      left + naturalTableWidths[0]! + naturalTableWidths[1]! + naturalTableWidths[2]!,
+      right,
+    ]
+
+    function drawQuestionTableRow(question: ExerciseQuestion, y: number, correction = false) {
+      const height = tableQuestionHeight(question, correction)
+      const parts = tableQuestionParts(question)
+      const values = [
+        parts.infinitive,
+        parts.tense,
+        parts.pronoun,
+        correction ? printableCorrectionText(question) : '',
+      ]
+      const fontSize = correction ? correctionSize : bodySize
+      const textBaseline = y + height / 2 + fontSize * 25.4 / 72 * .28
+      pdf.setFontSize(fontSize)
+      values.forEach((value, index) => {
+        const cellLeft = tableColumns[index]! + (index === 0 ? 0 : 2)
+        const cellRight = tableColumns[index + 1]! - 2
+        if (!correction && index === 3) {
+          pdf.setDrawColor(55, 55, 55)
+          pdf.line(cellLeft, textBaseline, cellRight, textBaseline)
+          return
+        }
+        pdf.setFont('helvetica', correction && index === 3 ? 'bold' : 'normal')
+        const textRight = index === 1 ? cellRight - pdf.getTextWidth(':') - 1.5 : cellRight
+        const lines = pdf.splitTextToSize(pdfSafe(value), textRight - cellLeft)
+        if (index < 3 && lines.length === 1) {
+          pdf.text(lines[0]!, cellLeft, textBaseline)
+          if (index === 1) pdf.text(':', cellRight, textBaseline, { align: 'right' })
+          return
+        }
+        const textHeight = lines.length * lineHeight
+        const textY = y + Math.max(2, (height - textHeight) / 2)
+        pdf.text(lines, cellLeft, textY, {
+          baseline: 'top',
+          lineHeightFactor: questionLineHeightFactor,
+        })
+      })
+      return y + height
+    }
+
     function drawExercisePage(page: typeof exercisePages.value[number], continuation: boolean) {
       addPage()
       let y = drawExerciseHeader(continuation)
       pdf.setFontSize(bodySize)
+      if (isTableLayout.value) {
+        page.forEach(({ item: question }) => {
+          y = drawQuestionTableRow(question, y)
+        })
+        drawFooter()
+        return
+      }
       page.forEach(({ item: question, index }) => {
         const prefix = `${index + 1}. `
         const printable = printableQuestionParts(question, props.exerciseKind)
@@ -459,6 +546,13 @@ async function buildPdf() {
       addPage()
       let y = drawCorrectionHeader(continuation)
       pdf.setFontSize(correctionSize)
+      if (isTableLayout.value) {
+        page.forEach(({ item: question }) => {
+          y = drawQuestionTableRow(question, y, true)
+        })
+        drawFooter()
+        return
+      }
       page.forEach(({ item: question, index }) => {
         const answer = printableCorrectionAnswers(question)
           .flatMap(value => pdf.splitTextToSize(
@@ -725,6 +819,62 @@ async function downloadWord() {
     const lightBottomBorder = {
       bottom: { style: BorderStyle.SINGLE, size: 2, color: 'D9D9D9' }
     }
+    const estimatedWordWidth = (values: string[], extra = 180) => Math.max(0, ...values.map(value => value.length * (inclusivePrint.value ? 120 : 100))) + extra
+    const naturalWordPromptWidths = [
+      estimatedWordWidth(printableQuestions.value.map(question => tableQuestionParts(question).infinitive)),
+      estimatedWordWidth(printableQuestions.value.map(question => tableQuestionParts(question).tense), 300),
+      estimatedWordWidth(printableQuestions.value.map(question => tableQuestionParts(question).pronoun)),
+    ]
+    const questionTableWidths = [
+      ...naturalWordPromptWidths,
+      Math.max(900, contentWidth - naturalWordPromptWidths.reduce((total, width) => total + width, 0)),
+    ]
+    const wordQuestionTable = (correction = false) => new Table({
+      width: { size: contentWidth, type: WidthType.DXA },
+      columnWidths: questionTableWidths,
+      layout: TableLayoutType.FIXED,
+      borders: TableBorders.NONE,
+      rows: [
+        ...printableQuestions.value.map(question => {
+          const parts = tableQuestionParts(question)
+          const values = [
+            parts.infinitive,
+            parts.tense,
+            parts.pronoun,
+            correction ? printableCorrectionText(question) : '',
+          ]
+          return new TableRow({
+            cantSplit: true,
+            height: { value: Math.round(tableQuestionHeight(question, correction) * 56.7), rule: HeightRule.ATLEAST },
+            children: values.map((value, index) => cell(
+              !correction && index === 3
+                ? [new Paragraph({
+                    spacing: noSpacing,
+                    tabStops: [{
+                      type: TabStopType.RIGHT,
+                      position: Math.max(300, questionTableWidths[index]! - 120),
+                      leader: LeaderType.UNDERSCORE,
+                    }],
+                    children: [new TextRun({ children: [new Tab()], size: wordBodySize, font: 'Arial' })],
+                  })]
+                : index === 1
+                ? [new Paragraph({
+                    spacing: noSpacing,
+                    tabStops: [{ type: TabStopType.RIGHT, position: Math.max(300, questionTableWidths[index]! - 180) }],
+                    children: [
+                      new TextRun({ text: value, size: wordBodySize, font: 'Arial' }),
+                      new TextRun({ children: [new Tab()], size: wordBodySize, font: 'Arial' }),
+                      new TextRun({ text: ':', size: wordBodySize, font: 'Arial' }),
+                    ],
+                  })]
+                : [paragraph(value, { bold: correction && index === 3, size: wordBodySize })],
+              questionTableWidths[index]!,
+              { margins: { top: 90, bottom: 90, left: 60, right: 60 } },
+            )),
+          })
+        }),
+      ],
+    })
 
     const identityCells: InstanceType<typeof TableCell>[] = []
     const identityValues = [
@@ -782,7 +932,7 @@ async function downloadWord() {
         children: [],
       }))
     }
-    exerciseChildren.push(new Table({
+    exerciseChildren.push(isTableLayout.value ? wordQuestionTable() : new Table({
       width: { size: contentWidth, type: WidthType.DXA },
       columnWidths: isTenseIdentification.value ? [480, 9495] : [480, 3900, 5595],
       layout: TableLayoutType.FIXED,
@@ -821,7 +971,7 @@ async function downloadWord() {
           new TextRun({ text: identifier, size: inclusivePrint.value ? wordBodySize : 18, font: 'Arial' })
         ]
       }),
-      new Table({
+      isTableLayout.value ? wordQuestionTable(true) : new Table({
         width: { size: contentWidth, type: WidthType.DXA },
         columnWidths: isTenseIdentification.value ? [480, 9495] : [480, 5100, 4395],
         layout: TableLayoutType.FIXED,
@@ -957,6 +1107,36 @@ async function downloadWord() {
               </div>
             </div>
           </section>
+
+          <fieldset v-if="exerciseKind === 'conjugation'" class="print-layout-choice">
+            <legend>{{ ui('Présentation des questions') }}</legend>
+            <label :class="{ 'is-selected': options.questionLayout === 'lines' }">
+              <input
+                type="radio"
+                name="preview-question-layout"
+                value="lines"
+                :checked="options.questionLayout === 'lines'"
+                @change="setPrintOption('questionLayout', 'lines')"
+              >
+              <span>
+                <strong>{{ ui('Présentation en lignes') }}</strong>
+                <small>{{ ui('Pronom, verbe et temps sur une ligne, puis une ligne pour écrire la réponse.') }}</small>
+              </span>
+            </label>
+            <label :class="{ 'is-selected': options.questionLayout === 'table' }">
+              <input
+                type="radio"
+                name="preview-question-layout"
+                value="table"
+                :checked="options.questionLayout === 'table'"
+                @change="setPrintOption('questionLayout', 'table')"
+              >
+              <span>
+                <strong>{{ ui('Présentation en tableau') }}</strong>
+                <small>{{ ui('Une colonne pour le verbe, le temps, le pronom et la réponse à écrire.') }}</small>
+              </span>
+            </label>
+          </fieldset>
 
           <label class="print-settings__field" for="preview-print-title">
             <span>{{ ui('Titre de la fiche') }}</span>

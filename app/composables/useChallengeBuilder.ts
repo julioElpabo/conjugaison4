@@ -28,6 +28,7 @@ export interface Catalogue {
 
 export interface PrintOptions {
   title: string
+  questionLayout: 'lines' | 'table'
   questionSpacingMm: number
   titleSpacingMm: number
   inclusiveDisplay: boolean
@@ -67,6 +68,7 @@ export interface SharedChallenge {
 
 export const createDefaultPrintOptions = (): PrintOptions => ({
   title: 'Défi de conjugaison',
+  questionLayout: 'lines',
   questionSpacingMm: 8,
   titleSpacingMm: 30,
   inclusiveDisplay: false,

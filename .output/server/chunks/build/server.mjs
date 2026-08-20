@@ -684,6 +684,11 @@ const uiMessages = {
   "Autoriser les r\xE9p\xE9titions": { de: "Wiederholungen zulassen", en: "Allow repetitions", it: "Consenti ripetizioni", es: "Permitir repeticiones" },
   "R\xE9p\xE9titions autoris\xE9es": { de: "Wiederholungen zugelassen", en: "Repetitions allowed", it: "Ripetizioni consentite", es: "Repeticiones permitidas" },
   "Titre de la fiche": { de: "Titel des Arbeitsblatts", en: "Worksheet title", it: "Titolo della scheda", es: "T\xEDtulo de la ficha" },
+  "Pr\xE9sentation des questions": { de: "Darstellung der Fragen", en: "Question layout", it: "Presentazione delle domande", es: "Presentaci\xF3n de las preguntas" },
+  "Pr\xE9sentation en lignes": { de: "Darstellung in Zeilen", en: "Line layout", it: "Presentazione in righe", es: "Presentaci\xF3n en l\xEDneas" },
+  "Pronom, verbe et temps sur une ligne, puis une ligne pour \xE9crire la r\xE9ponse.": { de: "Pronomen, Verb und Zeitform in einer Zeile, danach eine Linie f\xFCr die Antwort.", en: "Pronoun, verb and tense on one line, followed by a line for the answer.", it: "Pronome, verbo e tempo su una riga, poi una riga per scrivere la risposta.", es: "Pronombre, verbo y tiempo en una l\xEDnea, seguidos de una l\xEDnea para escribir la respuesta." },
+  "Pr\xE9sentation en tableau": { de: "Darstellung als Tabelle", en: "Table layout", it: "Presentazione in tabella", es: "Presentaci\xF3n en tabla" },
+  "Une colonne pour le verbe, le temps, le pronom et la r\xE9ponse \xE0 \xE9crire.": { de: "Je eine Spalte f\xFCr Verb, Zeitform, Pronomen und die zu schreibende Antwort.", en: "One column each for the verb, tense, pronoun and written answer.", it: "Una colonna per il verbo, il tempo, il pronome e la risposta da scrivere.", es: "Una columna para el verbo, el tiempo, el pronombre y la respuesta que se debe escribir." },
   "Espace avant le titre": { de: "Abstand vor dem Titel", en: "Space before the title", it: "Spazio prima del titolo", es: "Espacio antes del t\xEDtulo" },
   "Espacement entre les questions": { de: "Abstand zwischen den Fragen", en: "Spacing between questions", it: "Spaziatura tra le domande", es: "Espacio entre las preguntas" },
   "Mise en page": { de: "Layout", en: "Layout", it: "Impaginazione", es: "Dise\xF1o" },
@@ -1631,7 +1636,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-UnC5mgkc.mjs')
+    component: () => import('./users-C1YV6Xgv.mjs')
   },
   {
     name: "admin-verbes",
@@ -1651,12 +1656,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-DnUW6eLd.mjs')
+    component: () => import('./_code_-X1oKhYuR.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-Cyo1auf1.mjs')
+    component: () => import('./_slug_-DnFZ1zPN.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1701,7 +1706,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-CuXLrQtQ.mjs')
+    component: () => import('./exercices-de-conjugaison-5l9lRG4g.mjs')
   },
   {
     name: "mon-compte",
@@ -1712,12 +1717,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-bAEd_hQ3.mjs')
+    component: () => import('./my-page-DXPPSCPg.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-B0jC9pYc.mjs')
+    component: () => import('./nouveau-defi-gC70iD80.mjs')
   },
   {
     name: "signin",
@@ -1727,7 +1732,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-Bmqa2dNO.mjs')
+    component: () => import('./index-B8hltufS.mjs')
   },
   {
     name: "mode-tense",
@@ -1812,7 +1817,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-UnC5mgkc.mjs')
+    component: () => import('./users-C1YV6Xgv.mjs')
   },
   {
     name: "localized-admin-verbes",
@@ -1832,12 +1837,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-DnUW6eLd.mjs')
+    component: () => import('./_code_-X1oKhYuR.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es)/defis/:slug()",
-    component: () => import('./_slug_-Cyo1auf1.mjs')
+    component: () => import('./_slug_-DnFZ1zPN.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1882,7 +1887,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-CuXLrQtQ.mjs')
+    component: () => import('./exercices-de-conjugaison-5l9lRG4g.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1893,12 +1898,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-bAEd_hQ3.mjs')
+    component: () => import('./my-page-DXPPSCPg.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-B0jC9pYc.mjs')
+    component: () => import('./nouveau-defi-gC70iD80.mjs')
   },
   {
     name: "localized-signin",
@@ -1908,7 +1913,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-Bmqa2dNO.mjs')
+    component: () => import('./index-B8hltufS.mjs')
   },
   {
     name: "localized-mode-tense",

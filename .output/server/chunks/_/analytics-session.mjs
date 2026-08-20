@@ -77,6 +77,7 @@ function safeAnalyticsMetadata(value) {
     "showLastName",
     "showDate",
     "showRandomNumber",
+    "questionLayout",
     "questionSpacingBand",
     "titleSpacingBand"
   ];

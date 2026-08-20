@@ -393,7 +393,8 @@ async function buildPdf() {
     pdf.setFontSize(bodySize)
     const naturalTableWidths = [
       Math.max(...printableQuestions.value.map(question => pdf.getTextWidth(pdfSafe(tableQuestionParts(question).infinitive))), 0) + 5,
-      Math.max(...printableQuestions.value.map(question => pdf.getTextWidth(pdfSafe(tableQuestionParts(question).tense))), 0) + 10,
+      Math.max(...printableQuestions.value.map(question => pdf.getTextWidth(pdfSafe(tableQuestionParts(question).tense))), 0) + 5,
+      pdf.getTextWidth(':') + 4,
       Math.max(...printableQuestions.value.map(question => pdf.getTextWidth(pdfSafe(tableQuestionParts(question).pronoun))), 0) + 5,
     ]
     const tableColumns = [
@@ -401,8 +402,14 @@ async function buildPdf() {
       left + naturalTableWidths[0]!,
       left + naturalTableWidths[0]! + naturalTableWidths[1]!,
       left + naturalTableWidths[0]! + naturalTableWidths[1]! + naturalTableWidths[2]!,
+      left + naturalTableWidths[0]! + naturalTableWidths[1]! + naturalTableWidths[2]! + naturalTableWidths[3]!,
       right,
     ]
+    const linePromptWidth = Math.max(
+      0,
+      ...printableQuestions.value.map(question => pdf.getTextWidth(pdfSafe(capitalizePrintLine(printableQuestionParts(question, props.exerciseKind).label)))),
+    ) + 4
+    const lineCompletionX = left + 7 + linePromptWidth
 
     function drawQuestionTableRow(question: ExerciseQuestion, y: number, correction = false) {
       const height = tableQuestionHeight(question, correction)
@@ -410,6 +417,7 @@ async function buildPdf() {
       const values = [
         parts.infinitive,
         parts.tense,
+        ':',
         parts.pronoun,
         correction ? printableCorrectionText(question) : '',
       ]
@@ -419,17 +427,20 @@ async function buildPdf() {
       values.forEach((value, index) => {
         const cellLeft = tableColumns[index]! + (index === 0 ? 0 : 2)
         const cellRight = tableColumns[index + 1]! - 2
-        if (!correction && index === 3) {
+        if (index === 2) {
+          pdf.setFont('helvetica', 'normal')
+          pdf.text(':', (tableColumns[index]! + tableColumns[index + 1]!) / 2, textBaseline, { align: 'center' })
+          return
+        }
+        if (!correction && index === 4) {
           pdf.setDrawColor(55, 55, 55)
           pdf.line(cellLeft, textBaseline, cellRight, textBaseline)
           return
         }
-        pdf.setFont('helvetica', correction && index === 3 ? 'bold' : 'normal')
-        const textRight = index === 1 ? cellRight - pdf.getTextWidth(':') - 1.5 : cellRight
-        const lines = pdf.splitTextToSize(pdfSafe(value), textRight - cellLeft)
-        if (index < 3 && lines.length === 1) {
+        pdf.setFont('helvetica', correction && index === 4 ? 'bold' : 'normal')
+        const lines = pdf.splitTextToSize(pdfSafe(value), cellRight - cellLeft)
+        if (index < 4 && lines.length === 1) {
           pdf.text(lines[0]!, cellLeft, textBaseline)
-          if (index === 1) pdf.text(':', cellRight, textBaseline, { align: 'right' })
           return
         }
         const textHeight = lines.length * lineHeight
@@ -457,15 +468,15 @@ async function buildPdf() {
         const prefix = `${index + 1}. `
         const printable = printableQuestionParts(question, props.exerciseKind)
         pdf.setFont('helvetica', 'normal')
-        const labelLines = pdf.splitTextToSize(pdfSafe(capitalizePrintLine(printable.label)), 68)
-        const completionWidth = printable.label ? 96 : 169
+        const labelLines = pdf.splitTextToSize(pdfSafe(capitalizePrintLine(printable.label)), linePromptWidth)
+        const completionWidth = printable.label ? right - lineCompletionX : 169
         const literaryCitation = pdfLiteraryCitation(question, completionWidth)
         const completionLines = literaryCitation
           ? [...literaryCitation.lines.map(line => line.text), ...literaryCitation.sourceLines]
           : printable.fillBlank
           ? [pdfSafe(capitalizePrintLine(printable.completion))]
           : pdf.splitTextToSize(pdfSafe(capitalizePrintLine(printable.completion)), completionWidth)
-        const completionX = printable.label ? 96 : left + 7
+        const completionX = printable.label ? lineCompletionX : left + 7
         const before = pdfSafe(capitalizePrintLine(printable.completionPrefix))
         const after = pdfSafe(printable.completionSuffix)
         const lineStart = completionX + (before ? pdf.getTextWidth(before) + 2 : 0)
@@ -822,13 +833,19 @@ async function downloadWord() {
     const estimatedWordWidth = (values: string[], extra = 180) => Math.max(0, ...values.map(value => value.length * (inclusivePrint.value ? 120 : 100))) + extra
     const naturalWordPromptWidths = [
       estimatedWordWidth(printableQuestions.value.map(question => tableQuestionParts(question).infinitive)),
-      estimatedWordWidth(printableQuestions.value.map(question => tableQuestionParts(question).tense), 300),
+      estimatedWordWidth(printableQuestions.value.map(question => tableQuestionParts(question).tense)),
+      280,
       estimatedWordWidth(printableQuestions.value.map(question => tableQuestionParts(question).pronoun)),
     ]
     const questionTableWidths = [
       ...naturalWordPromptWidths,
       Math.max(900, contentWidth - naturalWordPromptWidths.reduce((total, width) => total + width, 0)),
     ]
+    const linePromptWidth = estimatedWordWidth(
+      printableQuestions.value.map(question => capitalizePrintLine(printableQuestionParts(question, props.exerciseKind).label)),
+      260,
+    )
+    const lineQuestionWidths = [480, linePromptWidth, Math.max(900, contentWidth - 480 - linePromptWidth)]
     const wordQuestionTable = (correction = false) => new Table({
       width: { size: contentWidth, type: WidthType.DXA },
       columnWidths: questionTableWidths,
@@ -840,6 +857,7 @@ async function downloadWord() {
           const values = [
             parts.infinitive,
             parts.tense,
+            ':',
             parts.pronoun,
             correction ? printableCorrectionText(question) : '',
           ]
@@ -847,7 +865,7 @@ async function downloadWord() {
             cantSplit: true,
             height: { value: Math.round(tableQuestionHeight(question, correction) * 56.7), rule: HeightRule.ATLEAST },
             children: values.map((value, index) => cell(
-              !correction && index === 3
+              !correction && index === 4
                 ? [new Paragraph({
                     spacing: noSpacing,
                     tabStops: [{
@@ -857,17 +875,7 @@ async function downloadWord() {
                     }],
                     children: [new TextRun({ children: [new Tab()], size: wordBodySize, font: 'Arial' })],
                   })]
-                : index === 1
-                ? [new Paragraph({
-                    spacing: noSpacing,
-                    tabStops: [{ type: TabStopType.RIGHT, position: Math.max(300, questionTableWidths[index]! - 180) }],
-                    children: [
-                      new TextRun({ text: value, size: wordBodySize, font: 'Arial' }),
-                      new TextRun({ children: [new Tab()], size: wordBodySize, font: 'Arial' }),
-                      new TextRun({ text: ':', size: wordBodySize, font: 'Arial' }),
-                    ],
-                  })]
-                : [paragraph(value, { bold: correction && index === 3, size: wordBodySize })],
+                : [paragraph(value, { bold: correction && index === 4, size: wordBodySize })],
               questionTableWidths[index]!,
               { margins: { top: 90, bottom: 90, left: 60, right: 60 } },
             )),
@@ -934,7 +942,7 @@ async function downloadWord() {
     }
     exerciseChildren.push(isTableLayout.value ? wordQuestionTable() : new Table({
       width: { size: contentWidth, type: WidthType.DXA },
-      columnWidths: isTenseIdentification.value ? [480, 9495] : [480, 3900, 5595],
+      columnWidths: isTenseIdentification.value ? [480, 9495] : lineQuestionWidths,
       layout: TableLayoutType.FIXED,
       borders: TableBorders.NONE,
       rows: printableQuestions.value.map((question, index) => {
@@ -948,8 +956,8 @@ async function downloadWord() {
         ]
         const conjugationCells = [
           cell([paragraph(`${index + 1}.`, { size: wordBodySize })], 480, { margins: { top: 70, bottom: 70, left: 0, right: 40 } }),
-          cell([paragraph(capitalizePrintLine(printable.label), { size: wordBodySize })], 3900),
-          cell(completionParagraphs(question), 5595),
+          cell([paragraph(capitalizePrintLine(printable.label), { size: wordBodySize })], lineQuestionWidths[1]!),
+          cell(completionParagraphs(question), lineQuestionWidths[2]!),
         ]
         return new TableRow({
           cantSplit: true,

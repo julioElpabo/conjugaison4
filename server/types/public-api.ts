@@ -15,6 +15,7 @@ export type QuestionnaireRequest = ChallengeConfig
 
 export interface ChallengePrintOptions {
   title: string
+  questionLayout: 'lines' | 'table'
   questionSpacingMm: number
   titleSpacingMm: number
   inclusiveDisplay: boolean

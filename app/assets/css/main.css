@@ -2633,6 +2633,65 @@ body.dialog-open {
   justify-content: center;
 }
 
+.print-layout-choice {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding: 0 0 18px;
+  border: 0;
+  border-bottom: 1px solid #d9e4e0;
+}
+
+.print-layout-choice legend {
+  padding: 0 0 9px;
+  color: var(--brand-dark);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.print-layout-choice label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px;
+  border: 1px solid #c5d9d3;
+  border-radius: 11px;
+  background: white;
+  color: #3d5650;
+  cursor: pointer;
+}
+
+.print-layout-choice label.is-selected {
+  border-color: var(--brand);
+  background: #edf8f4;
+  box-shadow: inset 0 0 0 1px var(--brand);
+}
+
+.print-layout-choice input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  flex: 0 0 auto;
+  accent-color: var(--brand);
+}
+
+.print-layout-choice span {
+  display: grid;
+  gap: 3px;
+}
+
+.print-layout-choice strong {
+  color: var(--brand-dark);
+  font-size: 0.84rem;
+}
+
+.print-layout-choice small {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
 .print-question-shortage {
   display: grid;
   gap: 12px;

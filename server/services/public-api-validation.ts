@@ -82,6 +82,7 @@ function parseChallengeDescription(value: unknown): string | undefined {
 
 const PRINT_OPTION_KEYS = new Set([
   'title',
+  'questionLayout',
   'questionSpacingMm',
   'titleSpacingMm',
   'inclusiveDisplay',
@@ -106,6 +107,7 @@ const BOOLEAN_PRINT_OPTION_KEYS = [
 
 const DEFAULT_PRINT_OPTIONS: ChallengePrintOptions = {
   title: 'Défi de conjugaison',
+  questionLayout: 'lines',
   questionSpacingMm: 8,
   titleSpacingMm: 30,
   inclusiveDisplay: false,
@@ -224,6 +226,12 @@ function parsePrintOptions(value: unknown): ChallengePrintOptions {
   }
 
   const parsed = { ...DEFAULT_PRINT_OPTIONS, title: title.trim() }
+  if (value.questionLayout !== undefined) {
+    if (value.questionLayout !== 'lines' && value.questionLayout !== 'table') {
+      throw new PublicInputError('printOptions.questionLayout doit valoir lines ou table')
+    }
+    parsed.questionLayout = value.questionLayout
+  }
   const numericOptions = {
     questionSpacingMm: { minimum: 2, maximum: 15 },
     titleSpacingMm: { minimum: 8, maximum: 30 },

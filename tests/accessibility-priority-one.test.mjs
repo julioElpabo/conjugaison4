@@ -57,4 +57,18 @@ describe('priorité 1 de l’audit d’accessibilité', () => {
     assert.match(preview, /const INCLUSIVE_QUESTION_LINE_HEIGHT_MM = 7\.5/u)
     assert.match(preview, /lineHeightFactor: questionLineHeightFactor/u)
   })
+
+  it('propose la présentation en tableau dans le PDF et le document Word', async () => {
+    const [builder, preview] = await Promise.all([
+      read('../app/composables/useChallengeBuilder.ts'),
+      read('../app/components/challenge/PrintPreview.vue'),
+    ])
+
+    assert.match(builder, /questionLayout: 'lines'/u)
+    assert.match(preview, /Présentation en tableau/u)
+    assert.match(preview, /function drawQuestionTableRow/u)
+    assert.match(preview, /const wordQuestionTable/u)
+    assert.match(preview, /borders: TableBorders\.NONE/u)
+    assert.doesNotMatch(preview, /drawQuestionTableHeader/u)
+  })
 })

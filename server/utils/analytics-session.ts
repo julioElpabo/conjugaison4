@@ -53,7 +53,7 @@ export function safeAnalyticsMetadata(value: unknown) {
     'complementPlacement', 'questionCountBand', 'inclusivePronouns', 'includeOnPronoun',
     'identificationSource', 'helpSource', 'printSource', 'inclusiveDisplay', 'showGrade',
     'showVerbs', 'showTenses', 'showFirstName', 'showLastName', 'showDate',
-    'showRandomNumber', 'questionSpacingBand', 'titleSpacingBand',
+    'showRandomNumber', 'questionLayout', 'questionSpacingBand', 'titleSpacingBand',
   ]
   const entries = Object.entries(value as Record<string, unknown>)
     .filter(([key, item]) => allowed.includes(key) && ['string', 'number', 'boolean'].includes(typeof item))

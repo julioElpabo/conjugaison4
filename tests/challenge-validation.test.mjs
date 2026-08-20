@@ -30,6 +30,7 @@ describe('validation des défis partagés', () => {
     assert.equal(challenge.complementPlacement, 'after')
     assert.deepEqual(challenge.complementOptions, ['cod-after', 'coi-after'])
     assert.equal(challenge.printOptions.title, 'Défi de conjugaison')
+    assert.equal(challenge.printOptions.questionLayout, 'lines')
   })
 
   it('conserve toutes les options du format moderne', () => {
@@ -49,6 +50,7 @@ describe('validation des défis partagés', () => {
       complementOptions: ['cod-after', 'coi-before'],
       printOptions: {
         title: 'Ma fiche',
+        questionLayout: 'table',
         questionSpacingMm: 8,
         titleSpacingMm: 18,
         inclusiveDisplay: true,
@@ -66,6 +68,7 @@ describe('validation des défis partagés', () => {
     assert.equal(parsed.identificationSource, 'literary-corpus')
     assert.equal(parsed.includeOnPronoun, true)
     assert.equal(parsed.printOptions.inclusiveDisplay, true)
+    assert.equal(parsed.printOptions.questionLayout, 'table')
     assert.deepEqual(JSON.parse(serializeDefi(parsed)), parsed)
   })
 
@@ -80,7 +83,7 @@ describe('validation des défis partagés', () => {
       voiceMode: 'mixed',
       complementOptions: ['cod-before', 'coi-after'],
       printOptions: {
-        title: 'Défi complet', questionSpacingMm: 6, titleSpacingMm: 20,
+        title: 'Défi complet', questionLayout: 'table', questionSpacingMm: 6, titleSpacingMm: 20,
         inclusiveDisplay: true,
         showGrade: false, showVerbs: true, showTenses: true, showFirstName: false,
         showLastName: true, showDate: false, showRandomNumber: false,

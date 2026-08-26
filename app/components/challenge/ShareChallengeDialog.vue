@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { ui, localePath } = useLanguagePreferences()
+const { isAuthenticated } = useLearnerAuth()
 const props = defineProps<{
   code: string
   url: string
@@ -83,6 +84,18 @@ function createCode() {
         </button>
         <p class="dialog-kicker">{{ code ? ui('Défi sauvegardé') : ui('Défi prêt à être partagé') }}</p>
         <h2 id="share-title">{{ ui('Votre défi est prêt à être partagé') }}</h2>
+        <NuxtLink
+          v-if="isAuthenticated"
+          class="share-account-notice"
+          :to="`${localePath('/my-page')}?tab=saved`"
+          @click="emit('close')"
+        >
+          <span aria-hidden="true">✓</span>
+          {{ code
+            ? ui('Ce défi est enregistré dans « Mes défis » de votre compte.')
+            : ui('Ce défi sera automatiquement enregistré dans « Mes défis » de votre compte.')
+          }}
+        </NuxtLink>
         <form class="share-title-form" @submit.prevent="createCode">
           <label for="share-challenge-title">{{ ui('Titre du défi') }}</label>
           <div>

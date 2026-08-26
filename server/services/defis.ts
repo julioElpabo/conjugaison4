@@ -1,5 +1,5 @@
 import { randomInt } from 'node:crypto'
-import type { RowDataPacket } from 'mysql2/promise'
+import type { ResultSetHeader, RowDataPacket } from 'mysql2/promise'
 import type { DefiDefinition } from '../types/public-api'
 import { useDatabase } from '../utils/database'
 import { parseDefiDefinition, PublicInputError, serializeDefi } from './public-api-validation'
@@ -73,26 +73,43 @@ export async function assertDefiSelectionExists(definition: DefiDefinition) {
   }
 }
 
-export async function saveDefi(definition: DefiDefinition) {
+export async function saveDefi(definition: DefiDefinition, learnerAccountId?: number) {
   const database = useDatabase()
   await assertDefiSelectionExists(definition)
+  const connection = await database.getConnection()
+  try {
+    await connection.beginTransaction()
+    for (let attempt = 0; attempt < 12; attempt++) {
+      const code = createCode()
+      const [existing] = await connection.execute<CountRow[]>(
+        'SELECT COUNT(*) AS count FROM defis WHERE name = ?',
+        [code]
+      )
+      if (Number(existing[0]?.count) !== 0) continue
 
-  for (let attempt = 0; attempt < 12; attempt++) {
-    const code = createCode()
-    const [existing] = await database.execute<CountRow[]>(
-      'SELECT COUNT(*) AS count FROM defis WHERE name = ?',
-      [code]
-    )
-    if (Number(existing[0]?.count) !== 0) continue
+      const [result] = await connection.execute<ResultSetHeader>(
+        'INSERT INTO defis (name, defi) VALUES (?, ?)',
+        [code, serializeDefi(definition)]
+      )
+      if (learnerAccountId) {
+        await connection.execute(`
+          INSERT INTO learner_saved_challenges (account_id, defi_id)
+          VALUES (?, ?)
+        `, [learnerAccountId, result.insertId])
+      }
+      await connection.commit()
+      return code
+    }
 
-    await database.execute(
-      'INSERT INTO defis (name, defi) VALUES (?, ?)',
-      [code, serializeDefi(definition)]
-    )
-    return code
+    throw new DefiStorageError('Impossible de créer un code unique')
   }
-
-  throw new DefiStorageError('Impossible de créer un code unique')
+  catch (error) {
+    await connection.rollback()
+    throw error
+  }
+  finally {
+    connection.release()
+  }
 }
 
 export async function getDefi(code: string): Promise<DefiDefinition> {

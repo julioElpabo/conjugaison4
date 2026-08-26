@@ -299,6 +299,19 @@ export default defineNitroPlugin(async () => {
           FOREIGN KEY (account_id) REFERENCES learner_accounts(id) ON DELETE CASCADE
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `)
+    await database.query(`
+      CREATE TABLE IF NOT EXISTS learner_saved_challenges (
+        account_id BIGINT UNSIGNED NOT NULL,
+        defi_id INT NOT NULL,
+        saved_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (account_id, defi_id),
+        KEY idx_learner_saved_challenges_date (account_id, saved_at),
+        CONSTRAINT fk_learner_saved_challenges_account
+          FOREIGN KEY (account_id) REFERENCES learner_accounts(id) ON DELETE CASCADE,
+        CONSTRAINT fk_learner_saved_challenges_defi
+          FOREIGN KEY (defi_id) REFERENCES defis(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `)
     await database.query('DELETE FROM learner_sessions WHERE expires_at < CURRENT_TIMESTAMP')
     await database.query(
       "DELETE FROM learner_accounts WHERE status = 'pending' AND activated_at IS NULL AND created_at < CURRENT_TIMESTAMP - INTERVAL 48 HOUR"

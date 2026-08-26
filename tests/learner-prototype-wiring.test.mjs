@@ -81,8 +81,31 @@ describe('câblage du prototype de compte pseudonyme', () => {
     assert.match(migration, /CREATE TABLE IF NOT EXISTS learner_run_questions/u)
     assert.match(migration, /CREATE TABLE IF NOT EXISTS learner_login_events/u)
     assert.match(migration, /CREATE TABLE IF NOT EXISTS learner_preferences/u)
+    assert.match(migration, /CREATE TABLE IF NOT EXISTS learner_saved_challenges/u)
     assert.match(session, /learner_session/u)
     assert.doesNotMatch(session, /conjugaison_session/u)
+  })
+
+  it('enregistre et rattache les défis au compte pseudonyme', async () => {
+    const space = await read('../app/components/learner/LearnerSpace.vue')
+    const shareDialog = await read('../app/components/challenge/ShareChallengeDialog.vue')
+    const creation = await read('../server/api/defis/index.post.ts')
+    const defis = await read('../server/services/defis.ts')
+    const savedList = await read('../server/api/learner/saved-challenges.get.ts')
+    const savedAdd = await read('../server/api/learner/saved-challenges.post.ts')
+
+    assert.match(space, /savedCopy\.tab/u)
+    assert.match(space, /learnerApi\('saved-challenges'\)/u)
+    assert.match(space, /localePath\(`\/defi\/\$\{challenge\.code\}`\)/u)
+    assert.match(shareDialog, /v-if="isAuthenticated"/u)
+    assert.match(shareDialog, /localePath\('\/my-page'\)/u)
+    assert.match(shareDialog, /tab=saved/u)
+    assert.match(shareDialog, /sera automatiquement enregistré dans « Mes défis »/u)
+    assert.match(creation, /getLearnerSession\(event\)/u)
+    assert.match(defis, /INSERT INTO learner_saved_challenges/u)
+    assert.match(savedList, /requireLearnerDataSubject\(event\)/u)
+    assert.match(savedAdd, /normalizeDefiCode/u)
+    assert.match(savedAdd, /INSERT IGNORE INTO learner_saved_challenges/u)
   })
 
   it('sépare les admins historiques des utilisateurs pseudonymes', async () => {
@@ -456,6 +479,15 @@ describe('câblage du prototype de compte pseudonyme', () => {
     assert.match(dashboard, /f\.question_json IS NOT NULL/u)
     assert.match(dashboard, /f\.incorrect_count > 0/u)
     assert.doesNotMatch(dashboard, /filter\(form => !form\.mastered/u)
+  })
+
+  it('ouvre directement l’étape 4 après le choix d’un défi tout fait sur l’accueil', async () => {
+    const wizard = await read('../app/components/challenge/WizardChallengeWorkspace.vue')
+    assert.match(wizard, /@select="selectHomePreset"/u)
+    assert.match(
+      wizard,
+      /function selectHomePreset\(preset: ChallengePreset, randomCount\?: number\)[\s\S]*?selectPreset\(preset, randomCount\)[\s\S]*?goToStep\(4\)[\s\S]*?showLaunchSummary\.value = true/u,
+    )
   })
 
   it('utilise dix questions par défaut dans les défis et les options', async () => {

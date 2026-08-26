@@ -2565,7 +2565,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-CWWdEDf0.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-GZSFTzP6.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

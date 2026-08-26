@@ -194,7 +194,7 @@ describe('câblage du prototype de compte pseudonyme', () => {
     assert.doesNotMatch(layout, /theme-switch__thumb/u)
     assert.match(layout, /\.theme-switch__icon--moon\s*\{\s*opacity:\s*1;/u)
     assert.match(layout, /\.theme-switch\.is-dark \.theme-switch__icon--sun\s*\{\s*opacity:\s*1;/u)
-    assert.match(layout, /learnerCopy\.history[\s\S]*learnerCopy\.commonErrors/u)
+    assert.match(layout, /learnerCopy\.account[\s\S]*learnerCopy\.commonErrors/u)
     assert.doesNotMatch(layout, /tab=challenges/u)
     assert.match(layout, /learnerCopy\.preferences/u)
     assert.match(layout, /learnerCopy\.changeLanguage/u)

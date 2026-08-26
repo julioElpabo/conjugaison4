@@ -1,41 +1,15 @@
 import assert from 'node:assert/strict'
-import { describe, it } from 'node:test'
-import {
-  GUIDED_TOUR_REMINDER_VISIT_COUNT,
-  parseGuidedTourReminderState,
-  postponedGuidedTourState,
-  registerGuidedTourHomepageVisit,
-  shouldRemindAboutGuidedTour,
-} from '../shared/utils/guided-tour-reminder.ts'
+import { readFile } from 'node:fs/promises'
+import test from 'node:test'
 
-describe('rappel de la visite guidée', () => {
-  it('ne repropose la visite qu’à la dixième visite après le report', () => {
-    let state = postponedGuidedTourState()
+const read = path => readFile(new URL(path, import.meta.url), 'utf8')
 
-    for (let visit = 1; visit < GUIDED_TOUR_REMINDER_VISIT_COUNT; visit += 1) {
-      state = registerGuidedTourHomepageVisit(state)
-      assert.equal(shouldRemindAboutGuidedTour(state), false)
-    }
+test('la visite guidée ne s’ouvre que sur une demande manuelle', async () => {
+  const workspace = await read('../app/components/challenge/WizardChallengeWorkspace.vue')
 
-    state = registerGuidedTourHomepageVisit(state)
-    assert.equal(shouldRemindAboutGuidedTour(state), true)
-  })
-
-  it('ne repropose plus automatiquement la visite après le rappel', () => {
-    const state = registerGuidedTourHomepageVisit({
-      visitsSincePostponement: GUIDED_TOUR_REMINDER_VISIT_COUNT,
-      reminderShown: true,
-    })
-
-    assert.deepEqual(state, {
-      visitsSincePostponement: GUIDED_TOUR_REMINDER_VISIT_COUNT,
-      reminderShown: true,
-    })
-    assert.equal(shouldRemindAboutGuidedTour(state), false)
-  })
-
-  it('ignore un état stocké invalide', () => {
-    assert.equal(parseGuidedTourReminderState('{"visitsSincePostponement":-1,"reminderShown":false}'), null)
-    assert.equal(parseGuidedTourReminderState('invalide'), null)
-  })
+  assert.match(workspace, /@click="openTourMenu"/u)
+  assert.match(workspace, /tourWelcomeSource\.value = 'manual'/u)
+  assert.doesNotMatch(workspace, /tourWelcomeSource\.value = '(?:initial|reminder)'/u)
+  assert.doesNotMatch(workspace, /guided-tour-reminder/u)
+  assert.doesNotMatch(workspace, /tourPromptTimer/u)
 })

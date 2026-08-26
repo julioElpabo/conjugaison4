@@ -1,5 +1,5 @@
 <script setup lang="ts">
-interface DailySessionSnapshot {
+interface DailyVisitorSnapshot {
   count: number
   date: string
   source: 'ga4' | 'local'
@@ -14,14 +14,16 @@ const loading = ref(false)
 let refreshTimer: ReturnType<typeof setInterval> | undefined
 
 const badgeLabel = computed(() => count.value === null
-  ? 'Chargement du nombre de sessions depuis minuit'
-  : `${count.value.toLocaleString('fr-CH')} session${count.value === 1 ? '' : 's'} ${source.value === 'ga4' ? 'GA4 ' : 'locales '}depuis minuit`)
+  ? 'Chargement du nombre de visiteurs distincts depuis minuit'
+  : source.value === 'ga4'
+    ? `${count.value.toLocaleString('fr-CH')} visiteur${count.value === 1 ? '' : 's'} distinct${count.value === 1 ? '' : 's'} depuis minuit selon GA4`
+    : `${count.value.toLocaleString('fr-CH')} visiteur${count.value === 1 ? '' : 's'} estimé${count.value === 1 ? '' : 's'} depuis minuit selon la mesure locale`)
 
 async function refreshCount() {
   if (!isAuthenticated.value || loading.value || document.visibilityState !== 'visible') return
   loading.value = true
   try {
-    const snapshot = await $fetch<DailySessionSnapshot>('/api/admin/daily-sessions', {
+    const snapshot = await $fetch<DailyVisitorSnapshot>('/api/admin/daily-visitors', {
       credentials: 'same-origin',
       timeout: 10_000,
     })
@@ -89,7 +91,7 @@ onBeforeUnmount(() => {
     aria-live="polite"
   >
     <strong>{{ count === null ? '…' : count.toLocaleString('fr-CH') }}</strong>
-    <span>{{ source === 'local' ? 'sessions locales' : 'sessions aujourd’hui' }}</span>
+    <span>{{ source === 'local' ? 'visiteurs estimés' : 'visiteurs aujourd’hui' }}</span>
   </NuxtLink>
 </template>
 

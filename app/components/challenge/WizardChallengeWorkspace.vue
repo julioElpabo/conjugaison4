@@ -8,14 +8,6 @@ import { legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils
 import { guidedTourCopy } from '~~/shared/i18n/guided-tour'
 import type { AppLocale } from '~~/shared/i18n/locales'
 import type { CoachProfile } from '~~/shared/types/coach'
-import {
-  GUIDED_TOUR_COMPLETED_STORAGE_KEY,
-  GUIDED_TOUR_REMINDER_STORAGE_KEY,
-  parseGuidedTourReminderState,
-  postponedGuidedTourState,
-  registerGuidedTourHomepageVisit,
-  shouldRemindAboutGuidedTour,
-} from '~~/shared/utils/guided-tour-reminder'
 import type { DriveStep, Driver } from 'driver.js'
 import { createDefaultChallenge, getChallengeErrorMessage, useChallengeBuilder, type ChallengeConfig as BuilderChallengeConfig } from '~/composables/useChallengeBuilder'
 import { normalizeChallengeCode, useChallengeApi } from '~/composables/useChallengeApi'
@@ -188,7 +180,7 @@ const identificationTenses = computed(() => {
 })
 // Cet état doit survivre au changement d’URL effectué par le sélecteur de langue.
 const isTourWelcomeOpen = useState('guided-tour-welcome-open', () => false)
-const tourWelcomeSource = useState<'initial' | 'reminder' | 'manual' | null>('guided-tour-welcome-source', () => null)
+const tourWelcomeSource = useState<'manual' | null>('guided-tour-welcome-source', () => null)
 const tourActive = ref(false)
 const tourSecondaryWizardStep = ref<WizardStep | null>(null)
 const tourWizardIndicatorStyle = ref<Record<string, string>>({})
@@ -220,7 +212,6 @@ let tourDriver: Driver | null = null
 let tourSnapshot: TourSnapshot | null = null
 let tourCompleted = false
 let trackedTourFormat: TourFormat | null = null
-let tourPromptTimer: ReturnType<typeof setTimeout> | undefined
 let guidedTourMediaQuery: MediaQueryList | undefined
 let exercisePreloadIdleId: number | undefined
 let exercisePreloadTimer: ReturnType<typeof setTimeout> | undefined
@@ -568,7 +559,6 @@ function exerciseUsageMetadata(presentation: 'classic' | 'chat' | 'print') {
 function syncGuidedTourAvailability() {
   guidedTourDisabled.value = guidedTourMediaQuery?.matches === true
   if (!guidedTourDisabled.value) return
-  if (tourPromptTimer) clearTimeout(tourPromptTimer)
   isTourWelcomeOpen.value = false
   guidedTourRequested.value = false
   if (tourActive.value) tourDriver?.destroy()
@@ -590,48 +580,6 @@ onMounted(() => {
     }
   } catch {
     // L'accueil fonctionne normalement si le stockage du navigateur est indisponible.
-  }
-  if (guidedTourDisabled.value) return
-  try {
-    const completed = localStorage.getItem(GUIDED_TOUR_COMPLETED_STORAGE_KEY) === 'completed'
-    let reminderState = parseGuidedTourReminderState(localStorage.getItem(GUIDED_TOUR_REMINDER_STORAGE_KEY))
-
-    // Conserve le choix des personnes ayant cliqué avant le passage au stockage persistant.
-    if (!reminderState && sessionStorage.getItem('tatitotu-guided-tour-postponed') === '1') {
-      reminderState = postponedGuidedTourState()
-      localStorage.setItem(GUIDED_TOUR_REMINDER_STORAGE_KEY, JSON.stringify(reminderState))
-      sessionStorage.removeItem('tatitotu-guided-tour-postponed')
-    }
-
-    if (!completed && !reminderState) {
-      tourPromptTimer = setTimeout(() => {
-        if (!falcMode.value && currentStep.value === 0 && !tourActive.value && !isTourWelcomeOpen.value) {
-          tourWelcomeSource.value = 'initial'
-          isTourWelcomeOpen.value = true
-        }
-      }, 900)
-    }
-    else if (!completed && reminderState && !reminderState.reminderShown) {
-      reminderState = registerGuidedTourHomepageVisit(reminderState)
-      localStorage.setItem(GUIDED_TOUR_REMINDER_STORAGE_KEY, JSON.stringify(reminderState))
-      if (shouldRemindAboutGuidedTour(reminderState)) {
-        tourPromptTimer = setTimeout(() => {
-          if (falcMode.value || currentStep.value !== 0 || tourActive.value || isTourWelcomeOpen.value) return
-          try {
-            localStorage.setItem(GUIDED_TOUR_REMINDER_STORAGE_KEY, JSON.stringify({
-              ...reminderState,
-              reminderShown: true,
-            }))
-          } catch {
-            // Le rappel peut tout de même être affiché si le stockage devient indisponible.
-          }
-          tourWelcomeSource.value = 'reminder'
-          isTourWelcomeOpen.value = true
-        }, 900)
-      }
-    }
-  } catch {
-    // La visite reste accessible manuellement si le stockage est indisponible.
   }
 })
 
@@ -1327,14 +1275,6 @@ function restoreAfterTour() {
   tourDriver = null
   tourActive.value = false
   if (currentStep.value === 3) void refreshConjugationExample()
-  if (tourCompleted) {
-    try {
-      localStorage.setItem(GUIDED_TOUR_COMPLETED_STORAGE_KEY, 'completed')
-      localStorage.removeItem(GUIDED_TOUR_REMINDER_STORAGE_KEY)
-    } catch {
-      // La visite fonctionne même sans stockage persistant.
-    }
-  }
   tourCompleted = false
   trackedTourFormat = null
 }
@@ -1408,13 +1348,6 @@ async function startGuidedTour(format: TourFormat) {
 
 function postponeTour() {
   isTourWelcomeOpen.value = false
-  try {
-    if (tourWelcomeSource.value === 'initial') {
-      localStorage.setItem(GUIDED_TOUR_REMINDER_STORAGE_KEY, JSON.stringify(postponedGuidedTourState()))
-    }
-  } catch {
-    // Le bouton reste fonctionnel sans stockage.
-  }
   tourWelcomeSource.value = null
 }
 
@@ -1734,7 +1667,6 @@ onBeforeUnmount(() => {
   if (exercisePreloadIdleId !== undefined && 'cancelIdleCallback' in window) window.cancelIdleCallback(exercisePreloadIdleId)
   if (exercisePreloadTimer) clearTimeout(exercisePreloadTimer)
   cancelPresetReveal()
-  if (tourPromptTimer) clearTimeout(tourPromptTimer)
   tourDriver?.destroy()
   document.body.classList.remove('guided-tour-active')
 })
@@ -1816,7 +1748,6 @@ async function prepareExercise(mode: 'classic' | 'chat') {
 watch(falcMode, (enabled) => {
   falcHomePanel.value = null
   if (!enabled) return
-  if (tourPromptTimer) clearTimeout(tourPromptTimer)
   isTourWelcomeOpen.value = false
   if (tourActive.value) tourDriver?.destroy()
   isCoachPickerOpen.value = false
@@ -2360,7 +2291,7 @@ async function createSharedChallenge(title: string, description: string) {
                 <span aria-hidden="true">{{ option.flag }}</span>
               </button>
             </div>
-            <button class="tour-welcome-dialog__close" type="button" :aria-label="tourWelcomeSource === 'reminder' ? ui('Fermer') : tourCopy.later" @click="postponeTour">×</button>
+            <button class="tour-welcome-dialog__close" type="button" :aria-label="ui('Fermer')" @click="postponeTour">×</button>
             <span class="tour-welcome-dialog__icon" aria-hidden="true">?</span>
             <h2 id="tour-welcome-title">{{ tourCopy.welcomeTitle }}</h2>
             <p>{{ tourCopy.welcomeBody }}</p>
@@ -2375,7 +2306,7 @@ async function createSharedChallenge(title: string, description: string) {
               </button>
             </div>
             <button class="tour-welcome-dialog__later" type="button" @click="postponeTour">
-              {{ tourWelcomeSource === 'reminder' ? ui('Fermer') : tourCopy.later }}
+              {{ ui('Fermer') }}
             </button>
           </section>
         </div>

@@ -696,7 +696,12 @@ async function generateQuestionnaire(request) {
     const rows = [];
     const literaryCitations = usesLiteraryCitations ? await validatedLiteraryCitations(null, finiteIds) : /* @__PURE__ */ new Map();
     const selectedVerbCount = verbIds.length + pronominalUseIds.length;
-    const limit = request.exerciseKind === "conjugation" ? passiveOnly ? 3e3 : Math.min(3e3, Math.max(request.questionCount * 10, selectedVerbCount * 3, request.questionCount)) : 600;
+    const limit = request.exerciseKind === "conjugation" ? passiveOnly ? 3e3 : Math.min(3e3, Math.max(
+      request.questionCount * 10,
+      selectedVerbCount * Math.max(1, finiteTenses.length) * 6,
+      selectedVerbCount * 3,
+      request.questionCount
+    )) : 600;
     const passivePersonClause = passiveOnly ? "AND vc.personne_id IN (6,9)" : "";
     const questionVerbIds = usesLiteraryCitations ? [...new Set([...literaryCitations.values()].flat().map((citation) => Number(citation.verb_id)))] : verbIds;
     const literaryCoordinates = usesLiteraryCitations ? [...literaryCitations.keys()].map((key) => {

@@ -1,4 +1,4 @@
-import { w as getCookie, u as useDatabase, v as deleteCookie, t as setCookie, J as getRequestURL } from '../nitro/nitro.mjs';
+import { w as getCookie, u as useDatabase, v as deleteCookie, t as setCookie, H as getRequestURL } from '../nitro/nitro.mjs';
 import { randomBytes, createHash } from 'node:crypto';
 
 const COOKIE_NAME = "learner_session";
@@ -48,7 +48,7 @@ async function getLearnerSession(event, activate = false) {
     await database.execute(`
       UPDATE learner_accounts
       SET status = 'active', activated_at = COALESCE(activated_at, CURRENT_TIMESTAMP),
-          last_login_at = CURRENT_TIMESTAMP
+          last_login_at = CURRENT_TIMESTAMP, deletion_scheduled_at = NULL
       WHERE id = ?
     `, [row.accountId]);
     row.status = "active";

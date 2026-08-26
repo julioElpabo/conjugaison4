@@ -1,6 +1,7 @@
-import { d as defineEventHandler, r as readBody, H as setResponseStatus } from '../../../../nitro/nitro.mjs';
+import { d as defineEventHandler, r as readBody, H as getRequestURL, x as useRuntimeConfig, I as setResponseStatus } from '../../../../nitro/nitro.mjs';
 import { r as requireAdministrator } from '../../../../_/session.mjs';
 import { s as startAdminTestJob } from '../../../../_/admin-test-jobs.mjs';
+import { r as runAdminTests } from '../../../../_/admin-tests.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -13,7 +14,6 @@ import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
 import 'node:os';
-import '../../../../_/admin-tests.mjs';
 import 'node:child_process';
 import '../../../../_/coaches.mjs';
 import '../../../../_/coach.mjs';
@@ -23,7 +23,12 @@ const run_post = defineEventHandler(async (event) => {
   requireAdministrator(event);
   const body = await readBody(event);
   const files = Array.isArray(body == null ? void 0 : body.files) ? body.files.filter((file) => typeof file === "string") : [];
-  const job = await startAdminTestJob(files);
+  getRequestURL(event).origin;
+  const configuredOrigin = String(useRuntimeConfig(event).public.siteUrl || "").replace(/\/$/u, "");
+  const baseUrl = configuredOrigin;
+  const job = await startAdminTestJob(files, {
+    run: (selectedFiles) => runAdminTests(selectedFiles, { baseUrl })
+  });
   setResponseStatus(event, 202);
   return { jobId: job.id };
 });

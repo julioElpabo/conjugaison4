@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, toRef, isRef, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, isReadonly, isShallow, isReactive, toRaw } from 'vue';
-import { a9 as SUPPORTED_LOCALES, aK as parseURL, aL as encodePath, aM as decodePath, aN as localeFromPath, y as normalizeLocale, aO as getRequestHeaders, c as createError$1, ae as hasProtocol, ag as isScriptProtocol, af as joinURL, aP as withQuery, aQ as klona, aR as DEFAULT_LANGUAGE_PREFERENCES, ac as localizePath, aS as sanitizeStatusCode, aT as getContext, aU as getRequestHeader, aV as isEqual, t as setCookie, w as getCookie, v as deleteCookie, aW as $fetch, aX as defu, K as stripLocaleFromPath, am as executeAsync, aY as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { a9 as SUPPORTED_LOCALES, aK as withSwissObjectAliases, aL as parseURL, aM as encodePath, aN as decodePath, aO as localeFromPath, y as normalizeLocale, aP as getRequestHeaders, c as createError$1, ae as hasProtocol, ag as isScriptProtocol, af as joinURL, aQ as withQuery, aR as klona, aS as DEFAULT_LANGUAGE_PREFERENCES, ac as localizePath, aT as sanitizeStatusCode, aU as getContext, aV as getRequestHeader, aW as isEqual, t as setCookie, w as getCookie, v as deleteCookie, aX as $fetch, aY as defu, K as stripLocaleFromPath, am as executeAsync, aZ as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useSeoMeta$1, a as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -442,6 +442,8 @@ const uiMessages = {
   "Commencer": { de: "Starten", en: "Start", it: "Inizia", es: "Empezar" },
   "Exercice de conjugaison": { de: "Konjugations\xFCbung", en: "Conjugation exercise", it: "Esercizio di coniugazione", es: "Ejercicio de conjugaci\xF3n" },
   "Juste !": { de: "Richtig!", en: "Correct!", it: "Giusto!", es: "\xA1Correcto!" },
+  "C\u2019est faux.": { de: "Das ist falsch.", en: "That\u2019s incorrect.", it: "Non \xE8 corretto.", es: "No es correcto." },
+  "La bonne r\xE9ponse est \xAB {expectedAnswer} \xBB.": { de: "Die richtige Antwort ist \u201E{expectedAnswer}\u201C.", en: "The correct answer is \u201C{expectedAnswer}\u201D.", it: "La risposta corretta \xE8 \xAB{expectedAnswer}\xBB.", es: "La respuesta correcta es \xAB{expectedAnswer}\xBB." },
   "Faux.": { de: "Falsch.", en: "Incorrect.", it: "Sbagliato.", es: "Incorrecto." },
   "Bonne r\xE9ponse :": { de: "Richtige Antwort:", en: "Correct answer:", it: "Risposta corretta:", es: "Respuesta correcta:" },
   "Voir les autres modes": { de: "Andere Modi anzeigen", en: "Show other moods", it: "Mostra gli altri modi", es: "Ver otros modos" },
@@ -619,6 +621,15 @@ const uiMessages = {
   "COD plac\xE9 avant": { de: "Direktes Objekt davor", en: "Direct object before", it: "Oggetto diretto prima", es: "Objeto directo antes" },
   "COI plac\xE9 apr\xE8s": { de: "Indirektes Objekt danach", en: "Indirect object after", it: "Oggetto indiretto dopo", es: "Objeto indirecto despu\xE9s" },
   "COI plac\xE9 avant": { de: "Indirektes Objekt davor", en: "Indirect object before", it: "Oggetto indiretto prima", es: "Objeto indirecto antes" },
+  "COD (CVD) plac\xE9 apr\xE8s": { de: "Direktes Objekt danach", en: "Direct object after", it: "Oggetto diretto dopo", es: "Objeto directo despu\xE9s" },
+  "COD (CVD) plac\xE9 avant": { de: "Direktes Objekt davor", en: "Direct object before", it: "Oggetto diretto prima", es: "Objeto directo antes" },
+  "COI (CVI) plac\xE9 apr\xE8s": { de: "Indirektes Objekt danach", en: "Indirect object after", it: "Oggetto indiretto dopo", es: "Objeto indirecto despu\xE9s" },
+  "COI (CVI) plac\xE9 avant": { de: "Indirektes Objekt davor", en: "Indirect object before", it: "Oggetto indiretto prima", es: "Objeto indirecto antes" },
+  "Ajoute des COD (CVD) ou des COI (CVI).": { de: "F\xFCge direkte oder indirekte Objekte hinzu.", en: "Add direct or indirect objects.", it: "Aggiungi complementi oggetto diretti o indiretti.", es: "A\xF1ade complementos directos o indirectos." },
+  "Aucun verbe choisi ne poss\xE8de de COD (CVD) valid\xE9.": { de: "Kein gew\xE4hltes Verb hat ein validiertes direktes Objekt.", en: "None of the chosen verbs has a validated direct object.", it: "Nessun verbo scelto possiede un complemento oggetto diretto convalidato.", es: "Ning\xFAn verbo elegido tiene un complemento directo validado." },
+  "Aucun COD (CVD) valid\xE9 ne peut \xEAtre plac\xE9 avant avec les verbes choisis.": { de: "Bei den gew\xE4hlten Verben kann kein validiertes direktes Objekt vorangestellt werden.", en: "No validated direct object can be placed before the chosen verbs.", it: "Nessun complemento oggetto diretto convalidato pu\xF2 essere posto prima con i verbi scelti.", es: "Ning\xFAn complemento directo validado puede colocarse antes con los verbos elegidos." },
+  "Aucun verbe choisi ne poss\xE8de de COI (CVI) valid\xE9.": { de: "Kein gew\xE4hltes Verb hat ein validiertes indirektes Objekt.", en: "None of the chosen verbs has a validated indirect object.", it: "Nessun verbo scelto possiede un complemento indiretto convalidato.", es: "Ning\xFAn verbo elegido tiene un complemento indirecto validado." },
+  "Aucun COI (CVI) valid\xE9 ne peut \xEAtre plac\xE9 avant avec les verbes choisis.": { de: "Bei den gew\xE4hlten Verben kann kein validiertes indirektes Objekt vorangestellt werden.", en: "No validated indirect object can be placed before the chosen verbs.", it: "Nessun complemento indiretto convalidato pu\xF2 essere posto prima con i verbi scelti.", es: "Ning\xFAn complemento indirecto validado puede colocarse antes con los verbos elegidos." },
   "Aper\xE7u d\u2019une question": { de: "Vorschau einer Frage", en: "Question preview", it: "Anteprima di una domanda", es: "Vista previa de una pregunta" },
   "Pr\xE9paration de l\u2019aper\xE7u": { de: "Vorschau wird vorbereitet", en: "Preparing preview", it: "Preparazione dell\u2019anteprima", es: "Preparando vista previa" },
   "Exemple de question": { de: "Beispielfrage", en: "Sample question", it: "Esempio di domanda", es: "Ejemplo de pregunta" },
@@ -1116,6 +1127,8 @@ const uiMessages = {
   "Retirer le verbe {verb}": { de: "Verb {verb} entfernen", en: "Remove the verb {verb}", it: "Rimuovi il verbo {verb}", es: "Eliminar el verbo {verb}" },
   "Quel est le mode et le temps de cette forme conjugu\xE9e ?": { de: "Welchen Modus und welche Zeitform hat diese konjugierte Form?", en: "What are the mood and tense of this conjugated form?", it: "Quali sono il modo e il tempo di questa forma coniugata?", es: "\xBFCu\xE1les son el modo y el tiempo de esta forma conjugada?" },
   "ou": { de: "oder", en: "or", it: "o", es: "o" },
+  "L\u2019autre possibilit\xE9 correcte est \xAB {answer} \xBB.": { de: "Die andere richtige M\xF6glichkeit ist \u201E{answer}\u201C.", en: "The other correct answer is \u201C{answer}\u201D.", it: "L\u2019altra possibilit\xE0 corretta \xE8 \xAB{answer}\xBB.", es: "La otra posibilidad correcta es \xAB{answer}\xBB." },
+  "Les autres possibilit\xE9s correctes sont {answers}.": { de: "Die anderen richtigen M\xF6glichkeiten sind {answers}.", en: "The other correct answers are {answers}.", it: "Le altre possibilit\xE0 corrette sono {answers}.", es: "Las otras posibilidades correctas son {answers}." },
   "f\xE9minin": { de: "weiblich", en: "feminine", it: "femminile", es: "femenino" },
   "masculin": { de: "m\xE4nnlich", en: "masculine", it: "maschile", es: "masculino" },
   "singulier": { de: "Singular", en: "singular", it: "singolare", es: "singular" },
@@ -1131,14 +1144,25 @@ const uiMessages = {
   "Ici, le COD \xAB {complement} \xBB est plac\xE9 apr\xE8s le verbe \xAB {verb} \xBB. Il ne commande donc aucun accord : le participe pass\xE9 reste \xAB {participle} \xBB.": { de: "Hier steht das direkte Objekt \u201E{complement}\u201C nach dem Verb \u201E{verb}\u201C. Es bewirkt daher keine Angleichung: Das Partizip Perfekt bleibt \u201E{participle}\u201C.", en: "Here, the direct object \u201C{complement}\u201D comes after the verb \u201C{verb}\u201D. It therefore causes no agreement: the past participle remains \u201C{participle}\u201D.", it: "Qui il complemento oggetto \xAB{complement}\xBB \xE8 posto dopo il verbo \xAB{verb}\xBB. Non determina quindi alcuna concordanza: il participio passato resta \xAB{participle}\xBB.", es: "Aqu\xED, el complemento directo \xAB{complement}\xBB aparece despu\xE9s del verbo \xAB{verb}\xBB. Por tanto, no determina ninguna concordancia: el participio pasado queda \xAB{participle}\xBB." },
   "C\u2019est juste : \xAB {complement} \xBB n\u2019est pas un COD, mais un COI du verbe \xAB {verb} \xBB. Un COI ne commande jamais l\u2019accord du participe pass\xE9 employ\xE9 avec avoir : il reste \xAB {participle} \xBB.": { de: "Richtig: \u201E{complement}\u201C ist kein direktes, sondern ein indirektes Objekt des Verbs \u201E{verb}\u201C. Ein indirektes Objekt bewirkt beim Partizip Perfekt mit avoir nie eine Angleichung: Es bleibt \u201E{participle}\u201C.", en: "Correct: \u201C{complement}\u201D is not a direct object but an indirect object of the verb \u201C{verb}\u201D. An indirect object never determines agreement of a past participle used with avoir, so it remains \u201C{participle}\u201D.", it: "Giusto: \xAB{complement}\xBB non \xE8 un complemento oggetto, ma un complemento indiretto del verbo \xAB{verb}\xBB. Un complemento indiretto non determina mai la concordanza del participio passato con avoir: resta \xAB{participle}\xBB.", es: "Correcto: \xAB{complement}\xBB no es un complemento directo, sino indirecto del verbo \xAB{verb}\xBB. Un complemento indirecto nunca determina la concordancia del participio pasado con avoir: queda \xAB{participle}\xBB." },
   "Attention : \xAB {complement} \xBB n\u2019est pas un COD, mais un COI du verbe \xAB {verb} \xBB. Il ne faut pas accorder le participe avec ce compl\xE9ment : il reste \xAB {participle} \xBB.": { de: "Vorsicht: \u201E{complement}\u201C ist kein direktes, sondern ein indirektes Objekt des Verbs \u201E{verb}\u201C. Das Partizip darf nicht an dieses Objekt angeglichen werden: Es bleibt \u201E{participle}\u201C.", en: "Careful: \u201C{complement}\u201D is not a direct object but an indirect object of the verb \u201C{verb}\u201D. The participle must not agree with this complement, so it remains \u201C{participle}\u201D.", it: "Attenzione: \xAB{complement}\xBB non \xE8 un complemento oggetto, ma un complemento indiretto del verbo \xAB{verb}\xBB. Il participio non va concordato con questo complemento: resta \xAB{participle}\xBB.", es: "Atenci\xF3n: \xAB{complement}\xBB no es un complemento directo, sino indirecto del verbo \xAB{verb}\xBB. El participio no debe concordar con este complemento: queda \xAB{participle}\xBB." },
-  "Pour reconna\xEEtre le COI, rep\xE8re sa pr\xE9position et pose la question \xAB {question} \xBB.": { de: "Um das indirekte Objekt zu erkennen, achte auf seine Pr\xE4position und stelle die Frage \u201E{question}\u201C.", en: "To identify the indirect object, find its preposition and ask \u201C{question}\u201D.", it: "Per riconoscere il complemento indiretto, individua la preposizione e poni la domanda \xAB{question}\xBB.", es: "Para reconocer el complemento indirecto, identifica la preposici\xF3n y formula la pregunta \xAB{question}\xBB." }
+  "Pour reconna\xEEtre le COI, rep\xE8re sa pr\xE9position et pose la question \xAB {question} \xBB.": { de: "Um das indirekte Objekt zu erkennen, achte auf seine Pr\xE4position und stelle die Frage \u201E{question}\u201C.", en: "To identify the indirect object, find its preposition and ask \u201C{question}\u201D.", it: "Per riconoscere il complemento indiretto, individua la preposizione e poni la domanda \xAB{question}\xBB.", es: "Para reconocer el complemento indirecto, identifica la preposici\xF3n y formula la pregunta \xAB{question}\xBB." },
+  "R\xE9ponse apr\xE8s la premi\xE8re tentative": { de: "Antwort nach dem ersten Versuch", en: "Answer after the first attempt", it: "Risposta dopo il primo tentativo", es: "Respuesta despu\xE9s del primer intento" },
+  "Erreur du premier essai :": { de: "Fehler beim ersten Versuch:", en: "First-attempt mistake:", it: "Errore del primo tentativo:", es: "Error del primer intento:" },
+  "Afficher": { de: "Anzeigen", en: "Show", it: "Mostra", es: "Mostrar" },
+  "Masquer": { de: "Ausblenden", en: "Hide", it: "Nascondi", es: "Ocultar" },
+  "Afficher le mot de passe": { de: "Passwort anzeigen", en: "Show password", it: "Mostra la password", es: "Mostrar la contrase\xF1a" },
+  "Masquer le mot de passe": { de: "Passwort ausblenden", en: "Hide password", it: "Nascondi la password", es: "Ocultar la contrase\xF1a" },
+  "Rep\xE8re le COD (CVD) plac\xE9 avant le verbe : avec avoir, il commande l\u2019accord du participe pass\xE9 en genre et en nombre.": { de: "Erkenne das vor dem Verb stehende direkte Objekt: Mit avoir bestimmt es Genus und Numerus des Partizips.", en: "Identify the direct object before the verb: with avoir, it determines the gender and number of the past participle.", it: "Individua il complemento oggetto prima del verbo: con avoir determina genere e numero del participio passato.", es: "Identifica el complemento directo situado antes del verbo: con avoir determina el g\xE9nero y el n\xFAmero del participio pasado." },
+  "Le COD (CVD) est plac\xE9 apr\xE8s le verbe : avec avoir, il ne commande pas l\u2019accord du participe pass\xE9.": { de: "Das direkte Objekt steht nach dem Verb: Mit avoir bestimmt es die Angleichung des Partizips nicht.", en: "The direct object comes after the verb: with avoir, it does not determine past-participle agreement.", it: "Il complemento oggetto \xE8 posto dopo il verbo: con avoir non determina la concordanza del participio passato.", es: "El complemento directo est\xE1 despu\xE9s del verbo: con avoir no determina la concordancia del participio pasado." },
+  "Ce compl\xE9ment est un COI (CVI) : il ne commande pas l\u2019accord du participe pass\xE9 avec avoir.": { de: "Dieses Objekt ist indirekt: Es bestimmt die Angleichung des Partizips mit avoir nicht.", en: "This is an indirect object: it does not determine past-participle agreement with avoir.", it: "\xC8 un complemento indiretto: non determina la concordanza del participio passato con avoir.", es: "Es un complemento indirecto: no determina la concordancia del participio pasado con avoir." },
+  "L\u2019auxiliaire choisi ne convient pas. Reprends la construction du temps demand\xE9 avec cette personne.": { de: "Das gew\xE4hlte Hilfsverb passt nicht. Bilde die verlangte Zeitform f\xFCr diese Person erneut.", en: "The chosen auxiliary is not correct. Rebuild the requested tense for this person.", it: "L\u2019ausiliare scelto non \xE8 corretto. Ricostruisci il tempo richiesto per questa persona.", es: "El auxiliar elegido no es correcto. Vuelve a construir el tiempo pedido para esta persona." }
 };
 function translateUiMessage(locale, message, parameters = {}) {
   const template = locale === "fr" ? message : uiMessages[message][locale];
-  return template.replace(/\{([a-zA-Z0-9_]+)\}/gu, (_match, name) => {
+  const rendered = template.replace(/\{([a-zA-Z0-9_]+)\}/gu, (_match, name) => {
     var _a;
     return String((_a = parameters[name]) != null ? _a : `{${name}}`);
   });
+  return locale === "fr" ? withSwissObjectAliases(rendered) : rendered;
 }
 function isUiMessage(value) {
   return Object.prototype.hasOwnProperty.call(uiMessages, value);
@@ -1603,17 +1627,17 @@ const _routes = [
   {
     name: "admin-feedbacks",
     path: "/admin/feedbacks",
-    component: () => import('./feedbacks-BnXB_qB4.mjs')
+    component: () => import('./feedbacks-BS7z551x.mjs')
   },
   {
     name: "admin-help-verification",
     path: "/admin/help-verification",
-    component: () => import('./help-verification-BmeKjn5M.mjs')
+    component: () => import('./help-verification-K7RQAcaT.mjs')
   },
   {
     name: "admin-helps",
     path: "/admin/helps",
-    component: () => import('./helps-BZ78xyEa.mjs')
+    component: () => import('./helps-CEqnAvwY.mjs')
   },
   {
     name: "admin-literary-corpus",
@@ -1638,7 +1662,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-DttbNoHa.mjs')
+    component: () => import('./users-DdfjMi01.mjs')
   },
   {
     name: "admin-verbes",
@@ -1658,12 +1682,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-BC1jQzJd.mjs')
+    component: () => import('./_code_-dkRRT38f.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-Dv9R9Vx7.mjs')
+    component: () => import('./_slug_-TTaBI2Ni.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1708,7 +1732,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-MwrdzEeW.mjs')
+    component: () => import('./exercices-de-conjugaison-DKaM8bEO.mjs')
   },
   {
     name: "mon-compte",
@@ -1719,22 +1743,22 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-bhGNQ3l5.mjs')
+    component: () => import('./my-page-BazDoEI2.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-GhDVdd8w.mjs')
+    component: () => import('./nouveau-defi-OPMtLIZx.mjs')
   },
   {
     name: "signin",
     path: "/signin",
-    component: () => import('./signin-CxU3vtr2.mjs')
+    component: () => import('./signin-gTfe3xHt.mjs')
   },
   {
     name: "index",
     path: "/",
-    component: () => import('./index-Bx1oJRa2.mjs')
+    component: () => import('./index-C7bs38Kw.mjs')
   },
   {
     name: "mode-tense",
@@ -1784,17 +1808,17 @@ const _routes = [
   {
     name: "localized-admin-feedbacks",
     path: "/:locale(fr|de|en|it|es)/admin/feedbacks",
-    component: () => import('./feedbacks-BnXB_qB4.mjs')
+    component: () => import('./feedbacks-BS7z551x.mjs')
   },
   {
     name: "localized-admin-help-verification",
     path: "/:locale(fr|de|en|it|es)/admin/help-verification",
-    component: () => import('./help-verification-BmeKjn5M.mjs')
+    component: () => import('./help-verification-K7RQAcaT.mjs')
   },
   {
     name: "localized-admin-helps",
     path: "/:locale(fr|de|en|it|es)/admin/helps",
-    component: () => import('./helps-BZ78xyEa.mjs')
+    component: () => import('./helps-CEqnAvwY.mjs')
   },
   {
     name: "localized-admin-literary-corpus",
@@ -1819,7 +1843,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-DttbNoHa.mjs')
+    component: () => import('./users-DdfjMi01.mjs')
   },
   {
     name: "localized-admin-verbes",
@@ -1839,12 +1863,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-BC1jQzJd.mjs')
+    component: () => import('./_code_-dkRRT38f.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es)/defis/:slug()",
-    component: () => import('./_slug_-Dv9R9Vx7.mjs')
+    component: () => import('./_slug_-TTaBI2Ni.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1889,7 +1913,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-MwrdzEeW.mjs')
+    component: () => import('./exercices-de-conjugaison-DKaM8bEO.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1900,22 +1924,22 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-bhGNQ3l5.mjs')
+    component: () => import('./my-page-BazDoEI2.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-GhDVdd8w.mjs')
+    component: () => import('./nouveau-defi-OPMtLIZx.mjs')
   },
   {
     name: "localized-signin",
     path: "/:locale(fr|de|en|it|es)/signin",
-    component: () => import('./signin-CxU3vtr2.mjs')
+    component: () => import('./signin-gTfe3xHt.mjs')
   },
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-Bx1oJRa2.mjs')
+    component: () => import('./index-C7bs38Kw.mjs')
   },
   {
     name: "localized-mode-tense",
@@ -2565,7 +2589,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-CU5IkUrA.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-THKaBvbB.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

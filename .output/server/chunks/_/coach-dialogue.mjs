@@ -24,6 +24,18 @@ function unknownCoachPlaceholders(template) {
   const allowed = new Set(COACH_PLACEHOLDERS);
   return [...template.matchAll(PLACEHOLDER)].map((match) => match[1] || "").filter((key, index, values) => !allowed.has(key) && values.indexOf(key) === index);
 }
+function missingCoachPlaceholders(template, context) {
+  const allowed = new Set(COACH_PLACEHOLDERS);
+  return [...template.matchAll(PLACEHOLDER)].map((match) => match[1] || "").filter((key, index, values) => {
+    if (values.indexOf(key) !== index) return false;
+    if (!allowed.has(key)) return true;
+    const value = context[key];
+    return value === void 0 || value === null || value === "";
+  });
+}
+function canRenderCoachTemplate(template, context) {
+  return missingCoachPlaceholders(template, context).length === 0;
+}
 function weightedChoice(items, random) {
   const total = items.reduce((sum, item) => sum + Math.max(1, item.weight), 0);
   if (!total) return void 0;
@@ -42,7 +54,7 @@ function createCoachReaction(coach, eventType, context = {}, options = {}) {
   var _a, _b, _c;
   const random = (_a = options.random) != null ? _a : Math.random;
   const allowedReplyIds = options.allowedReplyIds ? new Set(options.allowedReplyIds) : null;
-  const replies = coach.replies.filter((reply2) => reply2.isActive && reply2.eventType === eventType && (!allowedReplyIds || allowedReplyIds.has(reply2.id)));
+  const replies = coach.replies.filter((reply2) => reply2.isActive && reply2.eventType === eventType && (!allowedReplyIds || allowedReplyIds.has(reply2.id)) && canRenderCoachTemplate(reply2.content, context));
   const reply = weightedChoice(replies, random);
   const result = {
     text: reply ? renderCoachTemplate(reply.content, context) : "",
@@ -90,7 +102,7 @@ function createCoachDialogueState() {
   return { usageByEvent: /* @__PURE__ */ new Map(), lastReplyByEvent: /* @__PURE__ */ new Map() };
 }
 function createVariedCoachReaction(coach, eventType, context = {}, state, options = {}) {
-  const eventReplies = coach.replies.filter((reply) => reply.isActive && reply.eventType === eventType);
+  const eventReplies = coach.replies.filter((reply) => reply.isActive && reply.eventType === eventType && canRenderCoachTemplate(reply.content, context));
   const usage = state.usageByEvent.get(eventType) || /* @__PURE__ */ new Map();
   state.usageByEvent.set(eventType, usage);
   const minimumUsage = eventReplies.length ? Math.min(...eventReplies.map((reply) => usage.get(reply.id) || 0)) : 0;

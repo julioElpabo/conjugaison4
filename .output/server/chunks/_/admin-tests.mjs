@@ -326,6 +326,16 @@ const TEST_CATALOG = {
     title: "Conversations et cr\xE9dibilit\xE9 des coaches",
     description: "Simule les \xE9changes, les d\xE9lais, les corrections, les GIFs et 60 interventions par coach pour d\xE9tecter les r\xE9p\xE9titions m\xE9caniques.",
     category: "Exercices et d\xE9fis"
+  },
+  "browser-user-scenarios.test.mjs": {
+    title: "Parcours r\xE9els dans le navigateur",
+    description: "Rejoue la visite guid\xE9e, la cr\xE9ation d\u2019un d\xE9fi et le dialogue avec un coach comme le ferait un visiteur.",
+    category: "Sc\xE9narios utilisateur"
+  },
+  "coach-error-feedback-scenarios.test.mjs": {
+    title: "Diagnostics visibles du coach",
+    description: "Rejoue des r\xE9ponses fautives compl\xE8tes et v\xE9rifie les explications r\xE9ellement retenues sans r\xE9p\xE9tition.",
+    category: "Sc\xE9narios utilisateur"
   }
 };
 const RESULT_GROUP_CATALOG = {
@@ -357,14 +367,16 @@ const RESULT_GROUP_CATALOG = {
   "verbes d\xE9fectifs et impersonnels": { title: "Verbes d\xE9fectifs", description: "Falloir et pleuvoir sans g\xE9n\xE9ration de personnes inexistantes." },
   "int\xE9grit\xE9 des 488 verbes du catalogue": { title: "Audit complet du catalogue", description: "Doublons, m\xE9tadonn\xE9es, variantes, relations, formes manquantes et auxiliaires." },
   "sc\xE9narios chronologiques du chat": { title: "D\xE9roulement des conversations", description: "Ordre des bulles, consigne finale, correction, d\xE9lai de trois secondes, grammaire et fin du questionnaire." },
-  "cr\xE9dibilit\xE9 des douze coaches": { title: "Cr\xE9dibilit\xE9 des coaches", description: "Diversit\xE9 des formulations, absence de r\xE9p\xE9titions imm\xE9diates et vari\xE9t\xE9 des r\xE9actions visuelles." }
+  "cr\xE9dibilit\xE9 des douze coaches": { title: "Cr\xE9dibilit\xE9 des coaches", description: "Diversit\xE9 des formulations, absence de r\xE9p\xE9titions imm\xE9diates et vari\xE9t\xE9 des r\xE9actions visuelles." },
+  "parcours utilisateur dans un navigateur r\xE9el": { title: "Parcours utilisateur dans le navigateur", description: "Actions r\xE9ellement effectu\xE9es dans le site, de l\u2019accueil jusqu\u2019au changement de question avec un coach." },
+  "diagnostic visible du futur ant\xE9rieur \xE0 la place du conditionnel pass\xE9": { title: "Futur ant\xE9rieur ou conditionnel pass\xE9", description: "V\xE9rifie le diagnostic affich\xE9 pour \xAB je serai entr\xE9e \xBB au lieu de \xAB je serais entr\xE9e \xBB, sans faux accord ni r\xE9p\xE9tition." }
 };
 async function coachCredibilityResults() {
   const coaches = await listCoaches(useDatabase(), true);
   return coaches.map((coach, index) => auditCoachCredibility(coach, 1e4 + index));
 }
 async function availableAdminTests() {
-  const categoryOrder = ["Conjugaison fran\xE7aise", "Exercices et d\xE9fis", "Administration", "Technique"];
+  const categoryOrder = ["Sc\xE9narios utilisateur", "Conjugaison fran\xE7aise", "Exercices et d\xE9fis", "Administration", "Technique"];
   const entries = await readdir(TEST_DIRECTORY, { withFileTypes: true });
   return entries.filter((entry) => entry.isFile() && /^[a-z0-9-]+\.test\.mjs$/u.test(entry.name)).map((entry) => {
     var _a, _b, _c;
@@ -451,7 +463,7 @@ function repairPrompt(files, groups, scenarios, coachReports, output) {
   lines.push("", "Journal technique utile :", "```text", output.slice(-14e3), "```");
   return lines.join("\n");
 }
-async function runAdminTests(requestedFiles) {
+async function runAdminTests(requestedFiles, options = {}) {
   var _a, _b;
   const available = await availableAdminTests();
   const allowed = new Set(available.map((test) => test.id));
@@ -468,11 +480,16 @@ async function runAdminTests(requestedFiles) {
     filesByCategory.set(category, [...filesByCategory.get(category) || [], file]);
   }
   const executions = await executeAdminTestGroups([...filesByCategory], async (category, categoryFiles) => {
+    const executionEnvironment = categoryFiles.includes("browser-user-scenarios.test.mjs") ? {
+      ...testEnvironment,
+      ADMIN_BROWSER_TESTS: "1",
+      ADMIN_TEST_BASE_URL: options.baseUrl || String(useRuntimeConfig().public.siteUrl || "")
+    } : testEnvironment;
     const execution = await new Promise((resolveExecution) => {
       execFile(
         process.execPath,
         adminTestArguments(categoryFiles),
-        { cwd: process.cwd(), env: testEnvironment, timeout: ADMIN_TEST_EXECUTION_TIMEOUT_MS, maxBuffer: 2e6 },
+        { cwd: process.cwd(), env: executionEnvironment, timeout: ADMIN_TEST_EXECUTION_TIMEOUT_MS, maxBuffer: 2e6 },
         (error, stdout, stderr) => {
           const exitCode = error && typeof error.code === "number" ? error.code : error ? 1 : 0;
           resolveExecution({

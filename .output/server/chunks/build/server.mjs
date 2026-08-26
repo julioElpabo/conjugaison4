@@ -1658,12 +1658,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-DTJ9OR50.mjs')
+    component: () => import('./_code_-BC1jQzJd.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-BKPWkztC.mjs')
+    component: () => import('./_slug_-Dv9R9Vx7.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1708,7 +1708,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-BSC9Ud0S.mjs')
+    component: () => import('./exercices-de-conjugaison-MwrdzEeW.mjs')
   },
   {
     name: "mon-compte",
@@ -1724,7 +1724,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-CrrffWxr.mjs')
+    component: () => import('./nouveau-defi-GhDVdd8w.mjs')
   },
   {
     name: "signin",
@@ -1734,7 +1734,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-Cr_ptFaP.mjs')
+    component: () => import('./index-Bx1oJRa2.mjs')
   },
   {
     name: "mode-tense",
@@ -1839,12 +1839,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-DTJ9OR50.mjs')
+    component: () => import('./_code_-BC1jQzJd.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es)/defis/:slug()",
-    component: () => import('./_slug_-BKPWkztC.mjs')
+    component: () => import('./_slug_-Dv9R9Vx7.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1889,7 +1889,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-BSC9Ud0S.mjs')
+    component: () => import('./exercices-de-conjugaison-MwrdzEeW.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1905,7 +1905,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-CrrffWxr.mjs')
+    component: () => import('./nouveau-defi-GhDVdd8w.mjs')
   },
   {
     name: "localized-signin",
@@ -1915,7 +1915,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-Cr_ptFaP.mjs')
+    component: () => import('./index-Bx1oJRa2.mjs')
   },
   {
     name: "localized-mode-tense",
@@ -2565,7 +2565,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-GZSFTzP6.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-CU5IkUrA.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

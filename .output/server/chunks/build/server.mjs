@@ -1627,7 +1627,7 @@ const _routes = [
   {
     name: "admin-feedbacks",
     path: "/admin/feedbacks",
-    component: () => import('./feedbacks-BS7z551x.mjs')
+    component: () => import('./feedbacks-D7aIjfZD.mjs')
   },
   {
     name: "admin-help-verification",
@@ -1808,7 +1808,7 @@ const _routes = [
   {
     name: "localized-admin-feedbacks",
     path: "/:locale(fr|de|en|it|es)/admin/feedbacks",
-    component: () => import('./feedbacks-BS7z551x.mjs')
+    component: () => import('./feedbacks-D7aIjfZD.mjs')
   },
   {
     name: "localized-admin-help-verification",

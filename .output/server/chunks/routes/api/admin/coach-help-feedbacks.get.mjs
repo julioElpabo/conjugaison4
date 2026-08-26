@@ -74,7 +74,12 @@ const coachHelpFeedbacks_get = defineEventHandler(async (event) => {
     ORDER BY created_at ${sortDirection}, id ${sortDirection}
     LIMIT ${limit}
   `, [origin]);
+  const [[countRow]] = await database.execute(
+    `SELECT COUNT(*) AS totalCount FROM coach_help_feedback WHERE origin=?`,
+    [origin]
+  );
   return {
+    totalCount: Number((countRow == null ? void 0 : countRow.totalCount) || 0),
     feedbacks: rows.map((row) => ({
       id: Number(row.id),
       feedbackType: row.feedbackType,
@@ -109,12 +114,14 @@ const coachHelpFeedbacks_get = defineEventHandler(async (event) => {
       displayedHelpHtml: row.displayedHelpHtml,
       uiContext: parseJson(row.uiContextJson),
       userAgent: row.userAgent,
-      validationStatus: row.validationStatus,
-      validatedAt: row.validatedAt,
-      moderationStatus: row.moderationStatus,
-      moderationNote: row.moderationNote,
-      moderatedAt: row.moderatedAt,
-      deletedAt: row.deletedAt,
+      ...origin === "automatic" ? {
+        validationStatus: row.validationStatus,
+        validatedAt: row.validatedAt,
+        moderationStatus: row.moderationStatus,
+        moderationNote: row.moderationNote,
+        moderatedAt: row.moderatedAt,
+        deletedAt: row.deletedAt
+      } : {},
       createdAt: row.createdAt
     }))
   };

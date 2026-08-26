@@ -37,13 +37,13 @@ const export_get = defineEventHandler(async (event) => {
       exercise_context_json AS exerciseContextJson, attempts_json AS attemptsJson,
       messages_json AS messagesJson, displayed_help_json AS displayedHelpJson,
       displayed_help_html AS displayedHelpHtml, ui_context_json AS uiContextJson,
-      created_at AS createdAt, validated_at AS validatedAt
+      created_at AS createdAt
     FROM coach_help_feedback
-    WHERE origin='user' AND validation_status='validated' AND moderation_status='active'
+    WHERE origin='user'
     ORDER BY created_at ASC, id ASC
   `);
   const introduction = [
-    "Analyse les feedbacks utilisateurs valid\xE9s ci-dessous et apporte les am\xE9liorations utiles au projet.",
+    "Analyse tous les feedbacks utilisateurs ci-dessous et apporte les am\xE9liorations utiles au projet.",
     "Ne traite pas chaque exemple comme un cas isol\xE9 : cherche la cause g\xE9n\xE9rale et corrige toutes les situations \xE9quivalentes.",
     "Un retour \xAB Utile \xBB confirme un comportement \xE0 pr\xE9server. Pour les autres retours, confronte la remarque \xE0 la question, \xE0 la r\xE9ponse officielle et \xE0 l\u2019aide r\xE9ellement affich\xE9e.",
     "Ajoute ou adapte les tests qui prot\xE8gent les comportements corrig\xE9s."
@@ -51,13 +51,13 @@ const export_get = defineEventHandler(async (event) => {
   const entries = rows.map((row) => {
     var _a;
     return [
-      `## Feedback valid\xE9 #${row.id} \u2014 ${feedbackLabels[row.feedbackType]}`,
+      `## Feedback #${row.id} \u2014 ${feedbackLabels[row.feedbackType]}`,
       `Contexte : ${[row.person, row.verb, row.tense, row.mode].filter(Boolean).join(" | ") || "non renseign\xE9"}`,
       `Coach : ${row.coachName || "non renseign\xE9"} \xB7 aide : ${row.helpName || "non renseign\xE9e"} \xB7 question : ${(_a = row.questionNumber) != null ? _a : "\u2014"}`,
       `R\xE9ponse officielle : ${row.expectedAnswer || "non renseign\xE9e"}`,
       `Commentaire utilisateur : ${row.comment || "aucun commentaire"}`,
       `Session : ${row.sessionId || "\u2014"} \xB7 exercice : ${row.exerciseRunId || "\u2014"}`,
-      `Re\xE7u : ${row.createdAt} \xB7 valid\xE9 : ${row.validatedAt || "\u2014"}`,
+      `Re\xE7u : ${row.createdAt}`,
       "Question compl\xE8te :",
       "```json",
       prettyJson(row.questionJson),

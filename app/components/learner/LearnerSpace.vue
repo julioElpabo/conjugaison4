@@ -42,7 +42,7 @@ const props = withDefaults(defineProps<{
   readOnly: false,
 })
 
-type UserTab = 'challenges' | 'progress' | 'history' | 'preferences' | 'account'
+type UserTab = 'saved' | 'challenges' | 'progress' | 'history' | 'preferences' | 'account'
 type AccountAction = 'results' | 'account'
 
 interface DashboardChallenge {
@@ -76,6 +76,20 @@ interface DashboardResponse {
   challenges: DashboardChallenge[]
   nextOffset: number
   hasMore: boolean
+}
+
+interface SavedChallenge {
+  code: string
+  title: string
+  description: string
+  questionCount: number
+  verbCount: number
+  tenseCount: number
+  savedAt: string
+}
+
+interface SavedChallengesResponse {
+  challenges: SavedChallenge[]
 }
 
 interface HistorySummaryResponse {
@@ -152,6 +166,63 @@ const { user: sessionLearner, clearUser } = useLearnerAuth()
 const learner = computed(() => props.inspectedLearner || sessionLearner.value)
 const { interfaceLocale, localePath, setInterfaceLocale, ui } = useLanguagePreferences()
 const copy = computed(() => learnerSpaceCopy(interfaceLocale.value))
+const savedCopy = computed(() => ({
+  fr: {
+    tab: 'Mes défis', eyebrow: 'Mes défis enregistrés', title: 'Mes défis',
+    intro: 'Retrouve les défis que tu as créés ou ajoutés à ton compte.',
+    addTitle: 'Ajouter un ancien défi', addHint: 'Entre le code d’un défi créé avant ton compte ou avant l’arrivée de cette fonction.',
+    code: 'Code du défi', add: 'Ajouter', adding: 'Ajout…', launch: 'Lancer',
+    loading: 'Chargement de tes défis…', empty: 'Tu n’as encore aucun défi enregistré.',
+    emptyHint: 'Les défis que tu créeras en étant connecté apparaîtront ici.',
+    invalid: 'Entre un code au format AB-CD-EF-23.', missing: 'Ce code ne correspond à aucun défi.',
+    duplicate: 'Ce défi est déjà dans ton compte.', added: 'Le défi a été ajouté à ton compte.',
+    error: 'Impossible de charger tes défis pour le moment.', addError: 'Impossible d’ajouter ce défi pour le moment.',
+  },
+  de: {
+    tab: 'Meine Herausforderungen', eyebrow: 'Meine gespeicherten Herausforderungen', title: 'Meine Herausforderungen',
+    intro: 'Hier findest du die Herausforderungen, die du erstellt oder deinem Konto hinzugefügt hast.',
+    addTitle: 'Ältere Herausforderung hinzufügen', addHint: 'Gib den Code einer Herausforderung ein, die vor deinem Konto oder dieser Funktion erstellt wurde.',
+    code: 'Herausforderungscode', add: 'Hinzufügen', adding: 'Wird hinzugefügt…', launch: 'Starten',
+    loading: 'Deine Herausforderungen werden geladen…', empty: 'Du hast noch keine Herausforderung gespeichert.',
+    emptyHint: 'Herausforderungen, die du angemeldet erstellst, erscheinen hier.',
+    invalid: 'Gib einen Code im Format AB-CD-EF-23 ein.', missing: 'Dieser Code gehört zu keiner Herausforderung.',
+    duplicate: 'Diese Herausforderung ist bereits in deinem Konto.', added: 'Die Herausforderung wurde deinem Konto hinzugefügt.',
+    error: 'Deine Herausforderungen können momentan nicht geladen werden.', addError: 'Diese Herausforderung kann momentan nicht hinzugefügt werden.',
+  },
+  en: {
+    tab: 'My challenges', eyebrow: 'My saved challenges', title: 'My challenges',
+    intro: 'Find the challenges you created or added to your account.',
+    addTitle: 'Add an older challenge', addHint: 'Enter the code of a challenge created before your account or before this feature existed.',
+    code: 'Challenge code', add: 'Add', adding: 'Adding…', launch: 'Start',
+    loading: 'Loading your challenges…', empty: 'You have not saved any challenges yet.',
+    emptyHint: 'Challenges you create while signed in will appear here.',
+    invalid: 'Enter a code in the format AB-CD-EF-23.', missing: 'This code does not match any challenge.',
+    duplicate: 'This challenge is already in your account.', added: 'The challenge was added to your account.',
+    error: 'Your challenges cannot be loaded right now.', addError: 'This challenge cannot be added right now.',
+  },
+  it: {
+    tab: 'I miei esercizi', eyebrow: 'I miei esercizi salvati', title: 'I miei esercizi',
+    intro: 'Ritrova gli esercizi che hai creato o aggiunto al tuo account.',
+    addTitle: 'Aggiungi un vecchio esercizio', addHint: 'Inserisci il codice di un esercizio creato prima del tuo account o di questa funzione.',
+    code: 'Codice dell’esercizio', add: 'Aggiungi', adding: 'Aggiunta…', launch: 'Avvia',
+    loading: 'Caricamento degli esercizi…', empty: 'Non hai ancora salvato nessun esercizio.',
+    emptyHint: 'Gli esercizi creati mentre sei connesso appariranno qui.',
+    invalid: 'Inserisci un codice nel formato AB-CD-EF-23.', missing: 'Questo codice non corrisponde a nessun esercizio.',
+    duplicate: 'Questo esercizio è già nel tuo account.', added: 'L’esercizio è stato aggiunto al tuo account.',
+    error: 'Impossibile caricare gli esercizi al momento.', addError: 'Impossibile aggiungere questo esercizio al momento.',
+  },
+  es: {
+    tab: 'Mis ejercicios', eyebrow: 'Mis ejercicios guardados', title: 'Mis ejercicios',
+    intro: 'Encuentra los ejercicios que has creado o añadido a tu cuenta.',
+    addTitle: 'Añadir un ejercicio anterior', addHint: 'Introduce el código de un ejercicio creado antes de tu cuenta o de esta función.',
+    code: 'Código del ejercicio', add: 'Añadir', adding: 'Añadiendo…', launch: 'Iniciar',
+    loading: 'Cargando tus ejercicios…', empty: 'Todavía no has guardado ningún ejercicio.',
+    emptyHint: 'Los ejercicios que crees mientras estés conectado aparecerán aquí.',
+    invalid: 'Introduce un código con el formato AB-CD-EF-23.', missing: 'Este código no corresponde a ningún ejercicio.',
+    duplicate: 'Este ejercicio ya está en tu cuenta.', added: 'El ejercicio se ha añadido a tu cuenta.',
+    error: 'No se pueden cargar tus ejercicios en este momento.', addError: 'No se puede añadir este ejercicio en este momento.',
+  },
+})[interfaceLocale.value])
 const text = (key: keyof ReturnType<typeof learnerSpaceCopy>, parameters: Record<string, string | number> = {}) =>
   learnerSpaceText(copy.value, key, parameters)
 const learnerErrorComparison = (example: LearnerErrorProgressExample) => buildAnswerComparison(
@@ -165,11 +236,19 @@ const { track } = useSiteAnalytics()
 const route = useRoute()
 const requestFetch = useRequestFetch()
 const requestedTab = (value: unknown): UserTab => (
-  ['progress', 'history', 'preferences', 'account'].includes(String(value))
+  ['saved', 'progress', 'history', 'preferences', 'account'].includes(String(value))
     ? String(value) as UserTab
     : 'history'
 )
 const activeTab = ref<UserTab>(requestedTab(route.query.tab))
+const savedChallenges = ref<SavedChallenge[]>([])
+const savedChallengesLoaded = ref(false)
+const savedChallengesPending = ref(false)
+const savedChallengesError = ref('')
+const savedChallengeCode = ref('')
+const savedChallengeAdding = ref(false)
+const savedChallengeAddError = ref('')
+const savedChallengeAddNotice = ref('')
 const learnerProgress = ref<LearnerErrorProgressSummary>()
 const learnerProgressPending = ref(false)
 const learnerProgressError = ref('')
@@ -248,6 +327,7 @@ function exposeUsageFeature(feature: string) {
 }
 
 function learnerTabFeature(tab: UserTab) {
+  if (tab === 'saved') return 'learner.saved-challenges'
   if (tab === 'challenges') return 'learner.training'
   if (tab === 'progress') return 'learner.progress'
   if (tab === 'history') return 'learner.history'
@@ -315,6 +395,7 @@ onMounted(() => {
   }
   observeChallengeLoader()
   if (activeTab.value === 'challenges') void loadChallengeTrainings()
+  if (activeTab.value === 'saved') void loadSavedChallenges()
   if (activeTab.value === 'progress') void loadLearnerProgress()
   if (!randomCoachAvatar.value) void loadRandomCoachAvatar()
   exposeUsageFeature(learnerTabFeature(activeTab.value))
@@ -357,6 +438,7 @@ watch(activeTab, (tab) => {
   if (learnerTabReady && !props.readOnly) track('feature_selected', { feature })
   if (tab === 'progress') void loadLearnerProgress()
   if (tab === 'challenges') void loadChallengeTrainings()
+  if (tab === 'saved') void loadSavedChallenges()
 })
 
 watch(() => dashboard.value?.challenges, (challenges) => {
@@ -988,6 +1070,63 @@ async function launchProgressErrorChallenge(card: LearnerErrorProgressCard) {
   }
   finally {
     errorChallengePendingCode.value = undefined
+  }
+}
+
+function normalizeSavedChallengeCode(value: string) {
+  const compact = value.toUpperCase().replace(/[^A-Z0-9]/gu, '')
+  return compact.length === 8 ? compact.match(/.{2}/gu)?.join('-') || compact : value.trim().toUpperCase()
+}
+
+async function loadSavedChallenges(force = false) {
+  if (savedChallengesPending.value || (savedChallengesLoaded.value && !force)) return
+  savedChallengesPending.value = true
+  savedChallengesError.value = ''
+  try {
+    const response = await $fetch<SavedChallengesResponse>(learnerApi('saved-challenges'), {
+      credentials: 'same-origin',
+    })
+    savedChallenges.value = response.challenges
+    savedChallengesLoaded.value = true
+  }
+  catch {
+    savedChallengesError.value = savedCopy.value.error
+  }
+  finally {
+    savedChallengesPending.value = false
+  }
+}
+
+async function addSavedChallenge() {
+  if (props.readOnly || savedChallengeAdding.value) return
+  const code = normalizeSavedChallengeCode(savedChallengeCode.value)
+  savedChallengeAddError.value = ''
+  savedChallengeAddNotice.value = ''
+  if (!/^[A-HK-NP-Z2-9]{2}(?:-[A-HK-NP-Z2-9]{2}){3}$/u.test(code)) {
+    savedChallengeAddError.value = savedCopy.value.invalid
+    return
+  }
+  savedChallengeAdding.value = true
+  try {
+    const response = await $fetch<{ code: string, added: boolean }>(learnerApi('saved-challenges'), {
+      method: 'POST',
+      credentials: 'same-origin',
+      body: { code },
+    })
+    savedChallengeCode.value = ''
+    savedChallengeAddNotice.value = response.added ? savedCopy.value.added : savedCopy.value.duplicate
+    await loadSavedChallenges(true)
+  }
+  catch (error) {
+    const status = error && typeof error === 'object'
+      ? Number((error as { statusCode?: number, status?: number, response?: { status?: number } }).statusCode
+        || (error as { status?: number }).status
+        || (error as { response?: { status?: number } }).response?.status)
+      : 0
+    savedChallengeAddError.value = status === 404 ? savedCopy.value.missing : savedCopy.value.addError
+  }
+  finally {
+    savedChallengeAdding.value = false
   }
 }
 
@@ -1646,6 +1785,9 @@ async function confirmAccountAction() {
     </header>
 
     <nav class="learner-tabs" :style="stickyTabsStyle" :aria-label="copy.spaceSections">
+      <button :class="{ 'is-active': activeTab === 'saved' }" type="button" @click="activeTab = 'saved'">
+        {{ savedCopy.tab }}
+      </button>
       <button
         class="learner-tabs__primary"
         :class="{ 'is-active': activeTab === 'history' }"
@@ -1660,7 +1802,67 @@ async function confirmAccountAction() {
       </button>
     </nav>
 
-    <section v-if="activeTab === 'challenges' || activeTab === 'history'" class="learner-panel" aria-labelledby="challenges-title">
+    <section v-if="activeTab === 'saved'" class="learner-panel" aria-labelledby="saved-challenges-title">
+      <div class="learner-panel__heading">
+        <div>
+          <p class="learner-eyebrow">{{ savedCopy.eyebrow }}</p>
+          <h2 id="saved-challenges-title">{{ savedCopy.title }}</h2>
+        </div>
+      </div>
+
+      <p class="saved-challenges__intro">{{ savedCopy.intro }}</p>
+
+      <form v-if="!props.readOnly" class="saved-challenge-form" @submit.prevent="addSavedChallenge">
+        <div>
+          <strong>{{ savedCopy.addTitle }}</strong>
+          <p>{{ savedCopy.addHint }}</p>
+        </div>
+        <label for="saved-challenge-code">{{ savedCopy.code }}</label>
+        <div class="saved-challenge-form__control">
+          <input
+            id="saved-challenge-code"
+            v-model="savedChallengeCode"
+            type="text"
+            inputmode="text"
+            autocomplete="off"
+            maxlength="11"
+            placeholder="AB-CD-EF-23"
+            :disabled="savedChallengeAdding"
+          >
+          <button type="submit" :disabled="savedChallengeAdding">
+            {{ savedChallengeAdding ? savedCopy.adding : savedCopy.add }}
+          </button>
+        </div>
+        <p v-if="savedChallengeAddError" class="saved-challenge-form__error" role="alert">{{ savedChallengeAddError }}</p>
+        <p v-else-if="savedChallengeAddNotice" class="saved-challenge-form__notice" role="status">{{ savedChallengeAddNotice }}</p>
+      </form>
+
+      <p v-if="savedChallengesPending && !savedChallengesLoaded" class="learner-empty">{{ savedCopy.loading }}</p>
+      <p v-else-if="savedChallengesError" class="saved-challenge-form__error" role="alert">{{ savedChallengesError }}</p>
+      <div v-else-if="savedChallenges.length" class="saved-challenges__grid">
+        <article v-for="challenge in savedChallenges" :key="challenge.code" class="saved-challenge-card">
+          <div>
+            <span>{{ challenge.code }}</span>
+            <h3>{{ challenge.title }}</h3>
+            <p v-if="challenge.description">{{ challenge.description }}</p>
+          </div>
+          <dl>
+            <div><dt>{{ ui('Question') }}</dt><dd>{{ challenge.questionCount }}</dd></div>
+            <div><dt>{{ ui('Verbes') }}</dt><dd>{{ challenge.verbCount }}</dd></div>
+            <div><dt>{{ ui('Temps') }}</dt><dd>{{ challenge.tenseCount }}</dd></div>
+          </dl>
+          <NuxtLink class="learner-primary-link" :to="localePath(`/defi/${challenge.code}`)">
+            {{ savedCopy.launch }}
+          </NuxtLink>
+        </article>
+      </div>
+      <p v-else class="learner-empty">
+        <strong>{{ savedCopy.empty }}</strong>
+        <span>{{ savedCopy.emptyHint }}</span>
+      </p>
+    </section>
+
+    <section v-else-if="activeTab === 'challenges' || activeTab === 'history'" class="learner-panel" aria-labelledby="challenges-title">
       <div class="learner-panel__heading">
         <div>
           <p class="learner-eyebrow">{{ activeTab === 'history' ? copy.findActivities : copy.resumeAndConsolidate }}</p>
@@ -4056,7 +4258,7 @@ async function confirmAccountAction() {
   position: sticky;
   z-index: 80;
   top: var(--learner-tabs-sticky-top, 68px);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   box-shadow: 0 10px 24px rgb(20 28 38 / 12%);
 }
 
@@ -5514,7 +5716,7 @@ async function confirmAccountAction() {
 
 @media (max-width: 720px) {
   .learner-tabs {
-    grid-template-columns: repeat(2, minmax(150px, 1fr));
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
     overflow-x: auto;
     overscroll-behavior-inline: contain;
     scrollbar-width: thin;
@@ -5633,5 +5835,146 @@ async function confirmAccountAction() {
 .learner-space__hero h1,
 .learner-panel h2 {
   letter-spacing: .018em;
+}
+
+.saved-challenges__intro {
+  margin: -12px 0 0;
+  color: var(--muted);
+}
+
+.saved-challenge-form {
+  display: grid;
+  padding: 20px;
+  border: 1px solid color-mix(in srgb, #7052a0 28%, var(--line));
+  border-radius: 18px;
+  gap: 12px;
+  background: color-mix(in srgb, #7052a0 7%, var(--surface));
+}
+
+.saved-challenge-form strong {
+  color: var(--ink);
+  font-size: 1.05rem;
+}
+
+.saved-challenge-form p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.saved-challenge-form label {
+  color: var(--ink);
+  font-size: .82rem;
+  font-weight: 800;
+}
+
+.saved-challenge-form__control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 9px;
+}
+
+.saved-challenge-form input {
+  min-height: 46px;
+  padding: 10px 13px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  color: var(--ink);
+  background: var(--surface);
+  font: inherit;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.saved-challenge-form button {
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 11px;
+  color: white;
+  background: #7052a0;
+  font: inherit;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.saved-challenge-form button:disabled {
+  cursor: progress;
+  opacity: .65;
+}
+
+.saved-challenge-form .saved-challenge-form__error,
+.saved-challenge-form__error {
+  margin: 0;
+  color: var(--danger);
+}
+
+.saved-challenge-form .saved-challenge-form__notice {
+  margin: 0;
+  color: var(--success);
+  font-weight: 750;
+}
+
+.saved-challenges__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.saved-challenge-card {
+  display: grid;
+  padding: 20px;
+  align-content: start;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  gap: 16px;
+  background: var(--surface-soft);
+}
+
+.saved-challenge-card span {
+  color: #7052a0;
+  font-size: .75rem;
+  font-weight: 850;
+  letter-spacing: .08em;
+}
+
+.saved-challenge-card h3 {
+  margin: 4px 0 0;
+  color: var(--ink);
+}
+
+.saved-challenge-card p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.saved-challenge-card dl {
+  display: flex;
+  margin: 0;
+  gap: 18px;
+}
+
+.saved-challenge-card dl div {
+  display: grid;
+  gap: 2px;
+}
+
+.saved-challenge-card dt {
+  color: var(--muted);
+  font-size: .72rem;
+}
+
+.saved-challenge-card dd {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 850;
+}
+
+@media (max-width: 720px) {
+  .saved-challenges__grid,
+  .saved-challenge-form__control {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

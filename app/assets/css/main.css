@@ -1174,6 +1174,38 @@ body.dialog-open {
   max-width: 760px;
 }
 
+.share-account-notice {
+  display: flex;
+  margin: 15px 0 18px;
+  padding: 12px 14px;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--success) 38%, var(--line));
+  border-radius: 13px;
+  gap: 10px;
+  color: color-mix(in srgb, var(--success) 78%, var(--ink));
+  background: color-mix(in srgb, var(--success) 10%, white);
+  font-size: .88rem;
+  font-weight: 750;
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+.share-account-notice:hover {
+  text-decoration: underline;
+}
+
+.share-account-notice > span {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+  place-items: center;
+  border-radius: 50%;
+  color: white;
+  background: var(--success);
+  font-size: .78rem;
+}
+
 .share-title-form {
   display: grid;
   margin: 18px 0 20px;

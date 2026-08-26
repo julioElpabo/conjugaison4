@@ -2,6 +2,7 @@ import { saveDefi } from '../../services/defis'
 import { parseDefiDefinition, PublicInputError } from '../../services/public-api-validation'
 import { assertPublicApiRateLimit, PUBLIC_RATE_LIMITS } from '../../services/public-api-rate-limit'
 import { readLimitedJsonBody } from '../../utils/limited-json-body'
+import { getLearnerSession } from '../../utils/learner-session'
 
 export default defineEventHandler(async (event) => {
   await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.challengeCreate)
@@ -17,7 +18,8 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    return { code: await saveDefi(definition) }
+    const learner = await getLearnerSession(event)
+    return { code: await saveDefi(definition, learner?.id) }
   } catch (error) {
     if (error instanceof PublicInputError) {
       throw createError({ statusCode: 400, statusMessage: error.message })

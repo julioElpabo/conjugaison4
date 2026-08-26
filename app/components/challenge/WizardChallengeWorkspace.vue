@@ -1485,6 +1485,19 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   goToStep(1)
 }
 
+function selectHomePreset(preset: ChallengePreset, randomCount?: number) {
+  selectPreset(preset, randomCount)
+  if (falcMode.value || !isReady.value) return
+
+  cancelPresetReveal()
+  revealedPresetVerbIds.value = [...challenge.value.verbIds]
+  revealedPresetTenseIds.value = [...challenge.value.tenseIds]
+  presetTenseRevealPending.value = false
+  prefilledOptionsRevealPending.value = false
+  goToStep(4)
+  showLaunchSummary.value = true
+}
+
 async function restoreChallenge() {
   const normalized = normalizeChallengeCode(challengeCode.value)
   if (!/^[A-Z0-9]{2}(?:-[A-Z0-9]{2}){3}$/.test(normalized)) {
@@ -2035,7 +2048,7 @@ async function createSharedChallenge(title: string, description: string) {
                 <div v-else class="falc-home-panel">
                   <button class="falc-panel-back" type="button" :aria-label="ui('Retour')" @click="falcHomePanel = null">←</button>
                   <h2>{{ ui('Choisis un défi') }}</h2>
-                  <PresetPicker compact :presets="catalogue.presets" :verbs="catalogue.verbes" :modes="catalogue.modes" :tenses="catalogue.temps" :active-preset-id="activePresetId" @select="selectPreset" @stage-change="presetStage = $event" />
+                  <PresetPicker compact :presets="catalogue.presets" :verbs="catalogue.verbes" :modes="catalogue.modes" :tenses="catalogue.temps" :active-preset-id="activePresetId" @select="selectHomePreset" @stage-change="presetStage = $event" />
                 </div>
               </template>
               <template v-else>
@@ -2109,7 +2122,7 @@ async function createSharedChallenge(title: string, description: string) {
                       :modes="catalogue.modes"
                       :tenses="catalogue.temps"
                       :active-preset-id="activePresetId"
-                      @select="selectPreset"
+                      @select="selectHomePreset"
                       @stage-change="presetStage = $event"
                     />
                   </article>

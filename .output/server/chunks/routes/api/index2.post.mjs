@@ -3,6 +3,7 @@ import { s as saveDefi } from '../../_/defis.mjs';
 import { p as parseDefiDefinition, P as PublicInputError } from '../../_/public-api-validation.mjs';
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../_/public-api-rate-limit.mjs';
 import { r as readLimitedJsonBody } from '../../_/limited-json-body.mjs';
+import { g as getLearnerSession } from '../../_/learner-session.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -29,7 +30,8 @@ const index_post = defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "Corps JSON invalide" });
   }
   try {
-    return { code: await saveDefi(definition) };
+    const learner = await getLearnerSession(event);
+    return { code: await saveDefi(definition, learner == null ? void 0 : learner.id) };
   } catch (error) {
     if (error instanceof PublicInputError) {
       throw createError({ statusCode: 400, statusMessage: error.message });

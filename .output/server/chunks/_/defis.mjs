@@ -49,24 +49,40 @@ async function assertDefiSelectionExists(definition) {
     throw new PublicInputError("Un ou plusieurs temps sont inconnus");
   }
 }
-async function saveDefi(definition) {
+async function saveDefi(definition, learnerAccountId) {
   var _a;
   const database = useDatabase();
   await assertDefiSelectionExists(definition);
-  for (let attempt = 0; attempt < 12; attempt++) {
-    const code = createCode();
-    const [existing] = await database.execute(
-      "SELECT COUNT(*) AS count FROM defis WHERE name = ?",
-      [code]
-    );
-    if (Number((_a = existing[0]) == null ? void 0 : _a.count) !== 0) continue;
-    await database.execute(
-      "INSERT INTO defis (name, defi) VALUES (?, ?)",
-      [code, serializeDefi(definition)]
-    );
-    return code;
+  const connection = await database.getConnection();
+  try {
+    await connection.beginTransaction();
+    for (let attempt = 0; attempt < 12; attempt++) {
+      const code = createCode();
+      const [existing] = await connection.execute(
+        "SELECT COUNT(*) AS count FROM defis WHERE name = ?",
+        [code]
+      );
+      if (Number((_a = existing[0]) == null ? void 0 : _a.count) !== 0) continue;
+      const [result] = await connection.execute(
+        "INSERT INTO defis (name, defi) VALUES (?, ?)",
+        [code, serializeDefi(definition)]
+      );
+      if (learnerAccountId) {
+        await connection.execute(`
+          INSERT INTO learner_saved_challenges (account_id, defi_id)
+          VALUES (?, ?)
+        `, [learnerAccountId, result.insertId]);
+      }
+      await connection.commit();
+      return code;
+    }
+    throw new DefiStorageError("Impossible de cr\xE9er un code unique");
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
   }
-  throw new DefiStorageError("Impossible de cr\xE9er un code unique");
 }
 async function getDefi(code) {
   const database = useDatabase();
@@ -101,5 +117,5 @@ async function getDefi(code) {
   }
 }
 
-export { DefiNotFoundError as D, getDefi as g, normalizeDefiCode as n, saveDefi as s };
+export { DefiNotFoundError as D, DefiStorageError as a, getDefi as g, normalizeDefiCode as n, saveDefi as s };
 //# sourceMappingURL=defis.mjs.map

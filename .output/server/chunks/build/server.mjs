@@ -708,6 +708,8 @@ const uiMessages = {
   "L\u2019aper\xE7u PDF n\u2019a pas pu \xEAtre cr\xE9\xE9.": { de: "Die PDF-Vorschau konnte nicht erstellt werden.", en: "The PDF preview could not be created.", it: "Impossibile creare l\u2019anteprima PDF.", es: "No se ha podido crear la vista previa en PDF." },
   "CORRIG\xC9": { de: "L\xD6SUNGEN", en: "ANSWER KEY", it: "SOLUZIONI", es: "SOLUCIONES" },
   "D\xE9fi sauvegard\xE9": { de: "\xDCbung gespeichert", en: "Challenge saved", it: "Esercizio salvato", es: "Ejercicio guardado" },
+  "Ce d\xE9fi est enregistr\xE9 dans \xAB Mes d\xE9fis \xBB de votre compte.": { de: "Diese \xDCbung ist unter \u201EMeine Herausforderungen\u201C in deinem Konto gespeichert.", en: "This challenge is saved under \u201CMy challenges\u201D in your account.", it: "Questo esercizio \xE8 salvato in \xABI miei esercizi\xBB nel tuo account.", es: "Este ejercicio est\xE1 guardado en \xABMis ejercicios\xBB de tu cuenta." },
+  "Ce d\xE9fi sera automatiquement enregistr\xE9 dans \xAB Mes d\xE9fis \xBB de votre compte.": { de: "Diese \xDCbung wird automatisch unter \u201EMeine Herausforderungen\u201C in deinem Konto gespeichert.", en: "This challenge will automatically be saved under \u201CMy challenges\u201D in your account.", it: "Questo esercizio verr\xE0 salvato automaticamente in \xABI miei esercizi\xBB nel tuo account.", es: "Este ejercicio se guardar\xE1 autom\xE1ticamente en \xABMis ejercicios\xBB de tu cuenta." },
   "Votre d\xE9fi est pr\xEAt \xE0 \xEAtre partag\xE9": { de: "Deine \xDCbung kann geteilt werden", en: "Your challenge is ready to share", it: "Il tuo esercizio \xE8 pronto per essere condiviso", es: "Tu ejercicio est\xE1 listo para compartir" },
   "Deux possibilit\xE9s permettent \xE0 vos \xE9l\xE8ves de retrouver ce d\xE9fi.": { de: "Deine Sch\xFClerinnen und Sch\xFCler k\xF6nnen diese \xDCbung auf zwei Arten wiederfinden.", en: "Your students can retrieve this challenge in two ways.", it: "Gli alunni possono ritrovare questo esercizio in due modi.", es: "Tus alumnos pueden recuperar este ejercicio de dos maneras." },
   "Sauvegarder le code": { de: "Code speichern", en: "Save the code", it: "Salva il codice", es: "Guardar el c\xF3digo" },
@@ -1636,7 +1638,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-C1YV6Xgv.mjs')
+    component: () => import('./users-DttbNoHa.mjs')
   },
   {
     name: "admin-verbes",
@@ -1656,12 +1658,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-BrI8FKIt.mjs')
+    component: () => import('./_code_-DTJ9OR50.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-Dme-1oV1.mjs')
+    component: () => import('./_slug_-BKPWkztC.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1706,7 +1708,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-BoiTil0d.mjs')
+    component: () => import('./exercices-de-conjugaison-BSC9Ud0S.mjs')
   },
   {
     name: "mon-compte",
@@ -1717,12 +1719,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-DXPPSCPg.mjs')
+    component: () => import('./my-page-bhGNQ3l5.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-BjlUupWR.mjs')
+    component: () => import('./nouveau-defi-CrrffWxr.mjs')
   },
   {
     name: "signin",
@@ -1732,7 +1734,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-Dm8gYJL-.mjs')
+    component: () => import('./index-Cr_ptFaP.mjs')
   },
   {
     name: "mode-tense",
@@ -1817,7 +1819,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-C1YV6Xgv.mjs')
+    component: () => import('./users-DttbNoHa.mjs')
   },
   {
     name: "localized-admin-verbes",
@@ -1837,12 +1839,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-BrI8FKIt.mjs')
+    component: () => import('./_code_-DTJ9OR50.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es)/defis/:slug()",
-    component: () => import('./_slug_-Dme-1oV1.mjs')
+    component: () => import('./_slug_-BKPWkztC.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1887,7 +1889,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-BoiTil0d.mjs')
+    component: () => import('./exercices-de-conjugaison-BSC9Ud0S.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1898,12 +1900,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-DXPPSCPg.mjs')
+    component: () => import('./my-page-bhGNQ3l5.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-BjlUupWR.mjs')
+    component: () => import('./nouveau-defi-CrrffWxr.mjs')
   },
   {
     name: "localized-signin",
@@ -1913,7 +1915,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-Dm8gYJL-.mjs')
+    component: () => import('./index-Cr_ptFaP.mjs')
   },
   {
     name: "localized-mode-tense",

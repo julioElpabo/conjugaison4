@@ -448,7 +448,7 @@ const activeSection = computed(() => {
                 :to="`${localePath('/my-page')}?tab=history`"
               >
                 <span aria-hidden="true">✦</span>
-                {{ learnerCopy.history }}
+                {{ learnerCopy.account }}
               </NuxtLink>
               <NuxtLink
                 :to="`${localePath('/my-page')}?tab=progress`"

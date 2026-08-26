@@ -23,7 +23,6 @@ interface FeedbackExportRow extends RowDataPacket {
   displayedHelpHtml: string | null
   uiContextJson: string | null
   createdAt: Date | string
-  validatedAt: Date | string | null
 }
 
 function prettyJson(value: string | null) {
@@ -54,26 +53,26 @@ export default defineEventHandler(async (event) => {
       exercise_context_json AS exerciseContextJson, attempts_json AS attemptsJson,
       messages_json AS messagesJson, displayed_help_json AS displayedHelpJson,
       displayed_help_html AS displayedHelpHtml, ui_context_json AS uiContextJson,
-      created_at AS createdAt, validated_at AS validatedAt
+      created_at AS createdAt
     FROM coach_help_feedback
-    WHERE origin='user' AND validation_status='validated' AND moderation_status='active'
+    WHERE origin='user'
     ORDER BY created_at ASC, id ASC
   `)
 
   const introduction = [
-    'Analyse les feedbacks utilisateurs validés ci-dessous et apporte les améliorations utiles au projet.',
+    'Analyse tous les feedbacks utilisateurs ci-dessous et apporte les améliorations utiles au projet.',
     'Ne traite pas chaque exemple comme un cas isolé : cherche la cause générale et corrige toutes les situations équivalentes.',
     'Un retour « Utile » confirme un comportement à préserver. Pour les autres retours, confronte la remarque à la question, à la réponse officielle et à l’aide réellement affichée.',
     'Ajoute ou adapte les tests qui protègent les comportements corrigés.',
   ].join('\n')
   const entries = rows.map(row => [
-    `## Feedback validé #${row.id} — ${feedbackLabels[row.feedbackType]}`,
+    `## Feedback #${row.id} — ${feedbackLabels[row.feedbackType]}`,
     `Contexte : ${[row.person, row.verb, row.tense, row.mode].filter(Boolean).join(' | ') || 'non renseigné'}`,
     `Coach : ${row.coachName || 'non renseigné'} · aide : ${row.helpName || 'non renseignée'} · question : ${row.questionNumber ?? '—'}`,
     `Réponse officielle : ${row.expectedAnswer || 'non renseignée'}`,
     `Commentaire utilisateur : ${row.comment || 'aucun commentaire'}`,
     `Session : ${row.sessionId || '—'} · exercice : ${row.exerciseRunId || '—'}`,
-    `Reçu : ${row.createdAt} · validé : ${row.validatedAt || '—'}`,
+    `Reçu : ${row.createdAt}`,
     'Question complète :',
     '```json',
     prettyJson(row.questionJson),

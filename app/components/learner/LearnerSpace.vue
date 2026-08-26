@@ -2834,39 +2834,36 @@ async function confirmAccountAction() {
         <div class="account-password__fields">
           <label class="is-current">
             <span>{{ copy.currentPassword }}</span>
-            <input
+            <PasswordInput
               v-model="passwordForm.currentPassword"
-              type="password"
               name="current-password"
               autocomplete="current-password"
-              maxlength="200"
+              :maxlength="200"
               required
-            >
+            />
           </label>
           <label>
             <span>{{ copy.newPassword }}</span>
-            <input
+            <PasswordInput
               v-model="passwordForm.newPassword"
-              type="password"
               name="new-password"
               autocomplete="new-password"
-              minlength="10"
-              maxlength="200"
-              aria-describedby="password-help"
+              :minlength="10"
+              :maxlength="200"
+              describedby="password-help"
               required
-            >
+            />
           </label>
           <label>
             <span>{{ copy.confirmPassword }}</span>
-            <input
+            <PasswordInput
               v-model="passwordForm.confirmation"
-              type="password"
               name="new-password-confirmation"
               autocomplete="new-password"
-              minlength="10"
-              maxlength="200"
+              :minlength="10"
+              :maxlength="200"
               required
-            >
+            />
           </label>
         </div>
         <p v-if="passwordError" class="preferences-error" role="alert">{{ passwordError }}</p>

@@ -313,9 +313,16 @@ export default defineNitroPlugin(async () => {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `)
     await database.query('DELETE FROM learner_sessions WHERE expires_at < CURRENT_TIMESTAMP')
-    await database.query(
-      "DELETE FROM learner_accounts WHERE status = 'pending' AND activated_at IS NULL AND created_at < CURRENT_TIMESTAMP - INTERVAL 48 HOUR"
-    )
+    // Une inscription validée par l'API constitue désormais l'activation du compte.
+    // Répare aussi les comptes créés avant ce correctif : leur suppression automatique
+    // pouvait effacer en cascade des défis pourtant déjà réalisés.
+    await database.query(`
+      UPDATE learner_accounts
+      SET status = 'active',
+          activated_at = COALESCE(activated_at, created_at),
+          deletion_scheduled_at = NULL
+      WHERE status = 'pending' AND deleted_at IS NULL
+    `)
     await database.query(
       'DELETE FROM learner_registration_rate_limits WHERE updated_at < CURRENT_TIMESTAMP - INTERVAL 2 DAY'
     )

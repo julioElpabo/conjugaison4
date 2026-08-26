@@ -266,6 +266,7 @@ export function isFutureSimpleInsteadOfNearFuture(
 export function findConjugationConfusions(
   answer: unknown,
   question: {
+    pronom?: string
     conjugationConfusions?: readonly {
       tense: string
       mode: string
@@ -273,9 +274,11 @@ export function findConjugationConfusions(
     }[]
   },
 ) {
-  return (question.conjugationConfusions || []).filter(candidate =>
-    validateAnswer(answer, candidate.answers).isCorrect,
-  )
+  const pronoun = normalizedSubjectPronoun(question.pronom)
+  return (question.conjugationConfusions || []).filter(candidate => (
+    validateAnswer(answer, candidate.answers).isCorrect
+    || Boolean(pronoun && answerMatchesWithoutSubjectPronoun(answer, candidate.answers, pronoun))
+  ))
 }
 
 function lexicalWords(value: unknown) {

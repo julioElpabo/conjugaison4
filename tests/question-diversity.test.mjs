@@ -59,6 +59,19 @@ describe('diversité des verbes dans un questionnaire', () => {
     ], 2, () => 0)
     assert.deepEqual(new Set(selected.map(item => item.mode)), new Set(['indicatif', 'subjonctif']))
   })
+
+  it('couvre tous les verbes et tous les temps disponibles quand le nombre de questions le permet', () => {
+    const questions = []
+    for (const verbId of [1, 2, 3, 4, 5]) {
+      for (const tenseId of [1, 2, 3, 4]) {
+        questions.push(question(`${verbId}-${tenseId}`, verbId, tenseId))
+      }
+    }
+    const selected = diverseConjugationQuestions(questions, 5, () => .73)
+
+    assert.equal(new Set(selected.map(item => item.verbeId)).size, 5)
+    assert.equal(new Set(selected.map(item => item.tenseId)).size, 4)
+  })
 })
 
 describe('pronom on', () => {

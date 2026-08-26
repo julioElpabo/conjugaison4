@@ -292,7 +292,7 @@ async function logoutLearner() {
 const activeLearnerTab = computed(() => {
   if (localizedSectionPath.value !== '/my-page') return ''
   const tab = String(route.query.tab || 'history')
-  return ['history', 'progress', 'preferences', 'account'].includes(tab) ? tab : 'history'
+  return ['saved', 'history', 'progress', 'preferences', 'account'].includes(tab) ? tab : 'history'
 })
 
 async function selectLearnerLanguage(locale: AppLocale) {
@@ -442,6 +442,12 @@ const activeSection = computed(() => {
               <svg aria-hidden="true" viewBox="0 0 20 20"><path d="m5 7.5 5 5 5-5" /></svg>
             </summary>
             <div class="learner-menu__panel">
+              <NuxtLink
+                :to="`${localePath('/my-page')}?tab=saved`"
+                :class="{ 'is-active': activeLearnerTab === 'saved' }"
+              >
+                {{ learnerCopy.myChallenges }}
+              </NuxtLink>
               <NuxtLink
                 class="learner-menu__progress"
                 :class="{ 'is-active': activeLearnerTab === 'history' }"

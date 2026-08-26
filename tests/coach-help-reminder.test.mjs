@@ -61,7 +61,11 @@ describe('rappel de l’aide dans le chat', () => {
       component.indexOf('async function askCurrentQuestion('),
       component.indexOf('async function runChatOpening'),
     )
-    assert.match(component, /helpApproach === 'complete'[\s\S]*helpApproach === 'complete-avec-reponses'/u)
+    assert.match(component, /helpAnswersRevealed\.value/u)
+    assert.match(component, /helpApproach === 'complete-avec-reponses'/u)
+    assert.match(component, /failedQuestionIndexes\.has\(helpQuestionIndex\.value \?\? currentIndex\.value\)/u)
+    assert.match(component, /helpAnswersRevealed\.value[\s\S]*helpApproach === 'tres-condensee'/u)
+    assert.match(component, /participle: mayRevealAnswer \? reminder\?\.participle : undefined/u)
     assert.match(askQuestion, /speechOnly: true/u)
     assert.ok(
       askQuestion.indexOf('answerLine: true') < askQuestion.indexOf('speechOnly: true'),

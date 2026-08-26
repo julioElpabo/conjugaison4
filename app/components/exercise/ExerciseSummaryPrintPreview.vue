@@ -12,6 +12,7 @@ interface SummaryItem {
   expectedAnswer: string
   errorLabels: string[]
   errorDetails: LearnerErrorDetail[]
+  attemptNumber?: 1 | 2
 }
 
 interface SummaryTense {
@@ -186,36 +187,34 @@ async function buildPdf() {
 
   function fitCell(value: string, width: number, fontStyle: 'normal' | 'bold') {
     const text = pdfSafe(value || '—')
-    for (let size = 8.2; size >= 6.2; size -= .4) {
+    for (let size = 8.2; size >= 6.6; size -= .4) {
       pdf.setFont('helvetica', fontStyle)
       pdf.setFontSize(size)
       const lines = pdf.splitTextToSize(text, width) as string[]
-      if (lines.length <= 2) return { lines, size }
+      if (lines.length <= 3) return { lines, size }
     }
     pdf.setFont('helvetica', fontStyle)
     pdf.setFontSize(6.2)
-    const lines = pdf.splitTextToSize(text, width) as string[]
-    const compact = [lines[0] || '']
-    let last = lines.slice(1).join(' ')
-    while (last.length > 1 && pdf.getTextWidth(`${last}…`) > width) last = last.slice(0, -1)
-    compact.push(`${last.trimEnd()}…`)
-    return { lines: compact, size: 6.2 }
+    return { lines: pdf.splitTextToSize(text, width) as string[], size: 6.2 }
   }
 
   function drawQuestion(item: SummaryItem) {
     const question = fitCell(`${item.index}. ${item.questionLabel}`, questionWidth, 'bold')
-    const visibleErrorDetails = item.errorDetails.filter(detail => detail.code !== 'input.close_form')
+    const visibleErrorDetails = item.errorDetails
+    const retry = item.attemptNumber === 2
+      ? fitCell(ui('Réussie au deuxième essai'), questionWidth, 'bold')
+      : null
     const comparisons = visibleErrorDetails.filter(detail => detail.learnerValue && detail.expectedValue)
     const errors = visibleErrorDetails.length
-      ? fitCell(visibleErrorDetails.map(detail => (
+      ? fitCell(`${item.attemptNumber === 2 ? `${ui('Erreur du premier essai :')} ` : ''}${visibleErrorDetails.map(detail => (
           detail.learnerValue && detail.expectedValue
             ? localizedLearnerErrorMessage(detail, interfaceLocale.value)
             : learnerErrorDetailText(detail, interfaceLocale.value)
-        )).join(' · '), questionWidth, 'normal')
+        )).join(' · ')}`, questionWidth, 'normal')
       : null
     const learner = fitCell(item.learnerAnswer || '—', learnerWidth, 'normal')
     const expected = fitCell(item.expectedAnswer || '—', expectedWidth, 'bold')
-    const questionLineCount = question.lines.length + (errors?.lines.length || 0) + comparisons.length
+    const questionLineCount = question.lines.length + (retry?.lines.length || 0) + (errors?.lines.length || 0) + comparisons.length
     const lineCount = Math.max(questionLineCount, learner.lines.length, expected.lines.length)
     const rowHeight = Math.max(8.5, 4 + lineCount * 3.2)
 
@@ -226,12 +225,20 @@ async function buildPdf() {
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(question.size)
     pdf.text(question.lines, questionX, y + 2, { baseline: 'top', lineHeightFactor: 1.15 })
+    const retryOffset = question.lines.length * 3.2
+    if (retry) {
+      pdf.setTextColor(174, 112, 24)
+      pdf.setFont('helvetica', 'bold')
+      pdf.setFontSize(retry.size)
+      pdf.text(retry.lines, questionX, y + 2 + retryOffset, { baseline: 'top', lineHeightFactor: 1.15 })
+    }
     if (errors) {
       pdf.setTextColor(174, 55, 48)
       pdf.setFont('helvetica', 'normal')
       pdf.setFontSize(errors.size)
-      pdf.text(errors.lines, questionX, y + 2 + question.lines.length * 3.2, { baseline: 'top', lineHeightFactor: 1.15 })
-      let comparisonY = y + 2 + (question.lines.length + errors.lines.length) * 3.2
+      const errorOffset = retryOffset + (retry?.lines.length || 0) * 3.2
+      pdf.text(errors.lines, questionX, y + 2 + errorOffset, { baseline: 'top', lineHeightFactor: 1.15 })
+      let comparisonY = y + 2 + (question.lines.length + (retry?.lines.length || 0) + errors.lines.length) * 3.2
       for (const detail of comparisons) {
         const learnerValue = pdfSafe(detail.learnerValue)
         const expectedValue = pdfSafe(detail.expectedValue)

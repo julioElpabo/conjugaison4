@@ -9,7 +9,7 @@ const props = defineProps<{
 }>()
 
 const { interfaceLocale } = useLanguagePreferences()
-const visibleDetails = computed(() => props.details.filter(detail => detail.code !== 'input.close_form'))
+const visibleDetails = computed(() => props.details)
 </script>
 
 <template>

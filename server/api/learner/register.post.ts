@@ -79,8 +79,8 @@ export default defineEventHandler(async (event) => {
     const [result] = await connection.execute<ResultSetHeader>(`
       INSERT INTO learner_accounts
         (username, username_normalized, password_hash, recovery_code_hash, status,
-         privacy_notice_version, deletion_scheduled_at)
-      VALUES (?, ?, ?, ?, 'pending', ?, CURRENT_TIMESTAMP + INTERVAL 48 HOUR)
+         privacy_notice_version, activated_at, deletion_scheduled_at)
+      VALUES (?, ?, ?, ?, 'active', ?, CURRENT_TIMESTAMP, NULL)
     `, [username, username, passwordHash, recoveryCodeHash, CURRENT_PRIVACY_NOTICE_VERSION])
     await connection.execute(
       "INSERT INTO learner_login_events (account_id, event_type) VALUES (?, 'registration')",

@@ -75,6 +75,7 @@ describe('getAlternativeCorrections', () => {
     const corrections = ["j'assieds", "j'assois"]
     assert.deepEqual(getAlternativeCorrections("j'assieds", corrections), ["j'assois"])
     assert.deepEqual(getAlternativeCorrections('assois', corrections), [])
+    assert.deepEqual(getAlternativeCorrections('Il avait mu', ['Il avait mu', 'Il avait mû']), ['Il avait mû'])
   })
 
   it("tolère l'absence de ponctuation à l'impératif", () => {
@@ -228,6 +229,20 @@ describe('confusion avec un autre temps ou mode', () => {
       [['indicatif', 'présent']],
     )
     assert.deepEqual(findConjugationConfusions('tu finissais', question), [])
+  })
+
+  it('reconnaît un autre temps même si le pronom sujet manque dans la saisie', () => {
+    const question = {
+      pronom: 'ils',
+      conjugationConfusions: [
+        { mode: 'indicatif', tense: 'passé antérieur', answers: ['ils eurent réagi'] },
+      ],
+    }
+
+    assert.deepEqual(
+      findConjugationConfusions('eurent réagi', question).map(item => [item.mode, item.tense]),
+      [['indicatif', 'passé antérieur']],
+    )
   })
 })
 

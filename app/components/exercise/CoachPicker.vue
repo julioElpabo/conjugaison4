@@ -66,6 +66,7 @@ onMounted(async () => {
             v-for="group in coachGroups"
             :key="group.id"
             class="coach-caractere-group"
+            :data-help-approach="group.approach"
             :data-tour="group.approach === 'complete' ? 'coach-complete-group' : undefined"
           >
             <header v-if="!allophoneOnly" class="coach-caractere-group__header">

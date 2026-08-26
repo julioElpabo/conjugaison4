@@ -28,6 +28,12 @@ function question(overrides = {}) {
 }
 
 describe('classement pédagogique des erreurs', () => {
+  it('n’affiche aucun message lorsqu’une erreur ne peut pas être classée précisément', () => {
+    const target = question({ reponses: ['finis'] })
+    assert.deepEqual(diagnoseLearnerError('réponse sans rapport', target).map(tag => tag.code), ['unknown'])
+    assert.deepEqual(learnerErrorDetails('réponse sans rapport', target), [])
+  })
+
   it('reconnaît une forme correcte employée à un autre temps', () => {
     const target = question({
       conjugationConfusions: [{
@@ -44,6 +50,89 @@ describe('classement pédagogique des erreurs', () => {
       learnerErrorDetailText(learnerErrorDetails('finissais', target)[0]),
       'Tu as utilisé le temps « imparfait », alors que le temps « présent » était demandé.',
     )
+  })
+
+  it('classe « eurent réagi » comme un passé antérieur, pas comme un auxiliaire incorrect', () => {
+    const target = question({
+      titre: 'réagir',
+      consigne: 'ils | réagir | passé composé',
+      reponses: ['ils ont réagi'],
+      reponsesPourCorrige: ['ils ont réagi'],
+      personId: 8,
+      pronom: 'ils',
+      infinitif: 'réagir',
+      temps: 'passé composé',
+      isCompound: true,
+      conjugationConfusions: [{
+        tense: 'passé antérieur',
+        mode: 'indicatif',
+        answers: ['ils eurent réagi'],
+      }],
+    })
+
+    assert.deepEqual(diagnoseLearnerError('eurent réagi', target).map(tag => tag.code), [
+      'task.wrong_tense',
+    ])
+    assert.deepEqual(learnerErrorDetails('eurent réagi', target).map(detail => detail.message), [
+      'Tu as utilisé le temps « passé antérieur », alors que le temps « passé composé » était demandé.',
+    ])
+  })
+
+  it('classe « il étais » comme une terminaison impossible à l’imparfait, jamais comme un auxiliaire', () => {
+    const target = question({
+      titre: 'être',
+      consigne: 'il | être | imparfait',
+      reponses: ['il était'],
+      reponsesPourCorrige: ['il était'],
+      personId: 6,
+      pronom: 'il',
+      infinitif: 'être',
+      temps: 'imparfait',
+      isCompound: false,
+    })
+
+    assert.notEqual(diagnoseCoachAnswer('il étais', target, false).errorKind, 'auxiliary')
+    assert.deepEqual(diagnoseLearnerError('il étais', target).map(tag => tag.code), [
+      'person.impossible_ending',
+    ])
+    assert.deepEqual(learnerErrorDetails('il étais', target).map(detail => detail.message), [
+      'Avec « il », « elle » ou « iel », le verbe ne peut pas se terminer par « -s ».',
+    ])
+  })
+
+  it('ne confond pas une mauvaise forme du même auxiliaire avec le choix du mauvais auxiliaire', () => {
+    const target = question({
+      consigne: 'il | finir | plus-que-parfait',
+      reponses: ['il avait fini'],
+      reponsesPourCorrige: ['il avait fini'],
+      personId: 6,
+      pronom: 'il',
+      temps: 'plus-que-parfait',
+      isCompound: true,
+    })
+
+    assert.notEqual(diagnoseCoachAnswer('il avaient fini', target, false).errorKind, 'auxiliary')
+    assert.doesNotMatch(
+      learnerErrorDetails('il avaient fini', target).map(detail => detail.message).join(' '),
+      /auxiliaire/iu,
+    )
+  })
+
+  it('conserve le diagnostic d’auxiliaire lorsque avoir est réellement remplacé par être', () => {
+    const target = question({
+      consigne: 'il | finir | passé composé',
+      reponses: ['il a fini'],
+      reponsesPourCorrige: ['il a fini'],
+      personId: 6,
+      pronom: 'il',
+      temps: 'passé composé',
+      isCompound: true,
+    })
+
+    assert.equal(diagnoseCoachAnswer('il est fini', target, false).errorKind, 'auxiliary')
+    assert.deepEqual(diagnoseLearnerError('il est fini', target).map(tag => tag.code), [
+      'compound.auxiliary',
+    ])
   })
 
   it('conserve à la fois la confusion de temps et l’erreur d’accord', () => {
@@ -76,7 +165,38 @@ describe('classement pédagogique des erreurs', () => {
     assert.equal(diagnoseCoachAgreement('as lu', target)?.agreementSource, 'cod-before')
   })
 
-  it('conserve à la fois l’auxiliaire incorrect et l’erreur d’accord', () => {
+  it('reconnaît le futur antérieur sans inventer une erreur d’auxiliaire ou d’accord', () => {
+    const target = question({
+      reponses: ['serais entré', 'serais entrée'],
+      reponsesPourCorrige: ['je serais entré', 'je serais entrée'],
+      personId: 4,
+      pronom: 'je',
+      infinitif: 'entrer',
+      temps: 'passé',
+      mode: 'conditionnel',
+      isCompound: true,
+      conjugationConfusions: [{
+        tense: 'futur antérieur',
+        mode: 'indicatif',
+        answers: ['serai entré', 'serai entrée'],
+      }],
+    })
+
+    assert.equal(diagnoseCoachAgreement('serai entrée', target), undefined)
+    assert.deepEqual(diagnoseLearnerError('serai entrée', target).map(tag => tag.code), [
+      'task.wrong_mode',
+      'task.wrong_tense',
+    ])
+    assert.deepEqual(
+      learnerErrorDetails('serai entrée', target).map(detail => detail.message),
+      [
+        'Tu as utilisé le mode « indicatif », alors que le mode « conditionnel » était demandé.',
+        'Tu as utilisé le temps « futur antérieur », alors que le temps « passé » était demandé.',
+      ],
+    )
+  })
+
+  it('conserve à la fois un véritable changement d’auxiliaire et l’erreur d’accord', () => {
     const target = question({
       reponses: ['ont lus'],
       reponsesPourCorrige: ['les articles qu’ils ont lus'],
@@ -94,22 +214,22 @@ describe('classement pédagogique des erreurs', () => {
         number: 'pluriel',
       },
     })
-    const tags = diagnoseLearnerError('avait lu', target)
+    const tags = diagnoseLearnerError('était lu', target)
 
     assert.deepEqual(tags.map(tag => tag.code), [
       'compound.auxiliary',
       'agreement.cod_before',
     ])
     assert.deepEqual(tags.map(tag => tag.primary), [true, false])
-    assert.equal(tags[0].evidence.learnerAuxiliary, 'avait')
+    assert.equal(tags[0].evidence.learnerAuxiliary, 'était')
     assert.equal(tags[0].evidence.expectedAuxiliary, 'ont')
     assert.equal(
-      learnerErrorDetailText(learnerErrorDetails('avait lu', target)[0]),
-      'Tu as utilisé l’auxiliaire « avait », alors qu’il fallait « ont ».',
+      learnerErrorDetailText(learnerErrorDetails('était lu', target)[0]),
+      'Tu as utilisé l’auxiliaire « était », alors qu’il fallait « ont ».',
     )
-    assert.deepEqual(learnerErrorLabels('avait lu', target), [
+    assert.deepEqual(learnerErrorLabels('était lu', target), [
       'Auxiliaire incorrect',
-      'Accord avec un COD placé avant',
+      'Accord avec un COD (CVD) placé avant',
     ])
   })
 
@@ -217,7 +337,7 @@ describe('classement pédagogique des erreurs', () => {
     assert.equal(tags[0].evidence.complementFunction, 'COD')
     assert.equal(
       learnerErrorDetailText(detail),
-      'Tu as fait une faute d’orthographe en recopiant le COD : « les événement » au lieu de « les événements ».',
+      'Tu as fait une faute d’orthographe en recopiant le COD (CVD) : « les événement » au lieu de « les événements ».',
     )
     assert.ok(applicableLearnerErrorTypes(target).includes('orthography.copied_complement'))
   })
@@ -241,12 +361,12 @@ describe('classement pédagogique des erreurs', () => {
 
     assert.equal(
       learnerErrorDetailText(learnerErrorDetails('racontâtes une adedote', target)[0]),
-      'Tu as fait une faute d’orthographe en recopiant le COD : « une adedote » au lieu de « une anecdote ».',
+      'Tu as fait une faute d’orthographe en recopiant le COD (CVD) : « une adedote » au lieu de « une anecdote ».',
     )
     assert.ok(
       learnerErrorDetails('avez raconté une anedote', target)
         .some(detail => learnerErrorDetailText(detail)
-          === 'Tu as fait une faute d’orthographe en recopiant le COD : « une anedote » au lieu de « une anecdote ».'),
+          === 'Tu as fait une faute d’orthographe en recopiant le COD (CVD) : « une anedote » au lieu de « une anecdote ».'),
     )
     assert.deepEqual(
       learnerErrorDetails('racontâtes une anectote', target).map(detail => detail.code),

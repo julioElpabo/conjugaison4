@@ -66,7 +66,7 @@ export async function getLearnerSession(event: H3Event, activate = false): Promi
     await database.execute(`
       UPDATE learner_accounts
       SET status = 'active', activated_at = COALESCE(activated_at, CURRENT_TIMESTAMP),
-          last_login_at = CURRENT_TIMESTAMP
+          last_login_at = CURRENT_TIMESTAMP, deletion_scheduled_at = NULL
       WHERE id = ?
     `, [row.accountId])
     row.status = 'active'

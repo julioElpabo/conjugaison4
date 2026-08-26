@@ -382,6 +382,42 @@ describe('aides visuelles configurables', () => {
     assert.doesNotMatch(renderCoachHelpContent('{condensedTenseRuleHelp}', values), /<details>|<table>/u)
   })
 
+  it('masque aussi la forme demandée dans les tableaux des verbes irréguliers', () => {
+    const values = coachHelpQuestionVariables({
+      titre: 'Question', consigne: '', reponses: ['avions'], reponsesPourCorrige: ['nous avions une autre idée'],
+      infinitif: 'avoir', pronom: 'nous', mode: 'indicatif', temps: 'imparfait', conjugaison1: 'avions',
+      radicalReference: {
+        kind: 'present-nous', label: 'nous au présent', form: 'avons', removableEnding: 'ons',
+        radical: 'av', validated: true,
+        paradigmForms: [
+          { subject: 'je', form: 'avais', personId: 4 },
+          { subject: 'tu', form: 'avais', personId: 5 },
+          { subject: 'il', form: 'avait', personId: 6 },
+          { subject: 'nous', form: 'avions', personId: 7 },
+          { subject: 'vous', form: 'aviez', personId: 8 },
+          { subject: 'ils', form: 'avaient', personId: 9 },
+        ],
+      },
+    }, {
+      infinitif: 'avoir', groupeConjugaison: 3, terminaison: 'oir', auxiliaire: 'avoir', participePasse: 'eu',
+    })
+    const advice = renderCoachHelpContent('{completeAdviceHelp}', values)
+    assert.match(advice, /forme à trouver/u)
+    assert.doesNotMatch(advice, />avions</u)
+  })
+
+  it('ne remplace pas une réponse d’une lettre dans le texte des explications', () => {
+    const values = coachHelpQuestionVariables({
+      titre: 'Question', consigne: '', reponses: ['a'], reponsesPourCorrige: ['il a'],
+      infinitif: 'avoir', pronom: 'il', mode: 'indicatif', temps: 'présent', conjugaison1: 'a',
+    }, {
+      infinitif: 'avoir', groupeConjugaison: 3, terminaison: 'oir', auxiliaire: 'avoir', participePasse: 'eu',
+    })
+    const advice = renderCoachHelpContent('{completeAdviceHelp}', values)
+    assert.match(advice, /il n’a pas toujours le même radical/u)
+    assert.doesNotMatch(advice, /il n’<kbd>/u)
+  })
+
   it('garde les ressources des temps composés sans révéler leur construction', () => {
     const values = coachHelpQuestionVariables({
       titre: 'Question', consigne: '', reponses: ['eussiez calqué'], reponsesPourCorrige: ['vous eussiez calqué'],
@@ -438,7 +474,7 @@ describe('aides visuelles configurables', () => {
     assert.doesNotMatch(advice, /Résultat|…|<p>\s*<\/p>/u)
   })
 
-  it('conserve les trois formes repères de l’impératif, y compris vous', () => {
+  it('conserve les formes repères de l’impératif sans afficher celle qui répond à la question', () => {
     const values = coachHelpQuestionVariables({
       titre: 'Question', consigne: '', reponses: ['prenez'], reponsesPourCorrige: ['prenez'],
       infinitif: 'prendre', pronom: 'vous', mode: 'impératif', temps: 'présent', conjugaison1: 'prenez',
@@ -457,7 +493,8 @@ describe('aides visuelles configurables', () => {
     const advice = renderCoachHelpContent('{completeAdviceHelp}', values)
     assert.match(advice, /<th><strong>tu<\/strong><\/th><td><strong>Tu prends<\/strong><\/td>/u)
     assert.match(advice, /<th><strong>nous<\/strong><\/th><td><strong>Nous prenons<\/strong><\/td>/u)
-    assert.match(advice, /<th><strong>vous<\/strong><\/th><td><strong>Vous prenez<\/strong><\/td>/u)
+    assert.match(advice, /<th><strong>vous<\/strong><\/th><td><strong>Vous <kbd>forme à trouver<\/kbd><\/strong><\/td>/u)
+    assert.doesNotMatch(advice, />prenez</u)
     assert.doesNotMatch(advice, /<mark>|Résultat|…/u)
   })
 

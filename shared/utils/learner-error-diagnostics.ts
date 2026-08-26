@@ -6,9 +6,10 @@ import {
   normalizeAnswer,
   validateAnswer,
 } from './answer'
-import { diagnoseCoachAgreement, diagnoseCoachAnswer } from './coach-feedback'
+import { auxiliaryLemmaForForm, diagnoseCoachAgreement, diagnoseCoachAnswer } from './coach-feedback'
 import type { AppLocale } from '../i18n/locales'
 import { localizedLearnerErrorMessage, localizedLearnerErrorText } from '../i18n/learner-errors'
+import { withSwissObjectAliases } from './object-terminology'
 
 export type LearnerErrorConfidence = 'high' | 'medium' | 'low'
 
@@ -48,18 +49,11 @@ function text(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
 }
 
-const ETRE_AUXILIARY_FORMS = new Set([
-  'suis', 'es', 'est', 'sommes', 'êtes', 'sont',
-  'étais', 'était', 'étions', 'étiez', 'étaient',
-  'serai', 'seras', 'sera', 'serons', 'serez', 'seront',
-  'sois', 'soit', 'soyons', 'soyez', 'soient',
-])
-
 function expectedUsesEtre(question: ExerciseQuestion) {
   return question.reponses.some(answer => (
     normalizeAnswer(answer, { ignoreWhitespace: false })
       .match(/\p{L}+/gu)
-      ?.some(word => ETRE_AUXILIARY_FORMS.has(word))
+      ?.some(word => auxiliaryLemmaForForm(word) === 'être')
   ))
 }
 
@@ -302,7 +296,7 @@ export function learnerErrorLabels(
   answer: string,
   question: ExerciseQuestion,
 ): string[] {
-  return learnerErrorDetails(answer, question).map(detail => detail.label)
+  return learnerErrorDetails(answer, question).map(detail => withSwissObjectAliases(detail.label))
 }
 
 export function learnerErrorDetails(
@@ -311,8 +305,10 @@ export function learnerErrorDetails(
 ): LearnerErrorDetail[] {
   const labels = new Map(LEARNER_ERROR_TAXONOMY.map(item => [item.code, item.label]))
   return diagnoseLearnerError(answer, question)
-    .filter(item => item.code !== 'unknown')
     .flatMap((item): LearnerErrorDetail[] => {
+      // Conserve le type « unknown » pour les statistiques techniques, mais
+      // n'affiche pas à l'élève un diagnostic qui n'apporte aucune aide précise.
+      if (item.code === 'unknown') return []
       const label = labels.get(item.code)
       if (!label) return []
       if (item.code === 'person.other_form'
@@ -413,6 +409,17 @@ export function mergeLearnerErrorDetails(...groups: LearnerErrorDetail[][]): Lea
     if (!details.has(detail.code)) details.set(detail.code, detail)
   }
   return [...details.values()]
+}
+
+export function learnerErrorDisplayCoverage(details: readonly LearnerErrorDetail[]) {
+  const codes = new Set(details.map(detail => detail.code))
+  return {
+    agreement: [...codes].some(code => code.startsWith('agreement.')),
+    auxiliary: codes.has('compound.auxiliary'),
+    futureSimpleForNearFuture: codes.has('task.future_simple_for_near_future'),
+    conjugationConfusion: codes.has('task.wrong_mode') || codes.has('task.wrong_tense'),
+    impossibleEnding: codes.has('person.impossible_ending'),
+  }
 }
 
 export function learnerErrorDetailText(detail: LearnerErrorDetail, locale: AppLocale = 'fr'): string {

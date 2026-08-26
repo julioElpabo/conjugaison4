@@ -32,20 +32,24 @@ import {
   COACH_STREAK_LENGTH,
   chatMessageHasVisibleContent,
   chatReactionAllowsMedia,
+  coachReactionText,
   nextConsecutiveCorrectCount,
 } from '~~/shared/utils/coach-conversation'
 import { diagnoseCoachAgreement, diagnoseCoachAnswer } from '~~/shared/utils/coach-feedback'
 import {
   learnerErrorDetailText,
+  learnerErrorDisplayCoverage,
   learnerErrorDetails,
   mergeLearnerErrorDetails,
 } from '~~/shared/utils/learner-error-diagnostics'
 import { coachQuestionBubbles } from '~~/shared/utils/coach-question'
 import { buildTargetedConjugationHelp, isHelpCommand } from '~~/shared/utils/conjugation-help'
 import { coachHelpQuestionVariables, literaryIdentificationCoachHelpBlocks, localizedCoachVerbDefinition, visibleCoachHelpBlocks } from '~~/shared/utils/coach-help'
+import { coachHelpProfile } from '~~/shared/data/coach-help-profiles'
 import { CHAT_HELP_REMINDER_DELAY_MS, CHAT_HELP_REMINDER_INCORRECT_COUNT, nextConsecutiveIncorrectCount } from '~~/shared/utils/coach-help-reminder'
 import { sanitizeCoachHtml } from '~~/shared/utils/safe-html'
 import { areOnlyIndicativeTenses, withoutIndicativeMode } from '~~/shared/utils/chat-mode-display'
+import { shouldFollowChatAfterLearnerMessage, shouldFollowChatAfterUserScroll } from '~~/shared/utils/chat-scroll-follow'
 import { identificationFormParts, type IdentificationFormParts } from '~~/shared/utils/identification-form'
 
 
@@ -199,11 +203,13 @@ const closeConfirmationOpen = ref(false)
 const consultationVerbId = ref<number | null>(null)
 const helpOpen = ref(Boolean(props.tourDemo))
 const helpQuestionIndex = ref<number | null>(null)
+const failedQuestionIndexes = reactive(new Set<number>())
 const helpConsultationOfferedQuestions = new Set<number>()
 const tourDemoReady = ref(!props.tourDemo)
 const sequence = ref(0)
 const lastMediaQuestion = ref(-100)
 const allowMotion = ref(true)
+const autoFollowThread = ref(true)
 const chatSessionId = ref('')
 const exerciseRunId = ref('')
 const input = useTemplateRef<HTMLInputElement>('chat-answer')
@@ -216,6 +222,9 @@ let coachQueue: Promise<void> = Promise.resolve()
 let lastCoachBubbleAt = 0
 let dialogueState = createCoachDialogueState()
 let questionScrollFrame: number | null = null
+let programmaticScrollTimer: number | null = null
+let programmaticThreadScroll = false
+let threadTouchY: number | null = null
 let helpReminderTimer: number | null = null
 let speechSequence = 0
 let speechPauseTimer: number | undefined
@@ -259,14 +268,28 @@ const helpTense = computed(() => {
     || props.tenses.find(tense => normalizedInfinitive(tense.name) === normalizedInfinitive(question.temps))
 })
 const usesIdentificationHelp = computed(() => isIdentificationExercise.value)
+const selectedCoachHelpProfile = computed(() => coachHelpProfile(props.coach.helpApproach))
+const helpAnswersRevealed = computed(() => (
+  selectedCoachHelpProfile.value.revealsAnswers
+  && failedQuestionIndexes.has(helpQuestionIndex.value ?? currentIndex.value)
+))
+const effectiveHelpApproach = computed(() => (
+  selectedCoachHelpProfile.value.revealsAnswers && !helpAnswersRevealed.value
+    ? 'complete'
+    : props.coach.helpApproach
+))
 const usesAllophoneHelp = computed(() => (
-  props.coach.helpApproach === 'allophone'
+  effectiveHelpApproach.value === 'allophone'
   && !usesIdentificationHelp.value
 ))
 const usesImmediateAnswerAudio = computed(() => (
-  props.coach.helpApproach === 'complete' || props.coach.helpApproach === 'complete-avec-reponses'
+  helpAnswersRevealed.value
+  && (props.coach.helpApproach === 'complete-avec-reponses' || props.coach.helpApproach === 'allophone')
 ))
-const usesDelayedAnswerAudio = computed(() => props.coach.helpApproach === 'tres-condensee')
+const usesDelayedAnswerAudio = computed(() => (
+  helpAnswersRevealed.value
+  && props.coach.helpApproach === 'tres-condensee'
+))
 const targetedHelp = computed(() => helpQuestion.value
   ? buildTargetedConjugationHelp(helpQuestion.value, helpVerb.value, helpTense.value, {
       tense: uiLabel(helpQuestion.value.temps || helpTense.value?.name),
@@ -275,7 +298,10 @@ const targetedHelp = computed(() => helpQuestion.value
   : null)
 const helpBlocks = computed(() => usesIdentificationHelp.value
   ? literaryIdentificationCoachHelpBlocks()
-  : visibleCoachHelpBlocks(props.coach.helpApproach, helpQuestion.value))
+  : visibleCoachHelpBlocks(effectiveHelpApproach.value, helpQuestion.value))
+const revealedHelpAnswers = computed(() => helpAnswersRevealed.value
+  ? [...new Set(helpQuestion.value?.reponsesPourCorrige.map(item => item.trim()).filter(Boolean) || [])]
+  : [])
 const correctCount = computed(() => attempts.value.filter(item => item.status === 'correct' && !item.answerWasHeard).length)
 const score = computed(() => attempts.value.length
   ? Math.round(correctCount.value / attempts.value.length * 100)
@@ -296,6 +322,7 @@ const attemptSummaries = computed(() => attempts.value.map((attempt, index) => {
     expectedAnswer: attempt.question.reponsesPourCorrige.join(` ${ui('ou')} `) || attempt.question.reponses.join(` ${ui('ou')} `),
     errorLabels: attempt.errorLabels || [],
     errorDetails: attempt.errorDetails || [],
+    attemptNumber: attempt.attemptNumber,
     verbId: attempt.question.verbeId,
     verbLabel: attempt.question.infinitif,
     identificationForm: isIdentificationExercise.value && attempt.status === 'incorrect'
@@ -619,13 +646,22 @@ function compactTense(tense: ConjugationTense) {
   }
 }
 
-const helpValues = computed(() => helpQuestion.value ? {
-  coach: props.coach,
-  ...coachHelpQuestionVariables(helpQuestion.value, helpVerb.value, helpTense.value, interfaceLocale.value),
-  definition: localizedCoachVerbDefinition(helpVerb.value, interfaceLocale.value) || targetedHelp.value?.meaning || '',
-  helpTitle: usesIdentificationHelp.value ? ui('Reconnaître les modes') : targetedHelp.value?.title || '',
-  omitIndicativeMode: omitIndicativeMode.value,
-} : { coach: props.coach })
+const helpValues = computed(() => {
+  if (!helpQuestion.value) return { coach: props.coach }
+  const values = coachHelpQuestionVariables(helpQuestion.value, helpVerb.value, helpTense.value, interfaceLocale.value)
+  return {
+    coach: props.coach,
+    ...values,
+    ...(!helpAnswersRevealed.value ? {
+      correctAnswers: '',
+      auxiliaryAnswer: '',
+      pastParticipleAnswer: '',
+    } : {}),
+    definition: localizedCoachVerbDefinition(helpVerb.value, interfaceLocale.value) || targetedHelp.value?.meaning || '',
+    helpTitle: usesIdentificationHelp.value ? ui('Reconnaître les modes') : targetedHelp.value?.title || '',
+    omitIndicativeMode: omitIndicativeMode.value,
+  }
+})
 const helpDefinition = computed(() => helpQuestion.value
   ? localizedCoachVerbDefinition(helpVerb.value, interfaceLocale.value) || targetedHelp.value?.meaning || ''
   : '')
@@ -759,11 +795,60 @@ function focusAnswerInput() {
   })
 }
 
-function scrollThreadToBottom() {
+function markProgrammaticThreadScroll() {
+  programmaticThreadScroll = true
+  if (programmaticScrollTimer !== null) window.clearTimeout(programmaticScrollTimer)
+  programmaticScrollTimer = window.setTimeout(() => {
+    programmaticThreadScroll = false
+    programmaticScrollTimer = null
+  }, allowMotion.value ? 700 : 50)
+}
+
+function onThreadScroll() {
+  const container = thread.value
+  if (!container || programmaticThreadScroll) return
+  autoFollowThread.value = shouldFollowChatAfterUserScroll(container)
+}
+
+function stopProgrammaticThreadScroll() {
+  programmaticThreadScroll = false
+  if (programmaticScrollTimer !== null) window.clearTimeout(programmaticScrollTimer)
+  programmaticScrollTimer = null
+}
+
+function pauseThreadAutoFollow() {
+  stopProgrammaticThreadScroll()
+  autoFollowThread.value = false
+}
+
+function onThreadWheel(event: WheelEvent) {
+  if (event.deltaY < 0) pauseThreadAutoFollow()
+}
+
+function onThreadTouchStart(event: TouchEvent) {
+  threadTouchY = event.touches[0]?.clientY ?? null
+}
+
+function onThreadTouchMove(event: TouchEvent) {
+  const currentY = event.touches[0]?.clientY
+  if (threadTouchY !== null && currentY !== undefined && currentY > threadTouchY + 2) {
+    pauseThreadAutoFollow()
+  }
+  threadTouchY = currentY ?? null
+}
+
+function resumeThreadAutoFollow() {
+  autoFollowThread.value = shouldFollowChatAfterLearnerMessage()
+}
+
+function scrollThreadToBottom(force = false) {
+  if (!force && !autoFollowThread.value) return
   void nextTick(() => {
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
         const container = thread.value
+        if (!container || (!force && !autoFollowThread.value)) return
+        markProgrammaticThreadScroll()
         container?.scrollTo({
           top: container.scrollHeight,
           behavior: allowMotion.value ? 'smooth' : 'auto',
@@ -774,6 +859,7 @@ function scrollThreadToBottom() {
 }
 
 function scrollThreadToSummary() {
+  if (!autoFollowThread.value) return
   void nextTick(() => {
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
@@ -781,6 +867,7 @@ function scrollThreadToSummary() {
         const target = summary.value
         if (!container || !target) return
         const top = container.scrollTop + target.getBoundingClientRect().top - container.getBoundingClientRect().top - 8
+        markProgrammaticThreadScroll()
         container.scrollTo({ top, behavior: allowMotion.value ? 'smooth' : 'auto' })
       })
     })
@@ -788,6 +875,7 @@ function scrollThreadToSummary() {
 }
 
 function scrollThreadToMessage(messageId: number) {
+  if (!autoFollowThread.value) return
   if (questionScrollFrame !== null) window.cancelAnimationFrame(questionScrollFrame)
   void nextTick(() => {
     questionScrollFrame = window.requestAnimationFrame(() => {
@@ -797,6 +885,7 @@ function scrollThreadToMessage(messageId: number) {
         const target = container?.querySelector<HTMLElement>(`[data-chat-message-id="${messageId}"]`)
         if (!container || !target) return
         const top = target.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop - 4
+        markProgrammaticThreadScroll()
         container.scrollTo({
           top: Math.max(0, top),
           behavior: allowMotion.value ? 'smooth' : 'auto',
@@ -811,8 +900,9 @@ function mediaLoaded() {
 }
 
 function addMessage(author: ChatMessage['author'], text: string, tone?: ChatMessage['tone'], questionIndex?: number) {
+  if (author === 'learner') resumeThreadAutoFollow()
   messages.value.push({ id: ++sequence.value, author, text, ...(tone ? { tone } : {}), ...(questionIndex === undefined ? {} : { questionIndex }) })
-  scrollThreadToBottom()
+  scrollThreadToBottom(author === 'learner')
 }
 
 async function chooseIdentificationMode(mode: string) {
@@ -840,16 +930,23 @@ function contextFor(question?: ExerciseQuestion, hideIdentificationAnswer = fals
     : question?.consigne
   const instruction = question ? [question.instruction, displayedQuestion].filter(Boolean).join('\n') : undefined
   const hidesAnswer = hideIdentificationAnswer && isIdentificationExercise.value
+  const questionIndex = question ? props.questions.indexOf(question) : -1
+  const mayRevealAnswer = questionIndex >= 0
+    && failedQuestionIndexes.has(questionIndex)
+  const correctedAnswers = question?.reponsesPourCorrige.filter(value => value.trim()) || []
+  const expectedAnswers = correctedAnswers.length
+    ? correctedAnswers
+    : question?.reponses.filter(value => value.trim()) || []
   return {
     instruction: instruction && omitIndicativeMode.value ? withoutIndicativeMode(instruction) : instruction,
     verb: question?.infinitif || reminder?.infinitive,
     complement: reminder?.complement || question?.complement,
-    participle: reminder?.participle,
+    participle: mayRevealAnswer ? reminder?.participle : undefined,
     gender: reminder?.gender === 'feminin' ? 'féminin' : reminder?.gender === 'masculin' ? 'masculin' : undefined,
     number: reminder?.number || undefined,
     mode: hidesAnswer ? undefined : keepGrammarFrench ? question?.mode : uiLabel(question?.mode),
     tense: hidesAnswer ? undefined : keepGrammarFrench ? question?.temps : uiLabel(question?.temps),
-    expectedAnswer: hidesAnswer ? undefined : question?.reponsesPourCorrige.join(' ou '),
+    expectedAnswer: hidesAnswer || !mayRevealAnswer || !expectedAnswers.length ? undefined : expectedAnswers.join(' ou '),
     questionNumber: question ? displayedQuestionNumber.value : undefined,
   }
 }
@@ -858,6 +955,15 @@ function agreementReminderText(question: ExerciseQuestion) {
   const reminder = question.agreementReminder
   if (!reminder) {
     return ui('Le participe passé n’a pas le bon accord. Compare sa terminaison avec la correction.')
+  }
+  if (!selectedCoachHelpProfile.value.revealsAnswers) {
+    if (reminder.kind === 'cod-before') {
+      return ui('Repère le COD (CVD) placé avant le verbe : avec avoir, il commande l’accord du participe passé en genre et en nombre.')
+    }
+    if (reminder.kind === 'cod-after') {
+      return ui('Le COD (CVD) est placé après le verbe : avec avoir, il ne commande pas l’accord du participe passé.')
+    }
+    return ui('Ce complément est un COI (CVI) : il ne commande pas l’accord du participe passé avec avoir.')
   }
   const features = reminder.gender && reminder.number
     ? `, ${uiLabel(reminder.gender === 'feminin' ? 'féminin' : 'masculin')} ${uiLabel(reminder.number)}`
@@ -882,6 +988,9 @@ function auxiliaryReminderText(
   learnerAuxiliary: string,
   expectedAuxiliary: string,
 ) {
+  if (!selectedCoachHelpProfile.value.revealsAnswers) {
+    return ui('L’auxiliaire choisi ne convient pas. Reprends la construction du temps demandé avec cette personne.')
+  }
   return ui(
     'L’auxiliaire « {learnerAuxiliary} » ne convient pas. Avec {person} au {tense}, il fallait « {expectedAuxiliary} ».',
     {
@@ -891,6 +1000,15 @@ function auxiliaryReminderText(
       tense: uiLabel(question.temps),
     },
   )
+}
+
+function alternativePossibilitiesText(alternatives: readonly string[]) {
+  if (alternatives.length === 1) {
+    return ui('L’autre possibilité correcte est « {answer} ».', { answer: alternatives[0]! })
+  }
+  return ui('Les autres possibilités correctes sont {answers}.', {
+    answers: alternatives.map(answer => `« ${answer} »`).join(` ${ui('ou')} `),
+  })
 }
 
 function wait(milliseconds: number) {
@@ -989,14 +1107,21 @@ function addAnswerComparison(
   }))
 }
 
-async function addCoachReaction(eventType: CoachEvent, context: CoachMessageContext, tone?: ChatMessage['tone']) {
+async function addCoachReaction(
+  eventType: CoachEvent,
+  context: CoachMessageContext,
+  tone?: ChatMessage['tone'],
+  requiredText = '',
+  fallbackText = '',
+) {
   const rule = props.coach.rules.find(item => item.eventType === eventType)
   const cooledDown = currentIndex.value - lastMediaQuestion.value >= (rule?.cooldownQuestions || 0)
   const reaction = createVariedCoachReaction(props.coach, eventType, context, dialogueState, {
     allowMotion: allowMotion.value,
     mediaAllowed: chatReactionAllowsMedia(eventType, cooledDown, hasIncorrectMedia.value),
   })
-  const text = omitIndicativeMode.value ? withoutIndicativeMode(reaction.text) : reaction.text
+  const reactionText = omitIndicativeMode.value ? withoutIndicativeMode(reaction.text) : reaction.text
+  const text = coachReactionText(reactionText, requiredText, fallbackText, context.expectedAnswer?.toString())
   if (!text.trim() && !reaction.media) return false
   if (reaction.media) {
     lastMediaQuestion.value = currentIndex.value
@@ -1141,6 +1266,7 @@ async function submit() {
   answer.value = ''
 
   const currentErrorDetails = result.isCorrect || isIdentificationExercise.value ? [] : learnerErrorDetails(candidate, question)
+  if (!result.isCorrect) failedQuestionIndexes.add(currentIndex.value)
   const currentErrorLabels = currentErrorDetails.map(detail => detail.label)
   const attemptErrorLabels = [...new Set([...pendingErrorLabels.value, ...currentErrorLabels])]
   const attemptErrorDetails = mergeLearnerErrorDetails(pendingErrorDetails.value, currentErrorDetails)
@@ -1175,13 +1301,15 @@ async function submit() {
   const alternatives = result.isCorrect ? getAlternativeCorrections(candidate, question.reponsesPourCorrige) : []
   const agreementDiagnostic = result.isCorrect || isIdentificationExercise.value ? undefined : diagnoseCoachAgreement(candidate, question)
   const diagnostic = isIdentificationExercise.value ? null : diagnoseCoachAnswer(candidate, question, result.isCorrect)
-  const auxiliaryDiagnostic = diagnostic?.errorKind === 'auxiliary'
+  const usedFutureSimple = !isIdentificationExercise.value && !result.isCorrect && isFutureSimpleInsteadOfNearFuture(candidate, question)
+  const otherConjugations = isIdentificationExercise.value || result.isCorrect ? [] : findConjugationConfusions(candidate, question)
+  const auxiliaryDiagnostic = currentErrorDetails.some(detail => detail.code === 'compound.auxiliary')
+    && !otherConjugations.length
+    && diagnostic?.errorKind === 'auxiliary'
     && diagnostic.learnerAuxiliary
     && diagnostic.expectedAuxiliary
     ? diagnostic
     : undefined
-  const usedFutureSimple = !isIdentificationExercise.value && !result.isCorrect && isFutureSimpleInsteadOfNearFuture(candidate, question)
-  const otherConjugations = isIdentificationExercise.value || result.isCorrect ? [] : findConjugationConfusions(candidate, question)
   const impossibleEnding = isIdentificationExercise.value || result.isCorrect ? null : findImpossibleSingularEnding(candidate, question)
   const incorrectEvent = agreementDiagnostic?.errorKind === 'agreement' && question.agreementReminder
     ? question.agreementReminder.kind
@@ -1207,7 +1335,17 @@ async function submit() {
       const isIncorrectReaction = step.eventType === 'incorrect' || step.eventType === 'cod-before'
         || step.eventType === 'cod-after' || step.eventType === 'coi'
       const isCorrectReaction = step.eventType === 'correct' || step.eventType === 'correct-alternative' || step.eventType === 'streak'
-      const displayed = await addCoachReaction(step.eventType, contextFor(question), isIncorrectReaction ? 'error' : isCorrectReaction ? 'success' : undefined)
+      const reactionContext = contextFor(question)
+      const correctionText = isIncorrectReaction && reactionContext.expectedAnswer
+        ? ui('La bonne réponse est « {expectedAnswer} ».', { expectedAnswer: reactionContext.expectedAnswer })
+        : ''
+      const displayed = await addCoachReaction(
+        step.eventType,
+        reactionContext,
+        isIncorrectReaction ? 'error' : isCorrectReaction ? 'success' : undefined,
+        step.eventType === 'correct-alternative' ? alternativePossibilitiesText(alternatives) : correctionText,
+        isIncorrectReaction ? ui('C’est faux.') : '',
+      )
       if (displayed && agreementDiagnostic && step.eventType !== 'incorrect') {
         agreementReminderDisplayed = true
       }
@@ -1217,15 +1355,41 @@ async function submit() {
           agreementReminderDisplayed = true
         }
         else {
-          await addCoachReaction('incorrect', contextFor(question), 'error')
+          await addCoachReaction('incorrect', contextFor(question), 'error', '', ui('C’est faux.'))
         }
       }
       if (isIncorrectReaction && currentErrorDetails.length && !errorTypesDisplayed) {
-        await enqueueCoachBubble(() => ({
-          text: currentErrorDetails.map(detail => learnerErrorDetailText(detail, interfaceLocale.value)).join(' '),
-          tone: 'error',
-          errorDetails: currentErrorDetails,
-        }))
+        const unconcealedErrorDetails = agreementReminderDisplayed
+          ? currentErrorDetails.filter(detail => !detail.code.startsWith('agreement.'))
+          : currentErrorDetails
+        const displayedErrorDetails = selectedCoachHelpProfile.value.revealsAnswers
+          ? unconcealedErrorDetails
+          : unconcealedErrorDetails.map((detail) => {
+              const concealedMessage = detail.code === 'compound.auxiliary'
+                ? 'L’auxiliaire choisi ne convient pas pour construire ce temps composé.'
+                : detail.code === 'compound.participle_form'
+                  ? 'Après l’auxiliaire, emploie un participe passé et non une autre forme conjuguée.'
+                  : detail.message
+              return {
+                ...detail,
+                message: concealedMessage,
+                learnerValue: undefined,
+                expectedValue: undefined,
+              }
+            })
+        if (displayedErrorDetails.length) {
+          await enqueueCoachBubble(() => ({
+            text: displayedErrorDetails.map(detail => learnerErrorDetailText(detail, interfaceLocale.value)).join(' '),
+            tone: 'error',
+            errorDetails: displayedErrorDetails,
+          }))
+        }
+        const coverage = learnerErrorDisplayCoverage(displayedErrorDetails)
+        if (coverage.agreement) agreementReminderDisplayed = true
+        if (coverage.auxiliary) auxiliaryReminderDisplayed = true
+        if (coverage.futureSimpleForNearFuture) futureSimpleReminderDisplayed = true
+        if (coverage.conjugationConfusion) conjugationConfusionDisplayed = true
+        if (coverage.impossibleEnding) impossibleEndingReminderDisplayed = true
         errorTypesDisplayed = true
       }
       if (isIncorrectReaction && agreementDiagnostic && !agreementReminderDisplayed) {
@@ -1277,7 +1441,8 @@ async function submit() {
         )
         impossibleEndingReminderDisplayed = true
       }
-      if (isIncorrectReaction && !isIdentificationExercise.value && !comparisonDisplayed) {
+      if (isIncorrectReaction && !isIdentificationExercise.value && !comparisonDisplayed
+          && selectedCoachHelpProfile.value.revealsAnswers) {
         // Le texte de correction peut contenir tout le contexte de la phrase
         // (« Ce sont… que j’… »), alors que l'élève ne saisit que les blancs.
         // On compare donc en priorité avec les formes réellement validées.
@@ -1324,6 +1489,7 @@ async function continueChat() {
   }
 
   currentIndex.value += 1
+  helpQuestionIndex.value = null
   stopSpeech()
   answerHeardBeforeSubmission.value = false
   pendingErrorLabels.value = []
@@ -1344,9 +1510,11 @@ async function restart() {
   currentIndex.value = 0
   answer.value = ''
   attempts.value = []
+  failedQuestionIndexes.clear()
   pendingErrorLabels.value = []
   pendingErrorDetails.value = []
   messages.value = []
+  autoFollowThread.value = true
   waitingForNext.value = false
   deliveringFeedback.value = false
   posingQuestion.value = false
@@ -1433,6 +1601,7 @@ onBeforeUnmount(() => {
   smallScreenQuery?.removeEventListener('change', updateSmallScreen)
   clearHelpReminderTimer()
   if (questionScrollFrame !== null) window.cancelAnimationFrame(questionScrollFrame)
+  if (programmaticScrollTimer !== null) window.clearTimeout(programmaticScrollTimer)
   conversationVersion += 1
   if (!finished.value && attempts.value.length) track('exercise_abandoned', exerciseAnalyticsMetadata.value)
 })
@@ -1462,7 +1631,15 @@ onBeforeUnmount(() => {
           <span>{{ ui('Question {current} sur {total}', { current: displayedQuestionNumber, total: displayedQuestionCount }) }}</span>
         </div>
 
-        <div ref="chat-thread" class="chat-thread" aria-live="polite">
+        <div
+          ref="chat-thread"
+          class="chat-thread"
+          aria-live="polite"
+          @scroll.passive="onThreadScroll"
+          @wheel.passive="onThreadWheel"
+          @touchstart.passive="onThreadTouchStart"
+          @touchmove.passive="onThreadTouchMove"
+        >
           <div
             v-for="message in visibleMessages"
             :key="message.id"
@@ -1788,6 +1965,7 @@ onBeforeUnmount(() => {
           :question-number="(helpQuestionIndex ?? currentIndex) + 1"
           :coach-color="coach.themeColor"
           :feedback-context="helpFeedbackContext"
+          :revealed-answers="revealedHelpAnswers"
           :include-automatic-orthography="!usesIdentificationHelp && !usesAllophoneHelp"
           :enable-automatic-audit="!usesIdentificationHelp && !usesAllophoneHelp"
           :consult-verb-id="helpConsultVerbId"

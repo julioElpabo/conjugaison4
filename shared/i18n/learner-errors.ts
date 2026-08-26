@@ -1,6 +1,7 @@
 import type { AppLocale } from './locales'
 import type { LearnerErrorDetail } from '../types/conjugation'
 import type { LearnerErrorTypeCode } from '../utils/learner-error-diagnostics'
+import { withSwissObjectAliases } from '../utils/object-terminology'
 
 type ErrorTranslations = Record<Exclude<AppLocale, 'fr'>, string>
 
@@ -35,7 +36,7 @@ const insteadOf: Record<AppLocale, string> = {
 
 export function localizedLearnerErrorMessage(detail: LearnerErrorDetail, locale: AppLocale): string {
   return locale === 'fr'
-    ? detail.message
+    ? withSwissObjectAliases(detail.message)
     : learnerErrorMessages[detail.code]?.[locale] || detail.message
 }
 
@@ -55,7 +56,7 @@ export function localizedLearnerErrorMessageForCode(
   fallback: string,
   locale: AppLocale,
 ): string {
-  return locale === 'fr' ? fallback : learnerErrorMessages[code]?.[locale] || fallback
+  return locale === 'fr' ? withSwissObjectAliases(fallback) : learnerErrorMessages[code]?.[locale] || fallback
 }
 
 const learnerErrorLabels: Record<LearnerErrorTypeCode, ErrorTranslations> = {
@@ -91,7 +92,7 @@ const learnerErrorDomains: Record<string, Record<Exclude<AppLocale, 'fr'>, strin
 }
 
 export function localizedLearnerErrorLabel(code: LearnerErrorTypeCode, fallback: string, locale: AppLocale) {
-  return locale === 'fr' ? fallback : learnerErrorLabels[code]?.[locale] || fallback
+  return locale === 'fr' ? withSwissObjectAliases(fallback) : learnerErrorLabels[code]?.[locale] || fallback
 }
 
 export function localizedLearnerErrorDomain(domain: string, locale: AppLocale) {

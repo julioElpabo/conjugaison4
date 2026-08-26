@@ -796,7 +796,12 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
     const limit = request.exerciseKind === 'conjugation'
       ? passiveOnly
         ? 3_000
-        : Math.min(3_000, Math.max(request.questionCount * 10, selectedVerbCount * 3, request.questionCount))
+        : Math.min(3_000, Math.max(
+            request.questionCount * 10,
+            selectedVerbCount * Math.max(1, finiteTenses.length) * 6,
+            selectedVerbCount * 3,
+            request.questionCount,
+          ))
       : 600
     const passivePersonClause = passiveOnly ? 'AND vc.personne_id IN (6,9)' : ''
     const questionVerbIds = usesLiteraryCitations

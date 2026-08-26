@@ -4,8 +4,6 @@ import type { CoachHelpContentValues } from '~~/shared/utils/coach-help'
 import { getAdminErrorMessage } from '~/composables/useAdminAuth'
 
 type FeedbackType = 'useful' | 'unclear' | 'error' | 'remark'
-type ValidationStatus = 'unvalidated' | 'validated'
-type ModerationStatus = 'active' | 'removed'
 
 interface AdminHelpFeedback {
   id: number
@@ -38,40 +36,28 @@ interface AdminHelpFeedback {
   displayedHelpHtml: string | null
   uiContext: Record<string, unknown> | null
   userAgent: string | null
-  validationStatus: ValidationStatus
-  validatedAt: string | null
-  moderationStatus: ModerationStatus
-  moderationNote: string | null
-  moderatedAt: string | null
-  deletedAt: string | null
   createdAt: string
 }
 
 const { user, handleUnauthorized } = useAdminAuth()
 const feedbacks = ref<AdminHelpFeedback[]>([])
+const totalCount = ref(0)
 const selectedId = ref<number | null>(null)
-const showRemoved = ref(false)
 const loading = ref(false)
-const saving = ref(false)
 const copying = ref(false)
-const deletingTreated = ref(false)
+const deletingAll = ref(false)
 const error = ref('')
 const success = ref('')
 let loaded = false
 
 useHead({ title: 'Feedbacks — Administration' })
 
-const visibleFeedbacks = computed(() => feedbacks.value
-  .filter(item => showRemoved.value || item.moderationStatus !== 'removed')
+const visibleFeedbacks = computed(() => [...feedbacks.value]
   .sort((left, right) => {
     const dateDifference = new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
     return dateDifference || right.id - left.id
   }))
 const selectedFeedback = computed(() => visibleFeedbacks.value.find(item => item.id === selectedId.value) || visibleFeedbacks.value[0] || null)
-const unvalidatedCount = computed(() => feedbacks.value.filter(item => item.validationStatus === 'unvalidated' && item.moderationStatus === 'active').length)
-const validatedCount = computed(() => feedbacks.value.filter(item => item.validationStatus === 'validated' && item.moderationStatus === 'active').length)
-const disposableCount = computed(() => feedbacks.value.filter(item => item.validationStatus === 'validated' || item.moderationStatus === 'removed').length)
-const removedCount = computed(() => feedbacks.value.filter(item => item.moderationStatus === 'removed').length)
 const selectedQuestion = computed(() => selectedFeedback.value?.question || selectedFeedback.value?.context?.currentQuestion as Record<string, unknown> | null || null)
 const selectedMessages = computed(() => selectedFeedback.value?.messages || [])
 const selectedAttempts = computed(() => selectedFeedback.value?.attempts || [])
@@ -143,22 +129,16 @@ function questionLine(feedback: AdminHelpFeedback) {
   return [feedback.person, feedback.verb, feedback.tense, feedback.mode].filter(Boolean).join(' · ') || `Feedback #${feedback.id}`
 }
 
-function toggleRemovedFeedbacks() {
-  showRemoved.value = !showRemoved.value
-  if (!visibleFeedbacks.value.some(item => item.id === selectedId.value)) {
-    selectedId.value = visibleFeedbacks.value[0]?.id || null
-  }
-}
-
 async function loadFeedbacks(keepSelection = true) {
   loading.value = true
   error.value = ''
   try {
-    const response = await $fetch<{ feedbacks: AdminHelpFeedback[] }>('/api/admin/coach-help-feedbacks', {
+    const response = await $fetch<{ feedbacks: AdminHelpFeedback[], totalCount: number }>('/api/admin/coach-help-feedbacks', {
       credentials: 'same-origin',
       query: { sort: 'desc' },
     })
     feedbacks.value = response.feedbacks
+    totalCount.value = response.totalCount
     if (keepSelection && selectedId.value && visibleFeedbacks.value.some(item => item.id === selectedId.value)) return
     selectedId.value = visibleFeedbacks.value[0]?.id || null
   }
@@ -170,41 +150,7 @@ async function loadFeedbacks(keepSelection = true) {
   }
 }
 
-async function updateFeedback(action: 'validate' | 'unvalidate' | 'remove' | 'restore') {
-  const selected = selectedFeedback.value
-  if (!selected || saving.value) return
-  let note: string | null = null
-  if (action === 'remove') {
-    note = window.prompt('Raison du retrait ?', 'Sans valeur exploitable')?.trim() || ''
-    if (!note) return
-  }
-  saving.value = true
-  error.value = ''
-  success.value = ''
-  try {
-    await $fetch(`/api/admin/coach-help-feedbacks/${selected.id}`, {
-      method: 'PUT',
-      credentials: 'same-origin',
-      body: { action, note },
-    })
-    await loadFeedbacks(true)
-    success.value = action === 'validate'
-      ? 'Feedback validé.'
-      : action === 'unvalidate'
-        ? 'Feedback remis en non-validé.'
-        : action === 'remove'
-          ? 'Feedback retiré.'
-          : 'Feedback restauré.'
-  }
-  catch (caught) {
-    if (!handleUnauthorized(caught)) error.value = getAdminErrorMessage(caught, 'Impossible de traiter ce feedback.')
-  }
-  finally {
-    saving.value = false
-  }
-}
-
-async function copyValidatedFeedbacks() {
+async function copyAllFeedbacks() {
   if (copying.value) return
   copying.value = true
   error.value = ''
@@ -214,43 +160,42 @@ async function copyValidatedFeedbacks() {
       credentials: 'same-origin',
     })
     if (!response.prompt) {
-      success.value = 'Aucun feedback validé à copier.'
+      success.value = 'Aucun feedback à copier.'
       return
     }
     await navigator.clipboard.writeText(response.prompt)
-    success.value = `${response.count} feedback${response.count > 1 ? 's' : ''} validé${response.count > 1 ? 's' : ''} copié${response.count > 1 ? 's' : ''}.`
+    success.value = `${response.count} feedback${response.count > 1 ? 's' : ''} copié${response.count > 1 ? 's' : ''} pour Codex.`
   }
   catch (caught) {
-    if (!handleUnauthorized(caught)) error.value = getAdminErrorMessage(caught, 'Impossible de copier les feedbacks validés.')
+    if (!handleUnauthorized(caught)) error.value = getAdminErrorMessage(caught, 'Impossible de copier les feedbacks.')
   }
   finally {
     copying.value = false
   }
 }
 
-async function deleteTreatedFeedbacks() {
-  const count = disposableCount.value
-  if (!count || deletingTreated.value) return
-  const label = `${count} feedback${count > 1 ? 's' : ''} validé${count > 1 ? 's' : ''} ou retiré${count > 1 ? 's' : ''}`
-  if (!window.confirm(`Supprimer définitivement ${label} ?\n\nLes feedbacks validés et les feedbacks retirés seront effacés. Cette action est irréversible.`)) return
-  deletingTreated.value = true
+async function deleteAllFeedbacks() {
+  const count = totalCount.value
+  if (!count || deletingAll.value) return
+  const label = `${count} feedback${count > 1 ? 's' : ''}`
+  if (!window.confirm(`Supprimer définitivement les ${label} ?\n\nTous les feedbacks utilisateurs seront effacés. Cette action est irréversible.`)) return
+  deletingAll.value = true
   error.value = ''
   success.value = ''
   try {
-    const response = await $fetch<{ count: number }>('/api/admin/coach-help-feedbacks/treated', {
+    const response = await $fetch<{ count: number }>('/api/admin/coach-help-feedbacks/all', {
       method: 'DELETE',
       credentials: 'same-origin',
-      body: { origin: 'user', includeRemoved: true },
     })
     selectedId.value = null
     await loadFeedbacks(false)
-    success.value = `${response.count} feedback${response.count > 1 ? 's' : ''} validé${response.count > 1 ? 's' : ''} ou retiré${response.count > 1 ? 's' : ''} supprimé${response.count > 1 ? 's' : ''}.`
+    success.value = `${response.count} feedback${response.count > 1 ? 's' : ''} supprimé${response.count > 1 ? 's' : ''}.`
   }
   catch (caught) {
-    if (!handleUnauthorized(caught)) error.value = getAdminErrorMessage(caught, 'Impossible de supprimer les feedbacks validés.')
+    if (!handleUnauthorized(caught)) error.value = getAdminErrorMessage(caught, 'Impossible de supprimer tous les feedbacks.')
   }
   finally {
-    deletingTreated.value = false
+    deletingAll.value = false
   }
 }
 
@@ -271,11 +216,11 @@ watch(user, (current) => {
             <p class="admin-muted">Tous les retours sur les aides automatiques, du plus récent au plus ancien.</p>
           </div>
           <div class="feedback-admin__top-actions">
-            <button class="admin-button admin-button--danger" type="button" :disabled="deletingTreated || !disposableCount" @click="deleteTreatedFeedbacks">
-              {{ deletingTreated ? 'Suppression…' : `Supprimer les feedbacks validés ou retirés (${disposableCount})` }}
+            <button class="admin-button admin-button--primary" type="button" :disabled="copying || !totalCount" @click="copyAllFeedbacks">
+              {{ copying ? 'Copie…' : `Tout copier pour Codex (${totalCount})` }}
             </button>
-            <button class="admin-button admin-button--primary" type="button" :disabled="copying" @click="copyValidatedFeedbacks">
-              {{ copying ? 'Copie…' : 'Copier tous les feedbacks validés' }}
+            <button class="admin-button admin-button--danger" type="button" :disabled="deletingAll || !totalCount" @click="deleteAllFeedbacks">
+              {{ deletingAll ? 'Suppression…' : `Tout supprimer (${totalCount})` }}
             </button>
             <button class="admin-button admin-button--small" type="button" :disabled="loading" @click="loadFeedbacks(true)">
               {{ loading ? 'Chargement…' : 'Actualiser' }}
@@ -287,33 +232,18 @@ watch(user, (current) => {
         <p v-if="success" class="admin-notice admin-notice--success">{{ success }}</p>
 
         <section class="feedback-admin__summary">
-          <span><strong>{{ feedbacks.length }}</strong> feedbacks</span>
-          <span><strong>{{ validatedCount }}</strong> validés actifs</span>
-          <span><strong>{{ unvalidatedCount }}</strong> non-validés actifs</span>
-          <span><strong>{{ removedCount }}</strong> retirés</span>
+          <span><strong>{{ totalCount }}</strong> feedbacks</span>
         </section>
 
         <div class="feedback-admin__workspace">
           <aside class="admin-card feedback-list" aria-label="Liste des feedbacks">
-            <button
-              v-if="removedCount"
-              class="feedback-list__filter"
-              type="button"
-              :aria-pressed="showRemoved"
-              @click="toggleRemovedFeedbacks"
-            >
-              {{ showRemoved ? 'Masquer' : 'Afficher' }} les retirés ({{ removedCount }})
-            </button>
             <p v-if="loading && !feedbacks.length" class="feedback-empty">Chargement…</p>
             <p v-else-if="!visibleFeedbacks.length" class="feedback-empty">Aucun feedback à afficher.</p>
             <button
               v-for="feedback in visibleFeedbacks"
               :key="feedback.id"
               type="button"
-              :class="[
-                'feedback-list__item',
-                { 'is-selected': feedback.id === selectedFeedback?.id, 'is-removed': feedback.moderationStatus === 'removed' },
-              ]"
+              :class="['feedback-list__item', { 'is-selected': feedback.id === selectedFeedback?.id }]"
               @click="selectedId = feedback.id"
             >
               <span>
@@ -324,9 +254,6 @@ watch(user, (current) => {
                 <b>{{ questionLine(feedback) }}</b>
                 <small>{{ feedback.comment || 'Sans commentaire' }}</small>
               </span>
-              <em :class="[`is-${feedback.validationStatus}`, `is-${feedback.moderationStatus}`]">
-                {{ feedback.moderationStatus === 'removed' ? 'Retiré' : feedback.validationStatus === 'validated' ? 'Validé' : 'Non-validé' }}
-              </em>
             </button>
           </aside>
 
@@ -338,49 +265,9 @@ watch(user, (current) => {
                   <h2>{{ feedbackLabels[selectedFeedback.feedbackType] }} · {{ questionLine(selectedFeedback) }}</h2>
                   <p class="admin-muted">{{ formatDate(selectedFeedback.createdAt) }} · {{ selectedFeedback.coachName || 'coach inconnu' }} · {{ selectedFeedback.helpName || 'aide inconnue' }}</p>
                 </div>
-                <div class="feedback-panel__actions">
-                  <button
-                    v-if="selectedFeedback.validationStatus === 'unvalidated'"
-                    class="admin-button admin-button--primary admin-button--small"
-                    type="button"
-                    :disabled="saving || selectedFeedback.moderationStatus === 'removed'"
-                    @click="updateFeedback('validate')"
-                  >
-                    Valider
-                  </button>
-                  <button
-                    v-else
-                    class="admin-button admin-button--small"
-                    type="button"
-                    :disabled="saving || selectedFeedback.moderationStatus === 'removed'"
-                    @click="updateFeedback('unvalidate')"
-                  >
-                    Remettre non-validé
-                  </button>
-                  <button
-                    v-if="selectedFeedback.moderationStatus === 'active'"
-                    class="admin-button admin-button--danger admin-button--small"
-                    type="button"
-                    :disabled="saving"
-                    @click="updateFeedback('remove')"
-                  >
-                    Supprimer
-                  </button>
-                  <button
-                    v-else
-                    class="admin-button admin-button--small"
-                    type="button"
-                    :disabled="saving"
-                    @click="updateFeedback('restore')"
-                  >
-                    Restaurer
-                  </button>
-                </div>
               </header>
 
               <dl class="feedback-facts">
-                <div><dt>Statut</dt><dd>{{ selectedFeedback.validationStatus === 'validated' ? 'Validé' : 'Non-validé' }}</dd></div>
-                <div><dt>Modération</dt><dd>{{ selectedFeedback.moderationStatus === 'removed' ? 'Retiré' : 'Actif' }}</dd></div>
                 <div><dt>Question</dt><dd>{{ selectedFeedback.questionNumber ?? '—' }}</dd></div>
                 <div><dt>Session</dt><dd>{{ selectedFeedback.sessionId || '—' }}</dd></div>
               </dl>

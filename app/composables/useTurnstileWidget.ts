@@ -29,11 +29,21 @@ function loadTurnstileApi() {
   turnstileApiPromise = new Promise<TurnstileApi>((resolve, reject) => {
     const existing = document.querySelector<HTMLScriptElement>('script[data-turnstile-script]')
     const script = existing || document.createElement('script')
-    const loaded = () => {
-      if (window.turnstile) resolve(window.turnstile)
-      else reject(new Error('L’API Turnstile ne s’est pas initialisée.'))
+    let settled = false
+    const finish = (api?: TurnstileApi, error?: Error) => {
+      if (settled) return
+      settled = true
+      window.clearInterval(poll)
+      window.clearTimeout(timeout)
+      if (api) resolve(api)
+      else reject(error || new Error('Impossible de charger l’API Turnstile.'))
     }
-    const failed = () => reject(new Error('Impossible de charger l’API Turnstile.'))
+    const loaded = () => {
+      if (window.turnstile) finish(window.turnstile)
+    }
+    const failed = () => finish(undefined, new Error('Impossible de charger l’API Turnstile.'))
+    const poll = window.setInterval(loaded, 100)
+    const timeout = window.setTimeout(() => finish(undefined, new Error('Le chargement de Turnstile a expiré.')), 10_000)
 
     script.addEventListener('load', loaded, { once: true })
     script.addEventListener('error', failed, { once: true })
@@ -72,7 +82,10 @@ export function useTurnstileWidget(siteKey: string, action: string, options: { a
           token.value = response
           unavailable.value = false
         },
-        'expired-callback': () => { token.value = '' },
+        'expired-callback': () => {
+          token.value = ''
+          void reset()
+        },
         'error-callback': () => {
           token.value = ''
           unavailable.value = true
@@ -86,6 +99,7 @@ export function useTurnstileWidget(siteKey: string, action: string, options: { a
 
   async function reset() {
     token.value = ''
+    unavailable.value = false
     if (!widgetId) {
       await render()
       return

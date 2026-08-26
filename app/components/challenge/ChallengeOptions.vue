@@ -459,7 +459,7 @@ watch(passiveAvailable, (available) => {
         }"
       >
       <h3 v-if="gridLayout" class="complement-options__title">{{ ui('Compléments d’objets :') }}</h3>
-      <p v-if="gridLayout" class="complement-options__description">{{ ui('Ajoute des compléments d’objets directs ou indirects.') }}</p>
+      <p v-if="gridLayout" class="complement-options__description">{{ ui('Ajoute des COD (CVD) ou des COI (CVI).') }}</p>
       <button
         v-else
         class="complement-options__trigger"
@@ -485,19 +485,19 @@ watch(passiveAvailable, (available) => {
           <legend class="sr-only">{{ ui('Présentation des compléments d’objets') }}</legend>
           <label>
             <input type="checkbox" :disabled="!complementsAvailable || !codAvailable" :checked="displayedComplementOptions.includes('cod-after')" @change="toggleComplementOption('cod-after', ($event.target as HTMLInputElement).checked)">
-            <span><strong>{{ ui('COD placé après') }}</strong></span>
+            <span><strong>{{ ui('COD (CVD) placé après') }}</strong><small v-if="complementsAvailable && !codAvailable">{{ ui('Aucun verbe choisi ne possède de COD (CVD) validé.') }}</small></span>
           </label>
           <label>
             <input type="checkbox" :disabled="!complementsAvailable || !codBeforeAvailable" :checked="displayedComplementOptions.includes('cod-before')" @change="toggleComplementOption('cod-before', ($event.target as HTMLInputElement).checked)">
-            <span><strong>{{ ui('COD placé avant') }}</strong></span>
+            <span><strong>{{ ui('COD (CVD) placé avant') }}</strong><small v-if="complementsAvailable && !codBeforeAvailable">{{ ui('Aucun COD (CVD) validé ne peut être placé avant avec les verbes choisis.') }}</small></span>
           </label>
           <label>
             <input type="checkbox" :disabled="!complementsAvailable || !coiAvailable" :checked="displayedComplementOptions.includes('coi-after')" @change="toggleComplementOption('coi-after', ($event.target as HTMLInputElement).checked)">
-            <span><strong>{{ ui('COI placé après') }}</strong></span>
+            <span><strong>{{ ui('COI (CVI) placé après') }}</strong><small v-if="complementsAvailable && !coiAvailable">{{ ui('Aucun verbe choisi ne possède de COI (CVI) validé.') }}</small></span>
           </label>
           <label>
             <input type="checkbox" :disabled="!complementsAvailable || !coiBeforeAvailable" :checked="displayedComplementOptions.includes('coi-before')" @change="toggleComplementOption('coi-before', ($event.target as HTMLInputElement).checked)">
-            <span><strong>{{ ui('COI placé avant') }}</strong></span>
+            <span><strong>{{ ui('COI (CVI) placé avant') }}</strong><small v-if="complementsAvailable && !coiBeforeAvailable">{{ ui('Aucun COI (CVI) validé ne peut être placé avant avec les verbes choisis.') }}</small></span>
           </label>
         </fieldset>
       </Transition>
@@ -707,9 +707,10 @@ watch(passiveAvailable, (available) => {
 .complement-options__panel label { display: flex; min-width: 0; padding: 9px; align-items: flex-start; gap: 8px; border: 1px solid #d6e2de; border-radius: 9px; background: #f9fbfa; }
 .complement-options__panel input { margin-top: 3px; }
 .options-card--revealing .complement-options__panel input:checked { animation: prefilled-option-check 220ms cubic-bezier(.2, .9, .3, 1); }
-.complement-options__panel label > span { display: grid; min-width: 0; gap: 2px; }
+.complement-options__panel label > span { display: grid; min-width: 0; gap: 3px; }
 .complement-options__panel strong { color: var(--brand-dark); font-size: .92rem; }
 .complement-options__panel label:has(input:disabled) { opacity: .5; }
+.complement-options__panel label small { max-width: 27ch; color: var(--muted); font-size: .72rem; font-weight: 550; line-height: 1.3; }
 .complement-options__panel small { color: var(--muted); font-size: .9rem; line-height: 1.45; }
 .complement-options__panel small b { color: var(--ink); font-weight: 800; }
 .complement-panel-enter-active, .complement-panel-leave-active { transition: opacity 160ms ease, transform 160ms ease; }

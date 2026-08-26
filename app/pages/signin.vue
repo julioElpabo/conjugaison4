@@ -262,12 +262,12 @@ function downloadRecoveryCode() {
 
         <label class="learner-field">
           <span>{{ copy.choosePassword }}</span>
-          <input v-model="password" type="password" minlength="10" maxlength="200" autocomplete="new-password" required>
+          <PasswordInput v-model="password" :minlength="10" :maxlength="200" autocomplete="new-password" required />
           <small>{{ copy.passwordHint }}</small>
         </label>
         <label class="learner-field">
           <span>{{ copy.confirmPassword }}</span>
-          <input v-model="passwordConfirmation" type="password" minlength="10" maxlength="200" autocomplete="new-password" required>
+          <PasswordInput v-model="passwordConfirmation" :minlength="10" :maxlength="200" autocomplete="new-password" required />
         </label>
 
         <label class="honeypot" aria-hidden="true">
@@ -288,6 +288,7 @@ function downloadRecoveryCode() {
 
         <p v-if="turnstileUnavailable" class="learner-error" role="alert">
           Le contrôle antibot n’a pas pu se charger. Recharge la page ou vérifie que ton navigateur ne le bloque pas.
+          <button type="button" class="turnstile-retry" @click="resetTurnstile">Réessayer le contrôle</button>
         </p>
 
         <button class="primary-button is-full" type="submit" :disabled="submitting || loadingSuggestion || !suggestion">
@@ -302,7 +303,7 @@ function downloadRecoveryCode() {
         </label>
         <label class="learner-field">
           <span>{{ copy.password }}</span>
-          <input v-model="loginPassword" type="password" maxlength="200" autocomplete="current-password" required>
+          <PasswordInput v-model="loginPassword" :maxlength="200" autocomplete="current-password" required />
         </label>
         <button class="primary-button is-full" type="submit" :disabled="submitting">
           {{ submitting ? copy.signingIn : copy.signIn }}

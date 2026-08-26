@@ -7,6 +7,7 @@ import { withoutIndicativeMode } from './chat-mode-display'
 import { buildCompleteConjugationAdviceHtml, buildConjugationBaseHtml, buildConjugationEndingsHtml, buildPassiveVoiceHelpHtml, buildPassiveVoiceMethodHtml, decomposeConjugationForm } from './conjugation-help'
 import { bareNearFutureInfinitive, isNearFutureTense, isPronominalNearFutureInfinitive, nearFutureReflexivePronoun } from './near-future'
 import type { AppLocale } from '../i18n/locales'
+import { withSwissObjectAliases } from './object-terminology'
 
 const DEFAULT_TITLES: Record<CoachHelpBlockType, string> = {
   normal: '',
@@ -191,6 +192,27 @@ function escapedCoachText(value: string): string {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;')
+}
+
+function concealedRequestedFormsHtml(html: string, question: ExerciseQuestion): string {
+  const forms = [...new Set([
+    question.conjugaison1?.trim(),
+    question.conjugaison2?.trim(),
+  ].filter((form): form is string => Boolean(form)))]
+
+  return forms.reduce((rendered, form) => {
+    const escaped = escapedCoachText(form)
+    const pattern = escaped.replace(/[.*+?^\${}()|[\]\\]/gu, '\\$&')
+    if (!pattern) return rendered
+    const exactForm = new RegExp(`(?<![\\p{L}\\p{N}])${pattern}(?![\\p{L}\\p{N}])`, 'giu')
+    return rendered.replace(
+      /<(strong|mark|samp|td)([^>]*)>([\s\S]*?)<\/\1>/giu,
+      (element, tag: string, attributes: string, content: string) => {
+        const concealed = content.replace(exactForm, '<kbd>forme à trouver</kbd>')
+        return concealed === content ? element : `<${tag}${attributes}>${concealed}</${tag}>`
+      },
+    )
+  }, html)
 }
 
 function bareHelpInfinitive(value = ''): string {
@@ -859,7 +881,8 @@ export function renderCoachHelpContent(content: string, values: CoachHelpContent
     removedEnding: values.removedEnding || '',
   }
   const rendered = content.replace(/\{(coach|verb|definition|definitionHelp|helpTitle|mode|tense|subject|correctAnswers|auxiliaryAnswer|pastParticipleAnswer|unagreedPastParticiple|COD|isCODplace_avant|COI|isCOIplace_avant|endingsHelp|contextualBaseHelp|completeAdviceHelp|condensedVerbGroupHelp|condensedTenseRuleHelp|nearFutureHelp|nearFutureAllerHelp|passiveVoiceHelp|passiveVoiceAdviceHelp|passiveVoiceCondensedHelp|passiveVoiceMethodHelp|passiveVoiceMethodAdviceHelp|pronominalHelp|referenceFormHelp|nousFormHelp|conjugationBase|conjugationEnding|referenceMode|referenceTense|referenceSubject|referenceForm|referenceRadical|removedEnding)\}/gu, (_match, key: string) => replacements[key] || '')
-  return values.omitIndicativeMode ? withoutIndicativeMode(rendered) : rendered
+  const localizedTerminology = withSwissObjectAliases(rendered)
+  return values.omitIndicativeMode ? withoutIndicativeMode(localizedTerminology) : localizedTerminology
 }
 
 function startsWithVowelForArticle(value: string) {
@@ -1083,7 +1106,10 @@ export function coachHelpQuestionVariables(
     endingsHelpByApproach,
     contextualBaseHelp: contextualBaseHelpByApproach['cif-falc'],
     contextualBaseHelpByApproach,
-    completeAdviceHelp: buildCompleteConjugationAdviceHtml(question, verb, tense),
+    completeAdviceHelp: concealedRequestedFormsHtml(
+      buildCompleteConjugationAdviceHtml(question, verb, tense),
+      question,
+    ),
     condensedVerbGroupHelp: buildCondensedVerbGroupHtml(verb, {
       mode: question.mode || tense?.mode?.name,
       tense: question.temps || tense?.name,

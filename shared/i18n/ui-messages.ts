@@ -1,4 +1,5 @@
 import type { AppLocale } from './locales'
+import { withSwissObjectAliases } from '../utils/object-terminology'
 
 type Translations = Record<Exclude<AppLocale, 'fr'>, string>
 
@@ -75,6 +76,8 @@ export const uiMessages = {
   'Commencer': { de: 'Starten', en: 'Start', it: 'Inizia', es: 'Empezar' },
   'Exercice de conjugaison': { de: 'Konjugationsübung', en: 'Conjugation exercise', it: 'Esercizio di coniugazione', es: 'Ejercicio de conjugación' },
   'Juste !': { de: 'Richtig!', en: 'Correct!', it: 'Giusto!', es: '¡Correcto!' },
+  'C’est faux.': { de: 'Das ist falsch.', en: 'That’s incorrect.', it: 'Non è corretto.', es: 'No es correcto.' },
+  'La bonne réponse est « {expectedAnswer} ».': { de: 'Die richtige Antwort ist „{expectedAnswer}“.', en: 'The correct answer is “{expectedAnswer}”.', it: 'La risposta corretta è «{expectedAnswer}».', es: 'La respuesta correcta es «{expectedAnswer}».' },
   'Faux.': { de: 'Falsch.', en: 'Incorrect.', it: 'Sbagliato.', es: 'Incorrecto.' },
   'Bonne réponse :': { de: 'Richtige Antwort:', en: 'Correct answer:', it: 'Risposta corretta:', es: 'Respuesta correcta:' },
   'Voir les autres modes': { de: 'Andere Modi anzeigen', en: 'Show other moods', it: 'Mostra gli altri modi', es: 'Ver otros modos' },
@@ -252,6 +255,15 @@ export const uiMessages = {
   'COD placé avant': { de: 'Direktes Objekt davor', en: 'Direct object before', it: 'Oggetto diretto prima', es: 'Objeto directo antes' },
   'COI placé après': { de: 'Indirektes Objekt danach', en: 'Indirect object after', it: 'Oggetto indiretto dopo', es: 'Objeto indirecto después' },
   'COI placé avant': { de: 'Indirektes Objekt davor', en: 'Indirect object before', it: 'Oggetto indiretto prima', es: 'Objeto indirecto antes' },
+  'COD (CVD) placé après': { de: 'Direktes Objekt danach', en: 'Direct object after', it: 'Oggetto diretto dopo', es: 'Objeto directo después' },
+  'COD (CVD) placé avant': { de: 'Direktes Objekt davor', en: 'Direct object before', it: 'Oggetto diretto prima', es: 'Objeto directo antes' },
+  'COI (CVI) placé après': { de: 'Indirektes Objekt danach', en: 'Indirect object after', it: 'Oggetto indiretto dopo', es: 'Objeto indirecto después' },
+  'COI (CVI) placé avant': { de: 'Indirektes Objekt davor', en: 'Indirect object before', it: 'Oggetto indiretto prima', es: 'Objeto indirecto antes' },
+  'Ajoute des COD (CVD) ou des COI (CVI).': { de: 'Füge direkte oder indirekte Objekte hinzu.', en: 'Add direct or indirect objects.', it: 'Aggiungi complementi oggetto diretti o indiretti.', es: 'Añade complementos directos o indirectos.' },
+  'Aucun verbe choisi ne possède de COD (CVD) validé.': { de: 'Kein gewähltes Verb hat ein validiertes direktes Objekt.', en: 'None of the chosen verbs has a validated direct object.', it: 'Nessun verbo scelto possiede un complemento oggetto diretto convalidato.', es: 'Ningún verbo elegido tiene un complemento directo validado.' },
+  'Aucun COD (CVD) validé ne peut être placé avant avec les verbes choisis.': { de: 'Bei den gewählten Verben kann kein validiertes direktes Objekt vorangestellt werden.', en: 'No validated direct object can be placed before the chosen verbs.', it: 'Nessun complemento oggetto diretto convalidato può essere posto prima con i verbi scelti.', es: 'Ningún complemento directo validado puede colocarse antes con los verbos elegidos.' },
+  'Aucun verbe choisi ne possède de COI (CVI) validé.': { de: 'Kein gewähltes Verb hat ein validiertes indirektes Objekt.', en: 'None of the chosen verbs has a validated indirect object.', it: 'Nessun verbo scelto possiede un complemento indiretto convalidato.', es: 'Ningún verbo elegido tiene un complemento indirecto validado.' },
+  'Aucun COI (CVI) validé ne peut être placé avant avec les verbes choisis.': { de: 'Bei den gewählten Verben kann kein validiertes indirektes Objekt vorangestellt werden.', en: 'No validated indirect object can be placed before the chosen verbs.', it: 'Nessun complemento indiretto convalidato può essere posto prima con i verbi scelti.', es: 'Ningún complemento indirecto validado puede colocarse antes con los verbos elegidos.' },
   'Aperçu d’une question': { de: 'Vorschau einer Frage', en: 'Question preview', it: 'Anteprima di una domanda', es: 'Vista previa de una pregunta' },
   'Préparation de l’aperçu': { de: 'Vorschau wird vorbereitet', en: 'Preparing preview', it: 'Preparazione dell’anteprima', es: 'Preparando vista previa' },
   'Exemple de question': { de: 'Beispielfrage', en: 'Sample question', it: 'Esempio di domanda', es: 'Ejemplo de pregunta' },
@@ -749,6 +761,8 @@ export const uiMessages = {
   'Retirer le verbe {verb}': { de: 'Verb {verb} entfernen', en: 'Remove the verb {verb}', it: 'Rimuovi il verbo {verb}', es: 'Eliminar el verbo {verb}' },
   'Quel est le mode et le temps de cette forme conjuguée ?': { de: 'Welchen Modus und welche Zeitform hat diese konjugierte Form?', en: 'What are the mood and tense of this conjugated form?', it: 'Quali sono il modo e il tempo di questa forma coniugata?', es: '¿Cuáles son el modo y el tiempo de esta forma conjugada?' },
   'ou': { de: 'oder', en: 'or', it: 'o', es: 'o' },
+  'L’autre possibilité correcte est « {answer} ».': { de: 'Die andere richtige Möglichkeit ist „{answer}“.', en: 'The other correct answer is “{answer}”.', it: 'L’altra possibilità corretta è «{answer}».', es: 'La otra posibilidad correcta es «{answer}».' },
+  'Les autres possibilités correctes sont {answers}.': { de: 'Die anderen richtigen Möglichkeiten sind {answers}.', en: 'The other correct answers are {answers}.', it: 'Le altre possibilità corrette sono {answers}.', es: 'Las otras posibilidades correctas son {answers}.' },
   'féminin': { de: 'weiblich', en: 'feminine', it: 'femminile', es: 'femenino' },
   'masculin': { de: 'männlich', en: 'masculine', it: 'maschile', es: 'masculino' },
   'singulier': { de: 'Singular', en: 'singular', it: 'singolare', es: 'singular' },
@@ -765,13 +779,24 @@ export const uiMessages = {
   'C’est juste : « {complement} » n’est pas un COD, mais un COI du verbe « {verb} ». Un COI ne commande jamais l’accord du participe passé employé avec avoir : il reste « {participle} ».': { de: 'Richtig: „{complement}“ ist kein direktes, sondern ein indirektes Objekt des Verbs „{verb}“. Ein indirektes Objekt bewirkt beim Partizip Perfekt mit avoir nie eine Angleichung: Es bleibt „{participle}“.', en: 'Correct: “{complement}” is not a direct object but an indirect object of the verb “{verb}”. An indirect object never determines agreement of a past participle used with avoir, so it remains “{participle}”.', it: 'Giusto: «{complement}» non è un complemento oggetto, ma un complemento indiretto del verbo «{verb}». Un complemento indiretto non determina mai la concordanza del participio passato con avoir: resta «{participle}».', es: 'Correcto: «{complement}» no es un complemento directo, sino indirecto del verbo «{verb}». Un complemento indirecto nunca determina la concordancia del participio pasado con avoir: queda «{participle}».' },
   'Attention : « {complement} » n’est pas un COD, mais un COI du verbe « {verb} ». Il ne faut pas accorder le participe avec ce complément : il reste « {participle} ».': { de: 'Vorsicht: „{complement}“ ist kein direktes, sondern ein indirektes Objekt des Verbs „{verb}“. Das Partizip darf nicht an dieses Objekt angeglichen werden: Es bleibt „{participle}“.', en: 'Careful: “{complement}” is not a direct object but an indirect object of the verb “{verb}”. The participle must not agree with this complement, so it remains “{participle}”.', it: 'Attenzione: «{complement}» non è un complemento oggetto, ma un complemento indiretto del verbo «{verb}». Il participio non va concordato con questo complemento: resta «{participle}».', es: 'Atención: «{complement}» no es un complemento directo, sino indirecto del verbo «{verb}». El participio no debe concordar con este complemento: queda «{participle}».' },
   'Pour reconnaître le COI, repère sa préposition et pose la question « {question} ».': { de: 'Um das indirekte Objekt zu erkennen, achte auf seine Präposition und stelle die Frage „{question}“.', en: 'To identify the indirect object, find its preposition and ask “{question}”.', it: 'Per riconoscere il complemento indiretto, individua la preposizione e poni la domanda «{question}».', es: 'Para reconocer el complemento indirecto, identifica la preposición y formula la pregunta «{question}».' },
+  'Réponse après la première tentative': { de: 'Antwort nach dem ersten Versuch', en: 'Answer after the first attempt', it: 'Risposta dopo il primo tentativo', es: 'Respuesta después del primer intento' },
+  'Erreur du premier essai :': { de: 'Fehler beim ersten Versuch:', en: 'First-attempt mistake:', it: 'Errore del primo tentativo:', es: 'Error del primer intento:' },
+  'Afficher': { de: 'Anzeigen', en: 'Show', it: 'Mostra', es: 'Mostrar' },
+  'Masquer': { de: 'Ausblenden', en: 'Hide', it: 'Nascondi', es: 'Ocultar' },
+  'Afficher le mot de passe': { de: 'Passwort anzeigen', en: 'Show password', it: 'Mostra la password', es: 'Mostrar la contraseña' },
+  'Masquer le mot de passe': { de: 'Passwort ausblenden', en: 'Hide password', it: 'Nascondi la password', es: 'Ocultar la contraseña' },
+  'Repère le COD (CVD) placé avant le verbe : avec avoir, il commande l’accord du participe passé en genre et en nombre.': { de: 'Erkenne das vor dem Verb stehende direkte Objekt: Mit avoir bestimmt es Genus und Numerus des Partizips.', en: 'Identify the direct object before the verb: with avoir, it determines the gender and number of the past participle.', it: 'Individua il complemento oggetto prima del verbo: con avoir determina genere e numero del participio passato.', es: 'Identifica el complemento directo situado antes del verbo: con avoir determina el género y el número del participio pasado.' },
+  'Le COD (CVD) est placé après le verbe : avec avoir, il ne commande pas l’accord du participe passé.': { de: 'Das direkte Objekt steht nach dem Verb: Mit avoir bestimmt es die Angleichung des Partizips nicht.', en: 'The direct object comes after the verb: with avoir, it does not determine past-participle agreement.', it: 'Il complemento oggetto è posto dopo il verbo: con avoir non determina la concordanza del participio passato.', es: 'El complemento directo está después del verbo: con avoir no determina la concordancia del participio pasado.' },
+  'Ce complément est un COI (CVI) : il ne commande pas l’accord du participe passé avec avoir.': { de: 'Dieses Objekt ist indirekt: Es bestimmt die Angleichung des Partizips mit avoir nicht.', en: 'This is an indirect object: it does not determine past-participle agreement with avoir.', it: 'È un complemento indiretto: non determina la concordanza del participio passato con avoir.', es: 'Es un complemento indirecto: no determina la concordancia del participio pasado con avoir.' },
+  'L’auxiliaire choisi ne convient pas. Reprends la construction du temps demandé avec cette personne.': { de: 'Das gewählte Hilfsverb passt nicht. Bilde die verlangte Zeitform für diese Person erneut.', en: 'The chosen auxiliary is not correct. Rebuild the requested tense for this person.', it: 'L’ausiliare scelto non è corretto. Ricostruisci il tempo richiesto per questa persona.', es: 'El auxiliar elegido no es correcto. Vuelve a construir el tiempo pedido para esta persona.' },
 } as const satisfies Record<string, Translations>
 
 export type UiMessage = keyof typeof uiMessages
 
 export function translateUiMessage(locale: AppLocale, message: UiMessage, parameters: Record<string, string | number> = {}): string {
   const template = locale === 'fr' ? message : uiMessages[message][locale]
-  return template.replace(/\{([a-zA-Z0-9_]+)\}/gu, (_match, name: string) => String(parameters[name] ?? `{${name}}`))
+  const rendered = template.replace(/\{([a-zA-Z0-9_]+)\}/gu, (_match, name: string) => String(parameters[name] ?? `{${name}}`))
+  return locale === 'fr' ? withSwissObjectAliases(rendered) : rendered
 }
 
 export function isUiMessage(value: string): value is UiMessage {

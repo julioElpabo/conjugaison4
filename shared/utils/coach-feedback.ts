@@ -28,12 +28,31 @@ export interface CoachAnswerDiagnostic {
   agreementFeatures?: string
 }
 
-const AUXILIARIES = new Set([
+const AVOIR_AUXILIARY_FORMS = new Set([
   'ai', 'as', 'a', 'avons', 'avez', 'ont', 'avais', 'avait', 'avions', 'aviez', 'avaient',
-  'aurai', 'auras', 'aura', 'aurons', 'aurez', 'auront', 'aie', 'aies', 'ait', 'ayons', 'ayez', 'aient',
-  'suis', 'es', 'est', 'sommes', 'êtes', 'sont', 'étais', 'était', 'étions', 'étiez', 'étaient',
-  'serai', 'seras', 'sera', 'serons', 'serez', 'seront', 'sois', 'soit', 'soyons', 'soyez', 'soient',
+  'eus', 'eut', 'eûmes', 'eûtes', 'eurent',
+  'aurai', 'auras', 'aura', 'aurons', 'aurez', 'auront',
+  'aurais', 'aurait', 'aurions', 'auriez', 'auraient',
+  'aie', 'aies', 'ait', 'ayons', 'ayez', 'aient',
+  'eusse', 'eusses', 'eût', 'eussions', 'eussiez', 'eussent',
 ])
+
+const ETRE_AUXILIARY_FORMS = new Set([
+  'suis', 'es', 'est', 'sommes', 'êtes', 'sont', 'étais', 'était', 'étions', 'étiez', 'étaient',
+  'fus', 'fut', 'fûmes', 'fûtes', 'furent',
+  'serai', 'seras', 'sera', 'serons', 'serez', 'seront',
+  'serais', 'serait', 'serions', 'seriez', 'seraient',
+  'sois', 'soit', 'soyons', 'soyez', 'soient',
+  'fusse', 'fusses', 'fût', 'fussions', 'fussiez', 'fussent',
+])
+
+const AUXILIARIES = new Set([...AVOIR_AUXILIARY_FORMS, ...ETRE_AUXILIARY_FORMS])
+
+export function auxiliaryLemmaForForm(form: string): 'avoir' | 'être' | undefined {
+  if (AVOIR_AUXILIARY_FORMS.has(form)) return 'avoir'
+  if (ETRE_AUXILIARY_FORMS.has(form)) return 'être'
+  return undefined
+}
 
 function comparable(value: string) {
   return normalizeAnswer(value).replace(/[.!?;,«»"()[\]{}:…-]/gu, '')
@@ -152,6 +171,12 @@ export function diagnoseCoachAgreement(
   const learnerParticiple = learnerWords.at(-1)
   if (!learnerParticiple) return undefined
 
+  const acceptedParticiples = question.reponses
+    .filter(candidate => candidate.trim())
+    .map(candidate => words(candidate).at(-1))
+    .filter((candidate): candidate is string => Boolean(candidate))
+  if (acceptedParticiples.includes(learnerParticiple)) return undefined
+
   const expected = question.reponses
     .filter(candidate => candidate.trim())
     .map(candidate => ({
@@ -211,7 +236,12 @@ export function diagnoseCoachAnswer(
 
   const learnerAuxiliary = auxiliaryIn(learnerAnswer)
   const expectedAuxiliary = auxiliaryIn(comparedAnswer)
-  if (learnerAuxiliary && expectedAuxiliary && learnerAuxiliary !== expectedAuxiliary) {
+  const learnerAuxiliaryLemma = learnerAuxiliary ? auxiliaryLemmaForForm(learnerAuxiliary) : undefined
+  const expectedAuxiliaryLemma = expectedAuxiliary ? auxiliaryLemmaForForm(expectedAuxiliary) : undefined
+  if (question.isCompound
+    && learnerAuxiliary && expectedAuxiliary
+    && learnerAuxiliaryLemma && expectedAuxiliaryLemma
+    && learnerAuxiliaryLemma !== expectedAuxiliaryLemma) {
     return { ...base, errorKind: 'auxiliary', confidence: 'high', learnerAuxiliary, expectedAuxiliary }
   }
 

@@ -52,7 +52,10 @@ export default defineEventHandler(async (event) => {
   }
   await useDatabase().execute(`
     UPDATE learner_accounts
-    SET last_login_at = CURRENT_TIMESTAMP, deletion_scheduled_at = NULL
+    SET status = 'active',
+        activated_at = COALESCE(activated_at, CURRENT_TIMESTAMP),
+        last_login_at = CURRENT_TIMESTAMP,
+        deletion_scheduled_at = NULL
     WHERE id = ?
   `, [account.id])
   await useDatabase().execute(

@@ -5,6 +5,7 @@ import {
   ADMIN_TEST_EXECUTION_TIMEOUT_MS,
   adminTestArguments,
   adminTestEnvironment,
+  availableAdminTests,
   executeAdminTestGroups,
 } from '../server/services/admin-tests.ts'
 
@@ -71,5 +72,13 @@ describe('environnement des tests administrateur', () => {
     assert.deepEqual(started, ['Conjugaison française', 'Administration', 'Technique'])
     releases.forEach(release => release())
     assert.deepEqual(await execution, started)
+  })
+
+  it('rend les parcours navigateur visibles dans le catalogue administrateur', async () => {
+    const tests = await availableAdminTests()
+    const browserScenarios = tests.find(item => item.id === 'browser-user-scenarios.test.mjs')
+
+    assert.equal(browserScenarios?.title, 'Parcours réels dans le navigateur')
+    assert.equal(browserScenarios?.category, 'Scénarios utilisateur')
   })
 })

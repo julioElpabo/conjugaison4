@@ -32,6 +32,20 @@ export function chatMessageHasVisibleContent(message: {
   )
 }
 
+export function coachReactionText(
+  text: string,
+  requiredText = '',
+  fallbackText = '',
+  valueAlreadyCovered = '',
+): string {
+  const primaryText = text.trim() || fallbackText.trim()
+  const visiblePrimaryText = primaryText.replace(/<[^>]*>/gu, ' ').replace(/\s+/gu, ' ').trim()
+  const effectiveRequiredText = valueAlreadyCovered.trim() && visiblePrimaryText.includes(valueAlreadyCovered.trim())
+    ? ''
+    : requiredText.trim()
+  return [primaryText, effectiveRequiredText].filter(Boolean).join(' ')
+}
+
 export type CoachTurnStep =
   | { kind: 'reaction', eventType: CoachEvent }
   | { kind: 'instruction' }

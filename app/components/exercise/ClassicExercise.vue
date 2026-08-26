@@ -323,6 +323,7 @@ const summaryItems = computed(() => attempts.value.map((attempt, index) => ({
     || attempt.question.reponses.join(` ${ui('ou')} `),
   errorLabels: attempt.errorLabels || [],
   errorDetails: attempt.errorDetails || [],
+  attemptNumber: attempt.attemptNumber,
 })))
 const incorrectSummaryForms = computed(() => attempts.value.map(attempt => (
   isIdentificationExercise.value && attempt.status === 'incorrect'
@@ -486,12 +487,13 @@ function submitAnswer() {
   const impossibleEnding = isIdentificationExercise.value || result.isCorrect ? null : findImpossibleSingularEnding(answer.value, question)
   const hasAgreementError = !isIdentificationExercise.value && !result.isCorrect && Boolean(diagnoseCoachAgreement(answer.value, question))
   const diagnostic = isIdentificationExercise.value ? null : diagnoseCoachAnswer(answer.value, question, result.isCorrect)
-  const detectedAuxiliaryError = diagnostic?.errorKind === 'auxiliary'
+  const currentErrorDetails = result.isCorrect || isIdentificationExercise.value ? [] : learnerErrorDetails(answer.value, question)
+  const detectedAuxiliaryError = currentErrorDetails.some(detail => detail.code === 'compound.auxiliary')
+    && diagnostic?.errorKind === 'auxiliary'
     && diagnostic.learnerAuxiliary
     && diagnostic.expectedAuxiliary
     ? { learner: diagnostic.learnerAuxiliary, expected: diagnostic.expectedAuxiliary }
     : undefined
-  const currentErrorDetails = result.isCorrect || isIdentificationExercise.value ? [] : learnerErrorDetails(answer.value, question)
   const currentErrorLabels = currentErrorDetails.map(detail => detail.label)
   const attemptErrorLabels = mergeErrorLabels(pendingErrorLabels.value, currentErrorLabels)
   const attemptErrorDetails = mergeLearnerErrorDetails(pendingErrorDetails.value, currentErrorDetails)

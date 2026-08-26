@@ -16,6 +16,11 @@ type DatabaseRuntimeConfig = {
   dbName?: unknown
   dbUser?: unknown
   dbPassword?: unknown
+  public?: { siteUrl?: unknown }
+}
+
+interface AdminTestRunOptions {
+  baseUrl?: string
 }
 
 export function adminTestEnvironment(
@@ -126,6 +131,16 @@ const TEST_CATALOG: Record<string, { title: string, description: string, categor
     description: 'Simule les échanges, les délais, les corrections, les GIFs et 60 interventions par coach pour détecter les répétitions mécaniques.',
     category: 'Exercices et défis',
   },
+  'browser-user-scenarios.test.mjs': {
+    title: 'Parcours réels dans le navigateur',
+    description: 'Rejoue la visite guidée, la création d’un défi et le dialogue avec un coach comme le ferait un visiteur.',
+    category: 'Scénarios utilisateur',
+  },
+  'coach-error-feedback-scenarios.test.mjs': {
+    title: 'Diagnostics visibles du coach',
+    description: 'Rejoue des réponses fautives complètes et vérifie les explications réellement retenues sans répétition.',
+    category: 'Scénarios utilisateur',
+  },
 }
 
 const RESULT_GROUP_CATALOG: Record<string, { title: string, description: string }> = {
@@ -158,6 +173,8 @@ const RESULT_GROUP_CATALOG: Record<string, { title: string, description: string 
   'intégrité des 488 verbes du catalogue': { title: 'Audit complet du catalogue', description: 'Doublons, métadonnées, variantes, relations, formes manquantes et auxiliaires.' },
   'scénarios chronologiques du chat': { title: 'Déroulement des conversations', description: 'Ordre des bulles, consigne finale, correction, délai de trois secondes, grammaire et fin du questionnaire.' },
   'crédibilité des douze coaches': { title: 'Crédibilité des coaches', description: 'Diversité des formulations, absence de répétitions immédiates et variété des réactions visuelles.' },
+  'parcours utilisateur dans un navigateur réel': { title: 'Parcours utilisateur dans le navigateur', description: 'Actions réellement effectuées dans le site, de l’accueil jusqu’au changement de question avec un coach.' },
+  'diagnostic visible du futur antérieur à la place du conditionnel passé': { title: 'Futur antérieur ou conditionnel passé', description: 'Vérifie le diagnostic affiché pour « je serai entrée » au lieu de « je serais entrée », sans faux accord ni répétition.' },
 }
 
 async function coachCredibilityResults() {
@@ -166,7 +183,7 @@ async function coachCredibilityResults() {
 }
 
 export async function availableAdminTests() {
-  const categoryOrder = ['Conjugaison française', 'Exercices et défis', 'Administration', 'Technique']
+  const categoryOrder = ['Scénarios utilisateur', 'Conjugaison française', 'Exercices et défis', 'Administration', 'Technique']
   const entries = await readdir(TEST_DIRECTORY, { withFileTypes: true })
   return entries
     .filter(entry => entry.isFile() && /^[a-z0-9-]+\.test\.mjs$/u.test(entry.name))
@@ -267,7 +284,7 @@ function repairPrompt(
   return lines.join('\n')
 }
 
-export async function runAdminTests(requestedFiles: string[]) {
+export async function runAdminTests(requestedFiles: string[], options: AdminTestRunOptions = {}) {
   const available = await availableAdminTests()
   const allowed = new Set(available.map(test => test.id))
   const files = requestedFiles.length > 0 ? [...new Set(requestedFiles)] : [...allowed]
@@ -285,11 +302,18 @@ export async function runAdminTests(requestedFiles: string[]) {
   }
 
   const executions = await executeAdminTestGroups([...filesByCategory], async (category, categoryFiles) => {
+    const executionEnvironment = categoryFiles.includes('browser-user-scenarios.test.mjs')
+      ? {
+          ...testEnvironment,
+          ADMIN_BROWSER_TESTS: '1',
+          ADMIN_TEST_BASE_URL: options.baseUrl || String(useRuntimeConfig().public.siteUrl || ''),
+        }
+      : testEnvironment
     const execution = await new Promise<{ exitCode: number, stdout: string, stderr: string, timedOut: boolean }>((resolveExecution) => {
       execFile(
         process.execPath,
         adminTestArguments(categoryFiles),
-        { cwd: process.cwd(), env: testEnvironment, timeout: ADMIN_TEST_EXECUTION_TIMEOUT_MS, maxBuffer: 2_000_000 },
+        { cwd: process.cwd(), env: executionEnvironment, timeout: ADMIN_TEST_EXECUTION_TIMEOUT_MS, maxBuffer: 2_000_000 },
         (error, stdout, stderr) => {
           const exitCode = error && typeof error.code === 'number' ? error.code : (error ? 1 : 0)
           resolveExecution({

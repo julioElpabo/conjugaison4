@@ -5,6 +5,7 @@ import {
   CHAT_INCORRECT_DELAY_MS,
   chatMessageHasVisibleContent,
   chatReactionAllowsMedia,
+  coachReactionText,
 } from '../shared/utils/coach-conversation.ts'
 
 describe('enchaînement du chat après une réponse', () => {
@@ -44,5 +45,23 @@ describe('enchaînement du chat après une réponse', () => {
     assert.equal(chatMessageHasVisibleContent({ text: '', literaryCitation: { target: 'commencera' } }), true)
     assert.equal(chatMessageHasVisibleContent({ text: '', identificationForm: { target: 'commencera' } }), true)
     assert.equal(chatMessageHasVisibleContent({ text: '', spokenAnswer: 'Vous faites' }), true)
+  })
+
+  it('annonce toujours explicitement une erreur si aucune réaction compatible n’existe', () => {
+    assert.equal(coachReactionText('', '', 'C’est faux.'), 'C’est faux.')
+    assert.equal(coachReactionText('Essaie encore.', '', 'C’est faux.'), 'Essaie encore.')
+    assert.equal(coachReactionText('', 'Relis la consigne.', 'C’est faux.'), 'C’est faux. Relis la consigne.')
+  })
+
+  it('ajoute la correction sauf si la réaction du coach la contient déjà', () => {
+    const correction = 'La bonne réponse est « ils ont réagi ».'
+    assert.equal(
+      coachReactionText('C’est faux.', correction, '', 'ils ont réagi'),
+      `C’est faux. ${correction}`,
+    )
+    assert.equal(
+      coachReactionText('C’est faux. La bonne réponse est <b>« ils ont réagi »</b>.', correction, '', 'ils ont réagi'),
+      'C’est faux. La bonne réponse est <b>« ils ont réagi »</b>.',
+    )
   })
 })

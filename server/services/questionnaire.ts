@@ -89,6 +89,7 @@ interface RadicalReferenceRow extends RowDataPacket {
   conjugaison3: string
   mode_name: string
   temps_name: string
+  is_compound: number
 }
 
 export function conjugationConfusionsFor(
@@ -103,6 +104,7 @@ export function conjugationConfusionsFor(
       tense: form.temps_name,
       mode: form.mode_name,
       forms: unique([form.conjugaison1, form.conjugaison2, form.conjugaison3]),
+      isCompound: Boolean(form.is_compound),
     }))
     .filter(candidate => candidate.forms.length)
 }
@@ -964,7 +966,8 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
       const [referenceRows] = await database.execute<RadicalReferenceRow[]>(`
         SELECT vc.verbe_id, vc.personne_id, vc.temp_id, p.pronom,
                vc.conjugaison1, vc.conjugaison2, vc.conjugaison3,
-               m.name AS mode_name, t.name AS temps_name
+               m.name AS mode_name, t.name AS temps_name,
+               t.isTempsCompose AS is_compound
         FROM verbesconjugues vc
         INNER JOIN personnes p ON p.id = vc.personne_id
         INNER JOIN temps t ON t.id = vc.temp_id

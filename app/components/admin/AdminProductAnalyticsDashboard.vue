@@ -11,7 +11,7 @@ const funnel = (key: string) => props.product.funnels[key] || []
 const printOptionLabels: Record<string, string> = {
   inclusiveDisplay: 'Affichage inclusif', showGrade: 'Niveau / classe', showVerbs: 'Liste des verbes',
   showTenses: 'Liste des temps', showFirstName: 'Prénom', showLastName: 'Nom', showDate: 'Date',
-  showRandomNumber: 'Numéro aléatoire',
+  showRandomNumber: 'Code du défi',
 }
 
 function relabel(items: AnalyticsProductItem[], labels: Record<string, string>) {

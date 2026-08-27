@@ -178,6 +178,7 @@ function clearMessages() {
 
 function markAsCustom() {
   activePresetId.value = undefined
+  shareCode.value = ''
   clearMessages()
 }
 
@@ -322,7 +323,6 @@ function saveChallenge() {
   if (!isReady.value) return
   track('feature_selected', { feature: 'challenge.share' })
   const activePreset = catalogue.value.presets.find(preset => preset.id === activePresetId.value)
-  shareCode.value = ''
   shareError.value = ''
   shareTitle.value = activePreset?.label || savedChallengeTitle.value || ui('Défi de conjugaison')
   shareDescription.value = savedChallengeDescription.value
@@ -360,6 +360,7 @@ async function restoreChallenge(code: string, closeDialog = true) {
     applySharedChallenge(restored)
     savedChallengeTitle.value = restored.title || ''
     savedChallengeDescription.value = restored.description || ''
+    shareCode.value = restored.code
     activePresetId.value = undefined
     sourcePresetId.value = undefined
     sourcePresetRandomCount.value = null
@@ -465,12 +466,12 @@ function onToggleTense(id: number) {
             :complement-options="challenge.complementOptions"
             :complement-verbs="selectedVerbs"
             @update-question-count="challenge.questionCount = $event; markAsCustom()"
-            @update-exercise-kind="challenge.exerciseKind = $event"
-            @update-identification-source="challenge.identificationSource = $event"
-            @update-inclusive-pronouns="challenge.inclusivePronouns = $event"
-            @update-include-on-pronoun="challenge.includeOnPronoun = $event"
+            @update-exercise-kind="challenge.exerciseKind = $event; markAsCustom()"
+            @update-identification-source="challenge.identificationSource = $event; markAsCustom()"
+            @update-inclusive-pronouns="challenge.inclusivePronouns = $event; markAsCustom()"
+            @update-include-on-pronoun="challenge.includeOnPronoun = $event; markAsCustom()"
             @update-learning-support-mode="challenge.learningSupportMode = $event; markAsCustom()"
-            @update-voice-mode="challenge.voiceMode = $event"
+            @update-voice-mode="challenge.voiceMode = $event; markAsCustom()"
             @update-complement-options="updateComplementOptions"
           />
         </div>
@@ -544,11 +545,14 @@ function onToggleTense(id: number) {
       :verbs="selectedVerbs"
       :tenses="selectedTenses"
       :exercise-kind="challenge.exerciseKind"
+      :challenge="challenge"
+      :existing-challenge-code="shareCode"
       :options="challenge.printOptions"
       :requested-question-count="challenge.questionCount"
       :regenerating="busyAction === 'print'"
       :analytics-metadata="exerciseUsageMetadata('print')"
       @update-options="challenge.printOptions = $event"
+      @challenge-code-created="shareCode = $event"
       @regenerate="preparePrint"
       @close="isPrintOpen = false"
     />

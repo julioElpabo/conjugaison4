@@ -73,12 +73,20 @@ export async function assertDefiSelectionExists(definition: DefiDefinition) {
   }
 }
 
-export async function saveDefi(definition: DefiDefinition, learnerAccountId?: number) {
+export async function saveDefi(
+  definition: DefiDefinition,
+  learnerAccountId?: number,
+) {
   const database = useDatabase()
   await assertDefiSelectionExists(definition)
   const connection = await database.getConnection()
   try {
     await connection.beginTransaction()
+    await connection.execute(`
+      DELETE FROM defis
+      WHERE isANePasEffacer = 0
+        AND expires_at <= CURRENT_TIMESTAMP
+    `)
     for (let attempt = 0; attempt < 12; attempt++) {
       const code = createCode()
       const [existing] = await connection.execute<CountRow[]>(
@@ -88,7 +96,8 @@ export async function saveDefi(definition: DefiDefinition, learnerAccountId?: nu
       if (Number(existing[0]?.count) !== 0) continue
 
       const [result] = await connection.execute<ResultSetHeader>(
-        'INSERT INTO defis (name, defi) VALUES (?, ?)',
+        `INSERT INTO defis (name, defi, expires_at)
+         VALUES (?, ?, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 6 MONTH))`,
         [code, serializeDefi(definition)]
       )
       if (learnerAccountId) {
@@ -115,7 +124,10 @@ export async function saveDefi(definition: DefiDefinition, learnerAccountId?: nu
 export async function getDefi(code: string): Promise<DefiDefinition> {
   const database = useDatabase()
   const [rows] = await database.execute<DefiRow[]>(
-    'SELECT name, defi FROM defis WHERE name = ? ORDER BY id DESC LIMIT 1',
+    `SELECT name, defi FROM defis
+     WHERE name = ?
+       AND (isANePasEffacer = 1 OR expires_at > CURRENT_TIMESTAMP)
+     ORDER BY id DESC LIMIT 1`,
     [code]
   )
   const row = rows[0]

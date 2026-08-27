@@ -17,6 +17,7 @@ export default defineEventHandler(async (event) => {
     FROM learner_saved_challenges saved
     INNER JOIN defis d ON d.id=saved.defi_id
     WHERE saved.account_id=?
+      AND (d.isANePasEffacer = 1 OR d.expires_at > CURRENT_TIMESTAMP)
     ORDER BY saved.saved_at DESC, d.id DESC
   `, [learner.id])
 

@@ -712,6 +712,10 @@ const uiMessages = {
   "Liste des verbes": { de: "Verbliste", en: "Verb list", it: "Elenco dei verbi", es: "Lista de verbos" },
   "Liste des temps": { de: "Liste der Zeitformen", en: "Tense list", it: "Elenco dei tempi", es: "Lista de tiempos" },
   "Num\xE9ro questionnaire/corrig\xE9": { de: "Nummer des Fragebogens/der L\xF6sung", en: "Questionnaire/answer-key number", it: "Numero questionario/soluzioni", es: "N\xFAmero de cuestionario/soluciones" },
+  "Cr\xE9ation du code\u2026": { de: "Code wird erstellt\u2026", en: "Creating code\u2026", it: "Creazione del codice\u2026", es: "Creando el c\xF3digo\u2026" },
+  "Le d\xE9fi est enregistr\xE9 pendant 6 mois.": { de: "Die \xDCbung wird 6 Monate lang gespeichert.", en: "The challenge is saved for 6 months.", it: "L\u2019esercizio viene salvato per 6 mesi.", es: "El ejercicio se guarda durante 6 meses." },
+  "Impossible de cr\xE9er le code du d\xE9fi.": { de: "Der \xDCbungscode konnte nicht erstellt werden.", en: "The challenge code could not be created.", it: "Impossibile creare il codice dell\u2019esercizio.", es: "No se ha podido crear el c\xF3digo del ejercicio." },
+  "Le code du d\xE9fi n\u2019a pas pu \xEAtre cr\xE9\xE9.": { de: "Der \xDCbungscode konnte nicht erstellt werden.", en: "The challenge code could not be created.", it: "Non \xE8 stato possibile creare il codice dell\u2019esercizio.", es: "No se ha podido crear el c\xF3digo del ejercicio." },
   "Aper\xE7u exact de la fiche PDF et de son corrig\xE9": { de: "Genaue Vorschau des PDF-Arbeitsblatts und der L\xF6sungen", en: "Exact preview of the PDF worksheet and its answer key", it: "Anteprima esatta della scheda PDF e delle soluzioni", es: "Vista exacta de la ficha PDF y sus soluciones" },
   "Cr\xE9ation de l\u2019aper\xE7u PDF\u2026": { de: "PDF-Vorschau wird erstellt\u2026", en: "Creating PDF preview\u2026", it: "Creazione dell\u2019anteprima PDF\u2026", es: "Creando vista previa en PDF\u2026" },
   "La fiche et le corrig\xE9 sont mis en page.": { de: "Arbeitsblatt und L\xF6sungen werden formatiert.", en: "The worksheet and answer key are being laid out.", it: "La scheda e le soluzioni vengono impaginate.", es: "Se est\xE1n maquetando la ficha y las soluciones." },
@@ -1607,7 +1611,7 @@ const _routes = [
   {
     name: "admin-charts",
     path: "/admin/charts",
-    component: () => import('./charts-DJQ3RlkX.mjs')
+    component: () => import('./charts-B5aZ8lDe.mjs')
   },
   {
     name: "admin-coaches",
@@ -1682,12 +1686,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-dkRRT38f.mjs')
+    component: () => import('./_code_-Csr1jZXL.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-TTaBI2Ni.mjs')
+    component: () => import('./_slug_-BuzbkW1o.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1732,7 +1736,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-DKaM8bEO.mjs')
+    component: () => import('./exercices-de-conjugaison-Bt77HYyX.mjs')
   },
   {
     name: "mon-compte",
@@ -1748,7 +1752,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-OPMtLIZx.mjs')
+    component: () => import('./nouveau-defi-CoxohRx2.mjs')
   },
   {
     name: "signin",
@@ -1758,7 +1762,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-C7bs38Kw.mjs')
+    component: () => import('./index-DiS51vg8.mjs')
   },
   {
     name: "mode-tense",
@@ -1788,7 +1792,7 @@ const _routes = [
   {
     name: "localized-admin-charts",
     path: "/:locale(fr|de|en|it|es)/admin/charts",
-    component: () => import('./charts-DJQ3RlkX.mjs')
+    component: () => import('./charts-B5aZ8lDe.mjs')
   },
   {
     name: "localized-admin-coaches",
@@ -1863,12 +1867,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-dkRRT38f.mjs')
+    component: () => import('./_code_-Csr1jZXL.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es)/defis/:slug()",
-    component: () => import('./_slug_-TTaBI2Ni.mjs')
+    component: () => import('./_slug_-BuzbkW1o.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1913,7 +1917,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-DKaM8bEO.mjs')
+    component: () => import('./exercices-de-conjugaison-Bt77HYyX.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1929,7 +1933,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-OPMtLIZx.mjs')
+    component: () => import('./nouveau-defi-CoxohRx2.mjs')
   },
   {
     name: "localized-signin",
@@ -1939,7 +1943,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-C7bs38Kw.mjs')
+    component: () => import('./index-DiS51vg8.mjs')
   },
   {
     name: "localized-mode-tense",

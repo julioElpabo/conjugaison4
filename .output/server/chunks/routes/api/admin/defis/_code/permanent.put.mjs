@@ -20,7 +20,9 @@ const permanent_put = defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "Code de d\xE9fi invalide" });
   }
   const [result] = await useDatabase().execute(`
-    UPDATE defis SET isANePasEffacer = 1, modified = CURRENT_TIMESTAMP WHERE name = ?
+    UPDATE defis
+    SET isANePasEffacer = 1, expires_at = NULL, modified = CURRENT_TIMESTAMP
+    WHERE name = ?
   `, [code]);
   if (result.affectedRows === 0) {
     throw createError({ statusCode: 404, statusMessage: "D\xE9fi introuvable" });

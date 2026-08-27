@@ -371,15 +371,20 @@ function requestedReferenceVerificationHtml(question, reference, tense) {
   return `<figure><figcaption>V\xE9rifie la r\xE9ponse</figcaption><blockquote><p>Avec <strong>${escapedHtml(pronoun)}</strong> au pr\xE9sent, tu peux v\xE9rifier : radical ${radicalBadge(sourceStem)} + terminaison ${endingBadge(ending)}.</p><b>${assembledFormBadges(sourceStem, ending)}<i>\u2713</i></b></blockquote></figure>`;
 }
 function requestedReferenceHelpHtml(question, tense, reference, verb) {
-  var _a;
+  var _a, _b;
   const subject = ((_a = reference.referenceSubject) == null ? void 0 : _a.trim()) || question.pronom || question.saisiePrefixe || "";
   const requestedSubject = question.pronom || question.saisiePrefixe || "";
   const sameDisplayedSubject = referenceSubjectGroup(subject) === referenceSubjectGroup(requestedSubject);
   const display = displayedConjugatedForm(subject, reference.form, question.infinitif || (verb == null ? void 0 : verb.infinitif) || "", verb);
+  const mode = normalized$1(question.mode || ((_b = tense == null ? void 0 : tense.mode) == null ? void 0 : _b.name));
+  const time = normalized$1(question.temps || (tense == null ? void 0 : tense.name));
+  const pastSimpleSeries = mode === "indicatif" && time === "passe simple" ? pastSimpleSeriesFromReference(reference.form) : null;
+  const requestedPerson = subjectIndex(question);
+  const endingsKnowledge = pastSimpleSeries ? `<blockquote><strong>${escapedHtml(endingsKnowledgeTitle(question, tense))}</strong><table><tbody>${pastSimpleSeries.endings.map((ending, index) => `<tr><th><strong>${escapedHtml(endingPronouns("indicatif", 6)[index] || "")}</strong></th><td>${index === requestedPerson ? endingBadge(ending) : `<strong>-${escapedHtml(ending)}</strong>`}</td></tr>`).join("")}</tbody></table></blockquote>` : "";
   const intro = sameDisplayedSubject ? `La forme demand\xE9e est justement la <strong>forme rep\xE8re</strong> ${escapedHtml(tenseContext(question, tense))}.` : `La forme demand\xE9e utilise la m\xEAme forme verbale que cette <strong>forme rep\xE8re</strong> ${escapedHtml(tenseContext(question, tense))}.`;
   const decomposition = decomposeConjugationForm(question, verb, tense);
   const construction = decomposition ? `<figure><figcaption>Construis la r\xE9ponse</figcaption><blockquote><p>Tu peux aussi la reconstruire : radical ${radicalBadge(decomposition.base)} + terminaison ${endingBadge(decomposition.ending)}.</p><b>${assembledFormBadges(decomposition.base, decomposition.ending)}<i>\u2713</i></b>${pronominalAnswerHelp(requestedSubject, conjugatedCore$1(question.conjugaison1 || ""), question.infinitif || (verb == null ? void 0 : verb.infinitif) || "", verb, question.conjugaison1 || "")}</blockquote></figure>` : requestedReferenceVerificationHtml(question, reference, tense);
-  return `<figure>${knowledgeCaption()}<blockquote><strong>Forme rep\xE8re</strong><p>${intro} Apprends-la par c\u0153ur, c\u2019est tr\xE8s utile :</p><p>${rememberedFormBadgeMarkup(display)}</p></blockquote></figure>${construction}${referenceUsefulnessHtml(question, tense, reference, verb)}`;
+  return `<figure>${knowledgeCaption()}<blockquote><strong>Forme rep\xE8re</strong><p>${intro} Apprends-la par c\u0153ur, c\u2019est tr\xE8s utile :</p><p>${rememberedFormBadgeMarkup(display)}</p></blockquote>${endingsKnowledge}</figure>${construction}${referenceUsefulnessHtml(question, tense, reference, verb)}`;
 }
 function shouldUseReferenceMethodForRegularForm(question, reference, verb, tense) {
   var _a;

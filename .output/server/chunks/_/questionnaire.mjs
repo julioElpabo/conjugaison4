@@ -170,7 +170,8 @@ function conjugationConfusionsFor(row, references) {
   return forms.filter((form) => Number(form.personne_id) === Number(row.personne_id) && Number(form.temp_id) !== Number(row.temp_id)).map((form) => ({
     tense: form.temps_name,
     mode: form.mode_name,
-    forms: unique([form.conjugaison1, form.conjugaison2, form.conjugaison3])
+    forms: unique([form.conjugaison1, form.conjugaison2, form.conjugaison3]),
+    isCompound: Boolean(form.is_compound)
   })).filter((candidate) => candidate.forms.length);
 }
 class QuestionnaireSelectionError extends Error {
@@ -845,7 +846,8 @@ async function generateQuestionnaire(request) {
       const [referenceRows] = await database.execute(`
         SELECT vc.verbe_id, vc.personne_id, vc.temp_id, p.pronom,
                vc.conjugaison1, vc.conjugaison2, vc.conjugaison3,
-               m.name AS mode_name, t.name AS temps_name
+               m.name AS mode_name, t.name AS temps_name,
+               t.isTempsCompose AS is_compound
         FROM verbesconjugues vc
         INNER JOIN personnes p ON p.id = vc.personne_id
         INNER JOIN temps t ON t.id = vc.temp_id

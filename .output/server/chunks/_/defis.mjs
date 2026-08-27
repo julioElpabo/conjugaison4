@@ -56,6 +56,11 @@ async function saveDefi(definition, learnerAccountId) {
   const connection = await database.getConnection();
   try {
     await connection.beginTransaction();
+    await connection.execute(`
+      DELETE FROM defis
+      WHERE isANePasEffacer = 0
+        AND expires_at <= CURRENT_TIMESTAMP
+    `);
     for (let attempt = 0; attempt < 12; attempt++) {
       const code = createCode();
       const [existing] = await connection.execute(
@@ -64,7 +69,8 @@ async function saveDefi(definition, learnerAccountId) {
       );
       if (Number((_a = existing[0]) == null ? void 0 : _a.count) !== 0) continue;
       const [result] = await connection.execute(
-        "INSERT INTO defis (name, defi) VALUES (?, ?)",
+        `INSERT INTO defis (name, defi, expires_at)
+         VALUES (?, ?, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 6 MONTH))`,
         [code, serializeDefi(definition)]
       );
       if (learnerAccountId) {
@@ -87,7 +93,10 @@ async function saveDefi(definition, learnerAccountId) {
 async function getDefi(code) {
   const database = useDatabase();
   const [rows] = await database.execute(
-    "SELECT name, defi FROM defis WHERE name = ? ORDER BY id DESC LIMIT 1",
+    `SELECT name, defi FROM defis
+     WHERE name = ?
+       AND (isANePasEffacer = 1 OR expires_at > CURRENT_TIMESTAMP)
+     ORDER BY id DESC LIMIT 1`,
     [code]
   );
   const row = rows[0];

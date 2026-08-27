@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto'
+
 type CoachHelpFeedbackType = 'useful' | 'unclear' | 'error' | 'remark'
 
 interface CoachHelpFeedbackBody {
@@ -50,20 +52,40 @@ export default defineEventHandler(async (event) => {
   const displayedHelp = body?.displayedHelp ?? null
   const displayedHelpHtml = shortText(body?.displayedHelpHtml, 120_000)
   const uiContext = contextRecord(body?.uiContext)
+  const sessionId = shortText(context.sessionId, 120)
+  const exerciseRunId = shortText(context.exerciseRunId, 120)
+  const questionNumber = numericId(context.questionNumber)
+  const helpId = numericId(context.helpId)
+  const fingerprint = sessionId && exerciseRunId && questionNumber
+    ? createHash('sha256')
+        .update(['user', sessionId, exerciseRunId, questionNumber, helpId || 'automatic'].join('|'))
+        .digest('hex')
+    : null
 
   await useDatabase().execute(
     `INSERT INTO coach_help_feedback
-      (feedback_type, comment, session_id, exercise_run_id, question_number, help_id, help_name, coach_id, coach_name,
+      (feedback_type, fingerprint, comment, session_id, exercise_run_id, question_number, help_id, help_name, coach_id, coach_name,
        verb_id, verb, tense_id, tense, mode, person, expected_answer, context_json, question_json, exercise_context_json,
        attempts_json, messages_json, displayed_help_json, displayed_help_html, ui_context_json, user_agent)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON DUPLICATE KEY UPDATE
+       feedback_type=VALUES(feedback_type), comment=VALUES(comment), help_id=VALUES(help_id), help_name=VALUES(help_name),
+       coach_id=VALUES(coach_id), coach_name=VALUES(coach_name), verb_id=VALUES(verb_id), verb=VALUES(verb),
+       tense_id=VALUES(tense_id), tense=VALUES(tense), mode=VALUES(mode), person=VALUES(person),
+       expected_answer=VALUES(expected_answer), context_json=VALUES(context_json), question_json=VALUES(question_json),
+       exercise_context_json=VALUES(exercise_context_json), attempts_json=VALUES(attempts_json), messages_json=VALUES(messages_json),
+       displayed_help_json=VALUES(displayed_help_json), displayed_help_html=VALUES(displayed_help_html),
+       ui_context_json=VALUES(ui_context_json), user_agent=VALUES(user_agent), validation_status='unvalidated',
+       validated_at=NULL, moderation_status='active', moderation_note=NULL, moderated_at=NULL, deleted_at=NULL,
+       created_at=CURRENT_TIMESTAMP`,
     [
       feedbackType,
+      fingerprint,
       comment,
-      shortText(context.sessionId, 120),
-      shortText(context.exerciseRunId, 120),
-      numericId(context.questionNumber),
-      numericId(context.helpId),
+      sessionId,
+      exerciseRunId,
+      questionNumber,
+      helpId,
       shortText(context.helpName, 120),
       numericId(context.coachId),
       shortText(context.coachName, 120),

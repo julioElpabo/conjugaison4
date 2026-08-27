@@ -24,6 +24,7 @@ export interface ConjugationSourceRow {
     tense: string
     mode: string
     forms: string[]
+    isCompound?: boolean
   }>
   agreement_rule?: string | null
   complement_phrase?: string | null
@@ -391,10 +392,17 @@ export function formatConjugationQuestion(
   const conjugationConfusions = (row.conjugation_confusions || []).map(candidate => ({
     tense: candidate.tense,
     mode: candidate.mode,
-    answers: unique(candidate.forms.flatMap(form => [
-      formatAnswer(pronoun, form, candidate.mode, row.infinitif),
-      withPronoun(pronoun, form, row.infinitif),
-    ])),
+    answers: unique(candidate.forms.flatMap(form => agreementVariants(
+      form,
+      pronoun,
+      Boolean(candidate.isCompound),
+      row.auxiliaire,
+      row.participe_passe,
+      row.agreement_rule,
+    ).flatMap(agreedForm => [
+      formatAnswer(pronoun, agreedForm, candidate.mode, row.infinitif),
+      withPronoun(pronoun, agreedForm, row.infinitif),
+    ]))),
   })).filter(candidate => candidate.answers.length)
 
   return {

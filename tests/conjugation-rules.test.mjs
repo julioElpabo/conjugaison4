@@ -114,6 +114,29 @@ describe('diagnostic d’un autre temps ou mode', () => {
     )
     assert.equal(isAnswerCorrect('tu finis', question.reponses), false)
   })
+
+  it('accorde aussi au féminin pluriel les formes composées utilisées pour diagnostiquer un autre temps', () => {
+    const question = formatConjugationQuestion(row({
+      infinitif: 'partir',
+      auxiliaire: 'être',
+      participe_passe: 'parti',
+      conjugaison1: 'partent',
+      temps_name: 'présent',
+      conjugation_confusions: [
+        { mode: 'indicatif', tense: 'passé composé', forms: ['sont partis'], isCompound: true },
+        { mode: 'subjonctif', tense: 'passé', forms: ['soient partis'], isCompound: true },
+      ],
+    }), 'elles')
+
+    assert.deepEqual(question.conjugationConfusions, [
+      { mode: 'indicatif', tense: 'passé composé', answers: ['elles sont parties'] },
+      { mode: 'subjonctif', tense: 'passé', answers: ["qu'elles soient parties", 'elles soient parties'] },
+    ])
+    assert.deepEqual(
+      findConjugationConfusions('elles sont parties', question).map(item => [item.mode, item.tense]),
+      [['indicatif', 'passé composé']],
+    )
+  })
 })
 
 describe('apostrophes et élisions françaises', () => {

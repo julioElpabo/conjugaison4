@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const { ui, uiLabel } = useLanguagePreferences()
 import type { ExerciseQuestion } from '~~/shared/types/conjugation'
-import type { ExerciseKind, PrintOptions, Tense, Verb } from '~/composables/useChallengeBuilder'
+import type { ChallengeConfig, ExerciseKind, PrintOptions, Tense, Verb } from '~/composables/useChallengeBuilder'
 import { TENSE_IDENTIFICATION_INSTRUCTION } from '~~/shared/utils/exercise-instructions'
 import {
   correctionItemHeight,
@@ -22,6 +22,8 @@ const props = defineProps<{
   verbs: Verb[]
   tenses: Tense[]
   exerciseKind: ExerciseKind
+  challenge: ChallengeConfig
+  existingChallengeCode?: string
   options: PrintOptions
   requestedQuestionCount: number
   regenerating?: boolean
@@ -31,9 +33,11 @@ const props = defineProps<{
 const emit = defineEmits<{
   close: []
   updateOptions: [value: PrintOptions]
+  challengeCodeCreated: [code: string]
   regenerate: []
 }>()
 const { track } = useSiteAnalytics()
+const challengeApi = useChallengeApi()
 
 function spacingBand(value: number, small: number, large: number) {
   return value <= small ? 'compact' : value >= large ? 'large' : 'standard'
@@ -57,13 +61,10 @@ function printAnalyticsMetadata(format: 'pdf' | 'word') {
   }
 }
 
-function randomSheetNumber(excluding?: number) {
-  let number = Math.floor(Math.random() * 9000) + 1000
-  while (number === excluding) number = Math.floor(Math.random() * 9000) + 1000
-  return number
-}
-
-const sheetNumber = ref(randomSheetNumber())
+const challengeCode = ref(props.existingChallengeCode || '')
+const challengeCodeError = ref('')
+const isChallengeCodeBusy = ref(false)
+let challengeCodeRequest: Promise<void> | undefined
 const dialog = useTemplateRef<HTMLElement>('print-dialog')
 const isPdfBusy = ref(false)
 const isWordBusy = ref(false)
@@ -148,6 +149,7 @@ const exerciseFirstPageCapacity = computed(() => {
   }
   if (props.options.showVerbs) capacity -= 8
   if (props.options.showTenses) capacity -= 8
+  if (props.options.showRandomNumber) capacity -= 5
   if (isTenseIdentification.value) capacity -= 19
   else capacity -= 6
   return capacity
@@ -173,7 +175,7 @@ const exercisePages = computed(() => paginateByHeight(
 ))
 const correctionPages = computed(() => paginateByHeight(
   printableQuestions.value,
-  205,
+  205 - (props.options.showRandomNumber ? 5 : 0),
   220,
   question => isTableLayout.value
     ? tableQuestionHeight(question, true)
@@ -189,6 +191,31 @@ function setPrintOption<K extends keyof PrintOptions>(key: K, value: PrintOption
     ...props.options,
     [key]: value
   })
+  if (key === 'showRandomNumber' && value === true) void ensureChallengeCode()
+}
+
+function ensureChallengeCode() {
+  if (challengeCode.value) return Promise.resolve()
+  if (challengeCodeRequest) return challengeCodeRequest
+  isChallengeCodeBusy.value = true
+  challengeCodeError.value = ''
+  challengeCodeRequest = (async () => {
+    try {
+      const result = await challengeApi.savePrintedChallenge({
+        ...props.challenge,
+        printOptions: { ...props.challenge.printOptions, showRandomNumber: true },
+      })
+      challengeCode.value = result.code
+      emit('challengeCodeCreated', result.code)
+    } catch (error) {
+      console.error(ui('Impossible de créer le code du défi.'), error)
+      challengeCodeError.value = ui('Le code du défi n’a pas pu être créé.')
+    } finally {
+      isChallengeCodeBusy.value = false
+      challengeCodeRequest = undefined
+    }
+  })()
+  return challengeCodeRequest
 }
 
 function pdfSafe(value: unknown) {
@@ -232,7 +259,9 @@ async function buildPdf() {
     const left = 17
     const right = 193
     const title = pdfSafe(props.options.title || ui('Défi de conjugaison'))
-    const identifier = props.options.showRandomNumber ? ` n° ${sheetNumber.value}` : ''
+    const identifier = props.options.showRandomNumber && challengeCode.value
+      ? `${ui('Code du défi')} : ${challengeCode.value}`
+      : ''
     const bodySize = pdfBodySize.value
     const correctionSize = pdfCorrectionSize.value
     const lineHeight = pdfLineHeightMm.value
@@ -258,7 +287,11 @@ async function buildPdf() {
         pdf.setFont('helvetica', 'normal')
         pdf.setFontSize(inclusivePrint.value ? 12 : 8.5)
         pdf.setTextColor(90, 90, 90)
-        pdf.text(`${title}${identifier}`, pageWidth / 2, 12, { align: 'center' })
+        pdf.text(title, pageWidth / 2, identifier ? 10 : 12, { align: 'center' })
+        if (identifier) {
+          pdf.setFontSize(inclusivePrint.value ? 10 : 7.5)
+          pdf.text(identifier, pageWidth / 2, 15, { align: 'center' })
+        }
         pdf.setTextColor(20, 20, 20)
         return 32
       }
@@ -282,10 +315,18 @@ async function buildPdf() {
       }
       pdf.setFont('helvetica', 'bold')
       pdf.setFontSize(17)
-      const heading = `${title}${identifier}`
+      const heading = title
       const titleLines = pdf.splitTextToSize(inclusivePrint.value ? heading : heading.toUpperCase(), 150)
       pdf.text(titleLines, left, y + 8)
       y += titleLines.length * 7 + 10
+      if (identifier) {
+        pdf.setFont('helvetica', 'normal')
+        pdf.setFontSize(inclusivePrint.value ? 10 : 8.5)
+        pdf.setTextColor(80, 80, 80)
+        pdf.text(identifier, left, y - 5)
+        pdf.setTextColor(20, 20, 20)
+        y += 5
+      }
       pdf.setFontSize(inclusivePrint.value ? 12 : 9)
       if (props.options.showVerbs) {
         const lines = pdf.splitTextToSize(`Verbes : ${pdfSafe(props.verbs.map(verb => verb.infinitif).join(', '))}`, 176)
@@ -311,7 +352,11 @@ async function buildPdf() {
         pdf.setFont('helvetica', 'normal')
         pdf.setFontSize(inclusivePrint.value ? 12 : 8.5)
         pdf.setTextColor(90, 90, 90)
-        pdf.text(`${title} - corrigé${identifier}`, pageWidth / 2, 12, { align: 'center' })
+        pdf.text(`${title} - ${ui('CORRIGÉ').toLocaleLowerCase('fr-CH')}`, pageWidth / 2, identifier ? 10 : 12, { align: 'center' })
+        if (identifier) {
+          pdf.setFontSize(inclusivePrint.value ? 10 : 7.5)
+          pdf.text(identifier, pageWidth / 2, 15, { align: 'center' })
+        }
         pdf.setTextColor(20, 20, 20)
         return 32
       }
@@ -321,8 +366,15 @@ async function buildPdf() {
       const correctionTitle = inclusivePrint.value
         ? capitalizePrintLine(ui('CORRIGÉ').toLocaleLowerCase('fr-CH'))
         : ui('CORRIGÉ')
-      pdf.text(`${correctionTitle}${identifier}`, left, 26)
-      return 38
+      pdf.text(correctionTitle, left, 26)
+      if (identifier) {
+        pdf.setFont('helvetica', 'normal')
+        pdf.setFontSize(inclusivePrint.value ? 10 : 8.5)
+        pdf.setTextColor(80, 80, 80)
+        pdf.text(identifier, left, 32)
+        pdf.setTextColor(20, 20, 20)
+      }
+      return identifier ? 43 : 38
     }
 
     function pdfLiteraryCitation(question: ExerciseQuestion, width: number) {
@@ -616,6 +668,8 @@ async function downloadPdf() {
   track('feature_selected', { feature: 'download.pdf' })
   isPdfBusy.value = true
   try {
+    if (props.options.showRandomNumber) await ensureChallengeCode()
+    if (props.options.showRandomNumber && !challengeCode.value) throw new Error('Challenge code unavailable')
     const pdf = await buildPdf()
     pdf.save(pdfFileName())
     track('pdf_downloaded', printAnalyticsMetadata('pdf'))
@@ -665,27 +719,29 @@ function schedulePdfPreview() {
 }
 
 watch(
+  () => props.existingChallengeCode,
+  code => {
+    if (code) challengeCode.value = code
+  }
+)
+
+watch(
   () => ({
     questions: printableQuestions.value,
     verbs: props.verbs,
     tenses: props.tenses,
     exerciseKind: props.exerciseKind,
     options: props.options,
+    challengeCode: challengeCode.value,
   }),
   schedulePdfPreview,
   { deep: true }
 )
 
-watch(
-  () => props.questions,
-  () => {
-    sheetNumber.value = randomSheetNumber(sheetNumber.value)
-  }
-)
-
 onMounted(() => {
   track('feature_exposed', { feature: 'download.pdf' })
   track('feature_exposed', { feature: 'download.word' })
+  if (props.options.showRandomNumber) void ensureChallengeCode()
   void refreshPdfPreview()
 })
 
@@ -700,6 +756,8 @@ async function downloadWord() {
   track('feature_selected', { feature: 'download.word' })
   isWordBusy.value = true
   try {
+    if (props.options.showRandomNumber) await ensureChallengeCode()
+    if (props.options.showRandomNumber && !challengeCode.value) throw new Error('Challenge code unavailable')
     const {
       AlignmentType,
       BorderStyle,
@@ -725,7 +783,9 @@ async function downloadWord() {
     } = await import('docx')
 
     const title = props.options.title || ui('Défi de conjugaison')
-    const identifier = props.options.showRandomNumber ? ` n° ${sheetNumber.value}` : ''
+    const identifier = props.options.showRandomNumber && challengeCode.value
+      ? `${ui('Code du défi')} : ${challengeCode.value}`
+      : ''
     const contentWidth = 9975
     const pageMargins = { top: 1020, right: 965, bottom: 850, left: 965, header: 360, footer: 360, gutter: 0 }
     const wordBodySize = inclusivePrint.value ? 24 : 21
@@ -740,13 +800,19 @@ async function downloadWord() {
         children: [new TextRun({ text: 'conjugaison.tatitotu.ch', size: inclusivePrint.value ? 20 : 16, color: '666666' })]
       })]
     })
-    const runningHeader = (text: string) => new Header({
-      children: [new Paragraph({
-        alignment: AlignmentType.CENTER,
-        spacing: noSpacing,
-        children: [new TextRun({ text, size: inclusivePrint.value ? 20 : 17, color: '666666' })]
-      })]
-    })
+    const runningHeader = (text: string) => {
+      const [heading = '', code] = text.split('\n')
+      return new Header({
+        children: [new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: noSpacing,
+          children: [
+            new TextRun({ text: heading, size: inclusivePrint.value ? 20 : 17, color: '666666' }),
+            ...(code ? [new TextRun({ text: code, break: 1, size: inclusivePrint.value ? 18 : 15, color: '777777' })] : []),
+          ]
+        })]
+      })
+    }
     const emptyHeader = new Header({ children: [new Paragraph({ spacing: noSpacing })] })
     const paragraph = (text: string, options: { bold?: boolean, size?: number, alignment?: typeof AlignmentType[keyof typeof AlignmentType] } = {}) => new Paragraph({
       alignment: options.alignment,
@@ -922,7 +988,7 @@ async function downloadWord() {
       spacing: { before: Math.round(titleSpacingMm.value * 56.7), after: 260 },
       children: [
         new TextRun({ text: inclusivePrint.value ? title : title.toUpperCase(), bold: true, size: 34, font: 'Arial' }),
-        new TextRun({ text: identifier, size: inclusivePrint.value ? wordBodySize : 18, font: 'Arial' })
+        ...(identifier ? [new TextRun({ text: identifier, break: 1, size: inclusivePrint.value ? 20 : 17, color: '666666', font: 'Arial' })] : [])
       ]
     }))
     if (props.options.showVerbs) exerciseChildren.push(paragraph(`Verbes : ${props.verbs.map(verb => verb.infinitif).join(', ')}`, { bold: true, size: wordSecondarySize }))
@@ -976,7 +1042,7 @@ async function downloadWord() {
         spacing: { before: 0, after: 260 },
         children: [
           new TextRun({ text: inclusivePrint.value ? capitalizePrintLine(ui('CORRIGÉ').toLocaleLowerCase('fr-CH')) : ui('CORRIGÉ'), bold: true, size: 34, font: 'Arial' }),
-          new TextRun({ text: identifier, size: inclusivePrint.value ? wordBodySize : 18, font: 'Arial' })
+          ...(identifier ? [new TextRun({ text: identifier, break: 1, size: inclusivePrint.value ? 20 : 17, color: '666666', font: 'Arial' })] : [])
         ]
       }),
       isTableLayout.value ? wordQuestionTable(true) : new Table({
@@ -1025,13 +1091,13 @@ async function downloadWord() {
       sections: [
         {
           properties: { page: { margin: pageMargins }, titlePage: true },
-          headers: { first: emptyHeader, default: runningHeader(`${title}${identifier}`) },
+          headers: { first: emptyHeader, default: runningHeader(identifier ? `${title}\n${identifier}` : title) },
           footers: { first: footer, default: footer },
           children: exerciseChildren
         },
         {
           properties: { page: { margin: pageMargins }, type: SectionType.NEXT_PAGE },
-          headers: { default: runningHeader(`${title} — corrigé${identifier}`) },
+          headers: { default: runningHeader(identifier ? `${title} — corrigé\n${identifier}` : `${title} — corrigé`) },
           footers: { default: footer },
           children: correctionChildren
         }
@@ -1227,9 +1293,14 @@ async function downloadWord() {
               <input type="checkbox" :checked="options.showTenses" @change="setPrintOption('showTenses', ($event.target as HTMLInputElement).checked)">
               <span>{{ ui('Liste des temps') }}</span>
             </label>
-            <label>
+            <label class="print-settings__inclusive">
               <input type="checkbox" :checked="options.showRandomNumber" @change="setPrintOption('showRandomNumber', ($event.target as HTMLInputElement).checked)">
-              <span>{{ ui('Numéro questionnaire/corrigé') }}</span>
+              <span>
+                <strong>{{ ui('Code du défi') }}</strong>
+                <small v-if="isChallengeCodeBusy">{{ ui('Création du code…') }}</small>
+                <small v-else-if="challengeCodeError">{{ challengeCodeError }}</small>
+                <small v-else>{{ ui('Le défi est enregistré pendant 6 mois.') }}</small>
+              </span>
             </label>
           </fieldset>
         </aside>

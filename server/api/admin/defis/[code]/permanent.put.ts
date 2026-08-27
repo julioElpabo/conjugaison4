@@ -9,7 +9,9 @@ export default defineEventHandler(async (event) => {
   }
 
   const [result] = await useDatabase().execute<ResultSetHeader>(`
-    UPDATE defis SET isANePasEffacer = 1, modified = CURRENT_TIMESTAMP WHERE name = ?
+    UPDATE defis
+    SET isANePasEffacer = 1, expires_at = NULL, modified = CURRENT_TIMESTAMP
+    WHERE name = ?
   `, [code])
 
   if (result.affectedRows === 0) {

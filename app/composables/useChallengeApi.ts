@@ -85,6 +85,13 @@ export function useChallengeApi() {
     })
   }
 
+  async function savePrintedChallenge(challenge: ChallengeConfig) {
+    return await $fetch<{ code: string }>('/api/defis', {
+      method: 'POST',
+      body: toSharedChallengeRequest(challenge)
+    })
+  }
+
   async function loadChallenge(rawCode: string) {
     const code = normalizeChallengeCode(rawCode)
     return await $fetch<SharedChallenge>(`/api/defis/${encodeURIComponent(code)}`)
@@ -93,6 +100,7 @@ export function useChallengeApi() {
   return {
     generateQuestions,
     saveChallenge,
+    savePrintedChallenge,
     loadChallenge
   }
 }

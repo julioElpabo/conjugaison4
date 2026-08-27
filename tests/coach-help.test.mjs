@@ -783,4 +783,43 @@ describe('aides visuelles configurables', () => {
     assert.match(values.contextualBaseHelp, /<mark><strong>fut<\/strong><\/mark>/)
     assert.match(values.contextualBaseHelp, /En effet/)
   })
+
+  it('affiche explicitement les terminaisons quand la forme demandée est la forme repère du passé simple', () => {
+    const values = coachHelpQuestionVariables({
+      titre: 'Question',
+      consigne: '',
+      reponses: ['fit'],
+      reponsesPourCorrige: ['il fit'],
+      infinitif: 'faire',
+      pronom: 'il',
+      mode: 'indicatif',
+      temps: 'passé simple',
+      conjugaison1: 'fit',
+      radicalReference: {
+        kind: 'past-simple-il',
+        label: 'il au passé simple',
+        form: 'fit',
+        removableEnding: 'it',
+        radical: 'f',
+        targetEnding: 'it',
+        referenceMode: 'indicatif',
+        referenceTense: 'passé simple',
+        referenceSubject: 'il',
+        strategy: 'remove-ending',
+        validated: true,
+      },
+    }, {
+      infinitif: 'faire',
+      groupeConjugaison: 3,
+      terminaison: 're',
+      auxiliaire: 'avoir',
+      participePasse: 'fait',
+    })
+
+    assert.match(values.contextualBaseHelp, /Terminaisons du passé simple de l’indicatif/)
+    assert.match(values.contextualBaseHelp, /<strong>-is<\/strong>/)
+    assert.match(values.contextualBaseHelp, /<samp>-it<\/samp>/)
+    assert.match(values.contextualBaseHelp, /<strong>-îmes<\/strong>/)
+    assert.match(values.contextualBaseHelp, /<strong>-irent<\/strong>/)
+  })
 })

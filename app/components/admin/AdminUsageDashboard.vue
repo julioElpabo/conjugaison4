@@ -47,6 +47,43 @@ const activePreset = computed(() => (
   activePresetGroup.value?.presets.find(preset => preset.definition.id === activePresetId.value)
   || activePresetGroup.value?.presets[0]
 ))
+const presetMetricDefinitions = [
+  { key: 'starts', label: 'Lancé' },
+  { key: 'completions', label: 'Terminé' },
+  { key: 'selections', label: 'Choisi' },
+  { key: 'uniqueSessions', label: 'Sessions distinctes' },
+] as const
+const presetGroupMaxStarts = computed(() => Math.max(0, ...presetGroups.value.map(group => group.starts)))
+const activePresetMaxStarts = computed(() => Math.max(
+  0,
+  ...(activePresetGroup.value?.presets.map(preset => preset.usage?.starts || 0) || []),
+))
+const activePresetMetrics = computed(() => presetMetricDefinitions.map(metric => ({
+  label: metric.label,
+  value: activePreset.value?.usage?.[metric.key] || 0,
+})))
+const activePresetMetricMax = computed(() => Math.max(0, ...activePresetMetrics.value.map(metric => metric.value)))
+const presetUsageCombinations = computed(() => presetGroups.value.flatMap(group => (
+  group.presets.flatMap(preset => presetMetricDefinitions.map(metric => ({
+    key: `${group.id}:${preset.definition.id}:${metric.key}`,
+    groupLabel: group.label,
+    presetLabel: preset.definition.label,
+    metricLabel: metric.label,
+    value: preset.usage?.[metric.key] || 0,
+  })))
+)))
+const mostUsedPresetCombinations = computed(() => [...presetUsageCombinations.value]
+  .sort((left, right) => right.value - left.value
+    || left.groupLabel.localeCompare(right.groupLabel, 'fr')
+    || left.presetLabel.localeCompare(right.presetLabel, 'fr')
+    || left.metricLabel.localeCompare(right.metricLabel, 'fr'))
+  .slice(0, 5))
+const leastUsedPresetCombinations = computed(() => [...presetUsageCombinations.value]
+  .sort((left, right) => left.value - right.value
+    || left.groupLabel.localeCompare(right.groupLabel, 'fr')
+    || left.presetLabel.localeCompare(right.presetLabel, 'fr')
+    || left.metricLabel.localeCompare(right.metricLabel, 'fr'))
+  .slice(0, 5))
 const presetLaunchTotal = computed(() => presetGroups.value.reduce((total, group) => total + group.starts, 0))
 const rows = computed(() => {
   const values = category.value === 'preset' ? props.usage.presets : props.usage.features
@@ -166,6 +203,10 @@ function number(value: number) {
   return new Intl.NumberFormat('fr-CH').format(value)
 }
 
+function progressWidth(value: number, maximum: number) {
+  return `${maximum > 0 ? Math.min(90, Math.max(0, value / maximum * 90)) : 0}%`
+}
+
 function date(value: string | null) {
   return value
     ? new Intl.DateTimeFormat('fr-CH', { dateStyle: 'medium' }).format(new Date(value))
@@ -262,6 +303,7 @@ function selectPresetGroup(groupId: string) {
                 <span>{{ group.label }}</span>
                 <span class="preset-usage__count" :class="{ 'is-zero': !group.starts }">{{ number(group.starts) }}</span>
                 <span class="preset-usage__chevron" aria-hidden="true">›</span>
+                <span class="preset-usage__progress" aria-hidden="true"><i :style="{ width: progressWidth(group.starts, presetGroupMaxStarts) }" /></span>
               </button>
             </div>
           </section>
@@ -280,6 +322,7 @@ function selectPresetGroup(groupId: string) {
                 <span><strong>{{ preset.definition.label }}</strong></span>
                 <span class="preset-usage__count" :class="{ 'is-zero': !preset.usage?.starts }">{{ number(preset.usage?.starts || 0) }}</span>
                 <span class="preset-usage__chevron" aria-hidden="true">›</span>
+                <span class="preset-usage__progress" aria-hidden="true"><i :style="{ width: progressWidth(preset.usage?.starts || 0, activePresetMaxStarts) }" /></span>
               </button>
             </div>
           </section>
@@ -288,21 +331,10 @@ function selectPresetGroup(groupId: string) {
             <h4 :id="`usage-preset-details-${activePreset.definition.id}`">{{ activePreset.definition.label }}</h4>
             <p class="preset-usage__description">{{ activePreset.definition.description }}</p>
             <dl class="preset-usage__metrics">
-              <div>
-                <dt>Lancé</dt>
-                <dd>{{ number(activePreset.usage?.starts || 0) }}</dd>
-              </div>
-              <div>
-                <dt>Terminé</dt>
-                <dd>{{ number(activePreset.usage?.completions || 0) }}</dd>
-              </div>
-              <div>
-                <dt>Choisi</dt>
-                <dd>{{ number(activePreset.usage?.selections || 0) }}</dd>
-              </div>
-              <div>
-                <dt>Sessions distinctes</dt>
-                <dd>{{ number(activePreset.usage?.uniqueSessions || 0) }}</dd>
+              <div v-for="metric in activePresetMetrics" :key="metric.label">
+                <dt>{{ metric.label }}</dt>
+                <dd>{{ number(metric.value) }}</dd>
+                <span class="preset-usage__progress" aria-hidden="true"><i :style="{ width: progressWidth(metric.value, activePresetMetricMax) }" /></span>
               </div>
             </dl>
             <footer>
@@ -312,6 +344,33 @@ function selectPresetGroup(groupId: string) {
             </footer>
           </section>
         </div>
+
+        <section class="preset-usage__rankings" aria-label="Classement des combinaisons de défis">
+          <article>
+            <header>
+              <span aria-hidden="true">↗</span>
+              <div><h4>5 combinaisons les plus vues</h4><p>Les volumes les plus élevés sur la période.</p></div>
+            </header>
+            <ol>
+              <li v-for="item in mostUsedPresetCombinations" :key="item.key">
+                <span>{{ item.groupLabel }} – {{ item.presetLabel }} – {{ item.metricLabel }}</span>
+                <strong>{{ number(item.value) }}</strong>
+              </li>
+            </ol>
+          </article>
+          <article>
+            <header>
+              <span aria-hidden="true">↘</span>
+              <div><h4>5 combinaisons les moins utilisées</h4><p>Les volumes les plus faibles sur la période.</p></div>
+            </header>
+            <ol>
+              <li v-for="item in leastUsedPresetCombinations" :key="item.key">
+                <span>{{ item.groupLabel }} – {{ item.presetLabel }} – {{ item.metricLabel }}</span>
+                <strong :class="{ 'is-zero': !item.value }">{{ number(item.value) }}</strong>
+              </li>
+            </ol>
+          </article>
+        </section>
       </div>
 
       <div v-else-if="sortedRows.length" class="feature-catalogue">
@@ -382,8 +441,12 @@ function selectPresetGroup(groupId: string) {
 .feature-catalogue{display:grid}.feature-area-tabs{display:grid;padding:12px 16px;border-bottom:1px solid #dbe7e9;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;background:#f7fafb}.feature-area-tabs button{display:flex;min-height:43px;padding:8px 11px;align-items:center;justify-content:space-between;gap:8px;border:1px solid #c7dadd;border-radius:10px;color:#456069;background:#fff;font:inherit;font-size:.73rem;font-weight:850;text-align:left;cursor:pointer}.feature-area-tabs button:hover{border-color:#82b7c0}.feature-area-tabs button.active{color:#fff;border-color:#08758b;background:#08758b;box-shadow:0 5px 12px rgb(8 117 139 / 16%)}.feature-area-tabs button span{display:grid;min-width:23px;height:23px;padding:0 6px;place-items:center;border-radius:999px;color:#07566a;background:#e5f1f2;font-size:.65rem}.feature-area-tabs button.active span{background:#fff}.feature-cards{display:grid;padding:16px;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;background:#f4f8f9}.feature-card{min-width:0;overflow:hidden;border:1px solid #c8dadd;border-radius:16px;background:#fff;box-shadow:0 5px 15px rgb(13 63 75 / 5%)}.feature-card__preview{min-height:132px;padding:14px 15px;background:#edf6f7}.feature-card__preview>small{display:block;margin-bottom:10px;color:#637b82;font-size:.63rem;font-weight:900;letter-spacing:.055em;text-transform:uppercase}.feature-card__site-element{display:flex;min-height:78px;padding:13px;align-items:center;gap:12px;border:1px solid #9bc2c8;border-radius:14px;color:#07566a;background:#fff;box-shadow:0 5px 13px rgb(8 95 112 / 8%)}.feature-card__site-element>div{display:grid;min-width:0;gap:3px}.feature-card__site-element strong{font-size:.92rem;line-height:1.18}.feature-card__site-element div span{color:#657a80;font-size:.68rem;line-height:1.32}.feature-card__icon{display:grid;width:43px;height:43px;flex:0 0 43px;place-items:center;border-radius:12px;color:#fff;background:#08758b;font-size:.94rem;font-weight:900}.feature-card__arrow{margin-left:auto;color:#08758b;font-size:1.5rem}.feature-card__preview--choice{background:#edf7f5}.feature-card__preview--choice .feature-card__site-element{border-color:#a8ccc3}.feature-card__preview--choice .feature-card__icon{background:#315f56}.feature-card__preview--exercise{background:#edf6fa}.feature-card__preview--exercise .feature-card__site-element{border-color:#a9cbd8}.feature-card__preview--exercise .feature-card__icon{background:#176f89}.feature-card__preview--session{background:#f2eff8}.feature-card__preview--session .feature-card__site-element{color:#5d3b8f;border-color:#bdb0d8;background:#faf8fd}.feature-card__preview--session .feature-card__icon{background:#7351a6}.feature-card__preview--menu{background:#f1f5f5}.feature-card__preview--menu .feature-card__site-element{min-height:60px;border-color:#cbd9db;border-radius:9px;box-shadow:none}.feature-card__preview--menu .feature-card__icon{width:35px;height:35px;flex-basis:35px;border-radius:50%;background:#315f56}.feature-card__body{display:grid;padding:15px;gap:13px}.feature-card__body>header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.feature-card__body h3{margin:0;color:#123f4c;font-size:.94rem}.feature-card__body header small{display:block;margin-top:3px;color:#7b8e93;font-size:.62rem}.feature-card__metrics{display:grid;margin:0;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.feature-card__metrics div{display:grid;padding:8px;border-radius:9px;gap:2px;background:#f1f6f7}.feature-card__metrics dt{color:#72868c;font-size:.58rem;font-weight:800}.feature-card__metrics dd{margin:0;color:#07566a;font-size:1rem;font-weight:900}.feature-card__rates{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:hidden;border:1px solid #d8e4e6;border-radius:9px}.feature-card__rates span{display:grid;padding:7px 9px;border-right:1px solid #d8e4e6;gap:1px}.feature-card__rates span:last-child{border-right:0}.feature-card__rates small{color:#798c91;font-size:.57rem}.feature-card__rates strong{color:#365c65;font-size:.72rem}.feature-card__body>p{margin:0;padding-top:10px;border-top:1px solid #e1eaec;color:#687e84;font-size:.67rem;line-height:1.42}.feature-card .diagnostic{flex:0 0 auto}
 :global(:root[data-theme='dark']) .feature-area-tabs,:global(:root[data-theme='dark']) .feature-cards{border-color:#334b52;background:#13262c}:global(:root[data-theme='dark']) .feature-area-tabs button{color:#d9eff2;border-color:#48636b;background:#20383f}:global(:root[data-theme='dark']) .feature-area-tabs button.active{border-color:#1590a8;background:#08758b}:global(:root[data-theme='dark']) .feature-card{border-color:#3d565e;background:#172a30}:global(:root[data-theme='dark']) .feature-card__preview{background:#1c3238}:global(:root[data-theme='dark']) .feature-card__site-element{color:#dff5f7;border-color:#49656d;background:#20383f}:global(:root[data-theme='dark']) .feature-card__site-element div span,:global(:root[data-theme='dark']) .feature-card__preview>small,:global(:root[data-theme='dark']) .feature-card__body header small,:global(:root[data-theme='dark']) .feature-card__body>p{color:#a9c1c7}:global(:root[data-theme='dark']) .feature-card__body h3{color:#dff5f7}:global(:root[data-theme='dark']) .feature-card__metrics div{background:#20383f}:global(:root[data-theme='dark']) .feature-card__metrics dt,:global(:root[data-theme='dark']) .feature-card__rates small{color:#a9c1c7}:global(:root[data-theme='dark']) .feature-card__metrics dd{color:#8ed6df}:global(:root[data-theme='dark']) .feature-card__rates{border-color:#3d565e}:global(:root[data-theme='dark']) .feature-card__rates span{border-color:#3d565e}:global(:root[data-theme='dark']) .feature-card__rates strong{color:#c8dfe3}:global(:root[data-theme='dark']) .feature-card__body>p{border-color:#3d565e}
 .preset-usage{display:grid;padding:20px;gap:16px}.preset-usage__heading{display:flex;align-items:center;gap:14px}.preset-usage__heading h3{margin:0;color:#073f51;font-size:1.15rem}.preset-usage__heading p{margin:3px 0 0;color:#6d8187;font-size:.72rem}.preset-usage__star{display:grid;width:48px;height:48px;flex:0 0 48px;place-items:center;border-radius:14px;color:#fff;background:#08758b;font-size:1.55rem}.preset-usage__total{display:flex;margin-left:auto;padding:7px 11px;align-items:baseline;gap:5px;border:1px solid #b9d2d5;border-radius:999px;color:#5b747b;background:#eff6f6;font-size:.65rem;font-weight:800}.preset-usage__total strong{color:#07566a;font-size:.9rem}.preset-usage__browser{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:hidden;border:1px solid #c6d9dd;border-radius:16px;background:#fff}.preset-usage__column{display:grid;min-width:0;min-height:330px;padding:14px;align-content:start;border-right:1px solid #cfdfe2;background:#fbfdfd}.preset-usage__column:last-child{border-right:0}.preset-usage__column h4{margin:0;padding:5px 9px 12px;color:#687982;font-size:.72rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase}.preset-usage__list{display:grid;align-content:start;gap:5px}.preset-usage__list button{display:grid;width:100%;min-height:48px;padding:8px 9px 8px 13px;align-items:center;border:1px solid transparent;border-radius:11px;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;color:#20394b;background:transparent;font:inherit;font-size:.82rem;text-align:left;cursor:pointer}.preset-usage__list button strong{font-size:.86rem}.preset-usage__list button:hover{border-color:#b7d1d5;background:#edf6f7}.preset-usage__list button.active{color:#fff;border-color:#08758b;background:#08758b;box-shadow:0 6px 14px rgb(8 117 139 / 18%)}.preset-usage__chevron{color:#08758b;font-size:1.35rem;line-height:1}.preset-usage__list button.active .preset-usage__chevron{color:#fff}.preset-usage__count{display:grid;min-width:34px;height:27px;padding:0 8px;place-items:center;border:1px solid #a9c9ce;border-radius:999px;color:#07566a;background:#e5f1f2;font-size:.7rem;font-weight:900}.preset-usage__list button.active .preset-usage__count{color:#07566a;border-color:#fff;background:#fff}.preset-usage__count.is-zero{color:#7b8d91;border-color:#d3dfe1;background:#f0f4f4}.preset-usage__description{margin:1px 9px 15px;color:#657a80;font-size:.74rem;line-height:1.45}.preset-usage__metrics{display:grid;margin:0;gap:5px}.preset-usage__metrics div{display:flex;min-height:46px;padding:8px 10px;align-items:center;justify-content:space-between;gap:12px;border-radius:10px;color:#173c49;background:#f1f7f8}.preset-usage__metrics dt{font-size:.76rem;font-weight:800}.preset-usage__metrics dd{display:grid;min-width:38px;height:28px;margin:0;padding:0 9px;place-items:center;border:1px solid #a9c9ce;border-radius:999px;color:#07566a;background:#fff;font-size:.75rem;font-weight:900}.preset-usage__column footer{display:grid;margin-top:18px;padding:13px 9px 0;gap:4px;border-top:1px solid #dbe6e8}.preset-usage__column footer span{color:#345760;font-size:.71rem;font-weight:850}.preset-usage__column footer small{color:#7a8d92;font-size:.65rem}
+.preset-usage__list button,.preset-usage__metrics div{position:relative;overflow:hidden;padding-bottom:12px}.preset-usage__progress{position:absolute;right:10px;bottom:5px;left:10px;height:2px;overflow:hidden;border-radius:999px;background:rgb(8 117 139 / 11%);pointer-events:none}.preset-usage__progress i{display:block;height:100%;border-radius:inherit;background:#1590a8;transition:width .28s ease}.preset-usage__list button.active .preset-usage__progress{background:rgb(255 255 255 / 24%)}.preset-usage__list button.active .preset-usage__progress i{background:#fff}.preset-usage__metrics .preset-usage__progress{right:10px;left:10px}
+.preset-usage__rankings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.preset-usage__rankings article{min-width:0;padding:14px;border:1px solid #c9dce0;border-radius:14px;background:#fbfdfd}.preset-usage__rankings header{display:flex;margin-bottom:11px;align-items:center;gap:10px}.preset-usage__rankings header>span{display:grid;width:32px;height:32px;flex:0 0 32px;place-items:center;border-radius:9px;color:#fff;background:#08758b;font-size:1rem;font-weight:900}.preset-usage__rankings article:last-child header>span{background:#657a80}.preset-usage__rankings h4{margin:0;color:#123f4c;font-size:.82rem}.preset-usage__rankings p{margin:2px 0 0;color:#71868c;font-size:.63rem}.preset-usage__rankings ol{display:grid;margin:0;padding:0;gap:5px;list-style:none}.preset-usage__rankings li{display:grid;min-height:38px;padding:7px 8px 7px 10px;align-items:center;border-radius:9px;grid-template-columns:minmax(0,1fr) auto;gap:10px;color:#365760;background:#f1f7f8;font-size:.7rem;line-height:1.3}.preset-usage__rankings li>span{min-width:0}.preset-usage__rankings li>strong{display:grid;min-width:34px;height:25px;padding:0 7px;place-items:center;border:1px solid #a9c9ce;border-radius:999px;color:#07566a;background:#fff;font-size:.68rem}.preset-usage__rankings li>strong.is-zero{color:#7b8d91;border-color:#d3dfe1;background:#f0f4f4}
 :global(:root[data-theme='dark']) .preset-usage__heading h3{color:#dff5f7}:global(:root[data-theme='dark']) .preset-usage__heading p{color:#a9c1c7}:global(:root[data-theme='dark']) .preset-usage__total{color:#b8cdd1;border-color:#476169;background:#20383f}:global(:root[data-theme='dark']) .preset-usage__total strong{color:#8ed6df}:global(:root[data-theme='dark']) .preset-usage__browser{border-color:#3d565e;background:#172a30}:global(:root[data-theme='dark']) .preset-usage__column{border-color:#3d565e;background:#172a30}:global(:root[data-theme='dark']) .preset-usage__column h4,:global(:root[data-theme='dark']) .preset-usage__description,:global(:root[data-theme='dark']) .preset-usage__column footer small{color:#a9c1c7}:global(:root[data-theme='dark']) .preset-usage__list button{color:#dff5f7}:global(:root[data-theme='dark']) .preset-usage__list button:hover{border-color:#49656d;background:#20383f}:global(:root[data-theme='dark']) .preset-usage__metrics div{color:#dff5f7;background:#20383f}:global(:root[data-theme='dark']) .preset-usage__column footer{border-color:#3d565e}:global(:root[data-theme='dark']) .preset-usage__column footer span{color:#c3dadd}
+:global(:root[data-theme='dark']) .preset-usage__progress{background:rgb(142 214 223 / 17%)}:global(:root[data-theme='dark']) .preset-usage__progress i{background:#58c4d1}:global(:root[data-theme='dark']) .preset-usage__list button.active .preset-usage__progress{background:rgb(255 255 255 / 25%)}:global(:root[data-theme='dark']) .preset-usage__list button.active .preset-usage__progress i{background:#fff}
+:global(:root[data-theme='dark']) .preset-usage__rankings article{border-color:#3d565e;background:#172a30}:global(:root[data-theme='dark']) .preset-usage__rankings h4{color:#dff5f7}:global(:root[data-theme='dark']) .preset-usage__rankings p{color:#a9c1c7}:global(:root[data-theme='dark']) .preset-usage__rankings li{color:#c3dadd;background:#20383f}:global(:root[data-theme='dark']) .preset-usage__rankings li>strong{color:#8ed6df;border-color:#48636b;background:#172a30}:global(:root[data-theme='dark']) .preset-usage__rankings li>strong.is-zero{color:#91a8ad;border-color:#3d565e;background:#1b3036}
 @media(max-width:1050px){.usage-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.usage-intro{align-items:stretch;flex-direction:column}.actor-filter{align-self:start}.feature-area-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.feature-card__metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.preset-usage__browser{grid-template-columns:minmax(220px,.8fr) minmax(220px,.9fr) minmax(250px,1fr);overflow-x:auto}}
-@media(max-width:760px){.feature-cards{grid-template-columns:1fr}}
+@media(max-width:760px){.feature-cards,.preset-usage__rankings{grid-template-columns:1fr}}
 @media(max-width:650px){.usage-kpis{grid-template-columns:1fr 1fr}.usage-controls{align-items:stretch;flex-direction:column}.category-tabs{display:grid;grid-template-columns:1fr 1fr}.usage-controls select{width:100%}.feature-area-tabs{padding:10px;grid-template-columns:1fr 1fr}.feature-area-tabs button{padding-inline:8px}.feature-cards{padding:10px}.feature-card__rates{grid-template-columns:1fr}.feature-card__rates span{border-right:0;border-bottom:1px solid #d8e4e6}.feature-card__rates span:last-child{border-bottom:0}.preset-usage{padding:13px}.preset-usage__heading{align-items:flex-start;flex-wrap:wrap}.preset-usage__heading>div{min-width:calc(100% - 66px)}.preset-usage__total{margin-left:62px}.preset-usage__browser{width:100%;grid-template-columns:repeat(3,minmax(245px,78vw));overflow-x:auto}.preset-usage__column{min-height:300px}.usage-table-wrap{overflow:visible}table,tbody{display:grid}thead{display:none}tbody{gap:10px;padding:10px}tr{display:grid;padding:14px;border:1px solid #d7e4e6;border-radius:12px;grid-template-columns:1fr 1fr;background:#fff}tbody th{grid-column:1/-1;width:auto;min-width:0;padding:0 0 10px}td{display:flex;padding:7px 0;justify-content:space-between;gap:8px;border:0;text-align:right;white-space:normal}td::before{color:#778b91;content:attr(data-label);font-weight:700}.usage-intro{padding:19px}.actor-filter{width:100%}.actor-filter button{flex:1;padding-inline:6px}:global(:root[data-theme='dark']) tr{border-color:#3d565e;background:#172a30}:global(:root[data-theme='dark']) .feature-card__rates span{border-color:#3d565e}}
 </style>

@@ -215,6 +215,7 @@ export async function googleAnalyticsOverview(options: {
   const result: AnalyticsOverview = {
     source: 'ga4', configured: true,
     activeUsers: metric(0), sessions: realtime ? metric(0) : metric(2),
+    connectedAccounts: 0,
     newUsers: realtime ? 0 : metric(3), returningUsers: realtime ? 0 : Math.max(0, metric(1) - metric(3)),
     events: realtime ? metric(1) : metric(4),
     exerciseStarted, exerciseCompleted,

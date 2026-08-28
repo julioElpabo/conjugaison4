@@ -170,6 +170,7 @@ export interface AnalyticsOverview {
   configured: boolean
   activeUsers: number
   sessions: number
+  connectedAccounts: number
   newUsers: number
   returningUsers: number
   events: number

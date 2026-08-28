@@ -5,6 +5,7 @@ import { googleAnalyticsOverview } from '../../utils/google-analytics'
 
 interface ValueRow extends RowDataPacket { label: string, value: number }
 interface SummaryRow extends RowDataPacket { sessions: number }
+interface ConnectedAccountsRow extends RowDataPacket { value: number }
 interface EventRow extends RowDataPacket { event_name: string, value: number }
 interface EventSeriesRow extends RowDataPacket { date: string, event_name: string, value: number }
 interface SessionSeriesRow extends RowDataPacket { date: string, value: number }
@@ -32,7 +33,7 @@ function breakdown(rows: ValueRow[]): AnalyticsBreakdownItem[] {
 
 function emptyOverview(notice?: string): AnalyticsOverview {
   return {
-    source: 'local', configured: true, activeUsers: 0, sessions: 0, newUsers: 0, returningUsers: 0,
+    source: 'local', configured: true, activeUsers: 0, sessions: 0, connectedAccounts: 0, newUsers: 0, returningUsers: 0,
     events: 0, exerciseStarted: 0, exerciseCompleted: 0, completionRate: 0,
     correctAnswers: 0, submittedAnswers: 0, successRate: 0, helpScrolled: 0, pdfDownloads: 0,
     wordDownloads: 0, challengeLoads: 0, challengeSaves: 0, devices: [], languages: [],
@@ -69,8 +70,15 @@ export default defineEventHandler(async (event) => {
   let local = emptyOverview()
 
   try {
-    const [[summary], [eventRows], [devices], [languages], [activity], [eventSeries], [sessionSeries], [presentationSeries], [languageSeries], [featureUsageRows]] = await Promise.all([
+    const [[summary], [connectedAccountsRows], [eventRows], [devices], [languages], [activity], [eventSeries], [sessionSeries], [presentationSeries], [languageSeries], [featureUsageRows]] = await Promise.all([
       database.execute<SummaryRow[]>(`SELECT COUNT(*) AS sessions FROM analytics_sessions WHERE ${sessionWhere}`, sessionParams),
+      database.execute<ConnectedAccountsRow[]>(`SELECT COUNT(DISTINCT sessions.account_id) AS value
+        FROM learner_sessions sessions
+        INNER JOIN learner_accounts accounts ON accounts.id = sessions.account_id
+        WHERE sessions.last_seen_at >= DATE_SUB(NOW(), INTERVAL 30 MINUTE)
+          AND sessions.expires_at > NOW()
+          AND accounts.deleted_at IS NULL
+          AND accounts.status IN ('pending', 'active')`),
       database.execute<EventRow[]>(`SELECT event_name, COUNT(*) AS value FROM analytics_events WHERE ${eventWhere} GROUP BY event_name ORDER BY value DESC`, eventParams),
       database.execute<ValueRow[]>(`SELECT device_category AS label, COUNT(*) AS value FROM analytics_sessions WHERE ${sessionWhere} GROUP BY device_category ORDER BY value DESC`, sessionParams),
       database.execute<ValueRow[]>(`SELECT interface_locale AS label, COUNT(*) AS value FROM analytics_sessions WHERE ${sessionWhere} GROUP BY interface_locale ORDER BY value DESC`, sessionParams),
@@ -119,6 +127,7 @@ export default defineEventHandler(async (event) => {
     const featureUsage = featureUsageRows[0]
     local = {
       ...emptyOverview(), source: 'local', configured: true, activeUsers: sessions, sessions,
+      connectedAccounts: Number(connectedAccountsRows?.[0]?.value) || 0,
       newUsers: window === 'range' ? sessions : 0, returningUsers: 0,
       events: eventRows.reduce((sum, row) => sum + (Number(row.value) || 0), 0),
       exerciseStarted: started, exerciseCompleted: completed,

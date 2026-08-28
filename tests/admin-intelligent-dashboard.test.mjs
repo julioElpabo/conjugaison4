@@ -76,4 +76,16 @@ describe('dashboard intelligent des statistiques', () => {
     assert.match(page, /activeTab\.value === 'now'/u)
     assert.match(page, /Actualiser/u)
   })
+
+  it('affiche les comptes connectés dans l’onglet Maintenant et dans un bloc dédié', async () => {
+    const page = await read('../app/pages/admin/charts.vue')
+    const endpoint = await read('../server/api/admin/analytics.get.ts')
+    assert.match(page, /connectedAccountCount/u)
+    assert.match(page, /analytics-tab-title/u)
+    assert.match(page, /Comptes en ligne/u)
+    assert.match(page, /30 dernières minutes/u)
+    assert.match(endpoint, /COUNT\(DISTINCT sessions\.account_id\)/u)
+    assert.match(endpoint, /sessions\.last_seen_at >= DATE_SUB\(NOW\(\), INTERVAL 30 MINUTE\)/u)
+    assert.match(endpoint, /sessions\.expires_at > NOW\(\)/u)
+  })
 })

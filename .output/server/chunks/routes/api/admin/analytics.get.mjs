@@ -27,6 +27,7 @@ function emptyOverview(notice) {
     configured: true,
     activeUsers: 0,
     sessions: 0,
+    connectedAccounts: 0,
     newUsers: 0,
     returningUsers: 0,
     events: 0,
@@ -59,7 +60,7 @@ function emptyOverview(notice) {
   };
 }
 const analytics_get = defineEventHandler(async (event) => {
-  var _a;
+  var _a, _b;
   requireAdministrator(event);
   const query = getQuery(event);
   const requestedWindow = String(query.window || "30m");
@@ -80,8 +81,15 @@ const analytics_get = defineEventHandler(async (event) => {
   const database = useDatabase();
   let local = emptyOverview();
   try {
-    const [[summary], [eventRows], [devices], [languages], [activity], [eventSeries], [sessionSeries], [presentationSeries], [languageSeries], [featureUsageRows]] = await Promise.all([
+    const [[summary], [connectedAccountsRows], [eventRows], [devices], [languages], [activity], [eventSeries], [sessionSeries], [presentationSeries], [languageSeries], [featureUsageRows]] = await Promise.all([
       database.execute(`SELECT COUNT(*) AS sessions FROM analytics_sessions WHERE ${sessionWhere}`, sessionParams),
+      database.execute(`SELECT COUNT(DISTINCT sessions.account_id) AS value
+        FROM learner_sessions sessions
+        INNER JOIN learner_accounts accounts ON accounts.id = sessions.account_id
+        WHERE sessions.last_seen_at >= DATE_SUB(NOW(), INTERVAL 30 MINUTE)
+          AND sessions.expires_at > NOW()
+          AND accounts.deleted_at IS NULL
+          AND accounts.status IN ('pending', 'active')`),
       database.execute(`SELECT event_name, COUNT(*) AS value FROM analytics_events WHERE ${eventWhere} GROUP BY event_name ORDER BY value DESC`, eventParams),
       database.execute(`SELECT device_category AS label, COUNT(*) AS value FROM analytics_sessions WHERE ${sessionWhere} GROUP BY device_category ORDER BY value DESC`, sessionParams),
       database.execute(`SELECT interface_locale AS label, COUNT(*) AS value FROM analytics_sessions WHERE ${sessionWhere} GROUP BY interface_locale ORDER BY value DESC`, sessionParams),
@@ -134,6 +142,7 @@ const analytics_get = defineEventHandler(async (event) => {
       configured: true,
       activeUsers: sessions,
       sessions,
+      connectedAccounts: Number((_b = connectedAccountsRows == null ? void 0 : connectedAccountsRows[0]) == null ? void 0 : _b.value) || 0,
       newUsers: window === "range" ? sessions : 0,
       returningUsers: 0,
       events: eventRows.reduce((sum, row) => sum + (Number(row.value) || 0), 0),

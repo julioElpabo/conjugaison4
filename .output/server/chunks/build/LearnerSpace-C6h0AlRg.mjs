@@ -6,7 +6,7 @@ import { a as LearnerErrorDetailMessage } from './VerbConsultationModal-BL2XCn3o
 import { f as useLanguagePreferences, g as useRoute, i as useRequestFetch, h as useState } from './server.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 import { l as learnerSpaceCopy, u as useColorTheme, a as learnerSpaceText } from './useColorTheme-C6CCVHIc.mjs';
-import { aG as localizedLearnerErrorMessageForCode, aH as localizedLearnerErrorDomain, aI as localizedLearnerErrorLabel } from '../nitro/nitro.mjs';
+import { aH as localizedLearnerErrorMessageForCode, aI as localizedLearnerErrorDomain, aJ as localizedLearnerErrorLabel } from '../nitro/nitro.mjs';
 import ChatExercise from './ChatExercise-CJ5DhELx.mjs';
 import ClassicExercise from './ClassicExercise-giDjNw9x.mjs';
 import CoachPicker from './CoachPicker-BDhegtjB.mjs';

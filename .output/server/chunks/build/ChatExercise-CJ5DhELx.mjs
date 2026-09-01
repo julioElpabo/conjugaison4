@@ -4,7 +4,7 @@ import { ssrRenderTeleport, ssrRenderStyle, ssrRenderClass, ssrRenderAttr, ssrIn
 import { faStop, faBullhorn, faSpinner, faVolume, faArrowUpFromBracket, faPrint } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { L as LearnerErrorFeedback, S as ShareExerciseSummaryDialog, V as VerbConsultationModal } from './VerbConsultationModal-BL2XCn3o.mjs';
-import { aJ as SUBJECT_PRONOUN_PLACEHOLDER, as as conjugationRequiresSubjectPronoun, au as providedSubjunctiveInputPrefix, at as conjugationAnswerPlaceholder, a6 as learnerErrorDetailText } from '../nitro/nitro.mjs';
+import { aK as SUBJECT_PRONOUN_PLACEHOLDER, as as conjugationRequiresSubjectPronoun, au as providedSubjunctiveInputPrefix, at as conjugationAnswerPlaceholder, a6 as learnerErrorDetailText } from '../nitro/nitro.mjs';
 import { a as createVariedCoachReaction, b as createCoachDialogueState } from '../_/coach-dialogue.mjs';
 import { c as coachHelpProfile, d as buildTargetedConjugationHelp } from '../_/coach-help-audit.mjs';
 import { i as identificationFormParts } from '../_/identification-form.mjs';

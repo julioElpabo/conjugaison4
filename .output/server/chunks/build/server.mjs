@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, toRef, isRef, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, isReadonly, isShallow, isReactive, toRaw } from 'vue';
-import { a9 as SUPPORTED_LOCALES, aK as withSwissObjectAliases, aL as parseURL, aM as encodePath, aN as decodePath, aO as localeFromPath, y as normalizeLocale, aP as getRequestHeaders, c as createError$1, ae as hasProtocol, ag as isScriptProtocol, af as joinURL, aQ as withQuery, aR as klona, aS as DEFAULT_LANGUAGE_PREFERENCES, ac as localizePath, aT as sanitizeStatusCode, aU as getContext, aV as getRequestHeader, aW as isEqual, t as setCookie, w as getCookie, v as deleteCookie, aX as $fetch, aY as defu, K as stripLocaleFromPath, am as executeAsync, aZ as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { a9 as SUPPORTED_LOCALES, aL as withSwissObjectAliases, aM as parseURL, aN as encodePath, aO as decodePath, aP as localeFromPath, y as normalizeLocale, aQ as getRequestHeaders, c as createError$1, ae as hasProtocol, ag as isScriptProtocol, af as joinURL, aR as withQuery, aS as klona, aT as DEFAULT_LANGUAGE_PREFERENCES, ac as localizePath, aU as sanitizeStatusCode, aV as getContext, aW as getRequestHeader, aX as isEqual, t as setCookie, w as getCookie, v as deleteCookie, aY as $fetch, aZ as defu, K as stripLocaleFromPath, am as executeAsync, a_ as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useSeoMeta$1, a as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -678,6 +678,8 @@ const uiMessages = {
   "3 au hasard": { de: "3 zuf\xE4llig", en: "3 at random", it: "3 a caso", es: "3 al azar" },
   "5 au hasard": { de: "5 zuf\xE4llig", en: "5 at random", it: "5 a caso", es: "5 al azar" },
   "10 au hasard": { de: "10 zuf\xE4llig", en: "10 at random", it: "10 a caso", es: "10 al azar" },
+  "30 au hasard": { de: "30 zuf\xE4llig", en: "30 at random", it: "30 a caso", es: "30 al azar" },
+  "{count} au hasard": { de: "{count} zuf\xE4llig", en: "{count} at random", it: "{count} a caso", es: "{count} al azar" },
   "Pour d\xE9marrer rapidement": { de: "F\xFCr einen schnellen Start", en: "For a quick start", it: "Per iniziare rapidamente", es: "Para empezar r\xE1pidamente" },
   "D\xE9fis pr\xEAts \xE0 l\u2019emploi": { de: "Fertige \xDCbungen", en: "Ready-made challenges", it: "Esercizi pronti all\u2019uso", es: "Ejercicios listos para usar" },
   "Choisir un d\xE9fi pr\xEAt \xE0 l\u2019emploi": { de: "Eine fertige \xDCbung w\xE4hlen", en: "Choose a ready-made challenge", it: "Scegli un esercizio pronto", es: "Elegir un ejercicio listo" },
@@ -1687,12 +1689,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-CFjgh1cv.mjs')
+    component: () => import('./_code_-Dwwq2QZh.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-DzllMXaF.mjs')
+    component: () => import('./_slug_-DV-clyhH.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1737,7 +1739,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-qtguEbaZ.mjs')
+    component: () => import('./exercices-de-conjugaison-DyWkdPOr.mjs')
   },
   {
     name: "mon-compte",
@@ -1753,7 +1755,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-BsvMTLWy.mjs')
+    component: () => import('./nouveau-defi-6W6lias0.mjs')
   },
   {
     name: "signin",
@@ -1763,7 +1765,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-C5kw9z66.mjs')
+    component: () => import('./index-BWgkUI-I.mjs')
   },
   {
     name: "mode-tense",
@@ -1868,12 +1870,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-CFjgh1cv.mjs')
+    component: () => import('./_code_-Dwwq2QZh.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es)/defis/:slug()",
-    component: () => import('./_slug_-DzllMXaF.mjs')
+    component: () => import('./_slug_-DV-clyhH.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1918,7 +1920,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-qtguEbaZ.mjs')
+    component: () => import('./exercices-de-conjugaison-DyWkdPOr.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1934,7 +1936,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-BsvMTLWy.mjs')
+    component: () => import('./nouveau-defi-6W6lias0.mjs')
   },
   {
     name: "localized-signin",
@@ -1944,7 +1946,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-C5kw9z66.mjs')
+    component: () => import('./index-BWgkUI-I.mjs')
   },
   {
     name: "localized-mode-tense",

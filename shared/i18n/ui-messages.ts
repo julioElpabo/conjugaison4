@@ -312,6 +312,8 @@ export const uiMessages = {
   '3 au hasard': { de: '3 zufällig', en: '3 at random', it: '3 a caso', es: '3 al azar' },
   '5 au hasard': { de: '5 zufällig', en: '5 at random', it: '5 a caso', es: '5 al azar' },
   '10 au hasard': { de: '10 zufällig', en: '10 at random', it: '10 a caso', es: '10 al azar' },
+  '30 au hasard': { de: '30 zufällig', en: '30 at random', it: '30 a caso', es: '30 al azar' },
+  '{count} au hasard': { de: '{count} zufällig', en: '{count} at random', it: '{count} a caso', es: '{count} al azar' },
   'Pour démarrer rapidement': { de: 'Für einen schnellen Start', en: 'For a quick start', it: 'Per iniziare rapidamente', es: 'Para empezar rápidamente' },
   'Défis prêts à l’emploi': { de: 'Fertige Übungen', en: 'Ready-made challenges', it: 'Esercizi pronti all’uso', es: 'Ejercicios listos para usar' },
   'Choisir un défi prêt à l’emploi': { de: 'Eine fertige Übung wählen', en: 'Choose a ready-made challenge', it: 'Scegli un esercizio pronto', es: 'Elegir un ejercicio listo' },

@@ -54,6 +54,7 @@ export const challengePresetGroupLabels: Record<string, string> = {
   cif: 'CIF (FLE)',
   'verb-group': 'Groupes -er, -ir, etc.',
   spelling: 'Difficultés particulières',
+  ultimate: 'Le défi ultime',
   semantic: 'Sens des verbes',
 }
 
@@ -63,6 +64,7 @@ export const challengePresetGroupOrder: readonly ChallengePresetGroup[] = [
   'cif',
   'verb-group',
   'spelling',
+  'ultimate',
   'semantic',
 ]
 
@@ -85,6 +87,7 @@ export const usefulAllophoneVerbInfinitives = [
 ] as const
 
 export const usefulAllophoneChallengeId = '100-verbes-utiles-allophones'
+export const ultimateChallengeId = 'defi-ultime'
 
 export const challengePresetDefinitions = [
   { id: '5P', label: '5P', description: 'Verbes et temps usuels de 5P.', group: 'school', criteria: [{ field: 'niveauxScolaires', operator: 'includes', value: '5P' }], tenseIds: [1, 2], questionCount: 10 },
@@ -120,6 +123,7 @@ export const challengePresetDefinitions = [
   { id: 'rares', label: 'Verbes rares', description: 'Verbes marqués comme rares ou vieillis.', group: 'spelling', criteria: [{ field: 'registrePrincipal', operator: 'equals', value: 'rare' }], tenseIds: coreTenses, questionCount: 10 },
   { id: 'difficiles', label: 'Verbes difficiles', description: 'Conjugaisons de difficulté élevée.', group: 'spelling', criteria: [{ field: 'niveauDifficulte', operator: 'gte', value: 3 }], tenseIds: coreTenses, questionCount: 10 },
   { id: 'pronominaux', label: 'Verbes pronominaux', description: 'Tous les verbes pronominaux du catalogue.', group: 'spelling', criteria: [{ field: 'typePronominal', operator: 'not-equals', value: 'aucun' }], tenseIds: coreTenses, questionCount: 10 },
+  { id: ultimateChallengeId, label: 'Tous les verbes', description: 'Tous les verbes disponibles dans le catalogue.', group: 'ultimate', criteria: [], tenseIds: coreTenses, questionCount: 10 },
   { id: 'CIF1', label: 'CIF 1', description: 'Premier parcours CIF historique.', group: 'cif', criteria: [{ field: 'parcoursCif', operator: 'includes', value: 'CIF1' }], tenseIds: [1, nearFutureTenseId], questionCount: 10 },
   { id: 'CIF2', label: 'CIF 2', description: 'Deuxième parcours CIF historique.', group: 'cif', criteria: [{ field: 'parcoursCif', operator: 'includes', value: 'CIF2' }], tenseIds: [1, nearFutureTenseId], questionCount: 10 },
   { id: 'CIF3', label: 'CIF 3', description: 'Troisième parcours CIF historique.', group: 'cif', criteria: [{ field: 'parcoursCif', operator: 'includes', value: 'CIF3' }], tenseIds: [1, 2, 3, 4, nearFutureTenseId], questionCount: 10 },
@@ -144,6 +148,7 @@ function matchesCriterion(verb: Verb, criterion: VerbCriterion) {
 }
 
 export function verbsForChallengePresetDefinition(definition: ChallengePresetDefinition, verbs: readonly Verb[]) {
+  if (definition.id === ultimateChallengeId) return [...verbs]
   if (definition.id === 'pronominaux') {
     return verbs.filter(verb => verb.isPronominalForm || verb.typePronominal !== 'aucun')
   }

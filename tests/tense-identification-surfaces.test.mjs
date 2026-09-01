@@ -145,10 +145,12 @@ test('l’aperçu d’impression signale les questions manquantes et permet de c
   assert.match(printPreview, /rows: printableQuestions\.value\.map/u)
 })
 
-test('la fiche et son corrigé affichent le code enregistré sous leur titre', () => {
+test('la fiche et son corrigé affichent leur référence de version sous le titre', () => {
   assert.match(printPreview, /const challengeCode = ref\(props\.existingChallengeCode \|\| ''\)/u)
+  assert.match(printPreview, /const sheetNumber = ref\(1\)/u)
   assert.match(printPreview, /savePrintedChallenge/u)
-  assert.equal((printPreview.match(/`\$\{ui\('Code du défi'\)\} : \$\{challengeCode\.value\}`/gu) || []).length, 2)
+  assert.match(printPreview, /ui\('Défi \{code\} — fiche \{number\}', \{ code: challengeCode\.value, number: sheetNumber\.value \}\)/u)
   assert.match(printPreview, /pdf\.text\(identifier, left, y - 5\)/u)
   assert.match(printPreview, /pdf\.text\(identifier, left, 32\)/u)
+  assert.match(printPreview, /new TextRun\(\{ text: identifier, break: 1/u)
 })

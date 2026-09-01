@@ -1,14 +1,17 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
+import { readFileSync } from 'node:fs'
 
 import {
   challengeConfigFromLegacyTuple,
   challengeConfigToLegacyTuple,
   challengePresetDefinitions,
+  challengePresetGroupOrder,
   getChallengePreset,
   inspectPresetCompatibility,
   isChallengePresetId,
   resolveChallengePresets,
+  ultimateChallengeId,
   usefulAllophoneChallengeId,
   usefulAllophoneVerbInfinitives,
 } from '../shared/data/challenge-presets.ts'
@@ -48,6 +51,8 @@ const verbs = [
   verb(5, 'se laver', { typePronominal: 'occasionnel', particularites: ['pronominal'], categoriesSemantiques: ['corps'] }),
   verb(12, 'absoudre', { groupeConjugaison: 3, terminaison: 're', niveauDifficulte: 3, registrePrincipal: 'rare' }),
 ]
+const presetPickerSource = readFileSync(new URL('../app/components/challenge/PresetPicker.vue', import.meta.url), 'utf8')
+const ultimateMigrationSource = readFileSync(new URL('../server/plugins/ultimate-challenge-migration.ts', import.meta.url), 'utf8')
 
 describe('défis résolus par critères', () => {
   it('conserve un titre et une description explicites pour le suivi élève', () => {
@@ -58,13 +63,14 @@ describe('défis résolus par critères', () => {
     assert.equal(challengePresetTrackingDescription(5), '5 au hasard')
   })
 
-  it('expose les 38 défis avec des identifiants uniques et sans liste d’identifiants de verbes figée', () => {
-    assert.equal(challengePresetDefinitions.length, 38)
-    assert.equal(new Set(challengePresetDefinitions.map(preset => preset.id)).size, 38)
+  it('expose les 39 défis avec des identifiants uniques et sans liste d’identifiants de verbes figée', () => {
+    assert.equal(challengePresetDefinitions.length, 39)
+    assert.equal(new Set(challengePresetDefinitions.map(preset => preset.id)).size, 39)
     assert.ok(challengePresetDefinitions.every(preset => !Object.hasOwn(preset, 'verbIds')))
     assert.equal(isChallengePresetId('7H'), true)
     assert.equal(isChallengePresetId('france-cp'), true)
     assert.equal(isChallengePresetId(usefulAllophoneChallengeId), true)
+    assert.equal(isChallengePresetId(ultimateChallengeId), true)
     assert.equal(isChallengePresetId('cod-avant-passe-compose'), false)
     assert.equal(isChallengePresetId('inconnu'), false)
   })
@@ -134,7 +140,36 @@ describe('défis résolus par critères', () => {
     assert.equal(definitions.rares.group, 'spelling')
     assert.equal(definitions.difficiles.group, 'spelling')
     assert.equal(definitions.pronominaux.group, 'spelling')
+    assert.equal(definitions[ultimateChallengeId].group, 'ultimate')
     assert.equal(challengePresetDefinitions.some(preset => preset.group === 'training'), false)
+  })
+
+  it('place le défi ultime après les difficultés et y inclut tout le catalogue', () => {
+    const spellingIndex = challengePresetGroupOrder.indexOf('spelling')
+    assert.equal(challengePresetGroupOrder[spellingIndex + 1], 'ultimate')
+    const preset = getChallengePreset(ultimateChallengeId, verbs)
+    assert.ok(preset)
+    assert.equal(preset.label, 'Tous les verbes')
+    assert.deepEqual(preset.verbIds, verbs.map(item => item.id))
+  })
+
+  it('présente 30 au hasard avant le séparateur, puis 3, 5 et 10', () => {
+    const ultimateBranch = presetPickerSource.indexOf('selectedCompactPreset.id === ultimateChallengeId')
+    const thirty = presetPickerSource.indexOf('selectCompactPreset(selectedCompactPreset, 30)', ultimateBranch)
+    const separator = presetPickerSource.indexOf('preset-browser__quantity-separator', thirty)
+    const smallerChoices = presetPickerSource.indexOf('v-for="count in [3, 5, 10]"', separator)
+    assert.ok(ultimateBranch >= 0)
+    assert.ok(thirty > ultimateBranch)
+    assert.ok(separator > thirty)
+    assert.ok(smallerChoices > separator)
+  })
+
+  it('livre une migration de démarrage idempotente pour le défi ultime', () => {
+    assert.match(ultimateMigrationSource, /INSERT INTO challenge_preset_categories/u)
+    assert.match(ultimateMigrationSource, /ON DUPLICATE KEY UPDATE/u)
+    assert.match(ultimateMigrationSource, /category\.slug === 'spelling'/u)
+    assert.match(ultimateMigrationSource, /challenge_preset_tenses/u)
+    assert.match(ultimateMigrationSource, /invalidateCatalogueCache/u)
   })
 
   it('propose exactement 100 verbes utiles aux cinq temps demandés pour les allophones', () => {

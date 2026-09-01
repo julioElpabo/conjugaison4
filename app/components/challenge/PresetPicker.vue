@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const { ui, uiLabel } = useLanguagePreferences()
 const { track } = useSiteAnalytics()
-import { challengePresetGroupLabels, challengePresetGroupOrder } from '~~/shared/data/challenge-presets'
+import { challengePresetGroupLabels, challengePresetGroupOrder, ultimateChallengeId } from '~~/shared/data/challenge-presets'
 import type { ChallengePreset, ConjugationMode, ConjugationTense, Verb } from '~~/shared/types/conjugation'
 
 const props = defineProps<{
@@ -224,37 +224,52 @@ function selectRandom(preset: ChallengePreset, count: number) {
           <Transition name="browser-column">
             <section v-if="selectedCompactPreset" :key="selectedCompactPreset.id" class="preset-browser__column preset-browser__column--quantity" data-browser-column="3" :aria-label="ui('Choisir le nombre de verbes')">
               <div class="preset-browser__list">
-                <button type="button" @click="selectCompactPreset(selectedCompactPreset)">
-                  <span><strong>{{ ui('Tous les verbes') }}</strong></span>
-                  <span class="preset-browser__count">{{ selectedCompactPreset.verbIds.length }}</span>
-                  <span class="preset-browser__launch" aria-hidden="true">→</span>
-                </button>
-                <span class="preset-browser__quantity-separator" aria-hidden="true" />
-                <button v-if="selectedCompactPreset.verbIds.length >= 1 && selectedCompactPreset.verbIds.length < 5" type="button" @click="selectCompactPreset(selectedCompactPreset, 1)">
-                  <span><strong>{{ ui('1 au hasard') }}</strong></span>
-                  <span class="preset-browser__count">1</span>
-                  <span class="preset-browser__launch" aria-hidden="true">→</span>
-                </button>
-                <button v-if="selectedCompactPreset.verbIds.length >= 2 && selectedCompactPreset.verbIds.length < 5" type="button" @click="selectCompactPreset(selectedCompactPreset, 2)">
-                  <span><strong>{{ ui('2 au hasard') }}</strong></span>
-                  <span class="preset-browser__count">2</span>
-                  <span class="preset-browser__launch" aria-hidden="true">→</span>
-                </button>
-                <button v-if="selectedCompactPreset.verbIds.length >= 3" type="button" @click="selectCompactPreset(selectedCompactPreset, 3)">
-                  <span><strong>{{ ui('3 au hasard') }}</strong></span>
-                  <span class="preset-browser__count">3</span>
-                  <span class="preset-browser__launch" aria-hidden="true">→</span>
-                </button>
-                <button v-if="selectedCompactPreset.verbIds.length >= 5" type="button" @click="selectCompactPreset(selectedCompactPreset, 5)">
-                  <span><strong>{{ ui('5 au hasard') }}</strong></span>
-                  <span class="preset-browser__count">5</span>
-                  <span class="preset-browser__launch" aria-hidden="true">→</span>
-                </button>
-                <button v-if="selectedCompactPreset.verbIds.length >= 10" type="button" @click="selectCompactPreset(selectedCompactPreset, 10)">
-                  <span><strong>{{ ui('10 au hasard') }}</strong></span>
-                  <span class="preset-browser__count">10</span>
-                  <span class="preset-browser__launch" aria-hidden="true">→</span>
-                </button>
+                <template v-if="selectedCompactPreset.id === ultimateChallengeId">
+                  <button v-if="selectedCompactPreset.verbIds.length >= 30" type="button" @click="selectCompactPreset(selectedCompactPreset, 30)">
+                    <span><strong>{{ ui('30 au hasard') }}</strong></span>
+                    <span class="preset-browser__count">30</span>
+                    <span class="preset-browser__launch" aria-hidden="true">→</span>
+                  </button>
+                  <span class="preset-browser__quantity-separator" aria-hidden="true" />
+                  <button v-for="count in [3, 5, 10]" :key="count" v-show="selectedCompactPreset.verbIds.length >= count" type="button" @click="selectCompactPreset(selectedCompactPreset, count)">
+                    <span><strong>{{ ui('{count} au hasard', { count }) }}</strong></span>
+                    <span class="preset-browser__count">{{ count }}</span>
+                    <span class="preset-browser__launch" aria-hidden="true">→</span>
+                  </button>
+                </template>
+                <template v-else>
+                  <button type="button" @click="selectCompactPreset(selectedCompactPreset)">
+                    <span><strong>{{ ui('Tous les verbes') }}</strong></span>
+                    <span class="preset-browser__count">{{ selectedCompactPreset.verbIds.length }}</span>
+                    <span class="preset-browser__launch" aria-hidden="true">→</span>
+                  </button>
+                  <span class="preset-browser__quantity-separator" aria-hidden="true" />
+                  <button v-if="selectedCompactPreset.verbIds.length >= 1 && selectedCompactPreset.verbIds.length < 5" type="button" @click="selectCompactPreset(selectedCompactPreset, 1)">
+                    <span><strong>{{ ui('1 au hasard') }}</strong></span>
+                    <span class="preset-browser__count">1</span>
+                    <span class="preset-browser__launch" aria-hidden="true">→</span>
+                  </button>
+                  <button v-if="selectedCompactPreset.verbIds.length >= 2 && selectedCompactPreset.verbIds.length < 5" type="button" @click="selectCompactPreset(selectedCompactPreset, 2)">
+                    <span><strong>{{ ui('2 au hasard') }}</strong></span>
+                    <span class="preset-browser__count">2</span>
+                    <span class="preset-browser__launch" aria-hidden="true">→</span>
+                  </button>
+                  <button v-if="selectedCompactPreset.verbIds.length >= 3" type="button" @click="selectCompactPreset(selectedCompactPreset, 3)">
+                    <span><strong>{{ ui('3 au hasard') }}</strong></span>
+                    <span class="preset-browser__count">3</span>
+                    <span class="preset-browser__launch" aria-hidden="true">→</span>
+                  </button>
+                  <button v-if="selectedCompactPreset.verbIds.length >= 5" type="button" @click="selectCompactPreset(selectedCompactPreset, 5)">
+                    <span><strong>{{ ui('5 au hasard') }}</strong></span>
+                    <span class="preset-browser__count">5</span>
+                    <span class="preset-browser__launch" aria-hidden="true">→</span>
+                  </button>
+                  <button v-if="selectedCompactPreset.verbIds.length >= 10" type="button" @click="selectCompactPreset(selectedCompactPreset, 10)">
+                    <span><strong>{{ ui('10 au hasard') }}</strong></span>
+                    <span class="preset-browser__count">10</span>
+                    <span class="preset-browser__launch" aria-hidden="true">→</span>
+                  </button>
+                </template>
               </div>
             </section>
           </Transition>

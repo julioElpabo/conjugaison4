@@ -691,6 +691,7 @@ const uiMessages = {
   "Questions de la fiche": { de: "Fragen des Arbeitsblatts", en: "Worksheet questions", it: "Domande della scheda", es: "Preguntas de la ficha" },
   "Nouvelle fiche au hasard": { de: "Neues zuf\xE4lliges Arbeitsblatt", en: "New random worksheet", it: "Nuova scheda casuale", es: "Nueva ficha al azar" },
   "Cr\xE9ation d\u2019une nouvelle fiche\u2026": { de: "Neues Arbeitsblatt wird erstellt\u2026", en: "Creating a new worksheet\u2026", it: "Creazione di una nuova scheda\u2026", es: "Creando una nueva ficha\u2026" },
+  "D\xE9fi {code} \u2014 fiche {number}": { de: "\xDCbung {code} \u2014 Arbeitsblatt {number}", en: "Challenge {code} \u2014 worksheet {number}", it: "Esercizio {code} \u2014 scheda {number}", es: "Ejercicio {code} \u2014 ficha {number}" },
   "Seulement {available} questions diff\xE9rentes sont disponibles sur les {requested} demand\xE9es": { de: "Nur {available} verschiedene Fragen sind von den {requested} angeforderten verf\xFCgbar", en: "Only {available} different questions are available out of the {requested} requested", it: "Sono disponibili solo {available} domande diverse sulle {requested} richieste", es: "Solo hay {available} preguntas diferentes disponibles de las {requested} solicitadas" },
   "Autoriser les r\xE9p\xE9titions": { de: "Wiederholungen zulassen", en: "Allow repetitions", it: "Consenti ripetizioni", es: "Permitir repeticiones" },
   "R\xE9p\xE9titions autoris\xE9es": { de: "Wiederholungen zugelassen", en: "Repetitions allowed", it: "Ripetizioni consentite", es: "Repeticiones permitidas" },
@@ -1686,12 +1687,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-Csr1jZXL.mjs')
+    component: () => import('./_code_-CFjgh1cv.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-BuzbkW1o.mjs')
+    component: () => import('./_slug_-DzllMXaF.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1736,7 +1737,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-Bt77HYyX.mjs')
+    component: () => import('./exercices-de-conjugaison-qtguEbaZ.mjs')
   },
   {
     name: "mon-compte",
@@ -1752,7 +1753,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-CoxohRx2.mjs')
+    component: () => import('./nouveau-defi-BsvMTLWy.mjs')
   },
   {
     name: "signin",
@@ -1762,7 +1763,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-DiS51vg8.mjs')
+    component: () => import('./index-C5kw9z66.mjs')
   },
   {
     name: "mode-tense",
@@ -1867,12 +1868,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-Csr1jZXL.mjs')
+    component: () => import('./_code_-CFjgh1cv.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es)/defis/:slug()",
-    component: () => import('./_slug_-BuzbkW1o.mjs')
+    component: () => import('./_slug_-DzllMXaF.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1917,7 +1918,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-Bt77HYyX.mjs')
+    component: () => import('./exercices-de-conjugaison-qtguEbaZ.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1933,7 +1934,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-CoxohRx2.mjs')
+    component: () => import('./nouveau-defi-BsvMTLWy.mjs')
   },
   {
     name: "localized-signin",
@@ -1943,7 +1944,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-DiS51vg8.mjs')
+    component: () => import('./index-C5kw9z66.mjs')
   },
   {
     name: "localized-mode-tense",

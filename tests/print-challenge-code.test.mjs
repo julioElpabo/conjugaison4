@@ -28,7 +28,7 @@ describe('code des défis imprimés', () => {
     assert.match(savedChallenges, /d\.expires_at > CURRENT_TIMESTAMP/u)
   })
 
-  it('réutilise le code partagé et l’affiche en petit sous le titre', async () => {
+  it('réutilise le code partagé et distingue chaque fiche de son corrigé', async () => {
     const preview = await read('../app/components/challenge/PrintPreview.vue')
     const workspace = await read('../app/components/challenge/ChallengeWorkspace.vue')
 
@@ -39,7 +39,9 @@ describe('code des défis imprimés', () => {
     assert.match(workspace, /@challenge-code-created="shareCode = \$event"/u)
     assert.match(preview, /Code du défi/u)
     assert.match(preview, /Le défi est enregistré pendant 6 mois/u)
-    assert.doesNotMatch(preview, /sheetNumber|randomSheetNumber/u)
+    assert.match(preview, /const sheetNumber = ref\(1\)/u)
+    assert.match(preview, /Défi \{code\} — fiche \{number\}/u)
+    assert.match(preview, /if \(questions !== previousQuestions && questions\.length > 0\) sheetNumber\.value \+= 1/u)
     assert.match(preview, /pdf\.text\(identifier, left, y - 5\)/u)
   })
 })

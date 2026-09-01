@@ -62,6 +62,7 @@ function printAnalyticsMetadata(format: 'pdf' | 'word') {
 }
 
 const challengeCode = ref(props.existingChallengeCode || '')
+const sheetNumber = ref(1)
 const challengeCodeError = ref('')
 const isChallengeCodeBusy = ref(false)
 let challengeCodeRequest: Promise<void> | undefined
@@ -98,6 +99,9 @@ const isTenseIdentification = computed(() => props.exerciseKind === 'tense-ident
 const isTableLayout = computed(() => props.options.questionLayout === 'table' && props.exerciseKind === 'conjugation')
 const identificationAnswerHeightMm = computed(() => 8 + Math.max(0, 5 - questionSpacingMm.value))
 const missingQuestionCount = computed(() => Math.max(0, props.requestedQuestionCount - props.questions.length))
+const printIdentifier = computed(() => props.options.showRandomNumber && challengeCode.value
+  ? ui('Défi {code} — fiche {number}', { code: challengeCode.value, number: sheetNumber.value })
+  : '')
 const printableQuestions = computed(() => {
   if (!allowRepetitions.value || !missingQuestionCount.value || !props.questions.length) return props.questions
   const result = [...props.questions]
@@ -259,9 +263,7 @@ async function buildPdf() {
     const left = 17
     const right = 193
     const title = pdfSafe(props.options.title || ui('Défi de conjugaison'))
-    const identifier = props.options.showRandomNumber && challengeCode.value
-      ? `${ui('Code du défi')} : ${challengeCode.value}`
-      : ''
+    const identifier = pdfSafe(printIdentifier.value)
     const bodySize = pdfBodySize.value
     const correctionSize = pdfCorrectionSize.value
     const lineHeight = pdfLineHeightMm.value
@@ -726,6 +728,13 @@ watch(
 )
 
 watch(
+  () => props.questions,
+  (questions, previousQuestions) => {
+    if (questions !== previousQuestions && questions.length > 0) sheetNumber.value += 1
+  }
+)
+
+watch(
   () => ({
     questions: printableQuestions.value,
     verbs: props.verbs,
@@ -733,6 +742,7 @@ watch(
     exerciseKind: props.exerciseKind,
     options: props.options,
     challengeCode: challengeCode.value,
+    sheetNumber: sheetNumber.value,
   }),
   schedulePdfPreview,
   { deep: true }
@@ -783,9 +793,7 @@ async function downloadWord() {
     } = await import('docx')
 
     const title = props.options.title || ui('Défi de conjugaison')
-    const identifier = props.options.showRandomNumber && challengeCode.value
-      ? `${ui('Code du défi')} : ${challengeCode.value}`
-      : ''
+    const identifier = printIdentifier.value
     const contentWidth = 9975
     const pageMargins = { top: 1020, right: 965, bottom: 850, left: 965, header: 360, footer: 360, gutter: 0 }
     const wordBodySize = inclusivePrint.value ? 24 : 21
@@ -1299,7 +1307,10 @@ async function downloadWord() {
                 <strong>{{ ui('Code du défi') }}</strong>
                 <small v-if="isChallengeCodeBusy">{{ ui('Création du code…') }}</small>
                 <small v-else-if="challengeCodeError">{{ challengeCodeError }}</small>
-                <small v-else>{{ ui('Le défi est enregistré pendant 6 mois.') }}</small>
+                <template v-else>
+                  <small v-if="printIdentifier">{{ printIdentifier }}</small>
+                  <small>{{ ui('Le défi est enregistré pendant 6 mois.') }}</small>
+                </template>
               </span>
             </label>
           </fieldset>

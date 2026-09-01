@@ -325,6 +325,7 @@ export const uiMessages = {
   'Questions de la fiche': { de: 'Fragen des Arbeitsblatts', en: 'Worksheet questions', it: 'Domande della scheda', es: 'Preguntas de la ficha' },
   'Nouvelle fiche au hasard': { de: 'Neues zufälliges Arbeitsblatt', en: 'New random worksheet', it: 'Nuova scheda casuale', es: 'Nueva ficha al azar' },
   'Création d’une nouvelle fiche…': { de: 'Neues Arbeitsblatt wird erstellt…', en: 'Creating a new worksheet…', it: 'Creazione di una nuova scheda…', es: 'Creando una nueva ficha…' },
+  'Défi {code} — fiche {number}': { de: 'Übung {code} — Arbeitsblatt {number}', en: 'Challenge {code} — worksheet {number}', it: 'Esercizio {code} — scheda {number}', es: 'Ejercicio {code} — ficha {number}' },
   'Seulement {available} questions différentes sont disponibles sur les {requested} demandées': { de: 'Nur {available} verschiedene Fragen sind von den {requested} angeforderten verfügbar', en: 'Only {available} different questions are available out of the {requested} requested', it: 'Sono disponibili solo {available} domande diverse sulle {requested} richieste', es: 'Solo hay {available} preguntas diferentes disponibles de las {requested} solicitadas' },
   'Autoriser les répétitions': { de: 'Wiederholungen zulassen', en: 'Allow repetitions', it: 'Consenti ripetizioni', es: 'Permitir repeticiones' },
   'Répétitions autorisées': { de: 'Wiederholungen zugelassen', en: 'Repetitions allowed', it: 'Ripetizioni consentite', es: 'Repeticiones permitidas' },

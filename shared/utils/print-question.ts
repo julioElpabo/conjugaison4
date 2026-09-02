@@ -1,5 +1,6 @@
 import type { ExerciseQuestion } from '../types/conjugation'
 import { conjugationRequiresSubjectPronoun } from './answer'
+import { sentenceTerminalMark, withSentenceTerminalMark } from './sentence-punctuation'
 
 const ANSWER_LINE = '_________________________________'
 const GERUND_ANSWER_LINE = '______________________________________'
@@ -48,10 +49,11 @@ function completionParts(sentence: string, question: ExerciseQuestion) {
   const promptedSentence = withSubjunctiveCue(sentence.trim(), question)
   const [prefix = '', ...suffixParts] = promptedSentence.split('…')
   const rawSuffix = suffixParts.join('…').trim()
-  const isImperative = question.mode?.trim().toLocaleLowerCase('fr-CH') === 'impératif'
-  const suffix = isImperative && !rawSuffix.endsWith('!')
-    ? `${rawSuffix}${rawSuffix ? ' ' : ''}!`
-    : rawSuffix
+  const isComplementSentence = question.complementFunction === 'cod' || question.complementFunction === 'coi'
+  const terminalMark = isComplementSentence && !/[.!?…]$/u.test(rawSuffix)
+    ? sentenceTerminalMark(question.mode)
+    : ''
+  const suffix = `${rawSuffix}${terminalMark}`
   const requiresWrittenSubject = conjugationRequiresSubjectPronoun(question)
   const completionPrefix = requiresWrittenSubject
     ? prefixWithoutWrittenSubject(prefix.trim(), question)
@@ -69,7 +71,7 @@ function completionParts(sentence: string, question: ExerciseQuestion) {
     fillBlank: promptedSentence.includes('…') || suffixParts.length === 0,
     suffixOnNextLine,
     blankWidthPercent,
-    completion: [completionPrefix, answerLine, suffix].filter(Boolean).join(' '),
+    completion: `${[completionPrefix, answerLine].filter(Boolean).join(' ')}${suffix ? `${rawSuffix ? ' ' : ''}${suffix}` : ''}`,
   }
 }
 
@@ -147,7 +149,10 @@ export function printableQuestion(question: ExerciseQuestion, exerciseKind: stri
 }
 
 export function printableCorrectionAnswers(question: ExerciseQuestion): string[] {
-  const answers = [...new Set(question.reponsesPourCorrige.map(answer => answer.trim()).filter(Boolean))]
+  const isComplementSentence = question.complementFunction === 'cod' || question.complementFunction === 'coi'
+  const answers = [...new Set(question.reponsesPourCorrige
+    .map(answer => isComplementSentence ? withSentenceTerminalMark(answer, question.mode) : answer.trim())
+    .filter(Boolean))]
   if (question.isCompound && answers.length > 1) return answers.slice(0, 1)
   return answers
 }

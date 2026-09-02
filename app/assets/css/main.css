@@ -2036,6 +2036,14 @@ body.dialog-open {
   width: 100%;
 }
 
+.completion-sentence__terminal-mark {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  margin-left: .12em;
+  transform: translateY(-50%);
+}
+
 :root[data-theme='dark'] .prefixed-answer-control__prefix {
   color: #c3d8d3;
 }

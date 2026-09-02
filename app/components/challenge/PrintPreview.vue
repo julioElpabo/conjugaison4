@@ -876,7 +876,7 @@ async function downloadWord() {
           children: [
             ...(prefix ? [prefix, ' '] : []),
             new Tab(),
-            ...(suffix ? [` ${suffix}`] : []),
+            ...(suffix ? [`${suffix.startsWith('.') ? '' : ' '}${suffix}`] : []),
           ],
         })],
       })]

@@ -30,8 +30,10 @@ describe('questions imprimables', () => {
         consigne: 'elles … sa ronde | danser | présent (conditionnel)',
         reponses: [],
         reponsesPourCorrige: [],
+        complementPosition: 'after',
+        complementFunction: 'cod',
       }, 'conjugation'),
-      'danser | présent (conditionnel) : elles _________________________________ sa ronde',
+      'danser | présent (conditionnel) : elles _________________________________ sa ronde.',
     )
   })
 
@@ -42,12 +44,14 @@ describe('questions imprimables', () => {
         consigne: 'elles … sa ronde | danser | présent (conditionnel)',
         reponses: [],
         reponsesPourCorrige: [],
+        complementPosition: 'after',
+        complementFunction: 'cod',
       }, 'conjugation'),
       {
         label: 'danser | présent (conditionnel) :',
-        completion: 'elles _________________________________ sa ronde',
+        completion: 'elles _________________________________ sa ronde.',
         completionPrefix: 'elles',
-        completionSuffix: 'sa ronde',
+        completionSuffix: 'sa ronde.',
         fillBlank: true,
         suffixOnNextLine: false,
         blankWidthPercent: 100,
@@ -102,11 +106,12 @@ describe('questions imprimables', () => {
       temps: 'présent',
       mode: 'indicatif',
       complementPosition: 'after',
+      complementFunction: 'cod',
       saisiePrefixe: "j'",
     }, 'conjugation')
 
     assert.equal(parts.completionPrefix, "j'")
-    assert.equal(parts.completion, "j' _________________________________ ce morceau")
+    assert.equal(parts.completion, "j' _________________________________ ce morceau.")
   })
 
   it('conserve je devant un h aspiré', () => {
@@ -135,6 +140,7 @@ describe('questions imprimables', () => {
       temps: 'présent',
       mode: 'impératif',
       complementPosition: 'after',
+      complementFunction: 'cod',
       saisiePrefixe: '',
     }, 'conjugation')
 
@@ -198,6 +204,20 @@ describe('questions imprimables', () => {
     assert.equal(printableCorrectionText(question), "il s'assied\nil s'assoit")
   })
 
+  it('ponctue aussi le corrigé d’une phrase avec COI sans modifier la réponse source', () => {
+    const question = {
+      titre: 'parler',
+      consigne: 'elle … à ses amis | parler | passé composé (indicatif)',
+      reponses: ['elle a parlé'],
+      reponsesPourCorrige: ['elle a parlé à ses amis'],
+      mode: 'indicatif',
+      complementPosition: 'after',
+      complementFunction: 'coi',
+    }
+    assert.deepEqual(printableCorrectionAnswers(question), ['elle a parlé à ses amis.'])
+    assert.deepEqual(question.reponsesPourCorrige, ['elle a parlé à ses amis'])
+  })
+
   it('affiche le gérondif avec « en » et une zone à compléter dans la fiche élève', () => {
     const question = {
       titre: 'Aimer',
@@ -253,12 +273,13 @@ describe('questions imprimables', () => {
         temps: 'présent',
         mode: 'subjonctif',
         complementPosition: 'after',
+        complementFunction: 'cod',
       }, 'conjugation'),
       {
         label: 'lire | présent (subjonctif) :',
-        completion: 'que je _________________________________ ces lettres',
+        completion: 'que je _________________________________ ces lettres.',
         completionPrefix: 'que je',
-        completionSuffix: 'ces lettres',
+        completionSuffix: 'ces lettres.',
         fillBlank: true,
         suffixOnNextLine: false,
         blankWidthPercent: 100,
@@ -276,8 +297,10 @@ describe('questions imprimables', () => {
       temps: 'passé antérieur',
       mode: 'indicatif',
       complementPosition: 'before',
+      complementFunction: 'cod',
     }, 'conjugation')
     assert.equal(parts.completionPrefix, "les lettres que j'")
+    assert.equal(parts.completion, "les lettres que j' _________________________________.")
   })
 
   it('place un complément long sous une ligne continue plus longue', () => {
@@ -290,9 +313,10 @@ describe('questions imprimables', () => {
       temps: 'futur',
       mode: 'indicatif',
       complementPosition: 'after',
+      complementFunction: 'coi',
     }, 'conjugation')
     assert.equal(parts.completionPrefix, 'il')
-    assert.equal(parts.completionSuffix, 'nos livres par ordre alphabétique d’auteurs')
+    assert.equal(parts.completionSuffix, 'nos livres par ordre alphabétique d’auteurs.')
     assert.equal(parts.suffixOnNextLine, true)
     assert.ok(parts.blankWidthPercent >= 32 && parts.blankWidthPercent <= 58)
   })

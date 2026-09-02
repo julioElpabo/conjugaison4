@@ -1,9 +1,10 @@
-import { d as defineEventHandler, E as getHeader, u as useDatabase } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, w as getCookie, E as getHeader, u as useDatabase } from '../../../nitro/nitro.mjs';
 import { a as analyticsSessionId, s as safeAnalyticsPath, b as analyticsDeviceCategory } from '../../../_/analytics-session.mjs';
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../../_/public-api-rate-limit.mjs';
 import { r as readLimitedJsonBody } from '../../../_/limited-json-body.mjs';
 import { g as getLearnerSession } from '../../../_/learner-session.mjs';
 import { e as evaluateAdminPushAlerts } from '../../../_/admin-push-notifications.mjs';
+import { A as ANALYTICS_CONSENT_ACCEPTED, a as ANALYTICS_CONSENT_COOKIE_NAME } from '../../../_/analytics-consent.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -19,6 +20,7 @@ import '../../../_/google-analytics.mjs';
 import '../../../_/daily-sessions.mjs';
 
 const heartbeat_post = defineEventHandler(async (event) => {
+  if (getCookie(event, ANALYTICS_CONSENT_COOKIE_NAME) !== ANALYTICS_CONSENT_ACCEPTED) return { ok: true };
   await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.telemetry);
   const body = await readLimitedJsonBody(event, 8 * 1024);
   const sessionId = analyticsSessionId(event);

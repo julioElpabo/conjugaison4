@@ -26,6 +26,7 @@ function emptyOverview(notice) {
     source: "local",
     configured: true,
     activeUsers: 0,
+    pageViews: 0,
     sessions: 0,
     connectedAccounts: 0,
     newUsers: 0,
@@ -60,7 +61,7 @@ function emptyOverview(notice) {
   };
 }
 const analytics_get = defineEventHandler(async (event) => {
-  var _a, _b;
+  var _a, _b, _c;
   requireAdministrator(event);
   const query = getQuery(event);
   const requestedWindow = String(query.window || "30m");
@@ -81,8 +82,9 @@ const analytics_get = defineEventHandler(async (event) => {
   const database = useDatabase();
   let local = emptyOverview();
   try {
-    const [[summary], [connectedAccountsRows], [eventRows], [devices], [languages], [activity], [eventSeries], [sessionSeries], [presentationSeries], [languageSeries], [featureUsageRows]] = await Promise.all([
+    const [[summary], [pageViewRows], [connectedAccountsRows], [eventRows], [devices], [languages], [activity], [eventSeries], [sessionSeries], [presentationSeries], [languageSeries], [featureUsageRows]] = await Promise.all([
       database.execute(`SELECT COUNT(*) AS sessions FROM analytics_sessions WHERE ${sessionWhere}`, sessionParams),
+      database.execute(`SELECT COALESCE(SUM(page_views),0) AS value FROM analytics_page_views WHERE ${window === "range" ? "bucket_start >= ? AND bucket_start < DATE_ADD(?, INTERVAL 1 DAY)" : "bucket_start >= DATE_SUB(NOW(), INTERVAL ? MINUTE)"}`, eventParams),
       database.execute(`SELECT COUNT(DISTINCT sessions.account_id) AS value
         FROM learner_sessions sessions
         INNER JOIN learner_accounts accounts ON accounts.id = sessions.account_id
@@ -141,8 +143,9 @@ const analytics_get = defineEventHandler(async (event) => {
       source: "local",
       configured: true,
       activeUsers: sessions,
+      pageViews: Number((_b = pageViewRows == null ? void 0 : pageViewRows[0]) == null ? void 0 : _b.value) || 0,
       sessions,
-      connectedAccounts: Number((_b = connectedAccountsRows == null ? void 0 : connectedAccountsRows[0]) == null ? void 0 : _b.value) || 0,
+      connectedAccounts: Number((_c = connectedAccountsRows == null ? void 0 : connectedAccountsRows[0]) == null ? void 0 : _c.value) || 0,
       newUsers: window === "range" ? sessions : 0,
       returningUsers: 0,
       events: eventRows.reduce((sum, row) => sum + (Number(row.value) || 0), 0),

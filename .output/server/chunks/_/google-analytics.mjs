@@ -205,6 +205,7 @@ async function googleAnalyticsOverview(options) {
     source: "ga4",
     configured: true,
     activeUsers: metric(0),
+    pageViews: 0,
     sessions: realtime ? metric(0) : metric(2),
     connectedAccounts: 0,
     newUsers: realtime ? 0 : metric(3),

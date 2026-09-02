@@ -2,6 +2,7 @@ import { defineComponent, ref, useTemplateRef, computed, watch, unref, useSSRCon
 import { ssrRenderTeleport, ssrInterpolate, ssrIncludeBooleanAttr, ssrRenderAttr, ssrRenderClass } from 'vue/server-renderer';
 import { T as TENSE_IDENTIFICATION_INSTRUCTION } from '../_/exercise-instructions.mjs';
 import { as as conjugationRequiresSubjectPronoun } from '../nitro/nitro.mjs';
+import { s as sentenceTerminalMark, w as withSentenceTerminalMark } from '../_/sentence-punctuation.mjs';
 import { f as useLanguagePreferences } from './server.mjs';
 import { u as useSiteAnalytics } from './useSiteAnalytics-Bd_7Kr2F.mjs';
 import 'node:http';
@@ -87,12 +88,12 @@ function prefixWithoutWrittenSubject(prefix, question) {
   return prefix.trim();
 }
 function completionParts(sentence, question) {
-  var _a;
   const promptedSentence = withSubjunctiveCue(sentence.trim(), question);
   const [prefix = "", ...suffixParts] = promptedSentence.split("\u2026");
   const rawSuffix = suffixParts.join("\u2026").trim();
-  const isImperative = ((_a = question.mode) == null ? void 0 : _a.trim().toLocaleLowerCase("fr-CH")) === "imp\xE9ratif";
-  const suffix = isImperative && !rawSuffix.endsWith("!") ? `${rawSuffix}${rawSuffix ? " " : ""}!` : rawSuffix;
+  const isComplementSentence = question.complementFunction === "cod" || question.complementFunction === "coi";
+  const terminalMark = isComplementSentence && !/[.!?…]$/u.test(rawSuffix) ? sentenceTerminalMark(question.mode) : "";
+  const suffix = `${rawSuffix}${terminalMark}`;
   const requiresWrittenSubject = conjugationRequiresSubjectPronoun(question);
   const completionPrefix = requiresWrittenSubject ? prefixWithoutWrittenSubject(prefix.trim(), question) : question.complementPosition !== "before" && question.saisiePrefixe !== void 0 ? question.saisiePrefixe.trim() : prefix.trim();
   const answerLine = ANSWER_LINE;
@@ -104,7 +105,7 @@ function completionParts(sentence, question) {
     fillBlank: promptedSentence.includes("\u2026") || suffixParts.length === 0,
     suffixOnNextLine,
     blankWidthPercent,
-    completion: [completionPrefix, answerLine, suffix].filter(Boolean).join(" ")
+    completion: `${[completionPrefix, answerLine].filter(Boolean).join(" ")}${suffix ? `${rawSuffix ? " " : ""}${suffix}` : ""}`
   };
 }
 function printableQuestionParts(question, exerciseKind) {
@@ -173,7 +174,8 @@ function printableQuestion(question, exerciseKind) {
   return [parts.label, parts.completion].filter(Boolean).join(" ");
 }
 function printableCorrectionAnswers(question) {
-  const answers = [...new Set(question.reponsesPourCorrige.map((answer) => answer.trim()).filter(Boolean))];
+  const isComplementSentence = question.complementFunction === "cod" || question.complementFunction === "coi";
+  const answers = [...new Set(question.reponsesPourCorrige.map((answer) => isComplementSentence ? withSentenceTerminalMark(answer, question.mode) : answer.trim()).filter(Boolean))];
   if (question.isCompound && answers.length > 1) return answers.slice(0, 1);
   return answers;
 }

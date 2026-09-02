@@ -1669,7 +1669,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-DdfjMi01.mjs')
+    component: () => import('./users-Cpx5IWu-.mjs')
   },
   {
     name: "admin-verbes",
@@ -1689,12 +1689,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-DwSq7BsN.mjs')
+    component: () => import('./_code_-DkySOrPJ.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-DajV8XcJ.mjs')
+    component: () => import('./_slug_-vlLLa82_.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1739,7 +1739,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-B49-4CVX.mjs')
+    component: () => import('./exercices-de-conjugaison-D003ZL7y.mjs')
   },
   {
     name: "mon-compte",
@@ -1750,12 +1750,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-BazDoEI2.mjs')
+    component: () => import('./my-page-DNgR4av9.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-BZmo6aMc.mjs')
+    component: () => import('./nouveau-defi-DL8Vm2nk.mjs')
   },
   {
     name: "signin",
@@ -1765,7 +1765,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-DwfjmtI9.mjs')
+    component: () => import('./index-TDJbIEM1.mjs')
   },
   {
     name: "mode-tense",
@@ -1850,7 +1850,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es)/admin/users",
-    component: () => import('./users-DdfjMi01.mjs')
+    component: () => import('./users-Cpx5IWu-.mjs')
   },
   {
     name: "localized-admin-verbes",
@@ -1870,12 +1870,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-DwSq7BsN.mjs')
+    component: () => import('./_code_-DkySOrPJ.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es)/defis/:slug()",
-    component: () => import('./_slug_-DajV8XcJ.mjs')
+    component: () => import('./_slug_-vlLLa82_.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1920,7 +1920,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-B49-4CVX.mjs')
+    component: () => import('./exercices-de-conjugaison-D003ZL7y.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1931,12 +1931,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-BazDoEI2.mjs')
+    component: () => import('./my-page-DNgR4av9.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-BZmo6aMc.mjs')
+    component: () => import('./nouveau-defi-DL8Vm2nk.mjs')
   },
   {
     name: "localized-signin",
@@ -1946,7 +1946,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-DwfjmtI9.mjs')
+    component: () => import('./index-TDJbIEM1.mjs')
   },
   {
     name: "localized-mode-tense",

@@ -108,7 +108,7 @@ describe('questions affichées dans le chat', () => {
     assert.equal(question.consigne, "j' … les lettres de l'alphabet | lire | plus-que-parfait (indicatif)")
     assert.equal(
       result.sentence,
-      `${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK} les lettres de l'alphabet`,
+      `${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK} les lettres de l'alphabet.`,
     )
   })
 
@@ -321,7 +321,24 @@ describe('questions affichées dans le chat', () => {
     }, 'tu')
 
     const result = coachQuestionBubbles(question)
-    assert.equal(result.sentence, `C'est la seule autre maison que ${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK}`)
+    assert.equal(result.sentence, `C'est la seule autre maison que ${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${COMPOUND_TENSE_BLANK}.`)
+  })
+
+  it('conserve le point d’exclamation d’une phrase COD à l’impératif', () => {
+    const result = coachQuestionBubbles({
+      consigne: '… une pomme | manger | présent (impératif)',
+      pronom: 'tu',
+      saisiePrefixe: '',
+      infinitif: 'manger',
+      mode: 'impératif',
+      temps: 'présent',
+      conjugaison1: 'mange',
+      complement: 'une pomme',
+      complementPosition: 'after',
+      complementFunction: 'cod',
+    })
+
+    assert.equal(result.sentence, `${SIMPLE_TENSE_BLANK} une pomme !`)
   })
 
   it('masque le mode indicatif quand la session ne contient que ce mode', () => {

@@ -5,6 +5,7 @@ import { googleAnalyticsOverview } from '../../utils/google-analytics'
 
 interface ValueRow extends RowDataPacket { label: string, value: number }
 interface SummaryRow extends RowDataPacket { sessions: number }
+interface PageViewRow extends RowDataPacket { value: number }
 interface ConnectedAccountsRow extends RowDataPacket { value: number }
 interface EventRow extends RowDataPacket { event_name: string, value: number }
 interface EventSeriesRow extends RowDataPacket { date: string, event_name: string, value: number }
@@ -33,7 +34,7 @@ function breakdown(rows: ValueRow[]): AnalyticsBreakdownItem[] {
 
 function emptyOverview(notice?: string): AnalyticsOverview {
   return {
-    source: 'local', configured: true, activeUsers: 0, sessions: 0, connectedAccounts: 0, newUsers: 0, returningUsers: 0,
+    source: 'local', configured: true, activeUsers: 0, pageViews: 0, sessions: 0, connectedAccounts: 0, newUsers: 0, returningUsers: 0,
     events: 0, exerciseStarted: 0, exerciseCompleted: 0, completionRate: 0,
     correctAnswers: 0, submittedAnswers: 0, successRate: 0, helpScrolled: 0, pdfDownloads: 0,
     wordDownloads: 0, challengeLoads: 0, challengeSaves: 0, devices: [], languages: [],
@@ -70,8 +71,11 @@ export default defineEventHandler(async (event) => {
   let local = emptyOverview()
 
   try {
-    const [[summary], [connectedAccountsRows], [eventRows], [devices], [languages], [activity], [eventSeries], [sessionSeries], [presentationSeries], [languageSeries], [featureUsageRows]] = await Promise.all([
+    const [[summary], [pageViewRows], [connectedAccountsRows], [eventRows], [devices], [languages], [activity], [eventSeries], [sessionSeries], [presentationSeries], [languageSeries], [featureUsageRows]] = await Promise.all([
       database.execute<SummaryRow[]>(`SELECT COUNT(*) AS sessions FROM analytics_sessions WHERE ${sessionWhere}`, sessionParams),
+      database.execute<PageViewRow[]>(`SELECT COALESCE(SUM(page_views),0) AS value FROM analytics_page_views WHERE ${window === 'range'
+        ? 'bucket_start >= ? AND bucket_start < DATE_ADD(?, INTERVAL 1 DAY)'
+        : 'bucket_start >= DATE_SUB(NOW(), INTERVAL ? MINUTE)'}`, eventParams),
       database.execute<ConnectedAccountsRow[]>(`SELECT COUNT(DISTINCT sessions.account_id) AS value
         FROM learner_sessions sessions
         INNER JOIN learner_accounts accounts ON accounts.id = sessions.account_id
@@ -126,7 +130,8 @@ export default defineEventHandler(async (event) => {
     }
     const featureUsage = featureUsageRows[0]
     local = {
-      ...emptyOverview(), source: 'local', configured: true, activeUsers: sessions, sessions,
+      ...emptyOverview(), source: 'local', configured: true, activeUsers: sessions,
+      pageViews: Number(pageViewRows?.[0]?.value) || 0, sessions,
       connectedAccounts: Number(connectedAccountsRows?.[0]?.value) || 0,
       newUsers: window === 'range' ? sessions : 0, returningUsers: 0,
       events: eventRows.reduce((sum, row) => sum + (Number(row.value) || 0), 0),

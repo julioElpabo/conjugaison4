@@ -31,6 +31,13 @@ export default defineNitroPlugin(async () => {
       KEY idx_analytics_events_actor_name_created (actor_type, event_name, created_at, session_id),
       KEY idx_analytics_events_session (session_id, created_at)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
+    await database.query(`CREATE TABLE IF NOT EXISTS analytics_page_views (
+      bucket_start DATETIME NOT NULL,
+      path VARCHAR(255) NOT NULL,
+      page_views INT UNSIGNED NOT NULL DEFAULT 0,
+      PRIMARY KEY (bucket_start,path),
+      KEY idx_analytics_page_views_bucket (bucket_start)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
     const [[actorColumn]] = await database.query<ExistsRow[]>(`
       SELECT 1 AS value FROM information_schema.COLUMNS
       WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='analytics_events' AND COLUMN_NAME='actor_type'

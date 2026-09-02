@@ -63,13 +63,13 @@ const activityValueUnit = computed(() => audience.value.source === 'ga4' ? 'Sess
 
 const cards = computed(() => isRealtime.value
   ? [
-      { label: 'Visiteurs actifs', value: audience.value.activeUsers, hint: audience.value.source === 'ga4' ? 'Google Analytics' : 'Mesure locale' },
+      { label: 'Pages vues', value: pedagogy.value.pageViews, hint: 'Mesure agrégée, sans identifiant' },
       { label: 'Exercices lancés', value: pedagogy.value.exerciseStarted, hint: `${pedagogy.value.exerciseCompleted} terminés` },
       { label: 'Réponses envoyées', value: pedagogy.value.submittedAnswers, hint: `${pedagogy.value.correctAnswers} correctes` },
       { label: 'Taux de réussite', value: `${pedagogy.value.successRate} %`, hint: 'réponses correctes' },
     ]
   : [
-      { label: 'Visiteurs', value: audience.value.activeUsers, hint: audience.value.source === 'ga4' ? 'Google Analytics' : 'Mesure locale' },
+      { label: 'Pages vues', value: pedagogy.value.pageViews, hint: 'Mesure agrégée, sans identifiant' },
       { label: 'Sessions', value: audience.value.sessions, hint: 'sur la période choisie' },
       { label: 'Exercices terminés', value: pedagogy.value.exerciseCompleted, hint: `${pedagogy.value.exerciseStarted} lancés` },
       { label: 'Taux de complétion', value: `${pedagogy.value.completionRate} %`, hint: 'terminés / lancés' },

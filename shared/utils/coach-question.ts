@@ -1,6 +1,7 @@
 import type { ExerciseQuestion } from '../types/conjugation'
 import { SUBJECT_PRONOUN_PLACEHOLDER } from './answer'
 import { withoutIndicativeMode } from './chat-mode-display'
+import { withSentenceTerminalMark } from './sentence-punctuation'
 
 export const SIMPLE_TENSE_BLANK = '________________________'
 export const SUBJECT_PRONOUN_BLANK = SUBJECT_PRONOUN_PLACEHOLDER
@@ -139,6 +140,9 @@ export function coachQuestionBubbles(question: ExerciseQuestion, options: { omit
       : `${subjunctiveSubject(question)}${blankPrefix}${blank}`
   }
   sentence = withMaskedSubject(sentence, question)
+  if (question.complementFunction === 'cod' || question.complementFunction === 'coi') {
+    sentence = withSentenceTerminalMark(sentence, question.mode)
+  }
 
   return {
     formula: options.omitIndicativeMode ? withoutIndicativeMode(formula) : formula,

@@ -9,6 +9,7 @@ const { user: learner, checkSession, logout: endLearnerSession } = useLearnerAut
 const route = useRoute()
 const { applyTheme } = useColorTheme()
 const { track } = useSiteAnalytics()
+const { openPreferences } = useAnalyticsConsent()
 const isDark = ref(false)
 const isPhoneViewport = ref(false)
 const falcMode = useState<boolean>('falc-mode', () => false)
@@ -529,6 +530,7 @@ const activeSection = computed(() => {
       <div class="site-footer__links">
         <NuxtLink :to="localePath('/defis')">{{ publicChallengesLabel }}</NuxtLink>
         <button type="button" @click="contactDialog?.open()">{{ ui('Contact') }}</button>
+        <button type="button" @click="openPreferences">{{ ui('Statistiques') }}</button>
         <NuxtLink :to="localePath('/admin')">{{ ui('Administration') }}</NuxtLink>
       </div>
     </footer>
@@ -545,6 +547,7 @@ const activeSection = computed(() => {
       </div>
     </Teleport>
     <ContactDialog v-if="!embeddedConsultation" ref="contactDialog" />
+    <AnalyticsConsentDialog v-if="!isAdminRoute" />
   </div>
 </template>
 

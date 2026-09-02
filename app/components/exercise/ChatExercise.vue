@@ -48,6 +48,7 @@ import { coachHelpQuestionVariables, literaryIdentificationCoachHelpBlocks, loca
 import { coachHelpProfile } from '~~/shared/data/coach-help-profiles'
 import { CHAT_HELP_REMINDER_DELAY_MS, CHAT_HELP_REMINDER_INCORRECT_COUNT, nextConsecutiveIncorrectCount } from '~~/shared/utils/coach-help-reminder'
 import { sanitizeCoachHtml } from '~~/shared/utils/safe-html'
+import { withSentenceTerminalMark } from '~~/shared/utils/sentence-punctuation'
 import { areOnlyIndicativeTenses, withoutIndicativeMode } from '~~/shared/utils/chat-mode-display'
 import { shouldFollowChatAfterLearnerMessage, shouldFollowChatAfterUserScroll } from '~~/shared/utils/chat-scroll-follow'
 import { identificationFormParts, type IdentificationFormParts } from '~~/shared/utils/identification-form'
@@ -299,8 +300,17 @@ const targetedHelp = computed(() => helpQuestion.value
 const helpBlocks = computed(() => usesIdentificationHelp.value
   ? literaryIdentificationCoachHelpBlocks()
   : visibleCoachHelpBlocks(effectiveHelpApproach.value, helpQuestion.value))
+
+function displayedChatAnswer(question: ExerciseQuestion, expectedAnswer: string) {
+  return question.complementFunction === 'cod' || question.complementFunction === 'coi'
+    ? withSentenceTerminalMark(expectedAnswer, question.mode)
+    : expectedAnswer
+}
+
 const revealedHelpAnswers = computed(() => helpAnswersRevealed.value
-  ? [...new Set(helpQuestion.value?.reponsesPourCorrige.map(item => item.trim()).filter(Boolean) || [])]
+  ? [...new Set(helpQuestion.value?.reponsesPourCorrige
+      .map(item => displayedChatAnswer(helpQuestion.value!, item))
+      .filter(Boolean) || [])]
   : [])
 const correctCount = computed(() => attempts.value.filter(item => item.status === 'correct' && !item.answerWasHeard).length)
 const score = computed(() => attempts.value.length
@@ -319,7 +329,11 @@ const attemptSummaries = computed(() => attempts.value.map((attempt, index) => {
     answerWasHeard: attempt.answerWasHeard,
     questionLabel: formula,
     learnerAnswer: attempt.answer,
-    expectedAnswer: attempt.question.reponsesPourCorrige.join(` ${ui('ou')} `) || attempt.question.reponses.join(` ${ui('ou')} `),
+    expectedAnswer: (attempt.question.reponsesPourCorrige.length
+      ? attempt.question.reponsesPourCorrige
+      : attempt.question.reponses)
+      .map(answer => displayedChatAnswer(attempt.question, answer))
+      .join(` ${ui('ou')} `),
     errorLabels: attempt.errorLabels || [],
     errorDetails: attempt.errorDetails || [],
     attemptNumber: attempt.attemptNumber,
@@ -946,7 +960,9 @@ function contextFor(question?: ExerciseQuestion, hideIdentificationAnswer = fals
     number: reminder?.number || undefined,
     mode: hidesAnswer ? undefined : keepGrammarFrench ? question?.mode : uiLabel(question?.mode),
     tense: hidesAnswer ? undefined : keepGrammarFrench ? question?.temps : uiLabel(question?.temps),
-    expectedAnswer: hidesAnswer || !mayRevealAnswer || !expectedAnswers.length ? undefined : expectedAnswers.join(' ou '),
+    expectedAnswer: hidesAnswer || !mayRevealAnswer || !expectedAnswers.length || !question
+      ? undefined
+      : expectedAnswers.map(answer => displayedChatAnswer(question, answer)).join(' ou '),
     questionNumber: question ? displayedQuestionNumber.value : undefined,
   }
 }
@@ -1447,7 +1463,9 @@ async function submit() {
         // (« Ce sont… que j’… »), alors que l'élève ne saisit que les blancs.
         // On compare donc en priorité avec les formes réellement validées.
         const officialAnswers = question.reponses.length ? question.reponses : question.reponsesPourCorrige
-        await addAnswerComparison(candidate, officialAnswers, question.reponsesPourCorrige, question.speech?.answerToken)
+        const displayedAnswers = question.reponsesPourCorrige
+          .map(answer => displayedChatAnswer(question, answer))
+        await addAnswerComparison(candidate, officialAnswers, displayedAnswers, question.speech?.answerToken)
         comparisonDisplayed = true
       }
       if (step.eventType === 'streak') consecutiveCorrectCount.value = 0

@@ -4,6 +4,7 @@ import { assertPublicApiRateLimit, PUBLIC_RATE_LIMITS } from '../../services/pub
 import { readLimitedJsonBody } from '../../utils/limited-json-body'
 import { getLearnerSession } from '../../utils/learner-session'
 import { recordFalcModeUsed } from '../../services/admin-push-notifications'
+import { ANALYTICS_CONSENT_ACCEPTED, ANALYTICS_CONSENT_COOKIE_NAME } from '../../../shared/data/analytics-consent'
 
 const FALC_USAGE_EVENTS = new Set<AnalyticsEventName>([
   'challenge_preset_selected',
@@ -17,6 +18,7 @@ const FALC_USAGE_EVENTS = new Set<AnalyticsEventName>([
 ])
 
 export default defineEventHandler(async (event) => {
+  if (getCookie(event, ANALYTICS_CONSENT_COOKIE_NAME) !== ANALYTICS_CONSENT_ACCEPTED) return { ok: true }
   await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.telemetry)
   const body = await readLimitedJsonBody<{ name?: unknown, path?: unknown, metadata?: unknown }>(event, 8 * 1024)
   const name = typeof body?.name === 'string' ? body.name as AnalyticsEventName : '' as AnalyticsEventName

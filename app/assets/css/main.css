@@ -1996,7 +1996,7 @@ body.dialog-open {
   border-radius: 11px;
   font-size: clamp(1.15rem, 2.3vw, 1.55rem);
   font-weight: 700;
-  text-align: center;
+  text-align: left;
   transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
 }
 

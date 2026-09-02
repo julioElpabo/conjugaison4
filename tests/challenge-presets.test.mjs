@@ -153,14 +153,18 @@ describe('défis résolus par critères', () => {
     assert.deepEqual(preset.verbIds, verbs.map(item => item.id))
   })
 
-  it('présente 30 au hasard avant le séparateur, puis 3, 5 et 10', () => {
+  it('propose tous les verbes, puis un séparateur, puis 3, 5 et 10 au hasard', () => {
     const ultimateBranch = presetPickerSource.indexOf('selectedCompactPreset.id === ultimateChallengeId')
+    const allVerbs = presetPickerSource.indexOf('selectCompactPreset(selectedCompactPreset)', ultimateBranch)
+    const ultimateBranchEnd = presetPickerSource.indexOf('<template v-else>', ultimateBranch)
     const thirty = presetPickerSource.indexOf('selectCompactPreset(selectedCompactPreset, 30)', ultimateBranch)
-    const separator = presetPickerSource.indexOf('preset-browser__quantity-separator', thirty)
+    const separator = presetPickerSource.indexOf('preset-browser__quantity-separator', allVerbs)
     const smallerChoices = presetPickerSource.indexOf('v-for="count in [3, 5, 10]"', separator)
     assert.ok(ultimateBranch >= 0)
-    assert.ok(thirty > ultimateBranch)
-    assert.ok(separator > thirty)
+    assert.ok(allVerbs > ultimateBranch)
+    assert.match(presetPickerSource.slice(ultimateBranch, separator), /ui\('Tous au hasard'\)/u)
+    assert.ok(thirty < 0 || thirty > ultimateBranchEnd)
+    assert.ok(separator > allVerbs)
     assert.ok(smallerChoices > separator)
   })
 

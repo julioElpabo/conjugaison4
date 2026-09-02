@@ -3,8 +3,10 @@ import { assertPublicApiRateLimit, PUBLIC_RATE_LIMITS } from '../../services/pub
 import { readLimitedJsonBody } from '../../utils/limited-json-body'
 import { getLearnerSession } from '../../utils/learner-session'
 import { evaluateAdminPushAlerts } from '../../services/admin-push-notifications'
+import { ANALYTICS_CONSENT_ACCEPTED, ANALYTICS_CONSENT_COOKIE_NAME } from '../../../shared/data/analytics-consent'
 
 export default defineEventHandler(async (event) => {
+  if (getCookie(event, ANALYTICS_CONSENT_COOKIE_NAME) !== ANALYTICS_CONSENT_ACCEPTED) return { ok: true }
   await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.telemetry)
   const body = await readLimitedJsonBody<{ path?: unknown, locale?: unknown, pageView?: unknown }>(event, 8 * 1024)
   const sessionId = analyticsSessionId(event)

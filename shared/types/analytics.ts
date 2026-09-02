@@ -169,6 +169,7 @@ export interface AnalyticsOverview {
   source: 'local' | 'ga4'
   configured: boolean
   activeUsers: number
+  pageViews: number
   sessions: number
   connectedAccounts: number
   newUsers: number

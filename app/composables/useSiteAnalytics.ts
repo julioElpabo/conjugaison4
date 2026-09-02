@@ -4,10 +4,12 @@ import { stripLocaleFromPath } from '~~/shared/i18n/locales'
 export function useSiteAnalytics() {
   const route = useRoute()
   const { interfaceLocale } = useLanguagePreferences()
+  const { consent } = useAnalyticsConsent()
   const usedLanguageLocales = useState<string[]>('analytics-used-language-locales', () => [])
   const usedLanguagesStorageKey = 'tatitotu.analytics.used-languages'
 
   function sendEvent(name: AnalyticsEventName, metadata?: Record<string, string | number | boolean>) {
+    if (consent.value !== 'accepted') return
     const observedMetadata = {
       ...(metadata || {}),
       locale: interfaceLocale.value,

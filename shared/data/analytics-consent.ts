@@ -1,0 +1,4 @@
+export const ANALYTICS_CONSENT_COOKIE_NAME = 'tatitotu_analytics_consent'
+export const ANALYTICS_CONSENT_VERSION = 'v1'
+export const ANALYTICS_CONSENT_ACCEPTED = `accepted-${ANALYTICS_CONSENT_VERSION}`
+export const ANALYTICS_CONSENT_REFUSED = `refused-${ANALYTICS_CONSENT_VERSION}`

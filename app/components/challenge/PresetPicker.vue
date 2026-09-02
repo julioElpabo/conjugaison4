@@ -225,9 +225,9 @@ function selectRandom(preset: ChallengePreset, count: number) {
             <section v-if="selectedCompactPreset" :key="selectedCompactPreset.id" class="preset-browser__column preset-browser__column--quantity" data-browser-column="3" :aria-label="ui('Choisir le nombre de verbes')">
               <div class="preset-browser__list">
                 <template v-if="selectedCompactPreset.id === ultimateChallengeId">
-                  <button v-if="selectedCompactPreset.verbIds.length >= 30" type="button" @click="selectCompactPreset(selectedCompactPreset, 30)">
-                    <span><strong>{{ ui('30 au hasard') }}</strong></span>
-                    <span class="preset-browser__count">30</span>
+                  <button type="button" @click="selectCompactPreset(selectedCompactPreset)">
+                    <span><strong>{{ ui('Tous au hasard') }}</strong></span>
+                    <span class="preset-browser__count">{{ selectedCompactPreset.verbIds.length }}</span>
                     <span class="preset-browser__launch" aria-hidden="true">→</span>
                   </button>
                   <span class="preset-browser__quantity-separator" aria-hidden="true" />

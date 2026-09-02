@@ -673,12 +673,12 @@ const uiMessages = {
   "r\xE9ponses justes": { de: "richtige Antworten", en: "correct answers", it: "risposte corrette", es: "respuestas correctas" },
   "Temps": { de: "Zeitformen", en: "Tenses", it: "Tempi", es: "Tiempos" },
   "Tous les verbes": { de: "Alle Verben", en: "All verbs", it: "Tutti i verbi", es: "Todos los verbos" },
+  "Tous au hasard": { de: "Alle zuf\xE4llig", en: "All at random", it: "Tutti a caso", es: "Todos al azar" },
   "1 au hasard": { de: "1 zuf\xE4llig", en: "1 at random", it: "1 a caso", es: "1 al azar" },
   "2 au hasard": { de: "2 zuf\xE4llig", en: "2 at random", it: "2 a caso", es: "2 al azar" },
   "3 au hasard": { de: "3 zuf\xE4llig", en: "3 at random", it: "3 a caso", es: "3 al azar" },
   "5 au hasard": { de: "5 zuf\xE4llig", en: "5 at random", it: "5 a caso", es: "5 al azar" },
   "10 au hasard": { de: "10 zuf\xE4llig", en: "10 at random", it: "10 a caso", es: "10 al azar" },
-  "30 au hasard": { de: "30 zuf\xE4llig", en: "30 at random", it: "30 a caso", es: "30 al azar" },
   "{count} au hasard": { de: "{count} zuf\xE4llig", en: "{count} at random", it: "{count} a caso", es: "{count} al azar" },
   "Pour d\xE9marrer rapidement": { de: "F\xFCr einen schnellen Start", en: "For a quick start", it: "Per iniziare rapidamente", es: "Para empezar r\xE1pidamente" },
   "D\xE9fis pr\xEAts \xE0 l\u2019emploi": { de: "Fertige \xDCbungen", en: "Ready-made challenges", it: "Esercizi pronti all\u2019uso", es: "Ejercicios listos para usar" },
@@ -1689,12 +1689,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-Dwwq2QZh.mjs')
+    component: () => import('./_code_-DwSq7BsN.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-DV-clyhH.mjs')
+    component: () => import('./_slug_-DajV8XcJ.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1739,7 +1739,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-DyWkdPOr.mjs')
+    component: () => import('./exercices-de-conjugaison-B49-4CVX.mjs')
   },
   {
     name: "mon-compte",
@@ -1755,7 +1755,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-6W6lias0.mjs')
+    component: () => import('./nouveau-defi-BZmo6aMc.mjs')
   },
   {
     name: "signin",
@@ -1765,7 +1765,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-BWgkUI-I.mjs')
+    component: () => import('./index-DwfjmtI9.mjs')
   },
   {
     name: "mode-tense",
@@ -1870,12 +1870,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es)/defi/:code()",
-    component: () => import('./_code_-Dwwq2QZh.mjs')
+    component: () => import('./_code_-DwSq7BsN.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es)/defis/:slug()",
-    component: () => import('./_slug_-DV-clyhH.mjs')
+    component: () => import('./_slug_-DajV8XcJ.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1920,7 +1920,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-DyWkdPOr.mjs')
+    component: () => import('./exercices-de-conjugaison-B49-4CVX.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1936,7 +1936,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es)/nouveau-defi",
-    component: () => import('./nouveau-defi-6W6lias0.mjs')
+    component: () => import('./nouveau-defi-BZmo6aMc.mjs')
   },
   {
     name: "localized-signin",
@@ -1946,7 +1946,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es)/",
-    component: () => import('./index-BWgkUI-I.mjs')
+    component: () => import('./index-DwfjmtI9.mjs')
   },
   {
     name: "localized-mode-tense",

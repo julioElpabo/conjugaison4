@@ -22,6 +22,7 @@ import {
 import { diagnoseCoachAgreement, diagnoseCoachAnswer } from '~~/shared/utils/coach-feedback'
 import { evaluateExerciseAnswer } from '~~/shared/utils/exercise-attempt'
 import { identificationFormParts } from '~~/shared/utils/identification-form'
+import { sentenceTerminalMark, withSentenceTerminalMark } from '~~/shared/utils/sentence-punctuation'
 import {
   learnerErrorDetails,
   mergeLearnerErrorDetails,
@@ -73,6 +74,12 @@ const detectedErrorDetails = ref<LearnerErrorDetail[]>([])
 const isFinished = ref(false)
 const printSummaryOpen = ref(false)
 const printSummaryComponent: ShallowRef<Component | null> = shallowRef(null)
+
+function complementSentenceTerminalMark(question: ExerciseQuestion) {
+  return question.complementFunction === 'cod' || question.complementFunction === 'coi'
+    ? sentenceTerminalMark(question.mode)
+    : ''
+}
 
 watch(printSummaryOpen, async (open) => {
   if (!open || printSummaryComponent.value) return
@@ -174,7 +181,18 @@ const correctCount = computed(() => attempts.value.filter(attempt => attempt.sta
 const scorePercent = computed(() => attempts.value.length
   ? Math.round(correctCount.value / attempts.value.length * 100)
   : 0)
-const correction = computed(() => currentQuestion.value?.reponsesPourCorrige.join(` ${ui('ou')} `) ?? '')
+function displayedCorrectionAnswer(question: ExerciseQuestion, expectedAnswer: string) {
+  return question.complementFunction === 'cod' || question.complementFunction === 'coi'
+    ? withSentenceTerminalMark(expectedAnswer, question.mode)
+    : expectedAnswer
+}
+
+const correction = computed(() => currentQuestion.value
+  ? currentQuestion.value.reponsesPourCorrige
+      .map(answer => displayedCorrectionAnswer(currentQuestion.value!, answer))
+      .join(` ${ui('ou')} `)
+  : '')
+const correctionPunctuation = computed(() => /[.!?…]$/u.test(correction.value) ? '' : '.')
 const alternativeCorrections = computed(() => currentQuestion.value
   ? getAlternativeCorrections(answer.value, currentQuestion.value.reponsesPourCorrige)
   : [])
@@ -824,9 +842,10 @@ onBeforeUnmount(() => {
                     :aria-invalid="feedback === 'incorrect' || retryMessageVisible"
                     :aria-describedby="feedback !== 'idle' ? 'answer-feedback' : missingPronounMessageVisible ? 'answer-missing-pronoun' : retryMessageVisible ? 'answer-retry' : undefined"
                   >
+                  <span v-if="currentQuestion.complementPosition === 'before'" class="completion-sentence__terminal-mark">{{ complementSentenceTerminalMark(currentQuestion) }}</span>
                 </div>
                 <span v-if="currentQuestion.complementPosition !== 'before'">
-                  {{ currentQuestion.complement }}{{ currentQuestion.mode?.toLocaleLowerCase('fr') === 'impératif' ? ' !' : '' }}
+                  {{ currentQuestion.complement }}{{ complementSentenceTerminalMark(currentQuestion) }}
                 </span>
               </div>
               <button v-if="feedback === 'idle'" class="primary-button" type="submit" :disabled="!answer.trim()"> {{ ui('Vérifier') }} </button>
@@ -1024,7 +1043,7 @@ onBeforeUnmount(() => {
             </template>
             <template v-else>
               <strong>{{ feedback === 'correct' ? ui('Bravo, c’est juste !') : ui('Pas tout à fait.') }}</strong>
-              <p v-if="feedback === 'incorrect'">{{ ui('La réponse attendue était :') }} <strong :class="{ 'spoken-text-active': speakingKey === 'current-feedback' }">{{ correction }}</strong>.</p>
+              <p v-if="feedback === 'incorrect'">{{ ui('La réponse attendue était :') }} <strong :class="{ 'spoken-text-active': speakingKey === 'current-feedback' }">{{ correction }}</strong>{{ correctionPunctuation }}</p>
               <p v-else-if="alternativeCorrections.length"> {{ ui('On peut aussi répondre :') }} <strong>{{ alternativeText }}</strong>{{ alternativePunctuation }}</p>
               <p v-else>{{ ui('Tu peux passer à la question suivante.') }}</p>
             </template>
@@ -1110,7 +1129,7 @@ onBeforeUnmount(() => {
                       <div
                         v-for="expectedAnswer in (attempt.question.reponsesPourCorrige.length ? attempt.question.reponsesPourCorrige : attempt.question.reponses)"
                         :key="expectedAnswer"
-                      >{{ expectedAnswer }}</div>
+                      >{{ displayedCorrectionAnswer(attempt.question, expectedAnswer) }}</div>
                     </div>
                   </td>
                   <td>

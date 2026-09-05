@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { withDutchVariants } from '~~/shared/i18n/dutch-variants'
+
+import { localeLanguageTag } from '~~/shared/i18n/locales'
 import type { ChallengePublicationSummary } from '~~/shared/types/challenge-publication'
 
 const { interfaceLocale, localePath } = useLanguagePreferences()
-const copy = computed(() => ({
+const copy = computed(() => (withDutchVariants({
   fr: {
     eyebrow: 'Français langue étrangère',
     title: 'Exercices de conjugaison FLE gratuits et personnalisables',
@@ -49,8 +52,15 @@ const copy = computed(() => ({
     howTitle: 'Un ejercicio FLE adaptado a tu objetivo', howText: 'Elige un recorrido. Antes de empezar, puedes mantener la selección propuesta o modificar los verbos, los tiempos y las opciones.',
     listTitle: 'Elige un ejercicio de conjugación FLE', start: 'Empezar el ejercicio', library: 'Ver todos los retos oficiales', empty: 'No hay ningún ejercicio FLE disponible por el momento.',
     meta: 'Ejercicios gratuitos e interactivos de conjugación FLE. Practica verbos franceses útiles y personaliza los verbos y tiempos.',
+  }, nl: {
+    eyebrow: "Frans als vreemde taal", title: "Gratis oefeningen op maat voor Franse vervoeging voor anderstaligen", intro: "Oefen nuttige Franse werkwoorden om dagelijkse situaties te begrijpen, te spreken en te schrijven.",
+    whyTitle: "Leer Franse werkwoorden vervoegen als anderstalige", whyText: "Deze oefeningen zijn bedoeld voor anderstalige leerlingen Frans en voor leerkrachten die interactieve oefeningen zoeken. De stapsgewijze leertrajecten beginnen met veelgebruikte werkwoorden en voegen daarna meer tijden en vormen toe.",
+    benefits: ["Veelgebruikte werkwoorden die je meteen kunt gebruiken", "Stapsgewijze leertrajecten van CIF-niveau 1 tot CIF-niveau 4", "Werkwoorden en tijden die je aan jouw doel kunt aanpassen"],
+    howTitle: "Oefeningen voor anderstaligen op maat van jouw doel", howText: "Kies hieronder een leertraject. Behoud de voorgestelde selectie of pas de werkwoorden, tijden en opties aan om op het juiste niveau te oefenen.",
+    listTitle: "Kies een vervoegingsoefening Frans voor anderstaligen", start: "Start deze oefening", library: "Bekijk alle officiële uitdagingen", empty: "Er is momenteel geen oefening voor anderstaligen beschikbaar.",
+    meta: "Gratis interactieve oefeningen op Franse vervoeging voor anderstaligen. Oefen nuttige Franse werkwoorden per niveau en pas de werkwoorden en tijden aan.",
   },
-})[interfaceLocale.value])
+}))[interfaceLocale.value])
 
 const { data: response } = await useFetch<{ publications: ChallengePublicationSummary[] }>('/api/challenge-publications', {
   query: computed(() => ({ locale: interfaceLocale.value })),
@@ -82,7 +92,7 @@ useHead(() => ({
       name: copy.value.title,
       description: copy.value.meta,
       url: pageUrl.value,
-      inLanguage: interfaceLocale.value,
+      inLanguage: localeLanguageTag(interfaceLocale.value),
       isPartOf: { '@type': 'WebSite', name: 'TATITOTU' },
       mainEntity: {
         '@type': 'ItemList',

@@ -7,7 +7,7 @@
 
 <script setup lang="ts">
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { localizePath, stripLocaleFromPath, SUPPORTED_LOCALES } from '~~/shared/i18n/locales'
+import { localeLanguageTag, localizePath, stripLocaleFromPath, SUPPORTED_LOCALES } from '~~/shared/i18n/locales'
 
 const { ui, interfaceLocale } = useLanguagePreferences()
 const route = useRoute()
@@ -18,11 +18,11 @@ const { pageSeoOverride } = usePageSeoOverride()
 const canonicalUrl = computed(() => `${siteUrl.value}${pageSeoOverride.value?.canonicalPath ?? localizePath(routeWithoutLocale.value, interfaceLocale.value)}`)
 const alternateLinks = computed(() => pageSeoOverride.value?.alternates.map(alternate => ({
   rel: 'alternate',
-  hreflang: alternate.locale,
+  hreflang: localeLanguageTag(alternate.locale),
   href: `${siteUrl.value}${alternate.path}`,
 })) ?? SUPPORTED_LOCALES.map(locale => ({
   rel: 'alternate',
-  hreflang: locale,
+  hreflang: localeLanguageTag(locale),
   href: `${siteUrl.value}${localizePath(routeWithoutLocale.value, locale)}`,
 })))
 const xDefaultPath = computed(() => pageSeoOverride.value?.xDefaultPath ?? localizePath(routeWithoutLocale.value, 'fr'))

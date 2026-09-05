@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "batchId": "challenge-publications-fle-20260818-003",
+  "batchId": "challenge-publications-dutch-variants-20260905-001",
   "publications": [
     {
       "presetKey": "5P",
@@ -58,6 +58,30 @@
       "metaTitle": "Conjugación francesa: ejercicios de programa suizo de 5P",
       "description": "Practica los verbos y tiempos previstos en 5P por el programa escolar suizo. Este ejercicio consolida los contenidos del curso y mejora la seguridad al conjugar.",
       "metaDescription": "Ejercicios personalizables de conjugación francesa sobre programa suizo de 5P. Elige los verbos y tiempos adecuados para tu objetivo.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "5P",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-het-zwitserse-leerplan-5p",
+      "title": "Franse vervoegingsoefening: het Zwitserse leerplan 5P",
+      "metaTitle": "Franse vervoeging oefenen: het Zwitserse leerplan 5P",
+      "description": "Oefen de Franse werkwoorden en tijden die bij 5P in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Zwitserse leerplan 5P. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "5P",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-het-zwitserse-leerplan-5p",
+      "title": "Franse vervoegingsoefening: het Zwitserse leerplan 5P",
+      "metaTitle": "Franse vervoeging oefenen: het Zwitserse leerplan 5P",
+      "description": "Oefen de Franse werkwoorden en tijden die bij 5P in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Zwitserse leerplan 5P. Kies de werkwoorden en tijden die je wilt oefenen.",
       "isPublished": true,
       "isIndexable": true,
       "overwriteExisting": false
@@ -123,6 +147,30 @@
       "overwriteExisting": false
     },
     {
+      "presetKey": "6P",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-het-zwitserse-leerplan-6p",
+      "title": "Franse vervoegingsoefening: het Zwitserse leerplan 6P",
+      "metaTitle": "Franse vervoeging oefenen: het Zwitserse leerplan 6P",
+      "description": "Oefen de Franse werkwoorden en tijden die bij 6P in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Zwitserse leerplan 6P. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "6P",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-het-zwitserse-leerplan-6p",
+      "title": "Franse vervoegingsoefening: het Zwitserse leerplan 6P",
+      "metaTitle": "Franse vervoeging oefenen: het Zwitserse leerplan 6P",
+      "description": "Oefen de Franse werkwoorden en tijden die bij 6P in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Zwitserse leerplan 6P. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
       "presetKey": "7H",
       "locale": "fr",
       "slug": "exercice-de-conjugaison-le-programme-suisse-de-7h",
@@ -178,6 +226,30 @@
       "metaTitle": "Conjugación francesa: ejercicios de programa suizo de 7H",
       "description": "Practica los verbos y tiempos previstos en 7H por el programa escolar suizo. Este ejercicio consolida los contenidos del curso y mejora la seguridad al conjugar.",
       "metaDescription": "Ejercicios personalizables de conjugación francesa sobre programa suizo de 7H. Elige los verbos y tiempos adecuados para tu objetivo.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "7H",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-het-zwitserse-leerplan-7h",
+      "title": "Franse vervoegingsoefening: het Zwitserse leerplan 7H",
+      "metaTitle": "Franse vervoeging oefenen: het Zwitserse leerplan 7H",
+      "description": "Oefen de Franse werkwoorden en tijden die bij 7H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Zwitserse leerplan 7H. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "7H",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-het-zwitserse-leerplan-7h",
+      "title": "Franse vervoegingsoefening: het Zwitserse leerplan 7H",
+      "metaTitle": "Franse vervoeging oefenen: het Zwitserse leerplan 7H",
+      "description": "Oefen de Franse werkwoorden en tijden die bij 7H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Zwitserse leerplan 7H. Kies de werkwoorden en tijden die je wilt oefenen.",
       "isPublished": true,
       "isIndexable": true,
       "overwriteExisting": false
@@ -243,6 +315,30 @@
       "overwriteExisting": false
     },
     {
+      "presetKey": "8H",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-het-zwitserse-leerplan-8h",
+      "title": "Franse vervoegingsoefening: het Zwitserse leerplan 8H",
+      "metaTitle": "Franse vervoeging oefenen: het Zwitserse leerplan 8H",
+      "description": "Oefen de Franse werkwoorden en tijden die bij 8H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Zwitserse leerplan 8H. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "8H",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-het-zwitserse-leerplan-8h",
+      "title": "Franse vervoegingsoefening: het Zwitserse leerplan 8H",
+      "metaTitle": "Franse vervoeging oefenen: het Zwitserse leerplan 8H",
+      "description": "Oefen de Franse werkwoorden en tijden die bij 8H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Zwitserse leerplan 8H. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
       "presetKey": "9H",
       "locale": "fr",
       "slug": "exercice-de-conjugaison-le-programme-suisse-de-9h",
@@ -298,6 +394,30 @@
       "metaTitle": "Conjugación francesa: ejercicios de programa suizo de 9H",
       "description": "Practica los verbos y tiempos previstos en 9H por el programa escolar suizo. Este ejercicio consolida los contenidos del curso y mejora la seguridad al conjugar.",
       "metaDescription": "Ejercicios personalizables de conjugación francesa sobre programa suizo de 9H. Elige los verbos y tiempos adecuados para tu objetivo.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "9H",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-het-zwitserse-leerplan-9h",
+      "title": "Franse vervoegingsoefening: het Zwitserse leerplan 9H",
+      "metaTitle": "Franse vervoeging oefenen: het Zwitserse leerplan 9H",
+      "description": "Oefen de Franse werkwoorden en tijden die bij 9H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Zwitserse leerplan 9H. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "9H",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-het-zwitserse-leerplan-9h",
+      "title": "Franse vervoegingsoefening: het Zwitserse leerplan 9H",
+      "metaTitle": "Franse vervoeging oefenen: het Zwitserse leerplan 9H",
+      "description": "Oefen de Franse werkwoorden en tijden die bij 9H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Zwitserse leerplan 9H. Kies de werkwoorden en tijden die je wilt oefenen.",
       "isPublished": true,
       "isIndexable": true,
       "overwriteExisting": false
@@ -363,6 +483,30 @@
       "overwriteExisting": false
     },
     {
+      "presetKey": "10H",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-het-zwitserse-leerplan-10h",
+      "title": "Franse vervoegingsoefening: het Zwitserse leerplan 10H",
+      "metaTitle": "Franse vervoeging oefenen: het Zwitserse leerplan 10H",
+      "description": "Oefen de Franse werkwoorden en tijden die bij 10H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Zwitserse leerplan 10H. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "10H",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-het-zwitserse-leerplan-10h",
+      "title": "Franse vervoegingsoefening: het Zwitserse leerplan 10H",
+      "metaTitle": "Franse vervoeging oefenen: het Zwitserse leerplan 10H",
+      "description": "Oefen de Franse werkwoorden en tijden die bij 10H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Zwitserse leerplan 10H. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
       "presetKey": "11H",
       "locale": "fr",
       "slug": "exercice-de-conjugaison-le-programme-suisse-de-11h",
@@ -418,6 +562,30 @@
       "metaTitle": "Conjugación francesa: ejercicios de programa suizo de 11H",
       "description": "Practica los verbos y tiempos previstos en 11H por el programa escolar suizo. Este ejercicio consolida los contenidos del curso y mejora la seguridad al conjugar.",
       "metaDescription": "Ejercicios personalizables de conjugación francesa sobre programa suizo de 11H. Elige los verbos y tiempos adecuados para tu objetivo.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "11H",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-het-zwitserse-leerplan-11h",
+      "title": "Franse vervoegingsoefening: het Zwitserse leerplan 11H",
+      "metaTitle": "Franse vervoeging oefenen: het Zwitserse leerplan 11H",
+      "description": "Oefen de Franse werkwoorden en tijden die bij 11H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Zwitserse leerplan 11H. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "11H",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-het-zwitserse-leerplan-11h",
+      "title": "Franse vervoegingsoefening: het Zwitserse leerplan 11H",
+      "metaTitle": "Franse vervoeging oefenen: het Zwitserse leerplan 11H",
+      "description": "Oefen de Franse werkwoorden en tijden die bij 11H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Zwitserse leerplan 11H. Kies de werkwoorden en tijden die je wilt oefenen.",
       "isPublished": true,
       "isIndexable": true,
       "overwriteExisting": false
@@ -483,6 +651,30 @@
       "overwriteExisting": false
     },
     {
+      "presetKey": "france-cp",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-cp",
+      "title": "Franse vervoegingsoefening: het Franse leerplan CP",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan CP",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij CP in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan CP. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "france-cp",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-cp",
+      "title": "Franse vervoegingsoefening: het Franse leerplan CP",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan CP",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij CP in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan CP. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
       "presetKey": "france-ce1",
       "locale": "fr",
       "slug": "exercice-de-conjugaison-le-programme-francais-de-ce1",
@@ -538,6 +730,30 @@
       "metaTitle": "Conjugación francesa: ejercicios de programa escolar francés de CE1",
       "description": "Repasa los verbos, tiempos y modos previstos en CE1 por el programa escolar francés. Este ejercicio consolida los conocimientos necesarios en clase y en la expresión escrita.",
       "metaDescription": "Ejercicios personalizables de conjugación francesa sobre programa escolar francés de CE1. Elige los verbos y tiempos adecuados para tu objetivo.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "france-ce1",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-ce1",
+      "title": "Franse vervoegingsoefening: het Franse leerplan CE1",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan CE1",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij CE1 in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan CE1. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "france-ce1",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-ce1",
+      "title": "Franse vervoegingsoefening: het Franse leerplan CE1",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan CE1",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij CE1 in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan CE1. Kies de werkwoorden en tijden die je wilt oefenen.",
       "isPublished": true,
       "isIndexable": true,
       "overwriteExisting": false
@@ -603,6 +819,30 @@
       "overwriteExisting": false
     },
     {
+      "presetKey": "france-ce2",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-ce2",
+      "title": "Franse vervoegingsoefening: het Franse leerplan CE2",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan CE2",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij CE2 in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan CE2. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "france-ce2",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-ce2",
+      "title": "Franse vervoegingsoefening: het Franse leerplan CE2",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan CE2",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij CE2 in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan CE2. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
       "presetKey": "france-cm1",
       "locale": "fr",
       "slug": "exercice-de-conjugaison-le-programme-francais-de-cm1",
@@ -658,6 +898,30 @@
       "metaTitle": "Conjugación francesa: ejercicios de programa escolar francés de CM1",
       "description": "Repasa los verbos, tiempos y modos previstos en CM1 por el programa escolar francés. Este ejercicio consolida los conocimientos necesarios en clase y en la expresión escrita.",
       "metaDescription": "Ejercicios personalizables de conjugación francesa sobre programa escolar francés de CM1. Elige los verbos y tiempos adecuados para tu objetivo.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "france-cm1",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-cm1",
+      "title": "Franse vervoegingsoefening: het Franse leerplan CM1",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan CM1",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij CM1 in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan CM1. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "france-cm1",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-cm1",
+      "title": "Franse vervoegingsoefening: het Franse leerplan CM1",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan CM1",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij CM1 in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan CM1. Kies de werkwoorden en tijden die je wilt oefenen.",
       "isPublished": true,
       "isIndexable": true,
       "overwriteExisting": false
@@ -723,6 +987,30 @@
       "overwriteExisting": false
     },
     {
+      "presetKey": "france-cm2",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-cm2",
+      "title": "Franse vervoegingsoefening: het Franse leerplan CM2",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan CM2",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij CM2 in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan CM2. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "france-cm2",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-cm2",
+      "title": "Franse vervoegingsoefening: het Franse leerplan CM2",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan CM2",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij CM2 in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan CM2. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
       "presetKey": "france-6e",
       "locale": "fr",
       "slug": "exercice-de-conjugaison-le-programme-francais-de-6e",
@@ -778,6 +1066,30 @@
       "metaTitle": "Conjugación francesa: ejercicios de programa escolar francés de 6e",
       "description": "Repasa los verbos, tiempos y modos previstos en 6e por el programa escolar francés. Este ejercicio consolida los conocimientos necesarios en clase y en la expresión escrita.",
       "metaDescription": "Ejercicios personalizables de conjugación francesa sobre programa escolar francés de 6e. Elige los verbos y tiempos adecuados para tu objetivo.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "france-6e",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-6e",
+      "title": "Franse vervoegingsoefening: het Franse leerplan 6e",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan 6e",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij 6e in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan 6e. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "france-6e",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-6e",
+      "title": "Franse vervoegingsoefening: het Franse leerplan 6e",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan 6e",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij 6e in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan 6e. Kies de werkwoorden en tijden die je wilt oefenen.",
       "isPublished": true,
       "isIndexable": true,
       "overwriteExisting": false
@@ -843,6 +1155,30 @@
       "overwriteExisting": false
     },
     {
+      "presetKey": "france-5e",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-5e",
+      "title": "Franse vervoegingsoefening: het Franse leerplan 5e",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan 5e",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij 5e in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan 5e. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "france-5e",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-5e",
+      "title": "Franse vervoegingsoefening: het Franse leerplan 5e",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan 5e",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij 5e in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan 5e. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
       "presetKey": "france-4e",
       "locale": "fr",
       "slug": "exercice-de-conjugaison-le-programme-francais-de-4e",
@@ -898,6 +1234,30 @@
       "metaTitle": "Conjugación francesa: ejercicios de programa escolar francés de 4e",
       "description": "Repasa los verbos, tiempos y modos previstos en 4e por el programa escolar francés. Este ejercicio consolida los conocimientos necesarios en clase y en la expresión escrita.",
       "metaDescription": "Ejercicios personalizables de conjugación francesa sobre programa escolar francés de 4e. Elige los verbos y tiempos adecuados para tu objetivo.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "france-4e",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-4e",
+      "title": "Franse vervoegingsoefening: het Franse leerplan 4e",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan 4e",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij 4e in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan 4e. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "france-4e",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-4e",
+      "title": "Franse vervoegingsoefening: het Franse leerplan 4e",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan 4e",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij 4e in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan 4e. Kies de werkwoorden en tijden die je wilt oefenen.",
       "isPublished": true,
       "isIndexable": true,
       "overwriteExisting": false
@@ -963,6 +1323,30 @@
       "overwriteExisting": false
     },
     {
+      "presetKey": "france-3e",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-3e",
+      "title": "Franse vervoegingsoefening: het Franse leerplan 3e",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan 3e",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij 3e in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan 3e. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "france-3e",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-het-franse-leerplan-3e",
+      "title": "Franse vervoegingsoefening: het Franse leerplan 3e",
+      "metaTitle": "Franse vervoeging oefenen: het Franse leerplan 3e",
+      "description": "Herhaal de werkwoorden, tijden en wijzen die bij 3e in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+      "metaDescription": "Franse vervoegingsoefeningen over het Franse leerplan 3e. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
       "presetKey": "groupe1",
       "locale": "fr",
       "slug": "exercice-de-conjugaison-les-verbes-du-premier-groupe",
@@ -1018,6 +1402,30 @@
       "metaTitle": "Conjugación francesa: ejercicios de verbos del primer grupo",
       "description": "Los verbos regulares en -er son la base de muchísimas frases en francés. Dominar sus terminaciones permite conjugar con seguridad cientos de verbos frecuentes.",
       "metaDescription": "Ejercicios personalizables de conjugación francesa sobre verbos del primer grupo. Elige los verbos y tiempos adecuados para tu objetivo.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "groupe1",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-werkwoorden-van-de-eerste-groep",
+      "title": "Franse vervoegingsoefening: werkwoorden van de eerste groep",
+      "metaTitle": "Franse vervoeging oefenen: werkwoorden van de eerste groep",
+      "description": "Regelmatige werkwoorden op -er vormen de basis van heel wat Franse zinnen. Als je hun uitgangen kent, kun je honderden veelgebruikte werkwoorden met vertrouwen vervoegen.",
+      "metaDescription": "Franse vervoegingsoefeningen over werkwoorden van de eerste groep. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "groupe1",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-werkwoorden-van-de-eerste-groep",
+      "title": "Franse vervoegingsoefening: werkwoorden van de eerste groep",
+      "metaTitle": "Franse vervoeging oefenen: werkwoorden van de eerste groep",
+      "description": "Regelmatige werkwoorden op -er vormen de basis van heel wat Franse zinnen. Als je hun uitgangen kent, kun je honderden veelgebruikte werkwoorden met vertrouwen vervoegen.",
+      "metaDescription": "Franse vervoegingsoefeningen over werkwoorden van de eerste groep. Kies de werkwoorden en tijden die je wilt oefenen.",
       "isPublished": true,
       "isIndexable": true,
       "overwriteExisting": false
@@ -1083,6 +1491,30 @@
       "overwriteExisting": false
     },
     {
+      "presetKey": "groupe2",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-werkwoorden-van-de-tweede-groep",
+      "title": "Franse vervoegingsoefening: werkwoorden van de tweede groep",
+      "metaTitle": "Franse vervoeging oefenen: werkwoorden van de tweede groep",
+      "description": "Regelmatige werkwoorden op -ir zoals finir en choisir volgen een vast patroon. Als je dat herkent, vorm je werkwoorden zoals nous finissons en ils choisissaient correct.",
+      "metaDescription": "Franse vervoegingsoefeningen over werkwoorden van de tweede groep. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "groupe2",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-werkwoorden-van-de-tweede-groep",
+      "title": "Franse vervoegingsoefening: werkwoorden van de tweede groep",
+      "metaTitle": "Franse vervoeging oefenen: werkwoorden van de tweede groep",
+      "description": "Regelmatige werkwoorden op -ir zoals finir en choisir volgen een vast patroon. Als je dat herkent, vorm je werkwoorden zoals nous finissons en ils choisissaient correct.",
+      "metaDescription": "Franse vervoegingsoefeningen over werkwoorden van de tweede groep. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
       "presetKey": "groupe3",
       "locale": "fr",
       "slug": "exercice-de-conjugaison-les-verbes-du-troisieme-groupe",
@@ -1138,6 +1570,30 @@
       "metaTitle": "Conjugación francesa: ejercicios de verbos del tercer grupo",
       "description": "Los verbos del tercer grupo son muy frecuentes, pero a menudo irregulares. Practicarlos juntos ayuda a recordar sus raíces y terminaciones sin confundirlos.",
       "metaDescription": "Ejercicios personalizables de conjugación francesa sobre verbos del tercer grupo. Elige los verbos y tiempos adecuados para tu objetivo.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "groupe3",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-werkwoorden-van-de-derde-groep",
+      "title": "Franse vervoegingsoefening: werkwoorden van de derde groep",
+      "metaTitle": "Franse vervoeging oefenen: werkwoorden van de derde groep",
+      "description": "Werkwoorden van de derde groep komen heel vaak voor, maar zijn dikwijls onregelmatig. Door ze samen te oefenen, onthoud je hun stammen en uitgangen zonder ze te verwisselen.",
+      "metaDescription": "Franse vervoegingsoefeningen over werkwoorden van de derde groep. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "groupe3",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-werkwoorden-van-de-derde-groep",
+      "title": "Franse vervoegingsoefening: werkwoorden van de derde groep",
+      "metaTitle": "Franse vervoeging oefenen: werkwoorden van de derde groep",
+      "description": "Werkwoorden van de derde groep komen heel vaak voor, maar zijn dikwijls onregelmatig. Door ze samen te oefenen, onthoud je hun stammen en uitgangen zonder ze te verwisselen.",
+      "metaDescription": "Franse vervoegingsoefeningen over werkwoorden van de derde groep. Kies de werkwoorden en tijden die je wilt oefenen.",
       "isPublished": true,
       "isIndexable": true,
       "overwriteExisting": false
@@ -1203,6 +1659,30 @@
       "overwriteExisting": false
     },
     {
+      "presetKey": "groupe3ir",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-onregelmatige-werkwoorden-op-ir",
+      "title": "Franse vervoegingsoefening: onregelmatige werkwoorden op -ir",
+      "metaTitle": "Franse vervoeging oefenen: onregelmatige werkwoorden op -ir",
+      "description": "Partir, venir, dormir en sortir eindigen op -ir, maar volgen het patroon van finir niet. Door ze te vergelijken, herken je stamveranderingen en vermijd je onjuiste regelmatige vormen.",
+      "metaDescription": "Franse vervoegingsoefeningen over onregelmatige werkwoorden op -ir. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "groupe3ir",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-onregelmatige-werkwoorden-op-ir",
+      "title": "Franse vervoegingsoefening: onregelmatige werkwoorden op -ir",
+      "metaTitle": "Franse vervoeging oefenen: onregelmatige werkwoorden op -ir",
+      "description": "Partir, venir, dormir en sortir eindigen op -ir, maar volgen het patroon van finir niet. Door ze te vergelijken, herken je stamveranderingen en vermijd je onjuiste regelmatige vormen.",
+      "metaDescription": "Franse vervoegingsoefeningen over onregelmatige werkwoorden op -ir. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
       "presetKey": "groupe3oir",
       "locale": "fr",
       "slug": "exercice-de-conjugaison-les-verbes-du-troisieme-groupe-en-oir",
@@ -1258,6 +1738,30 @@
       "metaTitle": "Conjugación francesa: ejercicios de verbos del tercer grupo en -oir",
       "description": "Pouvoir, vouloir, devoir y recevoir son esenciales en la vida cotidiana. Dominar sus formas irregulares permite expresar posibilidad, voluntad y obligación con precisión.",
       "metaDescription": "Ejercicios personalizables de conjugación francesa sobre verbos del tercer grupo en -oir. Elige los verbos y tiempos adecuados para tu objetivo.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "groupe3oir",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-werkwoorden-van-de-derde-groep-op-oir",
+      "title": "Franse vervoegingsoefening: werkwoorden van de derde groep op -oir",
+      "metaTitle": "Franse vervoeging oefenen: werkwoorden van de derde groep op -oir",
+      "description": "Pouvoir, vouloir, devoir en recevoir zijn onmisbaar in het dagelijkse Frans. Als je hun onregelmatige vormen beheerst, kun je mogelijkheden, wensen en verplichtingen precies uitdrukken.",
+      "metaDescription": "Franse vervoegingsoefeningen over werkwoorden van de derde groep op -oir. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "groupe3oir",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-werkwoorden-van-de-derde-groep-op-oir",
+      "title": "Franse vervoegingsoefening: werkwoorden van de derde groep op -oir",
+      "metaTitle": "Franse vervoeging oefenen: werkwoorden van de derde groep op -oir",
+      "description": "Pouvoir, vouloir, devoir en recevoir zijn onmisbaar in het dagelijkse Frans. Als je hun onregelmatige vormen beheerst, kun je mogelijkheden, wensen en verplichtingen precies uitdrukken.",
+      "metaDescription": "Franse vervoegingsoefeningen over werkwoorden van de derde groep op -oir. Kies de werkwoorden en tijden die je wilt oefenen.",
       "isPublished": true,
       "isIndexable": true,
       "overwriteExisting": false
@@ -1323,6 +1827,30 @@
       "overwriteExisting": false
     },
     {
+      "presetKey": "groupe3autres",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-andere-werkwoorden-van-de-derde-groep",
+      "title": "Franse vervoegingsoefening: andere werkwoorden van de derde groep",
+      "metaTitle": "Franse vervoeging oefenen: andere werkwoorden van de derde groep",
+      "description": "Prendre, mettre, lire, écrire en conduire volgen bijzondere, veelgebruikte patronen. Door ze te oefenen, herken je werkwoordfamilies en onthoud je onregelmatige vormen makkelijker.",
+      "metaDescription": "Franse vervoegingsoefeningen over andere werkwoorden van de derde groep. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "groupe3autres",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-andere-werkwoorden-van-de-derde-groep",
+      "title": "Franse vervoegingsoefening: andere werkwoorden van de derde groep",
+      "metaTitle": "Franse vervoeging oefenen: andere werkwoorden van de derde groep",
+      "description": "Prendre, mettre, lire, écrire en conduire volgen bijzondere, veelgebruikte patronen. Door ze te oefenen, herken je werkwoordfamilies en onthoud je onregelmatige vormen makkelijker.",
+      "metaDescription": "Franse vervoegingsoefeningen over andere werkwoorden van de derde groep. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
       "presetKey": "ger",
       "locale": "fr",
       "slug": "exercice-de-conjugaison-les-verbes-en-ger",
@@ -1378,6 +1906,30 @@
       "metaTitle": "Conjugación francesa: ejercicios de verbos franceses en -ger",
       "description": "Una sola letra puede convertir una forma correcta en un error. Dominar los verbos en -ger ayuda a escribir nous mangeons y je voyageais correctamente y a entender sus cambios ortográficos.",
       "metaDescription": "Ejercicios personalizables de conjugación francesa sobre verbos franceses en -ger. Elige los verbos y tiempos adecuados para tu objetivo.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "ger",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-franse-werkwoorden-op-ger",
+      "title": "Franse vervoegingsoefening: Franse werkwoorden op -ger",
+      "metaTitle": "Franse vervoeging oefenen: Franse werkwoorden op -ger",
+      "description": "Eén letter kan een juiste vorm in een spelfout veranderen. Als je werkwoorden op -ger beheerst, schrijf je nous mangeons en je voyageais correct en begrijp je hun spellingveranderingen.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse werkwoorden op -ger. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "ger",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-franse-werkwoorden-op-ger",
+      "title": "Franse vervoegingsoefening: Franse werkwoorden op -ger",
+      "metaTitle": "Franse vervoeging oefenen: Franse werkwoorden op -ger",
+      "description": "Eén letter kan een juiste vorm in een spelfout veranderen. Als je werkwoorden op -ger beheerst, schrijf je nous mangeons en je voyageais correct en begrijp je hun spellingveranderingen.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse werkwoorden op -ger. Kies de werkwoorden en tijden die je wilt oefenen.",
       "isPublished": true,
       "isIndexable": true,
       "overwriteExisting": false
@@ -1443,6 +1995,30 @@
       "overwriteExisting": false
     },
     {
+      "presetKey": "cer",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-franse-werkwoorden-op-cer",
+      "title": "Franse vervoegingsoefening: Franse werkwoorden op -cer",
+      "metaTitle": "Franse vervoeging oefenen: Franse werkwoorden op -cer",
+      "description": "Commencer, avancer en remplacer hebben soms een cedille nodig om de zachte c-klank te behouden. Weten wanneer je nous commençons of je plaçais schrijft, helpt je een veelgemaakte spelfout te vermijden.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse werkwoorden op -cer. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "cer",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-franse-werkwoorden-op-cer",
+      "title": "Franse vervoegingsoefening: Franse werkwoorden op -cer",
+      "metaTitle": "Franse vervoeging oefenen: Franse werkwoorden op -cer",
+      "description": "Commencer, avancer en remplacer hebben soms een cedille nodig om de zachte c-klank te behouden. Weten wanneer je nous commençons of je plaçais schrijft, helpt je een veelgemaakte spelfout te vermijden.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse werkwoorden op -cer. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
       "presetKey": "ger-cer",
       "locale": "fr",
       "slug": "exercice-de-conjugaison-les-verbes-en-ger-et-en-cer",
@@ -1498,6 +2074,30 @@
       "metaTitle": "Conjugación francesa: ejercicios de verbos franceses en -ger y -cer",
       "description": "Los verbos en -ger y -cer cambian su ortografía para conservar la pronunciación. Comparar ambos modelos ayuda a elegir entre la e protectora y la cedilla.",
       "metaDescription": "Ejercicios personalizables de conjugación francesa sobre verbos franceses en -ger y -cer. Elige los verbos y tiempos adecuados para tu objetivo.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "ger-cer",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-franse-werkwoorden-op-ger-en-cer",
+      "title": "Franse vervoegingsoefening: Franse werkwoorden op -ger en -cer",
+      "metaTitle": "Franse vervoeging oefenen: Franse werkwoorden op -ger en -cer",
+      "description": "Franse werkwoorden op -ger en -cer veranderen van spelling om hun uitspraak te behouden. Door beide patronen te vergelijken, kies je snel tussen de extra e en de cedille.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse werkwoorden op -ger en -cer. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "ger-cer",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-franse-werkwoorden-op-ger-en-cer",
+      "title": "Franse vervoegingsoefening: Franse werkwoorden op -ger en -cer",
+      "metaTitle": "Franse vervoeging oefenen: Franse werkwoorden op -ger en -cer",
+      "description": "Franse werkwoorden op -ger en -cer veranderen van spelling om hun uitspraak te behouden. Door beide patronen te vergelijken, kies je snel tussen de extra e en de cedille.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse werkwoorden op -ger en -cer. Kies de werkwoorden en tijden die je wilt oefenen.",
       "isPublished": true,
       "isIndexable": true,
       "overwriteExisting": false
@@ -1563,6 +2163,30 @@
       "overwriteExisting": false
     },
     {
+      "presetKey": "sens-mouvement",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-franse-werkwoorden-van-beweging",
+      "title": "Franse vervoegingsoefening: Franse werkwoorden van beweging",
+      "metaTitle": "Franse vervoeging oefenen: Franse werkwoorden van beweging",
+      "description": "Aller, venir, partir, arriver, entrer en sortir zijn onmisbaar om verplaatsingen, routes en plannen te beschrijven. Door ze vlot te vervoegen, spreek en schrijf je nauwkeuriger Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse werkwoorden van beweging. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "sens-mouvement",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-franse-werkwoorden-van-beweging",
+      "title": "Franse vervoegingsoefening: Franse werkwoorden van beweging",
+      "metaTitle": "Franse vervoeging oefenen: Franse werkwoorden van beweging",
+      "description": "Aller, venir, partir, arriver, entrer en sortir zijn onmisbaar om verplaatsingen, routes en plannen te beschrijven. Door ze vlot te vervoegen, spreek en schrijf je nauwkeuriger Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse werkwoorden van beweging. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
       "presetKey": "sens-communication",
       "locale": "fr",
       "slug": "exercice-de-conjugaison-les-verbes-de-communication",
@@ -1618,6 +2242,30 @@
       "metaTitle": "Conjugación francesa: ejercicios de verbos franceses de comunicación",
       "description": "Dire, parler, répondre, expliquer y raconter permiten compartir ideas y participar en conversaciones. Conjugarlos bien hace que la comunicación sea más clara y natural.",
       "metaDescription": "Ejercicios personalizables de conjugación francesa sobre verbos franceses de comunicación. Elige los verbos y tiempos adecuados para tu objetivo.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "sens-communication",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-franse-werkwoorden-van-communicatie",
+      "title": "Franse vervoegingsoefening: Franse werkwoorden van communicatie",
+      "metaTitle": "Franse vervoeging oefenen: Franse werkwoorden van communicatie",
+      "description": "Dire, parler, répondre, expliquer en raconter helpen je ideeën te delen en deel te nemen aan gesprekken. Een juiste vervoeging maakt je communicatie duidelijker en natuurlijker.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse werkwoorden van communicatie. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "sens-communication",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-franse-werkwoorden-van-communicatie",
+      "title": "Franse vervoegingsoefening: Franse werkwoorden van communicatie",
+      "metaTitle": "Franse vervoeging oefenen: Franse werkwoorden van communicatie",
+      "description": "Dire, parler, répondre, expliquer en raconter helpen je ideeën te delen en deel te nemen aan gesprekken. Een juiste vervoeging maakt je communicatie duidelijker en natuurlijker.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse werkwoorden van communicatie. Kies de werkwoorden en tijden die je wilt oefenen.",
       "isPublished": true,
       "isIndexable": true,
       "overwriteExisting": false
@@ -1683,6 +2331,30 @@
       "overwriteExisting": false
     },
     {
+      "presetKey": "sens-cognition",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-franse-werkwoorden-van-denken-en-weten",
+      "title": "Franse vervoegingsoefening: Franse werkwoorden van denken en weten",
+      "metaTitle": "Franse vervoeging oefenen: Franse werkwoorden van denken en weten",
+      "description": "Penser, savoir, comprendre, apprendre en décider drukken meningen, kennis en keuzes uit. Als je ze beheerst, kun je ideeën precies en genuanceerd overbrengen.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse werkwoorden van denken en weten. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "sens-cognition",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-franse-werkwoorden-van-denken-en-weten",
+      "title": "Franse vervoegingsoefening: Franse werkwoorden van denken en weten",
+      "metaTitle": "Franse vervoeging oefenen: Franse werkwoorden van denken en weten",
+      "description": "Penser, savoir, comprendre, apprendre en décider drukken meningen, kennis en keuzes uit. Als je ze beheerst, kun je ideeën precies en genuanceerd overbrengen.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse werkwoorden van denken en weten. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
       "presetKey": "sens-emotion",
       "locale": "fr",
       "slug": "exercice-de-conjugaison-les-verbes-des-emotions",
@@ -1738,6 +2410,30 @@
       "metaTitle": "Conjugación francesa: ejercicios de verbos franceses de emoción",
       "description": "Aimer, préférer, craindre, rire y ressentir permiten hablar de gustos y emociones. Conjugarlos bien ayuda a expresar con precisión lo que se siente.",
       "metaDescription": "Ejercicios personalizables de conjugación francesa sobre verbos franceses de emoción. Elige los verbos y tiempos adecuados para tu objetivo.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "sens-emotion",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-franse-werkwoorden-van-gevoelens",
+      "title": "Franse vervoegingsoefening: Franse werkwoorden van gevoelens",
+      "metaTitle": "Franse vervoeging oefenen: Franse werkwoorden van gevoelens",
+      "description": "Aimer, préférer, craindre, rire en ressentir helpen je over voorkeuren en gevoelens te praten. Met de juiste vervoeging druk je nauwkeuriger uit hoe je je voelt.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse werkwoorden van gevoelens. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "sens-emotion",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-franse-werkwoorden-van-gevoelens",
+      "title": "Franse vervoegingsoefening: Franse werkwoorden van gevoelens",
+      "metaTitle": "Franse vervoeging oefenen: Franse werkwoorden van gevoelens",
+      "description": "Aimer, préférer, craindre, rire en ressentir helpen je over voorkeuren en gevoelens te praten. Met de juiste vervoeging druk je nauwkeuriger uit hoe je je voelt.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse werkwoorden van gevoelens. Kies de werkwoorden en tijden die je wilt oefenen.",
       "isPublished": true,
       "isIndexable": true,
       "overwriteExisting": false
@@ -1803,6 +2499,30 @@
       "overwriteExisting": false
     },
     {
+      "presetKey": "sens-corps",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-franse-werkwoorden-van-het-lichaam-en-behoeften",
+      "title": "Franse vervoegingsoefening: Franse werkwoorden van het lichaam en behoeften",
+      "metaTitle": "Franse vervoeging oefenen: Franse werkwoorden van het lichaam en behoeften",
+      "description": "Manger, boire, dormir, respirer en se soigner zijn onmisbaar om over gezondheid en het dagelijkse leven te praten. Door ze correct te vervoegen, beschrijf je behoeften en gewoonten duidelijk.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse werkwoorden van het lichaam en behoeften. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "sens-corps",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-franse-werkwoorden-van-het-lichaam-en-behoeften",
+      "title": "Franse vervoegingsoefening: Franse werkwoorden van het lichaam en behoeften",
+      "metaTitle": "Franse vervoeging oefenen: Franse werkwoorden van het lichaam en behoeften",
+      "description": "Manger, boire, dormir, respirer en se soigner zijn onmisbaar om over gezondheid en het dagelijkse leven te praten. Door ze correct te vervoegen, beschrijf je behoeften en gewoonten duidelijk.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse werkwoorden van het lichaam en behoeften. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
       "presetKey": "rares",
       "locale": "fr",
       "slug": "exercice-de-conjugaison-les-verbes-rares-ou-litteraires",
@@ -1858,6 +2578,30 @@
       "metaTitle": "Conjugación francesa: ejercicios de verbos franceses raros y literarios",
       "description": "Los verbos raros y literarios amplían el vocabulario y la comprensión lectora. Conjugarlos ayuda a entender mejor la literatura y descubrir los matices del francés.",
       "metaDescription": "Ejercicios personalizables de conjugación francesa sobre verbos franceses raros y literarios. Elige los verbos y tiempos adecuados para tu objetivo.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "rares",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-zeldzame-en-literaire-franse-werkwoorden",
+      "title": "Franse vervoegingsoefening: zeldzame en literaire Franse werkwoorden",
+      "metaTitle": "Franse vervoeging oefenen: zeldzame en literaire Franse werkwoorden",
+      "description": "Zeldzame en literaire werkwoorden verrijken je woordenschat en verbeteren je leesbegrip. Door ze te vervoegen, begrijp je literatuur beter en ontdek je de nuances van het Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over zeldzame en literaire Franse werkwoorden. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "rares",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-zeldzame-en-literaire-franse-werkwoorden",
+      "title": "Franse vervoegingsoefening: zeldzame en literaire Franse werkwoorden",
+      "metaTitle": "Franse vervoeging oefenen: zeldzame en literaire Franse werkwoorden",
+      "description": "Zeldzame en literaire werkwoorden verrijken je woordenschat en verbeteren je leesbegrip. Door ze te vervoegen, begrijp je literatuur beter en ontdek je de nuances van het Frans.",
+      "metaDescription": "Franse vervoegingsoefeningen over zeldzame en literaire Franse werkwoorden. Kies de werkwoorden en tijden die je wilt oefenen.",
       "isPublished": true,
       "isIndexable": true,
       "overwriteExisting": false
@@ -1923,6 +2667,30 @@
       "overwriteExisting": false
     },
     {
+      "presetKey": "difficiles",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-moeilijke-franse-werkwoorden",
+      "title": "Franse vervoegingsoefening: moeilijke Franse werkwoorden",
+      "metaTitle": "Franse vervoeging oefenen: moeilijke Franse werkwoorden",
+      "description": "De moeilijkste Franse werkwoorden combineren vaak stamveranderingen met onregelmatige uitgangen. Gericht oefenen helpt je hun patronen te herkennen en terugkerende fouten weg te werken.",
+      "metaDescription": "Franse vervoegingsoefeningen over moeilijke Franse werkwoorden. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "difficiles",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-moeilijke-franse-werkwoorden",
+      "title": "Franse vervoegingsoefening: moeilijke Franse werkwoorden",
+      "metaTitle": "Franse vervoeging oefenen: moeilijke Franse werkwoorden",
+      "description": "De moeilijkste Franse werkwoorden combineren vaak stamveranderingen met onregelmatige uitgangen. Gericht oefenen helpt je hun patronen te herkennen en terugkerende fouten weg te werken.",
+      "metaDescription": "Franse vervoegingsoefeningen over moeilijke Franse werkwoorden. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
       "presetKey": "pronominaux",
       "locale": "fr",
       "slug": "exercice-de-conjugaison-les-verbes-pronominaux-francais",
@@ -1983,6 +2751,30 @@
       "overwriteExisting": false
     },
     {
+      "presetKey": "pronominaux",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-franse-wederkerende-werkwoorden",
+      "title": "Franse vervoegingsoefening: Franse wederkerende werkwoorden",
+      "metaTitle": "Franse vervoeging oefenen: Franse wederkerende werkwoorden",
+      "description": "Se lever, s’habiller, se souvenir en se rencontrer zijn onmisbaar in het dagelijkse leven. Als je ze beheerst, plaats je het wederkerend voornaamwoord juist, kies je het juiste hulpwerkwoord en vorm je samengestelde tijden.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse wederkerende werkwoorden. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "pronominaux",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-franse-wederkerende-werkwoorden",
+      "title": "Franse vervoegingsoefening: Franse wederkerende werkwoorden",
+      "metaTitle": "Franse vervoeging oefenen: Franse wederkerende werkwoorden",
+      "description": "Se lever, s’habiller, se souvenir en se rencontrer zijn onmisbaar in het dagelijkse leven. Als je ze beheerst, plaats je het wederkerend voornaamwoord juist, kies je het juiste hulpwerkwoord en vorm je samengestelde tijden.",
+      "metaDescription": "Franse vervoegingsoefeningen over Franse wederkerende werkwoorden. Kies de werkwoorden en tijden die je wilt oefenen.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
       "presetKey": "CIF1",
       "locale": "fr",
       "slug": "exercice-de-conjugaison-fle-4-verbes-essentiels-niveau-cif-1",
@@ -1992,7 +2784,7 @@
       "metaDescription": "Exercice interactif de conjugaison FLE sur 4 verbes essentiels – niveau CIF 1. Choisis les verbes et les temps adaptés à ton apprentissage du français.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF1",
@@ -2004,7 +2796,7 @@
       "metaDescription": "Interaktive FLE-Übung zur französischen Konjugation: 4 wichtige Verben – Niveau CIF 1. Wähle passende Verben und Zeitformen.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF1",
@@ -2016,7 +2808,7 @@
       "metaDescription": "Interactive French as a foreign language (FLE) conjugation exercise on 4 essential verbs – CIF level 1. Choose the verbs and tenses you need.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF1",
@@ -2028,7 +2820,7 @@
       "metaDescription": "Esercizio interattivo di coniugazione FLE su 4 verbi essenziali – livello CIF 1. Scegli i verbi e i tempi adatti al tuo apprendimento.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF1",
@@ -2040,7 +2832,31 @@
       "metaDescription": "Ejercicio interactivo de conjugación FLE sobre 4 verbos esenciales – nivel CIF 1. Elige los verbos y tiempos adecuados para aprender francés.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "CIF1",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-voor-anderstaligen-4-essentiele-werkwoorden-cif-niveau-1",
+      "title": "Franse vervoegingsoefening voor anderstaligen: 4 essentiële werkwoorden – CIF-niveau 1",
+      "metaTitle": "Frans als vreemde taal: 4 essentiële werkwoorden – CIF-niveau 1",
+      "description": "4 essentiële werkwoorden – CIF-niveau 1 vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+      "metaDescription": "Interactieve Franse vervoegingsoefening (FLE): 4 essentiële werkwoorden – CIF-niveau 1. Kies de werkwoorden en tijden die je nodig hebt.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "CIF1",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-voor-anderstaligen-4-essentiele-werkwoorden-cif-niveau-1",
+      "title": "Franse vervoegingsoefening voor anderstaligen: 4 essentiële werkwoorden – CIF-niveau 1",
+      "metaTitle": "Frans als vreemde taal: 4 essentiële werkwoorden – CIF-niveau 1",
+      "description": "4 essentiële werkwoorden – CIF-niveau 1 vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+      "metaDescription": "Interactieve Franse vervoegingsoefening (FLE): 4 essentiële werkwoorden – CIF-niveau 1. Kies de werkwoorden en tijden die je nodig hebt.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF2",
@@ -2052,7 +2868,7 @@
       "metaDescription": "Exercice interactif de conjugaison FLE sur 12 verbes utiles – niveau CIF 2. Choisis les verbes et les temps adaptés à ton apprentissage du français.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF2",
@@ -2064,7 +2880,7 @@
       "metaDescription": "Interaktive FLE-Übung zur französischen Konjugation: 12 wichtige Verben – Niveau CIF 2. Wähle passende Verben und Zeitformen.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF2",
@@ -2076,7 +2892,7 @@
       "metaDescription": "Interactive French as a foreign language (FLE) conjugation exercise on 12 useful verbs – CIF level 2. Choose the verbs and tenses you need.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF2",
@@ -2088,7 +2904,7 @@
       "metaDescription": "Esercizio interattivo di coniugazione FLE su 12 verbi utili – livello CIF 2. Scegli i verbi e i tempi adatti al tuo apprendimento.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF2",
@@ -2100,7 +2916,31 @@
       "metaDescription": "Ejercicio interactivo de conjugación FLE sobre 12 verbos útiles – nivel CIF 2. Elige los verbos y tiempos adecuados para aprender francés.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "CIF2",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-voor-anderstaligen-12-nuttige-werkwoorden-cif-niveau-2",
+      "title": "Franse vervoegingsoefening voor anderstaligen: 12 nuttige werkwoorden – CIF-niveau 2",
+      "metaTitle": "Frans als vreemde taal: 12 nuttige werkwoorden – CIF-niveau 2",
+      "description": "12 nuttige werkwoorden – CIF-niveau 2 vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+      "metaDescription": "Interactieve Franse vervoegingsoefening (FLE): 12 nuttige werkwoorden – CIF-niveau 2. Kies de werkwoorden en tijden die je nodig hebt.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "CIF2",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-voor-anderstaligen-12-nuttige-werkwoorden-cif-niveau-2",
+      "title": "Franse vervoegingsoefening voor anderstaligen: 12 nuttige werkwoorden – CIF-niveau 2",
+      "metaTitle": "Frans als vreemde taal: 12 nuttige werkwoorden – CIF-niveau 2",
+      "description": "12 nuttige werkwoorden – CIF-niveau 2 vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+      "metaDescription": "Interactieve Franse vervoegingsoefening (FLE): 12 nuttige werkwoorden – CIF-niveau 2. Kies de werkwoorden en tijden die je nodig hebt.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF3",
@@ -2112,7 +2952,7 @@
       "metaDescription": "Exercice interactif de conjugaison FLE sur 12 verbes en -er – niveau CIF 3. Choisis les verbes et les temps adaptés à ton apprentissage du français.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF3",
@@ -2124,7 +2964,7 @@
       "metaDescription": "Interaktive FLE-Übung zur französischen Konjugation: 12 Verben auf -er – Niveau CIF 3. Wähle passende Verben und Zeitformen.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF3",
@@ -2136,7 +2976,7 @@
       "metaDescription": "Interactive French as a foreign language (FLE) conjugation exercise on 12 -er verbs – CIF level 3. Choose the verbs and tenses you need.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF3",
@@ -2148,7 +2988,7 @@
       "metaDescription": "Esercizio interattivo di coniugazione FLE su 12 verbi in -er – livello CIF 3. Scegli i verbi e i tempi adatti al tuo apprendimento.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF3",
@@ -2160,7 +3000,31 @@
       "metaDescription": "Ejercicio interactivo de conjugación FLE sobre 12 verbos en -er – nivel CIF 3. Elige los verbos y tiempos adecuados para aprender francés.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "CIF3",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-voor-anderstaligen-12-werkwoorden-op-er-cif-niveau-3",
+      "title": "Franse vervoegingsoefening voor anderstaligen: 12 werkwoorden op -er – CIF-niveau 3",
+      "metaTitle": "Frans als vreemde taal: 12 werkwoorden op -er – CIF-niveau 3",
+      "description": "12 werkwoorden op -er – CIF-niveau 3 vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+      "metaDescription": "Interactieve Franse vervoegingsoefening (FLE): 12 werkwoorden op -er – CIF-niveau 3. Kies de werkwoorden en tijden die je nodig hebt.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "CIF3",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-voor-anderstaligen-12-werkwoorden-op-er-cif-niveau-3",
+      "title": "Franse vervoegingsoefening voor anderstaligen: 12 werkwoorden op -er – CIF-niveau 3",
+      "metaTitle": "Frans als vreemde taal: 12 werkwoorden op -er – CIF-niveau 3",
+      "description": "12 werkwoorden op -er – CIF-niveau 3 vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+      "metaDescription": "Interactieve Franse vervoegingsoefening (FLE): 12 werkwoorden op -er – CIF-niveau 3. Kies de werkwoorden en tijden die je nodig hebt.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF4",
@@ -2172,7 +3036,7 @@
       "metaDescription": "Exercice interactif de conjugaison FLE sur 20 verbes utiles – niveau CIF 4. Choisis les verbes et les temps adaptés à ton apprentissage du français.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF4",
@@ -2184,7 +3048,7 @@
       "metaDescription": "Interaktive FLE-Übung zur französischen Konjugation: 20 wichtige Verben – Niveau CIF 4. Wähle passende Verben und Zeitformen.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF4",
@@ -2196,7 +3060,7 @@
       "metaDescription": "Interactive French as a foreign language (FLE) conjugation exercise on 20 useful verbs – CIF level 4. Choose the verbs and tenses you need.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF4",
@@ -2208,7 +3072,7 @@
       "metaDescription": "Esercizio interattivo di coniugazione FLE su 20 verbi utili – livello CIF 4. Scegli i verbi e i tempi adatti al tuo apprendimento.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "CIF4",
@@ -2220,7 +3084,31 @@
       "metaDescription": "Ejercicio interactivo de conjugación FLE sobre 20 verbos útiles – nivel CIF 4. Elige los verbos y tiempos adecuados para aprender francés.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "CIF4",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-voor-anderstaligen-20-nuttige-werkwoorden-cif-niveau-4",
+      "title": "Franse vervoegingsoefening voor anderstaligen: 20 nuttige werkwoorden – CIF-niveau 4",
+      "metaTitle": "Frans als vreemde taal: 20 nuttige werkwoorden – CIF-niveau 4",
+      "description": "20 nuttige werkwoorden – CIF-niveau 4 vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+      "metaDescription": "Interactieve Franse vervoegingsoefening (FLE): 20 nuttige werkwoorden – CIF-niveau 4. Kies de werkwoorden en tijden die je nodig hebt.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "CIF4",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-voor-anderstaligen-20-nuttige-werkwoorden-cif-niveau-4",
+      "title": "Franse vervoegingsoefening voor anderstaligen: 20 nuttige werkwoorden – CIF-niveau 4",
+      "metaTitle": "Frans als vreemde taal: 20 nuttige werkwoorden – CIF-niveau 4",
+      "description": "20 nuttige werkwoorden – CIF-niveau 4 vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+      "metaDescription": "Interactieve Franse vervoegingsoefening (FLE): 20 nuttige werkwoorden – CIF-niveau 4. Kies de werkwoorden en tijden die je nodig hebt.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
     },
     {
       "presetKey": "100-verbes-utiles-allophones",
@@ -2232,7 +3120,7 @@
       "metaDescription": "Exercice interactif de conjugaison FLE sur 100 verbes français utiles au quotidien. Choisis les verbes et les temps adaptés à ton apprentissage du français.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "100-verbes-utiles-allophones",
@@ -2244,7 +3132,7 @@
       "metaDescription": "Interaktive FLE-Übung zur französischen Konjugation: 100 wichtige französische Alltagsverben. Wähle passende Verben und Zeitformen.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "100-verbes-utiles-allophones",
@@ -2256,7 +3144,7 @@
       "metaDescription": "Interactive French as a foreign language (FLE) conjugation exercise on 100 useful everyday French verbs. Choose the verbs and tenses you need.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "100-verbes-utiles-allophones",
@@ -2268,7 +3156,7 @@
       "metaDescription": "Esercizio interattivo di coniugazione FLE su 100 verbi francesi utili ogni giorno. Scegli i verbi e i tempi adatti al tuo apprendimento.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
     },
     {
       "presetKey": "100-verbes-utiles-allophones",
@@ -2280,7 +3168,31 @@
       "metaDescription": "Ejercicio interactivo de conjugación FLE sobre 100 verbos franceses útiles para cada día. Elige los verbos y tiempos adecuados para aprender francés.",
       "isPublished": true,
       "isIndexable": true,
-      "overwriteExisting": true
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "100-verbes-utiles-allophones",
+      "locale": "nl",
+      "slug": "franse-vervoegingsoefening-voor-anderstaligen-100-nuttige-franse-werkwoorden-voor-elke-dag",
+      "title": "Franse vervoegingsoefening voor anderstaligen: 100 nuttige Franse werkwoorden voor elke dag",
+      "metaTitle": "Frans als vreemde taal: 100 nuttige Franse werkwoorden voor elke dag",
+      "description": "100 nuttige Franse werkwoorden voor elke dag vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+      "metaDescription": "Interactieve Franse vervoegingsoefening (FLE): 100 nuttige Franse werkwoorden voor elke dag. Kies de werkwoorden en tijden die je nodig hebt.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
+    },
+    {
+      "presetKey": "100-verbes-utiles-allophones",
+      "locale": "nl-NL",
+      "slug": "franse-vervoegingsoefening-voor-anderstaligen-100-nuttige-franse-werkwoorden-voor-elke-dag",
+      "title": "Franse vervoegingsoefening voor anderstaligen: 100 nuttige Franse werkwoorden voor elke dag",
+      "metaTitle": "Frans als vreemde taal: 100 nuttige Franse werkwoorden voor elke dag",
+      "description": "100 nuttige Franse werkwoorden voor elke dag vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+      "metaDescription": "Interactieve Franse vervoegingsoefening (FLE): 100 nuttige Franse werkwoorden voor elke dag. Kies de werkwoorden en tijden die je nodig hebt.",
+      "isPublished": true,
+      "isIndexable": true,
+      "overwriteExisting": false
     }
   ]
 }

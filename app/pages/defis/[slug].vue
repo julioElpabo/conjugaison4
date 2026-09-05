@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { withDutchVariants } from '~~/shared/i18n/dutch-variants'
+
+import { localeLanguageTag } from '~~/shared/i18n/locales'
 import WizardChallengeWorkspace from '~/components/challenge/WizardChallengeWorkspace.vue'
 import type { ChallengePublicationResolution } from '~~/shared/types/challenge-publication'
 
@@ -21,7 +24,7 @@ if (resolution.value.kind !== 'publication') {
 }
 
 const publication = resolution.value.publication
-const editHint = {
+const editHint = withDutchVariants({
   fr: {
     before: 'Les boutons',
     between: 'et',
@@ -56,8 +59,14 @@ const editHint = {
     after: 'te permiten ver qué verbos y tiempos vas a practicar. También puedes modificarlos. ¡Buen trabajo!',
     verbsLabel: 'Modificar los verbos que quieres practicar',
     tensesLabel: 'Modificar los tiempos que quieres practicar',
+  }, nl: {
+    before: "Knoppen",
+    between: "en",
+    after: "tonen welke werkwoorden en tijden je gaat oefenen. Je kunt ze ook aanpassen. Veel succes!",
+    verbsLabel: "Pas de te oefenen werkwoorden aan",
+    tensesLabel: "Pas de te oefenen tijden aan",
   },
-}[publication.locale]
+})[publication.locale]
 const canonicalPath = `/${publication.locale}/defis/${publication.slug}`
 const frenchAlternate = publication.translations.find(alternate => alternate.locale === 'fr')
 usePageSeoOverride().setPageSeoOverride({
@@ -88,7 +97,7 @@ useHead({
       url: pageUrl,
       learningResourceType: 'Exercise',
       educationalUse: 'Practice',
-      inLanguage: publication.locale,
+      inLanguage: localeLanguageTag(publication.locale),
       teaches: 'French conjugation',
       isAccessibleForFree: true,
     }),

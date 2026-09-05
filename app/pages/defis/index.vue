@@ -1,14 +1,16 @@
 <script setup lang="ts">
+import { withDutchVariants } from '~~/shared/i18n/dutch-variants'
+
 import type { ChallengePublicationSummary } from '~~/shared/types/challenge-publication'
 
 const { interfaceLocale, localePath } = useLanguagePreferences()
-const copy = computed(() => ({
+const copy = computed(() => (withDutchVariants({
   fr: { eyebrow: 'Défis officiels', title: 'Défis de conjugaison prêts à jouer', intro: 'Choisis un entraînement préparé par TATITOTU et commence immédiatement.', empty: 'Aucun défi public n’est encore disponible dans cette langue.', start: 'Commencer ce défi' },
   de: { eyebrow: 'Offizielle Aufgaben', title: 'Spielfertige Konjugationsaufgaben', intro: 'Wählen Sie eine von TATITOTU vorbereitete Übung und legen Sie sofort los.', empty: 'In dieser Sprache ist noch keine öffentliche Aufgabe verfügbar.', start: 'Aufgabe starten' },
   en: { eyebrow: 'Official challenges', title: 'Ready-to-play conjugation challenges', intro: 'Choose an exercise prepared by TATITOTU and start immediately.', empty: 'No public challenge is available in this language yet.', start: 'Start this challenge' },
   it: { eyebrow: 'Sfide ufficiali', title: 'Sfide di coniugazione pronte da giocare', intro: 'Scegli un esercizio preparato da TATITOTU e inizia subito.', empty: 'Non è ancora disponibile alcuna sfida pubblica in questa lingua.', start: 'Inizia questa sfida' },
-  es: { eyebrow: 'Retos oficiales', title: 'Retos de conjugación listos para jugar', intro: 'Elige un ejercicio preparado por TATITOTU y empieza inmediatamente.', empty: 'Todavía no hay ningún reto público disponible en este idioma.', start: 'Empezar este reto' },
-})[interfaceLocale.value])
+  es: { eyebrow: 'Retos oficiales', title: 'Retos de conjugación listos para jugar', intro: 'Elige un ejercicio preparado por TATITOTU y empieza inmediatamente.', empty: 'Todavía no hay ningún reto público disponible en este idioma.', start: 'Empezar este reto' }, nl: { eyebrow: "Officiële uitdagingen", title: "Kant-en-klare vervoegingsuitdagingen", intro: "Kies een oefening van TATITOTU en begin meteen.", empty: "Er is nog geen openbare uitdaging in deze taal beschikbaar.", start: "Start deze uitdaging" },
+}))[interfaceLocale.value])
 const { data: response } = await useFetch<{ publications: ChallengePublicationSummary[] }>('/api/challenge-publications', {
   query: computed(() => ({ locale: interfaceLocale.value })),
 })
@@ -23,27 +25,27 @@ const groups = computed(() => {
   return [...grouped.entries()].map(([slug, group]) => ({ slug, ...group }))
 })
 
-const navigationLabel = computed(() => ({
+const navigationLabel = computed(() => (withDutchVariants({
   fr: 'Aller directement à un groupe de défis',
   de: 'Direkt zu einer Aufgabengruppe springen',
   en: 'Jump directly to a challenge group',
   it: 'Vai direttamente a un gruppo di sfide',
-  es: 'Ir directamente a un grupo de retos',
-})[interfaceLocale.value])
-const backToTopLabel = computed(() => ({
+  es: 'Ir directamente a un grupo de retos', nl: "Ga rechtstreeks naar een groep uitdagingen",
+}))[interfaceLocale.value])
+const backToTopLabel = computed(() => (withDutchVariants({
   fr: 'Revenir en haut de la page',
   de: 'Zum Seitenanfang zurückkehren',
   en: 'Back to the top of the page',
   it: 'Torna all’inizio della pagina',
-  es: 'Volver al principio de la página',
-})[interfaceLocale.value])
-const flePageLabel = computed(() => ({
+  es: 'Volver al principio de la página', nl: "Terug naar boven",
+}))[interfaceLocale.value])
+const flePageLabel = computed(() => (withDutchVariants({
   fr: 'Découvrir les exercices de conjugaison FLE',
   de: 'FLE-Konjugationsübungen entdecken',
   en: 'Explore FLE French conjugation exercises',
   it: 'Scopri gli esercizi di coniugazione FLE',
-  es: 'Descubre los ejercicios de conjugación FLE',
-})[interfaceLocale.value])
+  es: 'Descubre los ejercicios de conjugación FLE', nl: "Ontdek oefeningen op Franse vervoeging voor anderstaligen",
+}))[interfaceLocale.value])
 const showBackToTop = ref(false)
 const backToTopBottom = ref(84)
 

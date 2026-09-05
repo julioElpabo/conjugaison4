@@ -1,6 +1,8 @@
+
+import { withDutchVariants } from './dutch-variants'
 import type { AppLocale } from './locales'
 
-const copies = {
+const copies = withDutchVariants({
   fr: {
     title: 'Écrire à TATITOTU',
     intro: 'Vous avez repéré une erreur sur le site ? Vous avez une suggestion d’amélioration ou vous souhaitez simplement me dire que le site vous plaît ? Écrivez-moi !',
@@ -115,8 +117,30 @@ const copies = {
     shortRateLimited: 'Ya has enviado {maximum} mensajes en un periodo corto. Inténtalo de nuevo {when}.',
     dailyRateLimited: 'Ya has enviado {maximum} mensajes hoy. Inténtalo de nuevo {when}.',
     unavailable: 'El formulario de contacto no está disponible temporalmente.',
+  }, nl: {
+    title: "Schrijf naar TATITOTU",
+    intro: "Heb je een fout op de website ontdekt? Heb je een voorstel om de website te verbeteren, of wil je gewoon vertellen dat je de website leuk vindt? Schrijf me!",
+    privacy: "Je adres wordt alleen gebruikt om je te antwoorden. Om misbruik te voorkomen, is het aantal berichten beperkt.",
+    email: "Je e-mailadres",
+    subject: "Onderwerp",
+    message: "Je bericht",
+    emailPlaceholder: "jij@voorbeeld.be",
+    subjectPlaceholder: "Bijvoorbeeld: een fout in een oefening",
+    messagePlaceholder: "Beschrijf precies wat je hebt opgemerkt…",
+    characters: "Minstens {count} tekens",
+    send: "Mijn bericht versturen",
+    sending: "Wordt verstuurd…",
+    cancel: "Annuleren",
+    close: "Sluiten",
+    successTitle: "Bedankt voor je bericht!",
+    success: "Het is verstuurd. We lezen het zo snel mogelijk.",
+    error: "Het bericht kon niet worden verstuurd. Probeer het over enkele ogenblikken opnieuw.",
+    rateLimited: "Je hebt vandaag al meerdere berichten verstuurd. Probeer het morgen opnieuw.",
+    shortRateLimited: "Je hebt in korte tijd al {maximum} berichten verstuurd. Probeer het opnieuw {when}.",
+    dailyRateLimited: "Je hebt vandaag al {maximum} berichten verstuurd. Probeer het opnieuw {when}.",
+    unavailable: "Het contactformulier is tijdelijk niet beschikbaar.",
   },
-} as const
+} as const)
 
 export function contactCopy(locale: AppLocale) {
   return copies[locale]

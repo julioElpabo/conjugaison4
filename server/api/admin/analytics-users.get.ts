@@ -1,3 +1,5 @@
+
+import { withDutchVariants } from '../../../shared/i18n/dutch-variants'
 import type { RowDataPacket } from 'mysql2/promise'
 import type {
   AnalyticsBreakdownItem,
@@ -10,13 +12,13 @@ interface LanguageRow extends RowDataPacket { locale: string, value: number }
 interface SeriesRow extends RowDataPacket { date: string, value: number }
 interface FeatureRow extends RowDataPacket { feature: string, value: number }
 
-const localeLabels: Record<string, string> = {
+const localeLabels: Record<string, string> = withDutchVariants({
   fr: 'Français',
   de: 'Allemand',
   en: 'Anglais',
   it: 'Italien',
-  es: 'Espagnol',
-}
+  es: 'Espagnol', nl: "Néerlandais",
+})
 const connectedFeatureLabels: Record<string, string> = {
   'learner.history': 'Historique', 'learner.summary': 'Bilan de séance', 'learner.finish': 'Reprendre une séance',
   'learner.relaunch.same': 'Relancer dans le même ordre', 'learner.relaunch.random': 'Relancer au hasard',
@@ -133,7 +135,7 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsersResponse>
       WHERE events.event_name='exercise_started'
         AND events.actor_type='anonymous'
         AND events.created_at>=? AND events.created_at<DATE_ADD(?, INTERVAL 1 DAY)
-        AND sessions.interface_locale IN ('fr','de','en','it','es')
+        AND sessions.interface_locale IN ('fr','de','en','it','es','nl','nl-NL')
       GROUP BY sessions.interface_locale
       ORDER BY value DESC
     `, [startDate, endDate]),

@@ -1,3 +1,5 @@
+
+import { withDutchVariants } from './dutch-variants'
 import type { AppLocale } from './locales'
 
 export type MessageParameters = Record<string, string | number>
@@ -19,7 +21,7 @@ const frenchMessages = {
 export type AppMessageKey = keyof typeof frenchMessages
 type MessageCatalogue = Partial<Record<AppMessageKey, string>>
 
-export const appMessages: Record<AppLocale, MessageCatalogue> = {
+export const appMessages: Record<AppLocale, MessageCatalogue> = withDutchVariants({
   fr: frenchMessages,
   de: {
     'language.interface': 'Sprache der Benutzeroberfläche',
@@ -72,8 +74,20 @@ export const appMessages: Record<AppLocale, MessageCatalogue> = {
     'common.loading': 'Cargando…',
     'common.save': 'Guardar',
     'common.cancel': 'Cancelar',
+  }, nl: {
+    'language.interface': "Taal van de interface",
+    'language.explanations': "Taal van de uitleg",
+    'language.french': "Frans",
+    'language.german': "Duits",
+    'language.english': "Engels",
+    'language.italian': "Italiaans",
+    'language.spanish': "Spaans",
+    'common.close': "Sluiten",
+    'common.loading': "Bezig met laden…",
+    'common.save': "Opslaan",
+    'common.cancel': "Annuleren",
   },
-}
+})
 
 export function translateAppMessage(locale: AppLocale, key: AppMessageKey, parameters: MessageParameters = {}): string {
   const template = appMessages[locale][key] || frenchMessages[key] || key

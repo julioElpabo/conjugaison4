@@ -55,7 +55,7 @@ const DEFI_KEYS = new Set([
   'printOptions'
 ])
 
-function parseChallengeTitle(value: unknown): string | undefined {
+export function parseChallengeTitle(value: unknown): string | undefined {
   if (value === undefined) return undefined
   if (typeof value !== 'string') {
     throw new PublicInputError('Le titre du défi doit être du texte')
@@ -67,7 +67,7 @@ function parseChallengeTitle(value: unknown): string | undefined {
   return title
 }
 
-function parseChallengeDescription(value: unknown): string | undefined {
+export function parseChallengeDescription(value: unknown): string | undefined {
   if (value === undefined || value === '') return undefined
   if (typeof value !== 'string') {
     throw new PublicInputError('La description du défi doit être du texte')

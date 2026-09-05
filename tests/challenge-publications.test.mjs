@@ -22,9 +22,10 @@ describe('publications SEO des défis officiels', () => {
     assert.equal(normalizeChallengePublicationSlug('Übungen für französische Verben'), 'ubungen-fur-franzosische-verben')
   })
 
-  it('limite strictement les langues aux cinq interfaces du site', () => {
+  it('limite strictement les langues aux sept variantes linguistiques du site', () => {
     assert.equal(parsePublicationLocale('de'), 'de')
-    assert.throws(() => parsePublicationLocale('nl'), /Langue/u)
+    assert.equal(parsePublicationLocale('nl'), 'nl')
+    assert.throws(() => parsePublicationLocale('pt'), /Langue/u)
   })
 
   it('traduit les catégories publiques dans la langue de la page', () => {
@@ -122,21 +123,21 @@ describe('publications SEO des défis officiels', () => {
     }), /identifiant/u)
   })
 
-  it('versionne et publie les cinq langues de tous les défis préfabriqués', async () => {
+  it('versionne et publie les sept variantes linguistiques des défis disposant d’une page éditoriale', async () => {
     const deployment = JSON.parse(await readFile(
       new URL('../shared/data/challenge-publication-deployment.json', import.meta.url), 'utf8',
     ))
     assert.equal(deployment.schemaVersion, 1)
-    assert.equal(deployment.publications.length, challengePresetDefinitions.length * 5)
+    assert.equal(deployment.publications.length, challengePresetDefinitions.filter(item => item.group !== 'ultimate').length * 7)
     assert.deepEqual(
       [...new Set(deployment.publications.map(item => item.presetKey))].sort(),
-      challengePresetDefinitions.map(item => item.id).sort(),
+      challengePresetDefinitions.filter(item => item.group !== 'ultimate').map(item => item.id).sort(),
     )
-    assert.deepEqual([...new Set(deployment.publications.map(item => item.locale))].sort(), ['de', 'en', 'es', 'fr', 'it'])
+    assert.deepEqual([...new Set(deployment.publications.map(item => item.locale))].sort(), ['de', 'en', 'es', 'fr', 'it', 'nl', 'nl-NL'])
     assert.ok(deployment.publications.every(item => item.isPublished && item.isIndexable))
     const flePresetKeys = new Set(challengePresetDefinitions.filter(item => item.group === 'cif').map(item => item.id))
-    assert.ok(deployment.publications.every(item => item.overwriteExisting === flePresetKeys.has(item.presetKey)))
-    assert.equal(deployment.publications.filter(item => item.overwriteExisting).length, flePresetKeys.size * 5)
+    assert.ok(deployment.publications.every(item => item.overwriteExisting === false))
+    assert.equal(deployment.publications.filter(item => item.overwriteExisting).length, 0)
     assert.ok(deployment.publications.every(item => item.description.length >= 120 && item.description.length <= 320))
     assert.ok(deployment.publications.every(item => item.metaDescription.length <= 160))
     assert.equal(new Set(deployment.publications.map(item => `${item.locale}:${item.slug}`)).size, deployment.publications.length)
@@ -146,6 +147,8 @@ describe('publications SEO des défis officiels', () => {
       en: /conjugation/iu,
       it: /coniugazione/iu,
       es: /conjugación/iu,
+      nl: /vervoeging/iu,
+      'nl-NL': /vervoeging/iu,
     }
     assert.ok(deployment.publications.every(item => conjugationMarkers[item.locale].test(item.title)))
     const frenchFlePublications = deployment.publications.filter(item => item.locale === 'fr' && flePresetKeys.has(item.presetKey))

@@ -191,6 +191,8 @@ const tourLanguageOptions = computed<{ value: AppLocale, label: string, flag: st
   { value: 'en', label: ui('Anglais'), flag: '🇬🇧' },
   { value: 'it', label: ui('Italien'), flag: '🇮🇹' },
   { value: 'es', label: ui('Espagnol'), flag: '🇪🇸' },
+  { value: 'nl-NL', label: 'Nederlands (Nederland)', flag: '🇳🇱' },
+  { value: 'nl', label: 'Nederlands (België)', flag: '🇧🇪' },
 ])
 const revealedPresetVerbIds = ref<number[]>([])
 const revealedPresetTenseIds = ref<number[]>([])

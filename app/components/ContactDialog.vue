@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { localeLanguageTag } from '~~/shared/i18n/locales'
 import { contactCopy } from '~~/shared/i18n/contact'
 
 const config = useRuntimeConfig()
@@ -56,7 +57,7 @@ function closeOnBackdrop(event: MouseEvent) {
 }
 
 function retryTime(seconds: number) {
-  const formatter = new Intl.RelativeTimeFormat(interfaceLocale.value, { numeric: 'always' })
+  const formatter = new Intl.RelativeTimeFormat(localeLanguageTag(interfaceLocale.value), { numeric: 'always' })
   if (seconds >= 90 * 60) return formatter.format(Math.ceil(seconds / 3600), 'hour')
   return formatter.format(Math.max(1, Math.ceil(seconds / 60)), 'minute')
 }

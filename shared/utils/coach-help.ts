@@ -1,3 +1,5 @@
+
+import { withDutchVariants } from '../i18n/dutch-variants'
 import { COACH_EXPLANATION_APPROACHES, type CoachExplanationApproach, type CoachHelpBlock, type CoachHelpBlockType, type CoachHelpEngineKey, type CoachHelpTemplate, type CoachProfile } from '../types/coach'
 import { coachHelpProfile, normalizeCoachHelpEngineKey, type CoachAutomaticHelpBlockId } from '../data/coach-help-profiles'
 import { coachCondensedTenseRule } from '../data/coach-condensed-tense-rules'
@@ -461,7 +463,7 @@ export function buildDefinitionHelpHtml(values: Pick<CoachHelpContentValues, 've
   return `<p><strong>${escapedCoachText(verb)}</strong> = ${escapedCoachText(definition)}</p>`
 }
 
-const semanticDefinitionFallbacks: Record<Exclude<AppLocale, 'fr'>, Record<string, string>> = {
+const semanticDefinitionFallbacks: Record<Exclude<AppLocale, 'fr'>, Record<string, string>> = withDutchVariants({
   de: {
     mouvement: 'eine Bewegung oder Fortbewegung ausdrücken',
     position: 'eine Position oder einen Positionswechsel ausdrücken',
@@ -525,15 +527,30 @@ const semanticDefinitionFallbacks: Record<Exclude<AppLocale, 'fr'>, Record<strin
     corps: 'expresar una acción o una necesidad del cuerpo',
     nature: 'describir un fenómeno natural',
     'action-processus': 'expresar una acción o un proceso',
+  }, nl: {
+    mouvement: "een beweging of verplaatsing uitdrukken",
+    position: "een positie of verandering van positie uitdrukken",
+    perception: "iets uitdrukken dat je met je zintuigen waarneemt",
+    manipulation: "een handeling op een voorwerp uitdrukken",
+    'creation-transformation': "een creatie of verandering uitdrukken",
+    communication: "woorden, ideeën of informatie overbrengen",
+    cognition: "denken, kennis of leren uitdrukken",
+    emotion: "een emotie, voorkeur of waardering uitdrukken",
+    modalite: "aangeven wat mogelijk, nodig of gewenst is",
+    'relation-sociale': "een relatie of een handeling met andere mensen uitdrukken",
+    echange: "een uitwisseling, gift of overdracht uitdrukken",
+    corps: "een lichamelijke handeling of behoefte uitdrukken",
+    nature: "een natuurverschijnsel beschrijven",
+    'action-processus': "een handeling of proces uitdrukken",
   },
-}
+})
 
-const genericDefinitionFallbacks: Record<Exclude<AppLocale, 'fr'>, string> = {
+const genericDefinitionFallbacks: Record<Exclude<AppLocale, 'fr'>, string> = withDutchVariants({
   de: 'ein französisches Verb; erschließe seine genaue Bedeutung aus dem Satz',
   en: 'a French verb; use the sentence to identify its precise meaning',
   it: 'un verbo francese; usa la frase per individuarne il significato preciso',
-  es: 'un verbo francés; usa la frase para identificar su significado exacto',
-}
+  es: 'un verbo francés; usa la frase para identificar su significado exacto', nl: "een Frans werkwoord; gebruik de zin om de precieze betekenis te achterhalen",
+})
 
 /**
  * Les définitions administrées sont encore incomplètes hors français. Dans ce
@@ -773,29 +790,29 @@ export function buildCondensedVerbGroupHtml(
 ) {
   const infinitive = verb?.infinitif?.trim() || 'Ce verbe'
   const group = verb?.groupeConjugaison
-  const missingGroup: Record<AppLocale, string> = {
+  const missingGroup: Record<AppLocale, string> = withDutchVariants({
     fr: 'groupe non renseigné.',
     de: 'Verbgruppe nicht angegeben.',
     en: 'verb group not specified.',
     it: 'gruppo del verbo non indicato.',
-    es: 'grupo del verbo no indicado.',
-  }
+    es: 'grupo del verbo no indicado.', nl: "werkwoordgroep niet vermeld.",
+  })
   if (!group) return `<p><strong>${escapedCoachText(infinitive)}</strong> : ${missingGroup[locale]}</p>`
-  const groupLabels: Record<AppLocale, string> = {
+  const groupLabels: Record<AppLocale, string> = withDutchVariants({
     fr: `${group}${group === 1 ? 'er' : 'e'} groupe`,
     de: `${group}. Verbgruppe`,
     en: `${group}${group === 1 ? 'st' : group === 2 ? 'nd' : 'rd'} group`,
     it: `${group}º gruppo`,
-    es: `${group}.${group === 1 || group === 3 ? 'er' : 'º'} grupo`,
-  }
-  const membership: Record<AppLocale, string> = {
+    es: `${group}.${group === 1 || group === 3 ? 'er' : 'º'} grupo`, nl: `${group}e groep`,
+  })
+  const membership: Record<AppLocale, string> = withDutchVariants({
     fr: 'appartient au',
     de: 'gehört zur',
     en: 'belongs to the',
     it: 'appartiene al',
-    es: 'pertenece al',
-  }
-  const consequencesByLocale: Record<AppLocale, Record<1 | 2 | 3, string[]>> = {
+    es: 'pertenece al', nl: "behoort tot de",
+  })
+  const consequencesByLocale: Record<AppLocale, Record<1 | 2 | 3, string[]>> = withDutchVariants({
     fr: {
       1: ['Conjugaison généralement régulière.', 'Attention : le radical ne s’écrit pas toujours de la même façon.'],
       2: ['Conjugaison régulière, sur le modèle de « finir ». Le radical prend souvent « -iss- ».'],
@@ -820,16 +837,20 @@ export function buildCondensedVerbGroupHtml(
       1: ['La conjugación suele ser regular.', 'Atención: la raíz no siempre se escribe de la misma manera.'],
       2: ['Conjugación regular según el modelo de « finir ». La raíz suele contener « -iss- ».'],
       3: ['La conjugación suele ser irregular: la raíz y las terminaciones pueden cambiar. Usa las formas de referencia aprendidas.'],
+    }, nl: {
+      1: ["De vervoeging is meestal regelmatig.", "Let op: de stam wordt niet altijd op dezelfde manier geschreven."],
+      2: ["Regelmatige vervoeging volgens het model van « finir ». De stam bevat vaak « -iss- »."],
+      3: ["De vervoeging is vaak onregelmatig: de stam en de uitgangen kunnen veranderen. Gebruik de basisvormen die je hebt geleerd."],
     },
-  }
+  })
   const consequences = consequencesByLocale[locale][group]
   const consequenceParagraphs = consequences.map(consequence => `<p>${escapedCoachText(consequence)}</p>`).join('')
-  const foreignThirdGroupAdvice: Record<Exclude<AppLocale, 'fr'>, string> = {
+  const foreignThirdGroupAdvice: Record<Exclude<AppLocale, 'fr'>, string> = withDutchVariants({
     de: '<p>Bei Verben der 3. Gruppe helfen gelernte Referenzformen dabei, den richtigen Stamm und die richtige Endung zu finden.</p>',
     en: '<p>For third-group verbs, use learnt reference forms to find the correct stem and ending.</p>',
     it: '<p>Per i verbi del 3º gruppo, usa le forme di riferimento imparate per trovare la radice e la desinenza corrette.</p>',
-    es: '<p>Para los verbos del 3.er grupo, usa las formas de referencia aprendidas para encontrar la raíz y la terminación correctas.</p>',
-  }
+    es: '<p>Para los verbos del 3.er grupo, usa las formas de referencia aprendidas para encontrar la raíz y la terminación correctas.</p>', nl: "<p>Gebruik bij werkwoorden van de derde groep de aangeleerde basisvormen om de juiste stam en uitgang te vinden.</p>",
+  })
   const referenceFormExplanation = group === 3
     ? locale === 'fr'
       ? condensedReferenceFormExplanation(context.mode, context.tense, context.subject, condensedVerbAuxiliary(verb) || 'avoir', isCondensedPronominalVerb(verb))
@@ -900,13 +921,13 @@ function modeWithArticle(value: string) {
   return startsWithVowelForArticle(mode) ? `de l’${mode}` : `du ${mode}`
 }
 
-const nearFutureHelpCopy: Record<AppLocale, {
+const nearFutureHelpCopy = withDutchVariants<Record<Exclude<AppLocale, 'nl-NL'>, {
   construction: string
   usage: string
   formulaPresent: string
   example: string
   reflexive: (example: string) => string
-}> = {
+}>>({
   fr: {
     construction: 'Le futur proche se construit avec « aller » au présent, suivi de l’infinitif du verbe.',
     usage: "Ce n'est pas un temps comme les autres. Il est utilisé pour une action proche.",
@@ -941,8 +962,14 @@ const nearFutureHelpCopy: Record<AppLocale, {
     formulaPresent: 'en presente',
     example: 'Ejemplo:',
     reflexive: example => `Con un verbo pronominal, coloca el pronombre reflexivo delante del infinitivo: <code>${example}</code>.`,
+  }, nl: {
+    construction: "De futur proche wordt gevormd met « aller » in de tegenwoordige tijd, gevolgd door de infinitief van het werkwoord.",
+    usage: "Deze tijd beschrijft een handeling die binnenkort zal plaatsvinden.",
+    formulaPresent: "in de tegenwoordige tijd",
+    example: "Voorbeeld:",
+    reflexive: example => `Plaats bij een wederkerend werkwoord het wederkerend voornaamwoord vóór de infinitief: <code>${example}</code>.`,
   },
-}
+})
 
 export function buildNearFutureCoachHelpHtml(
   verb?: Pick<Verb, 'infinitif'> & Partial<Pick<Verb, 'typeHInitial'>>,
@@ -959,13 +986,13 @@ export function buildNearFutureCoachHelpHtml(
 }
 
 export function buildNearFutureAllerHelpHtml(locale: AppLocale = 'fr') {
-  const summary: Record<AppLocale, string> = {
+  const summary: Record<AppLocale, string> = withDutchVariants({
     fr: 'Aller au présent',
     de: 'aller im Präsens',
     en: 'aller in the present tense',
     it: 'aller al presente',
-    es: 'aller en presente',
-  }
+    es: 'aller en presente', nl: "aller in de tegenwoordige tijd",
+  })
   return `<details><summary>${summary[locale]}</summary><table><tbody><tr><th>je</th><td>vais</td></tr><tr><th>tu</th><td>vas</td></tr><tr><th>il, elle, on</th><td>va</td></tr><tr><th>nous</th><td>allons</td></tr><tr><th>vous</th><td>allez</td></tr><tr><th>ils, elles</th><td>vont</td></tr></tbody></table></details>`
 }
 

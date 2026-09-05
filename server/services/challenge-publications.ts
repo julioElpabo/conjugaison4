@@ -1,3 +1,5 @@
+
+import { withDutchVariants } from '../../shared/i18n/dutch-variants'
 import type { Pool, PoolConnection, ResultSetHeader, RowDataPacket } from 'mysql2/promise'
 import { SUPPORTED_LOCALES, type AppLocale } from '../../shared/i18n/locales'
 import type {
@@ -55,31 +57,31 @@ const PAYLOAD_KEYS = new Set([
 ])
 
 const PUBLIC_CATEGORY_NAMES: Record<string, Record<AppLocale, string>> = {
-  school: {
+  school: withDutchVariants({
     fr: 'Niveaux scolaires suisses', de: 'Schweizer Schulstufen', en: 'Swiss school levels',
-    it: 'Livelli scolastici svizzeri', es: 'Niveles escolares suizos',
-  },
-  'school-france': {
+    it: 'Livelli scolastici svizzeri', es: 'Niveles escolares suizos', nl: "Zwitserse schoolniveaus",
+  }),
+  'school-france': withDutchVariants({
     fr: 'Niveaux scolaires français', de: 'Französische Schulstufen', en: 'French school levels',
-    it: 'Livelli scolastici francesi', es: 'Niveles escolares franceses',
-  },
-  cif: {
+    it: 'Livelli scolastici francesi', es: 'Niveles escolares franceses', nl: "Franse schoolniveaus",
+  }),
+  cif: withDutchVariants({
     fr: 'Conjugaison FLE (français langue étrangère)', de: 'FLE-Konjugation (Französisch als Fremdsprache)',
     en: 'FLE conjugation (French as a foreign language)', it: 'Coniugazione FLE (francese lingua straniera)',
-    es: 'Conjugación FLE (francés como lengua extranjera)',
-  },
-  'verb-group': {
+    es: 'Conjugación FLE (francés como lengua extranjera)', nl: "Vervoeging voor anderstaligen (FLE)",
+  }),
+  'verb-group': withDutchVariants({
     fr: 'Groupes de verbes', de: 'Verbgruppen', en: 'Verb groups',
-    it: 'Gruppi verbali', es: 'Grupos verbales',
-  },
-  spelling: {
+    it: 'Gruppi verbali', es: 'Grupos verbales', nl: "Werkwoordgroepen",
+  }),
+  spelling: withDutchVariants({
     fr: 'Difficultés particulières', de: 'Besondere Schwierigkeiten', en: 'Special difficulties',
-    it: 'Difficoltà particolari', es: 'Dificultades particulares',
-  },
-  semantic: {
+    it: 'Difficoltà particolari', es: 'Dificultades particulares', nl: "Bijzondere moeilijkheden",
+  }),
+  semantic: withDutchVariants({
     fr: 'Sens des verbes', de: 'Bedeutung der Verben', en: 'Verb meanings',
-    it: 'Significato dei verbi', es: 'Significado de los verbos',
-  },
+    it: 'Significato dei verbi', es: 'Significado de los verbos', nl: "Betekenissen van werkwoorden",
+  }),
 }
 
 export function publicChallengeCategoryName(categorySlug: string, locale: AppLocale, fallback: string) {
@@ -184,7 +186,7 @@ const PUBLICATION_SELECT = `SELECT publication.id,publication.preset_id AS prese
 
 export async function listAdminChallengePublications(executor: Executor, presetId: number) {
   const [rows] = await executor.execute<PublicationRow[]>(`${PUBLICATION_SELECT}
-    WHERE publication.preset_id=? ORDER BY FIELD(publication.locale,'fr','de','en','it','es')`, [presetId])
+    WHERE publication.preset_id=? ORDER BY FIELD(publication.locale,'fr','de','en','it','es','nl','nl-NL')`, [presetId])
   return rows.map(adminPublication)
 }
 
@@ -253,7 +255,7 @@ export async function saveChallengePublication(
 async function translationsForPreset(executor: Executor, presetId: number) {
   const [rows] = await executor.execute<TranslationRow[]>(`SELECT preset_id AS presetId,locale,slug,
     is_published AS isPublished,is_indexable AS isIndexable
-    FROM challenge_preset_publications WHERE preset_id=? ORDER BY FIELD(locale,'fr','de','en','it','es')`, [presetId])
+    FROM challenge_preset_publications WHERE preset_id=? ORDER BY FIELD(locale,'fr','de','en','it','es','nl','nl-NL')`, [presetId])
   return groupChallengePublicationAlternates(rows)
 }
 
@@ -314,7 +316,7 @@ export async function listPublishedChallengePublications(executor: Executor) {
   const [rows] = await executor.execute<PublicationRow[]>(`${PUBLICATION_SELECT}
     WHERE publication.is_published=1
       AND publication.slug IS NOT NULL AND preset.is_active=1 AND category.is_active=1
-    ORDER BY publication.preset_id,FIELD(publication.locale,'fr','de','en','it','es')`)
+    ORDER BY publication.preset_id,FIELD(publication.locale,'fr','de','en','it','es','nl','nl-NL')`)
   return rows.map(row => ({
     presetId: Number(row.presetId), locale: parsePublicationLocale(row.locale), slug: row.slug!,
     updatedAt: isoDate(row.updatedAt),

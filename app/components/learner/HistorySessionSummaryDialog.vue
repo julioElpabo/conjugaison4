@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { withDutchVariants } from '~~/shared/i18n/dutch-variants'
+
 import type { ExerciseQuestion, LearnerErrorDetail } from '~~/shared/types/conjugation'
 import type { IdentificationFormParts } from '~~/shared/utils/identification-form'
 import { buildAnswerComparison } from '~~/shared/utils/answer-difference'
@@ -38,13 +40,13 @@ const answerComparison = (item: SummaryItem) => buildAnswerComparison(
 )
 
 const resultLabel = computed(() => {
-  const middle = {
+  const middle = withDutchVariants({
     fr: 'réussites sur',
     de: 'Erfolge von',
     en: 'correct out of',
     it: 'risposte corrette su',
-    es: 'aciertos de',
-  }[interfaceLocale.value]
+    es: 'aciertos de', nl: "juist van",
+  })[interfaceLocale.value]
   return `${props.correctCount} ${middle} ${props.totalCount}`
 })
 

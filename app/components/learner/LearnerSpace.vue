@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { withDutchVariants } from '~~/shared/i18n/dutch-variants'
+
+import { localeLanguageTag } from '~~/shared/i18n/locales'
 import type {
   ConjugationTense,
   ExerciseQuestion,
@@ -10,7 +13,9 @@ import type {
 import type { CoachProfile } from '~~/shared/types/coach'
 import type { Catalogue } from '~/composables/useChallengeBuilder'
 import type { AppLocale } from '~~/shared/i18n/locales'
+import type { SavedChallenge } from '~~/shared/types/saved-challenge'
 import { learnerSpaceCopy, learnerSpaceText } from '~~/shared/i18n/learner-space'
+import { groupSavedChallenges } from '~~/shared/utils/saved-challenge-dates'
 import {
   localizedLearnerErrorDomain,
   localizedLearnerErrorLabel,
@@ -78,15 +83,6 @@ interface DashboardResponse {
   hasMore: boolean
 }
 
-interface SavedChallenge {
-  code: string
-  title: string
-  description: string
-  questionCount: number
-  verbCount: number
-  tenseCount: number
-  savedAt: string
-}
 
 interface SavedChallengesResponse {
   challenges: SavedChallenge[]
@@ -166,7 +162,7 @@ const { user: sessionLearner, clearUser } = useLearnerAuth()
 const learner = computed(() => props.inspectedLearner || sessionLearner.value)
 const { interfaceLocale, localePath, setInterfaceLocale, ui } = useLanguagePreferences()
 const copy = computed(() => learnerSpaceCopy(interfaceLocale.value))
-const savedCopy = computed(() => ({
+const savedCopy = computed(() => (withDutchVariants({
   fr: {
     tab: 'Mes défis', eyebrow: 'Mes défis enregistrés', title: 'Mes défis',
     intro: 'Retrouve les défis que tu as créés ou ajoutés à ton compte.',
@@ -221,8 +217,18 @@ const savedCopy = computed(() => ({
     invalid: 'Introduce un código con el formato AB-CD-EF-23.', missing: 'Este código no corresponde a ningún ejercicio.',
     duplicate: 'Este ejercicio ya está en tu cuenta.', added: 'El ejercicio se ha añadido a tu cuenta.',
     error: 'No se pueden cargar tus ejercicios en este momento.', addError: 'No se puede añadir este ejercicio en este momento.',
+  }, nl: {
+    tab: "Mijn uitdagingen", eyebrow: "Mijn opgeslagen uitdagingen", title: "Mijn uitdagingen",
+    intro: "Vind de uitdagingen die je hebt aangemaakt of aan je account hebt toegevoegd.",
+    addTitle: "Een oude uitdaging toevoegen", addHint: "Voer de code in van een uitdaging die is aangemaakt vóór je account of vóór deze functie bestond.",
+    code: "Code van de uitdaging", add: "Toevoegen", adding: "Wordt toegevoegd…", launch: "Starten",
+    loading: "Je uitdagingen worden geladen…", empty: "Je hebt nog geen uitdagingen opgeslagen.",
+    emptyHint: "Uitdagingen die je aanmaakt terwijl je aangemeld bent, verschijnen hier.",
+    invalid: "Voer een code in met de vorm AB-CD-EF-23.", missing: "Deze code hoort niet bij een uitdaging.",
+    duplicate: "Deze uitdaging staat al in je account.", added: "De uitdaging is aan je account toegevoegd.",
+    error: "Je uitdagingen kunnen momenteel niet worden geladen.", addError: "Deze uitdaging kan momenteel niet worden toegevoegd.",
   },
-})[interfaceLocale.value])
+}))[interfaceLocale.value])
 const text = (key: keyof ReturnType<typeof learnerSpaceCopy>, parameters: Record<string, string | number> = {}) =>
   learnerSpaceText(copy.value, key, parameters)
 const learnerErrorComparison = (example: LearnerErrorProgressExample) => buildAnswerComparison(
@@ -242,10 +248,23 @@ const requestedTab = (value: unknown): UserTab => (
 )
 const activeTab = ref<UserTab>(requestedTab(route.query.tab))
 const savedChallenges = ref<SavedChallenge[]>([])
+const savedChallengesNow = ref(new Date())
+const savedChallengeGroups = computed(() => groupSavedChallenges(savedChallenges.value, savedChallengesNow.value, interfaceLocale.value))
+let savedChallengesClock: ReturnType<typeof setInterval> | undefined
 const savedChallengesLoaded = ref(false)
 const savedChallengesPending = ref(false)
 const savedChallengesError = ref('')
 const savedChallengeCode = ref('')
+const savedChallengeFormOpen = ref(false)
+const savedChallengeCodeInput = useTemplateRef<HTMLInputElement>('saved-challenge-code-input')
+
+async function toggleSavedChallengeForm() {
+  savedChallengeFormOpen.value = !savedChallengeFormOpen.value
+  if (savedChallengeFormOpen.value) {
+    await nextTick()
+    savedChallengeCodeInput.value?.focus({ preventScroll: true })
+  }
+}
 const savedChallengeAdding = ref(false)
 const savedChallengeAddError = ref('')
 const savedChallengeAddNotice = ref('')
@@ -386,9 +405,13 @@ const localeOptions = computed<Array<{ value: AppLocale, label: string, flag: st
   { value: 'en', label: ui('Anglais'), flag: '🇬🇧' },
   { value: 'it', label: ui('Italien'), flag: '🇮🇹' },
   { value: 'es', label: ui('Espagnol'), flag: '🇪🇸' },
+  { value: 'nl-NL', label: 'Nederlands (Nederland)', flag: '🇳🇱' },
+  { value: 'nl', label: 'Nederlands (België)', flag: '🇧🇪' },
 ])
 
 onMounted(() => {
+  savedChallengesNow.value = new Date()
+  savedChallengesClock = setInterval(() => { savedChallengesNow.value = new Date() }, 60_000)
   if (!props.readOnly) applyTheme(preferredTheme.value, false)
   if (!props.readOnly && preferredLocale.value !== interfaceLocale.value) {
     setInterfaceLocale(preferredLocale.value)
@@ -420,6 +443,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  if (savedChallengesClock) clearInterval(savedChallengesClock)
   challengeObserver?.disconnect()
   siteHeaderObserver?.disconnect()
   document.removeEventListener('pointerdown', closeWorkMenuOnOutside)
@@ -587,7 +611,7 @@ const allTrainingErrorQuestions = computed(() => trainingSessions.value.flatMap(
   .filter((question): question is ExerciseQuestion => Boolean(question))))
 
 function trainingDateLabel(value: string, includeTime = false) {
-  return new Intl.DateTimeFormat(interfaceLocale.value, {
+  return new Intl.DateTimeFormat(localeLanguageTag(interfaceLocale.value), {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -760,7 +784,7 @@ function scrollToTrainingSession(point: ChallengeProgressPoint) {
 }
 
 function challengeDateParts(value: string) {
-  return new Intl.DateTimeFormat(interfaceLocale.value, {
+  return new Intl.DateTimeFormat(localeLanguageTag(interfaceLocale.value), {
     timeZone: 'Europe/Zurich',
     weekday: 'long',
     day: 'numeric',
@@ -786,7 +810,7 @@ function challengeDayLabel(value: string) {
 }
 
 function formattedChallengeTime(value: string) {
-  return new Intl.DateTimeFormat(interfaceLocale.value, {
+  return new Intl.DateTimeFormat(localeLanguageTag(interfaceLocale.value), {
     timeZone: 'Europe/Zurich',
     hour: '2-digit',
     minute: '2-digit',
@@ -794,6 +818,7 @@ function formattedChallengeTime(value: string) {
 }
 
 function challengeErrorsLabel(count: number) {
+  if ((interfaceLocale.value === 'nl' || interfaceLocale.value === 'nl-NL')) return `${count} ${count === 1 ? 'fout' : 'fouten'}`
   if (interfaceLocale.value === 'de') return `${count} Fehler`
   if (interfaceLocale.value === 'en') return `${count} ${count === 1 ? 'mistake' : 'mistakes'}`
   if (interfaceLocale.value === 'it') return `${count} ${count === 1 ? 'errore' : 'errori'}`
@@ -807,58 +832,58 @@ function pluralLabel(count: number, forms: Record<AppLocale, [string, string]>) 
 }
 
 function resultCountLabel(correct: number, incorrect: number) {
-  const correctText = pluralLabel(correct, {
+  const correctText = pluralLabel(correct, withDutchVariants({
     fr: ['réussite', 'réussites'], de: ['Erfolg', 'Erfolge'], en: ['success', 'successes'],
-    it: ['risposta corretta', 'risposte corrette'], es: ['acierto', 'aciertos'],
-  })
-  const incorrectText = pluralLabel(incorrect, {
+    it: ['risposta corretta', 'risposte corrette'], es: ['acierto', 'aciertos'], nl: ["juist antwoord", "juiste antwoorden"],
+  }))
+  const incorrectText = pluralLabel(incorrect, withDutchVariants({
     fr: ['erreur', 'erreurs'], de: ['Fehler', 'Fehler'], en: ['mistake', 'mistakes'],
-    it: ['errore', 'errori'], es: ['error', 'errores'],
-  })
+    it: ['errore', 'errori'], es: ['error', 'errores'], nl: ["fout", "fouten"],
+  }))
   return `${correctText} · ${incorrectText}`
 }
 
 function trainingCountLabel(count: number) {
-  return pluralLabel(count, {
+  return pluralLabel(count, withDutchVariants({
     fr: ['entraînement', 'entraînements'], de: ['Training', 'Trainings'], en: ['practice session', 'practice sessions'],
-    it: ['allenamento', 'allenamenti'], es: ['entrenamiento', 'entrenamientos'],
-  })
+    it: ['allenamento', 'allenamenti'], es: ['entrenamiento', 'entrenamientos'], nl: ["oefensessie", "oefensessies"],
+  }))
 }
 
 function occurrenceCountLabel(count: number) {
-  return pluralLabel(count, {
+  return pluralLabel(count, withDutchVariants({
     fr: ['occurrence', 'occurrences'], de: ['Sitzung', 'Sitzungen'], en: ['session', 'sessions'],
-    it: ['sessione', 'sessioni'], es: ['sesión', 'sesiones'],
-  })
+    it: ['sessione', 'sessioni'], es: ['sesión', 'sesiones'], nl: ["sessie", "sessies"],
+  }))
 }
 
 function questionCountLabel(count: number) {
-  return pluralLabel(count, {
+  return pluralLabel(count, withDutchVariants({
     fr: ['question', 'questions'], de: ['Frage', 'Fragen'], en: ['question', 'questions'],
-    it: ['domanda', 'domande'], es: ['pregunta', 'preguntas'],
-  })
+    it: ['domanda', 'domande'], es: ['pregunta', 'preguntas'], nl: ["vraag", "vragen"],
+  }))
 }
 
 function successPercentLabel(rate: number) {
-  const suffix = { fr: 'de réussite', de: 'Erfolg', en: 'success', it: 'di successo', es: 'de aciertos' }[interfaceLocale.value]
+  const suffix = withDutchVariants({ fr: 'de réussite', de: 'Erfolg', en: 'success', it: 'di successo', es: 'de aciertos', nl: "juiste antwoorden", })[interfaceLocale.value]
   return `${rate}% ${suffix}`
 }
 
 function successEvolutionLabel(label: string) {
-  const prefix = {
+  const prefix = withDutchVariants({
     fr: 'Évolution du pourcentage de réussite pour', de: 'Entwicklung der Erfolgsquote für',
     en: 'Success rate over time for', it: 'Evoluzione della percentuale di successo per',
-    es: 'Evolución del porcentaje de aciertos para',
-  }[interfaceLocale.value]
+    es: 'Evolución del porcentaje de aciertos para', nl: "Slaagpercentage door de tijd heen voor",
+  })[interfaceLocale.value]
   return `${prefix} ${label}`
 }
 
 function trainingPointLabel(point: ChallengeProgressPoint) {
-  const ending = {
+  const ending = withDutchVariants({
     fr: 'Voir les erreurs de cette session.', de: 'Fehler dieser Sitzung anzeigen.',
     en: 'View the mistakes from this session.', it: 'Vedi gli errori di questa sessione.',
-    es: 'Ver los errores de esta sesión.',
-  }[interfaceLocale.value]
+    es: 'Ver los errores de esta sesión.', nl: "Bekijk de fouten uit deze sessie.",
+  })[interfaceLocale.value]
   return `${trainingDateLabel(point.occurredAt, true)}: ${successPercentLabel(point.successPercent)}. ${ending}`
 }
 
@@ -867,15 +892,15 @@ function responseSummaryLabel(correct: number, incorrect: number) {
 }
 
 function questionsOutOfLabel(answered: number, total: number) {
-  const middle = { fr: 'questions sur', de: 'Fragen von', en: 'questions out of', it: 'domande su', es: 'preguntas de' }[interfaceLocale.value]
+  const middle = withDutchVariants({ fr: 'questions sur', de: 'Fragen von', en: 'questions out of', it: 'domande su', es: 'preguntas de', nl: "vragen van", })[interfaceLocale.value]
   return `${answered} ${middle} ${total}`
 }
 
 function trainingErrorsTitle(date: string) {
-  const prefix = {
+  const prefix = withDutchVariants({
     fr: 'Entraînement des erreurs du', de: 'Fehlertraining vom', en: 'Mistake practice from',
-    it: 'Allenamento sugli errori del', es: 'Entrenamiento de errores del',
-  }[interfaceLocale.value]
+    it: 'Allenamento sugli errori del', es: 'Entrenamiento de errores del', nl: "Fouten oefenen van",
+  })[interfaceLocale.value]
   return `${prefix} ${trainingDateLabel(date)}`
 }
 
@@ -885,12 +910,12 @@ function localizedTrainingReportTitle(title: string) {
   const frenchPrefix = 'Entraînement des erreurs du '
   if (title.startsWith(frenchPrefix)) {
     const suffix = title.slice(frenchPrefix.length)
-    const prefix = {
+    const prefix = withDutchVariants({
       de: 'Fehlertraining vom ',
       en: 'Mistake practice from ',
       it: 'Allenamento sugli errori del ',
-      es: 'Entrenamiento de errores del ',
-    }[interfaceLocale.value]
+      es: 'Entrenamiento de errores del ', nl: "Fouten oefenen van ",
+    })[interfaceLocale.value]
     return `${prefix}${suffix}`
   }
   return title
@@ -900,7 +925,7 @@ function trainQuestionsLabel(count: number) {
   if (interfaceLocale.value === 'fr') {
     return count === 1 ? 'Entraîner cette question' : `Entraîner ces ${count} questions`
   }
-  const prefix = { fr: 'Entraîner ces', de: 'Diese', en: 'Practise these', it: 'Allenare queste', es: 'Practicar estas' }[interfaceLocale.value]
+  const prefix = withDutchVariants({ fr: 'Entraîner ces', de: 'Diese', en: 'Practise these', it: 'Allenare queste', es: 'Practicar estas', nl: "Oefen deze", })[interfaceLocale.value]
   const suffix = interfaceLocale.value === 'de'
     ? (count === 1 ? 'Frage trainieren' : 'Fragen trainieren')
     : questionCountLabel(count).replace(String(count), '').trim()
@@ -908,56 +933,56 @@ function trainQuestionsLabel(count: number) {
 }
 
 function sessionResultLabel(correct: number, total: number) {
-  const middle = { fr: 'réussites sur', de: 'Erfolge von', en: 'successes out of', it: 'risposte corrette su', es: 'aciertos de' }[interfaceLocale.value]
+  const middle = withDutchVariants({ fr: 'réussites sur', de: 'Erfolge von', en: 'successes out of', it: 'risposte corrette su', es: 'aciertos de', nl: "juiste antwoorden van", })[interfaceLocale.value]
   return `${correct} ${middle} ${total}`
 }
 
 function errorEvolutionLabel(label: string) {
-  const prefix = {
+  const prefix = withDutchVariants({
     fr: 'Évolution du taux d’erreurs pour', de: 'Entwicklung der Fehlerquote für',
     en: 'Error rate over time for', it: 'Evoluzione della percentuale di errori per',
-    es: 'Evolución del porcentaje de errores para',
-  }[interfaceLocale.value]
+    es: 'Evolución del porcentaje de errores para', nl: "Foutenpercentage door de tijd heen voor",
+  })[interfaceLocale.value]
   return `${prefix} ${label}`
 }
 
 function chartPointLabel(rate: number, errors: number, opportunities: number) {
-  const values = {
+  const values = withDutchVariants({
     fr: `${rate}% de fautes, ${errors} sur ${opportunities} occasions testées`,
     de: `${rate}% Fehler, ${errors} von ${opportunities} geprüften Gelegenheiten`,
     en: `${rate}% mistakes, ${errors} out of ${opportunities} tested opportunities`,
     it: `${rate}% di errori, ${errors} su ${opportunities} occasioni verificate`,
-    es: `${rate}% de errores, ${errors} de ${opportunities} ocasiones evaluadas`,
-  }
+    es: `${rate}% de errores, ${errors} de ${opportunities} ocasiones evaluadas`, nl: `${rate}% fouten, ${errors} van ${opportunities} testgelegenheden`,
+  })
   return values[interfaceLocale.value]
 }
 
 function totalOpportunitiesLabel(count: number) {
-  const values = {
+  const values = withDutchVariants({
     fr: `${count} occasion${count === 1 ? '' : 's'} réellement testée${count === 1 ? '' : 's'} au total`,
     de: `${count} tatsächlich geprüfte ${count === 1 ? 'Gelegenheit' : 'Gelegenheiten'} insgesamt`,
     en: `${count} ${count === 1 ? 'opportunity' : 'opportunities'} actually tested in total`,
     it: `${count} ${count === 1 ? 'occasione realmente verificata' : 'occasioni realmente verificate'} in totale`,
-    es: `${count} ${count === 1 ? 'ocasión realmente evaluada' : 'ocasiones realmente evaluadas'} en total`,
-  }
+    es: `${count} ${count === 1 ? 'ocasión realmente evaluada' : 'ocasiones realmente evaluadas'} en total`, nl: `${count} ${count === 1 ? "testgelegenheid" : "testgelegenheden"} in totaal`,
+  })
   return values[interfaceLocale.value]
 }
 
 function mistakeCountLabel(count: number) {
-  return pluralLabel(count, {
+  return pluralLabel(count, withDutchVariants({
     fr: ['faute', 'fautes'], de: ['Fehler', 'Fehler'], en: ['mistake', 'mistakes'],
-    it: ['errore', 'errori'], es: ['error', 'errores'],
-  })
+    it: ['errore', 'errori'], es: ['error', 'errores'], nl: ["fout", "fouten"],
+  }))
 }
 
 function affectedChallengesLabel(count: number) {
-  const values = {
+  const values = withDutchVariants({
     fr: `${count === 1 ? 'défi concerné' : 'défis concernés'}`,
     de: count === 1 ? 'betroffene Übung' : 'betroffene Übungen',
     en: count === 1 ? 'challenge concerned' : 'challenges concerned',
     it: count === 1 ? 'esercizio interessato' : 'esercizi interessati',
-    es: count === 1 ? 'ejercicio relacionado' : 'ejercicios relacionados',
-  }
+    es: count === 1 ? 'ejercicio relacionado' : 'ejercicios relacionados', nl: count === 1 ? "betrokken uitdaging" : "betrokken uitdagingen",
+  })
   return values[interfaceLocale.value]
 }
 
@@ -976,6 +1001,9 @@ function progressCardAdvice(card: LearnerErrorProgressCard) {
 function progressExamplesLabel(card: LearnerErrorProgressCard) {
   const shown = Math.min(card.examples.length, card.totalErrors)
   const total = card.totalErrors
+  if ((interfaceLocale.value === 'nl' || interfaceLocale.value === 'nl-NL')) {
+    return shown < total ? `Bekijk ${shown} van mijn ${total} fouten` : `Bekijk mijn ${total} ${total === 1 ? 'fout' : 'fouten'}`
+  }
   if (interfaceLocale.value === 'de') {
     return shown < total
       ? `${shown} meiner ${total} Fehler anzeigen`
@@ -1003,13 +1031,13 @@ function progressExamplesLabel(card: LearnerErrorProgressCard) {
 
 function errorChallengeLabel(card: LearnerErrorProgressCard) {
   const label = progressCardLabel(card)
-  const values = {
+  const values = withDutchVariants({
     fr: `Défi ciblé : ${label}`,
     de: `Gezielte Übung: ${label}`,
     en: `Targeted challenge: ${label}`,
     it: `Esercizio mirato: ${label}`,
-    es: `Ejercicio específico: ${label}`,
-  }
+    es: `Ejercicio específico: ${label}`, nl: `Gerichte uitdaging: ${label}`,
+  })
   return values[interfaceLocale.value]
 }
 
@@ -1078,7 +1106,13 @@ function normalizeSavedChallengeCode(value: string) {
   return compact.length === 8 ? compact.match(/.{2}/gu)?.join('-') || compact : value.trim().toUpperCase()
 }
 
+function updateSavedChallenge(value: { code: string, title: string, description: string }) {
+  const challenge = savedChallenges.value.find(item => item.code === value.code)
+  if (challenge) Object.assign(challenge, value)
+}
+
 async function loadSavedChallenges(force = false) {
+  savedChallengesNow.value = new Date()
   if (savedChallengesPending.value || (savedChallengesLoaded.value && !force)) return
   savedChallengesPending.value = true
   savedChallengesError.value = ''
@@ -1196,6 +1230,7 @@ function progressTrendLabel(card: LearnerErrorProgressCard) {
   if (card.trend === 'improving') {
     const count = Math.abs(card.trendDelta || 0)
     return interfaceLocale.value === 'de' ? `${count} Fehlerpunkte weniger`
+      : (interfaceLocale.value === 'nl' || interfaceLocale.value === 'nl-NL') ? `${count} procentpunten minder fouten`
       : interfaceLocale.value === 'en' ? `${count} fewer error points`
         : interfaceLocale.value === 'it' ? `${count} punti di errore in meno`
           : interfaceLocale.value === 'es' ? `${count} puntos de error menos`
@@ -1204,6 +1239,7 @@ function progressTrendLabel(card: LearnerErrorProgressCard) {
   if (card.trend === 'worsening') {
     const count = Math.abs(card.trendDelta || 0)
     return interfaceLocale.value === 'de' ? `${count} Fehlerpunkte mehr`
+      : (interfaceLocale.value === 'nl' || interfaceLocale.value === 'nl-NL') ? `${count} procentpunten meer fouten`
       : interfaceLocale.value === 'en' ? `${count} more error points`
         : interfaceLocale.value === 'it' ? `${count} punti di errore in più`
           : interfaceLocale.value === 'es' ? `${count} puntos de error más`
@@ -1218,6 +1254,7 @@ function progressLastTestLabel(card: LearnerErrorProgressCard) {
   if (card.daysSinceLastTest === 1) return copy.value.testedYesterday
   const count = card.daysSinceLastTest
   return interfaceLocale.value === 'de' ? `Vor ${count} Tagen getestet`
+    : (interfaceLocale.value === 'nl' || interfaceLocale.value === 'nl-NL') ? `${count} dagen geleden getest`
     : interfaceLocale.value === 'en' ? `Tested ${count} days ago`
       : interfaceLocale.value === 'it' ? `Verificato ${count} giorni fa`
         : interfaceLocale.value === 'es' ? `Evaluado hace ${count} días`
@@ -1225,7 +1262,7 @@ function progressLastTestLabel(card: LearnerErrorProgressCard) {
 }
 
 function progressDateLabel(value: string) {
-  return new Intl.DateTimeFormat(interfaceLocale.value, {
+  return new Intl.DateTimeFormat(localeLanguageTag(interfaceLocale.value), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -1812,49 +1849,58 @@ async function confirmAccountAction() {
 
       <p class="saved-challenges__intro">{{ savedCopy.intro }}</p>
 
-      <form v-if="!props.readOnly" class="saved-challenge-form" @submit.prevent="addSavedChallenge">
-        <div>
+      <form v-if="!props.readOnly" class="saved-challenge-form" :class="{ 'is-collapsed': !savedChallengeFormOpen }" @submit.prevent="addSavedChallenge">
+        <div class="saved-challenge-form__header">
           <strong>{{ savedCopy.addTitle }}</strong>
-          <p>{{ savedCopy.addHint }}</p>
-        </div>
-        <label for="saved-challenge-code">{{ savedCopy.code }}</label>
-        <div class="saved-challenge-form__control">
-          <input
-            id="saved-challenge-code"
-            v-model="savedChallengeCode"
-            type="text"
-            inputmode="text"
-            autocomplete="off"
-            maxlength="11"
-            placeholder="AB-CD-EF-23"
-            :disabled="savedChallengeAdding"
-          >
-          <button type="submit" :disabled="savedChallengeAdding">
-            {{ savedChallengeAdding ? savedCopy.adding : savedCopy.add }}
+          <button v-if="!savedChallengeFormOpen" type="button" :aria-expanded="savedChallengeFormOpen" aria-controls="saved-challenge-form-details" :disabled="savedChallengeAdding" @click="toggleSavedChallengeForm">
+            {{ savedCopy.add }}
           </button>
         </div>
-        <p v-if="savedChallengeAddError" class="saved-challenge-form__error" role="alert">{{ savedChallengeAddError }}</p>
-        <p v-else-if="savedChallengeAddNotice" class="saved-challenge-form__notice" role="status">{{ savedChallengeAddNotice }}</p>
+        <div id="saved-challenge-form-details" class="saved-challenge-form__details" :class="{ 'is-open': savedChallengeFormOpen }" :inert="!savedChallengeFormOpen" :aria-hidden="!savedChallengeFormOpen">
+          <div class="saved-challenge-form__body">
+            <div class="saved-challenge-form__fields">
+              <p>{{ savedCopy.addHint }}</p>
+              <label for="saved-challenge-code">{{ savedCopy.code }}</label>
+              <div class="saved-challenge-form__control">
+                <input
+                  id="saved-challenge-code"
+                  ref="saved-challenge-code-input"
+                  v-model="savedChallengeCode"
+                  type="text"
+                  inputmode="text"
+                  autocomplete="off"
+                  maxlength="11"
+                  placeholder="AB-CD-EF-23"
+                  :disabled="savedChallengeAdding"
+                >
+                <button type="submit" :disabled="savedChallengeAdding">
+                  {{ savedChallengeAdding ? savedCopy.adding : savedCopy.add }}
+                </button>
+              </div>
+              <p v-if="savedChallengeAddError" class="saved-challenge-form__error" role="alert">{{ savedChallengeAddError }}</p>
+              <p v-else-if="savedChallengeAddNotice" class="saved-challenge-form__notice" role="status">{{ savedChallengeAddNotice }}</p>
+            </div>
+          </div>
+        </div>
       </form>
 
       <p v-if="savedChallengesPending && !savedChallengesLoaded" class="learner-empty">{{ savedCopy.loading }}</p>
       <p v-else-if="savedChallengesError" class="saved-challenge-form__error" role="alert">{{ savedChallengesError }}</p>
-      <div v-else-if="savedChallenges.length" class="saved-challenges__grid">
-        <article v-for="challenge in savedChallenges" :key="challenge.code" class="saved-challenge-card">
-          <div>
-            <span>{{ challenge.code }}</span>
-            <h3>{{ challenge.title }}</h3>
-            <p v-if="challenge.description">{{ challenge.description }}</p>
+      <div v-else-if="savedChallenges.length" class="saved-challenges__groups">
+        <section v-for="group in savedChallengeGroups" :key="group.key" class="saved-challenges__group" :aria-labelledby="`saved-group-${group.key}`">
+          <h3 :id="`saved-group-${group.key}`" class="saved-challenges__group-title">{{ group.title }}</h3>
+          <div class="saved-challenges__grid">
+            <LearnerSavedChallengeCard
+              v-for="{ challenge, dateLabel, dateTime } in group.entries"
+              :key="challenge.code"
+              :challenge="challenge"
+              :date-label="dateLabel"
+              :date-time="dateTime"
+              :read-only="props.readOnly"
+              @updated="updateSavedChallenge"
+            />
           </div>
-          <dl>
-            <div><dt>{{ ui('Question') }}</dt><dd>{{ challenge.questionCount }}</dd></div>
-            <div><dt>{{ ui('Verbes') }}</dt><dd>{{ challenge.verbCount }}</dd></div>
-            <div><dt>{{ ui('Temps') }}</dt><dd>{{ challenge.tenseCount }}</dd></div>
-          </dl>
-          <NuxtLink class="learner-primary-link" :to="localePath(`/defi/${challenge.code}`)">
-            {{ savedCopy.launch }}
-          </NuxtLink>
-        </article>
+        </section>
       </div>
       <p v-else class="learner-empty">
         <strong>{{ savedCopy.empty }}</strong>
@@ -5844,9 +5890,22 @@ async function confirmAccountAction() {
   padding: 20px;
   border: 1px solid color-mix(in srgb, #7052a0 28%, var(--line));
   border-radius: 18px;
-  gap: 12px;
+  gap: 0;
   background: color-mix(in srgb, #7052a0 7%, var(--surface));
 }
+
+.saved-challenge-form.is-collapsed { padding: 5px 12px; border-radius: 12px; }
+.saved-challenge-form.is-collapsed .saved-challenge-form__header strong { font-size: .8rem; line-height: 1.2; }
+.saved-challenge-form.is-collapsed .saved-challenge-form__header button { padding: 4px 10px; border-radius: 7px; font-size: .75rem; line-height: 1.2; }
+
+.saved-challenge-form__header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.saved-challenge-form__header button { flex-shrink: 0; }
+.saved-challenge-form__details { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 280ms ease, opacity 200ms ease; }
+.saved-challenge-form__details.is-open { grid-template-rows: 1fr; opacity: 1; }
+.saved-challenge-form__body { min-height: 0; overflow: hidden; }
+.saved-challenge-form__fields { display: grid; gap: 12px; padding-top: 12px; }
+.saved-challenge-form button:focus-visible { outline: 3px solid #8c6cba; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .saved-challenge-form__details { transition: none; } }
 
 .saved-challenge-form strong {
   color: var(--ink);
@@ -5918,56 +5977,10 @@ async function confirmAccountAction() {
   gap: 14px;
 }
 
-.saved-challenge-card {
-  display: grid;
-  padding: 20px;
-  align-content: start;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  gap: 16px;
-  background: var(--surface-soft);
-}
-
-.saved-challenge-card span {
-  color: #7052a0;
-  font-size: .75rem;
-  font-weight: 850;
-  letter-spacing: .08em;
-}
-
-.saved-challenge-card h3 {
-  margin: 4px 0 0;
-  color: var(--ink);
-}
-
-.saved-challenge-card p {
-  margin: 7px 0 0;
-  color: var(--muted);
-  line-height: 1.45;
-}
-
-.saved-challenge-card dl {
-  display: flex;
-  margin: 0;
-  gap: 18px;
-}
-
-.saved-challenge-card dl div {
-  display: grid;
-  gap: 2px;
-}
-
-.saved-challenge-card dt {
-  color: var(--muted);
-  font-size: .72rem;
-}
-
-.saved-challenge-card dd {
-  margin: 0;
-  color: var(--ink);
-  font-weight: 850;
-}
-
+.saved-challenges__groups { display: grid; gap: 30px; }
+.saved-challenges__group { display: grid; gap: 14px; }
+.saved-challenges__group-title { display: flex; align-items: center; gap: 14px; margin: 0; color: var(--ink); font-size: 1.05rem; }
+.saved-challenges__group-title::after { flex: 1; height: 1px; background: var(--line); content: ''; }
 @media (max-width: 720px) {
   .saved-challenges__grid,
   .saved-challenge-form__control {

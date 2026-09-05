@@ -252,7 +252,10 @@ function pdfFileName() {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-zA-Z0-9_-]+/g, '-')
     .replace(/^-|-$/g, '')
-  return `${safeTitle || 'defi-conjugaison'}.pdf`
+  const reference = props.options.showRandomNumber && challengeCode.value
+    ? `-${challengeCode.value}-fiche-${sheetNumber.value}`
+    : ''
+  return `${safeTitle || 'defi-conjugaison'}${reference}.pdf`
 }
 
 async function buildPdf() {
@@ -666,20 +669,39 @@ async function buildPdf() {
 }
 
 async function downloadPdf() {
-  if (isPdfBusy.value) return
+  if (isPdfBusy.value || props.regenerating) return
   track('feature_selected', { feature: 'download.pdf' })
   isPdfBusy.value = true
   try {
     if (props.options.showRandomNumber) await ensureChallengeCode()
     if (props.options.showRandomNumber && !challengeCode.value) throw new Error('Challenge code unavailable')
+
+    if (pdfPreviewTimer) {
+      clearTimeout(pdfPreviewTimer)
+      pdfPreviewTimer = undefined
+    }
+    const generation = ++pdfPreviewGeneration
+    isPdfPreviewBusy.value = true
+    isPdfPreviewFrameReady.value = false
     const pdf = await buildPdf()
-    pdf.save(pdfFileName())
+    const blob = pdf.output('blob')
+    if (generation !== pdfPreviewGeneration) return
+
+    revokePdfPreviewUrl()
+    pdfPreviewUrl.value = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = pdfPreviewUrl.value
+    link.download = pdfFileName()
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
     track('pdf_downloaded', printAnalyticsMetadata('pdf'))
   }
   catch {
     track('feature_failed', { feature: 'download.pdf' })
   }
   finally {
+    isPdfPreviewBusy.value = false
     isPdfBusy.value = false
   }
 }
@@ -714,6 +736,12 @@ async function refreshPdfPreview() {
 
 function schedulePdfPreview() {
   if (pdfPreviewTimer) clearTimeout(pdfPreviewTimer)
+  // Dès qu'une option ou une nouvelle série de questions change, l'ancien
+  // document n'est plus téléchargeable depuis la barre du lecteur PDF.
+  pdfPreviewGeneration += 1
+  isPdfPreviewBusy.value = true
+  isPdfPreviewFrameReady.value = false
+  revokePdfPreviewUrl()
   pdfPreviewTimer = setTimeout(() => {
     pdfPreviewTimer = undefined
     void refreshPdfPreview()
@@ -1145,7 +1173,12 @@ async function downloadWord() {
           <button class="secondary-button" type="button" :disabled="isWordBusy" @click="downloadWord">
             {{ isWordBusy ? 'Création du fichier Word…' : 'Télécharger au format Word' }}
           </button>
-          <button class="primary-button" type="button" :disabled="isPdfBusy" @click="downloadPdf">
+          <button
+            class="primary-button"
+            type="button"
+            :disabled="isPdfBusy || regenerating || isChallengeCodeBusy || isPdfPreviewBusy || !pdfPreviewUrl || !isPdfPreviewFrameReady"
+            @click="downloadPdf"
+          >
             {{ isPdfBusy ? 'Création du PDF…' : 'Télécharger le PDF' }}
           </button>
         </div>
@@ -1309,7 +1342,7 @@ async function downloadWord() {
                 <small v-else-if="challengeCodeError">{{ challengeCodeError }}</small>
                 <template v-else>
                   <small v-if="printIdentifier">{{ printIdentifier }}</small>
-                  <small>{{ ui('Le défi est enregistré pendant 6 mois.') }}</small>
+                  <small>{{ ui('Le lien reste actif. Un défi inutilisé depuis plus de cinq ans peut être supprimé.') }}</small>
                 </template>
               </span>
             </label>

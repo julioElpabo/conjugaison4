@@ -1,6 +1,7 @@
 import {
   DEFAULT_LANGUAGE_PREFERENCES,
   localeFromPath,
+  localeLanguageTag,
   localizePath,
   normalizeLocale,
   type AppLocale,
@@ -67,7 +68,7 @@ export function useLanguagePreferences() {
       : translated
   }
 
-  useHead(() => ({ htmlAttrs: { lang: interfaceLocale.value } }))
+  useHead(() => ({ htmlAttrs: { lang: localeLanguageTag(interfaceLocale.value) } }))
 
   function localePath(path: string, locale: AppLocale = interfaceLocale.value) {
     return localizePath(path, normalizeLocale(locale))

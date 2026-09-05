@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { withDutchVariants } from '~~/shared/i18n/dutch-variants'
+
 import mountainSvgSource from '../../public/images/site-mountains.svg?raw'
 import type { AppLocale } from '~~/shared/i18n/locales'
 import { guidedTourCopy } from '~~/shared/i18n/guided-tour'
@@ -15,7 +17,7 @@ const isPhoneViewport = ref(false)
 const falcMode = useState<boolean>('falc-mode', () => false)
 const falcConfirmationOpen = ref(false)
 const falcCancelButton = ref<HTMLButtonElement | null>(null)
-const localizedSectionPath = computed(() => route.path.replace(/^\/(?:fr|de|en|it|es)(?=\/|$)/u, '') || '/')
+const localizedSectionPath = computed(() => route.path.replace(/^\/(?:fr|de|en|it|es|nl-NL|nl)(?=\/|$)/u, '') || '/')
 const isAdminRoute = computed(() => localizedSectionPath.value === '/admin' || localizedSectionPath.value.startsWith('/admin/'))
 const embeddedConsultation = computed(() => localizedSectionPath.value === '/consulter' && route.query.embed === 'challenge')
 const themeSwitchTitle = computed(() => isDark.value ? ui('Activer le mode clair') : ui('Activer le mode sombre'))
@@ -26,6 +28,8 @@ const languageOptions = computed<{ value: AppLocale, label: string, flag: string
   { value: 'en', label: ui('Anglais'), flag: '🇬🇧' },
   { value: 'it', label: ui('Italien'), flag: '🇮🇹' },
   { value: 'es', label: ui('Espagnol'), flag: '🇪🇸' },
+  { value: 'nl-NL', label: 'Nederlands (Nederland)', flag: '🇳🇱' },
+  { value: 'nl', label: 'Nederlands (België)', flag: '🇧🇪' },
 ])
 const homeResetRequested = useState('home-reset-requested', () => false)
 const newChallengeRequested = useState('new-challenge-requested', () => false)
@@ -33,9 +37,9 @@ const guidedTourRequested = useState('guided-tour-requested', () => false)
 const wizardAtHome = useState('wizard-at-home', () => true)
 const tourCopy = computed(() => guidedTourCopy(interfaceLocale.value))
 const learnerCopy = computed(() => learnerSpaceCopy(interfaceLocale.value))
-const publicChallengesLabel = computed(() => ({
-  fr: 'Défis officiels', de: 'Offizielle Aufgaben', en: 'Official challenges', it: 'Sfide ufficiali', es: 'Retos oficiales',
-})[interfaceLocale.value])
+const publicChallengesLabel = computed(() => (withDutchVariants({
+  fr: 'Défis officiels', de: 'Offizielle Aufgaben', en: 'Official challenges', it: 'Sfide ufficiali', es: 'Retos oficiales', nl: "Officiële uitdagingen",
+}))[interfaceLocale.value])
 const isExerciseLandingPage = computed(() => ['/', '/exercices-de-conjugaison'].includes(localizedSectionPath.value))
 const isActualHomePage = computed(() => isExerciseLandingPage.value && wizardAtHome.value)
 const activeLanguageOption = computed(() => languageOptions.value.find(option => option.value === interfaceLocale.value) ?? languageOptions.value[0]!)
@@ -1391,6 +1395,7 @@ a {
 
 .learner-menu__language-options {
   display: flex;
+  flex-wrap: wrap;
   padding: 4px 7px 7px;
   gap: 5px;
 }

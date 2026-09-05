@@ -86,6 +86,6 @@ describe('migration des anciennes URL pour le référencement', () => {
     assert.match(home, /quel que soit le pays/u)
     assert.match(home, /'@type': 'LearningResource'/u)
     assert.match(home, /isAccessibleForFree: true/u)
-    assert.match(home, /inLanguage: interfaceLocale\.value/u)
+    assert.match(home, /inLanguage: localeLanguageTag\(interfaceLocale\.value\)/u)
   })
 })

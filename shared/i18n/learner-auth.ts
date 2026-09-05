@@ -1,6 +1,8 @@
+
+import { withDutchVariants } from './dutch-variants'
 import type { AppLocale } from './locales'
 
-const copies = {
+const copies = withDutchVariants({
   fr: {
     pageTitle: 'Compte pseudonyme', created: 'Ton compte est créé', keepCode: 'Conserve ton code de récupération', recoveryInfo: 'Il permet de récupérer ton compte sans adresse e-mail. Il ne sera plus affiché après cette étape.', username: 'Pseudonyme', recoveryCode: 'Code de récupération', codeCopied: 'Code copié', copyCode: 'Copier le code', download: 'Télécharger', continue: 'Continuer', create: 'Créer mon compte', signIn: 'Me connecter', intro: 'Créer un compte t’aide à mieux progresser : tes résultats sont mémorisés, tu peux suivre tes progrès et retravailler tes fautes. Aucun nom ni aucune adresse e-mail ne sont demandés.', chooseAction: 'Choisir une action', proposedUsername: 'Ton pseudonyme proposé', searching: 'Recherche…', unavailable: 'Indisponible', anotherUsername: 'M’en proposer un autre', choosePassword: 'Choisis un mot de passe', passwordHint: 'Au moins 10 caractères. Une petite phrase est facile à retenir.', confirmPassword: 'Confirme ton mot de passe', privacy: 'J’ai compris que le site enregistre mon pseudonyme et ma progression. Il ne demande ni mon vrai nom ni mon email et je pourrai supprimer mon compte.', creating: 'Création…', password: 'Mot de passe', signingIn: 'Connexion…',
   },
@@ -15,8 +17,10 @@ const copies = {
   },
   es: {
     pageTitle: 'Cuenta con seudónimo', created: 'Tu cuenta ha sido creada', keepCode: 'Guarda tu código de recuperación', recoveryInfo: 'Permite recuperar tu cuenta sin dirección de correo electrónico. No volverá a mostrarse después de este paso.', username: 'Seudónimo', recoveryCode: 'Código de recuperación', codeCopied: 'Código copiado', copyCode: 'Copiar el código', download: 'Descargar', continue: 'Continuar', create: 'Crear mi cuenta', signIn: 'Iniciar sesión', intro: 'Una cuenta guarda tus resultados para que puedas seguir tu progreso y volver a practicar tus errores. No se pide ningún nombre real ni correo electrónico.', chooseAction: 'Elegir una acción', proposedUsername: 'Seudónimo propuesto', searching: 'Buscando…', unavailable: 'No disponible', anotherUsername: 'Proponer otro', choosePassword: 'Elige una contraseña', passwordHint: 'Al menos 10 caracteres. Una frase corta es fácil de recordar.', confirmPassword: 'Confirma tu contraseña', privacy: 'Entiendo que el sitio guarda mi seudónimo y mi progreso. No pide mi nombre real y podré eliminar mi cuenta.', creating: 'Creando…', password: 'Contraseña', signingIn: 'Iniciando sesión…',
+  }, nl: {
+    pageTitle: "Account met een pseudoniem", created: "Je account is aangemaakt", keepCode: "Bewaar je herstelcode", recoveryInfo: "Hiermee kun je je account herstellen zonder e-mailadres. Na deze stap wordt de code niet meer getoond.", username: "Gebruikersnaam", recoveryCode: "Herstelcode", codeCopied: "Code gekopieerd", copyCode: "Code kopiëren", download: "Downloaden", continue: "Verder", create: "Mijn account aanmaken", signIn: "Aanmelden", intro: "Een account bewaart je resultaten zodat je je vooruitgang kunt volgen en je fouten opnieuw kunt oefenen. Je echte naam en e-mailadres zijn niet nodig.", chooseAction: "Kies een actie", proposedUsername: "Voorgestelde gebruikersnaam", searching: "Wordt gezocht…", unavailable: "Niet beschikbaar", anotherUsername: "Een andere voorstellen", choosePassword: "Kies een wachtwoord", passwordHint: "Minstens 10 tekens. Een korte zin is makkelijk te onthouden.", confirmPassword: "Bevestig je wachtwoord", privacy: "Ik begrijp dat de website mijn gebruikersnaam en vooruitgang bewaart. Mijn echte naam wordt niet gevraagd en ik kan mijn account verwijderen.", creating: "Account wordt aangemaakt…", password: "Wachtwoord", signingIn: "Bezig met aanmelden…",
   },
-} as const
+} as const)
 
 export function learnerAuthCopy(locale: AppLocale) {
   return copies[locale]

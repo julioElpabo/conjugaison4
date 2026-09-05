@@ -32,7 +32,7 @@ export default defineNuxtRouteMiddleware((to) => {
 
   if (routeLocale) {
     if (interfaceLocale.value !== routeLocale) interfaceLocale.value = routeLocale
-    if (to.path.replace(/^\/(?:fr|de|en|it|es)(?=\/|$)/u, '') === '/charts') {
+    if (to.path.replace(/^\/(?:fr|de|en|it|es|nl-NL|nl)(?=\/|$)/u, '') === '/charts') {
       return navigateTo({
         path: localizePath('/admin/charts', routeLocale),
         query: to.query,

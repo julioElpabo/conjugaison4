@@ -1,3 +1,5 @@
+
+import { withDutchVariants } from '../i18n/dutch-variants'
 import type { AppLocale } from '../i18n/locales'
 import type { ExerciseLandingSlug } from './exercise-landing-pages'
 
@@ -30,7 +32,7 @@ export interface TenseGroupGuide {
 }
 
 const translations: Record<ExerciseLandingSlug, Record<AppLocale, GuideTranslation>> = {
-  present: {
+  present: withDutchVariants({
     fr: {
       title: 'La formation du présent selon le groupe',
       intro: 'Le sujet donne la personne ; le groupe et la famille du verbe permettent ensuite de choisir le radical et la terminaison.',
@@ -85,9 +87,19 @@ const translations: Record<ExerciseLandingSlug, Record<AppLocale, GuideTranslati
       ],
       specialTitle: 'Casos particulares frecuentes',
       specialCases: ['-ger: nous mangeons conserva el sonido [ʒ].', '-cer: nous lançons lleva cedilla.', '-yer: j’essaie o j’essaye, pero nous essayons.', '-eler y -eter: j’appelle, je jette; algunos verbos llevan è, como j’achète.'],
+    }, nl: {
+      title: "De tegenwoordige tijd vormen per werkwoordgroep",
+      intro: "Het onderwerp bepaalt de persoon. De groep en de familie van het werkwoord bepalen vervolgens de stam en de uitgang.",
+      groups: [
+        { label: "Eerste groep", explanation: "Verwijder bij de meeste werkwoorden op -er de uitgang -er en voeg de uitgangen van de tegenwoordige tijd toe.", note: "De s van de tu-vorm en -ent van de ils-vorm worden meestal niet uitgesproken." },
+        { label: "Tweede groep", explanation: "Deze werkwoorden op -ir krijgen -issons bij nous. Ze gebruiken de korte stam in het enkelvoud en -iss- in het meervoud.", note: "Niet elk werkwoord op -ir hoort bij deze groep: partir en venir zijn werkwoorden van de derde groep." },
+        { label: "Derde groep", explanation: "Er is geen vast patroon. De stam kan veranderen en de uitgangen hangen af van de werkwoordfamilie.", note: "Leer eerst de vormen met je, nous en ils. Die tonen vaak de verschillende stammen." },
+      ],
+      specialTitle: "Veelvoorkomende bijzonderheden",
+      specialCases: ["-ger: nous mangeons behoudt de klank [ʒ].", "-cer: nous lançons krijgt een cedille.", "-yer: j’essaie of j’essaye, maar nous essayons.", "-eler en -eter: j’appelle, je jette; sommige werkwoorden krijgen in plaats daarvan è, zoals j’achète."],
     },
-  },
-  imparfait: {
+  }),
+  imparfait: withDutchVariants({
     fr: {
       title: 'La formation de l’imparfait selon le groupe',
       intro: 'La méthode est presque identique pour tous les groupes : pars de la forme « nous » au présent, enlève -ons et ajoute la terminaison.',
@@ -142,9 +154,19 @@ const translations: Record<ExerciseLandingSlug, Record<AppLocale, GuideTranslati
       ],
       specialTitle: 'Casos particulares frecuentes',
       specialCases: ['être: j’étais, nous étions.', '-ier: nous étudiions y vous étudiiez conservan dos íes.', '-yer: nous payions y vous payiez conservan la y.', 'Las terminaciones -ais, -ait y -aient se pronuncian igual.'],
+    }, nl: {
+      title: "De imparfait vormen per werkwoordgroep",
+      intro: "De werkwijze is voor elke groep bijna dezelfde: neem de nous-vorm van de tegenwoordige tijd, verwijder -ons en voeg de uitgang toe.",
+      groups: [
+        { label: "Eerste groep", explanation: "De stam komt van de nous-vorm van de tegenwoordige tijd: nous chantons → chant-. Voeg -ais, -ais, -ait, -ions, -iez, -aient toe.", note: "Werkwoorden op -ger en -cer behouden de spelling die nodig is voor de klank: je mangeais, je lançais." },
+        { label: "Tweede groep", explanation: "Nous finissons geeft de stam finiss-. Die -iss- blijft behouden in elke vorm van de imparfait.", note: "Vertrek niet rechtstreeks van de infinitief finir. Gebruik altijd nous finissons." },
+        { label: "Derde groep", explanation: "Ook hier levert de nous-vorm van de tegenwoordige tijd de stam: nous prenons → pren-, nous venons → ven-.", note: "Alleen être vormt een echte uitzondering: de stam is ét-." },
+      ],
+      specialTitle: "Veelvoorkomende bijzonderheden",
+      specialCases: ["être: j’étais, nous étions.", "-ier: nous étudiions en vous étudiiez behouden twee i’s.", "-yer: nous payions en vous payiez behouden de y.", "De uitgangen -ais, -ait en -aient klinken hetzelfde."],
     },
-  },
-  'passe-compose': {
+  }),
+  'passe-compose': withDutchVariants({
     fr: {
       title: 'La formation du passé composé selon le groupe',
       intro: 'Le groupe aide surtout à former le participe passé. Il faut ensuite choisir avoir ou être au présent et vérifier l’accord.',
@@ -199,8 +221,18 @@ const translations: Record<ExerciseLandingSlug, Record<AppLocale, GuideTranslati
       ],
       specialTitle: 'Auxiliares y concordancia',
       specialCases: ['Con avoir, el participio suele permanecer invariable, salvo si el complemento directo aparece antes.', 'Con être, el participio concuerda normalmente con el sujeto.', 'Los verbos pronominales usan être, pero la concordancia depende de la función del pronombre.', 'Algunos verbos usan avoir o être según el sentido: elle est sortie, elle a sorti le livre.'],
+    }, nl: {
+      title: "De passé composé vormen per werkwoordgroep",
+      intro: "De groep helpt vooral om het voltooid deelwoord te vormen. Kies daarna avoir of être in de tegenwoordige tijd en controleer de overeenkomst.",
+      groups: [
+        { label: "Eerste groep", explanation: "Het regelmatige voltooid deelwoord van werkwoorden op -er eindigt op -é: chanter → chanté.", note: "Verwar de infinitief op -er niet met het voltooid deelwoord op -é." },
+        { label: "Tweede groep", explanation: "Het regelmatige voltooid deelwoord eindigt op -i: finir → fini, choisir → choisi.", note: "De -iss- van de tegenwoordige tijd verdwijnt: fini, niet finissi." },
+        { label: "Derde groep", explanation: "Voltooide deelwoorden verschillen: pris, venu, fait, lu, écrit, ouvert. Je moet ze vaak uit het hoofd leren.", note: "Leer werkwoorden per familie en controleer welk hulpwerkwoord ze gebruiken." },
+      ],
+      specialTitle: "Hulpwerkwoorden en overeenkomst",
+      specialCases: ["Met avoir blijft het deelwoord meestal onveranderd, tenzij er een lijdend voorwerp voor staat.", "Met être komt het deelwoord meestal overeen met het onderwerp.", "Wederkerende werkwoorden gebruiken être, maar de overeenkomst hangt af van de functie van het voornaamwoord.", "Sommige werkwoorden gebruiken avoir of être naargelang de betekenis: elle est sortie, elle a sorti le livre."],
     },
-  },
+  }),
 }
 
 const sharedGroups: Record<ExerciseLandingSlug, [SharedGroup, SharedGroup, SharedGroup]> = {

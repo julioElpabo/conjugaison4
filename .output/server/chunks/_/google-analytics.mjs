@@ -1,4 +1,4 @@
-import { x as useRuntimeConfig } from '../nitro/nitro.mjs';
+import { y as useRuntimeConfig } from '../nitro/nitro.mjs';
 import { createSign } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 

@@ -1,6 +1,5 @@
-import { d as defineEventHandler, u as useDatabase, c as createError } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, u as useDatabase, Y as PublicInputError, c as createError } from '../../../nitro/nitro.mjs';
 import { n as normalizeDefiCode, g as getDefi, D as DefiNotFoundError, a as DefiStorageError } from '../../../_/defis.mjs';
-import { P as PublicInputError } from '../../../_/public-api-validation.mjs';
 import { r as readLimitedJsonBody } from '../../../_/limited-json-body.mjs';
 import { r as requireLearnerDataSubject } from '../../../_/learner-data-subject.mjs';
 import 'node:http';
@@ -14,7 +13,6 @@ import 'web-push';
 import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
-import '../../../_/challenge-defaults.mjs';
 import '../../../_/session.mjs';
 import '../../../_/learner-session.mjs';
 

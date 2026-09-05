@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, a as getQuery, c as createError, u as useDatabase } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, a as getQuery, c as createError, u as useDatabase, w as withDutchVariants } from '../../../nitro/nitro.mjs';
 import { r as requireAdministrator } from '../../../_/session.mjs';
 import 'node:http';
 import 'node:https';
@@ -12,13 +12,14 @@ import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
 
-const localeLabels = {
+const localeLabels = withDutchVariants({
   fr: "Fran\xE7ais",
   de: "Allemand",
   en: "Anglais",
   it: "Italien",
-  es: "Espagnol"
-};
+  es: "Espagnol",
+  nl: "N\xE9erlandais"
+});
 const connectedFeatureLabels = {
   "learner.history": "Historique",
   "learner.summary": "Bilan de s\xE9ance",
@@ -121,7 +122,7 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
       WHERE events.event_name='exercise_started'
         AND events.actor_type='anonymous'
         AND events.created_at>=? AND events.created_at<DATE_ADD(?, INTERVAL 1 DAY)
-        AND sessions.interface_locale IN ('fr','de','en','it','es')
+        AND sessions.interface_locale IN ('fr','de','en','it','es','nl','nl-NL')
       GROUP BY sessions.interface_locale
       ORDER BY value DESC
     `, [startDate, endDate]),

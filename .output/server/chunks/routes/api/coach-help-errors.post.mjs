@@ -1,4 +1,4 @@
-import { d as defineEventHandler, c as createError, E as getHeader, u as useDatabase } from '../../nitro/nitro.mjs';
+import { d as defineEventHandler, c as createError, F as getHeader, u as useDatabase } from '../../nitro/nitro.mjs';
 import { createHash } from 'node:crypto';
 import { a as auditRenderedCoachHelp, b as automaticHelpErrorsForRecording } from '../../_/coach-help-audit.mjs';
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../_/public-api-rate-limit.mjs';

@@ -46,7 +46,9 @@ const labels = {
   de: "Allemand",
   en: "Anglais",
   it: "Italien",
-  es: "Espagnol"
+  es: "Espagnol",
+  nl: "N\xE9erlandais (Belgique)",
+  "nl-NL": "N\xE9erlandais (Pays-Bas)"
 };
 const featureLabels = {
   "learner.history": "Historique",

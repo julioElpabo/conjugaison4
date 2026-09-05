@@ -65,6 +65,7 @@
     "pbf": "3.3.0",
     "perfect-debounce": "2.1.0",
     "performance-now": "2.1.0",
+    "qrcode.vue": "3.10.0",
     "raf": "3.4.1",
     "rgbcolor": "1.0.1",
     "safe-buffer": "5.2.1",

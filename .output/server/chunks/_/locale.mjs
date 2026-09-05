@@ -1,4 +1,4 @@
-import { a as getQuery, w as getCookie, E as getHeader, y as normalizeLocale } from '../nitro/nitro.mjs';
+import { a as getQuery, x as getCookie, F as getHeader, z as normalizeLocale } from '../nitro/nitro.mjs';
 
 function requestedLocale(event, queryKey, cookieKey) {
   var _a;

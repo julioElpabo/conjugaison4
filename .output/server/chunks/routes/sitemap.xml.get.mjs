@@ -1,4 +1,4 @@
-import { d as defineEventHandler, x as useRuntimeConfig, a9 as SUPPORTED_LOCALES, aa as listPublishedChallengePublications, u as useDatabase, ab as setHeader, ac as localizePath } from '../nitro/nitro.mjs';
+import { d as defineEventHandler, y as useRuntimeConfig, ag as SUPPORTED_LOCALES, ah as localeLanguageTag, ai as listPublishedChallengePublications, u as useDatabase, aj as setHeader, ak as localizePath } from '../nitro/nitro.mjs';
 import { M as MODE_TENSE_PATHS } from '../_/mode-tense-pages.mjs';
 import { T as TENSE_EXERCISE_PATHS } from '../_/tense-exercise-pages.mjs';
 import 'node:http';
@@ -32,7 +32,7 @@ const sitemap_xml_get = defineEventHandler(async (event) => {
   const absoluteUrl = (path, locale) => `${siteUrl}${localizePath(path, locale)}`;
   const staticEntries = PUBLIC_PATHS.flatMap((path) => SUPPORTED_LOCALES.map((locale) => {
     const alternates = [
-      ...SUPPORTED_LOCALES.map((alternate) => `<xhtml:link rel="alternate" hreflang="${alternate}" href="${escapeXml(absoluteUrl(path, alternate))}" />`),
+      ...SUPPORTED_LOCALES.map((alternate) => `<xhtml:link rel="alternate" hreflang="${localeLanguageTag(alternate)}" href="${escapeXml(absoluteUrl(path, alternate))}" />`),
       `<xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(absoluteUrl(path, "fr"))}" />`
     ].join("");
     return `<url><loc>${escapeXml(absoluteUrl(path, locale))}</loc>${alternates}</url>`;
@@ -50,7 +50,7 @@ const sitemap_xml_get = defineEventHandler(async (event) => {
       var _a2;
       const defaultPublication = (_a2 = group.find((publication) => publication.locale === "fr")) != null ? _a2 : group[0];
       if (!defaultPublication) return [];
-      const alternates = group.map((alternate) => `<xhtml:link rel="alternate" hreflang="${alternate.locale}" href="${escapeXml(`${siteUrl}/${alternate.locale}/defis/${alternate.slug}`)}" />`).join("") + `<xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(`${siteUrl}/${defaultPublication.locale}/defis/${defaultPublication.slug}`)}" />`;
+      const alternates = group.map((alternate) => `<xhtml:link rel="alternate" hreflang="${localeLanguageTag(alternate.locale)}" href="${escapeXml(`${siteUrl}/${alternate.locale}/defis/${alternate.slug}`)}" />`).join("") + `<xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(`${siteUrl}/${defaultPublication.locale}/defis/${defaultPublication.slug}`)}" />`;
       return group.map((publication) => `<url><loc>${escapeXml(`${siteUrl}/${publication.locale}/defis/${publication.slug}`)}</loc><lastmod>${escapeXml(publication.updatedAt.slice(0, 10))}</lastmod>${alternates}</url>`);
     }).join("");
   } catch (error) {

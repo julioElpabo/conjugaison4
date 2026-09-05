@@ -1,4 +1,4 @@
-import { E as getHeader, c as createError } from '../nitro/nitro.mjs';
+import { F as getHeader, c as createError } from '../nitro/nitro.mjs';
 
 function payloadTooLarge(maxBytes) {
   throw createError({

@@ -4466,7 +4466,7 @@ function _expandFromEnv(value) {
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "ca2561c4-6023-4615-8883-4968354463c6",
+    "buildId": "720818f6-1180-4705-9f7e-99cc01d2d3b0",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -6616,7 +6616,7 @@ function grammarTenseCode(value) {
   return GRAMMAR_TENSE_CODES.includes(normalized) ? normalized : TENSE_BY_FRENCH_NAME[normalized] || null;
 }
 
-const SUPPORTED_LOCALES = ["fr", "de", "en", "it", "es"];
+const SUPPORTED_LOCALES = ["fr", "de", "en", "it", "es", "nl", "nl-NL"];
 const DEFAULT_INTERFACE_LOCALE = "fr";
 const DEFAULT_EXPLANATION_LOCALE = "fr";
 const DEFAULT_LANGUAGE_PREFERENCES = {
@@ -6625,10 +6625,12 @@ const DEFAULT_LANGUAGE_PREFERENCES = {
 };
 function normalizeLocale(value, fallback = DEFAULT_INTERFACE_LOCALE) {
   if (typeof value !== "string") return fallback;
-  const language = value.trim().toLocaleLowerCase().split(/[-_]/u)[0];
+  const tag = value.trim().toLowerCase().replace("_", "-");
+  if (tag === "nl-nl") return "nl-NL";
+  const language = tag.split("-")[0];
   return SUPPORTED_LOCALES.includes(language) ? language : fallback;
 }
-const LOCALE_PATH_PATTERN = /^\/(fr|de|en|it|es)(?=\/|$)/u;
+const LOCALE_PATH_PATTERN = /^\/(fr|de|en|it|es|nl-NL|nl)(?=\/|$)/u;
 function localeFromPath(path) {
   const match = path.match(LOCALE_PATH_PATTERN);
   return (match == null ? void 0 : match[1]) ? normalizeLocale(match[1]) : null;
@@ -6641,6 +6643,9 @@ function localizePath(path, locale) {
   const absolutePath = path.startsWith("/") ? path : `/${path}`;
   const unlocalizedPath = stripLocaleFromPath(absolutePath);
   return unlocalizedPath === "/" ? `/${locale}/` : `/${locale}${unlocalizedPath}`;
+}
+function localeLanguageTag(locale) {
+  return locale === "nl" ? "nl-BE" : locale;
 }
 
 function parseArray(value) {
@@ -7179,12 +7184,33 @@ const __XhcuSx1Fo8FfgcfsoaX0dhzsV5g5sN3hIvWYmQn0sg = defineNitroPlugin(async () 
   }
 });
 
+async function extendPublicationLocales(database) {
+  var _a, _b, _c;
+  for (const [table, constraint] of [
+    ["challenge_preset_publications", "chk_challenge_publication_locale"],
+    ["challenge_preset_publication_redirects", "chk_challenge_publication_redirect_locale"]
+  ]) {
+    const [rows] = await database.query(`SHOW CREATE TABLE \`${table}\``);
+    const definition = String(((_a = rows[0]) == null ? void 0 : _a["Create Table"]) || "");
+    const clause = definition.split("\n").find((line) => line.includes(`\`${constraint}\``));
+    const width = (_b = definition.match(/`locale`\s+(?:var)?char\((\d+)\)/iu)) == null ? void 0 : _b[1];
+    if (width && Number(width) < 5) {
+      await database.query(`ALTER TABLE \`${table}\` MODIFY COLUMN locale VARCHAR(5) NOT NULL`);
+    }
+    if (!clause || /'nl-NL'/u.test(clause)) continue;
+    const [versionRows] = await database.query("SELECT VERSION() AS version");
+    const drop = /mariadb/iu.test(String((_c = versionRows[0]) == null ? void 0 : _c.version)) ? "DROP CONSTRAINT" : "DROP CHECK";
+    await database.query(`ALTER TABLE \`${table}\`
+      ${drop} \`${constraint}\`,
+      ADD CONSTRAINT \`${constraint}\` CHECK (locale IN ('fr','de','en','it','es','nl','nl-NL'))`);
+  }
+}
 async function migrateChallengePublications(database) {
   await database.query(`
     CREATE TABLE IF NOT EXISTS challenge_preset_publications (
       id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
       preset_id INT UNSIGNED NOT NULL,
-      locale CHAR(2) NOT NULL,
+      locale VARCHAR(5) NOT NULL,
       slug VARCHAR(120) NULL,
       title VARCHAR(180) NOT NULL DEFAULT '',
       meta_title VARCHAR(180) NOT NULL DEFAULT '',
@@ -7200,7 +7226,7 @@ async function migrateChallengePublications(database) {
       CONSTRAINT fk_challenge_publication_preset
         FOREIGN KEY (preset_id) REFERENCES challenge_presets(id) ON DELETE CASCADE,
       CONSTRAINT chk_challenge_publication_locale
-        CHECK (locale IN ('fr','de','en','it','es')),
+        CHECK (locale IN ('fr','de','en','it','es','nl','nl-NL')),
       CONSTRAINT chk_challenge_publication_indexable
         CHECK (is_indexable=0 OR is_published=1)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
@@ -7209,7 +7235,7 @@ async function migrateChallengePublications(database) {
     CREATE TABLE IF NOT EXISTS challenge_preset_publication_redirects (
       id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
       publication_id INT UNSIGNED NOT NULL,
-      locale CHAR(2) NOT NULL,
+      locale VARCHAR(5) NOT NULL,
       old_slug VARCHAR(120) NOT NULL,
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       UNIQUE KEY uq_challenge_publication_redirect_locale_slug (locale, old_slug),
@@ -7217,7 +7243,7 @@ async function migrateChallengePublications(database) {
       CONSTRAINT fk_challenge_publication_redirect_publication
         FOREIGN KEY (publication_id) REFERENCES challenge_preset_publications(id) ON DELETE CASCADE,
       CONSTRAINT chk_challenge_publication_redirect_locale
-        CHECK (locale IN ('fr','de','en','it','es'))
+        CHECK (locale IN ('fr','de','en','it','es','nl','nl-NL'))
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
   await database.query(`
@@ -7227,6 +7253,7 @@ async function migrateChallengePublications(database) {
       applied_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
+  await extendPublicationLocales(database);
   await database.query(`
     UPDATE challenge_preset_publications
     SET is_indexable=is_published
@@ -7494,16 +7521,59 @@ const _w0QUHKtU66TgEVl_bwejGdEUdejGy4Y7RJK0Z7Yygw = defineNitroPlugin(async () =
       ADD COLUMN expires_at DATETIME NULL AFTER modified,
       ADD INDEX idx_defis_expiration (expires_at)
     `);
-    await database.query(`
-      UPDATE defis
-      SET expires_at = CASE
-        WHEN isANePasEffacer = 1 THEN NULL
-        ELSE DATE_ADD(created, INTERVAL 6 MONTH)
-      END
-    `);
-    console.info("[database] Expiration \xE0 six mois ajout\xE9e aux d\xE9fis enregistr\xE9s.");
+    console.info("[database] Colonne historique expires_at ajout\xE9e aux d\xE9fis, sans expiration automatique.");
   } catch (error) {
     console.error("[database] \xC9chec de la migration automatique de l\u2019expiration des d\xE9fis.", error);
+  }
+});
+
+async function initializeDefisUsage(database) {
+  const [columns] = await database.query("SHOW COLUMNS FROM defis");
+  if (columns.some((column) => column.Field === "last_used_at")) return false;
+  await database.query(`
+    ALTER TABLE defis
+    ADD COLUMN last_used_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ADD INDEX idx_defis_last_used (last_used_at)
+  `);
+  return true;
+}
+const INACTIVE_DEFIS_WHERE = `isANePasEffacer = 0
+  AND last_used_at < ?
+  AND last_used_at < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 5 YEAR)`;
+function parseCleanupRequest(value) {
+  if (!value || typeof value !== "object") throw new Error("Confirmation invalide");
+  const body = value;
+  if (body.confirm !== true || typeof body.cutoff !== "string" || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(body.cutoff) || !Number.isFinite(Date.parse(body.cutoff.replace(" ", "T") + "Z"))) {
+    throw new Error("Confirmation invalide");
+  }
+  return { cutoff: body.cutoff };
+}
+async function previewDefisCleanup(database) {
+  const [dates] = await database.query(`
+    SELECT DATE_FORMAT(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 5 YEAR), '%Y-%m-%d %H:%i:%s') AS cutoff
+  `);
+  const cutoff = String(dates[0].cutoff);
+  const [rows] = await database.execute(`
+    SELECT COUNT(*) AS count FROM defis WHERE ${INACTIVE_DEFIS_WHERE}
+  `, [cutoff]);
+  return { cutoff, count: Number(rows[0].count) };
+}
+async function deleteInactiveDefis(database, cutoff) {
+  const [result] = await database.execute(`
+    DELETE FROM defis WHERE ${INACTIVE_DEFIS_WHERE}
+  `, [cutoff]);
+  return { deletedCount: result.affectedRows };
+}
+
+const _BM2aMf_LpnFKDmoyJHuL0i26e47wzYSHG3DEteBjpGI = defineNitroPlugin(async () => {
+  const database = useDatabase();
+  try {
+    if (await initializeDefisUsage(database)) {
+      console.info("[database] Suivi de l\u2019utilisation des d\xE9fis initialis\xE9 ; liens sans expiration automatique.");
+    }
+  } catch (error) {
+    console.error("[database] \xC9chec de la migration du suivi des d\xE9fis.", error);
+    throw error;
   }
 });
 
@@ -8480,37 +8550,65 @@ function diagnoseCoachAnswer(learnerAnswer, question, isCorrect) {
   return { ...base, errorKind: "unknown", confidence: "low" };
 }
 
+const netherlandsWording = {
+  "Je bent meer waard dan je punten": "Je bent meer waard dan je cijfers",
+  "Voor leerkrachten": "Voor leraren",
+  "Inschakelen op dit toestel": "Inschakelen op dit apparaat",
+  "Ingeschakeld op dit toestel": "Ingeschakeld op dit apparaat",
+  "Berichten om op dit toestel te ontvangen": "Berichten om op dit apparaat te ontvangen",
+  "Vertrek opnieuw van de volledige verbetering:": "Ga opnieuw uit van de volledige correctie:"
+};
+function netherlandsText(text) {
+  var _a;
+  return (_a = netherlandsWording[text]) != null ? _a : text;
+}
+function adaptDutch(value) {
+  if (typeof value === "string") return netherlandsText(value);
+  if (typeof value === "function") {
+    return ((...args) => adaptDutch(value(...args)));
+  }
+  if (Array.isArray(value)) return value.map(adaptDutch);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, adaptDutch(entry)]));
+  }
+  return value;
+}
+function withDutchVariants(translations) {
+  return { ...translations, "nl-NL": adaptDutch(translations.nl) };
+}
+
 function withSwissObjectAliases(value) {
   return value.replace(/\bCOD\b(?!\s*\(CVD\))/gu, "COD (CVD)").replace(/\bCOI\b(?!\s*\(CVI\))/gu, "COI (CVI)");
 }
 
 const learnerErrorMessages = {
-  "task.wrong_mode": { de: "Du hast einen anderen Modus als den verlangten verwendet.", en: "You used a different mood from the one requested.", it: "Hai usato un modo diverso da quello richiesto.", es: "Has usado un modo diferente del solicitado." },
-  "task.wrong_tense": { de: "Du hast eine andere Zeitform als die verlangte verwendet.", en: "You used a different tense from the one requested.", it: "Hai usato un tempo diverso da quello richiesto.", es: "Has usado un tiempo diferente del solicitado." },
-  "task.future_simple_for_near_future": { de: "Du hast das einfache Futur verwendet, obwohl das nahe Futur mit \xAB aller \xBB und dem Infinitiv gebildet werden sollte.", en: "You used the simple future, but the near future had to be formed with \xAB aller \xBB followed by the infinitive.", it: "Hai usato il futuro semplice, ma occorreva formare il futuro prossimo con \xAB aller \xBB seguito dall\u2019infinito.", es: "Has usado el futuro simple, pero hab\xEDa que formar el futuro pr\xF3ximo con \xAB aller \xBB seguido del infinitivo." },
-  "person.other_form": { de: "Du hast die grammatische Person verwechselt.", en: "You used the form for a different grammatical person.", it: "Hai confuso la persona grammaticale.", es: "Has confundido la persona gramatical." },
-  "person.impossible_ending": { de: "Die verwendete Endung ist bei dieser Person nicht m\xF6glich.", en: "The ending you used is not possible with this person.", it: "La desinenza usata non \xE8 possibile con questa persona.", es: "La terminaci\xF3n utilizada no es posible con esta persona." },
-  "compound.auxiliary": { de: "Du hast nicht das richtige Hilfsverb f\xFCr diese zusammengesetzte Zeitform verwendet.", en: "You did not use the correct auxiliary for this compound tense.", it: "Non hai usato l\u2019ausiliare corretto per questo tempo composto.", es: "No has usado el auxiliar correcto para este tiempo compuesto." },
-  "compound.participle_form": { de: "Nach dem Hilfsverb musstest du das Partizip Perfekt und keine andere konjugierte Form verwenden.", en: "After the auxiliary, you had to use the past participle rather than another conjugated form.", it: "Dopo l\u2019ausiliare dovevi usare il participio passato e non un\u2019altra forma coniugata.", es: "Despu\xE9s del auxiliar deb\xEDas usar el participio pasado y no otra forma conjugada." },
-  "agreement.subject": { de: "Das Partizip Perfekt wurde nicht richtig an das Subjekt angeglichen.", en: "The past participle did not agree correctly with the subject.", it: "Il participio passato non concordava correttamente con il soggetto.", es: "El participio pasado no concordaba correctamente con el sujeto." },
-  "agreement.cod_before": { de: "Das Partizip Perfekt musste an das vorangestellte direkte Objekt angeglichen werden.", en: "The past participle had to agree with the direct object placed before it.", it: "Il participio passato doveva concordare con il complemento oggetto posto prima.", es: "El participio pasado deb\xEDa concordar con el complemento directo colocado antes." },
-  "agreement.cod_after": { de: "Du hast das Partizip Perfekt an ein nachgestelltes Objekt angeglichen, obwohl es unver\xE4ndert bleiben musste.", en: "You made the past participle agree with an object placed after it, although it had to remain unchanged.", it: "Hai concordato il participio passato con un complemento posto dopo, mentre doveva restare invariato.", es: "Has hecho concordar el participio pasado con un complemento colocado despu\xE9s, aunque deb\xEDa permanecer invariable." },
-  "agreement.coi": { de: "Du hast das Partizip Perfekt an ein indirektes Objekt angeglichen; ein indirektes Objekt bewirkt diese Angleichung nie.", en: "You made the past participle agree with an indirect object, which never determines this agreement.", it: "Hai concordato il participio passato con un complemento indiretto, che non determina mai questa concordanza.", es: "Has hecho concordar el participio pasado con un complemento indirecto, que nunca determina esta concordancia." },
-  "agreement.avoir_unwarranted": { de: "Du hast das mit \xAB avoir \xBB verwendete Partizip Perfekt angeglichen, obwohl kein vorangestelltes Objekt dies erforderte.", en: "You made the past participle used with \xAB avoir \xBB agree, although no preceding object required it.", it: "Hai concordato il participio passato usato con \xAB avoir \xBB, anche se nessun complemento posto prima lo richiedeva.", es: "Has hecho concordar el participio pasado usado con \xAB avoir \xBB, aunque ning\xFAn complemento colocado antes lo exig\xEDa." },
-  "morphology.ending": { de: "Die Endung ist nicht richtig.", en: "The ending is not correct.", it: "La desinenza non \xE8 corretta.", es: "La terminaci\xF3n no es correcta." },
-  "orthography.copied_complement": { de: "Beim Abschreiben des in der Aufgabe vorgegebenen Objekts ist ein Rechtschreibfehler entstanden.", en: "You made a spelling error when copying the object given in the sentence.", it: "Hai commesso un errore ortografico copiando il complemento dato nella frase.", es: "Has cometido un error ortogr\xE1fico al copiar el complemento dado en la frase." },
-  "orthography.accent": { de: "Die Form war richtig aufgebaut, aber ein Akzent war falsch oder fehlte.", en: "The form was built correctly, but an accent was incorrect or missing.", it: "La forma era costruita correttamente, ma un accento era errato o mancante.", es: "La forma estaba bien construida, pero un acento era incorrecto o faltaba." },
-  "orthography.punctuation": { de: "Die Form war richtig, aber ein Zeichen wie ein Apostroph oder Bindestrich war falsch oder fehlte.", en: "The form was correct, but a mark such as an apostrophe or hyphen was incorrect or missing.", it: "La forma era corretta, ma un segno come un apostrofo o un trattino era errato o mancante.", es: "La forma era correcta, pero un signo como un ap\xF3strofo o un guion era incorrecto o faltaba." },
-  "input.close_form": { de: "Deine Antwort war fast richtig, enthielt aber noch einen Rechtschreibunterschied.", en: "Your answer was close to the correct form, but it still contained a spelling difference.", it: "La tua risposta era vicina alla forma corretta, ma conteneva ancora una differenza ortografica.", es: "Tu respuesta estaba cerca de la forma correcta, pero a\xFAn conten\xEDa una diferencia ortogr\xE1fica." },
-  unknown: { de: "Der Fehler konnte noch nicht genauer eingeordnet werden. Vergleiche deine Antwort mit der Korrektur.", en: "The error could not yet be classified more precisely. Compare your answer with the correction.", it: "L\u2019errore non pu\xF2 ancora essere classificato con maggiore precisione. Confronta la risposta con la correzione.", es: "El error todav\xEDa no puede clasificarse con mayor precisi\xF3n. Compara tu respuesta con la correcci\xF3n." }
+  "task.wrong_mode": withDutchVariants({ de: "Du hast einen anderen Modus als den verlangten verwendet.", en: "You used a different mood from the one requested.", it: "Hai usato un modo diverso da quello richiesto.", es: "Has usado un modo diferente del solicitado.", nl: "Je gebruikte een andere wijs dan gevraagd." }),
+  "task.wrong_tense": withDutchVariants({ de: "Du hast eine andere Zeitform als die verlangte verwendet.", en: "You used a different tense from the one requested.", it: "Hai usato un tempo diverso da quello richiesto.", es: "Has usado un tiempo diferente del solicitado.", nl: "Je gebruikte een andere tijd dan gevraagd." }),
+  "task.future_simple_for_near_future": withDutchVariants({ de: "Du hast das einfache Futur verwendet, obwohl das nahe Futur mit \xAB aller \xBB und dem Infinitiv gebildet werden sollte.", en: "You used the simple future, but the near future had to be formed with \xAB aller \xBB followed by the infinitive.", it: "Hai usato il futuro semplice, ma occorreva formare il futuro prossimo con \xAB aller \xBB seguito dall\u2019infinito.", es: "Has usado el futuro simple, pero hab\xEDa que formar el futuro pr\xF3ximo con \xAB aller \xBB seguido del infinitivo.", nl: "Je gebruikte de futur simple, maar je moest de futur proche vormen met \xAB aller \xBB gevolgd door de infinitief." }),
+  "person.other_form": withDutchVariants({ de: "Du hast die grammatische Person verwechselt.", en: "You used the form for a different grammatical person.", it: "Hai confuso la persona grammaticale.", es: "Has confundido la persona gramatical.", nl: "Je gebruikte de vorm van een andere grammaticale persoon." }),
+  "person.impossible_ending": withDutchVariants({ de: "Die verwendete Endung ist bei dieser Person nicht m\xF6glich.", en: "The ending you used is not possible with this person.", it: "La desinenza usata non \xE8 possibile con questa persona.", es: "La terminaci\xF3n utilizada no es posible con esta persona.", nl: "De uitgang die je gebruikte, is niet mogelijk bij deze persoon." }),
+  "compound.auxiliary": withDutchVariants({ de: "Du hast nicht das richtige Hilfsverb f\xFCr diese zusammengesetzte Zeitform verwendet.", en: "You did not use the correct auxiliary for this compound tense.", it: "Non hai usato l\u2019ausiliare corretto per questo tempo composto.", es: "No has usado el auxiliar correcto para este tiempo compuesto.", nl: "Je gebruikte niet het juiste hulpwerkwoord voor deze samengestelde tijd." }),
+  "compound.participle_form": withDutchVariants({ de: "Nach dem Hilfsverb musstest du das Partizip Perfekt und keine andere konjugierte Form verwenden.", en: "After the auxiliary, you had to use the past participle rather than another conjugated form.", it: "Dopo l\u2019ausiliare dovevi usare il participio passato e non un\u2019altra forma coniugata.", es: "Despu\xE9s del auxiliar deb\xEDas usar el participio pasado y no otra forma conjugada.", nl: "Na het hulpwerkwoord moest je het voltooid deelwoord gebruiken, niet een andere vervoegde vorm." }),
+  "agreement.subject": withDutchVariants({ de: "Das Partizip Perfekt wurde nicht richtig an das Subjekt angeglichen.", en: "The past participle did not agree correctly with the subject.", it: "Il participio passato non concordava correttamente con il soggetto.", es: "El participio pasado no concordaba correctamente con el sujeto.", nl: "Het voltooid deelwoord kwam niet correct overeen met het onderwerp." }),
+  "agreement.cod_before": withDutchVariants({ de: "Das Partizip Perfekt musste an das vorangestellte direkte Objekt angeglichen werden.", en: "The past participle had to agree with the direct object placed before it.", it: "Il participio passato doveva concordare con il complemento oggetto posto prima.", es: "El participio pasado deb\xEDa concordar con el complemento directo colocado antes.", nl: "Het voltooid deelwoord moest overeenkomen met het lijdend voorwerp dat ervoor staat." }),
+  "agreement.cod_after": withDutchVariants({ de: "Du hast das Partizip Perfekt an ein nachgestelltes Objekt angeglichen, obwohl es unver\xE4ndert bleiben musste.", en: "You made the past participle agree with an object placed after it, although it had to remain unchanged.", it: "Hai concordato il participio passato con un complemento posto dopo, mentre doveva restare invariato.", es: "Has hecho concordar el participio pasado con un complemento colocado despu\xE9s, aunque deb\xEDa permanecer invariable.", nl: "Je paste het voltooid deelwoord aan aan een voorwerp dat erna staat, terwijl het onveranderd moest blijven." }),
+  "agreement.coi": withDutchVariants({ de: "Du hast das Partizip Perfekt an ein indirektes Objekt angeglichen; ein indirektes Objekt bewirkt diese Angleichung nie.", en: "You made the past participle agree with an indirect object, which never determines this agreement.", it: "Hai concordato il participio passato con un complemento indiretto, che non determina mai questa concordanza.", es: "Has hecho concordar el participio pasado con un complemento indirecto, que nunca determina esta concordancia.", nl: "Je paste het voltooid deelwoord aan aan een meewerkend voorwerp, dat deze overeenkomst nooit bepaalt." }),
+  "agreement.avoir_unwarranted": withDutchVariants({ de: "Du hast das mit \xAB avoir \xBB verwendete Partizip Perfekt angeglichen, obwohl kein vorangestelltes Objekt dies erforderte.", en: "You made the past participle used with \xAB avoir \xBB agree, although no preceding object required it.", it: "Hai concordato il participio passato usato con \xAB avoir \xBB, anche se nessun complemento posto prima lo richiedeva.", es: "Has hecho concordar el participio pasado usado con \xAB avoir \xBB, aunque ning\xFAn complemento colocado antes lo exig\xEDa.", nl: "Je paste het voltooid deelwoord met \xAB avoir \xBB aan, terwijl er geen voorafgaand voorwerp was dat dit vereiste." }),
+  "morphology.ending": withDutchVariants({ de: "Die Endung ist nicht richtig.", en: "The ending is not correct.", it: "La desinenza non \xE8 corretta.", es: "La terminaci\xF3n no es correcta.", nl: "De uitgang is niet juist." }),
+  "orthography.copied_complement": withDutchVariants({ de: "Beim Abschreiben des in der Aufgabe vorgegebenen Objekts ist ein Rechtschreibfehler entstanden.", en: "You made a spelling error when copying the object given in the sentence.", it: "Hai commesso un errore ortografico copiando il complemento dato nella frase.", es: "Has cometido un error ortogr\xE1fico al copiar el complemento dado en la frase.", nl: "Je maakte een spelfout bij het overnemen van het voorwerp uit de zin." }),
+  "orthography.accent": withDutchVariants({ de: "Die Form war richtig aufgebaut, aber ein Akzent war falsch oder fehlte.", en: "The form was built correctly, but an accent was incorrect or missing.", it: "La forma era costruita correttamente, ma un accento era errato o mancante.", es: "La forma estaba bien construida, pero un acento era incorrecto o faltaba.", nl: "De vorm was juist opgebouwd, maar een accent was fout of ontbrak." }),
+  "orthography.punctuation": withDutchVariants({ de: "Die Form war richtig, aber ein Zeichen wie ein Apostroph oder Bindestrich war falsch oder fehlte.", en: "The form was correct, but a mark such as an apostrophe or hyphen was incorrect or missing.", it: "La forma era corretta, ma un segno come un apostrofo o un trattino era errato o mancante.", es: "La forma era correcta, pero un signo como un ap\xF3strofo o un guion era incorrecto o faltaba.", nl: "De vorm was juist, maar een teken zoals een apostrof of koppelteken was fout of ontbrak." }),
+  "input.close_form": withDutchVariants({ de: "Deine Antwort war fast richtig, enthielt aber noch einen Rechtschreibunterschied.", en: "Your answer was close to the correct form, but it still contained a spelling difference.", it: "La tua risposta era vicina alla forma corretta, ma conteneva ancora una differenza ortografica.", es: "Tu respuesta estaba cerca de la forma correcta, pero a\xFAn conten\xEDa una diferencia ortogr\xE1fica.", nl: "Je antwoord lag dicht bij de juiste vorm, maar bevatte nog een spellingsverschil." }),
+  unknown: withDutchVariants({ de: "Der Fehler konnte noch nicht genauer eingeordnet werden. Vergleiche deine Antwort mit der Korrektur.", en: "The error could not yet be classified more precisely. Compare your answer with the correction.", it: "L\u2019errore non pu\xF2 ancora essere classificato con maggiore precisione. Confronta la risposta con la correzione.", es: "El error todav\xEDa no puede clasificarse con mayor precisi\xF3n. Compara tu respuesta con la correcci\xF3n.", nl: "De fout kon nog niet preciezer worden ingedeeld. Vergelijk je antwoord met de verbetering." })
 };
-const insteadOf = {
+const insteadOf = withDutchVariants({
   fr: "\xE0 la place de",
   de: "anstelle von",
   en: "instead of",
   it: "al posto di",
-  es: "en lugar de"
-};
+  es: "en lugar de",
+  nl: "in plaats van"
+});
 function localizedLearnerErrorMessage(detail, locale) {
   var _a;
   return locale === "fr" ? withSwissObjectAliases(detail.message) : ((_a = learnerErrorMessages[detail.code]) == null ? void 0 : _a[locale]) || detail.message;
@@ -8527,34 +8625,34 @@ function localizedLearnerErrorMessageForCode(code, fallback, locale) {
   return locale === "fr" ? withSwissObjectAliases(fallback) : ((_a = learnerErrorMessages[code]) == null ? void 0 : _a[locale]) || fallback;
 }
 const learnerErrorLabels = {
-  "task.wrong_mode": { de: "Modi verwechseln (Indikativ, Konjunktiv, \u2026)", en: "Confusing moods (indicative, subjunctive, \u2026)", it: "Confondere i modi (indicativo, congiuntivo, \u2026)", es: "Confundir los modos (indicativo, subjuntivo, \u2026)" },
-  "task.wrong_tense": { de: "Zeitformen verwechseln (Imparfait, Futur, \u2026)", en: "Confusing tenses (imperfect, future, \u2026)", it: "Confondere i tempi (imperfetto, futuro, \u2026)", es: "Confundir los tiempos (imperfecto, futuro, \u2026)" },
-  "task.future_simple_for_near_future": { de: "Einfaches Futur statt nahes Futur", en: "Simple future instead of near future", it: "Futuro semplice al posto del futuro prossimo", es: "Futuro simple en lugar de futuro pr\xF3ximo" },
-  "person.other_form": { de: "Pronomen verwechseln (je, tu, ils \u2026)", en: "Confusing pronouns (je, tu, ils \u2026)", it: "Confondere i pronomi (je, tu, ils \u2026)", es: "Confundir los pronombres (je, tu, ils \u2026)" },
-  "person.impossible_ending": { de: "F\xFCr diese Person unm\xF6gliche Endung", en: "Ending impossible for this person", it: "Desinenza impossibile per questa persona", es: "Terminaci\xF3n imposible para esta persona" },
-  "compound.auxiliary": { de: "Falsches Hilfsverb", en: "Incorrect auxiliary", it: "Ausiliare errato", es: "Auxiliar incorrecto" },
-  "compound.participle_form": { de: "Falsche Form nach dem Hilfsverb", en: "Incorrect form after the auxiliary", it: "Forma errata dopo l\u2019ausiliare", es: "Forma incorrecta despu\xE9s del auxiliar" },
-  "agreement.subject": { de: "Angleichung des Partizips an das Subjekt", en: "Participle agreement with the subject", it: "Concordanza del participio con il soggetto", es: "Concordancia del participio con el sujeto" },
-  "agreement.cod_before": { de: "Angleichung an ein vorangestelltes direktes Objekt", en: "Agreement with a preceding direct object", it: "Concordanza con un complemento oggetto precedente", es: "Concordancia con un complemento directo anterior" },
-  "agreement.cod_after": { de: "Unn\xF6tige Angleichung an ein nachgestelltes Objekt", en: "Incorrect agreement with a following direct object", it: "Concordanza indebita con un complemento oggetto successivo", es: "Concordancia indebida con un complemento directo posterior" },
-  "agreement.coi": { de: "Unn\xF6tige Angleichung an ein indirektes Objekt", en: "Incorrect agreement with an indirect object", it: "Concordanza indebita con un complemento indiretto", es: "Concordancia indebida con un complemento indirecto" },
-  "agreement.avoir_unwarranted": { de: "Unn\xF6tige Angleichung mit avoir", en: "Incorrect agreement with avoir", it: "Concordanza indebita con avoir", es: "Concordancia indebida con avoir" },
-  "morphology.ending": { de: "Falsche Endung", en: "Incorrect ending", it: "Desinenza errata", es: "Terminaci\xF3n incorrecta" },
-  "orthography.copied_complement": { de: "Abschreibfehler beim Objekt", en: "Error copying the object", it: "Errore nel copiare il complemento", es: "Error al copiar el complemento" },
-  "orthography.accent": { de: "Falscher oder fehlender Akzent", en: "Incorrect or missing accent", it: "Accento errato o mancante", es: "Acento incorrecto o ausente" },
-  "orthography.punctuation": { de: "Falsche Zeichensetzung", en: "Incorrect punctuation or symbol", it: "Punteggiatura o segno errato", es: "Puntuaci\xF3n o signo incorrecto" },
-  "input.close_form": { de: "Antwort nahe an der richtigen Form", en: "Answer close to the correct form", it: "Forma vicina alla risposta corretta", es: "Forma cercana a la respuesta correcta" },
-  unknown: { de: "Noch nicht klassifizierter Fehler", en: "Mistake not yet classified", it: "Errore non ancora classificato", es: "Error a\xFAn no clasificado" }
+  "task.wrong_mode": withDutchVariants({ de: "Modi verwechseln (Indikativ, Konjunktiv, \u2026)", en: "Confusing moods (indicative, subjunctive, \u2026)", it: "Confondere i modi (indicativo, congiuntivo, \u2026)", es: "Confundir los modos (indicativo, subjuntivo, \u2026)", nl: "Wijzen verwarren (indicatief, subjonctief, \u2026)" }),
+  "task.wrong_tense": withDutchVariants({ de: "Zeitformen verwechseln (Imparfait, Futur, \u2026)", en: "Confusing tenses (imperfect, future, \u2026)", it: "Confondere i tempi (imperfetto, futuro, \u2026)", es: "Confundir los tiempos (imperfecto, futuro, \u2026)", nl: "Tijden verwarren (imparfait, futur, \u2026)" }),
+  "task.future_simple_for_near_future": withDutchVariants({ de: "Einfaches Futur statt nahes Futur", en: "Simple future instead of near future", it: "Futuro semplice al posto del futuro prossimo", es: "Futuro simple en lugar de futuro pr\xF3ximo", nl: "Futur simple in plaats van futur proche" }),
+  "person.other_form": withDutchVariants({ de: "Pronomen verwechseln (je, tu, ils \u2026)", en: "Confusing pronouns (je, tu, ils \u2026)", it: "Confondere i pronomi (je, tu, ils \u2026)", es: "Confundir los pronombres (je, tu, ils \u2026)", nl: "Voornaamwoorden verwarren (je, tu, ils \u2026)" }),
+  "person.impossible_ending": withDutchVariants({ de: "F\xFCr diese Person unm\xF6gliche Endung", en: "Ending impossible for this person", it: "Desinenza impossibile per questa persona", es: "Terminaci\xF3n imposible para esta persona", nl: "Uitgang niet mogelijk bij deze persoon" }),
+  "compound.auxiliary": withDutchVariants({ de: "Falsches Hilfsverb", en: "Incorrect auxiliary", it: "Ausiliare errato", es: "Auxiliar incorrecto", nl: "Verkeerd hulpwerkwoord" }),
+  "compound.participle_form": withDutchVariants({ de: "Falsche Form nach dem Hilfsverb", en: "Incorrect form after the auxiliary", it: "Forma errata dopo l\u2019ausiliare", es: "Forma incorrecta despu\xE9s del auxiliar", nl: "Verkeerde vorm na het hulpwerkwoord" }),
+  "agreement.subject": withDutchVariants({ de: "Angleichung des Partizips an das Subjekt", en: "Participle agreement with the subject", it: "Concordanza del participio con il soggetto", es: "Concordancia del participio con el sujeto", nl: "Overeenkomst van het deelwoord met het onderwerp" }),
+  "agreement.cod_before": withDutchVariants({ de: "Angleichung an ein vorangestelltes direktes Objekt", en: "Agreement with a preceding direct object", it: "Concordanza con un complemento oggetto precedente", es: "Concordancia con un complemento directo anterior", nl: "Overeenkomst met een voorafgaand lijdend voorwerp" }),
+  "agreement.cod_after": withDutchVariants({ de: "Unn\xF6tige Angleichung an ein nachgestelltes Objekt", en: "Incorrect agreement with a following direct object", it: "Concordanza indebita con un complemento oggetto successivo", es: "Concordancia indebida con un complemento directo posterior", nl: "Onterechte overeenkomst met een volgend lijdend voorwerp" }),
+  "agreement.coi": withDutchVariants({ de: "Unn\xF6tige Angleichung an ein indirektes Objekt", en: "Incorrect agreement with an indirect object", it: "Concordanza indebita con un complemento indiretto", es: "Concordancia indebida con un complemento indirecto", nl: "Onterechte overeenkomst met een meewerkend voorwerp" }),
+  "agreement.avoir_unwarranted": withDutchVariants({ de: "Unn\xF6tige Angleichung mit avoir", en: "Incorrect agreement with avoir", it: "Concordanza indebita con avoir", es: "Concordancia indebida con avoir", nl: "Onterechte overeenkomst met avoir" }),
+  "morphology.ending": withDutchVariants({ de: "Falsche Endung", en: "Incorrect ending", it: "Desinenza errata", es: "Terminaci\xF3n incorrecta", nl: "Verkeerde uitgang" }),
+  "orthography.copied_complement": withDutchVariants({ de: "Abschreibfehler beim Objekt", en: "Error copying the object", it: "Errore nel copiare il complemento", es: "Error al copiar el complemento", nl: "Fout bij het overnemen van het voorwerp" }),
+  "orthography.accent": withDutchVariants({ de: "Falscher oder fehlender Akzent", en: "Incorrect or missing accent", it: "Accento errato o mancante", es: "Acento incorrecto o ausente", nl: "Verkeerd of ontbrekend accent" }),
+  "orthography.punctuation": withDutchVariants({ de: "Falsche Zeichensetzung", en: "Incorrect punctuation or symbol", it: "Punteggiatura o segno errato", es: "Puntuaci\xF3n o signo incorrecto", nl: "Verkeerd leesteken of symbool" }),
+  "input.close_form": withDutchVariants({ de: "Antwort nahe an der richtigen Form", en: "Answer close to the correct form", it: "Forma vicina alla risposta corretta", es: "Forma cercana a la respuesta correcta", nl: "Antwoord dicht bij de juiste vorm" }),
+  unknown: withDutchVariants({ de: "Noch nicht klassifizierter Fehler", en: "Mistake not yet classified", it: "Errore non ancora classificato", es: "Error a\xFAn no clasificado", nl: "Fout nog niet ingedeeld" })
 };
 const learnerErrorDomains = {
-  Consigne: { de: "Aufgabe", en: "Instructions", it: "Consegna", es: "Consigna" },
-  Personne: { de: "Person", en: "Person", it: "Persona", es: "Persona" },
-  "Temps compos\xE9": { de: "Zusammengesetzte Zeit", en: "Compound tense", it: "Tempo composto", es: "Tiempo compuesto" },
-  Accord: { de: "Angleichung", en: "Agreement", it: "Concordanza", es: "Concordancia" },
-  Construction: { de: "Bildung", en: "Formation", it: "Formazione", es: "Formaci\xF3n" },
-  Orthographe: { de: "Rechtschreibung", en: "Spelling", it: "Ortografia", es: "Ortograf\xEDa" },
-  Saisie: { de: "Eingabe", en: "Input", it: "Inserimento", es: "Entrada" },
-  Autre: { de: "Sonstiges", en: "Other", it: "Altro", es: "Otro" }
+  Consigne: withDutchVariants({ de: "Aufgabe", en: "Instructions", it: "Consegna", es: "Consigna", nl: "Instructies" }),
+  Personne: withDutchVariants({ de: "Person", en: "Person", it: "Persona", es: "Persona", nl: "Persoon" }),
+  "Temps compos\xE9": withDutchVariants({ de: "Zusammengesetzte Zeit", en: "Compound tense", it: "Tempo composto", es: "Tiempo compuesto", nl: "Samengestelde tijd" }),
+  Accord: withDutchVariants({ de: "Angleichung", en: "Agreement", it: "Concordanza", es: "Concordancia", nl: "Overeenkomst" }),
+  Construction: withDutchVariants({ de: "Bildung", en: "Formation", it: "Formazione", es: "Formaci\xF3n", nl: "Vorming" }),
+  Orthographe: withDutchVariants({ de: "Rechtschreibung", en: "Spelling", it: "Ortografia", es: "Ortograf\xEDa", nl: "Spelling" }),
+  Saisie: withDutchVariants({ de: "Eingabe", en: "Input", it: "Inserimento", es: "Entrada", nl: "Invoer" }),
+  Autre: withDutchVariants({ de: "Sonstiges", en: "Other", it: "Altro", es: "Otro", nl: "Andere" })
 };
 function localizedLearnerErrorLabel(code, fallback, locale) {
   var _a;
@@ -122366,6 +122464,406 @@ const _cJS8fUHbWPAFEGMrZY0adbH3sscbwPp1lUW6TfGNu0 = defineNitroPlugin(async () =
   }
 });
 
+const DEFAULT_SHARED_CHALLENGE_OPTIONS = {
+  exerciseKind: "conjugation",
+  identificationSource: "selected-verbs",
+  literaryRegister: "all",
+  pastSimplePronouns: "all",
+  inclusivePronouns: false,
+  includeOnPronoun: false,
+  learningSupportMode: "normal",
+  voiceMode: "active",
+  includeComplements: true,
+  complementPlacement: "after",
+  complementOptions: [...DEFAULT_COMPLEMENT_OPTIONS]
+};
+
+class PublicInputError extends Error {
+}
+const MAX_VERB_IDS = 1e3;
+const QUESTIONNAIRE_KEYS = /* @__PURE__ */ new Set([
+  "description",
+  "verbIds",
+  "tenseIds",
+  "questionCount",
+  "exerciseKind",
+  "identificationSource",
+  "literaryRegister",
+  "pastSimplePronouns",
+  "inclusivePronouns",
+  "includeOnPronoun",
+  "learningSupportMode",
+  "voiceMode",
+  "includeComplements",
+  "complementPlacement",
+  "complementOptions"
+]);
+const DEFI_KEYS = /* @__PURE__ */ new Set([
+  "version",
+  "title",
+  "description",
+  "verbIds",
+  "tenseIds",
+  "questionCount",
+  "exerciseKind",
+  "identificationSource",
+  "literaryRegister",
+  "pastSimplePronouns",
+  "inclusivePronouns",
+  "includeOnPronoun",
+  "learningSupportMode",
+  "voiceMode",
+  "includeComplements",
+  "complementPlacement",
+  "complementOptions",
+  "printOptions"
+]);
+function parseChallengeTitle(value) {
+  if (value === void 0) return void 0;
+  if (typeof value !== "string") {
+    throw new PublicInputError("Le titre du d\xE9fi doit \xEAtre du texte");
+  }
+  const title = value.trim();
+  if (title.length < 1 || title.length > 80) {
+    throw new PublicInputError("Le titre du d\xE9fi doit contenir entre 1 et 80 caract\xE8res");
+  }
+  return title;
+}
+function parseChallengeDescription(value) {
+  if (value === void 0 || value === "") return void 0;
+  if (typeof value !== "string") {
+    throw new PublicInputError("La description du d\xE9fi doit \xEAtre du texte");
+  }
+  const description = value.trim();
+  if (!description) return void 0;
+  if (description.length > 1e3) {
+    throw new PublicInputError("La description du d\xE9fi ne peut pas d\xE9passer 1000 caract\xE8res");
+  }
+  return description;
+}
+const PRINT_OPTION_KEYS = /* @__PURE__ */ new Set([
+  "title",
+  "questionLayout",
+  "questionSpacingMm",
+  "titleSpacingMm",
+  "inclusiveDisplay",
+  "showGrade",
+  "showVerbs",
+  "showTenses",
+  "showFirstName",
+  "showLastName",
+  "showDate",
+  "showRandomNumber"
+]);
+const BOOLEAN_PRINT_OPTION_KEYS = [
+  "inclusiveDisplay",
+  "showGrade",
+  "showVerbs",
+  "showTenses",
+  "showFirstName",
+  "showLastName",
+  "showDate",
+  "showRandomNumber"
+];
+const DEFAULT_PRINT_OPTIONS = {
+  title: "D\xE9fi de conjugaison",
+  questionLayout: "lines",
+  questionSpacingMm: 8,
+  titleSpacingMm: 30,
+  inclusiveDisplay: false,
+  showGrade: true,
+  showVerbs: false,
+  showTenses: false,
+  showFirstName: true,
+  showLastName: true,
+  showDate: true,
+  showRandomNumber: true
+};
+function isRecord(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function assertOnlyKeys(value, allowed) {
+  const unexpected = Object.keys(value).filter((key) => !allowed.has(key));
+  if (unexpected.length > 0) {
+    throw new PublicInputError(`Champs non reconnus : ${unexpected.join(", ")}`);
+  }
+}
+function parseIds(value, label, maximum, allowVirtual = false) {
+  if (!Array.isArray(value) || value.length === 0 || value.length > maximum) {
+    throw new PublicInputError(`${label} doit contenir entre 1 et ${maximum} identifiants`);
+  }
+  const ids = value.map((id) => {
+    if (!Number.isSafeInteger(id) || Number(id) === 0 || !allowVirtual && Number(id) < 0) {
+      throw new PublicInputError(`${label} contient un identifiant invalide`);
+    }
+    return Number(id);
+  });
+  if (new Set(ids).size !== ids.length) {
+    throw new PublicInputError(`${label} ne doit pas contenir de doublons`);
+  }
+  return ids;
+}
+function parseQuestionCount(value) {
+  if (!Number.isSafeInteger(value) || Number(value) < 1 || Number(value) > 100) {
+    throw new PublicInputError("questionCount doit \xEAtre un entier entre 1 et 100");
+  }
+  return Number(value);
+}
+function parseExerciseKind(value) {
+  if (value === "conjugation" || value === "normal") {
+    return "conjugation";
+  }
+  if (value === "tense-identification" || value === "temps-mode") {
+    return "tense-identification";
+  }
+  if (value === "mode-identification") return "mode-identification";
+  throw new PublicInputError("exerciseKind doit valoir conjugation, tense-identification ou mode-identification");
+}
+function parseIdentificationSource(value) {
+  if (value === "selected-verbs" || value === "literary-corpus") return value;
+  throw new PublicInputError("identificationSource doit valoir selected-verbs ou literary-corpus");
+}
+function parseLiteraryRegister(value) {
+  if (value === "all" || value === "courant" || value === "soutenu") return value;
+  throw new PublicInputError("literaryRegister doit valoir all, courant ou soutenu");
+}
+function parsePastSimplePronouns(value) {
+  if (value === "all" || value === "tous") {
+    return "all";
+  }
+  if (value === "third-person-only" || value === "ililsonly") {
+    return "third-person-only";
+  }
+  throw new PublicInputError("pastSimplePronouns doit valoir all ou third-person-only");
+}
+function parseVoiceMode(value) {
+  if (value === "active" || value === "passive" || value === "mixed") return value;
+  throw new PublicInputError("voiceMode doit valoir active, passive ou mixed");
+}
+function parseLearningSupportMode(value) {
+  if (value === "normal" || value === "cif-fle") return value;
+  throw new PublicInputError("learningSupportMode doit valoir normal ou cif-fle");
+}
+function parseComplementPlacement(value) {
+  if (value === "after" || value === "mixed" || value === "before") return value;
+  throw new PublicInputError("complementPlacement doit valoir after, mixed ou before");
+}
+function parseComplementOptions(value) {
+  const parsed = normalizeComplementOptions(value);
+  if (!Array.isArray(value) || parsed.length !== value.length) {
+    throw new PublicInputError("complementOptions contient une option invalide");
+  }
+  return parsed;
+}
+function parsePrintOptions(value) {
+  if (value === void 0) {
+    return { ...DEFAULT_PRINT_OPTIONS };
+  }
+  if (!isRecord(value)) {
+    throw new PublicInputError("printOptions doit \xEAtre un objet");
+  }
+  assertOnlyKeys(value, PRINT_OPTION_KEYS);
+  const title = value.title === void 0 ? DEFAULT_PRINT_OPTIONS.title : value.title;
+  if (typeof title !== "string" || title.trim().length === 0 || title.length > 120) {
+    throw new PublicInputError("Le titre d\u2019impression doit contenir entre 1 et 120 caract\xE8res");
+  }
+  const parsed = { ...DEFAULT_PRINT_OPTIONS, title: title.trim() };
+  if (value.questionLayout !== void 0) {
+    if (value.questionLayout !== "lines" && value.questionLayout !== "table") {
+      throw new PublicInputError("printOptions.questionLayout doit valoir lines ou table");
+    }
+    parsed.questionLayout = value.questionLayout;
+  }
+  const numericOptions = {
+    questionSpacingMm: { minimum: 2, maximum: 15 },
+    titleSpacingMm: { minimum: 8, maximum: 30 }
+  };
+  for (const [key, limits] of Object.entries(numericOptions)) {
+    if (value[key] === void 0) continue;
+    const number = Number(value[key]);
+    if (!Number.isFinite(number) || number < limits.minimum || number > limits.maximum) {
+      throw new PublicInputError(`printOptions.${key} doit \xEAtre compris entre ${limits.minimum} et ${limits.maximum}`);
+    }
+    parsed[key] = number;
+  }
+  for (const key of BOOLEAN_PRINT_OPTION_KEYS) {
+    if (value[key] === void 0) continue;
+    if (typeof value[key] !== "boolean") {
+      throw new PublicInputError(`printOptions.${key} doit \xEAtre un bool\xE9en`);
+    }
+    parsed[key] = value[key];
+  }
+  return parsed;
+}
+function parseQuestionnaireRequest(value) {
+  var _a, _b;
+  if (!isRecord(value)) {
+    throw new PublicInputError("Le corps de la requ\xEAte doit \xEAtre un objet JSON");
+  }
+  assertOnlyKeys(value, QUESTIONNAIRE_KEYS);
+  parseChallengeDescription(value.description);
+  if (typeof value.inclusivePronouns !== "boolean") {
+    throw new PublicInputError("inclusivePronouns doit \xEAtre un bool\xE9en");
+  }
+  const includeOnPronoun = (_a = value.includeOnPronoun) != null ? _a : DEFAULT_SHARED_CHALLENGE_OPTIONS.includeOnPronoun;
+  if (typeof includeOnPronoun !== "boolean") {
+    throw new PublicInputError("includeOnPronoun doit \xEAtre un bool\xE9en");
+  }
+  const voiceMode = value.voiceMode === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.voiceMode : parseVoiceMode(value.voiceMode);
+  const learningSupportMode = value.learningSupportMode === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.learningSupportMode : parseLearningSupportMode(value.learningSupportMode);
+  const includeComplements = (_b = value.includeComplements) != null ? _b : false;
+  if (typeof includeComplements !== "boolean") {
+    throw new PublicInputError("includeComplements doit \xEAtre un bool\xE9en");
+  }
+  const complementPlacement = value.complementPlacement === void 0 ? "after" : parseComplementPlacement(value.complementPlacement);
+  const complementOptions = value.complementOptions === void 0 ? legacyComplementOptions(includeComplements, complementPlacement) : parseComplementOptions(value.complementOptions);
+  const resolvedLegacy = legacyComplementConfig(complementOptions);
+  return {
+    verbIds: parseIds(value.verbIds, "verbIds", MAX_VERB_IDS, true),
+    tenseIds: parseIds(value.tenseIds, "tenseIds", 30),
+    questionCount: parseQuestionCount(value.questionCount),
+    exerciseKind: parseExerciseKind(value.exerciseKind),
+    identificationSource: value.identificationSource === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.identificationSource : parseIdentificationSource(value.identificationSource),
+    literaryRegister: value.literaryRegister === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.literaryRegister : parseLiteraryRegister(value.literaryRegister),
+    pastSimplePronouns: parsePastSimplePronouns(value.pastSimplePronouns),
+    inclusivePronouns: value.inclusivePronouns,
+    includeOnPronoun,
+    learningSupportMode,
+    voiceMode,
+    includeComplements: resolvedLegacy.includeComplements,
+    complementPlacement: resolvedLegacy.complementPlacement,
+    complementOptions
+  };
+}
+function parseDefiDefinition(value) {
+  var _a, _b;
+  let modernValue;
+  let legacyPastSimple;
+  let legacyInclusive;
+  if (Array.isArray(value)) {
+    if (value.length < 3 || value.length > 5) {
+      throw new PublicInputError("Le d\xE9fi historique doit contenir entre 3 et 5 \xE9l\xE9ments");
+    }
+    modernValue = {
+      verbIds: value[0],
+      tenseIds: value[1],
+      questionCount: value[2]
+    };
+    legacyPastSimple = Array.isArray(value[3]) ? value[3][0] : value[3];
+    legacyInclusive = value[4];
+  } else if (isRecord(value)) {
+    assertOnlyKeys(value, DEFI_KEYS);
+    modernValue = value;
+  } else {
+    throw new PublicInputError("Le corps du d\xE9fi doit \xEAtre un objet JSON");
+  }
+  if (modernValue.version !== void 0 && modernValue.version !== 1) {
+    throw new PublicInputError("Version de d\xE9fi non prise en charge");
+  }
+  const exerciseKind = modernValue.exerciseKind === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.exerciseKind : parseExerciseKind(modernValue.exerciseKind);
+  const identificationSource = modernValue.identificationSource === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.identificationSource : parseIdentificationSource(modernValue.identificationSource);
+  const literaryRegister = modernValue.literaryRegister === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.literaryRegister : parseLiteraryRegister(modernValue.literaryRegister);
+  const pastSimplePronouns = modernValue.pastSimplePronouns === void 0 ? legacyPastSimple === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.pastSimplePronouns : parsePastSimplePronouns(legacyPastSimple) : parsePastSimplePronouns(modernValue.pastSimplePronouns);
+  const inclusivePronouns = modernValue.inclusivePronouns === void 0 ? legacyInclusive === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.inclusivePronouns : legacyInclusive === "afficherIel" : modernValue.inclusivePronouns;
+  const includeOnPronoun = (_a = modernValue.includeOnPronoun) != null ? _a : DEFAULT_SHARED_CHALLENGE_OPTIONS.includeOnPronoun;
+  const voiceMode = modernValue.voiceMode === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.voiceMode : parseVoiceMode(modernValue.voiceMode);
+  const learningSupportMode = modernValue.learningSupportMode === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.learningSupportMode : parseLearningSupportMode(modernValue.learningSupportMode);
+  if (typeof inclusivePronouns !== "boolean") {
+    throw new PublicInputError("inclusivePronouns doit \xEAtre un bool\xE9en");
+  }
+  if (typeof includeOnPronoun !== "boolean") {
+    throw new PublicInputError("includeOnPronoun doit \xEAtre un bool\xE9en");
+  }
+  const includeComplements = (_b = modernValue.includeComplements) != null ? _b : DEFAULT_SHARED_CHALLENGE_OPTIONS.includeComplements;
+  if (typeof includeComplements !== "boolean") {
+    throw new PublicInputError("includeComplements doit \xEAtre un bool\xE9en");
+  }
+  const complementPlacement = modernValue.complementPlacement === void 0 ? DEFAULT_SHARED_CHALLENGE_OPTIONS.complementPlacement : parseComplementPlacement(modernValue.complementPlacement);
+  const complementOptions = modernValue.complementOptions === void 0 ? legacyComplementOptions(includeComplements, complementPlacement) : parseComplementOptions(modernValue.complementOptions);
+  const resolvedLegacy = legacyComplementConfig(complementOptions);
+  const title = parseChallengeTitle(modernValue.title);
+  const description = parseChallengeDescription(modernValue.description);
+  return {
+    version: 1,
+    ...title === void 0 ? {} : { title },
+    ...description === void 0 ? {} : { description },
+    verbIds: parseIds(modernValue.verbIds, "verbIds", MAX_VERB_IDS, true),
+    tenseIds: parseIds(modernValue.tenseIds, "tenseIds", 30),
+    questionCount: parseQuestionCount(modernValue.questionCount),
+    exerciseKind,
+    identificationSource,
+    literaryRegister,
+    pastSimplePronouns,
+    inclusivePronouns,
+    includeOnPronoun,
+    learningSupportMode,
+    voiceMode,
+    includeComplements: resolvedLegacy.includeComplements,
+    complementPlacement: resolvedLegacy.complementPlacement,
+    complementOptions,
+    printOptions: parsePrintOptions(modernValue.printOptions)
+  };
+}
+function serializeDefi(definition) {
+  return JSON.stringify(definition);
+}
+
+const readiness = /* @__PURE__ */ new WeakMap();
+function ensureSavedChallengeMetadata(database) {
+  const pending = readiness.get(database);
+  if (pending) return pending;
+  const promise = initializeSavedChallengeMetadata(database).then(() => {
+  }).catch((error) => {
+    readiness.delete(database);
+    throw error;
+  });
+  readiness.set(database, promise);
+  return promise;
+}
+async function initializeSavedChallengeMetadata(database) {
+  const [columns] = await database.query("SHOW COLUMNS FROM learner_saved_challenges");
+  const additions = [];
+  if (!columns.some((column) => column.Field === "custom_title")) additions.push("ADD COLUMN custom_title VARCHAR(80) NULL");
+  if (!columns.some((column) => column.Field === "custom_description")) additions.push("ADD COLUMN custom_description TEXT NULL");
+  if (!additions.length) return false;
+  try {
+    await database.query(`ALTER TABLE learner_saved_challenges ${additions.join(", ")}`);
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "ER_DUP_FIELDNAME") {
+      return initializeSavedChallengeMetadata(database);
+    }
+    throw error;
+  }
+  return true;
+}
+function parseSavedChallengeMetadata(value) {
+  var _a;
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new PublicInputError("Modification invalide");
+  const body = value;
+  if (Object.keys(body).some((key) => key !== "title" && key !== "description")) throw new PublicInputError("Champ non autoris\xE9");
+  if (typeof body.title !== "string" || typeof body.description !== "string") throw new PublicInputError("Titre et description requis");
+  return { title: parseChallengeTitle(body.title), description: (_a = parseChallengeDescription(body.description)) != null ? _a : "" };
+}
+async function updateSavedChallengeMetadata(database, accountId, code, metadata) {
+  await ensureSavedChallengeMetadata(database);
+  const [result] = await database.execute(`
+    UPDATE learner_saved_challenges saved
+    INNER JOIN defis d ON d.id = saved.defi_id
+    SET saved.custom_title = ?, saved.custom_description = ?
+    WHERE saved.account_id = ? AND d.name = ?
+  `, [metadata.title, metadata.description, accountId, code]);
+  return result.affectedRows > 0;
+}
+
+const _TJDDzaX5MabDduepDQbXt2Bfcp_c14LXHahj3FOzltw = defineNitroPlugin(async () => {
+  try {
+    await ensureSavedChallengeMetadata(useDatabase());
+    console.info("[database] Titres et descriptions personnels des d\xE9fis disponibles.");
+  } catch (error) {
+    console.error("[database] \xC9chec de la migration des titres et descriptions personnels.", error);
+  }
+});
+
 const _814zagFqZVirl0AX1ucCZ2bAOmJBBaFwhnjGyTDxIPY = defineNitroPlugin(async () => {
   const definition = challengePresetDefinitions.find((preset) => preset.id === ultimateChallengeId);
   if (!definition) return;
@@ -125813,7 +126311,7 @@ const _0T1W4DkA4XhxQ3mqRSifwqf7ZnOeJX9jNfES0b6RQ = defineNitroPlugin(async () =>
 });
 
 var schemaVersion = 1;
-var batchId = "challenge-publications-fle-20260818-003";
+var batchId = "challenge-publications-dutch-variants-20260905-001";
 var publications = [
 	{
 		presetKey: "5P",
@@ -125871,6 +126369,30 @@ var publications = [
 		metaTitle: "Conjugación francesa: ejercicios de programa suizo de 5P",
 		description: "Practica los verbos y tiempos previstos en 5P por el programa escolar suizo. Este ejercicio consolida los contenidos del curso y mejora la seguridad al conjugar.",
 		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa suizo de 5P. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "5P",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-het-zwitserse-leerplan-5p",
+		title: "Franse vervoegingsoefening: het Zwitserse leerplan 5P",
+		metaTitle: "Franse vervoeging oefenen: het Zwitserse leerplan 5P",
+		description: "Oefen de Franse werkwoorden en tijden die bij 5P in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over het Zwitserse leerplan 5P. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "5P",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-het-zwitserse-leerplan-5p",
+		title: "Franse vervoegingsoefening: het Zwitserse leerplan 5P",
+		metaTitle: "Franse vervoeging oefenen: het Zwitserse leerplan 5P",
+		description: "Oefen de Franse werkwoorden en tijden die bij 5P in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over het Zwitserse leerplan 5P. Kies de werkwoorden en tijden die je wilt oefenen.",
 		isPublished: true,
 		isIndexable: true,
 		overwriteExisting: false
@@ -125936,6 +126458,30 @@ var publications = [
 		overwriteExisting: false
 	},
 	{
+		presetKey: "6P",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-het-zwitserse-leerplan-6p",
+		title: "Franse vervoegingsoefening: het Zwitserse leerplan 6P",
+		metaTitle: "Franse vervoeging oefenen: het Zwitserse leerplan 6P",
+		description: "Oefen de Franse werkwoorden en tijden die bij 6P in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over het Zwitserse leerplan 6P. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "6P",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-het-zwitserse-leerplan-6p",
+		title: "Franse vervoegingsoefening: het Zwitserse leerplan 6P",
+		metaTitle: "Franse vervoeging oefenen: het Zwitserse leerplan 6P",
+		description: "Oefen de Franse werkwoorden en tijden die bij 6P in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over het Zwitserse leerplan 6P. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
 		presetKey: "7H",
 		locale: "fr",
 		slug: "exercice-de-conjugaison-le-programme-suisse-de-7h",
@@ -125991,6 +126537,30 @@ var publications = [
 		metaTitle: "Conjugación francesa: ejercicios de programa suizo de 7H",
 		description: "Practica los verbos y tiempos previstos en 7H por el programa escolar suizo. Este ejercicio consolida los contenidos del curso y mejora la seguridad al conjugar.",
 		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa suizo de 7H. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "7H",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-het-zwitserse-leerplan-7h",
+		title: "Franse vervoegingsoefening: het Zwitserse leerplan 7H",
+		metaTitle: "Franse vervoeging oefenen: het Zwitserse leerplan 7H",
+		description: "Oefen de Franse werkwoorden en tijden die bij 7H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over het Zwitserse leerplan 7H. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "7H",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-het-zwitserse-leerplan-7h",
+		title: "Franse vervoegingsoefening: het Zwitserse leerplan 7H",
+		metaTitle: "Franse vervoeging oefenen: het Zwitserse leerplan 7H",
+		description: "Oefen de Franse werkwoorden en tijden die bij 7H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over het Zwitserse leerplan 7H. Kies de werkwoorden en tijden die je wilt oefenen.",
 		isPublished: true,
 		isIndexable: true,
 		overwriteExisting: false
@@ -126056,6 +126626,30 @@ var publications = [
 		overwriteExisting: false
 	},
 	{
+		presetKey: "8H",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-het-zwitserse-leerplan-8h",
+		title: "Franse vervoegingsoefening: het Zwitserse leerplan 8H",
+		metaTitle: "Franse vervoeging oefenen: het Zwitserse leerplan 8H",
+		description: "Oefen de Franse werkwoorden en tijden die bij 8H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over het Zwitserse leerplan 8H. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "8H",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-het-zwitserse-leerplan-8h",
+		title: "Franse vervoegingsoefening: het Zwitserse leerplan 8H",
+		metaTitle: "Franse vervoeging oefenen: het Zwitserse leerplan 8H",
+		description: "Oefen de Franse werkwoorden en tijden die bij 8H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over het Zwitserse leerplan 8H. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
 		presetKey: "9H",
 		locale: "fr",
 		slug: "exercice-de-conjugaison-le-programme-suisse-de-9h",
@@ -126111,6 +126705,30 @@ var publications = [
 		metaTitle: "Conjugación francesa: ejercicios de programa suizo de 9H",
 		description: "Practica los verbos y tiempos previstos en 9H por el programa escolar suizo. Este ejercicio consolida los contenidos del curso y mejora la seguridad al conjugar.",
 		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa suizo de 9H. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "9H",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-het-zwitserse-leerplan-9h",
+		title: "Franse vervoegingsoefening: het Zwitserse leerplan 9H",
+		metaTitle: "Franse vervoeging oefenen: het Zwitserse leerplan 9H",
+		description: "Oefen de Franse werkwoorden en tijden die bij 9H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over het Zwitserse leerplan 9H. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "9H",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-het-zwitserse-leerplan-9h",
+		title: "Franse vervoegingsoefening: het Zwitserse leerplan 9H",
+		metaTitle: "Franse vervoeging oefenen: het Zwitserse leerplan 9H",
+		description: "Oefen de Franse werkwoorden en tijden die bij 9H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over het Zwitserse leerplan 9H. Kies de werkwoorden en tijden die je wilt oefenen.",
 		isPublished: true,
 		isIndexable: true,
 		overwriteExisting: false
@@ -126176,6 +126794,30 @@ var publications = [
 		overwriteExisting: false
 	},
 	{
+		presetKey: "10H",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-het-zwitserse-leerplan-10h",
+		title: "Franse vervoegingsoefening: het Zwitserse leerplan 10H",
+		metaTitle: "Franse vervoeging oefenen: het Zwitserse leerplan 10H",
+		description: "Oefen de Franse werkwoorden en tijden die bij 10H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over het Zwitserse leerplan 10H. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "10H",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-het-zwitserse-leerplan-10h",
+		title: "Franse vervoegingsoefening: het Zwitserse leerplan 10H",
+		metaTitle: "Franse vervoeging oefenen: het Zwitserse leerplan 10H",
+		description: "Oefen de Franse werkwoorden en tijden die bij 10H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over het Zwitserse leerplan 10H. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
 		presetKey: "11H",
 		locale: "fr",
 		slug: "exercice-de-conjugaison-le-programme-suisse-de-11h",
@@ -126231,6 +126873,30 @@ var publications = [
 		metaTitle: "Conjugación francesa: ejercicios de programa suizo de 11H",
 		description: "Practica los verbos y tiempos previstos en 11H por el programa escolar suizo. Este ejercicio consolida los contenidos del curso y mejora la seguridad al conjugar.",
 		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa suizo de 11H. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "11H",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-het-zwitserse-leerplan-11h",
+		title: "Franse vervoegingsoefening: het Zwitserse leerplan 11H",
+		metaTitle: "Franse vervoeging oefenen: het Zwitserse leerplan 11H",
+		description: "Oefen de Franse werkwoorden en tijden die bij 11H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over het Zwitserse leerplan 11H. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "11H",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-het-zwitserse-leerplan-11h",
+		title: "Franse vervoegingsoefening: het Zwitserse leerplan 11H",
+		metaTitle: "Franse vervoeging oefenen: het Zwitserse leerplan 11H",
+		description: "Oefen de Franse werkwoorden en tijden die bij 11H in het Zwitserse leerplan horen. Deze oefening versterkt de belangrijkste vaardigheden van het schooljaar en geeft je meer vertrouwen bij het spreken en schrijven in het Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over het Zwitserse leerplan 11H. Kies de werkwoorden en tijden die je wilt oefenen.",
 		isPublished: true,
 		isIndexable: true,
 		overwriteExisting: false
@@ -126296,6 +126962,30 @@ var publications = [
 		overwriteExisting: false
 	},
 	{
+		presetKey: "france-cp",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-cp",
+		title: "Franse vervoegingsoefening: het Franse leerplan CP",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan CP",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij CP in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan CP. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cp",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-cp",
+		title: "Franse vervoegingsoefening: het Franse leerplan CP",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan CP",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij CP in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan CP. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
 		presetKey: "france-ce1",
 		locale: "fr",
 		slug: "exercice-de-conjugaison-le-programme-francais-de-ce1",
@@ -126351,6 +127041,30 @@ var publications = [
 		metaTitle: "Conjugación francesa: ejercicios de programa escolar francés de CE1",
 		description: "Repasa los verbos, tiempos y modos previstos en CE1 por el programa escolar francés. Este ejercicio consolida los conocimientos necesarios en clase y en la expresión escrita.",
 		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa escolar francés de CE1. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-ce1",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-ce1",
+		title: "Franse vervoegingsoefening: het Franse leerplan CE1",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan CE1",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij CE1 in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan CE1. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-ce1",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-ce1",
+		title: "Franse vervoegingsoefening: het Franse leerplan CE1",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan CE1",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij CE1 in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan CE1. Kies de werkwoorden en tijden die je wilt oefenen.",
 		isPublished: true,
 		isIndexable: true,
 		overwriteExisting: false
@@ -126416,6 +127130,30 @@ var publications = [
 		overwriteExisting: false
 	},
 	{
+		presetKey: "france-ce2",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-ce2",
+		title: "Franse vervoegingsoefening: het Franse leerplan CE2",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan CE2",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij CE2 in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan CE2. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-ce2",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-ce2",
+		title: "Franse vervoegingsoefening: het Franse leerplan CE2",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan CE2",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij CE2 in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan CE2. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
 		presetKey: "france-cm1",
 		locale: "fr",
 		slug: "exercice-de-conjugaison-le-programme-francais-de-cm1",
@@ -126471,6 +127209,30 @@ var publications = [
 		metaTitle: "Conjugación francesa: ejercicios de programa escolar francés de CM1",
 		description: "Repasa los verbos, tiempos y modos previstos en CM1 por el programa escolar francés. Este ejercicio consolida los conocimientos necesarios en clase y en la expresión escrita.",
 		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa escolar francés de CM1. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cm1",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-cm1",
+		title: "Franse vervoegingsoefening: het Franse leerplan CM1",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan CM1",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij CM1 in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan CM1. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cm1",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-cm1",
+		title: "Franse vervoegingsoefening: het Franse leerplan CM1",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan CM1",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij CM1 in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan CM1. Kies de werkwoorden en tijden die je wilt oefenen.",
 		isPublished: true,
 		isIndexable: true,
 		overwriteExisting: false
@@ -126536,6 +127298,30 @@ var publications = [
 		overwriteExisting: false
 	},
 	{
+		presetKey: "france-cm2",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-cm2",
+		title: "Franse vervoegingsoefening: het Franse leerplan CM2",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan CM2",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij CM2 in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan CM2. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-cm2",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-cm2",
+		title: "Franse vervoegingsoefening: het Franse leerplan CM2",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan CM2",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij CM2 in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan CM2. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
 		presetKey: "france-6e",
 		locale: "fr",
 		slug: "exercice-de-conjugaison-le-programme-francais-de-6e",
@@ -126591,6 +127377,30 @@ var publications = [
 		metaTitle: "Conjugación francesa: ejercicios de programa escolar francés de 6e",
 		description: "Repasa los verbos, tiempos y modos previstos en 6e por el programa escolar francés. Este ejercicio consolida los conocimientos necesarios en clase y en la expresión escrita.",
 		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa escolar francés de 6e. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-6e",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-6e",
+		title: "Franse vervoegingsoefening: het Franse leerplan 6e",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan 6e",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij 6e in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan 6e. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-6e",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-6e",
+		title: "Franse vervoegingsoefening: het Franse leerplan 6e",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan 6e",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij 6e in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan 6e. Kies de werkwoorden en tijden die je wilt oefenen.",
 		isPublished: true,
 		isIndexable: true,
 		overwriteExisting: false
@@ -126656,6 +127466,30 @@ var publications = [
 		overwriteExisting: false
 	},
 	{
+		presetKey: "france-5e",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-5e",
+		title: "Franse vervoegingsoefening: het Franse leerplan 5e",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan 5e",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij 5e in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan 5e. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-5e",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-5e",
+		title: "Franse vervoegingsoefening: het Franse leerplan 5e",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan 5e",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij 5e in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan 5e. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
 		presetKey: "france-4e",
 		locale: "fr",
 		slug: "exercice-de-conjugaison-le-programme-francais-de-4e",
@@ -126711,6 +127545,30 @@ var publications = [
 		metaTitle: "Conjugación francesa: ejercicios de programa escolar francés de 4e",
 		description: "Repasa los verbos, tiempos y modos previstos en 4e por el programa escolar francés. Este ejercicio consolida los conocimientos necesarios en clase y en la expresión escrita.",
 		metaDescription: "Ejercicios personalizables de conjugación francesa sobre programa escolar francés de 4e. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-4e",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-4e",
+		title: "Franse vervoegingsoefening: het Franse leerplan 4e",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan 4e",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij 4e in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan 4e. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-4e",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-4e",
+		title: "Franse vervoegingsoefening: het Franse leerplan 4e",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan 4e",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij 4e in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan 4e. Kies de werkwoorden en tijden die je wilt oefenen.",
 		isPublished: true,
 		isIndexable: true,
 		overwriteExisting: false
@@ -126776,6 +127634,30 @@ var publications = [
 		overwriteExisting: false
 	},
 	{
+		presetKey: "france-3e",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-3e",
+		title: "Franse vervoegingsoefening: het Franse leerplan 3e",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan 3e",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij 3e in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan 3e. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "france-3e",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-het-franse-leerplan-3e",
+		title: "Franse vervoegingsoefening: het Franse leerplan 3e",
+		metaTitle: "Franse vervoeging oefenen: het Franse leerplan 3e",
+		description: "Herhaal de werkwoorden, tijden en wijzen die bij 3e in het Franse leerplan horen. Deze oefening versterkt de vervoegingsvaardigheden die je in de klas en bij schrijfopdrachten nodig hebt.",
+		metaDescription: "Franse vervoegingsoefeningen over het Franse leerplan 3e. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
 		presetKey: "groupe1",
 		locale: "fr",
 		slug: "exercice-de-conjugaison-les-verbes-du-premier-groupe",
@@ -126831,6 +127713,30 @@ var publications = [
 		metaTitle: "Conjugación francesa: ejercicios de verbos del primer grupo",
 		description: "Los verbos regulares en -er son la base de muchísimas frases en francés. Dominar sus terminaciones permite conjugar con seguridad cientos de verbos frecuentes.",
 		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos del primer grupo. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe1",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-werkwoorden-van-de-eerste-groep",
+		title: "Franse vervoegingsoefening: werkwoorden van de eerste groep",
+		metaTitle: "Franse vervoeging oefenen: werkwoorden van de eerste groep",
+		description: "Regelmatige werkwoorden op -er vormen de basis van heel wat Franse zinnen. Als je hun uitgangen kent, kun je honderden veelgebruikte werkwoorden met vertrouwen vervoegen.",
+		metaDescription: "Franse vervoegingsoefeningen over werkwoorden van de eerste groep. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe1",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-werkwoorden-van-de-eerste-groep",
+		title: "Franse vervoegingsoefening: werkwoorden van de eerste groep",
+		metaTitle: "Franse vervoeging oefenen: werkwoorden van de eerste groep",
+		description: "Regelmatige werkwoorden op -er vormen de basis van heel wat Franse zinnen. Als je hun uitgangen kent, kun je honderden veelgebruikte werkwoorden met vertrouwen vervoegen.",
+		metaDescription: "Franse vervoegingsoefeningen over werkwoorden van de eerste groep. Kies de werkwoorden en tijden die je wilt oefenen.",
 		isPublished: true,
 		isIndexable: true,
 		overwriteExisting: false
@@ -126896,6 +127802,30 @@ var publications = [
 		overwriteExisting: false
 	},
 	{
+		presetKey: "groupe2",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-werkwoorden-van-de-tweede-groep",
+		title: "Franse vervoegingsoefening: werkwoorden van de tweede groep",
+		metaTitle: "Franse vervoeging oefenen: werkwoorden van de tweede groep",
+		description: "Regelmatige werkwoorden op -ir zoals finir en choisir volgen een vast patroon. Als je dat herkent, vorm je werkwoorden zoals nous finissons en ils choisissaient correct.",
+		metaDescription: "Franse vervoegingsoefeningen over werkwoorden van de tweede groep. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe2",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-werkwoorden-van-de-tweede-groep",
+		title: "Franse vervoegingsoefening: werkwoorden van de tweede groep",
+		metaTitle: "Franse vervoeging oefenen: werkwoorden van de tweede groep",
+		description: "Regelmatige werkwoorden op -ir zoals finir en choisir volgen een vast patroon. Als je dat herkent, vorm je werkwoorden zoals nous finissons en ils choisissaient correct.",
+		metaDescription: "Franse vervoegingsoefeningen over werkwoorden van de tweede groep. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
 		presetKey: "groupe3",
 		locale: "fr",
 		slug: "exercice-de-conjugaison-les-verbes-du-troisieme-groupe",
@@ -126951,6 +127881,30 @@ var publications = [
 		metaTitle: "Conjugación francesa: ejercicios de verbos del tercer grupo",
 		description: "Los verbos del tercer grupo son muy frecuentes, pero a menudo irregulares. Practicarlos juntos ayuda a recordar sus raíces y terminaciones sin confundirlos.",
 		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos del tercer grupo. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-werkwoorden-van-de-derde-groep",
+		title: "Franse vervoegingsoefening: werkwoorden van de derde groep",
+		metaTitle: "Franse vervoeging oefenen: werkwoorden van de derde groep",
+		description: "Werkwoorden van de derde groep komen heel vaak voor, maar zijn dikwijls onregelmatig. Door ze samen te oefenen, onthoud je hun stammen en uitgangen zonder ze te verwisselen.",
+		metaDescription: "Franse vervoegingsoefeningen over werkwoorden van de derde groep. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-werkwoorden-van-de-derde-groep",
+		title: "Franse vervoegingsoefening: werkwoorden van de derde groep",
+		metaTitle: "Franse vervoeging oefenen: werkwoorden van de derde groep",
+		description: "Werkwoorden van de derde groep komen heel vaak voor, maar zijn dikwijls onregelmatig. Door ze samen te oefenen, onthoud je hun stammen en uitgangen zonder ze te verwisselen.",
+		metaDescription: "Franse vervoegingsoefeningen over werkwoorden van de derde groep. Kies de werkwoorden en tijden die je wilt oefenen.",
 		isPublished: true,
 		isIndexable: true,
 		overwriteExisting: false
@@ -127016,6 +127970,30 @@ var publications = [
 		overwriteExisting: false
 	},
 	{
+		presetKey: "groupe3ir",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-onregelmatige-werkwoorden-op-ir",
+		title: "Franse vervoegingsoefening: onregelmatige werkwoorden op -ir",
+		metaTitle: "Franse vervoeging oefenen: onregelmatige werkwoorden op -ir",
+		description: "Partir, venir, dormir en sortir eindigen op -ir, maar volgen het patroon van finir niet. Door ze te vergelijken, herken je stamveranderingen en vermijd je onjuiste regelmatige vormen.",
+		metaDescription: "Franse vervoegingsoefeningen over onregelmatige werkwoorden op -ir. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3ir",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-onregelmatige-werkwoorden-op-ir",
+		title: "Franse vervoegingsoefening: onregelmatige werkwoorden op -ir",
+		metaTitle: "Franse vervoeging oefenen: onregelmatige werkwoorden op -ir",
+		description: "Partir, venir, dormir en sortir eindigen op -ir, maar volgen het patroon van finir niet. Door ze te vergelijken, herken je stamveranderingen en vermijd je onjuiste regelmatige vormen.",
+		metaDescription: "Franse vervoegingsoefeningen over onregelmatige werkwoorden op -ir. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
 		presetKey: "groupe3oir",
 		locale: "fr",
 		slug: "exercice-de-conjugaison-les-verbes-du-troisieme-groupe-en-oir",
@@ -127071,6 +128049,30 @@ var publications = [
 		metaTitle: "Conjugación francesa: ejercicios de verbos del tercer grupo en -oir",
 		description: "Pouvoir, vouloir, devoir y recevoir son esenciales en la vida cotidiana. Dominar sus formas irregulares permite expresar posibilidad, voluntad y obligación con precisión.",
 		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos del tercer grupo en -oir. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3oir",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-werkwoorden-van-de-derde-groep-op-oir",
+		title: "Franse vervoegingsoefening: werkwoorden van de derde groep op -oir",
+		metaTitle: "Franse vervoeging oefenen: werkwoorden van de derde groep op -oir",
+		description: "Pouvoir, vouloir, devoir en recevoir zijn onmisbaar in het dagelijkse Frans. Als je hun onregelmatige vormen beheerst, kun je mogelijkheden, wensen en verplichtingen precies uitdrukken.",
+		metaDescription: "Franse vervoegingsoefeningen over werkwoorden van de derde groep op -oir. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3oir",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-werkwoorden-van-de-derde-groep-op-oir",
+		title: "Franse vervoegingsoefening: werkwoorden van de derde groep op -oir",
+		metaTitle: "Franse vervoeging oefenen: werkwoorden van de derde groep op -oir",
+		description: "Pouvoir, vouloir, devoir en recevoir zijn onmisbaar in het dagelijkse Frans. Als je hun onregelmatige vormen beheerst, kun je mogelijkheden, wensen en verplichtingen precies uitdrukken.",
+		metaDescription: "Franse vervoegingsoefeningen over werkwoorden van de derde groep op -oir. Kies de werkwoorden en tijden die je wilt oefenen.",
 		isPublished: true,
 		isIndexable: true,
 		overwriteExisting: false
@@ -127136,6 +128138,30 @@ var publications = [
 		overwriteExisting: false
 	},
 	{
+		presetKey: "groupe3autres",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-andere-werkwoorden-van-de-derde-groep",
+		title: "Franse vervoegingsoefening: andere werkwoorden van de derde groep",
+		metaTitle: "Franse vervoeging oefenen: andere werkwoorden van de derde groep",
+		description: "Prendre, mettre, lire, écrire en conduire volgen bijzondere, veelgebruikte patronen. Door ze te oefenen, herken je werkwoordfamilies en onthoud je onregelmatige vormen makkelijker.",
+		metaDescription: "Franse vervoegingsoefeningen over andere werkwoorden van de derde groep. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "groupe3autres",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-andere-werkwoorden-van-de-derde-groep",
+		title: "Franse vervoegingsoefening: andere werkwoorden van de derde groep",
+		metaTitle: "Franse vervoeging oefenen: andere werkwoorden van de derde groep",
+		description: "Prendre, mettre, lire, écrire en conduire volgen bijzondere, veelgebruikte patronen. Door ze te oefenen, herken je werkwoordfamilies en onthoud je onregelmatige vormen makkelijker.",
+		metaDescription: "Franse vervoegingsoefeningen over andere werkwoorden van de derde groep. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
 		presetKey: "ger",
 		locale: "fr",
 		slug: "exercice-de-conjugaison-les-verbes-en-ger",
@@ -127191,6 +128217,30 @@ var publications = [
 		metaTitle: "Conjugación francesa: ejercicios de verbos franceses en -ger",
 		description: "Una sola letra puede convertir una forma correcta en un error. Dominar los verbos en -ger ayuda a escribir nous mangeons y je voyageais correctamente y a entender sus cambios ortográficos.",
 		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos franceses en -ger. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "ger",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-franse-werkwoorden-op-ger",
+		title: "Franse vervoegingsoefening: Franse werkwoorden op -ger",
+		metaTitle: "Franse vervoeging oefenen: Franse werkwoorden op -ger",
+		description: "Eén letter kan een juiste vorm in een spelfout veranderen. Als je werkwoorden op -ger beheerst, schrijf je nous mangeons en je voyageais correct en begrijp je hun spellingveranderingen.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse werkwoorden op -ger. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "ger",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-franse-werkwoorden-op-ger",
+		title: "Franse vervoegingsoefening: Franse werkwoorden op -ger",
+		metaTitle: "Franse vervoeging oefenen: Franse werkwoorden op -ger",
+		description: "Eén letter kan een juiste vorm in een spelfout veranderen. Als je werkwoorden op -ger beheerst, schrijf je nous mangeons en je voyageais correct en begrijp je hun spellingveranderingen.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse werkwoorden op -ger. Kies de werkwoorden en tijden die je wilt oefenen.",
 		isPublished: true,
 		isIndexable: true,
 		overwriteExisting: false
@@ -127256,6 +128306,30 @@ var publications = [
 		overwriteExisting: false
 	},
 	{
+		presetKey: "cer",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-franse-werkwoorden-op-cer",
+		title: "Franse vervoegingsoefening: Franse werkwoorden op -cer",
+		metaTitle: "Franse vervoeging oefenen: Franse werkwoorden op -cer",
+		description: "Commencer, avancer en remplacer hebben soms een cedille nodig om de zachte c-klank te behouden. Weten wanneer je nous commençons of je plaçais schrijft, helpt je een veelgemaakte spelfout te vermijden.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse werkwoorden op -cer. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "cer",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-franse-werkwoorden-op-cer",
+		title: "Franse vervoegingsoefening: Franse werkwoorden op -cer",
+		metaTitle: "Franse vervoeging oefenen: Franse werkwoorden op -cer",
+		description: "Commencer, avancer en remplacer hebben soms een cedille nodig om de zachte c-klank te behouden. Weten wanneer je nous commençons of je plaçais schrijft, helpt je een veelgemaakte spelfout te vermijden.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse werkwoorden op -cer. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
 		presetKey: "ger-cer",
 		locale: "fr",
 		slug: "exercice-de-conjugaison-les-verbes-en-ger-et-en-cer",
@@ -127311,6 +128385,30 @@ var publications = [
 		metaTitle: "Conjugación francesa: ejercicios de verbos franceses en -ger y -cer",
 		description: "Los verbos en -ger y -cer cambian su ortografía para conservar la pronunciación. Comparar ambos modelos ayuda a elegir entre la e protectora y la cedilla.",
 		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos franceses en -ger y -cer. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "ger-cer",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-franse-werkwoorden-op-ger-en-cer",
+		title: "Franse vervoegingsoefening: Franse werkwoorden op -ger en -cer",
+		metaTitle: "Franse vervoeging oefenen: Franse werkwoorden op -ger en -cer",
+		description: "Franse werkwoorden op -ger en -cer veranderen van spelling om hun uitspraak te behouden. Door beide patronen te vergelijken, kies je snel tussen de extra e en de cedille.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse werkwoorden op -ger en -cer. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "ger-cer",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-franse-werkwoorden-op-ger-en-cer",
+		title: "Franse vervoegingsoefening: Franse werkwoorden op -ger en -cer",
+		metaTitle: "Franse vervoeging oefenen: Franse werkwoorden op -ger en -cer",
+		description: "Franse werkwoorden op -ger en -cer veranderen van spelling om hun uitspraak te behouden. Door beide patronen te vergelijken, kies je snel tussen de extra e en de cedille.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse werkwoorden op -ger en -cer. Kies de werkwoorden en tijden die je wilt oefenen.",
 		isPublished: true,
 		isIndexable: true,
 		overwriteExisting: false
@@ -127376,6 +128474,30 @@ var publications = [
 		overwriteExisting: false
 	},
 	{
+		presetKey: "sens-mouvement",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-franse-werkwoorden-van-beweging",
+		title: "Franse vervoegingsoefening: Franse werkwoorden van beweging",
+		metaTitle: "Franse vervoeging oefenen: Franse werkwoorden van beweging",
+		description: "Aller, venir, partir, arriver, entrer en sortir zijn onmisbaar om verplaatsingen, routes en plannen te beschrijven. Door ze vlot te vervoegen, spreek en schrijf je nauwkeuriger Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse werkwoorden van beweging. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-mouvement",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-franse-werkwoorden-van-beweging",
+		title: "Franse vervoegingsoefening: Franse werkwoorden van beweging",
+		metaTitle: "Franse vervoeging oefenen: Franse werkwoorden van beweging",
+		description: "Aller, venir, partir, arriver, entrer en sortir zijn onmisbaar om verplaatsingen, routes en plannen te beschrijven. Door ze vlot te vervoegen, spreek en schrijf je nauwkeuriger Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse werkwoorden van beweging. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
 		presetKey: "sens-communication",
 		locale: "fr",
 		slug: "exercice-de-conjugaison-les-verbes-de-communication",
@@ -127431,6 +128553,30 @@ var publications = [
 		metaTitle: "Conjugación francesa: ejercicios de verbos franceses de comunicación",
 		description: "Dire, parler, répondre, expliquer y raconter permiten compartir ideas y participar en conversaciones. Conjugarlos bien hace que la comunicación sea más clara y natural.",
 		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos franceses de comunicación. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-communication",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-franse-werkwoorden-van-communicatie",
+		title: "Franse vervoegingsoefening: Franse werkwoorden van communicatie",
+		metaTitle: "Franse vervoeging oefenen: Franse werkwoorden van communicatie",
+		description: "Dire, parler, répondre, expliquer en raconter helpen je ideeën te delen en deel te nemen aan gesprekken. Een juiste vervoeging maakt je communicatie duidelijker en natuurlijker.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse werkwoorden van communicatie. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-communication",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-franse-werkwoorden-van-communicatie",
+		title: "Franse vervoegingsoefening: Franse werkwoorden van communicatie",
+		metaTitle: "Franse vervoeging oefenen: Franse werkwoorden van communicatie",
+		description: "Dire, parler, répondre, expliquer en raconter helpen je ideeën te delen en deel te nemen aan gesprekken. Een juiste vervoeging maakt je communicatie duidelijker en natuurlijker.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse werkwoorden van communicatie. Kies de werkwoorden en tijden die je wilt oefenen.",
 		isPublished: true,
 		isIndexable: true,
 		overwriteExisting: false
@@ -127496,6 +128642,30 @@ var publications = [
 		overwriteExisting: false
 	},
 	{
+		presetKey: "sens-cognition",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-franse-werkwoorden-van-denken-en-weten",
+		title: "Franse vervoegingsoefening: Franse werkwoorden van denken en weten",
+		metaTitle: "Franse vervoeging oefenen: Franse werkwoorden van denken en weten",
+		description: "Penser, savoir, comprendre, apprendre en décider drukken meningen, kennis en keuzes uit. Als je ze beheerst, kun je ideeën precies en genuanceerd overbrengen.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse werkwoorden van denken en weten. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-cognition",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-franse-werkwoorden-van-denken-en-weten",
+		title: "Franse vervoegingsoefening: Franse werkwoorden van denken en weten",
+		metaTitle: "Franse vervoeging oefenen: Franse werkwoorden van denken en weten",
+		description: "Penser, savoir, comprendre, apprendre en décider drukken meningen, kennis en keuzes uit. Als je ze beheerst, kun je ideeën precies en genuanceerd overbrengen.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse werkwoorden van denken en weten. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
 		presetKey: "sens-emotion",
 		locale: "fr",
 		slug: "exercice-de-conjugaison-les-verbes-des-emotions",
@@ -127551,6 +128721,30 @@ var publications = [
 		metaTitle: "Conjugación francesa: ejercicios de verbos franceses de emoción",
 		description: "Aimer, préférer, craindre, rire y ressentir permiten hablar de gustos y emociones. Conjugarlos bien ayuda a expresar con precisión lo que se siente.",
 		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos franceses de emoción. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-emotion",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-franse-werkwoorden-van-gevoelens",
+		title: "Franse vervoegingsoefening: Franse werkwoorden van gevoelens",
+		metaTitle: "Franse vervoeging oefenen: Franse werkwoorden van gevoelens",
+		description: "Aimer, préférer, craindre, rire en ressentir helpen je over voorkeuren en gevoelens te praten. Met de juiste vervoeging druk je nauwkeuriger uit hoe je je voelt.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse werkwoorden van gevoelens. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-emotion",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-franse-werkwoorden-van-gevoelens",
+		title: "Franse vervoegingsoefening: Franse werkwoorden van gevoelens",
+		metaTitle: "Franse vervoeging oefenen: Franse werkwoorden van gevoelens",
+		description: "Aimer, préférer, craindre, rire en ressentir helpen je over voorkeuren en gevoelens te praten. Met de juiste vervoeging druk je nauwkeuriger uit hoe je je voelt.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse werkwoorden van gevoelens. Kies de werkwoorden en tijden die je wilt oefenen.",
 		isPublished: true,
 		isIndexable: true,
 		overwriteExisting: false
@@ -127616,6 +128810,30 @@ var publications = [
 		overwriteExisting: false
 	},
 	{
+		presetKey: "sens-corps",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-franse-werkwoorden-van-het-lichaam-en-behoeften",
+		title: "Franse vervoegingsoefening: Franse werkwoorden van het lichaam en behoeften",
+		metaTitle: "Franse vervoeging oefenen: Franse werkwoorden van het lichaam en behoeften",
+		description: "Manger, boire, dormir, respirer en se soigner zijn onmisbaar om over gezondheid en het dagelijkse leven te praten. Door ze correct te vervoegen, beschrijf je behoeften en gewoonten duidelijk.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse werkwoorden van het lichaam en behoeften. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "sens-corps",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-franse-werkwoorden-van-het-lichaam-en-behoeften",
+		title: "Franse vervoegingsoefening: Franse werkwoorden van het lichaam en behoeften",
+		metaTitle: "Franse vervoeging oefenen: Franse werkwoorden van het lichaam en behoeften",
+		description: "Manger, boire, dormir, respirer en se soigner zijn onmisbaar om over gezondheid en het dagelijkse leven te praten. Door ze correct te vervoegen, beschrijf je behoeften en gewoonten duidelijk.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse werkwoorden van het lichaam en behoeften. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
 		presetKey: "rares",
 		locale: "fr",
 		slug: "exercice-de-conjugaison-les-verbes-rares-ou-litteraires",
@@ -127671,6 +128889,30 @@ var publications = [
 		metaTitle: "Conjugación francesa: ejercicios de verbos franceses raros y literarios",
 		description: "Los verbos raros y literarios amplían el vocabulario y la comprensión lectora. Conjugarlos ayuda a entender mejor la literatura y descubrir los matices del francés.",
 		metaDescription: "Ejercicios personalizables de conjugación francesa sobre verbos franceses raros y literarios. Elige los verbos y tiempos adecuados para tu objetivo.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "rares",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-zeldzame-en-literaire-franse-werkwoorden",
+		title: "Franse vervoegingsoefening: zeldzame en literaire Franse werkwoorden",
+		metaTitle: "Franse vervoeging oefenen: zeldzame en literaire Franse werkwoorden",
+		description: "Zeldzame en literaire werkwoorden verrijken je woordenschat en verbeteren je leesbegrip. Door ze te vervoegen, begrijp je literatuur beter en ontdek je de nuances van het Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over zeldzame en literaire Franse werkwoorden. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "rares",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-zeldzame-en-literaire-franse-werkwoorden",
+		title: "Franse vervoegingsoefening: zeldzame en literaire Franse werkwoorden",
+		metaTitle: "Franse vervoeging oefenen: zeldzame en literaire Franse werkwoorden",
+		description: "Zeldzame en literaire werkwoorden verrijken je woordenschat en verbeteren je leesbegrip. Door ze te vervoegen, begrijp je literatuur beter en ontdek je de nuances van het Frans.",
+		metaDescription: "Franse vervoegingsoefeningen over zeldzame en literaire Franse werkwoorden. Kies de werkwoorden en tijden die je wilt oefenen.",
 		isPublished: true,
 		isIndexable: true,
 		overwriteExisting: false
@@ -127736,6 +128978,30 @@ var publications = [
 		overwriteExisting: false
 	},
 	{
+		presetKey: "difficiles",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-moeilijke-franse-werkwoorden",
+		title: "Franse vervoegingsoefening: moeilijke Franse werkwoorden",
+		metaTitle: "Franse vervoeging oefenen: moeilijke Franse werkwoorden",
+		description: "De moeilijkste Franse werkwoorden combineren vaak stamveranderingen met onregelmatige uitgangen. Gericht oefenen helpt je hun patronen te herkennen en terugkerende fouten weg te werken.",
+		metaDescription: "Franse vervoegingsoefeningen over moeilijke Franse werkwoorden. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "difficiles",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-moeilijke-franse-werkwoorden",
+		title: "Franse vervoegingsoefening: moeilijke Franse werkwoorden",
+		metaTitle: "Franse vervoeging oefenen: moeilijke Franse werkwoorden",
+		description: "De moeilijkste Franse werkwoorden combineren vaak stamveranderingen met onregelmatige uitgangen. Gericht oefenen helpt je hun patronen te herkennen en terugkerende fouten weg te werken.",
+		metaDescription: "Franse vervoegingsoefeningen over moeilijke Franse werkwoorden. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
 		presetKey: "pronominaux",
 		locale: "fr",
 		slug: "exercice-de-conjugaison-les-verbes-pronominaux-francais",
@@ -127796,6 +129062,30 @@ var publications = [
 		overwriteExisting: false
 	},
 	{
+		presetKey: "pronominaux",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-franse-wederkerende-werkwoorden",
+		title: "Franse vervoegingsoefening: Franse wederkerende werkwoorden",
+		metaTitle: "Franse vervoeging oefenen: Franse wederkerende werkwoorden",
+		description: "Se lever, s’habiller, se souvenir en se rencontrer zijn onmisbaar in het dagelijkse leven. Als je ze beheerst, plaats je het wederkerend voornaamwoord juist, kies je het juiste hulpwerkwoord en vorm je samengestelde tijden.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse wederkerende werkwoorden. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "pronominaux",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-franse-wederkerende-werkwoorden",
+		title: "Franse vervoegingsoefening: Franse wederkerende werkwoorden",
+		metaTitle: "Franse vervoeging oefenen: Franse wederkerende werkwoorden",
+		description: "Se lever, s’habiller, se souvenir en se rencontrer zijn onmisbaar in het dagelijkse leven. Als je ze beheerst, plaats je het wederkerend voornaamwoord juist, kies je het juiste hulpwerkwoord en vorm je samengestelde tijden.",
+		metaDescription: "Franse vervoegingsoefeningen over Franse wederkerende werkwoorden. Kies de werkwoorden en tijden die je wilt oefenen.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
 		presetKey: "CIF1",
 		locale: "fr",
 		slug: "exercice-de-conjugaison-fle-4-verbes-essentiels-niveau-cif-1",
@@ -127805,7 +129095,7 @@ var publications = [
 		metaDescription: "Exercice interactif de conjugaison FLE sur 4 verbes essentiels – niveau CIF 1. Choisis les verbes et les temps adaptés à ton apprentissage du français.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF1",
@@ -127817,7 +129107,7 @@ var publications = [
 		metaDescription: "Interaktive FLE-Übung zur französischen Konjugation: 4 wichtige Verben – Niveau CIF 1. Wähle passende Verben und Zeitformen.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF1",
@@ -127829,7 +129119,7 @@ var publications = [
 		metaDescription: "Interactive French as a foreign language (FLE) conjugation exercise on 4 essential verbs – CIF level 1. Choose the verbs and tenses you need.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF1",
@@ -127841,7 +129131,7 @@ var publications = [
 		metaDescription: "Esercizio interattivo di coniugazione FLE su 4 verbi essenziali – livello CIF 1. Scegli i verbi e i tempi adatti al tuo apprendimento.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF1",
@@ -127853,7 +129143,31 @@ var publications = [
 		metaDescription: "Ejercicio interactivo de conjugación FLE sobre 4 verbos esenciales – nivel CIF 1. Elige los verbos y tiempos adecuados para aprender francés.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
+	},
+	{
+		presetKey: "CIF1",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-voor-anderstaligen-4-essentiele-werkwoorden-cif-niveau-1",
+		title: "Franse vervoegingsoefening voor anderstaligen: 4 essentiële werkwoorden – CIF-niveau 1",
+		metaTitle: "Frans als vreemde taal: 4 essentiële werkwoorden – CIF-niveau 1",
+		description: "4 essentiële werkwoorden – CIF-niveau 1 vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+		metaDescription: "Interactieve Franse vervoegingsoefening (FLE): 4 essentiële werkwoorden – CIF-niveau 1. Kies de werkwoorden en tijden die je nodig hebt.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "CIF1",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-voor-anderstaligen-4-essentiele-werkwoorden-cif-niveau-1",
+		title: "Franse vervoegingsoefening voor anderstaligen: 4 essentiële werkwoorden – CIF-niveau 1",
+		metaTitle: "Frans als vreemde taal: 4 essentiële werkwoorden – CIF-niveau 1",
+		description: "4 essentiële werkwoorden – CIF-niveau 1 vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+		metaDescription: "Interactieve Franse vervoegingsoefening (FLE): 4 essentiële werkwoorden – CIF-niveau 1. Kies de werkwoorden en tijden die je nodig hebt.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF2",
@@ -127865,7 +129179,7 @@ var publications = [
 		metaDescription: "Exercice interactif de conjugaison FLE sur 12 verbes utiles – niveau CIF 2. Choisis les verbes et les temps adaptés à ton apprentissage du français.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF2",
@@ -127877,7 +129191,7 @@ var publications = [
 		metaDescription: "Interaktive FLE-Übung zur französischen Konjugation: 12 wichtige Verben – Niveau CIF 2. Wähle passende Verben und Zeitformen.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF2",
@@ -127889,7 +129203,7 @@ var publications = [
 		metaDescription: "Interactive French as a foreign language (FLE) conjugation exercise on 12 useful verbs – CIF level 2. Choose the verbs and tenses you need.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF2",
@@ -127901,7 +129215,7 @@ var publications = [
 		metaDescription: "Esercizio interattivo di coniugazione FLE su 12 verbi utili – livello CIF 2. Scegli i verbi e i tempi adatti al tuo apprendimento.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF2",
@@ -127913,7 +129227,31 @@ var publications = [
 		metaDescription: "Ejercicio interactivo de conjugación FLE sobre 12 verbos útiles – nivel CIF 2. Elige los verbos y tiempos adecuados para aprender francés.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
+	},
+	{
+		presetKey: "CIF2",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-voor-anderstaligen-12-nuttige-werkwoorden-cif-niveau-2",
+		title: "Franse vervoegingsoefening voor anderstaligen: 12 nuttige werkwoorden – CIF-niveau 2",
+		metaTitle: "Frans als vreemde taal: 12 nuttige werkwoorden – CIF-niveau 2",
+		description: "12 nuttige werkwoorden – CIF-niveau 2 vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+		metaDescription: "Interactieve Franse vervoegingsoefening (FLE): 12 nuttige werkwoorden – CIF-niveau 2. Kies de werkwoorden en tijden die je nodig hebt.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "CIF2",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-voor-anderstaligen-12-nuttige-werkwoorden-cif-niveau-2",
+		title: "Franse vervoegingsoefening voor anderstaligen: 12 nuttige werkwoorden – CIF-niveau 2",
+		metaTitle: "Frans als vreemde taal: 12 nuttige werkwoorden – CIF-niveau 2",
+		description: "12 nuttige werkwoorden – CIF-niveau 2 vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+		metaDescription: "Interactieve Franse vervoegingsoefening (FLE): 12 nuttige werkwoorden – CIF-niveau 2. Kies de werkwoorden en tijden die je nodig hebt.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF3",
@@ -127925,7 +129263,7 @@ var publications = [
 		metaDescription: "Exercice interactif de conjugaison FLE sur 12 verbes en -er – niveau CIF 3. Choisis les verbes et les temps adaptés à ton apprentissage du français.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF3",
@@ -127937,7 +129275,7 @@ var publications = [
 		metaDescription: "Interaktive FLE-Übung zur französischen Konjugation: 12 Verben auf -er – Niveau CIF 3. Wähle passende Verben und Zeitformen.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF3",
@@ -127949,7 +129287,7 @@ var publications = [
 		metaDescription: "Interactive French as a foreign language (FLE) conjugation exercise on 12 -er verbs – CIF level 3. Choose the verbs and tenses you need.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF3",
@@ -127961,7 +129299,7 @@ var publications = [
 		metaDescription: "Esercizio interattivo di coniugazione FLE su 12 verbi in -er – livello CIF 3. Scegli i verbi e i tempi adatti al tuo apprendimento.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF3",
@@ -127973,7 +129311,31 @@ var publications = [
 		metaDescription: "Ejercicio interactivo de conjugación FLE sobre 12 verbos en -er – nivel CIF 3. Elige los verbos y tiempos adecuados para aprender francés.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
+	},
+	{
+		presetKey: "CIF3",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-voor-anderstaligen-12-werkwoorden-op-er-cif-niveau-3",
+		title: "Franse vervoegingsoefening voor anderstaligen: 12 werkwoorden op -er – CIF-niveau 3",
+		metaTitle: "Frans als vreemde taal: 12 werkwoorden op -er – CIF-niveau 3",
+		description: "12 werkwoorden op -er – CIF-niveau 3 vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+		metaDescription: "Interactieve Franse vervoegingsoefening (FLE): 12 werkwoorden op -er – CIF-niveau 3. Kies de werkwoorden en tijden die je nodig hebt.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "CIF3",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-voor-anderstaligen-12-werkwoorden-op-er-cif-niveau-3",
+		title: "Franse vervoegingsoefening voor anderstaligen: 12 werkwoorden op -er – CIF-niveau 3",
+		metaTitle: "Frans als vreemde taal: 12 werkwoorden op -er – CIF-niveau 3",
+		description: "12 werkwoorden op -er – CIF-niveau 3 vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+		metaDescription: "Interactieve Franse vervoegingsoefening (FLE): 12 werkwoorden op -er – CIF-niveau 3. Kies de werkwoorden en tijden die je nodig hebt.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF4",
@@ -127985,7 +129347,7 @@ var publications = [
 		metaDescription: "Exercice interactif de conjugaison FLE sur 20 verbes utiles – niveau CIF 4. Choisis les verbes et les temps adaptés à ton apprentissage du français.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF4",
@@ -127997,7 +129359,7 @@ var publications = [
 		metaDescription: "Interaktive FLE-Übung zur französischen Konjugation: 20 wichtige Verben – Niveau CIF 4. Wähle passende Verben und Zeitformen.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF4",
@@ -128009,7 +129371,7 @@ var publications = [
 		metaDescription: "Interactive French as a foreign language (FLE) conjugation exercise on 20 useful verbs – CIF level 4. Choose the verbs and tenses you need.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF4",
@@ -128021,7 +129383,7 @@ var publications = [
 		metaDescription: "Esercizio interattivo di coniugazione FLE su 20 verbi utili – livello CIF 4. Scegli i verbi e i tempi adatti al tuo apprendimento.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "CIF4",
@@ -128033,7 +129395,31 @@ var publications = [
 		metaDescription: "Ejercicio interactivo de conjugación FLE sobre 20 verbos útiles – nivel CIF 4. Elige los verbos y tiempos adecuados para aprender francés.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
+	},
+	{
+		presetKey: "CIF4",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-voor-anderstaligen-20-nuttige-werkwoorden-cif-niveau-4",
+		title: "Franse vervoegingsoefening voor anderstaligen: 20 nuttige werkwoorden – CIF-niveau 4",
+		metaTitle: "Frans als vreemde taal: 20 nuttige werkwoorden – CIF-niveau 4",
+		description: "20 nuttige werkwoorden – CIF-niveau 4 vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+		metaDescription: "Interactieve Franse vervoegingsoefening (FLE): 20 nuttige werkwoorden – CIF-niveau 4. Kies de werkwoorden en tijden die je nodig hebt.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "CIF4",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-voor-anderstaligen-20-nuttige-werkwoorden-cif-niveau-4",
+		title: "Franse vervoegingsoefening voor anderstaligen: 20 nuttige werkwoorden – CIF-niveau 4",
+		metaTitle: "Frans als vreemde taal: 20 nuttige werkwoorden – CIF-niveau 4",
+		description: "20 nuttige werkwoorden – CIF-niveau 4 vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+		metaDescription: "Interactieve Franse vervoegingsoefening (FLE): 20 nuttige werkwoorden – CIF-niveau 4. Kies de werkwoorden en tijden die je nodig hebt.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
 	},
 	{
 		presetKey: "100-verbes-utiles-allophones",
@@ -128045,7 +129431,7 @@ var publications = [
 		metaDescription: "Exercice interactif de conjugaison FLE sur 100 verbes français utiles au quotidien. Choisis les verbes et les temps adaptés à ton apprentissage du français.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "100-verbes-utiles-allophones",
@@ -128057,7 +129443,7 @@ var publications = [
 		metaDescription: "Interaktive FLE-Übung zur französischen Konjugation: 100 wichtige französische Alltagsverben. Wähle passende Verben und Zeitformen.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "100-verbes-utiles-allophones",
@@ -128069,7 +129455,7 @@ var publications = [
 		metaDescription: "Interactive French as a foreign language (FLE) conjugation exercise on 100 useful everyday French verbs. Choose the verbs and tenses you need.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "100-verbes-utiles-allophones",
@@ -128081,7 +129467,7 @@ var publications = [
 		metaDescription: "Esercizio interattivo di coniugazione FLE su 100 verbi francesi utili ogni giorno. Scegli i verbi e i tempi adatti al tuo apprendimento.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
 	},
 	{
 		presetKey: "100-verbes-utiles-allophones",
@@ -128093,7 +129479,31 @@ var publications = [
 		metaDescription: "Ejercicio interactivo de conjugación FLE sobre 100 verbos franceses útiles para cada día. Elige los verbos y tiempos adecuados para aprender francés.",
 		isPublished: true,
 		isIndexable: true,
-		overwriteExisting: true
+		overwriteExisting: false
+	},
+	{
+		presetKey: "100-verbes-utiles-allophones",
+		locale: "nl",
+		slug: "franse-vervoegingsoefening-voor-anderstaligen-100-nuttige-franse-werkwoorden-voor-elke-dag",
+		title: "Franse vervoegingsoefening voor anderstaligen: 100 nuttige Franse werkwoorden voor elke dag",
+		metaTitle: "Frans als vreemde taal: 100 nuttige Franse werkwoorden voor elke dag",
+		description: "100 nuttige Franse werkwoorden voor elke dag vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+		metaDescription: "Interactieve Franse vervoegingsoefening (FLE): 100 nuttige Franse werkwoorden voor elke dag. Kies de werkwoorden en tijden die je nodig hebt.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
+	},
+	{
+		presetKey: "100-verbes-utiles-allophones",
+		locale: "nl-NL",
+		slug: "franse-vervoegingsoefening-voor-anderstaligen-100-nuttige-franse-werkwoorden-voor-elke-dag",
+		title: "Franse vervoegingsoefening voor anderstaligen: 100 nuttige Franse werkwoorden voor elke dag",
+		metaTitle: "Frans als vreemde taal: 100 nuttige Franse werkwoorden voor elke dag",
+		description: "100 nuttige Franse werkwoorden voor elke dag vormen een stapsgewijze vervoegingsoefening voor Frans als vreemde taal (FLE). Je oefent de vormen die je nodig hebt om Frans te begrijpen, te spreken en te schrijven in dagelijkse situaties.",
+		metaDescription: "Interactieve Franse vervoegingsoefening (FLE): 100 nuttige Franse werkwoorden voor elke dag. Kies de werkwoorden en tijden die je nodig hebt.",
+		isPublished: true,
+		isIndexable: true,
+		overwriteExisting: false
 	}
 ];
 const publicationDeployment = {
@@ -128118,48 +129528,54 @@ const PAYLOAD_KEYS = /* @__PURE__ */ new Set([
   "isIndexable"
 ]);
 const PUBLIC_CATEGORY_NAMES = {
-  school: {
+  school: withDutchVariants({
     fr: "Niveaux scolaires suisses",
     de: "Schweizer Schulstufen",
     en: "Swiss school levels",
     it: "Livelli scolastici svizzeri",
-    es: "Niveles escolares suizos"
-  },
-  "school-france": {
+    es: "Niveles escolares suizos",
+    nl: "Zwitserse schoolniveaus"
+  }),
+  "school-france": withDutchVariants({
     fr: "Niveaux scolaires fran\xE7ais",
     de: "Franz\xF6sische Schulstufen",
     en: "French school levels",
     it: "Livelli scolastici francesi",
-    es: "Niveles escolares franceses"
-  },
-  cif: {
+    es: "Niveles escolares franceses",
+    nl: "Franse schoolniveaus"
+  }),
+  cif: withDutchVariants({
     fr: "Conjugaison FLE (fran\xE7ais langue \xE9trang\xE8re)",
     de: "FLE-Konjugation (Franz\xF6sisch als Fremdsprache)",
     en: "FLE conjugation (French as a foreign language)",
     it: "Coniugazione FLE (francese lingua straniera)",
-    es: "Conjugaci\xF3n FLE (franc\xE9s como lengua extranjera)"
-  },
-  "verb-group": {
+    es: "Conjugaci\xF3n FLE (franc\xE9s como lengua extranjera)",
+    nl: "Vervoeging voor anderstaligen (FLE)"
+  }),
+  "verb-group": withDutchVariants({
     fr: "Groupes de verbes",
     de: "Verbgruppen",
     en: "Verb groups",
     it: "Gruppi verbali",
-    es: "Grupos verbales"
-  },
-  spelling: {
+    es: "Grupos verbales",
+    nl: "Werkwoordgroepen"
+  }),
+  spelling: withDutchVariants({
     fr: "Difficult\xE9s particuli\xE8res",
     de: "Besondere Schwierigkeiten",
     en: "Special difficulties",
     it: "Difficolt\xE0 particolari",
-    es: "Dificultades particulares"
-  },
-  semantic: {
+    es: "Dificultades particulares",
+    nl: "Bijzondere moeilijkheden"
+  }),
+  semantic: withDutchVariants({
     fr: "Sens des verbes",
     de: "Bedeutung der Verben",
     en: "Verb meanings",
     it: "Significato dei verbi",
-    es: "Significado de los verbos"
-  }
+    es: "Significado de los verbos",
+    nl: "Betekenissen van werkwoorden"
+  })
 };
 function publicChallengeCategoryName(categorySlug, locale, fallback) {
   var _a, _b;
@@ -128250,7 +129666,7 @@ const PUBLICATION_SELECT = `SELECT publication.id,publication.preset_id AS prese
   INNER JOIN challenge_preset_categories category ON category.id=preset.category_id`;
 async function listAdminChallengePublications(executor, presetId) {
   const [rows] = await executor.execute(`${PUBLICATION_SELECT}
-    WHERE publication.preset_id=? ORDER BY FIELD(publication.locale,'fr','de','en','it','es')`, [presetId]);
+    WHERE publication.preset_id=? ORDER BY FIELD(publication.locale,'fr','de','en','it','es','nl','nl-NL')`, [presetId]);
   return rows.map(adminPublication);
 }
 async function assertPresetExists(executor, presetId) {
@@ -128316,7 +129732,7 @@ async function saveChallengePublication(connection, presetId, locale, input) {
 async function translationsForPreset(executor, presetId) {
   const [rows] = await executor.execute(`SELECT preset_id AS presetId,locale,slug,
     is_published AS isPublished,is_indexable AS isIndexable
-    FROM challenge_preset_publications WHERE preset_id=? ORDER BY FIELD(locale,'fr','de','en','it','es')`, [presetId]);
+    FROM challenge_preset_publications WHERE preset_id=? ORDER BY FIELD(locale,'fr','de','en','it','es','nl','nl-NL')`, [presetId]);
   return groupChallengePublicationAlternates(rows);
 }
 async function resolveChallengePublication(executor, locale, slug) {
@@ -128381,7 +129797,7 @@ async function listPublishedChallengePublications(executor) {
   const [rows] = await executor.execute(`${PUBLICATION_SELECT}
     WHERE publication.is_published=1
       AND publication.slug IS NOT NULL AND preset.is_active=1 AND category.is_active=1
-    ORDER BY publication.preset_id,FIELD(publication.locale,'fr','de','en','it','es')`);
+    ORDER BY publication.preset_id,FIELD(publication.locale,'fr','de','en','it','es','nl','nl-NL')`);
   return rows.map((row) => ({
     presetId: Number(row.presetId),
     locale: parsePublicationLocale(row.locale),
@@ -128542,6 +129958,7 @@ _QQ3_jm_M8WHw8h_XJhiQZi3NFofRBeGDgShBG2LW_8,
 _W6EmE61CNpKiO0DniMnORvCS4gw0wKBQ2elDKHwm3Vk,
 _zCJu2owYZ87LBosIyRTpSguHxfCuM7YreKVJ9ejQI,
 _w0QUHKtU66TgEVl_bwejGdEUdejGy4Y7RJK0Z7Yygw,
+_BM2aMf_LpnFKDmoyJHuL0i26e47wzYSHG3DEteBjpGI,
 _wYG30FGQemqLmLbST78z6QMvoy0C4xbYVMTBui6HFE,
 _hJs6Cg1xnShsDlkk4p31LNin39zh62lLBUKatLF4M0,
 _JOsA3jUY7njW3XDKIBbVuT3Ysg9FEVxTIGHLvxX7BfI,
@@ -128553,6 +129970,7 @@ _eSq4K5b6RSeu3LcljONAV8BhPU4WPYxVU6csrhX9YqY,
 _DsNS3JEJlnvrCCIjdkld6dzfoTqGONHrJMrPWhd60,
 _Qvt69RZj56eCkoAFoZ87Qax4PcSt9omNAJjJjfRESY,
 _cJS8fUHbWPAFEGMrZY0adbH3sscbwPp1lUW6TfGNu0,
+_TJDDzaX5MabDduepDQbXt2Bfcp_c14LXHahj3FOzltw,
 _814zagFqZVirl0AX1ucCZ2bAOmJBBaFwhnjGyTDxIPY,
 _LWTxJ9fVHK_pU1jweRMv5kXnmrienJVgJyNp7a_45Bo,
 _0T1W4DkA4XhxQ3mqRSifwqf7ZnOeJX9jNfES0b6RQ,
@@ -128563,3166 +129981,3173 @@ const assets = {
   "/.htaccess": {
     "type": "text/plain; charset=utf-8",
     "etag": "\"e7-hG2groYZxk6L7QIuDysXtOp31qQ\"",
-    "mtime": "2026-09-02T12:36:35.460Z",
+    "mtime": "2026-09-05T12:08:26.384Z",
     "size": 231,
     "path": "../public/.htaccess"
   },
   "/admin-push-sw.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"630-1FkNEGm/zRHg0Yq1zs0jlZVqy84\"",
-    "mtime": "2026-09-02T12:36:35.460Z",
+    "mtime": "2026-09-05T12:08:26.384Z",
     "size": 1584,
     "path": "../public/admin-push-sw.js"
   },
   "/favicon.ico": {
     "type": "image/vnd.microsoft.icon",
     "etag": "\"10be-n8egyE9tcb7sKGr/pYCaQ4uWqxI\"",
-    "mtime": "2026-09-02T12:36:35.460Z",
+    "mtime": "2026-09-05T12:08:26.384Z",
     "size": 4286,
     "path": "../public/favicon.ico"
   },
   "/favicon.svg": {
     "type": "image/svg+xml",
     "etag": "\"74-WyA9ZQw0VL+p5r20HpGPoXfXkds\"",
-    "mtime": "2026-09-02T12:36:35.460Z",
+    "mtime": "2026-09-05T12:08:26.385Z",
     "size": 116,
     "path": "../public/favicon.svg"
   },
   "/robots.txt": {
     "type": "text/plain; charset=utf-8",
     "etag": "\"194-zYMBBhB4q/jcC5o0BldfXliaHug\"",
-    "mtime": "2026-09-02T12:36:35.460Z",
+    "mtime": "2026-09-05T12:08:26.386Z",
     "size": 404,
     "path": "../public/robots.txt"
   },
   "/theme-init.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1d9-trb/vp5w6iznW8QPXyFTu4zLuZs\"",
-    "mtime": "2026-09-02T12:36:35.460Z",
+    "mtime": "2026-09-05T12:08:26.385Z",
     "size": 473,
     "path": "../public/theme-init.js"
   },
   "/images/ancien-site.webp": {
     "type": "image/webp",
     "etag": "\"3746-e734D11Dqjfh5NlFidUXIfqJ//8\"",
-    "mtime": "2026-09-02T12:36:35.456Z",
+    "mtime": "2026-09-05T12:08:26.379Z",
     "size": 14150,
     "path": "../public/images/ancien-site.webp"
   },
   "/images/recharger-defi.svg": {
     "type": "image/svg+xml",
     "etag": "\"7da-sW4Yx/P5X4Hs5bsLkaNr7fae5Cw\"",
-    "mtime": "2026-09-02T12:36:35.457Z",
+    "mtime": "2026-09-05T12:08:26.379Z",
     "size": 2010,
     "path": "../public/images/recharger-defi.svg"
   },
   "/images/site-mountains.svg": {
     "type": "image/svg+xml",
     "etag": "\"2fdd-Kp0xCymtx14aH6SsI0yTF9+0o2s\"",
-    "mtime": "2026-09-02T12:36:35.457Z",
+    "mtime": "2026-09-05T12:08:26.379Z",
     "size": 12253,
     "path": "../public/images/site-mountains.svg"
   },
-  "/_nuxt/-1mgtcZx.js": {
+  "/_nuxt/-l3vnKl0.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"165a-9X6xGxzlY7KM6nuD+WUz16Svxak\"",
-    "mtime": "2026-09-02T12:36:35.435Z",
-    "size": 5722,
-    "path": "../public/_nuxt/-1mgtcZx.js"
+    "etag": "\"40-hjJ5c97ZX3n0HUPLf5EsHCK8cGs\"",
+    "mtime": "2026-09-05T12:08:26.355Z",
+    "size": 64,
+    "path": "../public/_nuxt/-l3vnKl0.js"
   },
-  "/_nuxt/5hUK_MB7.js": {
+  "/_nuxt/55Ujb4u6.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"30b-Vqnit001ZyZ/RsDshSj7pEt6iAE\"",
-    "mtime": "2026-09-02T12:36:35.426Z",
-    "size": 779,
-    "path": "../public/_nuxt/5hUK_MB7.js"
+    "etag": "\"a8e1-Wsj0/1DPt0K1o5+ivaLnF417ZdE\"",
+    "mtime": "2026-09-05T12:08:26.337Z",
+    "size": 43233,
+    "path": "../public/_nuxt/55Ujb4u6.js"
   },
-  "/_nuxt/8ox2Grpy.js": {
+  "/_nuxt/4BQaJomB.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"225f-ONSZeE03KDYGH1vrGjoGb7ezVwM\"",
-    "mtime": "2026-09-02T12:36:35.426Z",
-    "size": 8799,
-    "path": "../public/_nuxt/8ox2Grpy.js"
+    "etag": "\"ba3-4bdALyUsNf0WAgmQhwui0DuBvB4\"",
+    "mtime": "2026-09-05T12:08:26.336Z",
+    "size": 2979,
+    "path": "../public/_nuxt/4BQaJomB.js"
+  },
+  "/_nuxt/5RdBhqtK.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1627-+jLFDSlYBH7ZF/ePmY+ORM4kXQM\"",
+    "mtime": "2026-09-05T12:08:26.336Z",
+    "size": 5671,
+    "path": "../public/_nuxt/5RdBhqtK.js"
+  },
+  "/_nuxt/4WZmEwfT.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"26d1e-iudn7lve6utgEsHJx/OQGogEZ8Y\"",
+    "mtime": "2026-09-05T12:08:26.337Z",
+    "size": 159006,
+    "path": "../public/_nuxt/4WZmEwfT.js"
+  },
+  "/_nuxt/8p9dZ0jW.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"aeef-QcorjXb4Uvm6M/8cde4DtL7u5M4\"",
+    "mtime": "2026-09-05T12:08:26.337Z",
+    "size": 44783,
+    "path": "../public/_nuxt/8p9dZ0jW.js"
   },
   "/_nuxt/AdminAuthBoundary.DHoXYhWa.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1c12-XEnUtETb6UD7RNyeKpm3ySK5CEs\"",
-    "mtime": "2026-09-02T12:36:35.426Z",
+    "mtime": "2026-09-05T12:08:26.337Z",
     "size": 7186,
     "path": "../public/_nuxt/AdminAuthBoundary.DHoXYhWa.css"
   },
-  "/_nuxt/B-TfxkOe.js": {
+  "/_nuxt/8LySteQe.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"195ce-3Og2SFB79V2dw71240/fAsd0J1U\"",
-    "mtime": "2026-09-02T12:36:35.426Z",
-    "size": 103886,
-    "path": "../public/_nuxt/B-TfxkOe.js"
+    "etag": "\"1adb6-v+PE0yepwBqTZTkxTWd8rUioFuc\"",
+    "mtime": "2026-09-05T12:08:26.337Z",
+    "size": 110006,
+    "path": "../public/_nuxt/8LySteQe.js"
   },
-  "/_nuxt/B1TcDZsj.js": {
+  "/_nuxt/B2h3nsv0.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"ecf-Zz2jPkCBL4apx55222AT7sod4Vw\"",
-    "mtime": "2026-09-02T12:36:35.426Z",
-    "size": 3791,
-    "path": "../public/_nuxt/B1TcDZsj.js"
+    "etag": "\"bad2-YYgPUGMVPoYvBLL6jS5iCkEbbNI\"",
+    "mtime": "2026-09-05T12:08:26.338Z",
+    "size": 47826,
+    "path": "../public/_nuxt/B2h3nsv0.js"
   },
   "/_nuxt/B5YpkWhb.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"22e8-Qz4B3yppm/0bdHKcaUgqfOix/64\"",
-    "mtime": "2026-09-02T12:36:35.426Z",
+    "mtime": "2026-09-05T12:08:26.337Z",
     "size": 8936,
     "path": "../public/_nuxt/B5YpkWhb.js"
   },
   "/_nuxt/B8Nt-ERl.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"5a49-ESbUzwq0WOLhq2HY+Y3PhM254ME\"",
-    "mtime": "2026-09-02T12:36:35.426Z",
+    "mtime": "2026-09-05T12:08:26.338Z",
     "size": 23113,
     "path": "../public/_nuxt/B8Nt-ERl.js"
+  },
+  "/_nuxt/BC58qIDK.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1f9b-DaMdVvp5hA8nK+ClTCBE1XhNEfw\"",
+    "mtime": "2026-09-05T12:08:26.338Z",
+    "size": 8091,
+    "path": "../public/_nuxt/BC58qIDK.js"
   },
   "/_nuxt/BFRtefY3.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"44b-lO6eNchT+yYq+Hz3UbSAPMdsRh4\"",
-    "mtime": "2026-09-02T12:36:35.426Z",
+    "mtime": "2026-09-05T12:08:26.338Z",
     "size": 1099,
     "path": "../public/_nuxt/BFRtefY3.js"
   },
-  "/_nuxt/BFvswaj_.js": {
+  "/_nuxt/BF3xK3uj.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"40-hMaPsKI00o0v29ckvCML/87UIP0\"",
-    "mtime": "2026-09-02T12:36:35.426Z",
-    "size": 64,
-    "path": "../public/_nuxt/BFvswaj_.js"
+    "etag": "\"1f8e-zK6OuLWHRKKYK/uotH1UY4gDN/M\"",
+    "mtime": "2026-09-05T12:08:26.338Z",
+    "size": 8078,
+    "path": "../public/_nuxt/BF3xK3uj.js"
   },
-  "/_nuxt/B01IvU7H.js": {
+  "/_nuxt/BKryhTZ7.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"248b6-S8XhERL2lShCvNSTaL2qmZU+ZJw\"",
-    "mtime": "2026-09-02T12:36:35.426Z",
-    "size": 149686,
-    "path": "../public/_nuxt/B01IvU7H.js"
+    "etag": "\"402-YCGBeYZxtBccr0zO2wr4OPelQ3g\"",
+    "mtime": "2026-09-05T12:08:26.338Z",
+    "size": 1026,
+    "path": "../public/_nuxt/BKryhTZ7.js"
   },
-  "/_nuxt/BIksleGf.js": {
+  "/_nuxt/B2mgQS-N.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1f8d-SXYqXEprcTXEyxWzYZG1n+idT7k\"",
-    "mtime": "2026-09-02T12:36:35.426Z",
-    "size": 8077,
-    "path": "../public/_nuxt/BIksleGf.js"
-  },
-  "/_nuxt/BIw1vQB5.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"3f0a-6mX8UOsxIP8JadMfs7r2dl2MmKc\"",
-    "mtime": "2026-09-02T12:36:35.426Z",
-    "size": 16138,
-    "path": "../public/_nuxt/BIw1vQB5.js"
-  },
-  "/_nuxt/BLny927R.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"3a12-/mDdUPDhK3c8HYuUnyxLQi4sPQo\"",
-    "mtime": "2026-09-02T12:36:35.427Z",
-    "size": 14866,
-    "path": "../public/_nuxt/BLny927R.js"
-  },
-  "/_nuxt/BNPv2-g3.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"ae05-qulSWgsWyU321Rq3bhDXXFiXw9Q\"",
-    "mtime": "2026-09-02T12:36:35.427Z",
-    "size": 44549,
-    "path": "../public/_nuxt/BNPv2-g3.js"
-  },
-  "/_nuxt/BOF6v8rb.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"643fd-4eAFzvIrVx6RBdakASdECPaZDE0\"",
-    "mtime": "2026-09-02T12:36:35.427Z",
-    "size": 410621,
-    "path": "../public/_nuxt/BOF6v8rb.js"
+    "etag": "\"25ddc-KgN8v4u/rA8iu147pxylBhTi8mo\"",
+    "mtime": "2026-09-05T12:08:26.338Z",
+    "size": 155100,
+    "path": "../public/_nuxt/B2mgQS-N.js"
   },
   "/_nuxt/BRJ-Bmaj.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1c3-+ceDLI3oMBnysq0NFhT1lLgABv4\"",
-    "mtime": "2026-09-02T12:36:35.427Z",
+    "mtime": "2026-09-05T12:08:26.338Z",
     "size": 451,
     "path": "../public/_nuxt/BRJ-Bmaj.js"
   },
-  "/_nuxt/BPGaaBPe.js": {
+  "/_nuxt/BVmL8Hdk.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"35d5-EfS9u36cKODuHAM7kBTw7aibmL0\"",
-    "mtime": "2026-09-02T12:36:35.427Z",
-    "size": 13781,
-    "path": "../public/_nuxt/BPGaaBPe.js"
+    "etag": "\"3dda-gnweLYjAfKy+9VEseF3evr5W4/g\"",
+    "mtime": "2026-09-05T12:08:26.339Z",
+    "size": 15834,
+    "path": "../public/_nuxt/BVmL8Hdk.js"
   },
-  "/_nuxt/BSzElPly.js": {
+  "/_nuxt/Ba3LhDEj.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"402-ktfFTuRjb/7O10YuUYVsTHq9G24\"",
-    "mtime": "2026-09-02T12:36:35.427Z",
-    "size": 1026,
-    "path": "../public/_nuxt/BSzElPly.js"
+    "etag": "\"2d65-Nr3k2futcGkZBi/CKlSSujsfWlo\"",
+    "mtime": "2026-09-05T12:08:26.339Z",
+    "size": 11621,
+    "path": "../public/_nuxt/Ba3LhDEj.js"
   },
-  "/_nuxt/B_FD6dXT.js": {
+  "/_nuxt/BisXISwy.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"46e3-NGc2kwinUu9V+CQHivE/K3cZexQ\"",
-    "mtime": "2026-09-02T12:36:35.427Z",
-    "size": 18147,
-    "path": "../public/_nuxt/B_FD6dXT.js"
+    "etag": "\"c99a-TwH0l7vCd01ETz39hPsLe5f46mA\"",
+    "mtime": "2026-09-05T12:08:26.339Z",
+    "size": 51610,
+    "path": "../public/_nuxt/BisXISwy.js"
   },
-  "/_nuxt/BzT7cRCW.js": {
+  "/_nuxt/BkZPaNrA.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"dc6-pUnA2q/ake4QWGk69e83bpsir5E\"",
-    "mtime": "2026-09-02T12:36:35.427Z",
-    "size": 3526,
-    "path": "../public/_nuxt/BzT7cRCW.js"
+    "etag": "\"4b4f-gn4cTR9hlN17VMHKr73fYBUoiU8\"",
+    "mtime": "2026-09-05T12:08:26.339Z",
+    "size": 19279,
+    "path": "../public/_nuxt/BkZPaNrA.js"
+  },
+  "/_nuxt/Bll_p-I4.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"84b1-fX6EVHzgKwZ7I2SnV8DTUXklZ7k\"",
+    "mtime": "2026-09-05T12:08:26.340Z",
+    "size": 33969,
+    "path": "../public/_nuxt/Bll_p-I4.js"
+  },
+  "/_nuxt/Bo_8vR0u.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"990-/xSDLrPWOtSK6DgKBD+wSFk2jCo\"",
+    "mtime": "2026-09-05T12:08:26.340Z",
+    "size": 2448,
+    "path": "../public/_nuxt/Bo_8vR0u.js"
+  },
+  "/_nuxt/Bq1JiFHo.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"4c2-gIuw7oiNp44pB7hxYPaXVkYvJN8\"",
+    "mtime": "2026-09-05T12:08:26.340Z",
+    "size": 1218,
+    "path": "../public/_nuxt/Bq1JiFHo.js"
+  },
+  "/_nuxt/Brv_3oBd.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"23ef-f5fMlRHCne9FAdeVX/ijyy527CA\"",
+    "mtime": "2026-09-05T12:08:26.340Z",
+    "size": 9199,
+    "path": "../public/_nuxt/Brv_3oBd.js"
+  },
+  "/_nuxt/BxNCMeBj.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"f29-6/PW8nz/kZwCYw8/hV130eWRkp4\"",
+    "mtime": "2026-09-05T12:08:26.340Z",
+    "size": 3881,
+    "path": "../public/_nuxt/BxNCMeBj.js"
   },
   "/_nuxt/C-EF7JVS.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"bb0-q+sSNxfSFWDK/5T/IrkS20Q0R68\"",
-    "mtime": "2026-09-02T12:36:35.427Z",
+    "mtime": "2026-09-05T12:08:26.340Z",
     "size": 2992,
     "path": "../public/_nuxt/C-EF7JVS.js"
   },
-  "/_nuxt/C2hmAbfx.js": {
+  "/_nuxt/C0ZtXz8I.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"e2-34QGp19OAd66FQZUuvp9lpxXNGA\"",
-    "mtime": "2026-09-02T12:36:35.427Z",
-    "size": 226,
-    "path": "../public/_nuxt/C2hmAbfx.js"
+    "etag": "\"43a-13/1BsOAqnaUH9XBPKiQv+mb8H8\"",
+    "mtime": "2026-09-05T12:08:26.340Z",
+    "size": 1082,
+    "path": "../public/_nuxt/C0ZtXz8I.js"
   },
-  "/_nuxt/C31ccbbA.js": {
+  "/_nuxt/C1jNCHEW.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"24c-Hz/c8Eh90xSBNi0mWCnc9p3E+EU\"",
-    "mtime": "2026-09-02T12:36:35.427Z",
-    "size": 588,
-    "path": "../public/_nuxt/C31ccbbA.js"
+    "etag": "\"5f6e-SD3qCowDT0b403ZIFhxcY3ETav4\"",
+    "mtime": "2026-09-05T12:08:26.340Z",
+    "size": 24430,
+    "path": "../public/_nuxt/C1jNCHEW.js"
   },
-  "/_nuxt/C7-ccowF.js": {
+  "/_nuxt/C3kiMiS1.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"22f9-U2SNPBwO/nc/qxAdy3HCGLUdHdY\"",
-    "mtime": "2026-09-02T12:36:35.428Z",
-    "size": 8953,
-    "path": "../public/_nuxt/C7-ccowF.js"
+    "etag": "\"3a70-BAlaT7PWwabjDhRm/Mkqcudt4A4\"",
+    "mtime": "2026-09-05T12:08:26.340Z",
+    "size": 14960,
+    "path": "../public/_nuxt/C3kiMiS1.js"
   },
-  "/_nuxt/CEHU5LSm.js": {
+  "/_nuxt/C50SXgUb.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"12a-pM9pZv/ZJ6rYO3oRE7JXel2/HzU\"",
-    "mtime": "2026-09-02T12:36:35.428Z",
-    "size": 298,
-    "path": "../public/_nuxt/CEHU5LSm.js"
+    "etag": "\"d96-VlEGd2vOMCso1qryDxgJ38AkPSM\"",
+    "mtime": "2026-09-05T12:08:26.340Z",
+    "size": 3478,
+    "path": "../public/_nuxt/C50SXgUb.js"
   },
-  "/_nuxt/C4Sdh6yL.js": {
+  "/_nuxt/BOF6v8rb.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"5ff2-f4vTi+HR1Pej53qOpSTifGhzh9A\"",
-    "mtime": "2026-09-02T12:36:35.427Z",
-    "size": 24562,
-    "path": "../public/_nuxt/C4Sdh6yL.js"
+    "etag": "\"643fd-4eAFzvIrVx6RBdakASdECPaZDE0\"",
+    "mtime": "2026-09-05T12:08:26.339Z",
+    "size": 410621,
+    "path": "../public/_nuxt/BOF6v8rb.js"
+  },
+  "/_nuxt/CEnRCLMZ.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"2420-HxLdO3CxLMmyK/x4l+x2RZMMMxY\"",
+    "mtime": "2026-09-05T12:08:26.341Z",
+    "size": 9248,
+    "path": "../public/_nuxt/CEnRCLMZ.js"
   },
   "/_nuxt/CHsGr-GB.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"50b-5U6LLVkjislDAYgLVllQCAhmXm4\"",
-    "mtime": "2026-09-02T12:36:35.428Z",
+    "mtime": "2026-09-05T12:08:26.341Z",
     "size": 1291,
     "path": "../public/_nuxt/CHsGr-GB.js"
   },
-  "/_nuxt/CNfRx-wj.js": {
+  "/_nuxt/CAiSE__F.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"8ef7-nK9Nozn03JnycLWX39U1t35ZnFw\"",
-    "mtime": "2026-09-02T12:36:35.428Z",
-    "size": 36599,
-    "path": "../public/_nuxt/CNfRx-wj.js"
+    "etag": "\"553e-EVm8q7L3r5CFdZYbD5wmuQEDe5E\"",
+    "mtime": "2026-09-05T12:08:26.340Z",
+    "size": 21822,
+    "path": "../public/_nuxt/CAiSE__F.js"
+  },
+  "/_nuxt/CKAcjyc2.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"fb-YYuxL6lB/GbtWh/ZmjS3jwsEYUA\"",
+    "mtime": "2026-09-05T12:08:26.341Z",
+    "size": 251,
+    "path": "../public/_nuxt/CKAcjyc2.js"
+  },
+  "/_nuxt/BhR6GJcf.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"63418-lrjNn5yRbpTDQUooJbDwdRrpT/0\"",
+    "mtime": "2026-09-05T12:08:26.340Z",
+    "size": 406552,
+    "path": "../public/_nuxt/BhR6GJcf.js"
+  },
+  "/_nuxt/CJyzCP-6.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1766-6TVaKuMvS/O5r8cBhCkSvubx39o\"",
+    "mtime": "2026-09-05T12:08:26.341Z",
+    "size": 5990,
+    "path": "../public/_nuxt/CJyzCP-6.js"
+  },
+  "/_nuxt/CL5wIYNM.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"8e08-GzW9hT2NjTGrwNk1nJtiPCY//xs\"",
+    "mtime": "2026-09-05T12:08:26.341Z",
+    "size": 36360,
+    "path": "../public/_nuxt/CL5wIYNM.js"
+  },
+  "/_nuxt/CLyA6jtg.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"4962-JQjrD9Qi+S8E7a3UZd7e7ZUApFo\"",
+    "mtime": "2026-09-05T12:08:26.341Z",
+    "size": 18786,
+    "path": "../public/_nuxt/CLyA6jtg.js"
+  },
+  "/_nuxt/CC69SZDU.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"149547-2qUUxLkXf2sm8ZX3AruMr2g61jU\"",
+    "mtime": "2026-09-05T12:08:26.343Z",
+    "size": 1348935,
+    "path": "../public/_nuxt/CC69SZDU.js"
+  },
+  "/_nuxt/CTxDmmN9.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"17dd-OES5LilHuYZ+qPSW0tMkeugSM1Y\"",
+    "mtime": "2026-09-05T12:08:26.341Z",
+    "size": 6109,
+    "path": "../public/_nuxt/CTxDmmN9.js"
   },
   "/_nuxt/CR73arlb.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"79d0-ADJQWfaUv9HgWbLN4DgHI6iWzNs\"",
-    "mtime": "2026-09-02T12:36:35.428Z",
+    "mtime": "2026-09-05T12:08:26.341Z",
     "size": 31184,
     "path": "../public/_nuxt/CR73arlb.js"
   },
   "/_nuxt/CVB1eGFF.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"14cc-UCsKx6sqB2Wz0bOc7YJX+row4oM\"",
-    "mtime": "2026-09-02T12:36:35.428Z",
+    "mtime": "2026-09-05T12:08:26.341Z",
     "size": 5324,
     "path": "../public/_nuxt/CVB1eGFF.js"
   },
-  "/_nuxt/CXe6-ilQ.js": {
+  "/_nuxt/CWx2Hio1.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1c03-lsJxltlxF5kxocfOeAtjmtnSlM8\"",
-    "mtime": "2026-09-02T12:36:35.428Z",
-    "size": 7171,
-    "path": "../public/_nuxt/CXe6-ilQ.js"
+    "etag": "\"7e6-WYx/ECaG7zJkkZAy5OZbR89IYB4\"",
+    "mtime": "2026-09-05T12:08:26.342Z",
+    "size": 2022,
+    "path": "../public/_nuxt/CWx2Hio1.js"
   },
   "/_nuxt/CXlf8-D_.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"4bc-30DqI+ldm3I4v5fArgEYxpHU7+o\"",
-    "mtime": "2026-09-02T12:36:35.428Z",
+    "mtime": "2026-09-05T12:08:26.341Z",
     "size": 1212,
     "path": "../public/_nuxt/CXlf8-D_.js"
+  },
+  "/_nuxt/Cbnio6Ww.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"e2-HbG9bFFDLmacYrDt7LWn4Gm+/YQ\"",
+    "mtime": "2026-09-05T12:08:26.342Z",
+    "size": 226,
+    "path": "../public/_nuxt/Cbnio6Ww.js"
   },
   "/_nuxt/CfJh76KN.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"c5f-Ae2pl96xbET75nd+ihjyVYZrL8s\"",
-    "mtime": "2026-09-02T12:36:35.428Z",
+    "mtime": "2026-09-05T12:08:26.342Z",
     "size": 3167,
     "path": "../public/_nuxt/CfJh76KN.js"
   },
-  "/_nuxt/CgLu_V5b.js": {
+  "/_nuxt/Cfi26Ks-.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"174c-hQOoir/NxxunsALlrtKLNdL0HK8\"",
-    "mtime": "2026-09-02T12:36:35.429Z",
-    "size": 5964,
-    "path": "../public/_nuxt/CgLu_V5b.js"
+    "etag": "\"137c-edxEpOPNt+Lg9eGAdjhrtFhqizo\"",
+    "mtime": "2026-09-05T12:08:26.342Z",
+    "size": 4988,
+    "path": "../public/_nuxt/Cfi26Ks-.js"
   },
   "/_nuxt/ChatExercise.CydvEbUO.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"88bb-TDi7ppXRrhN5HqW9YoHpfk6wJ3A\"",
-    "mtime": "2026-09-02T12:36:35.429Z",
+    "mtime": "2026-09-05T12:08:26.342Z",
     "size": 35003,
     "path": "../public/_nuxt/ChatExercise.CydvEbUO.css"
-  },
-  "/_nuxt/Cfmi7sxr.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"848b-Y3vgzXxXaFhw5EeXI+c7QATLp7U\"",
-    "mtime": "2026-09-02T12:36:35.428Z",
-    "size": 33931,
-    "path": "../public/_nuxt/Cfmi7sxr.js"
-  },
-  "/_nuxt/CiJrS7kg.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"62d-ASFya8oi4Ab1Zqh7IZiSiyWmKW0\"",
-    "mtime": "2026-09-02T12:36:35.429Z",
-    "size": 1581,
-    "path": "../public/_nuxt/CiJrS7kg.js"
-  },
-  "/_nuxt/CdfjW6ba.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"5e478-k4fKz+ai+euEnjXxo6qGjVuHJTU\"",
-    "mtime": "2026-09-02T12:36:35.429Z",
-    "size": 386168,
-    "path": "../public/_nuxt/CdfjW6ba.js"
   },
   "/_nuxt/CjoFa3Ch.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"24e6-QKCNrjBirvyHs0Ti8hOrhjx2vpM\"",
-    "mtime": "2026-09-02T12:36:35.429Z",
+    "mtime": "2026-09-05T12:08:26.342Z",
     "size": 9446,
     "path": "../public/_nuxt/CjoFa3Ch.js"
-  },
-  "/_nuxt/CbldDXE5.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"149547-0z9qnkm9heXzNv0xD4/PLWKIf78\"",
-    "mtime": "2026-09-02T12:36:35.429Z",
-    "size": 1348935,
-    "path": "../public/_nuxt/CbldDXE5.js"
-  },
-  "/_nuxt/Clhi9zpm.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"bc0-apMuu6VjICo6QDTl09t2gCvKl1w\"",
-    "mtime": "2026-09-02T12:36:35.429Z",
-    "size": 3008,
-    "path": "../public/_nuxt/Clhi9zpm.js"
-  },
-  "/_nuxt/CmswLuX7.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"2b1c-NLJF+nsZ/0tqhfvbMBnDwNbtmhc\"",
-    "mtime": "2026-09-02T12:36:35.429Z",
-    "size": 11036,
-    "path": "../public/_nuxt/CmswLuX7.js"
   },
   "/_nuxt/CoYRKfuD.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"35-VNA0DjxaxUUvg8NcaUbo2abQ+oU\"",
-    "mtime": "2026-09-02T12:36:35.429Z",
+    "mtime": "2026-09-05T12:08:26.342Z",
     "size": 53,
     "path": "../public/_nuxt/CoYRKfuD.js"
-  },
-  "/_nuxt/CoachPicker.Dum6JffZ.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"ea2-vs0FkxwyFCU6MTR1H/zozEwqKKQ\"",
-    "mtime": "2026-09-02T12:36:35.429Z",
-    "size": 3746,
-    "path": "../public/_nuxt/CoachPicker.Dum6JffZ.css"
   },
   "/_nuxt/CoachHelpPanel.aYkz24MH.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"9a30-9yDv203vsrWa8j6kJuMpNf7i/sM\"",
-    "mtime": "2026-09-02T12:36:35.430Z",
+    "mtime": "2026-09-05T12:08:26.342Z",
     "size": 39472,
     "path": "../public/_nuxt/CoachHelpPanel.aYkz24MH.css"
   },
-  "/_nuxt/D1_xALWp.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"7936-YeCBNorrOndGh2cRH4Y/wo9Fh1M\"",
-    "mtime": "2026-09-02T12:36:35.430Z",
-    "size": 31030,
-    "path": "../public/_nuxt/D1_xALWp.js"
+  "/_nuxt/CoachPicker.Dum6JffZ.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"ea2-vs0FkxwyFCU6MTR1H/zozEwqKKQ\"",
+    "mtime": "2026-09-05T12:08:26.342Z",
+    "size": 3746,
+    "path": "../public/_nuxt/CoachPicker.Dum6JffZ.css"
   },
-  "/_nuxt/DAA9ls-n.js": {
+  "/_nuxt/Cp7e8g3t.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"7c6-J+4o7v4U4ydIpdWTTdDx2Js8lAE\"",
-    "mtime": "2026-09-02T12:36:35.430Z",
-    "size": 1990,
-    "path": "../public/_nuxt/DAA9ls-n.js"
+    "etag": "\"37a3-h4lUJ9v3wpdDg1ZJBrz0J/ytrqc\"",
+    "mtime": "2026-09-05T12:08:26.342Z",
+    "size": 14243,
+    "path": "../public/_nuxt/Cp7e8g3t.js"
   },
-  "/_nuxt/CsgBGHus.js": {
+  "/_nuxt/D4x97gjV.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"8e3b-k4nJQiMFk41bwTxX49Ua8XuWOCU\"",
-    "mtime": "2026-09-02T12:36:35.430Z",
-    "size": 36411,
-    "path": "../public/_nuxt/CsgBGHus.js"
-  },
-  "/_nuxt/DBazAeAS.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"4c2-ezngwJpEyVwe6u+9LPNMY38VYvc\"",
-    "mtime": "2026-09-02T12:36:35.430Z",
-    "size": 1218,
-    "path": "../public/_nuxt/DBazAeAS.js"
-  },
-  "/_nuxt/DBc-2B3y.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"4cf-bKNOPuwWZ6/Z6gyDtZWyun6yTEE\"",
-    "mtime": "2026-09-02T12:36:35.430Z",
-    "size": 1231,
-    "path": "../public/_nuxt/DBc-2B3y.js"
-  },
-  "/_nuxt/Cv9BBOY0.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"26d1e-BPoYfeMN/KNhDGSJELave/qkB9E\"",
-    "mtime": "2026-09-02T12:36:35.430Z",
-    "size": 159006,
-    "path": "../public/_nuxt/Cv9BBOY0.js"
-  },
-  "/_nuxt/DP147ujf.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"fc-A+N1my/g/cDKVPL6JOK8kEtiifA\"",
-    "mtime": "2026-09-02T12:36:35.430Z",
+    "etag": "\"fc-SPoGzm5TNTRvWseJCtRA3Aw6aAM\"",
+    "mtime": "2026-09-05T12:08:26.343Z",
     "size": 252,
-    "path": "../public/_nuxt/DP147ujf.js"
+    "path": "../public/_nuxt/D4x97gjV.js"
   },
-  "/_nuxt/DQcbWU9m.js": {
+  "/_nuxt/D1Hk9BCo.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"ed4-O/+EIjD3eP7LdrcID0fHPi4WX8s\"",
-    "mtime": "2026-09-02T12:36:35.430Z",
-    "size": 3796,
-    "path": "../public/_nuxt/DQcbWU9m.js"
+    "etag": "\"ae05-tY19RkJjRZVB3APCyYuhhPgDnPM\"",
+    "mtime": "2026-09-05T12:08:26.343Z",
+    "size": 44549,
+    "path": "../public/_nuxt/D1Hk9BCo.js"
   },
-  "/_nuxt/DRHF1PN8.js": {
+  "/_nuxt/DHUFhtDq.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"9e70-tgtNTB3BcKn3xtd8spRx3hhDKYM\"",
-    "mtime": "2026-09-02T12:36:35.430Z",
-    "size": 40560,
-    "path": "../public/_nuxt/DRHF1PN8.js"
+    "etag": "\"3759-Ln6r06hBHMYRI4xuecVJAzoMK+8\"",
+    "mtime": "2026-09-05T12:08:26.343Z",
+    "size": 14169,
+    "path": "../public/_nuxt/DHUFhtDq.js"
   },
-  "/_nuxt/DRzI58cA.js": {
+  "/_nuxt/CzunO8-X.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"3dda-cha06ncJNUws0wBekZuSs7aMPm4\"",
-    "mtime": "2026-09-02T12:36:35.430Z",
-    "size": 15834,
-    "path": "../public/_nuxt/DRzI58cA.js"
+    "etag": "\"5e478-QOEyPuaGzG4YRshxEi0rkHXOn24\"",
+    "mtime": "2026-09-05T12:08:26.344Z",
+    "size": 386168,
+    "path": "../public/_nuxt/CzunO8-X.js"
+  },
+  "/_nuxt/DJJ0W3vE.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"22f9-Yznz5d91bOi1Qc8SFKt0el1EXRk\"",
+    "mtime": "2026-09-05T12:08:26.343Z",
+    "size": 8953,
+    "path": "../public/_nuxt/DJJ0W3vE.js"
+  },
+  "/_nuxt/DN8zBN-I.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"33c-mmxJkrdzPsdVPzv24ai7b4hL4O0\"",
+    "mtime": "2026-09-05T12:08:26.343Z",
+    "size": 828,
+    "path": "../public/_nuxt/DN8zBN-I.js"
+  },
+  "/_nuxt/DQ8nQSzt.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"278e-0lF6sIy+WED2yDvhcuVpxTrcxb4\"",
+    "mtime": "2026-09-05T12:08:26.343Z",
+    "size": 10126,
+    "path": "../public/_nuxt/DQ8nQSzt.js"
+  },
+  "/_nuxt/DPA-pjEa.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"73a8-tXrYUa+YDEi4+9WAj4v0Xa6xVic\"",
+    "mtime": "2026-09-05T12:08:26.343Z",
+    "size": 29608,
+    "path": "../public/_nuxt/DPA-pjEa.js"
+  },
+  "/_nuxt/DQXUL1ai.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"2b48-JZLe1cp1fUOR4sWgerm/LkvhQoc\"",
+    "mtime": "2026-09-05T12:08:26.343Z",
+    "size": 11080,
+    "path": "../public/_nuxt/DQXUL1ai.js"
+  },
+  "/_nuxt/DV0ZR2sM.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"3a12-aYCYTKsrRxxr5kiWnLVoYD8ofXA\"",
+    "mtime": "2026-09-05T12:08:26.344Z",
+    "size": 14866,
+    "path": "../public/_nuxt/DV0ZR2sM.js"
   },
   "/_nuxt/DXEQVQnt.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"31151-TyUyRNm9rR2JDwpyAxcruTmmr6A\"",
-    "mtime": "2026-09-02T12:36:35.431Z",
+    "mtime": "2026-09-05T12:08:26.344Z",
     "size": 201041,
     "path": "../public/_nuxt/DXEQVQnt.js"
   },
-  "/_nuxt/DYAAt9PG.js": {
+  "/_nuxt/DXmUzcAs.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"2bb-6it5teq7K3WM1AVspV0NvJCTNz4\"",
-    "mtime": "2026-09-02T12:36:35.430Z",
-    "size": 699,
-    "path": "../public/_nuxt/DYAAt9PG.js"
-  },
-  "/_nuxt/DZclg-6C.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"2420-jin9NsbJkN44ezZqcDG1zp3Q9WM\"",
-    "mtime": "2026-09-02T12:36:35.430Z",
-    "size": 9248,
-    "path": "../public/_nuxt/DZclg-6C.js"
-  },
-  "/_nuxt/Dg_OJwy-.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"37a8-OFEy2U3VsIlruNLGBVSiD31uZPM\"",
-    "mtime": "2026-09-02T12:36:35.430Z",
-    "size": 14248,
-    "path": "../public/_nuxt/Dg_OJwy-.js"
-  },
-  "/_nuxt/DizLRu5S.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"fb-aujpNzV7fy8sF/QIjf1IymrQehE\"",
-    "mtime": "2026-09-02T12:36:35.431Z",
-    "size": 251,
-    "path": "../public/_nuxt/DizLRu5S.js"
+    "etag": "\"12a-1yLr4HPZCIxKeBWbvJlTvtDMlgo\"",
+    "mtime": "2026-09-05T12:08:26.344Z",
+    "size": 298,
+    "path": "../public/_nuxt/DXmUzcAs.js"
   },
   "/_nuxt/Dj4CfABu.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"6345-RnYNDiaKvisSouzs1GSYqwk0FRo\"",
-    "mtime": "2026-09-02T12:36:35.431Z",
+    "mtime": "2026-09-05T12:08:26.344Z",
     "size": 25413,
     "path": "../public/_nuxt/Dj4CfABu.js"
+  },
+  "/_nuxt/DaDG5FzH.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"195ce-o0vhTIh0vO316aUyh6+9X2E1Q3s\"",
+    "mtime": "2026-09-05T12:08:26.344Z",
+    "size": 103886,
+    "path": "../public/_nuxt/DaDG5FzH.js"
   },
   "/_nuxt/DlAUqK2U.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"5b-eFCz/UrraTh721pgAl0VxBNR1es\"",
-    "mtime": "2026-09-02T12:36:35.431Z",
+    "mtime": "2026-09-05T12:08:26.344Z",
     "size": 91,
     "path": "../public/_nuxt/DlAUqK2U.js"
   },
-  "/_nuxt/DmKK1puB.js": {
+  "/_nuxt/Dl8kG_wo.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"616-6knFyITtzU6mMJwIRmBz59XqjfU\"",
-    "mtime": "2026-09-02T12:36:35.431Z",
-    "size": 1558,
-    "path": "../public/_nuxt/DmKK1puB.js"
+    "etag": "\"8ef7-uBXvEq/hv+5Iob29jhdJNAgnLmM\"",
+    "mtime": "2026-09-05T12:08:26.344Z",
+    "size": 36599,
+    "path": "../public/_nuxt/Dl8kG_wo.js"
   },
-  "/_nuxt/DoO7IwrU.js": {
+  "/_nuxt/DlPpBJjm.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"bb2-Uo6X48cRWuCzuQ9hO+/CnAGUMx8\"",
-    "mtime": "2026-09-02T12:36:35.431Z",
-    "size": 2994,
-    "path": "../public/_nuxt/DoO7IwrU.js"
+    "etag": "\"4ef-+eu3OJISQzChj5IQjUp/pHrgf5U\"",
+    "mtime": "2026-09-05T12:08:26.344Z",
+    "size": 1263,
+    "path": "../public/_nuxt/DlPpBJjm.js"
   },
-  "/_nuxt/Dr3yi-sN.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"84c2-Wt04ezn8e100m6zfBtsMjVG0ZO0\"",
-    "mtime": "2026-09-02T12:36:35.431Z",
-    "size": 33986,
-    "path": "../public/_nuxt/Dr3yi-sN.js"
-  },
-  "/_nuxt/DvfQauxF.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"490c-pQcV+547qRlaPz0K2oLKk477gNU\"",
-    "mtime": "2026-09-02T12:36:35.431Z",
-    "size": 18700,
-    "path": "../public/_nuxt/DvfQauxF.js"
-  },
-  "/_nuxt/Dwkh6ES-.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"160-0USfM1lkWL4REIRn5Sl4W6g6Bcg\"",
-    "mtime": "2026-09-02T12:36:35.431Z",
-    "size": 352,
-    "path": "../public/_nuxt/Dwkh6ES-.js"
-  },
-  "/_nuxt/DzU-2wrS.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"2d65-pxOvFDRyz4YdxFCSIKBV+aZstyo\"",
-    "mtime": "2026-09-02T12:36:35.431Z",
-    "size": 11621,
-    "path": "../public/_nuxt/DzU-2wrS.js"
-  },
-  "/_nuxt/ExerciseSummaryPrintPreview.C8XaC7zm.css": {
+  "/_nuxt/ExerciseSummaryPrintPreview.DXPqfDFb.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"950-1x4d65zI9nWZnajwtz4giy3SeRc\"",
-    "mtime": "2026-09-02T12:36:35.431Z",
+    "etag": "\"950-vLa73S0TarwjlGMxFOR3I/AVLvc\"",
+    "mtime": "2026-09-05T12:08:26.345Z",
     "size": 2384,
-    "path": "../public/_nuxt/ExerciseSummaryPrintPreview.C8XaC7zm.css"
+    "path": "../public/_nuxt/ExerciseSummaryPrintPreview.DXPqfDFb.css"
   },
-  "/_nuxt/DwJlgxwD.js": {
+  "/_nuxt/DxgjJHN-.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1b888-L6Bxy30HqSejL+fsgWxg/c6mHnc\"",
-    "mtime": "2026-09-02T12:36:35.431Z",
-    "size": 112776,
-    "path": "../public/_nuxt/DwJlgxwD.js"
+    "etag": "\"1c03-U8Rfp6eChnP/NKM1U+NCfpAF3DU\"",
+    "mtime": "2026-09-05T12:08:26.344Z",
+    "size": 7171,
+    "path": "../public/_nuxt/DxgjJHN-.js"
+  },
+  "/_nuxt/NFDrb74e.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"ecf-h8pEm+JRVpOHrPspJxRkZuD+D1c\"",
+    "mtime": "2026-09-05T12:08:26.345Z",
+    "size": 3791,
+    "path": "../public/_nuxt/NFDrb74e.js"
   },
   "/_nuxt/PasswordInput.Bo7BswO2.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"3ab-krPYKdrCAQ+Cqj3Nu13l9SLwaHA\"",
-    "mtime": "2026-09-02T12:36:35.431Z",
+    "mtime": "2026-09-05T12:08:26.345Z",
     "size": 939,
     "path": "../public/_nuxt/PasswordInput.Bo7BswO2.css"
   },
-  "/_nuxt/LJyp1seS.js": {
+  "/_nuxt/RkwVitap.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"11ef3-E919ZNJdZnD3KDcG3oz7FyhGjNM\"",
-    "mtime": "2026-09-02T12:36:35.431Z",
-    "size": 73459,
-    "path": "../public/_nuxt/LJyp1seS.js"
+    "etag": "\"ef8-5mL6E5uiFII6ZpXZ+VXj1q4vO/4\"",
+    "mtime": "2026-09-05T12:08:26.345Z",
+    "size": 3832,
+    "path": "../public/_nuxt/RkwVitap.js"
   },
-  "/_nuxt/Teigbn0z.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"657-rHdHUfBTC74vLD09oKYXrCntmvE\"",
-    "mtime": "2026-09-02T12:36:35.432Z",
-    "size": 1623,
-    "path": "../public/_nuxt/Teigbn0z.js"
-  },
-  "/_nuxt/LearnerSpace.C5RE797U.css": {
+  "/_nuxt/LearnerSpace.DfT-QA8w.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"11d55-CLN3XIXO35Km87m6LPAwxHr3DBg\"",
-    "mtime": "2026-09-02T12:36:35.432Z",
-    "size": 73045,
-    "path": "../public/_nuxt/LearnerSpace.C5RE797U.css"
+    "etag": "\"13ded-fbt5Q7+2k/vYxiDamHgJiHUVw4Y\"",
+    "mtime": "2026-09-05T12:08:26.345Z",
+    "size": 81389,
+    "path": "../public/_nuxt/LearnerSpace.DfT-QA8w.css"
   },
   "/_nuxt/VaSPOPhr.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"7032-uZQ20bhcE4YqMv2bJ83N97r01ek\"",
-    "mtime": "2026-09-02T12:36:35.432Z",
+    "mtime": "2026-09-05T12:08:26.345Z",
     "size": 28722,
     "path": "../public/_nuxt/VaSPOPhr.js"
   },
-  "/_nuxt/WizardChallengeWorkspace.DW_XpFIL.css": {
+  "/_nuxt/WizardChallengeWorkspace.DKpfCzpC.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"d931-mdoKLbS32beDzB/XSTCoZnwE9+A\"",
-    "mtime": "2026-09-02T12:36:35.432Z",
+    "etag": "\"d931-NJSEGcXxrMKFOM716x/BYaZAc7o\"",
+    "mtime": "2026-09-05T12:08:26.346Z",
     "size": 55601,
-    "path": "../public/_nuxt/WizardChallengeWorkspace.DW_XpFIL.css"
+    "path": "../public/_nuxt/WizardChallengeWorkspace.DKpfCzpC.css"
+  },
+  "/_nuxt/ZMKLhjZG.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"b66-D4ILEQdE0fAMfvBi/qSPDhKNpfE\"",
+    "mtime": "2026-09-05T12:08:26.345Z",
+    "size": 2918,
+    "path": "../public/_nuxt/ZMKLhjZG.js"
   },
   "/_nuxt/_parcours_.Cq2EBnsY.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"d51-Y1nkHkKjv3B/qb7m0liupiPIOGU\"",
-    "mtime": "2026-09-02T12:36:35.432Z",
+    "mtime": "2026-09-05T12:08:26.346Z",
     "size": 3409,
     "path": "../public/_nuxt/_parcours_.Cq2EBnsY.css"
   },
-  "/_nuxt/ZRM2fPXq.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"c9ab-hJNqE/DbzDIS1XigBLGQraU33hs\"",
-    "mtime": "2026-09-02T12:36:35.432Z",
-    "size": 51627,
-    "path": "../public/_nuxt/ZRM2fPXq.js"
-  },
-  "/_nuxt/ZziFL5pR.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"b3a8-Y1qZcHnRAB/9GoWkaCRn5gHJ8vI\"",
-    "mtime": "2026-09-02T12:36:35.432Z",
-    "size": 45992,
-    "path": "../public/_nuxt/ZziFL5pR.js"
-  },
-  "/_nuxt/_slug_.BLOOk21-.css": {
+  "/_nuxt/_slug_.C7Qe_hQc.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"45-PGpppsSKUPDHgbCes9GdwTlNFJU\"",
-    "mtime": "2026-09-02T12:36:35.432Z",
+    "etag": "\"45-nLj5l1z86kSEQyHHv9dJC9iolFU\"",
+    "mtime": "2026-09-05T12:08:26.346Z",
     "size": 69,
-    "path": "../public/_nuxt/_slug_.BLOOk21-.css"
+    "path": "../public/_nuxt/_slug_.C7Qe_hQc.css"
   },
-  "/_nuxt/_temps_.ClMUGZN1.css": {
+  "/_nuxt/_temps_.ZfEtDN8m.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"1a22-wZE3L27yd2DBgMg6tZnV/Fmlxjk\"",
-    "mtime": "2026-09-02T12:36:35.432Z",
+    "etag": "\"1a22-IJgT+1PmdbdzvLOtCoSwapWVqWw\"",
+    "mtime": "2026-09-05T12:08:26.346Z",
     "size": 6690,
-    "path": "../public/_nuxt/_temps_.ClMUGZN1.css"
+    "path": "../public/_nuxt/_temps_.ZfEtDN8m.css"
   },
-  "/_nuxt/_token_.B7F0uY3n.css": {
+  "/_nuxt/_token_.DJ5OGerv.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"dc9-gKIpdDDyfCaflWpIWoY9wtu9kx0\"",
-    "mtime": "2026-09-02T12:36:35.432Z",
+    "etag": "\"dc9-CwghYy2kMoYAtHaFa3AIM1hySNM\"",
+    "mtime": "2026-09-05T12:08:26.346Z",
     "size": 3529,
-    "path": "../public/_nuxt/_token_.B7F0uY3n.css"
-  },
-  "/_nuxt/Dyj7jj4W.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"5ab8c-CzKfbypfWDAYPjMp/QvkIxVJC2Q\"",
-    "mtime": "2026-09-02T12:36:35.432Z",
-    "size": 371596,
-    "path": "../public/_nuxt/Dyj7jj4W.js"
+    "path": "../public/_nuxt/_token_.DJ5OGerv.css"
   },
   "/_nuxt/admins.dzDkGKEv.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"919-IcW5l1f9k07twX9+HuwUcwEj4n0\"",
-    "mtime": "2026-09-02T12:36:35.432Z",
+    "mtime": "2026-09-05T12:08:26.346Z",
     "size": 2329,
     "path": "../public/_nuxt/admins.dzDkGKEv.css"
   },
-  "/_nuxt/apprendre.Dz6zW_x0.css": {
+  "/_nuxt/b_WvzMQw.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"616-RGjeg8frfaXdUCX6vATyz6HNxpU\"",
+    "mtime": "2026-09-05T12:08:26.348Z",
+    "size": 1558,
+    "path": "../public/_nuxt/b_WvzMQw.js"
+  },
+  "/_nuxt/apprendre.DcIYaShe.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"3e28-UCYw18Tf88kcBmZIu2qYrBjP0OE\"",
-    "mtime": "2026-09-02T12:36:35.432Z",
+    "etag": "\"3e28-BWI4WDyvXP6PnQIS5NSmJIScDA0\"",
+    "mtime": "2026-09-05T12:08:26.346Z",
     "size": 15912,
-    "path": "../public/_nuxt/apprendre.Dz6zW_x0.css"
+    "path": "../public/_nuxt/apprendre.DcIYaShe.css"
   },
-  "/_nuxt/bAUb1e7I.js": {
+  "/_nuxt/bqDKqlNc.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1766-7393qKFZcblBgPJnOkTlJJ81HdQ\"",
-    "mtime": "2026-09-02T12:36:35.432Z",
-    "size": 5990,
-    "path": "../public/_nuxt/bAUb1e7I.js"
-  },
-  "/_nuxt/bxPP5_Hg.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"b2d-xyqPienKFZ3vFmcyI3x9Cs+12EE\"",
-    "mtime": "2026-09-02T12:36:35.432Z",
-    "size": 2861,
-    "path": "../public/_nuxt/bxPP5_Hg.js"
+    "etag": "\"aa75-LjQz2611DMdBtQxjj6ww4Oq6aIs\"",
+    "mtime": "2026-09-05T12:08:26.351Z",
+    "size": 43637,
+    "path": "../public/_nuxt/bqDKqlNc.js"
   },
   "/_nuxt/caracteres.BcNkZVio.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"5ed6-eQ6eNeASOetd0aeTsNNXynTuNLo\"",
-    "mtime": "2026-09-02T12:36:35.432Z",
+    "mtime": "2026-09-05T12:08:26.350Z",
     "size": 24278,
     "path": "../public/_nuxt/caracteres.BcNkZVio.css"
   },
-  "/_nuxt/challenges.D2wNsxIZ.css": {
+  "/_nuxt/challenges.CZPXscpO.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"303a-En3vl/y59ORpzpzx7nw5t9MZeS4\"",
-    "mtime": "2026-09-02T12:36:35.433Z",
-    "size": 12346,
-    "path": "../public/_nuxt/challenges.D2wNsxIZ.css"
-  },
-  "/_nuxt/charts.rg5xosni.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"f2ea-1lifFHb5CJAy2Pj6W6Wf7SlXqlg\"",
-    "mtime": "2026-09-02T12:36:35.433Z",
-    "size": 62186,
-    "path": "../public/_nuxt/charts.rg5xosni.css"
+    "etag": "\"3d1c-zylkSU3CpkO1xOg2tOvhd6X76FU\"",
+    "mtime": "2026-09-05T12:08:26.348Z",
+    "size": 15644,
+    "path": "../public/_nuxt/challenges.CZPXscpO.css"
   },
   "/_nuxt/coaches.BaDV-bQP.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"2220-x9RcJK5uh5+VaoyG5f2pdZ3z28E\"",
-    "mtime": "2026-09-02T12:36:35.433Z",
+    "mtime": "2026-09-05T12:08:26.350Z",
     "size": 8736,
     "path": "../public/_nuxt/coaches.BaDV-bQP.css"
   },
-  "/_nuxt/conjugaison-fle._JTH5P1i.css": {
+  "/_nuxt/charts.rg5xosni.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"b59-NB5C2blBkI2RUmCO3TsJjAPMivY\"",
-    "mtime": "2026-09-02T12:36:35.433Z",
+    "etag": "\"f2ea-1lifFHb5CJAy2Pj6W6Wf7SlXqlg\"",
+    "mtime": "2026-09-05T12:08:26.352Z",
+    "size": 62186,
+    "path": "../public/_nuxt/charts.rg5xosni.css"
+  },
+  "/_nuxt/conjugaison-fle.DaqVWH5M.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"b59-1QQ/R0WqLY/FVjwexnFWAWe/je0\"",
+    "mtime": "2026-09-05T12:08:26.350Z",
     "size": 2905,
-    "path": "../public/_nuxt/conjugaison-fle._JTH5P1i.css"
+    "path": "../public/_nuxt/conjugaison-fle.DaqVWH5M.css"
   },
   "/_nuxt/consulter.CKEeJjlW.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"4ee2-10rzcvn48oeTMxAFBa9g6fu10w8\"",
-    "mtime": "2026-09-02T12:36:35.433Z",
+    "mtime": "2026-09-05T12:08:26.352Z",
     "size": 20194,
     "path": "../public/_nuxt/consulter.CKEeJjlW.css"
   },
   "/_nuxt/contact.CEAlz-zn.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"8f4-ykOUqzOkUVv5IJI3yhju5VrDLdo\"",
-    "mtime": "2026-09-02T12:36:35.433Z",
+    "mtime": "2026-09-05T12:08:26.350Z",
     "size": 2292,
     "path": "../public/_nuxt/contact.CEAlz-zn.css"
-  },
-  "/_nuxt/d-6_CZ2F.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"3759-7gz0KPuYn0GiHPu3dIy2HFqGCYk\"",
-    "mtime": "2026-09-02T12:36:35.433Z",
-    "size": 14169,
-    "path": "../public/_nuxt/d-6_CZ2F.js"
   },
   "/_nuxt/driver.BndHJ0Kk.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"bdc-pZVw+h6Z7S/VWJ2Rk//0/Yz+nYE\"",
-    "mtime": "2026-09-02T12:36:35.433Z",
+    "mtime": "2026-09-05T12:08:26.352Z",
     "size": 3036,
     "path": "../public/_nuxt/driver.BndHJ0Kk.css"
   },
-  "/_nuxt/default.aS1oW1jY.css": {
+  "/_nuxt/default.D6lvDDqt.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"74e0-SvQs/s1A0IT8Wo9wj0AfUvgh3pg\"",
-    "mtime": "2026-09-02T12:36:35.433Z",
-    "size": 29920,
-    "path": "../public/_nuxt/default.aS1oW1jY.css"
+    "etag": "\"74ef-xYSINQMCuDwOYQMghnSTiISHU2I\"",
+    "mtime": "2026-09-05T12:08:26.352Z",
+    "size": 29935,
+    "path": "../public/_nuxt/default.D6lvDDqt.css"
   },
   "/_nuxt/e-ekCQbG.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"27a4-Mc2X3tIOv3VhU7DMVGV77BjV2E8\"",
-    "mtime": "2026-09-02T12:36:35.433Z",
+    "mtime": "2026-09-05T12:08:26.352Z",
     "size": 10148,
     "path": "../public/_nuxt/e-ekCQbG.js"
-  },
-  "/_nuxt/entry.DSV6iIrA.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"6934-/Q6f1TD60E0Nk69Kt/3tyG0Zpuc\"",
-    "mtime": "2026-09-02T12:36:35.433Z",
-    "size": 26932,
-    "path": "../public/_nuxt/entry.DSV6iIrA.css"
   },
   "/_nuxt/error-404.C3kT2QX-.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"97e-Xk26Nv4oQLpK3PtofolSggS9Z1M\"",
-    "mtime": "2026-09-02T12:36:35.434Z",
+    "mtime": "2026-09-05T12:08:26.352Z",
     "size": 2430,
     "path": "../public/_nuxt/error-404.C3kT2QX-.css"
   },
-  "/_nuxt/errors.BjGnDVcv.css": {
+  "/_nuxt/entry.DSV6iIrA.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"1362-+l8lZeseXcg1LBBZAI84EJMTHAg\"",
-    "mtime": "2026-09-02T12:36:35.434Z",
-    "size": 4962,
-    "path": "../public/_nuxt/errors.BjGnDVcv.css"
+    "etag": "\"6934-/Q6f1TD60E0Nk69Kt/3tyG0Zpuc\"",
+    "mtime": "2026-09-05T12:08:26.352Z",
+    "size": 26932,
+    "path": "../public/_nuxt/entry.DSV6iIrA.css"
   },
   "/_nuxt/error-500.BW0Y54Of.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"773-NSoEX19gPmM2NozVKWotHuvxtho\"",
-    "mtime": "2026-09-02T12:36:35.434Z",
+    "mtime": "2026-09-05T12:08:26.352Z",
     "size": 1907,
     "path": "../public/_nuxt/error-500.BW0Y54Of.css"
+  },
+  "/_nuxt/errors.BjGnDVcv.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"1362-+l8lZeseXcg1LBBZAI84EJMTHAg\"",
+    "mtime": "2026-09-05T12:08:26.352Z",
+    "size": 4962,
+    "path": "../public/_nuxt/errors.BjGnDVcv.css"
+  },
+  "/_nuxt/exercices-de-conjugaison.lxgEXarf.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"2c0-YJ583lrNkxObiMRq+ye1KMkIyL0\"",
+    "mtime": "2026-09-05T12:08:26.352Z",
+    "size": 704,
+    "path": "../public/_nuxt/exercices-de-conjugaison.lxgEXarf.css"
   },
   "/_nuxt/feedbacks.Dv4577Jd.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1ad1-0+dvY0xeP8LCHeEHdSR1f0my11o\"",
-    "mtime": "2026-09-02T12:36:35.434Z",
+    "mtime": "2026-09-05T12:08:26.353Z",
     "size": 6865,
     "path": "../public/_nuxt/feedbacks.Dv4577Jd.css"
   },
-  "/_nuxt/exercices-de-conjugaison.CWnJzGFA.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"2c0-3DaIH0BELF7UhQS5/+mWD49tRks\"",
-    "mtime": "2026-09-02T12:36:35.434Z",
-    "size": 704,
-    "path": "../public/_nuxt/exercices-de-conjugaison.CWnJzGFA.css"
-  },
-  "/_nuxt/help-verification.DODWt3zK.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"1e41-GtHymoSAF4psafTipM39PN7Xytg\"",
-    "mtime": "2026-09-02T12:36:35.434Z",
-    "size": 7745,
-    "path": "../public/_nuxt/help-verification.DODWt3zK.css"
-  },
-  "/_nuxt/gObwSbZj.js": {
+  "/_nuxt/fnts6q3I.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1f9b-hCWOlEjAR2Nno4o/bDBvqVrq4HE\"",
-    "mtime": "2026-09-02T12:36:35.434Z",
-    "size": 8091,
-    "path": "../public/_nuxt/gObwSbZj.js"
+    "etag": "\"262-4vtfx10q5b46cDnWD1mpitWIbiA\"",
+    "mtime": "2026-09-05T12:08:26.353Z",
+    "size": 610,
+    "path": "../public/_nuxt/fnts6q3I.js"
   },
   "/_nuxt/g6ucs01C.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"160-gtb4LsLA85Vn+6lu9juD+DKhlTM\"",
-    "mtime": "2026-09-02T12:36:35.434Z",
+    "mtime": "2026-09-05T12:08:26.353Z",
     "size": 352,
     "path": "../public/_nuxt/g6ucs01C.js"
+  },
+  "/_nuxt/glHdBey8.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"2d1-HwbfH0tCHFm1I6Ls5HOxQ3RflqA\"",
+    "mtime": "2026-09-05T12:08:26.353Z",
+    "size": 721,
+    "path": "../public/_nuxt/glHdBey8.js"
+  },
+  "/_nuxt/help-verification.DODWt3zK.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"1e41-GtHymoSAF4psafTipM39PN7Xytg\"",
+    "mtime": "2026-09-05T12:08:26.353Z",
+    "size": 7745,
+    "path": "../public/_nuxt/help-verification.DODWt3zK.css"
   },
   "/_nuxt/helps.DZJ6t0nO.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"2207-jtfvJZDC3TYKKO8XFRnFINfGF8k\"",
-    "mtime": "2026-09-02T12:36:35.434Z",
+    "mtime": "2026-09-05T12:08:26.353Z",
     "size": 8711,
     "path": "../public/_nuxt/helps.DZJ6t0nO.css"
   },
-  "/_nuxt/index.BGxLiiss.css": {
+  "/_nuxt/identification-form.BlbH7IDq.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"1445-4v2QEq6LaAcRoVOLkzxOtkLv184\"",
-    "mtime": "2026-09-02T12:36:35.434Z",
-    "size": 5189,
-    "path": "../public/_nuxt/index.BGxLiiss.css"
-  },
-  "/_nuxt/identification-form.B37d2ilM.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"25d1-kA2kN7iCaRmoFq88xg7iFCZRFy8\"",
-    "mtime": "2026-09-02T12:36:35.434Z",
+    "etag": "\"25d1-8aRRdBzUrAm8AVh3zTBd0Qe0aBk\"",
+    "mtime": "2026-09-05T12:08:26.353Z",
     "size": 9681,
-    "path": "../public/_nuxt/identification-form.B37d2ilM.css"
+    "path": "../public/_nuxt/identification-form.BlbH7IDq.css"
   },
-  "/_nuxt/index.CZerw0aR.css": {
+  "/_nuxt/index.ChbAW3l-.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"159e-4TMv0JRbkFsCZRtnWpWJzelyUK8\"",
-    "mtime": "2026-09-02T12:36:35.434Z",
+    "etag": "\"159e-pTWsW+v8dmyhwauI7AAQ+7JzL+s\"",
+    "mtime": "2026-09-05T12:08:26.353Z",
     "size": 5534,
-    "path": "../public/_nuxt/index.CZerw0aR.css"
+    "path": "../public/_nuxt/index.ChbAW3l-.css"
   },
-  "/_nuxt/l_-DW1eg.js": {
+  "/_nuxt/index.PIH2PDiU.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"1445-w5UooCkVzdBs/0rL4LFRAztGTQs\"",
+    "mtime": "2026-09-05T12:08:26.353Z",
+    "size": 5189,
+    "path": "../public/_nuxt/index.PIH2PDiU.css"
+  },
+  "/_nuxt/jNqv4UCU.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"137a-QQtBFkhcfk2M32iwKuoBjxEKnek\"",
-    "mtime": "2026-09-02T12:36:35.434Z",
-    "size": 4986,
-    "path": "../public/_nuxt/l_-DW1eg.js"
+    "etag": "\"bc0-EX4Swb0wE5lmH0OJlq8PKKsXrd4\"",
+    "mtime": "2026-09-05T12:08:26.353Z",
+    "size": 3008,
+    "path": "../public/_nuxt/jNqv4UCU.js"
+  },
+  "/_nuxt/lCLA8gdZ.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"657-+ciiSXhABSoKebn3WUSUZ2n+IM4\"",
+    "mtime": "2026-09-05T12:08:26.354Z",
+    "size": 1623,
+    "path": "../public/_nuxt/lCLA8gdZ.js"
   },
   "/_nuxt/literary-corpus.B2DRjof-.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1d49-4rT2LXp/VIU3wxeTP6DJcMLavx4\"",
-    "mtime": "2026-09-02T12:36:35.434Z",
+    "mtime": "2026-09-05T12:08:26.354Z",
     "size": 7497,
     "path": "../public/_nuxt/literary-corpus.B2DRjof-.css"
-  },
-  "/_nuxt/main.BVn6mx6N.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"cbc5-vqW2RZZyvRTlIW4IevdYibj5Zsc\"",
-    "mtime": "2026-09-02T12:36:35.435Z",
-    "size": 52165,
-    "path": "../public/_nuxt/main.BVn6mx6N.css"
   },
   "/_nuxt/mon-compte.Dd1pSVVr.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"c19-iFrdJXzcwNlsXbMwIx5pIVUg1cg\"",
-    "mtime": "2026-09-02T12:36:35.434Z",
+    "mtime": "2026-09-05T12:08:26.354Z",
     "size": 3097,
     "path": "../public/_nuxt/mon-compte.Dd1pSVVr.css"
   },
-  "/_nuxt/noLnz_VP.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"23cf-ThDw10nWXCn19UX6FZkMCruhgF4\"",
-    "mtime": "2026-09-02T12:36:35.435Z",
-    "size": 9167,
-    "path": "../public/_nuxt/noLnz_VP.js"
+  "/_nuxt/main.BVn6mx6N.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"cbc5-vqW2RZZyvRTlIW4IevdYibj5Zsc\"",
+    "mtime": "2026-09-05T12:08:26.354Z",
+    "size": 52165,
+    "path": "../public/_nuxt/main.BVn6mx6N.css"
   },
-  "/_nuxt/ohSpT_Zj.js": {
+  "/_nuxt/rAnCBfe3.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"e20-uJcUDptE2v3MGZ62vaVqShLbiro\"",
-    "mtime": "2026-09-02T12:36:35.435Z",
-    "size": 3616,
-    "path": "../public/_nuxt/ohSpT_Zj.js"
+    "etag": "\"174c-C94I/GWnJ6JaaH7QtGPnJ2H8DBM\"",
+    "mtime": "2026-09-05T12:08:26.354Z",
+    "size": 5964,
+    "path": "../public/_nuxt/rAnCBfe3.js"
+  },
+  "/_nuxt/ow6LBAoE.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"160-vKZ+6rIH9TXwYP8d6NWWYwgpIBY\"",
+    "mtime": "2026-09-05T12:08:26.354Z",
+    "size": 352,
+    "path": "../public/_nuxt/ow6LBAoE.js"
+  },
+  "/_nuxt/rh18b_ow.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"62d-VA73ajGb5a/O8a/x0ygQ951EGf8\"",
+    "mtime": "2026-09-05T12:08:26.354Z",
+    "size": 1581,
+    "path": "../public/_nuxt/rh18b_ow.js"
+  },
+  "/_nuxt/qCqDucOG.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1b964-C3hPAigh+936KSflZk5v1L9Yym0\"",
+    "mtime": "2026-09-05T12:08:26.355Z",
+    "size": 112996,
+    "path": "../public/_nuxt/qCqDucOG.js"
   },
   "/_nuxt/shared-summaries.ByFL8yZh.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"65b-PFjai3xJO+fBrqQOoI5SsmPeBzQ\"",
-    "mtime": "2026-09-02T12:36:35.435Z",
+    "mtime": "2026-09-05T12:08:26.354Z",
     "size": 1627,
     "path": "../public/_nuxt/shared-summaries.ByFL8yZh.css"
   },
   "/_nuxt/signin.Du-AyG8-.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"100e-T8sPE2nuhvu+ebwnW7ZqtwoALC4\"",
-    "mtime": "2026-09-02T12:36:35.435Z",
+    "mtime": "2026-09-05T12:08:26.354Z",
     "size": 4110,
     "path": "../public/_nuxt/signin.Du-AyG8-.css"
   },
   "/_nuxt/tests.BqPF9Zsa.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"39e7-GxuNd1OxNpLv+j5qgLOQuuK6myU\"",
-    "mtime": "2026-09-02T12:36:35.435Z",
+    "mtime": "2026-09-05T12:08:26.355Z",
     "size": 14823,
     "path": "../public/_nuxt/tests.BqPF9Zsa.css"
   },
   "/_nuxt/users.B1RX_mTk.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"24a0-GchT/cDiux2NRCiZ+VQBSZU7Iac\"",
-    "mtime": "2026-09-02T12:36:35.435Z",
+    "mtime": "2026-09-05T12:08:26.355Z",
     "size": 9376,
     "path": "../public/_nuxt/users.B1RX_mTk.css"
   },
-  "/_nuxt/vBNhFB1x.js": {
+  "/_nuxt/tnZ_E6o6.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"5f6e-Gw/p/CwgCwl/stTxakFyk7N4nA4\"",
-    "mtime": "2026-09-02T12:36:35.435Z",
-    "size": 24430,
-    "path": "../public/_nuxt/vBNhFB1x.js"
+    "etag": "\"8693-mrjuDzzOaNMroU9XSAK5Ftn76/w\"",
+    "mtime": "2026-09-05T12:08:26.355Z",
+    "size": 34451,
+    "path": "../public/_nuxt/tnZ_E6o6.js"
   },
   "/_nuxt/verbes.C567BY1t.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"488d-NTJnWUvJgIIojzRhFHQB1ji+PC0\"",
-    "mtime": "2026-09-02T12:36:35.435Z",
+    "mtime": "2026-09-05T12:08:26.355Z",
     "size": 18573,
     "path": "../public/_nuxt/verbes.C567BY1t.css"
-  },
-  "/_nuxt/xc6FGSoI.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"9971-PgHPQqVcE28WuPWknAZ+E6KlPy8\"",
-    "mtime": "2026-09-02T12:36:35.435Z",
-    "size": 39281,
-    "path": "../public/_nuxt/xc6FGSoI.js"
-  },
-  "/_nuxt/xyZRCJoX.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1627-pQKUNciva0q16/6AzVTzPAc/6eM\"",
-    "mtime": "2026-09-02T12:36:35.435Z",
-    "size": 5671,
-    "path": "../public/_nuxt/xyZRCJoX.js"
   },
   "/coach-media/avatars/amel.jpg": {
     "type": "image/jpeg",
     "etag": "\"bdc2-XpfseHXprhgQ2kOwJnuzEG4Szrk\"",
-    "mtime": "2026-09-02T12:36:35.458Z",
+    "mtime": "2026-09-05T12:08:26.381Z",
     "size": 48578,
     "path": "../public/coach-media/avatars/amel.jpg"
   },
   "/coach-media/avatars/camille.jpg": {
     "type": "image/jpeg",
     "etag": "\"8236-iF9IFpUQ41mOrk3DW4giaY2v1A4\"",
-    "mtime": "2026-09-02T12:36:35.461Z",
+    "mtime": "2026-09-05T12:08:26.385Z",
     "size": 33334,
     "path": "../public/coach-media/avatars/camille.jpg"
   },
   "/coach-media/avatars/claire.jpg": {
     "type": "image/jpeg",
     "etag": "\"c54e-brF3vVSmHDKtuq1fWp3D7oFg51M\"",
-    "mtime": "2026-09-02T12:36:35.461Z",
+    "mtime": "2026-09-05T12:08:26.385Z",
     "size": 50510,
     "path": "../public/coach-media/avatars/claire.jpg"
   },
   "/coach-media/avatars/gabriel.jpg": {
     "type": "image/jpeg",
     "etag": "\"bcf0-Gm00KTQi4TW4IfPKJlSbLvra1vY\"",
-    "mtime": "2026-09-02T12:36:35.461Z",
+    "mtime": "2026-09-05T12:08:26.385Z",
     "size": 48368,
     "path": "../public/coach-media/avatars/gabriel.jpg"
   },
   "/coach-media/avatars/hugo.jpg": {
     "type": "image/jpeg",
     "etag": "\"e0ab-BgIuErDh4c6iTXJy8Qw9D1fV2Y4\"",
-    "mtime": "2026-09-02T12:36:35.461Z",
+    "mtime": "2026-09-05T12:08:26.386Z",
     "size": 57515,
     "path": "../public/coach-media/avatars/hugo.jpg"
   },
   "/coach-media/avatars/karim.jpg": {
     "type": "image/jpeg",
     "etag": "\"f507-Nj981GfUvc5eTvpZtyN0ieyiCHU\"",
-    "mtime": "2026-09-02T12:36:35.461Z",
+    "mtime": "2026-09-05T12:08:26.386Z",
     "size": 62727,
     "path": "../public/coach-media/avatars/karim.jpg"
-  },
-  "/_nuxt/sAXZTHtI.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"d96-p9tw8TqUcTV+9PlOSPe7uO2YDxQ\"",
-    "mtime": "2026-09-02T12:36:35.435Z",
-    "size": 3478,
-    "path": "../public/_nuxt/sAXZTHtI.js"
   },
   "/coach-media/avatars/lea.jpg": {
     "type": "image/jpeg",
     "etag": "\"f9f5-I+UeknSzltKnBgxau2s+TTvCXzM\"",
-    "mtime": "2026-09-02T12:36:35.461Z",
+    "mtime": "2026-09-05T12:08:26.386Z",
     "size": 63989,
     "path": "../public/coach-media/avatars/lea.jpg"
   },
   "/coach-media/avatars/nora.jpg": {
     "type": "image/jpeg",
     "etag": "\"f434-vbQD186KDkY42S4uGz7cixTeM3Y\"",
-    "mtime": "2026-09-02T12:36:35.461Z",
+    "mtime": "2026-09-05T12:08:26.386Z",
     "size": 62516,
     "path": "../public/coach-media/avatars/nora.jpg"
-  },
-  "/coach-media/avatars/lucas.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"10f02-mIKj8itqNevLJJvdMQvCLra5sZs\"",
-    "mtime": "2026-09-02T12:36:35.461Z",
-    "size": 69378,
-    "path": "../public/coach-media/avatars/lucas.jpg"
   },
   "/coach-media/avatars/sami.jpg": {
     "type": "image/jpeg",
     "etag": "\"b13e-AVASgC2NUl9cEqNeVXQZf710AtI\"",
-    "mtime": "2026-09-02T12:36:35.461Z",
+    "mtime": "2026-09-05T12:08:26.387Z",
     "size": 45374,
     "path": "../public/coach-media/avatars/sami.jpg"
   },
-  "/coach-media/avatars/zoe.jpg": {
+  "/coach-media/avatars/lucas.jpg": {
     "type": "image/jpeg",
-    "etag": "\"c393-S8Ro+/yzyBY+cBCNNh6M59U1lLI\"",
-    "mtime": "2026-09-02T12:36:35.461Z",
-    "size": 50067,
-    "path": "../public/coach-media/avatars/zoe.jpg"
+    "etag": "\"10f02-mIKj8itqNevLJJvdMQvCLra5sZs\"",
+    "mtime": "2026-09-05T12:08:26.387Z",
+    "size": 69378,
+    "path": "../public/coach-media/avatars/lucas.jpg"
   },
   "/coach-media/avatars/thomas.jpg": {
     "type": "image/jpeg",
     "etag": "\"cf97-C0nHicl9/0pZcc6nPoN1AK6qGxg\"",
-    "mtime": "2026-09-02T12:36:35.461Z",
+    "mtime": "2026-09-05T12:08:26.387Z",
     "size": 53143,
     "path": "../public/coach-media/avatars/thomas.jpg"
   },
-  "/coach-media/avatars-cartoon/10f80bed-4250-41d9-8a65-fbaa5deba408.png": {
-    "type": "image/png",
-    "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
-    "mtime": "2026-09-02T12:36:35.463Z",
-    "size": 1882140,
-    "path": "../public/coach-media/avatars-cartoon/10f80bed-4250-41d9-8a65-fbaa5deba408.png"
+  "/coach-media/avatars/zoe.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"c393-S8Ro+/yzyBY+cBCNNh6M59U1lLI\"",
+    "mtime": "2026-09-05T12:08:26.387Z",
+    "size": 50067,
+    "path": "../public/coach-media/avatars/zoe.jpg"
   },
   "/coach-media/avatars-cartoon/Defi-de-conjugaison.pdf": {
     "type": "application/pdf",
     "etag": "\"1971-GvyCFxsExS5nnjCoRJihmJWjW1Y\"",
-    "mtime": "2026-09-02T12:36:35.471Z",
+    "mtime": "2026-09-05T12:08:26.401Z",
     "size": 6513,
     "path": "../public/coach-media/avatars-cartoon/Defi-de-conjugaison.pdf"
   },
-  "/coach-media/people/T01.06.01.xlsx": {
-    "type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "etag": "\"dcc6-yJKLWkGDw+a72V9Ge5nDtMengWg\"",
-    "mtime": "2026-09-02T12:36:35.458Z",
-    "size": 56518,
-    "path": "../public/coach-media/people/T01.06.01.xlsx"
-  },
-  "/coach-media/people/portrait1.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"8236-iF9IFpUQ41mOrk3DW4giaY2v1A4\"",
-    "mtime": "2026-09-02T12:36:35.475Z",
-    "size": 33334,
-    "path": "../public/coach-media/people/portrait1.jpg"
-  },
-  "/coach-media/people/200.webp": {
-    "type": "image/webp",
-    "etag": "\"1d696-kiyalxZWWq76I5xPP32p65sny50\"",
-    "mtime": "2026-09-02T12:36:35.475Z",
-    "size": 120470,
-    "path": "../public/coach-media/people/200.webp"
-  },
-  "/coach-media/people/portrait10.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"13242-oU9sw67fXaoOhBCspE1ufcKQVJk\"",
-    "mtime": "2026-09-02T12:36:35.475Z",
-    "size": 78402,
-    "path": "../public/coach-media/people/portrait10.jpg"
-  },
-  "/coach-media/people/portrait11.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"122fb-lSrwI6GnjcqOU7p9bL3eLB6zbPk\"",
-    "mtime": "2026-09-02T12:36:35.476Z",
-    "size": 74491,
-    "path": "../public/coach-media/people/portrait11.jpg"
-  },
-  "/coach-media/people/portrait12.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"f434-vbQD186KDkY42S4uGz7cixTeM3Y\"",
-    "mtime": "2026-09-02T12:36:35.476Z",
-    "size": 62516,
-    "path": "../public/coach-media/people/portrait12.jpg"
-  },
-  "/coach-media/people/portrait13.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e0ab-BgIuErDh4c6iTXJy8Qw9D1fV2Y4\"",
-    "mtime": "2026-09-02T12:36:35.476Z",
-    "size": 57515,
-    "path": "../public/coach-media/people/portrait13.jpg"
-  },
-  "/coach-media/people/portrait14.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"10f02-mIKj8itqNevLJJvdMQvCLra5sZs\"",
-    "mtime": "2026-09-02T12:36:35.476Z",
-    "size": 69378,
-    "path": "../public/coach-media/people/portrait14.jpg"
-  },
-  "/coach-media/people/portrait15.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e76c-vSk8fJrHyAqX+V28777ha8WbgNQ\"",
-    "mtime": "2026-09-02T12:36:35.476Z",
-    "size": 59244,
-    "path": "../public/coach-media/people/portrait15.jpg"
-  },
-  "/coach-media/avatars-cartoon/19f352b5-75f2-449a-b441-7b8203da9e6f.png": {
+  "/coach-media/avatars-cartoon/10f80bed-4250-41d9-8a65-fbaa5deba408.png": {
     "type": "image/png",
-    "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
-    "mtime": "2026-09-02T12:36:35.463Z",
-    "size": 1696814,
-    "path": "../public/coach-media/avatars-cartoon/19f352b5-75f2-449a-b441-7b8203da9e6f.png"
+    "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
+    "mtime": "2026-09-05T12:08:26.384Z",
+    "size": 1882140,
+    "path": "../public/coach-media/avatars-cartoon/10f80bed-4250-41d9-8a65-fbaa5deba408.png"
   },
   "/coach-media/avatars-cartoon/42f6c648-e545-4d49-8f0b-518fb3a2d186.png": {
     "type": "image/png",
     "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
-    "mtime": "2026-09-02T12:36:35.468Z",
+    "mtime": "2026-09-05T12:08:26.398Z",
     "size": 1500823,
     "path": "../public/coach-media/avatars-cartoon/42f6c648-e545-4d49-8f0b-518fb3a2d186.png"
-  },
-  "/coach-media/avatars-cartoon/732fe1f9-b633-4261-bdf8-542b99b2a98c.png": {
-    "type": "image/png",
-    "etag": "\"172bf9-bwNVo0D3pGzvGYiYtpjtpXMEyow\"",
-    "mtime": "2026-09-02T12:36:35.469Z",
-    "size": 1518585,
-    "path": "../public/coach-media/avatars-cartoon/732fe1f9-b633-4261-bdf8-542b99b2a98c.png"
   },
   "/coach-media/avatars-cartoon/4f7a8330-834e-44e0-ad17-397d1e2a5891.png": {
     "type": "image/png",
     "etag": "\"15dca6-tSDm1naznyFNYIkdupEaTCi//zk\"",
-    "mtime": "2026-09-02T12:36:35.468Z",
+    "mtime": "2026-09-05T12:08:26.389Z",
     "size": 1432742,
     "path": "../public/coach-media/avatars-cartoon/4f7a8330-834e-44e0-ad17-397d1e2a5891.png"
+  },
+  "/coach-media/avatars-cartoon/732fe1f9-b633-4261-bdf8-542b99b2a98c.png": {
+    "type": "image/png",
+    "etag": "\"172bf9-bwNVo0D3pGzvGYiYtpjtpXMEyow\"",
+    "mtime": "2026-09-05T12:08:26.399Z",
+    "size": 1518585,
+    "path": "../public/coach-media/avatars-cartoon/732fe1f9-b633-4261-bdf8-542b99b2a98c.png"
   },
   "/coach-media/avatars-cartoon/8f23428e-ed2c-4938-9186-44447f1efcbe.png": {
     "type": "image/png",
     "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
-    "mtime": "2026-09-02T12:36:35.473Z",
+    "mtime": "2026-09-05T12:08:26.404Z",
     "size": 1562456,
     "path": "../public/coach-media/avatars-cartoon/8f23428e-ed2c-4938-9186-44447f1efcbe.png"
   },
   "/coach-media/avatars-cartoon/db266268-397e-4920-93bb-f134a85cd8b7.png": {
     "type": "image/png",
     "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
-    "mtime": "2026-09-02T12:36:35.476Z",
+    "mtime": "2026-09-05T12:08:26.406Z",
     "size": 1416623,
     "path": "../public/coach-media/avatars-cartoon/db266268-397e-4920-93bb-f134a85cd8b7.png"
-  },
-  "/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png": {
-    "type": "image/png",
-    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
-    "mtime": "2026-09-02T12:36:35.463Z",
-    "size": 1578337,
-    "path": "../public/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png"
-  },
-  "/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png": {
-    "type": "image/png",
-    "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
-    "mtime": "2026-09-02T12:36:35.463Z",
-    "size": 1745848,
-    "path": "../public/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png"
-  },
-  "/coach-media/avatars-cartoon/830a8cdd-fb26-4191-a673-42c5f28f2e73.png": {
-    "type": "image/png",
-    "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
-    "mtime": "2026-09-02T12:36:35.473Z",
-    "size": 1602205,
-    "path": "../public/coach-media/avatars-cartoon/830a8cdd-fb26-4191-a673-42c5f28f2e73.png"
-  },
-  "/coach-media/avatars-cartoon/1af3afdd-5c5a-41ef-b639-d2e415aaa4fd.png": {
-    "type": "image/png",
-    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
-    "mtime": "2026-09-02T12:36:35.460Z",
-    "size": 1993248,
-    "path": "../public/coach-media/avatars-cartoon/1af3afdd-5c5a-41ef-b639-d2e415aaa4fd.png"
-  },
-  "/coach-media/avatars-cartoon/8ced5816-480d-4d64-8e16-a33a743d155c.png": {
-    "type": "image/png",
-    "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
-    "mtime": "2026-09-02T12:36:35.473Z",
-    "size": 1785490,
-    "path": "../public/coach-media/avatars-cartoon/8ced5816-480d-4d64-8e16-a33a743d155c.png"
-  },
-  "/coach-media/avatars-cartoon/5da085b6-2b23-4338-bc79-31f5e9a4b5bc.png": {
-    "type": "image/png",
-    "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-09-02T12:36:35.469Z",
-    "size": 1993166,
-    "path": "../public/coach-media/avatars-cartoon/5da085b6-2b23-4338-bc79-31f5e9a4b5bc.png"
-  },
-  "/coach-media/avatars-cartoon/b970ff06-9199-44c9-90d3-4adf29466ef2.png": {
-    "type": "image/png",
-    "etag": "\"191b76-HQFygNHbvhIArIsnfMO1th0D4OU\"",
-    "mtime": "2026-09-02T12:36:35.473Z",
-    "size": 1645430,
-    "path": "../public/coach-media/avatars-cartoon/b970ff06-9199-44c9-90d3-4adf29466ef2.png"
-  },
-  "/coach-media/people/portrait16.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"cf97-C0nHicl9/0pZcc6nPoN1AK6qGxg\"",
-    "mtime": "2026-09-02T12:36:35.476Z",
-    "size": 53143,
-    "path": "../public/coach-media/people/portrait16.jpg"
-  },
-  "/coach-media/avatars-cartoon/fad8cab6-7cd9-454b-a967-00de62cdde32.png": {
-    "type": "image/png",
-    "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
-    "mtime": "2026-09-02T12:36:35.477Z",
-    "size": 1665643,
-    "path": "../public/coach-media/avatars-cartoon/fad8cab6-7cd9-454b-a967-00de62cdde32.png"
-  },
-  "/coach-media/people/portrait17.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"bcf0-Gm00KTQi4TW4IfPKJlSbLvra1vY\"",
-    "mtime": "2026-09-02T12:36:35.476Z",
-    "size": 48368,
-    "path": "../public/coach-media/people/portrait17.jpg"
-  },
-  "/coach-media/people/portrait19.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"c393-S8Ro+/yzyBY+cBCNNh6M59U1lLI\"",
-    "mtime": "2026-09-02T12:36:35.476Z",
-    "size": 50067,
-    "path": "../public/coach-media/people/portrait19.jpg"
-  },
-  "/coach-media/people/portrait18.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"c54e-brF3vVSmHDKtuq1fWp3D7oFg51M\"",
-    "mtime": "2026-09-02T12:36:35.476Z",
-    "size": 50510,
-    "path": "../public/coach-media/people/portrait18.jpg"
-  },
-  "/coach-media/people/portrait2.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"bcdc-0QQ4XzMu+rYTbqYvpc9NTeUA8tY\"",
-    "mtime": "2026-09-02T12:36:35.477Z",
-    "size": 48348,
-    "path": "../public/coach-media/people/portrait2.jpg"
-  },
-  "/coach-media/people/portrait20.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"b13e-AVASgC2NUl9cEqNeVXQZf710AtI\"",
-    "mtime": "2026-09-02T12:36:35.477Z",
-    "size": 45374,
-    "path": "../public/coach-media/people/portrait20.jpg"
-  },
-  "/coach-media/people/portrait21.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"f9f5-I+UeknSzltKnBgxau2s+TTvCXzM\"",
-    "mtime": "2026-09-02T12:36:35.477Z",
-    "size": 63989,
-    "path": "../public/coach-media/people/portrait21.jpg"
-  },
-  "/coach-media/people/portrait23.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"be4c-P8CT4CrVwbEaeQLat0jhjTQMjxo\"",
-    "mtime": "2026-09-02T12:36:35.477Z",
-    "size": 48716,
-    "path": "../public/coach-media/people/portrait23.jpg"
-  },
-  "/coach-media/people/portrait22.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"bdc2-XpfseHXprhgQ2kOwJnuzEG4Szrk\"",
-    "mtime": "2026-09-02T12:36:35.477Z",
-    "size": 48578,
-    "path": "../public/coach-media/people/portrait22.jpg"
-  },
-  "/coach-media/people/portrait24.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"abed-vXR8pegbgVS9EPJiKC3ZDRQ4dJg\"",
-    "mtime": "2026-09-02T12:36:35.477Z",
-    "size": 44013,
-    "path": "../public/coach-media/people/portrait24.jpg"
-  },
-  "/coach-media/people/portrait25.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e0a7-8029IuA0LaQ6Vf6lujX/+UuHaV0\"",
-    "mtime": "2026-09-02T12:36:35.477Z",
-    "size": 57511,
-    "path": "../public/coach-media/people/portrait25.jpg"
-  },
-  "/coach-media/people/portrait26.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"10adb-Y2avzIjFtKDJtMnigpGDItgDIK4\"",
-    "mtime": "2026-09-02T12:36:35.477Z",
-    "size": 68315,
-    "path": "../public/coach-media/people/portrait26.jpg"
-  },
-  "/coach-media/people/portrait27.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e758-fcjR+RePqA6Bh1Ol6SdhNalWKxo\"",
-    "mtime": "2026-09-02T12:36:35.477Z",
-    "size": 59224,
-    "path": "../public/coach-media/people/portrait27.jpg"
-  },
-  "/coach-media/people/portrait28.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"ab15-QtgsG93oCrKL2cWD/M5wqljszjg\"",
-    "mtime": "2026-09-02T12:36:35.477Z",
-    "size": 43797,
-    "path": "../public/coach-media/people/portrait28.jpg"
-  },
-  "/coach-media/people/portrait29.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"f507-Nj981GfUvc5eTvpZtyN0ieyiCHU\"",
-    "mtime": "2026-09-02T12:36:35.477Z",
-    "size": 62727,
-    "path": "../public/coach-media/people/portrait29.jpg"
-  },
-  "/coach-media/people/portrait3.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"ce90-1wGjSDgtEHb8AUpH3znLDA47jOw\"",
-    "mtime": "2026-09-02T12:36:35.478Z",
-    "size": 52880,
-    "path": "../public/coach-media/people/portrait3.jpg"
-  },
-  "/coach-media/people/portrait30.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"91aa-41JiP0aXvZq9y9u/b4pTIbC5DeU\"",
-    "mtime": "2026-09-02T12:36:35.477Z",
-    "size": 37290,
-    "path": "../public/coach-media/people/portrait30.jpg"
-  },
-  "/coach-media/people/portrait31.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"ee72-6mKQvP6WUZZaZuh//G3t4u0EMBg\"",
-    "mtime": "2026-09-02T12:36:35.478Z",
-    "size": 61042,
-    "path": "../public/coach-media/people/portrait31.jpg"
-  },
-  "/coach-media/people/portrait32.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"c2cc-IStqzFyonefLZL/ubYviGC+lI+w\"",
-    "mtime": "2026-09-02T12:36:35.478Z",
-    "size": 49868,
-    "path": "../public/coach-media/people/portrait32.jpg"
-  },
-  "/coach-media/people/portrait33.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e86f-wCIX8Pwsa0GqVd/2WH5WG1WSyNs\"",
-    "mtime": "2026-09-02T12:36:35.478Z",
-    "size": 59503,
-    "path": "../public/coach-media/people/portrait33.jpg"
-  },
-  "/coach-media/people/portrait34.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"1002d-6T6Xf9AX5UafZW2vbYEzj+5xvO0\"",
-    "mtime": "2026-09-02T12:36:35.478Z",
-    "size": 65581,
-    "path": "../public/coach-media/people/portrait34.jpg"
-  },
-  "/coach-media/people/portrait4.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"d171-TlrBkVdDwxLYUzqOqRWUkbkpkAo\"",
-    "mtime": "2026-09-02T12:36:35.478Z",
-    "size": 53617,
-    "path": "../public/coach-media/people/portrait4.jpg"
-  },
-  "/coach-media/people/portrait5.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"c82f-tvc7CKCgsthto9vLFPf7pJndf5o\"",
-    "mtime": "2026-09-02T12:36:35.478Z",
-    "size": 51247,
-    "path": "../public/coach-media/people/portrait5.jpg"
-  },
-  "/coach-media/people/portrait6.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"10235-GkA1z8RzeZJIqSW/DgPAy8/3Vj0\"",
-    "mtime": "2026-09-02T12:36:35.478Z",
-    "size": 66101,
-    "path": "../public/coach-media/people/portrait6.jpg"
-  },
-  "/coach-media/people/portrait7.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e4ac-HYcziHIjoK0r/C0hUk1bV4NjrUM\"",
-    "mtime": "2026-09-02T12:36:35.478Z",
-    "size": 58540,
-    "path": "../public/coach-media/people/portrait7.jpg"
-  },
-  "/coach-media/people/portrait8.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e800-jIBzhW7XT+HESqFyHPtIW1HuZc4\"",
-    "mtime": "2026-09-02T12:36:35.478Z",
-    "size": 59392,
-    "path": "../public/coach-media/people/portrait8.jpg"
-  },
-  "/coach-media/people/portrait9.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e386-JbEwT6JqpTHkIY1qDgk1a5zOrIc\"",
-    "mtime": "2026-09-02T12:36:35.478Z",
-    "size": 58246,
-    "path": "../public/coach-media/people/portrait9.jpg"
   },
   "/coach-media/uploads/538b12dc-7f77-437e-a281-3db72a0a987c.png": {
     "type": "image/png",
     "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
-    "mtime": "2026-09-02T12:36:35.480Z",
+    "mtime": "2026-09-05T12:08:26.418Z",
     "size": 1562456,
     "path": "../public/coach-media/uploads/538b12dc-7f77-437e-a281-3db72a0a987c.png"
   },
   "/coach-media/uploads/58a1f2ac-9ac5-4c89-9453-f96b177e021a.png": {
     "type": "image/png",
     "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
-    "mtime": "2026-09-02T12:36:35.479Z",
+    "mtime": "2026-09-05T12:08:26.418Z",
     "size": 1416623,
     "path": "../public/coach-media/uploads/58a1f2ac-9ac5-4c89-9453-f96b177e021a.png"
+  },
+  "/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png": {
+    "type": "image/png",
+    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
+    "mtime": "2026-09-05T12:08:26.389Z",
+    "size": 1578337,
+    "path": "../public/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png"
+  },
+  "/coach-media/avatars-cartoon/19f352b5-75f2-449a-b441-7b8203da9e6f.png": {
+    "type": "image/png",
+    "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
+    "mtime": "2026-09-05T12:08:26.409Z",
+    "size": 1696814,
+    "path": "../public/coach-media/avatars-cartoon/19f352b5-75f2-449a-b441-7b8203da9e6f.png"
+  },
+  "/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png": {
+    "type": "image/png",
+    "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
+    "mtime": "2026-09-05T12:08:26.398Z",
+    "size": 1745848,
+    "path": "../public/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png"
+  },
+  "/coach-media/avatars-cartoon/830a8cdd-fb26-4191-a673-42c5f28f2e73.png": {
+    "type": "image/png",
+    "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
+    "mtime": "2026-09-05T12:08:26.415Z",
+    "size": 1602205,
+    "path": "../public/coach-media/avatars-cartoon/830a8cdd-fb26-4191-a673-42c5f28f2e73.png"
+  },
+  "/coach-media/avatars-cartoon/b970ff06-9199-44c9-90d3-4adf29466ef2.png": {
+    "type": "image/png",
+    "etag": "\"191b76-HQFygNHbvhIArIsnfMO1th0D4OU\"",
+    "mtime": "2026-09-05T12:08:26.407Z",
+    "size": 1645430,
+    "path": "../public/coach-media/avatars-cartoon/b970ff06-9199-44c9-90d3-4adf29466ef2.png"
+  },
+  "/coach-media/avatars-cartoon/1af3afdd-5c5a-41ef-b639-d2e415aaa4fd.png": {
+    "type": "image/png",
+    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
+    "mtime": "2026-09-05T12:08:26.390Z",
+    "size": 1993248,
+    "path": "../public/coach-media/avatars-cartoon/1af3afdd-5c5a-41ef-b639-d2e415aaa4fd.png"
+  },
+  "/coach-media/avatars-cartoon/8ced5816-480d-4d64-8e16-a33a743d155c.png": {
+    "type": "image/png",
+    "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
+    "mtime": "2026-09-05T12:08:26.397Z",
+    "size": 1785490,
+    "path": "../public/coach-media/avatars-cartoon/8ced5816-480d-4d64-8e16-a33a743d155c.png"
+  },
+  "/coach-media/avatars-cartoon/5da085b6-2b23-4338-bc79-31f5e9a4b5bc.png": {
+    "type": "image/png",
+    "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
+    "mtime": "2026-09-05T12:08:26.390Z",
+    "size": 1993166,
+    "path": "../public/coach-media/avatars-cartoon/5da085b6-2b23-4338-bc79-31f5e9a4b5bc.png"
+  },
+  "/coach-media/uploads/06e4101b-298e-4352-bf66-f4ea7a350500.png": {
+    "type": "image/png",
+    "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
+    "mtime": "2026-09-05T12:08:26.426Z",
+    "size": 1785490,
+    "path": "../public/coach-media/uploads/06e4101b-298e-4352-bf66-f4ea7a350500.png"
+  },
+  "/coach-media/avatars-cartoon/fad8cab6-7cd9-454b-a967-00de62cdde32.png": {
+    "type": "image/png",
+    "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
+    "mtime": "2026-09-05T12:08:26.407Z",
+    "size": 1665643,
+    "path": "../public/coach-media/avatars-cartoon/fad8cab6-7cd9-454b-a967-00de62cdde32.png"
   },
   "/coach-media/uploads/2f16e10d-f885-45d1-9208-7faac71a6577.png": {
     "type": "image/png",
     "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
-    "mtime": "2026-09-02T12:36:35.480Z",
+    "mtime": "2026-09-05T12:08:26.384Z",
     "size": 1696814,
     "path": "../public/coach-media/uploads/2f16e10d-f885-45d1-9208-7faac71a6577.png"
   },
   "/coach-media/uploads/30fdf4c2-bf1e-492d-b2ee-e4c920be3e28.png": {
     "type": "image/png",
     "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
-    "mtime": "2026-09-02T12:36:35.491Z",
+    "mtime": "2026-09-05T12:08:26.416Z",
     "size": 1602205,
     "path": "../public/coach-media/uploads/30fdf4c2-bf1e-492d-b2ee-e4c920be3e28.png"
-  },
-  "/coach-media/uploads/06e4101b-298e-4352-bf66-f4ea7a350500.png": {
-    "type": "image/png",
-    "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
-    "mtime": "2026-09-02T12:36:35.460Z",
-    "size": 1785490,
-    "path": "../public/coach-media/uploads/06e4101b-298e-4352-bf66-f4ea7a350500.png"
   },
   "/coach-media/uploads/4f43eb0e-1591-4688-9a04-ad786c1ed617.png": {
     "type": "image/png",
     "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-09-02T12:36:35.480Z",
+    "mtime": "2026-09-05T12:08:26.414Z",
     "size": 1993166,
     "path": "../public/coach-media/uploads/4f43eb0e-1591-4688-9a04-ad786c1ed617.png"
   },
   "/coach-media/uploads/5b59b65b-55d0-4b8a-a0d0-37bf9385ba24.png": {
     "type": "image/png",
     "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
-    "mtime": "2026-09-02T12:36:35.489Z",
+    "mtime": "2026-09-05T12:08:26.421Z",
     "size": 1745848,
     "path": "../public/coach-media/uploads/5b59b65b-55d0-4b8a-a0d0-37bf9385ba24.png"
   },
   "/coach-media/uploads/5c10171b-755c-4d43-aa06-52e70ee0c28e.png": {
     "type": "image/png",
     "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
-    "mtime": "2026-09-02T12:36:35.484Z",
+    "mtime": "2026-09-05T12:08:26.423Z",
     "size": 1696814,
     "path": "../public/coach-media/uploads/5c10171b-755c-4d43-aa06-52e70ee0c28e.png"
   },
   "/coach-media/uploads/5d410305-96e0-4e99-ae37-0ad0346d2834.png": {
     "type": "image/png",
     "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
-    "mtime": "2026-09-02T12:36:35.484Z",
+    "mtime": "2026-09-05T12:08:26.436Z",
     "size": 1785490,
     "path": "../public/coach-media/uploads/5d410305-96e0-4e99-ae37-0ad0346d2834.png"
+  },
+  "/coach-media/uploads/5fef96f4-0377-4736-b0e0-f084e8c0acb1.png": {
+    "type": "image/png",
+    "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
+    "mtime": "2026-09-05T12:08:26.431Z",
+    "size": 1602205,
+    "path": "../public/coach-media/uploads/5fef96f4-0377-4736-b0e0-f084e8c0acb1.png"
+  },
+  "/coach-media/people/200.webp": {
+    "type": "image/webp",
+    "etag": "\"1d696-kiyalxZWWq76I5xPP32p65sny50\"",
+    "mtime": "2026-09-05T12:08:26.382Z",
+    "size": 120470,
+    "path": "../public/coach-media/people/200.webp"
+  },
+  "/coach-media/people/T01.06.01.xlsx": {
+    "type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "etag": "\"dcc6-yJKLWkGDw+a72V9Ge5nDtMengWg\"",
+    "mtime": "2026-09-05T12:08:26.454Z",
+    "size": 56518,
+    "path": "../public/coach-media/people/T01.06.01.xlsx"
+  },
+  "/coach-media/people/portrait1.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"8236-iF9IFpUQ41mOrk3DW4giaY2v1A4\"",
+    "mtime": "2026-09-05T12:08:26.460Z",
+    "size": 33334,
+    "path": "../public/coach-media/people/portrait1.jpg"
+  },
+  "/coach-media/people/portrait10.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"13242-oU9sw67fXaoOhBCspE1ufcKQVJk\"",
+    "mtime": "2026-09-05T12:08:26.459Z",
+    "size": 78402,
+    "path": "../public/coach-media/people/portrait10.jpg"
+  },
+  "/coach-media/people/portrait11.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"122fb-lSrwI6GnjcqOU7p9bL3eLB6zbPk\"",
+    "mtime": "2026-09-05T12:08:26.461Z",
+    "size": 74491,
+    "path": "../public/coach-media/people/portrait11.jpg"
+  },
+  "/coach-media/people/portrait12.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"f434-vbQD186KDkY42S4uGz7cixTeM3Y\"",
+    "mtime": "2026-09-05T12:08:26.461Z",
+    "size": 62516,
+    "path": "../public/coach-media/people/portrait12.jpg"
+  },
+  "/coach-media/people/portrait13.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e0ab-BgIuErDh4c6iTXJy8Qw9D1fV2Y4\"",
+    "mtime": "2026-09-05T12:08:26.462Z",
+    "size": 57515,
+    "path": "../public/coach-media/people/portrait13.jpg"
+  },
+  "/coach-media/people/portrait14.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"10f02-mIKj8itqNevLJJvdMQvCLra5sZs\"",
+    "mtime": "2026-09-05T12:08:26.461Z",
+    "size": 69378,
+    "path": "../public/coach-media/people/portrait14.jpg"
   },
   "/coach-media/uploads/7c2bbc4c-d63f-430b-a18d-fcee64d2ee27.png": {
     "type": "image/png",
     "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
-    "mtime": "2026-09-02T12:36:35.484Z",
+    "mtime": "2026-09-05T12:08:26.426Z",
     "size": 1416623,
     "path": "../public/coach-media/uploads/7c2bbc4c-d63f-430b-a18d-fcee64d2ee27.png"
   },
   "/coach-media/uploads/841d5131-04ff-427b-893a-847773422907.png": {
     "type": "image/png",
     "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
-    "mtime": "2026-09-02T12:36:35.484Z",
+    "mtime": "2026-09-05T12:08:26.428Z",
     "size": 1562456,
     "path": "../public/coach-media/uploads/841d5131-04ff-427b-893a-847773422907.png"
-  },
-  "/coach-media/uploads/5fef96f4-0377-4736-b0e0-f084e8c0acb1.png": {
-    "type": "image/png",
-    "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
-    "mtime": "2026-09-02T12:36:35.489Z",
-    "size": 1602205,
-    "path": "../public/coach-media/uploads/5fef96f4-0377-4736-b0e0-f084e8c0acb1.png"
-  },
-  "/coach-media/uploads/849249ef-60fe-497d-a0cc-1ff6224e1035.png": {
-    "type": "image/png",
-    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
-    "mtime": "2026-09-02T12:36:35.489Z",
-    "size": 1993248,
-    "path": "../public/coach-media/uploads/849249ef-60fe-497d-a0cc-1ff6224e1035.png"
   },
   "/coach-media/uploads/c92ca73c-2c4e-4f00-8d40-78323ecc6d1d.png": {
     "type": "image/png",
     "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
-    "mtime": "2026-09-02T12:36:35.495Z",
+    "mtime": "2026-09-05T12:08:26.452Z",
     "size": 1500823,
     "path": "../public/coach-media/uploads/c92ca73c-2c4e-4f00-8d40-78323ecc6d1d.png"
-  },
-  "/coach-media/uploads/9e91555a-0c28-4378-8797-391dee96076d.png": {
-    "type": "image/png",
-    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
-    "mtime": "2026-09-02T12:36:35.489Z",
-    "size": 1993248,
-    "path": "../public/coach-media/uploads/9e91555a-0c28-4378-8797-391dee96076d.png"
   },
   "/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png": {
     "type": "image/png",
     "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
-    "mtime": "2026-09-02T12:36:35.497Z",
+    "mtime": "2026-09-05T12:08:26.453Z",
     "size": 1500823,
     "path": "../public/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png"
+  },
+  "/coach-media/uploads/9e91555a-0c28-4378-8797-391dee96076d.png": {
+    "type": "image/png",
+    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
+    "mtime": "2026-09-05T12:08:26.436Z",
+    "size": 1993248,
+    "path": "../public/coach-media/uploads/9e91555a-0c28-4378-8797-391dee96076d.png"
+  },
+  "/coach-media/uploads/849249ef-60fe-497d-a0cc-1ff6224e1035.png": {
+    "type": "image/png",
+    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
+    "mtime": "2026-09-05T12:08:26.436Z",
+    "size": 1993248,
+    "path": "../public/coach-media/uploads/849249ef-60fe-497d-a0cc-1ff6224e1035.png"
   },
   "/coach-media/uploads/a09d1eae-bb31-49b6-9b87-2f6b14cc7720.png": {
     "type": "image/png",
     "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
-    "mtime": "2026-09-02T12:36:35.491Z",
+    "mtime": "2026-09-05T12:08:26.436Z",
     "size": 1665643,
     "path": "../public/coach-media/uploads/a09d1eae-bb31-49b6-9b87-2f6b14cc7720.png"
   },
   "/coach-media/uploads/a1ec228e-1055-4648-9252-fb2dd6fb5a02.png": {
     "type": "image/png",
     "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-09-02T12:36:35.492Z",
+    "mtime": "2026-09-05T12:08:26.446Z",
     "size": 1993166,
     "path": "../public/coach-media/uploads/a1ec228e-1055-4648-9252-fb2dd6fb5a02.png"
   },
   "/coach-media/uploads/a2a433ff-1b21-482b-a9d9-6cb0da8146f4.png": {
     "type": "image/png",
     "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
-    "mtime": "2026-09-02T12:36:35.492Z",
+    "mtime": "2026-09-05T12:08:26.446Z",
     "size": 1745848,
     "path": "../public/coach-media/uploads/a2a433ff-1b21-482b-a9d9-6cb0da8146f4.png"
   },
   "/coach-media/uploads/ab818ee2-0431-430e-a9af-e78936417633.png": {
     "type": "image/png",
     "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
-    "mtime": "2026-09-02T12:36:35.495Z",
+    "mtime": "2026-09-05T12:08:26.446Z",
     "size": 1665643,
     "path": "../public/coach-media/uploads/ab818ee2-0431-430e-a9af-e78936417633.png"
   },
   "/coach-media/uploads/aed28159-a121-45cb-9dd1-16ecc349b84d.png": {
     "type": "image/png",
     "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
-    "mtime": "2026-09-02T12:36:35.495Z",
+    "mtime": "2026-09-05T12:08:26.446Z",
     "size": 1578337,
     "path": "../public/coach-media/uploads/aed28159-a121-45cb-9dd1-16ecc349b84d.png"
-  },
-  "/_nuxt/builds/latest.json": {
-    "type": "application/json",
-    "etag": "\"47-ykAtfqhROI0KEja+7uCf05NAIKQ\"",
-    "mtime": "2026-09-02T12:36:35.414Z",
-    "size": 71,
-    "path": "../public/_nuxt/builds/latest.json"
   },
   "/coach-media/uploads/bf6f3f5e-efca-4554-9963-44587811c0f8.png": {
     "type": "image/png",
     "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-09-02T12:36:35.497Z",
+    "mtime": "2026-09-05T12:08:26.454Z",
     "size": 1993166,
     "path": "../public/coach-media/uploads/bf6f3f5e-efca-4554-9963-44587811c0f8.png"
-  },
-  "/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png": {
-    "type": "image/png",
-    "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
-    "mtime": "2026-09-02T12:36:35.495Z",
-    "size": 1882140,
-    "path": "../public/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png"
   },
   "/coach-media/uploads/e5108547-b1b3-4c96-89ca-6e00c0d1c60a.png": {
     "type": "image/png",
     "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
-    "mtime": "2026-09-02T12:36:35.497Z",
+    "mtime": "2026-09-05T12:08:26.453Z",
     "size": 1882140,
     "path": "../public/coach-media/uploads/e5108547-b1b3-4c96-89ca-6e00c0d1c60a.png"
+  },
+  "/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png": {
+    "type": "image/png",
+    "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
+    "mtime": "2026-09-05T12:08:26.463Z",
+    "size": 1882140,
+    "path": "../public/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png"
   },
   "/coach-media/uploads/f8346f58-2678-4a95-aaa8-d37ba71ecb3b.png": {
     "type": "image/png",
     "etag": "\"191b76-HQFygNHbvhIArIsnfMO1th0D4OU\"",
-    "mtime": "2026-09-02T12:36:35.501Z",
+    "mtime": "2026-09-05T12:08:26.460Z",
     "size": 1645430,
     "path": "../public/coach-media/uploads/f8346f58-2678-4a95-aaa8-d37ba71ecb3b.png"
+  },
+  "/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png": {
+    "type": "image/png",
+    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
+    "mtime": "2026-09-05T12:08:26.460Z",
+    "size": 1578337,
+    "path": "../public/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png"
+  },
+  "/coach-media/people/portrait15.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e76c-vSk8fJrHyAqX+V28777ha8WbgNQ\"",
+    "mtime": "2026-09-05T12:08:26.463Z",
+    "size": 59244,
+    "path": "../public/coach-media/people/portrait15.jpg"
+  },
+  "/coach-media/people/portrait16.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"cf97-C0nHicl9/0pZcc6nPoN1AK6qGxg\"",
+    "mtime": "2026-09-05T12:08:26.463Z",
+    "size": 53143,
+    "path": "../public/coach-media/people/portrait16.jpg"
+  },
+  "/coach-media/people/portrait17.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"bcf0-Gm00KTQi4TW4IfPKJlSbLvra1vY\"",
+    "mtime": "2026-09-05T12:08:26.463Z",
+    "size": 48368,
+    "path": "../public/coach-media/people/portrait17.jpg"
+  },
+  "/coach-media/people/portrait18.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"c54e-brF3vVSmHDKtuq1fWp3D7oFg51M\"",
+    "mtime": "2026-09-05T12:08:26.463Z",
+    "size": 50510,
+    "path": "../public/coach-media/people/portrait18.jpg"
+  },
+  "/coach-media/people/portrait19.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"c393-S8Ro+/yzyBY+cBCNNh6M59U1lLI\"",
+    "mtime": "2026-09-05T12:08:26.463Z",
+    "size": 50067,
+    "path": "../public/coach-media/people/portrait19.jpg"
+  },
+  "/coach-media/people/portrait2.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"bcdc-0QQ4XzMu+rYTbqYvpc9NTeUA8tY\"",
+    "mtime": "2026-09-05T12:08:26.464Z",
+    "size": 48348,
+    "path": "../public/coach-media/people/portrait2.jpg"
+  },
+  "/coach-media/people/portrait20.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"b13e-AVASgC2NUl9cEqNeVXQZf710AtI\"",
+    "mtime": "2026-09-05T12:08:26.464Z",
+    "size": 45374,
+    "path": "../public/coach-media/people/portrait20.jpg"
+  },
+  "/coach-media/people/portrait21.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"f9f5-I+UeknSzltKnBgxau2s+TTvCXzM\"",
+    "mtime": "2026-09-05T12:08:26.464Z",
+    "size": 63989,
+    "path": "../public/coach-media/people/portrait21.jpg"
+  },
+  "/coach-media/people/portrait22.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"bdc2-XpfseHXprhgQ2kOwJnuzEG4Szrk\"",
+    "mtime": "2026-09-05T12:08:26.464Z",
+    "size": 48578,
+    "path": "../public/coach-media/people/portrait22.jpg"
+  },
+  "/coach-media/people/portrait23.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"be4c-P8CT4CrVwbEaeQLat0jhjTQMjxo\"",
+    "mtime": "2026-09-05T12:08:26.464Z",
+    "size": 48716,
+    "path": "../public/coach-media/people/portrait23.jpg"
+  },
+  "/coach-media/people/portrait24.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"abed-vXR8pegbgVS9EPJiKC3ZDRQ4dJg\"",
+    "mtime": "2026-09-05T12:08:26.464Z",
+    "size": 44013,
+    "path": "../public/coach-media/people/portrait24.jpg"
+  },
+  "/coach-media/people/portrait25.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e0a7-8029IuA0LaQ6Vf6lujX/+UuHaV0\"",
+    "mtime": "2026-09-05T12:08:26.465Z",
+    "size": 57511,
+    "path": "../public/coach-media/people/portrait25.jpg"
+  },
+  "/coach-media/people/portrait26.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"10adb-Y2avzIjFtKDJtMnigpGDItgDIK4\"",
+    "mtime": "2026-09-05T12:08:26.470Z",
+    "size": 68315,
+    "path": "../public/coach-media/people/portrait26.jpg"
+  },
+  "/coach-media/people/portrait27.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e758-fcjR+RePqA6Bh1Ol6SdhNalWKxo\"",
+    "mtime": "2026-09-05T12:08:26.465Z",
+    "size": 59224,
+    "path": "../public/coach-media/people/portrait27.jpg"
+  },
+  "/coach-media/people/portrait28.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"ab15-QtgsG93oCrKL2cWD/M5wqljszjg\"",
+    "mtime": "2026-09-05T12:08:26.466Z",
+    "size": 43797,
+    "path": "../public/coach-media/people/portrait28.jpg"
+  },
+  "/coach-media/people/portrait29.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"f507-Nj981GfUvc5eTvpZtyN0ieyiCHU\"",
+    "mtime": "2026-09-05T12:08:26.465Z",
+    "size": 62727,
+    "path": "../public/coach-media/people/portrait29.jpg"
+  },
+  "/coach-media/people/portrait30.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"91aa-41JiP0aXvZq9y9u/b4pTIbC5DeU\"",
+    "mtime": "2026-09-05T12:08:26.466Z",
+    "size": 37290,
+    "path": "../public/coach-media/people/portrait30.jpg"
+  },
+  "/coach-media/people/portrait3.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"ce90-1wGjSDgtEHb8AUpH3znLDA47jOw\"",
+    "mtime": "2026-09-05T12:08:26.470Z",
+    "size": 52880,
+    "path": "../public/coach-media/people/portrait3.jpg"
+  },
+  "/coach-media/people/portrait31.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"ee72-6mKQvP6WUZZaZuh//G3t4u0EMBg\"",
+    "mtime": "2026-09-05T12:08:26.470Z",
+    "size": 61042,
+    "path": "../public/coach-media/people/portrait31.jpg"
+  },
+  "/coach-media/people/portrait32.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"c2cc-IStqzFyonefLZL/ubYviGC+lI+w\"",
+    "mtime": "2026-09-05T12:08:26.471Z",
+    "size": 49868,
+    "path": "../public/coach-media/people/portrait32.jpg"
+  },
+  "/coach-media/people/portrait33.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e86f-wCIX8Pwsa0GqVd/2WH5WG1WSyNs\"",
+    "mtime": "2026-09-05T12:08:26.470Z",
+    "size": 59503,
+    "path": "../public/coach-media/people/portrait33.jpg"
+  },
+  "/coach-media/people/portrait34.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"1002d-6T6Xf9AX5UafZW2vbYEzj+5xvO0\"",
+    "mtime": "2026-09-05T12:08:26.472Z",
+    "size": 65581,
+    "path": "../public/coach-media/people/portrait34.jpg"
+  },
+  "/coach-media/people/portrait4.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"d171-TlrBkVdDwxLYUzqOqRWUkbkpkAo\"",
+    "mtime": "2026-09-05T12:08:26.473Z",
+    "size": 53617,
+    "path": "../public/coach-media/people/portrait4.jpg"
+  },
+  "/coach-media/people/portrait5.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"c82f-tvc7CKCgsthto9vLFPf7pJndf5o\"",
+    "mtime": "2026-09-05T12:08:26.473Z",
+    "size": 51247,
+    "path": "../public/coach-media/people/portrait5.jpg"
+  },
+  "/coach-media/people/portrait6.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"10235-GkA1z8RzeZJIqSW/DgPAy8/3Vj0\"",
+    "mtime": "2026-09-05T12:08:26.473Z",
+    "size": 66101,
+    "path": "../public/coach-media/people/portrait6.jpg"
+  },
+  "/coach-media/people/portrait7.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e4ac-HYcziHIjoK0r/C0hUk1bV4NjrUM\"",
+    "mtime": "2026-09-05T12:08:26.473Z",
+    "size": 58540,
+    "path": "../public/coach-media/people/portrait7.jpg"
+  },
+  "/coach-media/people/portrait8.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e800-jIBzhW7XT+HESqFyHPtIW1HuZc4\"",
+    "mtime": "2026-09-05T12:08:26.473Z",
+    "size": 59392,
+    "path": "../public/coach-media/people/portrait8.jpg"
+  },
+  "/_nuxt/builds/latest.json": {
+    "type": "application/json",
+    "etag": "\"47-JCU4NrfKT5UgHHWVt5mAXfERdXM\"",
+    "mtime": "2026-09-05T12:08:26.325Z",
+    "size": 71,
+    "path": "../public/_nuxt/builds/latest.json"
+  },
+  "/coach-media/people/portrait9.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e386-JbEwT6JqpTHkIY1qDgk1a5zOrIc\"",
+    "mtime": "2026-09-05T12:08:26.473Z",
+    "size": 58246,
+    "path": "../public/coach-media/people/portrait9.jpg"
   },
   "/coach-media/animations/fail/fail1.webp": {
     "type": "image/webp",
     "etag": "\"3e6cc-CLBekLwBwSBNLCxvb1eKJT9+wZU\"",
-    "mtime": "2026-09-02T12:36:35.458Z",
+    "mtime": "2026-09-05T12:08:26.476Z",
     "size": 255692,
     "path": "../public/coach-media/animations/fail/fail1.webp"
   },
   "/coach-media/animations/fail/fail2.webp": {
     "type": "image/webp",
     "etag": "\"5e028-RHwRc2cf0IvG2H9MS53ShV8XyoY\"",
-    "mtime": "2026-09-02T12:36:35.500Z",
+    "mtime": "2026-09-05T12:08:26.476Z",
     "size": 385064,
     "path": "../public/coach-media/animations/fail/fail2.webp"
   },
   "/coach-media/animations/fail/fail4.webp": {
     "type": "image/webp",
     "etag": "\"5cece-RjBisoBNjPRhvK+ndq3WET8sFcg\"",
-    "mtime": "2026-09-02T12:36:35.504Z",
+    "mtime": "2026-09-05T12:08:26.475Z",
     "size": 380622,
     "path": "../public/coach-media/animations/fail/fail4.webp"
   },
   "/coach-media/animations/fail/fail5.webp": {
     "type": "image/webp",
     "etag": "\"3418c-nUcgdhefQjLBbi5YPrFDciGNe1I\"",
-    "mtime": "2026-09-02T12:36:35.504Z",
+    "mtime": "2026-09-05T12:08:26.475Z",
     "size": 213388,
     "path": "../public/coach-media/animations/fail/fail5.webp"
   },
   "/coach-media/animations/fail/fail6.webp": {
     "type": "image/webp",
     "etag": "\"31e86-st4q2D401jTAQjaB6fQJge0HiLk\"",
-    "mtime": "2026-09-02T12:36:35.504Z",
+    "mtime": "2026-09-05T12:08:26.477Z",
     "size": 204422,
     "path": "../public/coach-media/animations/fail/fail6.webp"
-  },
-  "/coach-media/animations/fail/fail7.webp": {
-    "type": "image/webp",
-    "etag": "\"63788-deMgnTG8ziw8Sq9HQAAG5lpmaYQ\"",
-    "mtime": "2026-09-02T12:36:35.506Z",
-    "size": 407432,
-    "path": "../public/coach-media/animations/fail/fail7.webp"
-  },
-  "/coach-media/animations/fail/fail8.webp": {
-    "type": "image/webp",
-    "etag": "\"39a32-GZjK64v2UufujF0nhcGEc6ElNfk\"",
-    "mtime": "2026-09-02T12:36:35.506Z",
-    "size": 236082,
-    "path": "../public/coach-media/animations/fail/fail8.webp"
   },
   "/coach-media/animations/fail/fail10.webp": {
     "type": "image/webp",
     "etag": "\"ec4a8-LxdVywk4WTKCcK/Mz98lMc+PlrY\"",
-    "mtime": "2026-09-02T12:36:35.501Z",
+    "mtime": "2026-09-05T12:08:26.382Z",
     "size": 967848,
     "path": "../public/coach-media/animations/fail/fail10.webp"
+  },
+  "/coach-media/animations/fail/fail8.webp": {
+    "type": "image/webp",
+    "etag": "\"39a32-GZjK64v2UufujF0nhcGEc6ElNfk\"",
+    "mtime": "2026-09-05T12:08:26.477Z",
+    "size": 236082,
+    "path": "../public/coach-media/animations/fail/fail8.webp"
+  },
+  "/coach-media/animations/fail/fail7.webp": {
+    "type": "image/webp",
+    "etag": "\"63788-deMgnTG8ziw8Sq9HQAAG5lpmaYQ\"",
+    "mtime": "2026-09-05T12:08:26.480Z",
+    "size": 407432,
+    "path": "../public/coach-media/animations/fail/fail7.webp"
   },
   "/coach-media/animations/bravo/bravo1.webp": {
     "type": "image/webp",
     "etag": "\"44738-4QhsLfUd9XIbDTSNeKIP8/efIFU\"",
-    "mtime": "2026-09-02T12:36:35.459Z",
+    "mtime": "2026-09-05T12:08:26.479Z",
     "size": 280376,
     "path": "../public/coach-media/animations/bravo/bravo1.webp"
-  },
-  "/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png": {
-    "type": "image/png",
-    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
-    "mtime": "2026-09-02T12:36:35.507Z",
-    "size": 1578337,
-    "path": "../public/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png"
   },
   "/coach-media/animations/bravo/bravo11.webp": {
     "type": "image/webp",
     "etag": "\"1a216-3xX4QCqG7FtxwZvgt1PBqgFlbzg\"",
-    "mtime": "2026-09-02T12:36:35.508Z",
+    "mtime": "2026-09-05T12:08:26.383Z",
     "size": 107030,
     "path": "../public/coach-media/animations/bravo/bravo11.webp"
   },
   "/coach-media/animations/bravo/bravo12.webp": {
     "type": "image/webp",
     "etag": "\"1205a-/7k+Wui1IgWSv4DPL8QXZSf1p2U\"",
-    "mtime": "2026-09-02T12:36:35.507Z",
+    "mtime": "2026-09-05T12:08:26.483Z",
     "size": 73818,
     "path": "../public/coach-media/animations/bravo/bravo12.webp"
   },
   "/coach-media/animations/bravo/bravo13.webp": {
     "type": "image/webp",
     "etag": "\"56106-bhB3PYpSVxWys8XQ9pz9OrU7QBA\"",
-    "mtime": "2026-09-02T12:36:35.508Z",
+    "mtime": "2026-09-05T12:08:26.483Z",
     "size": 352518,
     "path": "../public/coach-media/animations/bravo/bravo13.webp"
-  },
-  "/coach-media/animations/fail/fail9.webp": {
-    "type": "image/webp",
-    "etag": "\"f5f18-OaHXpPB3qd/rQVrqz8lBFShsxjI\"",
-    "mtime": "2026-09-02T12:36:35.507Z",
-    "size": 1007384,
-    "path": "../public/coach-media/animations/fail/fail9.webp"
-  },
-  "/coach-media/animations/bravo/bravo15.webp": {
-    "type": "image/webp",
-    "etag": "\"2b0e2-qaGuoSfLeg5vXhKMrtg/rxugwqA\"",
-    "mtime": "2026-09-02T12:36:35.508Z",
-    "size": 176354,
-    "path": "../public/coach-media/animations/bravo/bravo15.webp"
   },
   "/coach-media/animations/bravo/bravo14.webp": {
     "type": "image/webp",
     "etag": "\"34da4-cRZ9lyimIePouzhUvQ/mHfvEtuY\"",
-    "mtime": "2026-09-02T12:36:35.508Z",
+    "mtime": "2026-09-05T12:08:26.480Z",
     "size": 216484,
     "path": "../public/coach-media/animations/bravo/bravo14.webp"
+  },
+  "/coach-media/animations/bravo/bravo15.webp": {
+    "type": "image/webp",
+    "etag": "\"2b0e2-qaGuoSfLeg5vXhKMrtg/rxugwqA\"",
+    "mtime": "2026-09-05T12:08:26.480Z",
+    "size": 176354,
+    "path": "../public/coach-media/animations/bravo/bravo15.webp"
   },
   "/coach-media/animations/bravo/bravo16.webp": {
     "type": "image/webp",
     "etag": "\"203f8-jg0MLG/nBqRrdnyLW65UaerRQNM\"",
-    "mtime": "2026-09-02T12:36:35.508Z",
+    "mtime": "2026-09-05T12:08:26.481Z",
     "size": 132088,
     "path": "../public/coach-media/animations/bravo/bravo16.webp"
-  },
-  "/coach-media/animations/bravo/bravo18.webp": {
-    "type": "image/webp",
-    "etag": "\"a01a-cps+HXxadKCjeKKYWHbwcIGk6hU\"",
-    "mtime": "2026-09-02T12:36:35.510Z",
-    "size": 40986,
-    "path": "../public/coach-media/animations/bravo/bravo18.webp"
   },
   "/coach-media/animations/bravo/bravo17.webp": {
     "type": "image/webp",
     "etag": "\"241a0-uyZNtAYraFvIQXIqjMvyOPE1jTw\"",
-    "mtime": "2026-09-02T12:36:35.508Z",
+    "mtime": "2026-09-05T12:08:26.481Z",
     "size": 147872,
     "path": "../public/coach-media/animations/bravo/bravo17.webp"
+  },
+  "/coach-media/animations/fail/fail9.webp": {
+    "type": "image/webp",
+    "etag": "\"f5f18-OaHXpPB3qd/rQVrqz8lBFShsxjI\"",
+    "mtime": "2026-09-05T12:08:26.480Z",
+    "size": 1007384,
+    "path": "../public/coach-media/animations/fail/fail9.webp"
+  },
+  "/coach-media/animations/bravo/bravo18.webp": {
+    "type": "image/webp",
+    "etag": "\"a01a-cps+HXxadKCjeKKYWHbwcIGk6hU\"",
+    "mtime": "2026-09-05T12:08:26.481Z",
+    "size": 40986,
+    "path": "../public/coach-media/animations/bravo/bravo18.webp"
   },
   "/coach-media/animations/bravo/bravo19.webp": {
     "type": "image/webp",
     "etag": "\"13352-7XcYb6ke3l0xF2LCw/KR+dXmc7Q\"",
-    "mtime": "2026-09-02T12:36:35.508Z",
+    "mtime": "2026-09-05T12:08:26.481Z",
     "size": 78674,
     "path": "../public/coach-media/animations/bravo/bravo19.webp"
-  },
-  "/coach-media/animations/bravo/bravo2.webp": {
-    "type": "image/webp",
-    "etag": "\"d0ca-uTre9Wq69Wtq99T7Vn3/dRXQFkg\"",
-    "mtime": "2026-09-02T12:36:35.508Z",
-    "size": 53450,
-    "path": "../public/coach-media/animations/bravo/bravo2.webp"
-  },
-  "/coach-media/animations/fail/fail3.webp": {
-    "type": "image/webp",
-    "etag": "\"19d1a6-49q6JpI6yKtRh2mygNyjyUsItIM\"",
-    "mtime": "2026-09-02T12:36:35.501Z",
-    "size": 1692070,
-    "path": "../public/coach-media/animations/fail/fail3.webp"
   },
   "/coach-media/animations/bravo/bravo10.webp": {
     "type": "image/webp",
     "etag": "\"adbd4-UywgFHyHGzDijqz6jodwTseMtkI\"",
-    "mtime": "2026-09-02T12:36:35.507Z",
+    "mtime": "2026-09-05T12:08:26.482Z",
     "size": 711636,
     "path": "../public/coach-media/animations/bravo/bravo10.webp"
+  },
+  "/coach-media/animations/fail/fail3.webp": {
+    "type": "image/webp",
+    "etag": "\"19d1a6-49q6JpI6yKtRh2mygNyjyUsItIM\"",
+    "mtime": "2026-09-05T12:08:26.477Z",
+    "size": 1692070,
+    "path": "../public/coach-media/animations/fail/fail3.webp"
+  },
+  "/coach-media/animations/bravo/bravo2.webp": {
+    "type": "image/webp",
+    "etag": "\"d0ca-uTre9Wq69Wtq99T7Vn3/dRXQFkg\"",
+    "mtime": "2026-09-05T12:08:26.481Z",
+    "size": 53450,
+    "path": "../public/coach-media/animations/bravo/bravo2.webp"
   },
   "/coach-media/animations/bravo/bravo20.webp": {
     "type": "image/webp",
     "etag": "\"233b2-LlDa1c9jqNgHkGB9k+cU7ap5b0Y\"",
-    "mtime": "2026-09-02T12:36:35.508Z",
+    "mtime": "2026-09-05T12:08:26.484Z",
     "size": 144306,
     "path": "../public/coach-media/animations/bravo/bravo20.webp"
   },
   "/coach-media/animations/bravo/bravo21.webp": {
     "type": "image/webp",
     "etag": "\"3da68-ISHGzxh2cgKoQraDg+pa1TIB3Eo\"",
-    "mtime": "2026-09-02T12:36:35.508Z",
+    "mtime": "2026-09-05T12:08:26.482Z",
     "size": 252520,
     "path": "../public/coach-media/animations/bravo/bravo21.webp"
   },
   "/coach-media/animations/bravo/bravo22.webp": {
     "type": "image/webp",
     "etag": "\"695d4-fo3c1QhJVPT0yXYAuoQyAXrIO9E\"",
-    "mtime": "2026-09-02T12:36:35.508Z",
+    "mtime": "2026-09-05T12:08:26.483Z",
     "size": 431572,
     "path": "../public/coach-media/animations/bravo/bravo22.webp"
   },
   "/coach-media/animations/bravo/bravo23.webp": {
     "type": "image/webp",
     "etag": "\"203f8-jg0MLG/nBqRrdnyLW65UaerRQNM\"",
-    "mtime": "2026-09-02T12:36:35.510Z",
+    "mtime": "2026-09-05T12:08:26.483Z",
     "size": 132088,
     "path": "../public/coach-media/animations/bravo/bravo23.webp"
   },
   "/coach-media/animations/bravo/bravo24.webp": {
     "type": "image/webp",
     "etag": "\"21c1c-BCPPzQaqjCgONCZQqIz0MRfkhnk\"",
-    "mtime": "2026-09-02T12:36:35.510Z",
+    "mtime": "2026-09-05T12:08:26.483Z",
     "size": 138268,
     "path": "../public/coach-media/animations/bravo/bravo24.webp"
-  },
-  "/coach-media/animations/bravo/bravo25.webp": {
-    "type": "image/webp",
-    "etag": "\"6e646-B09j5zbOGx/pB/KUZrJkPccQvk0\"",
-    "mtime": "2026-09-02T12:36:35.512Z",
-    "size": 452166,
-    "path": "../public/coach-media/animations/bravo/bravo25.webp"
   },
   "/coach-media/animations/bravo/bravo26.webp": {
     "type": "image/webp",
     "etag": "\"30b4-3zSDRUC/kfpm2SrLPRZXdNLOLHk\"",
-    "mtime": "2026-09-02T12:36:35.510Z",
+    "mtime": "2026-09-05T12:08:26.486Z",
     "size": 12468,
     "path": "../public/coach-media/animations/bravo/bravo26.webp"
+  },
+  "/coach-media/animations/bravo/bravo25.webp": {
+    "type": "image/webp",
+    "etag": "\"6e646-B09j5zbOGx/pB/KUZrJkPccQvk0\"",
+    "mtime": "2026-09-05T12:08:26.488Z",
+    "size": 452166,
+    "path": "../public/coach-media/animations/bravo/bravo25.webp"
   },
   "/coach-media/animations/bravo/bravo27.webp": {
     "type": "image/webp",
     "etag": "\"18b24-qcCeJs9S6OXbNHnCNtW2ImrJbvY\"",
-    "mtime": "2026-09-02T12:36:35.510Z",
+    "mtime": "2026-09-05T12:08:26.484Z",
     "size": 101156,
     "path": "../public/coach-media/animations/bravo/bravo27.webp"
   },
   "/coach-media/animations/bravo/bravo28.webp": {
     "type": "image/webp",
     "etag": "\"18612-7Zj+YVZPRJ6CKyZAwrxfXIc7fjI\"",
-    "mtime": "2026-09-02T12:36:35.510Z",
+    "mtime": "2026-09-05T12:08:26.484Z",
     "size": 99858,
     "path": "../public/coach-media/animations/bravo/bravo28.webp"
-  },
-  "/coach-media/animations/bravo/bravo29.webp": {
-    "type": "image/webp",
-    "etag": "\"163a6-ViRk6UjMsrG8Il8pS7HYT3/WiFk\"",
-    "mtime": "2026-09-02T12:36:35.512Z",
-    "size": 91046,
-    "path": "../public/coach-media/animations/bravo/bravo29.webp"
   },
   "/coach-media/animations/bravo/bravo3.webp": {
     "type": "image/webp",
     "etag": "\"80d8-WZGwWFCLsk3YDTm9XP5QCq8R7Es\"",
-    "mtime": "2026-09-02T12:36:35.510Z",
+    "mtime": "2026-09-05T12:08:26.491Z",
     "size": 32984,
     "path": "../public/coach-media/animations/bravo/bravo3.webp"
+  },
+  "/coach-media/animations/bravo/bravo29.webp": {
+    "type": "image/webp",
+    "etag": "\"163a6-ViRk6UjMsrG8Il8pS7HYT3/WiFk\"",
+    "mtime": "2026-09-05T12:08:26.490Z",
+    "size": 91046,
+    "path": "../public/coach-media/animations/bravo/bravo29.webp"
   },
   "/coach-media/animations/bravo/bravo30.webp": {
     "type": "image/webp",
     "etag": "\"2be66-2mV/o9/SR26sBGn1HK62usspEXM\"",
-    "mtime": "2026-09-02T12:36:35.511Z",
+    "mtime": "2026-09-05T12:08:26.490Z",
     "size": 179814,
     "path": "../public/coach-media/animations/bravo/bravo30.webp"
   },
   "/coach-media/animations/bravo/bravo31.webp": {
     "type": "image/webp",
     "etag": "\"2154c-mTHroY9VN55S8jkoGrrtwcul4rs\"",
-    "mtime": "2026-09-02T12:36:35.511Z",
+    "mtime": "2026-09-05T12:08:26.488Z",
     "size": 136524,
     "path": "../public/coach-media/animations/bravo/bravo31.webp"
   },
   "/coach-media/animations/bravo/bravo32.webp": {
     "type": "image/webp",
     "etag": "\"3ddf2-eZeHr4gLF4RNVRJoLdRkGG/wq/4\"",
-    "mtime": "2026-09-02T12:36:35.512Z",
+    "mtime": "2026-09-05T12:08:26.490Z",
     "size": 253426,
     "path": "../public/coach-media/animations/bravo/bravo32.webp"
   },
   "/coach-media/animations/bravo/bravo33.webp": {
     "type": "image/webp",
     "etag": "\"19ec0-c95YrxMrzqQW4G9FjU0ykKQ7V9o\"",
-    "mtime": "2026-09-02T12:36:35.511Z",
+    "mtime": "2026-09-05T12:08:26.490Z",
     "size": 106176,
     "path": "../public/coach-media/animations/bravo/bravo33.webp"
   },
   "/coach-media/animations/bravo/bravo5.webp": {
     "type": "image/webp",
     "etag": "\"120aa-WQCZmq2H4iAmCwkgGz0jbhroUMU\"",
-    "mtime": "2026-09-02T12:36:35.511Z",
+    "mtime": "2026-09-05T12:08:26.491Z",
     "size": 73898,
     "path": "../public/coach-media/animations/bravo/bravo5.webp"
   },
   "/coach-media/animations/bravo/bravo4.webp": {
     "type": "image/webp",
     "etag": "\"301b0-kZdjup76tUvXnUsAqLJ/bPOuJLQ\"",
-    "mtime": "2026-09-02T12:36:35.511Z",
+    "mtime": "2026-09-05T12:08:26.491Z",
     "size": 197040,
     "path": "../public/coach-media/animations/bravo/bravo4.webp"
   },
   "/coach-media/animations/bravo/bravo6.webp": {
     "type": "image/webp",
     "etag": "\"1a95c-STnlzMe66YjYqbDuY5yLt9ADvzM\"",
-    "mtime": "2026-09-02T12:36:35.511Z",
+    "mtime": "2026-09-05T12:08:26.490Z",
     "size": 108892,
     "path": "../public/coach-media/animations/bravo/bravo6.webp"
-  },
-  "/coach-media/animations/bravo/bravo9.webp": {
-    "type": "image/webp",
-    "etag": "\"1105e-m+/rIlVAaoiD3hxFGIcC7Skzq0k\"",
-    "mtime": "2026-09-02T12:36:35.512Z",
-    "size": 69726,
-    "path": "../public/coach-media/animations/bravo/bravo9.webp"
   },
   "/coach-media/animations/bravo/bravo8.webp": {
     "type": "image/webp",
     "etag": "\"1d8b4-xhvLiSPfxFlQsAeh/JU1EhCyKtQ\"",
-    "mtime": "2026-09-02T12:36:35.512Z",
+    "mtime": "2026-09-05T12:08:26.491Z",
     "size": 121012,
     "path": "../public/coach-media/animations/bravo/bravo8.webp"
   },
   "/coach-media/animations/bravo/bravo7.webp": {
     "type": "image/webp",
     "etag": "\"29fa6-QguGsOjUTD8OjKKTZfpb9dijR5g\"",
-    "mtime": "2026-09-02T12:36:35.513Z",
+    "mtime": "2026-09-05T12:08:26.493Z",
     "size": 171942,
     "path": "../public/coach-media/animations/bravo/bravo7.webp"
   },
-  "/coach-media/emojis/danger/danger1.png": {
-    "type": "image/png",
-    "etag": "\"3036-eXYZ+J7eqF26NQJZHhXFXrNgGww\"",
-    "mtime": "2026-09-02T12:36:35.458Z",
-    "size": 12342,
-    "path": "../public/coach-media/emojis/danger/danger1.png"
-  },
-  "/coach-media/emojis/heureux/heureux1.png": {
-    "type": "image/png",
-    "etag": "\"5091-+uAnUfC4q2tlld3BzD89z3lKd4w\"",
-    "mtime": "2026-09-02T12:36:35.459Z",
-    "size": 20625,
-    "path": "../public/coach-media/emojis/heureux/heureux1.png"
-  },
-  "/coach-media/emojis/heureux/heureux10.png": {
-    "type": "image/png",
-    "etag": "\"5bbe-8dpJHwcxgGm/L+GGIgukoN99+qw\"",
-    "mtime": "2026-09-02T12:36:35.546Z",
-    "size": 23486,
-    "path": "../public/coach-media/emojis/heureux/heureux10.png"
-  },
-  "/coach-media/emojis/heureux/heureux11.png": {
-    "type": "image/png",
-    "etag": "\"60b8-LMMAFjmB/Rwe+6qwtxB0KRRjFVE\"",
-    "mtime": "2026-09-02T12:36:35.546Z",
-    "size": 24760,
-    "path": "../public/coach-media/emojis/heureux/heureux11.png"
-  },
-  "/coach-media/emojis/heureux/heureux12.png": {
-    "type": "image/png",
-    "etag": "\"79c6-gOXTGgNP0DRA6mU73TQkCLA2IZc\"",
-    "mtime": "2026-09-02T12:36:35.546Z",
-    "size": 31174,
-    "path": "../public/coach-media/emojis/heureux/heureux12.png"
-  },
-  "/coach-media/emojis/heureux/heureux2.png": {
-    "type": "image/png",
-    "etag": "\"54c1-7stf5vr0fIsbVKX4y+9cXcdF6Mo\"",
-    "mtime": "2026-09-02T12:36:35.546Z",
-    "size": 21697,
-    "path": "../public/coach-media/emojis/heureux/heureux2.png"
-  },
-  "/coach-media/emojis/heureux/heureux3.png": {
-    "type": "image/png",
-    "etag": "\"531f-VfeI7fmVy/9I1cJdA+JneCazNHU\"",
-    "mtime": "2026-09-02T12:36:35.546Z",
-    "size": 21279,
-    "path": "../public/coach-media/emojis/heureux/heureux3.png"
-  },
-  "/coach-media/emojis/heureux/heureux4.png": {
-    "type": "image/png",
-    "etag": "\"5885-WkglwLUYH5ALdE1dXhy9hL4kIX4\"",
-    "mtime": "2026-09-02T12:36:35.546Z",
-    "size": 22661,
-    "path": "../public/coach-media/emojis/heureux/heureux4.png"
-  },
-  "/coach-media/emojis/heureux/heureux5.png": {
-    "type": "image/png",
-    "etag": "\"5a47-dAmqVWfHl7YFERUDnBuBJDfdxvs\"",
-    "mtime": "2026-09-02T12:36:35.546Z",
-    "size": 23111,
-    "path": "../public/coach-media/emojis/heureux/heureux5.png"
-  },
-  "/coach-media/emojis/heureux/heureux6.png": {
-    "type": "image/png",
-    "etag": "\"536f-MLOUAyVp0bZpHOQ61BWW10gqYAk\"",
-    "mtime": "2026-09-02T12:36:35.546Z",
-    "size": 21359,
-    "path": "../public/coach-media/emojis/heureux/heureux6.png"
-  },
-  "/coach-media/emojis/heureux/heureux7.png": {
-    "type": "image/png",
-    "etag": "\"4c1e-5J3Hb2P7b9Dhw36q+lPFACHsBzo\"",
-    "mtime": "2026-09-02T12:36:35.546Z",
-    "size": 19486,
-    "path": "../public/coach-media/emojis/heureux/heureux7.png"
-  },
-  "/coach-media/emojis/heureux/heureux8.png": {
-    "type": "image/png",
-    "etag": "\"4c3d-xFJiCChiW5P5PT3dzl6b9pdUZCU\"",
-    "mtime": "2026-09-02T12:36:35.546Z",
-    "size": 19517,
-    "path": "../public/coach-media/emojis/heureux/heureux8.png"
-  },
-  "/coach-media/emojis/heureux/heureux9.png": {
-    "type": "image/png",
-    "etag": "\"53d1-nvrpEmDOGFDrOhR0CwIqhjydUqw\"",
-    "mtime": "2026-09-02T12:36:35.546Z",
-    "size": 21457,
-    "path": "../public/coach-media/emojis/heureux/heureux9.png"
-  },
-  "/coach-media/emojis/muet/muet1.png": {
-    "type": "image/png",
-    "etag": "\"51a6-vln2s/UdhcTRTaO8VHDa3lfz0h8\"",
-    "mtime": "2026-09-02T12:36:35.459Z",
-    "size": 20902,
-    "path": "../public/coach-media/emojis/muet/muet1.png"
-  },
-  "/coach-media/emojis/muet/muet2.png": {
-    "type": "image/png",
-    "etag": "\"4fd6-7oBC0gGyTBoUjDE6sag9tGTRXEk\"",
-    "mtime": "2026-09-02T12:36:35.545Z",
-    "size": 20438,
-    "path": "../public/coach-media/emojis/muet/muet2.png"
-  },
-  "/coach-media/emojis/muet/muet3.png": {
-    "type": "image/png",
-    "etag": "\"5287-ywn34jaL1+x0Qfo7jSf48qjMhfs\"",
-    "mtime": "2026-09-02T12:36:35.545Z",
-    "size": 21127,
-    "path": "../public/coach-media/emojis/muet/muet3.png"
-  },
-  "/coach-media/emojis/muet/muet4.png": {
-    "type": "image/png",
-    "etag": "\"56a5-+3X/CcPHmEJ0+beAZBYg2M7ZSgA\"",
-    "mtime": "2026-09-02T12:36:35.546Z",
-    "size": 22181,
-    "path": "../public/coach-media/emojis/muet/muet4.png"
-  },
-  "/coach-media/emojis/triste/triste1.png": {
-    "type": "image/png",
-    "etag": "\"4ad5-sZv/ngDIpKluR3uoIL+9/tVgBAk\"",
-    "mtime": "2026-09-02T12:36:35.460Z",
-    "size": 19157,
-    "path": "../public/coach-media/emojis/triste/triste1.png"
-  },
-  "/coach-media/animations/bravo/bravo34.webp": {
-    "type": "image/webp",
-    "etag": "\"26ccac-0lLmGbQH56H1iPHEYHxgMHzvGqg\"",
-    "mtime": "2026-09-02T12:36:35.513Z",
-    "size": 2542764,
-    "path": "../public/coach-media/animations/bravo/bravo34.webp"
-  },
-  "/coach-media/emojis/triste/triste11.png": {
-    "type": "image/png",
-    "etag": "\"7b07-5Y/2vAUDwkCG9yUv2xhGyKhfVv4\"",
-    "mtime": "2026-09-02T12:36:35.546Z",
-    "size": 31495,
-    "path": "../public/coach-media/emojis/triste/triste11.png"
-  },
-  "/coach-media/emojis/triste/triste10.png": {
-    "type": "image/png",
-    "etag": "\"6ad7-6iFb9ksjGHu03kWI85GQAULPlgA\"",
-    "mtime": "2026-09-02T12:36:35.547Z",
-    "size": 27351,
-    "path": "../public/coach-media/emojis/triste/triste10.png"
-  },
-  "/coach-media/emojis/triste/triste4.png": {
-    "type": "image/png",
-    "etag": "\"51ea-mZrIfYhaUQQDvlUt7+NCSIE6cfI\"",
-    "mtime": "2026-09-02T12:36:35.546Z",
-    "size": 20970,
-    "path": "../public/coach-media/emojis/triste/triste4.png"
-  },
-  "/coach-media/emojis/triste/triste5.png": {
-    "type": "image/png",
-    "etag": "\"54c1-XD0mhNmrQPVAFqEXG0C1s1P3Oa4\"",
-    "mtime": "2026-09-02T12:36:35.547Z",
-    "size": 21697,
-    "path": "../public/coach-media/emojis/triste/triste5.png"
-  },
-  "/coach-media/emojis/triste/triste6.png": {
-    "type": "image/png",
-    "etag": "\"54c1-XD0mhNmrQPVAFqEXG0C1s1P3Oa4\"",
-    "mtime": "2026-09-02T12:36:35.547Z",
-    "size": 21697,
-    "path": "../public/coach-media/emojis/triste/triste6.png"
-  },
-  "/coach-media/emojis/triste/triste7.png": {
-    "type": "image/png",
-    "etag": "\"4663-GYg5O4kBtQpnNYQYt+t2VyLkYuE\"",
-    "mtime": "2026-09-02T12:36:35.547Z",
-    "size": 18019,
-    "path": "../public/coach-media/emojis/triste/triste7.png"
-  },
-  "/coach-media/emojis/triste/triste8.png": {
-    "type": "image/png",
-    "etag": "\"5281-YyJBOzW/kpn0XNWvaoOHWcnQ+0k\"",
-    "mtime": "2026-09-02T12:36:35.547Z",
-    "size": 21121,
-    "path": "../public/coach-media/emojis/triste/triste8.png"
-  },
-  "/coach-media/emojis/triste/triste9.png": {
-    "type": "image/png",
-    "etag": "\"56b5-7e4ksvafotKRdiRp4CmrqGW7UkM\"",
-    "mtime": "2026-09-02T12:36:35.547Z",
-    "size": 22197,
-    "path": "../public/coach-media/emojis/triste/triste9.png"
-  },
-  "/_nuxt/builds/meta/ca2561c4-6023-4615-8883-4968354463c6.json": {
-    "type": "application/json",
-    "etag": "\"58-IF+cFD3ztg0lm546wylapPTs8EM\"",
-    "mtime": "2026-09-02T12:36:35.411Z",
-    "size": 88,
-    "path": "../public/_nuxt/builds/meta/ca2561c4-6023-4615-8883-4968354463c6.json"
-  },
-  "/coach-media/animations/happy/happy10.webp": {
-    "type": "image/webp",
-    "etag": "\"13102-1AwfKNNogN0hV9N7INQr8b/L5U0\"",
-    "mtime": "2026-09-02T12:36:35.526Z",
-    "size": 78082,
-    "path": "../public/coach-media/animations/happy/happy10.webp"
-  },
-  "/coach-media/animations/happy/happy11.webp": {
-    "type": "image/webp",
-    "etag": "\"c51c-aSSJ/YerC2d+QHIzkxapjUKX1xo\"",
-    "mtime": "2026-09-02T12:36:35.525Z",
-    "size": 50460,
-    "path": "../public/coach-media/animations/happy/happy11.webp"
-  },
-  "/coach-media/animations/happy/happy12.webp": {
-    "type": "image/webp",
-    "etag": "\"26dd0-kEufqOKIIc4EphkqsilP8Vg0anA\"",
-    "mtime": "2026-09-02T12:36:35.526Z",
-    "size": 159184,
-    "path": "../public/coach-media/animations/happy/happy12.webp"
-  },
-  "/coach-media/animations/happy/happy13.webp": {
-    "type": "image/webp",
-    "etag": "\"1b7c8-6YwhPgMDDi09N6QaiQGvB3MESN8\"",
-    "mtime": "2026-09-02T12:36:35.526Z",
-    "size": 112584,
-    "path": "../public/coach-media/animations/happy/happy13.webp"
-  },
-  "/coach-media/animations/happy/happy14.webp": {
-    "type": "image/webp",
-    "etag": "\"2b5e-Tlk4vz7sMxW+TPrlh/TTUPVQZ64\"",
-    "mtime": "2026-09-02T12:36:35.526Z",
-    "size": 11102,
-    "path": "../public/coach-media/animations/happy/happy14.webp"
-  },
-  "/coach-media/animations/happy/happy15.webp": {
-    "type": "image/webp",
-    "etag": "\"1f82e-GdfVpoK+FBOph2APqZZ2ksTEi/M\"",
-    "mtime": "2026-09-02T12:36:35.526Z",
-    "size": 129070,
-    "path": "../public/coach-media/animations/happy/happy15.webp"
-  },
-  "/coach-media/animations/happy/happy1.webp": {
-    "type": "image/webp",
-    "etag": "\"9a9fe-dnJ60THXbLE/qdsCoy8mks8JEWo\"",
-    "mtime": "2026-09-02T12:36:35.459Z",
-    "size": 633342,
-    "path": "../public/coach-media/animations/happy/happy1.webp"
-  },
-  "/coach-media/animations/happy/happy16.webp": {
-    "type": "image/webp",
-    "etag": "\"39676-m3hlL8MEmfcM8A6RQ/d34G7k4z4\"",
-    "mtime": "2026-09-02T12:36:35.527Z",
-    "size": 235126,
-    "path": "../public/coach-media/animations/happy/happy16.webp"
-  },
-  "/coach-media/animations/happy/happy17.webp": {
-    "type": "image/webp",
-    "etag": "\"6c236-lcuyQg6sSZcT0+fCpGNG/JhMi7U\"",
-    "mtime": "2026-09-02T12:36:35.527Z",
-    "size": 442934,
-    "path": "../public/coach-media/animations/happy/happy17.webp"
-  },
-  "/coach-media/animations/happy/happy18.webp": {
-    "type": "image/webp",
-    "etag": "\"38cca-HDXyFn4nw7hhDQ0f8voh7jHxFIU\"",
-    "mtime": "2026-09-02T12:36:35.526Z",
-    "size": 232650,
-    "path": "../public/coach-media/animations/happy/happy18.webp"
-  },
-  "/coach-media/animations/happy/happy19.webp": {
-    "type": "image/webp",
-    "etag": "\"7340-Mvycs8QTkYX6zm7iIfL2nLfxOe8\"",
-    "mtime": "2026-09-02T12:36:35.527Z",
-    "size": 29504,
-    "path": "../public/coach-media/animations/happy/happy19.webp"
-  },
-  "/coach-media/animations/happy/happy2.webp": {
-    "type": "image/webp",
-    "etag": "\"1b638-CG1y3zibI0VpxAfTb3zZrzRaw90\"",
-    "mtime": "2026-09-02T12:36:35.528Z",
-    "size": 112184,
-    "path": "../public/coach-media/animations/happy/happy2.webp"
-  },
-  "/coach-media/animations/happy/happy21.webp": {
-    "type": "image/webp",
-    "etag": "\"d20a-nJXSMlgY3QzHwwJw2j7rW4bD6HU\"",
-    "mtime": "2026-09-02T12:36:35.527Z",
-    "size": 53770,
-    "path": "../public/coach-media/animations/happy/happy21.webp"
-  },
-  "/coach-media/animations/happy/happy20.webp": {
-    "type": "image/webp",
-    "etag": "\"31eb2-eG0f1RbiJPRwmWx1p+zVbeej7Jo\"",
-    "mtime": "2026-09-02T12:36:35.527Z",
-    "size": 204466,
-    "path": "../public/coach-media/animations/happy/happy20.webp"
-  },
-  "/coach-media/animations/happy/happy22.webp": {
-    "type": "image/webp",
-    "etag": "\"2be74-wts9jwpJqVDGud0ZifbURmTwf7g\"",
-    "mtime": "2026-09-02T12:36:35.527Z",
-    "size": 179828,
-    "path": "../public/coach-media/animations/happy/happy22.webp"
-  },
-  "/coach-media/animations/happy/happy23.webp": {
-    "type": "image/webp",
-    "etag": "\"e74a-F+BBio6AhOZ5hwHOGh8wKCLcoGA\"",
-    "mtime": "2026-09-02T12:36:35.527Z",
-    "size": 59210,
-    "path": "../public/coach-media/animations/happy/happy23.webp"
-  },
-  "/coach-media/animations/happy/happy25.webp": {
-    "type": "image/webp",
-    "etag": "\"16574-kubThW5vAMKccIZc2jswkTWLUoA\"",
-    "mtime": "2026-09-02T12:36:35.528Z",
-    "size": 91508,
-    "path": "../public/coach-media/animations/happy/happy25.webp"
-  },
-  "/coach-media/animations/happy/happy24.webp": {
-    "type": "image/webp",
-    "etag": "\"23e02-CIi7WeJXeH8cd/GgwMtt3CFFVkM\"",
-    "mtime": "2026-09-02T12:36:35.527Z",
-    "size": 146946,
-    "path": "../public/coach-media/animations/happy/happy24.webp"
-  },
-  "/coach-media/animations/happy/happy27.webp": {
-    "type": "image/webp",
-    "etag": "\"1c662-1bbHXwmlK1/Q6duQFfbU/+Wg5Fg\"",
-    "mtime": "2026-09-02T12:36:35.528Z",
-    "size": 116322,
-    "path": "../public/coach-media/animations/happy/happy27.webp"
-  },
-  "/coach-media/animations/happy/happy26.webp": {
-    "type": "image/webp",
-    "etag": "\"6c706-bOAKAMAiElDmC2MCxEJkrvr5A+k\"",
-    "mtime": "2026-09-02T12:36:35.528Z",
-    "size": 444166,
-    "path": "../public/coach-media/animations/happy/happy26.webp"
-  },
-  "/coach-media/animations/happy/happy28.webp": {
-    "type": "image/webp",
-    "etag": "\"2090a-cfPB8KwXDFTC2iWhg6Pn7kOvGeg\"",
-    "mtime": "2026-09-02T12:36:35.527Z",
-    "size": 133386,
-    "path": "../public/coach-media/animations/happy/happy28.webp"
-  },
-  "/coach-media/animations/happy/happy29.webp": {
-    "type": "image/webp",
-    "etag": "\"15a6e-F4FEHmzAIG7WW3pszvFsq0XKYGk\"",
-    "mtime": "2026-09-02T12:36:35.527Z",
-    "size": 88686,
-    "path": "../public/coach-media/animations/happy/happy29.webp"
-  },
-  "/coach-media/animations/happy/happy3.webp": {
-    "type": "image/webp",
-    "etag": "\"6438c-AQmLLI1sVtzVfySWLf8q8/SnoDQ\"",
-    "mtime": "2026-09-02T12:36:35.528Z",
-    "size": 410508,
-    "path": "../public/coach-media/animations/happy/happy3.webp"
-  },
-  "/coach-media/animations/happy/happy30.webp": {
-    "type": "image/webp",
-    "etag": "\"46140-52DID+yWWHNDhSWo2wqCW7AgztI\"",
-    "mtime": "2026-09-02T12:36:35.530Z",
-    "size": 287040,
-    "path": "../public/coach-media/animations/happy/happy30.webp"
-  },
-  "/coach-media/animations/happy/happy31.webp": {
-    "type": "image/webp",
-    "etag": "\"4d6ca-GZQfzSkO4AbRu7KJoQWgnIw6U6k\"",
-    "mtime": "2026-09-02T12:36:35.532Z",
-    "size": 317130,
-    "path": "../public/coach-media/animations/happy/happy31.webp"
-  },
-  "/coach-media/animations/happy/happy33.webp": {
-    "type": "image/webp",
-    "etag": "\"1ca8a-w5q1HyoRf3YSX2wny1ajxC1lVTw\"",
-    "mtime": "2026-09-02T12:36:35.532Z",
-    "size": 117386,
-    "path": "../public/coach-media/animations/happy/happy33.webp"
-  },
-  "/coach-media/animations/happy/happy32.webp": {
-    "type": "image/webp",
-    "etag": "\"1ce94-qd5mvwxqL3x8atGLGoQ6T5SBIM8\"",
-    "mtime": "2026-09-02T12:36:35.528Z",
-    "size": 118420,
-    "path": "../public/coach-media/animations/happy/happy32.webp"
-  },
-  "/coach-media/animations/happy/happy34.webp": {
-    "type": "image/webp",
-    "etag": "\"7a6e-N4lUoynD0pY1HrZqbhKsKEJcIdY\"",
-    "mtime": "2026-09-02T12:36:35.532Z",
-    "size": 31342,
-    "path": "../public/coach-media/animations/happy/happy34.webp"
-  },
-  "/coach-media/animations/happy/happy35.webp": {
-    "type": "image/webp",
-    "etag": "\"27e2a-nINbfIIzpb0aB5cQDbxz/GDwNug\"",
-    "mtime": "2026-09-02T12:36:35.530Z",
-    "size": 163370,
-    "path": "../public/coach-media/animations/happy/happy35.webp"
-  },
-  "/coach-media/animations/happy/happy37.webp": {
-    "type": "image/webp",
-    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
-    "mtime": "2026-09-02T12:36:35.530Z",
-    "size": 57724,
-    "path": "../public/coach-media/animations/happy/happy37.webp"
-  },
-  "/coach-media/animations/happy/happy36.webp": {
-    "type": "image/webp",
-    "etag": "\"1480e-iU7KcSbk60IXH4CWOzNyttBsbE0\"",
-    "mtime": "2026-09-02T12:36:35.530Z",
-    "size": 83982,
-    "path": "../public/coach-media/animations/happy/happy36.webp"
-  },
-  "/coach-media/animations/happy/happy38.webp": {
-    "type": "image/webp",
-    "etag": "\"20928-zE86yLQztSZEATTCxTKRuQFifnw\"",
-    "mtime": "2026-09-02T12:36:35.532Z",
-    "size": 133416,
-    "path": "../public/coach-media/animations/happy/happy38.webp"
-  },
-  "/coach-media/animations/happy/happy39.webp": {
-    "type": "image/webp",
-    "etag": "\"1031c-0I4f6s3jDJrqeEDNAVBubusuRqQ\"",
-    "mtime": "2026-09-02T12:36:35.530Z",
-    "size": 66332,
-    "path": "../public/coach-media/animations/happy/happy39.webp"
-  },
-  "/coach-media/animations/happy/happy4.webp": {
-    "type": "image/webp",
-    "etag": "\"80d8-WZGwWFCLsk3YDTm9XP5QCq8R7Es\"",
-    "mtime": "2026-09-02T12:36:35.532Z",
-    "size": 32984,
-    "path": "../public/coach-media/animations/happy/happy4.webp"
-  },
-  "/coach-media/animations/happy/happy40.webp": {
-    "type": "image/webp",
-    "etag": "\"116ba-M7X1kM6tt7dIECx3koEGYbji1us\"",
-    "mtime": "2026-09-02T12:36:35.532Z",
-    "size": 71354,
-    "path": "../public/coach-media/animations/happy/happy40.webp"
-  },
-  "/coach-media/animations/happy/happy41.webp": {
-    "type": "image/webp",
-    "etag": "\"a76a-Nmck64+pAP0tEnTHpG1mitI4ONk\"",
-    "mtime": "2026-09-02T12:36:35.532Z",
-    "size": 42858,
-    "path": "../public/coach-media/animations/happy/happy41.webp"
-  },
-  "/coach-media/animations/happy/happy42.webp": {
-    "type": "image/webp",
-    "etag": "\"7eba-Xqry0H+Qj7x/M1eDmO0CIQ+A7Mg\"",
-    "mtime": "2026-09-02T12:36:35.532Z",
-    "size": 32442,
-    "path": "../public/coach-media/animations/happy/happy42.webp"
-  },
-  "/coach-media/animations/happy/happy43.webp": {
-    "type": "image/webp",
-    "etag": "\"55a5e-kUYTswcDoeybUYnmGXDBV0ny564\"",
-    "mtime": "2026-09-02T12:36:35.532Z",
-    "size": 350814,
-    "path": "../public/coach-media/animations/happy/happy43.webp"
-  },
-  "/coach-media/animations/happy/happy44.webp": {
-    "type": "image/webp",
-    "etag": "\"24e16-Y7u+Md6oQPbYSDjE0D9H77j0Z5I\"",
-    "mtime": "2026-09-02T12:36:35.535Z",
-    "size": 151062,
-    "path": "../public/coach-media/animations/happy/happy44.webp"
-  },
-  "/coach-media/animations/happy/happy45.webp": {
-    "type": "image/webp",
-    "etag": "\"65a82-XxALJISFlOUdD3wSziHwFXHhxqc\"",
-    "mtime": "2026-09-02T12:36:35.533Z",
-    "size": 416386,
-    "path": "../public/coach-media/animations/happy/happy45.webp"
-  },
-  "/coach-media/animations/happy/happy46.webp": {
-    "type": "image/webp",
-    "etag": "\"13dec-uj4sm+IwuLOmQY7lGy1JeMzt2FM\"",
-    "mtime": "2026-09-02T12:36:35.534Z",
-    "size": 81388,
-    "path": "../public/coach-media/animations/happy/happy46.webp"
-  },
-  "/coach-media/animations/happy/happy47.webp": {
-    "type": "image/webp",
-    "etag": "\"234e4-DNBmLISLOFimd+G8XihNRgMsjGw\"",
-    "mtime": "2026-09-02T12:36:35.533Z",
-    "size": 144612,
-    "path": "../public/coach-media/animations/happy/happy47.webp"
-  },
-  "/coach-media/animations/happy/happy5.webp": {
-    "type": "image/webp",
-    "etag": "\"10784-0Rzy5v92HqFbOQ0qn2Jo9XRJ1r0\"",
-    "mtime": "2026-09-02T12:36:35.534Z",
-    "size": 67460,
-    "path": "../public/coach-media/animations/happy/happy5.webp"
-  },
-  "/coach-media/animations/happy/happy49.webp": {
-    "type": "image/webp",
-    "etag": "\"3123c-mf62C2iWRtx585STd9CHbYmICyM\"",
-    "mtime": "2026-09-02T12:36:35.534Z",
-    "size": 201276,
-    "path": "../public/coach-media/animations/happy/happy49.webp"
-  },
-  "/coach-media/animations/happy/happy50.webp": {
-    "type": "image/webp",
-    "etag": "\"2b72a-Xz8Gb2Cdj+rrnnpbXbSGBQRTFYw\"",
-    "mtime": "2026-09-02T12:36:35.534Z",
-    "size": 177962,
-    "path": "../public/coach-media/animations/happy/happy50.webp"
-  },
-  "/coach-media/animations/happy/happy51.webp": {
-    "type": "image/webp",
-    "etag": "\"29090-le1WcmrRN+RDX52joaRj6kdNQS0\"",
-    "mtime": "2026-09-02T12:36:35.534Z",
-    "size": 168080,
-    "path": "../public/coach-media/animations/happy/happy51.webp"
-  },
-  "/coach-media/animations/happy/happy52.webp": {
-    "type": "image/webp",
-    "etag": "\"4a9b0-bNgmWpmTSjuc06DQcbX6RkVvCnU\"",
-    "mtime": "2026-09-02T12:36:35.536Z",
-    "size": 305584,
-    "path": "../public/coach-media/animations/happy/happy52.webp"
-  },
-  "/coach-media/animations/happy/happy53.webp": {
-    "type": "image/webp",
-    "etag": "\"57d0-WEnplvWuFKWqXkfuwNFuk472muo\"",
-    "mtime": "2026-09-02T12:36:35.535Z",
-    "size": 22480,
-    "path": "../public/coach-media/animations/happy/happy53.webp"
-  },
-  "/coach-media/animations/happy/happy54.webp": {
-    "type": "image/webp",
-    "etag": "\"de70-7JEgp30lMgh1RT82Z43BnbOPyME\"",
-    "mtime": "2026-09-02T12:36:35.535Z",
-    "size": 56944,
-    "path": "../public/coach-media/animations/happy/happy54.webp"
-  },
-  "/coach-media/animations/happy/happy55.webp": {
-    "type": "image/webp",
-    "etag": "\"4b40a-Dq55EPJ++rGpcOm3dfVMczMYPaI\"",
-    "mtime": "2026-09-02T12:36:35.536Z",
-    "size": 308234,
-    "path": "../public/coach-media/animations/happy/happy55.webp"
-  },
-  "/coach-media/animations/happy/happy56.webp": {
-    "type": "image/webp",
-    "etag": "\"7ec86-JO0Q1vC7rgTxvmuYQZ3337jzHAM\"",
-    "mtime": "2026-09-02T12:36:35.535Z",
-    "size": 519302,
-    "path": "../public/coach-media/animations/happy/happy56.webp"
-  },
-  "/coach-media/animations/happy/happy48.webp": {
-    "type": "image/webp",
-    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
-    "mtime": "2026-09-02T12:36:35.535Z",
-    "size": 566688,
-    "path": "../public/coach-media/animations/happy/happy48.webp"
-  },
-  "/coach-media/animations/happy/happy59.webp": {
-    "type": "image/webp",
-    "etag": "\"e290-fQb7JlOst9pysXxzv35HJTcHlpE\"",
-    "mtime": "2026-09-02T12:36:35.537Z",
-    "size": 58000,
-    "path": "../public/coach-media/animations/happy/happy59.webp"
-  },
-  "/coach-media/animations/happy/happy57.webp": {
-    "type": "image/webp",
-    "etag": "\"74f88-eEN2CyUJ9rLsRvqY7OzSZS3p2IU\"",
-    "mtime": "2026-09-02T12:36:35.535Z",
-    "size": 479112,
-    "path": "../public/coach-media/animations/happy/happy57.webp"
-  },
-  "/coach-media/animations/happy/happy6.webp": {
-    "type": "image/webp",
-    "etag": "\"2f8ce-NjZdr7Vin1NbHT+GFgWzMwsZeZE\"",
-    "mtime": "2026-09-02T12:36:35.537Z",
-    "size": 194766,
-    "path": "../public/coach-media/animations/happy/happy6.webp"
-  },
-  "/coach-media/animations/happy/happy58.webp": {
-    "type": "image/webp",
-    "etag": "\"695d4-fo3c1QhJVPT0yXYAuoQyAXrIO9E\"",
-    "mtime": "2026-09-02T12:36:35.536Z",
-    "size": 431572,
-    "path": "../public/coach-media/animations/happy/happy58.webp"
-  },
-  "/coach-media/animations/happy/happy61.webp": {
-    "type": "image/webp",
-    "etag": "\"253e8-1Fqod1LG1PZNTdmri6v0gPMthaE\"",
-    "mtime": "2026-09-02T12:36:35.537Z",
-    "size": 152552,
-    "path": "../public/coach-media/animations/happy/happy61.webp"
-  },
-  "/coach-media/animations/happy/happy62.webp": {
-    "type": "image/webp",
-    "etag": "\"4f8f8-tLTO1/dtiZumcCPIDjxNhkIrS9g\"",
-    "mtime": "2026-09-02T12:36:35.536Z",
-    "size": 325880,
-    "path": "../public/coach-media/animations/happy/happy62.webp"
-  },
-  "/coach-media/animations/happy/happy63.webp": {
-    "type": "image/webp",
-    "etag": "\"2b52a-B18WnXoFNFEoRmRiTpAPD0Xw4fA\"",
-    "mtime": "2026-09-02T12:36:35.536Z",
-    "size": 177450,
-    "path": "../public/coach-media/animations/happy/happy63.webp"
-  },
-  "/coach-media/animations/happy/happy65.webp": {
-    "type": "image/webp",
-    "etag": "\"153e2-1MrE6YaWW1bqq3uRkAG3roDYdbI\"",
-    "mtime": "2026-09-02T12:36:35.544Z",
-    "size": 87010,
-    "path": "../public/coach-media/animations/happy/happy65.webp"
-  },
-  "/coach-media/animations/happy/happy66.webp": {
-    "type": "image/webp",
-    "etag": "\"5aac0-EL5Dnfs0ZHXfZ2nFXHuqusIiA6U\"",
-    "mtime": "2026-09-02T12:36:35.536Z",
-    "size": 371392,
-    "path": "../public/coach-media/animations/happy/happy66.webp"
-  },
-  "/coach-media/animations/happy/happy67.webp": {
-    "type": "image/webp",
-    "etag": "\"26842-Ttlq6ska7bBpzXjvIXLqSUaPnIk\"",
-    "mtime": "2026-09-02T12:36:35.537Z",
-    "size": 157762,
-    "path": "../public/coach-media/animations/happy/happy67.webp"
-  },
-  "/coach-media/animations/happy/happy68.webp": {
-    "type": "image/webp",
-    "etag": "\"3a9f6-uXcrvu87C4tyxdUD8qy84likyxA\"",
-    "mtime": "2026-09-02T12:36:35.543Z",
-    "size": 240118,
-    "path": "../public/coach-media/animations/happy/happy68.webp"
-  },
-  "/coach-media/animations/happy/happy69.webp": {
-    "type": "image/webp",
-    "etag": "\"1843a-+cJ0+7F0PNcalsjHJcXNkw7qRDw\"",
-    "mtime": "2026-09-02T12:36:35.537Z",
-    "size": 99386,
-    "path": "../public/coach-media/animations/happy/happy69.webp"
-  },
-  "/coach-media/animations/happy/happy64.webp": {
-    "type": "image/webp",
-    "etag": "\"8b070-7oC7TYj4LIldWg1605cOC8gYl+w\"",
-    "mtime": "2026-09-02T12:36:35.537Z",
-    "size": 569456,
-    "path": "../public/coach-media/animations/happy/happy64.webp"
-  },
-  "/coach-media/animations/happy/happy71.webp": {
-    "type": "image/webp",
-    "etag": "\"12890-iDkXNnqbnihYZd5fm+x9SogtFL0\"",
-    "mtime": "2026-09-02T12:36:35.543Z",
-    "size": 75920,
-    "path": "../public/coach-media/animations/happy/happy71.webp"
-  },
-  "/coach-media/animations/happy/happy7.webp": {
-    "type": "image/webp",
-    "etag": "\"6dbe6-GIqYtKyf033a2vAUrfvCUdyYOmE\"",
-    "mtime": "2026-09-02T12:36:35.540Z",
-    "size": 449510,
-    "path": "../public/coach-media/animations/happy/happy7.webp"
-  },
-  "/coach-media/animations/happy/happy72.webp": {
-    "type": "image/webp",
-    "etag": "\"1132e-N279XcIE77SVgWI5RK4HGZTKNNQ\"",
-    "mtime": "2026-09-02T12:36:35.543Z",
-    "size": 70446,
-    "path": "../public/coach-media/animations/happy/happy72.webp"
-  },
-  "/coach-media/animations/happy/happy73.webp": {
-    "type": "image/webp",
-    "etag": "\"12dd8-PuAHZqC2ZtYnGQM/yt5HL7w8Z5w\"",
-    "mtime": "2026-09-02T12:36:35.543Z",
-    "size": 77272,
-    "path": "../public/coach-media/animations/happy/happy73.webp"
-  },
-  "/coach-media/animations/happy/happy74.webp": {
-    "type": "image/webp",
-    "etag": "\"5deae-Nnfy+JPdNa90X/TKIQJKDHXtEDg\"",
-    "mtime": "2026-09-02T12:36:35.543Z",
-    "size": 384686,
-    "path": "../public/coach-media/animations/happy/happy74.webp"
-  },
-  "/coach-media/animations/happy/happy75.webp": {
-    "type": "image/webp",
-    "etag": "\"1cfd0-9c+pPyscG4ipyzhzbN//E8mdshQ\"",
-    "mtime": "2026-09-02T12:36:35.543Z",
-    "size": 118736,
-    "path": "../public/coach-media/animations/happy/happy75.webp"
-  },
-  "/coach-media/animations/happy/happy76.webp": {
-    "type": "image/webp",
-    "etag": "\"14a9e-d6rGydXTPMji/MdwYzCalRd2xW0\"",
-    "mtime": "2026-09-02T12:36:35.543Z",
-    "size": 84638,
-    "path": "../public/coach-media/animations/happy/happy76.webp"
-  },
-  "/coach-media/animations/happy/happy60.webp": {
-    "type": "image/webp",
-    "etag": "\"1e7f54-IoOugN/ir+60blKcpy6Kl2RuTBI\"",
-    "mtime": "2026-09-02T12:36:35.537Z",
-    "size": 1998676,
-    "path": "../public/coach-media/animations/happy/happy60.webp"
-  },
-  "/coach-media/animations/happy/happy77.webp": {
-    "type": "image/webp",
-    "etag": "\"1e10a-1aPPim9G6xum8/Hs8Ro6u3VlG6U\"",
-    "mtime": "2026-09-02T12:36:35.543Z",
-    "size": 123146,
-    "path": "../public/coach-media/animations/happy/happy77.webp"
-  },
-  "/coach-media/animations/happy/happy78.webp": {
-    "type": "image/webp",
-    "etag": "\"17ba4-3h26xVZZTGib30A7sQhqoYBlgqs\"",
-    "mtime": "2026-09-02T12:36:35.545Z",
-    "size": 97188,
-    "path": "../public/coach-media/animations/happy/happy78.webp"
-  },
-  "/coach-media/animations/happy/happy79.webp": {
-    "type": "image/webp",
-    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
-    "mtime": "2026-09-02T12:36:35.544Z",
-    "size": 57724,
-    "path": "../public/coach-media/animations/happy/happy79.webp"
-  },
-  "/coach-media/animations/happy/happy70.webp": {
-    "type": "image/webp",
-    "etag": "\"813fc-MRr6jjBP9Dwv9BEsHOHSRAaT2vg\"",
-    "mtime": "2026-09-02T12:36:35.541Z",
-    "size": 529404,
-    "path": "../public/coach-media/animations/happy/happy70.webp"
-  },
-  "/coach-media/animations/happy/happy8.webp": {
-    "type": "image/webp",
-    "etag": "\"9d5e-zP9Tu9ncCFIvZEyvVyuhVBachAE\"",
-    "mtime": "2026-09-02T12:36:35.544Z",
-    "size": 40286,
-    "path": "../public/coach-media/animations/happy/happy8.webp"
-  },
-  "/coach-media/animations/happy/happy80.webp": {
-    "type": "image/webp",
-    "etag": "\"1da90-C0sljbqRem33mzQhLpalQ7JqSpU\"",
-    "mtime": "2026-09-02T12:36:35.543Z",
-    "size": 121488,
-    "path": "../public/coach-media/animations/happy/happy80.webp"
-  },
-  "/coach-media/animations/happy/happy82.webp": {
-    "type": "image/webp",
-    "etag": "\"f1a4-tNEKunf3T9spLovIQWFozZvffw4\"",
-    "mtime": "2026-09-02T12:36:35.544Z",
-    "size": 61860,
-    "path": "../public/coach-media/animations/happy/happy82.webp"
-  },
-  "/coach-media/animations/happy/happy83.webp": {
-    "type": "image/webp",
-    "etag": "\"2fe42-Kmm0KGXV1dEPQbjoM5G8BWcNWBM\"",
-    "mtime": "2026-09-02T12:36:35.545Z",
-    "size": 196162,
-    "path": "../public/coach-media/animations/happy/happy83.webp"
-  },
-  "/coach-media/animations/happy/happy84.webp": {
-    "type": "image/webp",
-    "etag": "\"7b984-0wPlyvPIzXRP9eIMHgiBJFl+27A\"",
-    "mtime": "2026-09-02T12:36:35.545Z",
-    "size": 506244,
-    "path": "../public/coach-media/animations/happy/happy84.webp"
-  },
-  "/coach-media/animations/happy/happy85.webp": {
-    "type": "image/webp",
-    "etag": "\"150ae-QMfLvsJpp/BJuZy4OwOXUD8OYUQ\"",
-    "mtime": "2026-09-02T12:36:35.544Z",
-    "size": 86190,
-    "path": "../public/coach-media/animations/happy/happy85.webp"
-  },
-  "/coach-media/animations/happy/happy81.webp": {
-    "type": "image/webp",
-    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
-    "mtime": "2026-09-02T12:36:35.544Z",
-    "size": 566688,
-    "path": "../public/coach-media/animations/happy/happy81.webp"
-  },
-  "/coach-media/animations/happy/happy86.webp": {
-    "type": "image/webp",
-    "etag": "\"d7f8-QCvUvt2Z0TOPZeSr+n8EKTRxFUo\"",
-    "mtime": "2026-09-02T12:36:35.545Z",
-    "size": 55288,
-    "path": "../public/coach-media/animations/happy/happy86.webp"
-  },
-  "/coach-media/animations/happy/happy87.webp": {
-    "type": "image/webp",
-    "etag": "\"17dec-6w/mkYwGAw5T0lZlhGXtO5BcsZU\"",
-    "mtime": "2026-09-02T12:36:35.545Z",
-    "size": 97772,
-    "path": "../public/coach-media/animations/happy/happy87.webp"
-  },
-  "/coach-media/animations/happy/happy88.webp": {
-    "type": "image/webp",
-    "etag": "\"10722-eVPV4BPr+xXKB/m7b01HTc3BYvY\"",
-    "mtime": "2026-09-02T12:36:35.544Z",
-    "size": 67362,
-    "path": "../public/coach-media/animations/happy/happy88.webp"
-  },
-  "/coach-media/animations/happy/happy89.webp": {
-    "type": "image/webp",
-    "etag": "\"1c7e2-sUSfie0YAo/54wJ6tzJq/DwQ0Uw\"",
-    "mtime": "2026-09-02T12:36:35.544Z",
-    "size": 116706,
-    "path": "../public/coach-media/animations/happy/happy89.webp"
-  },
-  "/coach-media/animations/happy/happy9.webp": {
-    "type": "image/webp",
-    "etag": "\"48688-/orx463Bv1qJxQ1v4poLAvBrNjI\"",
-    "mtime": "2026-09-02T12:36:35.545Z",
-    "size": 296584,
-    "path": "../public/coach-media/animations/happy/happy9.webp"
-  },
-  "/coach-media/animations/happy/happy91.webp": {
-    "type": "image/webp",
-    "etag": "\"162e4-8HqkqL71/r+QJURh8ZbqNFMM6ZE\"",
-    "mtime": "2026-09-02T12:36:35.545Z",
-    "size": 90852,
-    "path": "../public/coach-media/animations/happy/happy91.webp"
-  },
-  "/coach-media/animations/happy/happy90.webp": {
-    "type": "image/webp",
-    "etag": "\"40b96-2KBRO6W19pvILapZ8+Vi3lurBCw\"",
-    "mtime": "2026-09-02T12:36:35.545Z",
-    "size": 265110,
-    "path": "../public/coach-media/animations/happy/happy90.webp"
-  },
-  "/coach-media/animations/happy/happy92.webp": {
-    "type": "image/webp",
-    "etag": "\"1eb3c-dpJ07uxpsVOLdaMyS3SOlqMT6/k\"",
-    "mtime": "2026-09-02T12:36:35.545Z",
-    "size": 125756,
-    "path": "../public/coach-media/animations/happy/happy92.webp"
+  "/coach-media/animations/bravo/bravo9.webp": {
+    "type": "image/webp",
+    "etag": "\"1105e-m+/rIlVAaoiD3hxFGIcC7Skzq0k\"",
+    "mtime": "2026-09-05T12:08:26.491Z",
+    "size": 69726,
+    "path": "../public/coach-media/animations/bravo/bravo9.webp"
   },
   "/coach-media/animations/surprise/surprise1.webp": {
     "type": "image/webp",
     "etag": "\"4a370-9Oi37cBTqcZsmdkv+CmJExyHBlo\"",
-    "mtime": "2026-09-02T12:36:35.459Z",
+    "mtime": "2026-09-05T12:08:26.493Z",
     "size": 303984,
     "path": "../public/coach-media/animations/surprise/surprise1.webp"
   },
   "/coach-media/animations/surprise/surprise10.webp": {
     "type": "image/webp",
     "etag": "\"131a0-flDD1aRXvJm4HKE+7qPrfT2YS20\"",
-    "mtime": "2026-09-02T12:36:35.512Z",
+    "mtime": "2026-09-05T12:08:26.383Z",
     "size": 78240,
     "path": "../public/coach-media/animations/surprise/surprise10.webp"
   },
   "/coach-media/animations/surprise/surprise11.webp": {
     "type": "image/webp",
     "etag": "\"226fa-Xm81GJcMlpKVokcSNJtb09zW62k\"",
-    "mtime": "2026-09-02T12:36:35.514Z",
+    "mtime": "2026-09-05T12:08:26.494Z",
     "size": 141050,
     "path": "../public/coach-media/animations/surprise/surprise11.webp"
   },
   "/coach-media/animations/surprise/surprise12.webp": {
     "type": "image/webp",
     "etag": "\"a118-ZWkYpEVwrTmfFkTwYVBVpG6odjA\"",
-    "mtime": "2026-09-02T12:36:35.514Z",
+    "mtime": "2026-09-05T12:08:26.493Z",
     "size": 41240,
     "path": "../public/coach-media/animations/surprise/surprise12.webp"
   },
   "/coach-media/animations/surprise/surprise13.webp": {
     "type": "image/webp",
     "etag": "\"289d4-B/06SsPdfqNr35A+kWV5GqsWzHg\"",
-    "mtime": "2026-09-02T12:36:35.514Z",
+    "mtime": "2026-09-05T12:08:26.494Z",
     "size": 166356,
     "path": "../public/coach-media/animations/surprise/surprise13.webp"
   },
   "/coach-media/animations/surprise/surprise14.webp": {
     "type": "image/webp",
     "etag": "\"3f97e-wtHNBTyAPcvP3sC4pqeu2CzXJMs\"",
-    "mtime": "2026-09-02T12:36:35.513Z",
+    "mtime": "2026-09-05T12:08:26.494Z",
     "size": 260478,
     "path": "../public/coach-media/animations/surprise/surprise14.webp"
   },
   "/coach-media/animations/surprise/surprise16.webp": {
     "type": "image/webp",
     "etag": "\"10334-Gb5fHOWmtfoadRAb/ahHh2AADW0\"",
-    "mtime": "2026-09-02T12:36:35.513Z",
+    "mtime": "2026-09-05T12:08:26.494Z",
     "size": 66356,
     "path": "../public/coach-media/animations/surprise/surprise16.webp"
   },
   "/coach-media/animations/surprise/surprise17.webp": {
     "type": "image/webp",
     "etag": "\"1b95e-L11+Pw+wBWHBUC/2neg+jcazG2Y\"",
-    "mtime": "2026-09-02T12:36:35.513Z",
+    "mtime": "2026-09-05T12:08:26.494Z",
     "size": 112990,
     "path": "../public/coach-media/animations/surprise/surprise17.webp"
   },
   "/coach-media/animations/surprise/surprise18.webp": {
     "type": "image/webp",
     "etag": "\"18598-xHc16X67VNu9v8+Gc1s2b0JpwDg\"",
-    "mtime": "2026-09-02T12:36:35.513Z",
+    "mtime": "2026-09-05T12:08:26.496Z",
     "size": 99736,
     "path": "../public/coach-media/animations/surprise/surprise18.webp"
   },
   "/coach-media/animations/surprise/surprise19.webp": {
     "type": "image/webp",
     "etag": "\"11b66-taP6NYs2DrSJ1/Fu0gCrYIFdJrI\"",
-    "mtime": "2026-09-02T12:36:35.514Z",
+    "mtime": "2026-09-05T12:08:26.495Z",
     "size": 72550,
     "path": "../public/coach-media/animations/surprise/surprise19.webp"
+  },
+  "/coach-media/animations/surprise/surprise15.webp": {
+    "type": "image/webp",
+    "etag": "\"83768-IbKQoFThb02i7K7OLM8NjZwMn+w\"",
+    "mtime": "2026-09-05T12:08:26.493Z",
+    "size": 538472,
+    "path": "../public/coach-media/animations/surprise/surprise15.webp"
   },
   "/coach-media/animations/surprise/surprise2.webp": {
     "type": "image/webp",
     "etag": "\"1b28c-nMtO/w3tSIWPnQA/P/d7OQO8Fos\"",
-    "mtime": "2026-09-02T12:36:35.513Z",
+    "mtime": "2026-09-05T12:08:26.495Z",
     "size": 111244,
     "path": "../public/coach-media/animations/surprise/surprise2.webp"
   },
   "/coach-media/animations/surprise/surprise20.webp": {
     "type": "image/webp",
     "etag": "\"193ea-58K//9bArX9XDu0po5Lr3OMkZHg\"",
-    "mtime": "2026-09-02T12:36:35.517Z",
+    "mtime": "2026-09-05T12:08:26.495Z",
     "size": 103402,
     "path": "../public/coach-media/animations/surprise/surprise20.webp"
   },
   "/coach-media/animations/surprise/surprise21.webp": {
     "type": "image/webp",
     "etag": "\"a180-9IgNwh+Zz8BrStL5KFb1UAAyx08\"",
-    "mtime": "2026-09-02T12:36:35.514Z",
+    "mtime": "2026-09-05T12:08:26.497Z",
     "size": 41344,
     "path": "../public/coach-media/animations/surprise/surprise21.webp"
   },
   "/coach-media/animations/surprise/surprise22.webp": {
     "type": "image/webp",
     "etag": "\"14758-fKETCESGU4TOKmR+Tq2Jt5vsZv4\"",
-    "mtime": "2026-09-02T12:36:35.514Z",
+    "mtime": "2026-09-05T12:08:26.496Z",
     "size": 83800,
     "path": "../public/coach-media/animations/surprise/surprise22.webp"
-  },
-  "/coach-media/animations/surprise/surprise15.webp": {
-    "type": "image/webp",
-    "etag": "\"83768-IbKQoFThb02i7K7OLM8NjZwMn+w\"",
-    "mtime": "2026-09-02T12:36:35.514Z",
-    "size": 538472,
-    "path": "../public/coach-media/animations/surprise/surprise15.webp"
   },
   "/coach-media/animations/surprise/surprise23.webp": {
     "type": "image/webp",
     "etag": "\"309fc-vmf3IDCZQraeJiH2u5nNYnBmLE0\"",
-    "mtime": "2026-09-02T12:36:35.515Z",
+    "mtime": "2026-09-05T12:08:26.496Z",
     "size": 199164,
     "path": "../public/coach-media/animations/surprise/surprise23.webp"
   },
   "/coach-media/animations/surprise/surprise24.webp": {
     "type": "image/webp",
     "etag": "\"8ec6-3SAThVbqdRWZ2r2MmBs4qSDgNSA\"",
-    "mtime": "2026-09-02T12:36:35.514Z",
+    "mtime": "2026-09-05T12:08:26.496Z",
     "size": 36550,
     "path": "../public/coach-media/animations/surprise/surprise24.webp"
   },
   "/coach-media/animations/surprise/surprise25.webp": {
     "type": "image/webp",
     "etag": "\"34a6-dvr2Gjy94G6cfLjV7K9ojhZks7w\"",
-    "mtime": "2026-09-02T12:36:35.514Z",
+    "mtime": "2026-09-05T12:08:26.496Z",
     "size": 13478,
     "path": "../public/coach-media/animations/surprise/surprise25.webp"
   },
   "/coach-media/animations/surprise/surprise27.webp": {
     "type": "image/webp",
     "etag": "\"2fd12-RMFF8r6epFOKQpfSCriVPGTdgVU\"",
-    "mtime": "2026-09-02T12:36:35.515Z",
+    "mtime": "2026-09-05T12:08:26.497Z",
     "size": 195858,
     "path": "../public/coach-media/animations/surprise/surprise27.webp"
-  },
-  "/coach-media/animations/surprise/surprise26.webp": {
-    "type": "image/webp",
-    "etag": "\"743c6-pt6mVsMYiG3+eBL112jrgey0Gzo\"",
-    "mtime": "2026-09-02T12:36:35.517Z",
-    "size": 476102,
-    "path": "../public/coach-media/animations/surprise/surprise26.webp"
   },
   "/coach-media/animations/surprise/surprise28.webp": {
     "type": "image/webp",
     "etag": "\"ad24-FgC+hvDgvud9BCFGf28pvxl71oQ\"",
-    "mtime": "2026-09-02T12:36:35.515Z",
+    "mtime": "2026-09-05T12:08:26.496Z",
     "size": 44324,
     "path": "../public/coach-media/animations/surprise/surprise28.webp"
+  },
+  "/coach-media/animations/surprise/surprise26.webp": {
+    "type": "image/webp",
+    "etag": "\"743c6-pt6mVsMYiG3+eBL112jrgey0Gzo\"",
+    "mtime": "2026-09-05T12:08:26.497Z",
+    "size": 476102,
+    "path": "../public/coach-media/animations/surprise/surprise26.webp"
   },
   "/coach-media/animations/surprise/surprise29.webp": {
     "type": "image/webp",
     "etag": "\"12cd0-q0YDo94p3qYkje+5yt5zOubu2/Q\"",
-    "mtime": "2026-09-02T12:36:35.515Z",
+    "mtime": "2026-09-05T12:08:26.501Z",
     "size": 77008,
     "path": "../public/coach-media/animations/surprise/surprise29.webp"
   },
   "/coach-media/animations/surprise/surprise31.webp": {
     "type": "image/webp",
     "etag": "\"8b78-fIpPGO3WzV7KeoLiRXPR1uc7I+0\"",
-    "mtime": "2026-09-02T12:36:35.515Z",
+    "mtime": "2026-09-05T12:08:26.497Z",
     "size": 35704,
     "path": "../public/coach-media/animations/surprise/surprise31.webp"
+  },
+  "/coach-media/animations/bravo/bravo34.webp": {
+    "type": "image/webp",
+    "etag": "\"26ccac-0lLmGbQH56H1iPHEYHxgMHzvGqg\"",
+    "mtime": "2026-09-05T12:08:26.493Z",
+    "size": 2542764,
+    "path": "../public/coach-media/animations/bravo/bravo34.webp"
   },
   "/coach-media/animations/surprise/surprise32.webp": {
     "type": "image/webp",
     "etag": "\"1fc6e-bll0tlhrTsQvI87il4kKbajXbMg\"",
-    "mtime": "2026-09-02T12:36:35.517Z",
+    "mtime": "2026-09-05T12:08:26.501Z",
     "size": 130158,
     "path": "../public/coach-media/animations/surprise/surprise32.webp"
-  },
-  "/coach-media/animations/surprise/surprise35.webp": {
-    "type": "image/webp",
-    "etag": "\"2fdf0-P29h6puCfyWcpyj5Hiuay3K7+XI\"",
-    "mtime": "2026-09-02T12:36:35.517Z",
-    "size": 196080,
-    "path": "../public/coach-media/animations/surprise/surprise35.webp"
   },
   "/coach-media/animations/surprise/surprise34.webp": {
     "type": "image/webp",
     "etag": "\"39c0c-gOa+85OS+P0yapBXCLgb6G4e3KY\"",
-    "mtime": "2026-09-02T12:36:35.520Z",
+    "mtime": "2026-09-05T12:08:26.502Z",
     "size": 236556,
     "path": "../public/coach-media/animations/surprise/surprise34.webp"
+  },
+  "/coach-media/animations/surprise/surprise35.webp": {
+    "type": "image/webp",
+    "etag": "\"2fdf0-P29h6puCfyWcpyj5Hiuay3K7+XI\"",
+    "mtime": "2026-09-05T12:08:26.505Z",
+    "size": 196080,
+    "path": "../public/coach-media/animations/surprise/surprise35.webp"
   },
   "/coach-media/animations/surprise/surprise36.webp": {
     "type": "image/webp",
     "etag": "\"65d6a-XLUQAUVvNKrY0Ak4xmcIhKdi+kc\"",
-    "mtime": "2026-09-02T12:36:35.518Z",
+    "mtime": "2026-09-05T12:08:26.505Z",
     "size": 417130,
     "path": "../public/coach-media/animations/surprise/surprise36.webp"
+  },
+  "/coach-media/animations/surprise/surprise30.webp": {
+    "type": "image/webp",
+    "etag": "\"a5fd0-Hnpb/dNn7ssnoWT9WjuIq+4t5Qo\"",
+    "mtime": "2026-09-05T12:08:26.503Z",
+    "size": 679888,
+    "path": "../public/coach-media/animations/surprise/surprise30.webp"
+  },
+  "/coach-media/animations/surprise/surprise3.webp": {
+    "type": "image/webp",
+    "etag": "\"c1a0c-usHwa9n1ie+2Cm+CLsVeWK9PJMQ\"",
+    "mtime": "2026-09-05T12:08:26.502Z",
+    "size": 793100,
+    "path": "../public/coach-media/animations/surprise/surprise3.webp"
   },
   "/coach-media/animations/surprise/surprise37.webp": {
     "type": "image/webp",
     "etag": "\"1c006-O6avPzSEEE8867z/qx4SNy/2Dbs\"",
-    "mtime": "2026-09-02T12:36:35.517Z",
+    "mtime": "2026-09-05T12:08:26.504Z",
     "size": 114694,
     "path": "../public/coach-media/animations/surprise/surprise37.webp"
   },
   "/coach-media/animations/surprise/surprise38.webp": {
     "type": "image/webp",
     "etag": "\"13470-E9RJjOFPzc8oN6aIexSBkTIvvno\"",
-    "mtime": "2026-09-02T12:36:35.519Z",
+    "mtime": "2026-09-05T12:08:26.502Z",
     "size": 78960,
     "path": "../public/coach-media/animations/surprise/surprise38.webp"
   },
   "/coach-media/animations/surprise/surprise39.webp": {
     "type": "image/webp",
     "etag": "\"3f126-BT2+LxctzUWG3/ThOwuDtTgAArY\"",
-    "mtime": "2026-09-02T12:36:35.518Z",
+    "mtime": "2026-09-05T12:08:26.503Z",
     "size": 258342,
     "path": "../public/coach-media/animations/surprise/surprise39.webp"
-  },
-  "/coach-media/animations/surprise/surprise3.webp": {
-    "type": "image/webp",
-    "etag": "\"c1a0c-usHwa9n1ie+2Cm+CLsVeWK9PJMQ\"",
-    "mtime": "2026-09-02T12:36:35.519Z",
-    "size": 793100,
-    "path": "../public/coach-media/animations/surprise/surprise3.webp"
-  },
-  "/coach-media/animations/surprise/surprise30.webp": {
-    "type": "image/webp",
-    "etag": "\"a5fd0-Hnpb/dNn7ssnoWT9WjuIq+4t5Qo\"",
-    "mtime": "2026-09-02T12:36:35.517Z",
-    "size": 679888,
-    "path": "../public/coach-media/animations/surprise/surprise30.webp"
   },
   "/coach-media/animations/surprise/surprise4.webp": {
     "type": "image/webp",
     "etag": "\"435ca-axYlJUxq0dxVUcdPGXfx7jIjOqI\"",
-    "mtime": "2026-09-02T12:36:35.518Z",
+    "mtime": "2026-09-05T12:08:26.503Z",
     "size": 275914,
     "path": "../public/coach-media/animations/surprise/surprise4.webp"
-  },
-  "/coach-media/animations/surprise/surprise41.webp": {
-    "type": "image/webp",
-    "etag": "\"a8cc-eJpn1iM/G93mG/y3J7MYZxb5oZk\"",
-    "mtime": "2026-09-02T12:36:35.518Z",
-    "size": 43212,
-    "path": "../public/coach-media/animations/surprise/surprise41.webp"
   },
   "/coach-media/animations/surprise/surprise40.webp": {
     "type": "image/webp",
     "etag": "\"39564-nIAqPe45sz0KpkAx2CKOstSaCTA\"",
-    "mtime": "2026-09-02T12:36:35.518Z",
+    "mtime": "2026-09-05T12:08:26.506Z",
     "size": 234852,
     "path": "../public/coach-media/animations/surprise/surprise40.webp"
+  },
+  "/coach-media/animations/surprise/surprise41.webp": {
+    "type": "image/webp",
+    "etag": "\"a8cc-eJpn1iM/G93mG/y3J7MYZxb5oZk\"",
+    "mtime": "2026-09-05T12:08:26.504Z",
+    "size": 43212,
+    "path": "../public/coach-media/animations/surprise/surprise41.webp"
   },
   "/coach-media/animations/surprise/surprise42.webp": {
     "type": "image/webp",
     "etag": "\"646bc-7+aKS5sl1K5hY8UDNYAFM4lfo6Y\"",
-    "mtime": "2026-09-02T12:36:35.518Z",
+    "mtime": "2026-09-05T12:08:26.506Z",
     "size": 411324,
     "path": "../public/coach-media/animations/surprise/surprise42.webp"
   },
   "/coach-media/animations/surprise/surprise43.webp": {
     "type": "image/webp",
     "etag": "\"4b24-EbrAgTKhgJEIluaU9wK/fZsqFQI\"",
-    "mtime": "2026-09-02T12:36:35.520Z",
+    "mtime": "2026-09-05T12:08:26.509Z",
     "size": 19236,
     "path": "../public/coach-media/animations/surprise/surprise43.webp"
   },
   "/coach-media/animations/surprise/surprise45.webp": {
     "type": "image/webp",
     "etag": "\"1a680-xKF6ecJOJz07Bq3nMYUvl7ZSmJo\"",
-    "mtime": "2026-09-02T12:36:35.519Z",
+    "mtime": "2026-09-05T12:08:26.510Z",
     "size": 108160,
     "path": "../public/coach-media/animations/surprise/surprise45.webp"
   },
   "/coach-media/animations/surprise/surprise46.webp": {
     "type": "image/webp",
     "etag": "\"b624-UVBhSbU4BcnZsHBEFLk/NJkigMs\"",
-    "mtime": "2026-09-02T12:36:35.519Z",
+    "mtime": "2026-09-05T12:08:26.506Z",
     "size": 46628,
     "path": "../public/coach-media/animations/surprise/surprise46.webp"
   },
   "/coach-media/animations/surprise/surprise47.webp": {
     "type": "image/webp",
     "etag": "\"ed28-q4uXmQ440B/uZ44347cvninGGos\"",
-    "mtime": "2026-09-02T12:36:35.520Z",
+    "mtime": "2026-09-05T12:08:26.506Z",
     "size": 60712,
     "path": "../public/coach-media/animations/surprise/surprise47.webp"
   },
   "/coach-media/animations/surprise/surprise48.webp": {
     "type": "image/webp",
     "etag": "\"132e0-ARE5bC0A3JVvXvF646DPkIObvBU\"",
-    "mtime": "2026-09-02T12:36:35.519Z",
+    "mtime": "2026-09-05T12:08:26.510Z",
     "size": 78560,
     "path": "../public/coach-media/animations/surprise/surprise48.webp"
-  },
-  "/coach-media/animations/surprise/surprise44.webp": {
-    "type": "image/webp",
-    "etag": "\"a77fc-figlb0a9uvdibEtUPy5WQ390cJ0\"",
-    "mtime": "2026-09-02T12:36:35.520Z",
-    "size": 686076,
-    "path": "../public/coach-media/animations/surprise/surprise44.webp"
-  },
-  "/coach-media/animations/surprise/surprise33.webp": {
-    "type": "image/webp",
-    "etag": "\"1ff378-3ceZyeJGfgZwkrgPrzBv1AbDx9o\"",
-    "mtime": "2026-09-02T12:36:35.519Z",
-    "size": 2093944,
-    "path": "../public/coach-media/animations/surprise/surprise33.webp"
   },
   "/coach-media/animations/surprise/surprise49.webp": {
     "type": "image/webp",
     "etag": "\"25b6c-wCdzxaXfkdqyDcw6a8xy07JXmzE\"",
-    "mtime": "2026-09-02T12:36:35.525Z",
+    "mtime": "2026-09-05T12:08:26.513Z",
     "size": 154476,
     "path": "../public/coach-media/animations/surprise/surprise49.webp"
   },
   "/coach-media/animations/surprise/surprise5.webp": {
     "type": "image/webp",
     "etag": "\"27cfa-OX0fnlOewddMbbATr6i9i2ynE3Y\"",
-    "mtime": "2026-09-02T12:36:35.523Z",
+    "mtime": "2026-09-05T12:08:26.511Z",
     "size": 163066,
     "path": "../public/coach-media/animations/surprise/surprise5.webp"
   },
   "/coach-media/animations/surprise/surprise50.webp": {
     "type": "image/webp",
     "etag": "\"54ee6-utB6xrbIiRW/BR2zFsCbLOBuYQ0\"",
-    "mtime": "2026-09-02T12:36:35.521Z",
+    "mtime": "2026-09-05T12:08:26.512Z",
     "size": 347878,
     "path": "../public/coach-media/animations/surprise/surprise50.webp"
+  },
+  "/coach-media/animations/surprise/surprise44.webp": {
+    "type": "image/webp",
+    "etag": "\"a77fc-figlb0a9uvdibEtUPy5WQ390cJ0\"",
+    "mtime": "2026-09-05T12:08:26.511Z",
+    "size": 686076,
+    "path": "../public/coach-media/animations/surprise/surprise44.webp"
+  },
+  "/coach-media/animations/surprise/surprise33.webp": {
+    "type": "image/webp",
+    "etag": "\"1ff378-3ceZyeJGfgZwkrgPrzBv1AbDx9o\"",
+    "mtime": "2026-09-05T12:08:26.503Z",
+    "size": 2093944,
+    "path": "../public/coach-media/animations/surprise/surprise33.webp"
   },
   "/coach-media/animations/surprise/surprise51.webp": {
     "type": "image/webp",
     "etag": "\"2227a-5yeomBh1J53C2OweVlrUJRsy7d0\"",
-    "mtime": "2026-09-02T12:36:35.523Z",
+    "mtime": "2026-09-05T12:08:26.511Z",
     "size": 139898,
     "path": "../public/coach-media/animations/surprise/surprise51.webp"
   },
   "/coach-media/animations/surprise/surprise52.webp": {
     "type": "image/webp",
     "etag": "\"142aa-ez2zkO6VqB8WIkeukvxz7D7f1lU\"",
-    "mtime": "2026-09-02T12:36:35.523Z",
+    "mtime": "2026-09-05T12:08:26.511Z",
     "size": 82602,
     "path": "../public/coach-media/animations/surprise/surprise52.webp"
   },
   "/coach-media/animations/surprise/surprise53.webp": {
     "type": "image/webp",
     "etag": "\"118e2-l9zmLQtW2P6gxSkdSTudjLq2c3Q\"",
-    "mtime": "2026-09-02T12:36:35.520Z",
+    "mtime": "2026-09-05T12:08:26.514Z",
     "size": 71906,
     "path": "../public/coach-media/animations/surprise/surprise53.webp"
   },
   "/coach-media/animations/surprise/surprise54.webp": {
     "type": "image/webp",
     "etag": "\"1e178-jaNfsOInt+QvPbLkhzwWaJqG/Bs\"",
-    "mtime": "2026-09-02T12:36:35.525Z",
+    "mtime": "2026-09-05T12:08:26.512Z",
     "size": 123256,
     "path": "../public/coach-media/animations/surprise/surprise54.webp"
-  },
-  "/coach-media/animations/surprise/surprise55.webp": {
-    "type": "image/webp",
-    "etag": "\"5a896-O68fUxVUguZ0BzBxfGlXQFyP0DA\"",
-    "mtime": "2026-09-02T12:36:35.524Z",
-    "size": 370838,
-    "path": "../public/coach-media/animations/surprise/surprise55.webp"
   },
   "/coach-media/animations/surprise/surprise56.webp": {
     "type": "image/webp",
     "etag": "\"1b960-DZp5H8cTkUG7OqYKTKt0Wb41j6Y\"",
-    "mtime": "2026-09-02T12:36:35.523Z",
+    "mtime": "2026-09-05T12:08:26.512Z",
     "size": 112992,
     "path": "../public/coach-media/animations/surprise/surprise56.webp"
   },
-  "/coach-media/animations/surprise/surprise57.webp": {
+  "/coach-media/animations/surprise/surprise55.webp": {
     "type": "image/webp",
-    "etag": "\"44ab8-mSBT2ojhhuQLKvtVbnLyoP47hJY\"",
-    "mtime": "2026-09-02T12:36:35.524Z",
-    "size": 281272,
-    "path": "../public/coach-media/animations/surprise/surprise57.webp"
+    "etag": "\"5a896-O68fUxVUguZ0BzBxfGlXQFyP0DA\"",
+    "mtime": "2026-09-05T12:08:26.515Z",
+    "size": 370838,
+    "path": "../public/coach-media/animations/surprise/surprise55.webp"
   },
   "/coach-media/animations/surprise/surprise58.webp": {
     "type": "image/webp",
     "etag": "\"21a8a-Yf9qQLhbyXuD9/JZ+89b4mvgAKw\"",
-    "mtime": "2026-09-02T12:36:35.523Z",
+    "mtime": "2026-09-05T12:08:26.515Z",
     "size": 137866,
     "path": "../public/coach-media/animations/surprise/surprise58.webp"
+  },
+  "/coach-media/animations/surprise/surprise57.webp": {
+    "type": "image/webp",
+    "etag": "\"44ab8-mSBT2ojhhuQLKvtVbnLyoP47hJY\"",
+    "mtime": "2026-09-05T12:08:26.512Z",
+    "size": 281272,
+    "path": "../public/coach-media/animations/surprise/surprise57.webp"
   },
   "/coach-media/animations/surprise/surprise59.webp": {
     "type": "image/webp",
     "etag": "\"ad24-FgC+hvDgvud9BCFGf28pvxl71oQ\"",
-    "mtime": "2026-09-02T12:36:35.525Z",
+    "mtime": "2026-09-05T12:08:26.512Z",
     "size": 44324,
     "path": "../public/coach-media/animations/surprise/surprise59.webp"
   },
   "/coach-media/animations/surprise/surprise6.webp": {
     "type": "image/webp",
     "etag": "\"efbe-4a9rtfMIdF2+TFeY3gBQcGq2OOY\"",
-    "mtime": "2026-09-02T12:36:35.524Z",
+    "mtime": "2026-09-05T12:08:26.513Z",
     "size": 61374,
     "path": "../public/coach-media/animations/surprise/surprise6.webp"
   },
   "/coach-media/animations/surprise/surprise60.webp": {
     "type": "image/webp",
     "etag": "\"4b7a6-epNKh/4axQkdUr59kQLtvLuUWxk\"",
-    "mtime": "2026-09-02T12:36:35.524Z",
+    "mtime": "2026-09-05T12:08:26.514Z",
     "size": 309158,
     "path": "../public/coach-media/animations/surprise/surprise60.webp"
   },
   "/coach-media/animations/surprise/surprise61.webp": {
     "type": "image/webp",
     "etag": "\"12cd0-q0YDo94p3qYkje+5yt5zOubu2/Q\"",
-    "mtime": "2026-09-02T12:36:35.525Z",
+    "mtime": "2026-09-05T12:08:26.513Z",
     "size": 77008,
     "path": "../public/coach-media/animations/surprise/surprise61.webp"
   },
   "/coach-media/animations/surprise/surprise62.webp": {
     "type": "image/webp",
     "etag": "\"1c6a0-mXpnKRv+Hz25jP09BjR4foiD6qw\"",
-    "mtime": "2026-09-02T12:36:35.525Z",
+    "mtime": "2026-09-05T12:08:26.513Z",
     "size": 116384,
     "path": "../public/coach-media/animations/surprise/surprise62.webp"
   },
   "/coach-media/animations/surprise/surprise63.webp": {
     "type": "image/webp",
     "etag": "\"1eeba-iqr/NnLNgmJCGHzVJ166UGdRB4Q\"",
-    "mtime": "2026-09-02T12:36:35.525Z",
+    "mtime": "2026-09-05T12:08:26.513Z",
     "size": 126650,
     "path": "../public/coach-media/animations/surprise/surprise63.webp"
   },
   "/coach-media/animations/surprise/surprise7.webp": {
     "type": "image/webp",
     "etag": "\"28cf0-WZKrfZgxmWudkDiNqJ2t+yttmY4\"",
-    "mtime": "2026-09-02T12:36:35.525Z",
+    "mtime": "2026-09-05T12:08:26.514Z",
     "size": 167152,
     "path": "../public/coach-media/animations/surprise/surprise7.webp"
   },
   "/coach-media/animations/surprise/surprise9.webp": {
     "type": "image/webp",
     "etag": "\"3567c-XTH6klwiC89h9A35OVWjuAEqJ5A\"",
-    "mtime": "2026-09-02T12:36:35.525Z",
+    "mtime": "2026-09-05T12:08:26.515Z",
     "size": 218748,
     "path": "../public/coach-media/animations/surprise/surprise9.webp"
+  },
+  "/coach-media/emojis/danger/danger1.png": {
+    "type": "image/png",
+    "etag": "\"3036-eXYZ+J7eqF26NQJZHhXFXrNgGww\"",
+    "mtime": "2026-09-05T12:08:26.381Z",
+    "size": 12342,
+    "path": "../public/coach-media/emojis/danger/danger1.png"
+  },
+  "/coach-media/animations/happy/happy10.webp": {
+    "type": "image/webp",
+    "etag": "\"13102-1AwfKNNogN0hV9N7INQr8b/L5U0\"",
+    "mtime": "2026-09-05T12:08:26.517Z",
+    "size": 78082,
+    "path": "../public/coach-media/animations/happy/happy10.webp"
+  },
+  "/coach-media/animations/happy/happy11.webp": {
+    "type": "image/webp",
+    "etag": "\"c51c-aSSJ/YerC2d+QHIzkxapjUKX1xo\"",
+    "mtime": "2026-09-05T12:08:26.517Z",
+    "size": 50460,
+    "path": "../public/coach-media/animations/happy/happy11.webp"
+  },
+  "/coach-media/animations/happy/happy12.webp": {
+    "type": "image/webp",
+    "etag": "\"26dd0-kEufqOKIIc4EphkqsilP8Vg0anA\"",
+    "mtime": "2026-09-05T12:08:26.517Z",
+    "size": 159184,
+    "path": "../public/coach-media/animations/happy/happy12.webp"
+  },
+  "/coach-media/animations/happy/happy13.webp": {
+    "type": "image/webp",
+    "etag": "\"1b7c8-6YwhPgMDDi09N6QaiQGvB3MESN8\"",
+    "mtime": "2026-09-05T12:08:26.519Z",
+    "size": 112584,
+    "path": "../public/coach-media/animations/happy/happy13.webp"
+  },
+  "/coach-media/animations/happy/happy14.webp": {
+    "type": "image/webp",
+    "etag": "\"2b5e-Tlk4vz7sMxW+TPrlh/TTUPVQZ64\"",
+    "mtime": "2026-09-05T12:08:26.517Z",
+    "size": 11102,
+    "path": "../public/coach-media/animations/happy/happy14.webp"
+  },
+  "/coach-media/animations/happy/happy15.webp": {
+    "type": "image/webp",
+    "etag": "\"1f82e-GdfVpoK+FBOph2APqZZ2ksTEi/M\"",
+    "mtime": "2026-09-05T12:08:26.518Z",
+    "size": 129070,
+    "path": "../public/coach-media/animations/happy/happy15.webp"
+  },
+  "/coach-media/animations/happy/happy16.webp": {
+    "type": "image/webp",
+    "etag": "\"39676-m3hlL8MEmfcM8A6RQ/d34G7k4z4\"",
+    "mtime": "2026-09-05T12:08:26.518Z",
+    "size": 235126,
+    "path": "../public/coach-media/animations/happy/happy16.webp"
+  },
+  "/coach-media/animations/happy/happy1.webp": {
+    "type": "image/webp",
+    "etag": "\"9a9fe-dnJ60THXbLE/qdsCoy8mks8JEWo\"",
+    "mtime": "2026-09-05T12:08:26.385Z",
+    "size": 633342,
+    "path": "../public/coach-media/animations/happy/happy1.webp"
+  },
+  "/coach-media/animations/happy/happy17.webp": {
+    "type": "image/webp",
+    "etag": "\"6c236-lcuyQg6sSZcT0+fCpGNG/JhMi7U\"",
+    "mtime": "2026-09-05T12:08:26.521Z",
+    "size": 442934,
+    "path": "../public/coach-media/animations/happy/happy17.webp"
+  },
+  "/coach-media/animations/happy/happy18.webp": {
+    "type": "image/webp",
+    "etag": "\"38cca-HDXyFn4nw7hhDQ0f8voh7jHxFIU\"",
+    "mtime": "2026-09-05T12:08:26.525Z",
+    "size": 232650,
+    "path": "../public/coach-media/animations/happy/happy18.webp"
+  },
+  "/coach-media/animations/happy/happy19.webp": {
+    "type": "image/webp",
+    "etag": "\"7340-Mvycs8QTkYX6zm7iIfL2nLfxOe8\"",
+    "mtime": "2026-09-05T12:08:26.524Z",
+    "size": 29504,
+    "path": "../public/coach-media/animations/happy/happy19.webp"
+  },
+  "/coach-media/animations/happy/happy2.webp": {
+    "type": "image/webp",
+    "etag": "\"1b638-CG1y3zibI0VpxAfTb3zZrzRaw90\"",
+    "mtime": "2026-09-05T12:08:26.518Z",
+    "size": 112184,
+    "path": "../public/coach-media/animations/happy/happy2.webp"
+  },
+  "/coach-media/animations/happy/happy21.webp": {
+    "type": "image/webp",
+    "etag": "\"d20a-nJXSMlgY3QzHwwJw2j7rW4bD6HU\"",
+    "mtime": "2026-09-05T12:08:26.519Z",
+    "size": 53770,
+    "path": "../public/coach-media/animations/happy/happy21.webp"
+  },
+  "/coach-media/animations/happy/happy20.webp": {
+    "type": "image/webp",
+    "etag": "\"31eb2-eG0f1RbiJPRwmWx1p+zVbeej7Jo\"",
+    "mtime": "2026-09-05T12:08:26.526Z",
+    "size": 204466,
+    "path": "../public/coach-media/animations/happy/happy20.webp"
+  },
+  "/coach-media/animations/happy/happy22.webp": {
+    "type": "image/webp",
+    "etag": "\"2be74-wts9jwpJqVDGud0ZifbURmTwf7g\"",
+    "mtime": "2026-09-05T12:08:26.525Z",
+    "size": 179828,
+    "path": "../public/coach-media/animations/happy/happy22.webp"
+  },
+  "/coach-media/animations/happy/happy23.webp": {
+    "type": "image/webp",
+    "etag": "\"e74a-F+BBio6AhOZ5hwHOGh8wKCLcoGA\"",
+    "mtime": "2026-09-05T12:08:26.524Z",
+    "size": 59210,
+    "path": "../public/coach-media/animations/happy/happy23.webp"
+  },
+  "/coach-media/animations/happy/happy24.webp": {
+    "type": "image/webp",
+    "etag": "\"23e02-CIi7WeJXeH8cd/GgwMtt3CFFVkM\"",
+    "mtime": "2026-09-05T12:08:26.525Z",
+    "size": 146946,
+    "path": "../public/coach-media/animations/happy/happy24.webp"
+  },
+  "/coach-media/animations/happy/happy25.webp": {
+    "type": "image/webp",
+    "etag": "\"16574-kubThW5vAMKccIZc2jswkTWLUoA\"",
+    "mtime": "2026-09-05T12:08:26.525Z",
+    "size": 91508,
+    "path": "../public/coach-media/animations/happy/happy25.webp"
+  },
+  "/coach-media/animations/happy/happy26.webp": {
+    "type": "image/webp",
+    "etag": "\"6c706-bOAKAMAiElDmC2MCxEJkrvr5A+k\"",
+    "mtime": "2026-09-05T12:08:26.526Z",
+    "size": 444166,
+    "path": "../public/coach-media/animations/happy/happy26.webp"
+  },
+  "/coach-media/animations/happy/happy27.webp": {
+    "type": "image/webp",
+    "etag": "\"1c662-1bbHXwmlK1/Q6duQFfbU/+Wg5Fg\"",
+    "mtime": "2026-09-05T12:08:26.526Z",
+    "size": 116322,
+    "path": "../public/coach-media/animations/happy/happy27.webp"
+  },
+  "/coach-media/animations/happy/happy28.webp": {
+    "type": "image/webp",
+    "etag": "\"2090a-cfPB8KwXDFTC2iWhg6Pn7kOvGeg\"",
+    "mtime": "2026-09-05T12:08:26.526Z",
+    "size": 133386,
+    "path": "../public/coach-media/animations/happy/happy28.webp"
+  },
+  "/coach-media/animations/happy/happy29.webp": {
+    "type": "image/webp",
+    "etag": "\"15a6e-F4FEHmzAIG7WW3pszvFsq0XKYGk\"",
+    "mtime": "2026-09-05T12:08:26.527Z",
+    "size": 88686,
+    "path": "../public/coach-media/animations/happy/happy29.webp"
+  },
+  "/coach-media/animations/happy/happy3.webp": {
+    "type": "image/webp",
+    "etag": "\"6438c-AQmLLI1sVtzVfySWLf8q8/SnoDQ\"",
+    "mtime": "2026-09-05T12:08:26.528Z",
+    "size": 410508,
+    "path": "../public/coach-media/animations/happy/happy3.webp"
+  },
+  "/coach-media/animations/happy/happy30.webp": {
+    "type": "image/webp",
+    "etag": "\"46140-52DID+yWWHNDhSWo2wqCW7AgztI\"",
+    "mtime": "2026-09-05T12:08:26.527Z",
+    "size": 287040,
+    "path": "../public/coach-media/animations/happy/happy30.webp"
+  },
+  "/coach-media/animations/happy/happy31.webp": {
+    "type": "image/webp",
+    "etag": "\"4d6ca-GZQfzSkO4AbRu7KJoQWgnIw6U6k\"",
+    "mtime": "2026-09-05T12:08:26.529Z",
+    "size": 317130,
+    "path": "../public/coach-media/animations/happy/happy31.webp"
+  },
+  "/coach-media/animations/happy/happy32.webp": {
+    "type": "image/webp",
+    "etag": "\"1ce94-qd5mvwxqL3x8atGLGoQ6T5SBIM8\"",
+    "mtime": "2026-09-05T12:08:26.530Z",
+    "size": 118420,
+    "path": "../public/coach-media/animations/happy/happy32.webp"
+  },
+  "/coach-media/animations/happy/happy34.webp": {
+    "type": "image/webp",
+    "etag": "\"7a6e-N4lUoynD0pY1HrZqbhKsKEJcIdY\"",
+    "mtime": "2026-09-05T12:08:26.526Z",
+    "size": 31342,
+    "path": "../public/coach-media/animations/happy/happy34.webp"
+  },
+  "/coach-media/animations/happy/happy33.webp": {
+    "type": "image/webp",
+    "etag": "\"1ca8a-w5q1HyoRf3YSX2wny1ajxC1lVTw\"",
+    "mtime": "2026-09-05T12:08:26.527Z",
+    "size": 117386,
+    "path": "../public/coach-media/animations/happy/happy33.webp"
+  },
+  "/coach-media/animations/happy/happy35.webp": {
+    "type": "image/webp",
+    "etag": "\"27e2a-nINbfIIzpb0aB5cQDbxz/GDwNug\"",
+    "mtime": "2026-09-05T12:08:26.527Z",
+    "size": 163370,
+    "path": "../public/coach-media/animations/happy/happy35.webp"
+  },
+  "/coach-media/animations/happy/happy36.webp": {
+    "type": "image/webp",
+    "etag": "\"1480e-iU7KcSbk60IXH4CWOzNyttBsbE0\"",
+    "mtime": "2026-09-05T12:08:26.528Z",
+    "size": 83982,
+    "path": "../public/coach-media/animations/happy/happy36.webp"
+  },
+  "/coach-media/animations/happy/happy37.webp": {
+    "type": "image/webp",
+    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
+    "mtime": "2026-09-05T12:08:26.529Z",
+    "size": 57724,
+    "path": "../public/coach-media/animations/happy/happy37.webp"
+  },
+  "/coach-media/animations/happy/happy38.webp": {
+    "type": "image/webp",
+    "etag": "\"20928-zE86yLQztSZEATTCxTKRuQFifnw\"",
+    "mtime": "2026-09-05T12:08:26.530Z",
+    "size": 133416,
+    "path": "../public/coach-media/animations/happy/happy38.webp"
+  },
+  "/coach-media/animations/happy/happy39.webp": {
+    "type": "image/webp",
+    "etag": "\"1031c-0I4f6s3jDJrqeEDNAVBubusuRqQ\"",
+    "mtime": "2026-09-05T12:08:26.528Z",
+    "size": 66332,
+    "path": "../public/coach-media/animations/happy/happy39.webp"
+  },
+  "/coach-media/animations/happy/happy4.webp": {
+    "type": "image/webp",
+    "etag": "\"80d8-WZGwWFCLsk3YDTm9XP5QCq8R7Es\"",
+    "mtime": "2026-09-05T12:08:26.528Z",
+    "size": 32984,
+    "path": "../public/coach-media/animations/happy/happy4.webp"
+  },
+  "/coach-media/animations/happy/happy40.webp": {
+    "type": "image/webp",
+    "etag": "\"116ba-M7X1kM6tt7dIECx3koEGYbji1us\"",
+    "mtime": "2026-09-05T12:08:26.530Z",
+    "size": 71354,
+    "path": "../public/coach-media/animations/happy/happy40.webp"
+  },
+  "/coach-media/animations/happy/happy41.webp": {
+    "type": "image/webp",
+    "etag": "\"a76a-Nmck64+pAP0tEnTHpG1mitI4ONk\"",
+    "mtime": "2026-09-05T12:08:26.530Z",
+    "size": 42858,
+    "path": "../public/coach-media/animations/happy/happy41.webp"
+  },
+  "/coach-media/animations/happy/happy42.webp": {
+    "type": "image/webp",
+    "etag": "\"7eba-Xqry0H+Qj7x/M1eDmO0CIQ+A7Mg\"",
+    "mtime": "2026-09-05T12:08:26.529Z",
+    "size": 32442,
+    "path": "../public/coach-media/animations/happy/happy42.webp"
+  },
+  "/coach-media/animations/happy/happy44.webp": {
+    "type": "image/webp",
+    "etag": "\"24e16-Y7u+Md6oQPbYSDjE0D9H77j0Z5I\"",
+    "mtime": "2026-09-05T12:08:26.531Z",
+    "size": 151062,
+    "path": "../public/coach-media/animations/happy/happy44.webp"
+  },
+  "/coach-media/animations/happy/happy43.webp": {
+    "type": "image/webp",
+    "etag": "\"55a5e-kUYTswcDoeybUYnmGXDBV0ny564\"",
+    "mtime": "2026-09-05T12:08:26.533Z",
+    "size": 350814,
+    "path": "../public/coach-media/animations/happy/happy43.webp"
+  },
+  "/coach-media/animations/happy/happy45.webp": {
+    "type": "image/webp",
+    "etag": "\"65a82-XxALJISFlOUdD3wSziHwFXHhxqc\"",
+    "mtime": "2026-09-05T12:08:26.531Z",
+    "size": 416386,
+    "path": "../public/coach-media/animations/happy/happy45.webp"
+  },
+  "/coach-media/animations/happy/happy46.webp": {
+    "type": "image/webp",
+    "etag": "\"13dec-uj4sm+IwuLOmQY7lGy1JeMzt2FM\"",
+    "mtime": "2026-09-05T12:08:26.531Z",
+    "size": 81388,
+    "path": "../public/coach-media/animations/happy/happy46.webp"
+  },
+  "/coach-media/animations/happy/happy47.webp": {
+    "type": "image/webp",
+    "etag": "\"234e4-DNBmLISLOFimd+G8XihNRgMsjGw\"",
+    "mtime": "2026-09-05T12:08:26.533Z",
+    "size": 144612,
+    "path": "../public/coach-media/animations/happy/happy47.webp"
+  },
+  "/coach-media/animations/happy/happy49.webp": {
+    "type": "image/webp",
+    "etag": "\"3123c-mf62C2iWRtx585STd9CHbYmICyM\"",
+    "mtime": "2026-09-05T12:08:26.531Z",
+    "size": 201276,
+    "path": "../public/coach-media/animations/happy/happy49.webp"
+  },
+  "/coach-media/animations/happy/happy5.webp": {
+    "type": "image/webp",
+    "etag": "\"10784-0Rzy5v92HqFbOQ0qn2Jo9XRJ1r0\"",
+    "mtime": "2026-09-05T12:08:26.531Z",
+    "size": 67460,
+    "path": "../public/coach-media/animations/happy/happy5.webp"
+  },
+  "/coach-media/animations/happy/happy50.webp": {
+    "type": "image/webp",
+    "etag": "\"2b72a-Xz8Gb2Cdj+rrnnpbXbSGBQRTFYw\"",
+    "mtime": "2026-09-05T12:08:26.532Z",
+    "size": 177962,
+    "path": "../public/coach-media/animations/happy/happy50.webp"
+  },
+  "/coach-media/animations/happy/happy51.webp": {
+    "type": "image/webp",
+    "etag": "\"29090-le1WcmrRN+RDX52joaRj6kdNQS0\"",
+    "mtime": "2026-09-05T12:08:26.533Z",
+    "size": 168080,
+    "path": "../public/coach-media/animations/happy/happy51.webp"
+  },
+  "/coach-media/animations/happy/happy48.webp": {
+    "type": "image/webp",
+    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
+    "mtime": "2026-09-05T12:08:26.532Z",
+    "size": 566688,
+    "path": "../public/coach-media/animations/happy/happy48.webp"
+  },
+  "/coach-media/animations/happy/happy52.webp": {
+    "type": "image/webp",
+    "etag": "\"4a9b0-bNgmWpmTSjuc06DQcbX6RkVvCnU\"",
+    "mtime": "2026-09-05T12:08:26.532Z",
+    "size": 305584,
+    "path": "../public/coach-media/animations/happy/happy52.webp"
+  },
+  "/coach-media/animations/happy/happy53.webp": {
+    "type": "image/webp",
+    "etag": "\"57d0-WEnplvWuFKWqXkfuwNFuk472muo\"",
+    "mtime": "2026-09-05T12:08:26.533Z",
+    "size": 22480,
+    "path": "../public/coach-media/animations/happy/happy53.webp"
+  },
+  "/coach-media/animations/happy/happy54.webp": {
+    "type": "image/webp",
+    "etag": "\"de70-7JEgp30lMgh1RT82Z43BnbOPyME\"",
+    "mtime": "2026-09-05T12:08:26.534Z",
+    "size": 56944,
+    "path": "../public/coach-media/animations/happy/happy54.webp"
+  },
+  "/coach-media/animations/happy/happy55.webp": {
+    "type": "image/webp",
+    "etag": "\"4b40a-Dq55EPJ++rGpcOm3dfVMczMYPaI\"",
+    "mtime": "2026-09-05T12:08:26.534Z",
+    "size": 308234,
+    "path": "../public/coach-media/animations/happy/happy55.webp"
+  },
+  "/coach-media/animations/happy/happy56.webp": {
+    "type": "image/webp",
+    "etag": "\"7ec86-JO0Q1vC7rgTxvmuYQZ3337jzHAM\"",
+    "mtime": "2026-09-05T12:08:26.543Z",
+    "size": 519302,
+    "path": "../public/coach-media/animations/happy/happy56.webp"
+  },
+  "/coach-media/animations/happy/happy57.webp": {
+    "type": "image/webp",
+    "etag": "\"74f88-eEN2CyUJ9rLsRvqY7OzSZS3p2IU\"",
+    "mtime": "2026-09-05T12:08:26.539Z",
+    "size": 479112,
+    "path": "../public/coach-media/animations/happy/happy57.webp"
+  },
+  "/coach-media/animations/happy/happy59.webp": {
+    "type": "image/webp",
+    "etag": "\"e290-fQb7JlOst9pysXxzv35HJTcHlpE\"",
+    "mtime": "2026-09-05T12:08:26.537Z",
+    "size": 58000,
+    "path": "../public/coach-media/animations/happy/happy59.webp"
+  },
+  "/coach-media/animations/happy/happy58.webp": {
+    "type": "image/webp",
+    "etag": "\"695d4-fo3c1QhJVPT0yXYAuoQyAXrIO9E\"",
+    "mtime": "2026-09-05T12:08:26.541Z",
+    "size": 431572,
+    "path": "../public/coach-media/animations/happy/happy58.webp"
+  },
+  "/coach-media/animations/happy/happy6.webp": {
+    "type": "image/webp",
+    "etag": "\"2f8ce-NjZdr7Vin1NbHT+GFgWzMwsZeZE\"",
+    "mtime": "2026-09-05T12:08:26.539Z",
+    "size": 194766,
+    "path": "../public/coach-media/animations/happy/happy6.webp"
+  },
+  "/coach-media/animations/happy/happy61.webp": {
+    "type": "image/webp",
+    "etag": "\"253e8-1Fqod1LG1PZNTdmri6v0gPMthaE\"",
+    "mtime": "2026-09-05T12:08:26.538Z",
+    "size": 152552,
+    "path": "../public/coach-media/animations/happy/happy61.webp"
+  },
+  "/coach-media/animations/happy/happy63.webp": {
+    "type": "image/webp",
+    "etag": "\"2b52a-B18WnXoFNFEoRmRiTpAPD0Xw4fA\"",
+    "mtime": "2026-09-05T12:08:26.543Z",
+    "size": 177450,
+    "path": "../public/coach-media/animations/happy/happy63.webp"
+  },
+  "/coach-media/animations/happy/happy62.webp": {
+    "type": "image/webp",
+    "etag": "\"4f8f8-tLTO1/dtiZumcCPIDjxNhkIrS9g\"",
+    "mtime": "2026-09-05T12:08:26.545Z",
+    "size": 325880,
+    "path": "../public/coach-media/animations/happy/happy62.webp"
+  },
+  "/coach-media/animations/happy/happy65.webp": {
+    "type": "image/webp",
+    "etag": "\"153e2-1MrE6YaWW1bqq3uRkAG3roDYdbI\"",
+    "mtime": "2026-09-05T12:08:26.540Z",
+    "size": 87010,
+    "path": "../public/coach-media/animations/happy/happy65.webp"
+  },
+  "/coach-media/animations/happy/happy67.webp": {
+    "type": "image/webp",
+    "etag": "\"26842-Ttlq6ska7bBpzXjvIXLqSUaPnIk\"",
+    "mtime": "2026-09-05T12:08:26.545Z",
+    "size": 157762,
+    "path": "../public/coach-media/animations/happy/happy67.webp"
+  },
+  "/coach-media/animations/happy/happy66.webp": {
+    "type": "image/webp",
+    "etag": "\"5aac0-EL5Dnfs0ZHXfZ2nFXHuqusIiA6U\"",
+    "mtime": "2026-09-05T12:08:26.546Z",
+    "size": 371392,
+    "path": "../public/coach-media/animations/happy/happy66.webp"
+  },
+  "/coach-media/animations/happy/happy68.webp": {
+    "type": "image/webp",
+    "etag": "\"3a9f6-uXcrvu87C4tyxdUD8qy84likyxA\"",
+    "mtime": "2026-09-05T12:08:26.541Z",
+    "size": 240118,
+    "path": "../public/coach-media/animations/happy/happy68.webp"
+  },
+  "/coach-media/animations/happy/happy69.webp": {
+    "type": "image/webp",
+    "etag": "\"1843a-+cJ0+7F0PNcalsjHJcXNkw7qRDw\"",
+    "mtime": "2026-09-05T12:08:26.544Z",
+    "size": 99386,
+    "path": "../public/coach-media/animations/happy/happy69.webp"
+  },
+  "/coach-media/animations/happy/happy7.webp": {
+    "type": "image/webp",
+    "etag": "\"6dbe6-GIqYtKyf033a2vAUrfvCUdyYOmE\"",
+    "mtime": "2026-09-05T12:08:26.551Z",
+    "size": 449510,
+    "path": "../public/coach-media/animations/happy/happy7.webp"
+  },
+  "/coach-media/animations/happy/happy64.webp": {
+    "type": "image/webp",
+    "etag": "\"8b070-7oC7TYj4LIldWg1605cOC8gYl+w\"",
+    "mtime": "2026-09-05T12:08:26.545Z",
+    "size": 569456,
+    "path": "../public/coach-media/animations/happy/happy64.webp"
+  },
+  "/coach-media/animations/happy/happy71.webp": {
+    "type": "image/webp",
+    "etag": "\"12890-iDkXNnqbnihYZd5fm+x9SogtFL0\"",
+    "mtime": "2026-09-05T12:08:26.547Z",
+    "size": 75920,
+    "path": "../public/coach-media/animations/happy/happy71.webp"
+  },
+  "/coach-media/animations/happy/happy72.webp": {
+    "type": "image/webp",
+    "etag": "\"1132e-N279XcIE77SVgWI5RK4HGZTKNNQ\"",
+    "mtime": "2026-09-05T12:08:26.550Z",
+    "size": 70446,
+    "path": "../public/coach-media/animations/happy/happy72.webp"
+  },
+  "/coach-media/animations/happy/happy73.webp": {
+    "type": "image/webp",
+    "etag": "\"12dd8-PuAHZqC2ZtYnGQM/yt5HL7w8Z5w\"",
+    "mtime": "2026-09-05T12:08:26.546Z",
+    "size": 77272,
+    "path": "../public/coach-media/animations/happy/happy73.webp"
+  },
+  "/coach-media/animations/happy/happy74.webp": {
+    "type": "image/webp",
+    "etag": "\"5deae-Nnfy+JPdNa90X/TKIQJKDHXtEDg\"",
+    "mtime": "2026-09-05T12:08:26.546Z",
+    "size": 384686,
+    "path": "../public/coach-media/animations/happy/happy74.webp"
+  },
+  "/coach-media/animations/happy/happy70.webp": {
+    "type": "image/webp",
+    "etag": "\"813fc-MRr6jjBP9Dwv9BEsHOHSRAaT2vg\"",
+    "mtime": "2026-09-05T12:08:26.552Z",
+    "size": 529404,
+    "path": "../public/coach-media/animations/happy/happy70.webp"
+  },
+  "/coach-media/animations/happy/happy75.webp": {
+    "type": "image/webp",
+    "etag": "\"1cfd0-9c+pPyscG4ipyzhzbN//E8mdshQ\"",
+    "mtime": "2026-09-05T12:08:26.550Z",
+    "size": 118736,
+    "path": "../public/coach-media/animations/happy/happy75.webp"
+  },
+  "/coach-media/animations/happy/happy76.webp": {
+    "type": "image/webp",
+    "etag": "\"14a9e-d6rGydXTPMji/MdwYzCalRd2xW0\"",
+    "mtime": "2026-09-05T12:08:26.551Z",
+    "size": 84638,
+    "path": "../public/coach-media/animations/happy/happy76.webp"
+  },
+  "/coach-media/animations/happy/happy77.webp": {
+    "type": "image/webp",
+    "etag": "\"1e10a-1aPPim9G6xum8/Hs8Ro6u3VlG6U\"",
+    "mtime": "2026-09-05T12:08:26.552Z",
+    "size": 123146,
+    "path": "../public/coach-media/animations/happy/happy77.webp"
+  },
+  "/coach-media/animations/happy/happy60.webp": {
+    "type": "image/webp",
+    "etag": "\"1e7f54-IoOugN/ir+60blKcpy6Kl2RuTBI\"",
+    "mtime": "2026-09-05T12:08:26.546Z",
+    "size": 1998676,
+    "path": "../public/coach-media/animations/happy/happy60.webp"
+  },
+  "/coach-media/animations/happy/happy78.webp": {
+    "type": "image/webp",
+    "etag": "\"17ba4-3h26xVZZTGib30A7sQhqoYBlgqs\"",
+    "mtime": "2026-09-05T12:08:26.554Z",
+    "size": 97188,
+    "path": "../public/coach-media/animations/happy/happy78.webp"
+  },
+  "/coach-media/animations/happy/happy79.webp": {
+    "type": "image/webp",
+    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
+    "mtime": "2026-09-05T12:08:26.551Z",
+    "size": 57724,
+    "path": "../public/coach-media/animations/happy/happy79.webp"
+  },
+  "/coach-media/animations/happy/happy8.webp": {
+    "type": "image/webp",
+    "etag": "\"9d5e-zP9Tu9ncCFIvZEyvVyuhVBachAE\"",
+    "mtime": "2026-09-05T12:08:26.552Z",
+    "size": 40286,
+    "path": "../public/coach-media/animations/happy/happy8.webp"
+  },
+  "/coach-media/animations/happy/happy80.webp": {
+    "type": "image/webp",
+    "etag": "\"1da90-C0sljbqRem33mzQhLpalQ7JqSpU\"",
+    "mtime": "2026-09-05T12:08:26.553Z",
+    "size": 121488,
+    "path": "../public/coach-media/animations/happy/happy80.webp"
+  },
+  "/coach-media/animations/happy/happy82.webp": {
+    "type": "image/webp",
+    "etag": "\"f1a4-tNEKunf3T9spLovIQWFozZvffw4\"",
+    "mtime": "2026-09-05T12:08:26.552Z",
+    "size": 61860,
+    "path": "../public/coach-media/animations/happy/happy82.webp"
+  },
+  "/coach-media/animations/happy/happy83.webp": {
+    "type": "image/webp",
+    "etag": "\"2fe42-Kmm0KGXV1dEPQbjoM5G8BWcNWBM\"",
+    "mtime": "2026-09-05T12:08:26.554Z",
+    "size": 196162,
+    "path": "../public/coach-media/animations/happy/happy83.webp"
+  },
+  "/coach-media/animations/happy/happy85.webp": {
+    "type": "image/webp",
+    "etag": "\"150ae-QMfLvsJpp/BJuZy4OwOXUD8OYUQ\"",
+    "mtime": "2026-09-05T12:08:26.555Z",
+    "size": 86190,
+    "path": "../public/coach-media/animations/happy/happy85.webp"
+  },
+  "/coach-media/animations/happy/happy84.webp": {
+    "type": "image/webp",
+    "etag": "\"7b984-0wPlyvPIzXRP9eIMHgiBJFl+27A\"",
+    "mtime": "2026-09-05T12:08:26.555Z",
+    "size": 506244,
+    "path": "../public/coach-media/animations/happy/happy84.webp"
+  },
+  "/coach-media/animations/happy/happy86.webp": {
+    "type": "image/webp",
+    "etag": "\"d7f8-QCvUvt2Z0TOPZeSr+n8EKTRxFUo\"",
+    "mtime": "2026-09-05T12:08:26.554Z",
+    "size": 55288,
+    "path": "../public/coach-media/animations/happy/happy86.webp"
+  },
+  "/coach-media/animations/happy/happy81.webp": {
+    "type": "image/webp",
+    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
+    "mtime": "2026-09-05T12:08:26.555Z",
+    "size": 566688,
+    "path": "../public/coach-media/animations/happy/happy81.webp"
+  },
+  "/coach-media/animations/happy/happy87.webp": {
+    "type": "image/webp",
+    "etag": "\"17dec-6w/mkYwGAw5T0lZlhGXtO5BcsZU\"",
+    "mtime": "2026-09-05T12:08:26.555Z",
+    "size": 97772,
+    "path": "../public/coach-media/animations/happy/happy87.webp"
+  },
+  "/coach-media/animations/happy/happy88.webp": {
+    "type": "image/webp",
+    "etag": "\"10722-eVPV4BPr+xXKB/m7b01HTc3BYvY\"",
+    "mtime": "2026-09-05T12:08:26.555Z",
+    "size": 67362,
+    "path": "../public/coach-media/animations/happy/happy88.webp"
+  },
+  "/coach-media/animations/happy/happy89.webp": {
+    "type": "image/webp",
+    "etag": "\"1c7e2-sUSfie0YAo/54wJ6tzJq/DwQ0Uw\"",
+    "mtime": "2026-09-05T12:08:26.556Z",
+    "size": 116706,
+    "path": "../public/coach-media/animations/happy/happy89.webp"
+  },
+  "/coach-media/animations/happy/happy9.webp": {
+    "type": "image/webp",
+    "etag": "\"48688-/orx463Bv1qJxQ1v4poLAvBrNjI\"",
+    "mtime": "2026-09-05T12:08:26.556Z",
+    "size": 296584,
+    "path": "../public/coach-media/animations/happy/happy9.webp"
+  },
+  "/coach-media/animations/happy/happy91.webp": {
+    "type": "image/webp",
+    "etag": "\"162e4-8HqkqL71/r+QJURh8ZbqNFMM6ZE\"",
+    "mtime": "2026-09-05T12:08:26.555Z",
+    "size": 90852,
+    "path": "../public/coach-media/animations/happy/happy91.webp"
+  },
+  "/coach-media/animations/happy/happy90.webp": {
+    "type": "image/webp",
+    "etag": "\"40b96-2KBRO6W19pvILapZ8+Vi3lurBCw\"",
+    "mtime": "2026-09-05T12:08:26.557Z",
+    "size": 265110,
+    "path": "../public/coach-media/animations/happy/happy90.webp"
+  },
+  "/coach-media/animations/happy/happy92.webp": {
+    "type": "image/webp",
+    "etag": "\"1eb3c-dpJ07uxpsVOLdaMyS3SOlqMT6/k\"",
+    "mtime": "2026-09-05T12:08:26.558Z",
+    "size": 125756,
+    "path": "../public/coach-media/animations/happy/happy92.webp"
+  },
+  "/coach-media/emojis/heureux/heureux1.png": {
+    "type": "image/png",
+    "etag": "\"5091-+uAnUfC4q2tlld3BzD89z3lKd4w\"",
+    "mtime": "2026-09-05T12:08:26.383Z",
+    "size": 20625,
+    "path": "../public/coach-media/emojis/heureux/heureux1.png"
+  },
+  "/coach-media/emojis/heureux/heureux10.png": {
+    "type": "image/png",
+    "etag": "\"5bbe-8dpJHwcxgGm/L+GGIgukoN99+qw\"",
+    "mtime": "2026-09-05T12:08:26.515Z",
+    "size": 23486,
+    "path": "../public/coach-media/emojis/heureux/heureux10.png"
+  },
+  "/coach-media/emojis/heureux/heureux11.png": {
+    "type": "image/png",
+    "etag": "\"60b8-LMMAFjmB/Rwe+6qwtxB0KRRjFVE\"",
+    "mtime": "2026-09-05T12:08:26.516Z",
+    "size": 24760,
+    "path": "../public/coach-media/emojis/heureux/heureux11.png"
+  },
+  "/coach-media/emojis/heureux/heureux12.png": {
+    "type": "image/png",
+    "etag": "\"79c6-gOXTGgNP0DRA6mU73TQkCLA2IZc\"",
+    "mtime": "2026-09-05T12:08:26.516Z",
+    "size": 31174,
+    "path": "../public/coach-media/emojis/heureux/heureux12.png"
+  },
+  "/coach-media/emojis/heureux/heureux2.png": {
+    "type": "image/png",
+    "etag": "\"54c1-7stf5vr0fIsbVKX4y+9cXcdF6Mo\"",
+    "mtime": "2026-09-05T12:08:26.515Z",
+    "size": 21697,
+    "path": "../public/coach-media/emojis/heureux/heureux2.png"
+  },
+  "/coach-media/emojis/heureux/heureux3.png": {
+    "type": "image/png",
+    "etag": "\"531f-VfeI7fmVy/9I1cJdA+JneCazNHU\"",
+    "mtime": "2026-09-05T12:08:26.516Z",
+    "size": 21279,
+    "path": "../public/coach-media/emojis/heureux/heureux3.png"
+  },
+  "/coach-media/emojis/heureux/heureux4.png": {
+    "type": "image/png",
+    "etag": "\"5885-WkglwLUYH5ALdE1dXhy9hL4kIX4\"",
+    "mtime": "2026-09-05T12:08:26.515Z",
+    "size": 22661,
+    "path": "../public/coach-media/emojis/heureux/heureux4.png"
+  },
+  "/coach-media/emojis/heureux/heureux5.png": {
+    "type": "image/png",
+    "etag": "\"5a47-dAmqVWfHl7YFERUDnBuBJDfdxvs\"",
+    "mtime": "2026-09-05T12:08:26.516Z",
+    "size": 23111,
+    "path": "../public/coach-media/emojis/heureux/heureux5.png"
+  },
+  "/coach-media/emojis/heureux/heureux6.png": {
+    "type": "image/png",
+    "etag": "\"536f-MLOUAyVp0bZpHOQ61BWW10gqYAk\"",
+    "mtime": "2026-09-05T12:08:26.516Z",
+    "size": 21359,
+    "path": "../public/coach-media/emojis/heureux/heureux6.png"
+  },
+  "/coach-media/emojis/heureux/heureux7.png": {
+    "type": "image/png",
+    "etag": "\"4c1e-5J3Hb2P7b9Dhw36q+lPFACHsBzo\"",
+    "mtime": "2026-09-05T12:08:26.516Z",
+    "size": 19486,
+    "path": "../public/coach-media/emojis/heureux/heureux7.png"
+  },
+  "/coach-media/emojis/heureux/heureux8.png": {
+    "type": "image/png",
+    "etag": "\"4c3d-xFJiCChiW5P5PT3dzl6b9pdUZCU\"",
+    "mtime": "2026-09-05T12:08:26.516Z",
+    "size": 19517,
+    "path": "../public/coach-media/emojis/heureux/heureux8.png"
+  },
+  "/coach-media/emojis/heureux/heureux9.png": {
+    "type": "image/png",
+    "etag": "\"53d1-nvrpEmDOGFDrOhR0CwIqhjydUqw\"",
+    "mtime": "2026-09-05T12:08:26.516Z",
+    "size": 21457,
+    "path": "../public/coach-media/emojis/heureux/heureux9.png"
+  },
+  "/coach-media/emojis/muet/muet1.png": {
+    "type": "image/png",
+    "etag": "\"51a6-vln2s/UdhcTRTaO8VHDa3lfz0h8\"",
+    "mtime": "2026-09-05T12:08:26.517Z",
+    "size": 20902,
+    "path": "../public/coach-media/emojis/muet/muet1.png"
+  },
+  "/coach-media/emojis/muet/muet2.png": {
+    "type": "image/png",
+    "etag": "\"4fd6-7oBC0gGyTBoUjDE6sag9tGTRXEk\"",
+    "mtime": "2026-09-05T12:08:26.518Z",
+    "size": 20438,
+    "path": "../public/coach-media/emojis/muet/muet2.png"
+  },
+  "/coach-media/emojis/muet/muet3.png": {
+    "type": "image/png",
+    "etag": "\"5287-ywn34jaL1+x0Qfo7jSf48qjMhfs\"",
+    "mtime": "2026-09-05T12:08:26.384Z",
+    "size": 21127,
+    "path": "../public/coach-media/emojis/muet/muet3.png"
+  },
+  "/coach-media/emojis/muet/muet4.png": {
+    "type": "image/png",
+    "etag": "\"56a5-+3X/CcPHmEJ0+beAZBYg2M7ZSgA\"",
+    "mtime": "2026-09-05T12:08:26.517Z",
+    "size": 22181,
+    "path": "../public/coach-media/emojis/muet/muet4.png"
+  },
+  "/coach-media/emojis/triste/triste1.png": {
+    "type": "image/png",
+    "etag": "\"4ad5-sZv/ngDIpKluR3uoIL+9/tVgBAk\"",
+    "mtime": "2026-09-05T12:08:26.556Z",
+    "size": 19157,
+    "path": "../public/coach-media/emojis/triste/triste1.png"
+  },
+  "/coach-media/emojis/triste/triste10.png": {
+    "type": "image/png",
+    "etag": "\"6ad7-6iFb9ksjGHu03kWI85GQAULPlgA\"",
+    "mtime": "2026-09-05T12:08:26.556Z",
+    "size": 27351,
+    "path": "../public/coach-media/emojis/triste/triste10.png"
+  },
+  "/coach-media/emojis/triste/triste11.png": {
+    "type": "image/png",
+    "etag": "\"7b07-5Y/2vAUDwkCG9yUv2xhGyKhfVv4\"",
+    "mtime": "2026-09-05T12:08:26.384Z",
+    "size": 31495,
+    "path": "../public/coach-media/emojis/triste/triste11.png"
+  },
+  "/coach-media/emojis/triste/triste4.png": {
+    "type": "image/png",
+    "etag": "\"51ea-mZrIfYhaUQQDvlUt7+NCSIE6cfI\"",
+    "mtime": "2026-09-05T12:08:26.557Z",
+    "size": 20970,
+    "path": "../public/coach-media/emojis/triste/triste4.png"
+  },
+  "/coach-media/emojis/triste/triste5.png": {
+    "type": "image/png",
+    "etag": "\"54c1-XD0mhNmrQPVAFqEXG0C1s1P3Oa4\"",
+    "mtime": "2026-09-05T12:08:26.556Z",
+    "size": 21697,
+    "path": "../public/coach-media/emojis/triste/triste5.png"
+  },
+  "/coach-media/emojis/triste/triste6.png": {
+    "type": "image/png",
+    "etag": "\"54c1-XD0mhNmrQPVAFqEXG0C1s1P3Oa4\"",
+    "mtime": "2026-09-05T12:08:26.557Z",
+    "size": 21697,
+    "path": "../public/coach-media/emojis/triste/triste6.png"
+  },
+  "/coach-media/emojis/triste/triste7.png": {
+    "type": "image/png",
+    "etag": "\"4663-GYg5O4kBtQpnNYQYt+t2VyLkYuE\"",
+    "mtime": "2026-09-05T12:08:26.557Z",
+    "size": 18019,
+    "path": "../public/coach-media/emojis/triste/triste7.png"
+  },
+  "/coach-media/emojis/triste/triste8.png": {
+    "type": "image/png",
+    "etag": "\"5281-YyJBOzW/kpn0XNWvaoOHWcnQ+0k\"",
+    "mtime": "2026-09-05T12:08:26.557Z",
+    "size": 21121,
+    "path": "../public/coach-media/emojis/triste/triste8.png"
+  },
+  "/coach-media/emojis/triste/triste9.png": {
+    "type": "image/png",
+    "etag": "\"56b5-7e4ksvafotKRdiRp4CmrqGW7UkM\"",
+    "mtime": "2026-09-05T12:08:26.557Z",
+    "size": 22197,
+    "path": "../public/coach-media/emojis/triste/triste9.png"
+  },
+  "/_nuxt/builds/meta/720818f6-1180-4705-9f7e-99cc01d2d3b0.json": {
+    "type": "application/json",
+    "etag": "\"58-QjQr5SIhoMX0XPT4EzDZrrcvbCE\"",
+    "mtime": "2026-09-05T12:08:26.322Z",
+    "size": 88,
+    "path": "../public/_nuxt/builds/meta/720818f6-1180-4705-9f7e-99cc01d2d3b0.json"
   }
 };
 
@@ -131988,7 +133413,7 @@ const _Hy8sLX = defineEventHandler((event) => {
   {
     setResponseHeader(event, "Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   }
-  if (path.startsWith("/api/admin") || path.startsWith("/api/auth/") || path.startsWith("/api/learner/") || /^\/(?:fr|de|en|it|es)\/admin(?:\/|$)/u.test(path) || /^\/(?:fr|de|en|it|es)\/(?:signin|my-page)$/u.test(path) || path === "/admin" || path.startsWith("/admin/")) {
+  if (path.startsWith("/api/admin") || path.startsWith("/api/auth/") || path.startsWith("/api/learner/") || /^\/(?:fr|de|en|it|es|nl-NL|nl)\/admin(?:\/|$)/u.test(path) || /^\/(?:fr|de|en|it|es|nl-NL|nl)\/(?:signin|my-page)$/u.test(path) || path === "/admin" || path.startsWith("/admin/")) {
     setResponseHeader(event, "Cache-Control", "no-store, private");
   }
   if (isProtectedMutation(path, event.method)) assertSameOrigin(event);
@@ -132059,6 +133484,8 @@ const _lazy_H6EpZy = () => import('../routes/api/admin/contact-settings.put.mjs'
 const _lazy_doLpbB = () => import('../routes/api/admin/daily-sessions.get.mjs');
 const _lazy__cGiz_ = () => import('../routes/api/admin/daily-visitors.get.mjs');
 const _lazy_X9D0v5 = () => import('../routes/api/admin/defis/_code/permanent.put.mjs');
+const _lazy_mhO94g = () => import('../routes/api/admin/defis/cleanup.get.mjs');
+const _lazy_0hk6P9 = () => import('../routes/api/admin/defis/cleanup.post.mjs');
 const _lazy_ULNBrZ = () => import('../routes/api/admin/index.delete.mjs');
 const _lazy_kFODEK = () => import('../routes/api/admin/index9.get.mjs');
 const _lazy_jwPzqA = () => import('../routes/api/admin/literary-corpus/_id_.put.mjs');
@@ -132129,6 +133556,7 @@ const _lazy_AVSiFL = () => import('../routes/api/learner/results.delete.mjs');
 const _lazy_VlO5xm = () => import('../routes/api/learner/review.get.mjs');
 const _lazy_aB0NgU = () => import('../routes/api/learner/saved-challenges.get.mjs');
 const _lazy_aNzP5s = () => import('../routes/api/learner/saved-challenges.post.mjs');
+const _lazy_s3yxmw = () => import('../routes/api/learner/saved-challenges/_code_.patch.mjs');
 const _lazy_eV99Yp = () => import('../routes/api/learner/timeline.get.mjs');
 const _lazy_dZqWCB = () => import('../routes/api/learner/username-suggestion.post.mjs');
 const _lazy_BOwuGD = () => import('../routes/api/logs.post.mjs');
@@ -132208,6 +133636,8 @@ const handlers = [
   { route: '/api/admin/daily-sessions', handler: _lazy_doLpbB, lazy: true, middleware: false, method: "get" },
   { route: '/api/admin/daily-visitors', handler: _lazy__cGiz_, lazy: true, middleware: false, method: "get" },
   { route: '/api/admin/defis/:code/permanent', handler: _lazy_X9D0v5, lazy: true, middleware: false, method: "put" },
+  { route: '/api/admin/defis/cleanup', handler: _lazy_mhO94g, lazy: true, middleware: false, method: "get" },
+  { route: '/api/admin/defis/cleanup', handler: _lazy_0hk6P9, lazy: true, middleware: false, method: "post" },
   { route: '/api/admin/exercise-summaries', handler: _lazy_ULNBrZ, lazy: true, middleware: false, method: "delete" },
   { route: '/api/admin/exercise-summaries', handler: _lazy_kFODEK, lazy: true, middleware: false, method: "get" },
   { route: '/api/admin/literary-corpus/:id', handler: _lazy_jwPzqA, lazy: true, middleware: false, method: "put" },
@@ -132278,6 +133708,7 @@ const handlers = [
   { route: '/api/learner/review', handler: _lazy_VlO5xm, lazy: true, middleware: false, method: "get" },
   { route: '/api/learner/saved-challenges', handler: _lazy_aB0NgU, lazy: true, middleware: false, method: "get" },
   { route: '/api/learner/saved-challenges', handler: _lazy_aNzP5s, lazy: true, middleware: false, method: "post" },
+  { route: '/api/learner/saved-challenges/:code', handler: _lazy_s3yxmw, lazy: true, middleware: false, method: "patch" },
   { route: '/api/learner/timeline', handler: _lazy_eV99Yp, lazy: true, middleware: false, method: "get" },
   { route: '/api/learner/username-suggestion', handler: _lazy_dZqWCB, lazy: true, middleware: false, method: "post" },
   { route: '/api/logs', handler: _lazy_BOwuGD, lazy: true, middleware: false, method: "post" },
@@ -132745,5 +134176,5 @@ trapUnhandledNodeErrors();
 setupGracefulShutdown(listener, nitroApp);
 const nodeServer = {};
 
-export { validateAnswer as $, getContactSettings as A, validateContactSettings as B, ChallengePublicationInputError as C, saveContactSettings as D, getHeader as E, deleteExpiredExerciseSummaries as F, getExerciseSummaryAdminStats as G, getRequestURL as H, setResponseStatus as I, refreshVerbMetadata as J, stripLocaleFromPath as K, getRequestIP as L, getExerciseSummary as M, ExerciseSummaryInputError as N, ExerciseSummaryNotFoundError as O, saveExerciseSummary as P, getCachedCatalogue as Q, setResponseHeaders as R, resolveChallengePublication as S, listPublicChallengePublications as T, encodePronominalSelectionId as U, decodePronominalSelectionId as V, legacyComplementOptions as W, legacyComplementConfig as X, normalizeComplementOptions as Y, DEFAULT_COMPLEMENT_OPTIONS as Z, validateConjugationAnswer as _, getQuery as a, grammarModeCode as a$, diagnoseLearnerError as a0, LEARNER_ERROR_DETECTOR_VERSION as a1, applicableLearnerErrorTypes as a2, learnerErrorDetails as a3, grammarTenseCode as a4, LEARNER_ERROR_TAXONOMY as a5, learnerErrorDetailText as a6, CURRENT_PRIVACY_NOTICE_VERSION as a7, synthesizeClassicSpeech as a8, SUPPORTED_LOCALES as a9, diagnoseCoachAgreement as aA, diagnoseCoachAnswer as aB, mergeLearnerErrorDetails as aC, ultimateChallengeId as aD, formatConjugationQuestion as aE, indirectRelative as aF, formatAnswer as aG, localizedLearnerErrorMessageForCode as aH, localizedLearnerErrorDomain as aI, localizedLearnerErrorLabel as aJ, SUBJECT_PRONOUN_PLACEHOLDER as aK, withSwissObjectAliases as aL, parseURL as aM, encodePath as aN, decodePath as aO, localeFromPath as aP, getRequestHeaders as aQ, klona as aR, withQuery as aS, DEFAULT_LANGUAGE_PREFERENCES as aT, getRequestHeader as aU, isEqual as aV, sanitizeStatusCode as aW, getContext as aX, $fetch as aY, defu as aZ, DEFAULT_INTERFACE_LOCALE as a_, listPublishedChallengePublications as aa, setHeader as ab, localizePath as ac, parseQuery as ad, hasProtocol as ae, joinURL as af, isScriptProtocol as ag, withTrailingSlash as ah, withoutTrailingSlash as ai, localizedLearnerErrorMessage as aj, learnerErrorInsteadOf as ak, hash$1 as al, executeAsync as am, challengePresetDefinitions as an, agreePastParticiple as ao, splitPastParticipleAgreement as ap, challengePresetGroupOrder as aq, challengePresetGroupLabels as ar, conjugationRequiresSubjectPronoun as as, conjugationAnswerPlaceholder as at, providedSubjunctiveInputPrefix as au, getAlternativeCorrections as av, impossibleSingularEndingReminderMessage as aw, isFutureSimpleInsteadOfNearFuture as ax, findConjugationConfusions as ay, findImpossibleSingularEnding as az, reorderChallengePresets as b, joinRelativeURL as b0, defineRenderHandler as b1, destr as b2, getRouteRules as b3, getResponseStatusText as b4, getResponseStatus as b5, useNitroApp as b6, nodeServer as b7, createError$1 as c, defineEventHandler as d, parseChallengePresetPayload as e, replaceChallengePresetSelections as f, getRouterParam as g, parsePublicationLocale as h, parseChallengePublicationPayload as i, saveChallengePublication as j, ChallengePublicationConflictError as k, ChallengePublicationNotFoundError as l, listAdminChallengePublications as m, getCatalogue as n, listChallengePresetCategories as o, parseChallengePresetCategoryPayload as p, listStoredChallengePresets as q, readBody as r, setResponseHeader as s, setCookie as t, useDatabase as u, deleteCookie as v, getCookie as w, useRuntimeConfig as x, normalizeLocale as y, readMultipartFormData as z };
+export { serializeDefi as $, readMultipartFormData as A, getContactSettings as B, ChallengePublicationInputError as C, validateContactSettings as D, saveContactSettings as E, getHeader as F, previewDefisCleanup as G, parseCleanupRequest as H, deleteInactiveDefis as I, deleteExpiredExerciseSummaries as J, getExerciseSummaryAdminStats as K, getRequestURL as L, setResponseStatus as M, refreshVerbMetadata as N, stripLocaleFromPath as O, getRequestIP as P, getExerciseSummary as Q, ExerciseSummaryInputError as R, ExerciseSummaryNotFoundError as S, saveExerciseSummary as T, getCachedCatalogue as U, setResponseHeaders as V, resolveChallengePublication as W, listPublicChallengePublications as X, PublicInputError as Y, parseDefiDefinition as Z, encodePronominalSelectionId as _, getQuery as a, getRequestHeaders as a$, decodePronominalSelectionId as a0, validateConjugationAnswer as a1, validateAnswer as a2, diagnoseLearnerError as a3, LEARNER_ERROR_DETECTOR_VERSION as a4, applicableLearnerErrorTypes as a5, learnerErrorDetails as a6, grammarTenseCode as a7, LEARNER_ERROR_TAXONOMY as a8, learnerErrorDetailText as a9, conjugationRequiresSubjectPronoun as aA, conjugationAnswerPlaceholder as aB, providedSubjunctiveInputPrefix as aC, getAlternativeCorrections as aD, impossibleSingularEndingReminderMessage as aE, isFutureSimpleInsteadOfNearFuture as aF, findConjugationConfusions as aG, findImpossibleSingularEnding as aH, diagnoseCoachAgreement as aI, diagnoseCoachAnswer as aJ, mergeLearnerErrorDetails as aK, DEFAULT_SHARED_CHALLENGE_OPTIONS as aL, legacyComplementOptions as aM, legacyComplementConfig as aN, ultimateChallengeId as aO, formatConjugationQuestion as aP, indirectRelative as aQ, formatAnswer as aR, localizedLearnerErrorMessageForCode as aS, localizedLearnerErrorDomain as aT, localizedLearnerErrorLabel as aU, SUBJECT_PRONOUN_PLACEHOLDER as aV, withSwissObjectAliases as aW, parseURL as aX, encodePath as aY, decodePath as aZ, localeFromPath as a_, CURRENT_PRIVACY_NOTICE_VERSION as aa, ensureSavedChallengeMetadata as ab, parseSavedChallengeMetadata as ac, updateSavedChallengeMetadata as ad, parseQuestionnaireRequest as ae, synthesizeClassicSpeech as af, SUPPORTED_LOCALES as ag, localeLanguageTag as ah, listPublishedChallengePublications as ai, setHeader as aj, localizePath as ak, parseQuery as al, hasProtocol as am, joinURL as an, isScriptProtocol as ao, withTrailingSlash as ap, withoutTrailingSlash as aq, localizedLearnerErrorMessage as ar, learnerErrorInsteadOf as as, hash$1 as at, executeAsync as au, challengePresetDefinitions as av, agreePastParticiple as aw, splitPastParticipleAgreement as ax, challengePresetGroupOrder as ay, challengePresetGroupLabels as az, reorderChallengePresets as b, klona as b0, withQuery as b1, DEFAULT_LANGUAGE_PREFERENCES as b2, getRequestHeader as b3, isEqual as b4, sanitizeStatusCode as b5, getContext as b6, $fetch as b7, defu as b8, DEFAULT_INTERFACE_LOCALE as b9, grammarModeCode as ba, joinRelativeURL as bb, defineRenderHandler as bc, destr as bd, getRouteRules as be, getResponseStatusText as bf, getResponseStatus as bg, useNitroApp as bh, nodeServer as bi, createError$1 as c, defineEventHandler as d, parseChallengePresetPayload as e, replaceChallengePresetSelections as f, getRouterParam as g, parsePublicationLocale as h, parseChallengePublicationPayload as i, saveChallengePublication as j, ChallengePublicationConflictError as k, ChallengePublicationNotFoundError as l, listAdminChallengePublications as m, getCatalogue as n, listChallengePresetCategories as o, parseChallengePresetCategoryPayload as p, listStoredChallengePresets as q, readBody as r, setResponseHeader as s, setCookie as t, useDatabase as u, deleteCookie as v, withDutchVariants as w, getCookie as x, useRuntimeConfig as y, normalizeLocale as z };
 //# sourceMappingURL=nitro.mjs.map

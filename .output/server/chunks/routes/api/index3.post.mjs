@@ -1,6 +1,5 @@
-import { d as defineEventHandler, c as createError } from '../../nitro/nitro.mjs';
+import { d as defineEventHandler, ae as parseQuestionnaireRequest, Y as PublicInputError, c as createError } from '../../nitro/nitro.mjs';
 import { g as generateQuestionnaire, Q as QuestionnaireSelectionError } from '../../_/questionnaire.mjs';
-import { a as parseQuestionnaireRequest, P as PublicInputError } from '../../_/public-api-validation.mjs';
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../_/public-api-rate-limit.mjs';
 import { r as readLimitedJsonBody } from '../../_/limited-json-body.mjs';
 import { a as addClassicSpeechTokens } from '../../_/classic-speech-token.mjs';
@@ -20,7 +19,6 @@ import '../../_/pronominal-formatter.mjs';
 import '../../_/exercise-instructions.mjs';
 import '../../_/passive-voice.mjs';
 import '../../_/near-future.mjs';
-import '../../_/challenge-defaults.mjs';
 
 const index_post = defineEventHandler(async (event) => {
   await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.questionnaire);

@@ -1,4 +1,4 @@
-import { d as defineEventHandler, w as getCookie, c as createError, u as useDatabase } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, x as getCookie, c as createError, u as useDatabase } from '../../../nitro/nitro.mjs';
 import { a as analyticsSessionId, s as safeAnalyticsPath, c as safeAnalyticsMetadata } from '../../../_/analytics-session.mjs';
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../../_/public-api-rate-limit.mjs';
 import { r as readLimitedJsonBody } from '../../../_/limited-json-body.mjs';

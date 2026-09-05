@@ -2,12 +2,12 @@ import { _ as __nuxt_component_0 } from './nuxt-link-icjx6oE7.mjs';
 import { _ as __nuxt_component_1 } from './PasswordInput-D9iWnxeu.mjs';
 import { defineComponent, computed, ref, mergeProps, unref, withCtx, createTextVNode, toDisplayString, isRef, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrInterpolate, ssrRenderComponent, ssrRenderAttr, ssrIncludeBooleanAttr, ssrLooseContain } from 'vue/server-renderer';
+import { w as withDutchVariants } from '../nitro/nitro.mjs';
 import { f as useLanguagePreferences, u as useHead, c as useRuntimeConfig } from './server.mjs';
 import { u as useLearnerAuth } from './useLearnerAuth-tqISusbB.mjs';
 import { u as useSiteAnalytics } from './useSiteAnalytics-CWvs4oMj.mjs';
 import { u as useTurnstileWidget } from './useTurnstileWidget-JtKO0GYz.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
-import '../nitro/nitro.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -28,7 +28,7 @@ import 'unhead/utils';
 import 'vue-router';
 import '../_/analytics-consent.mjs';
 
-const copies = {
+const copies = withDutchVariants({
   fr: {
     pageTitle: "Compte pseudonyme",
     created: "Ton compte est cr\xE9\xE9",
@@ -163,8 +163,35 @@ const copies = {
     creating: "Creando\u2026",
     password: "Contrase\xF1a",
     signingIn: "Iniciando sesi\xF3n\u2026"
+  },
+  nl: {
+    pageTitle: "Account met een pseudoniem",
+    created: "Je account is aangemaakt",
+    keepCode: "Bewaar je herstelcode",
+    recoveryInfo: "Hiermee kun je je account herstellen zonder e-mailadres. Na deze stap wordt de code niet meer getoond.",
+    username: "Gebruikersnaam",
+    recoveryCode: "Herstelcode",
+    codeCopied: "Code gekopieerd",
+    copyCode: "Code kopi\xEBren",
+    download: "Downloaden",
+    continue: "Verder",
+    create: "Mijn account aanmaken",
+    signIn: "Aanmelden",
+    intro: "Een account bewaart je resultaten zodat je je vooruitgang kunt volgen en je fouten opnieuw kunt oefenen. Je echte naam en e-mailadres zijn niet nodig.",
+    chooseAction: "Kies een actie",
+    proposedUsername: "Voorgestelde gebruikersnaam",
+    searching: "Wordt gezocht\u2026",
+    unavailable: "Niet beschikbaar",
+    anotherUsername: "Een andere voorstellen",
+    choosePassword: "Kies een wachtwoord",
+    passwordHint: "Minstens 10 tekens. Een korte zin is makkelijk te onthouden.",
+    confirmPassword: "Bevestig je wachtwoord",
+    privacy: "Ik begrijp dat de website mijn gebruikersnaam en vooruitgang bewaart. Mijn echte naam wordt niet gevraagd en ik kan mijn account verwijderen.",
+    creating: "Account wordt aangemaakt\u2026",
+    password: "Wachtwoord",
+    signingIn: "Bezig met aanmelden\u2026"
   }
-};
+});
 function learnerAuthCopy(locale) {
   return copies[locale];
 }

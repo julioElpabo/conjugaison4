@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, a as getQuery, y as normalizeLocale, c as createError, u as useDatabase, a3 as learnerErrorDetails } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, a as getQuery, z as normalizeLocale, c as createError, u as useDatabase, w as withDutchVariants, a6 as learnerErrorDetails } from '../../../nitro/nitro.mjs';
 import { i as identificationFormParts } from '../../../_/identification-form.mjs';
 import { r as requireLearnerDataSubject } from '../../../_/learner-data-subject.mjs';
 import 'node:http';
@@ -75,7 +75,7 @@ const challengeSummary_get = defineEventHandler(async (event) => {
   `, [runId]);
   const verbs = /* @__PURE__ */ new Set();
   const tenses = /* @__PURE__ */ new Map();
-  const answerSeparator = { fr: " ou ", de: " oder ", en: " or ", it: " o ", es: " o " }[locale];
+  const answerSeparator = withDutchVariants({ fr: " ou ", de: " oder ", en: " or ", it: " o ", es: " o ", nl: " of " })[locale];
   const items = [...incorrectRows, ...correctRows].flatMap((row, itemIndex) => {
     const question = questionFromJson(row.questionJson);
     if (!question) return [];

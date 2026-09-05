@@ -1,4 +1,6 @@
-const copies = {
+import { w as withDutchVariants } from '../nitro/nitro.mjs';
+
+const copies = withDutchVariants({
   fr: {
     discover: "Visite guid\xE9e",
     navLabel: "Visite guid\xE9e",
@@ -288,8 +290,66 @@ const copies = {
     accountDescription: "Con \xAB Conexi\xF3n \xBB puedes crear una cuenta gratuita, guardar tus resultados y seguir tus progresos.",
     completedTitle: "\xA1Buen trabajo!",
     completedDescription: "Ya conoces el recorrido. Puedes reiniciar esta visita en cualquier momento con \xAB Visita guiada \xBB."
+  },
+  nl: {
+    discover: "Rondleiding",
+    navLabel: "Rondleiding",
+    welcomeTitle: "Welkom op de vernieuwde TATITOTU",
+    welcomeBody: "De site is verbeterd. Hij blijft 100% gratis en zonder reclame. Een account is niet nodig.",
+    quickTitle: "Korte rondleiding",
+    quickMeta: "Ongeveer 1 minuut",
+    fullTitle: "Volledige rondleiding",
+    fullMeta: "Ongeveer 3 minuten",
+    later: "Later",
+    next: "Volgende",
+    previous: "Vorige",
+    finish: "Afronden",
+    close: "Rondleiding verlaten",
+    progress: "{{current}} van {{total}}",
+    homeTitle: "Drie manieren om te beginnen",
+    homeDescription: "Open een ontvangen uitdaging, kies een kant-en-klare uitdaging of stel er zelf een samen.",
+    buildTitle: "Stel een nieuwe uitdaging samen",
+    buildDescription: "Met deze knop maak je je eigen vervoegingsuitdaging.",
+    stepsTitle: "Maak ze in 4 stappen",
+    stepsDescription: "Je stelt de uitdaging stap voor stap samen. Zo blijft alles overzichtelijk.",
+    presetsTitle: "Kant-en-klare uitdagingen",
+    presetsDescription: "Ze maken meteen een selectie klaar die past bij een niveau of een doel.",
+    verbsTitle: "1 \xB7 Kies werkwoorden",
+    verbsDescription: "Selecteer hier de werkwoorden die je wilt oefenen.",
+    tensesTitle: "2 \xB7 Kies wijzen en tijden",
+    tensesDescription: "Selecteer hier de tijden die je wilt oefenen.",
+    optionsTitle: "3 \xB7 Stel de opties in",
+    optionsDescription: "Stel hier de verschillende manieren van oefenen in.",
+    complementsTitle: "Nieuw: voorwerpen",
+    complementsDescription: "Maak volledige zinnen, bijvoorbeeld: \u201CIl mange <mark>une pomme</mark>.\u201D",
+    previewTitle: "Livevoorbeeld",
+    previewDescription: "Terwijl je de instellingen aanpast, worden een voorbeeldvraag en het verwachte antwoord automatisch bijgewerkt.",
+    createTitle: "4 \xB7 Gebruik de uitdaging",
+    createDescription: "Je kunt dezelfde uitdaging op vier manieren maken:<ol><li>In de klassieke modus</li><li>Met een virtuele coach</li><li>Op papier</li><li>Door ze met anderen te delen</li></ol>",
+    classicTitle: "1 \xB7 In de klassieke modus",
+    classicDescription: "De meest rechtstreekse manier om te oefenen. De leerling beantwoordt een vraag en krijgt de verbetering. Er zijn twee pogingen mogelijk, met een overzicht op het einde.",
+    correctionTitle: "Onmiddellijke feedback",
+    correctionDescription: "Het juiste antwoord verschijnt, waar nuttig met een grammaticale uitleg.",
+    coachTitle: "2 \xB7 Met een coach",
+    coachDescription: "De coaches moedigen je op verschillende manieren aan en geven uitleg.",
+    chatTitle: "De chat",
+    chatDescription: "De oefening verloopt als een gesprek.",
+    helpTitle: "Hulp bij de vraag",
+    helpDescription: "Het paneel legt het werkwoord, de regel en de opbouw van het antwoord uit.",
+    printTitle: "3 \xB7 Als afdrukbaar werkblad",
+    printDescription: "Pas het werkblad en de oplossingen aan. Je kunt ze downloaden als PDF- of Word-bestand.",
+    shareTitle: "Deel de uitdaging",
+    shareDescription: "Met een code van 8 tekens vind je de uitdaging later terug of deel je ze met anderen. Ideaal om ze aan de leerlingen van een klas te bezorgen.",
+    resumeTitle: "Open de uitdaging opnieuw",
+    resumeDescription: "Later plakt de leerling de ontvangen code op de startpagina en vindt de uitdaging meteen terug. Oudere codes blijven geldig.",
+    falcTitle: "Eenvoudige leesmodus",
+    falcDescription: "FALC betekent <strong>gemakkelijk te lezen en te begrijpen</strong>. Deze modus toont alleen het belangrijkste en is ideaal voor mensen voor wie lezen veel inspanning vraagt.",
+    accountTitle: "Nieuw: een eigen plek om je vooruitgang te volgen",
+    accountDescription: "Via \u201CAanmelden\u201D maak je een gratis account aan, bewaar je je resultaten en volg je je vooruitgang.",
+    completedTitle: "Veel succes!",
+    completedDescription: "Je weet nu hoe het werkt. Je kunt deze rondleiding op elk moment opnieuw starten via \u201CRondleiding\u201D."
   }
-};
+});
 function guidedTourCopy(locale) {
   var _a;
   return (_a = copies[locale]) != null ? _a : copies.fr;

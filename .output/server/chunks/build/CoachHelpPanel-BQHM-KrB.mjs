@@ -4,9 +4,9 @@ import { faSpinner, faStop, faVolume, faChevronRight, faChevronDown } from '@for
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { f as useLanguagePreferences } from './server.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
+import { w as withDutchVariants, ba as grammarModeCode, aW as withSwissObjectAliases } from '../nitro/nitro.mjs';
 import { b as COACH_EXPLANATION_APPROACHES } from '../_/coach.mjs';
 import { c as coachHelpProfile, e as decomposeConjugationForm, f as buildConjugationEndingsHtml, g as buildConjugationBaseHtml, h as buildPassiveVoiceHelpHtml, i as buildPassiveVoiceMethodHtml, j as buildCompleteConjugationAdviceHtml, n as normalizeCoachHelpEngineKey, a as auditRenderedCoachHelp } from '../_/coach-help-audit.mjs';
-import { a$ as grammarModeCode, aL as withSwissObjectAliases } from '../nitro/nitro.mjs';
 import { a as bareNearFutureInfinitive, n as nearFutureReflexivePronoun, c as isPronominalNearFutureInfinitive, i as isNearFutureTense } from '../_/near-future.mjs';
 
 const COACH_CONDENSED_TENSE_RULES = {
@@ -138,59 +138,61 @@ function coachCondensedTenseRule(mode, tense) {
   };
 }
 
-const modeNames = {
+const modeNames = withDutchVariants({
   de: { indicatif: "Indikativ", imperatif: "Imperativ", subjonctif: "Subjunktiv", conditionnel: "Konditional", participe: "Partizip", gerondif: "Gerundium" },
   en: { indicatif: "Indicative", imperatif: "Imperative", subjonctif: "Subjunctive", conditionnel: "Conditional", participe: "Participle", gerondif: "Gerund" },
   it: { indicatif: "Indicativo", imperatif: "Imperativo", subjonctif: "Congiuntivo", conditionnel: "Condizionale", participe: "Participio", gerondif: "Gerundio" },
-  es: { indicatif: "Indicativo", imperatif: "Imperativo", subjonctif: "Subjuntivo", conditionnel: "Condicional", participe: "Participio", gerondif: "Gerundio" }
-};
-const tenseNames = {
+  es: { indicatif: "Indicativo", imperatif: "Imperativo", subjonctif: "Subjuntivo", conditionnel: "Condicional", participe: "Participio", gerondif: "Gerundio" },
+  nl: { indicatif: "Indicatief", imperatif: "Gebiedende wijs", subjonctif: "Subjonctief", conditionnel: "Conditionnel", participe: "Deelwoord", gerondif: "G\xE9rondif" }
+});
+const tenseNames = withDutchVariants({
   de: { present: "Pr\xE4sens", "futur proche": "nahes Futur", imparfait: "Imparfait", futur: "Futur", "passe simple": "Pass\xE9 simple", "passe compose": "Pass\xE9 compos\xE9", "futur anterieur": "Futur ant\xE9rieur", "plus-que-parfait": "Plusquamperfekt", "passe anterieur": "Pass\xE9 ant\xE9rieur", passe: "Vergangenheit", "passe 1": "Vergangenheit, erste Form", "passe 2": "Vergangenheit, zweite Form" },
   en: { present: "present", "futur proche": "near future", imparfait: "imperfect", futur: "future", "passe simple": "simple past", "passe compose": "compound past", "futur anterieur": "future perfect", "plus-que-parfait": "pluperfect", "passe anterieur": "past anterior", passe: "past", "passe 1": "past, first form", "passe 2": "past, second form" },
   it: { present: "presente", "futur proche": "futuro prossimo", imparfait: "imperfetto", futur: "futuro", "passe simple": "passato remoto", "passe compose": "passato prossimo", "futur anterieur": "futuro anteriore", "plus-que-parfait": "trapassato prossimo", "passe anterieur": "passato anteriore", passe: "passato", "passe 1": "passato, prima forma", "passe 2": "passato, seconda forma" },
-  es: { present: "presente", "futur proche": "futuro pr\xF3ximo", imparfait: "imperfecto", futur: "futuro", "passe simple": "pasado simple", "passe compose": "pasado compuesto", "futur anterieur": "futuro anterior", "plus-que-parfait": "pluscuamperfecto", "passe anterieur": "pasado anterior", passe: "pasado", "passe 1": "pasado, primera forma", "passe 2": "pasado, segunda forma" }
-};
+  es: { present: "presente", "futur proche": "futuro pr\xF3ximo", imparfait: "imperfecto", futur: "futuro", "passe simple": "pasado simple", "passe compose": "pasado compuesto", "futur anterieur": "futuro anterior", "plus-que-parfait": "pluscuamperfecto", "passe anterieur": "pasado anterior", passe: "pasado", "passe 1": "pasado, primera forma", "passe 2": "pasado, segunda forma" },
+  nl: { present: "tegenwoordige tijd", "futur proche": "futur proche", imparfait: "imparfait", futur: "futur", "passe simple": "pass\xE9 simple", "passe compose": "pass\xE9 compos\xE9", "futur anterieur": "futur ant\xE9rieur", "plus-que-parfait": "plus-que-parfait", "passe anterieur": "pass\xE9 ant\xE9rieur", passe: "verleden tijd", "passe 1": "verleden tijd, eerste vorm", "passe 2": "verleden tijd, tweede vorm" }
+});
 const rules = {
-  "indicatif:present": { de: "Pr\xE4sensstamm, manchmal ver\xE4nderlich, + Personalendung.", en: "Present-tense stem, which may vary, + the personal ending.", it: "Radice del presente, talvolta variabile, + desinenza della persona.", es: "Ra\xEDz del presente, a veces variable, + terminaci\xF3n de la persona." },
-  "indicatif:futur proche": { de: "\xAB aller \xBB im Pr\xE4sens + Infinitiv des Verbs.", en: "\xAB aller \xBB in the present tense + verb infinitive.", it: "\xAB aller \xBB al presente + infinito del verbo.", es: "\xAB aller \xBB en presente + infinitivo del verbo." },
-  "indicatif:imparfait": { de: "Form mit \xAB nous \xBB im Pr\xE4sens ohne \xAB -ons \xBB + Imparfait-Endung.", en: "Present-tense \xAB nous \xBB form without \xAB -ons \xBB + imperfect ending.", it: "Forma con \xAB nous \xBB al presente senza \xAB -ons \xBB + desinenza dell\u2019imperfetto.", es: "Forma de \xAB nous \xBB en presente sin \xAB -ons \xBB + terminaci\xF3n del imperfecto." },
-  "indicatif:futur": { de: "Futurstamm, meist der Infinitiv ohne das letzte \xAB e \xBB bei Verben auf \xAB -re \xBB, + Futurendung.", en: "Future stem, usually the infinitive without the final \xAB e \xBB of \xAB -re \xBB verbs, + future ending.", it: "Radice del futuro, spesso l\u2019infinito senza la \xAB e \xBB finale dei verbi in \xAB -re \xBB, + desinenza del futuro.", es: "Ra\xEDz del futuro, normalmente el infinitivo sin la \xAB e \xBB final de los verbos en \xAB -re \xBB, + terminaci\xF3n del futuro." },
-  "indicatif:passe simple": { de: "Stamm des Pass\xE9 simple + Endung der entsprechenden Reihe.", en: "Simple-past stem + the ending from its pattern.", it: "Radice del passato remoto + desinenza della serie corrispondente.", es: "Ra\xEDz del pasado simple + terminaci\xF3n de su serie." },
-  "indicatif:passe compose": { de: "Hilfsverb im Pr\xE4sens + Partizip Perfekt.", en: "Auxiliary in the present tense + past participle.", it: "Ausiliare al presente + participio passato.", es: "Auxiliar en presente + participio pasado." },
-  "indicatif:futur anterieur": { de: "Hilfsverb im Futur + Partizip Perfekt.", en: "Auxiliary in the future tense + past participle.", it: "Ausiliare al futuro + participio passato.", es: "Auxiliar en futuro + participio pasado." },
-  "indicatif:plus-que-parfait": { de: "Hilfsverb im Imparfait + Partizip Perfekt.", en: "Auxiliary in the imperfect + past participle.", it: "Ausiliare all\u2019imperfetto + participio passato.", es: "Auxiliar en imperfecto + participio pasado." },
-  "indicatif:passe anterieur": { de: "Hilfsverb im Pass\xE9 simple + Partizip Perfekt.", en: "Auxiliary in the simple past + past participle.", it: "Ausiliare al passato remoto + participio passato.", es: "Auxiliar en pasado simple + participio pasado." },
-  "imperatif:present": { de: "Pr\xE4sensform mit \xAB tu \xBB, \xAB nous \xBB oder \xAB vous \xBB, ohne Subjekt.", en: "Present-tense form with \xAB tu \xBB, \xAB nous \xBB or \xAB vous \xBB, without the subject.", it: "Forma del presente con \xAB tu \xBB, \xAB nous \xBB o \xAB vous \xBB, senza il soggetto.", es: "Forma del presente con \xAB tu \xBB, \xAB nous \xBB o \xAB vous \xBB, sin el sujeto." },
-  "imperatif:passe": { de: "Hilfsverb im Imperativ Pr\xE4sens + Partizip Perfekt.", en: "Auxiliary in the present imperative + past participle.", it: "Ausiliare all\u2019imperativo presente + participio passato.", es: "Auxiliar en imperativo presente + participio pasado." },
-  "subjonctif:present": { de: "Pr\xE4sensformen mit \xAB ils \xBB und \xAB nous \xBB ohne \xAB -ent \xBB bzw. \xAB -ons \xBB + Subjunktivendung.", en: "Present-tense \xAB ils \xBB and \xAB nous \xBB forms without \xAB -ent \xBB or \xAB -ons \xBB + subjunctive ending.", it: "Forme del presente con \xAB ils \xBB e \xAB nous \xBB senza \xAB -ent \xBB o \xAB -ons \xBB + desinenza del congiuntivo.", es: "Formas de presente con \xAB ils \xBB y \xAB nous \xBB sin \xAB -ent \xBB o \xAB -ons \xBB + terminaci\xF3n del subjuntivo." },
-  "subjonctif:passe": { de: "Hilfsverb im Subjunktiv Pr\xE4sens + Partizip Perfekt.", en: "Auxiliary in the present subjunctive + past participle.", it: "Ausiliare al congiuntivo presente + participio passato.", es: "Auxiliar en subjuntivo presente + participio pasado." },
-  "subjonctif:imparfait": { de: "Nimm die Form mit \xAB il \xBB im Pass\xE9 simple.", en: "Use the \xAB il \xBB form in the simple past.", it: "Prendi la forma con \xAB il \xBB al passato remoto.", es: "Toma la forma con \xAB il \xBB en pasado simple." },
-  "subjonctif:plus-que-parfait": { de: "Hilfsverb im Subjunktiv Imparfait + Partizip Perfekt.", en: "Auxiliary in the imperfect subjunctive + past participle.", it: "Ausiliare al congiuntivo imperfetto + participio passato.", es: "Auxiliar en subjuntivo imperfecto + participio pasado." },
-  "conditionnel:present": { de: "Futurstamm + Imparfait-Endung.", en: "Future stem + imperfect ending.", it: "Radice del futuro + desinenza dell\u2019imperfetto.", es: "Ra\xEDz del futuro + terminaci\xF3n del imperfecto." },
-  "conditionnel:passe 1": { de: "Hilfsverb im Konditional Pr\xE4sens + Partizip Perfekt.", en: "Auxiliary in the present conditional + past participle.", it: "Ausiliare al condizionale presente + participio passato.", es: "Auxiliar en condicional presente + participio pasado." },
-  "conditionnel:passe 2": { de: "Hilfsverb im Subjunktiv Imparfait + Partizip Perfekt.", en: "Auxiliary in the imperfect subjunctive + past participle.", it: "Ausiliare al congiuntivo imperfetto + participio passato.", es: "Auxiliar en subjuntivo imperfecto + participio pasado." },
-  "participe:present": { de: "Pr\xE4sensform mit \xAB nous \xBB ohne \xAB -ons \xBB + \xAB -ant \xBB.", en: "Present-tense \xAB nous \xBB form without \xAB -ons \xBB + \xAB -ant \xBB.", it: "Forma del presente con \xAB nous \xBB senza \xAB -ons \xBB + \xAB -ant \xBB.", es: "Forma de presente con \xAB nous \xBB sin \xAB -ons \xBB + \xAB -ant \xBB." },
-  "participe:passe": { de: "Das Partizip Perfekt ist eine Form, die gelernt werden muss.", en: "The past participle is a form that must be learnt.", it: "Il participio passato \xE8 una forma da imparare.", es: "El participio pasado es una forma que hay que aprender." },
-  "gerondif:present": { de: "\xAB en \xBB + Partizip Pr\xE4sens.", en: "\xAB en \xBB + present participle.", it: "\xAB en \xBB + participio presente.", es: "\xAB en \xBB + participio presente." },
-  "gerondif:passe": { de: "\xAB en \xBB + Partizip Pr\xE4sens des Hilfsverbs + Partizip Perfekt.", en: "\xAB en \xBB + present participle of the auxiliary + past participle.", it: "\xAB en \xBB + participio presente dell\u2019ausiliare + participio passato.", es: "\xAB en \xBB + participio presente del auxiliar + participio pasado." }
+  "indicatif:present": withDutchVariants({ de: "Pr\xE4sensstamm, manchmal ver\xE4nderlich, + Personalendung.", en: "Present-tense stem, which may vary, + the personal ending.", it: "Radice del presente, talvolta variabile, + desinenza della persona.", es: "Ra\xEDz del presente, a veces variable, + terminaci\xF3n de la persona.", nl: "Stam van de tegenwoordige tijd, die kan veranderen, + persoonsuitgang." }),
+  "indicatif:futur proche": withDutchVariants({ de: "\xAB aller \xBB im Pr\xE4sens + Infinitiv des Verbs.", en: "\xAB aller \xBB in the present tense + verb infinitive.", it: "\xAB aller \xBB al presente + infinito del verbo.", es: "\xAB aller \xBB en presente + infinitivo del verbo.", nl: "\xAB aller \xBB in de tegenwoordige tijd + infinitief van het werkwoord." }),
+  "indicatif:imparfait": withDutchVariants({ de: "Form mit \xAB nous \xBB im Pr\xE4sens ohne \xAB -ons \xBB + Imparfait-Endung.", en: "Present-tense \xAB nous \xBB form without \xAB -ons \xBB + imperfect ending.", it: "Forma con \xAB nous \xBB al presente senza \xAB -ons \xBB + desinenza dell\u2019imperfetto.", es: "Forma de \xAB nous \xBB en presente sin \xAB -ons \xBB + terminaci\xF3n del imperfecto.", nl: "\xAB nous \xBB-vorm van de tegenwoordige tijd zonder \xAB -ons \xBB + uitgang van de imparfait." }),
+  "indicatif:futur": withDutchVariants({ de: "Futurstamm, meist der Infinitiv ohne das letzte \xAB e \xBB bei Verben auf \xAB -re \xBB, + Futurendung.", en: "Future stem, usually the infinitive without the final \xAB e \xBB of \xAB -re \xBB verbs, + future ending.", it: "Radice del futuro, spesso l\u2019infinito senza la \xAB e \xBB finale dei verbi in \xAB -re \xBB, + desinenza del futuro.", es: "Ra\xEDz del futuro, normalmente el infinitivo sin la \xAB e \xBB final de los verbos en \xAB -re \xBB, + terminaci\xF3n del futuro.", nl: "Stam van de futur, meestal de infinitief zonder de laatste \xAB e \xBB bij werkwoorden op \xAB -re \xBB, + uitgang van de futur." }),
+  "indicatif:passe simple": withDutchVariants({ de: "Stamm des Pass\xE9 simple + Endung der entsprechenden Reihe.", en: "Simple-past stem + the ending from its pattern.", it: "Radice del passato remoto + desinenza della serie corrispondente.", es: "Ra\xEDz del pasado simple + terminaci\xF3n de su serie.", nl: "Stam van de pass\xE9 simple + uitgang van het bijbehorende patroon." }),
+  "indicatif:passe compose": withDutchVariants({ de: "Hilfsverb im Pr\xE4sens + Partizip Perfekt.", en: "Auxiliary in the present tense + past participle.", it: "Ausiliare al presente + participio passato.", es: "Auxiliar en presente + participio pasado.", nl: "Hulpwerkwoord in de tegenwoordige tijd + voltooid deelwoord." }),
+  "indicatif:futur anterieur": withDutchVariants({ de: "Hilfsverb im Futur + Partizip Perfekt.", en: "Auxiliary in the future tense + past participle.", it: "Ausiliare al futuro + participio passato.", es: "Auxiliar en futuro + participio pasado.", nl: "Hulpwerkwoord in de futur + voltooid deelwoord." }),
+  "indicatif:plus-que-parfait": withDutchVariants({ de: "Hilfsverb im Imparfait + Partizip Perfekt.", en: "Auxiliary in the imperfect + past participle.", it: "Ausiliare all\u2019imperfetto + participio passato.", es: "Auxiliar en imperfecto + participio pasado.", nl: "Hulpwerkwoord in de imparfait + voltooid deelwoord." }),
+  "indicatif:passe anterieur": withDutchVariants({ de: "Hilfsverb im Pass\xE9 simple + Partizip Perfekt.", en: "Auxiliary in the simple past + past participle.", it: "Ausiliare al passato remoto + participio passato.", es: "Auxiliar en pasado simple + participio pasado.", nl: "Hulpwerkwoord in de pass\xE9 simple + voltooid deelwoord." }),
+  "imperatif:present": withDutchVariants({ de: "Pr\xE4sensform mit \xAB tu \xBB, \xAB nous \xBB oder \xAB vous \xBB, ohne Subjekt.", en: "Present-tense form with \xAB tu \xBB, \xAB nous \xBB or \xAB vous \xBB, without the subject.", it: "Forma del presente con \xAB tu \xBB, \xAB nous \xBB o \xAB vous \xBB, senza il soggetto.", es: "Forma del presente con \xAB tu \xBB, \xAB nous \xBB o \xAB vous \xBB, sin el sujeto.", nl: "Vorm van de tegenwoordige tijd met \xAB tu \xBB, \xAB nous \xBB of \xAB vous \xBB, zonder onderwerp." }),
+  "imperatif:passe": withDutchVariants({ de: "Hilfsverb im Imperativ Pr\xE4sens + Partizip Perfekt.", en: "Auxiliary in the present imperative + past participle.", it: "Ausiliare all\u2019imperativo presente + participio passato.", es: "Auxiliar en imperativo presente + participio pasado.", nl: "Hulpwerkwoord in de tegenwoordige gebiedende wijs + voltooid deelwoord." }),
+  "subjonctif:present": withDutchVariants({ de: "Pr\xE4sensformen mit \xAB ils \xBB und \xAB nous \xBB ohne \xAB -ent \xBB bzw. \xAB -ons \xBB + Subjunktivendung.", en: "Present-tense \xAB ils \xBB and \xAB nous \xBB forms without \xAB -ent \xBB or \xAB -ons \xBB + subjunctive ending.", it: "Forme del presente con \xAB ils \xBB e \xAB nous \xBB senza \xAB -ent \xBB o \xAB -ons \xBB + desinenza del congiuntivo.", es: "Formas de presente con \xAB ils \xBB y \xAB nous \xBB sin \xAB -ent \xBB o \xAB -ons \xBB + terminaci\xF3n del subjuntivo.", nl: "\xAB ils \xBB- en \xAB nous \xBB-vorm van de tegenwoordige tijd zonder \xAB -ent \xBB of \xAB -ons \xBB + uitgang van de subjonctief." }),
+  "subjonctif:passe": withDutchVariants({ de: "Hilfsverb im Subjunktiv Pr\xE4sens + Partizip Perfekt.", en: "Auxiliary in the present subjunctive + past participle.", it: "Ausiliare al congiuntivo presente + participio passato.", es: "Auxiliar en subjuntivo presente + participio pasado.", nl: "Hulpwerkwoord in de subjonctif pr\xE9sent + voltooid deelwoord." }),
+  "subjonctif:imparfait": withDutchVariants({ de: "Nimm die Form mit \xAB il \xBB im Pass\xE9 simple.", en: "Use the \xAB il \xBB form in the simple past.", it: "Prendi la forma con \xAB il \xBB al passato remoto.", es: "Toma la forma con \xAB il \xBB en pasado simple.", nl: "Gebruik de \xAB il \xBB-vorm van de pass\xE9 simple." }),
+  "subjonctif:plus-que-parfait": withDutchVariants({ de: "Hilfsverb im Subjunktiv Imparfait + Partizip Perfekt.", en: "Auxiliary in the imperfect subjunctive + past participle.", it: "Ausiliare al congiuntivo imperfetto + participio passato.", es: "Auxiliar en subjuntivo imperfecto + participio pasado.", nl: "Hulpwerkwoord in de subjonctif imparfait + voltooid deelwoord." }),
+  "conditionnel:present": withDutchVariants({ de: "Futurstamm + Imparfait-Endung.", en: "Future stem + imperfect ending.", it: "Radice del futuro + desinenza dell\u2019imperfetto.", es: "Ra\xEDz del futuro + terminaci\xF3n del imperfecto.", nl: "Stam van de futur + uitgang van de imparfait." }),
+  "conditionnel:passe 1": withDutchVariants({ de: "Hilfsverb im Konditional Pr\xE4sens + Partizip Perfekt.", en: "Auxiliary in the present conditional + past participle.", it: "Ausiliare al condizionale presente + participio passato.", es: "Auxiliar en condicional presente + participio pasado.", nl: "Hulpwerkwoord in de conditionnel pr\xE9sent + voltooid deelwoord." }),
+  "conditionnel:passe 2": withDutchVariants({ de: "Hilfsverb im Subjunktiv Imparfait + Partizip Perfekt.", en: "Auxiliary in the imperfect subjunctive + past participle.", it: "Ausiliare al congiuntivo imperfetto + participio passato.", es: "Auxiliar en subjuntivo imperfecto + participio pasado.", nl: "Hulpwerkwoord in de subjonctif imparfait + voltooid deelwoord." }),
+  "participe:present": withDutchVariants({ de: "Pr\xE4sensform mit \xAB nous \xBB ohne \xAB -ons \xBB + \xAB -ant \xBB.", en: "Present-tense \xAB nous \xBB form without \xAB -ons \xBB + \xAB -ant \xBB.", it: "Forma del presente con \xAB nous \xBB senza \xAB -ons \xBB + \xAB -ant \xBB.", es: "Forma de presente con \xAB nous \xBB sin \xAB -ons \xBB + \xAB -ant \xBB.", nl: "\xAB nous \xBB-vorm van de tegenwoordige tijd zonder \xAB -ons \xBB + \xAB -ant \xBB." }),
+  "participe:passe": withDutchVariants({ de: "Das Partizip Perfekt ist eine Form, die gelernt werden muss.", en: "The past participle is a form that must be learnt.", it: "Il participio passato \xE8 una forma da imparare.", es: "El participio pasado es una forma que hay que aprender.", nl: "Het voltooid deelwoord is een vorm die je moet leren." }),
+  "gerondif:present": withDutchVariants({ de: "\xAB en \xBB + Partizip Pr\xE4sens.", en: "\xAB en \xBB + present participle.", it: "\xAB en \xBB + participio presente.", es: "\xAB en \xBB + participio presente.", nl: "\xAB en \xBB + tegenwoordig deelwoord." }),
+  "gerondif:passe": withDutchVariants({ de: "\xAB en \xBB + Partizip Pr\xE4sens des Hilfsverbs + Partizip Perfekt.", en: "\xAB en \xBB + present participle of the auxiliary + past participle.", it: "\xAB en \xBB + participio presente dell\u2019ausiliare + participio passato.", es: "\xAB en \xBB + participio presente del auxiliar + participio pasado.", nl: "\xAB en \xBB + tegenwoordig deelwoord van het hulpwerkwoord + voltooid deelwoord." })
 };
 const noteTranslations = {
-  "Ce n'est pas un temps comme les autres. Il est utilis\xE9 pour une action proche.": { de: "Diese Zeitform bezeichnet eine Handlung in naher Zukunft.", en: "This tense describes an action in the near future.", it: "Questo tempo indica un\u2019azione nel futuro prossimo.", es: "Este tiempo indica una acci\xF3n en un futuro pr\xF3ximo." },
-  "Exception : \xEAtre \u2192 \xE9t-.": { de: "Ausnahme: \xEAtre \u2192 \xE9t-.", en: "Exception: \xEAtre \u2192 \xE9t-.", it: "Eccezione: \xEAtre \u2192 \xE9t-.", es: "Excepci\xF3n: \xEAtre \u2192 \xE9t-." },
-  "Avec \xAB tu \xBB des verbes en \xAB -er \xBB, enl\xE8ve g\xE9n\xE9ralement le \xAB s \xBB.": { de: "Bei \xAB tu \xBB f\xE4llt bei Verben auf \xAB -er \xBB das \xAB s \xBB normalerweise weg.", en: "With \xAB tu \xBB, usually remove the \xAB s \xBB from \xAB -er \xBB verbs.", it: "Con \xAB tu \xBB, nei verbi in \xAB -er \xBB elimina generalmente la \xAB s \xBB.", es: "Con \xAB tu \xBB, en los verbos en \xAB -er \xBB se suele quitar la \xAB s \xBB." },
-  "Enl\xE8ve le \xAB t \xBB final s\u2019il y en a.": { de: "Entferne ein eventuell vorhandenes \xAB t \xBB am Ende.", en: "Remove the final \xAB t \xBB if there is one.", it: "Togli la \xAB t \xBB finale, se presente.", es: "Quita la \xAB t \xBB final, si la hay." },
-  "Puis ajoute la terminaison du subjonctif imparfait.": { de: "F\xFCge dann die Endung des Subjunktiv Imparfait hinzu.", en: "Then add the imperfect-subjunctive ending.", it: "Poi aggiungi la desinenza del congiuntivo imperfetto.", es: "Despu\xE9s a\xF1ade la terminaci\xF3n del subjuntivo imperfecto." },
-  "Il est utilis\xE9 dans les temps compos\xE9s.": { de: "Es wird in den zusammengesetzten Zeitformen verwendet.", en: "It is used in compound tenses.", it: "Si usa nei tempi composti.", es: "Se utiliza en los tiempos compuestos." },
-  "Ne construis pas sa r\xE9ponse \xE0 partir de la forme habituelle du pr\xE9sent.": { de: "Bilde die Antwort nicht aus der \xFCblichen Pr\xE4sensform.", en: "Do not build the answer from the usual present-tense form.", it: "Non costruire la risposta partendo dalla forma abituale del presente.", es: "No construyas la respuesta a partir de la forma habitual del presente." },
-  "La r\xE8gle \xAB nous au pr\xE9sent sans -ons \xBB ne fonctionne pas pour ce verbe.": { de: "Die Regel \xAB nous im Pr\xE4sens ohne -ons \xBB funktioniert bei diesem Verb nicht.", en: "The \u201Cpresent-tense nous form without -ons\u201D rule does not work for this verb.", it: "La regola \xAB nous al presente senza -ons \xBB non funziona per questo verbo.", es: "La regla \xAB nous en presente sin -ons \xBB no funciona con este verbo." },
-  "Exception : le participe pr\xE9sent de ce verbe est irr\xE9gulier et doit \xEAtre appris par c\u0153ur.": { de: "Ausnahme: Das Partizip Pr\xE4sens dieses Verbs ist unregelm\xE4\xDFig und muss auswendig gelernt werden.", en: "Exception: this verb has an irregular present participle that must be learnt by heart.", it: "Eccezione: il participio presente di questo verbo \xE8 irregolare e va imparato a memoria.", es: "Excepci\xF3n: el participio presente de este verbo es irregular y debe aprenderse de memoria." },
-  "Avec un verbe pronominal, place \xAB me, te, se, nous, vous, se \xBB devant l\u2019infinitif.": { de: "Bei einem reflexiven Verb stehen \xAB me, te, se, nous, vous, se \xBB vor dem Infinitiv.", en: "With a pronominal verb, place \xAB me, te, se, nous, vous, se \xBB before the infinitive.", it: "Con un verbo pronominale, metti \xAB me, te, se, nous, vous, se \xBB davanti all\u2019infinito.", es: "Con un verbo pronominal, coloca \xAB me, te, se, nous, vous, se \xBB delante del infinitivo." },
-  "Avec un verbe pronominal, v\xE9rifie l\u2019accord du participe pass\xE9 : il d\xE9pend de la fonction du pronom et d\u2019un \xE9ventuel COD.": { de: "Pr\xFCfe bei einem reflexiven Verb die Angleichung des Partizips Perfekt: Sie h\xE4ngt von der Funktion des Pronomens und einem m\xF6glichen direkten Objekt ab.", en: "With a pronominal verb, check past-participle agreement: it depends on the pronoun\u2019s function and any direct object.", it: "Con un verbo pronominale, verifica la concordanza del participio passato: dipende dalla funzione del pronome e da un eventuale complemento oggetto.", es: "Con un verbo pronominal, comprueba la concordancia del participio pasado: depende de la funci\xF3n del pronombre y de un posible complemento directo." },
-  "Avec \xAB \xEAtre \xBB, le participe pass\xE9 s\u2019accorde avec le sujet.": { de: "Mit \xAB \xEAtre \xBB wird das Partizip Perfekt an das Subjekt angeglichen.", en: "With \xAB \xEAtre \xBB, the past participle agrees with the subject.", it: "Con \xAB \xEAtre \xBB, il participio passato concorda con il soggetto.", es: "Con \xAB \xEAtre \xBB, el participio pasado concuerda con el sujeto." }
+  "Ce n'est pas un temps comme les autres. Il est utilis\xE9 pour une action proche.": withDutchVariants({ de: "Diese Zeitform bezeichnet eine Handlung in naher Zukunft.", en: "This tense describes an action in the near future.", it: "Questo tempo indica un\u2019azione nel futuro prossimo.", es: "Este tiempo indica una acci\xF3n en un futuro pr\xF3ximo.", nl: "Deze tijd beschrijft een handeling in de nabije toekomst." }),
+  "Exception : \xEAtre \u2192 \xE9t-.": withDutchVariants({ de: "Ausnahme: \xEAtre \u2192 \xE9t-.", en: "Exception: \xEAtre \u2192 \xE9t-.", it: "Eccezione: \xEAtre \u2192 \xE9t-.", es: "Excepci\xF3n: \xEAtre \u2192 \xE9t-.", nl: "Uitzondering: \xEAtre \u2192 \xE9t-." }),
+  "Avec \xAB tu \xBB des verbes en \xAB -er \xBB, enl\xE8ve g\xE9n\xE9ralement le \xAB s \xBB.": withDutchVariants({ de: "Bei \xAB tu \xBB f\xE4llt bei Verben auf \xAB -er \xBB das \xAB s \xBB normalerweise weg.", en: "With \xAB tu \xBB, usually remove the \xAB s \xBB from \xAB -er \xBB verbs.", it: "Con \xAB tu \xBB, nei verbi in \xAB -er \xBB elimina generalmente la \xAB s \xBB.", es: "Con \xAB tu \xBB, en los verbos en \xAB -er \xBB se suele quitar la \xAB s \xBB.", nl: "Laat bij \xAB tu \xBB meestal de \xAB s \xBB van werkwoorden op \xAB -er \xBB weg." }),
+  "Enl\xE8ve le \xAB t \xBB final s\u2019il y en a.": withDutchVariants({ de: "Entferne ein eventuell vorhandenes \xAB t \xBB am Ende.", en: "Remove the final \xAB t \xBB if there is one.", it: "Togli la \xAB t \xBB finale, se presente.", es: "Quita la \xAB t \xBB final, si la hay.", nl: "Verwijder de laatste \xAB t \xBB als die er is." }),
+  "Puis ajoute la terminaison du subjonctif imparfait.": withDutchVariants({ de: "F\xFCge dann die Endung des Subjunktiv Imparfait hinzu.", en: "Then add the imperfect-subjunctive ending.", it: "Poi aggiungi la desinenza del congiuntivo imperfetto.", es: "Despu\xE9s a\xF1ade la terminaci\xF3n del subjuntivo imperfecto.", nl: "Voeg daarna de uitgang van de subjonctif imparfait toe." }),
+  "Il est utilis\xE9 dans les temps compos\xE9s.": withDutchVariants({ de: "Es wird in den zusammengesetzten Zeitformen verwendet.", en: "It is used in compound tenses.", it: "Si usa nei tempi composti.", es: "Se utiliza en los tiempos compuestos.", nl: "Hij wordt gebruikt in samengestelde tijden." }),
+  "Ne construis pas sa r\xE9ponse \xE0 partir de la forme habituelle du pr\xE9sent.": withDutchVariants({ de: "Bilde die Antwort nicht aus der \xFCblichen Pr\xE4sensform.", en: "Do not build the answer from the usual present-tense form.", it: "Non costruire la risposta partendo dalla forma abituale del presente.", es: "No construyas la respuesta a partir de la forma habitual del presente.", nl: "Bouw het antwoord niet op vanuit de gewone vorm van de tegenwoordige tijd." }),
+  "La r\xE8gle \xAB nous au pr\xE9sent sans -ons \xBB ne fonctionne pas pour ce verbe.": withDutchVariants({ de: "Die Regel \xAB nous im Pr\xE4sens ohne -ons \xBB funktioniert bei diesem Verb nicht.", en: "The \u201Cpresent-tense nous form without -ons\u201D rule does not work for this verb.", it: "La regola \xAB nous al presente senza -ons \xBB non funziona per questo verbo.", es: "La regla \xAB nous en presente sin -ons \xBB no funciona con este verbo.", nl: "De regel \u201Cnous-vorm van de tegenwoordige tijd zonder -ons\u201D werkt niet voor dit werkwoord." }),
+  "Exception : le participe pr\xE9sent de ce verbe est irr\xE9gulier et doit \xEAtre appris par c\u0153ur.": withDutchVariants({ de: "Ausnahme: Das Partizip Pr\xE4sens dieses Verbs ist unregelm\xE4\xDFig und muss auswendig gelernt werden.", en: "Exception: this verb has an irregular present participle that must be learnt by heart.", it: "Eccezione: il participio presente di questo verbo \xE8 irregolare e va imparato a memoria.", es: "Excepci\xF3n: el participio presente de este verbo es irregular y debe aprenderse de memoria.", nl: "Uitzondering: dit werkwoord heeft een onregelmatig tegenwoordig deelwoord dat je uit het hoofd moet leren." }),
+  "Avec un verbe pronominal, place \xAB me, te, se, nous, vous, se \xBB devant l\u2019infinitif.": withDutchVariants({ de: "Bei einem reflexiven Verb stehen \xAB me, te, se, nous, vous, se \xBB vor dem Infinitiv.", en: "With a pronominal verb, place \xAB me, te, se, nous, vous, se \xBB before the infinitive.", it: "Con un verbo pronominale, metti \xAB me, te, se, nous, vous, se \xBB davanti all\u2019infinito.", es: "Con un verbo pronominal, coloca \xAB me, te, se, nous, vous, se \xBB delante del infinitivo.", nl: "Plaats bij een wederkerend werkwoord \xAB me, te, se, nous, vous, se \xBB voor de infinitief." }),
+  "Avec un verbe pronominal, v\xE9rifie l\u2019accord du participe pass\xE9 : il d\xE9pend de la fonction du pronom et d\u2019un \xE9ventuel COD.": withDutchVariants({ de: "Pr\xFCfe bei einem reflexiven Verb die Angleichung des Partizips Perfekt: Sie h\xE4ngt von der Funktion des Pronomens und einem m\xF6glichen direkten Objekt ab.", en: "With a pronominal verb, check past-participle agreement: it depends on the pronoun\u2019s function and any direct object.", it: "Con un verbo pronominale, verifica la concordanza del participio passato: dipende dalla funzione del pronome e da un eventuale complemento oggetto.", es: "Con un verbo pronominal, comprueba la concordancia del participio pasado: depende de la funci\xF3n del pronombre y de un posible complemento directo.", nl: "Controleer bij een wederkerend werkwoord de overeenkomst van het voltooid deelwoord. Die hangt af van de functie van het voornaamwoord en een eventueel lijdend voorwerp." }),
+  "Avec \xAB \xEAtre \xBB, le participe pass\xE9 s\u2019accorde avec le sujet.": withDutchVariants({ de: "Mit \xAB \xEAtre \xBB wird das Partizip Perfekt an das Subjekt angeglichen.", en: "With \xAB \xEAtre \xBB, the past participle agrees with the subject.", it: "Con \xAB \xEAtre \xBB, il participio passato concorda con il soggetto.", es: "Con \xAB \xEAtre \xBB, el participio pasado concuerda con el sujeto.", nl: "Met \xAB \xEAtre \xBB komt het voltooid deelwoord overeen met het onderwerp." })
 };
 const ruleOverrides = {
-  "Exception : ce verbe a des formes particuli\xE8res \xE0 l\u2019imp\xE9ratif, \xE0 apprendre par c\u0153ur.": { de: "Ausnahme: Dieses Verb hat besondere Imperativformen, die auswendig gelernt werden m\xFCssen.", en: "Exception: this verb has special imperative forms that must be learnt by heart.", it: "Eccezione: questo verbo ha forme particolari all\u2019imperativo, da imparare a memoria.", es: "Excepci\xF3n: este verbo tiene formas especiales de imperativo que deben aprenderse de memoria." },
-  "Exception : ce verbe a un participe pr\xE9sent irr\xE9gulier, \xE0 apprendre par c\u0153ur.": { de: "Ausnahme: Dieses Verb hat ein unregelm\xE4\xDFiges Partizip Pr\xE4sens, das auswendig gelernt werden muss.", en: "Exception: this verb has an irregular present participle that must be learnt by heart.", it: "Eccezione: questo verbo ha un participio presente irregolare, da imparare a memoria.", es: "Excepci\xF3n: este verbo tiene un participio presente irregular que debe aprenderse de memoria." }
+  "Exception : ce verbe a des formes particuli\xE8res \xE0 l\u2019imp\xE9ratif, \xE0 apprendre par c\u0153ur.": withDutchVariants({ de: "Ausnahme: Dieses Verb hat besondere Imperativformen, die auswendig gelernt werden m\xFCssen.", en: "Exception: this verb has special imperative forms that must be learnt by heart.", it: "Eccezione: questo verbo ha forme particolari all\u2019imperativo, da imparare a memoria.", es: "Excepci\xF3n: este verbo tiene formas especiales de imperativo que deben aprenderse de memoria.", nl: "Uitzondering: dit werkwoord heeft bijzondere vormen in de gebiedende wijs die je uit het hoofd moet leren." }),
+  "Exception : ce verbe a un participe pr\xE9sent irr\xE9gulier, \xE0 apprendre par c\u0153ur.": withDutchVariants({ de: "Ausnahme: Dieses Verb hat ein unregelm\xE4\xDFiges Partizip Pr\xE4sens, das auswendig gelernt werden muss.", en: "Exception: this verb has an irregular present participle that must be learnt by heart.", it: "Eccezione: questo verbo ha un participio presente irregolare, da imparare a memoria.", es: "Excepci\xF3n: este verbo tiene un participio presente irregular que debe aprenderse de memoria.", nl: "Uitzondering: dit werkwoord heeft een onregelmatig tegenwoordig deelwoord dat je uit het hoofd moet leren." })
 };
 function localizedCondensedTenseRule(locale, key, source) {
   var _a, _b, _c;
@@ -208,13 +210,14 @@ function localizedCondensedTenseRule(locale, key, source) {
     })
   };
 }
-const condensedExampleLabel = {
+const condensedExampleLabel = withDutchVariants({
   fr: "Exemple avec le verbe \xAB chanter \xBB :",
   de: "Beispiel mit dem Verb \xAB chanter \xBB:",
   en: "Example with the verb \u201Cchanter\u201D:",
   it: "Esempio con il verbo \xAB chanter \xBB:",
-  es: "Ejemplo con el verbo \xAB chanter \xBB:"
-};
+  es: "Ejemplo con el verbo \xAB chanter \xBB:",
+  nl: "Voorbeeld met het werkwoord \u201Cchanter\u201D:"
+});
 
 function areOnlyIndicativeTenses(tenses) {
   return tenses.length > 0 && tenses.every((tense) => {
@@ -551,7 +554,7 @@ function buildDefinitionHelpHtml(values) {
   if (!verb) return `<p>${escapedCoachText(definition)}</p>`;
   return `<p><strong>${escapedCoachText(verb)}</strong> = ${escapedCoachText(definition)}</p>`;
 }
-const semanticDefinitionFallbacks = {
+const semanticDefinitionFallbacks = withDutchVariants({
   de: {
     mouvement: "eine Bewegung oder Fortbewegung ausdr\xFCcken",
     position: "eine Position oder einen Positionswechsel ausdr\xFCcken",
@@ -615,14 +618,31 @@ const semanticDefinitionFallbacks = {
     corps: "expresar una acci\xF3n o una necesidad del cuerpo",
     nature: "describir un fen\xF3meno natural",
     "action-processus": "expresar una acci\xF3n o un proceso"
+  },
+  nl: {
+    mouvement: "een beweging of verplaatsing uitdrukken",
+    position: "een positie of verandering van positie uitdrukken",
+    perception: "iets uitdrukken dat je met je zintuigen waarneemt",
+    manipulation: "een handeling op een voorwerp uitdrukken",
+    "creation-transformation": "een creatie of verandering uitdrukken",
+    communication: "woorden, idee\xEBn of informatie overbrengen",
+    cognition: "denken, kennis of leren uitdrukken",
+    emotion: "een emotie, voorkeur of waardering uitdrukken",
+    modalite: "aangeven wat mogelijk, nodig of gewenst is",
+    "relation-sociale": "een relatie of een handeling met andere mensen uitdrukken",
+    echange: "een uitwisseling, gift of overdracht uitdrukken",
+    corps: "een lichamelijke handeling of behoefte uitdrukken",
+    nature: "een natuurverschijnsel beschrijven",
+    "action-processus": "een handeling of proces uitdrukken"
   }
-};
-const genericDefinitionFallbacks = {
+});
+const genericDefinitionFallbacks = withDutchVariants({
   de: "ein franz\xF6sisches Verb; erschlie\xDFe seine genaue Bedeutung aus dem Satz",
   en: "a French verb; use the sentence to identify its precise meaning",
   it: "un verbo francese; usa la frase per individuarne il significato preciso",
-  es: "un verbo franc\xE9s; usa la frase para identificar su significado exacto"
-};
+  es: "un verbo franc\xE9s; usa la frase para identificar su significado exacto",
+  nl: "een Frans werkwoord; gebruik de zin om de precieze betekenis te achterhalen"
+});
 function localizedCoachVerbDefinition(verb, locale) {
   var _a;
   if (!verb) return "";
@@ -819,29 +839,32 @@ function buildCondensedVerbGroupHtml(verb, context = {}, locale = "fr") {
   var _a;
   const infinitive = ((_a = verb == null ? void 0 : verb.infinitif) == null ? void 0 : _a.trim()) || "Ce verbe";
   const group = verb == null ? void 0 : verb.groupeConjugaison;
-  const missingGroup = {
+  const missingGroup = withDutchVariants({
     fr: "groupe non renseign\xE9.",
     de: "Verbgruppe nicht angegeben.",
     en: "verb group not specified.",
     it: "gruppo del verbo non indicato.",
-    es: "grupo del verbo no indicado."
-  };
+    es: "grupo del verbo no indicado.",
+    nl: "werkwoordgroep niet vermeld."
+  });
   if (!group) return `<p><strong>${escapedCoachText(infinitive)}</strong> : ${missingGroup[locale]}</p>`;
-  const groupLabels = {
+  const groupLabels = withDutchVariants({
     fr: `${group}${group === 1 ? "er" : "e"} groupe`,
     de: `${group}. Verbgruppe`,
     en: `${group}${group === 1 ? "st" : group === 2 ? "nd" : "rd"} group`,
     it: `${group}\xBA gruppo`,
-    es: `${group}.${group === 1 || group === 3 ? "er" : "\xBA"} grupo`
-  };
-  const membership = {
+    es: `${group}.${group === 1 || group === 3 ? "er" : "\xBA"} grupo`,
+    nl: `${group}e groep`
+  });
+  const membership = withDutchVariants({
     fr: "appartient au",
     de: "geh\xF6rt zur",
     en: "belongs to the",
     it: "appartiene al",
-    es: "pertenece al"
-  };
-  const consequencesByLocale = {
+    es: "pertenece al",
+    nl: "behoort tot de"
+  });
+  const consequencesByLocale = withDutchVariants({
     fr: {
       1: ["Conjugaison g\xE9n\xE9ralement r\xE9guli\xE8re.", "Attention : le radical ne s\u2019\xE9crit pas toujours de la m\xEAme fa\xE7on."],
       2: ["Conjugaison r\xE9guli\xE8re, sur le mod\xE8le de \xAB finir \xBB. Le radical prend souvent \xAB -iss- \xBB."],
@@ -866,16 +889,22 @@ function buildCondensedVerbGroupHtml(verb, context = {}, locale = "fr") {
       1: ["La conjugaci\xF3n suele ser regular.", "Atenci\xF3n: la ra\xEDz no siempre se escribe de la misma manera."],
       2: ["Conjugaci\xF3n regular seg\xFAn el modelo de \xAB finir \xBB. La ra\xEDz suele contener \xAB -iss- \xBB."],
       3: ["La conjugaci\xF3n suele ser irregular: la ra\xEDz y las terminaciones pueden cambiar. Usa las formas de referencia aprendidas."]
+    },
+    nl: {
+      1: ["De vervoeging is meestal regelmatig.", "Let op: de stam wordt niet altijd op dezelfde manier geschreven."],
+      2: ["Regelmatige vervoeging volgens het model van \xAB finir \xBB. De stam bevat vaak \xAB -iss- \xBB."],
+      3: ["De vervoeging is vaak onregelmatig: de stam en de uitgangen kunnen veranderen. Gebruik de basisvormen die je hebt geleerd."]
     }
-  };
+  });
   const consequences = consequencesByLocale[locale][group];
   const consequenceParagraphs = consequences.map((consequence) => `<p>${escapedCoachText(consequence)}</p>`).join("");
-  const foreignThirdGroupAdvice = {
+  const foreignThirdGroupAdvice = withDutchVariants({
     de: "<p>Bei Verben der 3. Gruppe helfen gelernte Referenzformen dabei, den richtigen Stamm und die richtige Endung zu finden.</p>",
     en: "<p>For third-group verbs, use learnt reference forms to find the correct stem and ending.</p>",
     it: "<p>Per i verbi del 3\xBA gruppo, usa le forme di riferimento imparate per trovare la radice e la desinenza corrette.</p>",
-    es: "<p>Para los verbos del 3.er grupo, usa las formas de referencia aprendidas para encontrar la ra\xEDz y la terminaci\xF3n correctas.</p>"
-  };
+    es: "<p>Para los verbos del 3.er grupo, usa las formas de referencia aprendidas para encontrar la ra\xEDz y la terminaci\xF3n correctas.</p>",
+    nl: "<p>Gebruik bij werkwoorden van de derde groep de aangeleerde basisvormen om de juiste stam en uitgang te vinden.</p>"
+  });
   const referenceFormExplanation = group === 3 ? locale === "fr" ? condensedReferenceFormExplanation(context.mode, context.tense, context.subject, condensedVerbAuxiliary(verb) || "avoir", isCondensedPronominalVerb(verb)) : foreignThirdGroupAdvice[locale] : "";
   return `<p><strong>${escapedCoachText(infinitive)}</strong> ${membership[locale]} <strong>${groupLabels[locale]}</strong>.</p>${consequenceParagraphs}${referenceFormExplanation}`;
 }
@@ -938,7 +967,7 @@ function modeWithArticle(value) {
   const mode = value.trim();
   return startsWithVowelForArticle(mode) ? `de l\u2019${mode}` : `du ${mode}`;
 }
-const nearFutureHelpCopy = {
+const nearFutureHelpCopy = withDutchVariants({
   fr: {
     construction: "Le futur proche se construit avec \xAB aller \xBB au pr\xE9sent, suivi de l\u2019infinitif du verbe.",
     usage: "Ce n'est pas un temps comme les autres. Il est utilis\xE9 pour une action proche.",
@@ -973,8 +1002,15 @@ const nearFutureHelpCopy = {
     formulaPresent: "en presente",
     example: "Ejemplo:",
     reflexive: (example) => `Con un verbo pronominal, coloca el pronombre reflexivo delante del infinitivo: <code>${example}</code>.`
+  },
+  nl: {
+    construction: "De futur proche wordt gevormd met \xAB aller \xBB in de tegenwoordige tijd, gevolgd door de infinitief van het werkwoord.",
+    usage: "Deze tijd beschrijft een handeling die binnenkort zal plaatsvinden.",
+    formulaPresent: "in de tegenwoordige tijd",
+    example: "Voorbeeld:",
+    reflexive: (example) => `Plaats bij een wederkerend werkwoord het wederkerend voornaamwoord v\xF3\xF3r de infinitief: <code>${example}</code>.`
   }
-};
+});
 function buildNearFutureCoachHelpHtml(verb, locale = "fr") {
   var _a;
   const infinitive = ((_a = verb == null ? void 0 : verb.infinitif) == null ? void 0 : _a.trim()) || "chanter";
@@ -985,13 +1021,14 @@ function buildNearFutureCoachHelpHtml(verb, locale = "fr") {
   return `<p><strong>${copy.construction}</strong></p><p>${copy.usage}</p><p><code>aller ${copy.formulaPresent} + ${escapedCoachText(lexicalInfinitive)}</code></p><p><strong>${copy.example}</strong><br><code>Il va ouvrir la porte.</code></p>${pronominal}`;
 }
 function buildNearFutureAllerHelpHtml(locale = "fr") {
-  const summary = {
+  const summary = withDutchVariants({
     fr: "Aller au pr\xE9sent",
     de: "aller im Pr\xE4sens",
     en: "aller in the present tense",
     it: "aller al presente",
-    es: "aller en presente"
-  };
+    es: "aller en presente",
+    nl: "aller in de tegenwoordige tijd"
+  });
   return `<details><summary>${summary[locale]}</summary><table><tbody><tr><th>je</th><td>vais</td></tr><tr><th>tu</th><td>vas</td></tr><tr><th>il, elle, on</th><td>va</td></tr><tr><th>nous</th><td>allons</td></tr><tr><th>vous</th><td>allez</td></tr><tr><th>ils, elles</th><td>vont</td></tr></tbody></table></details>`;
 }
 function normalizedGrammar(value) {

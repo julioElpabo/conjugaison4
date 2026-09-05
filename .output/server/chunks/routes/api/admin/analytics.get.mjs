@@ -108,7 +108,7 @@ const analytics_get = defineEventHandler(async (event) => {
       database.execute(`SELECT DATE_FORMAT(created_at, '${seriesFormat}') AS date,
         event_name, JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.locale')) AS locale, COUNT(*) AS value
         FROM analytics_events WHERE ${eventWhere} AND event_name IN ('language_tested','language_used')
-          AND JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.locale')) IN ('fr','de','en','it','es')
+          AND JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.locale')) IN ('fr','de','en','it','es','nl','nl-NL')
         GROUP BY date,event_name,locale ORDER BY date`, eventParams),
       database.execute(`SELECT
         SUM(CASE WHEN event_name='exercise_started' AND JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.presentation'))='classic' THEN 1 ELSE 0 END) AS classic,

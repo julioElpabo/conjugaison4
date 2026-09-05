@@ -1,6 +1,5 @@
 import { randomInt } from 'node:crypto';
-import { u as useDatabase, U as encodePronominalSelectionId, V as decodePronominalSelectionId } from '../nitro/nitro.mjs';
-import { P as PublicInputError, p as parseDefiDefinition, s as serializeDefi } from './public-api-validation.mjs';
+import { Y as PublicInputError, u as useDatabase, Z as parseDefiDefinition, _ as encodePronominalSelectionId, $ as serializeDefi, a0 as decodePronominalSelectionId } from '../nitro/nitro.mjs';
 
 const CODE_ALPHABET = "ABCDEFGHKLMNPQRSTUVWXYZ23456789";
 const CODE_PATTERN = /^[A-HK-NP-Z2-9]{2}(?:-[A-HK-NP-Z2-9]{2}){3}$/;
@@ -56,11 +55,6 @@ async function saveDefi(definition, learnerAccountId) {
   const connection = await database.getConnection();
   try {
     await connection.beginTransaction();
-    await connection.execute(`
-      DELETE FROM defis
-      WHERE isANePasEffacer = 0
-        AND expires_at <= CURRENT_TIMESTAMP
-    `);
     for (let attempt = 0; attempt < 12; attempt++) {
       const code = createCode();
       const [existing] = await connection.execute(
@@ -69,8 +63,8 @@ async function saveDefi(definition, learnerAccountId) {
       );
       if (Number((_a = existing[0]) == null ? void 0 : _a.count) !== 0) continue;
       const [result] = await connection.execute(
-        `INSERT INTO defis (name, defi, expires_at)
-         VALUES (?, ?, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 6 MONTH))`,
+        `INSERT INTO defis (name, defi, expires_at, last_used_at)
+         VALUES (?, ?, NULL, CURRENT_TIMESTAMP)`,
         [code, serializeDefi(definition)]
       );
       if (learnerAccountId) {
@@ -93,14 +87,18 @@ async function saveDefi(definition, learnerAccountId) {
 async function getDefi(code) {
   const database = useDatabase();
   const [rows] = await database.execute(
-    `SELECT name, defi FROM defis
+    `SELECT id, name, defi FROM defis
      WHERE name = ?
-       AND (isANePasEffacer = 1 OR expires_at > CURRENT_TIMESTAMP)
      ORDER BY id DESC LIMIT 1`,
     [code]
   );
   const row = rows[0];
   if (!row) throw new DefiNotFoundError("D\xE9fi introuvable");
+  const [updated] = await database.execute(
+    "UPDATE defis SET last_used_at = CURRENT_TIMESTAMP WHERE id = ?",
+    [row.id]
+  );
+  if (!updated.affectedRows) throw new DefiNotFoundError("D\xE9fi introuvable");
   try {
     const definition = parseDefiDefinition(JSON.parse(row.defi));
     const legacyIds = definition.verbIds.filter((id) => id > 0);

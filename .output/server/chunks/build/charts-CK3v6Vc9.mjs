@@ -3,7 +3,7 @@ import { defineComponent, ref, computed, watch, withCtx, unref, isRef, createVNo
 import { ssrRenderComponent, ssrIncludeBooleanAttr, ssrInterpolate, ssrRenderList, ssrRenderAttr, ssrRenderClass, ssrLooseContain, ssrLooseEqual, ssrRenderStyle, ssrRenderAttrs } from 'vue/server-renderer';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 import { u as useHead } from './server.mjs';
-import { aq as challengePresetGroupOrder, ar as challengePresetGroupLabels, an as challengePresetDefinitions } from '../nitro/nitro.mjs';
+import { ay as challengePresetGroupOrder, az as challengePresetGroupLabels, av as challengePresetDefinitions } from '../nitro/nitro.mjs';
 import { u as useAdminAuth, g as getAdminErrorMessage } from './useAdminAuth-BdfYT3Lh.mjs';
 import { s as setInterval } from './interval-CYXsK9dZ.mjs';
 import './nuxt-link-icjx6oE7.mjs';

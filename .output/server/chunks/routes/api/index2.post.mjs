@@ -1,6 +1,5 @@
-import { d as defineEventHandler, c as createError } from '../../nitro/nitro.mjs';
+import { d as defineEventHandler, Z as parseDefiDefinition, Y as PublicInputError, c as createError } from '../../nitro/nitro.mjs';
 import { s as saveDefi } from '../../_/defis.mjs';
-import { p as parseDefiDefinition, P as PublicInputError } from '../../_/public-api-validation.mjs';
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../_/public-api-rate-limit.mjs';
 import { r as readLimitedJsonBody } from '../../_/limited-json-body.mjs';
 import { g as getLearnerSession } from '../../_/learner-session.mjs';
@@ -15,7 +14,6 @@ import 'web-push';
 import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
-import '../../_/challenge-defaults.mjs';
 
 const index_post = defineEventHandler(async (event) => {
   await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.challengeCreate);

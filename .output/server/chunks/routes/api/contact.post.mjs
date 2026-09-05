@@ -1,4 +1,4 @@
-import { c as createError, x as useRuntimeConfig, d as defineEventHandler, s as setResponseHeader, A as getContactSettings } from '../../nitro/nitro.mjs';
+import { c as createError, y as useRuntimeConfig, d as defineEventHandler, s as setResponseHeader, B as getContactSettings } from '../../nitro/nitro.mjs';
 import nodemailer from 'nodemailer';
 import { a as assertPublicApiRateLimit } from '../../_/public-api-rate-limit.mjs';
 import { a as assertTurnstile } from '../../_/turnstile.mjs';

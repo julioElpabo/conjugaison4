@@ -1,4 +1,4 @@
-import { d as defineEventHandler, r as readBody, c as createError, u as useDatabase, J as refreshVerbMetadata } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, r as readBody, c as createError, u as useDatabase, N as refreshVerbMetadata } from '../../../nitro/nitro.mjs';
 import { r as requireAdministrator } from '../../../_/session.mjs';
 import 'node:http';
 import 'node:https';

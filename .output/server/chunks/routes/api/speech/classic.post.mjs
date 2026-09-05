@@ -1,4 +1,4 @@
-import { d as defineEventHandler, c as createError, a8 as synthesizeClassicSpeech, R as setResponseHeaders } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, c as createError, af as synthesizeClassicSpeech, V as setResponseHeaders } from '../../../nitro/nitro.mjs';
 import { r as readClassicSpeechToken } from '../../../_/classic-speech-token.mjs';
 import { c as coachSpeechVoiceGender } from '../../../_/coach-speech-voice.mjs';
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../../_/public-api-rate-limit.mjs';

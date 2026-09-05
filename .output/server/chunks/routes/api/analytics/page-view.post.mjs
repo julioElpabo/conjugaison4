@@ -1,4 +1,4 @@
-import { d as defineEventHandler, w as getCookie, v as deleteCookie, E as getHeader, u as useDatabase } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, x as getCookie, v as deleteCookie, F as getHeader, u as useDatabase } from '../../../nitro/nitro.mjs';
 import { s as safeAnalyticsPath } from '../../../_/analytics-session.mjs';
 import { r as readLimitedJsonBody } from '../../../_/limited-json-body.mjs';
 import { A as ANALYTICS_CONSENT_ACCEPTED, a as ANALYTICS_CONSENT_COOKIE_NAME } from '../../../_/analytics-consent.mjs';

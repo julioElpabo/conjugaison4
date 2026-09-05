@@ -1,0 +1,8 @@
+const exercicesDeConjugaison_vue_vue_type_style_index_0_scoped_c55b7edd_lang = ".tense-links[data-v-c55b7edd]{max-width:980px;margin:34px auto 8px;padding:22px 25px;border:1px solid var(--line);border-radius:18px;background:color-mix(in srgb,var(--surface) 95%,var(--brand));box-shadow:0 10px 28px #2a413d0d}.tense-links h2[data-v-c55b7edd]{margin:0 0 13px;color:var(--brand-dark);font-size:1.25rem}.tense-links ul[data-v-c55b7edd]{display:flex;margin:0;padding:0;flex-wrap:wrap;gap:7px 18px;list-style:none}.tense-links a[data-v-c55b7edd]{color:var(--muted);font-size:.9rem;line-height:1.5;text-decoration-thickness:1px;text-underline-offset:3px}.tense-links a[data-v-c55b7edd]:hover{color:var(--brand-dark)}@media(max-width:720px){.tense-links[data-v-c55b7edd]{margin-inline:10px}}";
+
+const exercicesDeConjugaisonStyles_DMOVeyPN = [
+  exercicesDeConjugaison_vue_vue_type_style_index_0_scoped_c55b7edd_lang
+];
+
+export { exercicesDeConjugaisonStyles_DMOVeyPN as default };
+//# sourceMappingURL=exercices-de-conjugaison-styles.DMOVeyPN.mjs.map

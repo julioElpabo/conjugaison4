@@ -1,4 +1,4 @@
-import { u as useDatabase, V as decodePronominalSelectionId, aF as indirectRelative, aE as formatConjugationQuestion, aG as formatAnswer } from '../nitro/nitro.mjs';
+import { u as useDatabase, a0 as decodePronominalSelectionId, aQ as indirectRelative, aP as formatConjugationQuestion, aR as formatAnswer } from '../nitro/nitro.mjs';
 import { b as buildRadicalReference } from './radical-reference.mjs';
 import { g as generatePronominalRow, r as resolveVariableAuxiliary } from './pronominal-formatter.mjs';
 import { M as MODE_IDENTIFICATION_INSTRUCTION, T as TENSE_IDENTIFICATION_INSTRUCTION } from './exercise-instructions.mjs';

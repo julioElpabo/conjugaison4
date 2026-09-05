@@ -1,4 +1,4 @@
-import { u as useDatabase, c as createError, x as useRuntimeConfig } from '../nitro/nitro.mjs';
+import { u as useDatabase, c as createError, y as useRuntimeConfig } from '../nitro/nitro.mjs';
 import { createHash } from 'node:crypto';
 import webPush from 'web-push';
 import { c as googleAnalyticsRealtimeCountries } from './google-analytics.mjs';

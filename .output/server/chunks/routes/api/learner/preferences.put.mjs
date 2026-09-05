@@ -13,7 +13,7 @@ import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
 
-const LOCALES = /* @__PURE__ */ new Set(["fr", "de", "en", "it", "es"]);
+const LOCALES = /* @__PURE__ */ new Set(["fr", "de", "en", "it", "es", "nl", "nl-NL"]);
 const THEMES = /* @__PURE__ */ new Set(["light", "dark"]);
 const preferences_put = defineEventHandler(async (event) => {
   setResponseHeader(event, "Cache-Control", "no-store");

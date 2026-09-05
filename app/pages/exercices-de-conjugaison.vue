@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { localeLanguageTag } from '~~/shared/i18n/locales'
 import WizardChallengeWorkspace from '~/components/challenge/WizardChallengeWorkspace.vue'
 import { TENSE_EXERCISE_PAGES } from '~~/shared/data/tense-exercise-pages'
 
@@ -29,7 +30,7 @@ useHead(() => ({
       url: pageUrl.value,
       learningResourceType: 'Interactive resource',
       educationalUse: ['Instruction', 'Practice'],
-      inLanguage: interfaceLocale.value,
+      inLanguage: localeLanguageTag(interfaceLocale.value),
       teaches: ui('Conjugaison française'),
       isAccessibleForFree: true,
     }),

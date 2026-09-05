@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { localeLanguageTag } from '~~/shared/i18n/locales'
 const { ui, uiLabel, interfaceLocale } = useLanguagePreferences()
 import type { LearnerErrorDetail } from '~~/shared/types/conjugation'
 import { learnerErrorDetailText } from '~~/shared/utils/learner-error-diagnostics'
@@ -41,7 +42,7 @@ let previewGeneration = 0
 
 useDialogFocus(dialog, () => emit('close'))
 
-const formattedDate = computed(() => new Intl.DateTimeFormat(`${interfaceLocale.value}-CH`, {
+const formattedDate = computed(() => new Intl.DateTimeFormat((interfaceLocale.value === 'nl' || interfaceLocale.value === 'nl-NL') ? localeLanguageTag(interfaceLocale.value) : `${interfaceLocale.value}-CH`, {
   weekday: 'long',
   day: 'numeric',
   month: 'long',

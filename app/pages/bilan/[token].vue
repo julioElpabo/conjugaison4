@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { localeLanguageTag } from '~~/shared/i18n/locales'
 import type { SharedExerciseSummary } from '~~/shared/types/exercise-summary'
 
 const route = useRoute()
@@ -10,7 +11,7 @@ if (error.value || !summary.value) {
   throw createError({ statusCode: error.value?.statusCode || 404, statusMessage: ui('Bilan introuvable') })
 }
 
-const formattedDate = computed(() => new Intl.DateTimeFormat(`${interfaceLocale.value}-CH`, {
+const formattedDate = computed(() => new Intl.DateTimeFormat((interfaceLocale.value === 'nl' || interfaceLocale.value === 'nl-NL') ? localeLanguageTag(interfaceLocale.value) : `${interfaceLocale.value}-CH`, {
   day: 'numeric',
   month: 'long',
   year: 'numeric',

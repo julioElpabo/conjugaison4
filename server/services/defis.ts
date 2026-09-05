@@ -9,7 +9,7 @@ import {
 } from '../../shared/utils/pronominal-selection'
 
 interface CountRow extends RowDataPacket { count: number }
-interface DefiRow extends RowDataPacket { name: string; defi: string }
+interface DefiRow extends RowDataPacket { id: number; name: string; defi: string }
 interface LegacyPronominalRow extends RowDataPacket { id: number; legacy_verbe_id: number }
 
 const CODE_ALPHABET = 'ABCDEFGHKLMNPQRSTUVWXYZ23456789'
@@ -82,11 +82,6 @@ export async function saveDefi(
   const connection = await database.getConnection()
   try {
     await connection.beginTransaction()
-    await connection.execute(`
-      DELETE FROM defis
-      WHERE isANePasEffacer = 0
-        AND expires_at <= CURRENT_TIMESTAMP
-    `)
     for (let attempt = 0; attempt < 12; attempt++) {
       const code = createCode()
       const [existing] = await connection.execute<CountRow[]>(
@@ -96,8 +91,8 @@ export async function saveDefi(
       if (Number(existing[0]?.count) !== 0) continue
 
       const [result] = await connection.execute<ResultSetHeader>(
-        `INSERT INTO defis (name, defi, expires_at)
-         VALUES (?, ?, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 6 MONTH))`,
+        `INSERT INTO defis (name, defi, expires_at, last_used_at)
+         VALUES (?, ?, NULL, CURRENT_TIMESTAMP)`,
         [code, serializeDefi(definition)]
       )
       if (learnerAccountId) {
@@ -124,14 +119,19 @@ export async function saveDefi(
 export async function getDefi(code: string): Promise<DefiDefinition> {
   const database = useDatabase()
   const [rows] = await database.execute<DefiRow[]>(
-    `SELECT name, defi FROM defis
+    `SELECT id, name, defi FROM defis
      WHERE name = ?
-       AND (isANePasEffacer = 1 OR expires_at > CURRENT_TIMESTAMP)
      ORDER BY id DESC LIMIT 1`,
     [code]
   )
   const row = rows[0]
   if (!row) throw new DefiNotFoundError('Défi introuvable')
+
+  // Le chargement du lien ou du code renouvelle la date d’utilisation.
+  const [updated] = await database.execute<ResultSetHeader>(
+    'UPDATE defis SET last_used_at = CURRENT_TIMESTAMP WHERE id = ?', [row.id]
+  )
+  if (!updated.affectedRows) throw new DefiNotFoundError('Défi introuvable')
 
   try {
     const definition = parseDefiDefinition(JSON.parse(row.defi))

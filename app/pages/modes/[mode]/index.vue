@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { withDutchVariants } from '~~/shared/i18n/dutch-variants'
+
+import { localeLanguageTag } from '~~/shared/i18n/locales'
 import { MODE_LANDING_SLUGS, isModeLandingSlug, modeLandingPage } from '~~/shared/data/mode-landing-pages'
 import { modeTensePages } from '~~/shared/data/mode-tense-pages'
 
@@ -16,9 +19,9 @@ const modeNavigation = computed(() => MODE_LANDING_SLUGS.map(modeSlug => ({
   label: modeLandingPage(modeSlug, interfaceLocale.value).modeName,
   to: localePath(`/modes/${modeSlug}`),
 })))
-const navigationLabel = computed(() => ({
-  fr: 'Les modes', de: 'Die Modi', en: 'French moods', it: 'I modi', es: 'Los modos',
-}[interfaceLocale.value]))
+const navigationLabel = computed(() => (withDutchVariants({
+  fr: 'Les modes', de: 'Die Modi', en: 'French moods', it: 'I modi', es: 'Los modos', nl: "Franse wijzen",
+})[interfaceLocale.value]))
 const tenseItems = computed(() => modeTensePages(slug).map(tense => ({
   key: tense.slug,
   label: tense.label,
@@ -44,7 +47,7 @@ useHead(() => ({
       description: page.value.description,
       learningResourceType: 'Lesson',
       educationalUse: ['Instruction', 'Practice'],
-      inLanguage: interfaceLocale.value,
+      inLanguage: localeLanguageTag(interfaceLocale.value),
       teaches: `Conjugaison française : ${page.value.modeName}`,
       isAccessibleForFree: true,
     }),

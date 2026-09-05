@@ -1,3 +1,5 @@
+
+import { withDutchVariants } from '../../../shared/i18n/dutch-variants'
 import type { RowDataPacket } from 'mysql2/promise'
 import type { ExerciseQuestion } from '~~/shared/types/conjugation'
 import { normalizeLocale } from '~~/shared/i18n/locales'
@@ -86,7 +88,7 @@ export default defineEventHandler(async (event) => {
 
   const verbs = new Set<string>()
   const tenses = new Map<string, { name: string, mode?: string }>()
-  const answerSeparator = { fr: ' ou ', de: ' oder ', en: ' or ', it: ' o ', es: ' o ' }[locale]
+  const answerSeparator = withDutchVariants({ fr: ' ou ', de: ' oder ', en: ' or ', it: ' o ', es: ' o ', nl: " of ", })[locale]
   const items = [...incorrectRows, ...correctRows].flatMap((row, itemIndex) => {
     const question = questionFromJson(row.questionJson)
     if (!question) return []

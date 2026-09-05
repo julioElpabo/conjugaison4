@@ -84,7 +84,7 @@ export default defineNuxtConfig({
           file: modeTensePage.file,
         })
       }
-      const localePrefix = '/:locale(fr|de|en|it|es)'
+      const localePrefix = '/:locale(fr|de|en|it|es|nl-NL|nl)'
       const localizePage = (page: typeof pages[number]): typeof pages[number] => ({
         ...page,
         name: page.name ? `localized-${page.name}` : undefined,

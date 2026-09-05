@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { withDutchVariants } from '~~/shared/i18n/dutch-variants'
+
 import type { LearnerErrorDetail } from '~~/shared/types/conjugation'
 import { localizedLearnerErrorMessage } from '~~/shared/i18n/learner-errors'
 
@@ -9,13 +11,13 @@ const isPersonConfusion = computed(() => (
   && Boolean(props.detail.learnerValue)
   && Boolean(props.detail.expectedValue)
 ))
-const personSentence = computed(() => ({
+const personSentence = computed(() => (withDutchVariants({
   fr: { intro: 'Tu as confondu la personne.', before: 'Tu as conjugué avec', middle: 'alors que c’était' },
   de: { intro: 'Du hast die Person verwechselt.', before: 'Du hast mit', middle: 'konjugiert, erwartet war aber' },
   en: { intro: 'You confused the grammatical person.', before: 'You conjugated for', middle: 'but the expected person was' },
   it: { intro: 'Hai confuso la persona.', before: 'Hai coniugato con', middle: 'ma la persona richiesta era' },
-  es: { intro: 'Has confundido la persona.', before: 'Has conjugado con', middle: 'pero la persona esperada era' },
-})[interfaceLocale.value])
+  es: { intro: 'Has confundido la persona.', before: 'Has conjugado con', middle: 'pero la persona esperada era' }, nl: { intro: "Je hebt de grammaticale persoon verwisseld.", before: "Je hebt vervoegd voor", middle: "maar de verwachte persoon was" },
+}))[interfaceLocale.value])
 </script>
 
 <template>

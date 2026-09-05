@@ -14,18 +14,18 @@ describe('code des défis imprimés', () => {
     assert.throws(() => normalizeDefiCode('1234567'), PublicInputError)
   })
 
-  it('enregistre en base une date d’expiration à six mois', async () => {
+  it('enregistre les défis sans expiration automatique', async () => {
     const service = await read('../server/services/defis.ts')
     const migration = await read('../server/plugins/defis-expiration-migration.ts')
     const api = await read('../app/composables/useChallengeApi.ts')
     const savedChallenges = await read('../server/api/learner/saved-challenges.get.ts')
 
     assert.match(service, /expires_at/u)
-    assert.match(service, /INTERVAL 6 MONTH/u)
-    assert.match(service, /DELETE FROM defis/u)
+    assert.doesNotMatch(service, /INTERVAL 6 MONTH/u)
+    assert.doesNotMatch(service, /DELETE FROM defis/u)
     assert.match(migration, /ADD COLUMN expires_at DATETIME/u)
     assert.match(api, /savePrintedChallenge[\s\S]*'\/api\/defis'/u)
-    assert.match(savedChallenges, /d\.expires_at > CURRENT_TIMESTAMP/u)
+    assert.doesNotMatch(savedChallenges, /expires_at/u)
   })
 
   it('réutilise le code partagé et distingue chaque fiche de son corrigé', async () => {
@@ -38,10 +38,14 @@ describe('code des défis imprimés', () => {
     assert.match(workspace, /:existing-challenge-code="shareCode"/u)
     assert.match(workspace, /@challenge-code-created="shareCode = \$event"/u)
     assert.match(preview, /Code du défi/u)
-    assert.match(preview, /Le défi est enregistré pendant 6 mois/u)
+    assert.match(preview, /Le lien reste actif/u)
     assert.match(preview, /const sheetNumber = ref\(1\)/u)
     assert.match(preview, /Défi \{code\} — fiche \{number\}/u)
     assert.match(preview, /if \(questions !== previousQuestions && questions\.length > 0\) sheetNumber\.value \+= 1/u)
     assert.match(preview, /pdf\.text\(identifier, left, y - 5\)/u)
+    assert.match(preview, /link\.href = pdfPreviewUrl\.value/u)
+    assert.match(preview, /link\.download = pdfFileName\(\)/u)
+    assert.match(preview, /-fiche-\$\{sheetNumber\.value\}/u)
+    assert.match(preview, /revokePdfPreviewUrl\(\)[\s\S]*pdfPreviewTimer = setTimeout/u)
   })
 })

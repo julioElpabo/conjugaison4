@@ -1,3 +1,5 @@
+
+import { withDutchVariants } from '../i18n/dutch-variants'
 import type { AppLocale } from '../i18n/locales'
 
 export const EXERCISE_LANDING_SLUGS = ['present', 'imparfait', 'passe-compose'] as const
@@ -29,7 +31,7 @@ type LandingTranslations = Record<AppLocale, LocalizedExerciseContent>
 const pages: Record<ExerciseLandingSlug, { tenseName: string, translations: LandingTranslations }> = {
   present: {
     tenseName: 'présent',
-    translations: {
+    translations: withDutchVariants({
       fr: {
         title: 'Exercices de conjugaison au présent',
         metaTitle: 'Exercices de conjugaison au présent gratuits',
@@ -104,12 +106,26 @@ const pages: Record<ExerciseLandingSlug, { tenseName: string, translations: Land
         ctaTitle: 'Crea tu ejercicio de presente',
         ctaText: 'El presente ya está seleccionado. Elige los verbos, el número de preguntas y la forma de practicar.',
         ctaLabel: 'Empezar un ejercicio de presente',
+      }, nl: {
+        title: "Oefeningen op de Franse tegenwoordige tijd",
+        metaTitle: "Gratis oefeningen op de Franse tegenwoordige tijd",
+        description: "Oefen de Franse tegenwoordige tijd met een online oefening op maat of een afdrukbaar werkblad met oplossingen.",
+        eyebrow: "Indicatief · tegenwoordige tijd",
+        ruleTitle: "Wanneer gebruik je de tegenwoordige tijd?",
+        rule: "De tegenwoordige tijd beschrijft een handeling die nu plaatsvindt, een gewoonte of een algemene waarheid. De uitgangen hangen af van de werkwoordgroep. Sommige veelgebruikte werkwoorden hebben een onregelmatige stam.",
+        examplesTitle: "Drie voorbeelden",
+        examples: ["Je parle avec mon voisin.", "Nous finissons notre travail.", "Ils prennent le train."],
+        watchTitle: "Aandachtspunten",
+        watchItems: ["Overeenkomst met het onderwerp.", "De vaak onuitgesproken uitgangen -e, -es en -ent.", "Veelgebruikte werkwoorden zoals être, avoir, aller en faire."],
+        ctaTitle: "Stel je oefening op de tegenwoordige tijd samen",
+        ctaText: "De tegenwoordige tijd is al geselecteerd. Kies alleen nog de werkwoorden, het aantal vragen en hoe je wilt oefenen.",
+        ctaLabel: "Start een oefening op de tegenwoordige tijd",
       },
-    },
+    }),
   },
   imparfait: {
     tenseName: 'imparfait',
-    translations: {
+    translations: withDutchVariants({
       fr: {
         title: 'Exercices de conjugaison à l’imparfait',
         metaTitle: 'Exercices de conjugaison à l’imparfait gratuits',
@@ -184,12 +200,26 @@ const pages: Record<ExerciseLandingSlug, { tenseName: string, translations: Land
         ctaTitle: 'Crea tu ejercicio de imperfecto',
         ctaText: 'El imperfecto ya está seleccionado. Elige los verbos y adapta la longitud del ejercicio.',
         ctaLabel: 'Empezar un ejercicio de imperfecto',
+      }, nl: {
+        title: "Oefeningen op de Franse imparfait",
+        metaTitle: "Gratis oefeningen op de Franse imparfait",
+        description: "Oefen de Franse imparfait met een online oefening op maat of een afdrukbaar werkblad.",
+        eyebrow: "Indicatief · imparfait",
+        ruleTitle: "Hoe vorm je de imparfait?",
+        rule: "Neem meestal de nous-vorm van de tegenwoordige tijd, verwijder -ons en voeg -ais, -ais, -ait, -ions, -iez of -aient toe. Het werkwoord être gebruikt de stam ét-.",
+        examplesTitle: "Drie voorbeelden",
+        examples: ["Je regardais la montagne.", "Nous choisissions un livre.", "Vous étiez déjà là."],
+        watchTitle: "Aandachtspunten",
+        watchItems: ["De uitgangen -ais, -ait en -aient klinken hetzelfde.", "Werkwoorden op -ger behouden soms een e: je mangeais.", "Werkwoorden op -cer krijgen een cedille: je commençais."],
+        ctaTitle: "Stel je oefening op de imparfait samen",
+        ctaText: "De imparfait is al geselecteerd. Kies de werkwoorden en pas de lengte van de oefening aan.",
+        ctaLabel: "Start een oefening op de imparfait",
       },
-    },
+    }),
   },
   'passe-compose': {
     tenseName: 'passé composé',
-    translations: {
+    translations: withDutchVariants({
       fr: {
         title: 'Exercices de conjugaison au passé composé',
         metaTitle: 'Exercices de conjugaison au passé composé gratuits',
@@ -264,8 +294,22 @@ const pages: Record<ExerciseLandingSlug, { tenseName: string, translations: Land
         ctaTitle: 'Crea tu ejercicio de passé composé',
         ctaText: 'El passé composé ya está seleccionado. Elige los verbos para practicar su formación, los auxiliares y las concordancias.',
         ctaLabel: 'Empezar un ejercicio de passé composé',
+      }, nl: {
+        title: "Oefeningen op de Franse passé composé",
+        metaTitle: "Gratis oefeningen op de Franse passé composé",
+        description: "Oefen de Franse passé composé, de keuze van het hulpwerkwoord en de overeenkomst met een online of afdrukbare oefening op maat.",
+        eyebrow: "Indicatief · passé composé",
+        ruleTitle: "Hoe vorm je de passé composé?",
+        rule: "De Franse passé composé bestaat uit avoir of être in de tegenwoordige tijd en het voltooid deelwoord van het werkwoord. Met être komt het deelwoord meestal overeen met het onderwerp.",
+        examplesTitle: "Drie voorbeelden",
+        examples: ["Tu as terminé ton travail.", "Elles sont arrivées tôt.", "Nous avons pris le train."],
+        watchTitle: "Aandachtspunten",
+        watchItems: ["Kiezen tussen avoir en être.", "Voltooide deelwoorden met een onregelmatige vorm.", "Overeenkomst met être en, in sommige gevallen, met avoir."],
+        ctaTitle: "Stel je oefening op de passé composé samen",
+        ctaText: "De passé composé is al geselecteerd. Kies werkwoorden om de vorming, de hulpwerkwoorden en de overeenkomst te oefenen.",
+        ctaLabel: "Start een oefening op de passé composé",
       },
-    },
+    }),
   },
 }
 

@@ -1,7 +1,7 @@
 import { getLearnerSession } from '../../utils/learner-session'
 import { readLimitedJsonBody } from '../../utils/limited-json-body'
 
-const LOCALES = new Set(['fr', 'de', 'en', 'it', 'es'])
+const LOCALES = new Set(['fr', 'de', 'en', 'it', 'es', 'nl', 'nl-NL'])
 const THEMES = new Set(['light', 'dark'])
 
 export default defineEventHandler(async (event) => {

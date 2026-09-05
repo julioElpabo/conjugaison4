@@ -2,6 +2,8 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   localeFromPath,
+  localeLanguageTag,
+  normalizeLocale,
   localizePath,
   stripLocaleFromPath,
   SUPPORTED_LOCALES,
@@ -12,8 +14,8 @@ import { learnerErrorInsteadOf, localizedLearnerErrorMessage, localizedLearnerEr
 import { learnerAuthCopy } from '../shared/i18n/learner-auth.ts'
 import { learnerSpaceCopy, learnerSpaceText } from '../shared/i18n/learner-space.ts'
 
-test('tous les textes d’interface possèdent les quatre traductions attendues', () => {
-  assert.deepEqual(SUPPORTED_LOCALES, ['fr', 'de', 'en', 'it', 'es'])
+test('tous les textes d’interface possèdent les six traductions attendues', () => {
+  assert.deepEqual(SUPPORTED_LOCALES, ['fr', 'de', 'en', 'it', 'es', 'nl', 'nl-NL'])
   for (const [french, translations] of Object.entries(uiMessages)) {
     assert.ok(french.trim(), 'une clé française ne doit pas être vide')
     for (const locale of SUPPORTED_LOCALES.filter(locale => locale !== 'fr')) {
@@ -114,4 +116,27 @@ test('tous les onglets de mon espace disposent d’un catalogue complet dans cha
     learnerSpaceText(learnerSpaceCopy('en'), 'privacy', { username: 'Camille' }),
     /Camille/u,
   )
+})
+
+test('le néerlandais belge conserve une route nl et une balise régionale nl-BE', () => {
+  assert.equal(normalizeLocale('nl-BE'), 'nl')
+  assert.equal(normalizeLocale('NL_be'), 'nl')
+  assert.equal(localeLanguageTag('nl'), 'nl-BE')
+  assert.equal(localeLanguageTag('fr'), 'fr')
+  assert.equal(localeFromPath('/nl/my-page'), 'nl')
+  assert.equal(localizePath('/fr/defi/AB-CD-EF-23', 'nl'), '/nl/defi/AB-CD-EF-23')
+  assert.equal(localizePath('/nl/my-page', 'de'), '/de/my-page')
+  assert.equal(learnerAuthCopy('nl').create, 'Mijn account aanmaken')
+  assert.equal(translateUiMessage('nl', 'Défi {code} · Conjugaison', { code: 'AB-CD' }), 'Uitdaging AB-CD · Vervoeging')
+})
+
+test('les traductions néerlandaises conservent les paramètres des messages', () => {
+  const parameters = value => [...value.matchAll(/\{\w+\}/gu)].map(match => match[0]).sort()
+  for (const [french, translations] of Object.entries(uiMessages)) {
+    assert.deepEqual(parameters(translations.nl), parameters(translations.en), french)
+  }
+  const english = learnerSpaceCopy('en')
+  for (const [key, value] of Object.entries(learnerSpaceCopy('nl'))) {
+    assert.deepEqual(parameters(value), parameters(english[key]), key)
+  }
 })

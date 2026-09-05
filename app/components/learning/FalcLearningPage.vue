@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { withDutchVariants } from '~~/shared/i18n/dutch-variants'
+
 import type { AppLocale } from '~~/shared/i18n/locales'
 
 interface FalcLearningCopy {
@@ -16,7 +18,7 @@ interface FalcLearningCopy {
 
 const { interfaceLocale, localePath } = useLanguagePreferences()
 
-const copyByLocale = {
+const copyByLocale = withDutchVariants({
   fr: {
     title: 'Apprendre simplement',
     groupsTitle: 'Les 3 groupes de verbes',
@@ -131,8 +133,30 @@ const copyByLocale = {
     practiceTitle: '¿Quieres probar?',
     practiceText: 'Elige verbos y haz un ejercicio.',
     practiceButton: 'Hacer un ejercicio',
+  }, nl: {
+    title: "Eenvoudig leren",
+    groupsTitle: "De 3 werkwoordgroepen",
+    groupsIntro: "De groep van een werkwoord helpt je om het te vervoegen.",
+    groups: [
+      { title: "Groep 1", text: "De werkwoorden eindigen op -er. Deze werkwoorden zijn vaak makkelijk te vervoegen.", example: "parler · aimer · jouer", easy: true },
+      { title: "Groep 2", text: "De werkwoorden eindigen op -ir. Bij nous eindigen ze op -issons.", example: "finir → nous finissons" },
+      { title: "Groep 3", text: "Deze werkwoorden zijn moeilijk. Er zijn veel uitzonderingen. Vaak moet je de werkwoorden één voor één leren.", example: "aller · venir · prendre" },
+    ],
+    tensesTitle: "6 nuttige tijden",
+    tensesIntro: "Elke tijd geeft aan wanneer of hoe een handeling gebeurt.",
+    tenses: [
+      { title: "Tegenwoordige tijd", use: "Voor iets dat nu of regelmatig gebeurt.", rule: "De uitgang van het werkwoord verandert volgens de persoon.", example: "Maintenant, il mange. · Il habite dans cette maison." },
+      { title: "Passé composé", use: "Voor een voltooide handeling.", rule: "Gebruik avoir of être, gevolgd door het voltooid deelwoord.", example: "Hier, nous avons regardé un film. · Ce matin, elle est partie en vacances." },
+      { title: "Imparfait", use: "Om het verleden of een vroegere gewoonte te beschrijven.", rule: "De uitgangen zijn: -ais, -ais, -ait, -ions, -iez, -aient.", example: "Avant, je jouais ici." },
+      { title: "Futur simple", use: "Voor iets dat later zal gebeuren.", rule: "De uitgangen zijn: -ai, -as, -a, -ons, -ez, -ont.", example: "Demain, je partirai." },
+      { title: "Futur proche", use: "Voor iets dat binnenkort zal gebeuren.", rule: "Gebruik aller in de tegenwoordige tijd, gevolgd door de infinitief.", example: "Je vais manger." },
+      { title: "Impératif présent", use: "Om een bevel, advies of instructie te geven.", rule: "Gebruik tu, nous of vous. Schrijf het onderwerp niet.", example: "Ferme la porte. · Asseyez-vous." },
+    ],
+    practiceTitle: "Wil je het proberen?",
+    practiceText: "Kies enkele werkwoorden en maak een oefening.",
+    practiceButton: "Een oefening maken",
   },
-} satisfies Record<AppLocale, FalcLearningCopy>
+}) satisfies Record<AppLocale, FalcLearningCopy>
 
 const copy = computed(() => copyByLocale[interfaceLocale.value])
 </script>

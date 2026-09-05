@@ -56,7 +56,7 @@ describe('dashboard intelligent des statistiques', () => {
     assert.match(endpoint, /events\.event_name='exercise_started'/u)
     assert.match(endpoint, /events\.actor_type='anonymous'/u)
     assert.match(endpoint, /COUNT\(DISTINCT events\.session_id\)/u)
-    assert.match(endpoint, /sessions\.interface_locale IN \('fr','de','en','it','es'\)/u)
+    assert.match(endpoint, /sessions\.interface_locale IN \('fr','de','en','it','es','nl','nl-NL'\)/u)
   })
 
   it('adapte les constats à la période et évite les conclusions sur un faible volume', async () => {

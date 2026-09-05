@@ -1,3 +1,4 @@
+
 import type { RowDataPacket } from 'mysql2/promise'
 import type {
   AnalyticsActorFilter,
@@ -52,7 +53,7 @@ const labels: Record<string, string> = {
   after: 'Après', before: 'Avant', manual: 'Aide volontaire', reminder: 'Aide proposée',
   pdf: 'PDF', word: 'Word', light: 'Clair', dark: 'Sombre', true: 'Activé', false: 'Désactivé',
   quick: 'Visite rapide', complete: 'Visite complète', preset: 'Défi tout fait', code: 'Défi chargé', custom: 'Défi personnalisé',
-  fr: 'Français', de: 'Allemand', en: 'Anglais', it: 'Italien', es: 'Espagnol',
+  fr: 'Français', de: 'Allemand', en: 'Anglais', it: 'Italien', es: 'Espagnol', nl: "Néerlandais (Belgique)", 'nl-NL': "Néerlandais (Pays-Bas)",
 }
 
 const featureLabels: Record<string, string> = {

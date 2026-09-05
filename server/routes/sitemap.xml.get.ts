@@ -1,6 +1,6 @@
 import { MODE_TENSE_PATHS } from '../../shared/data/mode-tense-pages'
 import { TENSE_EXERCISE_PATHS } from '../../shared/data/tense-exercise-pages'
-import { localizePath, SUPPORTED_LOCALES, type AppLocale } from '../../shared/i18n/locales'
+import { localeLanguageTag, localizePath, SUPPORTED_LOCALES, type AppLocale } from '../../shared/i18n/locales'
 import { listPublishedChallengePublications } from '../services/challenge-publications'
 
 const PUBLIC_PATHS = [
@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
   const staticEntries = PUBLIC_PATHS.flatMap(path => SUPPORTED_LOCALES.map(locale => {
     const alternates = [
       ...SUPPORTED_LOCALES.map(alternate => (
-        `<xhtml:link rel="alternate" hreflang="${alternate}" href="${escapeXml(absoluteUrl(path, alternate))}" />`
+        `<xhtml:link rel="alternate" hreflang="${localeLanguageTag(alternate)}" href="${escapeXml(absoluteUrl(path, alternate))}" />`
       )),
       `<xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(absoluteUrl(path, 'fr'))}" />`,
     ].join('')
@@ -50,7 +50,7 @@ export default defineEventHandler(async (event) => {
       const defaultPublication = group.find(publication => publication.locale === 'fr') ?? group[0]
       if (!defaultPublication) return []
       const alternates = group.map(alternate => (
-        `<xhtml:link rel="alternate" hreflang="${alternate.locale}" href="${escapeXml(`${siteUrl}/${alternate.locale}/defis/${alternate.slug}`)}" />`
+        `<xhtml:link rel="alternate" hreflang="${localeLanguageTag(alternate.locale)}" href="${escapeXml(`${siteUrl}/${alternate.locale}/defis/${alternate.slug}`)}" />`
       )).join('') + `<xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(`${siteUrl}/${defaultPublication.locale}/defis/${defaultPublication.slug}`)}" />`
       return group.map(publication => `<url><loc>${escapeXml(`${siteUrl}/${publication.locale}/defis/${publication.slug}`)}</loc><lastmod>${escapeXml(publication.updatedAt.slice(0, 10))}</lastmod>${alternates}</url>`)
     }).join('')

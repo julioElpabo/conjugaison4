@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { withDutchVariants } from '~~/shared/i18n/dutch-variants'
+
 import { EXERCISE_LANDING_SLUGS, exerciseLandingPage } from '~~/shared/data/exercise-landing-pages'
 import { MODE_LANDING_SLUGS, modeLandingPage, type ModeLandingSlug } from '~~/shared/data/mode-landing-pages'
 import { modeTensePages } from '~~/shared/data/mode-tense-pages'
@@ -11,13 +13,13 @@ useHead(() => ({
   meta: [{ name: 'description', content: ui('Une synthèse claire des règles essentielles de la conjugaison française.') }],
 }))
 
-const modeExplorerCopy = computed(() => ({
+const modeExplorerCopy = computed(() => (withDutchVariants({
   fr: { eyebrow: 'Le sens et le temps', title: 'Comprendre les modes et choisir un temps', intro: 'Sélectionne un mode pour comprendre ce qu’il exprime. Tu verras ensuite ses exemples, les points à surveiller et uniquement les temps qui lui appartiennent.', tabsLabel: 'Choisir un mode', tenseHelp: 'Choisis ensuite un temps pour approfondir son rôle, sa formation et ses emplois.' },
   de: { eyebrow: 'Bedeutung und Zeit', title: 'Modi verstehen und eine Zeit wählen', intro: 'Wähle einen Modus, um seine Bedeutung zu verstehen. Danach siehst du Beispiele, wichtige Hinweise und nur die dazugehörigen Zeiten.', tabsLabel: 'Einen Modus wählen', tenseHelp: 'Wähle anschließend eine Zeitform, um Funktion, Bildung und Gebrauch zu vertiefen.' },
   en: { eyebrow: 'Meaning and tense', title: 'Understand moods and choose a tense', intro: 'Select a mood to understand what it expresses. You will then see examples, points to watch and only the tenses that belong to it.', tabsLabel: 'Choose a mood', tenseHelp: 'Then choose a tense to explore its role, formation and uses.' },
   it: { eyebrow: 'Significato e tempo', title: 'Capire i modi e scegliere un tempo', intro: 'Seleziona un modo per capire che cosa esprime. Vedrai poi gli esempi, i punti importanti e soltanto i tempi che gli appartengono.', tabsLabel: 'Scegliere un modo', tenseHelp: 'Scegli quindi un tempo per approfondirne ruolo, formazione e usi.' },
-  es: { eyebrow: 'Significado y tiempo', title: 'Comprender los modos y elegir un tiempo', intro: 'Selecciona un modo para comprender qué expresa. Después verás ejemplos, puntos importantes y únicamente los tiempos que le corresponden.', tabsLabel: 'Elegir un modo', tenseHelp: 'Elige después un tiempo para profundizar en su función, formación y usos.' },
-}[interfaceLocale.value]))
+  es: { eyebrow: 'Significado y tiempo', title: 'Comprender los modos y elegir un tiempo', intro: 'Selecciona un modo para comprender qué expresa. Después verás ejemplos, puntos importantes y únicamente los tiempos que le corresponden.', tabsLabel: 'Elegir un modo', tenseHelp: 'Elige después un tiempo para profundizar en su función, formación y usos.' }, nl: { eyebrow: "Betekenis en tijd", title: "De wijzen begrijpen en een tijd kiezen", intro: "Kies een wijs om te begrijpen wat die uitdrukt. Je ziet daarna voorbeelden, aandachtspunten en alleen de tijden die bij die wijs horen.", tabsLabel: "Kies een wijs", tenseHelp: "Kies daarna een tijd om de functie, vorming en het gebruik ervan te ontdekken." },
+})[interfaceLocale.value]))
 const sections = computed(() => [
   { id: 'modes', number: '01', title: modeExplorerCopy.value.title, description: modeExplorerCopy.value.tabsLabel },
   { id: 'bases', number: '02', title: ui('Comprendre le verbe'), description: ui('Radical, terminaison, groupes et auxiliaires.') },

@@ -3,6 +3,7 @@ import { PublicInputError } from '../../services/public-api-validation'
 import { assertPublicApiRateLimit, PUBLIC_RATE_LIMITS } from '../../services/public-api-rate-limit'
 
 export default defineEventHandler(async (event) => {
+  setResponseHeader(event, 'Cache-Control', 'no-store')
   await assertPublicApiRateLimit(event, PUBLIC_RATE_LIMITS.challengeRead)
   let code: string
   try {

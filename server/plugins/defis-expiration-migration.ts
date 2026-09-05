@@ -20,14 +20,7 @@ export default defineNitroPlugin(async () => {
       ADD COLUMN expires_at DATETIME NULL AFTER modified,
       ADD INDEX idx_defis_expiration (expires_at)
     `)
-    await database.query(`
-      UPDATE defis
-      SET expires_at = CASE
-        WHEN isANePasEffacer = 1 THEN NULL
-        ELSE DATE_ADD(created, INTERVAL 6 MONTH)
-      END
-    `)
-    console.info('[database] Expiration à six mois ajoutée aux défis enregistrés.')
+    console.info('[database] Colonne historique expires_at ajoutée aux défis, sans expiration automatique.')
   } catch (error) {
     console.error('[database] Échec de la migration automatique de l’expiration des défis.', error)
   }

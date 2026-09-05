@@ -1,4 +1,5 @@
 import { rename, writeFile } from 'node:fs/promises'
+import { dutchChallengePublication } from '../shared/data/challenge-publication-nl.ts'
 import { challengePresetDefinitions } from '../shared/data/challenge-presets.ts'
 
 const outputPath = 'shared/data/challenge-publication-deployment.json'
@@ -6,6 +7,11 @@ const temporaryPath = `${outputPath}.tmp`
 const locales = ['fr', 'de', 'en', 'it', 'es']
 
 const wrappers = {
+  nl: {
+    title: topic => `Franse vervoegingsoefening: ${topic}`,
+    meta: topic => `Franse vervoeging oefenen: ${topic}`,
+    metaDescription: topic => `Franse vervoegingsoefeningen over ${topic}. Kies de werkwoorden en tijden die je wilt oefenen.`,
+  },
   fr: {
     title: topic => `Exercice de conjugaison : ${topic}`,
     meta: topic => `Exercice de conjugaison sur ${topic}`,
@@ -34,6 +40,11 @@ const wrappers = {
 }
 
 const fleWrappers = {
+  nl: {
+    title: topic => `Franse vervoegingsoefening voor anderstaligen: ${topic}`,
+    meta: topic => `Frans als vreemde taal: ${topic}`,
+    metaDescription: topic => `Interactieve Franse vervoegingsoefening (FLE): ${topic}. Kies de werkwoorden en tijden die je nodig hebt.`,
+  },
   fr: {
     title: topic => `Exercice de conjugaison FLE : ${topic}`,
     meta: topic => `Conjugaison FLE : exercice sur ${topic}`,
@@ -306,12 +317,14 @@ function specification(definition) {
 }
 
 const publications = []
-for (const definition of challengePresetDefinitions) {
+// Le défi ultime ne possède pas de page éditoriale publiée.
+for (const definition of challengePresetDefinitions.filter(item => item.group !== 'ultimate')) {
   const translations = specification(definition)
-  for (const locale of locales) {
+  for (const locale of [...locales, 'nl', 'nl-NL']) {
     const isFle = definition.group === 'cif'
-    const copy = isFle ? fleWrappers[locale] : wrappers[locale]
-    const { topic, description } = translations[locale]
+    const copyLocale = locale === 'nl-NL' ? 'nl' : locale
+    const copy = isFle ? fleWrappers[copyLocale] : wrappers[copyLocale]
+    const { topic, description } = locale.startsWith('nl') ? dutchChallengePublication(definition) : translations[locale]
     const entry = {
       presetKey: definition.id,
       locale,
@@ -322,7 +335,7 @@ for (const definition of challengePresetDefinitions) {
       metaDescription: copy.metaDescription(topic),
       isPublished: true,
       isIndexable: true,
-      overwriteExisting: isFle,
+      overwriteExisting: false,
     }
     if (entry.slug.length > 120 || entry.title.length > 180 || entry.metaTitle.length > 180 || entry.metaDescription.length > 160) {
       throw new Error(`Contenu trop long pour ${definition.id}:${locale}.`)
@@ -340,7 +353,7 @@ for (const publication of publications) {
 
 const batch = {
   schemaVersion: 1,
-  batchId: 'challenge-publications-fle-20260818-003',
+  batchId: 'challenge-publications-dutch-variants-20260905-001',
   publications,
 }
 

@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { withDutchVariants } from '~~/shared/i18n/dutch-variants'
+
 import type { AppLocale } from '~~/shared/i18n/locales'
 
 const { interfaceLocale, setInterfaceLocale } = useLanguagePreferences()
 const { consent, preferencesOpen, choose } = useAnalyticsConsent()
 const declineButton = ref<HTMLButtonElement | null>(null)
 
-const copy: Record<AppLocale, { title: string, body: string, decline: string, accept: string }> = {
+const copy: Record<AppLocale, { title: string, body: string, decline: string, accept: string }> = withDutchVariants({
   fr: {
     title: 'Aidez-nous à améliorer le site',
     body: 'Ce site est entièrement non commercial. Avec votre accord, il utilise des données anonymes uniquement pour comprendre sa fréquentation et améliorer son fonctionnement. Aucune donnée n’est vendue.',
@@ -35,8 +37,13 @@ const copy: Record<AppLocale, { title: string, body: string, decline: string, ac
     body: 'Este sitio no tiene ningún fin comercial. Con tu consentimiento, utiliza datos anónimos únicamente para conocer su afluencia y mejorar su funcionamiento. No se vende ningún dato.',
     decline: 'No, gracias',
     accept: 'Aceptar',
+  }, nl: {
+    title: "Help ons de website te verbeteren",
+    body: "Deze website is volledig niet-commercieel. Met jouw toestemming gebruikt hij anonieme gegevens, alleen om het aantal bezoeken te begrijpen en de werking te verbeteren. Er worden geen gegevens verkocht.",
+    decline: "Nee, bedankt",
+    accept: "Accepteren",
   },
-}
+})
 const text = computed(() => copy[interfaceLocale.value])
 const languages: Array<{ locale: AppLocale, flag: string, label: string }> = [
   { locale: 'fr', flag: '🇫🇷', label: 'Français' },
@@ -44,6 +51,8 @@ const languages: Array<{ locale: AppLocale, flag: string, label: string }> = [
   { locale: 'en', flag: '🇬🇧', label: 'English' },
   { locale: 'it', flag: '🇮🇹', label: 'Italiano' },
   { locale: 'es', flag: '🇪🇸', label: 'Español' },
+  { locale: 'nl-NL', flag: '🇳🇱', label: 'Nederlands (Nederland)' },
+  { locale: 'nl', flag: '🇧🇪', label: 'Nederlands (België)' },
 ]
 const visible = computed(() => consent.value === null || preferencesOpen.value)
 

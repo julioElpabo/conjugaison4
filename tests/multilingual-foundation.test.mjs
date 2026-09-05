@@ -11,7 +11,8 @@ describe('fondation multilingue', () => {
   it('normalise les locales prises en charge', () => {
     assert.equal(normalizeLocale('de-CH'), 'de')
     assert.equal(normalizeLocale('EN_us'), 'en')
-    assert.equal(normalizeLocale('nl'), 'fr')
+    assert.equal(normalizeLocale('nl-BE'), 'nl')
+    assert.equal(normalizeLocale('pt'), 'fr')
   })
 
   it('conserve le français en repli et traduit les messages communs', () => {

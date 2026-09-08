@@ -47,7 +47,7 @@ const emit = defineEmits<{
 const complementsOpen = ref(Boolean(props.gridLayout))
 const selectedComplementVerbs = computed(() => (props.complementVerbs ?? []).filter(verb => Boolean(verb.complementExample)))
 const complementsAvailable = computed(() => (
-  props.exerciseKind === 'conjugation'
+  ['conjugation', 'mixed'].includes(props.exerciseKind)
   && props.voiceMode !== 'passive'
   && selectedComplementVerbs.value.length > 0
 ))
@@ -338,7 +338,7 @@ watch(passiveAvailable, (available) => {
 
         <fieldset v-if="!falcMode" class="option-fieldset option-group-card option-group-card--exercise">
           <legend>{{ ui('Type d’exercice') }}</legend>
-          <div class="segmented-control">
+          <div class="segmented-control segmented-control--exercise-kinds">
             <label>
               <input
                 type="radio"
@@ -359,11 +359,16 @@ watch(passiveAvailable, (available) => {
               >
               <span>{{ ui('Trouver le mode et le temps') }}</span>
             </label>
+            <label>
+              <input type="radio" :name="exerciseKindName" value="mixed"
+                :checked="exerciseKind === 'mixed'" @change="onExerciseKindChange">
+              <span>{{ ui('Un mélange des deux') }}</span>
+            </label>
           </div>
 
           <Transition name="identification-options">
             <div
-              v-if="exerciseKind === 'tense-identification'"
+              v-if="exerciseKind === 'tense-identification' || exerciseKind === 'mixed'"
               class="identification-source-panel"
             >
               <div class="segmented-control segmented-control--stacked">
@@ -401,8 +406,8 @@ watch(passiveAvailable, (available) => {
         <fieldset
           v-if="!falcMode"
           class="option-fieldset option-group-card option-group-card--voice voice-mode-fieldset"
-          :class="{ 'option-group-card--disabled': exerciseKind !== 'conjugation' }"
-          :disabled="exerciseKind !== 'conjugation'"
+          :class="{ 'option-group-card--disabled': !['conjugation', 'mixed'].includes(exerciseKind) }"
+          :disabled="!['conjugation', 'mixed'].includes(exerciseKind)"
         >
           <legend>{{ ui('Voix du verbe') }}</legend>
           <div class="segmented-control segmented-control--stacked">
@@ -473,7 +478,7 @@ watch(passiveAvailable, (available) => {
         <span aria-hidden="true">{{ complementsOpen ? '−' : '+' }}</span>
       </button>
       <p v-if="!complementsAvailable" class="complement-options__unavailable">
-        {{ exerciseKind !== 'conjugation'
+        {{ !['conjugation', 'mixed'].includes(exerciseKind)
           ? ui('Disponible uniquement pour un exercice de conjugaison.')
           : voiceMode === 'passive'
             ? ui('Au passif, le COD devient le sujet : ces options ne s’appliquent pas.')
@@ -643,6 +648,8 @@ watch(passiveAvailable, (available) => {
 .identification-options-leave-active { max-height: 240px; transition: max-height 260ms ease, opacity 210ms ease, transform 210ms ease, margin-top 260ms ease, padding-top 260ms ease; }
 .identification-options-enter-from,
 .identification-options-leave-to { max-height: 0; margin-top: 0; padding-top: 0; opacity: 0; transform: translateY(-8px); }
+.segmented-control--exercise-kinds { grid-template-columns: .85fr 1.35fr; }
+.segmented-control--exercise-kinds label:last-child { grid-column: 1 / -1; }
 .segmented-control--stacked { padding: 7px; grid-template-columns: 1fr; gap: 9px; background: #e7efec; }
 .segmented-control--stacked label > span { position: relative; min-height: 62px; padding: 10px 13px 10px 46px; align-content: center; justify-items: start; gap: 2px; background: #f8fbfa; border: 2px solid #b7c9c3; box-shadow: 0 2px 5px rgb(46 67 62 / 8%); text-align: left; transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease, background 150ms ease; }
 .segmented-control--stacked label > span::before { position: absolute; left: 15px; top: 50%; width: 18px; height: 18px; content: ''; border: 2px solid #78918a; border-radius: 50%; background: white; box-shadow: inset 0 0 0 4px white; transform: translateY(-50%); }

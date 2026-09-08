@@ -2492,12 +2492,21 @@ body.dialog-open {
   background: #fff1ad;
 }
 
+.results-table .result-question-column { vertical-align: middle; }
+.result-question-cell { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.result-question-content { min-width: 0; overflow-wrap: anywhere; }
+
 .result-consult-verb {
   display: inline-flex;
   font-family: inherit;
   cursor: pointer;
-  margin-top: 10px;
-  padding: 7px 10px;
+  flex: 0 0 auto;
+  margin: 0;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+  padding: 6px 10px;
   border: 1px solid var(--brand);
   border-radius: 9px;
   color: white;

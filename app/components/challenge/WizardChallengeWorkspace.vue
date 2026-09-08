@@ -1526,6 +1526,7 @@ async function refreshConjugationExample() {
       && Boolean(exampleComplementOption)
     const exampleConfig = {
       ...challenge.value,
+      exerciseKind: challenge.value.exerciseKind === 'mixed' ? 'conjugation' as const : challenge.value.exerciseKind,
       questionCount: 50,
       inclusivePronouns: false,
       includeOnPronoun: false,
@@ -1606,7 +1607,7 @@ async function refreshConjugationExample() {
         ? `${example.temps} (${example.mode})`
         : ''
       conjugationQuestionContextRaw.value = example
-        ? (challenge.value.exerciseKind === 'conjugation'
+        ? ((example.exerciseKind || exampleConfig.exerciseKind) === 'conjugation'
             ? [subject, example.infinitif, modeAndTense].filter(Boolean).join(' | ')
             : '')
         : ''

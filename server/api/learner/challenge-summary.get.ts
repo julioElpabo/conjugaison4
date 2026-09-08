@@ -31,7 +31,7 @@ function questionFromJson(source: string) {
 function exerciseKindFromJson(source: string) {
   try {
     const config = JSON.parse(source) as { exerciseKind?: unknown }
-    return config.exerciseKind === 'tense-identification' || config.exerciseKind === 'mode-identification'
+    return config.exerciseKind === 'tense-identification' || config.exerciseKind === 'mode-identification' || config.exerciseKind === 'mixed'
       ? config.exerciseKind
       : 'conjugation'
   }
@@ -59,7 +59,6 @@ export default defineEventHandler(async (event) => {
   `, [runId, learner.id])
   if (!run) throw createError({ statusCode: 404, statusMessage: 'Séance introuvable' })
   const exerciseKind = exerciseKindFromJson(run.challengeConfigJson)
-  const isIdentificationExercise = exerciseKind === 'tense-identification' || exerciseKind === 'mode-identification'
 
   const [incorrectRows] = await database.execute<FormRow[]>(`
     SELECT a.question_index AS questionIndex,
@@ -92,6 +91,8 @@ export default defineEventHandler(async (event) => {
   const items = [...incorrectRows, ...correctRows].flatMap((row, itemIndex) => {
     const question = questionFromJson(row.questionJson)
     if (!question) return []
+    const kind = question.exerciseKind || exerciseKind
+    const isIdentificationExercise = kind === 'tense-identification' || kind === 'mode-identification'
     if (question.infinitif) verbs.add(question.infinitif)
     if (question.temps) {
       const key = `${question.mode || ''}\u0000${question.temps}`

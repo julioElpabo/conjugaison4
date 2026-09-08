@@ -164,8 +164,9 @@ function parseExerciseKind(value: unknown): ExerciseKind {
   if (value === 'tense-identification' || value === 'temps-mode') {
     return 'tense-identification'
   }
+  if (value === 'mixed') return 'mixed'
   if (value === 'mode-identification') return 'mode-identification'
-  throw new PublicInputError('exerciseKind doit valoir conjugation, tense-identification ou mode-identification')
+  throw new PublicInputError('exerciseKind doit valoir conjugation, tense-identification, mode-identification ou mixed')
 }
 
 function parseIdentificationSource(value: unknown) {

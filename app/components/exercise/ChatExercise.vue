@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { subjunctiveIdentificationExample } from '~~/shared/utils/identification-ambiguity'
 import type { Component, ShallowRef } from 'vue'
 const { interfaceLocale, ui, uiLabel } = useLanguagePreferences()
 import { faArrowUpFromBracket, faBullhorn, faPrint, faSpinner, faStop, faVolume } from '@fortawesome/free-solid-svg-icons'
@@ -93,7 +94,7 @@ function changeCoachFromHelp(coach: CoachProfile) {
   track('coach_selected', { coach: coach.id, previousCoach: props.coach.id, source: 'help_recommendation' })
   emit('changeCoach', coach)
 }
-const activeExerciseKind = computed(() => props.exerciseKind || props.trackingContext?.challenge.exerciseKind)
+const activeExerciseKind = computed(() => currentQuestion.value?.exerciseKind || props.exerciseKind || props.trackingContext?.challenge.exerciseKind)
 const isModeIdentificationExercise = computed(() => activeExerciseKind.value === 'mode-identification')
 const isIdentificationExercise = computed(() => (
   activeExerciseKind.value === 'tense-identification' || isModeIdentificationExercise.value
@@ -339,7 +340,7 @@ const attemptSummaries = computed(() => attempts.value.map((attempt, index) => {
     attemptNumber: attempt.attemptNumber,
     verbId: attempt.question.verbeId,
     verbLabel: attempt.question.infinitif,
-    identificationForm: isIdentificationExercise.value && attempt.status === 'incorrect'
+    identificationForm: (attempt.question.exerciseKind ? attempt.question.exerciseKind !== 'conjugation' : isIdentificationExercise.value) && attempt.status === 'incorrect'
       ? identificationFormParts(attempt.question)
       : null,
     literaryCitation: attempt.question.literaryCitation,
@@ -1351,6 +1352,13 @@ async function submit() {
       const isIncorrectReaction = step.eventType === 'incorrect' || step.eventType === 'cod-before'
         || step.eventType === 'cod-after' || step.eventType === 'coi'
       const isCorrectReaction = step.eventType === 'correct' || step.eventType === 'correct-alternative' || step.eventType === 'streak'
+      const ambiguityExample = isIncorrectReaction && isIdentificationExercise.value
+        ? subjunctiveIdentificationExample(question, candidate)
+        : null
+      if (ambiguityExample) {
+        await addCoachText(ui('Cette forme est aussi possible au subjonctif, mais elle est très souvent précédée de « que » ou « qu’ » : « {example} ». Ici, sans ce contexte, on attend l’indicatif.', { example: ambiguityExample }))
+        continue
+      }
       const reactionContext = contextFor(question)
       const correctionText = isIncorrectReaction && reactionContext.expectedAnswer
         ? ui('La bonne réponse est « {expectedAnswer} ».', { expectedAnswer: reactionContext.expectedAnswer })
@@ -1855,10 +1863,20 @@ onBeforeUnmount(() => {
               >
                 <span class="chat-summary-list__status" aria-hidden="true">{{ item.answerWasHeard ? '🔊' : item.status === 'correct' ? '✓' : '×' }}</span>
                 <div>
+                  <div class="chat-summary-question-row">
                   <strong class="chat-summary-list__question">
                     <span>{{ ui('Question') }} {{ item.index }}</span>
                     <span>{{ item.questionLabel }}</span>
                   </strong>
+                  <button
+                    v-if="item.verbId"
+                    type="button"
+                    class="chat-summary-consult-link"
+                    @click.stop="openVerbConsultation(item.verbId)"
+                  >
+                    {{ ui('Consulter') }}
+                  </button>
+                  </div>
                   <blockquote v-if="item.identificationForm" class="chat-summary-list__citation">
                     <p>
                       <span>{{ item.identificationForm.before }}</span><mark>{{ item.identificationForm.target }}</mark><span>{{ item.identificationForm.after }}</span>
@@ -1882,14 +1900,7 @@ onBeforeUnmount(() => {
                       <dd>{{ item.expectedAnswer }}</dd>
                     </div>
                   </dl>
-                  <button
-                    v-if="item.verbId"
-                    type="button"
-                    class="chat-summary-consult-link"
-                    @click.stop="openVerbConsultation(item.verbId)"
-                  >
-                    {{ ui('Consulter le verbe') }}
-                  </button>
+
                 </div>
               </li>
             </ol>
@@ -3250,7 +3261,8 @@ onBeforeUnmount(() => {
   font-weight: 850;
   overflow-wrap: anywhere;
 }
-.chat-summary-consult-link { color: white; }
+.chat-summary-question-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.chat-summary-consult-link { flex: 0 0 auto; color: white; margin: 0; padding: 6px 10px; min-height: 32px; font-size: .8rem; line-height: 1.2; border-radius: 8px; white-space: nowrap; }
 
 .chat-summary-tool > footer {
   display: flex;

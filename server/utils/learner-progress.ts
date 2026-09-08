@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import type { ExerciseQuestion, LearnerChallengeSnapshot } from '~~/shared/types/conjugation'
+import type { ExerciseKind, ExerciseQuestion, LearnerChallengeSnapshot } from '~~/shared/types/conjugation'
 
 const SAFE_IDENTIFIER = /^[A-Za-z0-9_-]{8,100}$/u
 const SAFE_FINGERPRINT = /^[a-f0-9]{64}$/u
@@ -31,6 +31,7 @@ export function learnerChallengeSnapshot(value: unknown): LearnerChallengeSnapsh
   const candidate = value as Record<string, unknown>
   const exerciseKind = candidate.exerciseKind === 'tense-identification'
     || candidate.exerciseKind === 'mode-identification'
+    || candidate.exerciseKind === 'mixed'
     ? candidate.exerciseKind
     : 'conjugation'
   const questionCount = Math.min(200, Math.max(1, Number(candidate.questionCount) || 1))
@@ -152,6 +153,9 @@ export function learnerQuestionSnapshot(value: unknown): ExerciseQuestion {
     : null
   const citationTarget = shortText(citation?.target, 200)
   return {
+    ...(['conjugation', 'tense-identification', 'mode-identification'].includes(String(question.exerciseKind))
+      ? { exerciseKind: question.exerciseKind as Exclude<ExerciseKind, 'mixed'> }
+      : {}),
     titre: shortText(question.titre, 300),
     instruction: shortText(question.instruction, 300) || undefined,
     consigne: shortText(question.consigne, 500),
@@ -215,7 +219,7 @@ export function learnerQuestionSnapshot(value: unknown): ExerciseQuestion {
 
 export function learnerFormKey(question: ExerciseQuestion, exerciseKind: string) {
   const source = [
-    exerciseKind,
+    question.exerciseKind || exerciseKind,
     question.verbeId || question.infinitif || '',
     question.tenseId || question.temps || '',
     question.personId || question.pronom || question.saisiePrefixe || '',

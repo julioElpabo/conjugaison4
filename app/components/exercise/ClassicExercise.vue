@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { subjunctiveIdentificationExample } from '~~/shared/utils/identification-ambiguity'
 import type { Component, ShallowRef } from 'vue'
 import { faArrowUpFromBracket, faCirclePlay, faPrint, faSpinner, faStop, faVolume } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
@@ -113,17 +114,18 @@ const falcQuestionPrompt = computed(() => {
   return [question.pronom, question.infinitif, tenseAndMode].filter(Boolean).join(' | ')
 })
 const currentSubjectMustBeTyped = computed(() => Boolean(
-  currentQuestion.value && props.exerciseKind === 'conjugation'
+  currentQuestion.value && activeExerciseKind.value === 'conjugation'
   && conjugationRequiresSubjectPronoun(currentQuestion.value),
 ))
 const currentAnswerPlaceholder = computed(() => currentQuestion.value
   ? conjugationAnswerPlaceholder(currentQuestion.value)
   : '')
-const providedAnswerPrefix = computed(() => currentQuestion.value && props.exerciseKind === 'conjugation'
+const providedAnswerPrefix = computed(() => currentQuestion.value && activeExerciseKind.value === 'conjugation'
   ? providedSubjunctiveInputPrefix(currentQuestion.value)
   : '')
-const isModeIdentificationExercise = computed(() => props.exerciseKind === 'mode-identification')
-const isTenseIdentificationExercise = computed(() => props.exerciseKind === 'tense-identification')
+const activeExerciseKind = computed(() => currentQuestion.value?.exerciseKind || props.exerciseKind)
+const isModeIdentificationExercise = computed(() => activeExerciseKind.value === 'mode-identification')
+const isTenseIdentificationExercise = computed(() => activeExerciseKind.value === 'tense-identification')
 const isIdentificationExercise = computed(() => isModeIdentificationExercise.value || isTenseIdentificationExercise.value)
 const currentIdentificationFormParts = computed(() => currentQuestion.value && isIdentificationExercise.value
   ? identificationFormParts(currentQuestion.value)
@@ -260,7 +262,14 @@ const auxiliaryErrorText = computed(() => {
     },
   )
 })
+const identificationAmbiguityMessage = computed(() => {
+  const example = currentQuestion.value && isIdentificationExercise.value
+    ? subjunctiveIdentificationExample(currentQuestion.value, lastIncorrectIdentificationAnswer.value)
+    : null
+  return example ? ui('Cette forme est aussi possible au subjonctif, mais elle est très souvent précédée de « que » ou « qu’ » : « {example} ». Ici, sans ce contexte, on attend l’indicatif.', { example }) : ''
+})
 const identificationChoiceHelpMessages = computed(() => {
+  if (identificationAmbiguityMessage.value) return []
   const question = currentQuestion.value
   const submittedAnswer = normalizedGrammarChoice(lastIncorrectIdentificationAnswer.value)
   if (!isIdentificationExercise.value || !question || !submittedAnswer) return []
@@ -344,7 +353,7 @@ const summaryItems = computed(() => attempts.value.map((attempt, index) => ({
   attemptNumber: attempt.attemptNumber,
 })))
 const incorrectSummaryForms = computed(() => attempts.value.map(attempt => (
-  isIdentificationExercise.value && attempt.status === 'incorrect'
+  (attempt.question.exerciseKind ? attempt.question.exerciseKind !== 'conjugation' : isIdentificationExercise.value) && attempt.status === 'incorrect'
     ? identificationFormParts(attempt.question)
     : null
 )))
@@ -774,10 +783,10 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="!isFinished && currentQuestion" class="exercise-question">
-          <p v-if="exerciseKind === 'tense-identification' || exerciseKind === 'mode-identification'" class="question-instruction">
+          <p v-if="activeExerciseKind === 'tense-identification' || activeExerciseKind === 'mode-identification'" class="question-instruction">
             {{ currentQuestion.instruction }}
           </p>
-          <template v-if="falcMode && exerciseKind === 'conjugation'">
+          <template v-if="falcMode && activeExerciseKind === 'conjugation'">
             <p class="falc-question-prompt">{{ falcQuestionPrompt }}</p>
             <form class="falc-answer-form" @submit.prevent="feedback === 'idle' ? submitAnswer() : nextQuestion()">
               <div class="prefixed-answer-control" :class="{ 'has-prefix': providedAnswerPrefix }">
@@ -802,7 +811,7 @@ onBeforeUnmount(() => {
               </button>
             </form>
           </template>
-          <template v-else-if="exerciseKind === 'conjugation' && currentQuestion.complement">
+          <template v-else-if="activeExerciseKind === 'conjugation' && currentQuestion.complement">
             <p class="question-context" :aria-label="ui('Contexte grammatical')">
               <span>Verbe : <strong>{{ currentQuestion.infinitif }}</strong></span>
               <i aria-hidden="true">|</i>
@@ -860,7 +869,7 @@ onBeforeUnmount(() => {
             <div v-if="retryMessageVisible" id="answer-retry" class="answer-retry" role="status" aria-live="polite">
               <span class="answer-retry__icon" aria-hidden="true">↻</span>
               <div>
-                <strong>{{ ui('Pas encore. Essaie une deuxième fois.') }}</strong>
+                <strong>{{ identificationAmbiguityMessage || ui('Pas encore. Essaie une deuxième fois.') }}</strong>
               </div>
             </div>
             <aside v-if="retryMessageVisible && retryGuidanceMessages.length" class="answer-retry-hint">
@@ -883,7 +892,7 @@ onBeforeUnmount(() => {
           </div>
           <p v-else class="question-text">{{ currentQuestion.consigne }}</p>
           <button
-            v-if="exerciseKind === 'conjugation' && currentQuestion.speech?.questionToken"
+            v-if="activeExerciseKind === 'conjugation' && currentQuestion.speech?.questionToken"
             class="question-speech-button"
             type="button"
             :disabled="audioLoadingKey === 'question'"
@@ -942,7 +951,7 @@ onBeforeUnmount(() => {
           </div>
 
           <form
-            v-if="!falcMode && !(exerciseKind === 'conjugation' && currentQuestion.complement)"
+            v-if="!falcMode && !(activeExerciseKind === 'conjugation' && currentQuestion.complement)"
             class="answer-form"
             :class="{ 'is-awaiting-retry': retryMessageVisible || missingPronounMessageVisible }"
             @submit.prevent="feedback === 'idle' ? submitAnswer() : nextQuestion()"
@@ -974,7 +983,7 @@ onBeforeUnmount(() => {
               </button>
             </div>
           </form>
-          <div v-if="exerciseKind === 'conjugation' && currentQuestion.speech?.answerToken" class="answer-listen-row">
+          <div v-if="activeExerciseKind === 'conjugation' && currentQuestion.speech?.answerToken" class="answer-listen-row">
             <span>{{ ui('Entendre la réponse') }}</span>
             <button
               type="button"
@@ -994,7 +1003,7 @@ onBeforeUnmount(() => {
           </div>
           <p v-if="audioError" class="audio-error" role="status">{{ audioError }}</p>
           <div
-            v-if="missingPronounMessageVisible && !(exerciseKind === 'conjugation' && currentQuestion.complement)"
+            v-if="missingPronounMessageVisible && !(activeExerciseKind === 'conjugation' && currentQuestion.complement)"
             id="answer-missing-pronoun"
             class="answer-retry answer-retry--missing-pronoun"
             role="status"
@@ -1004,7 +1013,7 @@ onBeforeUnmount(() => {
             <div><strong>{{ ui('Il manque le pronom') }}</strong></div>
           </div>
           <div
-            v-if="retryMessageVisible && !(exerciseKind === 'conjugation' && currentQuestion.complement)"
+            v-if="retryMessageVisible && !(activeExerciseKind === 'conjugation' && currentQuestion.complement)"
             id="answer-retry"
             class="answer-retry"
             role="status"
@@ -1012,18 +1021,18 @@ onBeforeUnmount(() => {
           >
             <span class="answer-retry__icon" aria-hidden="true">↻</span>
             <div>
-              <strong>{{ ui('Pas encore. Essaie une deuxième fois.') }}</strong>
+              <strong>{{ identificationAmbiguityMessage || ui('Pas encore. Essaie une deuxième fois.') }}</strong>
             </div>
           </div>
           <aside
-            v-if="retryMessageVisible && retryGuidanceMessages.length && !(exerciseKind === 'conjugation' && currentQuestion.complement)"
+            v-if="retryMessageVisible && retryGuidanceMessages.length && !(activeExerciseKind === 'conjugation' && currentQuestion.complement)"
             class="answer-retry-hint"
           >
             <strong>{{ ui('Un indice pour t’aider') }}</strong>
             <p v-for="message in retryGuidanceMessages" :key="message">{{ message }}</p>
           </aside>
           <LearnerErrorFeedback
-            v-if="retryMessageVisible && detectedErrorDetails.length && !(exerciseKind === 'conjugation' && currentQuestion.complement)"
+            v-if="retryMessageVisible && detectedErrorDetails.length && !(activeExerciseKind === 'conjugation' && currentQuestion.complement)"
             :details="detectedErrorDetails"
           />
           <div
@@ -1099,29 +1108,33 @@ onBeforeUnmount(() => {
               </thead>
               <tbody>
                 <tr v-for="(attempt, index) in attempts" :key="index">
-                  <td>
-                    <blockquote v-if="incorrectSummaryForms[index]" class="result-identification-citation">
-                      <p>
-                        <span>{{ incorrectSummaryForms[index]?.before }}</span><mark>{{ incorrectSummaryForms[index]?.target }}</mark><span>{{ incorrectSummaryForms[index]?.after }}</span>
-                      </p>
-                      <footer v-if="attempt.question.literaryCitation">
-                        {{ attempt.question.literaryCitation.author }}, <cite>{{ attempt.question.literaryCitation.work }}</cite>
-                      </footer>
-                    </blockquote>
-                    <span v-else>{{ attempt.question.consigne }}</span>
-                    <LearnerErrorFeedback
-                      v-if="attempt.errorDetails?.length"
-                      :details="attempt.errorDetails"
-                      compact
-                    />
-                    <button
-                      v-if="attempt.question.verbeId"
-                      type="button"
-                      class="result-consult-verb"
-                      @click="openVerbConsultation(attempt.question.verbeId)"
-                    >
-                      {{ ui('Consulter le verbe') }}
-                    </button>
+                  <td class="result-question-column">
+                    <div class="result-question-cell">
+                      <div class="result-question-content">
+                        <blockquote v-if="incorrectSummaryForms[index]" class="result-identification-citation">
+                          <p>
+                            <span>{{ incorrectSummaryForms[index]?.before }}</span><mark>{{ incorrectSummaryForms[index]?.target }}</mark><span>{{ incorrectSummaryForms[index]?.after }}</span>
+                          </p>
+                          <footer v-if="attempt.question.literaryCitation">
+                            {{ attempt.question.literaryCitation.author }}, <cite>{{ attempt.question.literaryCitation.work }}</cite>
+                          </footer>
+                        </blockquote>
+                        <span v-else>{{ attempt.question.consigne }}</span>
+                        <LearnerErrorFeedback
+                          v-if="attempt.errorDetails?.length"
+                          :details="attempt.errorDetails"
+                          compact
+                        />
+                      </div>
+                      <button
+                        v-if="attempt.question.verbeId"
+                        type="button"
+                        class="result-consult-verb"
+                        @click="openVerbConsultation(attempt.question.verbeId)"
+                      >
+                        {{ ui('Consulter') }}
+                      </button>
+                    </div>
                   </td>
                   <td>{{ attempt.answer }}</td>
                   <td>

@@ -354,7 +354,7 @@ export function formatConjugationQuestion(
     ? `${normalized(row.mode_name) === 'impératif'
       ? ''
       : `${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif)} `}… ${row.complement_phrase} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
-    : `${pronoun} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
+    : `${normalized(row.mode_name) === 'subjonctif' ? `${startsWithVowel(pronoun) ? "qu'" : 'que '}${pronoun}` : pronoun} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`
   const displayedComplement = row.complement_position === 'before'
     ? anteposedComplement?.antecedent
     : row.complement_phrase

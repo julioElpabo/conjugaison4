@@ -70,7 +70,7 @@
     "test:conjugations": "node --env-file-if-exists=.env --import tsx --test tests/*conjugation*.test.mjs",
     "test:help:condensed": "node scripts/run-condensed-help-tests.mjs",
     "test:help:complete": "node scripts/run-complete-help-tests.mjs",
-    "typecheck": "nuxt typecheck",
+    "typecheck": "node scripts/typecheck.mjs",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {

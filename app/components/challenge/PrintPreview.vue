@@ -924,11 +924,12 @@ async function downloadWord() {
         new TextRun({ children: [new Tab()], size: wordSecondarySize, font: 'Arial' }),
       ],
     })
-    const cell = (children: InstanceType<typeof Paragraph>[], width: number, options: { borders?: Record<string, unknown>, margins?: Record<string, number> } = {}) => new TableCell({
+    const cell = (children: InstanceType<typeof Paragraph>[], width: number, options: { borders?: Record<string, unknown>, margins?: Record<string, number>, columnSpan?: number } = {}) => new TableCell({
       children,
       width: { size: width, type: WidthType.DXA },
       verticalAlign: VerticalAlign.CENTER,
       borders: options.borders,
+      columnSpan: options.columnSpan,
       margins: options.margins ?? { top: 70, bottom: 70, left: 70, right: 70 }
     })
     const lightBottomBorder = {
@@ -1046,7 +1047,7 @@ async function downloadWord() {
     }
     exerciseChildren.push(isTableLayout.value ? wordQuestionTable() : new Table({
       width: { size: contentWidth, type: WidthType.DXA },
-      columnWidths: usesWideRows.value ? [480, 9495] : lineQuestionWidths,
+      columnWidths: isTenseIdentification.value ? [480, 9495] : lineQuestionWidths,
       layout: TableLayoutType.FIXED,
       borders: TableBorders.NONE,
       rows: printableQuestions.value.map((question, index) => {
@@ -1054,10 +1055,12 @@ async function downloadWord() {
         const identificationCells = [
           cell([paragraph(`${index + 1}.`, { size: wordBodySize })], 480, { margins: { top: 90, bottom: 90, left: 0, right: 40 } }),
           cell([
-            ...(isIdentificationQuestion(question)
-              ? [...identificationQuestionParagraphs(question), identificationAnswerParagraph()]
-              : [paragraph(capitalizePrintLine(printable.label), { size: wordBodySize }), ...completionParagraphs(question)]),
-          ], 9495, { margins: { top: 90, bottom: 100, left: 70, right: 70 } }),
+            ...identificationQuestionParagraphs(question),
+            identificationAnswerParagraph(),
+          ], contentWidth - 480, {
+            columnSpan: props.exerciseKind === 'mixed' ? 2 : undefined,
+            margins: { top: 90, bottom: 100, left: 70, right: 70 },
+          }),
         ]
         const conjugationCells = [
           cell([paragraph(`${index + 1}.`, { size: wordBodySize })], 480, { margins: { top: 70, bottom: 70, left: 0, right: 40 } }),
@@ -1071,7 +1074,7 @@ async function downloadWord() {
               + Math.max(isIdentificationQuestion(question) ? 5 : 0, wordQuestionSpacingMm)) * 56.7),
             rule: HeightRule.ATLEAST,
           },
-          children: usesWideRows.value ? identificationCells : conjugationCells,
+          children: isIdentificationQuestion(question) ? identificationCells : conjugationCells,
         })
       })
     }))

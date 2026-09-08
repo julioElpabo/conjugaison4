@@ -1,4 +1,4 @@
-import { u as useDatabase, a0 as decodePronominalSelectionId, aQ as indirectRelative, aP as formatConjugationQuestion, aR as formatAnswer } from '../nitro/nitro.mjs';
+import { u as useDatabase, a0 as decodePronominalSelectionId, aF as indirectRelative, aE as formatConjugationQuestion, aG as formatAnswer } from '../nitro/nitro.mjs';
 import { b as buildRadicalReference } from './radical-reference.mjs';
 import { g as generatePronominalRow, r as resolveVariableAuxiliary } from './pronominal-formatter.mjs';
 import { M as MODE_IDENTIFICATION_INSTRUCTION, T as TENSE_IDENTIFICATION_INSTRUCTION } from './exercise-instructions.mjs';
@@ -441,7 +441,7 @@ function literaryIdentificationQuestion(citation, modeOnly) {
     mode_code: citation.mode_code
   }, citation, modeOnly);
 }
-function identificationQuestion(row, citation, modeOnly = false) {
+function identificationQuestion(row, citation, modeOnly = false, confusions = []) {
   const pronoun = row.pronom;
   const phrase = formatAnswer(pronoun, row.conjugaison1, row.mode_name);
   const tense = normalized(row.temps_name);
@@ -465,6 +465,11 @@ function identificationQuestion(row, citation, modeOnly = false) {
     titre: row.infinitif,
     instruction: modeOnly ? MODE_IDENTIFICATION_INSTRUCTION : TENSE_IDENTIFICATION_INSTRUCTION,
     consigne: phrase,
+    conjugationConfusions: confusions.map((candidate) => ({
+      tense: candidate.tense,
+      mode: candidate.mode,
+      answers: candidate.forms.map((form) => formatAnswer(pronoun, form, candidate.mode, row.infinitif))
+    })),
     reponses: unique(answers),
     reponsesPourCorrige: [correction],
     infinitif: row.infinitif,
@@ -660,8 +665,35 @@ async function validateSelections(request) {
   }
   return tenseResult[0];
 }
+async function generateMixedQuestionnaire(request, generate = generateQuestionnaire) {
+  const conjugationCount = Math.floor(request.questionCount / 2) + (request.questionCount % 2 && Math.random() < 0.5 ? 1 : 0);
+  const identificationCount = request.questionCount - conjugationCount;
+  const conjugation = conjugationCount ? await generate({
+    ...request,
+    exerciseKind: "conjugation",
+    questionCount: conjugationCount
+  }) : [];
+  const identification = identificationCount ? await generate({
+    ...request,
+    exerciseKind: "tense-identification",
+    questionCount: identificationCount
+  }) : [];
+  const groups = [
+    shuffle(conjugation).map((question) => ({ ...question, exerciseKind: "conjugation" })),
+    shuffle(identification).map((question) => ({ ...question, exerciseKind: "tense-identification" }))
+  ];
+  if (groups[1].length > groups[0].length || groups[1].length === groups[0].length && Math.random() < 0.5) groups.reverse();
+  const questions = [];
+  for (let index = 0; index < Math.max(...groups.map((group) => group.length)); index++) {
+    for (const group of groups) {
+      if (group[index]) questions.push(group[index]);
+    }
+  }
+  return questions;
+}
 async function generateQuestionnaire(request) {
   var _a, _b, _c, _d, _e;
+  if (request.exerciseKind === "mixed") return generateMixedQuestionnaire(request);
   const selectedTenses = await validateSelections(request);
   const nonFiniteModes = ["participe", "g\xE9rondif", "infinitif"];
   const finiteTenses = selectedTenses.filter((row) => !nonFiniteModes.includes(normalized(row.mode_name)));
@@ -947,7 +979,8 @@ async function generateQuestionnaire(request) {
             Number(row.temp_id),
             Number(row.personne_id)
           ))) == null ? void 0 : _e.shift(),
-          request.exerciseKind === "mode-identification"
+          request.exerciseKind === "mode-identification",
+          conjugationConfusions
         ));
       }
       if (wantsPassiveVoice && Number(row.verbe_id) > 0 && isPassivizableInfinitive(row.infinitif) && [6, 9].includes(Number(row.personne_id)) && normalized(row.mode_name) !== "imp\xE9ratif") {

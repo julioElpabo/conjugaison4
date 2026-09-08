@@ -32,7 +32,7 @@ const attempt_post = defineEventHandler(async (event) => {
   if (!answer || typeof body.correct !== "boolean") {
     throw createError({ statusCode: 400, statusMessage: "Tentative invalide" });
   }
-  const correct = (challenge.exerciseKind === "conjugation" ? validateConjugationAnswer(answer, question) : validateAnswer(answer, question.reponses)).isCorrect;
+  const correct = ((question.exerciseKind || challenge.exerciseKind) === "conjugation" ? validateConjugationAnswer(answer, question) : validateAnswer(answer, question.reponses)).isCorrect;
   const diagnostics = correct ? [] : diagnoseLearnerError(answer, question);
   const database = useDatabase();
   const connection = await database.getConnection();

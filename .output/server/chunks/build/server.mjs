@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, toRef, isRef, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, isReadonly, isShallow, isReactive, toRaw } from 'vue';
-import { ag as SUPPORTED_LOCALES, w as withDutchVariants, aW as withSwissObjectAliases, aX as parseURL, aY as encodePath, aZ as decodePath, a_ as localeFromPath, z as normalizeLocale, a$ as getRequestHeaders, b0 as klona, c as createError$1, am as hasProtocol, ao as isScriptProtocol, an as joinURL, b1 as withQuery, b2 as DEFAULT_LANGUAGE_PREFERENCES, ak as localizePath, b3 as getRequestHeader, b4 as isEqual, b5 as sanitizeStatusCode, b6 as getContext, t as setCookie, x as getCookie, v as deleteCookie, b7 as $fetch, ah as localeLanguageTag, b8 as defu, O as stripLocaleFromPath, au as executeAsync, b9 as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { ag as SUPPORTED_LOCALES, w as withDutchVariants, aX as withSwissObjectAliases, aY as parseURL, aZ as encodePath, a_ as decodePath, a$ as localeFromPath, z as normalizeLocale, b0 as getRequestHeaders, b1 as klona, c as createError$1, am as hasProtocol, ao as isScriptProtocol, an as joinURL, L as getRequestURL, b2 as withQuery, b3 as DEFAULT_LANGUAGE_PREFERENCES, ak as localizePath, b4 as getRequestHeader, b5 as isEqual, b6 as sanitizeStatusCode, b7 as getContext, t as setCookie, x as getCookie, v as deleteCookie, b8 as $fetch, ah as localeLanguageTag, b9 as defu, O as stripLocaleFromPath, au as executeAsync, ba as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useSeoMeta$1, a as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -411,6 +411,7 @@ const uiMessages = {
   "Navigation principale": withDutchVariants({ de: "Hauptnavigation", en: "Main navigation", it: "Navigazione principale", es: "Navegaci\xF3n principal", nl: "Hoofdnavigatie" }),
   "Accueil": withDutchVariants({ de: "Startseite", en: "Home", it: "Home", es: "Inicio", nl: "Startpagina" }),
   "S\u2019exercer": withDutchVariants({ de: "\xDCben", en: "Practise", it: "Esercitarsi", es: "Practicar", nl: "Oefenen" }),
+  "Cette forme est aussi possible au subjonctif, mais elle est tr\xE8s souvent pr\xE9c\xE9d\xE9e de \xAB que \xBB ou \xAB qu\u2019 \xBB : \xAB {example} \xBB. Ici, sans ce contexte, on attend l\u2019indicatif.": withDutchVariants({ de: "Diese Form ist auch im Subjonctif m\xF6glich, steht aber sehr oft nach \u201Eque\u201C oder \u201Equ\u2019\u201C: \u201E{example}\u201C. Hier wird ohne diesen Kontext der Indikativ erwartet.", en: "This form is also possible in the subjunctive, but it is very often preceded by \u201Cque\u201D or \u201Cqu\u2019\u201D: \u201C{example}\u201D. Here, without that context, the indicative is expected.", it: "Questa forma \xE8 possibile anche al congiuntivo, ma \xE8 molto spesso preceduta da \xAB que \xBB o \xAB qu\u2019 \xBB: \xAB {example} \xBB. Qui, senza questo contesto, si richiede l\u2019indicativo.", es: "Esta forma tambi\xE9n es posible en subjuntivo, pero suele ir precedida de \xAB que \xBB o \xAB qu\u2019 \xBB: \xAB {example} \xBB. Aqu\xED, sin ese contexto, se espera el indicativo.", nl: "Deze vorm kan ook in de subjonctif voorkomen, maar wordt vaak voorafgegaan door \xAB que \xBB of \xAB qu\u2019 \xBB: \xAB {example} \xBB. Hier wordt zonder die context de indicatif verwacht." }),
   "Consulter": withDutchVariants({ de: "Nachschlagen", en: "Look up", it: "Consultare", es: "Consultar", nl: "Opzoeken" }),
   "Apprendre": withDutchVariants({ de: "Lernen", en: "Learn", it: "Imparare", es: "Aprender", nl: "Leren" }),
   "Un outil gratuit pour travailler la conjugaison fran\xE7aise.": withDutchVariants({ de: "Ein kostenloses Werkzeug zum \xDCben der franz\xF6sischen Konjugation.", en: "A free tool for practising French conjugation.", it: "Uno strumento gratuito per esercitare la coniugazione francese.", es: "Una herramienta gratuita para practicar la conjugaci\xF3n francesa.", nl: "Een gratis hulpmiddel om Franse vervoeging te oefenen." }),
@@ -609,6 +610,7 @@ const uiMessages = {
   "Ils appara\xEEtront ponctuellement dans les questions.": withDutchVariants({ de: "Sie erscheinen gelegentlich in den Fragen.", en: "They will occasionally appear in questions.", it: "Appariranno occasionalmente nelle domande.", es: "Aparecer\xE1n ocasionalmente en las preguntas.", nl: "Ze komen af en toe voor in de vragen." }),
   "Inclure le pronom": withDutchVariants({ de: "Pronomen einbeziehen", en: "Include the pronoun", it: "Includi il pronome", es: "Incluir el pronombre", nl: "Het voornaamwoord opnemen" }),
   "Il appara\xEEtra ponctuellement dans les questions \xE0 la troisi\xE8me personne du singulier.": withDutchVariants({ de: "Es erscheint gelegentlich in Fragen in der dritten Person Singular.", en: "It will occasionally appear in third-person singular questions.", it: "Apparir\xE0 occasionalmente nelle domande alla terza persona singolare.", es: "Aparecer\xE1 ocasionalmente en preguntas en tercera persona del singular.", nl: "Het komt af en toe voor in vragen in de derde persoon enkelvoud." }),
+  "Un m\xE9lange des deux": withDutchVariants({ de: "Eine Mischung aus beiden", en: "A mix of both", it: "Un misto dei due", es: "Una mezcla de ambos", nl: "Een mix van beide" }),
   "Type d\u2019exercice": withDutchVariants({ de: "\xDCbungstyp", en: "Exercise type", it: "Tipo di esercizio", es: "Tipo de ejercicio", nl: "Soort oefening" }),
   "Choix des verbes": withDutchVariants({ de: "Auswahl der Verben", en: "Verb selection", it: "Scelta dei verbi", es: "Selecci\xF3n de verbos", nl: "Werkwoordselectie" }),
   "Conjuguer": withDutchVariants({ de: "Konjugieren", en: "Conjugate", it: "Coniugare", es: "Conjugar", nl: "Vervoegen" }),
@@ -1612,364 +1614,364 @@ const _routes = [
   {
     name: "admin-admins",
     path: "/admin/admins",
-    component: () => import('./admins-3KOrvOy7.mjs')
+    component: () => import('./admins-BhYnzN7b.mjs')
   },
   {
     name: "admin-caracteres",
     path: "/admin/caracteres",
-    component: () => import('./caracteres-DEMsAfRw.mjs')
+    component: () => import('./caracteres-UQf4m0zF.mjs')
   },
   {
     name: "admin-challenges",
     path: "/admin/challenges",
-    component: () => import('./challenges-BSf0BHbP.mjs')
+    component: () => import('./challenges-BhAPSoeH.mjs')
   },
   {
     name: "admin-characters",
     path: "/admin/characters",
-    component: () => import('./characters-BXdrw2IO.mjs')
+    component: () => import('./characters-BDN6Apzv.mjs')
   },
   {
     name: "admin-charts",
     path: "/admin/charts",
-    component: () => import('./charts-CK3v6Vc9.mjs')
+    component: () => import('./charts-CaQVeYM2.mjs')
   },
   {
     name: "admin-coaches",
     path: "/admin/coaches",
-    component: () => import('./coaches-BlTVkvRW.mjs')
+    component: () => import('./coaches-BctS588V.mjs')
   },
   {
     name: "admin-contact",
     path: "/admin/contact",
-    component: () => import('./contact-DApuYpWu.mjs')
+    component: () => import('./contact-B3hjRscf.mjs')
   },
   {
     name: "admin-errors",
     path: "/admin/errors",
-    component: () => import('./errors-CYLSmv7X.mjs')
+    component: () => import('./errors-D-Dt8878.mjs')
   },
   {
     name: "admin-feedbacks",
     path: "/admin/feedbacks",
-    component: () => import('./feedbacks-D7aIjfZD.mjs')
+    component: () => import('./feedbacks-CUBUL4TG.mjs')
   },
   {
     name: "admin-help-verification",
     path: "/admin/help-verification",
-    component: () => import('./help-verification-K7RQAcaT.mjs')
+    component: () => import('./help-verification-DRvzAq9s.mjs')
   },
   {
     name: "admin-helps",
     path: "/admin/helps",
-    component: () => import('./helps-CEqnAvwY.mjs')
+    component: () => import('./helps-CEdghcWW.mjs')
   },
   {
     name: "admin-literary-corpus",
     path: "/admin/literary-corpus",
-    component: () => import('./literary-corpus-CUtTCOZC.mjs')
+    component: () => import('./literary-corpus-BVbZUk9l.mjs')
   },
   {
     name: "admin-phrases",
     path: "/admin/phrases",
-    component: () => import('./phrases-DEqEMVrl.mjs')
+    component: () => import('./phrases-DSAn6hff.mjs')
   },
   {
     name: "admin-shared-summaries",
     path: "/admin/shared-summaries",
-    component: () => import('./shared-summaries-BuWWdgY4.mjs')
+    component: () => import('./shared-summaries-BXnUbTT5.mjs')
   },
   {
     name: "admin-tests",
     path: "/admin/tests",
-    component: () => import('./tests-WMbfJxRn.mjs')
+    component: () => import('./tests-DbEikvjU.mjs')
   },
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-OtuZSG73.mjs')
+    component: () => import('./users-CPUSUR2-.mjs')
   },
   {
     name: "admin-verbes",
     path: "/admin/verbes",
-    component: () => import('./verbes-Bw35G_Ge.mjs')
+    component: () => import('./verbes-Cl-i40FO.mjs')
   },
   {
     name: "modes-mode-temps",
     path: "/modes/:mode()/:temps()",
-    component: () => import('./_temps_-BmmDOAZL.mjs')
+    component: () => import('./_temps_-BR94dmUq.mjs')
   },
   {
     name: "bilan-token",
     path: "/bilan/:token()",
-    component: () => import('./_token_-gBJRMAQT.mjs')
+    component: () => import('./_token_-BAMu5TwF.mjs')
   },
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-IUiv5mvJ.mjs')
+    component: () => import('./_code_-Cuw921c4.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-By00p13m.mjs')
+    component: () => import('./_slug_-18FBjTDM.mjs')
   },
   {
     name: "exercices-parcours",
     path: "/exercices/:parcours()",
-    component: () => import('./_parcours_-CIi2CIfO.mjs')
+    component: () => import('./_parcours_-C1t3Aeoo.mjs')
   },
   {
     name: "modes-mode",
     path: "/modes/:mode()",
-    component: () => import('./index-CSS0QjNm.mjs')
+    component: () => import('./index-DDjszWB7.mjs')
   },
   {
     name: "admin",
     path: "/admin",
-    component: () => import('./index-DvPP2nXZ.mjs')
+    component: () => import('./index-Dsuuoj1c.mjs')
   },
   {
     name: "apprendre",
     path: "/apprendre",
-    component: () => import('./apprendre-2EYIPkLg.mjs')
+    component: () => import('./apprendre-BJOz7xOa.mjs')
   },
   {
     name: "conjugaison-fle",
     path: "/conjugaison-fle",
-    component: () => import('./conjugaison-fle-C5nA-Ju0.mjs')
+    component: () => import('./conjugaison-fle-B4fOqYk0.mjs')
   },
   {
     name: "consulter",
     path: "/consulter",
-    component: () => import('./consulter-hV_4r-FU.mjs')
+    component: () => import('./consulter-CFH7KA7-.mjs')
   },
   {
     name: "defis",
     path: "/defis",
-    component: () => import('./index-Zf7iS1LL.mjs')
+    component: () => import('./index-CuVVnwXz.mjs')
   },
   {
     name: "exercices",
     path: "/exercices",
-    component: () => import('./index-BM0DBf8x.mjs')
+    component: () => import('./index-CVI_LT5D.mjs')
   },
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-Ds-HflYz.mjs')
+    component: () => import('./exercices-de-conjugaison-BFOETKig.mjs')
   },
   {
     name: "mon-compte",
     path: "/mon-compte",
-    component: () => import('./mon-compte-DcPmWdNY.mjs')
+    component: () => import('./mon-compte-iBL6b7-T.mjs')
   },
   {
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-CTql2gYG.mjs')
+    component: () => import('./my-page-wCGsnM_D.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-DHHIq5Vi.mjs')
+    component: () => import('./nouveau-defi-27l2DLww.mjs')
   },
   {
     name: "signin",
     path: "/signin",
-    component: () => import('./signin-DjYgwd49.mjs')
+    component: () => import('./signin-BTrO2HeM.mjs')
   },
   {
     name: "index",
     path: "/",
-    component: () => import('./index-CeXea7Hg.mjs')
+    component: () => import('./index-CeuxDEMD.mjs')
   },
   {
     name: "mode-tense",
     path: "/:mode(indicatif|subjonctif|conditionnel|imperatif|participe)/:temps",
-    component: () => import('./_temps_-BmmDOAZL.mjs')
+    component: () => import('./_temps_-BR94dmUq.mjs')
   },
   {
     name: "localized-admin-admins",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/admins",
-    component: () => import('./admins-3KOrvOy7.mjs')
+    component: () => import('./admins-BhYnzN7b.mjs')
   },
   {
     name: "localized-admin-caracteres",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/caracteres",
-    component: () => import('./caracteres-DEMsAfRw.mjs')
+    component: () => import('./caracteres-UQf4m0zF.mjs')
   },
   {
     name: "localized-admin-challenges",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/challenges",
-    component: () => import('./challenges-BSf0BHbP.mjs')
+    component: () => import('./challenges-BhAPSoeH.mjs')
   },
   {
     name: "localized-admin-characters",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/characters",
-    component: () => import('./characters-BXdrw2IO.mjs')
+    component: () => import('./characters-BDN6Apzv.mjs')
   },
   {
     name: "localized-admin-charts",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/charts",
-    component: () => import('./charts-CK3v6Vc9.mjs')
+    component: () => import('./charts-CaQVeYM2.mjs')
   },
   {
     name: "localized-admin-coaches",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/coaches",
-    component: () => import('./coaches-BlTVkvRW.mjs')
+    component: () => import('./coaches-BctS588V.mjs')
   },
   {
     name: "localized-admin-contact",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/contact",
-    component: () => import('./contact-DApuYpWu.mjs')
+    component: () => import('./contact-B3hjRscf.mjs')
   },
   {
     name: "localized-admin-errors",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/errors",
-    component: () => import('./errors-CYLSmv7X.mjs')
+    component: () => import('./errors-D-Dt8878.mjs')
   },
   {
     name: "localized-admin-feedbacks",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/feedbacks",
-    component: () => import('./feedbacks-D7aIjfZD.mjs')
+    component: () => import('./feedbacks-CUBUL4TG.mjs')
   },
   {
     name: "localized-admin-help-verification",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/help-verification",
-    component: () => import('./help-verification-K7RQAcaT.mjs')
+    component: () => import('./help-verification-DRvzAq9s.mjs')
   },
   {
     name: "localized-admin-helps",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/helps",
-    component: () => import('./helps-CEqnAvwY.mjs')
+    component: () => import('./helps-CEdghcWW.mjs')
   },
   {
     name: "localized-admin-literary-corpus",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/literary-corpus",
-    component: () => import('./literary-corpus-CUtTCOZC.mjs')
+    component: () => import('./literary-corpus-BVbZUk9l.mjs')
   },
   {
     name: "localized-admin-phrases",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/phrases",
-    component: () => import('./phrases-DEqEMVrl.mjs')
+    component: () => import('./phrases-DSAn6hff.mjs')
   },
   {
     name: "localized-admin-shared-summaries",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/shared-summaries",
-    component: () => import('./shared-summaries-BuWWdgY4.mjs')
+    component: () => import('./shared-summaries-BXnUbTT5.mjs')
   },
   {
     name: "localized-admin-tests",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/tests",
-    component: () => import('./tests-WMbfJxRn.mjs')
+    component: () => import('./tests-DbEikvjU.mjs')
   },
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/users",
-    component: () => import('./users-OtuZSG73.mjs')
+    component: () => import('./users-CPUSUR2-.mjs')
   },
   {
     name: "localized-admin-verbes",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/verbes",
-    component: () => import('./verbes-Bw35G_Ge.mjs')
+    component: () => import('./verbes-Cl-i40FO.mjs')
   },
   {
     name: "localized-modes-mode-temps",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/modes/:mode()/:temps()",
-    component: () => import('./_temps_-BmmDOAZL.mjs')
+    component: () => import('./_temps_-BR94dmUq.mjs')
   },
   {
     name: "localized-bilan-token",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/bilan/:token()",
-    component: () => import('./_token_-gBJRMAQT.mjs')
+    component: () => import('./_token_-BAMu5TwF.mjs')
   },
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defi/:code()",
-    component: () => import('./_code_-IUiv5mvJ.mjs')
+    component: () => import('./_code_-Cuw921c4.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defis/:slug()",
-    component: () => import('./_slug_-By00p13m.mjs')
+    component: () => import('./_slug_-18FBjTDM.mjs')
   },
   {
     name: "localized-exercices-parcours",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/exercices/:parcours()",
-    component: () => import('./_parcours_-CIi2CIfO.mjs')
+    component: () => import('./_parcours_-C1t3Aeoo.mjs')
   },
   {
     name: "localized-modes-mode",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/modes/:mode()",
-    component: () => import('./index-CSS0QjNm.mjs')
+    component: () => import('./index-DDjszWB7.mjs')
   },
   {
     name: "localized-admin",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin",
-    component: () => import('./index-DvPP2nXZ.mjs')
+    component: () => import('./index-Dsuuoj1c.mjs')
   },
   {
     name: "localized-apprendre",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/apprendre",
-    component: () => import('./apprendre-2EYIPkLg.mjs')
+    component: () => import('./apprendre-BJOz7xOa.mjs')
   },
   {
     name: "localized-conjugaison-fle",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/conjugaison-fle",
-    component: () => import('./conjugaison-fle-C5nA-Ju0.mjs')
+    component: () => import('./conjugaison-fle-B4fOqYk0.mjs')
   },
   {
     name: "localized-consulter",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/consulter",
-    component: () => import('./consulter-hV_4r-FU.mjs')
+    component: () => import('./consulter-CFH7KA7-.mjs')
   },
   {
     name: "localized-defis",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defis",
-    component: () => import('./index-Zf7iS1LL.mjs')
+    component: () => import('./index-CuVVnwXz.mjs')
   },
   {
     name: "localized-exercices",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/exercices",
-    component: () => import('./index-BM0DBf8x.mjs')
+    component: () => import('./index-CVI_LT5D.mjs')
   },
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-Ds-HflYz.mjs')
+    component: () => import('./exercices-de-conjugaison-BFOETKig.mjs')
   },
   {
     name: "localized-mon-compte",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/mon-compte",
-    component: () => import('./mon-compte-DcPmWdNY.mjs')
+    component: () => import('./mon-compte-iBL6b7-T.mjs')
   },
   {
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-CTql2gYG.mjs')
+    component: () => import('./my-page-wCGsnM_D.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/nouveau-defi",
-    component: () => import('./nouveau-defi-DHHIq5Vi.mjs')
+    component: () => import('./nouveau-defi-27l2DLww.mjs')
   },
   {
     name: "localized-signin",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/signin",
-    component: () => import('./signin-DjYgwd49.mjs')
+    component: () => import('./signin-BTrO2HeM.mjs')
   },
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/",
-    component: () => import('./index-CeXea7Hg.mjs')
+    component: () => import('./index-CeuxDEMD.mjs')
   },
   {
     name: "localized-mode-tense",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/:mode(indicatif|subjonctif|conditionnel|imperatif|participe)/:temps",
-    component: () => import('./_temps_-BmmDOAZL.mjs')
+    component: () => import('./_temps_-BR94dmUq.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -2354,7 +2356,7 @@ const globalMiddleware = [
   manifest_45route_45rule
 ];
 const namedMiddleware = {
-  "learner-auth": () => import('./learner-auth-BVuWqFgW.mjs')
+  "learner-auth": () => import('./learner-auth-B6mhf-bv.mjs')
 };
 Object.assign(/* @__PURE__ */ Object.create(null), {});
 const pageIslandRoutes = Object.assign(/* @__PURE__ */ Object.create(null), {});
@@ -2601,11 +2603,29 @@ const revive_payload_server_MVtmlZaQpj6ApFmshWfUWl5PehCebzaBf2NuRMiIbms = /* @__
 const components_plugin_4kY4pyzJIYX99vmMAAIorFf3CnAaptHitJgf7JxiED8 = /* @__PURE__ */ defineNuxtPlugin({
   name: "nuxt:global-components"
 });
+function useRequestURL(opts) {
+  {
+    return getRequestURL(useRequestEvent(), opts);
+  }
+}
+const favicon_iEgXS9ymha8i9PS9GtX0rutyoMQM3_8DqfsbkeInjdc = /* @__PURE__ */ defineNuxtPlugin(() => {
+  const { hostname } = useRequestURL();
+  const local = hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]" || hostname.endsWith(".localhost") || hostname.endsWith(".local");
+  useHead({
+    link: [{
+      key: "favicon",
+      rel: "icon",
+      type: "image/svg+xml",
+      href: local ? "/favicon-local.svg" : "/favicon.svg"
+    }]
+  });
+});
 const plugins = [
   unhead_k2P3m_ZDyjlr2mMYnoDPwavjsDN8hBlk9cFai0bbopU,
   plugin,
   revive_payload_server_MVtmlZaQpj6ApFmshWfUWl5PehCebzaBf2NuRMiIbms,
-  components_plugin_4kY4pyzJIYX99vmMAAIorFf3CnAaptHitJgf7JxiED8
+  components_plugin_4kY4pyzJIYX99vmMAAIorFf3CnAaptHitJgf7JxiED8,
+  favicon_iEgXS9ymha8i9PS9GtX0rutyoMQM3_8DqfsbkeInjdc
 ];
 const ServerPlaceholder = defineComponent({
   name: "ServerPlaceholder",
@@ -2614,7 +2634,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-CuilOmzl.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-D4Glrd6u.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({
@@ -3003,8 +3023,8 @@ const _sfc_main$1 = {
     const statusText = _error.statusMessage ?? (is404 ? "Page Not Found" : "Internal Server Error");
     const description = _error.message || _error.toString();
     const stack = void 0;
-    const _Error404 = defineAsyncComponent(() => import('./error-404-dpVO1X5U.mjs'));
-    const _Error = defineAsyncComponent(() => import('./error-500-Or7ZOf9q.mjs'));
+    const _Error404 = defineAsyncComponent(() => import('./error-404-dASE3DLq.mjs'));
+    const _Error = defineAsyncComponent(() => import('./error-500-BgWSn_z6.mjs'));
     const ErrorTemplate = is404 ? _Error404 : _Error;
     return (_ctx, _push, _parent, _attrs) => {
       _push(ssrRenderComponent(unref(ErrorTemplate), mergeProps({ status: unref(status), statusText: unref(statusText), statusCode: unref(status), statusMessage: unref(statusText), description: unref(description), stack: unref(stack) }, _attrs), null, _parent));
@@ -3096,5 +3116,5 @@ let entry;
 }
 const entry_default = ((ssrContext) => entry(ssrContext));
 
-export { useRouter as a, useNuxtApp as b, useRuntimeConfig as c, nuxtLinkDefaults as d, entry_default as default, encodeRoutePath as e, useLanguagePreferences as f, useRoute as g, useState as h, useRequestFetch as i, useRequestHeaders as j, useCookie as k, asyncDataDefaults as l, createError as m, navigateTo as n, fetchDefaults as o, useRequestEvent as p, usePageSeoOverride as q, resolveRouteObject as r, useSeoMeta as s, defineNuxtRouteMiddleware as t, useHead as u };
+export { useRouter as a, useNuxtApp as b, useRuntimeConfig as c, nuxtLinkDefaults as d, entry_default as default, encodeRoutePath as e, useLanguagePreferences as f, useRoute as g, useState as h, useRequestFetch as i, useRequestHeaders as j, useCookie as k, asyncDataDefaults as l, createError as m, navigateTo as n, fetchDefaults as o, useRequestURL as p, usePageSeoOverride as q, resolveRouteObject as r, useSeoMeta as s, defineNuxtRouteMiddleware as t, useHead as u };
 //# sourceMappingURL=server.mjs.map

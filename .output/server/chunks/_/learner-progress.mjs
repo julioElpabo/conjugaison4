@@ -22,7 +22,7 @@ function learnerChallengeSnapshot(value) {
     throw createError({ statusCode: 400, statusMessage: "D\xE9fi invalide" });
   }
   const candidate = value;
-  const exerciseKind = candidate.exerciseKind === "tense-identification" || candidate.exerciseKind === "mode-identification" ? candidate.exerciseKind : "conjugation";
+  const exerciseKind = candidate.exerciseKind === "tense-identification" || candidate.exerciseKind === "mode-identification" || candidate.exerciseKind === "mixed" ? candidate.exerciseKind : "conjugation";
   const questionCount = Math.min(200, Math.max(1, Number(candidate.questionCount) || 1));
   const description = typeof candidate.description === "string" ? candidate.description.trim().slice(0, 1e3) : "";
   const trainingReportTitle = typeof candidate.trainingReportTitle === "string" ? candidate.trainingReportTitle.trim().slice(0, 200) : "";
@@ -103,6 +103,7 @@ function learnerQuestionSnapshot(value) {
   const citation = question.literaryCitation && typeof question.literaryCitation === "object" ? question.literaryCitation : null;
   const citationTarget = shortText(citation == null ? void 0 : citation.target, 200);
   return {
+    ...["conjugation", "tense-identification", "mode-identification"].includes(String(question.exerciseKind)) ? { exerciseKind: question.exerciseKind } : {},
     titre: shortText(question.titre, 300),
     instruction: shortText(question.instruction, 300) || void 0,
     consigne: shortText(question.consigne, 500),
@@ -155,7 +156,7 @@ function learnerQuestionSnapshot(value) {
 }
 function learnerFormKey(question, exerciseKind) {
   const source = [
-    exerciseKind,
+    question.exerciseKind || exerciseKind,
     question.verbeId || question.infinitif || "",
     question.tenseId || question.temps || "",
     question.personId || question.pronom || question.saisiePrefixe || "",

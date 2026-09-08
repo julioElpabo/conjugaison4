@@ -1,5 +1,5 @@
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'vue-bundle-renderer/runtime';
-import { bb as joinRelativeURL, y as useRuntimeConfig, aY as encodePath, bc as defineRenderHandler, a as getQuery, c as createError, bd as destr, be as getRouteRules, bf as getResponseStatusText, bg as getResponseStatus, bh as useNitroApp } from '../nitro/nitro.mjs';
+import { bc as joinRelativeURL, y as useRuntimeConfig, aZ as encodePath, bd as defineRenderHandler, a as getQuery, c as createError, be as destr, bf as getRouteRules, bg as getResponseStatusText, bh as getResponseStatus, bi as useNitroApp } from '../nitro/nitro.mjs';
 import { renderToString } from 'vue/server-renderer';
 import { createHead as createHead$1, propsToString, renderSSRHead } from 'unhead/server';
 import { stringify, uneval } from 'devalue';
@@ -86,7 +86,7 @@ function createHead(options = {}) {
 
 const NUXT_RUNTIME_PAYLOAD_EXTRACTION = false;
 
-const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[{"rel":"icon","type":"image/svg+xml","href":"/favicon.svg"}],"style":[],"script":[],"noscript":[]};
+const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[],"style":[],"script":[],"noscript":[]};
 
 const appRootTag = "div";
 

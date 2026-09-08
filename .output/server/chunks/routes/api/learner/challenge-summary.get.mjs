@@ -25,7 +25,7 @@ function questionFromJson(source) {
 function exerciseKindFromJson(source) {
   try {
     const config = JSON.parse(source);
-    return config.exerciseKind === "tense-identification" || config.exerciseKind === "mode-identification" ? config.exerciseKind : "conjugation";
+    return config.exerciseKind === "tense-identification" || config.exerciseKind === "mode-identification" || config.exerciseKind === "mixed" ? config.exerciseKind : "conjugation";
   } catch {
     return "conjugation";
   }
@@ -48,7 +48,6 @@ const challengeSummary_get = defineEventHandler(async (event) => {
   `, [runId, learner.id]);
   if (!run) throw createError({ statusCode: 404, statusMessage: "S\xE9ance introuvable" });
   const exerciseKind = exerciseKindFromJson(run.challengeConfigJson);
-  const isIdentificationExercise = exerciseKind === "tense-identification" || exerciseKind === "mode-identification";
   const [incorrectRows] = await database.execute(`
     SELECT a.question_index AS questionIndex,
            COALESCE(q.question_json, a.question_json) AS questionJson,
@@ -79,6 +78,8 @@ const challengeSummary_get = defineEventHandler(async (event) => {
   const items = [...incorrectRows, ...correctRows].flatMap((row, itemIndex) => {
     const question = questionFromJson(row.questionJson);
     if (!question) return [];
+    const kind = question.exerciseKind || exerciseKind;
+    const isIdentificationExercise = kind === "tense-identification" || kind === "mode-identification";
     if (question.infinitif) verbs.add(question.infinitif);
     if (question.temps) {
       const key = `${question.mode || ""}\0${question.temps}`;

@@ -542,6 +542,7 @@ function challengeProgressLabel(challenge: DashboardChallenge) {
 }
 
 function challengeExerciseKindLabel(challenge: DashboardChallenge) {
+  if (challenge.challenge.exerciseKind === 'mixed') return ui('Un mélange des deux')
   return challenge.challenge.exerciseKind === 'tense-identification'
     ? ui('Trouver le mode et les temps')
     : ''

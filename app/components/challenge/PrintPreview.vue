@@ -95,6 +95,8 @@ const effectiveQuestionSpacingMm = computed(() => inclusivePrint.value
 const pdfBodySize = computed(() => inclusivePrint.value ? 12 : 10.5)
 const pdfCorrectionSize = computed(() => inclusivePrint.value ? 12 : 9.5)
 const pdfLineHeightMm = computed(() => inclusivePrint.value ? 6.5 : 5)
+const isIdentificationQuestion = (question: ExerciseQuestion) => (question.exerciseKind || props.exerciseKind) === 'tense-identification'
+const usesWideRows = computed(() => props.exerciseKind === 'mixed' || isTenseIdentification.value)
 const isTenseIdentification = computed(() => props.exerciseKind === 'tense-identification')
 const isTableLayout = computed(() => props.options.questionLayout === 'table' && props.exerciseKind === 'conjugation')
 const identificationAnswerHeightMm = computed(() => 8 + Math.max(0, 5 - questionSpacingMm.value))
@@ -173,7 +175,7 @@ const exercisePages = computed(() => paginateByHeight(
       * (inclusivePrint.value ? 1.18 : 1)
       + (inclusivePrint.value ? Math.max(0, inclusiveLineCount - 1) * (INCLUSIVE_QUESTION_LINE_HEIGHT_MM - pdfLineHeightMm.value) : 0)
       + (printable.suffixOnNextLine ? 6 : 0)
-      + (isTenseIdentification.value ? identificationAnswerHeightMm.value : 0)
+      + (isIdentificationQuestion(question) ? identificationAnswerHeightMm.value : 0)
       + (question.literaryCitation ? 4 : 0)
   }
 ))
@@ -183,7 +185,7 @@ const correctionPages = computed(() => paginateByHeight(
   220,
   question => isTableLayout.value
     ? tableQuestionHeight(question, true)
-    : isTenseIdentification.value
+    : isIdentificationQuestion(question)
     ? correctionItemHeight('', printableCorrectionText(question)) * (inclusivePrint.value ? 1.35 : 1)
     : correctionItemHeight(printableCorrectionLabel(question, props.exerciseKind), printableCorrectionText(question)) * (inclusivePrint.value ? 1.35 : 1)
 ))
@@ -587,7 +589,7 @@ async function buildPdf() {
         } else {
           pdf.text(completionLines, completionX, y, { lineHeightFactor: questionLineHeightFactor })
         }
-        if (isTenseIdentification.value) {
+        if (isIdentificationQuestion(question)) {
           const questionHeight = literaryCitation ? literaryCitation.height : lineCount * questionLineHeight
           const answerY = y + questionHeight + 2
           const modeLabel = pdfSafe(ui('Mode :'))
@@ -625,10 +627,10 @@ async function buildPdf() {
         const answer = printableCorrectionAnswers(question)
           .flatMap(value => pdf.splitTextToSize(
             pdfSafe(capitalizePrintText(value)),
-            isTenseIdentification.value ? 169 : 82,
+            isIdentificationQuestion(question) ? 169 : 82,
           ))
         const answerHeight = answer.length * lineHeight
-        if (isTenseIdentification.value) {
+        if (isIdentificationQuestion(question)) {
           const rowHeight = Math.max(inclusivePrint.value ? 13 : 9, answerHeight + 4)
           const textY = y + Math.max(0, (rowHeight - answerHeight) / 2)
           pdf.setFont('helvetica', 'normal')
@@ -1044,7 +1046,7 @@ async function downloadWord() {
     }
     exerciseChildren.push(isTableLayout.value ? wordQuestionTable() : new Table({
       width: { size: contentWidth, type: WidthType.DXA },
-      columnWidths: isTenseIdentification.value ? [480, 9495] : lineQuestionWidths,
+      columnWidths: usesWideRows.value ? [480, 9495] : lineQuestionWidths,
       layout: TableLayoutType.FIXED,
       borders: TableBorders.NONE,
       rows: printableQuestions.value.map((question, index) => {
@@ -1052,8 +1054,9 @@ async function downloadWord() {
         const identificationCells = [
           cell([paragraph(`${index + 1}.`, { size: wordBodySize })], 480, { margins: { top: 90, bottom: 90, left: 0, right: 40 } }),
           cell([
-            ...identificationQuestionParagraphs(question),
-            identificationAnswerParagraph(),
+            ...(isIdentificationQuestion(question)
+              ? [...identificationQuestionParagraphs(question), identificationAnswerParagraph()]
+              : [paragraph(capitalizePrintLine(printable.label), { size: wordBodySize }), ...completionParagraphs(question)]),
           ], 9495, { margins: { top: 90, bottom: 100, left: 70, right: 70 } }),
         ]
         const conjugationCells = [
@@ -1064,11 +1067,11 @@ async function downloadWord() {
         return new TableRow({
           cantSplit: true,
           height: {
-            value: Math.round(((isTenseIdentification.value ? 13 : 5)
-              + Math.max(isTenseIdentification.value ? 5 : 0, wordQuestionSpacingMm)) * 56.7),
+            value: Math.round(((isIdentificationQuestion(question) ? 13 : 5)
+              + Math.max(isIdentificationQuestion(question) ? 5 : 0, wordQuestionSpacingMm)) * 56.7),
             rule: HeightRule.ATLEAST,
           },
-          children: isTenseIdentification.value ? identificationCells : conjugationCells,
+          children: usesWideRows.value ? identificationCells : conjugationCells,
         })
       })
     }))
@@ -1083,7 +1086,7 @@ async function downloadWord() {
       }),
       isTableLayout.value ? wordQuestionTable(true) : new Table({
         width: { size: contentWidth, type: WidthType.DXA },
-        columnWidths: isTenseIdentification.value ? [480, 9495] : [480, 5100, 4395],
+        columnWidths: usesWideRows.value ? [480, 9495] : [480, 5100, 4395],
         layout: TableLayoutType.FIXED,
         borders: TableBorders.NONE,
         rows: printableQuestions.value.map((question, index) => {
@@ -1093,7 +1096,10 @@ async function downloadWord() {
               margins: { top: 70, bottom: 70, left: 0, right: 40 },
             }),
             cell(
-              printableCorrectionAnswers(question).map(answer => paragraph(capitalizePrintText(answer), { bold: true, size: wordSecondarySize })),
+              [
+                ...(!isIdentificationQuestion(question) ? [paragraph(capitalizePrintLine(printableCorrectionLabel(question, props.exerciseKind)), { size: wordSecondarySize })] : []),
+                ...printableCorrectionAnswers(question).map(answer => paragraph(capitalizePrintText(answer), { bold: true, size: wordSecondarySize })),
+              ],
               9495,
               { borders: lightBottomBorder, margins: { top: 70, bottom: 70, left: 70, right: 70 } },
             ),
@@ -1110,7 +1116,7 @@ async function downloadWord() {
           return new TableRow({
             cantSplit: true,
             height: { value: 460, rule: HeightRule.ATLEAST },
-            children: isTenseIdentification.value
+            children: usesWideRows.value
               ? identificationCorrectionCells
               : conjugationCorrectionCells,
           })

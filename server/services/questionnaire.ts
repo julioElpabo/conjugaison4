@@ -502,7 +502,7 @@ function literaryIdentificationQuestion(citation: LiteraryCitationRow, modeOnly:
   } as ConjugationRow, citation, modeOnly)
 }
 
-export function identificationQuestion(row: ConjugationRow, citation?: LiteraryCitationRow, modeOnly = false): ExerciseQuestion {
+export function identificationQuestion(row: ConjugationRow, citation?: LiteraryCitationRow, modeOnly = false, confusions: ReturnType<typeof conjugationConfusionsFor> = []): ExerciseQuestion {
   const pronoun = row.pronom
   const phrase = formatAnswer(pronoun, row.conjugaison1, row.mode_name)
   const tense = normalized(row.temps_name)
@@ -527,6 +527,11 @@ export function identificationQuestion(row: ConjugationRow, citation?: LiteraryC
     titre: row.infinitif,
     instruction: modeOnly ? MODE_IDENTIFICATION_INSTRUCTION : TENSE_IDENTIFICATION_INSTRUCTION,
     consigne: phrase,
+    conjugationConfusions: confusions.map(candidate => ({
+      tense: candidate.tense,
+      mode: candidate.mode,
+      answers: candidate.forms.map(form => formatAnswer(pronoun, form, candidate.mode, row.infinitif)),
+    })),
     reponses: unique(answers),
     reponsesPourCorrige: [correction],
     infinitif: row.infinitif,
@@ -745,7 +750,37 @@ async function validateSelections(request: QuestionnaireRequest) {
   return tenseResult[0]
 }
 
-export async function generateQuestionnaire(request: QuestionnaireRequest) {
+export async function generateMixedQuestionnaire(
+  request: QuestionnaireRequest,
+  generate: (request: QuestionnaireRequest) => Promise<ExerciseQuestion[]> = generateQuestionnaire,
+): Promise<ExerciseQuestion[]> {
+  const conjugationCount = Math.floor(request.questionCount / 2)
+    + (request.questionCount % 2 && Math.random() < .5 ? 1 : 0)
+  const identificationCount = request.questionCount - conjugationCount
+  const conjugation = conjugationCount ? await generate({
+    ...request, exerciseKind: 'conjugation', questionCount: conjugationCount,
+  }) : []
+  const identification = identificationCount ? await generate({
+    ...request, exerciseKind: 'tense-identification', questionCount: identificationCount,
+  }) : []
+  const groups = [
+    shuffle(conjugation).map(question => ({ ...question, exerciseKind: 'conjugation' as const })),
+    shuffle(identification).map(question => ({ ...question, exerciseKind: 'tense-identification' as const })),
+  ]
+  // Intercaler les types empêche le hasard de recréer deux blocs séparés.
+  if (groups[1]!.length > groups[0]!.length
+      || (groups[1]!.length === groups[0]!.length && Math.random() < .5)) groups.reverse()
+  const questions: ExerciseQuestion[] = []
+  for (let index = 0; index < Math.max(...groups.map(group => group.length)); index++) {
+    for (const group of groups) {
+      if (group[index]) questions.push(group[index]!)
+    }
+  }
+  return questions
+}
+
+export async function generateQuestionnaire(request: QuestionnaireRequest): Promise<ExerciseQuestion[]> {
+  if (request.exerciseKind === 'mixed') return generateMixedQuestionnaire(request)
   const selectedTenses = await validateSelections(request)
   const nonFiniteModes = ['participe', 'gérondif', 'infinitif']
   const finiteTenses = selectedTenses.filter(row => !nonFiniteModes.includes(normalized(row.mode_name)))
@@ -1085,6 +1120,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest) {
               Number(row.verbe_id), Number(row.temp_id), Number(row.personne_id),
             ))?.shift(),
             request.exerciseKind === 'mode-identification',
+            conjugationConfusions,
           ))
       }
 

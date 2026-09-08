@@ -226,7 +226,7 @@ export function parseChallengePresetPayload(value: unknown) {
   if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/u.test(presetKey) || !name || !categoryId
     || !questionCount || sortOrder === null || !verbIds?.length || !tenseIds?.length
     || criteria === null
-    || !['conjugation', 'tense-identification'].includes(String(exerciseKind))
+    || !['conjugation', 'tense-identification', 'mixed'].includes(String(exerciseKind))
     || !['all', 'third-person-only'].includes(String(pastSimplePronouns))
     || !['normal', 'cif-fle'].includes(String(learningSupportMode))
     || !Array.isArray(body.complementOptions) || complementOptions.length !== body.complementOptions.length

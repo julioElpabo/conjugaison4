@@ -124,9 +124,9 @@ test('la provenance est isolée sur une ligne plus petite et italique dans les d
 test('le corrigé d’identification ne contient que les réponses de mode et de temps', () => {
   assert.match(printPreview, /correctionItemHeight\('', printableCorrectionText\(question\)\)/u)
   assert.match(printPreview, /pdf\.text\(answer, left \+ 10/u)
-  assert.match(printPreview, /columnWidths: isTenseIdentification\.value \? \[480, 9495\]/u)
+  assert.match(printPreview, /columnWidths: usesWideRows\.value \? \[480, 9495\]/u)
   assert.match(printPreview, /identificationCorrectionCells/u)
-  assert.match(printPreview, /children: isTenseIdentification\.value[\s\S]*\? identificationCorrectionCells/u)
+  assert.match(printPreview, /children: usesWideRows\.value[\s\S]*\? identificationCorrectionCells/u)
 })
 
 test('les fiches ordinaires éloignent la première question du titre en PDF et Word', () => {

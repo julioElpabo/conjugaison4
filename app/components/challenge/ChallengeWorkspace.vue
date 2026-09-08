@@ -487,7 +487,7 @@ function onToggleTense(id: number) {
           </div>
           <p v-if="!isReady">{{ ui('Sélectionne au moins un verbe et un temps pour pouvoir le lancer.') }}</p>
           <p v-else>
-            {{ challenge.exerciseKind === 'conjugation' ? ui('Conjuguer les formes demandées') : ui('Trouver le mode et le temps') }}
+            {{ challenge.exerciseKind === 'mixed' ? ui('Un mélange des deux') : challenge.exerciseKind === 'conjugation' ? ui('Conjuguer les formes demandées') : ui('Trouver le mode et le temps') }}
             <template v-if="challenge.exerciseKind === 'conjugation' && challenge.includeComplements">
               · {{ ui('avec compléments,') }} {{ complementPlacementLabel }}
             </template>

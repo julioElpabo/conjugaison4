@@ -76,7 +76,7 @@ export interface GrammaticalPerson {
 }
 
 export type PastSimplePronouns = 'all' | 'third-person-only'
-export type ExerciseKind = 'conjugation' | 'tense-identification' | 'mode-identification'
+export type ExerciseKind = 'conjugation' | 'tense-identification' | 'mode-identification' | 'mixed'
 export type IdentificationSource = 'selected-verbs' | 'literary-corpus'
 export type LiteraryRegister = 'all' | 'courant' | 'soutenu'
 export type ComplementPlacement = 'after' | 'mixed' | 'before'
@@ -127,6 +127,7 @@ export interface ChallengePreset extends ChallengeConfig {
 
 /** Forme compatible avec les questionnaires de l'application historique. */
 export interface ExerciseQuestion {
+  exerciseKind?: Exclude<ExerciseKind, 'mixed'>
   id?: string | number
   titre: string
   instruction?: string

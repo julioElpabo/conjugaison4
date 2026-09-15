@@ -15,6 +15,7 @@ export default defineNitroPlugin(async () => {
     await connection.commit()
     console.info(
       '[database] Demandes des utilisateurs contrôlées : '
+      + `${report.reportedSimpleForms} forme(s) simple(s) signalée(s), `
       + `${report.protegerPresentNous} forme « protégeons », `
       + `${report.malformedPluralParticiples} participe(s) sans s redoublé, `
       + `${report.affaiblirPastSimpleForms} forme(s) d’« affaiblir » ajoutée(s), `

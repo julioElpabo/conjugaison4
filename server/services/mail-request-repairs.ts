@@ -1,4 +1,4 @@
-import type { PoolConnection, RowDataPacket } from 'mysql2/promise'
+import type { PoolConnection, ResultSetHeader, RowDataPacket } from 'mysql2/promise'
 
 interface ConjugationRow extends RowDataPacket {
   id: number
@@ -46,6 +46,12 @@ export const MISSING_DE_ACCENT_REPAIRS = [
   { before: 'developper', after: 'développer', presentParticiple: 'développant', pastParticiple: 'développé' },
 ] as const
 
+export const REPORTED_SIMPLE_FORM_REPAIRS = [
+  { infinitive: 'appeler', mode: 'indicatif', tense: 'présent', pronoun: 'nous', before: 'appellons', after: 'appelons' },
+  { infinitive: 'rappeler', mode: 'indicatif', tense: 'présent', pronoun: 'nous', before: 'rappellons', after: 'rappelons' },
+  { infinitive: 'élever', mode: 'indicatif', tense: 'présent', pronoun: 'il', before: 'élèves', after: 'élève' },
+] as const
+
 export interface ParadigmIssue {
   infinitive: string
   mode: string
@@ -91,7 +97,7 @@ export function repairMissingDeAccentForm(form: string, beforeInfinitive: string
   return form.split(beforeStem).join(afterStem)
 }
 
-export async function repairMissingDeAccents(connection: PoolConnection) {
+export async function repairMissingDeAccents(connection: PoolConnection, apply = true) {
   const report = {
     verbs: 0,
     conjugationRows: 0,
@@ -132,10 +138,12 @@ export async function repairMissingDeAccents(connection: PoolConnection) {
       const repaired = current.map(form => repairMissingDeAccentForm(form, repair.before, repair.after))
       const changedForms = current.filter((form, index) => form !== repaired[index]).length
       if (!changedForms && row.verbe_infinitif === repair.after) continue
-      await connection.execute(
-        'UPDATE verbesconjugues SET verbe_infinitif=?,conjugaison1=?,conjugaison2=?,conjugaison3=? WHERE id=?',
-        [repair.after, ...repaired, row.id],
-      )
+      if (apply) {
+        await connection.execute(
+          'UPDATE verbesconjugues SET verbe_infinitif=?,conjugaison1=?,conjugaison2=?,conjugaison3=? WHERE id=?',
+          [repair.after, ...repaired, row.id],
+        )
+      }
       report.conjugationRows += 1
       report.conjugationForms += changedForms
     }
@@ -149,7 +157,7 @@ export async function repairMissingDeAccents(connection: PoolConnection) {
     for (const row of pronominalRows) {
       const repaired = row.value1.split(repair.before).join(repair.after)
       if (repaired === row.value1) continue
-      await connection.execute('UPDATE emplois_pronominaux SET infinitif_pronominal=? WHERE id=?', [repaired, row.id])
+      if (apply) await connection.execute('UPDATE emplois_pronominaux SET infinitif_pronominal=? WHERE id=?', [repaired, row.id])
       report.pronominalUses += 1
     }
 
@@ -165,7 +173,7 @@ export async function repairMissingDeAccents(connection: PoolConnection) {
         ? null
         : row.value2.split(repair.before).join(repair.after)
       if (title === row.value1 && definition === (row.value2 ?? null)) continue
-      await connection.execute('UPDATE verbe_sens SET intitule=?,definition=? WHERE id=?', [title, definition, row.id])
+      if (apply) await connection.execute('UPDATE verbe_sens SET intitule=?,definition=? WHERE id=?', [title, definition, row.id])
       report.meaningTexts += Number(title !== row.value1) + Number(definition !== (row.value2 ?? null))
     }
 
@@ -174,11 +182,13 @@ export async function repairMissingDeAccents(connection: PoolConnection) {
       || verb.participe_passe !== repair.pastParticiple
       || verb.forme_canonique !== repair.after
     if (verbNeedsRepair) {
-      await connection.execute(`
-        UPDATE verbes
-        SET infinitif=?,\`participe_présent\`=?,\`participe_passé\`=?,forme_canonique=?
-        WHERE id=?
-      `, [repair.after, repair.presentParticiple, repair.pastParticiple, repair.after, verb.id])
+      if (apply) {
+        await connection.execute(`
+          UPDATE verbes
+          SET infinitif=?,\`participe_présent\`=?,\`participe_passé\`=?,forme_canonique=?
+          WHERE id=?
+        `, [repair.after, repair.presentParticiple, repair.pastParticiple, repair.after, verb.id])
+      }
       report.verbs += 1
     }
   }
@@ -232,12 +242,42 @@ export async function auditFiniteParadigms(connection: PoolConnection): Promise<
   return issues
 }
 
-export async function repairMailRequestConjugations(connection: PoolConnection) {
+export async function repairMailRequestConjugations(connection: PoolConnection, { apply = true } = {}) {
   const report = {
+    reportedSimpleForms: 0,
     protegerPresentNous: 0,
     malformedPluralParticiples: 0,
     affaiblirPastSimpleForms: 0,
-    missingDeAccents: await repairMissingDeAccents(connection),
+    missingDeAccents: await repairMissingDeAccents(connection, apply),
+  }
+
+  for (const repair of REPORTED_SIMPLE_FORM_REPAIRS) {
+    const joins = `
+      FROM verbesconjugues vc
+      INNER JOIN verbes v ON v.id=vc.verbe_id
+      INNER JOIN personnes p ON p.id=vc.personne_id
+      INNER JOIN temps t ON t.id=vc.temp_id
+      INNER JOIN modes m ON m.id=t.mode_id
+      WHERE v.infinitif=? AND m.name=? AND t.name=? AND p.pronom=?
+        AND vc.conjugaison1=?
+    `
+    const coordinates = [repair.infinitive, repair.mode, repair.tense, repair.pronoun, repair.before]
+    if (apply) {
+      const [result] = await connection.execute<ResultSetHeader>(`
+        UPDATE verbesconjugues vc
+        INNER JOIN verbes v ON v.id=vc.verbe_id
+        INNER JOIN personnes p ON p.id=vc.personne_id
+        INNER JOIN temps t ON t.id=vc.temp_id
+        INNER JOIN modes m ON m.id=t.mode_id
+        SET vc.conjugaison1=?
+        WHERE v.infinitif=? AND m.name=? AND t.name=? AND p.pronom=?
+          AND vc.conjugaison1=?
+      `, [repair.after, ...coordinates])
+      report.reportedSimpleForms += Number(result.affectedRows || 0)
+    } else {
+      const [rows] = await connection.execute<Array<RowDataPacket & { count: number }>>(`SELECT COUNT(*) AS count ${joins}`, coordinates)
+      report.reportedSimpleForms += Number(rows[0]?.count || 0)
+    }
   }
 
   const [protegerRows] = await connection.execute<ConjugationRow[]>(`
@@ -260,10 +300,12 @@ export async function repairMailRequestConjugations(connection: PoolConnection) 
     throw new Error(`Forme inattendue pour « nous protéger » : ${proteger.conjugaison1}.`)
   }
   if (proteger.conjugaison1 === 'protègeons') {
-    await connection.execute(
-      "UPDATE verbesconjugues SET conjugaison1='protégeons' WHERE id=?",
-      [proteger.id],
-    )
+    if (apply) {
+      await connection.execute(
+        "UPDATE verbesconjugues SET conjugaison1='protégeons' WHERE id=?",
+        [proteger.id],
+      )
+    }
     report.protegerPresentNous = 1
   }
 
@@ -282,10 +324,12 @@ export async function repairMailRequestConjugations(connection: PoolConnection) 
     const current = forms(row)
     const repaired = current.map(form => repairMalformedPluralParticiple(form, row.participe_passe))
     if (current.join('\u0000') === repaired.join('\u0000')) continue
-    await connection.execute(
-      'UPDATE verbesconjugues SET conjugaison1=?,conjugaison2=?,conjugaison3=? WHERE id=?',
-      [...repaired, row.id],
-    )
+    if (apply) {
+      await connection.execute(
+        'UPDATE verbesconjugues SET conjugaison1=?,conjugaison2=?,conjugaison3=? WHERE id=?',
+        [...repaired, row.id],
+      )
+    }
     report.malformedPluralParticiples += 1
   }
 
@@ -312,14 +356,16 @@ export async function repairMailRequestConjugations(connection: PoolConnection) 
     `, [affaiblirContext[0]!.verb_id, affaiblirContext[0]!.tense_id, personId])
     if (existing.length > 1) throw new Error(`Plusieurs formes d’« affaiblir » existent pour la personne ${personId}.`)
     if (!existing.length) {
-      await connection.execute(`
-        INSERT INTO verbesconjugues
-          (verbe_id,verbe_infinitif,personne_id,temp_id,conjugaison1,conjugaison2,conjugaison3)
-        VALUES (?,'affaiblir',?,?,?,'','')
-      `, [affaiblirContext[0]!.verb_id, personId, affaiblirContext[0]!.tense_id, expected])
+      if (apply) {
+        await connection.execute(`
+          INSERT INTO verbesconjugues
+            (verbe_id,verbe_infinitif,personne_id,temp_id,conjugaison1,conjugaison2,conjugaison3)
+          VALUES (?,'affaiblir',?,?,?,'','')
+        `, [affaiblirContext[0]!.verb_id, personId, affaiblirContext[0]!.tense_id, expected])
+      }
       report.affaiblirPastSimpleForms += 1
     } else if (!existing[0]!.conjugaison1) {
-      await connection.execute('UPDATE verbesconjugues SET conjugaison1=? WHERE id=?', [expected, existing[0]!.id])
+      if (apply) await connection.execute('UPDATE verbesconjugues SET conjugaison1=? WHERE id=?', [expected, existing[0]!.id])
       report.affaiblirPastSimpleForms += 1
     } else if (existing[0]!.conjugaison1 !== expected) {
       throw new Error(`Forme inattendue pour « affaiblir » (personne ${personId}) : ${existing[0]!.conjugaison1}.`)

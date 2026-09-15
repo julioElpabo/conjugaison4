@@ -98,6 +98,9 @@ referenceCases('familles à modification orthographique', [
 ])
 
 referenceCases('doléances vérifiées des utilisateurs', [
+  { infinitive: 'appeler', mode: 'indicatif', tense: 'présent', pronoun: 'nous', expected: ['appelons'] },
+  { infinitive: 'rappeler', mode: 'indicatif', tense: 'présent', pronoun: 'nous', expected: ['rappelons'] },
+  { infinitive: 'élever', mode: 'indicatif', tense: 'présent', pronoun: 'il', expected: ['élève'] },
   { infinitive: 'naître', mode: 'indicatif', tense: 'présent', pronoun: 'il', expected: ['naît', 'nait'] },
   { infinitive: 'naître', mode: 'indicatif', tense: 'futur', pronoun: 'je', expected: ['naîtrai', 'naitrai'] },
   { infinitive: 'reconnaître', mode: 'indicatif', tense: 'présent', pronoun: 'il', expected: ['reconnaît', 'reconnait'] },

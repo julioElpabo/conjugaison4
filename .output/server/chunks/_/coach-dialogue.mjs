@@ -50,8 +50,12 @@ function uniformChoice(items, random) {
   if (!items.length) return void 0;
   return items[Math.min(items.length - 1, Math.floor(random() * items.length))];
 }
+function coachMediaRule(coach, eventType) {
+  var _a;
+  return (_a = coach.rules.find((item) => item.eventType === eventType)) != null ? _a : eventType === "correct-alternative" || eventType === "streak" ? coach.rules.find((item) => item.eventType === "correct") : void 0;
+}
 function createCoachReaction(coach, eventType, context = {}, options = {}) {
-  var _a, _b, _c;
+  var _a, _b, _c, _d, _e;
   const random = (_a = options.random) != null ? _a : Math.random;
   const allowedReplyIds = options.allowedReplyIds ? new Set(options.allowedReplyIds) : null;
   const replies = coach.replies.filter((reply2) => reply2.isActive && reply2.eventType === eventType && (!allowedReplyIds || allowedReplyIds.has(reply2.id)) && canRenderCoachTemplate(reply2.content, context));
@@ -61,7 +65,7 @@ function createCoachReaction(coach, eventType, context = {}, options = {}) {
     ...reply ? { replyId: reply.id } : {}
   };
   if (!reply) return result;
-  const rule = coach.rules.find((item) => item.eventType === eventType);
+  const rule = coachMediaRule(coach, eventType);
   if (!options.mediaAllowed || !rule) return result;
   const mediaEvent = eventType === "correct-alternative" || eventType === "streak" ? "correct" : eventType;
   const exactAssignments = coach.assignments.filter((item) => item.isActive && item.eventType === eventType);
@@ -74,27 +78,27 @@ function createCoachReaction(coach, eventType, context = {}, options = {}) {
     return [{ media, weight: assignment.weight }];
   });
   const excluded = new Set(options.excludeMediaIds || []);
-  const freshCandidates = candidates.filter((item) => !excluded.has(item.media.id));
-  const selectable = freshCandidates.length ? freshCandidates : candidates;
   const mediaGroups = [
     {
       type: "animation",
       probability: (_b = rule.animationProbability) != null ? _b : rule.mediaProbability,
-      candidates: selectable.filter((item) => item.media.mediaType === "animation" || item.media.mediaType === "video")
+      candidates: candidates.filter((item) => item.media.mediaType === "animation" || item.media.mediaType === "video")
     },
     {
       type: "emoji",
       probability: (_c = rule.emojiProbability) != null ? _c : rule.mediaProbability,
-      candidates: selectable.filter((item) => item.media.mediaType === "emoji")
+      candidates: candidates.filter((item) => item.media.mediaType === "emoji")
     },
     {
       type: "other",
       probability: rule.mediaProbability,
-      candidates: selectable.filter((item) => item.media.mediaType !== "animation" && item.media.mediaType !== "video" && item.media.mediaType !== "emoji")
+      candidates: candidates.filter((item) => item.media.mediaType !== "animation" && item.media.mediaType !== "video" && item.media.mediaType !== "emoji")
     }
-  ].filter((group) => group.candidates.length && Math.max(0, group.probability) > 0 && random() <= Math.min(1, group.probability));
-  const selectedGroup = weightedChoice(mediaGroups.map((group) => ({ ...group, weight: Math.max(1, Math.round(group.probability * 100)) })), random);
-  const selected = (selectedGroup == null ? void 0 : selectedGroup.type) === "animation" ? uniformChoice(selectedGroup.candidates, random) : selectedGroup ? weightedChoice(selectedGroup.candidates, random) : void 0;
+  ];
+  const selectedGroup = mediaGroups.find((group) => group.candidates.length && group.probability > 0 && random() < Math.min(1, group.probability));
+  const freshCandidates = (_d = selectedGroup == null ? void 0 : selectedGroup.candidates.filter((item) => !excluded.has(item.media.id))) != null ? _d : [];
+  const selectable = freshCandidates.length ? freshCandidates : (_e = selectedGroup == null ? void 0 : selectedGroup.candidates) != null ? _e : [];
+  const selected = (selectedGroup == null ? void 0 : selectedGroup.type) === "animation" ? uniformChoice(selectable, random) : selectedGroup ? weightedChoice(selectable, random) : void 0;
   if (selected) result.media = selected.media;
   return result;
 }
@@ -122,5 +126,5 @@ function createVariedCoachReaction(coach, eventType, context = {}, state, option
   return reaction;
 }
 
-export { COACH_PLACEHOLDERS as C, createVariedCoachReaction as a, createCoachDialogueState as b, createCoachReaction as c, unknownCoachPlaceholders as u };
+export { COACH_PLACEHOLDERS as C, createVariedCoachReaction as a, createCoachDialogueState as b, createCoachReaction as c, coachMediaRule as d, unknownCoachPlaceholders as u };
 //# sourceMappingURL=coach-dialogue.mjs.map

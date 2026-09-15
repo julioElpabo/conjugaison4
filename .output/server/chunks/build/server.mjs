@@ -1619,7 +1619,7 @@ const _routes = [
   {
     name: "admin-caracteres",
     path: "/admin/caracteres",
-    component: () => import('./caracteres-UQf4m0zF.mjs')
+    component: () => import('./caracteres-Dr8QtA07.mjs')
   },
   {
     name: "admin-challenges",
@@ -1689,7 +1689,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-CPUSUR2-.mjs')
+    component: () => import('./users-pz3jG2GI.mjs')
   },
   {
     name: "admin-verbes",
@@ -1709,12 +1709,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-Cuw921c4.mjs')
+    component: () => import('./_code_-b7A3-VJl.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-18FBjTDM.mjs')
+    component: () => import('./_slug_-DV5oQs_S.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1759,7 +1759,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-BFOETKig.mjs')
+    component: () => import('./exercices-de-conjugaison-DXV-UDf9.mjs')
   },
   {
     name: "mon-compte",
@@ -1770,12 +1770,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-wCGsnM_D.mjs')
+    component: () => import('./my-page-DVPDzIBz.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-27l2DLww.mjs')
+    component: () => import('./nouveau-defi-DRZJSsn2.mjs')
   },
   {
     name: "signin",
@@ -1785,7 +1785,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-CeuxDEMD.mjs')
+    component: () => import('./index-9T1ZKPTa.mjs')
   },
   {
     name: "mode-tense",
@@ -1800,7 +1800,7 @@ const _routes = [
   {
     name: "localized-admin-caracteres",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/caracteres",
-    component: () => import('./caracteres-UQf4m0zF.mjs')
+    component: () => import('./caracteres-Dr8QtA07.mjs')
   },
   {
     name: "localized-admin-challenges",
@@ -1870,7 +1870,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/users",
-    component: () => import('./users-CPUSUR2-.mjs')
+    component: () => import('./users-pz3jG2GI.mjs')
   },
   {
     name: "localized-admin-verbes",
@@ -1890,12 +1890,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defi/:code()",
-    component: () => import('./_code_-Cuw921c4.mjs')
+    component: () => import('./_code_-b7A3-VJl.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defis/:slug()",
-    component: () => import('./_slug_-18FBjTDM.mjs')
+    component: () => import('./_slug_-DV5oQs_S.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1940,7 +1940,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-BFOETKig.mjs')
+    component: () => import('./exercices-de-conjugaison-DXV-UDf9.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1951,12 +1951,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-wCGsnM_D.mjs')
+    component: () => import('./my-page-DVPDzIBz.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/nouveau-defi",
-    component: () => import('./nouveau-defi-27l2DLww.mjs')
+    component: () => import('./nouveau-defi-DRZJSsn2.mjs')
   },
   {
     name: "localized-signin",
@@ -1966,7 +1966,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/",
-    component: () => import('./index-CeuxDEMD.mjs')
+    component: () => import('./index-9T1ZKPTa.mjs')
   },
   {
     name: "localized-mode-tense",

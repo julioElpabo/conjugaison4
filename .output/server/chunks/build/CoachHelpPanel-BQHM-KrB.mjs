@@ -394,7 +394,10 @@ function concealedRequestedFormsHtml(html, question) {
         return concealed === content ? element : `<${tag}${attributes}>${concealed}</${tag}>`;
       }
     );
-  }, html);
+  }, html).replace(
+    /<strong>(Tu|Nous|Vous)\s+<kbd>forme à trouver<\/kbd><\/strong>/gu,
+    "<strong>$1</strong> : <kbd>forme \xE0 retrouver</kbd>"
+  );
 }
 function bareHelpInfinitive(value = "") {
   return value.trim().toLocaleLowerCase("fr").replace(/^(?:se\s+|s[’']\s*)/u, "");

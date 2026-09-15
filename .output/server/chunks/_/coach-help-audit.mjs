@@ -436,8 +436,19 @@ function imperativePresentHelpHtml(question, reference) {
   const sourceForm = (requestedReference == null ? void 0 : requestedReference.form) || (reference == null ? void 0 : reference.form) || "";
   const regularTarget = subject === "tu" && /(?:es|as)$/iu.test(sourceForm) ? sourceForm.slice(0, -1) : sourceForm;
   const isException = Boolean(sourceForm && normalized$1(regularTarget) !== normalized$1(actualForm));
+  const irregularStem = (() => {
+    var _a;
+    const infinitive = normalized$1(bareInfinitive(question.infinitif || ""));
+    const stems = {
+      etre: { tu: "soi-", nous: "soy-", vous: "soy-" },
+      avoir: { tu: "ai-", nous: "ay-", vous: "ay-" },
+      savoir: { tu: "sach-", nous: "sach-", vous: "sach-" },
+      vouloir: { tu: "veuill-", nous: "veuill-", vous: "veuill-" }
+    };
+    return ((_a = stems[infinitive]) == null ? void 0 : _a[subject]) || "";
+  })();
   const referenceStep = requestedReference ? `Avec <strong>${escapedHtml(subject)}</strong>, pars de la forme du pr\xE9sent de l\u2019indicatif :<br>${rememberedFormMarkup(`${subject} ${requestedReference.form}`)}` : `Choisis la forme du pr\xE9sent de l\u2019indicatif qui correspond \xE0 <strong>${escapedHtml(subject || "la personne demand\xE9e")}</strong>.`;
-  const verificationStep = isException ? "Ce verbe fait exception : sa forme \xE0 l\u2019imp\xE9ratif doit aussi \xEAtre apprise par c\u0153ur. Regarde les exceptions plus bas." : subject === "tu" ? "V\xE9rifie s\u2019il faut garder ou enlever le <strong>s</strong>. Regarde le bloc \xAB s ou pas s avec tu \xBB plus bas." : "";
+  const verificationStep = isException ? `Ce verbe fait exception : sa forme \xE0 l\u2019imp\xE9ratif doit aussi \xEAtre apprise par c\u0153ur.${irregularStem ? ` Pour la retrouver avec <strong>${escapedHtml(subject)}</strong>, pars du radical particulier <strong>${escapedHtml(irregularStem)}</strong>, puis ajoute la terminaison de cette personne.` : ""}` : subject === "tu" ? "V\xE9rifie s\u2019il faut garder ou enlever le <strong>s</strong>. Regarde le bloc \xAB s ou pas s avec tu \xBB plus bas." : "";
   const result = actualForm ? `<blockquote><strong>R\xE9sultat</strong><p>${resultFormMarkup(capitalizedResult, false)}</p></blockquote>` : "";
   const verificationItem = verificationStep ? `<li>${verificationStep}</li>` : "";
   const construction = `<figure><figcaption>Construis la r\xE9ponse</figcaption><ol><li>${referenceStep}</li><li>Garde la forme verbale, mais n\u2019\xE9cris pas le pronom sujet.</li>${verificationItem}</ol>${result}</figure>`;
@@ -665,7 +676,9 @@ function auxiliaryConjugationHtml(auxiliary, target, requestedPerson, highlightR
   if (!selected) return "<p>La conjugaison de l\u2019auxiliaire n\u2019est pas disponible pour cette forme.</p>";
   const rows = selected.forms[auxiliary].map((form, index) => {
     const isRequested = index === requestedPerson || requestedPerson === null && selected.forms[auxiliary].length === 1;
-    return `<tr><th><strong>${escapedHtml(selected.pronouns[index] || `personne ${index + 1}`)}</strong></th><td>${highlightRequested && isRequested ? `<mark><strong>${escapedHtml(form)}</strong></mark>` : `<strong>${escapedHtml(form)}</strong>`}</td></tr>`;
+    const rawPronoun = selected.pronouns[index] || `personne ${index + 1}`;
+    const displayedPronoun = rawPronoun === "je" && startsWithVowelSound(form) ? "j\u2019" : rawPronoun;
+    return `<tr><th><strong>${escapedHtml(displayedPronoun)}</strong></th><td>${highlightRequested && isRequested ? `<mark><strong>${escapedHtml(form)}</strong></mark>` : `<strong>${escapedHtml(form)}</strong>`}</td></tr>`;
   }).join("");
   const summary = (target == null ? void 0 : target.tense) ? `${target.tense} ${withDeArticle(target.mode)} du verbe ${auxiliary}` : `Temps simples du verbe ${auxiliary}`;
   return `<details><summary>${escapedHtml(summary)}</summary><table><tbody>${rows}</tbody></table></details>`;
@@ -744,7 +757,7 @@ function buildCompoundConjugationHtml(question, verb, tense, revealAnswers = tru
   const auxiliaryForm = compoundAuxiliaryPart(question.conjugaison1 || "", participle);
   const officialForm = officialCompoundForm(question, participle);
   const auxiliaryContext = simpleTense ? `${withAArticle(simpleTense.tense)} ${withDeArticle(simpleTense.mode)}` : "au temps simple correspondant";
-  const auxiliaryKnowledge = revealAnswers ? auxiliaryConjugationHtml(auxiliary, simpleTense, person) : `${auxiliaryConjugationHtml("avoir", simpleTense, person, false)}${auxiliaryConjugationHtml("\xEAtre", simpleTense, person, false)}`;
+  const auxiliaryKnowledge = auxiliaryConjugationHtml(auxiliary, simpleTense, person);
   const participleKnowledge = revealAnswers ? rememberedFormMarkup(participle) : `<strong>${escapedHtml(participle)}</strong>`;
   const auxiliaryChoice = revealAnswers ? `<blockquote><strong>Quel verbe auxiliaire pour ${escapedHtml(infinitive)} ?</strong>${auxiliaryChoicesMarkup(auxiliary)}</blockquote>` : `<blockquote><strong>Auxiliaire \xE0 utiliser</strong><p>Pour <strong>${escapedHtml(infinitive)}</strong>, utilise l\u2019auxiliaire <strong>${escapedHtml(auxiliary)}</strong>.</p></blockquote>`;
   const knowledge = `<figure>${knowledgeCaption()}${auxiliaryChoice}${auxiliaryKnowledge}<blockquote><strong>Le participe pass\xE9 de ${escapedHtml(infinitive)}</strong><p>${participleKnowledge}</p></blockquote></figure>`;
@@ -1104,6 +1117,9 @@ function answerFreeNonPersonalHelpHtml(question, verb, tense) {
   const time = normalized$1(question.temps || (tense == null ? void 0 : tense.name));
   const infinitive = question.infinitif || (verb == null ? void 0 : verb.infinitif) || "ce verbe";
   const irregularPresentParticiple = ["avoir", "etre", "savoir"].includes(normalized$1(bareInfinitive(infinitive)));
+  if (mode === "infinitif" && time === "present") {
+    return "<figure><figcaption>Infinitif pr\xE9sent</figcaption><ol><li>L\u2019infinitif est la forme du dictionnaire, celle qui est d\xE9j\xE0 indiqu\xE9e dans la question.</li><li>N\u2019ajoute aucun pronom sujet.</li><li>Ne change ni le radical ni la terminaison : recopie cette forme telle quelle.</li></ol></figure>";
+  }
   if (mode === "participe" && time === "present") {
     const method = irregularPresentParticiple ? "<li>Ce verbe a un participe pr\xE9sent irr\xE9gulier : retrouve la forme apprise par c\u0153ur.</li><li>V\xE9rifie qu\u2019elle se termine bien par <strong>-ant</strong>.</li>" : "<li>Prends la forme avec <strong>nous</strong> au pr\xE9sent.</li><li>Enl\xE8ve <strong>-ons</strong>, puis ajoute <strong>-ant</strong>.</li>";
     return `<figure><figcaption>Participe pr\xE9sent</figcaption><ol><li>Rep\xE8re le verbe <strong>${escapedHtml(infinitive)}</strong>.</li>${method}</ol></figure>`;

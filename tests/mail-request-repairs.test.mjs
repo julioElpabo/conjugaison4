@@ -3,9 +3,20 @@ import { describe, it } from 'node:test'
 
 import {
   MISSING_DE_ACCENT_REPAIRS,
+  REPORTED_SIMPLE_FORM_REPAIRS,
   repairMalformedPluralParticiple,
   repairMissingDeAccentForm,
 } from '../server/services/mail-request-repairs.ts'
+
+describe('formes simples signalées par les utilisateurs', () => {
+  it('répare uniquement les graphies fautives vérifiées', () => {
+    assert.deepEqual(REPORTED_SIMPLE_FORM_REPAIRS, [
+      { infinitive: 'appeler', mode: 'indicatif', tense: 'présent', pronoun: 'nous', before: 'appellons', after: 'appelons' },
+      { infinitive: 'rappeler', mode: 'indicatif', tense: 'présent', pronoun: 'nous', before: 'rappellons', after: 'rappelons' },
+      { infinitive: 'élever', mode: 'indicatif', tense: 'présent', pronoun: 'il', before: 'élèves', after: 'élève' },
+    ])
+  })
+})
 
 describe('réparation des participes terminés par s ou x', () => {
   it('retire seulement le s pluriel redoublé', () => {

@@ -427,13 +427,15 @@ describe('aides visuelles configurables', () => {
     })
     const advice = renderCoachHelpContent('{completeAdviceHelp}', values)
     assert.match(advice, /imparfait du subjonctif du verbe avoir/u)
-    assert.match(advice, /imparfait du subjonctif du verbe être/u)
+    assert.doesNotMatch(advice, /imparfait du subjonctif du verbe être/u)
+    assert.match(advice, /<mark><strong>eussiez<\/strong><\/mark>/u)
+    assert.match(advice, /<th><strong>que j’<\/strong><\/th><td><strong>eusse<\/strong><\/td>/u)
     assert.match(advice, /Le participe passé de calquer[\s\S]*<strong>calqué<\/strong>/u)
     assert.match(advice, /Conjugue le verbe auxiliaire à l’imparfait du subjonctif avec <strong>vous<\/strong>\./u)
     assert.match(advice, /<li>Ajoute le participe passé\.<\/li>/u)
     assert.match(advice, /Vérifie l’accord du participe passé\. Regarde plus bas pour plus de détails\./u)
     assert.match(advice, /<figcaption>Accord du participe passé<\/figcaption>/u)
-    assert.doesNotMatch(advice, /Quel verbe auxiliaire|<kbd>Avoir<\/kbd>|<kbd>Être<\/kbd>|<mark>|eussiez calqué|Résultat|…/u)
+    assert.doesNotMatch(advice, /Quel verbe auxiliaire|<kbd>Avoir<\/kbd>|<kbd>Être<\/kbd>|eussiez calqué|Résultat|…/u)
   })
 
   it('ne donne ni radical ni terminaison ciblée au conditionnel sans réponses', () => {
@@ -493,9 +495,41 @@ describe('aides visuelles configurables', () => {
     const advice = renderCoachHelpContent('{completeAdviceHelp}', values)
     assert.match(advice, /<th><strong>tu<\/strong><\/th><td><strong>Tu prends<\/strong><\/td>/u)
     assert.match(advice, /<th><strong>nous<\/strong><\/th><td><strong>Nous prenons<\/strong><\/td>/u)
-    assert.match(advice, /<th><strong>vous<\/strong><\/th><td><strong>Vous <kbd>forme à trouver<\/kbd><\/strong><\/td>/u)
+    assert.match(advice, /<th><strong>vous<\/strong><\/th><td><strong>Vous<\/strong> : <kbd>forme à retrouver<\/kbd><\/td>/u)
     assert.doesNotMatch(advice, />prenez</u)
     assert.doesNotMatch(advice, /<mark>|Résultat|…/u)
+  })
+
+  it('donne un indice de radical pour un impératif irrégulier sans révéler la réponse', () => {
+    const values = coachHelpQuestionVariables({
+      titre: 'Question', consigne: '', reponses: ['soyez'], reponsesPourCorrige: ['soyez !'],
+      infinitif: 'être', pronom: 'vous', mode: 'impératif', temps: 'présent', conjugaison1: 'soyez',
+      radicalReference: {
+        kind: 'present-same-person', label: 'vous au présent', form: 'êtes', radical: 'êt',
+        referenceMode: 'indicatif', referenceTense: 'présent', referenceSubject: 'vous', strategy: 'memorize', validated: true,
+        imperativePresentReferences: [
+          { subject: 'tu', form: 'es' }, { subject: 'nous', form: 'sommes' }, { subject: 'vous', form: 'êtes' },
+        ],
+      },
+    }, {
+      infinitif: 'être', groupeConjugaison: 3, terminaison: 're', auxiliaire: 'avoir', participePasse: 'été',
+    })
+    const advice = renderCoachHelpContent('{completeAdviceHelp}', values)
+    assert.match(advice, /radical particulier <strong>soy-<\/strong>/u)
+    assert.doesNotMatch(advice, /soyez/u)
+  })
+
+  it('explique l’infinitif présent sans produire « forme à trouver »', () => {
+    const values = coachHelpQuestionVariables({
+      titre: 'Question', consigne: '', reponses: ['aimer'], reponsesPourCorrige: ['Aimer'],
+      infinitif: 'aimer', pronom: '', mode: 'infinitif', temps: 'présent', conjugaison1: 'aimer',
+    }, {
+      infinitif: 'aimer', groupeConjugaison: 1, terminaison: 'er', auxiliaire: 'avoir', participePasse: 'aimé',
+    })
+    const advice = renderCoachHelpContent('{completeAdviceHelp}', values)
+    assert.match(advice, /L’infinitif est la forme du dictionnaire/u)
+    assert.match(advice, /recopie cette forme telle quelle/u)
+    assert.doesNotMatch(advice, /forme à trouver/u)
   })
 
   it('conserve la forme repère mais masque le radical et la terminaison pendant la construction', () => {

@@ -24,7 +24,7 @@ import {
   validateConjugationAnswer,
 } from '~~/shared/utils/answer'
 import { buildAnswerComparison } from '~~/shared/utils/answer-difference'
-import { createCoachDialogueState, createVariedCoachReaction } from '~~/shared/utils/coach-dialogue'
+import { coachMediaRule, createCoachDialogueState, createVariedCoachReaction } from '~~/shared/utils/coach-dialogue'
 import {
   answerTurnPlan,
   CHAT_BUBBLE_DELAY_MS,
@@ -1131,7 +1131,7 @@ async function addCoachReaction(
   requiredText = '',
   fallbackText = '',
 ) {
-  const rule = props.coach.rules.find(item => item.eventType === eventType)
+  const rule = coachMediaRule(props.coach, eventType)
   const cooledDown = currentIndex.value - lastMediaQuestion.value >= (rule?.cooldownQuestions || 0)
   const reaction = createVariedCoachReaction(props.coach, eventType, context, dialogueState, {
     allowMotion: allowMotion.value,

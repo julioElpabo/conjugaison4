@@ -59,6 +59,13 @@ function uniformChoice<T>(items: T[], random: () => number): T | undefined {
   return items[Math.min(items.length - 1, Math.floor(random() * items.length))]
 }
 
+export function coachMediaRule(coach: CoachProfile, eventType: CoachEvent) {
+  return coach.rules.find(item => item.eventType === eventType)
+    ?? (eventType === 'correct-alternative' || eventType === 'streak'
+      ? coach.rules.find(item => item.eventType === 'correct')
+      : undefined)
+}
+
 export function createCoachReaction(
   coach: CoachProfile,
   eventType: CoachEvent,
@@ -78,7 +85,7 @@ export function createCoachReaction(
   }
   if (!reply) return result
 
-  const rule = coach.rules.find(item => item.eventType === eventType)
+  const rule = coachMediaRule(coach, eventType)
   if (!options.mediaAllowed || !rule) return result
 
   const mediaEvent = eventType === 'correct-alternative' || eventType === 'streak' ? 'correct' : eventType
@@ -94,31 +101,35 @@ export function createCoachReaction(
     return [{ media, weight: assignment.weight }]
   })
   const excluded = new Set(options.excludeMediaIds || [])
-  const freshCandidates = candidates.filter(item => !excluded.has(item.media.id))
-  const selectable = freshCandidates.length ? freshCandidates : candidates
   const mediaGroups = [
     {
       type: 'animation',
       probability: rule.animationProbability ?? rule.mediaProbability,
-      candidates: selectable.filter(item => item.media.mediaType === 'animation' || item.media.mediaType === 'video'),
+      candidates: candidates.filter(item => item.media.mediaType === 'animation' || item.media.mediaType === 'video'),
     },
     {
       type: 'emoji',
       probability: rule.emojiProbability ?? rule.mediaProbability,
-      candidates: selectable.filter(item => item.media.mediaType === 'emoji'),
+      candidates: candidates.filter(item => item.media.mediaType === 'emoji'),
     },
     {
       type: 'other',
       probability: rule.mediaProbability,
-      candidates: selectable.filter(item => item.media.mediaType !== 'animation' && item.media.mediaType !== 'video' && item.media.mediaType !== 'emoji'),
+      candidates: candidates.filter(item => item.media.mediaType !== 'animation' && item.media.mediaType !== 'video' && item.media.mediaType !== 'emoji'),
     },
-  ].filter(group => group.candidates.length && Math.max(0, group.probability) > 0 && random() <= Math.min(1, group.probability))
+  ]
 
-  const selectedGroup = weightedChoice(mediaGroups.map(group => ({ ...group, weight: Math.max(1, Math.round(group.probability * 100)) })), random)
+  // One media per bubble: give animations their configured probability, then
+  // try emojis/images only if no animation was selected.
+  const selectedGroup = mediaGroups.find(group => group.candidates.length
+    && group.probability > 0 && random() < Math.min(1, group.probability))
+  const freshCandidates = selectedGroup?.candidates.filter(item => !excluded.has(item.media.id)) ?? []
+  // Vary within the selected type without excluding its only available GIF.
+  const selectable = freshCandidates.length ? freshCandidates : selectedGroup?.candidates ?? []
   const selected = selectedGroup?.type === 'animation'
-    ? uniformChoice(selectedGroup.candidates, random)
+    ? uniformChoice(selectable, random)
     : selectedGroup
-      ? weightedChoice(selectedGroup.candidates, random)
+      ? weightedChoice(selectable, random)
       : undefined
   if (selected) result.media = selected.media
   return result

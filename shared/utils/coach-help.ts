@@ -214,7 +214,10 @@ function concealedRequestedFormsHtml(html: string, question: ExerciseQuestion): 
         return concealed === content ? element : `<${tag}${attributes}>${concealed}</${tag}>`
       },
     )
-  }, html)
+  }, html).replace(
+    /<strong>(Tu|Nous|Vous)\s+<kbd>forme à trouver<\/kbd><\/strong>/gu,
+    '<strong>$1</strong> : <kbd>forme à retrouver</kbd>',
+  )
 }
 
 function bareHelpInfinitive(value = ''): string {

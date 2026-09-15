@@ -12,7 +12,7 @@ const connection = await mysql.createConnection({
 
 try {
   await connection.beginTransaction()
-  const repairs = await repairMailRequestConjugations(connection)
+  const repairs = await repairMailRequestConjugations(connection, { apply })
   const issues = await auditFiniteParadigms(connection)
   if (apply) await connection.commit()
   else await connection.rollback()

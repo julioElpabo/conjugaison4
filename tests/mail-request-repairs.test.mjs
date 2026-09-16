@@ -13,6 +13,7 @@ describe('formes simples signalées par les utilisateurs', () => {
     assert.deepEqual(REPORTED_SIMPLE_FORM_REPAIRS, [
       { infinitive: 'appeler', mode: 'indicatif', tense: 'présent', pronoun: 'nous', before: 'appellons', after: 'appelons' },
       { infinitive: 'rappeler', mode: 'indicatif', tense: 'présent', pronoun: 'nous', before: 'rappellons', after: 'rappelons' },
+      { infinitive: 'rappeler', mode: 'indicatif', tense: 'présent', pronoun: 'vous', before: 'rappellez', after: 'rappelez' },
       { infinitive: 'élever', mode: 'indicatif', tense: 'présent', pronoun: 'il', before: 'élèves', after: 'élève' },
     ])
   })

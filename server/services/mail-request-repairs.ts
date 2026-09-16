@@ -49,6 +49,7 @@ export const MISSING_DE_ACCENT_REPAIRS = [
 export const REPORTED_SIMPLE_FORM_REPAIRS = [
   { infinitive: 'appeler', mode: 'indicatif', tense: 'présent', pronoun: 'nous', before: 'appellons', after: 'appelons' },
   { infinitive: 'rappeler', mode: 'indicatif', tense: 'présent', pronoun: 'nous', before: 'rappellons', after: 'rappelons' },
+  { infinitive: 'rappeler', mode: 'indicatif', tense: 'présent', pronoun: 'vous', before: 'rappellez', after: 'rappelez' },
   { infinitive: 'élever', mode: 'indicatif', tense: 'présent', pronoun: 'il', before: 'élèves', after: 'élève' },
 ] as const
 

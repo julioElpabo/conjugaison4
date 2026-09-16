@@ -9,17 +9,19 @@ INNER JOIN verbes AS v ON v.id = vc.verbe_id
 INNER JOIN personnes AS p ON p.id = vc.personne_id
 INNER JOIN temps AS t ON t.id = vc.temp_id
 INNER JOIN modes AS m ON m.id = t.mode_id
-SET vc.conjugaison1 = CASE v.infinitif
-  WHEN 'appeler' THEN 'appelons'
-  WHEN 'rappeler' THEN 'rappelons'
-  WHEN 'élever' THEN 'élève'
+SET vc.conjugaison1 = CASE
+  WHEN v.infinitif = 'appeler' AND p.pronom = 'nous' THEN 'appelons'
+  WHEN v.infinitif = 'rappeler' AND p.pronom = 'nous' THEN 'rappelons'
+  WHEN v.infinitif = 'rappeler' AND p.pronom = 'vous' THEN 'rappelez'
+  WHEN v.infinitif = 'élever' AND p.pronom = 'il' THEN 'élève'
   ELSE vc.conjugaison1
 END
 WHERE m.name = 'indicatif'
   AND t.name = 'présent'
   AND (
     (v.infinitif = 'appeler' AND vc.conjugaison1 = 'appellons')
-    OR (v.infinitif = 'rappeler' AND vc.conjugaison1 = 'rappellons')
+    OR (v.infinitif = 'rappeler' AND p.pronom = 'nous' AND vc.conjugaison1 = 'rappellons')
+    OR (v.infinitif = 'rappeler' AND p.pronom = 'vous' AND vc.conjugaison1 = 'rappellez')
     OR (v.infinitif = 'élever' AND p.pronom = 'il' AND vc.conjugaison1 = 'élèves')
   );
 
@@ -38,7 +40,8 @@ INNER JOIN personnes AS p ON p.id = vc.personne_id
 INNER JOIN temps AS t ON t.id = vc.temp_id
 INNER JOIN modes AS m ON m.id = t.mode_id
 WHERE v.infinitif IN ('appeler', 'rappeler', 'élever')
-  AND ((v.infinitif IN ('appeler', 'rappeler') AND p.pronom = 'nous')
+  AND ((v.infinitif = 'appeler' AND p.pronom = 'nous')
+    OR (v.infinitif = 'rappeler' AND p.pronom IN ('nous', 'vous'))
     OR (v.infinitif = 'élever' AND p.pronom = 'il'))
   AND m.name = 'indicatif'
   AND t.name = 'présent'

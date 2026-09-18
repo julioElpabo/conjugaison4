@@ -85,6 +85,7 @@ function boundedOption(value: number | undefined, fallback: number, minimum: num
 const GRADE_BOX_SIZE_MM = 17
 const INCLUSIVE_GRADE_TOP_MM = 26
 const INCLUSIVE_QUESTION_LINE_HEIGHT_MM = 7.5
+const PRINT_USAGE_NOTICE = '©tatitotu.ch, toute utilisation commerciale de ce site ou de son contenu est strictement interdite.'
 
 const questionSpacingMm = computed(() => boundedOption(props.options.questionSpacingMm, 8, 2, 15))
 const titleSpacingMm = computed(() => boundedOption(props.options.titleSpacingMm, 30, 8, 30))
@@ -283,9 +284,10 @@ async function buildPdf() {
 
     function drawFooter() {
       pdf.setFont('helvetica', 'normal')
-      pdf.setFontSize(8)
+      pdf.setFontSize(7)
       pdf.setTextColor(105, 105, 105)
-      pdf.text('conjugaison.tatitotu.ch', pageWidth / 2, pageHeight - 8, { align: 'center' })
+      const lines = pdf.splitTextToSize(pdfSafe(PRINT_USAGE_NOTICE), right - left)
+      pdf.text(lines, pageWidth / 2, pageHeight - 10, { align: 'center', lineHeightFactor: 1.15 })
       pdf.setTextColor(20, 20, 20)
     }
 
@@ -835,7 +837,7 @@ async function downloadWord() {
       children: [new Paragraph({
         alignment: AlignmentType.CENTER,
         spacing: noSpacing,
-        children: [new TextRun({ text: 'conjugaison.tatitotu.ch', size: inclusivePrint.value ? 20 : 16, color: '666666' })]
+        children: [new TextRun({ text: PRINT_USAGE_NOTICE, size: inclusivePrint.value ? 20 : 16, color: '666666' })]
       })]
     })
     const runningHeader = (text: string) => {

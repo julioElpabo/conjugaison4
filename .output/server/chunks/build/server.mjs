@@ -414,7 +414,7 @@ const uiMessages = {
   "Cette forme est aussi possible au subjonctif, mais elle est tr\xE8s souvent pr\xE9c\xE9d\xE9e de \xAB que \xBB ou \xAB qu\u2019 \xBB : \xAB {example} \xBB. Ici, sans ce contexte, on attend l\u2019indicatif.": withDutchVariants({ de: "Diese Form ist auch im Subjonctif m\xF6glich, steht aber sehr oft nach \u201Eque\u201C oder \u201Equ\u2019\u201C: \u201E{example}\u201C. Hier wird ohne diesen Kontext der Indikativ erwartet.", en: "This form is also possible in the subjunctive, but it is very often preceded by \u201Cque\u201D or \u201Cqu\u2019\u201D: \u201C{example}\u201D. Here, without that context, the indicative is expected.", it: "Questa forma \xE8 possibile anche al congiuntivo, ma \xE8 molto spesso preceduta da \xAB que \xBB o \xAB qu\u2019 \xBB: \xAB {example} \xBB. Qui, senza questo contesto, si richiede l\u2019indicativo.", es: "Esta forma tambi\xE9n es posible en subjuntivo, pero suele ir precedida de \xAB que \xBB o \xAB qu\u2019 \xBB: \xAB {example} \xBB. Aqu\xED, sin ese contexto, se espera el indicativo.", nl: "Deze vorm kan ook in de subjonctif voorkomen, maar wordt vaak voorafgegaan door \xAB que \xBB of \xAB qu\u2019 \xBB: \xAB {example} \xBB. Hier wordt zonder die context de indicatif verwacht." }),
   "Consulter": withDutchVariants({ de: "Nachschlagen", en: "Look up", it: "Consultare", es: "Consultar", nl: "Opzoeken" }),
   "Apprendre": withDutchVariants({ de: "Lernen", en: "Learn", it: "Imparare", es: "Aprender", nl: "Leren" }),
-  "Un outil gratuit pour travailler la conjugaison fran\xE7aise.": withDutchVariants({ de: "Ein kostenloses Werkzeug zum \xDCben der franz\xF6sischen Konjugation.", en: "A free tool for practising French conjugation.", it: "Uno strumento gratuito per esercitare la coniugazione francese.", es: "Una herramienta gratuita para practicar la conjugaci\xF3n francesa.", nl: "Een gratis hulpmiddel om Franse vervoeging te oefenen." }),
+  "Ce site est gratuit. Toute utilisation commerciale de ce site ou de son contenu est strictement interdite.": withDutchVariants({ de: "Diese Website ist kostenlos. Jede kommerzielle Nutzung dieser Website oder ihrer Inhalte ist strengstens untersagt.", en: "This website is free to use. Any commercial use of this website or its content is strictly prohibited.", it: "Questo sito \xE8 gratuito. Qualsiasi utilizzo commerciale del sito o dei suoi contenuti \xE8 severamente vietato.", es: "Este sitio es gratuito. Queda estrictamente prohibido cualquier uso comercial del sitio o de su contenido.", nl: "Deze website is gratis. Elk commercieel gebruik van deze website of de inhoud ervan is strikt verboden." }),
   "Contact": withDutchVariants({ de: "Kontakt", en: "Contact", it: "Contatti", es: "Contacto", nl: "Contact" }),
   "Administration": withDutchVariants({ de: "Verwaltung", en: "Administration", it: "Amministrazione", es: "Administraci\xF3n", nl: "Beheer" }),
   "Connexion": withDutchVariants({ de: "Anmelden", en: "Sign in", it: "Accedi", es: "Iniciar sesi\xF3n", nl: "Aanmelden" }),
@@ -1709,12 +1709,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-b7A3-VJl.mjs')
+    component: () => import('./_code_-bLkNrazN.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-DV5oQs_S.mjs')
+    component: () => import('./_slug_-CHyE_b16.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1759,7 +1759,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-DXV-UDf9.mjs')
+    component: () => import('./exercices-de-conjugaison-iZgJF5uK.mjs')
   },
   {
     name: "mon-compte",
@@ -1775,7 +1775,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-DRZJSsn2.mjs')
+    component: () => import('./nouveau-defi-ByVP62i2.mjs')
   },
   {
     name: "signin",
@@ -1785,7 +1785,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-9T1ZKPTa.mjs')
+    component: () => import('./index-CTRSXliZ.mjs')
   },
   {
     name: "mode-tense",
@@ -1890,12 +1890,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defi/:code()",
-    component: () => import('./_code_-b7A3-VJl.mjs')
+    component: () => import('./_code_-bLkNrazN.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defis/:slug()",
-    component: () => import('./_slug_-DV5oQs_S.mjs')
+    component: () => import('./_slug_-CHyE_b16.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1940,7 +1940,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-DXV-UDf9.mjs')
+    component: () => import('./exercices-de-conjugaison-iZgJF5uK.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1956,7 +1956,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/nouveau-defi",
-    component: () => import('./nouveau-defi-DRZJSsn2.mjs')
+    component: () => import('./nouveau-defi-ByVP62i2.mjs')
   },
   {
     name: "localized-signin",
@@ -1966,7 +1966,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/",
-    component: () => import('./index-9T1ZKPTa.mjs')
+    component: () => import('./index-CTRSXliZ.mjs')
   },
   {
     name: "localized-mode-tense",
@@ -2634,7 +2634,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-D4Glrd6u.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-MCelOZNU.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

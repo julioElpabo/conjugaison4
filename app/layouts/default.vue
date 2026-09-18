@@ -530,7 +530,7 @@ const activeSection = computed(() => {
     </main>
 
     <footer v-if="!embeddedConsultation" class="site-footer">
-      <p>{{ ui('Un outil gratuit pour travailler la conjugaison française.') }}</p>
+      <p>{{ ui('Ce site est gratuit. Toute utilisation commerciale de ce site ou de son contenu est strictement interdite.') }}</p>
       <div class="site-footer__links">
         <NuxtLink :to="localePath('/defis')">{{ publicChallengesLabel }}</NuxtLink>
         <button type="button" @click="contactDialog?.open()">{{ ui('Contact') }}</button>

@@ -39,6 +39,7 @@ const props = defineProps<{
   identificationTenses?: ConjugationTense[]
   trackingContext?: LearnerExerciseTrackingContext
   requireSuccess?: boolean
+  canSaveChallenge?: boolean
   analyticsMetadata?: Record<string, string | number | boolean>
 }>()
 const { track } = useSiteAnalytics()
@@ -46,6 +47,7 @@ const { recordAttempt, recordQuestionPlan } = useLearnerProgress()
 
 const emit = defineEmits<{
   close: []
+  saveChallenge: []
 }>()
 
 const currentIndex = ref(0)
@@ -1164,6 +1166,7 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="dialog-actions exercise-results__actions">
+            <button v-if="!falcMode && canSaveChallenge" class="secondary-button exercise-result-action" type="button" @click="emit('saveChallenge')"><span aria-hidden="true"><FontAwesomeIcon :icon="faArrowUpFromBracket" /></span>{{ ui('Enregistrer/partager ce défi') }}</button>
             <button v-if="!falcMode" class="secondary-button exercise-result-action" type="button" @click="shareSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faArrowUpFromBracket" /></span>{{ ui('Partager mon bilan') }}</button>
             <button v-if="!falcMode" class="secondary-button exercise-result-action" type="button" @click="printSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faPrint" /></span>{{ ui('Imprimer mon bilan') }}</button>
             <button class="primary-button exercise-result-action" type="button" @click="restart"><span aria-hidden="true">↻</span>{{ ui('Recommencer') }}</button>

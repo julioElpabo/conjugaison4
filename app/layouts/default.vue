@@ -205,6 +205,17 @@ function toggleTheme() {
   const updateTheme = () => {
     isDark.value = nextTheme === 'dark'
     applyTheme(nextTheme)
+    if (learner.value) {
+      void $fetch('/api/learner/preferences', {
+        method: 'PUT',
+        body: {
+          interfaceLocale: interfaceLocale.value,
+          colorTheme: nextTheme,
+        },
+      }).catch(() => {
+        // Le thème reste actif localement si sa mémorisation distante échoue.
+      })
+    }
     track('feature_completed', { feature: 'theme.change', item: nextTheme })
   }
   const viewTransitionDocument = document as Document & {

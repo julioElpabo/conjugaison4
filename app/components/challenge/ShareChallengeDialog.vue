@@ -82,8 +82,7 @@ function createCode() {
         <button ref="close-button" class="dialog-close" type="button" :aria-label="ui('Fermer')" @click="emit('close')">
           ×
         </button>
-        <p class="dialog-kicker">{{ code ? ui('Défi sauvegardé') : ui('Défi prêt à être partagé') }}</p>
-        <h2 id="share-title">{{ ui('Votre défi est prêt à être partagé') }}</h2>
+        <h2 id="share-title">{{ ui('Votre défi est enregistré et prêt à être partagé') }}</h2>
         <p>{{ ui('Le lien reste actif. Un défi inutilisé depuis plus de cinq ans peut être supprimé.') }}</p>
         <NuxtLink
           v-if="isAuthenticated"

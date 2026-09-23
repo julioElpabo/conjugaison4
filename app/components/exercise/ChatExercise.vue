@@ -67,6 +67,7 @@ const props = defineProps<{
   trackingContext?: LearnerExerciseTrackingContext
   learningSupportMode?: LearningSupportMode
   requireSuccess?: boolean
+  canSaveChallenge?: boolean
   analyticsMetadata?: Record<string, string | number | boolean>
 }>()
 const audioReadingEnabled = AUDIO_READING_ENABLED
@@ -80,7 +81,7 @@ const restartCoachMessage = computed<ChatMessage>(() => ({
   text: ui('Tu veux refaire ce défi ?'),
 }))
 
-const emit = defineEmits<{ close: [], changeCoach: [coach: CoachProfile] }>()
+const emit = defineEmits<{ close: [], changeCoach: [coach: CoachProfile], saveChallenge: [] }>()
 const { track } = useSiteAnalytics()
 const { recordAttempt, recordQuestionPlan } = useLearnerProgress()
 const exerciseAnalyticsMetadata = computed(() => ({
@@ -1918,6 +1919,7 @@ onBeforeUnmount(() => {
                 <button type="button" class="chat-restart-prompt__new" :disabled="regeneratingQuestions" @click="restartWithNewQuestions">
                   <span aria-hidden="true">↻</span>{{ regeneratingQuestions ? ui('Préparation…') : ui('Avec d’autres questions') }}
                 </button>
+                <button v-if="canSaveChallenge" type="button" class="chat-restart-prompt__challenge-share" :disabled="regeneratingQuestions" @click="emit('saveChallenge')"><span aria-hidden="true"><FontAwesomeIcon :icon="faArrowUpFromBracket" /></span>{{ ui('Enregistrer/partager ce défi') }}</button>
                 <button type="button" class="chat-restart-prompt__share" :disabled="regeneratingQuestions" @click="shareSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faArrowUpFromBracket" /></span>{{ ui('Partager mon bilan') }}</button>
                 <button type="button" class="chat-restart-prompt__print" :disabled="regeneratingQuestions" @click="printSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faPrint" /></span>{{ ui('Imprimer mon bilan') }}</button>
                 <button type="button" class="chat-restart-prompt__quit" :disabled="regeneratingQuestions" @click="emit('close')">{{ ui('Quitter le chat') }}</button>
@@ -3417,6 +3419,19 @@ onBeforeUnmount(() => {
   background: #e8f6f8;
 }
 
+.chat-restart-prompt__actions .chat-restart-prompt__challenge-share {
+  min-height: 38px;
+  grid-column: 1 / -1;
+  color: #215f4f;
+  border-color: #86b9aa;
+  background: #edf8f4;
+}
+
+.chat-restart-prompt__actions .chat-restart-prompt__challenge-share:hover:not(:disabled),
+.chat-restart-prompt__actions .chat-restart-prompt__challenge-share:focus-visible {
+  background: #def2eb;
+}
+
 .chat-restart-prompt__actions .chat-restart-prompt__share:hover:not(:disabled),
 .chat-restart-prompt__actions .chat-restart-prompt__share:focus-visible {
   background: #d9f0f3;
@@ -3559,6 +3574,17 @@ onBeforeUnmount(() => {
   color: #cce9ed;
   border-color: #52737a;
   background: #1b3439;
+}
+
+:global(:root[data-theme='dark']) .chat-restart-prompt__actions .chat-restart-prompt__challenge-share {
+  color: #d1eee4;
+  border-color: #477b6c;
+  background: #1d3c34;
+}
+
+:global(:root[data-theme='dark']) .chat-restart-prompt__actions .chat-restart-prompt__challenge-share:hover:not(:disabled),
+:global(:root[data-theme='dark']) .chat-restart-prompt__actions .chat-restart-prompt__challenge-share:focus-visible {
+  background: #285047;
 }
 
 :global(:root[data-theme='dark']) .chat-restart-prompt__actions .chat-restart-prompt__print:hover:not(:disabled),
@@ -3777,6 +3803,10 @@ onBeforeUnmount(() => {
     grid-column: auto;
   }
 
+  .chat-restart-prompt__actions .chat-restart-prompt__challenge-share {
+    grid-column: auto;
+  }
+
   .coach-avatar {
     width: 94px;
     height: 94px;
@@ -3808,6 +3838,7 @@ onBeforeUnmount(() => {
   }
 
   .chat-restart-prompt__actions .chat-restart-prompt__quit,
+  .chat-restart-prompt__actions .chat-restart-prompt__challenge-share,
   .chat-restart-prompt__actions .chat-restart-prompt__share,
   .chat-restart-prompt__actions .chat-restart-prompt__print {
     grid-column: auto;

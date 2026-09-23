@@ -236,7 +236,7 @@ const learnerErrorComparison = (example: LearnerErrorProgressExample) => buildAn
   example.acceptedAnswers?.length ? example.acceptedAnswers : example.expectedAnswers,
   example.expectedAnswers,
 )
-const { applyTheme } = useColorTheme()
+const { theme, applyTheme } = useColorTheme()
 const { flushProgress } = useLearnerProgress()
 const { track } = useSiteAnalytics()
 const route = useRoute()
@@ -399,6 +399,9 @@ const { data: storedPreferences } = await useAsyncData(
 
 const preferredLocale = ref<AppLocale>(storedPreferences.value?.interfaceLocale || interfaceLocale.value)
 const preferredTheme = ref<'light' | 'dark'>(storedPreferences.value?.colorTheme || 'light')
+watch(theme, (nextTheme) => {
+  if (!props.readOnly) preferredTheme.value = nextTheme
+})
 const localeOptions = computed<Array<{ value: AppLocale, label: string, flag: string }>>(() => [
   { value: 'fr', label: ui('Français'), flag: '🇫🇷' },
   { value: 'de', label: ui('Allemand'), flag: '🇩🇪' },

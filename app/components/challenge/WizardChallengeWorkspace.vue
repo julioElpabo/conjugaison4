@@ -1832,6 +1832,11 @@ function saveChallenge() {
   isShareOpen.value = true
 }
 
+function saveChallengeFromSummary() {
+  isExerciseOpen.value = false
+  saveChallenge()
+}
+
 async function createSharedChallenge(title: string, description: string) {
   busyAction.value = 'save'
   shareError.value = ''
@@ -2263,8 +2268,8 @@ async function createSharedChallenge(title: string, description: string) {
       </template>
       </main>
 
-      <ClassicExercise ref="classic-exercise" v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" :identification-tenses="identificationTenses" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('classic')" @close="closeClassicExercise" />
-      <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :exercise-kind="challenge.exerciseKind" :coach="selectedCoach" :verbs="chatExerciseVerbs" :tenses="selectedTenses" :identification-tenses="identificationTenses" :regenerate-questions="regenerateChatQuestions" :tracking-context="exerciseTracking" :learning-support-mode="challenge.learningSupportMode" :analytics-metadata="exerciseUsageMetadata('chat')" :tour-demo="tourActive" @change-coach="selectedCoach = $event" @close="isExerciseOpen = false" />
+      <ClassicExercise ref="classic-exercise" v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" :identification-tenses="identificationTenses" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('classic')" can-save-challenge @save-challenge="saveChallengeFromSummary" @close="closeClassicExercise" />
+      <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :exercise-kind="challenge.exerciseKind" :coach="selectedCoach" :verbs="chatExerciseVerbs" :tenses="selectedTenses" :identification-tenses="identificationTenses" :regenerate-questions="regenerateChatQuestions" :tracking-context="exerciseTracking" :learning-support-mode="challenge.learningSupportMode" :analytics-metadata="exerciseUsageMetadata('chat')" :tour-demo="tourActive" can-save-challenge @save-challenge="saveChallengeFromSummary" @change-coach="selectedCoach = $event" @close="isExerciseOpen = false" />
       <CoachPicker v-if="isCoachPickerOpen && !falcMode" :tour-demo="tourActive" :learning-support-mode="challenge.learningSupportMode" @close="isCoachPickerOpen = false" @select="launchWithCoach" />
       <component :is="printPreviewComponent" v-if="isPrintOpen && !falcMode && printPreviewComponent" :questions="printQuestions" :verbs="selectedVerbs" :tenses="selectedTenses" :exercise-kind="challenge.exerciseKind" :challenge="challenge" :existing-challenge-code="shareCode" :options="challenge.printOptions" :requested-question-count="challenge.questionCount" :regenerating="busyAction === 'print'" :analytics-metadata="exerciseUsageMetadata('print')" @update-options="challenge.printOptions = $event" @challenge-code-created="shareCode = $event" @regenerate="preparePrint" @close="isPrintOpen = false" />
       <ShareChallengeDialog

@@ -63,6 +63,26 @@ test('monte explicitement le modal et ordonne les actions du bilan', async () =>
   }
 })
 
+test('propose de sauvegarder ou partager le défi depuis les deux bilans', async () => {
+  const [classic, chat, workspace, wizard] = await Promise.all([
+    readFile(new URL('../app/components/exercise/ClassicExercise.vue', import.meta.url), 'utf8'),
+    readFile(new URL('../app/components/exercise/ChatExercise.vue', import.meta.url), 'utf8'),
+    readFile(new URL('../app/components/challenge/ChallengeWorkspace.vue', import.meta.url), 'utf8'),
+    readFile(new URL('../app/components/challenge/WizardChallengeWorkspace.vue', import.meta.url), 'utf8'),
+  ])
+
+  for (const exercise of [classic, chat]) {
+    assert.match(exercise, /canSaveChallenge\?: boolean/u)
+    assert.match(exercise, /ui\('Enregistrer\/partager ce défi'\)/u)
+    assert.match(exercise, /emit\('saveChallenge'\)/u)
+  }
+  for (const challengeWorkspace of [workspace, wizard]) {
+    assert.match(challengeWorkspace, /can-save-challenge/u)
+    assert.match(challengeWorkspace, /@save-challenge="saveChallengeFromSummary"/u)
+    assert.match(challengeWorkspace, /function saveChallengeFromSummary\(\) \{\s+isExerciseOpen\.value = false\s+saveChallenge\(\)/u)
+  }
+})
+
 test('limite les liens à un mois et protège le nettoyage administratif', async () => {
   const service = await readFile(new URL('../server/services/exercise-summaries.ts', import.meta.url), 'utf8')
   const modal = await readFile(new URL('../app/components/exercise/ShareExerciseSummaryDialog.vue', import.meta.url), 'utf8')

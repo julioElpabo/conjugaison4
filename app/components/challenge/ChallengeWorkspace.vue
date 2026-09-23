@@ -329,6 +329,11 @@ function saveChallenge() {
   isShareOpen.value = true
 }
 
+function saveChallengeFromSummary() {
+  isExerciseOpen.value = false
+  saveChallenge()
+}
+
 async function createSharedChallenge(title: string, description: string) {
   busyAction.value = 'save'
   shareError.value = ''
@@ -512,6 +517,8 @@ function onToggleTense(id: number) {
       :identification-tenses="identificationTenses"
       :tracking-context="exerciseTracking"
       :analytics-metadata="exerciseUsageMetadata('classic')"
+      can-save-challenge
+      @save-challenge="saveChallengeFromSummary"
       @close="isExerciseOpen = false"
     />
 
@@ -527,6 +534,8 @@ function onToggleTense(id: number) {
       :tracking-context="exerciseTracking"
       :learning-support-mode="challenge.learningSupportMode"
       :analytics-metadata="exerciseUsageMetadata('chat')"
+      can-save-challenge
+      @save-challenge="saveChallengeFromSummary"
       @change-coach="selectedCoach = $event"
       @close="isExerciseOpen = false"
     />

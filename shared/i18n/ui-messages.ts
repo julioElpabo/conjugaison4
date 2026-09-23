@@ -507,6 +507,7 @@ export const uiMessages = {
   'Avec les mêmes questions': withDutchVariants({ de: 'Mit denselben Fragen', en: 'With the same questions', it: 'Con le stesse domande', es: 'Con las mismas preguntas', nl: "Met dezelfde vragen", }),
   'Imprimer le bilan': withDutchVariants({ de: 'Auswertung drucken', en: 'Print summary', it: 'Stampa il riepilogo', es: 'Imprimir el resumen', nl: "Overzicht afdrukken", }),
   'Partager mon bilan': withDutchVariants({ de: 'Meine Auswertung teilen', en: 'Share my summary', it: 'Condividi il mio riepilogo', es: 'Compartir mi resumen', nl: "Mijn overzicht delen", }),
+  'Enregistrer/partager ce défi': withDutchVariants({ de: 'Diese Übung speichern/teilen', en: 'Save/share this challenge', it: 'Salva/condividi questo esercizio', es: 'Guardar/compartir este ejercicio', nl: "Deze uitdaging opslaan/delen", }),
   'Imprimer mon bilan': withDutchVariants({ de: 'Meine Auswertung drucken', en: 'Print my summary', it: 'Stampa il mio riepilogo', es: 'Imprimir mi resumen', nl: "Mijn overzicht afdrukken", }),
   'PARTAGER MON BILAN': withDutchVariants({ de: 'MEINE AUSWERTUNG TEILEN', en: 'SHARE MY SUMMARY', it: 'CONDIVIDI IL MIO RIEPILOGO', es: 'COMPARTIR MI RESUMEN', nl: "MIJN OVERZICHT DELEN", }),
   'Ton bilan est prêt à être envoyé': withDutchVariants({ de: 'Deine Auswertung kann verschickt werden', en: 'Your summary is ready to send', it: 'Il tuo riepilogo è pronto per essere inviato', es: 'Tu resumen está listo para enviar', nl: "Je overzicht is klaar om te versturen", }),

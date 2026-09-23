@@ -390,7 +390,6 @@ function translateAppMessage(locale, key, parameters = {}) {
 const uiMessages = {
   "D\xE9fis de conjugaison": withDutchVariants({ de: "Konjugations\xFCbungen", en: "Conjugation challenges", it: "Esercizi di coniugazione", es: "Ejercicios de conjugaci\xF3n", nl: "Vervoegingsuitdagingen" }),
   "D\xE9fi de conjugaison": withDutchVariants({ de: "Konjugations\xFCbung", en: "Conjugation challenge", it: "Esercizio di coniugazione", es: "Ejercicio de conjugaci\xF3n", nl: "Vervoegingsuitdaging" }),
-  "D\xE9fi pr\xEAt \xE0 \xEAtre partag\xE9": withDutchVariants({ de: "\xDCbung bereit zum Teilen", en: "Challenge ready to share", it: "Esercizio pronto per essere condiviso", es: "Ejercicio listo para compartir", nl: "Uitdaging klaar om te delen" }),
   "D\xE9fi partag\xE9": withDutchVariants({ de: "Geteilte \xDCbung", en: "Shared challenge", it: "Esercizio condiviso", es: "Ejercicio compartido", nl: "Gedeelde uitdaging" }),
   "Phrases litt\xE9raires": withDutchVariants({ de: "Literarische S\xE4tze", en: "Literary sentences", it: "Frasi letterarie", es: "Frases literarias", nl: "Literaire zinnen" }),
   "Titre du d\xE9fi": withDutchVariants({ de: "Titel der \xDCbung", en: "Challenge title", it: "Titolo dell\u2019esercizio", es: "T\xEDtulo del ejercicio", nl: "Titel van de uitdaging" }),
@@ -740,10 +739,9 @@ const uiMessages = {
   "Impossible de g\xE9n\xE9rer l\u2019aper\xE7u PDF.": withDutchVariants({ de: "Die PDF-Vorschau konnte nicht erstellt werden.", en: "The PDF preview could not be generated.", it: "Impossibile generare l\u2019anteprima PDF.", es: "No se ha podido generar la vista previa en PDF.", nl: "Het PDF-voorbeeld kon niet worden gegenereerd." }),
   "L\u2019aper\xE7u PDF n\u2019a pas pu \xEAtre cr\xE9\xE9.": withDutchVariants({ de: "Die PDF-Vorschau konnte nicht erstellt werden.", en: "The PDF preview could not be created.", it: "Impossibile creare l\u2019anteprima PDF.", es: "No se ha podido crear la vista previa en PDF.", nl: "Het PDF-voorbeeld kon niet worden aangemaakt." }),
   "CORRIG\xC9": withDutchVariants({ de: "L\xD6SUNGEN", en: "ANSWER KEY", it: "SOLUZIONI", es: "SOLUCIONES", nl: "OPLOSSINGEN" }),
-  "D\xE9fi sauvegard\xE9": withDutchVariants({ de: "\xDCbung gespeichert", en: "Challenge saved", it: "Esercizio salvato", es: "Ejercicio guardado", nl: "Uitdaging opgeslagen" }),
   "Ce d\xE9fi est enregistr\xE9 dans \xAB Mes d\xE9fis \xBB de votre compte.": withDutchVariants({ de: "Diese \xDCbung ist unter \u201EMeine Herausforderungen\u201C in deinem Konto gespeichert.", en: "This challenge is saved under \u201CMy challenges\u201D in your account.", it: "Questo esercizio \xE8 salvato in \xABI miei esercizi\xBB nel tuo account.", es: "Este ejercicio est\xE1 guardado en \xABMis ejercicios\xBB de tu cuenta.", nl: "Deze uitdaging is opgeslagen bij \u201CMijn uitdagingen\u201D in je account." }),
   "Ce d\xE9fi sera automatiquement enregistr\xE9 dans \xAB Mes d\xE9fis \xBB de votre compte.": withDutchVariants({ de: "Diese \xDCbung wird automatisch unter \u201EMeine Herausforderungen\u201C in deinem Konto gespeichert.", en: "This challenge will automatically be saved under \u201CMy challenges\u201D in your account.", it: "Questo esercizio verr\xE0 salvato automaticamente in \xABI miei esercizi\xBB nel tuo account.", es: "Este ejercicio se guardar\xE1 autom\xE1ticamente en \xABMis ejercicios\xBB de tu cuenta.", nl: "Deze uitdaging wordt automatisch opgeslagen bij \u201CMijn uitdagingen\u201D in je account." }),
-  "Votre d\xE9fi est pr\xEAt \xE0 \xEAtre partag\xE9": withDutchVariants({ de: "Deine \xDCbung kann geteilt werden", en: "Your challenge is ready to share", it: "Il tuo esercizio \xE8 pronto per essere condiviso", es: "Tu ejercicio est\xE1 listo para compartir", nl: "Je uitdaging is klaar om te delen" }),
+  "Votre d\xE9fi est enregistr\xE9 et pr\xEAt \xE0 \xEAtre partag\xE9": withDutchVariants({ de: "Deine \xDCbung ist gespeichert und kann geteilt werden", en: "Your challenge is saved and ready to share", it: "Il tuo esercizio \xE8 salvato e pronto per essere condiviso", es: "Tu ejercicio est\xE1 guardado y listo para compartir", nl: "Je uitdaging is opgeslagen en klaar om te delen" }),
   "Deux possibilit\xE9s permettent \xE0 vos \xE9l\xE8ves de retrouver ce d\xE9fi.": withDutchVariants({ de: "Deine Sch\xFClerinnen und Sch\xFCler k\xF6nnen diese \xDCbung auf zwei Arten wiederfinden.", en: "Your students can retrieve this challenge in two ways.", it: "Gli alunni possono ritrovare questo esercizio in due modi.", es: "Tus alumnos pueden recuperar este ejercicio de dos maneras.", nl: "Je leerlingen kunnen deze uitdaging op twee manieren terugvinden." }),
   "Sauvegarder le code": withDutchVariants({ de: "Code speichern", en: "Save the code", it: "Salva il codice", es: "Guardar el c\xF3digo", nl: "Bewaar de code" }),
   "L\u2019\xE9l\xE8ve conserve ce code. Plus tard, il le copie sur la page d\u2019accueil pour retrouver ce d\xE9fi.": withDutchVariants({ de: "Der Sch\xFCler bewahrt diesen Code auf und gibt ihn sp\xE4ter auf der Startseite ein, um die \xDCbung wiederzufinden.", en: "The student keeps this code and later enters it on the home page to retrieve the challenge.", it: "L\u2019alunno conserva il codice e lo inserisce in seguito nella home page per ritrovare l\u2019esercizio.", es: "El alumno guarda el c\xF3digo y lo introduce m\xE1s tarde en la p\xE1gina de inicio para recuperar el ejercicio.", nl: "De leerling bewaart deze code en voert ze later in op de startpagina om de uitdaging terug te vinden." }),
@@ -884,7 +882,7 @@ const uiMessages = {
   "Avec les m\xEAmes questions": withDutchVariants({ de: "Mit denselben Fragen", en: "With the same questions", it: "Con le stesse domande", es: "Con las mismas preguntas", nl: "Met dezelfde vragen" }),
   "Imprimer le bilan": withDutchVariants({ de: "Auswertung drucken", en: "Print summary", it: "Stampa il riepilogo", es: "Imprimir el resumen", nl: "Overzicht afdrukken" }),
   "Partager mon bilan": withDutchVariants({ de: "Meine Auswertung teilen", en: "Share my summary", it: "Condividi il mio riepilogo", es: "Compartir mi resumen", nl: "Mijn overzicht delen" }),
-  "Enregistrer/partager ce d\xE9fi": withDutchVariants({ de: "Diese \xDCbung speichern/teilen", en: "Save/share this challenge", it: "Salva/condividi questo esercizio", es: "Guardar/compartir este ejercicio", nl: "Deze uitdaging opslaan/delen" }),
+  "Enregistrer / partager ce d\xE9fi": withDutchVariants({ de: "Diese \xDCbung speichern / teilen", en: "Save / share this challenge", it: "Salva / condividi questo esercizio", es: "Guardar / compartir este ejercicio", nl: "Deze uitdaging opslaan / delen" }),
   "Imprimer mon bilan": withDutchVariants({ de: "Meine Auswertung drucken", en: "Print my summary", it: "Stampa il mio riepilogo", es: "Imprimir mi resumen", nl: "Mijn overzicht afdrukken" }),
   "PARTAGER MON BILAN": withDutchVariants({ de: "MEINE AUSWERTUNG TEILEN", en: "SHARE MY SUMMARY", it: "CONDIVIDI IL MIO RIEPILOGO", es: "COMPARTIR MI RESUMEN", nl: "MIJN OVERZICHT DELEN" }),
   "Ton bilan est pr\xEAt \xE0 \xEAtre envoy\xE9": withDutchVariants({ de: "Deine Auswertung kann verschickt werden", en: "Your summary is ready to send", it: "Il tuo riepilogo \xE8 pronto per essere inviato", es: "Tu resumen est\xE1 listo para enviar", nl: "Je overzicht is klaar om te versturen" }),
@@ -1000,7 +998,7 @@ const uiMessages = {
   "Classique": withDutchVariants({ de: "Klassisch", en: "Classic", it: "Classica", es: "Cl\xE1sica", nl: "Klassiek" }),
   "Avec un coach": withDutchVariants({ de: "Mit einem Coach", en: "With a coach", it: "Con un coach", es: "Con un coach", nl: "Met een coach" }),
   "Imprimer": withDutchVariants({ de: "Drucken", en: "Print", it: "Stampa", es: "Imprimir", nl: "Afdrukken" }),
-  "Partager": withDutchVariants({ de: "Teilen", en: "Share", it: "Condividi", es: "Compartir", nl: "Delen" }),
+  "Enregistrer / partager": withDutchVariants({ de: "Speichern / teilen", en: "Save / share", it: "Salva / condividi", es: "Guardar / compartir", nl: "Opslaan / delen" }),
   "Sauvegarde\u2026": withDutchVariants({ de: "Wird gespeichert\u2026", en: "Saving\u2026", it: "Salvataggio\u2026", es: "Guardando\u2026", nl: "Wordt opgeslagen\u2026" }),
   "R\xE9sultats": withDutchVariants({ de: "Ergebnisse", en: "Results", it: "Risultati", es: "Resultados", nl: "Resultaten" }),
   "Question {current} sur {total}": withDutchVariants({ de: "Frage {current} von {total}", en: "Question {current} of {total}", it: "Domanda {current} di {total}", es: "Pregunta {current} de {total}", nl: "Vraag {current} van {total}" }),
@@ -1690,7 +1688,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-offu--zG.mjs')
+    component: () => import('./users-yNcSwtgp.mjs')
   },
   {
     name: "admin-verbes",
@@ -1710,12 +1708,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-DVyyD21I.mjs')
+    component: () => import('./_code_-DYDMv_N5.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-iiW8r_0K.mjs')
+    component: () => import('./_slug_-DHuvHjFQ.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1760,7 +1758,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-D4w2T4vo.mjs')
+    component: () => import('./exercices-de-conjugaison-BpqYdKJZ.mjs')
   },
   {
     name: "mon-compte",
@@ -1771,12 +1769,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-0mqfQ5z6.mjs')
+    component: () => import('./my-page-DUP-hWxo.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-DYyhLaCG.mjs')
+    component: () => import('./nouveau-defi-CBo95m0E.mjs')
   },
   {
     name: "signin",
@@ -1786,7 +1784,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-DzxRLW1i.mjs')
+    component: () => import('./index-C5ihs6EU.mjs')
   },
   {
     name: "mode-tense",
@@ -1871,7 +1869,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/users",
-    component: () => import('./users-offu--zG.mjs')
+    component: () => import('./users-yNcSwtgp.mjs')
   },
   {
     name: "localized-admin-verbes",
@@ -1891,12 +1889,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defi/:code()",
-    component: () => import('./_code_-DVyyD21I.mjs')
+    component: () => import('./_code_-DYDMv_N5.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defis/:slug()",
-    component: () => import('./_slug_-iiW8r_0K.mjs')
+    component: () => import('./_slug_-DHuvHjFQ.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1941,7 +1939,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-D4w2T4vo.mjs')
+    component: () => import('./exercices-de-conjugaison-BpqYdKJZ.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1952,12 +1950,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-0mqfQ5z6.mjs')
+    component: () => import('./my-page-DUP-hWxo.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/nouveau-defi",
-    component: () => import('./nouveau-defi-DYyhLaCG.mjs')
+    component: () => import('./nouveau-defi-CBo95m0E.mjs')
   },
   {
     name: "localized-signin",
@@ -1967,7 +1965,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/",
-    component: () => import('./index-DzxRLW1i.mjs')
+    component: () => import('./index-C5ihs6EU.mjs')
   },
   {
     name: "localized-mode-tense",

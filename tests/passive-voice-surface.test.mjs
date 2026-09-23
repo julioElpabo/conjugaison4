@@ -59,7 +59,7 @@ test('ouvrir les choix du mode et du temps ne change pas la colonne des autres b
 
 test('les blocs inapplicables restent visibles mais sont désactivés', () => {
   assert.doesNotMatch(optionsSource, /v-if="exerciseKind === 'conjugation'" class="option-fieldset option-group-card option-group-card--voice/u)
-  assert.match(optionsSource, /:disabled="exerciseKind !== 'conjugation'"/u)
+  assert.match(optionsSource, /:disabled="!\['conjugation', 'mixed'\]\.includes\(exerciseKind\)"/u)
   assert.doesNotMatch(optionsSource, /complement-options--hidden/u)
 })
 

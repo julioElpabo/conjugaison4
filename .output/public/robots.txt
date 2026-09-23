@@ -1,19 +1,7 @@
 User-Agent: *
 Disallow: /api/
-Disallow: /fr/admin/
-Disallow: /de/admin/
-Disallow: /en/admin/
-Disallow: /it/admin/
-Disallow: /es/admin/
-Disallow: /fr/signin
-Disallow: /de/signin
-Disallow: /en/signin
-Disallow: /it/signin
-Disallow: /es/signin
-Disallow: /fr/my-page
-Disallow: /de/my-page
-Disallow: /en/my-page
-Disallow: /it/my-page
-Disallow: /es/my-page
+
+# Les pages HTML privées restent explorables afin que leur directive
+# meta robots "noindex, nofollow" puisse être lue par les moteurs de recherche.
 
 Sitemap: https://conjugaison.tatitotu.ch/sitemap.xml

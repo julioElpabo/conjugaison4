@@ -14,15 +14,15 @@ describe('câblage du prototype de compte pseudonyme', () => {
     assert.match(space, /\{\{ copy\.hello \}\} \{\{ displayUsername \}\}/u)
   })
 
-  it('garde la connexion hors des statistiques et mesure anonymement les outils personnels', async () => {
+  it('garde la connexion hors des statistiques et rend le noindex lisible par les robots', async () => {
     const analytics = await read('../app/plugins/analytics.client.ts')
     const siteAnalytics = await read('../app/composables/useSiteAnalytics.ts')
     assert.match(analytics, /normalized === '\/signin'/u)
     assert.doesNotMatch(analytics, /normalized === '\/signin' \|\| normalized === '\/my-page'/u)
     assert.match(siteAnalytics, /isLearnerSpace \? \{ user_type: 'learner' \}/u)
     const robots = await read('../public/robots.txt')
-    assert.match(robots, /Disallow: \/fr\/signin/u)
-    assert.match(robots, /Disallow: \/fr\/my-page/u)
+    assert.match(robots, /Disallow: \/api\//u)
+    assert.doesNotMatch(robots, /Disallow: \/(?:fr|de|en|it|es)\/(?:admin|signin|my-page)/u)
   })
 
   it('mesure les outils personnels sans transmettre l’identité du compte', async () => {
@@ -104,6 +104,7 @@ describe('câblage du prototype de compte pseudonyme', () => {
 
   it('enregistre et rattache les défis au compte pseudonyme', async () => {
     const space = await read('../app/components/learner/LearnerSpace.vue')
+    const savedChallengeCard = await read('../app/components/learner/SavedChallengeCard.vue')
     const shareDialog = await read('../app/components/challenge/ShareChallengeDialog.vue')
     const creation = await read('../server/api/defis/index.post.ts')
     const defis = await read('../server/services/defis.ts')
@@ -112,7 +113,8 @@ describe('câblage du prototype de compte pseudonyme', () => {
 
     assert.match(space, /savedCopy\.tab/u)
     assert.match(space, /learnerApi\('saved-challenges'\)/u)
-    assert.match(space, /localePath\(`\/defi\/\$\{challenge\.code\}`\)/u)
+    assert.match(space, /<LearnerSavedChallengeCard/u)
+    assert.match(savedChallengeCard, /localePath\(`\/defi\/\$\{props\.challenge\.code\}`\)/u)
     assert.match(shareDialog, /v-if="isAuthenticated"/u)
     assert.match(shareDialog, /localePath\('\/my-page'\)/u)
     assert.match(shareDialog, /tab=saved/u)

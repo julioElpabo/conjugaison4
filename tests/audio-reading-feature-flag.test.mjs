@@ -76,7 +76,7 @@ describe('lecture audio des exercices', () => {
     assert.match(chat, /question\.speech\?\.questionToken/u)
     assert.match(chat, /speechToken: question\.speech\.questionToken/u)
     assert.match(chat, /question\.speech\?\.answerToken/u)
-    assert.match(chat, /addAnswerComparison\(candidate, officialAnswers, question\.reponsesPourCorrige, question\.speech\?\.answerToken\)/u)
+    assert.match(chat, /addAnswerComparison\(candidate, officialAnswers, displayedAnswers, question\.speech\?\.answerToken\)/u)
     assert.match(chat, /if \(message\.answerLine\) return Boolean\(message\.speechToken\)/u)
     assert.match(chat, /answerLine: true,[\s\S]*question\.speech\?\.answerToken \? \{ speechToken: question\.speech\.answerToken \}/u)
   })

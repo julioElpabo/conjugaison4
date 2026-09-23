@@ -1166,7 +1166,7 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="dialog-actions exercise-results__actions">
-            <button v-if="!falcMode && canSaveChallenge" class="secondary-button exercise-result-action" type="button" @click="emit('saveChallenge')"><span aria-hidden="true"><FontAwesomeIcon :icon="faArrowUpFromBracket" /></span>{{ ui('Enregistrer/partager ce défi') }}</button>
+            <button v-if="!falcMode && canSaveChallenge" class="secondary-button exercise-result-action" type="button" @click="emit('saveChallenge')"><span aria-hidden="true"><FontAwesomeIcon :icon="faArrowUpFromBracket" /></span>{{ ui('Enregistrer / partager ce défi') }}</button>
             <button v-if="!falcMode" class="secondary-button exercise-result-action" type="button" @click="shareSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faArrowUpFromBracket" /></span>{{ ui('Partager mon bilan') }}</button>
             <button v-if="!falcMode" class="secondary-button exercise-result-action" type="button" @click="printSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faPrint" /></span>{{ ui('Imprimer mon bilan') }}</button>
             <button class="primary-button exercise-result-action" type="button" @click="restart"><span aria-hidden="true">↻</span>{{ ui('Recommencer') }}</button>

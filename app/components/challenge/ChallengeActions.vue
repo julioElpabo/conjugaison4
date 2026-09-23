@@ -106,7 +106,7 @@ onMounted(async () => {
           <FontAwesomeIcon :icon="faArrowUpFromBracket" />
         </span>
         <span>
-          <strong>{{ busyAction === 'save' ? ui('Sauvegarde…') : ui('Partager') }}</strong>
+          <strong>{{ busyAction === 'save' ? ui('Sauvegarde…') : ui('Enregistrer / partager') }}</strong>
           <small>{{ ui('Partager ce défi avec d’autres personnes') }}</small>
         </span>
       </button>

@@ -1919,7 +1919,7 @@ onBeforeUnmount(() => {
                 <button type="button" class="chat-restart-prompt__new" :disabled="regeneratingQuestions" @click="restartWithNewQuestions">
                   <span aria-hidden="true">↻</span>{{ regeneratingQuestions ? ui('Préparation…') : ui('Avec d’autres questions') }}
                 </button>
-                <button v-if="canSaveChallenge" type="button" class="chat-restart-prompt__challenge-share" :disabled="regeneratingQuestions" @click="emit('saveChallenge')"><span aria-hidden="true"><FontAwesomeIcon :icon="faArrowUpFromBracket" /></span>{{ ui('Enregistrer/partager ce défi') }}</button>
+                <button v-if="canSaveChallenge" type="button" class="chat-restart-prompt__challenge-share" :disabled="regeneratingQuestions" @click="emit('saveChallenge')"><span aria-hidden="true"><FontAwesomeIcon :icon="faArrowUpFromBracket" /></span>{{ ui('Enregistrer / partager ce défi') }}</button>
                 <button type="button" class="chat-restart-prompt__share" :disabled="regeneratingQuestions" @click="shareSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faArrowUpFromBracket" /></span>{{ ui('Partager mon bilan') }}</button>
                 <button type="button" class="chat-restart-prompt__print" :disabled="regeneratingQuestions" @click="printSummaryOpen = true"><span aria-hidden="true"><FontAwesomeIcon :icon="faPrint" /></span>{{ ui('Imprimer mon bilan') }}</button>
                 <button type="button" class="chat-restart-prompt__quit" :disabled="regeneratingQuestions" @click="emit('close')">{{ ui('Quitter le chat') }}</button>

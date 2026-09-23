@@ -73,7 +73,7 @@ test('propose de sauvegarder ou partager le défi depuis les deux bilans', async
 
   for (const exercise of [classic, chat]) {
     assert.match(exercise, /canSaveChallenge\?: boolean/u)
-    assert.match(exercise, /ui\('Enregistrer\/partager ce défi'\)/u)
+    assert.match(exercise, /ui\('Enregistrer \/ partager ce défi'\)/u)
     assert.match(exercise, /emit\('saveChallenge'\)/u)
   }
   for (const challengeWorkspace of [workspace, wizard]) {

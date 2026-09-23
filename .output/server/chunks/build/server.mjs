@@ -884,6 +884,7 @@ const uiMessages = {
   "Avec les m\xEAmes questions": withDutchVariants({ de: "Mit denselben Fragen", en: "With the same questions", it: "Con le stesse domande", es: "Con las mismas preguntas", nl: "Met dezelfde vragen" }),
   "Imprimer le bilan": withDutchVariants({ de: "Auswertung drucken", en: "Print summary", it: "Stampa il riepilogo", es: "Imprimir el resumen", nl: "Overzicht afdrukken" }),
   "Partager mon bilan": withDutchVariants({ de: "Meine Auswertung teilen", en: "Share my summary", it: "Condividi il mio riepilogo", es: "Compartir mi resumen", nl: "Mijn overzicht delen" }),
+  "Enregistrer/partager ce d\xE9fi": withDutchVariants({ de: "Diese \xDCbung speichern/teilen", en: "Save/share this challenge", it: "Salva/condividi questo esercizio", es: "Guardar/compartir este ejercicio", nl: "Deze uitdaging opslaan/delen" }),
   "Imprimer mon bilan": withDutchVariants({ de: "Meine Auswertung drucken", en: "Print my summary", it: "Stampa il mio riepilogo", es: "Imprimir mi resumen", nl: "Mijn overzicht afdrukken" }),
   "PARTAGER MON BILAN": withDutchVariants({ de: "MEINE AUSWERTUNG TEILEN", en: "SHARE MY SUMMARY", it: "CONDIVIDI IL MIO RIEPILOGO", es: "COMPARTIR MI RESUMEN", nl: "MIJN OVERZICHT DELEN" }),
   "Ton bilan est pr\xEAt \xE0 \xEAtre envoy\xE9": withDutchVariants({ de: "Deine Auswertung kann verschickt werden", en: "Your summary is ready to send", it: "Il tuo riepilogo \xE8 pronto per essere inviato", es: "Tu resumen est\xE1 listo para enviar", nl: "Je overzicht is klaar om te versturen" }),
@@ -1689,7 +1690,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-pz3jG2GI.mjs')
+    component: () => import('./users-offu--zG.mjs')
   },
   {
     name: "admin-verbes",
@@ -1709,12 +1710,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-bLkNrazN.mjs')
+    component: () => import('./_code_-DVyyD21I.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-CHyE_b16.mjs')
+    component: () => import('./_slug_-iiW8r_0K.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1759,7 +1760,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-iZgJF5uK.mjs')
+    component: () => import('./exercices-de-conjugaison-D4w2T4vo.mjs')
   },
   {
     name: "mon-compte",
@@ -1770,12 +1771,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-DVPDzIBz.mjs')
+    component: () => import('./my-page-0mqfQ5z6.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-ByVP62i2.mjs')
+    component: () => import('./nouveau-defi-DYyhLaCG.mjs')
   },
   {
     name: "signin",
@@ -1785,7 +1786,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-CTRSXliZ.mjs')
+    component: () => import('./index-DzxRLW1i.mjs')
   },
   {
     name: "mode-tense",
@@ -1870,7 +1871,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/users",
-    component: () => import('./users-pz3jG2GI.mjs')
+    component: () => import('./users-offu--zG.mjs')
   },
   {
     name: "localized-admin-verbes",
@@ -1890,12 +1891,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defi/:code()",
-    component: () => import('./_code_-bLkNrazN.mjs')
+    component: () => import('./_code_-DVyyD21I.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defis/:slug()",
-    component: () => import('./_slug_-CHyE_b16.mjs')
+    component: () => import('./_slug_-iiW8r_0K.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1940,7 +1941,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-iZgJF5uK.mjs')
+    component: () => import('./exercices-de-conjugaison-D4w2T4vo.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1951,12 +1952,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-DVPDzIBz.mjs')
+    component: () => import('./my-page-0mqfQ5z6.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/nouveau-defi",
-    component: () => import('./nouveau-defi-ByVP62i2.mjs')
+    component: () => import('./nouveau-defi-DYyhLaCG.mjs')
   },
   {
     name: "localized-signin",
@@ -1966,7 +1967,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/",
-    component: () => import('./index-CTRSXliZ.mjs')
+    component: () => import('./index-DzxRLW1i.mjs')
   },
   {
     name: "localized-mode-tense",

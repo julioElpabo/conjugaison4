@@ -360,6 +360,16 @@ function choosePronoun(pronom, inclusive, includeOn, random = Math.random) {
   }
   return pronom;
 }
+function createPronounChooser(inclusive, includeOn, random = Math.random) {
+  let inclusivePronounPrepared = false;
+  return (pronoun) => {
+    if (inclusive && !inclusivePronounPrepared && ["il", "ils"].includes(pronoun)) {
+      inclusivePronounPrepared = true;
+      return pronoun === "il" ? "iel" : "iels";
+    }
+    return choosePronoun(pronoun, inclusive, includeOn, random);
+  };
+}
 function conjugationTenseKey(question) {
   if (question.tenseId !== void 0 && question.tenseId !== null) return `id:${question.tenseId}`;
   const mode = normalized(question.mode || "");
@@ -370,7 +380,7 @@ function conjugationVerbKey(question, fallback) {
   const verbId = Number(question.verbeId);
   return Number.isFinite(verbId) ? `id:${verbId}` : `unknown:${fallback}`;
 }
-function diverseConjugationQuestions(questions, count, random = Math.random) {
+function diverseConjugationQuestions(questions, count, random = Math.random, prioritizeInclusivePronoun = false) {
   var _a, _b;
   const remaining = shuffleWith([...questions], random);
   const tenseUses = /* @__PURE__ */ new Map();
@@ -380,6 +390,16 @@ function diverseConjugationQuestions(questions, count, random = Math.random) {
   let nextVoice = random() < 0.5 ? "active" : "passive";
   const selected = [];
   while (selected.length < count && remaining.length) {
+    const inclusiveCandidates = prioritizeInclusivePronoun && selected.length === 0 ? remaining.filter((question) => ["iel", "iels"].includes(question.pronom || "")) : [];
+    if (inclusiveCandidates.length) {
+      const chosen2 = inclusiveCandidates[Math.floor(random() * inclusiveCandidates.length)];
+      remaining.splice(remaining.indexOf(chosen2), 1);
+      selected.push(chosen2);
+      tenseUses.set(conjugationTenseKey(chosen2), 1);
+      verbUses.set(conjugationVerbKey(chosen2, 0), 1);
+      nextVoice = chosen2.voice === "passive" ? "active" : "passive";
+      continue;
+    }
     const minimumTenseUse = Math.min(...remaining.map((question) => {
       var _a2;
       return (_a2 = tenseUses.get(conjugationTenseKey(question))) != null ? _a2 : 0;
@@ -700,6 +720,10 @@ async function generateQuestionnaire(request) {
   const nonFiniteTenses = selectedTenses.filter((row) => nonFiniteModes.includes(normalized(row.mode_name)));
   const database = useDatabase();
   const questions = [];
+  const pronounForQuestion = createPronounChooser(
+    request.inclusivePronouns,
+    request.includeOnPronoun
+  );
   const voiceMode = (_a = request.voiceMode) != null ? _a : "active";
   const wantsActiveVoice = voiceMode !== "passive";
   const wantsPassiveVoice = request.exerciseKind === "conjugation" && voiceMode !== "active";
@@ -970,7 +994,7 @@ async function generateQuestionnaire(request) {
           radical_reference: radicalReference,
           future_simple_forms: futureSimpleForms,
           conjugation_confusions: conjugationConfusions
-        }, choosePronoun(row.pronom, request.inclusivePronouns, request.includeOnPronoun)));
+        }, pronounForQuestion(row.pronom)));
       } else if (request.exerciseKind !== "conjugation") {
         questions.push(identificationQuestion(
           semanticRow,
@@ -1079,7 +1103,7 @@ async function generateQuestionnaire(request) {
   if (request.exerciseKind === "mode-identification") {
     return balancedModeIdentificationQuestions(questions, request.questionCount);
   }
-  return request.exerciseKind === "tense-identification" ? balancedIdentificationQuestions(questions, request.questionCount) : diverseConjugationQuestions(questions, request.questionCount);
+  return request.exerciseKind === "tense-identification" ? balancedIdentificationQuestions(questions, request.questionCount) : diverseConjugationQuestions(questions, request.questionCount, Math.random, request.inclusivePronouns);
 }
 
 export { QuestionnaireSelectionError as Q, generateQuestionnaire as g };

@@ -404,6 +404,21 @@ export function choosePronoun(
   return pronom
 }
 
+export function createPronounChooser(
+  inclusive: boolean,
+  includeOn: boolean,
+  random: () => number = Math.random,
+) {
+  let inclusivePronounPrepared = false
+  return (pronoun: string) => {
+    if (inclusive && !inclusivePronounPrepared && ['il', 'ils'].includes(pronoun)) {
+      inclusivePronounPrepared = true
+      return pronoun === 'il' ? 'iel' : 'iels'
+    }
+    return choosePronoun(pronoun, inclusive, includeOn, random)
+  }
+}
+
 function conjugationTenseKey(question: ExerciseQuestion) {
   if (question.tenseId !== undefined && question.tenseId !== null) return `id:${question.tenseId}`
   const mode = normalized(question.mode || '')
@@ -424,6 +439,7 @@ export function diverseConjugationQuestions(
   questions: ExerciseQuestion[],
   count: number,
   random: () => number = Math.random,
+  prioritizeInclusivePronoun = false,
 ) {
   const remaining = shuffleWith([...questions], random)
   const tenseUses = new Map<string, number>()
@@ -434,6 +450,18 @@ export function diverseConjugationQuestions(
   const selected: ExerciseQuestion[] = []
 
   while (selected.length < count && remaining.length) {
+    const inclusiveCandidates = prioritizeInclusivePronoun && selected.length === 0
+      ? remaining.filter(question => ['iel', 'iels'].includes(question.pronom || ''))
+      : []
+    if (inclusiveCandidates.length) {
+      const chosen = inclusiveCandidates[Math.floor(random() * inclusiveCandidates.length)]!
+      remaining.splice(remaining.indexOf(chosen), 1)
+      selected.push(chosen)
+      tenseUses.set(conjugationTenseKey(chosen), 1)
+      verbUses.set(conjugationVerbKey(chosen, 0), 1)
+      nextVoice = chosen.voice === 'passive' ? 'active' : 'passive'
+      continue
+    }
     const minimumTenseUse = Math.min(...remaining.map(question => (
       tenseUses.get(conjugationTenseKey(question)) ?? 0
     )))
@@ -787,6 +815,10 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
   const nonFiniteTenses = selectedTenses.filter(row => nonFiniteModes.includes(normalized(row.mode_name)))
   const database = useDatabase()
   const questions: ExerciseQuestion[] = []
+  const pronounForQuestion = createPronounChooser(
+    request.inclusivePronouns,
+    request.includeOnPronoun,
+  )
   const voiceMode = request.voiceMode ?? 'active'
   const wantsActiveVoice = voiceMode !== 'passive'
   const wantsPassiveVoice = request.exerciseKind === 'conjugation' && voiceMode !== 'active'
@@ -1112,7 +1144,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
             radical_reference: radicalReference,
             future_simple_forms: futureSimpleForms,
             conjugation_confusions: conjugationConfusions,
-          }, choosePronoun(row.pronom, request.inclusivePronouns, request.includeOnPronoun)))
+          }, pronounForQuestion(row.pronom)))
       } else if (request.exerciseKind !== 'conjugation') {
         questions.push(identificationQuestion(
             semanticRow,
@@ -1243,5 +1275,5 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
   }
   return request.exerciseKind === 'tense-identification'
     ? balancedIdentificationQuestions(questions, request.questionCount)
-    : diverseConjugationQuestions(questions, request.questionCount)
+    : diverseConjugationQuestions(questions, request.questionCount, Math.random, request.inclusivePronouns)
 }

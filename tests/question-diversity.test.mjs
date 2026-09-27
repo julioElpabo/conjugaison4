@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-import { choosePronoun, diverseConjugationQuestions } from '../server/services/questionnaire.ts'
+import {
+  choosePronoun,
+  createPronounChooser,
+  diverseConjugationQuestions,
+} from '../server/services/questionnaire.ts'
 
 function question(id, verbId, tenseId) {
   return {
@@ -79,5 +83,36 @@ describe('pronom on', () => {
     assert.equal(choosePronoun('il', false, true, () => .999), 'on')
     assert.notEqual(choosePronoun('ils', true, true, () => .999), 'on')
     assert.equal(choosePronoun('tu', true, true, () => .999), 'tu')
+  })
+})
+
+describe('pronoms inclusifs', () => {
+  it('prépare une forme inclusive dès la première troisième personne disponible', () => {
+    const choose = createPronounChooser(true, false, () => 0)
+
+    assert.equal(choose('je'), 'je')
+    assert.equal(choose('ils'), 'iels')
+    assert.equal(choose('il'), 'il')
+  })
+
+  it('retient au moins une question inclusive quand cette option est demandée', () => {
+    const questions = [
+      { ...question('ordinary', 1, 1), pronom: 'il' },
+      { ...question('inclusive', 2, 2), pronom: 'iel' },
+      { ...question('plural', 3, 3), pronom: 'ils' },
+    ]
+
+    const selected = diverseConjugationQuestions(questions, 1, () => 0, true)
+
+    assert.equal(selected[0].pronom, 'iel')
+  })
+
+  it('conserve la sélection habituelle quand aucun pronom inclusif n’est disponible', () => {
+    const selected = diverseConjugationQuestions([
+      { ...question('first', 1, 1), pronom: 'je' },
+      { ...question('second', 2, 2), pronom: 'tu' },
+    ], 1, () => 0, true)
+
+    assert.equal(selected.length, 1)
   })
 })

@@ -1180,7 +1180,15 @@ const uiMessages = {
   "Rep\xE8re le COD (CVD) plac\xE9 avant le verbe : avec avoir, il commande l\u2019accord du participe pass\xE9 en genre et en nombre.": withDutchVariants({ de: "Erkenne das vor dem Verb stehende direkte Objekt: Mit avoir bestimmt es Genus und Numerus des Partizips.", en: "Identify the direct object before the verb: with avoir, it determines the gender and number of the past participle.", it: "Individua il complemento oggetto prima del verbo: con avoir determina genere e numero del participio passato.", es: "Identifica el complemento directo situado antes del verbo: con avoir determina el g\xE9nero y el n\xFAmero del participio pasado.", nl: "Herken het lijdend voorwerp voor het werkwoord: met avoir bepaalt het het geslacht en getal van het voltooid deelwoord." }),
   "Le COD (CVD) est plac\xE9 apr\xE8s le verbe : avec avoir, il ne commande pas l\u2019accord du participe pass\xE9.": withDutchVariants({ de: "Das direkte Objekt steht nach dem Verb: Mit avoir bestimmt es die Angleichung des Partizips nicht.", en: "The direct object comes after the verb: with avoir, it does not determine past-participle agreement.", it: "Il complemento oggetto \xE8 posto dopo il verbo: con avoir non determina la concordanza del participio passato.", es: "El complemento directo est\xE1 despu\xE9s del verbo: con avoir no determina la concordancia del participio pasado.", nl: "Het lijdend voorwerp staat na het werkwoord: met avoir bepaalt het niet de overeenkomst van het voltooid deelwoord." }),
   "Ce compl\xE9ment est un COI (CVI) : il ne commande pas l\u2019accord du participe pass\xE9 avec avoir.": withDutchVariants({ de: "Dieses Objekt ist indirekt: Es bestimmt die Angleichung des Partizips mit avoir nicht.", en: "This is an indirect object: it does not determine past-participle agreement with avoir.", it: "\xC8 un complemento indiretto: non determina la concordanza del participio passato con avoir.", es: "Es un complemento indirecto: no determina la concordancia del participio pasado con avoir.", nl: "Dit is een meewerkend voorwerp: het bepaalt niet de overeenkomst van het voltooid deelwoord met avoir." }),
-  "L\u2019auxiliaire choisi ne convient pas. Reprends la construction du temps demand\xE9 avec cette personne.": withDutchVariants({ de: "Das gew\xE4hlte Hilfsverb passt nicht. Bilde die verlangte Zeitform f\xFCr diese Person erneut.", en: "The chosen auxiliary is not correct. Rebuild the requested tense for this person.", it: "L\u2019ausiliare scelto non \xE8 corretto. Ricostruisci il tempo richiesto per questa persona.", es: "El auxiliar elegido no es correcto. Vuelve a construir el tiempo pedido para esta persona.", nl: "Het gekozen hulpwerkwoord is niet juist. Vorm de gevraagde tijd opnieuw voor deze persoon." })
+  "L\u2019auxiliaire choisi ne convient pas. Reprends la construction du temps demand\xE9 avec cette personne.": withDutchVariants({ de: "Das gew\xE4hlte Hilfsverb passt nicht. Bilde die verlangte Zeitform f\xFCr diese Person erneut.", en: "The chosen auxiliary is not correct. Rebuild the requested tense for this person.", it: "L\u2019ausiliare scelto non \xE8 corretto. Ricostruisci il tempo richiesto per questa persona.", es: "El auxiliar elegido no es correcto. Vuelve a construir el tiempo pedido para esta persona.", nl: "Het gekozen hulpwerkwoord is niet juist. Vorm de gevraagde tijd opnieuw voor deze persoon." }),
+  "Pour r\xE9pondre": withDutchVariants({ de: "So antwortest du", en: "How to answer", it: "Per rispondere", es: "Para responder", nl: "Zo antwoord je" }),
+  "Rep\xE8re le sujet : {subject}.": withDutchVariants({ de: "Bestimme das Subjekt: {subject}.", en: "Find the subject: {subject}.", it: "Individua il soggetto: {subject}.", es: "Identifica el sujeto: {subject}.", nl: "Zoek het onderwerp: {subject}." }),
+  "Cherche le verbe {verb} au temps {tense}.": withDutchVariants({ de: "Suche das Verb {verb} im {tense}.", en: "Find the verb {verb} in the {tense}.", it: "Cerca il verbo {verb} al {tense}.", es: "Busca el verbo {verb} en {tense}.", nl: "Zoek het werkwoord {verb} in de {tense}." }),
+  "Ouvre le temps surlign\xE9 et retrouve la ligne du sujet.": withDutchVariants({ de: "\xD6ffne die markierte Zeitform und suche die Zeile des Subjekts.", en: "Open the highlighted tense and find the subject row.", it: "Apri il tempo evidenziato e trova la riga del soggetto.", es: "Abre el tiempo resaltado y busca la fila del sujeto.", nl: "Open de gemarkeerde tijd en zoek de rij van het onderwerp." }),
+  "Voici la r\xE9ponse : \xAB {answer} \xBB. Essaie maintenant de la recopier sans la regarder.": withDutchVariants({ de: "Hier ist die Antwort: \u201E{answer}\u201C. Versuche nun, sie abzuschreiben, ohne hinzusehen.", en: "Here is the answer: \u201C{answer}\u201D. Now try to write it again without looking.", it: "Ecco la risposta: \xAB{answer}\xBB. Ora prova a riscriverla senza guardare.", es: "Esta es la respuesta: \xAB{answer}\xBB. Ahora intenta escribirla sin mirar.", nl: "Dit is het antwoord: \u201C{answer}\u201D. Probeer het nu zonder te kijken opnieuw te schrijven." }),
+  "Aide pour cette question": withDutchVariants({ de: "Hilfe zu dieser Frage", en: "Help with this question", it: "Aiuto per questa domanda", es: "Ayuda para esta pregunta", nl: "Hulp bij deze vraag" }),
+  "Voir la r\xE9ponse": withDutchVariants({ de: "Antwort anzeigen", en: "Show the answer", it: "Mostra la risposta", es: "Ver la respuesta", nl: "Antwoord tonen" }),
+  "Ce n\u2019est pas encore \xE7a.": withDutchVariants({ de: "Noch nicht ganz.", en: "Not quite yet.", it: "Non ancora.", es: "Todav\xEDa no.", nl: "Nog niet helemaal." })
 };
 function translateUiMessage(locale, message, parameters = {}) {
   const template = locale === "fr" ? message : uiMessages[message][locale];
@@ -1653,17 +1661,17 @@ const _routes = [
   {
     name: "admin-feedbacks",
     path: "/admin/feedbacks",
-    component: () => import('./feedbacks-CUBUL4TG.mjs')
+    component: () => import('./feedbacks-D25NYH-M.mjs')
   },
   {
     name: "admin-help-verification",
     path: "/admin/help-verification",
-    component: () => import('./help-verification-DRvzAq9s.mjs')
+    component: () => import('./help-verification-Bg69YUEv.mjs')
   },
   {
     name: "admin-helps",
     path: "/admin/helps",
-    component: () => import('./helps-CEdghcWW.mjs')
+    component: () => import('./helps-CGI5S8Ny.mjs')
   },
   {
     name: "admin-literary-corpus",
@@ -1688,7 +1696,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-yNcSwtgp.mjs')
+    component: () => import('./users-BR3IEnHV.mjs')
   },
   {
     name: "admin-verbes",
@@ -1708,12 +1716,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-DYDMv_N5.mjs')
+    component: () => import('./_code_-CAFIREAo.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-DHuvHjFQ.mjs')
+    component: () => import('./_slug_-DRrsuY6d.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1758,7 +1766,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-BpqYdKJZ.mjs')
+    component: () => import('./exercices-de-conjugaison-B1hK18w2.mjs')
   },
   {
     name: "mon-compte",
@@ -1769,12 +1777,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-DUP-hWxo.mjs')
+    component: () => import('./my-page-u8mmnlug.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-CBo95m0E.mjs')
+    component: () => import('./nouveau-defi-DIHpiVn5.mjs')
   },
   {
     name: "signin",
@@ -1784,7 +1792,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-C5ihs6EU.mjs')
+    component: () => import('./index-DwRQ4ua1.mjs')
   },
   {
     name: "mode-tense",
@@ -1834,17 +1842,17 @@ const _routes = [
   {
     name: "localized-admin-feedbacks",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/feedbacks",
-    component: () => import('./feedbacks-CUBUL4TG.mjs')
+    component: () => import('./feedbacks-D25NYH-M.mjs')
   },
   {
     name: "localized-admin-help-verification",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/help-verification",
-    component: () => import('./help-verification-DRvzAq9s.mjs')
+    component: () => import('./help-verification-Bg69YUEv.mjs')
   },
   {
     name: "localized-admin-helps",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/helps",
-    component: () => import('./helps-CEdghcWW.mjs')
+    component: () => import('./helps-CGI5S8Ny.mjs')
   },
   {
     name: "localized-admin-literary-corpus",
@@ -1869,7 +1877,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/users",
-    component: () => import('./users-yNcSwtgp.mjs')
+    component: () => import('./users-BR3IEnHV.mjs')
   },
   {
     name: "localized-admin-verbes",
@@ -1889,12 +1897,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defi/:code()",
-    component: () => import('./_code_-DYDMv_N5.mjs')
+    component: () => import('./_code_-CAFIREAo.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defis/:slug()",
-    component: () => import('./_slug_-DHuvHjFQ.mjs')
+    component: () => import('./_slug_-DRrsuY6d.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1939,7 +1947,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-BpqYdKJZ.mjs')
+    component: () => import('./exercices-de-conjugaison-B1hK18w2.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1950,12 +1958,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-DUP-hWxo.mjs')
+    component: () => import('./my-page-u8mmnlug.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/nouveau-defi",
-    component: () => import('./nouveau-defi-CBo95m0E.mjs')
+    component: () => import('./nouveau-defi-DIHpiVn5.mjs')
   },
   {
     name: "localized-signin",
@@ -1965,7 +1973,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/",
-    component: () => import('./index-C5ihs6EU.mjs')
+    component: () => import('./index-DwRQ4ua1.mjs')
   },
   {
     name: "localized-mode-tense",

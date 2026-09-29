@@ -45,7 +45,10 @@ function contextualizeSubjunctiveTemplate(template: string, question: ExerciseQu
   if (!pronoun) return `${contextualSubject} ${template}`
 
   const lowerTemplate = template.toLocaleLowerCase('fr-CH')
-  const candidates = [`que ${pronoun}`, `qu'${pronoun}`, `qu’${pronoun}`, pronoun]
+  const inputPrefix = question.saisiePrefixe?.trim() || ''
+  const elidedFirstPerson = normalized(pronoun) === 'je' ? ["que j'", 'que j’'] : []
+  const candidates = [inputPrefix, ...elidedFirstPerson, `que ${pronoun}`, `qu'${pronoun}`, `qu’${pronoun}`, pronoun]
+    .filter(Boolean)
     .sort((left, right) => right.length - left.length)
   const matchedPrefix = candidates.find(candidate => lowerTemplate.startsWith(candidate.toLocaleLowerCase('fr-CH')))
   return matchedPrefix
@@ -95,7 +98,8 @@ function withMaskedSubject(sentence: string, question: ExerciseQuestion) {
     .filter((value): value is string => Boolean(value))
     .sort((left, right) => right.length - left.length)
   for (const candidate of candidates) {
-    const pattern = new RegExp(escapeRegExp(candidate).replace(/[’']/gu, "[’']"), 'giu')
+    const escapedCandidate = escapeRegExp(candidate).replace(/[’']/gu, "[’']")
+    const pattern = new RegExp(`(?<![\\p{L}\\p{N}])${escapedCandidate}(?![\\p{L}\\p{N}])`, 'giu')
     const matches = [...sentence.matchAll(pattern)]
     const match = matches.at(-1)
     if (!match || match.index === undefined) continue

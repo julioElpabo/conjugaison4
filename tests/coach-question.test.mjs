@@ -256,6 +256,63 @@ describe('questions affichées dans le chat', () => {
     assert.equal(result.sentence, `Il faut que ${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${SIMPLE_TENSE_BLANK}`)
   })
 
+  it('ne double pas « que » avec le préfixe élidé « que j’ »', () => {
+    const result = coachQuestionBubbles({
+      consigne: "que j' … la musique | aimer | présent (subjonctif)",
+      pronom: 'je',
+      saisiePrefixe: "que j'",
+      infinitif: 'aimer',
+      mode: 'subjonctif',
+      temps: 'présent',
+      isCompound: false,
+      conjugaison1: 'aime',
+      complement: 'la musique',
+      complementPosition: 'after',
+      complementFunction: 'cod',
+    })
+
+    assert.equal(result.sentence, `Il faut que ${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${SIMPLE_TENSE_BLANK} la musique.`)
+    assert.doesNotMatch(result.sentence, /que que/iu)
+  })
+
+  it('ne masque jamais un pronom trouvé à l’intérieur d’un complément', () => {
+    const result = coachQuestionBubbles({
+      consigne: 'tu … notre statuette d’argile | modeler | présent (conditionnel)',
+      pronom: 'tu',
+      saisiePrefixe: 'tu',
+      infinitif: 'modeler',
+      mode: 'conditionnel',
+      temps: 'présent',
+      isCompound: false,
+      conjugaison1: 'modèlerais',
+      complement: 'notre statuette d’argile',
+      complementPosition: 'after',
+      complementFunction: 'cod',
+    })
+
+    assert.equal(result.sentence, `${SUBJECT_PRONOUN_BLANK}${COMPOUND_TENSE_GAP}${SIMPLE_TENSE_BLANK} notre statuette d’argile.`)
+  })
+
+  it('protège aussi les pronoms inclus dans chanson et fille', () => {
+    for (const [pronoun, complement] of [['on', 'une chanson'], ['il', 'cette fille']]) {
+      const result = coachQuestionBubbles({
+        consigne: `${pronoun} … ${complement} | aimer | présent (indicatif)`,
+        pronom: pronoun,
+        saisiePrefixe: pronoun,
+        infinitif: 'aimer',
+        mode: 'indicatif',
+        temps: 'présent',
+        isCompound: false,
+        conjugaison1: 'aime',
+        complement,
+        complementPosition: 'after',
+        complementFunction: 'cod',
+      })
+      assert.match(result.sentence, new RegExp(complement, 'u'))
+      assert.deepEqual(blankGroups(result.sentence), [SUBJECT_PRONOUN_BLANK, SIMPLE_TENSE_BLANK])
+    }
+  })
+
   it('introduit le subjonctif passé avec « Il faut qu’il » et deux champs', () => {
     const result = coachQuestionBubbles({
       consigne: 'il | prendre | passé (subjonctif)',

@@ -482,6 +482,9 @@ onBeforeUnmount(() => {
         :tenses="allophoneTenses"
         :coach-id="allophoneCoachId"
         :audio-enabled="allophoneAudioEnabled"
+        :target-subject="values.subject"
+        :target-mode="values.mode"
+        :target-tense="values.tense"
       />
 
       <template v-else>

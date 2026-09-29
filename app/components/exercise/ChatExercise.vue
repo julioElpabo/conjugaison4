@@ -35,6 +35,7 @@ import {
   chatReactionAllowsMedia,
   coachReactionText,
   nextConsecutiveCorrectCount,
+  softenIncorrectCoachText,
 } from '~~/shared/utils/coach-conversation'
 import { diagnoseCoachAgreement, diagnoseCoachAnswer } from '~~/shared/utils/coach-feedback'
 import {
@@ -71,10 +72,11 @@ const props = defineProps<{
   analyticsMetadata?: Record<string, string | number | boolean>
 }>()
 const audioReadingEnabled = AUDIO_READING_ENABLED
-const coachMessageAudioEnabled = computed(() => (
+const usesCifFleSupport = computed(() => (
   props.learningSupportMode === 'cif-fle'
   || props.trackingContext?.challenge.learningSupportMode === 'cif-fle'
 ))
+const coachMessageAudioEnabled = computed(() => usesCifFleSupport.value)
 const restartCoachMessage = computed<ChatMessage>(() => ({
   id: -1,
   author: 'coach',
@@ -207,6 +209,7 @@ const consultationVerbId = ref<number | null>(null)
 const helpOpen = ref(Boolean(props.tourDemo))
 const helpQuestionIndex = ref<number | null>(null)
 const failedQuestionIndexes = reactive(new Set<number>())
+const revealedQuestionIndexes = reactive(new Set<number>())
 const helpConsultationOfferedQuestions = new Set<number>()
 const tourDemoReady = ref(!props.tourDemo)
 const sequence = ref(0)
@@ -1109,6 +1112,25 @@ async function suggestHelp(offerConsultation = false) {
   }
 }
 
+async function revealCurrentAnswer() {
+  const question = currentQuestion.value
+  if (!question || waitingForNext.value || posingQuestion.value || deliveringFeedback.value || finished.value) return
+  clearHelpReminderTimer()
+  failedQuestionIndexes.add(currentIndex.value)
+  revealedQuestionIndexes.add(currentIndex.value)
+  answerHeardBeforeSubmission.value = true
+  helpQuestionIndex.value = null
+  helpOpen.value = true
+  const expected = question.reponsesPourCorrige[0] || question.reponses[0]
+  if (expected) {
+    await addCoachText(ui('Voici la réponse : « {answer} ». Essaie maintenant de la recopier sans la regarder.', {
+      answer: displayedChatAnswer(question, expected),
+    }))
+  }
+  track('feature_selected', { ...exerciseAnalyticsMetadata.value, feature: 'chat.answer-reveal' })
+  focusAnswerInput()
+}
+
 function addAnswerComparison(
   learnerAnswer: string,
   expectedAnswers: readonly string[],
@@ -1138,7 +1160,10 @@ async function addCoachReaction(
     allowMotion: allowMotion.value,
     mediaAllowed: chatReactionAllowsMedia(eventType, cooledDown, hasIncorrectMedia.value),
   })
-  const reactionText = omitIndicativeMode.value ? withoutIndicativeMode(reaction.text) : reaction.text
+  const rawReactionText = omitIndicativeMode.value ? withoutIndicativeMode(reaction.text) : reaction.text
+  const isIncorrectReaction = eventType === 'incorrect' || eventType === 'cod-before'
+    || eventType === 'cod-after' || eventType === 'coi'
+  const reactionText = isIncorrectReaction ? softenIncorrectCoachText(rawReactionText) : rawReactionText
   const text = coachReactionText(reactionText, requiredText, fallbackText, context.expectedAnswer?.toString())
   if (!text.trim() && !reaction.media) return false
   if (reaction.media) {
@@ -1369,7 +1394,7 @@ async function submit() {
         reactionContext,
         isIncorrectReaction ? 'error' : isCorrectReaction ? 'success' : undefined,
         step.eventType === 'correct-alternative' ? alternativePossibilitiesText(alternatives) : correctionText,
-        isIncorrectReaction ? ui('C’est faux.') : '',
+        isIncorrectReaction ? ui('Ce n’est pas encore ça.') : '',
       )
       if (displayed && agreementDiagnostic && step.eventType !== 'incorrect') {
         agreementReminderDisplayed = true
@@ -1380,7 +1405,7 @@ async function submit() {
           agreementReminderDisplayed = true
         }
         else {
-          await addCoachReaction('incorrect', contextFor(question), 'error', '', ui('C’est faux.'))
+          await addCoachReaction('incorrect', contextFor(question), 'error', '', ui('Ce n’est pas encore ça.'))
         }
       }
       if (isIncorrectReaction && currentErrorDetails.length && !errorTypesDisplayed) {
@@ -1538,6 +1563,7 @@ async function restart() {
   answer.value = ''
   attempts.value = []
   failedQuestionIndexes.clear()
+  revealedQuestionIndexes.clear()
   pendingErrorLabels.value = []
   pendingErrorDetails.value = []
   messages.value = []
@@ -1946,6 +1972,9 @@ onBeforeUnmount(() => {
         </div>
 
         <form v-if="!finished" class="chat-composer" @submit.prevent="submit">
+          <div v-if="usesCifFleSupport" class="chat-composer__help-actions" role="group" :aria-label="ui('Aide pour cette question')">
+            <button type="button" :disabled="waitingForNext || posingQuestion || deliveringFeedback || revealedQuestionIndexes.has(currentIndex)" @click="revealCurrentAnswer">{{ ui('Voir la réponse') }}</button>
+          </div>
           <div class="chat-answer-control" :class="{ 'has-prefix': providedAnswerPrefix }">
             <span v-if="providedAnswerPrefix" class="chat-answer-control__prefix">{{ providedAnswerPrefix }}</span>
             <input
@@ -3603,6 +3632,7 @@ onBeforeUnmount(() => {
   border-top: 1px solid #d4e1e6;
   background: white;
 }
+.chat-composer__help-actions{display:flex;grid-column:1/-1;flex-wrap:wrap;gap:7px}.chat-composer__help-actions button{min-height:34px;padding:6px 10px;border:1px solid color-mix(in srgb,var(--coach-color,#295f72) 35%,#c7d6d9);border-radius:999px;color:color-mix(in srgb,var(--coach-color,#295f72) 78%,#233b43);background:color-mix(in srgb,var(--coach-color,#295f72) 7%,white);font-size:.78rem}.chat-composer__help-actions button:hover,.chat-composer__help-actions button:focus-visible{background:color-mix(in srgb,var(--coach-color,#295f72) 14%,white)}
 
 .chat-answer-control {
   position: relative;

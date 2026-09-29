@@ -63,7 +63,7 @@ try {
     }
     for (const [eventType, probability] of [['correct', 1], ['correct-alternative', 1], ['incorrect', 1], ['streak', 0.8], ['finish', 1]]) {
       await database.execute(`INSERT INTO coach_character_reaction_rules (character_id,event_type,media_probability,animation_probability,emoji_probability,cooldown_questions)
-        VALUES (?,?,?,?,?,2) ON DUPLICATE KEY UPDATE event_type=event_type`,
+        VALUES (?,?,?,?,?,1) ON DUPLICATE KEY UPDATE event_type=event_type`,
       [character.id, eventType, probability, probability, probability])
     }
   }

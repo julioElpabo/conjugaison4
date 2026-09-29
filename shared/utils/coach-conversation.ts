@@ -46,6 +46,10 @@ export function coachReactionText(
   return [primaryText, effectiveRequiredText].filter(Boolean).join(' ')
 }
 
+export function softenIncorrectCoachText(text: string): string {
+  return text.replace(/^C(?:'|’)est faux\s*[.!]\s*/iu, 'Ce n’est pas encore ça. ')
+}
+
 export type CoachTurnStep =
   | { kind: 'reaction', eventType: CoachEvent }
   | { kind: 'instruction' }

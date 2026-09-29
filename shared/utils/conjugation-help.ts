@@ -1011,10 +1011,15 @@ function compoundAgreementHtml(auxiliary: 'avoir' | 'être', subject: string, ba
   }
   const contextualReminder = question?.agreementReminder?.kind === 'coi'
     ? `<blockquote><strong>Dans cette question : COI</strong><p>« ${escapedHtml(question.agreementReminder.complement)} » est un complément d’objet indirect. Un COI ne commande pas l’accord du participe passé.</p></blockquote>`
+    : question?.agreementReminder?.kind === 'cod-before'
+      ? `<blockquote><strong>Dans cette question : COD placé avant</strong><p>« ${escapedHtml(question.agreementReminder.complement)} » est placé avant le verbe : le participe passé s’accorde avec ce COD.</p></blockquote>`
     : question?.agreementReminder?.kind === 'cod-after'
       ? `<blockquote><strong>Dans cette question : COD placé après</strong><p>« ${escapedHtml(question.agreementReminder.complement)} » est placé après le verbe : il ne commande pas l’accord du participe passé.</p></blockquote>`
       : ''
-  return `<figure><figcaption>Accord du participe passé</figcaption><blockquote><strong>Cas général avec avoir</strong><p>Le participe passé ne s’accorde pas avec le sujet.</p><p><em>Elle a mangé. · Ils ont mangé.</em></p></blockquote><blockquote><strong>Si le COD est placé avant</strong><p>Le participe passé s’accorde avec le complément d’objet direct placé avant le verbe.</p><p><em>Les pommes qu’elle a mangées. · Les livres qu’il a lus.</em></p></blockquote>${contextualReminder}</figure>`
+  if (!contextualReminder) {
+    return '<figure><figcaption>Accord du participe passé</figcaption><blockquote><strong>Avec avoir</strong><p>Dans cette question, le participe passé ne s’accorde pas avec le sujet.</p></blockquote></figure>'
+  }
+  return `<figure><figcaption>Accord du participe passé</figcaption><blockquote><strong>Avec avoir</strong><p>Le participe passé ne s’accorde pas avec le sujet. Il s’accorde seulement avec un COD placé avant le verbe.</p></blockquote>${contextualReminder}</figure>`
 }
 
 function buildCompoundConjugationHtml(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationTense, revealAnswers = true) {
@@ -1038,16 +1043,19 @@ function buildCompoundConjugationHtml(question: ExerciseQuestion, verb?: Verb, t
   const conjugatedAuxiliary = auxiliaryForm
     ? `<br><mark><strong>${escapedHtml(auxiliaryForm)}</strong></mark>`
     : ''
-  const nonPersonal = ['participe', 'gerondif'].includes(normalized(question.mode || tense?.mode?.name))
-  const auxiliaryInstruction = nonPersonal
-    ? `Utilise le verbe auxiliaire <strong>${escapedHtml(auxiliary)}</strong> ${escapedHtml(auxiliaryContext)} :${conjugatedAuxiliary}`
+  const normalizedMode = normalized(question.mode || tense?.mode?.name)
+  const nonPersonal = ['participe', 'gerondif', 'infinitif'].includes(normalizedMode)
+  const auxiliaryInstruction = normalizedMode === 'infinitif'
+    ? `Utilise l’auxiliaire <strong>${escapedHtml(auxiliary)}</strong> à l’infinitif :${conjugatedAuxiliary}`
+    : nonPersonal
+      ? `Utilise le verbe auxiliaire <strong>${escapedHtml(auxiliary)}</strong> ${escapedHtml(auxiliaryContext)} :${conjugatedAuxiliary}`
     : `Conjugue le verbe auxiliaire <strong>${escapedHtml(auxiliary)}</strong> ${escapedHtml(auxiliaryContext)} avec <strong>${escapedHtml(subject)}</strong> :${conjugatedAuxiliary}`
   const result = officialForm
     ? `<blockquote><strong>Résultat</strong><p>${resultFormMarkup(officialForm, false)}</p></blockquote>`
     : ''
   const answer = revealAnswers
     ? `<figure><figcaption>Construis la réponse</figcaption><ol><li>${auxiliaryInstruction}</li><li>Ajoute le participe passé :<br>${rememberedFormMarkup(participle)}</li><li>Vérifie l’accord du participe passé. Regarde plus bas pour plus de détails.</li></ol>${result}</figure>`
-    : `<figure><figcaption>Construis la réponse</figcaption><ol><li>Conjugue le verbe auxiliaire ${escapedHtml(auxiliaryContext)} avec <strong>${escapedHtml(subject)}</strong>.</li><li>Ajoute le participe passé.</li><li>Vérifie l’accord du participe passé. Regarde plus bas pour plus de détails.</li></ol></figure>`
+    : `<figure><figcaption>Construis la réponse</figcaption><ol><li>${auxiliaryInstruction}</li><li>Ajoute le participe passé.</li><li>Vérifie l’accord du participe passé. Regarde plus bas pour plus de détails.</li></ol></figure>`
   return `${knowledge}${answer}${compoundAgreementHtml(auxiliary, subject, participle, officialForm, question, verb)}`
 }
 
@@ -1546,8 +1554,9 @@ function answerFreeNonPersonalHelpHtml(question: ExerciseQuestion, verb?: Verb, 
   }
 
   if (mode === 'participe' && time === 'present') {
+    const irregularStem: Record<string, string> = { avoir: 'ay-', etre: 'ét-', savoir: 'sach-' }
     const method = irregularPresentParticiple
-      ? '<li>Ce verbe a un participe présent irrégulier : retrouve la forme apprise par cœur.</li><li>Vérifie qu’elle se termine bien par <strong>-ant</strong>.</li>'
+      ? `<li>Ce verbe a un participe présent irrégulier.</li><li>Utilise la base repère <strong>${irregularStem[normalized(bareInfinitive(infinitive))]}</strong>, puis ajoute <strong>-ant</strong>.</li>`
       : '<li>Prends la forme avec <strong>nous</strong> au présent.</li><li>Enlève <strong>-ons</strong>, puis ajoute <strong>-ant</strong>.</li>'
     return `<figure><figcaption>Participe présent</figcaption><ol><li>Repère le verbe <strong>${escapedHtml(infinitive)}</strong>.</li>${method}</ol></figure>`
   }

@@ -431,10 +431,11 @@ describe('aides visuelles configurables', () => {
     assert.match(advice, /<mark><strong>eussiez<\/strong><\/mark>/u)
     assert.match(advice, /<th><strong>que j’<\/strong><\/th><td><strong>eusse<\/strong><\/td>/u)
     assert.match(advice, /Le participe passé de calquer[\s\S]*<strong>calqué<\/strong>/u)
-    assert.match(advice, /Conjugue le verbe auxiliaire à l’imparfait du subjonctif avec <strong>vous<\/strong>\./u)
+    assert.match(advice, /Conjugue le verbe auxiliaire <strong>avoir<\/strong> à l’imparfait du subjonctif avec <strong>vous<\/strong>/u)
     assert.match(advice, /<li>Ajoute le participe passé\.<\/li>/u)
     assert.match(advice, /Vérifie l’accord du participe passé\. Regarde plus bas pour plus de détails\./u)
     assert.match(advice, /<figcaption>Accord du participe passé<\/figcaption>/u)
+    assert.doesNotMatch(advice, /Les pommes qu’elle a mangées|Les livres qu’il a lus/u)
     assert.doesNotMatch(advice, /Quel verbe auxiliaire|<kbd>Avoir<\/kbd>|<kbd>Être<\/kbd>|eussiez calqué|Résultat|…/u)
   })
 
@@ -530,6 +531,30 @@ describe('aides visuelles configurables', () => {
     assert.match(advice, /L’infinitif est la forme du dictionnaire/u)
     assert.match(advice, /recopie cette forme telle quelle/u)
     assert.doesNotMatch(advice, /forme à trouver/u)
+  })
+
+  it('explique l’infinitif passé sans inventer de personne grammaticale', () => {
+    const values = coachHelpQuestionVariables({
+      titre: 'Question', consigne: '', reponses: ['Avoir reçu'], reponsesPourCorrige: ['Avoir reçu'],
+      infinitif: 'recevoir', pronom: '', mode: 'infinitif', temps: 'passé', conjugaison1: 'Avoir reçu', isCompound: true,
+    }, {
+      infinitif: 'recevoir', groupeConjugaison: 3, terminaison: 'oir', auxiliaire: 'avoir', participePasse: 'reçu',
+    })
+    const advice = renderCoachHelpContent('{completeAdviceHelp}', values)
+    assert.match(advice, /Utilise l’auxiliaire <strong>avoir<\/strong> à l’infinitif/u)
+    assert.doesNotMatch(advice, /personne demandée|avec <strong>la personne/u)
+  })
+
+  it('donne une base exploitable pour les participes présents irréguliers', () => {
+    const values = coachHelpQuestionVariables({
+      titre: 'Question', consigne: '', reponses: ['Étant'], reponsesPourCorrige: ['Étant'],
+      infinitif: 'être', pronom: '', mode: 'participe', temps: 'présent', conjugaison1: 'Étant',
+    }, {
+      infinitif: 'être', groupeConjugaison: 3, terminaison: 're', auxiliaire: 'avoir', participePasse: 'été',
+    })
+    const advice = renderCoachHelpContent('{completeAdviceHelp}', values)
+    assert.match(advice, /base repère <strong>ét-<\/strong>[^]*<strong>-ant<\/strong>/u)
+    assert.doesNotMatch(advice, /retrouve la forme apprise par cœur/u)
   })
 
   it('conserve la forme repère mais masque le radical et la terminaison pendant la construction', () => {

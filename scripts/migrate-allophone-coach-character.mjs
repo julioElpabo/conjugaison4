@@ -19,8 +19,8 @@ export const allophoneReplySeeds = [
 ]
 
 export const allophoneReactionRuleSeeds = [
-  ['correct', 1, 1, 1, 2],
-  ['correct-alternative', 1, 1, 1, 2],
+  ['correct', 1, 1, 1, 1],
+  ['correct-alternative', 1, 1, 1, 1],
   ['finish', 0, 0, 0, 2],
   ['incorrect', 1, 1, 1, 2],
   ['streak', 0.8, 0.8, 0.8, 2],

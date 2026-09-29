@@ -11,6 +11,9 @@ const props = defineProps<{
   tenses: ConjugationTense[]
   coachId?: number
   audioEnabled?: boolean
+  targetSubject?: string
+  targetMode?: string
+  targetTense?: string
 }>()
 
 const { ui, uiLabel } = useLanguagePreferences()
@@ -32,6 +35,19 @@ const displayedTenses = computed(() => props.tenses
     rows: (consultation.value?.conjugations || []).filter(row => row.tenseId === tense.id),
   }))
   .filter(tense => tense.rows.length))
+
+function normalized(value?: string) {
+  return (value || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLocaleLowerCase('fr')
+}
+
+function isTargetTense(tense: ConjugationTense) {
+  return normalized(tense.name) === normalized(props.targetTense)
+    && (!props.targetMode || normalized(tense.mode?.name) === normalized(props.targetMode))
+}
+
+function isTargetRow(row: ConsultedConjugation, tense: ConjugationTense) {
+  return isTargetTense(tense) && normalized(row.pronoun) === normalized(props.targetSubject)
+}
 
 function displayedForm(row: ConsultedConjugation, form: string, mode: string) {
   if (mode.trim().toLocaleLowerCase('fr') === 'impératif') return `${form} !`
@@ -167,13 +183,22 @@ onBeforeUnmount(stopAudio)
       <p><strong>{{ verbLabel }}</strong><template v-if="definition"> = {{ definition }}</template></p>
     </section>
 
+    <section v-if="targetTense || targetSubject" class="allophone-help__method">
+      <h3>{{ ui('Pour répondre') }}</h3>
+      <ol>
+        <li v-if="targetSubject">{{ ui('Repère le sujet : {subject}.', { subject: targetSubject }) }}</li>
+        <li>{{ ui('Cherche le verbe {verb} au temps {tense}.', { verb: verbLabel || '', tense: uiLabel(targetTense || '') }) }}</li>
+        <li>{{ ui('Ouvre le temps surligné et retrouve la ligne du sujet.') }}</li>
+      </ol>
+    </section>
+
     <p v-if="loading" class="allophone-help__status">{{ ui('Chargement de la conjugaison…') }}</p>
     <div v-else-if="loadError" class="allophone-help__error" role="alert">
       <p>{{ loadError }}</p>
       <button type="button" @click="loadConjugation">{{ ui('Réessayer') }}</button>
     </div>
 
-    <details v-for="tense in displayedTenses" :key="tense.id" class="allophone-help__tense">
+    <details v-for="tense in displayedTenses" :key="tense.id" class="allophone-help__tense" :class="{ 'is-target': isTargetTense(tense) }" :open="isTargetTense(tense)">
       <summary>
         <span class="allophone-help__tense-title">
           <span class="allophone-help__expand" aria-hidden="true">
@@ -200,7 +225,7 @@ onBeforeUnmount(stopAudio)
         </button>
       </summary>
       <ul>
-        <li v-for="row in tense.rows" :key="row.id">
+        <li v-for="row in tense.rows" :key="row.id" :class="{ 'is-target': isTargetRow(row, tense) }">
           <span class="allophone-help__forms">
             <template v-for="(form, index) in row.forms" :key="form">
               <span v-if="index" class="allophone-help__or">{{ ui('ou') }}</span>
@@ -230,6 +255,6 @@ onBeforeUnmount(stopAudio)
 </template>
 
 <style scoped>
-.allophone-help{display:grid;gap:12px}.allophone-help__definition,.allophone-help__tense{border:1px solid color-mix(in srgb,var(--coach-color,#295f72) 30%,#cfe0dc);border-radius:16px;background:color-mix(in srgb,var(--coach-color,#295f72) 5%,white);box-shadow:0 4px 14px rgb(37 75 78 / 6%)}.allophone-help__definition{padding:16px}.allophone-help__definition header{display:flex;align-items:center;justify-content:space-between;gap:12px}.allophone-help__definition h3{margin:0;color:#17566a;font-size:1rem}.allophone-help__definition p{margin:12px 0 0;color:#405b63;font-size:1rem;line-height:1.52}.allophone-help__audio{display:inline-grid;width:32px;height:32px;flex:0 0 auto;place-items:center;border:1px solid color-mix(in srgb,var(--coach-color,#295f72) 48%,#b9cccf);border-radius:50%;color:var(--coach-color,#295f72);background:white;cursor:pointer}.allophone-help__audio:hover,.allophone-help__audio:focus-visible{outline:2px solid color-mix(in srgb,var(--coach-color,#295f72) 25%,transparent);background:color-mix(in srgb,var(--coach-color,#295f72) 8%,white)}.allophone-help__audio.has-error{color:#a03e3e;border-color:#d69292}.allophone-help__tense{overflow:hidden}.allophone-help__tense summary{display:flex;padding:10px 12px;align-items:center;justify-content:space-between;gap:12px;color:#17566a;cursor:pointer;font-weight:850;list-style:none}.allophone-help__tense summary::-webkit-details-marker{display:none}.allophone-help__tense-title{display:flex;min-width:0;align-items:center;gap:10px}.allophone-help__expand{display:inline-grid;width:32px;height:32px;flex:0 0 auto;place-items:center;border:1px solid color-mix(in srgb,var(--coach-color,#295f72) 35%,#b9cccf);border-radius:50%;color:var(--coach-color,#295f72);background:color-mix(in srgb,var(--coach-color,#295f72) 5%,white)}.allophone-help__expand-open{display:none}.allophone-help__tense[open] .allophone-help__expand-collapsed{display:none}.allophone-help__tense[open] .allophone-help__expand-open{display:block}.allophone-help__tense[open] summary{border-bottom:1px solid #d7e4e2}.allophone-help__tense ul{display:grid;margin:0;padding:8px 14px 12px;list-style:none}.allophone-help__tense li{display:flex;min-height:44px;padding:7px 2px;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #e2ecea;color:#294a51}.allophone-help__tense li:last-child{border-bottom:0}.allophone-help__forms{display:flex;min-width:0;flex-wrap:wrap;gap:5px}.allophone-help__or{color:#7a8d91;font-size:.8rem;font-style:italic}.allophone-help__status,.allophone-help__error{margin:0;padding:14px;border:1px solid #cfe0dc;border-radius:14px;color:#5a7076;background:#f1f7f7}.allophone-help__error{display:grid;gap:9px}.allophone-help__error p{margin:0}.allophone-help__error button{justify-self:start;padding:7px 10px;border:0;border-radius:9px;color:white;background:var(--coach-color,#295f72);cursor:pointer;font:inherit;font-weight:800}
-:global(:root[data-theme='dark'] .allophone-help__definition),:global(:root[data-theme='dark'] .allophone-help__tense){border-color:#47666d;background:#1b3035}:global(:root[data-theme='dark'] .allophone-help__definition h3),:global(:root[data-theme='dark'] .allophone-help__tense summary){color:#b5e4e7}:global(:root[data-theme='dark'] .allophone-help__definition p),:global(:root[data-theme='dark'] .allophone-help__tense li){color:#d5e4e5}:global(:root[data-theme='dark'] .allophone-help__or){color:#9fb1b4}:global(:root[data-theme='dark'] .allophone-help__tense[open] summary),:global(:root[data-theme='dark'] .allophone-help__tense li){border-color:#385156}:global(:root[data-theme='dark'] .allophone-help__audio),:global(:root[data-theme='dark'] .allophone-help__expand){color:#b5e4e7;border-color:#53737a;background:#20383d}:global(:root[data-theme='dark'] .allophone-help__audio:hover),:global(:root[data-theme='dark'] .allophone-help__audio:focus-visible){background:#29464c}:global(:root[data-theme='dark'] .allophone-help__status),:global(:root[data-theme='dark'] .allophone-help__error){color:#bfd0d2;border-color:#47666d;background:#1b3035}
+.allophone-help{display:grid;gap:12px}.allophone-help__definition,.allophone-help__method,.allophone-help__tense{border:1px solid color-mix(in srgb,var(--coach-color,#295f72) 30%,#cfe0dc);border-radius:16px;background:color-mix(in srgb,var(--coach-color,#295f72) 5%,white);box-shadow:0 4px 14px rgb(37 75 78 / 6%)}.allophone-help__definition,.allophone-help__method{padding:16px}.allophone-help__definition header{display:flex;align-items:center;justify-content:space-between;gap:12px}.allophone-help__definition h3,.allophone-help__method h3{margin:0;color:#17566a;font-size:1rem}.allophone-help__definition p{margin:12px 0 0;color:#405b63;font-size:1rem;line-height:1.52}.allophone-help__method ol{margin:10px 0 0;padding-left:1.25rem;color:#405b63}.allophone-help__method li{line-height:1.5}.allophone-help__method li+li{margin-top:6px}.allophone-help__audio{display:inline-grid;width:32px;height:32px;flex:0 0 auto;place-items:center;border:1px solid color-mix(in srgb,var(--coach-color,#295f72) 48%,#b9cccf);border-radius:50%;color:var(--coach-color,#295f72);background:white;cursor:pointer}.allophone-help__audio:hover,.allophone-help__audio:focus-visible{outline:2px solid color-mix(in srgb,var(--coach-color,#295f72) 25%,transparent);background:color-mix(in srgb,var(--coach-color,#295f72) 8%,white)}.allophone-help__audio.has-error{color:#a03e3e;border-color:#d69292}.allophone-help__tense{overflow:hidden}.allophone-help__tense.is-target{border-width:2px;border-color:var(--coach-color,#295f72)}.allophone-help__tense summary{display:flex;padding:10px 12px;align-items:center;justify-content:space-between;gap:12px;color:#17566a;cursor:pointer;font-weight:850;list-style:none}.allophone-help__tense summary::-webkit-details-marker{display:none}.allophone-help__tense-title{display:flex;min-width:0;align-items:center;gap:10px}.allophone-help__expand{display:inline-grid;width:32px;height:32px;flex:0 0 auto;place-items:center;border:1px solid color-mix(in srgb,var(--coach-color,#295f72) 35%,#b9cccf);border-radius:50%;color:var(--coach-color,#295f72);background:color-mix(in srgb,var(--coach-color,#295f72) 5%,white)}.allophone-help__expand-open{display:none}.allophone-help__tense[open] .allophone-help__expand-collapsed{display:none}.allophone-help__tense[open] .allophone-help__expand-open{display:block}.allophone-help__tense[open] summary{border-bottom:1px solid #d7e4e2}.allophone-help__tense ul{display:grid;margin:0;padding:8px 14px 12px;list-style:none}.allophone-help__tense li{display:flex;min-height:44px;padding:7px 2px;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #e2ecea;color:#294a51}.allophone-help__tense li.is-target{margin:2px -7px;padding:8px 9px;border:0;border-radius:10px;background:color-mix(in srgb,var(--coach-color,#295f72) 14%,white);font-weight:900}.allophone-help__tense li:last-child{border-bottom:0}.allophone-help__forms{display:flex;min-width:0;flex-wrap:wrap;gap:5px}.allophone-help__or{color:#7a8d91;font-size:.8rem;font-style:italic}.allophone-help__status,.allophone-help__error{margin:0;padding:14px;border:1px solid #cfe0dc;border-radius:14px;color:#5a7076;background:#f1f7f7}.allophone-help__error{display:grid;gap:9px}.allophone-help__error p{margin:0}.allophone-help__error button{justify-self:start;padding:7px 10px;border:0;border-radius:9px;color:white;background:var(--coach-color,#295f72);cursor:pointer;font:inherit;font-weight:800}
+:global(:root[data-theme='dark'] .allophone-help__definition),:global(:root[data-theme='dark'] .allophone-help__method),:global(:root[data-theme='dark'] .allophone-help__tense){border-color:#47666d;background:#1b3035}:global(:root[data-theme='dark'] .allophone-help__definition h3),:global(:root[data-theme='dark'] .allophone-help__method h3),:global(:root[data-theme='dark'] .allophone-help__tense summary){color:#b5e4e7}:global(:root[data-theme='dark'] .allophone-help__definition p),:global(:root[data-theme='dark'] .allophone-help__method ol),:global(:root[data-theme='dark'] .allophone-help__tense li){color:#d5e4e5}:global(:root[data-theme='dark'] .allophone-help__or){color:#9fb1b4}:global(:root[data-theme='dark'] .allophone-help__tense[open] summary),:global(:root[data-theme='dark'] .allophone-help__tense li){border-color:#385156}:global(:root[data-theme='dark'] .allophone-help__tense li.is-target){background:color-mix(in srgb,var(--coach-color,#295f72) 30%,#1b3035)}:global(:root[data-theme='dark'] .allophone-help__audio),:global(:root[data-theme='dark'] .allophone-help__expand){color:#b5e4e7;border-color:#53737a;background:#20383d}:global(:root[data-theme='dark'] .allophone-help__audio:hover),:global(:root[data-theme='dark'] .allophone-help__audio:focus-visible){background:#29464c}:global(:root[data-theme='dark'] .allophone-help__status),:global(:root[data-theme='dark'] .allophone-help__error){color:#bfd0d2;border-color:#47666d;background:#1b3035}
 </style>

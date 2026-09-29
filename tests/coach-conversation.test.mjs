@@ -6,6 +6,7 @@ import {
   chatMessageHasVisibleContent,
   chatReactionAllowsMedia,
   coachReactionText,
+  softenIncorrectCoachText,
 } from '../shared/utils/coach-conversation.ts'
 
 describe('enchaînement du chat après une réponse', () => {
@@ -63,5 +64,13 @@ describe('enchaînement du chat après une réponse', () => {
       coachReactionText('C’est faux. La bonne réponse est <b>« ils ont réagi »</b>.', correction, '', 'ils ont réagi'),
       'C’est faux. La bonne réponse est <b>« ils ont réagi »</b>.',
     )
+  })
+
+  it('adoucit uniquement les anciennes corrections abruptes', () => {
+    assert.equal(
+      softenIncorrectCoachText("C'est faux. La bonne réponse est « tu es »."),
+      'Ce n’est pas encore ça. La bonne réponse est « tu es ».',
+    )
+    assert.equal(softenIncorrectCoachText('Regarde encore la terminaison.'), 'Regarde encore la terminaison.')
   })
 })

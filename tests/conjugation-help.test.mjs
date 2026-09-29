@@ -866,10 +866,10 @@ test('le bloc automatique d’un temps composé sépare mémorisation, réponse 
   assert.match(html, /<strong>Résultat<\/strong><p><strong>avions mangé<\/strong><\/p>/)
   assert.doesNotMatch(html, /<strong>Résultat<\/strong><p><mark>/)
   assert.match(html, /<figcaption>Accord du participe passé<\/figcaption>/)
-  assert.match(html, /Cas général avec avoir/)
+  assert.match(html, /<strong>Avec avoir<\/strong>/)
   assert.doesNotMatch(html, /Avec l’auxiliaire <strong>être<\/strong>/)
-  assert.match(html, /Si le COD est placé avant/)
-  assert.match(html, /Les pommes qu’elle a mangées/)
+  assert.doesNotMatch(html, /Si le COD est placé avant/)
+  assert.doesNotMatch(html, /Les pommes qu’elle a mangées/)
 })
 
 test('le bloc composé emploie être quand la forme réelle le demande', () => {

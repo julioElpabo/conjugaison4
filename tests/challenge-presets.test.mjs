@@ -52,6 +52,7 @@ const verbs = [
   verb(12, 'absoudre', { groupeConjugaison: 3, terminaison: 're', niveauDifficulte: 3, registrePrincipal: 'rare' }),
 ]
 const presetPickerSource = readFileSync(new URL('../app/components/challenge/PresetPicker.vue', import.meta.url), 'utf8')
+const wizardWorkspaceSource = readFileSync(new URL('../app/components/challenge/WizardChallengeWorkspace.vue', import.meta.url), 'utf8')
 const ultimateMigrationSource = readFileSync(new URL('../server/plugins/ultimate-challenge-migration.ts', import.meta.url), 'utf8')
 
 describe('défis résolus par critères', () => {
@@ -166,6 +167,20 @@ describe('défis résolus par critères', () => {
     assert.ok(thirty < 0 || thirty > ultimateBranchEnd)
     assert.ok(separator > allVerbs)
     assert.ok(smallerChoices > separator)
+  })
+
+  it('ouvre les défis de la page d’accueil sur le premier groupe', () => {
+    assert.match(wizardWorkspaceSource, /const presetExpanded = ref\(true\)/u)
+    assert.match(wizardWorkspaceSource, /const presetStage = ref<'groups' \| 'presets'>\('presets'\)/u)
+    assert.match(presetPickerSource, /groups\.find\(group => group\.id === preferredGroupId\)\?\.id \?\? groups\[0\]\.id/u)
+  })
+
+  it('préfère les niveaux suisses en Suisse et les niveaux français ailleurs', () => {
+    assert.match(wizardWorkspaceSource, /forwardedVisitorCountry\.value === 'CH' \|\| swissLanguage \? 'school' : 'school-france'/u)
+    assert.match(wizardWorkspaceSource, /forwardedVisitorCountry\.value === 'CH' \? 'school' : 'school-france'/u)
+    assert.match(wizardWorkspaceSource, /timeZone === 'Europe\/Zurich'/u)
+    assert.match(wizardWorkspaceSource, /:preferred-compact-group-id="preferredPresetGroupId"/u)
+    assert.match(presetPickerSource, /compactGroupWasChosen\.value = true/u)
   })
 
   it('livre une migration de démarrage idempotente pour le défi ultime', () => {

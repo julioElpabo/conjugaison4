@@ -20,7 +20,29 @@ describe('dashboard intelligent des statistiques', () => {
   it('ouvre la vue d’ensemble par défaut et charge ses données après authentification', async () => {
     const page = await read('../app/pages/admin/charts.vue')
     assert.match(page, /const activeTab = ref<[^>]+>\('overview'\)/u)
+    assert.match(page, /const startDate = ref\(offsetDate\(-6\)\)/u)
     assert.match(page, /loadedForUserId = current\.id; void loadActiveTab\(\)/u)
+  })
+
+  it('affiche les données locales sans attendre GA4 et tolère les résultats partiels', async () => {
+    const page = await read('../app/pages/admin/charts.vue')
+    const localEndpoint = await read('../server/api/admin/analytics.get.ts')
+    const ga4Endpoint = await read('../server/api/admin/analytics-ga4.get.ts')
+    assert.match(page, /void loadGa4\(request, 'range', start, end\)/u)
+    assert.match(page, /Promise\.allSettled/u)
+    assert.match(page, /Les statistiques locales restent affichées/u)
+    assert.doesNotMatch(localEndpoint, /googleAnalyticsOverview/u)
+    assert.match(localEndpoint, /localResponseCache/u)
+    assert.match(ga4Endpoint, /googleAnalyticsOverview/u)
+  })
+
+  it('crée au démarrage les index temporels manquants', async () => {
+    const migration = await read('../server/plugins/zz-analytics-performance-migration.ts')
+    assert.match(migration, /idx_learner_sessions_seen_account/u)
+    assert.match(migration, /idx_learner_runs_answered_account_review/u)
+    assert.match(migration, /idx_learner_logins_date_type_account/u)
+    assert.match(migration, /idx_logs_created/u)
+    assert.match(migration, /information_schema\.STATISTICS/u)
   })
 
   it('propose Aujourd’hui avant 7 jours et le traduit en une période d’un jour', async () => {

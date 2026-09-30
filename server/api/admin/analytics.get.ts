@@ -1,7 +1,6 @@
 import type { RowDataPacket } from 'mysql2/promise'
-import type { AnalyticsBreakdownItem, AnalyticsOverview, AnalyticsSeriesPoint, AnalyticsWindow } from '../../../shared/types/analytics'
+import type { AnalyticsBreakdownItem, AnalyticsOverview, AnalyticsResponse, AnalyticsSeriesPoint, AnalyticsWindow } from '../../../shared/types/analytics'
 import { ANALYTICS_EVENTS } from '../../../shared/types/analytics'
-import { googleAnalyticsOverview } from '../../utils/google-analytics'
 
 interface ValueRow extends RowDataPacket { label: string, value: number }
 interface SummaryRow extends RowDataPacket { sessions: number }
@@ -20,6 +19,7 @@ interface LegacyRow extends RowDataPacket {
 }
 
 const windows: AnalyticsWindow[] = ['now', '3m', '5m', '30m', 'range']
+const localResponseCache = new Map<string, { expiresAt: number, value: AnalyticsResponse }>()
 
 function isoDate(value: unknown, fallback: Date) {
   const text = String(value || '')
@@ -55,6 +55,9 @@ export default defineEventHandler(async (event) => {
   const startDate = isoDate(query.start, defaultStart)
   const endDate = isoDate(query.end, today)
   if (startDate > endDate) throw createError({ statusCode: 400, statusMessage: 'La date de début doit précéder la date de fin.' })
+  const cacheKey = `${window}:${startDate}:${endDate}`
+  const cached = localResponseCache.get(cacheKey)
+  if (cached && cached.expiresAt > Date.now()) return cached.value
 
   const liveMinutes = window === 'now' ? 1 : window === '3m' ? 3 : window === '5m' ? 5 : 30
   const eventWhere = window === 'range'
@@ -201,21 +204,10 @@ export default defineEventHandler(async (event) => {
     local = emptyOverview('Les nouvelles tables statistiques ne sont pas encore disponibles.')
   }
 
-  let ga4: AnalyticsOverview | null = null
-  try {
-    ga4 = await googleAnalyticsOverview({ window, startDate, endDate })
-  }
-  catch (error) {
-    console.error('[analytics] Lecture GA4 impossible.', error)
-    const rawDetail = error instanceof Error ? error.message.replace(/\s+/gu, ' ') : ''
-    const detail = rawDetail.includes('(429)')
-      ? 'Le quota horaire GA4 est temporairement atteint. Les statistiques locales restent disponibles et GA4 reprendra automatiquement dans moins d’une heure.'
-      : rawDetail.slice(0, 180)
-    ga4 = {
-      ...emptyOverview(`Connexion GA4 indisponible.${detail ? ` ${detail}` : ' Vérifiez les variables serveur et l’accès de la propriété.'}`),
-      source: 'ga4',
-      configured: true,
-    }
-  }
-  return { window, startDate, endDate, local, ga4 }
+  const response: AnalyticsResponse = { window, startDate, endDate, local, ga4: null }
+  localResponseCache.set(cacheKey, {
+    value: response,
+    expiresAt: Date.now() + (window === 'range' ? 60_000 : 15_000),
+  })
+  return response
 })

@@ -27,6 +27,7 @@ const connectedFeatureLabels: Record<string, string> = {
   'learner.training': 'Progression par défi', 'learner.training.analysis': 'Analyse de progression',
   'learner.preferences': 'Préférences', 'learner.account': 'Réglages du compte',
 }
+const usersResponseCache = new Map<string, { expiresAt: number, value: AnalyticsUsersResponse }>()
 
 function isoDate(value: unknown, fallback: Date) {
   const text = String(value || '')
@@ -75,6 +76,9 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsersResponse>
   if (startDate > endDate) {
     throw createError({ statusCode: 400, statusMessage: 'La date de début doit précéder la date de fin.' })
   }
+  const cacheKey = `${startDate}:${endDate}`
+  const cached = usersResponseCache.get(cacheKey)
+  if (cached && cached.expiresAt > Date.now()) return cached.value
 
   const rangeDays = Math.max(1, Math.ceil(
     (Date.parse(`${endDate}T12:00:00Z`) - Date.parse(`${startDate}T12:00:00Z`)) / 86400000,
@@ -202,7 +206,7 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsersResponse>
     Number(initialTotal?.value) || 0,
   )
 
-  return {
+  const response: AnalyticsUsersResponse = {
     startDate,
     endDate,
     totalAccounts: Number(total?.value) || 0,
@@ -220,4 +224,6 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsersResponse>
     generatedAt: new Date().toISOString(),
     notice: 'L’activité regroupe les connexions, les sessions de compte et les réponses enregistrées. La reprise des erreurs compte chaque utilisateur une seule fois sur la période.',
   }
+  usersResponseCache.set(cacheKey, { value: response, expiresAt: Date.now() + 60_000 })
+  return response
 })

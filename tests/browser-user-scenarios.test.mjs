@@ -248,6 +248,14 @@ test('parcours utilisateur dans un navigateur réel', { skip: !enabled && 'Dispo
     const challengeReady = await waitFor(page, `document.body.innerText.includes('Comment veux-tu l’utiliser')`, 12_000)
     await check(t, 'Le défi est généré et arrive à l’étape de lancement', challengeReady)
 
+    await page.evaluate(`document.querySelector('.action-button--print')?.click()`)
+    const printPreviewOpened = await waitFor(page, `Boolean(document.querySelector('.print-overlay'))`, 15_000)
+    await check(t, 'L’aperçu avant impression s’ouvre depuis le défi', printPreviewOpened)
+    if (printPreviewOpened) {
+      await page.evaluate(`[...document.querySelectorAll('[data-tour="print-preview"] button')].find(button => button.textContent?.trim() === 'Fermer')?.click()`)
+      await waitFor(page, `!document.querySelector('.print-overlay')`)
+    }
+
     await page.evaluate(`document.querySelector('.action-button--chat')?.click()`)
     const pickerOpened = await waitFor(page, `Boolean(document.querySelector('.coach-picker'))`)
     await check(t, 'Le sélecteur de coach s’ouvre depuis le défi', pickerOpened)

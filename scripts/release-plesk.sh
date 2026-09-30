@@ -52,6 +52,8 @@ while [[ -L "$script_path" ]]; do
 done
 script_dir="$(cd -P "$(dirname "$script_path")" && pwd)"
 repository_root="$(cd "$script_dir/.." && pwd)"
+nuxt_asset_snapshot="$(mktemp -d "${TMPDIR:-/tmp}/conjugaison-nuxt-assets.XXXXXX")"
+trap 'rm -rf "$nuxt_asset_snapshot"' EXIT
 
 fail() {
   printf 'Erreur : %s\n' "$1" >&2
@@ -116,7 +118,11 @@ printf '\n[5/8] Installation exacte des dépendances\n'
 npm --prefix "$repository_root" ci
 
 printf '\n[6/8] Construction du paquet Nuxt\n'
+node "$repository_root/scripts/retain-previous-nuxt-assets.mjs" \
+  snapshot "$repository_root/.output" "$nuxt_asset_snapshot"
 npm --prefix "$repository_root" run build
+node "$repository_root/scripts/retain-previous-nuxt-assets.mjs" \
+  restore "$repository_root/.output" "$nuxt_asset_snapshot"
 node --env-file-if-exists="$repository_root/.env" \
   "$repository_root/scripts/assert-no-azure-secrets-in-build.mjs"
 

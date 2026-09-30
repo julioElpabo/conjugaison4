@@ -133,11 +133,33 @@ const guidedTourDisabled = ref(false)
 const wizardAtHome = useState('wizard-at-home', () => true)
 const falcMode = useState<boolean>('falc-mode', () => false)
 const currentStep = ref<WizardStep>(0)
+// Conservé pour pouvoir réactiver facilement le bloc de présentation de l’accueil.
+const showHomeSeoIntro = false
 const falcHomePanel = ref<'code' | 'presets' | null>(null)
 const isPreparingStep4 = ref(false)
 const highlightChallengeLoader = ref(false)
-const presetStage = ref<'groups' | 'presets'>('groups')
-const presetExpanded = ref(false)
+const presetStage = ref<'groups' | 'presets'>('presets')
+const presetExpanded = ref(true)
+const requestHeaders = useRequestHeaders([
+  'accept-language',
+  'cf-ipcountry',
+  'cloudfront-viewer-country',
+  'x-appengine-country',
+  'x-country-code',
+  'x-vercel-ip-country',
+])
+const forwardedCountry = [
+  requestHeaders['cf-ipcountry'],
+  requestHeaders['cloudfront-viewer-country'],
+  requestHeaders['x-appengine-country'],
+  requestHeaders['x-country-code'],
+  requestHeaders['x-vercel-ip-country'],
+].find(Boolean)?.trim().toUpperCase()
+const swissLanguage = /(?:^|,)\s*[a-z]{2,3}-CH(?:\s*;|\s*,|$)/iu.test(requestHeaders['accept-language'] ?? '')
+const forwardedVisitorCountry = useState<string | null>('forwarded-visitor-country', () => forwardedCountry ?? null)
+const preferredPresetGroupId = useState<'school' | 'school-france'>('preferred-preset-group', () => (
+  forwardedVisitorCountry.value === 'CH' || swissLanguage ? 'school' : 'school-france'
+))
 const challengeCode = ref('')
 const codeError = ref('')
 const actionError = ref('')
@@ -567,6 +589,13 @@ function syncGuidedTourAvailability() {
 }
 
 onMounted(() => {
+  const browserLanguages = navigator.languages?.length ? navigator.languages : [navigator.language]
+  const hasSwissBrowserRegion = browserLanguages.some(language => /-CH$/iu.test(language))
+  const hasSwissTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone === 'Europe/Zurich'
+  preferredPresetGroupId.value = forwardedVisitorCountry.value
+    ? forwardedVisitorCountry.value === 'CH' ? 'school' : 'school-france'
+    : hasSwissBrowserRegion || hasSwissTimezone ? 'school' : 'school-france'
+
   guidedTourMediaQuery = window.matchMedia('(max-width: 640px)')
   syncGuidedTourAvailability()
   guidedTourMediaQuery.addEventListener('change', syncGuidedTourAvailability)
@@ -738,8 +767,8 @@ function restartChallenge() {
   prefilledOptionsRevealPending.value = false
   isPrefilledChallenge.value = false
   isPresetVerbEditing.value = false
-  presetExpanded.value = false
-  presetStage.value = 'groups'
+  presetExpanded.value = true
+  presetStage.value = 'presets'
   challengeCode.value = ''
   codeError.value = ''
   notice.value = ''
@@ -1988,7 +2017,7 @@ async function createSharedChallenge(title: string, description: string) {
                 <div v-else class="falc-home-panel">
                   <button class="falc-panel-back" type="button" :aria-label="ui('Retour')" @click="falcHomePanel = null">←</button>
                   <h2>{{ ui('Choisis un défi') }}</h2>
-                  <PresetPicker compact :presets="catalogue.presets" :verbs="catalogue.verbes" :modes="catalogue.modes" :tenses="catalogue.temps" :active-preset-id="activePresetId" @select="selectHomePreset" @stage-change="presetStage = $event" />
+                  <PresetPicker compact :presets="catalogue.presets" :verbs="catalogue.verbes" :modes="catalogue.modes" :tenses="catalogue.temps" :active-preset-id="activePresetId" :preferred-compact-group-id="preferredPresetGroupId" @select="selectHomePreset" @stage-change="presetStage = $event" />
                 </div>
               </template>
               <template v-else>
@@ -2062,6 +2091,7 @@ async function createSharedChallenge(title: string, description: string) {
                       :modes="catalogue.modes"
                       :tenses="catalogue.temps"
                       :active-preset-id="activePresetId"
+                      :preferred-compact-group-id="preferredPresetGroupId"
                       @select="selectHomePreset"
                       @stage-change="presetStage = $event"
                     />
@@ -2076,8 +2106,8 @@ async function createSharedChallenge(title: string, description: string) {
                     <button class="primary-button" :class="{ 'wizard-next-pulse': !highlightChallengeLoader }" type="button" @click="startCustomChallenge">{{ ui('Construire un nouveau défi →') }}</button>
                   </article>
                 </div>
-                <div class="wizard-home__separator" aria-hidden="true"></div>
-                <section class="wizard-home__seo-intro" aria-labelledby="home-features-title">
+                <div v-if="showHomeSeoIntro" class="wizard-home__separator" aria-hidden="true"></div>
+                <section v-if="showHomeSeoIntro" class="wizard-home__seo-intro" aria-labelledby="home-features-title">
                   <header>
                     <p class="wizard-home__seo-eyebrow">{{ ui('Tout pour progresser') }}</p>
                     <h2 id="home-features-title">{{ ui('Des exercices de conjugaison adaptés à tes besoins') }}</h2>

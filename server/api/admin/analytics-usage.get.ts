@@ -27,6 +27,7 @@ interface UsageAccumulator {
 }
 
 const actorFilters: AnalyticsActorFilter[] = ['all', 'anonymous', 'learner']
+const usageResponseCache = new Map<string, { expiresAt: number, value: AnalyticsUsageResponse }>()
 
 const featureLabels: Record<string, string> = {
   'builder.custom': 'Construire un défi personnalisé',
@@ -112,6 +113,9 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsageResponse>
   if (startDate > endDate) {
     throw createError({ statusCode: 400, statusMessage: 'La date de début doit précéder la date de fin.' })
   }
+  const cacheKey = `${startDate}:${endDate}:${actor}`
+  const cached = usageResponseCache.get(cacheKey)
+  if (cached && cached.expiresAt > Date.now()) return cached.value
 
   const actorExpression = "COALESCE(actor_type, 'anonymous')"
   const actorClause = actor === 'all' ? '' : ` AND ${actorExpression}=?`
@@ -294,7 +298,7 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsageResponse>
     || row.eventName === 'challenge_preset_selected'
   )).map(row => row.sessionId)).size
 
-  return {
+  const response: AnalyticsUsageResponse = {
     startDate,
     endDate,
     actor,
@@ -310,4 +314,6 @@ export default defineEventHandler(async (event): Promise<AnalyticsUsageResponse>
     generatedAt: new Date().toISOString(),
     notice: 'La distinction anonyme/connecté et les expositions détaillées commencent à partir de cette version. Les sélections historiques restent visibles, mais ne suffisent pas seules à recommander une suppression.',
   }
+  usageResponseCache.set(cacheKey, { value: response, expiresAt: Date.now() + 60_000 })
+  return response
 })

@@ -52,6 +52,13 @@ export interface AnalyticsResponse {
   ga4: AnalyticsOverview | null
 }
 
+export interface AnalyticsGa4Response {
+  window: AnalyticsWindow
+  startDate: string
+  endDate: string
+  ga4: AnalyticsOverview | null
+}
+
 export interface AnalyticsGeoTimelinePoint {
   minute: string
   cityId?: string

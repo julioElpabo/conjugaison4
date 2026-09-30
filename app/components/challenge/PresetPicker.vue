@@ -8,6 +8,7 @@ const props = defineProps<{
   presets: ChallengePreset[]
   activePresetId?: string
   compact?: boolean
+  preferredCompactGroupId?: string
   verbs?: readonly Verb[]
   modes?: readonly ConjugationMode[]
   tenses?: readonly ConjugationTense[]
@@ -47,9 +48,15 @@ const selectedCompactPresetId = ref<string | null>(null)
 const compactGroup = computed(() => groupedPresets.value.find(group => group.id === compactGroupId.value))
 const selectedCompactPreset = computed(() => props.presets.find(preset => preset.id === selectedCompactPresetId.value))
 const compactBrowser = ref<HTMLElement | null>(null)
+const compactGroupWasChosen = ref(false)
 const hoveredInfoPresetId = ref<string | null>(null)
 const pinnedInfoPresetId = ref<string | null>(null)
 const exposedPresetIds = new Set<string>()
+
+watch([groupedPresets, () => props.preferredCompactGroupId], ([groups, preferredGroupId]) => {
+  if (!props.compact || compactGroupWasChosen.value || !groups[0]) return
+  compactGroupId.value = groups.find(group => group.id === preferredGroupId)?.id ?? groups[0].id
+}, { immediate: true })
 
 const verbNameById = computed(() => new Map((props.verbs ?? []).map(verb => [verb.id, verb.infinitif])))
 const tenseById = computed(() => new Map((props.tenses ?? []).map(tense => [tense.id, tense])))
@@ -119,6 +126,7 @@ function revealCompactColumn(column: number) {
 }
 
 function openCompactGroup(groupId: string) {
+  compactGroupWasChosen.value = true
   compactGroupId.value = groupId
   selectedCompactPresetId.value = null
   pinnedInfoPresetId.value = null

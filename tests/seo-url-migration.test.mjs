@@ -67,11 +67,13 @@ describe('migration des anciennes URL pour le référencement', () => {
     assert.doesNotMatch(sitemap, /MODE_LANDING_SLUGS/u)
   })
 
-  it('décrit clairement les exercices dans le contenu visible de l’accueil', async () => {
+  it('conserve la présentation détaillée de l’accueil sans l’afficher', async () => {
     const wizard = await readFile(new URL('../app/components/challenge/WizardChallengeWorkspace.vue', import.meta.url), 'utf8')
 
     assert.match(wizard, /<h1 v-if="currentStep === 0 && !falcMode && !props\.embedded" class="wizard-hero__subtitle">\{\{ props\.homeHeading \|\| ui\('Exercices de conjugaison française, gratuits et sans publicité'\) \}\}<\/h1>/u)
-    assert.match(wizard, /class="wizard-home__seo-intro"/u)
+    assert.match(wizard, /const showHomeSeoIntro = false/u)
+    assert.match(wizard, /<div v-if="showHomeSeoIntro" class="wizard-home__separator"/u)
+    assert.match(wizard, /<section v-if="showHomeSeoIntro" class="wizard-home__seo-intro"/u)
     assert.match(wizard, /exercices de conjugaison française entièrement gratuits, interactifs et personnalisables/u)
     assert.match(wizard, /dialogue avec un coach virtuel qui t’aide pour chaque question/u)
     assert.match(wizard, /Tes propres exercices peuvent être partagés avec tes élèves/u)

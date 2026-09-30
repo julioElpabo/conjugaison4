@@ -35,6 +35,7 @@ const connectedFeatureLabels = {
   "learner.preferences": "Pr\xE9f\xE9rences",
   "learner.account": "R\xE9glages du compte"
 };
+const usersResponseCache = /* @__PURE__ */ new Map();
 function isoDate(value, fallback) {
   const text = String(value || "");
   return /^\d{4}-\d{2}-\d{2}$/u.test(text) && !Number.isNaN(Date.parse(`${text}T12:00:00Z`)) ? text : fallback.toISOString().slice(0, 10);
@@ -72,6 +73,9 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
   if (startDate > endDate) {
     throw createError({ statusCode: 400, statusMessage: "La date de d\xE9but doit pr\xE9c\xE9der la date de fin." });
   }
+  const cacheKey = `${startDate}:${endDate}`;
+  const cached = usersResponseCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) return cached.value;
   const rangeDays = Math.max(1, Math.ceil(
     (Date.parse(`${endDate}T12:00:00Z`) - Date.parse(`${startDate}T12:00:00Z`)) / 864e5
   ) + 1);
@@ -187,7 +191,7 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
     registrationUnit,
     Number(initialTotal == null ? void 0 : initialTotal.value) || 0
   );
-  return {
+  const response = {
     startDate,
     endDate,
     totalAccounts: Number(total == null ? void 0 : total.value) || 0,
@@ -205,6 +209,8 @@ const analyticsUsers_get = defineEventHandler(async (event) => {
     generatedAt: (/* @__PURE__ */ new Date()).toISOString(),
     notice: "L\u2019activit\xE9 regroupe les connexions, les sessions de compte et les r\xE9ponses enregistr\xE9es. La reprise des erreurs compte chaque utilisateur une seule fois sur la p\xE9riode."
   };
+  usersResponseCache.set(cacheKey, { value: response, expiresAt: Date.now() + 6e4 });
+  return response;
 });
 
 export { analyticsUsers_get as default };

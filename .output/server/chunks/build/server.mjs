@@ -1641,7 +1641,7 @@ const _routes = [
   {
     name: "admin-charts",
     path: "/admin/charts",
-    component: () => import('./charts-CaQVeYM2.mjs')
+    component: () => import('./charts-Dk4Hq0F1.mjs')
   },
   {
     name: "admin-coaches",
@@ -1716,12 +1716,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-CAFIREAo.mjs')
+    component: () => import('./_code_-CgiW3Upi.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-DRrsuY6d.mjs')
+    component: () => import('./_slug_-CoEj1Luk.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1766,7 +1766,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-B1hK18w2.mjs')
+    component: () => import('./exercices-de-conjugaison-Bi9mKN3t.mjs')
   },
   {
     name: "mon-compte",
@@ -1782,7 +1782,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-DIHpiVn5.mjs')
+    component: () => import('./nouveau-defi-DRlh0mtJ.mjs')
   },
   {
     name: "signin",
@@ -1792,7 +1792,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-DwRQ4ua1.mjs')
+    component: () => import('./index-Cf2NTdfy.mjs')
   },
   {
     name: "mode-tense",
@@ -1822,7 +1822,7 @@ const _routes = [
   {
     name: "localized-admin-charts",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/charts",
-    component: () => import('./charts-CaQVeYM2.mjs')
+    component: () => import('./charts-Dk4Hq0F1.mjs')
   },
   {
     name: "localized-admin-coaches",
@@ -1897,12 +1897,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defi/:code()",
-    component: () => import('./_code_-CAFIREAo.mjs')
+    component: () => import('./_code_-CgiW3Upi.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defis/:slug()",
-    component: () => import('./_slug_-DRrsuY6d.mjs')
+    component: () => import('./_slug_-CoEj1Luk.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1947,7 +1947,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-B1hK18w2.mjs')
+    component: () => import('./exercices-de-conjugaison-Bi9mKN3t.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1963,7 +1963,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/nouveau-defi",
-    component: () => import('./nouveau-defi-DIHpiVn5.mjs')
+    component: () => import('./nouveau-defi-DRlh0mtJ.mjs')
   },
   {
     name: "localized-signin",
@@ -1973,7 +1973,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/",
-    component: () => import('./index-DwRQ4ua1.mjs')
+    component: () => import('./index-Cf2NTdfy.mjs')
   },
   {
     name: "localized-mode-tense",

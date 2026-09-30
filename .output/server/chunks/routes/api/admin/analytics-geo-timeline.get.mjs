@@ -1,6 +1,6 @@
 import { d as defineEventHandler, a as getQuery, c as createError } from '../../../nitro/nitro.mjs';
 import { r as requireAdministrator } from '../../../_/session.mjs';
-import { g as googleAnalyticsGeoTimeline } from '../../../_/google-analytics.mjs';
+import { a as googleAnalyticsGeoTimeline } from '../../../_/google-analytics.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';

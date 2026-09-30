@@ -1,6 +1,5 @@
 import { d as defineEventHandler, a as getQuery, c as createError, u as useDatabase } from '../../../nitro/nitro.mjs';
 import { r as requireAdministrator } from '../../../_/session.mjs';
-import { a as googleAnalyticsOverview } from '../../../_/google-analytics.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -14,6 +13,7 @@ import 'node:fs/promises';
 import 'node:url';
 
 const windows = ["now", "3m", "5m", "30m", "range"];
+const localResponseCache = /* @__PURE__ */ new Map();
 function isoDate(value, fallback) {
   const text = String(value || "");
   return /^\d{4}-\d{2}-\d{2}$/u.test(text) && !Number.isNaN(Date.parse(`${text}T12:00:00Z`)) ? text : fallback.toISOString().slice(0, 10);
@@ -72,6 +72,9 @@ const analytics_get = defineEventHandler(async (event) => {
   const startDate = isoDate(query.start, defaultStart);
   const endDate = isoDate(query.end, today);
   if (startDate > endDate) throw createError({ statusCode: 400, statusMessage: "La date de d\xE9but doit pr\xE9c\xE9der la date de fin." });
+  const cacheKey = `${window}:${startDate}:${endDate}`;
+  const cached = localResponseCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) return cached.value;
   const liveMinutes = window === "now" ? 1 : window === "3m" ? 3 : window === "5m" ? 5 : 30;
   const eventWhere = window === "range" ? "created_at >= ? AND created_at < DATE_ADD(?, INTERVAL 1 DAY)" : "created_at >= DATE_SUB(NOW(), INTERVAL ? MINUTE)";
   const sessionWhere = window === "range" ? "first_seen >= ? AND first_seen < DATE_ADD(?, INTERVAL 1 DAY)" : "last_seen >= DATE_SUB(NOW(), INTERVAL ? MINUTE)";
@@ -222,20 +225,12 @@ const analytics_get = defineEventHandler(async (event) => {
     console.error("[analytics] Lecture des statistiques locales impossible.", error);
     local = emptyOverview("Les nouvelles tables statistiques ne sont pas encore disponibles.");
   }
-  let ga4 = null;
-  try {
-    ga4 = await googleAnalyticsOverview({ window, startDate, endDate });
-  } catch (error) {
-    console.error("[analytics] Lecture GA4 impossible.", error);
-    const rawDetail = error instanceof Error ? error.message.replace(/\s+/gu, " ") : "";
-    const detail = rawDetail.includes("(429)") ? "Le quota horaire GA4 est temporairement atteint. Les statistiques locales restent disponibles et GA4 reprendra automatiquement dans moins d\u2019une heure." : rawDetail.slice(0, 180);
-    ga4 = {
-      ...emptyOverview(`Connexion GA4 indisponible.${detail ? ` ${detail}` : " V\xE9rifiez les variables serveur et l\u2019acc\xE8s de la propri\xE9t\xE9."}`),
-      source: "ga4",
-      configured: true
-    };
-  }
-  return { window, startDate, endDate, local, ga4 };
+  const response = { window, startDate, endDate, local, ga4: null };
+  localResponseCache.set(cacheKey, {
+    value: response,
+    expiresAt: Date.now() + (window === "range" ? 6e4 : 15e3)
+  });
+  return response;
 });
 
 export { analytics_get as default };

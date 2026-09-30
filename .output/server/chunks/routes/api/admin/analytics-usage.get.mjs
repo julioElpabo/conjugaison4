@@ -54,6 +54,7 @@ function analyticsUsageDiagnostic(row) {
 }
 
 const actorFilters = ["all", "anonymous", "learner"];
+const usageResponseCache = /* @__PURE__ */ new Map();
 const featureLabels = {
   "builder.custom": "Construire un d\xE9fi personnalis\xE9",
   "preset.library": "Parcourir les d\xE9fis tout faits",
@@ -131,6 +132,9 @@ const analyticsUsage_get = defineEventHandler(async (event) => {
   if (startDate > endDate) {
     throw createError({ statusCode: 400, statusMessage: "La date de d\xE9but doit pr\xE9c\xE9der la date de fin." });
   }
+  const cacheKey = `${startDate}:${endDate}:${actor}`;
+  const cached = usageResponseCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) return cached.value;
   const actorExpression = "COALESCE(actor_type, 'anonymous')";
   const actorClause = actor === "all" ? "" : ` AND ${actorExpression}=?`;
   const parameters = [startDate, endDate];
@@ -275,7 +279,7 @@ const analyticsUsage_get = defineEventHandler(async (event) => {
   const features = finalized.filter((row) => row.category === "feature").sort(order);
   const exposedSessions = new Set(events.filter((row) => row.eventName === "feature_exposed").map((row) => row.sessionId)).size;
   const activeFeatureSessions = new Set(events.filter((row) => row.eventName === "feature_selected" || row.eventName === "exercise_started" || row.eventName === "challenge_preset_selected").map((row) => row.sessionId)).size;
-  return {
+  const response = {
     startDate,
     endDate,
     actor,
@@ -291,6 +295,8 @@ const analyticsUsage_get = defineEventHandler(async (event) => {
     generatedAt: (/* @__PURE__ */ new Date()).toISOString(),
     notice: "La distinction anonyme/connect\xE9 et les expositions d\xE9taill\xE9es commencent \xE0 partir de cette version. Les s\xE9lections historiques restent visibles, mais ne suffisent pas seules \xE0 recommander une suppression."
   };
+  usageResponseCache.set(cacheKey, { value: response, expiresAt: Date.now() + 6e4 });
+  return response;
 });
 
 export { analyticsUsage_get as default };

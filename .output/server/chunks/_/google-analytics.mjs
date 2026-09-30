@@ -447,5 +447,5 @@ async function googleAnalyticsGeoTimeline(date) {
   return value;
 }
 
-export { googleAnalyticsOverview as a, googleAnalyticsTodaySessions as b, googleAnalyticsRealtimeCountries as c, googleAnalyticsTodayUsers as d, googleAnalyticsGeoTimeline as g };
+export { googleAnalyticsGeoTimeline as a, googleAnalyticsTodaySessions as b, googleAnalyticsRealtimeCountries as c, googleAnalyticsTodayUsers as d, googleAnalyticsOverview as g };
 //# sourceMappingURL=google-analytics.mjs.map

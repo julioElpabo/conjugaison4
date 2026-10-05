@@ -198,9 +198,8 @@ describe('aides visuelles configurables', () => {
   it('compose les blocs selon le profil moteur du caractère', () => {
     const configured = visibleCoachHelpBlocks('tres-condensee')
     assert.deepEqual(configured.map(item => item.content), [
-      '{definitionHelp}',
-      '{condensedVerbGroupHelp}',
       '{condensedTenseRuleHelp}',
+      '{condensedVerbGroupHelp}',
     ])
     assert.equal(configured[1].type, 'normal')
     assert.ok(configured.every(item => item.explanationApproach === 'concise'))
@@ -265,11 +264,12 @@ describe('aides visuelles configurables', () => {
     }
     for (const profile of Object.keys(expectedContent)) {
       const blocks = visibleCoachHelpBlocks(profile, passiveQuestion)
-      assert.deepEqual(blocks.map(item => item.content), ['{definitionHelp}', ...expectedContent[profile]])
-      assert.deepEqual(blocks.slice(1).map(item => item.title), ['Marche à suivre', 'Comprendre la voix passive'])
-      const method = renderCoachHelpContent(blocks[1].content, values, blocks[1].explanationApproach)
+      const offset = profile === 'tres-condensee' ? 0 : 1
+      assert.deepEqual(blocks.map(item => item.content), [...(offset ? ['{definitionHelp}'] : []), ...expectedContent[profile]])
+      assert.deepEqual(blocks.slice(offset).map(item => item.title), ['Marche à suivre', 'Comprendre la voix passive'])
+      const method = renderCoachHelpContent(blocks[offset].content, values, blocks[offset].explanationApproach)
       assert.equal(method.match(/<li>/gu)?.length, 4)
-      const rendered = renderCoachHelpContent(blocks[2].content, values, blocks[2].explanationApproach)
+      const rendered = renderCoachHelpContent(blocks[offset + 1].content, values, blocks[offset + 1].explanationApproach)
       assert.match(rendered, /met(?:tre)? en avant[\s\S]*subit l’action/iu)
       assert.match(rendered, /être[\s\S]*(?:temps demandé|porte le mode et le temps)/iu)
       assert.match(rendered, /participe passé/iu)
@@ -281,7 +281,7 @@ describe('aides visuelles configurables', () => {
     assert.doesNotMatch(adviceHtml, /est abandonnée/u)
     const revealed = visibleCoachHelpBlocks('complete-avec-reponses', passiveQuestion)[1]
     assert.match(renderCoachHelpContent(revealed.content, values, revealed.explanationApproach), /est abandonnée/u)
-    const condensed = visibleCoachHelpBlocks('tres-condensee', passiveQuestion)[2]
+    const condensed = visibleCoachHelpBlocks('tres-condensee', passiveQuestion)[1]
     const condensedHtml = renderCoachHelpContent(condensed.content, values, condensed.explanationApproach)
     assert.doesNotMatch(condensedHtml, /<blockquote>|Formule/iu)
     assert.match(condensedHtml, /Par exemple :<br>Le facteur a distribué les lettres ce matin<br>Les lettres ont été distribuées ce matin\./u)
@@ -428,7 +428,8 @@ describe('aides visuelles configurables', () => {
     const advice = renderCoachHelpContent('{completeAdviceHelp}', values)
     assert.match(advice, /imparfait du subjonctif du verbe avoir/u)
     assert.doesNotMatch(advice, /imparfait du subjonctif du verbe être/u)
-    assert.match(advice, /<mark><strong>eussiez<\/strong><\/mark>/u)
+    assert.match(advice, /<strong>eussiez<\/strong>/u)
+    assert.doesNotMatch(advice, /<mark>/u)
     assert.match(advice, /<th><strong>que j’<\/strong><\/th><td><strong>eusse<\/strong><\/td>/u)
     assert.match(advice, /Le participe passé de calquer[\s\S]*<strong>calqué<\/strong>/u)
     assert.match(advice, /Conjugue le verbe auxiliaire <strong>avoir<\/strong> à l’imparfait du subjonctif avec <strong>vous<\/strong>/u)

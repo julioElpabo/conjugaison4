@@ -22,7 +22,9 @@ export function withoutComplementPreposition(value: string, preposition: Complem
 
 /** Applique à un complément sa préposition en respectant les contractions françaises. */
 export function withComplementPreposition(value: string, preposition: ComplementPreposition): string {
-  const phrase = withoutComplementPreposition(value, preposition)
+  // « de » absorbe l’article indéfini pluriel « des » : de livres, d’amis.
+  const cleaned = preposition === 'de' ? value.replace(/^de\s+des\s+/iu, 'de ') : value
+  const phrase = withoutComplementPreposition(cleaned, preposition)
   if (!phrase) return ''
 
   if (preposition === 'à') {

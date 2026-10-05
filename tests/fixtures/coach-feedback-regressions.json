@@ -1,0 +1,789 @@
+{
+  "379": {
+    "question": {
+      "verbeId": 65,
+      "tenseId": 7,
+      "personId": 7,
+      "titre": "servir",
+      "consigne": "nous … les repas | servir | plus-que-parfait (indicatif)",
+      "reponses": [
+        "nous avions servi",
+        "nous avions servi les repas"
+      ],
+      "reponsesPourCorrige": [
+        "nous avions servi les repas"
+      ],
+      "infinitif": "servir",
+      "pronom": "nous",
+      "temps": "plus-que-parfait",
+      "mode": "indicatif",
+      "tenseCode": "pluperfect",
+      "modeCode": "indicative",
+      "isCompound": true,
+      "voice": "active",
+      "conjugaison1": "avions servi",
+      "conjugaison2": "",
+      "conjugaison3": "",
+      "nousForm": "avions servi",
+      "complement": "les repas",
+      "complementPosition": "after",
+      "complementFunction": "cod",
+      "saisiePrefixe": "nous",
+      "agreementReminder": {
+        "kind": "cod-after",
+        "infinitive": "servir",
+        "complement": "les repas",
+        "preposition": null,
+        "participle": "servi",
+        "gender": null,
+        "number": null
+      }
+    },
+    "verb": {
+      "infinitif": "servir",
+      "meaning": "Donner quelque chose à une personne ou être utile à un usage.",
+      "auxiliaire": "avoir",
+      "participePasse": "servi",
+      "groupeConjugaison": 3,
+      "familleConjugaison": "troisieme-ir",
+      "particularites": []
+    },
+    "tense": {
+      "id": 7,
+      "name": "plus-que-parfait",
+      "code": "pluperfect",
+      "modeId": 2,
+      "mode": {
+        "id": 2,
+        "code": "indicative",
+        "name": "indicatif",
+        "order": 20
+      },
+      "isCompound": true,
+      "selected": true
+    }
+  },
+  "389": {
+    "question": {
+      "verbeId": 94,
+      "tenseId": 4,
+      "personId": 9,
+      "titre": "manger",
+      "consigne": "elles | manger | passé simple (indicatif)",
+      "reponses": [
+        "elles mangèrent"
+      ],
+      "reponsesPourCorrige": [
+        "elles mangèrent"
+      ],
+      "infinitif": "manger",
+      "pronom": "elles",
+      "temps": "passé simple",
+      "mode": "indicatif",
+      "tenseCode": "simple-past",
+      "modeCode": "indicative",
+      "isCompound": false,
+      "voice": "active",
+      "conjugaison1": "mangèrent",
+      "conjugaison2": "",
+      "conjugaison3": "",
+      "nousForm": "mangeâmes",
+      "radicalReference": {
+        "kind": "past-simple-il",
+        "label": "il au passé simple",
+        "form": "mangea",
+        "removableEnding": "a",
+        "radical": "mang",
+        "targetEnding": "èrent",
+        "referenceMode": "indicatif",
+        "referenceTense": "passé simple",
+        "referenceSubject": "il",
+        "strategy": "remove-ending",
+        "orthographicAdjustment": "Devant è, le g garde déjà son son doux : le e de la forme en a disparaît.",
+        "validated": true,
+        "paradigmForms": [
+          {
+            "subject": "je",
+            "form": "mangeai",
+            "personId": 4
+          },
+          {
+            "subject": "tu",
+            "form": "mangeas",
+            "personId": 5
+          },
+          {
+            "subject": "il",
+            "form": "mangea",
+            "personId": 6
+          },
+          {
+            "subject": "nous",
+            "form": "mangeâmes",
+            "personId": 7
+          },
+          {
+            "subject": "vous",
+            "form": "mangeâtes",
+            "personId": 8
+          },
+          {
+            "subject": "ils",
+            "form": "mangèrent",
+            "personId": 9
+          }
+        ]
+      },
+      "saisiePrefixe": "elles"
+    },
+    "verb": {
+      "infinitif": "manger",
+      "meaning": "Mettre de la nourriture dans sa bouche, puis l’avaler.",
+      "auxiliaire": "avoir",
+      "participePasse": "mangé",
+      "groupeConjugaison": 1,
+      "familleConjugaison": "ger",
+      "particularites": [
+        "ger"
+      ]
+    },
+    "tense": {
+      "id": 4,
+      "name": "passé simple",
+      "code": "simple-past",
+      "modeId": 2,
+      "mode": {
+        "id": 2,
+        "code": "indicative",
+        "name": "indicatif",
+        "order": 20
+      },
+      "isCompound": false,
+      "selected": true
+    }
+  },
+  "390": {
+    "question": {
+      "verbeId": 94,
+      "tenseId": 9,
+      "personId": 8,
+      "titre": "manger",
+      "consigne": "… un gâteau | manger | présent (impératif)",
+      "reponses": [
+        "mangez !",
+        "mangez",
+        "mangez un gâteau !",
+        "mangez un gâteau"
+      ],
+      "reponsesPourCorrige": [
+        "mangez un gâteau !"
+      ],
+      "infinitif": "manger",
+      "pronom": "vous",
+      "temps": "présent",
+      "mode": "impératif",
+      "tenseCode": "present",
+      "modeCode": "imperative",
+      "isCompound": false,
+      "voice": "active",
+      "conjugaison1": "mangez",
+      "conjugaison2": "",
+      "conjugaison3": "",
+      "nousForm": "mangeons",
+      "radicalReference": {
+        "kind": "present-same-person",
+        "label": "vous à l’indicatif présent",
+        "form": "mangez",
+        "removableEnding": "",
+        "radical": "mangez",
+        "referenceMode": "indicatif",
+        "referenceTense": "présent",
+        "referenceSubject": "vous",
+        "strategy": "reuse-form",
+        "imperativePresentReferences": [
+          {
+            "subject": "tu",
+            "form": "manges"
+          },
+          {
+            "subject": "nous",
+            "form": "mangeons"
+          },
+          {
+            "subject": "vous",
+            "form": "mangez"
+          }
+        ],
+        "validated": true,
+        "paradigmForms": [
+          {
+            "subject": "tu",
+            "form": "mange",
+            "personId": 5
+          },
+          {
+            "subject": "nous",
+            "form": "mangeons",
+            "personId": 7
+          },
+          {
+            "subject": "vous",
+            "form": "mangez",
+            "personId": 8
+          }
+        ]
+      },
+      "complement": "un gâteau",
+      "complementPosition": "after",
+      "complementFunction": "cod",
+      "saisiePrefixe": ""
+    },
+    "verb": {
+      "infinitif": "manger",
+      "meaning": "Mettre de la nourriture dans sa bouche, puis l’avaler.",
+      "auxiliaire": "avoir",
+      "participePasse": "mangé",
+      "groupeConjugaison": 1,
+      "familleConjugaison": "ger",
+      "particularites": [
+        "ger"
+      ]
+    },
+    "tense": {
+      "id": 9,
+      "name": "présent",
+      "code": "present",
+      "modeId": 3,
+      "mode": {
+        "id": 3,
+        "code": "imperative",
+        "name": "impératif",
+        "order": 30
+      },
+      "isCompound": false,
+      "selected": true
+    }
+  },
+  "391": {
+    "question": {
+      "verbeId": 162,
+      "tenseId": 9,
+      "personId": 5,
+      "titre": "élever",
+      "consigne": "… ma construction | élever | présent (impératif)",
+      "reponses": [
+        "élève !",
+        "élève",
+        "élève ma construction !",
+        "élève ma construction"
+      ],
+      "reponsesPourCorrige": [
+        "élève ma construction !"
+      ],
+      "infinitif": "élever",
+      "pronom": "tu",
+      "temps": "présent",
+      "mode": "impératif",
+      "tenseCode": "present",
+      "modeCode": "imperative",
+      "isCompound": false,
+      "voice": "active",
+      "conjugaison1": "élève",
+      "conjugaison2": "",
+      "conjugaison3": "",
+      "nousForm": "élevons",
+      "radicalReference": {
+        "kind": "present-same-person",
+        "label": "tu à l’indicatif présent",
+        "form": "élèves",
+        "removableEnding": "s",
+        "radical": "élève",
+        "referenceMode": "indicatif",
+        "referenceTense": "présent",
+        "referenceSubject": "tu",
+        "strategy": "remove-ending",
+        "imperativePresentReferences": [
+          {
+            "subject": "tu",
+            "form": "élèves"
+          },
+          {
+            "subject": "nous",
+            "form": "élevons"
+          },
+          {
+            "subject": "vous",
+            "form": "élevez"
+          }
+        ],
+        "validated": true,
+        "paradigmForms": [
+          {
+            "subject": "tu",
+            "form": "élève",
+            "personId": 5
+          },
+          {
+            "subject": "nous",
+            "form": "élevons",
+            "personId": 7
+          },
+          {
+            "subject": "vous",
+            "form": "élevez",
+            "personId": 8
+          }
+        ]
+      },
+      "complement": "ma construction",
+      "complementPosition": "after",
+      "complementFunction": "cod",
+      "saisiePrefixe": ""
+    },
+    "verb": {
+      "infinitif": "élever",
+      "meaning": "Mettre plus haut, faire grandir un enfant ou s’occuper d’un animal.",
+      "auxiliaire": "avoir",
+      "participePasse": "élevé",
+      "groupeConjugaison": 1,
+      "familleConjugaison": "er-alternance",
+      "particularites": []
+    },
+    "tense": {
+      "id": 9,
+      "name": "présent",
+      "code": "present",
+      "modeId": 3,
+      "mode": {
+        "id": 3,
+        "code": "imperative",
+        "name": "impératif",
+        "order": 30
+      },
+      "isCompound": false,
+      "selected": true
+    }
+  },
+  "393": {
+    "question": {
+      "verbeId": 49,
+      "tenseId": 6,
+      "personId": 6,
+      "titre": "finir",
+      "consigne": "il … tes travaux | finir | futur antérieur (indicatif)",
+      "reponses": [
+        "il aura fini",
+        "il aura fini tes travaux"
+      ],
+      "reponsesPourCorrige": [
+        "il aura fini tes travaux"
+      ],
+      "infinitif": "finir",
+      "pronom": "il",
+      "temps": "futur antérieur",
+      "mode": "indicatif",
+      "tenseCode": "future-perfect",
+      "modeCode": "indicative",
+      "isCompound": true,
+      "voice": "active",
+      "conjugaison1": "aura fini",
+      "conjugaison2": "",
+      "conjugaison3": "",
+      "nousForm": "aurons fini",
+      "complement": "tes travaux",
+      "complementPosition": "after",
+      "complementFunction": "cod",
+      "saisiePrefixe": "il",
+      "agreementReminder": {
+        "kind": "cod-after",
+        "infinitive": "finir",
+        "complement": "tes travaux",
+        "preposition": null,
+        "participle": "fini",
+        "gender": null,
+        "number": null
+      }
+    },
+    "verb": {
+      "infinitif": "finir",
+      "meaning": "Arriver à la fin d’une action.",
+      "auxiliaire": "avoir",
+      "participePasse": "fini",
+      "groupeConjugaison": 2,
+      "familleConjugaison": "ir-issant",
+      "particularites": []
+    },
+    "tense": {
+      "id": 6,
+      "name": "futur antérieur",
+      "code": "future-perfect",
+      "modeId": 2,
+      "mode": {
+        "id": 2,
+        "code": "indicative",
+        "name": "indicatif",
+        "order": 20
+      },
+      "isCompound": true,
+      "selected": true
+    }
+  },
+  "401": {
+    "question": {
+      "verbeId": 2,
+      "tenseId": 7,
+      "personId": 7,
+      "titre": "aller",
+      "consigne": "nous | aller | plus-que-parfait (indicatif)",
+      "reponses": [
+        "nous étions allés",
+        "nous étions allées"
+      ],
+      "reponsesPourCorrige": [
+        "nous étions allés",
+        "nous étions allées"
+      ],
+      "infinitif": "aller",
+      "pronom": "nous",
+      "temps": "plus-que-parfait",
+      "mode": "indicatif",
+      "tenseCode": "pluperfect",
+      "modeCode": "indicative",
+      "isCompound": true,
+      "voice": "active",
+      "conjugaison1": "étions allés",
+      "conjugaison2": "",
+      "conjugaison3": "",
+      "nousForm": "étions allés",
+      "saisiePrefixe": "nous"
+    },
+    "verb": {
+      "infinitif": "aller",
+      "meaning": "Se déplacer vers un lieu.",
+      "auxiliaire": "être",
+      "participePasse": "allé",
+      "groupeConjugaison": 3,
+      "familleConjugaison": "irregulier",
+      "particularites": []
+    },
+    "tense": {
+      "id": 7,
+      "name": "plus-que-parfait",
+      "code": "pluperfect",
+      "modeId": 2,
+      "mode": {
+        "id": 2,
+        "code": "indicative",
+        "name": "indicatif",
+        "order": 20
+      },
+      "isCompound": true,
+      "selected": true
+    }
+  },
+  "402": {
+    "question": {
+      "verbeId": 6,
+      "tenseId": 9,
+      "personId": 8,
+      "titre": "vouloir",
+      "consigne": "… leur réponse | vouloir | présent (impératif)",
+      "reponses": [
+        "veuillez !",
+        "veuillez",
+        "voulez !",
+        "voulez",
+        "veuillez leur réponse !",
+        "veuillez leur réponse",
+        "voulez leur réponse !",
+        "voulez leur réponse"
+      ],
+      "reponsesPourCorrige": [
+        "veuillez leur réponse !",
+        "voulez leur réponse !"
+      ],
+      "infinitif": "vouloir",
+      "pronom": "vous",
+      "temps": "présent",
+      "mode": "impératif",
+      "tenseCode": "present",
+      "modeCode": "imperative",
+      "isCompound": false,
+      "voice": "active",
+      "conjugaison1": "veuillez",
+      "conjugaison2": "voulez",
+      "conjugaison3": "",
+      "nousForm": "voulons",
+      "radicalReference": {
+        "kind": "memorized-form",
+        "label": "forme particulière de vouloir",
+        "form": "veuillez",
+        "removableEnding": "",
+        "radical": "veuillez",
+        "referenceMode": "impératif",
+        "referenceTense": "présent",
+        "referenceSubject": "",
+        "strategy": "memorize-stem",
+        "validated": true,
+        "imperativePresentReferences": [
+          {
+            "subject": "tu",
+            "form": "veux"
+          },
+          {
+            "subject": "nous",
+            "form": "voulons"
+          },
+          {
+            "subject": "vous",
+            "form": "voulez"
+          }
+        ],
+        "paradigmForms": [
+          {
+            "subject": "tu",
+            "form": "veuille",
+            "personId": 5
+          },
+          {
+            "subject": "nous",
+            "form": "voulons",
+            "personId": 7
+          },
+          {
+            "subject": "vous",
+            "form": "veuillez",
+            "personId": 8
+          }
+        ]
+      },
+      "complement": "leur réponse",
+      "complementPosition": "after",
+      "complementFunction": "cod",
+      "saisiePrefixe": ""
+    },
+    "verb": {
+      "infinitif": "vouloir",
+      "meaning": "Avoir envie de faire ou d’obtenir quelque chose.",
+      "auxiliaire": "avoir",
+      "participePasse": "voulu",
+      "groupeConjugaison": 3,
+      "familleConjugaison": "troisieme-oir",
+      "particularites": [
+        "formes-alternatives"
+      ]
+    },
+    "tense": {
+      "id": 9,
+      "name": "présent",
+      "code": "present",
+      "modeId": 3,
+      "mode": {
+        "id": 3,
+        "code": "imperative",
+        "name": "impératif",
+        "order": 30
+      },
+      "isCompound": false,
+      "selected": true
+    }
+  },
+  "403": {
+    "question": {
+      "verbeId": 4,
+      "tenseId": 9,
+      "personId": 8,
+      "titre": "avoir",
+      "consigne": "… une nouvelle occasion | avoir | présent (impératif)",
+      "reponses": [
+        "ayez !",
+        "ayez",
+        "ayez une nouvelle occasion !",
+        "ayez une nouvelle occasion"
+      ],
+      "reponsesPourCorrige": [
+        "ayez une nouvelle occasion !"
+      ],
+      "infinitif": "avoir",
+      "pronom": "vous",
+      "temps": "présent",
+      "mode": "impératif",
+      "tenseCode": "present",
+      "modeCode": "imperative",
+      "isCompound": false,
+      "voice": "active",
+      "conjugaison1": "ayez",
+      "conjugaison2": "",
+      "conjugaison3": "",
+      "nousForm": "ayons",
+      "radicalReference": {
+        "kind": "memorized-form",
+        "label": "forme particulière de avoir",
+        "form": "ayez",
+        "removableEnding": "",
+        "radical": "ayez",
+        "referenceMode": "impératif",
+        "referenceTense": "présent",
+        "referenceSubject": "",
+        "strategy": "memorize-stem",
+        "validated": true,
+        "imperativePresentReferences": [
+          {
+            "subject": "tu",
+            "form": "as"
+          },
+          {
+            "subject": "nous",
+            "form": "avons"
+          },
+          {
+            "subject": "vous",
+            "form": "avez"
+          }
+        ],
+        "paradigmForms": [
+          {
+            "subject": "tu",
+            "form": "aie",
+            "personId": 5
+          },
+          {
+            "subject": "nous",
+            "form": "ayons",
+            "personId": 7
+          },
+          {
+            "subject": "vous",
+            "form": "ayez",
+            "personId": 8
+          }
+        ]
+      },
+      "complement": "une nouvelle occasion",
+      "complementPosition": "after",
+      "complementFunction": "cod",
+      "saisiePrefixe": ""
+    },
+    "verb": {
+      "infinitif": "avoir",
+      "meaning": "Posséder quelque chose ou vivre une situation.",
+      "auxiliaire": "avoir",
+      "participePasse": "eu",
+      "groupeConjugaison": 3,
+      "familleConjugaison": "voir-recevoir",
+      "particularites": []
+    },
+    "tense": {
+      "id": 9,
+      "name": "présent",
+      "code": "present",
+      "modeId": 3,
+      "mode": {
+        "id": 3,
+        "code": "imperative",
+        "name": "impératif",
+        "order": 30
+      },
+      "isCompound": false,
+      "selected": true
+    }
+  },
+  "405": {
+    "question": {
+      "verbeId": 149,
+      "tenseId": 2,
+      "personId": 4,
+      "titre": "ranger",
+      "consigne": "je | ranger | imparfait (indicatif)",
+      "reponses": [
+        "je rangeais"
+      ],
+      "reponsesPourCorrige": [
+        "je rangeais"
+      ],
+      "infinitif": "ranger",
+      "pronom": "je",
+      "temps": "imparfait",
+      "mode": "indicatif",
+      "tenseCode": "imperfect",
+      "modeCode": "indicative",
+      "isCompound": false,
+      "voice": "active",
+      "conjugaison1": "rangeais",
+      "conjugaison2": "",
+      "conjugaison3": "",
+      "nousForm": "rangions",
+      "radicalReference": {
+        "kind": "present-nous",
+        "label": "nous au présent",
+        "form": "rangeons",
+        "removableEnding": "ons",
+        "radical": "range",
+        "targetEnding": "ais",
+        "referenceMode": "indicatif",
+        "referenceTense": "présent",
+        "referenceSubject": "nous",
+        "strategy": "remove-ending",
+        "validated": true,
+        "paradigmForms": [
+          {
+            "subject": "je",
+            "form": "rangeais",
+            "personId": 4
+          },
+          {
+            "subject": "tu",
+            "form": "rangeais",
+            "personId": 5
+          },
+          {
+            "subject": "il",
+            "form": "rangeait",
+            "personId": 6
+          },
+          {
+            "subject": "nous",
+            "form": "rangions",
+            "personId": 7
+          },
+          {
+            "subject": "vous",
+            "form": "rangiez",
+            "personId": 8
+          },
+          {
+            "subject": "ils",
+            "form": "rangeaient",
+            "personId": 9
+          }
+        ]
+      },
+      "saisiePrefixe": "je"
+    },
+    "verb": {
+      "infinitif": "ranger",
+      "meaning": "Mettre les choses à leur place.",
+      "auxiliaire": "avoir",
+      "participePasse": "rangé",
+      "groupeConjugaison": 1,
+      "familleConjugaison": "ger",
+      "particularites": [
+        "ger"
+      ]
+    },
+    "tense": {
+      "id": 2,
+      "name": "imparfait",
+      "code": "imperfect",
+      "modeId": 2,
+      "mode": {
+        "id": 2,
+        "code": "indicative",
+        "name": "indicatif",
+        "order": 20
+      },
+      "isCompound": false,
+      "selected": true
+    }
+  }
+}

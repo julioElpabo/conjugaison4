@@ -1,11 +1,12 @@
 import { readFile } from 'node:fs/promises'
 import mysql from 'mysql2/promise'
+import { withComplementPreposition } from '../shared/utils/complement-preposition.ts'
 import { inferAnteposedComplement } from '../server/services/complement-placement.ts'
 
 const report = JSON.parse(await readFile(new URL('../reports/academie-complements.json', import.meta.url), 'utf8'))
 const SOURCE = 'Catalogue pédagogique mineurs 2026'
 const OBSOLETE_SOURCE = 'Catalogue exhaustif contrôlé 2026'
-const excludedDirect = new Set(['douter', 'grandir', 'partir', 'pouvoir'])
+const excludedDirect = new Set(['douter', 'grandir', 'partir', 'pouvoir', 'tomber'])
 
 // Uniquement les articles pour lesquels aucun exemple direct court et exploitable
 // n'est extractible automatiquement. Chaque amorce désigne un emploi français courant.
@@ -53,7 +54,7 @@ const childSafeDirect = {
   oublier: 'un rendez-vous', perdre: 'une clé', plonger: 'un objet', présenter: 'un projet',
   protéger: 'un animal', répandre: 'une bonne nouvelle', reprendre: 'un exercice',
   requérir: 'une aide', résoudre: 'un problème', saluer: 'un ami', servir: 'un repas',
-  sortir: 'une poubelle', souffrir: 'une attente', tenir: 'un objet', tomber: 'une quille',
+  sortir: 'une poubelle', souffrir: 'une douleur', tenir: 'un objet',
   tirer: 'un rideau', tordre: 'un fil de fer', trouver: 'une solution', tuer: 'un microbe',
   vaincre: 'une difficulté',
   vivre: 'une aventure', vouloir: 'une réponse',
@@ -134,7 +135,7 @@ const reviewedDirect = {
   dénicher: 'une solution', dénommer: 'une figure', détacher: 'une feuille',
   déverser: 'un contenu', découvrir: 'une surprise', dériver: 'un cours d’eau', devoir: 'une somme',
   diminuer: 'un volume', discuter: 'une proposition', diviser: 'une quantité',
-  documenter: 'un dossier', élever: 'une construction', encourager: 'un camarade',
+  documenter: 'un dossier', élever: 'une poule', encourager: 'un camarade',
   enfiler: 'une perle', enseigner: 'une règle', éteindre: 'une lampe',
   étudier: 'une leçon', exercer: 'une compétence', explorer: 'une région',
   exprimer: 'une idée', fatiguer: 'une personne', filer: 'un fil',
@@ -329,6 +330,7 @@ function variants(seed, preposition = null) {
     if (preposition === 'à' && determiner === 'le') text = `au ${variantRest}`
     else if (preposition === 'à' && determiner === 'les') text = `aux ${variantRest}`
     else if (preposition === 'de' && determiner === 'le') text = `du ${variantRest}`
+    else if (preposition === 'de' && determiner === 'des') text = withComplementPreposition(`de ${phrase}`, 'de')
     else if (preposition === 'de' && determiner === 'les') text = `des ${variantRest}`
     else if (preposition === 'de' && determiner === 'un') text = `d’un ${variantRest}`
     else if (preposition === 'de' && determiner === 'une') text = `d’une ${variantRest}`

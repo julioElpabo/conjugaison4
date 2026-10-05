@@ -87,6 +87,20 @@ describe('pronom on', () => {
 })
 
 describe('pronoms inclusifs', () => {
+  it('conserve il pour les impersonnels sans consommer le premier pronom inclusif', () => {
+    const choose = createPronounChooser(true, true, () => .999)
+    assert.equal(choose('il', true), 'il')
+    assert.equal(choose('il'), 'iel')
+    assert.equal(choose('il', true), 'il')
+    assert.equal(choose('il'), 'on')
+  })
+
+  it('ne féminise jamais les impersonnels même sans option particulière', () => {
+    const choose = createPronounChooser(false, false, () => .999)
+    assert.equal(choose('il', true), 'il')
+    assert.equal(choose('il'), 'elle')
+  })
+
   it('prépare une forme inclusive dès la première troisième personne disponible', () => {
     const choose = createPronounChooser(true, false, () => 0)
 

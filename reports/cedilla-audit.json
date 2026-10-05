@@ -1,0 +1,269 @@
+{
+  "mode": "appliqué",
+  "repairs": {
+    "verbFields": 0,
+    "conjugationRows": 0,
+    "conjugationForms": 0,
+    "savedQuestions": 1
+  },
+  "audit": {
+    "checkedTextColumns": 313,
+    "checkedVerbs": 595,
+    "checkedConjugationRows": 58835,
+    "findings": [
+      {
+        "table": "backup_verbes_vfp202601",
+        "column": "participe_présent",
+        "cedillaValues": 17,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "backup_verbes_vfp202601",
+        "column": "participe_passé",
+        "cedillaValues": 4,
+        "suspiciousValues": 1,
+        "unusualValues": 1
+      },
+      {
+        "table": "backup_verbesconjugues_vfp202601",
+        "column": "conjugaison1",
+        "cedillaValues": 516,
+        "suspiciousValues": 16,
+        "unusualValues": 16
+      },
+      {
+        "table": "challenge_preset_categories",
+        "column": "name",
+        "cedillaValues": 1,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "challenge_preset_categories",
+        "column": "description",
+        "cedillaValues": 1,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "challenge_preset_publications",
+        "column": "title",
+        "cedillaValues": 13,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "challenge_preset_publications",
+        "column": "meta_title",
+        "cedillaValues": 13,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "challenge_preset_publications",
+        "column": "description",
+        "cedillaValues": 23,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "challenge_preset_publications",
+        "column": "meta_description",
+        "cedillaValues": 38,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "challenge_presets",
+        "column": "description",
+        "cedillaValues": 9,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "coach_character_reply_templates",
+        "column": "content",
+        "cedillaValues": 1,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "coach_character_translations",
+        "column": "masculine_name",
+        "cedillaValues": 1,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "coach_help_feedback",
+        "column": "context_json",
+        "cedillaValues": 1,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "coach_help_feedback",
+        "column": "displayed_help_json",
+        "cedillaValues": 1,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "coach_help_verb_reviews",
+        "column": "issues_json",
+        "cedillaValues": 1,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "coach_reply_templates",
+        "column": "content",
+        "cedillaValues": 9,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "coaches",
+        "column": "description",
+        "cedillaValues": 1,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "complements_verbaux",
+        "column": "texte",
+        "cedillaValues": 36,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "complements_verbaux",
+        "column": "texte_antepose",
+        "cedillaValues": 24,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "emplois_pronominaux",
+        "column": "source",
+        "cedillaValues": 146,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "learner_answer_attempts",
+        "column": "question_json",
+        "cedillaValues": 2,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "learner_challenge_runs",
+        "column": "challenge_label",
+        "cedillaValues": 8,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "learner_run_forms",
+        "column": "question_json",
+        "cedillaValues": 2,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "learner_run_questions",
+        "column": "question_json",
+        "cedillaValues": 10,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "literary_sentences",
+        "column": "chapter",
+        "cedillaValues": 7,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "literary_sentences",
+        "column": "sentence_text",
+        "cedillaValues": 46,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "literary_sources",
+        "column": "public_domain_basis",
+        "cedillaValues": 5,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "literary_targets",
+        "column": "target_text",
+        "cedillaValues": 20,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "verbe_sens",
+        "column": "intitule",
+        "cedillaValues": 2,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "verbe_sens",
+        "column": "definition",
+        "cedillaValues": 2,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "verbe_sens",
+        "column": "source",
+        "cedillaValues": 349,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "verbe_sens_translations",
+        "column": "intitule",
+        "cedillaValues": 1,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "verbe_sens_translations",
+        "column": "definition",
+        "cedillaValues": 1,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "verbes",
+        "column": "participe_présent",
+        "cedillaValues": 20,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "verbes",
+        "column": "participe_passé",
+        "cedillaValues": 5,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      },
+      {
+        "table": "verbesconjugues",
+        "column": "conjugaison1",
+        "cedillaValues": 695,
+        "suspiciousValues": 0,
+        "unusualValues": 0
+      }
+    ],
+    "missingCedillas": []
+  }
+}

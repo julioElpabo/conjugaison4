@@ -1,3 +1,5 @@
+import { isImpersonalVerb } from './impersonal-verbs'
+
 const NON_PASSIVIZABLE_INFINITIVES = new Set([
   'avoir',
   'falloir',
@@ -15,5 +17,6 @@ function normalizedInfinitive(value: string) {
  * un bon exercice scolaire (p. ex. « une idée est eue »).
  */
 export function isPassivizableInfinitive(infinitive: string) {
-  return !NON_PASSIVIZABLE_INFINITIVES.has(normalizedInfinitive(infinitive))
+  return !isImpersonalVerb(infinitive)
+    && !NON_PASSIVIZABLE_INFINITIVES.has(normalizedInfinitive(infinitive))
 }

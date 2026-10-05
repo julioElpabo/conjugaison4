@@ -1,4 +1,5 @@
 
+import { translateUiMessage } from '../i18n/ui-messages'
 import { withDutchVariants } from '../i18n/dutch-variants'
 import { COACH_EXPLANATION_APPROACHES, type CoachExplanationApproach, type CoachHelpBlock, type CoachHelpBlockType, type CoachHelpEngineKey, type CoachHelpTemplate, type CoachProfile } from '../types/coach'
 import { coachHelpProfile, normalizeCoachHelpEngineKey, type CoachAutomaticHelpBlockId } from '../data/coach-help-profiles'
@@ -36,7 +37,7 @@ const AUTOMATIC_BLOCKS: Record<CoachAutomaticHelpBlockId, Pick<CoachHelpBlock, '
   definition: { type: 'normal', title: 'Définition', content: '{definitionHelp}' },
   'complete-with-answers': { type: 'normal', title: '', content: '{contextualBaseHelp}' },
   'complete-advice': { type: 'normal', title: '', content: '{completeAdviceHelp}' },
-  'condensed-verb-group': { type: 'normal', title: 'Groupe du verbe', content: '{condensedVerbGroupHelp}' },
+  'condensed-verb-group': { type: 'normal', title: '', content: '{condensedVerbGroupHelp}' },
   'condensed-tense-rule': { type: 'normal', title: '', content: '{condensedTenseRuleHelp}' },
 }
 
@@ -286,9 +287,10 @@ function visibleHelpText(value = '') {
 
 function letterGHelp(verb: string, answerText = ''): CoachHelpBlock {
   const escapedVerb = escapedCoachText(verb)
+  const nextLetter = visibleHelpText(answerText).match(/suivie de ([eéèêëiîïyÿ])/iu)?.[1] || 'i'
   const contextualExample = verb.endsWith('ger')
-    ? /pas besoin de e|suivie de i/iu.test(visibleHelpText(answerText))
-      ? `<p><strong>Avec ${escapedVerb} :</strong> devant <strong>i</strong>, le <strong>g</strong> fait déjà le son « j ». Le <strong>e</strong> n’est donc pas utile dans cette réponse.</p>`
+    ? /pas besoin de e|suivie de [eéèêëiîïyÿ]/iu.test(visibleHelpText(answerText))
+      ? `<p><strong>Avec ${escapedVerb} :</strong> devant <strong>${escapedCoachText(nextLetter)}</strong>, le <strong>g</strong> fait déjà le son « j ». Le <strong>e</strong> n’est donc pas utile dans cette réponse.</p>`
       : `<p><strong>Avec ${escapedVerb} :</strong> on écrit <strong>ge</strong> devant <strong>a</strong> ou <strong>o</strong> pour garder le son « j ».</p>`
     : `<p><strong>Avec ${escapedVerb} :</strong> le <strong>u</strong> après <strong>g</strong> garde le son « g ».</p>`
   const rule = verb.endsWith('ger')
@@ -358,8 +360,8 @@ function automaticParticipleAgreementHelpBlock(values: CoachHelpContentValues): 
   return [{
     id: AUTOMATIC_PARTICIPLE_AGREEMENT_HELP_ID,
     type: 'info',
-    title: 'Accord du participe passé',
-    content,
+    title: '',
+    content: `<details><summary>Accord du participe passé</summary>${content}</details>`,
     explanationApproach: 'concise',
     profileId: 'tres-condensee',
     isActive: true,
@@ -1100,6 +1102,16 @@ export function coachHelpQuestionVariables(
   const baseParticiple = verb?.participePasse?.trim() || ''
   const firstCorrectAnswer = question.reponsesPourCorrige.find(answer => answer.trim()) || ''
   const decomposition = decomposeConjugationForm(question, verb, tense)
+  const orthographyNote = bareHelpInfinitive(question.infinitif || verb?.infinitif || '').endsWith('ger') && /^[aoâàô]/iu.test(decomposition?.ending.replace(/^-/, '') || '')
+    ? `<p>${withDutchVariants({
+        fr: 'Pour ce verbe en -ger, garde le e devant a ou o pour conserver le son « j ».',
+        de: 'Bei diesem Verb auf -ger bleibt das e vor a oder o, um den weichen g-Laut zu bewahren.',
+        en: 'For this -ger verb, keep e before a or o to preserve the soft g sound.',
+        it: 'Per questo verbo in -ger, conserva la e davanti ad a o o per mantenere il suono dolce della g.',
+        es: 'En este verbo en -ger, conserva la e delante de a u o para mantener el sonido suave de la g.',
+        nl: 'Behoud bij dit werkwoord op -ger de e voor a of o om de zachte g-klank te bewaren.',
+      })[locale]}</p>`
+    : ''
   const endingsHelpByApproach = Object.fromEntries(COACH_EXPLANATION_APPROACHES.map(approach => [
     approach,
     buildConjugationEndingsHtml(question, verb, tense, approach),
@@ -1140,12 +1152,12 @@ export function coachHelpQuestionVariables(
       buildCompleteConjugationAdviceHtml(question, verb, tense),
       question,
     ),
-    condensedVerbGroupHelp: buildCondensedVerbGroupHtml(verb, {
+    condensedVerbGroupHelp: `<details><summary>${translateUiMessage(locale, 'Groupe du verbe')}</summary>${buildCondensedVerbGroupHtml(verb, {
       mode: question.mode || tense?.mode?.name,
       tense: question.temps || tense?.name,
       subject: question.pronom || question.saisiePrefixe,
-    }, locale),
-    condensedTenseRuleHelp: buildCondensedTenseRuleHtml(question.mode || tense?.mode?.name, question.temps || tense?.name, verb, locale),
+    }, locale)}</details>`,
+    condensedTenseRuleHelp: buildCondensedTenseRuleHtml(question.mode || tense?.mode?.name, question.temps || tense?.name, verb, locale) + orthographyNote,
     nearFutureHelp: buildNearFutureCoachHelpHtml(verb, locale),
     nearFutureAllerHelp: buildNearFutureAllerHelpHtml(locale),
     passiveVoiceHelp,

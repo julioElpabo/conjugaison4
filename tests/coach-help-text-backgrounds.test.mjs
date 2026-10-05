@@ -18,17 +18,15 @@ describe('contraste des blocs de texte de l’aide du coach', () => {
     assert.match(panel, /class="coach-help-feedback"/u)
   })
 
-  it('propose un coach du niveau d’aide supérieur après le retour automatique', async () => {
+  it('propose les autres niveaux d’aide après le retour automatique', async () => {
     const panel = await read('../app/components/coach/CoachHelpPanel.vue')
     const chat = await read('../app/components/exercise/ChatExercise.vue')
     const wizard = await read('../app/components/challenge/WizardChallengeWorkspace.vue')
     const challenge = await read('../app/components/challenge/ChallengeWorkspace.vue')
     const learner = await read('../app/components/learner/LearnerSpace.vue')
 
-    assert.match(panel, /activeProfile\.value\.id === 'tres-condensee'\) return \['complete', 'complete-avec-reponses'\]/u)
-    assert.match(panel, /activeProfile\.value\.id === 'complete'\) return \['complete-avec-reponses'\]/u)
-    assert.match(panel, /coachPairForPicker\(available, \(\) => 0\)/u)
-    assert.match(panel, /coach\.status === 'published' && coach\.helpApproach === approach/u)
+    assert.match(panel, /coachPickerAlternativeGroups\(response.coaches, selectedHelpProfile\.value\.id\)/u)
+    assert.match(chat, /:help-approach="selectedCoachHelpProfile.id"/u)
     assert.match(panel, /recommendedCoach\.pedagogicalStyle/u)
     assert.match(panel, /coach-help-recommendation__group\+\.coach-help-recommendation__group/u)
     assert.match(panel, /recommendedCoach\.avatarPath/u)

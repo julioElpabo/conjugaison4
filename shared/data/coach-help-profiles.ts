@@ -45,7 +45,7 @@ export const COACH_HELP_PROFILES: Record<CoachHelpEngineKey, CoachHelpProfile> =
     id: 'tres-condensee',
     label: 'Très condensée',
     description: 'Un rappel du groupe et une règle courte adaptée au mode et au temps.',
-    blocks: ['definition', 'condensed-verb-group', 'condensed-tense-rule'],
+    blocks: ['condensed-tense-rule', 'condensed-verb-group'],
     revealsAnswers: false,
     highlightsTarget: false,
     conditionalBlocks: ['pronominal', 'participle-agreement'],

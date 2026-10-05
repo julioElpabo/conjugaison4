@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { describe, it } from 'node:test'
-import { coachPairForPicker, coachPickerGroups } from '../shared/utils/coach-picker-groups.ts'
+import { coachPairForPicker, coachPickerGroups, coachPickerAlternativeGroups } from '../shared/utils/coach-picker-groups.ts'
 
 const picker = await readFile(new URL('../app/components/exercise/CoachPicker.vue', import.meta.url), 'utf8')
 const challengeWorkspace = await readFile(new URL('../app/components/challenge/ChallengeWorkspace.vue', import.meta.url), 'utf8')
@@ -94,4 +94,21 @@ describe('regroupement des coaches du sélecteur', () => {
     assert.deepEqual(groups.map(group => group.label), ['Premiers indices', 'Conseils'])
     assert.deepEqual(groups.map(group => group.coaches[0].firstName), ['Sami', 'Camille'])
   })
+})
+
+
+it('permet chaque changement de niveau en excluant le niveau actuel et les coaches non publiés', () => {
+  const levels = ['complete-avec-reponses', 'complete', 'tres-condensee', 'allophone']
+  const coaches = levels.flatMap((level, index) => [
+    { ...coach(index * 3 + 1, 'Camille', level, 1), gender: 'female', status: 'published' },
+    { ...coach(index * 3 + 2, 'Sami', level, 2), gender: 'male', status: 'published' },
+    { ...coach(index * 3 + 3, 'Brouillon', level, 0), gender: 'female', status: 'draft' },
+  ])
+  for (const current of levels) {
+    const groups = coachPickerAlternativeGroups(coaches, current)
+    assert.deepEqual(groups.map(group => group.approach), levels.filter(level => level !== current))
+    assert.ok(groups.every(group => group.coaches.length === 2 && group.coaches.every(item => item.status === 'published')))
+    assert.deepEqual(groups.map(group => group.label), coachPickerGroups(coaches.filter(item => item.status === 'published'))
+      .filter(group => group.approach !== current).map(group => group.label))
+  }
 })

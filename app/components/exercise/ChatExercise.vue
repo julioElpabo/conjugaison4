@@ -2018,6 +2018,8 @@ onBeforeUnmount(() => {
       <Transition name="chat-help" appear>
         <CoachHelpPanel
           v-if="helpOpen && (targetedHelp || usesIdentificationHelp)"
+          :active-coach="coach"
+          :help-approach="selectedCoachHelpProfile.id"
           :blocks="helpBlocks"
           :values="helpValues"
           header-title="{helpTitle}"

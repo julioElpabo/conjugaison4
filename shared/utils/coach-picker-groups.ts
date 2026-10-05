@@ -65,3 +65,11 @@ export function coachPickerGroups(coaches: readonly CoachProfile[]): CoachPicker
     }
   })
 }
+
+/** Résumé du choix des coaches : tous les autres niveaux, avec une paire par groupe. */
+export function coachPickerAlternativeGroups(coaches: readonly CoachProfile[], currentApproach: CoachHelpEngineKey): CoachPickerGroup[] {
+  return coachPickerGroups(coaches.filter(coach => coach.status === 'published'))
+    .filter(group => group.approach !== currentApproach)
+    .map(group => ({ ...group, coaches: coachPairForPicker(group.coaches, () => 0) }))
+    .filter(group => group.coaches.length === 2)
+}

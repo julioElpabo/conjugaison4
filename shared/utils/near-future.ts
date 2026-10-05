@@ -1,3 +1,5 @@
+import { isImpersonalVerb } from './impersonal-verbs'
+
 export const NEAR_FUTURE_TENSE_CODE = 'near-future' as const
 export const NEAR_FUTURE_TENSE_NAME = 'futur proche' as const
 
@@ -75,6 +77,7 @@ export function buildNearFutureParadigm(
 ) {
   const allowed = options.allowedPersonIds?.length ? new Set(options.allowedPersonIds.map(Number)) : null
   return auxiliaryForms
+    .filter(form => !isImpersonalVerb(infinitive) || form.pronoun === 'il')
     .filter(form => !allowed || allowed.has(Number(form.personId)))
     .map(form => ({
       id: nearFutureSyntheticId(tenseId, verbId, form.personId),

@@ -41,6 +41,15 @@ describe('génération du futur proche', () => {
     assert.deepEqual(paradigm.map(form => [form.pronoun, form.forms[0]]), [['il', 'va falloir']])
   })
 
+  it('ne génère que il pour les impersonnels même avec des métadonnées absentes ou erronées', () => {
+    for (const infinitive of ['falloir', 'pleuvoir', 'neiger', 'bruiner', 'venter', "s'agir"]) {
+      for (const options of [{}, { allowedPersonIds: [4, 5, 6, 7, 8, 9] }]) {
+        const paradigm = buildNearFutureParadigm(24, 10, infinitive, aller, options)
+        assert.deepEqual(paradigm.map(form => form.pronoun), ['il'], infinitive)
+      }
+    }
+  })
+
   it('distingue les identifiants des verbes stockés et des emplois virtuels', () => {
     assert.notEqual(nearFutureSyntheticId(24, 400, 4), nearFutureSyntheticId(24, -400, 4))
   })

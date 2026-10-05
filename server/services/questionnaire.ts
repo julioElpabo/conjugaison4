@@ -11,6 +11,7 @@ import { indirectRelative } from './indirect-relative'
 import { resolveVariableAuxiliary } from './compound-auxiliary'
 import { formatPassiveQuestion, type PassiveAuxiliaryForm } from './passive-voice'
 import { isPassivizableInfinitive } from '../../shared/utils/passive-voice'
+import { isImpersonalVerb } from '../../shared/utils/impersonal-verbs'
 import { buildRadicalReference } from '../../shared/utils/radical-reference'
 import {
   buildNearFutureParadigm,
@@ -53,6 +54,7 @@ interface ConjugationRow extends RowDataPacket {
   mode_name: string
   mode_code: ExerciseQuestion['modeCode']
   base_verbe_id?: number
+  est_impersonnel?: number
   type_h_initial?: string | null
   future_simple_forms?: string[]
 }
@@ -149,6 +151,7 @@ interface NearFutureVerbRow extends RowDataPacket {
   participe_passe: string
   type_h_initial: string | null
   personnes_disponibles: string | number[] | null
+  est_impersonnel?: number
 }
 
 interface NearFutureUseRow extends RowDataPacket {
@@ -214,7 +217,10 @@ function nearFutureRows(
       infinitive: verb.infinitif,
       typeHInitial: verb.type_h_initial,
       pastParticiple: verb.participe_passe,
-      allowedPersonIds: allowedPersons(verb.personnes_disponibles),
+      allowedPersonIds: isImpersonalVerb(verb.infinitif, verb.est_impersonnel)
+        ? [6]
+        : allowedPersons(verb.personnes_disponibles),
+      impersonal: isImpersonalVerb(verb.infinitif, verb.est_impersonnel),
     })),
     ...pronominalUses.map(use => ({
       selectionId: -Number(use.id),
@@ -223,6 +229,7 @@ function nearFutureRows(
       typeHInitial: use.type_h_initial,
       pastParticiple: '',
       allowedPersonIds: allowedPersons(use.personnes_autorisees),
+      impersonal: isImpersonalVerb(use.infinitif_pronominal),
     })),
   ]
 
@@ -261,6 +268,7 @@ function nearFutureRows(
       mode_code: tense.mode_code,
       nous_form: nousForm,
       type_h_initial: source.typeHInitial,
+      est_impersonnel: Number(source.impersonal),
     }))
   }) as unknown as ConjugationRow[]
 }
@@ -410,7 +418,8 @@ export function createPronounChooser(
   random: () => number = Math.random,
 ) {
   let inclusivePronounPrepared = false
-  return (pronoun: string) => {
+  return (pronoun: string, impersonal = false) => {
+    if (impersonal) return 'il'
     if (inclusive && !inclusivePronounPrepared && ['il', 'ils'].includes(pronoun)) {
       inclusivePronounPrepared = true
       return pronoun === 'il' ? 'iel' : 'iels'
@@ -900,7 +909,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
       const [storedRows] = await database.execute<ConjugationRow[]>(`
       SELECT vc.id, vc.verbe_id, vc.personne_id, vc.temp_id,
              vc.conjugaison1, vc.conjugaison2, vc.conjugaison3,
-             v.infinitif, v.auxiliaire,
+             v.infinitif, v.auxiliaire, v.est_impersonnel,
              v.\`participe_présent\` AS participe_present,
              v.\`participe_passé\` AS participe_passe,
              auxiliary.infinitif AS auxiliaire_infinitif,
@@ -921,6 +930,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
         AND vc.temp_id IN (${placeholders(finiteIds)})
         ${exactLiteraryClause}
         AND vc.conjugaison1 <> ''
+        AND (COALESCE(v.est_impersonnel, 0) = 0 OR p.pronom = 'il')
         ${passivePersonClause}
         ${pastSimpleClause}
       ORDER BY ${literaryOrderClause} RAND()
@@ -987,7 +997,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
         verbIds.length
           ? database.execute<NearFutureVerbRow[]>(`
               SELECT id, infinitif, v.\`participe_passé\` AS participe_passe,
-                     type_h_initial, personnes_disponibles
+                     type_h_initial, personnes_disponibles, est_impersonnel
               FROM verbes v
               WHERE id IN (${placeholders(verbIds)}) AND est_archive = 0
             `, verbIds)
@@ -1087,11 +1097,13 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
       }
     }
 
+    const personalRows = rows.filter(row => !isImpersonalVerb(row.infinitif, row.est_impersonnel)
+      || row.pronom === 'il')
     const eligibleRows = usesLiteraryCitations
-      ? rows.filter(row => literaryCitations.has(literaryCitationKey(
+      ? personalRows.filter(row => literaryCitations.has(literaryCitationKey(
           Number(row.verbe_id), Number(row.temp_id), Number(row.personne_id),
         )))
-      : rows
+      : personalRows
     const rowsForQuestions = onlyBeforeComplements
       ? eligibleRows.filter(row => normalized(row.mode_name) !== 'impératif'
         && (requestedComplementOptions.includes('coi-before') || Boolean(row.is_compound)))
@@ -1144,7 +1156,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
             radical_reference: radicalReference,
             future_simple_forms: futureSimpleForms,
             conjugation_confusions: conjugationConfusions,
-          }, pronounForQuestion(row.pronom)))
+          }, pronounForQuestion(row.pronom, isImpersonalVerb(row.infinitif, row.est_impersonnel))))
       } else if (request.exerciseKind !== 'conjugation') {
         questions.push(identificationQuestion(
             semanticRow,
@@ -1158,6 +1170,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
 
       if (wantsPassiveVoice
           && Number(row.verbe_id) > 0
+          && !isImpersonalVerb(row.infinitif, row.est_impersonnel)
           && isPassivizableInfinitive(row.infinitif)
           && [6, 9].includes(Number(row.personne_id))
           && normalized(row.mode_name) !== 'impératif') {

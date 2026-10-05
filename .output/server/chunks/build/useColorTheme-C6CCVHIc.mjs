@@ -1,5 +1,5 @@
 import { w as withDutchVariants } from '../nitro/nitro.mjs';
-import { h as useState } from './server.mjs';
+import { c as useState } from './server.mjs';
 import { computed } from 'vue';
 
 const copies = withDutchVariants({

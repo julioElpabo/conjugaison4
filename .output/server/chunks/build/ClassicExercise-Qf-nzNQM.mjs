@@ -1,6 +1,6 @@
 import { defineComponent, ref, shallowRef, watch, markRaw, useTemplateRef, computed, unref, createVNode, resolveDynamicComponent, nextTick, useSSRContext } from 'vue';
 import { ssrRenderTeleport, ssrRenderClass, ssrRenderAttr, ssrInterpolate, ssrRenderList, ssrIncludeBooleanAttr, ssrRenderComponent, ssrRenderVNode } from 'vue/server-renderer';
-import { aH as normalizeAnswer, a1 as validateConjugationAnswer, a2 as validateAnswer, aI as conjugationRequiresSubjectPronoun, aJ as conjugationAnswerPlaceholder, aK as providedSubjunctiveInputPrefix, aL as getAlternativeCorrections, aM as impossibleSingularEndingReminderMessage, a7 as grammarTenseCode, aN as isFutureSimpleInsteadOfNearFuture, aO as findConjugationConfusions, aP as findImpossibleSingularEnding, aQ as diagnoseCoachAgreement, aR as diagnoseCoachAnswer, a6 as learnerErrorDetails, aS as mergeLearnerErrorDetails } from '../nitro/nitro.mjs';
+import { aK as normalizeAnswer, a4 as validateConjugationAnswer, a5 as validateAnswer, aL as conjugationRequiresSubjectPronoun, aM as conjugationAnswerPlaceholder, aN as providedSubjunctiveInputPrefix, aO as getAlternativeCorrections, aP as impossibleSingularEndingReminderMessage, aa as grammarTenseCode, aQ as isFutureSimpleInsteadOfNearFuture, aR as findConjugationConfusions, aS as findImpossibleSingularEnding, aT as diagnoseCoachAgreement, aU as diagnoseCoachAnswer, a9 as learnerErrorDetails, aV as mergeLearnerErrorDetails } from '../nitro/nitro.mjs';
 import { faSpinner, faStop, faVolume, faCirclePlay, faArrowUpFromBracket, faPrint } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { L as LearnerErrorFeedback, S as ShareExerciseSummaryDialog, V as VerbConsultationModal } from './VerbConsultationModal-DLbo-LR6.mjs';
@@ -8,7 +8,7 @@ import { i as isModeLandingSlug, m as modeLandingPage } from '../_/mode-landing-
 import { m as modeTensePedagogy } from '../_/mode-tense-pedagogy.mjs';
 import { i as identificationFormParts } from '../_/identification-form.mjs';
 import { w as withSentenceTerminalMark, s as sentenceTerminalMark } from '../_/sentence-punctuation.mjs';
-import { f as useLanguagePreferences, h as useState } from './server.mjs';
+import { a as useLanguagePreferences, c as useState } from './server.mjs';
 import { u as useSiteAnalytics } from './useSiteAnalytics-CWvs4oMj.mjs';
 import { u as useLearnerProgress } from './main-5kKBKOih.mjs';
 import 'node:http';

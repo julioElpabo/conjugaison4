@@ -6,7 +6,7 @@ import { R as REQUIRED_COACH_REPLY_EVENTS, C as COACH_EVENTS } from '../_/coach.
 import { f as formatCaractereName } from '../_/coach-caractere.mjs';
 import { C as COACH_PLACEHOLDERS, u as unknownCoachPlaceholders } from '../_/coach-dialogue.mjs';
 import { u as useAdminAuth, g as getAdminErrorMessage } from './useAdminAuth-BdfYT3Lh.mjs';
-import { f as useLanguagePreferences, g as useRoute, u as useHead, n as navigateTo } from './server.mjs';
+import { a as useLanguagePreferences, b as useRoute, u as useHead, n as navigateTo } from './server.mjs';
 import { onBeforeRouteLeave } from 'vue-router';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 import '../nitro/nitro.mjs';

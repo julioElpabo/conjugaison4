@@ -6,9 +6,15 @@ import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 import { m as matchingVerbs, n as normalizeVerbSearch } from '../_/verb-search.mjs';
 import { u as useHead } from './server.mjs';
 import { i as isFiniteConjugationMode, c as conjugationModeOrder, a as conjugationTenseOrder, d as conjugationTenseLabel } from '../_/conjugation-display.mjs';
-import { w as withComplementPreposition, n as normalizeComplementPreposition } from '../_/complement-preposition.mjs';
+import { P as withComplementPreposition, O as normalizeComplementPreposition } from '../nitro/nitro.mjs';
 import './nuxt-link-icjx6oE7.mjs';
-import '../nitro/nitro.mjs';
+import '../routes/renderer.mjs';
+import 'vue-bundle-renderer/runtime';
+import 'unhead/server';
+import 'devalue';
+import 'unhead/plugins';
+import 'unhead/utils';
+import 'vue-router';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -20,13 +26,6 @@ import 'web-push';
 import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
-import '../routes/renderer.mjs';
-import 'vue-bundle-renderer/runtime';
-import 'unhead/server';
-import 'devalue';
-import 'unhead/plugins';
-import 'unhead/utils';
-import 'vue-router';
 
 const _sfc_main$3 = /* @__PURE__ */ defineComponent({
   __name: "NewVerbForm",

@@ -1,6 +1,6 @@
 import { isRef, computed, toValue, getCurrentInstance, onServerPrefetch, ref, shallowRef, nextTick, unref, toRef, defineComponent, provide, cloneVNode, h, createElementBlock } from 'vue';
 import { debounce } from 'perfect-debounce';
-import { b as useNuxtApp, l as asyncDataDefaults, m as createError } from './server.mjs';
+import { f as useNuxtApp, k as asyncDataDefaults, l as createError } from './server.mjs';
 
 const clientOnlySymbol = /* @__PURE__ */ Symbol.for("nuxt:client-only");
 defineComponent({

@@ -2,7 +2,7 @@ import { defineComponent, computed, ref, useTemplateRef, withAsyncContext, merge
 import { ssrRenderAttrs, ssrInterpolate, ssrRenderAttr, ssrRenderClass, ssrRenderList, ssrIncludeBooleanAttr } from 'vue/server-renderer';
 import { i as isFiniteConjugationMode, c as conjugationModeOrder, a as conjugationTenseOrder, b as conjugationTenseRow, d as conjugationTenseLabel } from '../_/conjugation-display.mjs';
 import { n as normalizeVerbSearch, m as matchingVerbs } from '../_/verb-search.mjs';
-import { f as useLanguagePreferences, g as useRoute, a as useRouter, u as useHead } from './server.mjs';
+import { a as useLanguagePreferences, b as useRoute, d as useRouter, u as useHead } from './server.mjs';
 import { u as useSiteAnalytics } from './useSiteAnalytics-CWvs4oMj.mjs';
 import { u as useFetch } from './fetch-Co7nvrA6.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';

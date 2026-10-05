@@ -1,6 +1,6 @@
 import { defineComponent, shallowRef, h, resolveComponent, computed, unref } from 'vue';
-import { al as parseQuery, am as hasProtocol, an as joinURL, ao as isScriptProtocol, ap as withTrailingSlash, aq as withoutTrailingSlash } from '../nitro/nitro.mjs';
-import { a as useRouter, e as encodeRoutePath, r as resolveRouteObject, n as navigateTo, b as useNuxtApp, c as useRuntimeConfig, d as nuxtLinkDefaults } from './server.mjs';
+import { ao as parseQuery, ap as hasProtocol, aq as joinURL, ar as isScriptProtocol, as as withTrailingSlash, at as withoutTrailingSlash } from '../nitro/nitro.mjs';
+import { d as useRouter, e as encodeRoutePath, r as resolveRouteObject, n as navigateTo, f as useNuxtApp, g as useRuntimeConfig, h as nuxtLinkDefaults } from './server.mjs';
 
 const firstNonUndefined = (...args) => args.find((arg) => arg !== void 0);
 function sanitizeExternalHref(value) {

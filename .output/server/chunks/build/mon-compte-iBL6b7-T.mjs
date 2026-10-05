@@ -2,7 +2,7 @@ import { _ as __nuxt_component_0, a as __nuxt_component_1 } from './AdminShell-U
 import { defineComponent, ref, reactive, computed, withCtx, unref, openBlock, createBlock, createVNode, toDisplayString, Fragment, createCommentVNode, renderList, useSSRContext } from 'vue';
 import { ssrRenderComponent, ssrInterpolate, ssrRenderAttr, ssrIncludeBooleanAttr, ssrRenderList } from 'vue/server-renderer';
 import { u as useAdminAuth, g as getAdminErrorMessage } from './useAdminAuth-BdfYT3Lh.mjs';
-import { f as useLanguagePreferences, u as useHead } from './server.mjs';
+import { a as useLanguagePreferences, u as useHead } from './server.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 import './nuxt-link-icjx6oE7.mjs';
 import '../nitro/nitro.mjs';

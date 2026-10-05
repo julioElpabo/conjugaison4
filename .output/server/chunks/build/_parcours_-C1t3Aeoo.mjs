@@ -2,7 +2,7 @@ import { _ as __nuxt_component_0 } from './nuxt-link-icjx6oE7.mjs';
 import { defineComponent, withAsyncContext, computed, mergeProps, unref, withCtx, createTextVNode, toDisplayString, createVNode, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrInterpolate, ssrRenderComponent, ssrRenderList } from 'vue/server-renderer';
 import { t as tenseExercisePage, r as relatedTenseExercisePages } from '../_/tense-exercise-pages.mjs';
-import { g as useRoute, f as useLanguagePreferences, n as navigateTo, m as createError, u as useHead, s as useSeoMeta } from './server.mjs';
+import { b as useRoute, a as useLanguagePreferences, n as navigateTo, l as createError, u as useHead, q as useSeoMeta } from './server.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 import '../nitro/nitro.mjs';
 import 'node:http';

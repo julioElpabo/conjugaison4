@@ -3,7 +3,7 @@ import { _ as __nuxt_component_1 } from './PasswordInput-D9iWnxeu.mjs';
 import { defineComponent, computed, ref, mergeProps, unref, withCtx, createTextVNode, toDisplayString, isRef, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrInterpolate, ssrRenderComponent, ssrRenderAttr, ssrIncludeBooleanAttr, ssrLooseContain } from 'vue/server-renderer';
 import { w as withDutchVariants } from '../nitro/nitro.mjs';
-import { f as useLanguagePreferences, u as useHead, c as useRuntimeConfig } from './server.mjs';
+import { a as useLanguagePreferences, u as useHead, g as useRuntimeConfig } from './server.mjs';
 import { u as useLearnerAuth } from './useLearnerAuth-tqISusbB.mjs';
 import { u as useSiteAnalytics } from './useSiteAnalytics-CWvs4oMj.mjs';
 import { u as useTurnstileWidget } from './useTurnstileWidget-JtKO0GYz.mjs';

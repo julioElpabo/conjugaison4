@@ -1,24 +1,8 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, toRef, isRef, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, isReadonly, isShallow, isReactive, toRaw } from 'vue';
-import { ag as SUPPORTED_LOCALES, w as withDutchVariants, aX as withSwissObjectAliases, aY as parseURL, aZ as encodePath, a_ as decodePath, a$ as localeFromPath, z as normalizeLocale, b0 as getRequestHeaders, b1 as klona, c as createError$1, am as hasProtocol, ao as isScriptProtocol, an as joinURL, L as getRequestURL, b2 as withQuery, b3 as DEFAULT_LANGUAGE_PREFERENCES, ak as localizePath, b4 as getRequestHeader, b5 as isEqual, b6 as sanitizeStatusCode, b7 as getContext, t as setCookie, x as getCookie, v as deleteCookie, b8 as $fetch, ah as localeLanguageTag, b9 as defu, O as stripLocaleFromPath, au as executeAsync, ba as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { aj as SUPPORTED_LOCALES, w as withDutchVariants, a_ as withSwissObjectAliases, a$ as parseURL, b0 as encodePath, b1 as decodePath, b2 as localeFromPath, z as normalizeLocale, b3 as getRequestHeaders, b4 as klona, c as createError$1, ap as hasProtocol, ar as isScriptProtocol, aq as joinURL, L as getRequestURL, b5 as withQuery, b6 as DEFAULT_LANGUAGE_PREFERENCES, an as localizePath, b7 as getRequestHeader, b8 as isEqual, b9 as sanitizeStatusCode, ba as getContext, t as setCookie, x as getCookie, v as deleteCookie, bb as $fetch, ak as localeLanguageTag, bc as defu, R as stripLocaleFromPath, ax as executeAsync, bd as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useSeoMeta$1, a as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
-import 'node:http';
-import 'node:https';
-import 'node:events';
-import 'node:buffer';
-import 'node:fs';
-import 'node:path';
-import 'node:crypto';
-import 'web-push';
-import 'mysql2/promise';
-import 'node:fs/promises';
-import 'node:url';
-import 'vue-bundle-renderer/runtime';
-import 'unhead/server';
-import 'devalue';
-import 'unhead/plugins';
-import 'unhead/utils';
 
 function flatHooks(configHooks, hooks = {}, parentName) {
 	for (const key in configHooks) {
@@ -927,6 +911,10 @@ const uiMessages = {
   "Fermer l\u2019aide": withDutchVariants({ de: "Hilfe schlie\xDFen", en: "Close help", it: "Chiudi l\u2019aiuto", es: "Cerrar la ayuda", nl: "Hulp sluiten" }),
   "Retour sur l\u2019aide automatique": withDutchVariants({ de: "Feedback zur automatischen Hilfe", en: "Feedback on automated help", it: "Feedback sull\u2019aiuto automatico", es: "Comentarios sobre la ayuda autom\xE1tica", nl: "Feedback over automatische hulp" }),
   "Cette aide est g\xE9n\xE9r\xE9e automatiquement. Elle peut contenir une erreur ou manquer de clart\xE9. Les retours permettent de l\u2019am\xE9liorer.": withDutchVariants({ de: "Diese Hilfe wird automatisch erstellt. Sie kann Fehler enthalten oder unklar sein. R\xFCckmeldungen helfen, sie zu verbessern.", en: "This help is generated automatically. It may contain an error or lack clarity. Feedback helps improve it.", it: "Questo aiuto \xE8 generato automaticamente. Pu\xF2 contenere errori o essere poco chiaro. I feedback aiutano a migliorarlo.", es: "Esta ayuda se genera autom\xE1ticamente. Puede contener errores o no ser clara. Los comentarios ayudan a mejorarla.", nl: "Deze hulp wordt automatisch gegenereerd. Ze kan een fout bevatten of onduidelijk zijn. Feedback helpt om ze te verbeteren." }),
+  "Niveau d\u2019aide": withDutchVariants({ de: "Hilfeniveau", en: "Help level", it: "Livello di aiuto", es: "Nivel de ayuda", nl: "Hulpniveau" }),
+  "Ton niveau actuel d\u2019aide": withDutchVariants({ de: "Dein aktuelles Hilfeniveau", en: "Your current help level", it: "Il tuo livello di aiuto attuale", es: "Tu nivel de ayuda actual", nl: "Je huidige hulpniveau" }),
+  "Vous avez choisi le niveau d\u2019aide \xAB {level} \xBB.": withDutchVariants({ de: "Sie haben das Hilfeniveau \u201E{level}\u201C gew\xE4hlt.", en: "You have chosen the help level \u201C{level}\u201D.", it: "Hai scelto il livello di aiuto \xAB{level}\xBB.", es: "Has elegido el nivel de ayuda \xAB{level}\xBB.", nl: "Je hebt het hulpniveau \u201C{level}\u201D gekozen." }),
+  "Changer le niveau d\u2019aide": withDutchVariants({ de: "Hilfeniveau wechseln", en: "Change the help level", it: "Cambia il livello di aiuto", es: "Cambiar el nivel de ayuda", nl: "Het hulpniveau wijzigen" }),
   "Changer de niveau d\u2019aide": withDutchVariants({ de: "Hilfeniveau wechseln", en: "Change help level", it: "Cambia livello di aiuto", es: "Cambiar el nivel de ayuda", nl: "Hulpniveau wijzigen" }),
   "Approfondir sans voir la r\xE9ponse": withDutchVariants({ de: "Vertiefen, ohne die Antwort zu sehen", en: "Go deeper without seeing the answer", it: "Approfondisci senza vedere la risposta", es: "Profundizar sin ver la respuesta", nl: "Verder verdiepen zonder het antwoord te zien" }),
   "Ces coaches analysent la question plus pr\xE9cis\xE9ment et te guident \xE9tape par \xE9tape, sans r\xE9v\xE9ler la r\xE9ponse.": withDutchVariants({ de: "Diese Coaches untersuchen die Aufgabe genauer und f\xFChren dich Schritt f\xFCr Schritt, ohne die Antwort zu verraten.", en: "These coaches analyse the question more closely and guide you step by step without revealing the answer.", it: "Questi coach analizzano la domanda pi\xF9 precisamente e ti guidano passo dopo passo, senza rivelare la risposta.", es: "Estos coaches analizan la pregunta con m\xE1s precisi\xF3n y te gu\xEDan paso a paso sin revelar la respuesta.", nl: "Deze coaches analyseren de vraag grondiger en begeleiden je stap voor stap zonder het antwoord te geven." }),
@@ -1661,17 +1649,17 @@ const _routes = [
   {
     name: "admin-feedbacks",
     path: "/admin/feedbacks",
-    component: () => import('./feedbacks-D25NYH-M.mjs')
+    component: () => import('./feedbacks-B0HhET9x.mjs')
   },
   {
     name: "admin-help-verification",
     path: "/admin/help-verification",
-    component: () => import('./help-verification-Bg69YUEv.mjs')
+    component: () => import('./help-verification-Do34aVrG.mjs')
   },
   {
     name: "admin-helps",
     path: "/admin/helps",
-    component: () => import('./helps-CGI5S8Ny.mjs')
+    component: () => import('./helps-CVRmP47p.mjs')
   },
   {
     name: "admin-literary-corpus",
@@ -1696,7 +1684,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-BR3IEnHV.mjs')
+    component: () => import('./users-HWc3zyGQ.mjs')
   },
   {
     name: "admin-verbes",
@@ -1716,12 +1704,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-CgiW3Upi.mjs')
+    component: () => import('./_code_-lV6UtwQL.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-CoEj1Luk.mjs')
+    component: () => import('./_slug_-Cz-hCh_6.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1766,7 +1754,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-Bi9mKN3t.mjs')
+    component: () => import('./exercices-de-conjugaison-DE68nSXi.mjs')
   },
   {
     name: "mon-compte",
@@ -1777,12 +1765,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-u8mmnlug.mjs')
+    component: () => import('./my-page-B_4c2vV3.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-DRlh0mtJ.mjs')
+    component: () => import('./nouveau-defi-XeIX-GaH.mjs')
   },
   {
     name: "signin",
@@ -1792,7 +1780,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-Cf2NTdfy.mjs')
+    component: () => import('./index-UOY6x3x6.mjs')
   },
   {
     name: "mode-tense",
@@ -1842,17 +1830,17 @@ const _routes = [
   {
     name: "localized-admin-feedbacks",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/feedbacks",
-    component: () => import('./feedbacks-D25NYH-M.mjs')
+    component: () => import('./feedbacks-B0HhET9x.mjs')
   },
   {
     name: "localized-admin-help-verification",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/help-verification",
-    component: () => import('./help-verification-Bg69YUEv.mjs')
+    component: () => import('./help-verification-Do34aVrG.mjs')
   },
   {
     name: "localized-admin-helps",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/helps",
-    component: () => import('./helps-CGI5S8Ny.mjs')
+    component: () => import('./helps-CVRmP47p.mjs')
   },
   {
     name: "localized-admin-literary-corpus",
@@ -1877,7 +1865,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/users",
-    component: () => import('./users-BR3IEnHV.mjs')
+    component: () => import('./users-HWc3zyGQ.mjs')
   },
   {
     name: "localized-admin-verbes",
@@ -1897,12 +1885,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defi/:code()",
-    component: () => import('./_code_-CgiW3Upi.mjs')
+    component: () => import('./_code_-lV6UtwQL.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defis/:slug()",
-    component: () => import('./_slug_-CoEj1Luk.mjs')
+    component: () => import('./_slug_-Cz-hCh_6.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1947,7 +1935,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-Bi9mKN3t.mjs')
+    component: () => import('./exercices-de-conjugaison-DE68nSXi.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1958,12 +1946,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-u8mmnlug.mjs')
+    component: () => import('./my-page-B_4c2vV3.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/nouveau-defi",
-    component: () => import('./nouveau-defi-DRlh0mtJ.mjs')
+    component: () => import('./nouveau-defi-XeIX-GaH.mjs')
   },
   {
     name: "localized-signin",
@@ -1973,7 +1961,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/",
-    component: () => import('./index-Cf2NTdfy.mjs')
+    component: () => import('./index-UOY6x3x6.mjs')
   },
   {
     name: "localized-mode-tense",
@@ -3123,5 +3111,31 @@ let entry;
 }
 const entry_default = ((ssrContext) => entry(ssrContext));
 
-export { useRouter as a, useNuxtApp as b, useRuntimeConfig as c, nuxtLinkDefaults as d, entry_default as default, encodeRoutePath as e, useLanguagePreferences as f, useRoute as g, useState as h, useRequestFetch as i, useRequestHeaders as j, useCookie as k, asyncDataDefaults as l, createError as m, navigateTo as n, fetchDefaults as o, useRequestURL as p, usePageSeoOverride as q, resolveRouteObject as r, useSeoMeta as s, defineNuxtRouteMiddleware as t, useHead as u };
+const server = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+	__proto__: null,
+	a: useRouter,
+	b: useNuxtApp,
+	c: useRuntimeConfig,
+	d: nuxtLinkDefaults,
+	default: entry_default,
+	e: encodeRoutePath,
+	f: useLanguagePreferences,
+	g: useRoute,
+	h: useState,
+	i: useRequestFetch,
+	j: useRequestHeaders,
+	k: useCookie,
+	l: asyncDataDefaults,
+	m: createError,
+	n: navigateTo,
+	o: fetchDefaults,
+	p: useRequestURL,
+	q: usePageSeoOverride,
+	r: resolveRouteObject,
+	s: useSeoMeta,
+	t: defineNuxtRouteMiddleware,
+	u: useHead
+}, Symbol.toStringTag, { value: 'Module' }));
+
+export { useLanguagePreferences as a, useRoute as b, useState as c, useRouter as d, encodeRoutePath as e, useNuxtApp as f, useRuntimeConfig as g, nuxtLinkDefaults as h, useRequestHeaders as i, useCookie as j, asyncDataDefaults as k, createError as l, fetchDefaults as m, navigateTo as n, useRequestFetch as o, usePageSeoOverride as p, useSeoMeta as q, resolveRouteObject as r, defineNuxtRouteMiddleware as s, useRequestURL as t, useHead as u, translateUiMessage as v, server as w };
 //# sourceMappingURL=server.mjs.map

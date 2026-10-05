@@ -1,5 +1,5 @@
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'vue-bundle-renderer/runtime';
-import { bc as joinRelativeURL, y as useRuntimeConfig, aZ as encodePath, bd as defineRenderHandler, a as getQuery, c as createError, be as destr, bf as getRouteRules, bg as getResponseStatusText, bh as getResponseStatus, bi as useNitroApp } from '../nitro/nitro.mjs';
+import { bf as joinRelativeURL, y as useRuntimeConfig, b0 as encodePath, bg as defineRenderHandler, a as getQuery, c as createError, bh as destr, bi as getRouteRules, bj as getResponseStatusText, bk as getResponseStatus, bl as useNitroApp } from '../nitro/nitro.mjs';
 import { renderToString } from 'vue/server-renderer';
 import { createHead as createHead$1, propsToString, renderSSRHead } from 'unhead/server';
 import { stringify, uneval } from 'devalue';
@@ -127,7 +127,7 @@ globalThis.__publicAssetsURL = publicAssetsURL;
 const APP_ROOT_OPEN_TAG = `<${appRootTag}${propsToString(appRootAttrs)}>`;
 const APP_ROOT_CLOSE_TAG = `</${appRootTag}>`;
 // @ts-expect-error file will be produced after app build
-const getServerEntry = () => import('../build/server.mjs').then((r) => r.default || r);
+const getServerEntry = () => import('../build/server.mjs').then(function (n) { return n.w; }).then((r) => r.default || r);
 // @ts-expect-error file will be produced after app build
 const getPrecomputedDependencies = () => import('../build/client.precomputed.mjs').then((r) => r.default || r).then((r) => typeof r === "function" ? r() : r);
 

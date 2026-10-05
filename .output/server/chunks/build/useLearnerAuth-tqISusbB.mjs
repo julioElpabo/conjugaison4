@@ -1,4 +1,4 @@
-import { h as useState, j as useRequestHeaders } from './server.mjs';
+import { c as useState, i as useRequestHeaders } from './server.mjs';
 import { computed } from 'vue';
 
 function learnerErrorStatus(error) {

@@ -1,4 +1,4 @@
-import { x as getCookie, t as setCookie, L as getRequestURL, O as stripLocaleFromPath } from '../nitro/nitro.mjs';
+import { x as getCookie, t as setCookie, L as getRequestURL, R as stripLocaleFromPath } from '../nitro/nitro.mjs';
 import { randomUUID } from 'node:crypto';
 
 const COOKIE_NAME = "tatitotu_session";

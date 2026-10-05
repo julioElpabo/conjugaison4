@@ -2,7 +2,7 @@ import { _ as __nuxt_component_0 } from './nuxt-link-icjx6oE7.mjs';
 import { defineComponent, computed, withAsyncContext, ref, mergeProps, unref, withCtx, createTextVNode, toDisplayString, createVNode, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrInterpolate, ssrRenderAttr, ssrRenderList, ssrRenderComponent, ssrRenderStyle } from 'vue/server-renderer';
 import { w as withDutchVariants } from '../nitro/nitro.mjs';
-import { f as useLanguagePreferences, u as useHead } from './server.mjs';
+import { a as useLanguagePreferences, u as useHead } from './server.mjs';
 import { u as useFetch } from './fetch-Co7nvrA6.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 import 'node:http';

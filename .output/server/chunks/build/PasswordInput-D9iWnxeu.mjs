@@ -1,6 +1,6 @@
 import { defineComponent, ref, mergeProps, unref, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrRenderAttr, ssrInterpolate } from 'vue/server-renderer';
-import { f as useLanguagePreferences } from './server.mjs';
+import { a as useLanguagePreferences } from './server.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 
 const _sfc_main = /* @__PURE__ */ defineComponent({

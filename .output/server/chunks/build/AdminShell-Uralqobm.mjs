@@ -3,7 +3,7 @@ import { ssrRenderAttrs, ssrRenderComponent, ssrRenderSlot, ssrRenderStyle, ssrI
 import { u as useAdminAuth } from './useAdminAuth-BdfYT3Lh.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 import { _ as __nuxt_component_0$2 } from './nuxt-link-icjx6oE7.mjs';
-import { f as useLanguagePreferences, g as useRoute } from './server.mjs';
+import { a as useLanguagePreferences, b as useRoute } from './server.mjs';
 
 const _sfc_main$2 = /* @__PURE__ */ defineComponent({
   __name: "AdminLoginForm",

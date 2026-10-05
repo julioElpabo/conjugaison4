@@ -1,6 +1,6 @@
 import { defineComponent, withAsyncContext, useSSRContext } from 'vue';
 import { ssrRenderAttrs } from 'vue/server-renderer';
-import { f as useLanguagePreferences, n as navigateTo } from './server.mjs';
+import { a as useLanguagePreferences, n as navigateTo } from './server.mjs';
 import '../nitro/nitro.mjs';
 import 'node:http';
 import 'node:https';

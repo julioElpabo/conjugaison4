@@ -1,5 +1,5 @@
 import { defineComponent, withAsyncContext, useSSRContext } from 'vue';
-import { g as useRoute, f as useLanguagePreferences, n as navigateTo } from './server.mjs';
+import { b as useRoute, a as useLanguagePreferences, n as navigateTo } from './server.mjs';
 import '../nitro/nitro.mjs';
 import 'node:http';
 import 'node:https';

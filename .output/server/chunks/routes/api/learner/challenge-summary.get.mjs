@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, a as getQuery, z as normalizeLocale, c as createError, u as useDatabase, w as withDutchVariants, a6 as learnerErrorDetails } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, a as getQuery, z as normalizeLocale, c as createError, u as useDatabase, w as withDutchVariants, a9 as learnerErrorDetails } from '../../../nitro/nitro.mjs';
 import { i as identificationFormParts } from '../../../_/identification-form.mjs';
 import { r as requireLearnerDataSubject } from '../../../_/learner-data-subject.mjs';
 import 'node:http';

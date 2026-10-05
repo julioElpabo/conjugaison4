@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, c as createError, g as getRouterParam, ac as parseSavedChallengeMetadata, ad as updateSavedChallengeMetadata, u as useDatabase, Y as PublicInputError } from '../../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, c as createError, g as getRouterParam, af as parseSavedChallengeMetadata, ag as updateSavedChallengeMetadata, u as useDatabase, $ as PublicInputError } from '../../../../nitro/nitro.mjs';
 import { g as getLearnerSession } from '../../../../_/learner-session.mjs';
 import { r as readLimitedJsonBody } from '../../../../_/limited-json-body.mjs';
 import { n as normalizeDefiCode } from '../../../../_/defis.mjs';

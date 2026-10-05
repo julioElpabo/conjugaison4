@@ -1,5 +1,5 @@
-import { au as executeAsync } from '../nitro/nitro.mjs';
-import { t as defineNuxtRouteMiddleware, f as useLanguagePreferences, n as navigateTo } from './server.mjs';
+import { ax as executeAsync } from '../nitro/nitro.mjs';
+import { s as defineNuxtRouteMiddleware, a as useLanguagePreferences, n as navigateTo } from './server.mjs';
 import { u as useLearnerAuth } from './useLearnerAuth-tqISusbB.mjs';
 import 'node:http';
 import 'node:https';

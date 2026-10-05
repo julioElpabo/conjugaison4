@@ -424,6 +424,16 @@ function nearFutureHelpHtml(question, revealAnswers = true) {
   const pronominalReminder = pronominal ? "<blockquote><strong>Attention \xE0 l\u2019ordre</strong><p>Le pronom r\xE9fl\xE9chi ne se place pas devant \xAB aller \xBB : on dit <em>je vais me lever</em>, et non <em>je me vais lever</em>.</p></blockquote>" : "";
   return `<figure>${knowledgeCaption()}<blockquote><strong>\xAB Aller \xBB au pr\xE9sent</strong><p>Le futur proche est une construction : <strong>aller au pr\xE9sent + infinitif</strong>.</p><table><tbody>${allerRows}</tbody></table></blockquote></figure><figure><figcaption>Construis le futur proche</figcaption><ol><li>${chosenAller}</li>${construction}</ol>${result}</figure>${pronominalReminder}`;
 }
+function orthographyAdjustmentHtml(infinitive, source, target, ending) {
+  const nextLetter = ending.replace(/^-/, "").normalize("NFC").charAt(0);
+  if (infinitive.endsWith("ger") && normalized$1(source).endsWith("ge") && normalized$1(target).endsWith("g")) {
+    return `Si la lettre <strong>g</strong> est suivie de <strong>${escapedHtml(nextLetter)}</strong>, pas besoin de <strong>e</strong>. Regarde l\u2019explication plus bas.`;
+  }
+  if (infinitive.endsWith("cer") && source.toLocaleLowerCase("fr").endsWith("\xE7") && normalized$1(target).endsWith("c")) {
+    return `Devant <strong>${escapedHtml(nextLetter)}</strong>, la c\xE9dille ne sert pas. Regarde l\u2019explication plus bas.`;
+  }
+  return "";
+}
 function imperativePresentHelpHtml(question, reference) {
   const subject = subjectKey(question.pronom || question.saisiePrefixe);
   const references = (reference == null ? void 0 : reference.imperativePresentReferences) || [];
@@ -447,11 +457,18 @@ function imperativePresentHelpHtml(question, reference) {
     };
     return ((_a = stems[infinitive]) == null ? void 0 : _a[subject]) || "";
   })();
+  const irregular = Boolean(irregularStem && normalized$1(actualForm).startsWith(irregularStem.slice(0, -1)));
+  if (irregular) {
+    const stemInstruction = irregularStem ? `Avec <strong>${escapedHtml(subject)}</strong>, pars du radical particulier <strong>${escapedHtml(irregularStem)}</strong>, puis ajoute la terminaison de cette personne.` : "Apprends la forme particuli\xE8re de ce verbe \xE0 l\u2019imp\xE9ratif.";
+    const result2 = actualForm ? `<blockquote><strong>R\xE9sultat</strong><p>${resultFormMarkup(capitalizedResult, false)}</p></blockquote>` : "";
+    return `<figure>${knowledgeCaption()}<blockquote><strong>Imp\xE9ratif irr\xE9gulier</strong><p>Ce verbe a des formes particuli\xE8res \xE0 l\u2019imp\xE9ratif. Apprends-les par c\u0153ur.</p></blockquote></figure><figure><figcaption>Construis la r\xE9ponse</figcaption><ol><li>${stemInstruction}</li><li>N\u2019\xE9cris pas le pronom sujet.</li></ol>${result2}</figure>`;
+  }
+  const accentReminder = actualForm.includes("\xE8") && !bareInfinitive(question.infinitif || "").includes("\xE8") ? "<li>Le radical prend un accent grave : \xE9cris <strong>\xE8</strong>. L\u2019accent fait partie de l\u2019orthographe du verbe.</li>" : "";
   const referenceStep = requestedReference ? `Avec <strong>${escapedHtml(subject)}</strong>, pars de la forme du pr\xE9sent de l\u2019indicatif :<br>${rememberedFormMarkup(`${subject} ${requestedReference.form}`)}` : `Choisis la forme du pr\xE9sent de l\u2019indicatif qui correspond \xE0 <strong>${escapedHtml(subject || "la personne demand\xE9e")}</strong>.`;
   const verificationStep = isException ? `Ce verbe fait exception : sa forme \xE0 l\u2019imp\xE9ratif doit aussi \xEAtre apprise par c\u0153ur.${irregularStem ? ` Pour la retrouver avec <strong>${escapedHtml(subject)}</strong>, pars du radical particulier <strong>${escapedHtml(irregularStem)}</strong>, puis ajoute la terminaison de cette personne.` : ""}` : subject === "tu" ? "V\xE9rifie s\u2019il faut garder ou enlever le <strong>s</strong>. Regarde le bloc \xAB s ou pas s avec tu \xBB plus bas." : "";
   const result = actualForm ? `<blockquote><strong>R\xE9sultat</strong><p>${resultFormMarkup(capitalizedResult, false)}</p></blockquote>` : "";
   const verificationItem = verificationStep ? `<li>${verificationStep}</li>` : "";
-  const construction = `<figure><figcaption>Construis la r\xE9ponse</figcaption><ol><li>${referenceStep}</li><li>Garde la forme verbale, mais n\u2019\xE9cris pas le pronom sujet.</li>${verificationItem}</ol>${result}</figure>`;
+  const construction = `<figure><figcaption>Construis la r\xE9ponse</figcaption><ol><li>${referenceStep}</li><li>Garde la forme verbale, mais n\u2019\xE9cris pas le pronom sujet.</li>${verificationItem}${accentReminder}</ol>${result}</figure>`;
   const sRule = subject === "tu" && sourceForm ? normalized$1(sourceForm) !== normalized$1(actualForm) ? `<figure><figcaption>S ou pas s avec tu</figcaption><blockquote><strong>Ici : pas de s final</strong><p>La forme au pr\xE9sent est <strong>${escapedHtml(sourceForm)}</strong>. \xC0 l\u2019imp\xE9ratif avec <strong>tu</strong>, on enl\xE8ve le <strong>s</strong> final : <strong>${escapedHtml(actualForm)}</strong>.</p><p>Si <strong>en</strong> ou <strong>y</strong> vient juste apr\xE8s, le <strong>s</strong> revient : <em>manges-en</em>, <em>vas-y</em>.</p></blockquote></figure>` : `<figure><figcaption>S ou pas s avec tu</figcaption><blockquote><strong>Ici : garde le s final</strong><p>La forme au pr\xE9sent est <strong>${escapedHtml(sourceForm)}</strong>. Pour ce verbe, l\u2019imp\xE9ratif avec <strong>tu</strong> garde cette forme sans le pronom sujet.</p></blockquote></figure>` : "";
   return `${knowledge}${construction}${sRule}`;
 }
@@ -528,7 +545,7 @@ function subjunctivePresentHelpHtml(question, reference, verb) {
   const radical = (reference == null ? void 0 : reference.radical) || rawRadical;
   const ending = (reference == null ? void 0 : reference.targetEnding) || (requestedPerson === null ? "" : endings[requestedPerson] || "");
   const bare = normalized$1(bareInfinitive(question.infinitif || ""));
-  const adjustmentExplanation = bare.endsWith("ger") && normalized$1(rawRadical).endsWith("ge") && normalized$1(radical).endsWith("g") ? "Si la lettre <strong>g</strong> est suivie de <strong>i</strong>, pas besoin de <strong>e</strong>. Regarde l\u2019explication plus bas." : bare.endsWith("cer") && rawRadical.toLocaleLowerCase("fr").endsWith("\xE7") && normalized$1(radical).endsWith("c") ? "Devant <strong>i</strong>, la c\xE9dille ne sert pas. Regarde l\u2019explication plus bas." : "Le radical s\u2019adapte devant cette terminaison.";
+  const adjustmentExplanation = orthographyAdjustmentHtml(bare, rawRadical, radical, ending) || "Le radical s\u2019adapte devant cette terminaison.";
   const adjustment = normalized$1(rawRadical) !== normalized$1(radical) ? `<li>${adjustmentExplanation} ${radicalBadge(rawRadical)} devient ${radicalBadge(radical)}.</li>` : "";
   const assembly = radical && ending ? assembledFormBadges(radical, ending) : resultFormMarkup(requestedForm);
   const pronominalResult = pronominalAnswerHelp(requestedSubject, requestedForm, infinitive, verb, question.conjugaison1 || "", false);
@@ -741,7 +758,9 @@ function compoundAgreementHtml(auxiliary, subject, baseParticiple = "", answer =
     const agreed = agreedParticipleFromCompound(answer, baseParticiple);
     const key = subjectKey(subject);
     const pluralNote = ["nous", "vous", "ils", "elles"].includes(key) && agreed && normalized$1(agreed) !== normalized$1(baseParticiple) ? key === "vous" ? `<p>Ici, l\u2019exercice attend <strong>${escapedHtml(agreed)}</strong>. Avec <strong>vous</strong>, l\u2019accord d\xE9pend du contexte : une personne polie, plusieurs personnes, masculin ou f\xE9minin.</p>` : `<p>Ici, <strong>${escapedHtml(key)}</strong> d\xE9signe plusieurs personnes : le participe pass\xE9 s\u2019accorde au pluriel. <strong>${escapedHtml(baseParticiple)}</strong> devient <strong>${escapedHtml(agreed)}</strong>.</p>` : "";
-    return `<figure><figcaption>Accord du participe pass\xE9</figcaption><blockquote><strong>Avec \xEAtre</strong><p>Le participe pass\xE9 s\u2019accorde avec le sujet.</p><p><em>Elle est arriv\xE9e. \xB7 Ils sont arriv\xE9s.</em></p>${pluralNote}${tuNote}</blockquote></figure>`;
+    const acceptedParticiples = ((question == null ? void 0 : question.reponsesPourCorrige) || []).map((form) => agreedParticipleFromCompound(form, baseParticiple));
+    const genderNote = acceptedParticiples.includes(`${baseParticiple}s`) && acceptedParticiples.includes(`${baseParticiple}es`) ? "<p>Pour un groupe masculin ou mixte, ajoute <strong>-s</strong> ; pour un groupe enti\xE8rement f\xE9minin, ajoute <strong>-es</strong>. Les deux accords sont accept\xE9s ici.</p>" : "";
+    return `<figure><figcaption>Accord du participe pass\xE9</figcaption><blockquote><strong>Avec \xEAtre</strong><p>Le participe pass\xE9 s\u2019accorde avec le sujet.</p><p><em>Elle est arriv\xE9e. \xB7 Ils sont arriv\xE9s.</em></p>${pluralNote}${genderNote}${tuNote}</blockquote></figure>`;
   }
   const contextualReminder = ((_a = question == null ? void 0 : question.agreementReminder) == null ? void 0 : _a.kind) === "coi" ? `<blockquote><strong>Dans cette question : COI</strong><p>\xAB ${escapedHtml(question.agreementReminder.complement)} \xBB est un compl\xE9ment d\u2019objet indirect. Un COI ne commande pas l\u2019accord du participe pass\xE9.</p></blockquote>` : ((_b = question == null ? void 0 : question.agreementReminder) == null ? void 0 : _b.kind) === "cod-before" ? `<blockquote><strong>Dans cette question : COD plac\xE9 avant</strong><p>\xAB ${escapedHtml(question.agreementReminder.complement)} \xBB est plac\xE9 avant le verbe : le participe pass\xE9 s\u2019accorde avec ce COD.</p></blockquote>` : ((_c = question == null ? void 0 : question.agreementReminder) == null ? void 0 : _c.kind) === "cod-after" ? `<blockquote><strong>Dans cette question : COD plac\xE9 apr\xE8s</strong><p>\xAB ${escapedHtml(question.agreementReminder.complement)} \xBB est plac\xE9 apr\xE8s le verbe : il ne commande pas l\u2019accord du participe pass\xE9.</p></blockquote>` : "";
   if (!contextualReminder) {
@@ -750,7 +769,7 @@ function compoundAgreementHtml(auxiliary, subject, baseParticiple = "", answer =
   return `<figure><figcaption>Accord du participe pass\xE9</figcaption><blockquote><strong>Avec avoir</strong><p>Le participe pass\xE9 ne s\u2019accorde pas avec le sujet. Il s\u2019accorde seulement avec un COD plac\xE9 avant le verbe.</p></blockquote>${contextualReminder}</figure>`;
 }
 function buildCompoundConjugationHtml(question, verb, tense, revealAnswers = true) {
-  var _a, _b, _c, _d, _e;
+  var _a, _b, _c, _d, _e, _f;
   const infinitive = question.infinitif || (verb == null ? void 0 : verb.infinitif) || "ce verbe";
   const auxiliary = inferCompoundAuxiliary(question, verb);
   const participle = ((_a = verb == null ? void 0 : verb.participePasse) == null ? void 0 : _a.trim()) || ((_c = (_b = question.agreementReminder) == null ? void 0 : _b.participle) == null ? void 0 : _c.trim()) || "participe pass\xE9 \xE0 v\xE9rifier";
@@ -768,8 +787,11 @@ function buildCompoundConjugationHtml(question, verb, tense, revealAnswers = tru
   const normalizedMode = normalized$1(question.mode || ((_e = tense == null ? void 0 : tense.mode) == null ? void 0 : _e.name));
   const nonPersonal = ["participe", "gerondif", "infinitif"].includes(normalizedMode);
   const auxiliaryInstruction = normalizedMode === "infinitif" ? `Utilise l\u2019auxiliaire <strong>${escapedHtml(auxiliary)}</strong> \xE0 l\u2019infinitif :${conjugatedAuxiliary}` : nonPersonal ? `Utilise le verbe auxiliaire <strong>${escapedHtml(auxiliary)}</strong> ${escapedHtml(auxiliaryContext)} :${conjugatedAuxiliary}` : `Conjugue le verbe auxiliaire <strong>${escapedHtml(auxiliary)}</strong> ${escapedHtml(auxiliaryContext)} avec <strong>${escapedHtml(subject)}</strong> :${conjugatedAuxiliary}`;
-  const result = officialForm ? `<blockquote><strong>R\xE9sultat</strong><p>${resultFormMarkup(officialForm, false)}</p></blockquote>` : "";
-  const answer = revealAnswers ? `<figure><figcaption>Construis la r\xE9ponse</figcaption><ol><li>${auxiliaryInstruction}</li><li>Ajoute le participe pass\xE9 :<br>${rememberedFormMarkup(participle)}</li><li>V\xE9rifie l\u2019accord du participe pass\xE9. Regarde plus bas pour plus de d\xE9tails.</li></ol>${result}</figure>` : `<figure><figcaption>Construis la r\xE9ponse</figcaption><ol><li>${auxiliaryInstruction}</li><li>Ajoute le participe pass\xE9.</li><li>V\xE9rifie l\u2019accord du participe pass\xE9. Regarde plus bas pour plus de d\xE9tails.</li></ol></figure>`;
+  const resultForms = [...new Set(((_f = question.reponsesPourCorrige) == null ? void 0 : _f.length) ? question.reponsesPourCorrige : [officialForm])].filter(Boolean);
+  const result = resultForms.length ? `<blockquote><strong>R\xE9sultat</strong>${resultForms.map((form) => `<p>${resultFormMarkup(form, false)}</p>`).join("")}</blockquote>` : "";
+  const assemblyInstruction = nonPersonal || normalizedMode === "imperatif" ? "\xC9cris l\u2019auxiliaire, puis le participe pass\xE9." : `\xC9cris le sujet <strong>${escapedHtml(subject)}</strong>, puis l\u2019auxiliaire et le participe pass\xE9.`;
+  const complementInstruction = question.complementPosition === "before" ? " Garde le compl\xE9ment \xE0 sa place avant le verbe." : question.complement ? " Ajoute ensuite le compl\xE9ment de la question." : "";
+  const answer = revealAnswers ? `<figure><figcaption>Construis la r\xE9ponse</figcaption><ol><li>${auxiliaryInstruction}</li><li>Ajoute le participe pass\xE9 :<br>${rememberedFormMarkup(participle)}</li><li>V\xE9rifie l\u2019accord du participe pass\xE9. Regarde plus bas pour plus de d\xE9tails.</li></ol>${result}</figure>` : `<figure><figcaption>Construis la r\xE9ponse</figcaption><ol><li>${auxiliaryInstruction}</li><li>Ajoute le participe pass\xE9.</li><li>V\xE9rifie l\u2019accord du participe pass\xE9. Regarde plus bas pour plus de d\xE9tails.</li><li>${assemblyInstruction}${complementInstruction}</li></ol></figure>`;
   return `${knowledge}${answer}${compoundAgreementHtml(auxiliary, subject, participle, officialForm, question, verb)}`;
 }
 function tenseRule(question, verb, tense) {
@@ -971,7 +993,7 @@ function buildConjugationBaseHtml(question, verb, tense, approach = "grammatical
       const changesBeforeEnding = normalized$1(rawReferenceRadical) !== normalized$1(decomposition.base);
       const firstAssembly = changesBeforeEnding ? assembledFormBadges(rawReferenceRadical, decomposition.ending) : assembledForm;
       const crossedAssembly = changesBeforeEnding ? adjustedAssemblyBadges(rawReferenceRadical, decomposition.base, decomposition.ending) : "";
-      const adjustmentNote = bare.endsWith("ger") && normalized$1(rawReferenceRadical).endsWith("ge") && normalized$1(decomposition.base).endsWith("g") ? "Si la lettre <strong>g</strong> est suivie de <strong>i</strong>, pas besoin de <strong>e</strong>. Regarde l\u2019explication plus bas." : bare.endsWith("cer") && rawReferenceRadical.toLocaleLowerCase("fr").endsWith("\xE7") && normalized$1(decomposition.base).endsWith("c") ? "Devant <strong>i</strong>, la c\xE9dille ne sert pas. Regarde l\u2019explication plus bas." : "Le radical s\u2019adapte devant cette terminaison. Regarde l\u2019explication plus bas.";
+      const adjustmentNote = orthographyAdjustmentHtml(bare, rawReferenceRadical, decomposition.base, decomposition.ending) || "Le radical s\u2019adapte devant cette terminaison. Regarde l\u2019explication plus bas.";
       const assembly = changesBeforeEnding ? `${firstAssembly}<small>${adjustmentNote}</small>${crossedAssembly}<strong>R\xE9sultat</strong><b>${assembledForm}<i>\u2713</i></b>` : assembledForm;
       const requestedPersonIndex = subjectIndex(question);
       const endingRows = rule.endingItems.map((item, index) => {
@@ -1150,7 +1172,7 @@ function buildCompleteConjugationAdviceHtml(question, verb, tense) {
     return nearFutureHelpHtml(question, false);
   }
   if (question.isCompound || (tense == null ? void 0 : tense.isCompound)) {
-    return buildCompoundConjugationHtml(question, verb, tense, false);
+    return buildCompoundConjugationHtml(question, verb, tense, false).replace(/<mark>([\s\S]*?)<\/mark>/gu, "$1");
   }
   const mode = normalized$1(question.mode || ((_a = tense == null ? void 0 : tense.mode) == null ? void 0 : _a.name));
   const time = normalized$1(question.temps || (tense == null ? void 0 : tense.name));
@@ -1287,7 +1309,7 @@ const COACH_HELP_PROFILES = {
     id: "tres-condensee",
     label: "Tr\xE8s condens\xE9e",
     description: "Un rappel du groupe et une r\xE8gle courte adapt\xE9e au mode et au temps.",
-    blocks: ["definition", "condensed-verb-group", "condensed-tense-rule"],
+    blocks: ["condensed-tense-rule", "condensed-verb-group"],
     revealsAnswers: false,
     highlightsTarget: false,
     conditionalBlocks: ["pronominal", "participle-agreement"],

@@ -1,4 +1,4 @@
-import { g as useRoute, f as useLanguagePreferences, h as useState, k as useCookie } from './server.mjs';
+import { b as useRoute, a as useLanguagePreferences, c as useState, j as useCookie } from './server.mjs';
 import { a as ANALYTICS_CONSENT_COOKIE_NAME, A as ANALYTICS_CONSENT_ACCEPTED, b as ANALYTICS_CONSENT_REFUSED } from '../_/analytics-consent.mjs';
 
 function consentFromCookie(value) {

@@ -1,4 +1,4 @@
-import { d as defineEventHandler, u as useDatabase, Y as PublicInputError, c as createError } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, u as useDatabase, $ as PublicInputError, c as createError } from '../../../nitro/nitro.mjs';
 import { n as normalizeDefiCode, g as getDefi, D as DefiNotFoundError, a as DefiStorageError } from '../../../_/defis.mjs';
 import { r as readLimitedJsonBody } from '../../../_/limited-json-body.mjs';
 import { r as requireLearnerDataSubject } from '../../../_/learner-data-subject.mjs';

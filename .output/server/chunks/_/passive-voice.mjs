@@ -1,3 +1,5 @@
+import { i as isImpersonalVerb } from './near-future.mjs';
+
 const NON_PASSIVIZABLE_INFINITIVES = /* @__PURE__ */ new Set([
   "avoir",
   "falloir",
@@ -8,7 +10,7 @@ function normalizedInfinitive(value) {
   return value.trim().toLocaleLowerCase("fr-CH");
 }
 function isPassivizableInfinitive(infinitive) {
-  return !NON_PASSIVIZABLE_INFINITIVES.has(normalizedInfinitive(infinitive));
+  return !isImpersonalVerb(infinitive) && !NON_PASSIVIZABLE_INFINITIVES.has(normalizedInfinitive(infinitive));
 }
 
 export { isPassivizableInfinitive as i };

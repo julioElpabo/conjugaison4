@@ -12,7 +12,7 @@ import { _ as __nuxt_component_0 } from './nuxt-link-icjx6oE7.mjs';
 import { p as publicAssetsURL } from '../routes/renderer.mjs';
 import { u as useLearnerAuth } from './useLearnerAuth-tqISusbB.mjs';
 import { a as conjugationTenseOrder } from '../_/conjugation-display.mjs';
-import { i as isNearFutureTense } from '../_/near-future.mjs';
+import { a as isNearFutureTense } from '../_/near-future.mjs';
 import { n as normalizeVerbSearch, m as matchingVerbs } from '../_/verb-search.mjs';
 import { c as createLearnerTrackingContext } from './main-5kKBKOih.mjs';
 

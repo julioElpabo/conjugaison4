@@ -1,3 +1,16 @@
+const IMPERSONAL_INFINITIVES = /* @__PURE__ */ new Set([
+  "falloir",
+  "pleuvoir",
+  "neiger",
+  "bruiner",
+  "venter",
+  "s'agir"
+]);
+function isImpersonalVerb(infinitive, impersonal) {
+  const normalized = infinitive.trim().normalize("NFC").toLocaleLowerCase("fr").replace(/’/gu, "'");
+  return Boolean(impersonal) || IMPERSONAL_INFINITIVES.has(normalized);
+}
+
 const NEAR_FUTURE_TENSE_CODE = "near-future";
 const NEAR_FUTURE_TENSE_NAME = "futur proche";
 function normalized(value) {
@@ -37,7 +50,7 @@ function buildNearFutureForm(allerForm, infinitive, personId, typeHInitial) {
 function buildNearFutureParadigm(tenseId, verbId, infinitive, auxiliaryForms, options = {}) {
   var _a;
   const allowed = ((_a = options.allowedPersonIds) == null ? void 0 : _a.length) ? new Set(options.allowedPersonIds.map(Number)) : null;
-  return auxiliaryForms.filter((form) => !allowed || allowed.has(Number(form.personId))).map((form) => ({
+  return auxiliaryForms.filter((form) => !isImpersonalVerb(infinitive) || form.pronoun === "il").filter((form) => !allowed || allowed.has(Number(form.personId))).map((form) => ({
     id: nearFutureSyntheticId(tenseId, verbId, form.personId),
     personId: Number(form.personId),
     tenseId: Number(tenseId),
@@ -51,5 +64,5 @@ function nearFutureSyntheticId(tenseId, verbId, personId) {
   return -(Number(tenseId) * 1e8 + verbPart * 10 + Number(personId));
 }
 
-export { bareNearFutureInfinitive as a, buildNearFutureParadigm as b, isPronominalNearFutureInfinitive as c, isNearFutureTense as i, nearFutureReflexivePronoun as n };
+export { isNearFutureTense as a, buildNearFutureParadigm as b, bareNearFutureInfinitive as c, isPronominalNearFutureInfinitive as d, isImpersonalVerb as i, nearFutureReflexivePronoun as n };
 //# sourceMappingURL=near-future.mjs.map

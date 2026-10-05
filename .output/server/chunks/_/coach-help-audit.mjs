@@ -1,4 +1,4 @@
-import { i as isNearFutureTense, a as bareNearFutureInfinitive, c as isPronominalNearFutureInfinitive } from './near-future.mjs';
+import { a as isNearFutureTense, c as bareNearFutureInfinitive, d as isPronominalNearFutureInfinitive } from './near-future.mjs';
 import { a as COACH_HELP_ENGINE_KEYS } from './coach.mjs';
 
 const semanticMeanings = {

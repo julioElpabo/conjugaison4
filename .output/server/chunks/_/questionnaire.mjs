@@ -3,7 +3,7 @@ import { b as buildRadicalReference } from './radical-reference.mjs';
 import { g as generatePronominalRow, r as resolveVariableAuxiliary } from './pronominal-formatter.mjs';
 import { M as MODE_IDENTIFICATION_INSTRUCTION, T as TENSE_IDENTIFICATION_INSTRUCTION } from './exercise-instructions.mjs';
 import { i as isPassivizableInfinitive } from './passive-voice.mjs';
-import { i as isNearFutureTense, b as buildNearFutureParadigm, c as isPronominalNearFutureInfinitive, n as nearFutureReflexivePronoun } from './near-future.mjs';
+import { a as isNearFutureTense, i as isImpersonalVerb, b as buildNearFutureParadigm, d as isPronominalNearFutureInfinitive, n as nearFutureReflexivePronoun } from './near-future.mjs';
 
 function normalized$2(value) {
   return value.trim().toLocaleLowerCase("fr-CH");
@@ -208,7 +208,8 @@ function nearFutureRows(tense, verbs, pronominalUses, allerRows) {
       infinitive: verb.infinitif,
       typeHInitial: verb.type_h_initial,
       pastParticiple: verb.participe_passe,
-      allowedPersonIds: allowedPersons(verb.personnes_disponibles)
+      allowedPersonIds: isImpersonalVerb(verb.infinitif, verb.est_impersonnel) ? [6] : allowedPersons(verb.personnes_disponibles),
+      impersonal: isImpersonalVerb(verb.infinitif, verb.est_impersonnel)
     })),
     ...pronominalUses.map((use) => ({
       selectionId: -Number(use.id),
@@ -216,7 +217,8 @@ function nearFutureRows(tense, verbs, pronominalUses, allerRows) {
       infinitive: use.infinitif_pronominal,
       typeHInitial: use.type_h_initial,
       pastParticiple: "",
-      allowedPersonIds: allowedPersons(use.personnes_autorisees)
+      allowedPersonIds: allowedPersons(use.personnes_autorisees),
+      impersonal: isImpersonalVerb(use.infinitif_pronominal)
     }))
   ];
   return sources.flatMap((source) => {
@@ -256,7 +258,8 @@ function nearFutureRows(tense, verbs, pronominalUses, allerRows) {
         mode_name: tense.mode_name,
         mode_code: tense.mode_code,
         nous_form: nousForm,
-        type_h_initial: source.typeHInitial
+        type_h_initial: source.typeHInitial,
+        est_impersonnel: Number(source.impersonal)
       };
     });
   });
@@ -362,7 +365,8 @@ function choosePronoun(pronom, inclusive, includeOn, random = Math.random) {
 }
 function createPronounChooser(inclusive, includeOn, random = Math.random) {
   let inclusivePronounPrepared = false;
-  return (pronoun) => {
+  return (pronoun, impersonal = false) => {
+    if (impersonal) return "il";
     if (inclusive && !inclusivePronounPrepared && ["il", "ils"].includes(pronoun)) {
       inclusivePronounPrepared = true;
       return pronoun === "il" ? "iel" : "iels";
@@ -779,7 +783,7 @@ async function generateQuestionnaire(request) {
       const [storedRows] = await database.execute(`
       SELECT vc.id, vc.verbe_id, vc.personne_id, vc.temp_id,
              vc.conjugaison1, vc.conjugaison2, vc.conjugaison3,
-             v.infinitif, v.auxiliaire,
+             v.infinitif, v.auxiliaire, v.est_impersonnel,
              v.\`participe_pr\xE9sent\` AS participe_present,
              v.\`participe_pass\xE9\` AS participe_passe,
              auxiliary.infinitif AS auxiliaire_infinitif,
@@ -800,6 +804,7 @@ async function generateQuestionnaire(request) {
         AND vc.temp_id IN (${placeholders(finiteIds)})
         ${exactLiteraryClause}
         AND vc.conjugaison1 <> ''
+        AND (COALESCE(v.est_impersonnel, 0) = 0 OR p.pronom = 'il')
         ${passivePersonClause}
         ${pastSimpleClause}
       ORDER BY ${literaryOrderClause} RAND()
@@ -860,7 +865,7 @@ async function generateQuestionnaire(request) {
       const [nearFutureVerbs, nearFutureUses, allerRows] = await Promise.all([
         verbIds.length ? database.execute(`
               SELECT id, infinitif, v.\`participe_pass\xE9\` AS participe_passe,
-                     type_h_initial, personnes_disponibles
+                     type_h_initial, personnes_disponibles, est_impersonnel
               FROM verbes v
               WHERE id IN (${placeholders(verbIds)}) AND est_archive = 0
             `, verbIds) : Promise.resolve([[]]),
@@ -950,11 +955,12 @@ async function generateQuestionnaire(request) {
         complementsByVerb.set(Number(complement.verbe_id), candidates);
       }
     }
-    const eligibleRows = usesLiteraryCitations ? rows.filter((row) => literaryCitations.has(literaryCitationKey(
+    const personalRows = rows.filter((row) => !isImpersonalVerb(row.infinitif, row.est_impersonnel) || row.pronom === "il");
+    const eligibleRows = usesLiteraryCitations ? personalRows.filter((row) => literaryCitations.has(literaryCitationKey(
       Number(row.verbe_id),
       Number(row.temp_id),
       Number(row.personne_id)
-    ))) : rows;
+    ))) : personalRows;
     const rowsForQuestions = onlyBeforeComplements ? eligibleRows.filter((row) => normalized(row.mode_name) !== "imp\xE9ratif" && (requestedComplementOptions.includes("coi-before") || Boolean(row.is_compound))) : eligibleRows;
     for (const row of rowsForQuestions) {
       const candidates = (_d = complementsByVerb.get(Number(row.verbe_id))) != null ? _d : [];
@@ -994,7 +1000,7 @@ async function generateQuestionnaire(request) {
           radical_reference: radicalReference,
           future_simple_forms: futureSimpleForms,
           conjugation_confusions: conjugationConfusions
-        }, pronounForQuestion(row.pronom)));
+        }, pronounForQuestion(row.pronom, isImpersonalVerb(row.infinitif, row.est_impersonnel))));
       } else if (request.exerciseKind !== "conjugation") {
         questions.push(identificationQuestion(
           semanticRow,
@@ -1007,7 +1013,7 @@ async function generateQuestionnaire(request) {
           conjugationConfusions
         ));
       }
-      if (wantsPassiveVoice && Number(row.verbe_id) > 0 && isPassivizableInfinitive(row.infinitif) && [6, 9].includes(Number(row.personne_id)) && normalized(row.mode_name) !== "imp\xE9ratif") {
+      if (wantsPassiveVoice && Number(row.verbe_id) > 0 && !isImpersonalVerb(row.infinitif, row.est_impersonnel) && isPassivizableInfinitive(row.infinitif) && [6, 9].includes(Number(row.personne_id)) && normalized(row.mode_name) !== "imp\xE9ratif") {
         const expectedNumber = Number(row.personne_id) === 9 ? "pluriel" : "singulier";
         const passiveComplements = candidates.filter((candidate) => candidate.fonction_objet === "cod" && Boolean(candidate.texte_antepose && candidate.genre && candidate.nombre) && normalized(candidate.nombre || "") === expectedNumber);
         const passiveComplement = randomComplement(passiveComplements);

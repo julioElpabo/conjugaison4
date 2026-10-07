@@ -1098,21 +1098,22 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="results-table-wrap">
-            <table class="results-table">
+            <table class="results-table" role="table">
               <caption>{{ ui('Récapitulatif des réponses') }}</caption>
-              <thead>
-                <tr>
+              <thead role="rowgroup">
+                <tr role="row">
                   <th scope="col">{{ ui('Question') }}</th>
                   <th scope="col">{{ ui('Ta réponse') }}</th>
                   <th scope="col">{{ ui('Correction') }}</th>
                   <th scope="col">{{ ui('Résultat') }}</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr v-for="(attempt, index) in attempts" :key="index">
-                  <td class="result-question-column">
+              <tbody role="rowgroup">
+                <tr v-for="(attempt, index) in attempts" :key="index" role="row">
+                  <td class="result-question-column" role="cell">
                     <div class="result-question-cell">
                       <div class="result-question-content">
+                        <span class="result-mobile-label" aria-hidden="true">{{ ui('Question') }}</span>
                         <blockquote v-if="incorrectSummaryForms[index]" class="result-identification-citation">
                           <p>
                             <span>{{ incorrectSummaryForms[index]?.before }}</span><mark>{{ incorrectSummaryForms[index]?.target }}</mark><span>{{ incorrectSummaryForms[index]?.after }}</span>
@@ -1138,8 +1139,12 @@ onBeforeUnmount(() => {
                       </button>
                     </div>
                   </td>
-                  <td>{{ attempt.answer }}</td>
-                  <td>
+                  <td class="result-answer-column" role="cell">
+                    <span class="result-mobile-label" aria-hidden="true">{{ ui('Ta réponse') }}</span>
+                    {{ attempt.answer || '—' }}
+                  </td>
+                  <td class="result-correction-column" role="cell">
+                    <span class="result-mobile-label" aria-hidden="true">{{ ui('Correction') }}</span>
                     <div class="result-spoken-answers">
                       <div
                         v-for="expectedAnswer in (attempt.question.reponsesPourCorrige.length ? attempt.question.reponsesPourCorrige : attempt.question.reponses)"
@@ -1147,7 +1152,8 @@ onBeforeUnmount(() => {
                       >{{ displayedCorrectionAnswer(attempt.question, expectedAnswer) }}</div>
                     </div>
                   </td>
-                  <td>
+                  <td class="result-status-column" role="cell">
+                    <span class="result-mobile-label" aria-hidden="true">{{ ui('Question {current} sur {total}', { current: index + 1, total: attempts.length }) }}</span>
                     <span
                       :class="{
                         'result-heard': attempt.answerWasHeard,

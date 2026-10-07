@@ -2410,6 +2410,10 @@ body.dialog-open {
   text-transform: uppercase;
 }
 
+.result-mobile-label {
+  display: none;
+}
+
 .speech-answer-button {
   display: inline-flex;
   min-height: 44px;
@@ -3338,9 +3342,120 @@ body.dialog-open {
     width: 100%;
   }
 
-  .results-table th:nth-child(2),
-  .results-table td:nth-child(2) {
-    display: none;
+  .results-hero {
+    margin-bottom: 18px;
+    padding: 16px;
+    gap: 4px;
+  }
+
+  .results-hero p {
+    font-size: 1.25rem;
+  }
+
+  .results-hero strong {
+    font-size: clamp(2.75rem, 12vw, 3.5rem);
+  }
+
+  .results-table-wrap {
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .results-table {
+    display: block;
+    font-size: 1rem;
+    line-height: 1.45;
+  }
+
+  .results-table caption {
+    display: block;
+    padding: 0 0 12px;
+  }
+
+  /* Keep the column headers available to assistive technology. */
+  .results-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .results-table tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  .results-table tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 14px;
+    gap: 12px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+  }
+
+  .results-table td {
+    display: block;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .results-table .result-status-column {
+    display: flex;
+    grid-row: 1;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .result-mobile-label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-size: .8rem;
+    font-weight: 800;
+  }
+
+  .result-status-column .result-mobile-label {
+    margin: 0;
+  }
+
+  .result-question-cell {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .result-question-content {
+    width: 100%;
+  }
+
+  .result-consult-verb {
+    min-height: 44px;
+    padding: 9px 12px;
+    font-size: .9rem;
+  }
+
+  .result-identification-citation {
+    min-width: 0;
+  }
+
+  .result-spoken-answers > div {
+    display: block;
+  }
+
+  .result-status-column > span:last-child {
+    max-width: 100%;
+    white-space: normal;
   }
 
   .print-toolbar > div:last-child {

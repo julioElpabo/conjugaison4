@@ -9,12 +9,12 @@ import {
 } from '~~/shared/i18n/locales'
 import { translateAppMessage, type AppMessageKey, type MessageParameters } from '~~/shared/i18n/messages'
 import { isUiMessage, translateUiMessage, type UiMessage } from '~~/shared/i18n/ui-messages'
+import { usePreferenceCookie } from './usePreferencePersistence'
 
 export function useLanguagePreferences() {
   const route = useRoute()
-  const cookieOptions = { maxAge: 60 * 60 * 24 * 365, path: '/', sameSite: 'lax' as const }
-  const interfaceCookie = useCookie<string>('interface_locale', { ...cookieOptions, default: () => DEFAULT_LANGUAGE_PREFERENCES.interfaceLocale })
-  const explanationCookie = useCookie<string>('explanation_locale', { ...cookieOptions, default: () => DEFAULT_LANGUAGE_PREFERENCES.explanationLocale })
+  const interfaceCookie = usePreferenceCookie<string>('interface_locale', DEFAULT_LANGUAGE_PREFERENCES.interfaceLocale)
+  const explanationCookie = usePreferenceCookie<string>('explanation_locale', DEFAULT_LANGUAGE_PREFERENCES.explanationLocale)
   const routeLocale = computed(() => localeFromPath(route.path))
   if (routeLocale.value && interfaceCookie.value !== routeLocale.value) {
     interfaceCookie.value = routeLocale.value

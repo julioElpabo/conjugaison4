@@ -1,8 +1,11 @@
+import { usePreferencePersistence } from './usePreferencePersistence'
+
 export type ColorTheme = 'light' | 'dark'
 
 const STORAGE_KEY = 'conjugaison.theme'
 
 export function useColorTheme() {
+  const { rememberPreferences } = usePreferencePersistence()
   const theme = useState<ColorTheme>('color-theme', () => 'light')
   const isDark = computed(() => theme.value === 'dark')
 
@@ -14,7 +17,7 @@ export function useColorTheme() {
     document.documentElement.dataset.theme = nextTheme
     document.documentElement.style.colorScheme = nextTheme
 
-    if (persist) localStorage.setItem(STORAGE_KEY, nextTheme)
+    if (persist && rememberPreferences.value) localStorage.setItem(STORAGE_KEY, nextTheme)
   }
 
   function toggleTheme() {

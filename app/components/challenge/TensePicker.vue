@@ -8,6 +8,14 @@ import type {
 } from '~/composables/useChallengeBuilder'
 import { conjugationTenseOrder } from '~~/shared/data/conjugation-display'
 import { isNearFutureTense } from '~~/shared/utils/near-future'
+import {
+  classifyTenses,
+  classifiedTenseToggleIds,
+  isClassifiedTenseSelected,
+  type ClassifiedTense,
+} from '~~/shared/utils/tense-classification'
+
+const { classification, setClassification, saveError } = useTenseClassification()
 
 const props = defineProps<{
   modes: ConjugationMode[]
@@ -20,20 +28,27 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   toggle: [id: number]
-  selectAll: []
+  selectAll: [ids?: number[]]
   clear: []
   updatePastSimplePronouns: [value: PastSimplePronouns]
 }>()
 
 const selectedSet = computed(() => new Set(props.selectedIds))
+const classifiedTenses = computed(() => classifyTenses(props.modes, props.tenses, classification.value))
+const isSelected = (tense: ClassifiedTense) => isClassifiedTenseSelected(tense, selectedSet.value)
+const selectedCount = computed(() => classifiedTenses.value.filter(isSelected).length)
 const advancedModesOpen = ref(false)
 // La restriction il / ils ne concerne que le passé simple.
 const isPastSimple = (tense: Tense) => tense.name.toLocaleLowerCase('fr') === 'passé simple'
 
-function toggleTense(tense: Tense) {
-  const wasSelected = selectedSet.value.has(tense.id)
-  emit('toggle', tense.id)
+function toggleTense(tense: ClassifiedTense) {
+  const wasSelected = isSelected(tense)
+  for (const id of classifiedTenseToggleIds(tense, selectedSet.value)) emit('toggle', id)
   if (wasSelected && isPastSimple(tense)) emit('updatePastSimplePronouns', 'all')
+}
+
+function selectAll() {
+  emit('selectAll', classification.value === 'modern' ? classifiedTenses.value.map(tense => tense.id) : undefined)
 }
 
 function updatePastSimplePronouns(event: Event) {
@@ -56,7 +71,7 @@ const exampleRequestKey = computed(() => (
 ))
 const groups = computed(() => props.modes
   .map((mode) => {
-    const tenses = props.tenses
+    const tenses = classifiedTenses.value
       .filter(tense => tense.modeId === mode.id)
       .sort((left, right) => conjugationTenseOrder(mode.name, left.name) - conjugationTenseOrder(mode.name, right.name) || left.id - right.id)
     const trailingTenses = tenses.filter(tense => isNearFutureTense(tense))
@@ -114,13 +129,13 @@ watch(exampleRequestKey, () => void loadExamples())
         <p class="builder-card__eyebrow">{{ ui('Étape 2') }}</p>
         <h2 id="tenses-title">{{ ui('Mes temps') }}</h2>
       </div>
-      <span class="count-badge" :aria-label="`${selectedIds.length} temps sélectionnés`">
-        {{ selectedIds.length }}
+      <span class="count-badge" :aria-label="`${selectedCount} temps sélectionnés`">
+        {{ selectedCount }}
       </span>
     </div>
 
     <div v-if="!falcMode" class="selection-toolbar">
-      <button class="text-button" type="button" @click="emit('selectAll')"> {{ ui('Tout cocher') }} </button>
+      <button class="text-button" type="button" @click="selectAll"> {{ ui('Tout cocher') }} </button>
       <button class="text-button text-button--danger" type="button" @click="emit('clear')"> {{ ui('Tout décocher') }} </button>
     </div>
 
@@ -143,12 +158,13 @@ watch(exampleRequestKey, () => void loadExamples())
                     <template v-if="examples[tense.id]"> {{ ui('Exemple:') }} <strong>{{ examples[tense.id]!.emphasis }}</strong><template v-if="examples[tense.id]!.rest"> {{ examples[tense.id]!.rest }}</template>
                     </template>
                     <template v-else>{{ examplesLoading ? ui('Chargement…') : ui('Exemple momentanément indisponible.') }}</template>
+                    <span v-if="tense.information" class="tense-tooltip__information">{{ ui(tense.information) }}</span>
                   </span>
                 </span>
                 <label class="switch-row">
                   <input
                     type="checkbox"
-                    :checked="selectedSet.has(tense.id)"
+                    :checked="isSelected(tense)"
                     @change="toggleTense(tense)"
                   >
                   <span class="switch-row__control" aria-hidden="true" />
@@ -158,7 +174,7 @@ watch(exampleRequestKey, () => void loadExamples())
 
               <Transition name="past-simple-option">
                 <div
-                  v-if="isPastSimple(tense) && selectedSet.has(tense.id)"
+                  v-if="isPastSimple(tense) && isSelected(tense)"
                   class="past-simple-option"
                 >
                   <label class="past-simple-option__choice">
@@ -197,7 +213,7 @@ watch(exampleRequestKey, () => void loadExamples())
               <label class="switch-row">
                 <input
                   type="checkbox"
-                  :checked="selectedSet.has(tense.id)"
+                  :checked="isSelected(tense)"
                   @change="toggleTense(tense)"
                 >
                 <span class="switch-row__control" aria-hidden="true" />
@@ -217,10 +233,43 @@ watch(exampleRequestKey, () => void loadExamples())
         {{ advancedModesOpen ? ui('Masquer les autres modes') : ui('Voir les autres modes') }}
       </button>
     </div>
+    <div class="tense-classification">
+      <button
+        class="text-button tense-classification__toggle"
+        type="button"
+        @click="setClassification(classification === 'traditional' ? 'modern' : 'traditional')"
+      >
+        {{ classification === 'traditional' ? ui('Utiliser la classification moderne') : ui('Revenir à la classification traditionnelle') }}
+      </button>
+      <p v-if="saveError" class="tense-classification__error" role="alert">{{ ui('Impossible d’enregistrer ces préférences pour le moment.') }}</p>
+    </div>
   </section>
 </template>
 
 <style scoped>
+.tense-classification {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+
+.tense-classification__toggle {
+  min-height: 44px;
+  max-width: 100%;
+  padding: 8px 0;
+  color: var(--brand-dark);
+  text-align: center;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.tense-classification__error {
+  margin: 6px 0 0;
+  color: var(--danger);
+  font-size: .8rem;
+}
+
 .tense-group__columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -364,6 +413,23 @@ watch(exampleRequestKey, () => void loadExamples())
   letter-spacing: .018em;
 }
 
+.tense-tooltip:has(.tense-tooltip__information) {
+  width: 240px;
+  max-width: calc(100vw - 56px);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.tense-group__column + .tense-group__column .tense-tooltip:has(.tense-tooltip__information) {
+  right: -8px;
+  left: auto;
+}
+
+.tense-tooltip__information {
+  display: block;
+  margin-top: 8px;
+}
+
 .tense-tooltip::after {
   position: absolute;
   top: 100%;
@@ -371,6 +437,11 @@ watch(exampleRequestKey, () => void loadExamples())
   border: 6px solid transparent;
   border-top-color: #233f3a;
   content: '';
+}
+
+.tense-group__column + .tense-group__column .tense-tooltip:has(.tense-tooltip__information)::after {
+  right: 13px;
+  left: auto;
 }
 
 .tense-info:hover .tense-tooltip,
@@ -391,5 +462,13 @@ watch(exampleRequestKey, () => void loadExamples())
 @media (max-width: 520px) {
   .tense-group__columns { grid-template-columns: 1fr; }
   .tense-group__column + .tense-group__column { margin-top: 22px; }
+  .tense-group__column + .tense-group__column .tense-tooltip:has(.tense-tooltip__information) {
+    right: auto;
+    left: -8px;
+  }
+  .tense-group__column + .tense-group__column .tense-tooltip:has(.tense-tooltip__information)::after {
+    right: auto;
+    left: 13px;
+  }
 }
 </style>

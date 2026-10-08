@@ -1,25 +1,19 @@
 import { getLearnerSession } from '../../utils/learner-session'
 import { readLimitedJsonBody } from '../../utils/limited-json-body'
-
-const LOCALES = new Set(['fr', 'de', 'en', 'it', 'es', 'nl', 'nl-NL'])
-const THEMES = new Set(['light', 'dark'])
+import { parseLearnerPreferencesPatch, updateLearnerPreferences } from '../../services/learner-preferences'
+import { PublicInputError } from '../../services/public-api-validation'
 
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Cache-Control', 'no-store')
   const learner = await getLearnerSession(event)
   if (!learner) throw createError({ statusCode: 401, statusMessage: 'Authentification requise' })
-  const body = await readLimitedJsonBody<{ interfaceLocale?: unknown, colorTheme?: unknown }>(event, 4 * 1024)
-  const interfaceLocale = String(body.interfaceLocale || '')
-  const colorTheme = String(body.colorTheme || '')
-  if (!LOCALES.has(interfaceLocale) || !THEMES.has(colorTheme)) {
-    throw createError({ statusCode: 400, statusMessage: 'Préférences invalides' })
+  const body = await readLimitedJsonBody<unknown>(event, 4 * 1024)
+  let patch
+  try {
+    patch = parseLearnerPreferencesPatch(body)
+  } catch (error) {
+    if (error instanceof PublicInputError) throw createError({ statusCode: 400, statusMessage: error.message })
+    throw error
   }
-  await useDatabase().execute(`
-    INSERT INTO learner_preferences (account_id, interface_locale, color_theme)
-    VALUES (?, ?, ?)
-    ON DUPLICATE KEY UPDATE
-      interface_locale=VALUES(interface_locale),
-      color_theme=VALUES(color_theme)
-  `, [learner.id, interfaceLocale, colorTheme])
-  return { interfaceLocale, colorTheme }
+  return updateLearnerPreferences(useDatabase(), learner.id, patch)
 })

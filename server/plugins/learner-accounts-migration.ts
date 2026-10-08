@@ -2,6 +2,7 @@ import type { RowDataPacket } from 'mysql2/promise'
 import { useDatabase } from '../utils/database'
 import { LEARNER_ERROR_TAXONOMY } from '~~/shared/utils/learner-error-diagnostics'
 import { CURRENT_PRIVACY_NOTICE_VERSION } from '~~/shared/data/privacy-notice'
+import { ensureLearnerPreferenceClassification } from '../services/learner-preferences'
 
 export default defineNitroPlugin(async () => {
   try {
@@ -294,11 +295,13 @@ export default defineNitroPlugin(async () => {
         account_id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
         interface_locale VARCHAR(5) NOT NULL DEFAULT 'fr',
         color_theme VARCHAR(10) NOT NULL DEFAULT 'light',
+        tense_classification VARCHAR(15) NOT NULL DEFAULT 'traditional',
         updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         CONSTRAINT fk_learner_preferences_account
           FOREIGN KEY (account_id) REFERENCES learner_accounts(id) ON DELETE CASCADE
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `)
+    await ensureLearnerPreferenceClassification(database)
     await database.query(`
       CREATE TABLE IF NOT EXISTS learner_saved_challenges (
         account_id BIGINT UNSIGNED NOT NULL,

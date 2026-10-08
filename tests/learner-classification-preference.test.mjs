@@ -135,3 +135,15 @@ test('une erreur d’enregistrement laisse la bascule active et remonte un messa
   await preference.setClassification('traditional')
   assert.equal(preference.saveError.value, false)
 })
+
+test('le sélecteur de temps et les préférences du compte partagent le choix et sa sauvegarde', async () => {
+  const picker = preferenceHarness({ learner: { id: 1 }, stored: 'modern' })
+  await picker.restoreClassification()
+  const accountPreferences = useTenseClassification()
+  assert.equal(accountPreferences.classification.value, 'modern')
+  await accountPreferences.setClassification('traditional')
+  assert.equal(picker.classification.value, 'traditional')
+  await picker.setClassification('modern')
+  assert.equal(accountPreferences.classification.value, 'modern')
+  assert.deepEqual(picker.writes, ['traditional', 'modern'])
+})

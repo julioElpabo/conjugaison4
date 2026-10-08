@@ -14,6 +14,7 @@ import type { CoachProfile } from '~~/shared/types/coach'
 import type { Catalogue } from '~/composables/useChallengeBuilder'
 import type { AppLocale } from '~~/shared/i18n/locales'
 import type { SavedChallenge } from '~~/shared/types/saved-challenge'
+import type { LearnerPreferences, TenseClassification } from '~~/shared/types/learner-preferences'
 import { learnerSpaceCopy, learnerSpaceText } from '~~/shared/i18n/learner-space'
 import { groupSavedChallenges } from '~~/shared/utils/saved-challenge-dates'
 import {
@@ -148,17 +149,13 @@ interface ChallengeTrainingProgressResponse extends ChallengeProgressSummary {
   sessions: ChallengeTrainingSession[]
 }
 
-interface LearnerPreferences {
-  interfaceLocale: AppLocale
-  colorTheme: 'light' | 'dark'
-}
-
 interface ErrorChallengeResponse {
   challenge: LearnerChallengeSnapshot
   questions: ExerciseQuestion[]
 }
 
 const { user: sessionLearner, clearUser } = useLearnerAuth()
+const { classification: tenseClassification, setClassification, saveError: classificationSaveError } = useTenseClassification()
 const learner = computed(() => props.inspectedLearner || sessionLearner.value)
 const { interfaceLocale, localePath, setInterfaceLocale, ui } = useLanguagePreferences()
 const copy = computed(() => learnerSpaceCopy(interfaceLocale.value))
@@ -399,6 +396,9 @@ const { data: storedPreferences } = await useAsyncData(
 
 const preferredLocale = ref<AppLocale>(storedPreferences.value?.interfaceLocale || interfaceLocale.value)
 const preferredTheme = ref<'light' | 'dark'>(storedPreferences.value?.colorTheme || 'light')
+const preferredClassification = computed(() => props.readOnly
+  ? storedPreferences.value?.tenseClassification || 'traditional'
+  : tenseClassification.value)
 watch(theme, (nextTheme) => {
   if (!props.readOnly) preferredTheme.value = nextTheme
 })
@@ -1684,6 +1684,23 @@ async function savePreferences(nextLocale = preferredLocale.value, nextTheme = p
   }
 }
 
+async function saveClassificationPreference(next: TenseClassification) {
+  if (props.readOnly || preferencesSaving.value) return
+  preferencesSaving.value = true
+  preferencesSaved.value = false
+  preferencesError.value = ''
+  try {
+    await setClassification(next)
+    if (classificationSaveError.value) {
+      preferencesError.value = copy.value.preferencesSaveError
+    } else {
+      preferencesSaved.value = true
+    }
+  } finally {
+    preferencesSaving.value = false
+  }
+}
+
 function passwordRequestMessage(error: unknown) {
   if (!error || typeof error !== 'object') return ''
   const candidate = error as {
@@ -2849,6 +2866,33 @@ async function confirmAccountAction() {
           </button>
         </div>
       </div>
+
+      <div class="preference-block">
+        <div>
+          <h3>{{ copy.tenseClassification }}</h3>
+          <p>{{ copy.tenseClassificationHint }}</p>
+        </div>
+        <div class="theme-choices classification-choices" role="group" :aria-label="copy.tenseClassification">
+          <button
+            type="button"
+            :class="{ 'is-active': preferredClassification === 'traditional' }"
+            :aria-pressed="preferredClassification === 'traditional'"
+            :disabled="readOnly || preferencesSaving"
+            @click="saveClassificationPreference('traditional')"
+          >
+            {{ copy.traditionalClassification }}
+          </button>
+          <button
+            type="button"
+            :class="{ 'is-active': preferredClassification === 'modern' }"
+            :aria-pressed="preferredClassification === 'modern'"
+            :disabled="readOnly || preferencesSaving"
+            @click="saveClassificationPreference('modern')"
+          >
+            {{ copy.modernClassification }}
+          </button>
+        </div>
+      </div>
     </section>
 
     <section v-else class="learner-panel account-panel" aria-labelledby="account-title">
@@ -3047,6 +3091,12 @@ async function confirmAccountAction() {
 </template>
 
 <style scoped>
+.theme-choices.classification-choices button {
+  min-height: 44px;
+  flex: 1 1 160px;
+  justify-content: center;
+}
+
 .learner-space{display:grid;max-width:1060px;margin:0 auto;gap:22px}.learner-space__hero{display:flex;padding:30px 34px;align-items:end;justify-content:space-between;gap:24px;border-radius:24px;color:white;background:linear-gradient(125deg,#624193,#8162b2 62%,#9c78ca);box-shadow:0 18px 42px rgb(74 47 112 / 22%)}.learner-space__hero p,.learner-eyebrow{margin:0 0 5px;font-size:.73rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.learner-space__hero h1{margin:0;font-size:clamp(2rem,5vw,3.8rem);letter-spacing:-.055em}.learner-space__hero>span{max-width:300px;opacity:.86;line-height:1.45}.learner-tabs{display:grid;grid-template-columns:repeat(6,1fr);padding:5px;border:1px solid var(--line);border-radius:16px;background:var(--surface-soft)}.learner-tabs button{min-height:46px;padding:9px 14px;border:0;border-radius:12px;color:var(--muted);background:transparent;font:inherit;font-weight:850;cursor:pointer}.learner-tabs button.is-active{color:white;background:#7052a0;box-shadow:0 7px 18px rgb(75 48 113 / 20%)}.learner-panel{display:grid;min-height:430px;padding:clamp(22px,4vw,38px);border:1px solid var(--line);border-radius:24px;gap:25px;background:var(--surface);box-shadow:var(--shadow)}.learner-panel__heading{display:flex;align-items:center;justify-content:space-between;gap:20px}.learner-panel h2{margin:0;color:var(--brand-dark);font-size:clamp(1.7rem,4vw,2.5rem);letter-spacing:-.04em}.learner-eyebrow{color:#7052a0}.learner-primary-link,.review-button{display:inline-flex;min-height:42px;padding:9px 15px;align-items:center;justify-content:center;border:0;border-radius:999px;color:white;background:#7052a0;text-decoration:none;font:inherit;font-size:.86rem;font-weight:850;cursor:pointer}.challenge-history{position:relative;display:grid;margin:0;padding:0 0 0 42px;gap:18px;list-style:none}.challenge-history::before{position:absolute;top:10px;bottom:10px;left:14px;width:3px;border-radius:99px;background:color-mix(in srgb,#7052a0 30%,var(--line));content:""}.challenge-history>li{position:relative}.challenge-history__dot{position:absolute;z-index:1;top:24px;left:-36px;width:17px;height:17px;border:4px solid var(--surface);border-radius:50%;background:#7052a0;box-shadow:0 0 0 2px #7052a0}.challenge-history>li::before{position:absolute;top:31px;left:-22px;width:22px;height:2px;background:color-mix(in srgb,#7052a0 30%,var(--line));content:""}.challenge-card{display:grid;padding:20px;border:1px solid var(--line);border-radius:18px;gap:13px;background:var(--surface-soft)}.challenge-card__top{display:flex;align-items:start;justify-content:space-between;gap:12px}.challenge-card__top span{color:var(--muted);font-size:.74rem}.challenge-card h3{margin:3px 0 0;color:var(--ink);font-size:1.12rem}.challenge-card__top>strong{display:grid;width:52px;height:52px;place-items:center;color:#9a3b35;border-radius:50%;background:color-mix(in srgb,var(--danger) 12%,var(--surface));font-size:.86rem}.challenge-card__top>strong.is-mastered{color:#24734d;background:color-mix(in srgb,var(--success) 14%,var(--surface))}.challenge-card__bar{height:7px;overflow:hidden;border-radius:99px;background:color-mix(in srgb,var(--danger) 16%,var(--surface))}.challenge-card__bar span{display:block;height:100%;border-radius:inherit;background:var(--success)}.challenge-card>p{margin:0;color:var(--muted);font-size:.86rem;line-height:1.45}.challenge-card .challenge-mastered{color:var(--success);font-weight:750}.review-button{justify-self:start;color:#5a3b86;border:1px solid color-mix(in srgb,#7052a0 35%,var(--line));background:color-mix(in srgb,#7052a0 10%,var(--surface))}.challenge-loader{justify-self:center;padding:10px 17px;border:1px solid color-mix(in srgb,#7052a0 32%,var(--line));border-radius:999px;color:#5a3b86;background:color-mix(in srgb,#7052a0 8%,var(--surface));font:inherit;font-size:.82rem;font-weight:850;cursor:pointer}.challenge-loader:disabled{cursor:progress;opacity:.65}.learner-empty{display:grid;min-height:220px;margin:0;place-content:center;gap:6px;color:var(--muted);text-align:center}.learner-empty strong{color:var(--ink);font-size:1.05rem}.timeline-filters{display:flex;align-items:end;justify-content:space-between;gap:16px}.timeline-filters>div{display:flex;padding:4px;border-radius:12px;background:var(--surface-soft)}.timeline-filters button{padding:8px 12px;border:0;border-radius:9px;color:var(--muted);background:transparent;font:inherit;font-size:.82rem;font-weight:800;cursor:pointer}.timeline-filters button.is-active{color:#5b3e86;background:var(--surface);box-shadow:0 3px 10px rgb(36 50 71 / 10%)}.timeline-filters label{display:grid;gap:5px;color:var(--muted);font-size:.72rem;font-weight:850}.timeline-filters select{min-width:220px;padding:9px 32px 9px 11px;border:1px solid var(--line);border-radius:10px;color:var(--ink);background:var(--surface);font:inherit}.progress-score{display:grid;justify-items:end}.progress-score strong{color:var(--success);font-size:1.8rem;line-height:1}.progress-score span{color:var(--muted);font-size:.72rem}.timeline-scroll{overflow-x:auto;padding:8px 5px 20px}.timeline{position:relative;display:flex;width:max-content;min-width:100%;margin:0;padding:0 10px;gap:14px;list-style:none}.timeline::before{position:absolute;top:45px;right:10px;left:10px;height:3px;background:var(--line);content:""}.timeline li{position:relative;display:grid;width:180px;grid-template-rows:25px 28px auto;justify-items:center}.timeline time{color:var(--muted);font-size:.69rem}.timeline__dot{z-index:1;display:block;width:17px;height:17px;margin-top:4px;border:4px solid var(--surface);border-radius:50%;background:#7052a0;box-shadow:0 0 0 2px #7052a0}.timeline li.is-correct .timeline__dot{background:var(--success);box-shadow:0 0 0 2px var(--success)}.timeline li.is-incorrect .timeline__dot{background:var(--danger);box-shadow:0 0 0 2px var(--danger)}.timeline article{display:grid;width:100%;min-height:122px;padding:12px;border:1px solid var(--line);border-radius:13px;gap:3px;background:var(--surface-soft);text-align:left}.timeline article strong{color:var(--ink)}.timeline article span,.timeline article small{color:var(--muted);font-size:.73rem;line-height:1.3}.timeline article b{align-self:end;justify-self:start;color:var(--success);font-size:.7rem}.timeline li.is-incorrect article b{color:var(--danger)}.preference-block{display:grid;padding:22px;border:1px solid var(--line);border-radius:18px;gap:18px;background:var(--surface-soft)}.preference-block h3{margin:0;color:var(--ink);font-size:1.15rem}.preference-block p{margin:5px 0 0;color:var(--muted)}.locale-choices,.theme-choices{display:flex;flex-wrap:wrap;gap:9px}.locale-choices button,.theme-choices button{display:inline-flex;min-height:43px;padding:9px 13px;align-items:center;gap:7px;border:1px solid var(--line);border-radius:11px;color:var(--ink);background:var(--surface);font:inherit;font-size:.84rem;font-weight:750;cursor:pointer}.locale-choices button.is-active,.theme-choices button.is-active{color:#5a3b86;border-color:#8c6cba;background:color-mix(in srgb,#7052a0 10%,var(--surface));box-shadow:inset 0 0 0 1px #8c6cba}.preferences-saved{padding:6px 10px;border-radius:99px;color:var(--success);background:color-mix(in srgb,var(--success) 12%,var(--surface));font-size:.78rem;font-weight:800}.preferences-error{margin:0;padding:10px 12px;border-radius:10px;color:var(--danger);background:color-mix(in srgb,var(--danger) 10%,transparent)}@media(max-width:720px){.learner-space__hero,.learner-panel__heading,.timeline-filters{align-items:stretch;flex-direction:column}.learner-space__hero>span{max-width:none}.learner-tabs{grid-template-columns:1fr}.progress-score{justify-items:start}.timeline-filters label,.timeline-filters select{width:100%}.learner-primary-link{align-self:start}}@media(max-width:480px){.learner-space__hero{padding:24px 20px}.learner-panel{padding:20px 15px}.challenge-history{padding-left:32px}.challenge-history::before{left:10px}.challenge-history__dot{left:-28px}.challenge-history>li::before{left:-14px;width:14px}.locale-choices button{flex:1 1 130px}.theme-choices button{flex:1}}
 
 .learner-space__hero {

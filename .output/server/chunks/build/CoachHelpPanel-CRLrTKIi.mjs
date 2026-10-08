@@ -2,7 +2,7 @@ import { defineComponent, useTemplateRef, ref, computed, watch, mergeProps, unre
 import { ssrRenderAttrs, ssrInterpolate, ssrRenderAttr, ssrRenderList, ssrRenderComponent, ssrRenderClass, ssrIncludeBooleanAttr, ssrRenderStyle } from 'vue/server-renderer';
 import { faSpinner, faStop, faVolume, faChevronRight, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { v as translateUiMessage, a as useLanguagePreferences } from './server.mjs';
+import { x as translateUiMessage, a as useLanguagePreferences } from './server.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 import { w as withDutchVariants, bh as grammarModeCode, b1 as withSwissObjectAliases } from '../nitro/nitro.mjs';
 import { b as COACH_EXPLANATION_APPROACHES, a as COACH_HELP_ENGINE_KEYS } from '../_/coach.mjs';

@@ -127,7 +127,7 @@ globalThis.__publicAssetsURL = publicAssetsURL;
 const APP_ROOT_OPEN_TAG = `<${appRootTag}${propsToString(appRootAttrs)}>`;
 const APP_ROOT_CLOSE_TAG = `</${appRootTag}>`;
 // @ts-expect-error file will be produced after app build
-const getServerEntry = () => import('../build/server.mjs').then(function (n) { return n.w; }).then((r) => r.default || r);
+const getServerEntry = () => import('../build/server.mjs').then(function (n) { return n.y; }).then((r) => r.default || r);
 // @ts-expect-error file will be produced after app build
 const getPrecomputedDependencies = () => import('../build/client.precomputed.mjs').then((r) => r.default || r).then((r) => typeof r === "function" ? r() : r);
 
@@ -465,5 +465,5 @@ const renderer = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: handler
 }, Symbol.toStringTag, { value: 'Module' }));
 
-export { useHead as a, baseURL as b, headSymbol as h, publicAssetsURL as p, renderer as r, useSeoMeta as u };
+export { useSeoMeta as a, baseURL as b, headSymbol as h, publicAssetsURL as p, renderer as r, useHead as u };
 //# sourceMappingURL=renderer.mjs.map

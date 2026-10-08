@@ -2,7 +2,7 @@ import { _ as __nuxt_component_0$2 } from './nuxt-link-icjx6oE7.mjs';
 import { defineComponent, computed, ref, useTemplateRef, reactive, withAsyncContext, watch, nextTick, mergeProps, unref, withCtx, createTextVNode, toDisplayString, createVNode, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrInterpolate, ssrRenderAttr, ssrRenderClass, ssrRenderStyle, ssrIncludeBooleanAttr, ssrRenderList, ssrRenderComponent, ssrRenderTeleport } from 'vue/server-renderer';
 import QrcodeVue from 'qrcode.vue';
-import { w as withDutchVariants, ak as localeLanguageTag, aW as localizedLearnerErrorMessageForCode, aX as localizedLearnerErrorDomain, aY as localizedLearnerErrorLabel } from '../nitro/nitro.mjs';
+import { w as withDutchVariants, an as localeLanguageTag, aZ as localizedLearnerErrorMessageForCode, a_ as localizedLearnerErrorDomain, a$ as localizedLearnerErrorLabel } from '../nitro/nitro.mjs';
 import { a as useLanguagePreferences, b as useRoute, o as useRequestFetch, c as useState, g as useRuntimeConfig } from './server.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 import { _ as __nuxt_component_1$1 } from './PasswordInput-D9iWnxeu.mjs';

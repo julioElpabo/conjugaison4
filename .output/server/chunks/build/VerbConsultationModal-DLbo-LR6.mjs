@@ -1,6 +1,6 @@
 import { defineComponent, computed, unref, mergeProps, useTemplateRef, ref, watch, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrInterpolate, ssrRenderList, ssrRenderComponent, ssrRenderTeleport, ssrRenderAttr, ssrRenderStyle } from 'vue/server-renderer';
-import { w as withDutchVariants, au as localizedLearnerErrorMessage, av as learnerErrorInsteadOf } from '../nitro/nitro.mjs';
+import { w as withDutchVariants, ax as localizedLearnerErrorMessage, ay as learnerErrorInsteadOf } from '../nitro/nitro.mjs';
 import { a as useLanguagePreferences, g as useRuntimeConfig } from './server.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 import { i as isFiniteConjugationMode, c as conjugationModeOrder, a as conjugationTenseOrder, b as conjugationTenseRow, d as conjugationTenseLabel } from '../_/conjugation-display.mjs';

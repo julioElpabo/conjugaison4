@@ -4,7 +4,7 @@ import { faSpinner, faStop, faVolume, faChevronRight, faChevronDown } from '@for
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { v as translateUiMessage, a as useLanguagePreferences } from './server.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
-import { w as withDutchVariants, be as grammarModeCode, a_ as withSwissObjectAliases } from '../nitro/nitro.mjs';
+import { w as withDutchVariants, bh as grammarModeCode, b1 as withSwissObjectAliases } from '../nitro/nitro.mjs';
 import { b as COACH_EXPLANATION_APPROACHES, a as COACH_HELP_ENGINE_KEYS } from '../_/coach.mjs';
 import { c as coachHelpProfile, e as decomposeConjugationForm, f as buildConjugationEndingsHtml, g as buildConjugationBaseHtml, h as buildPassiveVoiceHelpHtml, i as buildPassiveVoiceMethodHtml, j as buildCompleteConjugationAdviceHtml, n as normalizeCoachHelpEngineKey, a as auditRenderedCoachHelp } from '../_/coach-help-audit.mjs';
 import { c as bareNearFutureInfinitive, n as nearFutureReflexivePronoun, d as isPronominalNearFutureInfinitive, a as isNearFutureTense } from '../_/near-future.mjs';

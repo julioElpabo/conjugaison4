@@ -4,7 +4,7 @@ import { ssrRenderTeleport, ssrRenderStyle, ssrRenderClass, ssrRenderAttr, ssrIn
 import { faStop, faBullhorn, faSpinner, faVolume, faArrowUpFromBracket, faPrint } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { L as LearnerErrorFeedback, S as ShareExerciseSummaryDialog, V as VerbConsultationModal } from './VerbConsultationModal-DLbo-LR6.mjs';
-import { aZ as SUBJECT_PRONOUN_PLACEHOLDER, aL as conjugationRequiresSubjectPronoun, aN as providedSubjunctiveInputPrefix, aM as conjugationAnswerPlaceholder, ac as learnerErrorDetailText } from '../nitro/nitro.mjs';
+import { b0 as SUBJECT_PRONOUN_PLACEHOLDER, aK as conjugationRequiresSubjectPronoun, aM as providedSubjunctiveInputPrefix, aL as conjugationAnswerPlaceholder, af as learnerErrorDetailText } from '../nitro/nitro.mjs';
 import { d as coachMediaRule, a as createVariedCoachReaction, b as createCoachDialogueState } from '../_/coach-dialogue.mjs';
 import { w as withSentenceTerminalMark } from '../_/sentence-punctuation.mjs';
 import { c as coachHelpProfile, d as buildTargetedConjugationHelp } from '../_/coach-help-audit.mjs';

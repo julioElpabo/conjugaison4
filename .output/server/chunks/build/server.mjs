@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, toRef, isRef, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, isReadonly, isShallow, isReactive, toRaw } from 'vue';
-import { aj as SUPPORTED_LOCALES, w as withDutchVariants, a_ as withSwissObjectAliases, a$ as parseURL, b0 as encodePath, b1 as decodePath, b2 as localeFromPath, z as normalizeLocale, b3 as getRequestHeaders, b4 as klona, c as createError$1, ap as hasProtocol, ar as isScriptProtocol, aq as joinURL, L as getRequestURL, b5 as withQuery, b6 as DEFAULT_LANGUAGE_PREFERENCES, an as localizePath, b7 as getRequestHeader, b8 as isEqual, b9 as sanitizeStatusCode, ba as getContext, t as setCookie, x as getCookie, v as deleteCookie, bb as $fetch, ak as localeLanguageTag, bc as defu, R as stripLocaleFromPath, ax as executeAsync, bd as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { am as SUPPORTED_LOCALES, w as withDutchVariants, b1 as withSwissObjectAliases, b2 as parseURL, b3 as encodePath, b4 as decodePath, b5 as localeFromPath, z as normalizeLocale, b6 as getRequestHeaders, b7 as klona, c as createError$1, as as hasProtocol, au as isScriptProtocol, at as joinURL, L as getRequestURL, b8 as withQuery, b9 as DEFAULT_LANGUAGE_PREFERENCES, aq as localizePath, ba as getRequestHeader, bb as isEqual, bc as sanitizeStatusCode, bd as getContext, t as setCookie, x as getCookie, v as deleteCookie, be as $fetch, an as localeLanguageTag, bf as defu, R as stripLocaleFromPath, aA as executeAsync, bg as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useSeoMeta$1, a as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -955,6 +955,12 @@ const uiMessages = {
   "\xC9cris ta r\xE9ponse": withDutchVariants({ de: "Schreibe deine Antwort", en: "Type your answer", it: "Scrivi la tua risposta", es: "Escribe tu respuesta", nl: "Typ je antwoord" }),
   "Subjonctif": withDutchVariants({ de: "Subjonktiv", en: "Subjunctive", it: "Congiuntivo", es: "Subjuntivo", nl: "Subjonctief" }),
   "Conditionnel": withDutchVariants({ de: "Konditional", en: "Conditional", it: "Condizionale", es: "Condicional", nl: "Conditionnel" }),
+  "conditionnel pr\xE9sent": withDutchVariants({ de: "Konditional Pr\xE4sens", en: "present conditional", it: "condizionale presente", es: "condicional presente", nl: "conditionnel pr\xE9sent" }),
+  "conditionnel pass\xE9": withDutchVariants({ de: "Konditional Vergangenheit", en: "past conditional", it: "condizionale passato", es: "condicional pasado", nl: "conditionnel pass\xE9" }),
+  "Utiliser la classification moderne": withDutchVariants({ de: "Die moderne Einteilung verwenden", en: "Use the modern classification", it: "Usa la classificazione moderna", es: "Utilizar la clasificaci\xF3n moderna", nl: "De moderne indeling gebruiken" }),
+  "Revenir \xE0 la classification traditionnelle": withDutchVariants({ de: "Zur traditionellen Einteilung zur\xFCckkehren", en: "Return to the traditional classification", it: "Torna alla classificazione tradizionale", es: "Volver a la clasificaci\xF3n tradicional", nl: "Terug naar de traditionele indeling" }),
+  "Aussi appel\xE9 conditionnel pass\xE9 deuxi\xE8me forme dans la classification traditionnelle.": withDutchVariants({ de: "In der traditionellen Einteilung auch als Konditional Vergangenheit, zweite Form bezeichnet.", en: "Also called the second form of the past conditional in the traditional classification.", it: "Chiamato anche condizionale passato, seconda forma, nella classificazione tradizionale.", es: "Tambi\xE9n llamado condicional pasado, segunda forma, en la clasificaci\xF3n tradicional.", nl: "In de traditionele indeling ook conditionnel pass\xE9 tweede vorm genoemd." }),
+  "Impossible d\u2019enregistrer ces pr\xE9f\xE9rences pour le moment.": withDutchVariants({ de: "Diese Einstellungen k\xF6nnen momentan nicht gespeichert werden.", en: "These preferences cannot be saved right now.", it: "Impossibile salvare queste preferenze al momento.", es: "No se pueden guardar estas preferencias en este momento.", nl: "Deze voorkeuren kunnen momenteel niet worden opgeslagen." }),
   "Imp\xE9ratif": withDutchVariants({ de: "Imperativ", en: "Imperative", it: "Imperativo", es: "Imperativo", nl: "Gebiedende wijs" }),
   "Infinitif": withDutchVariants({ de: "Infinitiv", en: "Infinitive", it: "Infinito", es: "Infinitivo", nl: "Infinitief" }),
   "Participe": withDutchVariants({ de: "Partizip", en: "Participle", it: "Participio", es: "Participio", nl: "Deelwoord" }),
@@ -1704,12 +1710,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-B4MxaIIj.mjs')
+    component: () => import('./_code_-BsB0yQTE.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-ChR4bJQ4.mjs')
+    component: () => import('./_slug_-C8OZgmHA.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1754,7 +1760,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-CReTo3Ui.mjs')
+    component: () => import('./exercices-de-conjugaison-Dul-eto4.mjs')
   },
   {
     name: "mon-compte",
@@ -1770,7 +1776,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-EGtUfAya.mjs')
+    component: () => import('./nouveau-defi-Bj9WcXcw.mjs')
   },
   {
     name: "signin",
@@ -1780,7 +1786,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-CvovRHEY.mjs')
+    component: () => import('./index-CfrpUmut.mjs')
   },
   {
     name: "mode-tense",
@@ -1885,12 +1891,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defi/:code()",
-    component: () => import('./_code_-B4MxaIIj.mjs')
+    component: () => import('./_code_-BsB0yQTE.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defis/:slug()",
-    component: () => import('./_slug_-ChR4bJQ4.mjs')
+    component: () => import('./_slug_-C8OZgmHA.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1935,7 +1941,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-CReTo3Ui.mjs')
+    component: () => import('./exercices-de-conjugaison-Dul-eto4.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1951,7 +1957,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/nouveau-defi",
-    component: () => import('./nouveau-defi-EGtUfAya.mjs')
+    component: () => import('./nouveau-defi-Bj9WcXcw.mjs')
   },
   {
     name: "localized-signin",
@@ -1961,7 +1967,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/",
-    component: () => import('./index-CvovRHEY.mjs')
+    component: () => import('./index-CfrpUmut.mjs')
   },
   {
     name: "localized-mode-tense",
@@ -2629,7 +2635,7 @@ const ServerPlaceholder = defineComponent({
   }
 });
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-MCelOZNU.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-ChgstjQT.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

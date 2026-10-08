@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, u as useDatabase } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, ac as readLearnerPreferences, u as useDatabase } from '../../../nitro/nitro.mjs';
 import { r as requireLearnerDataSubject } from '../../../_/learner-data-subject.mjs';
 import 'node:http';
 import 'node:https';
@@ -17,16 +17,7 @@ import '../../../_/learner-session.mjs';
 const preferences_get = defineEventHandler(async (event) => {
   setResponseHeader(event, "Cache-Control", "no-store");
   const learner = await requireLearnerDataSubject(event);
-  const [[preferences]] = await useDatabase().execute(`
-    SELECT interface_locale AS interfaceLocale, color_theme AS colorTheme
-    FROM learner_preferences
-    WHERE account_id=?
-    LIMIT 1
-  `, [learner.id]);
-  return {
-    interfaceLocale: (preferences == null ? void 0 : preferences.interfaceLocale) || "fr",
-    colorTheme: (preferences == null ? void 0 : preferences.colorTheme) === "dark" ? "dark" : "light"
-  };
+  return readLearnerPreferences(useDatabase(), learner.id);
 });
 
 export { preferences_get as default };

@@ -17,6 +17,8 @@ const TENSE_ORDER = /* @__PURE__ */ new Map([
   ["indicatif:futur proche", 40],
   ["indicatif:futur", 50],
   ["indicatif:futur ant\xE9rieur", 51],
+  ["indicatif:conditionnel pr\xE9sent", 60],
+  ["indicatif:conditionnel pass\xE9", 61],
   ["subjonctif:pr\xE9sent", 10],
   ["subjonctif:pass\xE9", 11],
   ["subjonctif:imparfait", 20],

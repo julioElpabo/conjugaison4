@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, u as useDatabase, ae as ensureSavedChallengeMetadata, a0 as parseDefiDefinition } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, u as useDatabase, ah as ensureSavedChallengeMetadata, a0 as parseDefiDefinition } from '../../../nitro/nitro.mjs';
 import { r as requireLearnerDataSubject } from '../../../_/learner-data-subject.mjs';
 import 'node:http';
 import 'node:https';

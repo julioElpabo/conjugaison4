@@ -197,8 +197,8 @@ export function useChallengeBuilder() {
       : [...challenge.value.tenseIds, id]
   }
 
-  function selectAllTenses() {
-    challenge.value.tenseIds = catalogue.value.temps.map(tense => tense.id)
+  function selectAllTenses(ids?: number[]) {
+    challenge.value.tenseIds = ids ?? catalogue.value.temps.map(tense => tense.id)
   }
 
   function clearTenses() {

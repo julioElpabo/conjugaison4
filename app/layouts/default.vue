@@ -8,6 +8,7 @@ import { learnerSpaceCopy } from '~~/shared/i18n/learner-space'
 
 const { ui, interfaceLocale, setInterfaceLocale, localePath } = useLanguagePreferences()
 const { user: learner, checkSession, logout: endLearnerSession } = useLearnerAuth()
+const { restoreClassification } = useTenseClassification()
 const route = useRoute()
 const { applyTheme } = useColorTheme()
 const { track } = useSiteAnalytics()
@@ -102,6 +103,8 @@ const learnerDisplayName = computed(() => {
 })
 
 await checkSession()
+await restoreClassification()
+watch(() => learner.value?.id, () => void restoreClassification())
 
 watch(() => route.fullPath, () => {
   learnerMenu.value?.removeAttribute('open')

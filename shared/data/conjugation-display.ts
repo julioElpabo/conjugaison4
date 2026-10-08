@@ -18,6 +18,8 @@ const TENSE_ORDER = new Map([
   ['indicatif:futur proche', 40],
   ['indicatif:futur', 50],
   ['indicatif:futur antérieur', 51],
+  ['indicatif:conditionnel présent', 60],
+  ['indicatif:conditionnel passé', 61],
   ['subjonctif:présent', 10],
   ['subjonctif:passé', 11],
   ['subjonctif:imparfait', 20],

@@ -5,6 +5,7 @@ import type { ChallengePreset, ComplementOption, ExerciseQuestion, LearnerExerci
 import { challengePresetGroupLabels } from '~~/shared/data/challenge-presets'
 import { challengePresetTrackingDescription, challengePresetTrackingTitle } from '~~/shared/utils/challenge-preset-tracking'
 import { legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils/complement-options'
+import { classifyTenses, isClassifiedTenseSelected } from '~~/shared/utils/tense-classification'
 import { guidedTourCopy } from '~~/shared/i18n/guided-tour'
 import type { AppLocale } from '~~/shared/i18n/locales'
 import type { CoachProfile } from '~~/shared/types/coach'
@@ -120,6 +121,7 @@ const {
   applySelection,
   applySharedChallenge
 } = useChallengeBuilder()
+const { classification: tenseClassification } = useTenseClassification()
 
 const api = useChallengeApi()
 const { track } = useSiteAnalytics()
@@ -375,7 +377,8 @@ const shareUrl = computed(() => shareCode.value
 
 const stepStatus = computed(() => ({
   verbs: selectedVerbs.value.length,
-  tenses: selectedTenses.value.length
+  tenses: classifyTenses(catalogue.value.modes, catalogue.value.temps, tenseClassification.value)
+    .filter(tense => isClassifiedTenseSelected(tense, new Set(challenge.value.tenseIds))).length,
 }))
 const activePreset = computed(() => catalogue.value.presets.find(preset => preset.id === activePresetId.value) ?? null)
 const sourcePreset = computed(() => catalogue.value.presets.find(preset => preset.id === sourcePresetId.value) ?? null)
@@ -2194,7 +2197,7 @@ async function createSharedChallenge(title: string, description: string) {
                 :past-simple-pronouns="challenge.pastSimplePronouns"
                 :falc-mode="falcMode"
                 @toggle="onToggleTense"
-                @select-all="markAsCustom(); selectAllTenses()"
+                @select-all="markAsCustom(); selectAllTenses($event)"
                 @clear="markAsCustom(); clearTenses(); challenge.pastSimplePronouns = 'all'"
                 @update-past-simple-pronouns="challenge.pastSimplePronouns = $event; markAsCustom()"
               />

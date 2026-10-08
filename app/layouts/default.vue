@@ -11,6 +11,7 @@ const { user: learner, checkSession, logout: endLearnerSession } = useLearnerAut
 const { restoreClassification } = useTenseClassification()
 const route = useRoute()
 const { applyTheme } = useColorTheme()
+const { rememberPreferences } = usePreferencePersistence()
 const { track } = useSiteAnalytics()
 const { openPreferences } = useAnalyticsConsent()
 const isDark = ref(false)
@@ -244,7 +245,7 @@ function setFalcMode(enabled: boolean) {
   falcMode.value = enabled
   falcConfirmationOpen.value = false
   document.documentElement.dataset.falcMode = enabled ? 'true' : 'false'
-  localStorage.setItem('conjugaison.falc-mode', String(enabled))
+  if (rememberPreferences.value) localStorage.setItem('conjugaison.falc-mode', String(enabled))
   track('feature_selected', { feature: 'accessibility.falc', item: enabled ? 'enabled' : 'disabled' })
 }
 

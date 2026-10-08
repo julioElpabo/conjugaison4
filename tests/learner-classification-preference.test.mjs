@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import {
   initializeLearnerPreferenceClassification,
   ensureLearnerPreferenceClassification,
@@ -9,6 +9,7 @@ import {
   updateLearnerPreferences,
 } from '../server/services/learner-preferences.ts'
 import { useTenseClassification } from '../app/composables/useTenseClassification.ts'
+import { usePreferencePersistence } from '../app/composables/usePreferencePersistence.ts'
 
 function database() {
   const columns = new Set(['account_id', 'interface_locale', 'color_theme'])
@@ -77,9 +78,14 @@ test('valide les choix autorisés et refuse les valeurs ou champs inconnus', () 
   }
 })
 
-function preferenceHarness({ learner = null, stored = 'traditional', read, write } = {}) {
+function preferenceHarness({ learner = null, stored = 'traditional', cookie, remember = true, read, write } = {}) {
   const state = new Map()
   const user = ref(learner)
+  const cookieValue = ref(cookie)
+  const cookieValues = new Map([
+    ['tense_classification', cookieValue],
+    ['tatitotu_remember_preferences', ref(remember ? undefined : 'disabled')],
+  ])
   const app = {}
   const writes = []
   globalThis.useState = (key, init) => {
@@ -87,10 +93,15 @@ function preferenceHarness({ learner = null, stored = 'traditional', read, write
     return state.get(key)
   }
   globalThis.useLearnerAuth = () => ({ user })
+  globalThis.useCookie = name => {
+    if (!cookieValues.has(name)) cookieValues.set(name, ref(undefined))
+    return cookieValues.get(name)
+  }
+  globalThis.watch = watch
   globalThis.useRequestFetch = () => read ?? (async () => ({ tenseClassification: stored }))
   globalThis.useNuxtApp = () => app
   globalThis.$fetch = async (_url, options) => { writes.push(options.body.tenseClassification); await write?.(options.body.tenseClassification) }
-  return { ...useTenseClassification(), user, writes }
+  return { ...useTenseClassification(), user, writes, cookie: cookieValue }
 }
 
 test('la classification traditionnelle est le défaut ; un visiteur anonyme ne déclenche aucune sauvegarde', async () => {
@@ -98,7 +109,9 @@ test('la classification traditionnelle est le défaut ; un visiteur anonyme ne d
   assert.equal(preference.classification.value, 'traditional')
   await preference.setClassification('modern')
   assert.equal(preference.classification.value, 'modern')
+  assert.equal(preference.cookie.value, 'modern')
   await preference.setClassification('traditional')
+  assert.equal(preference.cookie.value, 'traditional')
   assert.deepEqual(preference.writes, [])
 })
 
@@ -146,4 +159,63 @@ test('le sélecteur de temps et les préférences du compte partagent le choix e
   await picker.setClassification('modern')
   assert.equal(accountPreferences.classification.value, 'modern')
   assert.deepEqual(picker.writes, ['traditional', 'modern'])
+})
+
+test('restaure le choix anonyme à une nouvelle visite sans requête au serveur de préférences', async () => {
+  const firstVisit = preferenceHarness()
+  await firstVisit.setClassification('modern')
+  const nextVisit = preferenceHarness({ cookie: firstVisit.cookie.value, read: () => { throw Error('Aucune lecture de compte attendue') } })
+  await nextVisit.restoreClassification()
+  assert.equal(nextVisit.classification.value, 'modern')
+  assert.deepEqual(nextVisit.writes, [])
+})
+
+test('les préférences du compte priment sur le cookie ; la déconnexion restaure le choix anonyme', async () => {
+  const preference = preferenceHarness({ learner: { id: 1 }, stored: 'traditional', cookie: 'modern' })
+  await preference.restoreClassification()
+  assert.equal(preference.classification.value, 'traditional')
+  await preference.setClassification('traditional')
+  assert.equal(preference.cookie.value, 'modern', 'le choix du compte ne remplace pas celui du navigateur anonyme')
+  preference.user.value = null
+  await preference.restoreClassification()
+  assert.equal(preference.classification.value, 'modern')
+})
+
+test('un cookie absent ou invalide laisse la classification traditionnelle par défaut', async () => {
+  for (const cookie of [undefined, null, '', 'inconnu', { classification: 'modern' }]) {
+    assert.equal(preferenceHarness({ cookie }).classification.value, 'traditional')
+  }
+})
+
+test('décocher la mémorisation efface la classification stockée et garde les choix en mémoire', async () => {
+  const preference = preferenceHarness({ cookie: 'modern' })
+  const persistence = usePreferencePersistence()
+  assert.equal(persistence.rememberPreferences.value, true)
+  persistence.setRememberPreferences(false)
+  assert.equal(preference.cookie.value, null)
+  assert.equal(preference.classification.value, 'modern', 'le choix reste actif pendant cette visite')
+  await preference.setClassification('traditional')
+  await preference.setClassification('modern')
+  assert.equal(preference.cookie.value, null, 'les changements suivants ne recréent pas le cookie')
+  persistence.setRememberPreferences(true)
+  assert.equal(preference.cookie.value, 'modern', 'réactiver la mémorisation conserve le choix actuel')
+})
+
+test('un refus de mémorisation empêche la restauration d’un ancien cookie et les sauvegardes anonymes', async () => {
+  const preference = preferenceHarness({ remember: false, cookie: 'modern' })
+  assert.equal(preference.classification.value, 'traditional')
+  assert.equal(preference.cookie.value, null)
+  await preference.setClassification('modern')
+  assert.equal(preference.classification.value, 'modern')
+  assert.equal(preference.cookie.value, null)
+  assert.deepEqual(preference.writes, [])
+})
+
+test('le refus de stockage dans le navigateur ne désactive pas les préférences du compte', async () => {
+  const preference = preferenceHarness({ learner: { id: 1 }, stored: 'modern', remember: false })
+  await preference.restoreClassification()
+  assert.equal(preference.classification.value, 'modern')
+  await preference.setClassification('traditional')
+  assert.deepEqual(preference.writes, ['traditional'])
+  assert.equal(preference.cookie.value, null)
 })

@@ -1,10 +1,13 @@
 import type { LearnerPreferences, TenseClassification } from '~~/shared/types/learner-preferences'
+import { usePreferenceCookie } from './usePreferencePersistence'
 
 // Une file par application évite qu’une bascule rapide soit enregistrée dans le mauvais ordre.
 const saveQueues = new WeakMap<object, Promise<void>>()
 
 export function useTenseClassification() {
-  const classification = useState<TenseClassification>('tense-classification', () => 'traditional')
+  const classificationCookie = usePreferenceCookie<TenseClassification | undefined>('tense_classification', undefined)
+  const anonymousClassification = (): TenseClassification => classificationCookie.value === 'modern' ? 'modern' : 'traditional'
+  const classification = useState<TenseClassification>('tense-classification', anonymousClassification)
   const loadedAccount = useState<number | null>('tense-classification-account', () => null)
   const revision = useState('tense-classification-revision', () => 0)
   const saveError = useState('tense-classification-save-error', () => false)
@@ -16,7 +19,7 @@ export function useTenseClassification() {
     const accountId = user.value?.id ?? null
     if (accountId === loadedAccount.value) return
     loadedAccount.value = accountId
-    classification.value = 'traditional'
+    classification.value = accountId === null ? anonymousClassification() : 'traditional'
     saveError.value = false
     const requestRevision = ++revision.value
     if (accountId === null) return
@@ -35,7 +38,10 @@ export function useTenseClassification() {
     saveError.value = false
     const changeRevision = ++revision.value
     const accountId = user.value?.id
-    if (!accountId) return
+    if (!accountId) {
+      classificationCookie.value = next
+      return
+    }
     const queued = (saveQueues.get(app) ?? Promise.resolve()).catch(() => {}).then(async () => {
       if (user.value?.id !== accountId) return
       await $fetch('/api/learner/preferences', { method: 'PUT', body: { tenseClassification: next } })

@@ -1690,7 +1690,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-rUDiQdTr.mjs')
+    component: () => import('./users-CrtJI2AG.mjs')
   },
   {
     name: "admin-verbes",
@@ -1771,7 +1771,7 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-CrmJArhK.mjs')
+    component: () => import('./my-page-C3zCih48.mjs')
   },
   {
     name: "nouveau-defi",
@@ -1871,7 +1871,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/users",
-    component: () => import('./users-rUDiQdTr.mjs')
+    component: () => import('./users-CrtJI2AG.mjs')
   },
   {
     name: "localized-admin-verbes",
@@ -1952,7 +1952,7 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-CrmJArhK.mjs')
+    component: () => import('./my-page-C3zCih48.mjs')
   },
   {
     name: "localized-nouveau-defi",
@@ -3143,5 +3143,5 @@ const server = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
 	u: useHead
 }, Symbol.toStringTag, { value: 'Module' }));
 
-export { useLanguagePreferences as a, useRoute as b, useState as c, useRouter as d, encodeRoutePath as e, useNuxtApp as f, useRuntimeConfig as g, nuxtLinkDefaults as h, useRequestHeaders as i, useCookie as j, asyncDataDefaults as k, createError as l, fetchDefaults as m, navigateTo as n, useRequestFetch as o, usePageSeoOverride as p, useSeoMeta as q, resolveRouteObject as r, defineNuxtRouteMiddleware as s, useRequestURL as t, useHead as u, translateUiMessage as v, server as w };
+export { useLanguagePreferences as a, useRoute as b, useState as c, useRouter as d, encodeRoutePath as e, useNuxtApp as f, useRuntimeConfig as g, nuxtLinkDefaults as h, useRequestHeaders as i, useRequestFetch as j, useCookie as k, asyncDataDefaults as l, createError as m, navigateTo as n, fetchDefaults as o, usePageSeoOverride as p, useSeoMeta as q, resolveRouteObject as r, defineNuxtRouteMiddleware as s, useRequestURL as t, useHead as u, translateUiMessage as v, server as w };
 //# sourceMappingURL=server.mjs.map

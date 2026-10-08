@@ -1,7 +1,7 @@
 import { defineComponent, defineAsyncComponent, ref, shallowRef, useTemplateRef, computed, watch, markRaw, withAsyncContext, mergeProps, unref, createVNode, resolveDynamicComponent, nextTick, reactive, withCtx, createTextVNode, toDisplayString, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrInterpolate, ssrRenderClass, ssrRenderAttr, ssrIncludeBooleanAttr, ssrRenderStyle, ssrRenderComponent, ssrRenderList, ssrRenderVNode, ssrRenderTeleport } from 'vue/server-renderer';
 import { aF as challengePresetGroupLabels, aV as DEFAULT_SHARED_CHALLENGE_OPTIONS, aW as legacyComplementOptions, aX as legacyComplementConfig, aE as challengePresetGroupOrder, aY as ultimateChallengeId } from '../nitro/nitro.mjs';
-import { u as useTenseClassification, g as guidedTourCopy } from './useTenseClassification-DCYpAfxZ.mjs';
+import { g as guidedTourCopy } from '../_/guided-tour.mjs';
 import { a as useLanguagePreferences, b as useRoute, t as useRequestURL, c as useState, i as useRequestHeaders, n as navigateTo } from './server.mjs';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faVolume, faArrowUpFromBracket } from '@fortawesome/free-solid-svg-icons';
@@ -13,6 +13,7 @@ import { p as publicAssetsURL } from '../routes/renderer.mjs';
 import { u as useLearnerAuth } from './useLearnerAuth-tqISusbB.mjs';
 import { a as conjugationTenseOrder } from '../_/conjugation-display.mjs';
 import { a as isNearFutureTense } from '../_/near-future.mjs';
+import { u as useTenseClassification } from './useTenseClassification-DCYpAfxZ.mjs';
 import { n as normalizeVerbSearch, m as matchingVerbs } from '../_/verb-search.mjs';
 import { c as createLearnerTrackingContext } from './main-BLfPFffj.mjs';
 

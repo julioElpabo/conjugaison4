@@ -5,7 +5,7 @@ import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 import { w as withDutchVariants, an as localeLanguageTag } from '../nitro/nitro.mjs';
 import { i as isModeLandingSlug, m as modeLandingPage, M as MODE_LANDING_SLUGS } from '../_/mode-landing-pages.mjs';
 import { m as modeTensePages } from '../_/mode-tense-pages.mjs';
-import { b as useRoute, a as useLanguagePreferences, l as createError, u as useHead, q as useSeoMeta } from './server.mjs';
+import { b as useRoute, a as useLanguagePreferences, m as createError, u as useHead, q as useSeoMeta } from './server.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';

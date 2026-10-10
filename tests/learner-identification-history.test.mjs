@@ -36,7 +36,7 @@ test('conserve le mode CIF/FLE dans les reprises et normalise les anciens histor
 })
 
 test('la reprise en chat conserve l’aide d’identification sans révéler la réponse', () => {
-  assert.match(chat, /const usesIdentificationHelp = computed\(\(\) => isIdentificationExercise\.value\)/u)
+  assert.match(chat, /const usesIdentificationHelp = computed\(\(\) => helpQuestion\.value\?\.exerciseKind/u)
   assert.match(chat, /usesIdentificationHelp\.value[\s\S]*literaryIdentificationCoachHelpBlocks/u)
   assert.match(chat, /:enable-automatic-audit="!usesIdentificationHelp && !usesAllophoneHelp"/u)
   assert.doesNotMatch(chat, /isIdentificationExercise\.value && Boolean\(helpQuestion\.value\?\.literaryCitation\)/u)

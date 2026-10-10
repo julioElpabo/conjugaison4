@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { exerciseKindFor, exerciseKindsFor, exerciseKindLabel } from '~~/shared/utils/exercise-kinds'
+import type { AtomicExerciseKind } from '~~/shared/types/conjugation'
 import type { Component, ShallowRef } from 'vue'
 const { ui, localePath } = useLanguagePreferences()
 import type { ChallengePreset, ComplementOption, ExerciseQuestion, LearnerExerciseTrackingContext } from '~~/shared/types/conjugation'
@@ -77,7 +79,7 @@ watch(isPrintOpen, async (open) => {
 })
 const chatExerciseVerbs = computed(() => {
   if (challenge.value.identificationSource !== 'literary-corpus'
-    || challenge.value.exerciseKind !== 'tense-identification') return selectedVerbs.value
+    || !exerciseKindsFor(challenge.value).some(kind => kind !== 'conjugation')) return selectedVerbs.value
   const questionVerbIds = new Set(questions.value.map(question => Number(question.verbeId)))
   const literaryVerbs = catalogue.value.verbes.filter(verb => questionVerbIds.has(verb.id))
   return literaryVerbs.length ? literaryVerbs : selectedVerbs.value
@@ -91,6 +93,12 @@ const complementPlacementLabel = computed(() => ({
   mixed: ui('parfois avant'),
   before: ui('avant si possible')
 }[challenge.value.complementPlacement]))
+function updateExerciseKinds(kinds: AtomicExerciseKind[]) {
+  challenge.value.exerciseKinds = [...kinds]
+  challenge.value.exerciseKind = exerciseKindFor(kinds)
+  markAsCustom()
+}
+
 function updateComplementOptions(options: ComplementOption[]) {
   const legacy = legacyComplementConfig(options)
   challenge.value.complementOptions = options
@@ -197,6 +205,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
     tenseIds: [...preset.tenseIds],
     questionCount: preset.questionCount
   })
+  challenge.value.exerciseKinds = preset.exerciseKinds ? [...preset.exerciseKinds] : undefined
   challenge.value.exerciseKind = preset.exerciseKind
   challenge.value.identificationSource = preset.identificationSource
   challenge.value.pastSimplePronouns = preset.pastSimplePronouns
@@ -230,8 +239,9 @@ function beginExerciseTracking(presentation: 'classic' | 'chat') {
         || (preset ? challengePresetTrackingDescription(sourcePresetRandomCount.value) : undefined),
       verbIds: [...challenge.value.verbIds],
       tenseIds: [...challenge.value.tenseIds],
-      questionCount: challenge.value.questionCount,
+      questionCount: questions.value.length || challenge.value.questionCount,
       exerciseKind: challenge.value.exerciseKind,
+      ...(challenge.value.exerciseKinds ? { exerciseKinds: [...challenge.value.exerciseKinds] } : {}),
       identificationSource: challenge.value.identificationSource,
       pastSimplePronouns: challenge.value.pastSimplePronouns,
       inclusivePronouns: challenge.value.inclusivePronouns,
@@ -463,6 +473,7 @@ function onToggleTense(id: number) {
           <ChallengeOptions
             :question-count="challenge.questionCount"
             :exercise-kind="challenge.exerciseKind"
+                :exercise-kinds="challenge.exerciseKinds"
             :identification-source="challenge.identificationSource"
             :inclusive-pronouns="challenge.inclusivePronouns"
             :include-on-pronoun="challenge.includeOnPronoun"
@@ -471,7 +482,7 @@ function onToggleTense(id: number) {
             :complement-options="challenge.complementOptions"
             :complement-verbs="selectedVerbs"
             @update-question-count="challenge.questionCount = $event; markAsCustom()"
-            @update-exercise-kind="challenge.exerciseKind = $event; markAsCustom()"
+            @update-exercise-kinds="updateExerciseKinds"
             @update-identification-source="challenge.identificationSource = $event; markAsCustom()"
             @update-inclusive-pronouns="challenge.inclusivePronouns = $event; markAsCustom()"
             @update-include-on-pronoun="challenge.includeOnPronoun = $event; markAsCustom()"
@@ -492,7 +503,7 @@ function onToggleTense(id: number) {
           </div>
           <p v-if="!isReady">{{ ui('Sélectionne au moins un verbe et un temps pour pouvoir le lancer.') }}</p>
           <p v-else>
-            {{ challenge.exerciseKind === 'mixed' ? ui('Un mélange des deux') : challenge.exerciseKind === 'conjugation' ? ui('Conjuguer les formes demandées') : ui('Trouver le mode et le temps') }}
+            {{ exerciseKindsFor(challenge).map(kind => ui(exerciseKindLabel(kind))).join(' · ') }}
             <template v-if="challenge.exerciseKind === 'conjugation' && challenge.includeComplements">
               · {{ ui('avec compléments,') }} {{ complementPlacementLabel }}
             </template>
@@ -511,9 +522,12 @@ function onToggleTense(id: number) {
     </div>
 
     <ClassicExercise
+      :verbs="catalogue.verbes"
+      :learning-support-mode="challenge.learningSupportMode"
       v-if="isExerciseOpen && exercisePresentation === 'classic'"
       :questions="questions"
       :exercise-kind="challenge.exerciseKind"
+                :exercise-kinds="challenge.exerciseKinds"
       :identification-tenses="identificationTenses"
       :tracking-context="exerciseTracking"
       :analytics-metadata="exerciseUsageMetadata('classic')"
@@ -526,8 +540,9 @@ function onToggleTense(id: number) {
       v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach"
       :questions="questions"
       :exercise-kind="challenge.exerciseKind"
+                :exercise-kinds="challenge.exerciseKinds"
       :coach="selectedCoach"
-      :verbs="chatExerciseVerbs"
+      :verbs="chatExerciseVerbs" :help-verbs="catalogue.verbes"
       :tenses="selectedTenses"
       :identification-tenses="identificationTenses"
       :regenerate-questions="regenerateChatQuestions"
@@ -554,6 +569,7 @@ function onToggleTense(id: number) {
       :verbs="selectedVerbs"
       :tenses="selectedTenses"
       :exercise-kind="challenge.exerciseKind"
+                :exercise-kinds="challenge.exerciseKinds"
       :challenge="challenge"
       :existing-challenge-code="shareCode"
       :options="challenge.printOptions"

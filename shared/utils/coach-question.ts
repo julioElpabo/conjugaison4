@@ -112,6 +112,7 @@ function withMaskedSubject(sentence: string, question: ExerciseQuestion) {
 }
 
 export function coachQuestionBubbles(question: ExerciseQuestion, options: { omitIndicativeMode?: boolean } = {}): CoachQuestionBubbles {
+  if (question.exerciseKind && question.exerciseKind !== 'conjugation') return { formula: question.consigne }
   const sentenceTemplate = templateWithInputPrefix(
     question.consigne.split('|')[0]?.trim() || '',
     question,

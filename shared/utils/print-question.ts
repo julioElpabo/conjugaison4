@@ -1,4 +1,5 @@
-import type { ExerciseQuestion } from '../types/conjugation'
+import { questionExerciseKind } from './exercise-kinds'
+import type { ExerciseKind, ExerciseQuestion } from '../types/conjugation'
 import { conjugationRequiresSubjectPronoun } from './answer'
 import { sentenceTerminalMark, withSentenceTerminalMark } from './sentence-punctuation'
 
@@ -76,13 +77,14 @@ function completionParts(sentence: string, question: ExerciseQuestion) {
 }
 
 export function printableQuestionParts(question: ExerciseQuestion, exerciseKind: string): PrintableQuestionParts {
-  if ((question.exerciseKind || exerciseKind) === 'tense-identification') {
+  const kind = questionExerciseKind(question, exerciseKind as ExerciseKind)
+  if (kind === 'tense-identification' || kind === 'infinitive-identification' || kind === 'mode-identification') {
     const sentence = question.literaryCitation
       ? `${question.literaryCitation.before}【${question.literaryCitation.target}】${question.literaryCitation.after} — ${question.literaryCitation.author}, ${question.literaryCitation.work}`
       : question.consigne
     return {
       label: '',
-      completion: sentence,
+      completion: kind === 'infinitive-identification' ? `Trouver l’infinitif : ${sentence}` : sentence,
       completionPrefix: sentence,
       completionSuffix: '',
       fillBlank: false,
@@ -153,7 +155,7 @@ export function printableCorrectionAnswers(question: ExerciseQuestion): string[]
   const answers = [...new Set(question.reponsesPourCorrige
     .map(answer => isComplementSentence ? withSentenceTerminalMark(answer, question.mode) : answer.trim())
     .filter(Boolean))]
-  if (question.isCompound && answers.length > 1) return answers.slice(0, 1)
+  if (question.exerciseKind !== 'infinitive-identification' && question.isCompound && answers.length > 1) return answers.slice(0, 1)
   return answers
 }
 

@@ -1,3 +1,4 @@
+import { exerciseKindFor, SELECTABLE_EXERCISE_KINDS } from '../../shared/utils/exercise-kinds'
 import { createHash } from 'node:crypto'
 import type { ExerciseKind, ExerciseQuestion, LearnerChallengeSnapshot } from '~~/shared/types/conjugation'
 
@@ -16,11 +17,11 @@ export function learnerAttemptIdentifier(value: unknown) {
   return learnerRunIdentifier(value)
 }
 
-function integerList(value: unknown, maximum = 1000) {
+function integerList(value: unknown, maximum = 1000, virtual = false) {
   if (!Array.isArray(value)) return []
   return [...new Set(value
     .map(item => Number(item))
-    .filter(item => Number.isInteger(item) && item > 0 && item <= 10_000_000))]
+    .filter(item => Number.isInteger(item) && item !== 0 && (virtual || item > 0) && Math.abs(item) <= 10_000_000))]
     .slice(0, maximum)
 }
 
@@ -29,11 +30,16 @@ export function learnerChallengeSnapshot(value: unknown): LearnerChallengeSnapsh
     throw createError({ statusCode: 400, statusMessage: 'Défi invalide' })
   }
   const candidate = value as Record<string, unknown>
-  const exerciseKind = candidate.exerciseKind === 'tense-identification'
+  let exerciseKind: ExerciseKind = candidate.exerciseKind === 'tense-identification'
+    || candidate.exerciseKind === 'infinitive-identification'
     || candidate.exerciseKind === 'mode-identification'
     || candidate.exerciseKind === 'mixed'
     ? candidate.exerciseKind
     : 'conjugation'
+  const suppliedKinds = candidate.exerciseKinds
+  const exerciseKinds = Array.isArray(suppliedKinds)
+    ? SELECTABLE_EXERCISE_KINDS.filter(kind => suppliedKinds.includes(kind)) : undefined
+  if (exerciseKinds?.length) exerciseKind = exerciseKindFor(exerciseKinds)
   const questionCount = Math.min(200, Math.max(1, Number(candidate.questionCount) || 1))
   const description = typeof candidate.description === 'string'
     ? candidate.description.trim().slice(0, 1000)
@@ -44,10 +50,11 @@ export function learnerChallengeSnapshot(value: unknown): LearnerChallengeSnapsh
   return {
     ...(description ? { description } : {}),
     ...(trainingReportTitle ? { trainingReportTitle } : {}),
-    verbIds: integerList(candidate.verbIds),
+    verbIds: integerList(candidate.verbIds, 1000, true),
     tenseIds: integerList(candidate.tenseIds),
     questionCount,
     exerciseKind,
+    ...(exerciseKinds?.length ? { exerciseKinds } : {}),
     identificationSource: candidate.identificationSource === 'literary-corpus'
       ? 'literary-corpus'
       : 'selected-verbs',
@@ -153,7 +160,7 @@ export function learnerQuestionSnapshot(value: unknown): ExerciseQuestion {
     : null
   const citationTarget = shortText(citation?.target, 200)
   return {
-    ...(['conjugation', 'tense-identification', 'mode-identification'].includes(String(question.exerciseKind))
+    ...(['conjugation', 'tense-identification', 'mode-identification', 'infinitive-identification'].includes(String(question.exerciseKind))
       ? { exerciseKind: question.exerciseKind as Exclude<ExerciseKind, 'mixed'> }
       : {}),
     titre: shortText(question.titre, 300),
@@ -163,7 +170,7 @@ export function learnerQuestionSnapshot(value: unknown): ExerciseQuestion {
     reponsesPourCorrige: correctionAnswers,
     futureSimpleAnswers: futureSimpleAnswers.length ? futureSimpleAnswers : undefined,
     conjugationConfusions: conjugationConfusions.length ? conjugationConfusions : undefined,
-    verbeId: number(question.verbeId),
+    verbeId: Number.isSafeInteger(question.verbeId) && Number(question.verbeId) !== 0 ? Number(question.verbeId) : undefined,
     tenseId: number(question.tenseId),
     personId: number(question.personId) ?? null,
     infinitif: shortText(question.infinitif, 100) || undefined,

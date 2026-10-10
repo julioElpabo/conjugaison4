@@ -14,6 +14,7 @@ export default defineEventHandler((event) => {
     if (event.node.res.statusCode < 200 || event.node.res.statusCode >= 400) return
     void import('../services/catalogue').then(({ invalidateCatalogueCache }) => {
       invalidateCatalogueCache()
+      void import('../services/infinitive-identification').then(({ invalidateInfinitiveLexicon }) => invalidateInfinitiveLexicon())
     })
   })
 })

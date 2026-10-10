@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { questionExerciseKind } from '~~/shared/utils/exercise-kinds'
+import InfinitiveCoachHelp from '../coach/InfinitiveCoachHelp.vue'
+import { INFINITIVE_AMBIGUITY_NOTICE, infinitiveIdentificationHint, infinitiveIdentificationFeedback } from '~~/shared/utils/infinitive-identification'
 import { subjunctiveIdentificationExample } from '~~/shared/utils/identification-ambiguity'
 import type { Component, ShallowRef } from 'vue'
 import { faArrowUpFromBracket, faCirclePlay, faPrint, faSpinner, faStop, faVolume } from '@fortawesome/free-solid-svg-icons'
@@ -8,7 +11,7 @@ import ShareExerciseSummaryDialog from '~/components/exercise/ShareExerciseSumma
 import VerbConsultationModal from '~/components/exercise/VerbConsultationModal.vue'
 import { isModeLandingSlug, modeLandingPage } from '~~/shared/data/mode-landing-pages'
 import { modeTensePedagogy } from '~~/shared/data/mode-tense-pedagogy'
-import type { ConjugationTense, ExerciseAttempt, ExerciseKind, ExerciseQuestion, LearnerErrorDetail, LearnerExerciseTrackingContext } from '~~/shared/types/conjugation'
+import type { ConjugationTense, ExerciseAttempt, ExerciseKind, ExerciseQuestion, LearningSupportMode, Verb, LearnerErrorDetail, LearnerExerciseTrackingContext } from '~~/shared/types/conjugation'
 import { grammarTenseCode } from '~~/shared/utils/grammar-codes'
 import {
   conjugationAnswerPlaceholder,
@@ -35,6 +38,8 @@ const falcMode = useState<boolean>('falc-mode', () => false)
 
 const props = defineProps<{
   questions: ExerciseQuestion[]
+  verbs?: Verb[]
+  learningSupportMode?: LearningSupportMode
   exerciseKind: ExerciseKind
   identificationTenses?: ConjugationTense[]
   trackingContext?: LearnerExerciseTrackingContext
@@ -42,6 +47,7 @@ const props = defineProps<{
   canSaveChallenge?: boolean
   analyticsMetadata?: Record<string, string | number | boolean>
 }>()
+const usesCifFleSupport = computed(() => props.learningSupportMode === 'cif-fle' || props.trackingContext?.challenge.learningSupportMode === 'cif-fle')
 const { track } = useSiteAnalytics()
 const { recordAttempt, recordQuestionPlan } = useLearnerProgress()
 
@@ -125,10 +131,13 @@ const currentAnswerPlaceholder = computed(() => currentQuestion.value
 const providedAnswerPrefix = computed(() => currentQuestion.value && activeExerciseKind.value === 'conjugation'
   ? providedSubjunctiveInputPrefix(currentQuestion.value)
   : '')
-const activeExerciseKind = computed(() => currentQuestion.value?.exerciseKind || props.exerciseKind)
+const activeExerciseKind = computed(() => questionExerciseKind(currentQuestion.value, props.exerciseKind))
+const infinitiveHelpOpen = ref(false)
+watch(currentIndex, () => { infinitiveHelpOpen.value = false })
+const isInfinitiveIdentificationExercise = computed(() => activeExerciseKind.value === 'infinitive-identification')
 const isModeIdentificationExercise = computed(() => activeExerciseKind.value === 'mode-identification')
 const isTenseIdentificationExercise = computed(() => activeExerciseKind.value === 'tense-identification')
-const isIdentificationExercise = computed(() => isModeIdentificationExercise.value || isTenseIdentificationExercise.value)
+const isIdentificationExercise = computed(() => isModeIdentificationExercise.value || isTenseIdentificationExercise.value || isInfinitiveIdentificationExercise.value)
 const currentIdentificationFormParts = computed(() => currentQuestion.value && isIdentificationExercise.value
   ? identificationFormParts(currentQuestion.value)
   : null)
@@ -169,7 +178,9 @@ const selectedModeTenseRows = computed(() => pairClassicTenseChoices(
   selectedModeTenseChoices.value,
 ))
 
-const answerPlaceholder = computed(() => isIdentificationExercise.value && isSmallScreen.value
+const answerPlaceholder = computed(() => isInfinitiveIdentificationExercise.value
+  ? ui('Écris l’infinitif')
+  : isIdentificationExercise.value && isSmallScreen.value
   ? ui('Écris ta réponse')
   : isModeIdentificationExercise.value
     ? ui('Écris ta réponse ou clique directement sur le mode correct')
@@ -319,6 +330,12 @@ const identificationChoiceHelpMessages = computed(() => {
   return messages
 })
 const retryGuidanceMessages = computed(() => {
+  if (isInfinitiveIdentificationExercise.value && currentQuestion.value) {
+    const candidate = answer.value.trim().toLocaleLowerCase('fr')
+    return [currentQuestion.value.isCompound && ['être', 'avoir'].includes(candidate)
+      ? ui('Repère le participe passé. Cherche l’infinitif du verbe principal, pas celui de l’auxiliaire.')
+      : infinitiveIdentificationHint(currentQuestion.value, ui)]
+  }
   if (isIdentificationExercise.value) return identificationChoiceHelpMessages.value
   const messages: string[] = []
   if (futureSimpleConfusion.value) {
@@ -785,7 +802,7 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="!isFinished && currentQuestion" class="exercise-question">
-          <p v-if="activeExerciseKind === 'tense-identification' || activeExerciseKind === 'mode-identification'" class="question-instruction">
+          <p v-if="isIdentificationExercise" class="question-instruction">
             {{ currentQuestion.instruction }}
           </p>
           <template v-if="falcMode && activeExerciseKind === 'conjugation'">
@@ -910,7 +927,7 @@ onBeforeUnmount(() => {
               aria-hidden="true"
             />
           </button>
-          <div v-if="isIdentificationExercise" class="classic-identification-choices">
+          <div v-if="isIdentificationExercise && !isInfinitiveIdentificationExercise" class="classic-identification-choices">
             <div v-if="isTenseIdentificationExercise && selectedIdentificationMode" class="classic-tense-choice-step">
               <div class="classic-tense-choice-step__header">
                 <button type="button" :disabled="feedback !== 'idle'" @click="selectedIdentificationMode = ''">← {{ ui('Modes') }}</button>
@@ -953,7 +970,7 @@ onBeforeUnmount(() => {
           </div>
 
           <form
-            v-if="!falcMode && !(activeExerciseKind === 'conjugation' && currentQuestion.complement)"
+            v-if="(!falcMode || isIdentificationExercise) && !(activeExerciseKind === 'conjugation' && currentQuestion.complement)"
             class="answer-form"
             :class="{ 'is-awaiting-retry': retryMessageVisible || missingPronounMessageVisible }"
             @submit.prevent="feedback === 'idle' ? submitAnswer() : nextQuestion()"
@@ -985,6 +1002,13 @@ onBeforeUnmount(() => {
               </button>
             </div>
           </form>
+          <p v-if="isInfinitiveIdentificationExercise && currentQuestion.reponsesPourCorrige.length > 1">{{ ui(INFINITIVE_AMBIGUITY_NOTICE) }}</p>
+          <button v-if="isInfinitiveIdentificationExercise && feedback === 'idle'" type="button" class="secondary-button" @click="infinitiveHelpOpen = !infinitiveHelpOpen">{{ ui('Aide') }}</button>
+          <InfinitiveCoachHelp v-if="isInfinitiveIdentificationExercise && infinitiveHelpOpen"
+            :question="currentQuestion" :question-number="displayedQuestionNumber" :corrected="feedback !== 'idle'"
+            :verbs="verbs" :allow-answer="usesCifFleSupport" :learning-support-mode="usesCifFleSupport ? 'cif-fle' : 'normal'"
+            @reveal-answer="answerHeardBeforeSubmission = true"
+            @close="infinitiveHelpOpen = false" />
           <div v-if="activeExerciseKind === 'conjugation' && currentQuestion.speech?.answerToken" class="answer-listen-row">
             <span>{{ ui('Entendre la réponse') }}</span>
             <button
@@ -1059,6 +1083,7 @@ onBeforeUnmount(() => {
               <p v-else>{{ ui('Tu peux passer à la question suivante.') }}</p>
             </template>
 
+            <p v-if="isInfinitiveIdentificationExercise">{{ infinitiveIdentificationFeedback(currentQuestion, answer, ui) }}</p>
             <LearnerErrorFeedback v-if="!falcMode && detectedErrorDetails.length" :details="detectedErrorDetails" />
 
             <aside v-if="!falcMode && futureSimpleConfusion" class="grammar-reminder">

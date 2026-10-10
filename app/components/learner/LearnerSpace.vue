@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { exerciseKindsFor, exerciseKindLabel } from '~~/shared/utils/exercise-kinds'
 import { withDutchVariants } from '~~/shared/i18n/dutch-variants'
 
 import { localeLanguageTag } from '~~/shared/i18n/locales'
@@ -545,6 +546,7 @@ function challengeProgressLabel(challenge: DashboardChallenge) {
 }
 
 function challengeExerciseKindLabel(challenge: DashboardChallenge) {
+  if (challenge.challenge.exerciseKinds || challenge.challenge.exerciseKind === 'infinitive-identification') return exerciseKindsFor(challenge.challenge).map(kind => ui(exerciseKindLabel(kind))).join(' · ')
   if (challenge.challenge.exerciseKind === 'mixed') return ui('Un mélange des deux')
   return challenge.challenge.exerciseKind === 'tense-identification'
     ? ui('Trouver le mode et les temps')
@@ -2996,6 +2998,7 @@ async function confirmAccountAction() {
     </section>
 
     <ClassicExercise
+      :verbs="catalogue?.verbes"
       v-if="reviewOpen && reviewTracking && exercisePresentation === 'classic'"
       :questions="reviewQuestions"
       :exercise-kind="reviewTracking.challenge.exerciseKind"
@@ -3012,6 +3015,7 @@ async function confirmAccountAction() {
       :exercise-kind="reviewTracking.challenge.exerciseKind"
       :coach="selectedCoach"
       :verbs="challengeVerbs(selectedWork.challenge)"
+      :help-verbs="catalogue?.verbes"
       :tenses="challengeTenses(selectedWork.challenge)"
       :identification-tenses="identificationTenses"
       :regenerate-questions="regenerateChatQuestions"

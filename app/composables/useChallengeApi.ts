@@ -7,6 +7,7 @@ export interface QuestionnaireRequest {
   verbIds: number[]
   tenseIds: number[]
   questionCount: number
+  exerciseKinds?: ChallengeConfig['exerciseKinds']
   exerciseKind: ChallengeConfig['exerciseKind']
   identificationSource: ChallengeConfig['identificationSource']
   literaryRegister: NonNullable<ChallengeConfig['literaryRegister']>
@@ -26,6 +27,7 @@ export function toQuestionnaireRequest(challenge: ChallengeConfig): Questionnair
     tenseIds: [...challenge.tenseIds],
     questionCount: challenge.questionCount,
     exerciseKind: challenge.exerciseKind,
+    ...(challenge.exerciseKinds ? { exerciseKinds: [...challenge.exerciseKinds] } : {}),
     identificationSource: challenge.identificationSource ?? 'selected-verbs',
     literaryRegister: challenge.literaryRegister ?? 'all',
     pastSimplePronouns: challenge.pastSimplePronouns,
@@ -56,6 +58,7 @@ export function toSharedChallengeRequest(challenge: ChallengeConfig, title?: str
     tenseIds: [...challenge.tenseIds],
     questionCount: challenge.questionCount,
     exerciseKind: challenge.exerciseKind,
+    ...(challenge.exerciseKinds ? { exerciseKinds: [...challenge.exerciseKinds] } : {}),
     identificationSource: challenge.identificationSource ?? 'selected-verbs',
     literaryRegister: challenge.literaryRegister ?? 'all',
     pastSimplePronouns: challenge.pastSimplePronouns,

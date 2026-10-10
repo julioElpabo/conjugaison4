@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { questionExerciseKind } from '~~/shared/utils/exercise-kinds'
 const { ui, uiLabel } = useLanguagePreferences()
 import type { ExerciseQuestion } from '~~/shared/types/conjugation'
 import type { ChallengeConfig, ExerciseKind, PrintOptions, Tense, Verb } from '~/composables/useChallengeBuilder'
+import { INFINITIVE_IDENTIFICATION_INSTRUCTION } from '~~/shared/utils/infinitive-identification'
 import { TENSE_IDENTIFICATION_INSTRUCTION } from '~~/shared/utils/exercise-instructions'
 import {
   correctionItemHeight,
@@ -96,9 +98,10 @@ const effectiveQuestionSpacingMm = computed(() => inclusivePrint.value
 const pdfBodySize = computed(() => inclusivePrint.value ? 12 : 10.5)
 const pdfCorrectionSize = computed(() => inclusivePrint.value ? 12 : 9.5)
 const pdfLineHeightMm = computed(() => inclusivePrint.value ? 6.5 : 5)
-const isIdentificationQuestion = (question: ExerciseQuestion) => (question.exerciseKind || props.exerciseKind) === 'tense-identification'
+const isIdentificationQuestion = (question: ExerciseQuestion) => questionExerciseKind(question, props.exerciseKind) !== 'conjugation'
 const usesWideRows = computed(() => props.exerciseKind === 'mixed' || isTenseIdentification.value)
-const isTenseIdentification = computed(() => props.exerciseKind === 'tense-identification')
+const isTenseIdentification = computed(() => props.exerciseKind === 'tense-identification' || props.exerciseKind === 'infinitive-identification' || props.exerciseKind === 'mode-identification')
+const identificationInstruction = computed(() => props.exerciseKind === 'infinitive-identification' ? INFINITIVE_IDENTIFICATION_INSTRUCTION : TENSE_IDENTIFICATION_INSTRUCTION)
 const isTableLayout = computed(() => props.options.questionLayout === 'table' && props.exerciseKind === 'conjugation')
 const identificationAnswerHeightMm = computed(() => 8 + Math.max(0, 5 - questionSpacingMm.value))
 const missingQuestionCount = computed(() => Math.max(0, props.requestedQuestionCount - props.questions.length))
@@ -350,7 +353,7 @@ async function buildPdf() {
       if (isTenseIdentification.value) {
         pdf.setDrawColor(120, 120, 120)
         pdf.rect(left, y, 176, 10)
-        pdf.text(TENSE_IDENTIFICATION_INSTRUCTION, left + 3, y + 6)
+        pdf.text(identificationInstruction.value, left + 3, y + 6)
         y += 21
       }
       return y + (isTenseIdentification.value ? 2 : 8)
@@ -594,16 +597,17 @@ async function buildPdf() {
         if (isIdentificationQuestion(question)) {
           const questionHeight = literaryCitation ? literaryCitation.height : lineCount * questionLineHeight
           const answerY = y + questionHeight + 2
-          const modeLabel = pdfSafe(ui('Mode :'))
+          const infinitiveQuestion = (question.exerciseKind || props.exerciseKind) === 'infinitive-identification'
+          const modeLabel = pdfSafe(infinitiveQuestion ? `${ui('Infinitif')} :` : ui('Mode :'))
           const tenseLabel = pdfSafe(ui('Temps :'))
           pdf.setFont('helvetica', 'bold')
           pdf.setFontSize(inclusivePrint.value ? 12 : 9.5)
           pdf.setTextColor(70, 70, 70)
           pdf.text(modeLabel, left + 7, answerY)
-          pdf.text(tenseLabel, 108, answerY)
+          if (!infinitiveQuestion) pdf.text(tenseLabel, 108, answerY)
           pdf.setDrawColor(105, 105, 105)
-          pdf.line(left + 7 + pdf.getTextWidth(modeLabel) + 2, answerY + .7, 101, answerY + .7)
-          pdf.line(108 + pdf.getTextWidth(tenseLabel) + 2, answerY + .7, right, answerY + .7)
+          pdf.line(left + 7 + pdf.getTextWidth(modeLabel) + 2, answerY + .7, infinitiveQuestion ? right : 101, answerY + .7)
+          if (!infinitiveQuestion) pdf.line(108 + pdf.getTextWidth(tenseLabel) + 2, answerY + .7, right, answerY + .7)
           pdf.setTextColor(20, 20, 20)
           pdf.setFontSize(bodySize)
           y += questionHeight + 8 + Math.max(5, effectiveQuestionSpacingMm.value)
@@ -860,6 +864,7 @@ async function downloadWord() {
       children: [new TextRun({ text, bold: options.bold, size: options.size ?? wordBodySize, font: 'Arial' })]
     })
     const identificationQuestionParagraphs = (question: ExerciseQuestion, size = wordBodySize) => {
+      const heading = question.exerciseKind === 'infinitive-identification' ? [paragraph('Trouver l’infinitif', { bold: true, size })] : []
       const citation = question.literaryCitation
       if (!citation) {
         return [paragraph(capitalizePrintLine(printableQuestionParts(question, props.exerciseKind).completion), { size })]
@@ -867,6 +872,7 @@ async function downloadWord() {
       const before = capitalizePrintLine(citation.before)
       const target = citation.before ? citation.target : capitalizePrintLine(citation.target)
       return [
+        ...heading,
         new Paragraph({
           spacing: noSpacing,
           children: [
@@ -913,7 +919,16 @@ async function downloadWord() {
         })],
       })]
     }
-    const identificationAnswerParagraph = () => new Paragraph({
+    const identificationAnswerParagraph = (question: ExerciseQuestion) => (question.exerciseKind || props.exerciseKind) === 'infinitive-identification'
+      ? new Paragraph({
+          spacing: { before: 150, after: 40, line: wordLineSpacing },
+          tabStops: [{ type: TabStopType.RIGHT, position: 9250, leader: LeaderType.UNDERSCORE }],
+          children: [
+            new TextRun({ text: `${ui('Infinitif')} : `, bold: true, size: wordSecondarySize, font: 'Arial' }),
+            new TextRun({ children: [new Tab()], size: wordSecondarySize, font: 'Arial' }),
+          ],
+        })
+      : new Paragraph({
       spacing: { before: 150, after: 40, line: wordLineSpacing },
       tabStops: [
         { type: TabStopType.RIGHT, position: 4300, leader: LeaderType.UNDERSCORE },
@@ -1038,7 +1053,7 @@ async function downloadWord() {
       exerciseChildren.push(new Paragraph({
         spacing: { before: 160, after: 480 },
         border: { top: { style: BorderStyle.SINGLE, size: 4, color: '777777' }, bottom: { style: BorderStyle.SINGLE, size: 4, color: '777777' }, left: { style: BorderStyle.SINGLE, size: 4, color: '777777' }, right: { style: BorderStyle.SINGLE, size: 4, color: '777777' } },
-        children: [new TextRun({ text: TENSE_IDENTIFICATION_INSTRUCTION, size: wordSecondarySize, font: 'Arial' })]
+        children: [new TextRun({ text: identificationInstruction.value, size: wordSecondarySize, font: 'Arial' })]
       }))
     }
     else {
@@ -1058,7 +1073,7 @@ async function downloadWord() {
           cell([paragraph(`${index + 1}.`, { size: wordBodySize })], 480, { margins: { top: 90, bottom: 90, left: 0, right: 40 } }),
           cell([
             ...identificationQuestionParagraphs(question),
-            identificationAnswerParagraph(),
+            identificationAnswerParagraph(question),
           ], contentWidth - 480, {
             columnSpan: props.exerciseKind === 'mixed' ? 2 : undefined,
             margins: { top: 90, bottom: 100, left: 70, right: 70 },

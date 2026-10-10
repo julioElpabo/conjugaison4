@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { questionExerciseKind } from '~~/shared/utils/exercise-kinds'
+import InfinitiveCoachHelp from '../coach/InfinitiveCoachHelp.vue'
+import { INFINITIVE_AMBIGUITY_NOTICE, infinitiveIdentificationFeedback } from '~~/shared/utils/infinitive-identification'
 import { subjunctiveIdentificationExample } from '~~/shared/utils/identification-ambiguity'
 import type { Component, ShallowRef } from 'vue'
 const { interfaceLocale, ui, uiLabel } = useLanguagePreferences()
@@ -61,6 +64,7 @@ const props = defineProps<{
   exerciseKind?: ExerciseKind
   coach: CoachProfile
   verbs: Verb[]
+  helpVerbs?: Verb[]
   tenses: ConjugationTense[]
   identificationTenses?: ConjugationTense[]
   regenerateQuestions: () => Promise<void>
@@ -97,10 +101,12 @@ function changeCoachFromHelp(coach: CoachProfile) {
   track('coach_selected', { coach: coach.id, previousCoach: props.coach.id, source: 'help_recommendation' })
   emit('changeCoach', coach)
 }
-const activeExerciseKind = computed(() => currentQuestion.value?.exerciseKind || props.exerciseKind || props.trackingContext?.challenge.exerciseKind)
+const activeExerciseKind = computed(() => questionExerciseKind(currentQuestion.value, props.exerciseKind || props.trackingContext?.challenge.exerciseKind))
+const isInfinitiveIdentificationExercise = computed(() => activeExerciseKind.value === 'infinitive-identification')
+const helpIsInfinitive = computed(() => questionExerciseKind(helpQuestion.value, props.exerciseKind || props.trackingContext?.challenge.exerciseKind) === 'infinitive-identification')
 const isModeIdentificationExercise = computed(() => activeExerciseKind.value === 'mode-identification')
 const isIdentificationExercise = computed(() => (
-  activeExerciseKind.value === 'tense-identification' || isModeIdentificationExercise.value
+  activeExerciseKind.value === 'tense-identification' || isModeIdentificationExercise.value || isInfinitiveIdentificationExercise.value
 ))
 const isSmallScreen = ref(false)
 const modeAnswerChoices = computed(() => [
@@ -110,7 +116,9 @@ const modeAnswerChoices = computed(() => [
   { value: 'conditionnel', label: ui('Conditionnel') },
   { value: 'infinitif', label: ui('Infinitif') },
 ])
-const chatAnswerPlaceholder = computed(() => isSmallScreen.value
+const chatAnswerPlaceholder = computed(() => isInfinitiveIdentificationExercise.value
+  ? ui('Écris l’infinitif')
+  : isSmallScreen.value
   ? ui('Écris ta réponse')
   : isModeIdentificationExercise.value
     ? ui('Écris ta réponse ou clique directement sur le mode correct')
@@ -265,16 +273,26 @@ const helpVerb = computed(() => {
   return props.verbs.find(verb => verb.id === question.verbeId)
     || props.verbs.find(verb => normalizedInfinitive(verb.infinitif) === normalizedInfinitive(question.infinitif))
 })
-const helpConsultVerbId = computed(() => helpQuestion.value?.verbeId ?? helpVerb.value?.id)
-const helpConsultVerbLabel = computed(() => helpQuestion.value?.infinitif || helpVerb.value?.infinitif || '')
+const helpConsultVerbId = computed(() => helpIsInfinitive.value ? undefined : helpQuestion.value?.verbeId ?? helpVerb.value?.id)
+const helpConsultVerbLabel = computed(() => helpIsInfinitive.value ? '' : helpQuestion.value?.infinitif || helpVerb.value?.infinitif || '')
 const helpTense = computed(() => {
   const question = helpQuestion.value
   if (!question) return undefined
   return props.tenses.find(tense => tense.id === question.tenseId)
     || props.tenses.find(tense => normalizedInfinitive(tense.name) === normalizedInfinitive(question.temps))
 })
-const usesIdentificationHelp = computed(() => isIdentificationExercise.value)
+const usesIdentificationHelp = computed(() => helpQuestion.value?.exerciseKind
+  ? helpQuestion.value.exerciseKind !== 'conjugation'
+  : questionExerciseKind(helpQuestion.value, props.exerciseKind || props.trackingContext?.challenge.exerciseKind) !== 'conjugation')
 const selectedCoachHelpProfile = computed(() => coachHelpProfile(props.coach.helpApproach))
+const infinitiveHelpAllowsAnswer = computed(() => usesCifFleSupport.value || selectedCoachHelpProfile.value.revealsAnswers)
+function markInfinitiveAnswerRevealed() {
+  const index = helpQuestionIndex.value ?? currentIndex.value
+  if (index !== currentIndex.value || attempts.value.some(attempt => attempt.question === helpQuestion.value)) return
+  answerHeardBeforeSubmission.value = true
+  revealedQuestionIndexes.add(index)
+  track('feature_selected', { ...exerciseAnalyticsMetadata.value, feature: 'chat.answer-reveal' })
+}
 const helpAnswersRevealed = computed(() => (
   selectedCoachHelpProfile.value.revealsAnswers
   && failedQuestionIndexes.has(helpQuestionIndex.value ?? currentIndex.value)
@@ -958,7 +976,7 @@ function contextFor(question?: ExerciseQuestion, hideIdentificationAnswer = fals
     : question?.reponses.filter(value => value.trim()) || []
   return {
     instruction: instruction && omitIndicativeMode.value ? withoutIndicativeMode(instruction) : instruction,
-    verb: question?.infinitif || reminder?.infinitive,
+    verb: question?.exerciseKind === 'infinitive-identification' ? undefined : question?.infinitif || reminder?.infinitive,
     complement: reminder?.complement || question?.complement,
     participle: mayRevealAnswer ? reminder?.participle : undefined,
     gender: reminder?.gender === 'feminin' ? 'féminin' : reminder?.gender === 'masculin' ? 'masculin' : undefined,
@@ -1095,7 +1113,7 @@ async function suggestHelp(offerConsultation = false) {
   if (!offerConsultation) await addCoachReaction('help-announcement', contextFor(question))
   const verbId = question.verbeId ?? helpVerb.value?.id
   const verbLabel = question.infinitif || helpVerb.value?.infinitif
-  if (offerConsultation && verbId && verbLabel) {
+  if (offerConsultation && !isInfinitiveIdentificationExercise.value && verbId && verbLabel) {
     await enqueueCoachBubble(() => ({
       text: ui('Tu veux consulter la conjugaison du verbe {verb} ?', { verb: verbLabel }),
       consultVerbId: verbId,
@@ -1181,6 +1199,7 @@ async function askCurrentQuestion() {
   const firstQuestionMessageId = sequence.value + 1
   if (currentIndex.value > 0) await addCoachReaction('question', contextFor(question, true, true))
   if (question.instruction) await addCoachText(question.instruction, undefined, false, true)
+  if (isInfinitiveIdentificationExercise.value && question.reponsesPourCorrige.length > 1) await addCoachText(ui(INFINITIVE_AMBIGUITY_NOTICE))
   if (isIdentificationExercise.value) {
     if (question.literaryCitation) {
       await enqueueCoachBubble(() => ({
@@ -1505,6 +1524,10 @@ async function submit() {
       if (step.eventType === 'streak') consecutiveCorrectCount.value = 0
     }
   }
+  if (isInfinitiveIdentificationExercise.value) {
+    if (!result.isCorrect) await addCoachText(ui('La réponse attendue était :') + ' ' + question.reponsesPourCorrige.join(` ${ui('ou')} `), 'error')
+    await addCoachText(infinitiveIdentificationFeedback(question, candidate, ui))
+  }
   if (shouldSuggestHelp) {
     await suggestHelp()
     consecutiveIncorrectCount.value = 0
@@ -1798,7 +1821,7 @@ onBeforeUnmount(() => {
             <video v-if="message.media?.mediaType === 'video'" :src="message.media.filePath" :aria-label="message.media.altText" muted playsinline controls @loadedmetadata="mediaLoaded" />
             <img v-else-if="message.media" :class="{ 'chat-media--emoji': message.media.mediaType === 'emoji' }" :src="message.media.filePath" :alt="message.media.altText" @load="mediaLoaded">
             <div
-              v-if="message.identificationPrompt && message.questionIndex === currentIndex"
+              v-if="message.identificationPrompt && message.questionIndex === currentIndex && !isInfinitiveIdentificationExercise"
               class="chat-identification-choices"
             >
               <div
@@ -1972,7 +1995,7 @@ onBeforeUnmount(() => {
         </div>
 
         <form v-if="!finished" class="chat-composer" @submit.prevent="submit">
-          <div v-if="usesCifFleSupport" class="chat-composer__help-actions" role="group" :aria-label="ui('Aide pour cette question')">
+          <div v-if="usesCifFleSupport && !isInfinitiveIdentificationExercise" class="chat-composer__help-actions" role="group" :aria-label="ui('Aide pour cette question')">
             <button type="button" :disabled="waitingForNext || posingQuestion || deliveringFeedback || revealedQuestionIndexes.has(currentIndex)" @click="revealCurrentAnswer">{{ ui('Voir la réponse') }}</button>
           </div>
           <div class="chat-answer-control" :class="{ 'has-prefix': providedAnswerPrefix }">
@@ -2016,8 +2039,22 @@ onBeforeUnmount(() => {
       </section>
 
       <Transition name="chat-help" appear>
+        <InfinitiveCoachHelp
+          v-if="helpOpen && helpIsInfinitive && helpQuestion"
+          :question="helpQuestion"
+          :question-number="(helpQuestionIndex ?? currentIndex) + 1"
+          :coach="coach"
+          :learning-support-mode="usesCifFleSupport ? 'cif-fle' : 'normal'"
+          :verbs="helpVerbs || verbs"
+          :allow-answer="infinitiveHelpAllowsAnswer"
+          :feedback-context="helpFeedbackContext"
+          @change-coach="changeCoachFromHelp"
+          @reveal-answer="markInfinitiveAnswerRevealed"
+          :corrected="attempts.some(attempt => attempt.question === helpQuestion)"
+          @close="closeHelp"
+        />
         <CoachHelpPanel
-          v-if="helpOpen && (targetedHelp || usesIdentificationHelp)"
+          v-else-if="helpOpen && (targetedHelp || usesIdentificationHelp)"
           :active-coach="coach"
           :help-approach="selectedCoachHelpProfile.id"
           :blocks="helpBlocks"
@@ -2108,6 +2145,14 @@ onBeforeUnmount(() => {
   width: min(1240px, calc(100vw - 40px));
   transition-duration: .5s;
   transition-timing-function: ease-out;
+}
+
+.chat-dialogs :deep(.infinitive-help) {
+  width: min(440px, 38vw);
+  min-width: 320px;
+  height: 100%;
+  flex: 0 0 auto;
+  overflow-y: auto;
 }
 
 .chat-dialogs :deep(.coach-help-badge) {
@@ -3734,7 +3779,7 @@ onBeforeUnmount(() => {
     scroll-snap-stop: always;
   }
 
-  .chat-dialogs :deep(.coach-help-panel) {
+  .chat-dialogs :deep(:is(.coach-help-panel, .infinitive-help)) {
     width: 100%;
     height: 100vh;
     height: 100dvh;
@@ -3747,6 +3792,8 @@ onBeforeUnmount(() => {
     scroll-snap-align: start;
     scroll-snap-stop: always;
   }
+
+  .chat-dialogs :deep(.infinitive-help) { overflow-y: auto; }
 
   .chat-dialogs :deep(.coach-help-header),
   .chat-dialogs :deep(.coach-help-footer) {

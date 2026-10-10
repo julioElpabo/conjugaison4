@@ -76,7 +76,8 @@ export interface GrammaticalPerson {
 }
 
 export type PastSimplePronouns = 'all' | 'third-person-only'
-export type ExerciseKind = 'conjugation' | 'tense-identification' | 'mode-identification' | 'mixed'
+export type AtomicExerciseKind = 'conjugation' | 'tense-identification' | 'infinitive-identification' | 'mode-identification'
+export type ExerciseKind = AtomicExerciseKind | 'mixed'
 export type IdentificationSource = 'selected-verbs' | 'literary-corpus'
 export type LiteraryRegister = 'all' | 'courant' | 'soutenu'
 export type ComplementPlacement = 'after' | 'mixed' | 'before'
@@ -94,6 +95,8 @@ export interface ChallengeConfig {
   tenseIds: TenseId[]
   questionCount: number
   exerciseKind: ExerciseKind
+  /** Liste des types demandés. Absente dans les anciens défis. */
+  exerciseKinds?: AtomicExerciseKind[]
   identificationSource: IdentificationSource
   literaryRegister?: LiteraryRegister
   pastSimplePronouns: PastSimplePronouns
@@ -265,6 +268,7 @@ export interface LearnerChallengeSnapshot {
   tenseIds: number[]
   questionCount: number
   exerciseKind: ExerciseKind
+  exerciseKinds?: AtomicExerciseKind[]
   identificationSource?: IdentificationSource
   pastSimplePronouns?: PastSimplePronouns
   inclusivePronouns?: boolean

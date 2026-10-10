@@ -2,13 +2,15 @@
 import { faVolume } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 const { ui } = useLanguagePreferences()
-import type { ExerciseQuestion } from '~~/shared/types/conjugation'
+import { exerciseKindsFor, SELECTABLE_EXERCISE_KINDS } from '~~/shared/utils/exercise-kinds'
+import type { AtomicExerciseKind, ExerciseQuestion } from '~~/shared/types/conjugation'
 import { isPassivizableInfinitive } from '~~/shared/utils/passive-voice'
 import type { ComplementOption, ExerciseKind, IdentificationSource, LearningSupportMode, VoiceMode, Verb } from '~/composables/useChallengeBuilder'
 
 const props = defineProps<{
   questionCount: number
   exerciseKind: ExerciseKind
+  exerciseKinds?: AtomicExerciseKind[]
   identificationSource: IdentificationSource
   inclusivePronouns: boolean
   includeOnPronoun: boolean
@@ -34,7 +36,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   updateQuestionCount: [value: number]
-  updateExerciseKind: [value: ExerciseKind]
+  updateExerciseKinds: [value: AtomicExerciseKind[]]
   updateIdentificationSource: [value: IdentificationSource]
   updateInclusivePronouns: [value: boolean]
   updateIncludeOnPronoun: [value: boolean]
@@ -44,10 +46,19 @@ const emit = defineEmits<{
   prefilledOptionsRevealStart: []
 }>()
 
+const selectedExerciseKinds = computed(() => exerciseKindsFor(props))
+const hasConjugation = computed(() => selectedExerciseKinds.value.includes('conjugation'))
+const hasIdentification = computed(() => selectedExerciseKinds.value.some(kind => kind !== 'conjugation'))
+const exerciseChoices = [
+  { kind: 'conjugation', label: 'Conjuguer' },
+  { kind: 'tense-identification', label: 'Trouver le mode et le temps' },
+  { kind: 'infinitive-identification', label: 'Trouver l’infinitif' },
+] as const
+
 const complementsOpen = ref(Boolean(props.gridLayout))
 const selectedComplementVerbs = computed(() => (props.complementVerbs ?? []).filter(verb => Boolean(verb.complementExample)))
 const complementsAvailable = computed(() => (
-  ['conjugation', 'mixed'].includes(props.exerciseKind)
+  hasConjugation.value
   && props.voiceMode !== 'passive'
   && selectedComplementVerbs.value.length > 0
 ))
@@ -220,8 +231,10 @@ function onQuestionCountChange(event: Event) {
 }
 
 function onExerciseKindChange(event: Event) {
-  const exerciseKind = (event.target as HTMLInputElement).value as ExerciseKind
-  emit('updateExerciseKind', exerciseKind)
+  const input = event.target as HTMLInputElement
+  const kinds = selectedExerciseKinds.value.filter(kind => kind !== input.value)
+  if (input.checked) kinds.push(input.value as AtomicExerciseKind)
+  emit('updateExerciseKinds', SELECTABLE_EXERCISE_KINDS.filter(kind => kinds.includes(kind)))
 }
 
 function onLearningSupportModeChange(event: Event) {
@@ -338,37 +351,19 @@ watch(passiveAvailable, (available) => {
 
         <fieldset v-if="!falcMode" class="option-fieldset option-group-card option-group-card--exercise">
           <legend>{{ ui('Type d’exercice') }}</legend>
-          <div class="segmented-control segmented-control--exercise-kinds">
-            <label>
-              <input
-                type="radio"
-                :name="exerciseKindName"
-                value="conjugation"
-                :checked="exerciseKind === 'conjugation'"
-                @change="onExerciseKindChange"
-              >
-              <span>{{ ui('Conjuguer') }}</span>
-            </label>
-            <label>
-              <input
-                type="radio"
-                :name="exerciseKindName"
-                value="tense-identification"
-                :checked="exerciseKind === 'tense-identification'"
-                @change="onExerciseKindChange"
-              >
-              <span>{{ ui('Trouver le mode et le temps') }}</span>
-            </label>
-            <label>
-              <input type="radio" :name="exerciseKindName" value="mixed"
-                :checked="exerciseKind === 'mixed'" @change="onExerciseKindChange">
-              <span>{{ ui('Un mélange des deux') }}</span>
+          <div class="exercise-kind-checkboxes">
+            <label v-for="choice in exerciseChoices" :key="choice.kind">
+              <input type="checkbox" :name="exerciseKindName" :value="choice.kind"
+                :checked="selectedExerciseKinds.includes(choice.kind)" @change="onExerciseKindChange">
+              <span>{{ ui(choice.label) }}</span>
             </label>
           </div>
+          <small class="field-hint">{{ ui('Coche un ou plusieurs types d’exercice pour les mélanger.') }}</small>
+          <p v-if="!selectedExerciseKinds.length" class="exercise-kind-error" role="alert">{{ ui('Choisis au moins un type d’exercice.') }}</p>
 
           <Transition name="identification-options">
             <div
-              v-if="exerciseKind === 'tense-identification' || exerciseKind === 'mixed'"
+              v-if="hasIdentification"
               class="identification-source-panel"
             >
               <div class="segmented-control segmented-control--stacked">
@@ -406,8 +401,8 @@ watch(passiveAvailable, (available) => {
         <fieldset
           v-if="!falcMode"
           class="option-fieldset option-group-card option-group-card--voice voice-mode-fieldset"
-          :class="{ 'option-group-card--disabled': !['conjugation', 'mixed'].includes(exerciseKind) }"
-          :disabled="!['conjugation', 'mixed'].includes(exerciseKind)"
+          :class="{ 'option-group-card--disabled': !hasConjugation }"
+          :disabled="!hasConjugation"
         >
           <legend>{{ ui('Voix du verbe') }}</legend>
           <div class="segmented-control segmented-control--stacked">
@@ -478,7 +473,7 @@ watch(passiveAvailable, (available) => {
         <span aria-hidden="true">{{ complementsOpen ? '−' : '+' }}</span>
       </button>
       <p v-if="!complementsAvailable" class="complement-options__unavailable">
-        {{ !['conjugation', 'mixed'].includes(exerciseKind)
+        {{ !hasConjugation
           ? ui('Disponible uniquement pour un exercice de conjugaison.')
           : voiceMode === 'passive'
             ? ui('Au passif, le COD devient le sujet : ces options ne s’appliquent pas.')
@@ -513,7 +508,7 @@ watch(passiveAvailable, (available) => {
       v-if="!falcMode && gridLayout && (conjugationExampleLoading || hasConjugationExample)"
       class="conjugation-example"
       data-tour="options-preview"
-      :class="{ 'conjugation-example--wide': exerciseKind === 'tense-identification' }"
+      :class="{ 'conjugation-example--wide': !hasConjugation }"
       aria-live="polite"
       aria-atomic="true"
     >
@@ -539,7 +534,7 @@ watch(passiveAvailable, (available) => {
           <Transition name="example-item">
             <div v-if="exampleRevealStage >= 1" class="conjugation-example__question">
               <span class="conjugation-example__block-label">{{ ui('Exemple de question') }}</span>
-              <template v-if="exerciseKind === 'tense-identification' && conjugationInstruction && conjugationQuestion">
+              <template v-if="!hasConjugation && conjugationInstruction && conjugationQuestion">
                 <p class="conjugation-example__instruction">{{ conjugationInstruction }}</p>
                 <blockquote v-if="conjugationLiteraryCitation" class="conjugation-example__citation">
                   <p><span>{{ conjugationLiteraryCitation.before }}</span><mark>{{ conjugationLiteraryCitation.target }}</mark><span>{{ conjugationLiteraryCitation.after }}</span></p>
@@ -648,8 +643,12 @@ watch(passiveAvailable, (available) => {
 .identification-options-leave-active { max-height: 240px; transition: max-height 260ms ease, opacity 210ms ease, transform 210ms ease, margin-top 260ms ease, padding-top 260ms ease; }
 .identification-options-enter-from,
 .identification-options-leave-to { max-height: 0; margin-top: 0; padding-top: 0; opacity: 0; transform: translateY(-8px); }
-.segmented-control--exercise-kinds { grid-template-columns: .85fr 1.35fr; }
-.segmented-control--exercise-kinds label:last-child { grid-column: 1 / -1; }
+.exercise-kind-checkboxes { display: grid; gap: 8px; margin-top: 4px; }
+.exercise-kind-checkboxes label { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 10px 12px; border: 1px solid #c8d8d3; border-radius: 10px; background: var(--paper); color: var(--brand-dark); font-weight: 750; line-height: 1.4; cursor: pointer; }
+.exercise-kind-checkboxes label:has(input:checked) { border-color: var(--brand-dark); background: var(--soft); }
+.exercise-kind-checkboxes input { flex: 0 0 auto; width: 20px; height: 20px; margin: 0; accent-color: var(--brand-dark); }
+.exercise-kind-checkboxes label:focus-within { outline: 2px solid var(--brand-dark); outline-offset: 2px; }
+.exercise-kind-error { margin-bottom: 0; color: var(--danger); }
 .segmented-control--stacked { padding: 7px; grid-template-columns: 1fr; gap: 9px; background: #e7efec; }
 .segmented-control--stacked label > span { position: relative; min-height: 62px; padding: 10px 13px 10px 46px; align-content: center; justify-items: start; gap: 2px; background: #f8fbfa; border: 2px solid #b7c9c3; box-shadow: 0 2px 5px rgb(46 67 62 / 8%); text-align: left; transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease, background 150ms ease; }
 .segmented-control--stacked label > span::before { position: absolute; left: 15px; top: 50%; width: 18px; height: 18px; content: ''; border: 2px solid #78918a; border-radius: 50%; background: white; box-shadow: inset 0 0 0 4px white; transform: translateY(-50%); }

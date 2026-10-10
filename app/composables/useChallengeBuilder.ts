@@ -3,6 +3,7 @@ import type {
   ChallengePreset,
   ConjugationMode,
   ConjugationTense,
+  AtomicExerciseKind,
   ExerciseKind,
   IdentificationSource,
   LiteraryRegister,
@@ -13,6 +14,7 @@ import type {
   VoiceMode,
   Verb
 } from '~~/shared/types/conjugation'
+import { exerciseKindsFor } from '~~/shared/utils/exercise-kinds'
 import { legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils/complement-options'
 import { DEFAULT_SHARED_CHALLENGE_OPTIONS } from '~~/shared/utils/challenge-defaults'
 
@@ -52,6 +54,7 @@ export interface SharedChallenge {
   verbIds: number[]
   tenseIds: number[]
   questionCount: number
+  exerciseKinds?: AtomicExerciseKind[]
   exerciseKind?: ExerciseKind
   identificationSource?: IdentificationSource
   literaryRegister?: LiteraryRegister
@@ -121,6 +124,7 @@ export function useChallengeBuilder() {
     challenge.value.verbIds.length > 0
     && challenge.value.tenseIds.length > 0
     && challenge.value.questionCount > 0
+    && exerciseKindsFor(challenge.value).length > 0
   ))
 
   function defaultTenseIds() {
@@ -232,6 +236,7 @@ export function useChallengeBuilder() {
     challenge.value = {
       ...challenge.value,
       exerciseKind: shared.exerciseKind ?? defaults.exerciseKind,
+      exerciseKinds: shared.exerciseKinds ? [...shared.exerciseKinds] : undefined,
       identificationSource: shared.identificationSource ?? defaults.identificationSource,
       literaryRegister: shared.literaryRegister ?? defaults.literaryRegister,
       pastSimplePronouns: shared.pastSimplePronouns ?? defaults.pastSimplePronouns,

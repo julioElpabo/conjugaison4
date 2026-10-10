@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { exerciseKindFor, exerciseKindsFor, exerciseKindLabel } from '~~/shared/utils/exercise-kinds'
+import type { AtomicExerciseKind } from '~~/shared/types/conjugation'
 import type { Component, ShallowRef } from 'vue'
 const { ui, localePath, interfaceLocale, setInterfaceLocale } = useLanguagePreferences()
 import type { ChallengePreset, ComplementOption, ExerciseQuestion, LearnerExerciseTrackingContext } from '~~/shared/types/conjugation'
@@ -193,7 +195,7 @@ const classicExerciseRef = useTemplateRef<ClassicExerciseExposed>('classic-exerc
 const chatExerciseRef = useTemplateRef<ChatExerciseExposed>('chat-exercise')
 const chatExerciseVerbs = computed(() => {
   if (challenge.value.identificationSource !== 'literary-corpus'
-    || challenge.value.exerciseKind !== 'tense-identification') return selectedVerbs.value
+    || !exerciseKindsFor(challenge.value).some(kind => kind !== 'conjugation')) return selectedVerbs.value
   const questionVerbIds = new Set(questions.value.map(question => Number(question.verbeId)))
   const literaryVerbs = catalogue.value.verbes.filter(verb => questionVerbIds.has(verb.id))
   return literaryVerbs.length ? literaryVerbs : selectedVerbs.value
@@ -710,6 +712,7 @@ function applyFalcTenseDefaults() {
 }
 
 function applyFalcExerciseDefaults() {
+  challenge.value.exerciseKinds = undefined
   challenge.value.exerciseKind = 'conjugation'
   challenge.value.voiceMode = 'active'
   challenge.value.includeComplements = false
@@ -755,6 +758,7 @@ function restartChallenge() {
   clearTenses()
   if (falcMode.value) applyFalcTenseDefaults()
   challenge.value.questionCount = 10
+  challenge.value.exerciseKinds = undefined
   challenge.value.exerciseKind = 'conjugation'
   challenge.value.pastSimplePronouns = 'all'
   challenge.value.inclusivePronouns = false
@@ -921,6 +925,7 @@ function prepareTourChallenge() {
     tenseIds,
     questionCount: 10,
     exerciseKind: 'conjugation',
+    exerciseKinds: undefined,
     pastSimplePronouns: 'all',
     inclusivePronouns: false,
     includeOnPronoun: false,
@@ -1426,6 +1431,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
     tenseIds: [...preset.tenseIds],
     questionCount: preset.questionCount
   })
+  challenge.value.exerciseKinds = preset.exerciseKinds ? [...preset.exerciseKinds] : undefined
   challenge.value.exerciseKind = preset.exerciseKind
   challenge.value.identificationSource = preset.identificationSource
   challenge.value.pastSimplePronouns = preset.pastSimplePronouns
@@ -1517,6 +1523,12 @@ function onToggleTense(id: number) {
   toggleTense(id)
 }
 
+function updateExerciseKinds(kinds: AtomicExerciseKind[]) {
+  challenge.value.exerciseKinds = [...kinds]
+  challenge.value.exerciseKind = exerciseKindFor(kinds)
+  markAsCustom()
+}
+
 function updateComplementOptions(options: ComplementOption[]) {
   const legacy = legacyComplementConfig(options)
   challenge.value.complementOptions = options
@@ -1558,7 +1570,8 @@ async function refreshConjugationExample() {
       && Boolean(exampleComplementOption)
     const exampleConfig = {
       ...challenge.value,
-      exerciseKind: challenge.value.exerciseKind === 'mixed' ? 'conjugation' as const : challenge.value.exerciseKind,
+      exerciseKind: exerciseKindsFor(challenge.value)[0] || 'conjugation',
+      exerciseKinds: undefined,
       questionCount: 50,
       inclusivePronouns: false,
       includeOnPronoun: false,
@@ -1680,6 +1693,7 @@ watch(
     () => challenge.value.complementPlacement,
     () => challenge.value.complementOptions.join(','),
     () => challenge.value.exerciseKind,
+    () => challenge.value.exerciseKinds?.join(','),
     () => challenge.value.identificationSource,
     () => challenge.value.inclusivePronouns,
     () => challenge.value.includeOnPronoun,
@@ -1724,8 +1738,9 @@ function beginExerciseTracking(presentation: 'classic' | 'chat') {
         || (preset ? challengePresetTrackingDescription(sourcePresetRandomCount.value) : undefined),
       verbIds: [...challenge.value.verbIds],
       tenseIds: [...challenge.value.tenseIds],
-      questionCount: challenge.value.questionCount,
+      questionCount: questions.value.length || challenge.value.questionCount,
       exerciseKind: challenge.value.exerciseKind,
+      ...(challenge.value.exerciseKinds ? { exerciseKinds: [...challenge.value.exerciseKinds] } : {}),
       identificationSource: challenge.value.identificationSource,
       pastSimplePronouns: challenge.value.pastSimplePronouns,
       inclusivePronouns: challenge.value.inclusivePronouns,
@@ -2212,7 +2227,7 @@ async function createSharedChallenge(title: string, description: string) {
                   ← <template v-if="!falcMode"><span class="mobile-label-hidden">{{ ui('Modes et temps') }}</span><span class="mobile-label-only">{{ ui('Temps') }}</span></template>
                 </button>
                 <div class="wizard-step__controls">
-                  <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" @click="nextStep">{{ falcMode ? ui('Commencer') : ui('Créer le défi') }}</button>
+                  <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" :disabled="!isReady || isPreparingStep4" @click="nextStep">{{ falcMode ? ui('Commencer') : ui('Créer le défi') }}</button>
                 </div>
               </div>
               <div v-if="!falcMode" class="wizard-step__intro wizard-step__intro--selection">
@@ -2223,6 +2238,7 @@ async function createSharedChallenge(title: string, description: string) {
                 data-tour="options"
                 :question-count="challenge.questionCount"
                 :exercise-kind="challenge.exerciseKind"
+                :exercise-kinds="challenge.exerciseKinds"
                 :identification-source="challenge.identificationSource"
                 :inclusive-pronouns="challenge.inclusivePronouns"
                 :include-on-pronoun="challenge.includeOnPronoun"
@@ -2245,7 +2261,7 @@ async function createSharedChallenge(title: string, description: string) {
                 id-prefix="wizard-step-options"
                 @prefilled-options-reveal-start="prefilledOptionsRevealPending = false"
                 @update-question-count="challenge.questionCount = $event; markAsCustom()"
-                @update-exercise-kind="challenge.exerciseKind = $event; markAsCustom()"
+                @update-exercise-kinds="updateExerciseKinds"
                 @update-identification-source="challenge.identificationSource = $event; markAsCustom()"
                 @update-inclusive-pronouns="challenge.inclusivePronouns = $event; markAsCustom()"
                 @update-include-on-pronoun="challenge.includeOnPronoun = $event; markAsCustom()"
@@ -2255,7 +2271,7 @@ async function createSharedChallenge(title: string, description: string) {
               />
 
               <div v-if="!falcMode" class="wizard-step__bottom-actions">
-                <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" @click="nextStep">{{ falcMode ? ui('Commencer') : ui('Créer le défi') }}</button>
+                <button class="primary-button wizard-step__cta wizard-step__cta--launch wizard-next-pulse" type="button" :disabled="!isReady || isPreparingStep4" @click="nextStep">{{ falcMode ? ui('Commencer') : ui('Créer le défi') }}</button>
               </div>
 
             </div>
@@ -2301,8 +2317,8 @@ async function createSharedChallenge(title: string, description: string) {
       </template>
       </main>
 
-      <ClassicExercise ref="classic-exercise" v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :exercise-kind="challenge.exerciseKind" :identification-tenses="identificationTenses" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('classic')" can-save-challenge @save-challenge="saveChallengeFromSummary" @close="closeClassicExercise" />
-      <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :exercise-kind="challenge.exerciseKind" :coach="selectedCoach" :verbs="chatExerciseVerbs" :tenses="selectedTenses" :identification-tenses="identificationTenses" :regenerate-questions="regenerateChatQuestions" :tracking-context="exerciseTracking" :learning-support-mode="challenge.learningSupportMode" :analytics-metadata="exerciseUsageMetadata('chat')" :tour-demo="tourActive" can-save-challenge @save-challenge="saveChallengeFromSummary" @change-coach="selectedCoach = $event" @close="isExerciseOpen = false" />
+      <ClassicExercise ref="classic-exercise" v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :verbs="catalogue.verbes" :learning-support-mode="challenge.learningSupportMode" :exercise-kind="challenge.exerciseKind" :identification-tenses="identificationTenses" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('classic')" can-save-challenge @save-challenge="saveChallengeFromSummary" @close="closeClassicExercise" />
+      <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :exercise-kind="challenge.exerciseKind" :coach="selectedCoach" :verbs="chatExerciseVerbs" :help-verbs="catalogue.verbes" :tenses="selectedTenses" :identification-tenses="identificationTenses" :regenerate-questions="regenerateChatQuestions" :tracking-context="exerciseTracking" :learning-support-mode="challenge.learningSupportMode" :analytics-metadata="exerciseUsageMetadata('chat')" :tour-demo="tourActive" can-save-challenge @save-challenge="saveChallengeFromSummary" @change-coach="selectedCoach = $event" @close="isExerciseOpen = false" />
       <CoachPicker v-if="isCoachPickerOpen && !falcMode" :tour-demo="tourActive" :learning-support-mode="challenge.learningSupportMode" @close="isCoachPickerOpen = false" @select="launchWithCoach" />
       <component :is="printPreviewComponent" v-if="isPrintOpen && !falcMode && printPreviewComponent" :questions="printQuestions" :verbs="selectedVerbs" :tenses="selectedTenses" :exercise-kind="challenge.exerciseKind" :challenge="challenge" :existing-challenge-code="shareCode" :options="challenge.printOptions" :requested-question-count="challenge.questionCount" :regenerating="busyAction === 'print'" :analytics-metadata="exerciseUsageMetadata('print')" @update-options="challenge.printOptions = $event" @challenge-code-created="shareCode = $event" @regenerate="preparePrint" @close="isPrintOpen = false" />
       <ShareChallengeDialog

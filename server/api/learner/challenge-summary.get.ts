@@ -1,4 +1,5 @@
 
+import { questionExerciseKind } from '~~/shared/utils/exercise-kinds'
 import { withDutchVariants } from '../../../shared/i18n/dutch-variants'
 import type { RowDataPacket } from 'mysql2/promise'
 import type { ExerciseQuestion } from '~~/shared/types/conjugation'
@@ -31,7 +32,7 @@ function questionFromJson(source: string) {
 function exerciseKindFromJson(source: string) {
   try {
     const config = JSON.parse(source) as { exerciseKind?: unknown }
-    return config.exerciseKind === 'tense-identification' || config.exerciseKind === 'mode-identification' || config.exerciseKind === 'mixed'
+    return config.exerciseKind === 'infinitive-identification' || config.exerciseKind === 'tense-identification' || config.exerciseKind === 'mode-identification' || config.exerciseKind === 'mixed'
       ? config.exerciseKind
       : 'conjugation'
   }
@@ -91,8 +92,8 @@ export default defineEventHandler(async (event) => {
   const items = [...incorrectRows, ...correctRows].flatMap((row, itemIndex) => {
     const question = questionFromJson(row.questionJson)
     if (!question) return []
-    const kind = question.exerciseKind || exerciseKind
-    const isIdentificationExercise = kind === 'tense-identification' || kind === 'mode-identification'
+    const kind = questionExerciseKind(question, exerciseKind)
+    const isIdentificationExercise = kind === 'infinitive-identification' || kind === 'tense-identification' || kind === 'mode-identification'
     if (question.infinitif) verbs.add(question.infinitif)
     if (question.temps) {
       const key = `${question.mode || ''}\u0000${question.temps}`

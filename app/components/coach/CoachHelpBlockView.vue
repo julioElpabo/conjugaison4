@@ -32,8 +32,11 @@ const renderedContent = computed(() => sanitizeCoachHtml(renderCoachHelpContent(
       <span v-else-if="isDefinitionBlock" class="coach-help-block__info-icon" aria-hidden="true">i</span>
       {{ renderedTitle }}
     </h3>
+    <div v-if="$slots.content" class="coach-help-block__content">
+      <slot name="content" />
+    </div>
     <div
-      v-if="renderedContent"
+      v-else-if="renderedContent"
       class="coach-help-block__content"
       :class="{ 'coach-help-block__content--radical': isRadicalBlock, 'coach-help-block__content--condensed-tense-rule': isCondensedTenseRuleBlock }"
       v-html="renderedContent"

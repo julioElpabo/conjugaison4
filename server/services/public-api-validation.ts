@@ -10,6 +10,8 @@ import type {
   VoiceMode,
 } from '../types/public-api'
 import { legacyComplementConfig, legacyComplementOptions, normalizeComplementOptions } from '../../shared/utils/complement-options'
+import type { AtomicExerciseKind } from '../../shared/types/conjugation'
+import { exerciseKindFor, SELECTABLE_EXERCISE_KINDS } from '../../shared/utils/exercise-kinds'
 import { DEFAULT_SHARED_CHALLENGE_OPTIONS } from '../../shared/utils/challenge-defaults'
 
 export class PublicInputError extends Error {}
@@ -22,6 +24,7 @@ const QUESTIONNAIRE_KEYS = new Set([
   'tenseIds',
   'questionCount',
   'exerciseKind',
+  'exerciseKinds',
   'identificationSource',
   'literaryRegister',
   'pastSimplePronouns',
@@ -42,6 +45,7 @@ const DEFI_KEYS = new Set([
   'tenseIds',
   'questionCount',
   'exerciseKind',
+  'exerciseKinds',
   'identificationSource',
   'literaryRegister',
   'pastSimplePronouns',
@@ -164,9 +168,23 @@ function parseExerciseKind(value: unknown): ExerciseKind {
   if (value === 'tense-identification' || value === 'temps-mode') {
     return 'tense-identification'
   }
+  if (value === 'infinitive-identification') return value
   if (value === 'mixed') return 'mixed'
   if (value === 'mode-identification') return 'mode-identification'
-  throw new PublicInputError('exerciseKind doit valoir conjugation, tense-identification, mode-identification ou mixed')
+  throw new PublicInputError('exerciseKind doit valoir conjugation, tense-identification, mode-identification, infinitive-identification ou mixed')
+}
+
+function parseExerciseSelection(value: Record<string, unknown>, fallback: ExerciseKind) {
+  const kind = value.exerciseKind === undefined ? fallback : parseExerciseKind(value.exerciseKind)
+  if (value.exerciseKinds === undefined) return { exerciseKind: kind }
+  const kinds = value.exerciseKinds
+  if (!Array.isArray(kinds) || !kinds.length || kinds.length > 3
+    || kinds.some(kind => !SELECTABLE_EXERCISE_KINDS.includes(kind))
+    || new Set(kinds).size !== kinds.length) {
+    throw new PublicInputError('Choisis au moins un type d’exercice, sans doublons')
+  }
+  const ordered = SELECTABLE_EXERCISE_KINDS.filter(kind => kinds.includes(kind)) as AtomicExerciseKind[]
+  return { exerciseKind: exerciseKindFor(ordered), exerciseKinds: ordered }
 }
 
 function parseIdentificationSource(value: unknown) {
@@ -294,7 +312,7 @@ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest 
     verbIds: parseIds(value.verbIds, 'verbIds', MAX_VERB_IDS, true),
     tenseIds: parseIds(value.tenseIds, 'tenseIds', 30),
     questionCount: parseQuestionCount(value.questionCount),
-    exerciseKind: parseExerciseKind(value.exerciseKind),
+    ...parseExerciseSelection(value, DEFAULT_SHARED_CHALLENGE_OPTIONS.exerciseKind),
     identificationSource: value.identificationSource === undefined
       ? DEFAULT_SHARED_CHALLENGE_OPTIONS.identificationSource
       : parseIdentificationSource(value.identificationSource),
@@ -390,7 +408,7 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
     verbIds: parseIds(modernValue.verbIds, 'verbIds', MAX_VERB_IDS, true),
     tenseIds: parseIds(modernValue.tenseIds, 'tenseIds', 30),
     questionCount: parseQuestionCount(modernValue.questionCount),
-    exerciseKind,
+    ...parseExerciseSelection(modernValue, exerciseKind),
     identificationSource,
     literaryRegister,
     pastSimplePronouns,

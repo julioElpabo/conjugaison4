@@ -1,5 +1,7 @@
 import type { RowDataPacket } from 'mysql2/promise'
 import type { ExerciseQuestion, QuestionnaireRequest } from '../types/public-api'
+import { exerciseKindsFor } from '../../shared/utils/exercise-kinds'
+import { identifyInfinitives } from './infinitive-identification'
 import { useDatabase } from '../utils/database'
 import { formatAnswer, formatConjugationQuestion } from './question-formatter'
 import { formatNonFiniteQuestion } from './non-finite-formatter'
@@ -575,6 +577,9 @@ export function identificationQuestion(row: ConjugationRow, citation?: LiteraryC
     pronom: pronoun,
     temps: row.temps_name,
     mode: row.mode_name,
+    isCompound: Boolean(row.is_compound),
+    ...(row.tense_code ? { tenseCode: row.tense_code } : {}),
+    ...(row.mode_code ? { modeCode: row.mode_code } : {}),
     conjugaison1: row.conjugaison1,
     conjugaison2: row.conjugaison2 || '',
     conjugaison3: row.conjugaison3 || '',
@@ -791,22 +796,17 @@ export async function generateMixedQuestionnaire(
   request: QuestionnaireRequest,
   generate: (request: QuestionnaireRequest) => Promise<ExerciseQuestion[]> = generateQuestionnaire,
 ): Promise<ExerciseQuestion[]> {
-  const conjugationCount = Math.floor(request.questionCount / 2)
-    + (request.questionCount % 2 && Math.random() < .5 ? 1 : 0)
-  const identificationCount = request.questionCount - conjugationCount
-  const conjugation = conjugationCount ? await generate({
-    ...request, exerciseKind: 'conjugation', questionCount: conjugationCount,
-  }) : []
-  const identification = identificationCount ? await generate({
-    ...request, exerciseKind: 'tense-identification', questionCount: identificationCount,
-  }) : []
-  const groups = [
-    shuffle(conjugation).map(question => ({ ...question, exerciseKind: 'conjugation' as const })),
-    shuffle(identification).map(question => ({ ...question, exerciseKind: 'tense-identification' as const })),
-  ]
+  const kinds = shuffle(exerciseKindsFor(request))
+  const groups: ExerciseQuestion[][] = []
+  for (const [index, kind] of kinds.entries()) {
+    const count = Math.floor(request.questionCount / kinds.length) + (index < request.questionCount % kinds.length ? 1 : 0)
+    if (!count) continue
+    const questions = await generate({ ...request, exerciseKind: kind, exerciseKinds: undefined, questionCount: count })
+    if (!questions.length) throw new QuestionnaireSelectionError('Aucune question disponible pour un des types d’exercice choisis')
+    groups.push(shuffle(questions).map(question => ({ ...question, exerciseKind: kind })))
+  }
   // Intercaler les types empêche le hasard de recréer deux blocs séparés.
-  if (groups[1]!.length > groups[0]!.length
-      || (groups[1]!.length === groups[0]!.length && Math.random() < .5)) groups.reverse()
+  groups.sort((left, right) => right.length - left.length)
   const questions: ExerciseQuestion[] = []
   for (let index = 0; index < Math.max(...groups.map(group => group.length)); index++) {
     for (const group of groups) {
@@ -817,8 +817,17 @@ export async function generateMixedQuestionnaire(
 }
 
 export async function generateQuestionnaire(request: QuestionnaireRequest): Promise<ExerciseQuestion[]> {
-  if (request.exerciseKind === 'mixed') return generateMixedQuestionnaire(request)
-  const selectedTenses = await validateSelections(request)
+  const kinds = exerciseKindsFor(request)
+  if (!kinds.length) throw new QuestionnaireSelectionError('Choisis au moins un type d’exercice')
+  if (kinds.length > 1) return generateMixedQuestionnaire(request)
+  request = { ...request, exerciseKind: kinds[0]!, exerciseKinds: undefined,
+    ...(kinds[0] !== 'conjugation' ? { voiceMode: 'active' as const } : {}) }
+  const isInfinitive = request.exerciseKind === 'infinitive-identification'
+  const allSelectedTenses = await validateSelections(request)
+  const selectedTenses = isInfinitive
+    ? allSelectedTenses.filter(tense => normalized(tense.mode_name) !== 'infinitif' && !isNearFutureTense(tense))
+    : allSelectedTenses
+  if (!selectedTenses.length) throw new QuestionnaireSelectionError('Pour trouver l’infinitif, choisis un temps autre que l’infinitif ou le futur proche')
   const nonFiniteModes = ['participe', 'gérondif', 'infinitif']
   const finiteTenses = selectedTenses.filter(row => !nonFiniteModes.includes(normalized(row.mode_name)))
   const nonFiniteTenses = selectedTenses.filter(row => nonFiniteModes.includes(normalized(row.mode_name)))
@@ -832,7 +841,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
   const wantsActiveVoice = voiceMode !== 'passive'
   const wantsPassiveVoice = request.exerciseKind === 'conjugation' && voiceMode !== 'active'
   const passiveOnly = request.exerciseKind === 'conjugation' && voiceMode === 'passive'
-  const requestedComplementOptions = wantsActiveVoice ? (request.complementOptions || []) : []
+  const requestedComplementOptions = request.exerciseKind === 'conjugation' && wantsActiveVoice ? (request.complementOptions || []) : []
   const onlyBeforeComplements = requestedComplementOptions.length > 0
     && requestedComplementOptions.every(option => option.endsWith('-before'))
   const verbIds = request.verbIds.filter(id => id > 0)
@@ -841,7 +850,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
     .map(decodePronominalSelectionId)
     .filter((id): id is number => id !== null)
   const usesLiteraryCitations = request.exerciseKind === 'mode-identification'
-    || (request.exerciseKind === 'tense-identification' && request.identificationSource === 'literary-corpus')
+    || ((request.exerciseKind === 'tense-identification' || isInfinitive) && request.identificationSource === 'literary-corpus')
 
   if (usesLiteraryCitations) {
     const citations = await validatedLiteraryCitations(
@@ -849,8 +858,9 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
       selectedTenses.map(row => Number(row.id)),
       request.literaryRegister ?? 'all',
     )
-    const literaryQuestions = [...citations.values()].flat()
+    let literaryQuestions = [...citations.values()].flat()
       .map(citation => literaryIdentificationQuestion(citation, request.exerciseKind === 'mode-identification'))
+    if (isInfinitive) literaryQuestions = await identifyInfinitives(literaryQuestions)
     if (!literaryQuestions.length) {
       throw new QuestionnaireSelectionError('Aucune citation validée ne correspond aux temps sélectionnés')
     }
@@ -1193,7 +1203,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
     }
   }
 
-  if (nonFiniteTenses.length > 0 && request.exerciseKind === 'conjugation' && wantsActiveVoice
+  if (nonFiniteTenses.length > 0 && (request.exerciseKind === 'conjugation' || isInfinitive) && wantsActiveVoice
       && !onlyBeforeComplements) {
     const verbs: NonFiniteVerbRow[] = []
     const selectedNonFiniteRequirePresentParticiple = nonFiniteTenses.every((tense) => {
@@ -1266,7 +1276,9 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
     for (const verb of verbs) {
       for (const tense of nonFiniteTenses) {
         const question = formatNonFiniteQuestion(verb, tense)
-        if (question) questions.push(question)
+        if (question) questions.push(isInfinitive
+          ? { ...question, consigne: question.conjugaison1 || question.reponses[0]!, radicalReference: undefined }
+          : question)
       }
     }
   }
@@ -1286,6 +1298,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
   if (request.exerciseKind === 'mode-identification') {
     return balancedModeIdentificationQuestions(questions, request.questionCount)
   }
+  if (isInfinitive) return balancedIdentificationQuestions(await identifyInfinitives(questions), request.questionCount)
   return request.exerciseKind === 'tense-identification'
     ? balancedIdentificationQuestions(questions, request.questionCount)
     : diverseConjugationQuestions(questions, request.questionCount, Math.random, request.inclusivePronouns)

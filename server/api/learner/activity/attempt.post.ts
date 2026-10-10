@@ -1,3 +1,4 @@
+import { questionExerciseKind } from '~~/shared/utils/exercise-kinds'
 import type { ResultSetHeader } from 'mysql2/promise'
 import { validateAnswer, validateConjugationAnswer } from '~~/shared/utils/answer'
 import {
@@ -50,10 +51,13 @@ export default defineEventHandler(async (event) => {
   if (!answer || typeof body.correct !== 'boolean') {
     throw createError({ statusCode: 400, statusMessage: 'Tentative invalide' })
   }
-  const correct = ((question.exerciseKind || challenge.exerciseKind) === 'conjugation'
+  const isConjugation = questionExerciseKind(question, challenge.exerciseKind) === 'conjugation'
+  // Les identifiants virtuels restent dans le JSON ; la colonne SQL est non signée.
+  const storedVerbId = question.verbeId && question.verbeId > 0 ? question.verbeId : null
+  const correct = (isConjugation
     ? validateConjugationAnswer(answer, question)
     : validateAnswer(answer, question.reponses)).isCorrect
-  const diagnostics = correct ? [] : diagnoseLearnerError(answer, question)
+  const diagnostics = correct || !isConjugation ? [] : diagnoseLearnerError(answer, question)
 
   const database = useDatabase()
   const connection = await database.getConnection()
@@ -80,7 +84,7 @@ export default defineEventHandler(async (event) => {
     const formValues = [
       attemptId,
       questionIndex,
-      question.verbeId || null,
+      storedVerbId,
       question.tenseId || null,
       question.personId || null,
       question.infinitif || '',
@@ -101,7 +105,7 @@ export default defineEventHandler(async (event) => {
       runDatabaseId,
       formKey,
       questionIndex,
-      question.verbeId || null,
+      storedVerbId,
       question.tenseId || null,
       question.personId || null,
       question.infinitif || '',
@@ -147,7 +151,7 @@ export default defineEventHandler(async (event) => {
         attemptId,
         questionIndex,
         formKey,
-        question.verbeId || null,
+        storedVerbId,
         question.tenseId || null,
         question.personId || null,
         question.infinitif || '',
@@ -175,7 +179,7 @@ export default defineEventHandler(async (event) => {
     }
     if (recorded) {
       if (attemptNumber === 1) {
-        const applicableTypes = applicableLearnerErrorTypes(question)
+        const applicableTypes = isConjugation ? applicableLearnerErrorTypes(question) : []
         const errorTypes = new Set(diagnostics.map(diagnostic => diagnostic.code))
         if (applicableTypes.length) {
           await connection.query(`

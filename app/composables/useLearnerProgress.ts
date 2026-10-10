@@ -27,6 +27,7 @@ export function createLearnerTrackingContext(input: {
 
 function compactQuestion(question: ExerciseQuestion): ExerciseQuestion {
   return {
+    exerciseKind: question.exerciseKind,
     titre: question.titre,
     instruction: question.instruction,
     consigne: question.consigne,

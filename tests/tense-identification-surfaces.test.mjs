@@ -97,7 +97,7 @@ test('l’impression délimite la cible et indique la provenance', () => {
 
 test('les fiches PDF et Word réservent une réponse séparée au mode et au temps', () => {
   assert.match(printPreview, /identificationAnswerHeightMm/u)
-  assert.match(printPreview, /const modeLabel = pdfSafe\(ui\('Mode :'\)\)/u)
+  assert.match(printPreview, /const modeLabel = pdfSafe\(infinitiveQuestion[\s\S]*ui\('Mode :'\)/u)
   assert.match(printPreview, /const tenseLabel = pdfSafe\(ui\('Temps :'\)\)/u)
   assert.match(printPreview, /identificationAnswerParagraph/u)
   assert.match(printPreview, /LeaderType\.UNDERSCORE/u)

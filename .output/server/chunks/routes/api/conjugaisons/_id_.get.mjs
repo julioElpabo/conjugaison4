@@ -1,4 +1,4 @@
-import { aC as agreePastParticiple, aD as splitPastParticipleAgreement, d as defineEventHandler, g as getRouterParam, c as createError, u as useDatabase, a3 as decodePronominalSelectionId } from '../../../nitro/nitro.mjs';
+import { aG as agreePastParticiple, aH as splitPastParticipleAgreement, d as defineEventHandler, g as getRouterParam, c as createError, u as useDatabase, a3 as decodePronominalSelectionId } from '../../../nitro/nitro.mjs';
 import { g as generatePronominalRow } from '../../../_/pronominal-formatter.mjs';
 import { b as buildNearFutureParadigm } from '../../../_/near-future.mjs';
 import { i as inferAnteposedComplement } from '../../../_/complement-placement.mjs';
@@ -13,6 +13,7 @@ import 'web-push';
 import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
+import '../../../_/impersonal-verbs.mjs';
 
 function cleanPhrase(value) {
   return value.replace(/\s+/gu, " ").replace(/[.!?]+$/gu, "").trim();

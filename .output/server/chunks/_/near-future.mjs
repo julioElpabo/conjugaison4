@@ -1,15 +1,4 @@
-const IMPERSONAL_INFINITIVES = /* @__PURE__ */ new Set([
-  "falloir",
-  "pleuvoir",
-  "neiger",
-  "bruiner",
-  "venter",
-  "s'agir"
-]);
-function isImpersonalVerb(infinitive, impersonal) {
-  const normalized = infinitive.trim().normalize("NFC").toLocaleLowerCase("fr").replace(/’/gu, "'");
-  return Boolean(impersonal) || IMPERSONAL_INFINITIVES.has(normalized);
-}
+import { i as isImpersonalVerb } from './impersonal-verbs.mjs';
 
 const NEAR_FUTURE_TENSE_CODE = "near-future";
 const NEAR_FUTURE_TENSE_NAME = "futur proche";
@@ -64,5 +53,5 @@ function nearFutureSyntheticId(tenseId, verbId, personId) {
   return -(Number(tenseId) * 1e8 + verbPart * 10 + Number(personId));
 }
 
-export { isNearFutureTense as a, buildNearFutureParadigm as b, bareNearFutureInfinitive as c, isPronominalNearFutureInfinitive as d, isImpersonalVerb as i, nearFutureReflexivePronoun as n };
+export { isPronominalNearFutureInfinitive as a, buildNearFutureParadigm as b, bareNearFutureInfinitive as c, isNearFutureTense as i, nearFutureReflexivePronoun as n };
 //# sourceMappingURL=near-future.mjs.map

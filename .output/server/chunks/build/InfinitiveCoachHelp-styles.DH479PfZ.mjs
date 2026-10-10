@@ -1,0 +1,8 @@
+const InfinitiveCoachHelp_vue_vue_type_style_index_0_scoped_67670127_lang = ".infinitive-help[data-v-67670127]{min-width:0;width:100%;padding:20px;border:1px solid var(--line);border-radius:18px;background:var(--paper);color:var(--ink);overflow-wrap:anywhere;line-height:1.6}.infinitive-help header[data-v-67670127]{display:flex;align-items:start;justify-content:space-between;gap:12px;color:var(--brand-dark)}.infinitive-help header div[data-v-67670127]{display:grid;gap:4px}.infinitive-help header button[data-v-67670127]{flex:0 0 auto;width:44px;height:44px;border:0;border-radius:50%;color:inherit;background:var(--soft);font-size:1.5rem;cursor:pointer}.infinitive-help__blocks[data-v-67670127]{display:grid;gap:12px;margin-top:16px}.infinitive-help details[data-v-67670127]{border:1px solid var(--line);border-radius:12px;background:var(--soft)}.infinitive-help summary[data-v-67670127]{padding:12px;min-height:44px;color:var(--brand-dark);font-weight:700;cursor:pointer}.infinitive-help summary[data-v-67670127]:focus-visible{outline:2px solid var(--brand-dark);outline-offset:2px;border-radius:12px}.infinitive-help details p[data-v-67670127],.infinitive-help__correction[data-v-67670127]{margin:0;padding:0 12px 12px}.infinitive-help__definition[data-v-67670127]{margin:0 12px 12px}.infinitive-help .infinitive-help__correction p[data-v-67670127],.infinitive-help .infinitive-help__definition p[data-v-67670127]{padding:0}";
+
+const InfinitiveCoachHelpStyles_DH479PfZ = [
+  InfinitiveCoachHelp_vue_vue_type_style_index_0_scoped_67670127_lang
+];
+
+export { InfinitiveCoachHelpStyles_DH479PfZ as default };
+//# sourceMappingURL=InfinitiveCoachHelp-styles.DH479PfZ.mjs.map

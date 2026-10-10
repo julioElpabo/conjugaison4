@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, a as getQuery, ab as LEARNER_ERROR_TAXONOMY, c as createError, u as useDatabase, a6 as diagnoseLearnerError, a8 as applicableLearnerErrorTypes } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, a as getQuery, ae as LEARNER_ERROR_TAXONOMY, c as createError, u as useDatabase, a6 as diagnoseLearnerError, a8 as applicableLearnerErrorTypes } from '../../../nitro/nitro.mjs';
 import { g as generateQuestionnaire } from '../../../_/questionnaire.mjs';
 import { r as requireLearnerDataSubject } from '../../../_/learner-data-subject.mjs';
 import 'node:http';
@@ -12,8 +12,11 @@ import 'web-push';
 import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
+import '../../../_/infinitive-identification.mjs';
 import '../../../_/radical-reference.mjs';
 import '../../../_/pronominal-formatter.mjs';
+import '../../../_/impersonal-verbs.mjs';
+import '../../../_/infinitive-identification2.mjs';
 import '../../../_/exercise-instructions.mjs';
 import '../../../_/passive-voice.mjs';
 import '../../../_/near-future.mjs';

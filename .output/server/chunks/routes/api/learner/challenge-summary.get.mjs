@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, a as getQuery, z as normalizeLocale, c as createError, u as useDatabase, w as withDutchVariants, a9 as learnerErrorDetails } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, a as getQuery, z as normalizeLocale, c as createError, u as useDatabase, w as withDutchVariants, a9 as questionExerciseKind, ac as learnerErrorDetails } from '../../../nitro/nitro.mjs';
 import { i as identificationFormParts } from '../../../_/identification-form.mjs';
 import { r as requireLearnerDataSubject } from '../../../_/learner-data-subject.mjs';
 import 'node:http';
@@ -25,7 +25,7 @@ function questionFromJson(source) {
 function exerciseKindFromJson(source) {
   try {
     const config = JSON.parse(source);
-    return config.exerciseKind === "tense-identification" || config.exerciseKind === "mode-identification" || config.exerciseKind === "mixed" ? config.exerciseKind : "conjugation";
+    return config.exerciseKind === "infinitive-identification" || config.exerciseKind === "tense-identification" || config.exerciseKind === "mode-identification" || config.exerciseKind === "mixed" ? config.exerciseKind : "conjugation";
   } catch {
     return "conjugation";
   }
@@ -78,8 +78,8 @@ const challengeSummary_get = defineEventHandler(async (event) => {
   const items = [...incorrectRows, ...correctRows].flatMap((row, itemIndex) => {
     const question = questionFromJson(row.questionJson);
     if (!question) return [];
-    const kind = question.exerciseKind || exerciseKind;
-    const isIdentificationExercise = kind === "tense-identification" || kind === "mode-identification";
+    const kind = questionExerciseKind(question, exerciseKind);
+    const isIdentificationExercise = kind === "infinitive-identification" || kind === "tense-identification" || kind === "mode-identification";
     if (question.infinitif) verbs.add(question.infinitif);
     if (question.temps) {
       const key = `${question.mode || ""}\0${question.temps}`;

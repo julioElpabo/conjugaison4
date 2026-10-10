@@ -1,6 +1,6 @@
 import { defineComponent, useTemplateRef, ref, computed, unref, useSSRContext } from 'vue';
 import { ssrRenderTeleport, ssrInterpolate, ssrIncludeBooleanAttr, ssrRenderAttr } from 'vue/server-renderer';
-import { an as localeLanguageTag } from '../nitro/nitro.mjs';
+import { ar as localeLanguageTag } from '../nitro/nitro.mjs';
 import { a as useLanguagePreferences } from './server.mjs';
 import { u as useSiteAnalytics } from './useSiteAnalytics-B3_coq30.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';

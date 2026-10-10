@@ -14,6 +14,7 @@ import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
 import '../../_/near-future.mjs';
+import '../../_/impersonal-verbs.mjs';
 import '../../_/coach.mjs';
 
 function record(value) {

@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, z as normalizeLocale, c as createError, u as useDatabase, ag as CURRENT_PRIVACY_NOTICE_VERSION } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, z as normalizeLocale, c as createError, u as useDatabase, ak as CURRENT_PRIVACY_NOTICE_VERSION } from '../../../nitro/nitro.mjs';
 import { randomBytes } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { n as normalizeLearnerUsername, i as isGeneratedLearnerUsername, a as availableLearnerUsername } from '../../../_/learner-username.mjs';

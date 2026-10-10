@@ -1,4 +1,4 @@
-import { i as isImpersonalVerb } from './near-future.mjs';
+import { i as isImpersonalVerb } from './impersonal-verbs.mjs';
 
 const NON_PASSIVIZABLE_INFINITIVES = /* @__PURE__ */ new Set([
   "avoir",

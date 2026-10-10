@@ -1,4 +1,4 @@
-import { aa as grammarTenseCode } from '../nitro/nitro.mjs';
+import { ad as grammarTenseCode } from '../nitro/nitro.mjs';
 
 function identificationFormParts(question) {
   if (question.literaryCitation) {

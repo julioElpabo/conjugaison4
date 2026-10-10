@@ -2,7 +2,7 @@ import { _ as __nuxt_component_0$1 } from './nuxt-link-icjx6oE7.mjs';
 import { defineComponent, computed, mergeProps, unref, withCtx, createTextVNode, toDisplayString, createVNode, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrRenderComponent, ssrInterpolate, ssrRenderList, ssrRenderAttr } from 'vue/server-renderer';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
-import { w as withDutchVariants, an as localeLanguageTag } from '../nitro/nitro.mjs';
+import { w as withDutchVariants, ar as localeLanguageTag } from '../nitro/nitro.mjs';
 import { i as isModeLandingSlug, m as modeLandingPage, M as MODE_LANDING_SLUGS } from '../_/mode-landing-pages.mjs';
 import { m as modeTensePages } from '../_/mode-tense-pages.mjs';
 import { b as useRoute, a as useLanguagePreferences, o as createError, u as useHead, s as useSeoMeta } from './server.mjs';

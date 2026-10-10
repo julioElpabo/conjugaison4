@@ -1,6 +1,6 @@
 import { defineComponent, computed, withAsyncContext, unref, mergeProps, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrInterpolate, ssrRenderAttr, ssrRenderList, ssrRenderClass } from 'vue/server-renderer';
-import { an as localeLanguageTag } from '../nitro/nitro.mjs';
+import { ar as localeLanguageTag } from '../nitro/nitro.mjs';
 import { b as useRoute, a as useLanguagePreferences, o as createError, u as useHead } from './server.mjs';
 import { u as useFetch } from './fetch-CBmzzU3B.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';

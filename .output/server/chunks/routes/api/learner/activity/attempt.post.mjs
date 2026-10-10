@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, c as createError, a4 as validateConjugationAnswer, a5 as validateAnswer, a6 as diagnoseLearnerError, u as useDatabase, a7 as LEARNER_ERROR_DETECTOR_VERSION, a8 as applicableLearnerErrorTypes } from '../../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, c as createError, a4 as validateConjugationAnswer, a5 as validateAnswer, a6 as diagnoseLearnerError, u as useDatabase, a7 as LEARNER_ERROR_DETECTOR_VERSION, a8 as applicableLearnerErrorTypes, a9 as questionExerciseKind } from '../../../../nitro/nitro.mjs';
 import { l as learnerRunIdentifier, a as learnerAttemptIdentifier, b as learnerChallengeSnapshot, c as learnerChallengeFingerprint, d as learnerChallengeLabel, e as learnerQuestionSnapshot, f as learnerFormKey } from '../../../../_/learner-progress.mjs';
 import { g as getLearnerSession } from '../../../../_/learner-session.mjs';
 import { r as readLimitedJsonBody } from '../../../../_/limited-json-body.mjs';
@@ -32,8 +32,10 @@ const attempt_post = defineEventHandler(async (event) => {
   if (!answer || typeof body.correct !== "boolean") {
     throw createError({ statusCode: 400, statusMessage: "Tentative invalide" });
   }
-  const correct = ((question.exerciseKind || challenge.exerciseKind) === "conjugation" ? validateConjugationAnswer(answer, question) : validateAnswer(answer, question.reponses)).isCorrect;
-  const diagnostics = correct ? [] : diagnoseLearnerError(answer, question);
+  const isConjugation = questionExerciseKind(question, challenge.exerciseKind) === "conjugation";
+  const storedVerbId = question.verbeId && question.verbeId > 0 ? question.verbeId : null;
+  const correct = (isConjugation ? validateConjugationAnswer(answer, question) : validateAnswer(answer, question.reponses)).isCorrect;
+  const diagnostics = correct || !isConjugation ? [] : diagnoseLearnerError(answer, question);
   const database = useDatabase();
   const connection = await database.getConnection();
   try {
@@ -59,7 +61,7 @@ const attempt_post = defineEventHandler(async (event) => {
     const formValues = [
       attemptId,
       questionIndex,
-      question.verbeId || null,
+      storedVerbId,
       question.tenseId || null,
       question.personId || null,
       question.infinitif || "",
@@ -80,7 +82,7 @@ const attempt_post = defineEventHandler(async (event) => {
       runDatabaseId,
       formKey,
       questionIndex,
-      question.verbeId || null,
+      storedVerbId,
       question.tenseId || null,
       question.personId || null,
       question.infinitif || "",
@@ -126,7 +128,7 @@ const attempt_post = defineEventHandler(async (event) => {
         attemptId,
         questionIndex,
         formKey,
-        question.verbeId || null,
+        storedVerbId,
         question.tenseId || null,
         question.personId || null,
         question.infinitif || "",
@@ -154,7 +156,7 @@ const attempt_post = defineEventHandler(async (event) => {
     }
     if (recorded) {
       if (attemptNumber === 1) {
-        const applicableTypes = applicableLearnerErrorTypes(question);
+        const applicableTypes = isConjugation ? applicableLearnerErrorTypes(question) : [];
         const errorTypes = new Set(diagnostics.map((diagnostic) => diagnostic.code));
         if (applicableTypes.length) {
           await connection.query(`

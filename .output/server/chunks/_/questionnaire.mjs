@@ -1,80 +1,11 @@
-import { u as useDatabase, a3 as decodePronominalSelectionId, aH as indirectRelative, aG as formatConjugationQuestion, aI as formatAnswer } from '../nitro/nitro.mjs';
-import { b as buildRadicalReference } from './radical-reference.mjs';
+import { aI as exerciseKindsFor, u as useDatabase, a3 as decodePronominalSelectionId, aJ as indirectRelative, aK as formatConjugationQuestion, aL as formatAnswer } from '../nitro/nitro.mjs';
+import { i as identifyInfinitives, f as formatNonFiniteQuestion } from './infinitive-identification.mjs';
 import { g as generatePronominalRow, r as resolveVariableAuxiliary } from './pronominal-formatter.mjs';
 import { M as MODE_IDENTIFICATION_INSTRUCTION, T as TENSE_IDENTIFICATION_INSTRUCTION } from './exercise-instructions.mjs';
 import { i as isPassivizableInfinitive } from './passive-voice.mjs';
-import { a as isNearFutureTense, i as isImpersonalVerb, b as buildNearFutureParadigm, d as isPronominalNearFutureInfinitive, n as nearFutureReflexivePronoun } from './near-future.mjs';
-
-function normalized$2(value) {
-  return value.trim().toLocaleLowerCase("fr-CH");
-}
-function upperFirst(value) {
-  return value ? value.charAt(0).toLocaleUpperCase("fr-CH") + value.slice(1) : value;
-}
-function variants(value) {
-  return [...new Set(value.split("-").map((part) => part.trim()).filter((part) => part && part !== "-"))];
-}
-function hasPresentParticiple(verb) {
-  return variants(verb.participe_present).length > 0;
-}
-function formatNonFiniteQuestion(verb, tense) {
-  const mode = normalized$2(tense.mode_name);
-  const tenseName = normalized$2(tense.name);
-  const infinitive = upperFirst(verb.infinitif);
-  let label;
-  let answers;
-  if (mode === "participe" && tenseName === "pr\xE9sent") {
-    label = "Le participe pr\xE9sent";
-    answers = variants(verb.participe_present).map(upperFirst);
-  } else if (mode === "participe" && tenseName === "pass\xE9") {
-    label = "Le participe pass\xE9";
-    answers = variants(verb.participe_passe).map(upperFirst);
-  } else if (mode === "g\xE9rondif" && tenseName === "pr\xE9sent" && hasPresentParticiple(verb)) {
-    label = "Le g\xE9rondif pr\xE9sent";
-    answers = variants(verb.participe_present).map((form) => `En ${form}`);
-  } else if (mode === "g\xE9rondif" && tenseName === "pass\xE9" && hasPresentParticiple(verb) && verb.auxiliaire_participe_present) {
-    label = "Le g\xE9rondif pass\xE9";
-    answers = variants(verb.participe_passe).map((form) => `En ${verb.auxiliaire_participe_present} ${form}`);
-  } else if (mode === "infinitif" && tenseName === "pr\xE9sent") {
-    label = "L\u2019infinitif pr\xE9sent";
-    answers = [upperFirst(verb.infinitif)];
-  } else if (mode === "infinitif" && tenseName === "pass\xE9" && verb.auxiliaire_infinitif) {
-    label = "L\u2019infinitif pass\xE9";
-    const auxiliary = /^s[’']|^se\s/u.test(normalized$2(verb.infinitif)) ? "s\u2019\xEAtre" : normalized$2(verb.auxiliaire_infinitif);
-    answers = variants(verb.participe_passe).map((form) => upperFirst(`${auxiliary} ${form}`));
-  } else {
-    return null;
-  }
-  if (answers.length === 0) return null;
-  const radicalReference = buildRadicalReference({
-    infinitive: verb.infinitif,
-    mode: tense.mode_name,
-    tense: tense.name,
-    personId: null,
-    conjugation: answers[0],
-    isCompound: Boolean(tense.is_compound) && !(mode === "participe" && tenseName === "pass\xE9")
-  }, verb.present_nous ? [{ mode: "indicatif", tense: "pr\xE9sent", personId: 7, pronoun: "nous", form: verb.present_nous }] : []);
-  return {
-    id: `n-${verb.id}-${tense.id}`,
-    verbeId: Number(verb.id),
-    tenseId: Number(tense.id),
-    personId: null,
-    titre: infinitive,
-    consigne: `${label} de ${infinitive}`,
-    reponses: answers,
-    reponsesPourCorrige: answers,
-    infinitif: verb.infinitif,
-    temps: tense.name,
-    mode: tense.mode_name,
-    ...tense.code ? { tenseCode: tense.code } : {},
-    ...tense.mode_code ? { modeCode: tense.mode_code } : {},
-    isCompound: Boolean(tense.is_compound),
-    conjugaison1: answers[0],
-    conjugaison2: answers[1] || "",
-    conjugaison3: answers[2] || "",
-    ...radicalReference ? { radicalReference } : {}
-  };
-}
+import { i as isImpersonalVerb } from './impersonal-verbs.mjs';
+import { b as buildRadicalReference } from './radical-reference.mjs';
+import { i as isNearFutureTense, b as buildNearFutureParadigm, a as isPronominalNearFutureInfinitive, n as nearFutureReflexivePronoun } from './near-future.mjs';
 
 function normalized$1(value) {
   return value.trim().toLocaleLowerCase("fr-CH");
@@ -500,6 +431,9 @@ function identificationQuestion(row, citation, modeOnly = false, confusions = []
     pronom: pronoun,
     temps: row.temps_name,
     mode: row.mode_name,
+    isCompound: Boolean(row.is_compound),
+    ...row.tense_code ? { tenseCode: row.tense_code } : {},
+    ...row.mode_code ? { modeCode: row.mode_code } : {},
     conjugaison1: row.conjugaison1,
     conjugaison2: row.conjugaison2 || "",
     conjugaison3: row.conjugaison3 || "",
@@ -690,23 +624,16 @@ async function validateSelections(request) {
   return tenseResult[0];
 }
 async function generateMixedQuestionnaire(request, generate = generateQuestionnaire) {
-  const conjugationCount = Math.floor(request.questionCount / 2) + (request.questionCount % 2 && Math.random() < 0.5 ? 1 : 0);
-  const identificationCount = request.questionCount - conjugationCount;
-  const conjugation = conjugationCount ? await generate({
-    ...request,
-    exerciseKind: "conjugation",
-    questionCount: conjugationCount
-  }) : [];
-  const identification = identificationCount ? await generate({
-    ...request,
-    exerciseKind: "tense-identification",
-    questionCount: identificationCount
-  }) : [];
-  const groups = [
-    shuffle(conjugation).map((question) => ({ ...question, exerciseKind: "conjugation" })),
-    shuffle(identification).map((question) => ({ ...question, exerciseKind: "tense-identification" }))
-  ];
-  if (groups[1].length > groups[0].length || groups[1].length === groups[0].length && Math.random() < 0.5) groups.reverse();
+  const kinds = shuffle(exerciseKindsFor(request));
+  const groups = [];
+  for (const [index, kind] of kinds.entries()) {
+    const count = Math.floor(request.questionCount / kinds.length) + (index < request.questionCount % kinds.length ? 1 : 0);
+    if (!count) continue;
+    const questions2 = await generate({ ...request, exerciseKind: kind, exerciseKinds: void 0, questionCount: count });
+    if (!questions2.length) throw new QuestionnaireSelectionError("Aucune question disponible pour un des types d\u2019exercice choisis");
+    groups.push(shuffle(questions2).map((question) => ({ ...question, exerciseKind: kind })));
+  }
+  groups.sort((left, right) => right.length - left.length);
   const questions = [];
   for (let index = 0; index < Math.max(...groups.map((group) => group.length)); index++) {
     for (const group of groups) {
@@ -717,8 +644,19 @@ async function generateMixedQuestionnaire(request, generate = generateQuestionna
 }
 async function generateQuestionnaire(request) {
   var _a, _b, _c, _d, _e;
-  if (request.exerciseKind === "mixed") return generateMixedQuestionnaire(request);
-  const selectedTenses = await validateSelections(request);
+  const kinds = exerciseKindsFor(request);
+  if (!kinds.length) throw new QuestionnaireSelectionError("Choisis au moins un type d\u2019exercice");
+  if (kinds.length > 1) return generateMixedQuestionnaire(request);
+  request = {
+    ...request,
+    exerciseKind: kinds[0],
+    exerciseKinds: void 0,
+    ...kinds[0] !== "conjugation" ? { voiceMode: "active" } : {}
+  };
+  const isInfinitive = request.exerciseKind === "infinitive-identification";
+  const allSelectedTenses = await validateSelections(request);
+  const selectedTenses = isInfinitive ? allSelectedTenses.filter((tense) => normalized(tense.mode_name) !== "infinitif" && !isNearFutureTense(tense)) : allSelectedTenses;
+  if (!selectedTenses.length) throw new QuestionnaireSelectionError("Pour trouver l\u2019infinitif, choisis un temps autre que l\u2019infinitif ou le futur proche");
   const nonFiniteModes = ["participe", "g\xE9rondif", "infinitif"];
   const finiteTenses = selectedTenses.filter((row) => !nonFiniteModes.includes(normalized(row.mode_name)));
   const nonFiniteTenses = selectedTenses.filter((row) => nonFiniteModes.includes(normalized(row.mode_name)));
@@ -732,18 +670,19 @@ async function generateQuestionnaire(request) {
   const wantsActiveVoice = voiceMode !== "passive";
   const wantsPassiveVoice = request.exerciseKind === "conjugation" && voiceMode !== "active";
   const passiveOnly = request.exerciseKind === "conjugation" && voiceMode === "passive";
-  const requestedComplementOptions = wantsActiveVoice ? request.complementOptions || [] : [];
+  const requestedComplementOptions = request.exerciseKind === "conjugation" && wantsActiveVoice ? request.complementOptions || [] : [];
   const onlyBeforeComplements = requestedComplementOptions.length > 0 && requestedComplementOptions.every((option) => option.endsWith("-before"));
   const verbIds = request.verbIds.filter((id) => id > 0);
   const pronominalUseIds = request.verbIds.filter((id) => id < 0).map(decodePronominalSelectionId).filter((id) => id !== null);
-  const usesLiteraryCitations = request.exerciseKind === "mode-identification" || request.exerciseKind === "tense-identification" && request.identificationSource === "literary-corpus";
+  const usesLiteraryCitations = request.exerciseKind === "mode-identification" || (request.exerciseKind === "tense-identification" || isInfinitive) && request.identificationSource === "literary-corpus";
   if (usesLiteraryCitations) {
     const citations = await validatedLiteraryCitations(
       null,
       selectedTenses.map((row) => Number(row.id)),
       (_b = request.literaryRegister) != null ? _b : "all"
     );
-    const literaryQuestions = [...citations.values()].flat().map((citation) => literaryIdentificationQuestion(citation, request.exerciseKind === "mode-identification"));
+    let literaryQuestions = [...citations.values()].flat().map((citation) => literaryIdentificationQuestion(citation, request.exerciseKind === "mode-identification"));
+    if (isInfinitive) literaryQuestions = await identifyInfinitives(literaryQuestions);
     if (!literaryQuestions.length) {
       throw new QuestionnaireSelectionError("Aucune citation valid\xE9e ne correspond aux temps s\xE9lectionn\xE9s");
     }
@@ -1028,7 +967,7 @@ async function generateQuestionnaire(request) {
       }
     }
   }
-  if (nonFiniteTenses.length > 0 && request.exerciseKind === "conjugation" && wantsActiveVoice && !onlyBeforeComplements) {
+  if (nonFiniteTenses.length > 0 && (request.exerciseKind === "conjugation" || isInfinitive) && wantsActiveVoice && !onlyBeforeComplements) {
     const verbs = [];
     const selectedNonFiniteRequirePresentParticiple = nonFiniteTenses.every((tense) => {
       const mode = normalized(tense.mode_name);
@@ -1094,7 +1033,7 @@ async function generateQuestionnaire(request) {
     for (const verb of verbs) {
       for (const tense of nonFiniteTenses) {
         const question = formatNonFiniteQuestion(verb, tense);
-        if (question) questions.push(question);
+        if (question) questions.push(isInfinitive ? { ...question, consigne: question.conjugaison1 || question.reponses[0], radicalReference: void 0 } : question);
       }
     }
   }
@@ -1109,6 +1048,7 @@ async function generateQuestionnaire(request) {
   if (request.exerciseKind === "mode-identification") {
     return balancedModeIdentificationQuestions(questions, request.questionCount);
   }
+  if (isInfinitive) return balancedIdentificationQuestions(await identifyInfinitives(questions), request.questionCount);
   return request.exerciseKind === "tense-identification" ? balancedIdentificationQuestions(questions, request.questionCount) : diverseConjugationQuestions(questions, request.questionCount, Math.random, request.inclusivePronouns);
 }
 

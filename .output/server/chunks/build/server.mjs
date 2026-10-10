@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, toRef, isRef, watch, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, isReadonly, isShallow, isReactive, toRaw } from 'vue';
-import { am as SUPPORTED_LOCALES, w as withDutchVariants, b1 as withSwissObjectAliases, b2 as parseURL, b3 as encodePath, b4 as decodePath, b5 as localeFromPath, z as normalizeLocale, b6 as getRequestHeaders, b7 as klona, as as hasProtocol, au as isScriptProtocol, at as joinURL, c as createError$1, b8 as withQuery, L as getRequestURL, b9 as DEFAULT_LANGUAGE_PREFERENCES, aq as localizePath, ba as getRequestHeader, bb as isEqual, bc as sanitizeStatusCode, bd as getContext, t as setCookie, x as getCookie, v as deleteCookie, be as $fetch, an as localeLanguageTag, bf as defu, R as stripLocaleFromPath, aA as executeAsync, bg as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { aq as SUPPORTED_LOCALES, w as withDutchVariants, b6 as withSwissObjectAliases, b7 as parseURL, b8 as encodePath, b9 as decodePath, ba as localeFromPath, z as normalizeLocale, bb as getRequestHeaders, bc as klona, aw as hasProtocol, ay as isScriptProtocol, ax as joinURL, c as createError$1, bd as withQuery, L as getRequestURL, be as DEFAULT_LANGUAGE_PREFERENCES, au as localizePath, bf as getRequestHeader, bg as isEqual, bh as sanitizeStatusCode, bi as getContext, t as setCookie, x as getCookie, v as deleteCookie, bj as $fetch, ar as localeLanguageTag, bk as defu, R as stripLocaleFromPath, aE as executeAsync, bl as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useHead$1, a as useSeoMeta$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -594,6 +594,30 @@ const uiMessages = {
   "Inclure le pronom": withDutchVariants({ de: "Pronomen einbeziehen", en: "Include the pronoun", it: "Includi il pronome", es: "Incluir el pronombre", nl: "Het voornaamwoord opnemen" }),
   "Il appara\xEEtra ponctuellement dans les questions \xE0 la troisi\xE8me personne du singulier.": withDutchVariants({ de: "Es erscheint gelegentlich in Fragen in der dritten Person Singular.", en: "It will occasionally appear in third-person singular questions.", it: "Apparir\xE0 occasionalmente nelle domande alla terza persona singolare.", es: "Aparecer\xE1 ocasionalmente en preguntas en tercera persona del singular.", nl: "Het komt af en toe voor in vragen in de derde persoon enkelvoud." }),
   "Un m\xE9lange des deux": withDutchVariants({ de: "Eine Mischung aus beiden", en: "A mix of both", it: "Un misto dei due", es: "Una mezcla de ambos", nl: "Een mix van beide" }),
+  "Trouver l\u2019infinitif": withDutchVariants({ "de": "Den Infinitiv finden", "en": "Find the infinitive", "it": "Trovare l\u2019infinito", "es": "Encontrar el infinitivo", "nl": "De infinitief vinden" }),
+  "Trouver le mode": withDutchVariants({ "de": "Den Modus bestimmen", "en": "Identify the mood", "it": "Trovare il modo", "es": "Identificar el modo", "nl": "De wijs herkennen" }),
+  "\xC9cris l\u2019infinitif": withDutchVariants({ "de": "Schreibe den Infinitiv", "en": "Write the infinitive", "it": "Scrivi l\u2019infinito", "es": "Escribe el infinitivo", "nl": "Schrijf de infinitief" }),
+  "Coche un ou plusieurs types d\u2019exercice pour les m\xE9langer.": withDutchVariants({ "de": "W\xE4hle einen oder mehrere \xDCbungstypen aus, um sie zu mischen.", "en": "Select one or more exercise types to mix them.", "it": "Seleziona uno o pi\xF9 tipi di esercizio per mescolarli.", "es": "Marca uno o varios tipos de ejercicio para mezclarlos.", "nl": "Kies een of meer soorten oefeningen om ze te mengen." }),
+  "Choisis au moins un type d\u2019exercice.": withDutchVariants({ "de": "W\xE4hle mindestens einen \xDCbungstyp.", "en": "Choose at least one exercise type.", "it": "Scegli almeno un tipo di esercizio.", "es": "Elige al menos un tipo de ejercicio.", "nl": "Kies minstens \xE9\xE9n soort oefening." }),
+  "Indice {number}": withDutchVariants({ de: "Hinweis {number}", en: "Hint {number}", it: "Indizio {number}", es: "Pista {number}", nl: "Hint {number}" }),
+  "Il s\u2019agit du": withDutchVariants({ de: "Es handelt sich um das", en: "It is the", it: "Si tratta del", es: "Se trata del", nl: "Het gaat om het" }),
+  "C\u2019est le": withDutchVariants({ de: "Das ist das", en: "This is the", it: "\xC8 il", es: "Es el", nl: "Dit is het" }),
+  "verbe {verb}": withDutchVariants({ de: "Verb {verb}", en: "verb {verb}", it: "verbo {verb}", es: "verbo {verb}", nl: "werkwoord {verb}" }),
+  "Ce verbe signifie :": withDutchVariants({ de: "Dieses Verb bedeutet:", en: "This verb means:", it: "Questo verbo significa:", es: "Este verbo significa:", nl: "Dit werkwoord betekent:" }),
+  "Ce verbe fait partie du {group}.": withDutchVariants({ de: "Dieses Verb geh\xF6rt zur {group}.", en: "This verb belongs to the {group}.", it: "Questo verbo appartiene al {group}.", es: "Este verbo pertenece al {group}.", nl: "Dit werkwoord hoort bij de {group}." }),
+  "Terminaison": withDutchVariants({ de: "Endung", en: "Ending", it: "Desinenza", es: "Terminaci\xF3n", nl: "Uitgang" }),
+  "D\xE9finition indisponible pour ce verbe.": withDutchVariants({ de: "F\xFCr dieses Verb ist keine Definition verf\xFCgbar.", en: "No definition is available for this verb.", it: "Nessuna definizione disponibile per questo verbo.", es: "No hay definici\xF3n disponible para este verbo.", nl: "Er is geen definitie beschikbaar voor dit werkwoord." }),
+  "L\u2019infinitif est la forme du verbe donn\xE9e dans le dictionnaire.": withDutchVariants({ de: "Der Infinitiv ist die Verbform, die im W\xF6rterbuch steht.", en: "The infinitive is the form of the verb found in the dictionary.", it: "L\u2019infinito \xE8 la forma del verbo riportata nel dizionario.", es: "El infinitivo es la forma del verbo que aparece en el diccionario.", nl: "De infinitief is de vorm van het werkwoord die in het woordenboek staat." }),
+  "Un autre indice": withDutchVariants({ "de": "Ein weiterer Hinweis", "en": "Another hint", "it": "Un altro indizio", "es": "Otra pista", "nl": "Nog een hint" }),
+  "Quel est l\u2019infinitif du verbe surlign\xE9\xA0?": withDutchVariants({ "de": "Wie lautet der Infinitiv des hervorgehobenen Verbs?", "en": "What is the infinitive of the highlighted verb?", "it": "Qual \xE8 l\u2019infinito del verbo evidenziato?", "es": "\xBFCu\xE1l es el infinitivo del verbo resaltado?", "nl": "Wat is de infinitief van het gemarkeerde werkwoord?" }),
+  "Cette forme peut correspondre \xE0 plusieurs verbes. Un infinitif possible suffit.": withDutchVariants({ "de": "Diese Form kann zu mehreren Verben geh\xF6ren. Ein m\xF6glicher Infinitiv gen\xFCgt.", "en": "This form can belong to several verbs. One possible infinitive is enough.", "it": "Questa forma pu\xF2 corrispondere a pi\xF9 verbi. Basta un infinito possibile.", "es": "Esta forma puede corresponder a varios verbos. Basta con un infinitivo posible.", "nl": "Deze vorm kan bij meerdere werkwoorden horen. E\xE9n mogelijke infinitief is voldoende." }),
+  "C\u2019est un verbe pronominal : conserve \xAB se \xBB ou \xAB s\u2019 \xBB devant son infinitif.": withDutchVariants({ "de": "Es ist ein reflexives Verb: Behalte \xAB se \xBB oder \xAB s\u2019 \xBB vor dem Infinitiv bei.", "en": "It is a pronominal verb: keep \u201Cse\u201D or \u201Cs\u2019\u201D before its infinitive.", "it": "\xC8 un verbo pronominale: mantieni \xAB se \xBB o \xAB s\u2019 \xBB davanti all\u2019infinito.", "es": "Es un verbo pronominal: conserva \xAB se \xBB o \xAB s\u2019 \xBB delante del infinitivo.", "nl": "Het is een wederkerend werkwoord: behoud \xAB se \xBB of \xAB s\u2019 \xBB v\xF3\xF3r de infinitief." }),
+  "Rep\xE8re le participe pass\xE9. Cherche l\u2019infinitif du verbe principal, pas celui de l\u2019auxiliaire.": withDutchVariants({ "de": "Finde das Partizip Perfekt. Suche den Infinitiv des Hauptverbs, nicht des Hilfsverbs.", "en": "Locate the past participle. Find the infinitive of the main verb, not the auxiliary.", "it": "Individua il participio passato. Cerca l\u2019infinito del verbo principale, non dell\u2019ausiliare.", "es": "Localiza el participio pasado. Busca el infinitivo del verbo principal, no del auxiliar.", "nl": "Zoek het voltooid deelwoord. Zoek de infinitief van het hoofdwerkwoord, niet van het hulpwerkwoord." }),
+  "Son infinitif se termine par \xAB -{ending} \xBB.": withDutchVariants({ "de": "Sein Infinitiv endet auf \xAB -{ending} \xBB.", "en": "Its infinitive ends in \u201C-{ending}\u201D.", "it": "Il suo infinito termina in \xAB -{ending} \xBB.", "es": "Su infinitivo termina en \xAB -{ending} \xBB.", "nl": "De infinitief eindigt op \xAB -{ending} \xBB." }),
+  "Sans autre contexte, plusieurs infinitifs conviennent. Une seule de ces r\xE9ponses suffit.": withDutchVariants({ "de": "Ohne weiteren Kontext passen mehrere Infinitive. Eine dieser Antworten gen\xFCgt.", "en": "Without further context, several infinitives fit. One of these answers is enough.", "it": "Senza altro contesto, pi\xF9 infiniti sono possibili. Basta una di queste risposte.", "es": "Sin m\xE1s contexto, varios infinitivos son posibles. Basta con una de estas respuestas.", "nl": "Zonder verdere context passen meerdere infinitieven. E\xE9n van deze antwoorden is voldoende." }),
+  "Le pronom fait partie du verbe pronominal : on le conserve sous la forme \xAB se \xBB ou \xAB s\u2019 \xBB \xE0 l\u2019infinitif.": withDutchVariants({ "de": "Das Pronomen geh\xF6rt zum reflexiven Verb: Im Infinitiv bleibt es als \xAB se \xBB oder \xAB s\u2019 \xBB erhalten.", "en": "The pronoun belongs to the pronominal verb: keep it as \u201Cse\u201D or \u201Cs\u2019\u201D in the infinitive.", "it": "Il pronome fa parte del verbo pronominale: all\u2019infinito si mantiene \xAB se \xBB o \xAB s\u2019 \xBB.", "es": "El pronombre forma parte del verbo pronominal: se conserva como \xAB se \xBB o \xAB s\u2019 \xBB en el infinitivo.", "nl": "Het voornaamwoord hoort bij het wederkerende werkwoord: behoud het als \xAB se \xBB of \xAB s\u2019 \xBB bij de infinitief." }),
+  "Tu as donn\xE9 l\u2019infinitif de l\u2019auxiliaire. Ici, on cherche celui du verbe principal, port\xE9 par le participe pass\xE9.": withDutchVariants({ "de": "Du hast den Infinitiv des Hilfsverbs angegeben. Gesucht ist der des Hauptverbs, das im Partizip Perfekt steht.", "en": "You gave the infinitive of the auxiliary. Here we want the main verb, expressed by the past participle.", "it": "Hai dato l\u2019infinito dell\u2019ausiliare. Qui cerchiamo quello del verbo principale, espresso dal participio passato.", "es": "Has dado el infinitivo del auxiliar. Aqu\xED buscamos el del verbo principal, expresado por el participio pasado.", "nl": "Je gaf de infinitief van het hulpwerkwoord. Hier zoeken we het hoofdwerkwoord, uitgedrukt door het voltooid deelwoord." }),
+  "\xC0 un temps compos\xE9, l\u2019auxiliaire accompagne le verbe principal. C\u2019est l\u2019infinitif de ce dernier qu\u2019on cherche.": withDutchVariants({ "de": "Bei einer zusammengesetzten Zeit begleitet das Hilfsverb das Hauptverb. Gesucht ist der Infinitiv des Hauptverbs.", "en": "In a compound tense, the auxiliary accompanies the main verb. We want the infinitive of the main verb.", "it": "In un tempo composto, l\u2019ausiliare accompagna il verbo principale. Cerchiamo l\u2019infinito di quest\u2019ultimo.", "es": "En un tiempo compuesto, el auxiliar acompa\xF1a al verbo principal. Buscamos el infinitivo de este \xFAltimo.", "nl": "Bij een samengestelde tijd staat het hulpwerkwoord bij het hoofdwerkwoord. We zoeken de infinitief van dat hoofdwerkwoord." }),
   "Type d\u2019exercice": withDutchVariants({ de: "\xDCbungstyp", en: "Exercise type", it: "Tipo di esercizio", es: "Tipo de ejercicio", nl: "Soort oefening" }),
   "Choix des verbes": withDutchVariants({ de: "Auswahl der Verben", en: "Verb selection", it: "Scelta dei verbi", es: "Selecci\xF3n de verbos", nl: "Werkwoordselectie" }),
   "Conjuguer": withDutchVariants({ de: "Konjugieren", en: "Conjugate", it: "Coniugare", es: "Conjugar", nl: "Vervoegen" }),
@@ -1625,7 +1649,7 @@ const _routes = [
   {
     name: "admin-challenges",
     path: "/admin/challenges",
-    component: () => import('./challenges-BhAPSoeH.mjs')
+    component: () => import('./challenges-yWgyoj58.mjs')
   },
   {
     name: "admin-characters",
@@ -1655,17 +1679,17 @@ const _routes = [
   {
     name: "admin-feedbacks",
     path: "/admin/feedbacks",
-    component: () => import('./feedbacks-B0HhET9x.mjs')
+    component: () => import('./feedbacks-aqfvltfj.mjs')
   },
   {
     name: "admin-help-verification",
     path: "/admin/help-verification",
-    component: () => import('./help-verification-Do34aVrG.mjs')
+    component: () => import('./help-verification-YMj35AI4.mjs')
   },
   {
     name: "admin-helps",
     path: "/admin/helps",
-    component: () => import('./helps-CVRmP47p.mjs')
+    component: () => import('./helps-swANAk_T.mjs')
   },
   {
     name: "admin-literary-corpus",
@@ -1690,7 +1714,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-BnNBY3Cm.mjs')
+    component: () => import('./users-tM8hNcWI.mjs')
   },
   {
     name: "admin-verbes",
@@ -1710,12 +1734,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-BxBNNJRl.mjs')
+    component: () => import('./_code_-BizjyR51.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-Do2c_rdX.mjs')
+    component: () => import('./_slug_-CdQCLXQc.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1760,7 +1784,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-DxDjFbmq.mjs')
+    component: () => import('./exercices-de-conjugaison-CfXB6Ls0.mjs')
   },
   {
     name: "mon-compte",
@@ -1771,12 +1795,12 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-CLjHSIUu.mjs')
+    component: () => import('./my-page-BBtBV2tt.mjs')
   },
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-aOODJkcs.mjs')
+    component: () => import('./nouveau-defi-B3zduPW0.mjs')
   },
   {
     name: "signin",
@@ -1786,7 +1810,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-oXVMr-_8.mjs')
+    component: () => import('./index-DbeCeu6D.mjs')
   },
   {
     name: "mode-tense",
@@ -1806,7 +1830,7 @@ const _routes = [
   {
     name: "localized-admin-challenges",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/challenges",
-    component: () => import('./challenges-BhAPSoeH.mjs')
+    component: () => import('./challenges-yWgyoj58.mjs')
   },
   {
     name: "localized-admin-characters",
@@ -1836,17 +1860,17 @@ const _routes = [
   {
     name: "localized-admin-feedbacks",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/feedbacks",
-    component: () => import('./feedbacks-B0HhET9x.mjs')
+    component: () => import('./feedbacks-aqfvltfj.mjs')
   },
   {
     name: "localized-admin-help-verification",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/help-verification",
-    component: () => import('./help-verification-Do34aVrG.mjs')
+    component: () => import('./help-verification-YMj35AI4.mjs')
   },
   {
     name: "localized-admin-helps",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/helps",
-    component: () => import('./helps-CVRmP47p.mjs')
+    component: () => import('./helps-swANAk_T.mjs')
   },
   {
     name: "localized-admin-literary-corpus",
@@ -1871,7 +1895,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/users",
-    component: () => import('./users-BnNBY3Cm.mjs')
+    component: () => import('./users-tM8hNcWI.mjs')
   },
   {
     name: "localized-admin-verbes",
@@ -1891,12 +1915,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defi/:code()",
-    component: () => import('./_code_-BxBNNJRl.mjs')
+    component: () => import('./_code_-BizjyR51.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defis/:slug()",
-    component: () => import('./_slug_-Do2c_rdX.mjs')
+    component: () => import('./_slug_-CdQCLXQc.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1941,7 +1965,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-DxDjFbmq.mjs')
+    component: () => import('./exercices-de-conjugaison-CfXB6Ls0.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1952,12 +1976,12 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-CLjHSIUu.mjs')
+    component: () => import('./my-page-BBtBV2tt.mjs')
   },
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/nouveau-defi",
-    component: () => import('./nouveau-defi-aOODJkcs.mjs')
+    component: () => import('./nouveau-defi-B3zduPW0.mjs')
   },
   {
     name: "localized-signin",
@@ -1967,7 +1991,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/",
-    component: () => import('./index-oXVMr-_8.mjs')
+    component: () => import('./index-DbeCeu6D.mjs')
   },
   {
     name: "localized-mode-tense",

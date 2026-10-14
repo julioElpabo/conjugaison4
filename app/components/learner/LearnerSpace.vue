@@ -17,6 +17,7 @@ import type { AppLocale } from '~~/shared/i18n/locales'
 import type { SavedChallenge } from '~~/shared/types/saved-challenge'
 import type { LearnerPreferences, TenseClassification } from '~~/shared/types/learner-preferences'
 import { learnerSpaceCopy, learnerSpaceText } from '~~/shared/i18n/learner-space'
+import { savedChallengeRemovalCopy } from '~~/shared/i18n/saved-challenge-removal'
 import { groupSavedChallenges } from '~~/shared/utils/saved-challenge-dates'
 import {
   localizedLearnerErrorDomain,
@@ -246,6 +247,24 @@ const requestedTab = (value: unknown): UserTab => (
 )
 const activeTab = ref<UserTab>(requestedTab(route.query.tab))
 const savedChallenges = ref<SavedChallenge[]>([])
+const removalCopy = computed(() => savedChallengeRemovalCopy(interfaceLocale.value))
+const {
+  selecting: selectingSavedChallenges, selectedCodes: selectedSavedChallengeCodes,
+  selected: selectedSavedChallenges, allSelected: allSavedChallengesSelected,
+  targets: savedChallengeRemovalTargets, pending: savedChallengeRemovalPending,
+  failed: savedChallengeRemovalFailed, removedCount: savedChallengeRemovedCount,
+  toggleSelecting: toggleSavedChallengeSelection, toggle: toggleSavedChallenge,
+  toggleAll: toggleAllSavedChallenges, requestRemoval: requestSavedChallengeRemoval,
+  cancel: cancelSavedChallengeRemoval, confirm: confirmSavedChallengeRemoval,
+} = useSavedChallengeRemoval(savedChallenges, () => props.readOnly)
+const savedChallengesHeading = useTemplateRef<HTMLElement>('saved-challenges-heading')
+
+async function removeSavedChallenges() {
+  if (await confirmSavedChallengeRemoval()) {
+    await nextTick()
+    savedChallengesHeading.value?.focus({ preventScroll: true })
+  }
+}
 const savedChallengesNow = ref(new Date())
 const savedChallengeGroups = computed(() => groupSavedChallenges(savedChallenges.value, savedChallengesNow.value, interfaceLocale.value))
 let savedChallengesClock: ReturnType<typeof setInterval> | undefined
@@ -1866,11 +1885,22 @@ async function confirmAccountAction() {
       <div class="learner-panel__heading">
         <div>
           <p class="learner-eyebrow">{{ savedCopy.eyebrow }}</p>
-          <h2 id="saved-challenges-title">{{ savedCopy.title }}</h2>
+          <h2 id="saved-challenges-title" ref="saved-challenges-heading" tabindex="-1">{{ savedCopy.title }}</h2>
         </div>
+        <button v-if="!props.readOnly && savedChallenges.length" type="button" class="saved-challenges__select" :aria-pressed="selectingSavedChallenges" :disabled="savedChallengeAdding || savedChallengesPending" @click="toggleSavedChallengeSelection">
+          {{ selectingSavedChallenges ? removalCopy.cancel : removalCopy.select }}
+        </button>
       </div>
 
       <p class="saved-challenges__intro">{{ savedCopy.intro }}</p>
+      <p class="saved-challenges__notice" role="status">{{ savedChallengeRemovedCount ? removalCopy.removed(savedChallengeRemovedCount) : '' }}</p>
+
+      <div v-if="selectingSavedChallenges && !props.readOnly && savedChallenges.length" class="saved-challenges__selection">
+        <button type="button" @click="toggleAllSavedChallenges">{{ allSavedChallengesSelected ? removalCopy.deselectAll : removalCopy.selectAll }}</button>
+        <button type="button" class="saved-challenges__remove" :disabled="!selectedSavedChallenges.length || savedChallengeAdding || savedChallengesPending" @click="requestSavedChallengeRemoval(selectedSavedChallenges)">
+          {{ removalCopy.removeSelected(selectedSavedChallenges.length) }}
+        </button>
+      </div>
 
       <form v-if="!props.readOnly" class="saved-challenge-form" :class="{ 'is-collapsed': !savedChallengeFormOpen }" @submit.prevent="addSavedChallenge">
         <div class="saved-challenge-form__header">
@@ -1920,7 +1950,12 @@ async function confirmAccountAction() {
               :date-label="dateLabel"
               :date-time="dateTime"
               :read-only="props.readOnly"
+              :selecting="selectingSavedChallenges"
+              :selected="selectedSavedChallengeCodes.includes(challenge.code)"
+              :removal-disabled="savedChallengeAdding || savedChallengesPending"
               @updated="updateSavedChallenge"
+              @toggle-selected="toggleSavedChallenge(challenge.code)"
+              @remove="requestSavedChallengeRemoval([challenge])"
             />
           </div>
         </section>
@@ -1929,6 +1964,14 @@ async function confirmAccountAction() {
         <strong>{{ savedCopy.empty }}</strong>
         <span>{{ savedCopy.emptyHint }}</span>
       </p>
+      <LearnerSavedChallengeRemoveDialog
+        v-if="savedChallengeRemovalTargets.length && !props.readOnly"
+        :challenges="savedChallengeRemovalTargets"
+        :pending="savedChallengeRemovalPending"
+        :failed="savedChallengeRemovalFailed"
+        @close="cancelSavedChallengeRemoval"
+        @confirm="removeSavedChallenges"
+      />
     </section>
 
     <section v-else-if="activeTab === 'challenges' || activeTab === 'history'" class="learner-panel" aria-labelledby="challenges-title">
@@ -5938,6 +5981,13 @@ async function confirmAccountAction() {
   letter-spacing: .018em;
 }
 
+.saved-challenges__select,.saved-challenges__selection button{padding:10px 14px;border:1px solid var(--line);border-radius:10px;color:var(--ink);background:var(--surface);font:inherit;font-size:.85rem;cursor:pointer}
+.saved-challenges__selection{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.saved-challenges__selection .saved-challenges__remove{color:var(--danger);border-color:var(--danger)}
+.saved-challenges__select:disabled,.saved-challenges__selection button:disabled{opacity:.5;cursor:default}
+.saved-challenges__select:focus-visible,.saved-challenges__selection button:focus-visible,#saved-challenges-title:focus-visible{outline:3px solid #8c6cba;outline-offset:3px}
+.saved-challenges__notice{color:var(--success);font-size:.85rem}.saved-challenges__notice:empty{margin:0}
+@media(max-width:480px){.saved-challenges__selection button{width:100%}}
 .saved-challenges__intro {
   margin: -12px 0 0;
   color: var(--muted);

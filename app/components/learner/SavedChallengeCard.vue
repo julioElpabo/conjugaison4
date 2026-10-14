@@ -2,13 +2,19 @@
 import QrcodeVue from 'qrcode.vue'
 import type { SavedChallenge } from '~~/shared/types/saved-challenge'
 import { savedChallengeCardCopy } from '~~/shared/i18n/saved-challenge-card'
+import { savedChallengeRemovalCopy } from '~~/shared/i18n/saved-challenge-removal'
 import { copyText } from '~/utils/copy-text'
 
-const props = defineProps<{ challenge: SavedChallenge, dateLabel: string, dateTime?: string, readOnly?: boolean }>()
-const emit = defineEmits<{ updated: [value: { code: string, title: string, description: string }] }>()
+const props = defineProps<{ challenge: SavedChallenge, dateLabel: string, dateTime?: string, readOnly?: boolean, selecting?: boolean, selected?: boolean, removalDisabled?: boolean }>()
+const emit = defineEmits<{
+  updated: [value: { code: string, title: string, description: string }]
+  remove: []
+  toggleSelected: []
+}>()
 const { interfaceLocale, localePath } = useLanguagePreferences()
 const config = useRuntimeConfig()
 const copy = computed(() => savedChallengeCardCopy(interfaceLocale.value))
+const removalCopy = computed(() => savedChallengeRemovalCopy(interfaceLocale.value))
 const challengePath = computed(() => localePath(`/defi/${props.challenge.code}`))
 const shareUrl = computed(() => new URL(challengePath.value, import.meta.client ? window.location.origin : String(config.public.siteUrl)).toString())
 const qrOpen = ref(false)
@@ -66,11 +72,18 @@ onBeforeUnmount(() => { if (copyTimer) clearTimeout(copyTimer) })
 </script>
 
 <template>
-  <article class="saved-card">
+  <article class="saved-card" :class="{ 'saved-card--selected': selecting && selected }">
     <header class="saved-card__top">
+      <label v-if="selecting && !readOnly" class="saved-card__selection">
+        <input type="checkbox" :checked="selected" :aria-label="removalCopy.selectChallenge(challenge.title)" @change="emit('toggleSelected')">
+        {{ removalCopy.select }}
+      </label>
       <div class="saved-card__heading">
         <time v-if="dateTime" :datetime="dateTime">{{ dateLabel }}</time><span v-else />
-        <button v-if="!readOnly && !editing" ref="edit-button" type="button" class="saved-card__edit" @click="edit"><span aria-hidden="true">✎</span> {{ copy.edit }}</button>
+        <div v-if="!readOnly && !editing && !selecting" class="saved-card__actions">
+          <button ref="edit-button" type="button" class="saved-card__edit" @click="edit"><span aria-hidden="true">✎</span> {{ copy.edit }}</button>
+          <button type="button" class="saved-card__remove" :disabled="removalDisabled" :aria-label="`${removalCopy.removeOne} — ${challenge.title}`" @click="emit('remove')"><svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7" /></svg> {{ removalCopy.removeOne }}</button>
+        </div>
       </div>
       <form v-if="editing" class="saved-card__form" @submit.prevent="save" @keydown.esc.stop.prevent="cancel">
         <p class="saved-card__scope">{{ copy.scopeHint }}</p>
@@ -112,6 +125,8 @@ onBeforeUnmount(() => { if (copyTimer) clearTimeout(copyTimer) })
 </template>
 
 <style scoped>
+.saved-card__heading{flex-wrap:wrap}.saved-card__actions{margin-left:auto}
+.saved-card--selected{outline:3px solid #8c6cba;outline-offset:3px}.saved-card__actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}.saved-card__remove{display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--danger);font-size:.76rem!important}.saved-card__remove svg{flex-shrink:0}.saved-card__selection{display:flex;align-items:center;gap:10px;color:var(--ink);font-size:.85rem;cursor:pointer}.saved-card__selection input{width:20px;height:20px;margin:0;accent-color:#7052a0}.saved-card__selection input:focus-visible{outline:3px solid #8c6cba;outline-offset:3px}
 .saved-card__scope{margin:0 0 5px;color:var(--muted);font-size:.76rem;line-height:1.45}.saved-card__sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .saved-card{--card-padding:20px;display:flex;min-width:0;padding:var(--card-padding);flex-direction:column;gap:16px;border:2px solid color-mix(in srgb,#7052a0 58%,var(--line));border-radius:20px;background:var(--surface);box-shadow:0 8px 22px rgb(46 31 73 / 14%),0 2px 5px rgb(46 31 73 / 8%)}.saved-card__top{display:grid;gap:14px;margin:calc(0px - var(--card-padding)) calc(0px - var(--card-padding)) 0;padding:14px var(--card-padding);border-radius:18px 18px 0 0;background:color-mix(in srgb,#7052a0 12%,var(--surface))}.saved-card__heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.saved-card time{color:var(--ink);font-size:.76rem;font-weight:750}.saved-card button{font:inherit;cursor:pointer}.saved-card button:disabled{opacity:.5;cursor:default}.saved-card button:focus-visible,.saved-card a:focus-visible,.saved-card input:focus-visible,.saved-card textarea:focus-visible{outline:3px solid #8c6cba;outline-offset:3px}.saved-card__edit{display:flex;padding:6px 9px;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;color:var(--ink);background:var(--surface);font-size:.76rem!important}.saved-card__content h4{margin:0;color:var(--ink);font-size:1.15rem;line-height:1.35;overflow-wrap:anywhere}.saved-card__description{margin:8px 0 0;color:var(--muted);font-size:.87rem;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}.saved-card__stats{display:flex;flex-wrap:nowrap;align-items:center;justify-content:flex-start;gap:clamp(8px,2vw,18px);margin:0;text-align:left;font-weight:400}.saved-card__stats div{display:flex;flex-direction:row-reverse;align-items:center;gap:4px;white-space:nowrap}.saved-card__stats dt{color:var(--muted);font-size:.7rem;font-weight:400}.saved-card__stats dd{margin:0;color:var(--ink);font-size:.8rem;font-weight:400}.saved-card__share{display:grid;grid-template-columns:minmax(0,1fr) 112px;align-items:center;gap:14px;margin-top:auto;padding:16px 0;border-bottom:1px solid var(--line)}.saved-card__code{display:flex;min-width:0;align-items:flex-start;flex-direction:column;gap:8px}.saved-card__code>span:first-child{color:var(--muted);font-size:.72rem}.saved-card__code strong{color:var(--ink);font-size:clamp(.9rem,1.8vw,1.2rem);letter-spacing:.05em;white-space:nowrap;user-select:all}.saved-card__copy{padding:8px 11px;border:1px solid color-mix(in srgb,#7052a0 35%,var(--line));border-radius:9px;color:var(--ink);background:color-mix(in srgb,#7052a0 8%,var(--surface));font-size:.76rem!important;font-weight:750!important}.saved-card__copy-status{font-size:.72rem;color:var(--muted)}.saved-card__copy-status:empty{display:none}.saved-card__qr{display:grid;padding:4px;justify-items:center;gap:5px;border:1px solid var(--line);border-radius:12px;color:var(--ink);background:var(--surface)}.saved-card__qr svg{display:block;border-radius:7px}.saved-card__qr span{padding:0 2px 4px;font-size:.68rem;line-height:1.3}.saved-card__qr:hover{border-color:#8c6cba}.saved-card__launch{display:flex;min-height:42px;align-items:center;justify-content:center;gap:12px;border-radius:11px;color:white;background:#7052a0;font-size:.84rem;font-weight:800;text-decoration:none}.saved-card__launch:hover{background:#5c408d}.saved-card__form{display:grid;gap:7px}.saved-card__form label{color:var(--ink);font-size:.8rem;font-weight:750}.saved-card__form label span{font-weight:400;color:var(--muted)}.saved-card__form input,.saved-card__form textarea{box-sizing:border-box;width:100%;min-width:0;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font:inherit}.saved-card__form textarea{resize:vertical}.saved-card__form small{justify-self:end;color:var(--muted);font-size:.7rem}.saved-card__form-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}.saved-card__form-actions button{padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font-size:.8rem}.saved-card__form-actions .saved-card__primary{color:white;border-color:#7052a0;background:#7052a0}.saved-card__error{color:var(--danger);font-size:.8rem}.saved-card__notice{margin:8px 0 0;color:var(--success);font-size:.76rem}
 @media(max-width:380px){.saved-card{--card-padding:15px}.saved-card__share{grid-template-columns:minmax(0,1fr) 104px;gap:8px}.saved-card__qr svg{width:94px;height:94px}.saved-card__code strong{font-size:.9rem;letter-spacing:0}}

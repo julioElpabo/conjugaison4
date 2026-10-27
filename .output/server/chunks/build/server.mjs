@@ -372,6 +372,11 @@ function translateAppMessage(locale, key, parameters = {}) {
 }
 
 const uiMessages = {
+  "Vous aimez Tatitotu ?": withDutchVariants({ "de": "Gef\xE4llt Ihnen Tatitotu?", "en": "Enjoying Tatitotu?", "it": "Ti piace Tatitotu?", "es": "\xBFTe gusta Tatitotu?", "nl": "Vind je Tatitotu leuk?" }),
+  "D\xE9couvrez Zazizozu.": withDutchVariants({ "de": "Entdecken Sie Zazizozu.", "en": "Discover Zazizozu.", "it": "Scopri Zazizozu.", "es": "Descubre Zazizozu.", "nl": "Ontdek Zazizozu." }),
+  "Des jeux \xE9ducatifs pour progresser en lecture, en maths et dans la vie quotidienne.": withDutchVariants({ "de": "Lernspiele f\xFCr Fortschritte beim Lesen, in Mathematik und im Alltag.", "en": "Educational games to build reading, maths and everyday skills.", "it": "Giochi educativi per migliorare nella lettura, in matematica e nella vita quotidiana.", "es": "Juegos educativos para mejorar en lectura, matem\xE1ticas y en la vida cotidiana.", "nl": "Educatieve spellen om te groeien in lezen, rekenen en het dagelijks leven." }),
+  "Toujours gratuit et sans publicit\xE9": withDutchVariants({ "de": "Immer kostenlos und werbefrei", "en": "Always free and ad-free", "it": "Sempre gratuito e senza pubblicit\xE0", "es": "Siempre gratis y sin publicidad", "nl": "Altijd gratis en zonder reclame" }),
+  "D\xE9couvrir Zazizozu": withDutchVariants({ "de": "Zazizozu entdecken", "en": "Discover Zazizozu", "it": "Scopri Zazizozu", "es": "Descubre Zazizozu", "nl": "Ontdek Zazizozu" }),
   "D\xE9fis de conjugaison": withDutchVariants({ de: "Konjugations\xFCbungen", en: "Conjugation challenges", it: "Esercizi di coniugazione", es: "Ejercicios de conjugaci\xF3n", nl: "Vervoegingsuitdagingen" }),
   "D\xE9fi de conjugaison": withDutchVariants({ de: "Konjugations\xFCbung", en: "Conjugation challenge", it: "Esercizio di coniugazione", es: "Ejercicio de conjugaci\xF3n", nl: "Vervoegingsuitdaging" }),
   "D\xE9fi partag\xE9": withDutchVariants({ de: "Geteilte \xDCbung", en: "Shared challenge", it: "Esercizio condiviso", es: "Ejercicio compartido", nl: "Gedeelde uitdaging" }),
@@ -1734,12 +1739,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-BizjyR51.mjs')
+    component: () => import('./_code_-DnhXbPgA.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-CdQCLXQc.mjs')
+    component: () => import('./_slug_-BatEB7R-.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1784,7 +1789,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-CfXB6Ls0.mjs')
+    component: () => import('./exercices-de-conjugaison-JE856aOi.mjs')
   },
   {
     name: "mon-compte",
@@ -1800,7 +1805,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-B3zduPW0.mjs')
+    component: () => import('./nouveau-defi-Cu4znYGM.mjs')
   },
   {
     name: "signin",
@@ -1810,7 +1815,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-DbeCeu6D.mjs')
+    component: () => import('./index-DRGu6kii.mjs')
   },
   {
     name: "mode-tense",
@@ -1915,12 +1920,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defi/:code()",
-    component: () => import('./_code_-BizjyR51.mjs')
+    component: () => import('./_code_-DnhXbPgA.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defis/:slug()",
-    component: () => import('./_slug_-CdQCLXQc.mjs')
+    component: () => import('./_slug_-BatEB7R-.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1965,7 +1970,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-CfXB6Ls0.mjs')
+    component: () => import('./exercices-de-conjugaison-JE856aOi.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1981,7 +1986,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/nouveau-defi",
-    component: () => import('./nouveau-defi-B3zduPW0.mjs')
+    component: () => import('./nouveau-defi-Cu4znYGM.mjs')
   },
   {
     name: "localized-signin",
@@ -1991,7 +1996,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/",
-    component: () => import('./index-DbeCeu6D.mjs')
+    component: () => import('./index-DRGu6kii.mjs')
   },
   {
     name: "localized-mode-tense",

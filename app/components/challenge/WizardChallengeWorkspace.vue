@@ -8,6 +8,8 @@ import { challengePresetGroupLabels } from '~~/shared/data/challenge-presets'
 import { challengePresetTrackingDescription, challengePresetTrackingTitle } from '~~/shared/utils/challenge-preset-tracking'
 import { legacyComplementConfig, legacyComplementOptions } from '~~/shared/utils/complement-options'
 import { classifyTenses, isClassifiedTenseSelected } from '~~/shared/utils/tense-classification'
+import { stripLocaleFromPath } from '~~/shared/i18n/locales'
+import ZazizozuDiscoveryCard from '~/components/ZazizozuDiscoveryCard.vue'
 import { guidedTourCopy } from '~~/shared/i18n/guided-tour'
 import type { AppLocale } from '~~/shared/i18n/locales'
 import type { CoachProfile } from '~~/shared/types/coach'
@@ -139,6 +141,8 @@ const falcMode = useState<boolean>('falc-mode', () => false)
 const currentStep = ref<WizardStep>(0)
 // Conservé pour pouvoir réactiver facilement le bloc de présentation de l’accueil.
 const showHomeSeoIntro = false
+const zazizozuDiscoveryEligible = computed(() => !props.embedded && stripLocaleFromPath(route.path) === '/' && currentStep.value === 0 && !falcMode.value)
+const { visible: showZazizozuDiscovery, rememberClick: rememberZazizozuClick } = useZazizozuDiscovery(zazizozuDiscoveryEligible)
 const falcHomePanel = ref<'code' | 'presets' | null>(null)
 const isPreparingStep4 = ref(false)
 const highlightChallengeLoader = ref(false)
@@ -1907,7 +1911,7 @@ async function createSharedChallenge(title: string, description: string) {
 
 <template>
   <div class="wizard-entry-page">
-    <div class="challenge-page wizard-page">
+    <div class="challenge-page wizard-page" :class="{ 'wizard-page--discovery': showZazizozuDiscovery && currentStep === 0 && !falcMode }">
       <header v-if="!props.startAtLaunch" class="wizard-hero">
         <p v-if="currentStep === 0 && !falcMode" class="wizard-hero__brand">{{ heroTitle }}</p>
         <h1 v-if="currentStep === 0 && !falcMode && !props.embedded" class="wizard-hero__subtitle">{{ props.homeHeading || ui('Exercices de conjugaison française, gratuits et sans publicité') }}</h1>
@@ -2317,6 +2321,10 @@ async function createSharedChallenge(title: string, description: string) {
       </template>
       </main>
 
+      <div v-if="showZazizozuDiscovery && currentStep === 0 && !falcMode" class="wizard-discovery-slot">
+        <ZazizozuDiscoveryCard @discover="rememberZazizozuClick" />
+      </div>
+
       <ClassicExercise ref="classic-exercise" v-if="isExerciseOpen && exercisePresentation === 'classic'" :questions="questions" :verbs="catalogue.verbes" :learning-support-mode="challenge.learningSupportMode" :exercise-kind="challenge.exerciseKind" :identification-tenses="identificationTenses" :tracking-context="exerciseTracking" :analytics-metadata="exerciseUsageMetadata('classic')" can-save-challenge @save-challenge="saveChallengeFromSummary" @close="closeClassicExercise" />
       <ChatExercise ref="chat-exercise" v-if="isExerciseOpen && exercisePresentation === 'chat' && selectedCoach" :questions="questions" :exercise-kind="challenge.exerciseKind" :coach="selectedCoach" :verbs="chatExerciseVerbs" :help-verbs="catalogue.verbes" :tenses="selectedTenses" :identification-tenses="identificationTenses" :regenerate-questions="regenerateChatQuestions" :tracking-context="exerciseTracking" :learning-support-mode="challenge.learningSupportMode" :analytics-metadata="exerciseUsageMetadata('chat')" :tour-demo="tourActive" can-save-challenge @save-challenge="saveChallengeFromSummary" @change-coach="selectedCoach = $event" @close="isExerciseOpen = false" />
       <CoachPicker v-if="isCoachPickerOpen && !falcMode" :tour-demo="tourActive" :learning-support-mode="challenge.learningSupportMode" @close="isCoachPickerOpen = false" @select="launchWithCoach" />
@@ -2376,6 +2384,21 @@ async function createSharedChallenge(title: string, description: string) {
 <style scoped>
 .wizard-entry-page { font-family: "Funnel Sans", "Avenir Next", Avenir, system-ui, sans-serif; }
 .wizard-page { overflow: hidden; padding-bottom: 70px; border-radius: 26px; }
+.wizard-discovery-slot { container-type: inline-size; width: min(1120px, calc(100% - 40px)); margin: 28px auto 0; }
+@media (max-width: 820px) {
+  .wizard-discovery-slot { width: min(100% - 20px, 650px); }
+}
+/* La carte compacte partage la rangée du titre, au-dessus du bloc des défis. */
+@media (min-width: 1024px) {
+  .wizard-page--discovery { display: grid; width: min(1432px, calc(100vw - 48px)); margin-inline: calc((100% - min(1432px, 100vw - 48px)) / 2); grid-template-columns: minmax(0, 1fr) 400px; column-gap: 32px; align-items: start; overflow: visible; }
+  .wizard-page--discovery > .wizard-hero { width: 100%; grid-column: 1; grid-row: 1; }
+  .wizard-page--discovery > .wizard-shell { width: min(1120px, 100%); min-width: 0; grid-column: 1 / -1; grid-row: 2; }
+  .wizard-page--discovery > .wizard-discovery-slot { width: 100%; margin: 0 0 16px; grid-column: 2; grid-row: 1; }
+}
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .wizard-page--discovery .code-loader { grid-template-columns: 1fr; gap: 10px; }
+  .wizard-page--discovery .code-loader__error { grid-column: 1; }
+}
 .wizard-hero { max-width: 820px; margin: 0 auto; padding: 42px 24px 24px; text-align: center; }
 .wizard-hero h1, .wizard-hero__brand { margin: 0; color: #294c4b; font-size: clamp(2.2rem, 5vw, 4rem); letter-spacing: .018em; line-height: 1.05; }
 .wizard-hero__brand { letter-spacing: .18em; text-indent: .18em; }

@@ -11,6 +11,11 @@ type Translations = Record<Exclude<AppLocale, 'fr'>, string>
  * pédagogiques, qui seront traduits dans une étape séparée.
  */
 export const uiMessages = {
+  "Vous aimez Tatitotu ?": withDutchVariants({"de": "Gefällt Ihnen Tatitotu?", "en": "Enjoying Tatitotu?", "it": "Ti piace Tatitotu?", "es": "¿Te gusta Tatitotu?", "nl": "Vind je Tatitotu leuk?"}),
+  "Découvrez Zazizozu.": withDutchVariants({"de": "Entdecken Sie Zazizozu.", "en": "Discover Zazizozu.", "it": "Scopri Zazizozu.", "es": "Descubre Zazizozu.", "nl": "Ontdek Zazizozu."}),
+  "Des jeux éducatifs pour progresser en lecture, en maths et dans la vie quotidienne.": withDutchVariants({"de": "Lernspiele für Fortschritte beim Lesen, in Mathematik und im Alltag.", "en": "Educational games to build reading, maths and everyday skills.", "it": "Giochi educativi per migliorare nella lettura, in matematica e nella vita quotidiana.", "es": "Juegos educativos para mejorar en lectura, matemáticas y en la vida cotidiana.", "nl": "Educatieve spellen om te groeien in lezen, rekenen en het dagelijks leven."}),
+  "Toujours gratuit et sans publicité": withDutchVariants({"de": "Immer kostenlos und werbefrei", "en": "Always free and ad-free", "it": "Sempre gratuito e senza pubblicità", "es": "Siempre gratis y sin publicidad", "nl": "Altijd gratis en zonder reclame"}),
+  "Découvrir Zazizozu": withDutchVariants({"de": "Zazizozu entdecken", "en": "Discover Zazizozu", "it": "Scopri Zazizozu", "es": "Descubre Zazizozu", "nl": "Ontdek Zazizozu"}),
   'Défis de conjugaison': withDutchVariants({ de: 'Konjugationsübungen', en: 'Conjugation challenges', it: 'Esercizi di coniugazione', es: 'Ejercicios de conjugación', nl: "Vervoegingsuitdagingen", }),
   'Défi de conjugaison': withDutchVariants({ de: 'Konjugationsübung', en: 'Conjugation challenge', it: 'Esercizio di coniugazione', es: 'Ejercicio de conjugación', nl: "Vervoegingsuitdaging", }),
   'Défi partagé': withDutchVariants({ de: 'Geteilte Übung', en: 'Shared challenge', it: 'Esercizio condiviso', es: 'Ejercicio compartido', nl: "Gedeelde uitdaging", }),

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { withDutchVariants } from '~~/shared/i18n/dutch-variants'
+import { useZazizozuDiscoveryClick } from '~/composables/useZazizozuDiscovery'
 
 import mountainSvgSource from '../../public/images/site-mountains.svg?raw'
 import type { AppLocale } from '~~/shared/i18n/locales'
@@ -14,6 +15,7 @@ const { applyTheme } = useColorTheme()
 const { rememberPreferences } = usePreferencePersistence()
 const { track } = useSiteAnalytics()
 const { openPreferences } = useAnalyticsConsent()
+const { rememberClick: rememberZazizozuClick } = useZazizozuDiscoveryClick()
 const isDark = ref(false)
 const isPhoneViewport = ref(false)
 const falcMode = useState<boolean>('falc-mode', () => false)
@@ -545,6 +547,22 @@ const activeSection = computed(() => {
     </main>
 
     <footer v-if="!embeddedConsultation" class="site-footer">
+      <a
+        class="site-footer__zazizozu"
+        href="https://zazizozu.ch/"
+        target="_blank"
+        rel="noopener noreferrer"
+        :aria-label="ui('Découvrir Zazizozu')"
+        @click="rememberZazizozuClick"
+        @auxclick.middle="rememberZazizozuClick"
+      >
+        <img src="/images/zazizozu/ma-ville.webp" width="56" height="44" alt="" loading="lazy" decoding="async" />
+        <span class="site-footer__zazizozu-copy">
+          <strong>{{ ui('Découvrir Zazizozu') }}</strong>
+          <small>{{ ui('Toujours gratuit et sans publicité') }}</small>
+        </span>
+        <span class="site-footer__zazizozu-arrow" aria-hidden="true">↗</span>
+      </a>
       <p>{{ ui('Ce site est gratuit. Toute utilisation commerciale de ce site ou de son contenu est strictement interdite.') }}</p>
       <div class="site-footer__links">
         <NuxtLink :to="localePath('/defis')">{{ publicChallengesLabel }}</NuxtLink>
@@ -1645,6 +1663,28 @@ a {
   text-decoration: underline;
   cursor: pointer;
 }
+
+.site-footer .site-footer__zazizozu {
+  display: flex;
+  width: min(100%, 380px);
+  min-height: 64px;
+  margin: 0 auto 24px;
+  padding: 10px 12px;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 7%);
+  text-align: left;
+  text-decoration: none;
+}
+.site-footer__zazizozu img { width: 56px; height: 44px; flex: 0 0 56px; border-radius: 7px; object-fit: cover; object-position: 60% center; }
+.site-footer__zazizozu-copy { display: grid; min-width: 0; flex: 1; gap: 4px; }
+.site-footer__zazizozu-copy strong { color: #fff; font-size: .85rem; line-height: 1.3; }
+.site-footer__zazizozu-copy small { color: #dfe9ef; font-size: .71rem; line-height: 1.4; }
+.site-footer__zazizozu-arrow { color: #fbe4a0; font-size: 1.2rem; }
+.site-footer .site-footer__zazizozu:hover { border-color: rgb(255 255 255 / 40%); background: rgb(255 255 255 / 12%); }
+.site-footer .site-footer__zazizozu:focus-visible { outline: 3px solid #fbe4a0; outline-offset: 4px; }
 
 .site-footer__links {
   display: flex;

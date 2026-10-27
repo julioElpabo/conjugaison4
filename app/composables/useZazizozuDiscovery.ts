@@ -4,7 +4,7 @@ import { nextZazizozuDiscoveryVisit, rememberZazizozuDiscoveryClick, ZAZIZOZU_CL
 export function useZazizozuDiscovery(eligible: Ref<boolean>) {
   const mounted = ref(false)
   const selected = ref(false)
-  const clicked = useState('zazizozu-discovery-clicked', () => false)
+  const { clicked, rememberClick } = useZazizozuDiscoveryClick()
 
   watch([mounted, eligible], ([ready, allowed]) => {
     selected.value = false
@@ -15,11 +15,6 @@ export function useZazizozuDiscovery(eligible: Ref<boolean>) {
       // L’accès au stockage lui-même peut être bloqué.
     }
   })
-
-  function rememberClick() {
-    clicked.value = true
-    try { rememberZazizozuDiscoveryClick(window.localStorage) } catch { /* Navigation toujours possible. */ }
-  }
 
   function onStorage(event: StorageEvent) {
     if (event.key === ZAZIZOZU_CLICKED_KEY && event.newValue === '1') clicked.value = true
@@ -32,4 +27,16 @@ export function useZazizozuDiscovery(eligible: Ref<boolean>) {
   onBeforeUnmount(() => window.removeEventListener('storage', onStorage))
 
   return { visible: computed(() => eligible.value && selected.value && !clicked.value), rememberClick }
+}
+
+/** Tous les liens vers Zazizozu mémorisent le même choix, y compris celui du footer. */
+export function useZazizozuDiscoveryClick() {
+  const clicked = useState('zazizozu-discovery-clicked', () => false)
+
+  function rememberClick() {
+    clicked.value = true
+    try { rememberZazizozuDiscoveryClick(window.localStorage) } catch { /* Navigation toujours possible. */ }
+  }
+
+  return { clicked, rememberClick }
 }

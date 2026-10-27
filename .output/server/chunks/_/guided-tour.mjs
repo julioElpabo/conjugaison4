@@ -1,4 +1,55 @@
+import { p as publicAssetsURL } from '../routes/renderer.mjs';
+import { ref, watch, computed } from 'vue';
+import { c as useState } from '../build/server.mjs';
 import { w as withDutchVariants } from '../nitro/nitro.mjs';
+
+const ZAZIZOZU_CLICKED_KEY = "tatitotu.zazizozu.clicked";
+const ZAZIZOZU_ROTATION_KEY = "tatitotu.zazizozu.rotation";
+function nextZazizozuDiscoveryVisit(storage) {
+  var _a;
+  try {
+    if (storage.getItem(ZAZIZOZU_CLICKED_KEY) === "1") return false;
+    const saved = (_a = storage.getItem(ZAZIZOZU_ROTATION_KEY)) != null ? _a : "0";
+    const rotation = /^[0-3]$/u.test(saved) ? Number(saved) : 0;
+    storage.setItem(ZAZIZOZU_ROTATION_KEY, String((rotation + 1) % 4));
+    return rotation === 0;
+  } catch {
+    return false;
+  }
+}
+function rememberZazizozuDiscoveryClick(storage) {
+  try {
+    storage.setItem(ZAZIZOZU_CLICKED_KEY, "1");
+  } catch {
+  }
+}
+
+const _imports_0 = publicAssetsURL("/images/zazizozu/ma-ville.webp");
+function useZazizozuDiscovery(eligible) {
+  const mounted = ref(false);
+  const selected = ref(false);
+  const { clicked, rememberClick } = useZazizozuDiscoveryClick();
+  watch([mounted, eligible], ([ready, allowed]) => {
+    selected.value = false;
+    if (!ready || !allowed || clicked.value) return;
+    try {
+      selected.value = nextZazizozuDiscoveryVisit((void 0).localStorage);
+    } catch {
+    }
+  });
+  return { visible: computed(() => eligible.value && selected.value && !clicked.value), rememberClick };
+}
+function useZazizozuDiscoveryClick() {
+  const clicked = useState("zazizozu-discovery-clicked", () => false);
+  function rememberClick() {
+    clicked.value = true;
+    try {
+      rememberZazizozuDiscoveryClick((void 0).localStorage);
+    } catch {
+    }
+  }
+  return { clicked, rememberClick };
+}
 
 const copies = withDutchVariants({
   fr: {
@@ -355,5 +406,5 @@ function guidedTourCopy(locale) {
   return (_a = copies[locale]) != null ? _a : copies.fr;
 }
 
-export { guidedTourCopy as g };
+export { _imports_0 as _, useZazizozuDiscovery as a, guidedTourCopy as g, useZazizozuDiscoveryClick as u };
 //# sourceMappingURL=guided-tour.mjs.map

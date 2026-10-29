@@ -648,6 +648,7 @@ const uiMessages = {
   "COD plac\xE9 avant": withDutchVariants({ de: "Direktes Objekt davor", en: "Direct object before", it: "Oggetto diretto prima", es: "Objeto directo antes", nl: "Lijdend voorwerp ervoor" }),
   "COI plac\xE9 apr\xE8s": withDutchVariants({ de: "Indirektes Objekt danach", en: "Indirect object after", it: "Oggetto indiretto dopo", es: "Objeto indirecto despu\xE9s", nl: "Meewerkend voorwerp erna" }),
   "COI plac\xE9 avant": withDutchVariants({ de: "Indirektes Objekt davor", en: "Indirect object before", it: "Oggetto indiretto prima", es: "Objeto indirecto antes", nl: "Meewerkend voorwerp ervoor" }),
+  "Juste la conjugaison, sans COD ni COI": withDutchVariants({ de: "Nur die Konjugation, ohne direktes oder indirektes Objekt", en: "Conjugation only, without a direct or indirect object", it: "Solo la coniugazione, senza complemento oggetto o indiretto", es: "Solo la conjugaci\xF3n, sin complemento directo ni indirecto", nl: "Alleen de vervoeging, zonder lijdend of meewerkend voorwerp" }),
   "COD (CVD) plac\xE9 apr\xE8s": withDutchVariants({ de: "Direktes Objekt danach", en: "Direct object after", it: "Oggetto diretto dopo", es: "Objeto directo despu\xE9s", nl: "Lijdend voorwerp erna" }),
   "COD (CVD) plac\xE9 avant": withDutchVariants({ de: "Direktes Objekt davor", en: "Direct object before", it: "Oggetto diretto prima", es: "Objeto directo antes", nl: "Lijdend voorwerp ervoor" }),
   "COI (CVI) plac\xE9 apr\xE8s": withDutchVariants({ de: "Indirektes Objekt danach", en: "Indirect object after", it: "Oggetto indiretto dopo", es: "Objeto indirecto despu\xE9s", nl: "Meewerkend voorwerp erna" }),
@@ -1739,12 +1740,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-Dqk6xKaM.mjs')
+    component: () => import('./_code_-CKycOIyC.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-B4jRl8hY.mjs')
+    component: () => import('./_slug_-C62-S5PX.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1789,7 +1790,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-BbttMtYl.mjs')
+    component: () => import('./exercices-de-conjugaison-BHVHRigN.mjs')
   },
   {
     name: "mon-compte",
@@ -1805,7 +1806,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-C8z0pGfP.mjs')
+    component: () => import('./nouveau-defi-DYFZwgvG.mjs')
   },
   {
     name: "signin",
@@ -1815,7 +1816,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-COO4Brwo.mjs')
+    component: () => import('./index-QRDmdAmp.mjs')
   },
   {
     name: "mode-tense",
@@ -1920,12 +1921,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defi/:code()",
-    component: () => import('./_code_-Dqk6xKaM.mjs')
+    component: () => import('./_code_-CKycOIyC.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defis/:slug()",
-    component: () => import('./_slug_-B4jRl8hY.mjs')
+    component: () => import('./_slug_-C62-S5PX.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1970,7 +1971,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-BbttMtYl.mjs')
+    component: () => import('./exercices-de-conjugaison-BHVHRigN.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1986,7 +1987,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/nouveau-defi",
-    component: () => import('./nouveau-defi-C8z0pGfP.mjs')
+    component: () => import('./nouveau-defi-DYFZwgvG.mjs')
   },
   {
     name: "localized-signin",
@@ -1996,7 +1997,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/",
-    component: () => import('./index-COO4Brwo.mjs')
+    component: () => import('./index-QRDmdAmp.mjs')
   },
   {
     name: "localized-mode-tense",

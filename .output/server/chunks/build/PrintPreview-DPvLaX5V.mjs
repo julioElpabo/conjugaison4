@@ -1,6 +1,6 @@
 import { defineComponent, ref, useTemplateRef, computed, watch, unref, useSSRContext } from 'vue';
 import { ssrRenderTeleport, ssrInterpolate, ssrIncludeBooleanAttr, ssrRenderAttr, ssrRenderClass } from 'vue/server-renderer';
-import { aa as questionExerciseKind, aU as conjugationRequiresSubjectPronoun } from '../nitro/nitro.mjs';
+import { aa as questionExerciseKind, aW as conjugationRequiresSubjectPronoun } from '../nitro/nitro.mjs';
 import { d as INFINITIVE_IDENTIFICATION_INSTRUCTION } from '../_/infinitive-identification2.mjs';
 import { T as TENSE_IDENTIFICATION_INSTRUCTION } from '../_/exercise-instructions.mjs';
 import { s as sentenceTerminalMark, w as withSentenceTerminalMark } from '../_/sentence-punctuation.mjs';

@@ -1,4 +1,4 @@
-import { aR as exerciseKindsFor, u as useDatabase, a4 as decodePronominalSelectionId, aJ as hasVariableAuxiliary, aS as indirectRelative, aT as resolveVariableAuxiliary, aN as formatConjugationQuestion, aK as formatAnswer } from '../nitro/nitro.mjs';
+import { aT as exerciseKindsFor, u as useDatabase, a4 as decodePronominalSelectionId, aJ as hasVariableAuxiliary, aU as indirectRelative, aV as resolveVariableAuxiliary, aO as formatConjugationQuestion, aL as formatAnswer } from '../nitro/nitro.mjs';
 import { i as identifyInfinitives, f as formatNonFiniteQuestion } from './infinitive-identification.mjs';
 import { g as generatePronominalRow } from './pronominal-formatter.mjs';
 import { M as MODE_IDENTIFICATION_INSTRUCTION, T as TENSE_IDENTIFICATION_INSTRUCTION } from './exercise-instructions.mjs';

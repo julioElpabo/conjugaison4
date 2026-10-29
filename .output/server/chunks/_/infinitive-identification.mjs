@@ -1,4 +1,4 @@
-import { aJ as hasVariableAuxiliary, aK as formatAnswer, u as useDatabase } from '../nitro/nitro.mjs';
+import { aJ as hasVariableAuxiliary, aK as prefersEtreWithoutComplement, aL as formatAnswer, u as useDatabase } from '../nitro/nitro.mjs';
 import { b as buildRadicalReference } from './radical-reference.mjs';
 import { g as generatePronominalRow } from './pronominal-formatter.mjs';
 import { i as isImpersonalVerb } from './impersonal-verbs.mjs';
@@ -52,6 +52,8 @@ function formatNonFiniteQuestion(verb, tense) {
       ...["", "e", "s", "es"].map((ending) => upperFirst(`${mode === "g\xE9rondif" ? "en \xE9tant" : "\xEAtre"} ${participle}${ending}`))
     ]);
   }
+  const preferredAuxiliary = variableAuxiliary && prefersEtreWithoutComplement(verb.infinitif) ? "\xEAtre" : void 0;
+  if (preferredAuxiliary) answers = [...answers.filter((answer) => /^(?:Être|En étant) /u.test(answer)), ...answers.filter((answer) => !/^(?:Être|En étant) /u.test(answer))];
   const radicalReference = buildRadicalReference({
     infinitive: verb.infinitif,
     mode: tense.mode_name,
@@ -68,7 +70,8 @@ function formatNonFiniteQuestion(verb, tense) {
     titre: infinitive,
     consigne: `${label} de ${infinitive}`,
     reponses: answers,
-    reponsesPourCorrige: answers,
+    reponsesPourCorrige: preferredAuxiliary ? answers.filter((answer) => /^(?:Être|En étant) /u.test(answer)) : answers,
+    ...preferredAuxiliary ? { preferredAuxiliary } : {},
     infinitif: verb.infinitif,
     temps: tense.name,
     mode: tense.mode_name,

@@ -1,7 +1,7 @@
 import { w as withoutIndicativeMode, f as literaryIdentificationCoachHelpBlocks, v as visibleCoachHelpBlocks, g as areOnlyIndicativeTenses, c as coachHelpQuestionVariables, l as localizedCoachVerbDefinition, s as sanitizeCoachHtml, _ as __nuxt_component_0 } from './CoachHelpPanel-D-N4HXfV.mjs';
 import { defineComponent, computed, ref, shallowRef, watch, markRaw, reactive, useTemplateRef, unref, createVNode, resolveDynamicComponent, nextTick, useSSRContext } from 'vue';
 import { ssrRenderTeleport, ssrRenderStyle, ssrRenderClass, ssrRenderAttr, ssrInterpolate, ssrRenderList, ssrRenderComponent, ssrIncludeBooleanAttr, ssrRenderVNode } from 'vue/server-renderer';
-import { br as SUBJECT_PRONOUN_PLACEHOLDER, aa as questionExerciseKind, aU as conjugationRequiresSubjectPronoun, aW as providedSubjunctiveInputPrefix, aV as conjugationAnswerPlaceholder, ak as learnerErrorDetailText } from '../nitro/nitro.mjs';
+import { bt as SUBJECT_PRONOUN_PLACEHOLDER, aa as questionExerciseKind, aW as conjugationRequiresSubjectPronoun, aY as providedSubjunctiveInputPrefix, aX as conjugationAnswerPlaceholder, ak as learnerErrorDetailText } from '../nitro/nitro.mjs';
 import { L as LearnerErrorFeedback, I as InfinitiveCoachHelp, S as ShareExerciseSummaryDialog, V as VerbConsultationModal } from './VerbConsultationModal-CzRYX635.mjs';
 import { faStop, faBullhorn, faSpinner, faVolume, faArrowUpFromBracket, faPrint } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';

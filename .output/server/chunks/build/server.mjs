@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, toRef, isRef, watch, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, isReadonly, isShallow, isReactive, toRaw } from 'vue';
-import { ar as SUPPORTED_LOCALES, w as withDutchVariants, b7 as withSwissObjectAliases, b8 as parseURL, b9 as encodePath, ba as decodePath, bb as localeFromPath, z as normalizeLocale, bc as getRequestHeaders, bd as klona, ax as hasProtocol, az as isScriptProtocol, ay as joinURL, c as createError$1, be as withQuery, L as getRequestURL, bf as DEFAULT_LANGUAGE_PREFERENCES, av as localizePath, bg as getRequestHeader, bh as isEqual, bi as sanitizeStatusCode, bj as getContext, t as setCookie, x as getCookie, v as deleteCookie, bk as $fetch, as as localeLanguageTag, bl as defu, R as stripLocaleFromPath, aF as executeAsync, bm as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { ar as SUPPORTED_LOCALES, w as withDutchVariants, b9 as withSwissObjectAliases, ba as parseURL, bb as encodePath, bc as decodePath, bd as localeFromPath, z as normalizeLocale, be as getRequestHeaders, bf as klona, ax as hasProtocol, az as isScriptProtocol, ay as joinURL, c as createError$1, bg as withQuery, L as getRequestURL, bh as DEFAULT_LANGUAGE_PREFERENCES, av as localizePath, bi as getRequestHeader, bj as isEqual, bk as sanitizeStatusCode, bl as getContext, t as setCookie, x as getCookie, v as deleteCookie, bm as $fetch, as as localeLanguageTag, bn as defu, R as stripLocaleFromPath, aF as executeAsync, bo as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useHead$1, a as useSeoMeta$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -1740,12 +1740,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-CKycOIyC.mjs')
+    component: () => import('./_code_-Ce3mSDVq.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-C62-S5PX.mjs')
+    component: () => import('./_slug_-DnRQ5EZa.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1790,7 +1790,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-BHVHRigN.mjs')
+    component: () => import('./exercices-de-conjugaison-DE3qBbrx.mjs')
   },
   {
     name: "mon-compte",
@@ -1806,7 +1806,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-DYFZwgvG.mjs')
+    component: () => import('./nouveau-defi-CGCyG2v5.mjs')
   },
   {
     name: "signin",
@@ -1816,7 +1816,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-QRDmdAmp.mjs')
+    component: () => import('./index-CDE5RqV3.mjs')
   },
   {
     name: "mode-tense",
@@ -1921,12 +1921,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defi/:code()",
-    component: () => import('./_code_-CKycOIyC.mjs')
+    component: () => import('./_code_-Ce3mSDVq.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defis/:slug()",
-    component: () => import('./_slug_-C62-S5PX.mjs')
+    component: () => import('./_slug_-DnRQ5EZa.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1971,7 +1971,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-BHVHRigN.mjs')
+    component: () => import('./exercices-de-conjugaison-DE3qBbrx.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1987,7 +1987,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/nouveau-defi",
-    component: () => import('./nouveau-defi-DYFZwgvG.mjs')
+    component: () => import('./nouveau-defi-CGCyG2v5.mjs')
   },
   {
     name: "localized-signin",
@@ -1997,7 +1997,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/",
-    component: () => import('./index-QRDmdAmp.mjs')
+    component: () => import('./index-CDE5RqV3.mjs')
   },
   {
     name: "localized-mode-tense",

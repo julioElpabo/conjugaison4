@@ -4,7 +4,7 @@ import { faSpinner, faStop, faVolume, faChevronRight, faChevronDown } from '@for
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { x as translateUiMessage, a as useLanguagePreferences } from './server.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
-import { w as withDutchVariants, bs as grammarModeCode, bt as auxiliaryLemmaForForm, b7 as withSwissObjectAliases, aP as VARIABLE_AUXILIARY_EXPLANATION } from '../nitro/nitro.mjs';
+import { w as withDutchVariants, bu as grammarModeCode, aP as hasMultipleAuxiliaryModels, bv as auxiliaryLemmaForForm, b9 as withSwissObjectAliases, aR as VARIABLE_AUXILIARY_EXPLANATION } from '../nitro/nitro.mjs';
 import { b as COACH_EXPLANATION_APPROACHES, a as COACH_HELP_ENGINE_KEYS } from '../_/coach.mjs';
 import { c as coachHelpProfile, e as decomposeConjugationForm, f as buildConjugationEndingsHtml, g as buildConjugationBaseHtml, h as buildPassiveVoiceHelpHtml, i as buildPassiveVoiceMethodHtml, j as inferCompoundAuxiliary, k as buildCompleteConjugationAdviceHtml, n as normalizeCoachHelpEngineKey, a as auditRenderedCoachHelp } from '../_/coach-help-audit.mjs';
 import { a as bareNearFutureInfinitive, n as nearFutureReflexivePronoun, c as isPronominalNearFutureInfinitive, i as isNearFutureTense } from '../_/near-future.mjs';
@@ -1168,7 +1168,7 @@ function auxiliaryPart(form, baseParticiple) {
   return trimmed.replace(new RegExp(`\\s+${escaped}(?:e|s|es)?$`, "iu"), "").trim();
 }
 function coachHelpQuestionVariables(question, verb, tense, locale = "fr") {
-  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r;
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q;
   const complement = ((_a = question.agreementReminder) == null ? void 0 : _a.complement) || question.complement || "";
   const isCod = question.complementFunction === "cod" || ((_b = question.agreementReminder) == null ? void 0 : _b.kind) === "cod-before" || ((_c = question.agreementReminder) == null ? void 0 : _c.kind) === "cod-after";
   const isCoi = question.complementFunction === "coi" || ((_d = question.agreementReminder) == null ? void 0 : _d.kind) === "coi";
@@ -1198,7 +1198,7 @@ function coachHelpQuestionVariables(question, verb, tense, locale = "fr") {
   const passiveVoiceMethodAdviceHelp = buildPassiveVoiceMethodHtml(question, verb, tense, false);
   const referenceFormHelp = buildReferenceFormHelpHtml(question, verb, tense);
   const infinitive = question.infinitif || (verb == null ? void 0 : verb.infinitif) || "";
-  const variableAuxiliary = (((_f = question.auxiliaryChoices) == null ? void 0 : _f.length) || 0) > 1;
+  const variableAuxiliary = hasMultipleAuxiliaryModels(question);
   const contextualVerb = verb && question.isCompound ? { ...verb, auxiliaire: variableAuxiliary ? null : inferCompoundAuxiliary(question, verb) } : verb;
   const auxiliaryAnswers = variableAuxiliary ? [...new Set(question.reponsesPourCorrige.flatMap((answer) => answer.toLocaleLowerCase("fr").match(/\p{L}+/gu) || []).filter((word) => auxiliaryLemmaForForm(word)))].join(" ou ") : auxiliaryPart(question.conjugaison1 || "", baseParticiple);
   return {
@@ -1208,14 +1208,14 @@ function coachHelpQuestionVariables(question, verb, tense, locale = "fr") {
     subject: question.pronom || question.saisiePrefixe || "",
     correctAnswers: [...new Set(question.reponsesPourCorrige.map((answer) => answer.trim()).filter(Boolean))].join(" ou "),
     auxiliaryAnswer: question.isCompound ? auxiliaryAnswers : "",
-    pastParticipleAnswer: question.isCompound ? variableAuxiliary ? [...new Set(question.reponsesPourCorrige.map((answer) => agreedParticipleInAnswer(answer, baseParticiple)))].filter(Boolean).join(" ou ") : ((_g = question.agreementReminder) == null ? void 0 : _g.participle) || agreedParticipleInAnswer(firstCorrectAnswer, baseParticiple) : "",
+    pastParticipleAnswer: question.isCompound ? variableAuxiliary ? [...new Set(question.reponsesPourCorrige.map((answer) => agreedParticipleInAnswer(answer, baseParticiple)))].filter(Boolean).join(" ou ") : ((_f = question.agreementReminder) == null ? void 0 : _f.participle) || agreedParticipleInAnswer(firstCorrectAnswer, baseParticiple) : "",
     unagreedPastParticiple: baseParticiple,
     COD: isCod ? complement : "",
-    isCODplace_avant: isCod && (question.complementPosition === "before" || ((_h = question.agreementReminder) == null ? void 0 : _h.kind) === "cod-before") ? "oui" : "non",
+    isCODplace_avant: isCod && (question.complementPosition === "before" || ((_g = question.agreementReminder) == null ? void 0 : _g.kind) === "cod-before") ? "oui" : "non",
     COI: isCoi ? complement : "",
     isCOIplace_avant: isCoi && question.complementPosition === "before" ? "oui" : "non",
     isCompound: Boolean(question.isCompound || (tense == null ? void 0 : tense.isCompound)),
-    auxiliary: variableAuxiliary ? "avoir ou \xEAtre" : isCondensedPronominalVerb(verb) ? "\xEAtre" : ((_i = contextualVerb == null ? void 0 : contextualVerb.auxiliaire) == null ? void 0 : _i.trim()) || "",
+    auxiliary: variableAuxiliary ? "avoir ou \xEAtre" : isCondensedPronominalVerb(verb) ? "\xEAtre" : ((_h = contextualVerb == null ? void 0 : contextualVerb.auxiliaire) == null ? void 0 : _h.trim()) || "",
     endingsHelp: endingsHelpByApproach["cif-falc"],
     endingsHelpByApproach,
     contextualBaseHelp: contextualBaseHelpByApproach["cif-falc"],
@@ -1225,11 +1225,11 @@ function coachHelpQuestionVariables(question, verb, tense, locale = "fr") {
       question
     ),
     condensedVerbGroupHelp: `<details><summary>${translateUiMessage(locale, "Groupe du verbe")}</summary>${buildCondensedVerbGroupHtml(verb, {
-      mode: question.mode || ((_j = tense == null ? void 0 : tense.mode) == null ? void 0 : _j.name),
+      mode: question.mode || ((_i = tense == null ? void 0 : tense.mode) == null ? void 0 : _i.name),
       tense: question.temps || (tense == null ? void 0 : tense.name),
       subject: question.pronom || question.saisiePrefixe
     }, locale)}</details>`,
-    condensedTenseRuleHelp: buildCondensedTenseRuleHtml(question.mode || ((_k = tense == null ? void 0 : tense.mode) == null ? void 0 : _k.name), question.temps || (tense == null ? void 0 : tense.name), contextualVerb, locale, question.pronom) + (variableAuxiliary ? `<p>${escapedCoachText(VARIABLE_AUXILIARY_EXPLANATION)}</p>` : "") + orthographyNote,
+    condensedTenseRuleHelp: buildCondensedTenseRuleHtml(question.mode || ((_j = tense == null ? void 0 : tense.mode) == null ? void 0 : _j.name), question.temps || (tense == null ? void 0 : tense.name), contextualVerb, locale, question.pronom) + (variableAuxiliary ? `<p>${escapedCoachText(VARIABLE_AUXILIARY_EXPLANATION)}</p>` : "") + orthographyNote,
     nearFutureHelp: buildNearFutureCoachHelpHtml(verb, locale),
     nearFutureAllerHelp: buildNearFutureAllerHelpHtml(locale),
     passiveVoiceHelp,
@@ -1243,12 +1243,12 @@ function coachHelpQuestionVariables(question, verb, tense, locale = "fr") {
     nousFormHelp: referenceFormHelp,
     conjugationBase: decomposition ? `${decomposition.base}-` : "",
     conjugationEnding: decomposition ? `-${decomposition.ending}` : "",
-    referenceMode: ((_l = question.radicalReference) == null ? void 0 : _l.referenceMode) || "",
-    referenceTense: ((_m = question.radicalReference) == null ? void 0 : _m.referenceTense) || "",
-    referenceSubject: ((_n = question.radicalReference) == null ? void 0 : _n.referenceSubject) || "",
-    referenceForm: ((_o = question.radicalReference) == null ? void 0 : _o.form) || "",
-    referenceRadical: ((_p = question.radicalReference) == null ? void 0 : _p.kind) !== "memorized-form" && ((_q = question.radicalReference) == null ? void 0 : _q.radical) ? `${question.radicalReference.radical}-` : "",
-    removedEnding: ((_r = question.radicalReference) == null ? void 0 : _r.removableEnding) ? `-${question.radicalReference.removableEnding}` : ""
+    referenceMode: ((_k = question.radicalReference) == null ? void 0 : _k.referenceMode) || "",
+    referenceTense: ((_l = question.radicalReference) == null ? void 0 : _l.referenceTense) || "",
+    referenceSubject: ((_m = question.radicalReference) == null ? void 0 : _m.referenceSubject) || "",
+    referenceForm: ((_n = question.radicalReference) == null ? void 0 : _n.form) || "",
+    referenceRadical: ((_o = question.radicalReference) == null ? void 0 : _o.kind) !== "memorized-form" && ((_p = question.radicalReference) == null ? void 0 : _p.radical) ? `${question.radicalReference.radical}-` : "",
+    removedEnding: ((_q = question.radicalReference) == null ? void 0 : _q.removableEnding) ? `-${question.radicalReference.removableEnding}` : ""
   };
 }
 

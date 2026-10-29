@@ -1,4 +1,4 @@
-import { aO as AUXILIARY_SIMPLE_TENSES, aP as VARIABLE_AUXILIARY_EXPLANATION, aQ as compoundSimpleTense } from '../nitro/nitro.mjs';
+import { aP as hasMultipleAuxiliaryModels, aQ as AUXILIARY_SIMPLE_TENSES, aR as VARIABLE_AUXILIARY_EXPLANATION, aS as compoundSimpleTense } from '../nitro/nitro.mjs';
 import { i as isNearFutureTense, a as bareNearFutureInfinitive, c as isPronominalNearFutureInfinitive } from './near-future.mjs';
 import { a as COACH_HELP_ENGINE_KEYS } from './coach.mjs';
 
@@ -739,21 +739,21 @@ function compoundAgreementHtml(auxiliary, subject, baseParticiple = "", answer =
   return `<figure><figcaption>Accord du participe pass\xE9</figcaption><blockquote><strong>Avec avoir</strong><p>Le participe pass\xE9 ne s\u2019accorde pas avec le sujet. Il s\u2019accorde seulement avec un COD plac\xE9 avant le verbe.</p></blockquote>${contextualReminder}</figure>`;
 }
 function buildCompoundConjugationHtml(question, verb, tense, revealAnswers = true) {
-  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i;
   const infinitive = question.infinitif || (verb == null ? void 0 : verb.infinitif) || "ce verbe";
-  if ((((_a = question.auxiliaryChoices) == null ? void 0 : _a.length) || 0) > 1) {
-    const mode = normalized$1(question.mode || ((_b = tense == null ? void 0 : tense.mode) == null ? void 0 : _b.name));
-    const simpleTense2 = compoundSimpleTense(question.mode || ((_c = tense == null ? void 0 : tense.mode) == null ? void 0 : _c.name) || "", question.temps || (tense == null ? void 0 : tense.name) || "");
+  if (hasMultipleAuxiliaryModels(question)) {
+    const mode = normalized$1(question.mode || ((_a = tense == null ? void 0 : tense.mode) == null ? void 0 : _a.name));
+    const simpleTense2 = compoundSimpleTense(question.mode || ((_b = tense == null ? void 0 : tense.mode) == null ? void 0 : _b.name) || "", question.temps || (tense == null ? void 0 : tense.name) || "");
     const person2 = auxiliaryPersonIndex(question, simpleTense2);
-    const participle2 = ((_d = verb == null ? void 0 : verb.participePasse) == null ? void 0 : _d.trim()) || "le participe pass\xE9 du verbe";
+    const participle2 = ((_c = verb == null ? void 0 : verb.participePasse) == null ? void 0 : _c.trim()) || "le participe pass\xE9 du verbe";
     const knowledge2 = question.auxiliaryChoices.map((auxiliary2) => auxiliaryConjugationHtml(auxiliary2, simpleTense2, person2, revealAnswers)).join("");
     const result2 = revealAnswers ? `<blockquote><strong>R\xE9sultat</strong>${question.reponsesPourCorrige.map((answer2) => `<p>${resultFormMarkup(answer2, false)}</p>`).join("")}</blockquote>` : "";
     const instruction = mode === "infinitif" ? "Mets cet auxiliaire \xE0 l\u2019infinitif." : mode === "gerondif" ? "Mets cet auxiliaire au participe pr\xE9sent et place \xAB en \xBB devant." : "Conjugue cet auxiliaire au temps simple correspondant et \xE0 la personne demand\xE9e.";
     return `<figure>${knowledgeCaption()}<p>${escapedHtml(VARIABLE_AUXILIARY_EXPLANATION)}</p>${knowledge2}<blockquote><strong>Le participe pass\xE9 de ${escapedHtml(infinitive)}</strong><p>${escapedHtml(participle2)}</p></blockquote></figure><figure><figcaption>Construis la r\xE9ponse</figcaption><ol><li>Choisis avoir ou \xEAtre selon le sens que tu donnes au verbe.</li><li>${instruction}</li><li>Ajoute le participe pass\xE9 et v\xE9rifie son accord selon l\u2019auxiliaire choisi.</li></ol>${result2}</figure>`;
   }
   const auxiliary = inferCompoundAuxiliary(question, verb);
-  const participle = ((_e = verb == null ? void 0 : verb.participePasse) == null ? void 0 : _e.trim()) || ((_g = (_f = question.agreementReminder) == null ? void 0 : _f.participle) == null ? void 0 : _g.trim()) || "participe pass\xE9 \xE0 v\xE9rifier";
-  const simpleTense = compoundSimpleTense(question.mode || ((_h = tense == null ? void 0 : tense.mode) == null ? void 0 : _h.name) || "", question.temps || (tense == null ? void 0 : tense.name) || "");
+  const participle = ((_d = verb == null ? void 0 : verb.participePasse) == null ? void 0 : _d.trim()) || ((_f = (_e = question.agreementReminder) == null ? void 0 : _e.participle) == null ? void 0 : _f.trim()) || "participe pass\xE9 \xE0 v\xE9rifier";
+  const simpleTense = compoundSimpleTense(question.mode || ((_g = tense == null ? void 0 : tense.mode) == null ? void 0 : _g.name) || "", question.temps || (tense == null ? void 0 : tense.name) || "");
   const person = auxiliaryPersonIndex(question, simpleTense);
   const subject = question.pronom || question.saisiePrefixe || "la personne demand\xE9e";
   const auxiliaryForm = compoundAuxiliaryPart(question.conjugaison1 || "", participle);
@@ -764,10 +764,10 @@ function buildCompoundConjugationHtml(question, verb, tense, revealAnswers = tru
   const auxiliaryChoice = revealAnswers ? `<blockquote><strong>Quel verbe auxiliaire pour ${escapedHtml(infinitive)} ?</strong>${auxiliaryChoicesMarkup(auxiliary)}</blockquote>` : `<blockquote><strong>Auxiliaire \xE0 utiliser</strong><p>Pour <strong>${escapedHtml(infinitive)}</strong>, utilise l\u2019auxiliaire <strong>${escapedHtml(auxiliary)}</strong>.</p></blockquote>`;
   const knowledge = `<figure>${knowledgeCaption()}${auxiliaryChoice}${auxiliaryKnowledge}<blockquote><strong>Le participe pass\xE9 de ${escapedHtml(infinitive)}</strong><p>${participleKnowledge}</p></blockquote></figure>`;
   const conjugatedAuxiliary = auxiliaryForm ? `<br><mark><strong>${escapedHtml(auxiliaryForm)}</strong></mark>` : "";
-  const normalizedMode = normalized$1(question.mode || ((_i = tense == null ? void 0 : tense.mode) == null ? void 0 : _i.name));
+  const normalizedMode = normalized$1(question.mode || ((_h = tense == null ? void 0 : tense.mode) == null ? void 0 : _h.name));
   const nonPersonal = ["participe", "gerondif", "infinitif"].includes(normalizedMode);
   const auxiliaryInstruction = normalizedMode === "infinitif" ? `Utilise l\u2019auxiliaire <strong>${escapedHtml(auxiliary)}</strong> \xE0 l\u2019infinitif :${conjugatedAuxiliary}` : nonPersonal ? `Utilise le verbe auxiliaire <strong>${escapedHtml(auxiliary)}</strong> ${escapedHtml(auxiliaryContext)} :${conjugatedAuxiliary}` : `Conjugue le verbe auxiliaire <strong>${escapedHtml(auxiliary)}</strong> ${escapedHtml(auxiliaryContext)} avec <strong>${escapedHtml(subject)}</strong> :${conjugatedAuxiliary}`;
-  const resultForms = [...new Set(((_j = question.reponsesPourCorrige) == null ? void 0 : _j.length) ? question.reponsesPourCorrige : [officialForm])].filter(Boolean);
+  const resultForms = [...new Set(((_i = question.reponsesPourCorrige) == null ? void 0 : _i.length) ? question.reponsesPourCorrige : [officialForm])].filter(Boolean);
   const result = resultForms.length ? `<blockquote><strong>R\xE9sultat</strong>${resultForms.map((form) => `<p>${resultFormMarkup(form, false)}</p>`).join("")}</blockquote>` : "";
   const assemblyInstruction = nonPersonal || normalizedMode === "imperatif" ? "\xC9cris l\u2019auxiliaire, puis le participe pass\xE9." : `\xC9cris le sujet <strong>${escapedHtml(subject)}</strong>, puis l\u2019auxiliaire et le participe pass\xE9.`;
   const complementInstruction = question.complementPosition === "before" ? " Garde le compl\xE9ment \xE0 sa place avant le verbe." : question.complement ? " Ajoute ensuite le compl\xE9ment de la question." : "";
@@ -775,7 +775,7 @@ function buildCompoundConjugationHtml(question, verb, tense, revealAnswers = tru
   return `${knowledge}${answer}${compoundAgreementHtml(auxiliary, subject, participle, officialForm, question, verb)}`;
 }
 function tenseRule(question, verb, tense) {
-  var _a, _b;
+  var _a;
   const mode = normalized$1(question.mode || ((_a = tense == null ? void 0 : tense.mode) == null ? void 0 : _a.name));
   const time = normalized$1(question.temps || (tense == null ? void 0 : tense.name));
   const group = verb == null ? void 0 : verb.groupeConjugaison;
@@ -793,7 +793,7 @@ function tenseRule(question, verb, tense) {
     endingsText = "Formes de \xAB aller \xBB au pr\xE9sent : vais, vas, va, allons, allez, vont.";
     rule = "Conjugue \xAB aller \xBB au pr\xE9sent, puis ajoute l\u2019infinitif du verbe. Avec un verbe pronominal, place le pronom r\xE9fl\xE9chi devant l\u2019infinitif.";
   } else if (question.isCompound || (tense == null ? void 0 : tense.isCompound)) {
-    const variableAuxiliary = (((_b = question.auxiliaryChoices) == null ? void 0 : _b.length) || 0) > 1;
+    const variableAuxiliary = hasMultipleAuxiliaryModels(question);
     const auxiliaryLabelFromVerb = variableAuxiliary ? "avoir ou \xEAtre" : inferCompoundAuxiliary(question, verb);
     const auxiliary = normalized$1(auxiliaryLabelFromVerb);
     auxiliaryLabel = auxiliaryLabelFromVerb;
@@ -1053,8 +1053,8 @@ function buildConjugationBaseHtml(question, verb, tense, approach = "grammatical
   return `<p>${strongIrregularity}</p><p>Aucune r\xE8gle de retrait fond\xE9e sur la r\xE9ponse attendue n\u2019est propos\xE9e : elle serait circulaire. Il faut rattacher cette forme \xE0 son paradigme ou \xE0 sa famille.</p><p>La forme \xE0 retenir est ${rememberedFormMarkup(actualForm)}.</p>${lexicalFact}${familyFact}`;
 }
 function buildConjugationEndingsHtml(question, verb, tense, approach = "grammatical-technical") {
-  var _a, _b, _c, _d;
-  if ((((_a = question.auxiliaryChoices) == null ? void 0 : _a.length) || 0) > 1) {
+  var _a, _b, _c;
+  if (hasMultipleAuxiliaryModels(question)) {
     return buildCompoundConjugationHtml(question, verb, tense);
   }
   if (question.voice === "passive") {
@@ -1071,8 +1071,8 @@ function buildConjugationEndingsHtml(question, verb, tense, approach = "grammati
   const decomposition = decomposeConjugationForm(question, verb, tense);
   const requestedEnding = subjectIndex(question) === null ? "" : endingItems[subjectIndex(question)] || "";
   const introduction = `<p>Le verbe <strong>${escapedHtml(infinitive)}</strong> est ${verbGroupDescription(verb, infinitive)}.</p>`;
-  const reference = ((_b = question.radicalReference) == null ? void 0 : _b.validated) === false ? void 0 : question.radicalReference;
-  const referenceSubject = ((_c = reference == null ? void 0 : reference.referenceSubject) == null ? void 0 : _c.trim()) || "";
+  const reference = ((_a = question.radicalReference) == null ? void 0 : _a.validated) === false ? void 0 : question.radicalReference;
+  const referenceSubject = ((_b = reference == null ? void 0 : reference.referenceSubject) == null ? void 0 : _b.trim()) || "";
   const referenceDisplay = (reference == null ? void 0 : reference.form) ? displayedConjugatedForm(referenceSubject, reference.form, infinitive, verb) : "";
   const referenceReminder = referenceDisplay ? `<p><strong>${(reference == null ? void 0 : reference.kind) === "memorized-stem" ? "Radical rep\xE8re" : "Forme rep\xE8re"} :</strong> ${(reference == null ? void 0 : reference.kind) === "memorized-stem" ? `<mark>${escapedHtml(referenceDisplay)}</mark>` : rememberedFormMarkup(referenceDisplay)}.</p>` : "";
   if (reference && requestedFormIsReference(question, reference) && shouldUseReferenceMethodForRegularForm(question, reference, verb, tense)) {
@@ -1104,7 +1104,7 @@ function buildConjugationEndingsHtml(question, verb, tense, approach = "grammati
     return `${introduction}${referenceReminder}<p>Il n\u2019existe pas de s\xE9rie unique de d\xE9sinences ${escapedHtml(context)} pour ce verbe. Le radical d\xE9pend de sa famille et parfois de la personne.${suppl\u00E9tive}</p><p>Il faut donc partir de la forme attest\xE9e, puis identifier sa d\xE9sinence.</p>`;
   }
   const lead = rule.endingsKind === "auxiliary" ? `<p>${context.replace(/^./u, (character) => character.toLocaleUpperCase("fr"))}, le verbe se construit avec l\u2019auxiliaire <strong>${escapedHtml(rule.auxiliaryLabel)}</strong>. Les formes de cet auxiliaire sont :</p>` : `<p>Ses terminaisons ${escapedHtml(context)} sont :</p>`;
-  const pronouns = endingPronouns(question.mode || ((_d = tense == null ? void 0 : tense.mode) == null ? void 0 : _d.name) || "", endingItems.length);
+  const pronouns = endingPronouns(question.mode || ((_c = tense == null ? void 0 : tense.mode) == null ? void 0 : _c.name) || "", endingItems.length);
   const rows = endingItems.map((ending, index) => `<tr><th>${escapedHtml(pronouns[index] || `forme ${index + 1}`)}</th><td>${escapedHtml(ending)}</td></tr>`).join("");
   const construction = decomposition ? `<p><strong>${escapedHtml(decomposition.baseLabel)}</strong> : ${assembledFormBadges(decomposition.base, decomposition.ending)}. Cette construction associe un <strong>radical contextuel</strong> et une <strong>d\xE9sinence</strong>.</p>` : "";
   const stem = lexicalStem(infinitive, verb == null ? void 0 : verb.terminaison);
@@ -1187,9 +1187,8 @@ function meaningFor(question, verb) {
   return "Observe la phrase enti\xE8re pour d\xE9terminer le sens pr\xE9cis du verbe dans ce contexte.";
 }
 function targetedWarnings(question, verb) {
-  var _a;
   const warnings = [];
-  if ((((_a = question.auxiliaryChoices) == null ? void 0 : _a.length) || 0) > 1) warnings.push(VARIABLE_AUXILIARY_EXPLANATION);
+  if (hasMultipleAuxiliaryModels(question)) warnings.push(VARIABLE_AUXILIARY_EXPLANATION);
   const infinitive = normalized$1(question.infinitif || (verb == null ? void 0 : verb.infinitif));
   const particularities = new Set(((verb == null ? void 0 : verb.particularites) || []).map(normalized$1));
   if (question.voice === "passive") {

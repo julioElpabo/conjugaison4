@@ -19,7 +19,7 @@ export default defineNitroPlugin(async () => {
       + `${report.protegerPresentNous} forme « protégeons », `
       + `${report.malformedPluralParticiples} participe(s) sans s redoublé, `
       + `${report.affaiblirPastSimpleForms} forme(s) d’« affaiblir » ajoutée(s), `
-      + `${report.missingDeAccents.verbs} verbe(s) en « dé- » corrigé(s).`,
+      + `${report.missingDeAccents.verbs} verbe(s) aux accents corrigés.`,
     )
   } catch (error) {
     await connection.rollback()

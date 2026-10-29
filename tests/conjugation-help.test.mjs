@@ -480,7 +480,7 @@ test('l’impératif présent mémorise tu, nous et vous puis renvoie à la règ
   assert.match(html, /<figcaption>Construis la réponse<\/figcaption>/)
   assert.doesNotMatch(html, /À l’impératif, n’écris pas le pronom sujet/)
   assert.match(html, /<li>Garde la forme verbale, mais n’écris pas le pronom sujet\.<\/li><li>Vérifie s’il faut garder ou enlever/)
-  assert.equal(html.match(/n’écris pas le pronom sujet/g)?.length, 1)
+  assert.equal(html.match(/n’écris pas le pronom sujet/gi)?.length, 1)
   assert.match(html, /Regarde le bloc « s ou pas s avec tu » plus bas/)
   assert.match(html, /<figcaption>S ou pas s avec tu<\/figcaption>/)
   assert.match(html, /Ici : pas de s final/)
@@ -503,12 +503,12 @@ test('l’impératif présent reconnaît une forme irrégulière sans fausse tra
     },
   }), verb({ infinitif: 'être', terminaison: 're', groupeConjugaison: 3 }), undefined, 'cif-falc')
 
-  assert.match(html, /Tu es/)
-  assert.match(html, /Nous sommes/)
-  assert.match(html, /Vous êtes/)
-  assert.match(html, /Ce verbe fait exception/)
-  assert.match(html, /Garde la forme verbale, mais n’écris pas le pronom sujet/)
-  assert.equal(html.match(/n’écris pas le pronom sujet/g)?.length, 1)
+  assert.match(html, /Impératif irrégulier/)
+  assert.match(html, /formes particulières à l’impératif/)
+  assert.match(html, /radical particulier <strong>soi-<\/strong>/)
+  assert.doesNotMatch(html, /Tu es|Nous sommes|Vous êtes/)
+  assert.match(html, /N’écris pas le pronom sujet/)
+  assert.equal(html.match(/n’écris pas le pronom sujet/gi)?.length, 1)
   assert.match(html, /<strong>Sois<\/strong>/)
   assert.doesNotMatch(html, /il reste le radical|Ajoute <samp>/)
 })
@@ -529,7 +529,7 @@ test('l’impératif rappelle une seule fois de retirer le pronom avec nous et v
     }), verb({ infinitif: 'manger', terminaison: 'er', groupeConjugaison: 1 }), undefined, 'cif-falc')
 
     assert.match(html, /Garde la forme verbale, mais n’écris pas le pronom sujet/)
-    assert.equal(html.match(/n’écris pas le pronom sujet/g)?.length, 1)
+    assert.equal(html.match(/n’écris pas le pronom sujet/gi)?.length, 1)
   }
 })
 
@@ -863,7 +863,7 @@ test('le bloc automatique d’un temps composé sépare mémorisation, réponse 
   assert.match(html, /Le participe passé de manger<\/strong><p><mark><strong>Mangé/)
   assert.match(html, /<figcaption>Construis la réponse<\/figcaption>/)
   assert.match(html, /Conjugue le verbe auxiliaire <strong>avoir<\/strong> à l’imparfait de l’indicatif avec <strong>nous<\/strong>/)
-  assert.match(html, /<strong>Résultat<\/strong><p><strong>avions mangé<\/strong><\/p>/)
+  assert.match(html, /<strong>Résultat<\/strong><p><strong>nous avions mangé<\/strong><\/p>/)
   assert.doesNotMatch(html, /<strong>Résultat<\/strong><p><mark>/)
   assert.match(html, /<figcaption>Accord du participe passé<\/figcaption>/)
   assert.match(html, /<strong>Avec avoir<\/strong>/)
@@ -895,7 +895,7 @@ test('le bloc composé affiche la réponse officielle accordée avec un COD plac
     },
   }), verb({ infinitif: 'manger', participePasse: 'mangé', auxiliaire: 'avoir', particularites: [] }), undefined, 'cif-falc')
 
-  assert.match(html, /<strong>a mangée<\/strong>/)
+  assert.match(html, /<strong>elle a mangée<\/strong>/)
   assert.doesNotMatch(html, /<strong>a mangé<\/strong><\/mark><\/p><\/blockquote>/)
 })
 

@@ -1,5 +1,7 @@
 import type { ConjugationTense, ExerciseQuestion, Verb } from '../types/conjugation'
 import type { CoachExplanationApproach } from '../types/coach'
+import { AUXILIARY_SIMPLE_TENSES, compoundSimpleTense } from './compound-auxiliaries'
+import { VARIABLE_AUXILIARY_EXPLANATION } from './variable-auxiliary'
 import {
   bareNearFutureInfinitive,
   isNearFutureTense,
@@ -877,47 +879,7 @@ function compoundAuxiliaryForms(auxiliary: string, time: string, mode: string) {
   return forms[key] || null
 }
 
-interface AuxiliarySimpleTense {
-  mode: string
-  tense: string
-  pronouns: string[]
-  forms: Record<'avoir' | 'être', string[]>
-}
-
-const AUXILIARY_SIMPLE_TENSES: AuxiliarySimpleTense[] = [
-  { mode: 'indicatif', tense: 'présent', pronouns: ['je', 'tu', 'il / elle / on', 'nous', 'vous', 'ils / elles'], forms: { avoir: ['ai', 'as', 'a', 'avons', 'avez', 'ont'], être: ['suis', 'es', 'est', 'sommes', 'êtes', 'sont'] } },
-  { mode: 'indicatif', tense: 'imparfait', pronouns: ['je', 'tu', 'il / elle / on', 'nous', 'vous', 'ils / elles'], forms: { avoir: ['avais', 'avais', 'avait', 'avions', 'aviez', 'avaient'], être: ['étais', 'étais', 'était', 'étions', 'étiez', 'étaient'] } },
-  { mode: 'indicatif', tense: 'futur', pronouns: ['je', 'tu', 'il / elle / on', 'nous', 'vous', 'ils / elles'], forms: { avoir: ['aurai', 'auras', 'aura', 'aurons', 'aurez', 'auront'], être: ['serai', 'seras', 'sera', 'serons', 'serez', 'seront'] } },
-  { mode: 'indicatif', tense: 'passé simple', pronouns: ['je', 'tu', 'il / elle / on', 'nous', 'vous', 'ils / elles'], forms: { avoir: ['eus', 'eus', 'eut', 'eûmes', 'eûtes', 'eurent'], être: ['fus', 'fus', 'fut', 'fûmes', 'fûtes', 'furent'] } },
-  { mode: 'conditionnel', tense: 'présent', pronouns: ['je', 'tu', 'il / elle / on', 'nous', 'vous', 'ils / elles'], forms: { avoir: ['aurais', 'aurais', 'aurait', 'aurions', 'auriez', 'auraient'], être: ['serais', 'serais', 'serait', 'serions', 'seriez', 'seraient'] } },
-  { mode: 'subjonctif', tense: 'présent', pronouns: ['que j’', 'que tu', 'qu’il / elle / on', 'que nous', 'que vous', 'qu’ils / elles'], forms: { avoir: ['aie', 'aies', 'ait', 'ayons', 'ayez', 'aient'], être: ['sois', 'sois', 'soit', 'soyons', 'soyez', 'soient'] } },
-  { mode: 'subjonctif', tense: 'imparfait', pronouns: ['que j’', 'que tu', 'qu’il / elle / on', 'que nous', 'que vous', 'qu’ils / elles'], forms: { avoir: ['eusse', 'eusses', 'eût', 'eussions', 'eussiez', 'eussent'], être: ['fusse', 'fusses', 'fût', 'fussions', 'fussiez', 'fussent'] } },
-  { mode: 'impératif', tense: 'présent', pronouns: ['tu', 'nous', 'vous'], forms: { avoir: ['aie', 'ayons', 'ayez'], être: ['sois', 'soyons', 'soyez'] } },
-  { mode: 'infinitif', tense: 'présent', pronouns: ['forme'], forms: { avoir: ['avoir'], être: ['être'] } },
-  { mode: 'participe', tense: 'présent', pronouns: ['forme'], forms: { avoir: ['ayant'], être: ['étant'] } },
-]
-
-function compoundSimpleTense(mode: string, tense: string) {
-  const key = `${normalized(mode)}:${normalized(tense)}`
-  const mappings: Record<string, { mode: string, tense: string }> = {
-    'indicatif:passe compose': { mode: 'indicatif', tense: 'présent' },
-    'indicatif:plus-que-parfait': { mode: 'indicatif', tense: 'imparfait' },
-    'indicatif:futur anterieur': { mode: 'indicatif', tense: 'futur' },
-    'indicatif:passe anterieur': { mode: 'indicatif', tense: 'passé simple' },
-    'conditionnel:passe': { mode: 'conditionnel', tense: 'présent' },
-    'conditionnel:passe 1': { mode: 'conditionnel', tense: 'présent' },
-    'conditionnel:passe 2': { mode: 'subjonctif', tense: 'imparfait' },
-    'subjonctif:passe': { mode: 'subjonctif', tense: 'présent' },
-    'subjonctif:plus-que-parfait': { mode: 'subjonctif', tense: 'imparfait' },
-    'imperatif:passe': { mode: 'impératif', tense: 'présent' },
-    'infinitif:passe': { mode: 'infinitif', tense: 'présent' },
-    'participe:passe': { mode: 'participe', tense: 'présent' },
-    'gerondif:passe': { mode: 'participe', tense: 'présent' },
-  }
-  return mappings[key] || null
-}
-
-function inferCompoundAuxiliary(question: ExerciseQuestion, verb?: Verb): 'avoir' | 'être' {
+export function inferCompoundAuxiliary(question: ExerciseQuestion, verb?: Verb): 'avoir' | 'être' {
   const words = new Set(normalized(question.conjugaison1).split(/[^a-z]+/u).filter(Boolean))
   const etreForms = new Set(AUXILIARY_SIMPLE_TENSES.flatMap(item => item.forms.être.map(normalized)))
   const avoirForms = new Set(AUXILIARY_SIMPLE_TENSES.flatMap(item => item.forms.avoir.map(normalized)))
@@ -1046,6 +1008,22 @@ function compoundAgreementHtml(auxiliary: 'avoir' | 'être', subject: string, ba
 
 function buildCompoundConjugationHtml(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationTense, revealAnswers = true) {
   const infinitive = question.infinitif || verb?.infinitif || 'ce verbe'
+  if ((question.auxiliaryChoices?.length || 0) > 1) {
+    const mode = normalized(question.mode || tense?.mode?.name)
+    const simpleTense = compoundSimpleTense(question.mode || tense?.mode?.name || '', question.temps || tense?.name || '')
+    const person = auxiliaryPersonIndex(question, simpleTense)
+    const participle = verb?.participePasse?.trim() || 'le participe passé du verbe'
+    const knowledge = question.auxiliaryChoices!.map(auxiliary => auxiliaryConjugationHtml(auxiliary, simpleTense, person, revealAnswers)).join('')
+    const result = revealAnswers
+      ? `<blockquote><strong>Résultat</strong>${question.reponsesPourCorrige.map(answer => `<p>${resultFormMarkup(answer, false)}</p>`).join('')}</blockquote>`
+      : ''
+    const instruction = mode === 'infinitif'
+      ? 'Mets cet auxiliaire à l’infinitif.'
+      : mode === 'gerondif'
+        ? 'Mets cet auxiliaire au participe présent et place « en » devant.'
+        : 'Conjugue cet auxiliaire au temps simple correspondant et à la personne demandée.'
+    return `<figure>${knowledgeCaption()}<p>${escapedHtml(VARIABLE_AUXILIARY_EXPLANATION)}</p>${knowledge}<blockquote><strong>Le participe passé de ${escapedHtml(infinitive)}</strong><p>${escapedHtml(participle)}</p></blockquote></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Choisis avoir ou être selon le sens que tu donnes au verbe.</li><li>${instruction}</li><li>Ajoute le participe passé et vérifie son accord selon l’auxiliaire choisi.</li></ol>${result}</figure>`
+  }
   const auxiliary = inferCompoundAuxiliary(question, verb)
   const participle = verb?.participePasse?.trim() || question.agreementReminder?.participle?.trim() || 'participe passé à vérifier'
   const simpleTense = compoundSimpleTense(question.mode || tense?.mode?.name || '', question.temps || tense?.name || '')
@@ -1107,7 +1085,8 @@ function tenseRule(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationT
     endingsText = 'Formes de « aller » au présent : vais, vas, va, allons, allez, vont.'
     rule = 'Conjugue « aller » au présent, puis ajoute l’infinitif du verbe. Avec un verbe pronominal, place le pronom réfléchi devant l’infinitif.'
   } else if (question.isCompound || tense?.isCompound) {
-    const auxiliaryLabelFromVerb = verb?.auxiliaire?.trim() || 'avoir ou être selon le verbe'
+    const variableAuxiliary = (question.auxiliaryChoices?.length || 0) > 1
+    const auxiliaryLabelFromVerb = variableAuxiliary ? 'avoir ou être' : inferCompoundAuxiliary(question, verb)
     const auxiliary = normalized(auxiliaryLabelFromVerb)
     auxiliaryLabel = auxiliaryLabelFromVerb
     const auxiliaryTime: Record<string, string> = {
@@ -1115,7 +1094,8 @@ function tenseRule(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationT
       'passe anterieur': 'au passé simple', passe: mode === 'gerondif' ? 'au participe présent' : 'au temps simple correspondant',
       'passe 1': 'au conditionnel présent', 'passe 2': 'au subjonctif imparfait',
     }
-    rule = `Conjugue l’auxiliaire ${auxiliary} ${auxiliaryTime[time] || 'au temps demandé'}, puis ajoute le participe passé.`
+    rule = `Conjugue l’auxiliaire ${auxiliaryLabelFromVerb} ${auxiliaryTime[time] || 'au temps demandé'}, puis ajoute le participe passé.`
+    if (variableAuxiliary) rule += ` ${VARIABLE_AUXILIARY_EXPLANATION}`
     const auxiliaryForms = compoundAuxiliaryForms(auxiliary, time, mode)
     if (auxiliaryForms) {
       endings = auxiliaryForms.split(',').map(form => form.trim())
@@ -1454,6 +1434,9 @@ export function buildConjugationEndingsHtml(
   tense?: ConjugationTense,
   approach: CoachExplanationApproach = 'grammatical-technical',
 ) {
+  if ((question.auxiliaryChoices?.length || 0) > 1) {
+    return buildCompoundConjugationHtml(question, verb, tense)
+  }
   if (question.voice === 'passive') {
     return `${buildPassiveVoiceMethodHtml(question, verb, tense)}${buildPassiveVoiceHelpHtml(question, verb, tense)}`
   }
@@ -1622,6 +1605,16 @@ export function buildCompleteConjugationAdviceHtml(question: ExerciseQuestion, v
   if (mode === 'conditionnel' && time === 'present') {
     return conditionalPresentHelpHtml(question, verb, reference, false)
   }
+  if (mode === 'indicatif' && time === 'passe simple' && reference?.kind === 'past-simple-il'
+      && reference.removableEnding && reference.form.endsWith(reference.removableEnding)) {
+    const series = /int$/u.test(reference.form) ? ['ins', 'ins', 'int', 'înmes', 'întes', 'inrent']
+      : /ut$/u.test(reference.form) ? ['us', 'us', 'ut', 'ûmes', 'ûtes', 'urent']
+        : /it$/u.test(reference.form) ? ['is', 'is', 'it', 'îmes', 'îtes', 'irent']
+          : /a$/u.test(reference.form) ? ['ai', 'as', 'a', 'âmes', 'âtes', 'èrent'] : []
+    const subjects = ['je', 'tu', 'il / elle', 'nous', 'vous', 'ils / elles']
+    const table = series.length ? `<table><tbody>${series.map((ending, index) => `<tr><th>${subjects[index]}</th><td>-${ending}</td></tr>`).join('')}</tbody></table>` : ''
+    return `<figure>${knowledgeCaption()}<p>Forme repère : <strong>il ${escapedHtml(reference.form)}</strong>.</p></figure><figure><figcaption>Construis la réponse</figcaption><ol><li>Enlève la terminaison <strong>-${escapedHtml(reference.removableEnding)}</strong> de cette forme repère pour retrouver le radical.</li><li>Choisis la terminaison correspondant à <strong>${escapedHtml(question.pronom || 'la personne demandée')}</strong> dans la série de ce verbe.</li><li>Assemble le radical et cette terminaison, puis vérifie les accents.</li></ol>${table}</figure>`
+  }
 
   let html = buildConjugationBaseHtml(question, verb, tense, 'cif-falc')
 
@@ -1654,6 +1647,7 @@ function meaningFor(question: ExerciseQuestion, verb?: Verb) {
 
 function targetedWarnings(question: ExerciseQuestion, verb?: Verb) {
   const warnings: string[] = []
+  if ((question.auxiliaryChoices?.length || 0) > 1) warnings.push(VARIABLE_AUXILIARY_EXPLANATION)
   const infinitive = normalized(question.infinitif || verb?.infinitif)
   const particularities = new Set((verb?.particularites || []).map(normalized))
 

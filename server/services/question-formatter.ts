@@ -1,5 +1,6 @@
 import type { ExerciseQuestion } from '../types/public-api'
 import { agreePastParticiple } from '../../shared/utils/past-participle-agreement'
+import { variableAuxiliaryRows } from './compound-auxiliary'
 
 export interface ConjugationSourceRow {
   id: number
@@ -321,6 +322,22 @@ function answerVariants(row: ConjugationSourceRow, pronoun: string) {
 }
 
 export function formatConjugationQuestion(
+  row: ConjugationSourceRow,
+  pronoun: string
+): ExerciseQuestion {
+  const rows = variableAuxiliaryRows(row)
+  const questions = rows.map(candidate => formatSingleAuxiliaryQuestion(candidate, pronoun))
+  const primary = questions[0]!
+  if (questions.length === 1) return primary
+  return {
+    ...primary,
+    reponses: unique(questions.flatMap(question => [...question.reponses])),
+    reponsesPourCorrige: unique(questions.flatMap(question => [...question.reponsesPourCorrige])),
+    auxiliaryChoices: rows.map(candidate => candidate.auxiliaire as 'avoir' | 'être'),
+  }
+}
+
+function formatSingleAuxiliaryQuestion(
   row: ConjugationSourceRow,
   pronoun: string
 ): ExerciseQuestion {

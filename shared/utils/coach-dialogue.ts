@@ -70,7 +70,7 @@ export function createCoachReaction(
   coach: CoachProfile,
   eventType: CoachEvent,
   context: CoachMessageContext = {},
-  options: { random?: () => number, allowMotion?: boolean, mediaAllowed?: boolean, animatedOnly?: boolean, excludeMediaIds?: readonly number[], allowedReplyIds?: readonly number[] } = {}
+  options: { random?: () => number, allowMotion?: boolean, mediaAllowed?: boolean, animatedOnly?: boolean, excludeMediaIds?: readonly number[], allowedReplyIds?: readonly number[], mediaUsage?: ReadonlyMap<number, number> } = {}
 ): CoachReaction {
   const random = options.random ?? Math.random
   const allowedReplyIds = options.allowedReplyIds ? new Set(options.allowedReplyIds) : null
@@ -125,7 +125,11 @@ export function createCoachReaction(
     && group.probability > 0 && random() < Math.min(1, group.probability))
   const freshCandidates = selectedGroup?.candidates.filter(item => !excluded.has(item.media.id)) ?? []
   // Vary within the selected type without excluding its only available GIF.
-  const selectable = freshCandidates.length ? freshCandidates : selectedGroup?.candidates ?? []
+  const available = freshCandidates.length ? freshCandidates : selectedGroup?.candidates ?? []
+  const minimumUsage = available.length ? Math.min(...available.map(item => options.mediaUsage?.get(item.media.id) || 0)) : 0
+  const selectable = options.mediaUsage
+    ? available.filter(item => (options.mediaUsage!.get(item.media.id) || 0) === minimumUsage)
+    : available
   const selected = selectedGroup?.type === 'animation'
     ? uniformChoice(selectable, random)
     : selectedGroup
@@ -139,10 +143,11 @@ export interface CoachDialogueState {
   usageByEvent: Map<CoachEvent, Map<number, number>>
   lastReplyByEvent: Map<CoachEvent, number>
   lastMediaId?: number
+  mediaUsage: Map<number, number>
 }
 
 export function createCoachDialogueState(): CoachDialogueState {
-  return { usageByEvent: new Map(), lastReplyByEvent: new Map() }
+  return { usageByEvent: new Map(), lastReplyByEvent: new Map(), mediaUsage: new Map() }
 }
 
 export function createVariedCoachReaction(
@@ -166,11 +171,15 @@ export function createVariedCoachReaction(
     ...options,
     allowedReplyIds: preferred.map(reply => reply.id),
     excludeMediaIds: state.lastMediaId ? [state.lastMediaId] : [],
+    mediaUsage: state.mediaUsage,
   })
   if (reaction.replyId) {
     usage.set(reaction.replyId, (usage.get(reaction.replyId) || 0) + 1)
     state.lastReplyByEvent.set(eventType, reaction.replyId)
   }
-  if (reaction.media) state.lastMediaId = reaction.media.id
+  if (reaction.media) {
+    state.lastMediaId = reaction.media.id
+    state.mediaUsage.set(reaction.media.id, (state.mediaUsage.get(reaction.media.id) || 0) + 1)
+  }
   return reaction
 }

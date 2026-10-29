@@ -41,6 +41,8 @@ import {
   softenIncorrectCoachText,
 } from '~~/shared/utils/coach-conversation'
 import { diagnoseCoachAgreement, diagnoseCoachAnswer } from '~~/shared/utils/coach-feedback'
+import { subjectPronounIssue, subjectPronounFeedback } from '~~/shared/utils/subject-pronoun-feedback'
+import { coachHelpProgressionNotice } from '~~/shared/utils/coach-help-progression'
 import {
   learnerErrorDetailText,
   learnerErrorDisplayCoverage,
@@ -285,6 +287,7 @@ const usesIdentificationHelp = computed(() => helpQuestion.value?.exerciseKind
   ? helpQuestion.value.exerciseKind !== 'conjugation'
   : questionExerciseKind(helpQuestion.value, props.exerciseKind || props.trackingContext?.challenge.exerciseKind) !== 'conjugation')
 const selectedCoachHelpProfile = computed(() => coachHelpProfile(props.coach.helpApproach))
+const subjectTypoRetriedIndexes = new Set<number>()
 const infinitiveHelpAllowsAnswer = computed(() => usesCifFleSupport.value || selectedCoachHelpProfile.value.revealsAnswers)
 function markInfinitiveAnswerRevealed() {
   const index = helpQuestionIndex.value ?? currentIndex.value
@@ -297,6 +300,9 @@ const helpAnswersRevealed = computed(() => (
   selectedCoachHelpProfile.value.revealsAnswers
   && failedQuestionIndexes.has(helpQuestionIndex.value ?? currentIndex.value)
 ))
+const helpProgressionDescription = computed(() => selectedCoachHelpProfile.value.revealsAnswers
+  ? `<p>${coachHelpProgressionNotice(interfaceLocale.value, helpAnswersRevealed.value)}</p>`
+  : '')
 const effectiveHelpApproach = computed(() => (
   selectedCoachHelpProfile.value.revealsAnswers && !helpAnswersRevealed.value
     ? 'complete'
@@ -1295,7 +1301,7 @@ async function runChatOpening(eventType: Extract<CoachEvent, 'introduction' | 'r
 async function submit() {
   const question = currentQuestion.value
   const candidate = answer.value.trim()
-  if (!question || !candidate || waitingForNext.value || posingQuestion.value || finished.value) return
+  if (!question || !candidate || deliveringFeedback.value || waitingForNext.value || posingQuestion.value || finished.value) return
   clearHelpReminderTimer()
   if (isHelpCommand(candidate)) {
     openHelp(candidate)
@@ -1311,6 +1317,17 @@ async function submit() {
   const result = isIdentificationExercise.value
     ? validateAnswer(candidate, question.reponses)
     : validateConjugationAnswer(candidate, question)
+  const subjectIssue = isIdentificationExercise.value ? null : subjectPronounIssue(candidate, question)
+  if (!result.isCorrect && subjectIssue?.kind === 'typo' && !subjectTypoRetriedIndexes.has(currentIndex.value)) {
+    subjectTypoRetriedIndexes.add(currentIndex.value)
+    deliveringFeedback.value = true
+    await enqueueCoachBubble(() => ({ text: subjectPronounFeedback(subjectIssue, interfaceLocale.value) }))
+    if (version !== conversationVersion) return
+    deliveringFeedback.value = false
+    restartHelpReminderTimer()
+    focusAnswerInput()
+    return
+  }
   if (result.reason === 'missing-subject-pronoun') {
     answer.value = ''
     deliveringFeedback.value = true
@@ -1586,6 +1603,7 @@ async function restart() {
   answer.value = ''
   attempts.value = []
   failedQuestionIndexes.clear()
+  subjectTypoRetriedIndexes.clear()
   revealedQuestionIndexes.clear()
   pendingErrorLabels.value = []
   pendingErrorDetails.value = []
@@ -2060,7 +2078,7 @@ onBeforeUnmount(() => {
           :blocks="helpBlocks"
           :values="helpValues"
           header-title="{helpTitle}"
-          header-description=""
+          :header-description="helpProgressionDescription"
           :question-number="(helpQuestionIndex ?? currentIndex) + 1"
           :coach-color="coach.themeColor"
           :feedback-context="helpFeedbackContext"

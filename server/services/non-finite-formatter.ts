@@ -1,5 +1,6 @@
 import type { ExerciseQuestion } from '../types/public-api'
 import { buildRadicalReference } from '../../shared/utils/radical-reference'
+import { hasVariableAuxiliary } from '../../shared/utils/variable-auxiliary'
 
 export interface NonFiniteVerbSource {
   id: number
@@ -74,6 +75,15 @@ export function formatNonFiniteQuestion(
   }
   if (answers.length === 0) return null
 
+  const variableAuxiliary = hasVariableAuxiliary(verb.infinitif)
+    && tenseName === 'passé' && ['infinitif', 'gérondif'].includes(mode)
+  if (variableAuxiliary) {
+    answers = variants(verb.participe_passe).flatMap(participle => [
+      upperFirst(`${mode === 'gérondif' ? 'en ayant' : 'avoir'} ${participle}`),
+      ...['', 'e', 's', 'es'].map(ending => upperFirst(`${mode === 'gérondif' ? 'en étant' : 'être'} ${participle}${ending}`)),
+    ])
+  }
+
   const radicalReference = buildRadicalReference({
     infinitive: verb.infinitif,
     mode: tense.mode_name,
@@ -98,6 +108,7 @@ export function formatNonFiniteQuestion(
     ...(tense.code ? { tenseCode: tense.code } : {}),
     ...(tense.mode_code ? { modeCode: tense.mode_code } : {}),
     isCompound: Boolean(tense.is_compound),
+    ...(variableAuxiliary ? { auxiliaryChoices: ['avoir', 'être'] as const } : {}),
     conjugaison1: answers[0]!,
     conjugaison2: answers[1] || '',
     conjugaison3: answers[2] || '',

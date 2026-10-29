@@ -1,6 +1,6 @@
 import type { ExerciseQuestion } from '../types/public-api'
 import { buildRadicalReference } from '../../shared/utils/radical-reference'
-import { hasVariableAuxiliary } from '../../shared/utils/variable-auxiliary'
+import { hasVariableAuxiliary, prefersEtreWithoutComplement } from '../../shared/utils/variable-auxiliary'
 
 export interface NonFiniteVerbSource {
   id: number
@@ -84,6 +84,9 @@ export function formatNonFiniteQuestion(
     ])
   }
 
+  const preferredAuxiliary = variableAuxiliary && prefersEtreWithoutComplement(verb.infinitif) ? 'être' as const : undefined
+  if (preferredAuxiliary) answers = [...answers.filter(answer => /^(?:Être|En étant) /u.test(answer)), ...answers.filter(answer => !/^(?:Être|En étant) /u.test(answer))]
+
   const radicalReference = buildRadicalReference({
     infinitive: verb.infinitif,
     mode: tense.mode_name,
@@ -101,7 +104,8 @@ export function formatNonFiniteQuestion(
     titre: infinitive,
     consigne: `${label} de ${infinitive}`,
     reponses: answers,
-    reponsesPourCorrige: answers,
+    reponsesPourCorrige: preferredAuxiliary ? answers.filter(answer => /^(?:Être|En étant) /u.test(answer)) : answers,
+    ...(preferredAuxiliary ? { preferredAuxiliary } : {}),
     infinitif: verb.infinitif,
     temps: tense.name,
     mode: tense.mode_name,

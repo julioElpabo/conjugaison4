@@ -1,7 +1,7 @@
 import type { ConjugationTense, ExerciseQuestion, Verb } from '../types/conjugation'
 import type { CoachExplanationApproach } from '../types/coach'
 import { AUXILIARY_SIMPLE_TENSES, compoundSimpleTense } from './compound-auxiliaries'
-import { VARIABLE_AUXILIARY_EXPLANATION } from './variable-auxiliary'
+import { VARIABLE_AUXILIARY_EXPLANATION, hasMultipleAuxiliaryModels } from './variable-auxiliary'
 import {
   bareNearFutureInfinitive,
   isNearFutureTense,
@@ -1008,7 +1008,7 @@ function compoundAgreementHtml(auxiliary: 'avoir' | 'être', subject: string, ba
 
 function buildCompoundConjugationHtml(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationTense, revealAnswers = true) {
   const infinitive = question.infinitif || verb?.infinitif || 'ce verbe'
-  if ((question.auxiliaryChoices?.length || 0) > 1) {
+  if (hasMultipleAuxiliaryModels(question)) {
     const mode = normalized(question.mode || tense?.mode?.name)
     const simpleTense = compoundSimpleTense(question.mode || tense?.mode?.name || '', question.temps || tense?.name || '')
     const person = auxiliaryPersonIndex(question, simpleTense)
@@ -1085,7 +1085,7 @@ function tenseRule(question: ExerciseQuestion, verb?: Verb, tense?: ConjugationT
     endingsText = 'Formes de « aller » au présent : vais, vas, va, allons, allez, vont.'
     rule = 'Conjugue « aller » au présent, puis ajoute l’infinitif du verbe. Avec un verbe pronominal, place le pronom réfléchi devant l’infinitif.'
   } else if (question.isCompound || tense?.isCompound) {
-    const variableAuxiliary = (question.auxiliaryChoices?.length || 0) > 1
+    const variableAuxiliary = hasMultipleAuxiliaryModels(question)
     const auxiliaryLabelFromVerb = variableAuxiliary ? 'avoir ou être' : inferCompoundAuxiliary(question, verb)
     const auxiliary = normalized(auxiliaryLabelFromVerb)
     auxiliaryLabel = auxiliaryLabelFromVerb
@@ -1434,7 +1434,7 @@ export function buildConjugationEndingsHtml(
   tense?: ConjugationTense,
   approach: CoachExplanationApproach = 'grammatical-technical',
 ) {
-  if ((question.auxiliaryChoices?.length || 0) > 1) {
+  if (hasMultipleAuxiliaryModels(question)) {
     return buildCompoundConjugationHtml(question, verb, tense)
   }
   if (question.voice === 'passive') {
@@ -1647,7 +1647,7 @@ function meaningFor(question: ExerciseQuestion, verb?: Verb) {
 
 function targetedWarnings(question: ExerciseQuestion, verb?: Verb) {
   const warnings: string[] = []
-  if ((question.auxiliaryChoices?.length || 0) > 1) warnings.push(VARIABLE_AUXILIARY_EXPLANATION)
+  if (hasMultipleAuxiliaryModels(question)) warnings.push(VARIABLE_AUXILIARY_EXPLANATION)
   const infinitive = normalized(question.infinitif || verb?.infinitif)
   const particularities = new Set((verb?.particularites || []).map(normalized))
 

@@ -162,6 +162,8 @@ export interface ExerciseQuestion {
   isCompound?: boolean
   /** Auxiliaires admis lorsque l’exercice ne fournit pas de contexte. */
   auxiliaryChoices?: readonly ('avoir' | 'être')[]
+  /** Auxiliaire utilisé dans le modèle pédagogique sans restreindre les réponses admises. */
+  preferredAuxiliary?: 'avoir' | 'être'
   voice?: 'active' | 'passive'
   passiveSubject?: string
   passiveAgent?: string

@@ -1,5 +1,6 @@
 import type { ExerciseQuestion } from '../types/public-api'
 import { agreePastParticiple } from '../../shared/utils/past-participle-agreement'
+import { prefersEtreWithoutComplement } from '../../shared/utils/variable-auxiliary'
 import { variableAuxiliaryRows } from './compound-auxiliary'
 
 export interface ConjugationSourceRow {
@@ -94,6 +95,8 @@ function applyAgreement(
   if (agreementRule === 'invariable') return masculineSingularForm(form, participle)
 
   const stem = masculineSingularForm(form, participle)
+  if (pronoun === 'il') return stem
+  if (pronoun === 'ils') return /[sx]$/u.test(stem) ? stem : `${stem}s`
   if (pronoun === 'elle') return `${stem}e`
   if (pronoun === 'elles') return `${stem}es`
   if (pronoun === 'iel') return `${stem}(e)`
@@ -329,10 +332,12 @@ export function formatConjugationQuestion(
   const questions = rows.map(candidate => formatSingleAuxiliaryQuestion(candidate, pronoun))
   const primary = questions[0]!
   if (questions.length === 1) return primary
+  const preferredAuxiliary = prefersEtreWithoutComplement(row.infinitif) ? 'être' as const : undefined
   return {
     ...primary,
     reponses: unique(questions.flatMap(question => [...question.reponses])),
-    reponsesPourCorrige: unique(questions.flatMap(question => [...question.reponsesPourCorrige])),
+    reponsesPourCorrige: preferredAuxiliary ? primary.reponsesPourCorrige : unique(questions.flatMap(question => [...question.reponsesPourCorrige])),
+    ...(preferredAuxiliary ? { preferredAuxiliary } : {}),
     auxiliaryChoices: rows.map(candidate => candidate.auxiliaire as 'avoir' | 'être'),
   }
 }

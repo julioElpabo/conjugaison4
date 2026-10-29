@@ -319,29 +319,20 @@ function revealIds(ids: number[], target: Ref<number[]>, duration = 1_000) {
   })
 }
 
-function withExampleSubject(value: string) {
-  const subject = challenge.value.inclusivePronouns
-    ? 'iel'
-    : challenge.value.includeOnPronoun ? 'on' : 'il'
-  return value.replace(/\b(?:il|elle|iel)\b/iu, match => (
-    /^\p{Lu}/u.test(match) ? subject.charAt(0).toLocaleUpperCase('fr') + subject.slice(1) : subject
-  ))
-}
-
 function capitalizeExampleSentence(value: string) {
   return value.replace(/\p{L}/u, letter => letter.toLocaleUpperCase('fr'))
 }
 
 const conjugationInstruction = computed(() => conjugationInstructionRaw.value)
-const conjugationQuestionContext = computed(() => withExampleSubject(conjugationQuestionContextRaw.value))
-const conjugationQuestion = computed(() => capitalizeExampleSentence(withExampleSubject(conjugationQuestionRaw.value)))
-const conjugationExample = computed(() => capitalizeExampleSentence(withExampleSubject(conjugationExampleRaw.value)))
-const conjugationExamplePrefix = computed(() => capitalizeExampleSentence(withExampleSubject(conjugationExamplePrefixRaw.value)))
+const conjugationQuestionContext = computed(() => conjugationQuestionContextRaw.value)
+const conjugationQuestion = computed(() => capitalizeExampleSentence(conjugationQuestionRaw.value))
+const conjugationExample = computed(() => capitalizeExampleSentence(conjugationExampleRaw.value))
+const conjugationExamplePrefix = computed(() => capitalizeExampleSentence(conjugationExamplePrefixRaw.value))
 const conjugationExampleEmphasis = computed(() => {
-  const emphasis = withExampleSubject(conjugationExampleEmphasisRaw.value)
+  const emphasis = conjugationExampleEmphasisRaw.value
   return conjugationExamplePrefixRaw.value ? emphasis : capitalizeExampleSentence(emphasis)
 })
-const conjugationExampleSuffix = computed(() => withExampleSubject(conjugationExampleSuffixRaw.value))
+const conjugationExampleSuffix = computed(() => conjugationExampleSuffixRaw.value)
 
 function expectedAnswerParts(question: ExerciseQuestion | undefined) {
   const answer = question?.reponsesPourCorrige[0] ?? ''
@@ -1595,7 +1586,7 @@ async function refreshConjugationExample() {
           : question.complementPosition === 'after' && Boolean(question.complement)))
     )
     const isPreferredExample = (question: ExerciseQuestion) => (
-      question.pronom === 'il' || question.personId === 6
+      question.pronom === 'il'
     )
     const findExample = async (config: typeof exampleConfig, attempts = 3, requireSelectedComplement = true) => {
       let fallback: ExerciseQuestion | undefined

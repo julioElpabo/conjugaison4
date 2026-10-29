@@ -202,7 +202,11 @@ function compoundParticipleDifference(learnerAnswer: string, expectedAnswer: str
 }
 
 function displayedCorrection(question: ExerciseQuestion, fallback: string) {
-  return closestExpected(fallback, question.reponsesPourCorrige)?.value || fallback
+  const structure = compoundStructure(fallback, question)
+  const candidates = structure
+    ? question.reponsesPourCorrige.filter(answer => compoundStructure(answer, question)?.auxiliaryPhrase === structure.auxiliaryPhrase)
+    : question.reponsesPourCorrige
+  return closestExpected(fallback, candidates)?.value || fallback
 }
 
 /**

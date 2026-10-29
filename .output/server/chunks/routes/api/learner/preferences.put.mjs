@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, c as createError, ah as parseLearnerPreferencesPatch, $ as PublicInputError, ai as updateLearnerPreferences, u as useDatabase } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, c as createError, ai as parseLearnerPreferencesPatch, a0 as PublicInputError, aj as updateLearnerPreferences, u as useDatabase } from '../../../nitro/nitro.mjs';
 import { g as getLearnerSession } from '../../../_/learner-session.mjs';
 import { r as readLimitedJsonBody } from '../../../_/limited-json-body.mjs';
 import 'node:http';

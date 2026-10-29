@@ -97,13 +97,18 @@ function createCoachReaction(coach, eventType, context = {}, options = {}) {
   ];
   const selectedGroup = mediaGroups.find((group) => group.candidates.length && group.probability > 0 && random() < Math.min(1, group.probability));
   const freshCandidates = (_d = selectedGroup == null ? void 0 : selectedGroup.candidates.filter((item) => !excluded.has(item.media.id))) != null ? _d : [];
-  const selectable = freshCandidates.length ? freshCandidates : (_e = selectedGroup == null ? void 0 : selectedGroup.candidates) != null ? _e : [];
+  const available = freshCandidates.length ? freshCandidates : (_e = selectedGroup == null ? void 0 : selectedGroup.candidates) != null ? _e : [];
+  const minimumUsage = available.length ? Math.min(...available.map((item) => {
+    var _a2;
+    return ((_a2 = options.mediaUsage) == null ? void 0 : _a2.get(item.media.id)) || 0;
+  })) : 0;
+  const selectable = options.mediaUsage ? available.filter((item) => (options.mediaUsage.get(item.media.id) || 0) === minimumUsage) : available;
   const selected = (selectedGroup == null ? void 0 : selectedGroup.type) === "animation" ? uniformChoice(selectable, random) : selectedGroup ? weightedChoice(selectable, random) : void 0;
   if (selected) result.media = selected.media;
   return result;
 }
 function createCoachDialogueState() {
-  return { usageByEvent: /* @__PURE__ */ new Map(), lastReplyByEvent: /* @__PURE__ */ new Map() };
+  return { usageByEvent: /* @__PURE__ */ new Map(), lastReplyByEvent: /* @__PURE__ */ new Map(), mediaUsage: /* @__PURE__ */ new Map() };
 }
 function createVariedCoachReaction(coach, eventType, context = {}, state, options = {}) {
   const eventReplies = coach.replies.filter((reply) => reply.isActive && reply.eventType === eventType && canRenderCoachTemplate(reply.content, context));
@@ -116,13 +121,17 @@ function createVariedCoachReaction(coach, eventType, context = {}, state, option
   const reaction = createCoachReaction(coach, eventType, context, {
     ...options,
     allowedReplyIds: preferred.map((reply) => reply.id),
-    excludeMediaIds: state.lastMediaId ? [state.lastMediaId] : []
+    excludeMediaIds: state.lastMediaId ? [state.lastMediaId] : [],
+    mediaUsage: state.mediaUsage
   });
   if (reaction.replyId) {
     usage.set(reaction.replyId, (usage.get(reaction.replyId) || 0) + 1);
     state.lastReplyByEvent.set(eventType, reaction.replyId);
   }
-  if (reaction.media) state.lastMediaId = reaction.media.id;
+  if (reaction.media) {
+    state.lastMediaId = reaction.media.id;
+    state.mediaUsage.set(reaction.media.id, (state.mediaUsage.get(reaction.media.id) || 0) + 1);
+  }
   return reaction;
 }
 

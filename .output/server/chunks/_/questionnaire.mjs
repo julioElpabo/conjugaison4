@@ -1,11 +1,19 @@
-import { aI as exerciseKindsFor, u as useDatabase, a3 as decodePronominalSelectionId, aJ as indirectRelative, aK as formatConjugationQuestion, aL as formatAnswer } from '../nitro/nitro.mjs';
+import { aR as exerciseKindsFor, u as useDatabase, a4 as decodePronominalSelectionId, aJ as hasVariableAuxiliary, aS as indirectRelative, aT as resolveVariableAuxiliary, aN as formatConjugationQuestion, aK as formatAnswer } from '../nitro/nitro.mjs';
 import { i as identifyInfinitives, f as formatNonFiniteQuestion } from './infinitive-identification.mjs';
-import { g as generatePronominalRow, r as resolveVariableAuxiliary } from './pronominal-formatter.mjs';
+import { g as generatePronominalRow } from './pronominal-formatter.mjs';
 import { M as MODE_IDENTIFICATION_INSTRUCTION, T as TENSE_IDENTIFICATION_INSTRUCTION } from './exercise-instructions.mjs';
 import { i as isPassivizableInfinitive } from './passive-voice.mjs';
 import { i as isImpersonalVerb } from './impersonal-verbs.mjs';
 import { b as buildRadicalReference } from './radical-reference.mjs';
-import { i as isNearFutureTense, b as buildNearFutureParadigm, a as isPronominalNearFutureInfinitive, n as nearFutureReflexivePronoun } from './near-future.mjs';
+import { i as isNearFutureTense, b as buildNearFutureParadigm, c as isPronominalNearFutureInfinitive, n as nearFutureReflexivePronoun } from './near-future.mjs';
+
+function allowsPedagogicalComplement(question, complement) {
+  const infinitive = question.infinitif.trim().toLocaleLowerCase("fr");
+  const imperative = question.mode_name.trim().toLocaleLowerCase("fr") === "imp\xE9ratif";
+  if (infinitive === "vouloir" && imperative) return false;
+  if (infinitive === "tomber" && complement.fonction_objet === "cod") return false;
+  return true;
+}
 
 function normalized$1(value) {
   return value.trim().toLocaleLowerCase("fr-CH");
@@ -861,7 +869,7 @@ async function generateQuestionnaire(request) {
         radicalReferences.set(Number(reference.verbe_id), candidates);
       }
     }
-    if (!etreAuxiliaryForms.length && (wantsPassiveVoice || rows.some((row) => normalized(row.infinitif) === "sortir" && Boolean(row.is_compound)))) {
+    if (!etreAuxiliaryForms.length && (wantsPassiveVoice || request.includeComplements && rows.some((row) => hasVariableAuxiliary(row.infinitif) && Boolean(row.is_compound)))) {
       const [auxiliaryForms] = await database.execute(`
         SELECT vc.personne_id, m.name AS mode_name, t.name AS temps_name, vc.conjugaison1
         FROM verbesconjugues vc
@@ -902,7 +910,7 @@ async function generateQuestionnaire(request) {
     ))) : personalRows;
     const rowsForQuestions = onlyBeforeComplements ? eligibleRows.filter((row) => normalized(row.mode_name) !== "imp\xE9ratif" && (requestedComplementOptions.includes("coi-before") || Boolean(row.is_compound))) : eligibleRows;
     for (const row of rowsForQuestions) {
-      const candidates = (_d = complementsByVerb.get(Number(row.verbe_id))) != null ? _d : [];
+      const candidates = ((_d = complementsByVerb.get(Number(row.verbe_id))) != null ? _d : []).filter((complement2) => allowsPedagogicalComplement(row, complement2));
       const availableOptions = requestedComplementOptions.flatMap((option2) => {
         const [functionObject, position] = option2.split("-");
         const matching = candidates.filter((candidate) => candidate.fonction_objet === functionObject).filter((candidate) => {

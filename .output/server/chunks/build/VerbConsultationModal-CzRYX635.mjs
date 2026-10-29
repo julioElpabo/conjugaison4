@@ -5,7 +5,7 @@ import { c as coachHelpProfile } from '../_/coach-help-audit.mjs';
 import { i as infinitiveHelpVerb, a as infinitiveIdentificationGroupHints, b as infinitiveIdentificationEndingHints, I as INFINITIVE_AMBIGUITY_NOTICE } from '../_/infinitive-identification2.mjs';
 import { a as useLanguagePreferences, g as useRuntimeConfig } from './server.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
-import { w as withDutchVariants, aB as localizedLearnerErrorMessage, aC as learnerErrorInsteadOf } from '../nitro/nitro.mjs';
+import { w as withDutchVariants, aC as localizedLearnerErrorMessage, aD as learnerErrorInsteadOf } from '../nitro/nitro.mjs';
 import { i as isFiniteConjugationMode, c as conjugationModeOrder, a as conjugationTenseOrder, b as conjugationTenseRow, d as conjugationTenseLabel } from '../_/conjugation-display.mjs';
 
 const _sfc_main$4 = /* @__PURE__ */ defineComponent({

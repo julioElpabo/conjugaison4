@@ -1,4 +1,4 @@
-import { af as normalizeAnswer } from '../nitro/nitro.mjs';
+import { ag as normalizeAnswer } from '../nitro/nitro.mjs';
 
 const INFINITIVE_IDENTIFICATION_INSTRUCTION = "Quel est l\u2019infinitif du verbe surlign\xE9\xA0?";
 const INFINITIVE_AMBIGUITY_NOTICE = "Cette forme peut correspondre \xE0 plusieurs verbes. Un infinitif possible suffit.";

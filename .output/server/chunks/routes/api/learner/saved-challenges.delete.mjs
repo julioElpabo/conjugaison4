@@ -1,4 +1,4 @@
-import { $ as PublicInputError, d as defineEventHandler, s as setResponseHeader, c as createError, u as useDatabase } from '../../../nitro/nitro.mjs';
+import { a0 as PublicInputError, d as defineEventHandler, s as setResponseHeader, c as createError, u as useDatabase } from '../../../nitro/nitro.mjs';
 import { g as getLearnerSession } from '../../../_/learner-session.mjs';
 import { r as readLimitedJsonBody } from '../../../_/limited-json-body.mjs';
 import { n as normalizeDefiCode } from '../../../_/defis.mjs';

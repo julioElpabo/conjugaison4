@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, c as createError, a4 as validateConjugationAnswer, a5 as validateAnswer, a6 as diagnoseLearnerError, u as useDatabase, a7 as LEARNER_ERROR_DETECTOR_VERSION, a8 as applicableLearnerErrorTypes, a9 as questionExerciseKind } from '../../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, c as createError, a5 as validateConjugationAnswer, a6 as validateAnswer, a7 as diagnoseLearnerError, u as useDatabase, a8 as LEARNER_ERROR_DETECTOR_VERSION, a9 as applicableLearnerErrorTypes, aa as questionExerciseKind } from '../../../../nitro/nitro.mjs';
 import { l as learnerRunIdentifier, a as learnerAttemptIdentifier, b as learnerChallengeSnapshot, c as learnerChallengeFingerprint, d as learnerChallengeLabel, e as learnerQuestionSnapshot, f as learnerFormKey } from '../../../../_/learner-progress.mjs';
 import { g as getLearnerSession } from '../../../../_/learner-session.mjs';
 import { r as readLimitedJsonBody } from '../../../../_/limited-json-body.mjs';

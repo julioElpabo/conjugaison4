@@ -1,4 +1,4 @@
-import { aL as formatAnswer, u as useDatabase } from '../nitro/nitro.mjs';
+import { aJ as hasVariableAuxiliary, aK as formatAnswer, u as useDatabase } from '../nitro/nitro.mjs';
 import { b as buildRadicalReference } from './radical-reference.mjs';
 import { g as generatePronominalRow } from './pronominal-formatter.mjs';
 import { i as isImpersonalVerb } from './impersonal-verbs.mjs';
@@ -45,6 +45,13 @@ function formatNonFiniteQuestion(verb, tense) {
     return null;
   }
   if (answers.length === 0) return null;
+  const variableAuxiliary = hasVariableAuxiliary(verb.infinitif) && tenseName === "pass\xE9" && ["infinitif", "g\xE9rondif"].includes(mode);
+  if (variableAuxiliary) {
+    answers = variants(verb.participe_passe).flatMap((participle) => [
+      upperFirst(`${mode === "g\xE9rondif" ? "en ayant" : "avoir"} ${participle}`),
+      ...["", "e", "s", "es"].map((ending) => upperFirst(`${mode === "g\xE9rondif" ? "en \xE9tant" : "\xEAtre"} ${participle}${ending}`))
+    ]);
+  }
   const radicalReference = buildRadicalReference({
     infinitive: verb.infinitif,
     mode: tense.mode_name,
@@ -68,6 +75,7 @@ function formatNonFiniteQuestion(verb, tense) {
     ...tense.code ? { tenseCode: tense.code } : {},
     ...tense.mode_code ? { modeCode: tense.mode_code } : {},
     isCompound: Boolean(tense.is_compound),
+    ...variableAuxiliary ? { auxiliaryChoices: ["avoir", "\xEAtre"] } : {},
     conjugaison1: answers[0],
     conjugaison2: answers[1] || "",
     conjugaison3: answers[2] || "",

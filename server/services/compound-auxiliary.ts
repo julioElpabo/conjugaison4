@@ -1,22 +1,12 @@
 import type { ConjugationSourceRow } from './question-formatter'
+import { AUXILIARY_SIMPLE_TENSES, compoundSimpleTense } from '../../shared/utils/compound-auxiliaries'
+import { hasVariableAuxiliary } from '../../shared/utils/variable-auxiliary'
 
 export interface CompoundAuxiliaryForm {
   personne_id: number
   mode_name: string
   temps_name: string
   conjugaison1: string
-}
-
-const compoundAuxiliaryTense: Record<string, [string, string]> = {
-  'indicatif:passé composé': ['indicatif', 'présent'],
-  'indicatif:plus-que-parfait': ['indicatif', 'imparfait'],
-  'indicatif:passé antérieur': ['indicatif', 'passé simple'],
-  'indicatif:futur antérieur': ['indicatif', 'futur'],
-  'subjonctif:passé': ['subjonctif', 'présent'],
-  'subjonctif:plus-que-parfait': ['subjonctif', 'imparfait'],
-  'conditionnel:passé 1': ['conditionnel', 'présent'],
-  'conditionnel:passé 2': ['subjonctif', 'imparfait'],
-  'impératif:passé': ['impératif', 'présent'],
 }
 
 function normalized(value: string) {
@@ -27,12 +17,12 @@ export function findCompoundAuxiliaryForm(
   row: Pick<ConjugationSourceRow, 'personne_id' | 'mode_name' | 'temps_name'>,
   auxiliaryForms: readonly CompoundAuxiliaryForm[],
 ) {
-  const target = compoundAuxiliaryTense[`${normalized(row.mode_name)}:${normalized(row.temps_name)}`]
+  const target = compoundSimpleTense(row.mode_name, row.temps_name)
   if (!target) return null
   return auxiliaryForms.find(form => (
     Number(form.personne_id) === Number(row.personne_id)
-    && normalized(form.mode_name) === target[0]
-    && normalized(form.temps_name) === target[1]
+    && normalized(form.mode_name) === target.mode
+    && normalized(form.temps_name) === target.tense
   )) ?? null
 }
 
@@ -71,11 +61,46 @@ export function resolveVariableAuxiliary<T extends ConjugationSourceRow>(
   auxiliaryForms: readonly CompoundAuxiliaryForm[],
 ): T {
   if (
-    normalized(row.infinitif) === 'sortir'
+    hasVariableAuxiliary(row.infinitif)
+    && normalized(row.infinitif) !== 'demeurer'
     && Number(row.is_compound)
+    && Boolean(row.complement_phrase || row.complement_anteposed)
     && row.complement_function !== 'cod'
   ) {
     return useEtreForIntransitiveCompound(row, auxiliaryForms)
   }
   return row
+}
+
+/** Construit chaque auxiliaire séparément pour appliquer ensuite son accord. */
+export function variableAuxiliaryRows(row: ConjugationSourceRow): ConjugationSourceRow[] {
+  if (!Number(row.is_compound) || !hasVariableAuxiliary(row.infinitif)) return [row]
+  const target = compoundSimpleTense(row.mode_name, row.temps_name)
+  const paradigm = target && AUXILIARY_SIMPLE_TENSES.find(item => (
+    normalized(item.mode) === normalized(target.mode) && normalized(item.tense) === normalized(target.tense)
+  ))
+  if (!paradigm) return [row]
+  const person = normalized(row.mode_name) === 'impératif'
+    ? [5, 7, 8].indexOf(Number(row.personne_id))
+    : Number(row.personne_id) - 4
+  const contextual = Boolean(row.complement_phrase || row.complement_anteposed)
+  const auxiliaries: Array<'avoir' | 'être'> = contextual
+    ? row.complement_function === 'cod' ? ['avoir'] : []
+    : normalized(row.auxiliaire) === 'être' ? ['être', 'avoir'] : ['avoir', 'être']
+  if (!auxiliaries.length) return [row]
+  return auxiliaries.map(auxiliary => {
+    const form = paradigm.forms[auxiliary][person]
+    if (!form) throw new Error(`Auxiliaire introuvable pour ${row.mode_name} · ${row.temps_name} · personne ${row.personne_id}.`)
+    const participle = auxiliary === 'être'
+      ? participleForPerson(row.participe_passe, row.personne_id)
+      : row.participe_passe.trim()
+    return {
+      ...row,
+      auxiliaire: auxiliary,
+      conjugaison1: `${form} ${participle}`,
+      conjugaison2: '',
+      conjugaison3: '',
+      nous_form: `${paradigm.forms[auxiliary][normalized(row.mode_name) === 'impératif' ? 1 : 3]} ${auxiliary === 'être' ? participleForPerson(row.participe_passe, 7) : row.participe_passe.trim()}`,
+    }
+  })
 }

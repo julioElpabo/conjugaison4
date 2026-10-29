@@ -8,6 +8,9 @@ interface ConjugationRow extends RowDataPacket {
   conjugaison1: string
   conjugaison2: string
   conjugaison3: string
+  mode_name?: string
+  temps_name?: string
+  personne_id?: number
 }
 
 interface ParadigmRow extends RowDataPacket {
@@ -44,6 +47,13 @@ export const MISSING_DE_ACCENT_REPAIRS = [
   { before: 'designer', after: 'désigner', presentParticiple: 'désignant', pastParticiple: 'désigné' },
   { before: 'detourner', after: 'détourner', presentParticiple: 'détournant', pastParticiple: 'détourné' },
   { before: 'developper', after: 'développer', presentParticiple: 'développant', pastParticiple: 'développé' },
+] as const
+
+export const MISSING_VERB_ACCENT_REPAIRS = [
+  ...MISSING_DE_ACCENT_REPAIRS,
+  { before: 'caracteriser', after: 'caractériser', presentParticiple: 'caractérisant', pastParticiple: 'caractérisé' },
+  { before: 'celebrer', after: 'célébrer', presentParticiple: 'célébrant', pastParticiple: 'célébré' },
+  { before: 'controler', after: 'contrôler', presentParticiple: 'contrôlant', pastParticiple: 'contrôlé' },
 ] as const
 
 export const REPORTED_SIMPLE_FORM_REPAIRS = [
@@ -98,6 +108,16 @@ export function repairMissingDeAccentForm(form: string, beforeInfinitive: string
   return form.split(beforeStem).join(afterStem)
 }
 
+export function repairMissingVerbAccentForm(form: string, before: string, after: string, coordinate: {
+  mode_name?: string, temps_name?: string, personne_id?: number,
+} = {}) {
+  const repaired = repairMissingDeAccentForm(form, before, after)
+  const alternating = before === 'celebrer' && coordinate.temps_name === 'présent'
+    && ((['indicatif', 'subjonctif'].includes(coordinate.mode_name || '') && [4, 5, 6, 9].includes(Number(coordinate.personne_id)))
+      || (coordinate.mode_name === 'impératif' && Number(coordinate.personne_id) === 5))
+  return alternating ? repaired.replace(/célébr/gu, 'célèbr') : repaired
+}
+
 export async function repairMissingDeAccents(connection: PoolConnection, apply = true) {
   const report = {
     verbs: 0,
@@ -107,7 +127,7 @@ export async function repairMissingDeAccents(connection: PoolConnection, apply =
     meaningTexts: 0,
   }
 
-  for (const repair of MISSING_DE_ACCENT_REPAIRS) {
+  for (const repair of MISSING_VERB_ACCENT_REPAIRS) {
     const [verbRows] = await connection.execute<AccentVerbRow[]>(`
       SELECT id,infinitif,
              \`participe_présent\` AS participe_present,
@@ -127,16 +147,18 @@ export async function repairMissingDeAccents(connection: PoolConnection, apply =
     if (!verb) continue
 
     const [conjugationRows] = await connection.execute<ConjugationRow[]>(`
-      SELECT id,'' AS infinitif,'' AS participe_passe,verbe_infinitif,
-             conjugaison1,conjugaison2,conjugaison3
-      FROM verbesconjugues
-      WHERE verbe_id=?
-      ORDER BY id
+      SELECT vc.id,'' AS infinitif,'' AS participe_passe,vc.verbe_infinitif,
+             vc.conjugaison1,vc.conjugaison2,vc.conjugaison3,vc.personne_id,
+             m.name AS mode_name,t.name AS temps_name
+      FROM verbesconjugues vc
+      JOIN temps t ON t.id=vc.temp_id JOIN modes m ON m.id=t.mode_id
+      WHERE vc.verbe_id=?
+      ORDER BY vc.id
       FOR UPDATE
     `, [verb.id])
     for (const row of conjugationRows) {
       const current = forms(row)
-      const repaired = current.map(form => repairMissingDeAccentForm(form, repair.before, repair.after))
+      const repaired = current.map(form => repairMissingVerbAccentForm(form, repair.before, repair.after, row))
       const changedForms = current.filter((form, index) => form !== repaired[index]).length
       if (!changedForms && row.verbe_infinitif === repair.after) continue
       if (apply) {

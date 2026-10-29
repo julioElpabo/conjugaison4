@@ -7,7 +7,10 @@ import { coachCondensedTenseRule } from '../data/coach-condensed-tense-rules'
 import { condensedExampleLabel, localizedCondensedTenseRule } from '../i18n/coach-condensed-help'
 import type { ConjugationTense, ExerciseQuestion, Verb } from '../types/conjugation'
 import { withoutIndicativeMode } from './chat-mode-display'
-import { buildCompleteConjugationAdviceHtml, buildConjugationBaseHtml, buildConjugationEndingsHtml, buildPassiveVoiceHelpHtml, buildPassiveVoiceMethodHtml, decomposeConjugationForm } from './conjugation-help'
+import { buildCompleteConjugationAdviceHtml, buildConjugationBaseHtml, buildConjugationEndingsHtml, buildPassiveVoiceHelpHtml, buildPassiveVoiceMethodHtml, decomposeConjugationForm, inferCompoundAuxiliary } from './conjugation-help'
+import { VARIABLE_AUXILIARY_EXPLANATION } from './variable-auxiliary'
+import { auxiliaryLemmaForForm } from './coach-feedback'
+import { condensedConjugationExample } from './condensed-conjugation-example'
 import { bareNearFutureInfinitive, isNearFutureTense, isPronominalNearFutureInfinitive, nearFutureReflexivePronoun } from './near-future'
 import type { AppLocale } from '../i18n/locales'
 import { withSwissObjectAliases } from './object-terminology'
@@ -657,6 +660,16 @@ function contextualCondensedTenseRule(mode?: string, tense?: string, verb?: Cond
   let rule = source.rule
   let example = source.example
   const notes = [...(source.notes || [])]
+  if (verb?.groupeConjugaison === 2 && key === 'indicatif:present') {
+    rule = 'Au singulier : radical + -is, -is, -it. Au pluriel : radical + -issons, -issez, -issent.'
+  }
+  if (verb?.groupeConjugaison === 3 && ['indicatif:futur', 'conditionnel:present'].includes(key)) {
+    rule = 'Utilise le radical repère du futur de ce verbe, puis ajoute la terminaison de la personne.'
+  }
+  if (['appeler', 'rappeler', 'jeter', 'rejeter'].includes(normalizedGrammar(infinitive))
+      && ['indicatif:present', 'indicatif:futur', 'conditionnel:present'].includes(key)) {
+    notes.push('Pour ce verbe, vérifie le doublement de l ou de t au temps et à la personne demandés.')
+  }
 
   if (key === 'imperatif:present' && ['avoir', 'etre', 'savoir', 'vouloir'].includes(normalizedGrammar(infinitive))) {
     rule = 'Exception : ce verbe a des formes particulières à l’impératif, à apprendre par cœur.'
@@ -713,11 +726,14 @@ function contextualCondensedTenseRule(mode?: string, tense?: string, verb?: Cond
   return { ...source, rule, notes, example }
 }
 
-export function buildCondensedTenseRuleHtml(mode?: string, tense?: string, verb?: CondensedVerb, locale: AppLocale = 'fr') {
+export function buildCondensedTenseRuleHtml(mode?: string, tense?: string, verb?: CondensedVerb, locale: AppLocale = 'fr', subject?: string) {
   const key = `${normalizedGrammar(mode || '')}:${normalizedGrammar(tense || '')}`
   const rule = localizedCondensedTenseRule(locale, key, contextualCondensedTenseRule(mode, tense, verb))
+  const contextualExample = verb && subject ? condensedConjugationExample(mode || '', tense || '', verb, subject) : null
+  if (contextualExample) rule.example = contextualExample.example
   const notes = (rule.notes || []).map(note => `<p>${escapedCoachText(note)}</p>`).join('')
-  return `<p><strong>${escapedCoachText(rule.label)}</strong></p><p>${escapedCoachText(rule.rule)}</p>${notes}<p><strong>${condensedExampleLabel[locale]}</strong><br><code>${escapedCoachText(rule.example)}</code></p>`
+  const label = condensedExampleLabel[locale].replace('chanter', contextualExample?.infinitive || 'chanter')
+  return `<p><strong>${escapedCoachText(rule.label)}</strong></p><p>${escapedCoachText(rule.rule)}</p>${notes}<p><strong>${escapedCoachText(label)}</strong><br><code>${escapedCoachText(rule.example)}</code></p>`
 }
 
 function condensedReferenceFormExplanation(mode = '', tense = '', currentSubject = '', auxiliary = 'avoir', pronominal = false) {
@@ -856,9 +872,14 @@ export function buildCondensedVerbGroupHtml(
     it: '<p>Per i verbi del 3º gruppo, usa le forme di riferimento imparate per trovare la radice e la desinenza corrette.</p>',
     es: '<p>Para los verbos del 3.er grupo, usa las formas de referencia aprendidas para encontrar la raíz y la terminación correctas.</p>', nl: "<p>Gebruik bij werkwoorden van de derde groep de aangeleerde basisvormen om de juiste stam en uitgang te vinden.</p>",
   })
+  const contextualModel = context.subject && verb
+    ? condensedConjugationExample(context.mode || '', context.tense || '', verb, context.subject)
+    : null
   const referenceFormExplanation = group === 3
     ? locale === 'fr'
-      ? condensedReferenceFormExplanation(context.mode, context.tense, context.subject, condensedVerbAuxiliary(verb) || 'avoir', isCondensedPronominalVerb(verb))
+      ? contextualModel
+        ? `<details><summary>Qu’est-ce que c’est ?</summary><p>Une forme repère est une forme apprise qui aide à retrouver le radical.</p><p>Exemple avec <strong>${escapedCoachText(contextualModel.infinitive)}</strong> : <code>${escapedCoachText(contextualModel.example)}</code>.</p></details>`
+        : condensedReferenceFormExplanation(context.mode, context.tense, context.subject, condensedVerbAuxiliary(verb) || 'avoir', isCondensedPronominalVerb(verb))
       : foreignThirdGroupAdvice[locale]
     : ''
   return `<p><strong>${escapedCoachText(infinitive)}</strong> ${membership[locale]} <strong>${groupLabels[locale]}</strong>.</p>${consequenceParagraphs}${referenceFormExplanation}`
@@ -1127,15 +1148,25 @@ export function coachHelpQuestionVariables(
   const passiveVoiceMethodAdviceHelp = buildPassiveVoiceMethodHtml(question, verb, tense, false)
   const referenceFormHelp = buildReferenceFormHelpHtml(question, verb, tense)
   const infinitive = question.infinitif || verb?.infinitif || ''
+  const variableAuxiliary = (question.auxiliaryChoices?.length || 0) > 1
+  const contextualVerb = verb && question.isCompound
+    ? { ...verb, auxiliaire: variableAuxiliary ? null : inferCompoundAuxiliary(question, verb) }
+    : verb
+  const auxiliaryAnswers = variableAuxiliary
+    ? [...new Set(question.reponsesPourCorrige.flatMap(answer => answer.toLocaleLowerCase('fr').match(/\p{L}+/gu) || [])
+        .filter(word => auxiliaryLemmaForForm(word)))].join(' ou ')
+    : auxiliaryPart(question.conjugaison1 || '', baseParticiple)
   return {
     verb: infinitive,
     mode: question.mode || '',
     tense: question.temps || '',
     subject: question.pronom || question.saisiePrefixe || '',
     correctAnswers: [...new Set(question.reponsesPourCorrige.map(answer => answer.trim()).filter(Boolean))].join(' ou '),
-    auxiliaryAnswer: question.isCompound ? auxiliaryPart(question.conjugaison1 || '', baseParticiple) : '',
+    auxiliaryAnswer: question.isCompound ? auxiliaryAnswers : '',
     pastParticipleAnswer: question.isCompound
-      ? question.agreementReminder?.participle || agreedParticipleInAnswer(firstCorrectAnswer, baseParticiple)
+      ? variableAuxiliary
+        ? [...new Set(question.reponsesPourCorrige.map(answer => agreedParticipleInAnswer(answer, baseParticiple)))].filter(Boolean).join(' ou ')
+        : question.agreementReminder?.participle || agreedParticipleInAnswer(firstCorrectAnswer, baseParticiple)
       : '',
     unagreedPastParticiple: baseParticiple,
     COD: isCod ? complement : '',
@@ -1143,7 +1174,7 @@ export function coachHelpQuestionVariables(
     COI: isCoi ? complement : '',
     isCOIplace_avant: isCoi && question.complementPosition === 'before' ? 'oui' : 'non',
     isCompound: Boolean(question.isCompound || tense?.isCompound),
-    auxiliary: isCondensedPronominalVerb(verb) ? 'être' : verb?.auxiliaire?.trim() || '',
+    auxiliary: variableAuxiliary ? 'avoir ou être' : isCondensedPronominalVerb(verb) ? 'être' : contextualVerb?.auxiliaire?.trim() || '',
     endingsHelp: endingsHelpByApproach['cif-falc'],
     endingsHelpByApproach,
     contextualBaseHelp: contextualBaseHelpByApproach['cif-falc'],
@@ -1157,7 +1188,8 @@ export function coachHelpQuestionVariables(
       tense: question.temps || tense?.name,
       subject: question.pronom || question.saisiePrefixe,
     }, locale)}</details>`,
-    condensedTenseRuleHelp: buildCondensedTenseRuleHtml(question.mode || tense?.mode?.name, question.temps || tense?.name, verb, locale) + orthographyNote,
+    condensedTenseRuleHelp: buildCondensedTenseRuleHtml(question.mode || tense?.mode?.name, question.temps || tense?.name, contextualVerb, locale, question.pronom)
+      + (variableAuxiliary ? `<p>${escapedCoachText(VARIABLE_AUXILIARY_EXPLANATION)}</p>` : '') + orthographyNote,
     nearFutureHelp: buildNearFutureCoachHelpHtml(verb, locale),
     nearFutureAllerHelp: buildNearFutureAllerHelpHtml(locale),
     passiveVoiceHelp,

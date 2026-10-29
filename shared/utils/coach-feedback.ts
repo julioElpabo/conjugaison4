@@ -24,11 +24,12 @@ export interface CoachAnswerDiagnostic {
   learnerAuxiliary?: string
   expectedParticiple?: string
   learnerFormAfterAuxiliary?: string
-  agreementSource?: 'subject' | 'cod-before' | 'cod-after' | 'coi'
+  agreementSource?: 'subject' | 'avoir' | 'cod-before' | 'cod-after' | 'coi'
   agreementFeatures?: string
 }
 
 const AVOIR_AUXILIARY_FORMS = new Set([
+  'avoir', 'ayant',
   'ai', 'as', 'a', 'avons', 'avez', 'ont', 'avais', 'avait', 'avions', 'aviez', 'avaient',
   'eus', 'eut', 'eûmes', 'eûtes', 'eurent',
   'aurai', 'auras', 'aura', 'aurons', 'aurez', 'auront',
@@ -38,6 +39,7 @@ const AVOIR_AUXILIARY_FORMS = new Set([
 ])
 
 const ETRE_AUXILIARY_FORMS = new Set([
+  'être', 'étant',
   'suis', 'es', 'est', 'sommes', 'êtes', 'sont', 'étais', 'était', 'étions', 'étiez', 'étaient',
   'fus', 'fut', 'fûmes', 'fûtes', 'furent',
   'serai', 'seras', 'sera', 'serons', 'serez', 'seront',
@@ -107,10 +109,6 @@ function differingWord(answer: string, expected: string) {
   return differences.length === 1 ? differences[0] : undefined
 }
 
-function agreementBase(value: string) {
-  return value.replace(/(?:es|s|e)$/u, '')
-}
-
 function agreementStems(value: string) {
   const normalized = comparable(value)
   return new Set([
@@ -132,66 +130,119 @@ function commonPrefix(left: string, right: string) {
   return length
 }
 
-function auxiliaryIn(value: string) {
-  return words(value).find(word => AUXILIARIES.has(word))
+/** Repère la construction et le participe, sans confondre le complément avec lui. */
+function compoundStructure(value: string, question: ExerciseQuestion) {
+  const tokens = words(value)
+  const subjects = new Set(['je', 'j', 'tu', 'il', 'elle', 'iel', 'on', 'nous', 'vous', 'ils', 'elles', 'iels'])
+  const clitics = new Set(['me', 'm', 'te', 't', 'se', 's', 'le', 'la', 'les', 'l', 'lui', 'leur', 'y', 'en', 'nous', 'vous', 'ne', 'n'])
+  const requestedSubject = words(question.passiveSubject || question.pronom || '')
+  let index = -1
+  for (let position = 0; position < tokens.length; position += 1) {
+    const namedSubject = requestedSubject.length > 0
+      && requestedSubject.every((word, offset) => tokens[position + offset] === word)
+    if (!namedSubject && !subjects.has(tokens[position]!)) continue
+    let afterSubject = position + (namedSubject ? requestedSubject.length : 1)
+    while (clitics.has(tokens[afterSubject] || '')) afterSubject += 1
+    if (AUXILIARIES.has(tokens[afterSubject] || '')) {
+      index = afterSubject
+      break
+    }
+  }
+  // Les réponses peuvent ne contenir que la forme verbale, notamment au passif.
+  // Le sujet permet sinon d’éviter de prendre « avions » ou « sommes » dans
+  // un complément nominal pour l’auxiliaire de la phrase.
+  if (index < 0) index = tokens.findIndex(token => AUXILIARIES.has(token))
+  if (index < 0) return undefined
+  const auxiliary = tokens[index]!
+  const chain = [auxiliary]
+  let participleIndex = index + 1
+  const infinitive = normalizeAnswer(question.infinitif || '')
+  // Au passif composé, « été » appartient à la chaîne auxiliaire.
+  // Pour le verbe être lui-même, c’est au contraire le participe à vérifier.
+  if (infinitive !== 'être' && tokens[participleIndex] === 'été' && tokens[participleIndex + 1]) {
+    chain.push(tokens[participleIndex++]!)
+  }
+  const prefix = tokens.slice(0, index)
+  const reflexive = prefix.some(token => ['me', 'm', 'te', 't', 'se', 's'].includes(token))
+    || prefix.filter(token => token === 'nous').length > 1
+    || prefix.filter(token => token === 'vous').length > 1
+  return {
+    auxiliary,
+    auxiliaryPhrase: chain.join(' '),
+    agreementAuxiliary: chain.length > 1 ? 'être' : auxiliaryLemmaForForm(auxiliary),
+    participle: tokens[participleIndex],
+    signature: `${auxiliaryLemmaForForm(auxiliary)}:${chain.slice(1).join(' ')}:${reflexive}`,
+  }
 }
 
-function compoundParticipleDifference(learnerAnswer: string, expectedAnswer: string) {
-  const learnerWords = words(learnerAnswer)
-  const expectedWords = words(expectedAnswer)
-  const auxiliaryIndex = expectedWords.findIndex(word => AUXILIARIES.has(word))
-  if (auxiliaryIndex < 0 || learnerWords[auxiliaryIndex] !== expectedWords[auxiliaryIndex]) return undefined
-  const expectedParticiple = expectedWords[auxiliaryIndex + 1]
-  const learnerForm = learnerWords[auxiliaryIndex + 1]
+function candidatesForAuxiliary(answer: string, question: ExerciseQuestion) {
+  const auxiliary = auxiliaryLemmaForForm(compoundStructure(answer, question)?.auxiliary || '')
+  if (!question.isCompound || !auxiliary) return question.reponses
+  const sameAuxiliary = question.reponses.filter(candidate => (
+    auxiliaryLemmaForForm(compoundStructure(candidate, question)?.auxiliary || '') === auxiliary
+  ))
+  return sameAuxiliary.length ? sameAuxiliary : question.reponses
+}
+
+function compoundParticipleDifference(learnerAnswer: string, expectedAnswer: string, question: ExerciseQuestion) {
+  const learner = compoundStructure(learnerAnswer, question)
+  const expected = compoundStructure(expectedAnswer, question)
+  if (!learner || !expected || learner.signature !== expected.signature
+      || learner.auxiliaryPhrase !== expected.auxiliaryPhrase) return undefined
+  const expectedParticiple = expected.participle
+  const learnerForm = learner.participle
   if (!expectedParticiple || !learnerForm || expectedParticiple === learnerForm) return undefined
   if (belongsToSameAgreementFamily(learnerForm, expectedParticiple)) return undefined
   if (commonPrefix(learnerForm, expectedParticiple) < 2) return undefined
   return {
-    auxiliary: expectedWords[auxiliaryIndex]!,
+    auxiliary: expected.auxiliaryPhrase,
     expectedParticiple,
     learnerForm,
   }
 }
 
 function displayedCorrection(question: ExerciseQuestion, fallback: string) {
-  return question.reponsesPourCorrige.find(candidate => candidate.trim()) || fallback
+  return closestExpected(fallback, question.reponsesPourCorrige)?.value || fallback
 }
 
 /**
- * Détecte l'accord du participe indépendamment des autres différences.
- * Cela permet notamment de conserver l'erreur d'accord lorsque l'auxiliaire
- * révèle aussi une confusion de temps ou de mode.
+ * Compare les accords seulement entre constructions grammaticales identiques.
+ * Un autre temps du même auxiliaire peut conserver une erreur d’accord ;
+ * un changement d’auxiliaire ou de voix impose de revoir la construction d’abord.
  */
 export function diagnoseCoachAgreement(
   learnerAnswer: string,
   question: ExerciseQuestion,
 ): CoachAnswerDiagnostic | undefined {
-  if (!question.isCompound && !question.agreementReminder) return undefined
-  const learnerWords = words(learnerAnswer)
-  const learnerParticiple = learnerWords.at(-1)
+  if (!question.isCompound && !question.agreementReminder && question.voice !== 'passive') return undefined
+  const learner = compoundStructure(learnerAnswer, question)
+  const learnerParticiple = learner?.participle
   if (!learnerParticiple) return undefined
 
-  const acceptedParticiples = question.reponses
+  const candidates = question.reponses.filter(candidate => (
+    compoundStructure(candidate, question)?.signature === learner.signature
+  ))
+  const acceptedParticiples = candidates
     .filter(candidate => candidate.trim())
-    .map(candidate => words(candidate).at(-1))
+    .map(candidate => compoundStructure(candidate, question)?.participle)
     .filter((candidate): candidate is string => Boolean(candidate))
   if (acceptedParticiples.includes(learnerParticiple)) return undefined
 
-  const expected = question.reponses
+  const expected = candidates
     .filter(candidate => candidate.trim())
     .map(candidate => ({
       value: candidate,
-      words: words(candidate),
+      structure: compoundStructure(candidate, question)!,
       distance: editDistance(comparable(learnerAnswer), comparable(candidate)),
     }))
     .filter((candidate) => {
-      const expectedParticiple = candidate.words.at(-1)
+      const expectedParticiple = candidate.structure.participle
       return expectedParticiple
         && learnerParticiple !== expectedParticiple
         && belongsToSameAgreementFamily(learnerParticiple, expectedParticiple)
     })
     .sort((left, right) => left.distance - right.distance)[0]
-  const expectedParticiple = expected?.words.at(-1)
+  const expectedParticiple = expected?.structure.participle
   if (!expected || !expectedParticiple) return undefined
 
   const reminder = question.agreementReminder
@@ -206,7 +257,8 @@ export function diagnoseCoachAgreement(
     errorKind: 'agreement',
     confidence: 'high',
     agreementFeatures: features,
-    agreementSource: reminder?.kind || 'subject',
+    agreementSource: reminder?.kind || (question.voice !== 'passive'
+      && expected.structure.agreementAuxiliary === 'avoir' ? 'avoir' : 'subject'),
   }
 }
 
@@ -215,7 +267,7 @@ export function diagnoseCoachAnswer(
   question: ExerciseQuestion,
   isCorrect: boolean,
 ): CoachAnswerDiagnostic {
-  const nearest = closestExpected(learnerAnswer, question.reponses)
+  const nearest = closestExpected(learnerAnswer, candidatesForAuxiliary(learnerAnswer, question))
   const comparedAnswer = nearest?.value || question.reponses[0] || ''
   const expectedAnswer = displayedCorrection(question, comparedAnswer)
   const base: CoachAnswerDiagnostic = {
@@ -234,37 +286,35 @@ export function diagnoseCoachAnswer(
     return { ...base, errorKind: 'punctuation', confidence: 'high' }
   }
 
-  const learnerAuxiliary = auxiliaryIn(learnerAnswer)
-  const expectedAuxiliary = auxiliaryIn(comparedAnswer)
+  const learnerConstruction = compoundStructure(learnerAnswer, question)
+  const expectedConstruction = compoundStructure(comparedAnswer, question)
+  const learnerAuxiliary = learnerConstruction?.auxiliary
+  const expectedAuxiliary = expectedConstruction?.auxiliary
   const learnerAuxiliaryLemma = learnerAuxiliary ? auxiliaryLemmaForForm(learnerAuxiliary) : undefined
   const expectedAuxiliaryLemma = expectedAuxiliary ? auxiliaryLemmaForForm(expectedAuxiliary) : undefined
+  const differentConstruction = learnerConstruction && expectedConstruction
+    && learnerConstruction.signature !== expectedConstruction.signature
   if (question.isCompound
     && learnerAuxiliary && expectedAuxiliary
     && learnerAuxiliaryLemma && expectedAuxiliaryLemma
     && learnerAuxiliaryLemma !== expectedAuxiliaryLemma) {
     return { ...base, errorKind: 'auxiliary', confidence: 'high', learnerAuxiliary, expectedAuxiliary }
   }
+  if ((question.isCompound || question.voice === 'passive') && differentConstruction
+      && learnerConstruction.auxiliaryPhrase !== expectedConstruction.auxiliaryPhrase) {
+    return {
+      ...base, errorKind: 'auxiliary', confidence: 'high',
+      learnerAuxiliary: learnerConstruction.auxiliaryPhrase,
+      expectedAuxiliary: expectedConstruction.auxiliaryPhrase,
+    }
+  }
 
   const independentAgreement = diagnoseCoachAgreement(learnerAnswer, question)
   if (independentAgreement) return independentAgreement
 
   const difference = differingWord(learnerAnswer, comparedAnswer)
-  const questionCanRequireAgreement = Boolean(question.agreementReminder)
-    || Boolean(learnerAuxiliary && expectedAuxiliary && learnerAuxiliary === expectedAuxiliary)
-  if (questionCanRequireAgreement && difference && agreementBase(difference.learner) === agreementBase(difference.expected)
-    && difference.learner !== difference.expected) {
-    const reminder = question.agreementReminder
-    const features = reminder?.gender && reminder.number
-      ? `${reminder.gender === 'feminin' ? 'féminin' : 'masculin'} ${reminder.number}`
-      : undefined
-    return {
-      ...base, errorKind: 'agreement', confidence: 'high', agreementFeatures: features,
-      agreementSource: reminder?.kind || 'subject',
-    }
-  }
-
-  const compoundParticiple = question.isCompound
-    ? compoundParticipleDifference(learnerAnswer, comparedAnswer)
+  const compoundParticiple = question.isCompound || question.voice === 'passive'
+    ? compoundParticipleDifference(learnerAnswer, comparedAnswer, question)
     : undefined
   if (compoundParticiple) {
     return {

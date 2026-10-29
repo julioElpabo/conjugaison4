@@ -11,6 +11,8 @@ import { MODE_IDENTIFICATION_INSTRUCTION, TENSE_IDENTIFICATION_INSTRUCTION } fro
 import type { ComplementOption } from '../../shared/types/conjugation'
 import { indirectRelative } from './indirect-relative'
 import { resolveVariableAuxiliary } from './compound-auxiliary'
+import { hasVariableAuxiliary } from '../../shared/utils/variable-auxiliary'
+import { allowsPedagogicalComplement } from '../../shared/utils/pedagogical-complements'
 import { formatPassiveQuestion, type PassiveAuxiliaryForm } from './passive-voice'
 import { isPassivizableInfinitive } from '../../shared/utils/passive-voice'
 import { isImpersonalVerb } from '../../shared/utils/impersonal-verbs'
@@ -1070,7 +1072,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
     }
 
     if (!etreAuxiliaryForms.length && (wantsPassiveVoice
-      || rows.some(row => normalized(row.infinitif) === 'sortir' && Boolean(row.is_compound)))) {
+      || (request.includeComplements && rows.some(row => hasVariableAuxiliary(row.infinitif) && Boolean(row.is_compound))))) {
       const [auxiliaryForms] = await database.execute<AuxiliaryFormRow[]>(`
         SELECT vc.personne_id, m.name AS mode_name, t.name AS temps_name, vc.conjugaison1
         FROM verbesconjugues vc
@@ -1120,7 +1122,8 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
       : eligibleRows
 
     for (const row of rowsForQuestions) {
-      const candidates = complementsByVerb.get(Number(row.verbe_id)) ?? []
+      const candidates = (complementsByVerb.get(Number(row.verbe_id)) ?? [])
+        .filter(complement => allowsPedagogicalComplement(row, complement))
       const availableOptions = requestedComplementOptions.flatMap((option) => {
         const [functionObject, position] = option.split('-') as ['cod' | 'coi', 'after' | 'before']
         const matching = candidates.filter(candidate => candidate.fonction_objet === functionObject)

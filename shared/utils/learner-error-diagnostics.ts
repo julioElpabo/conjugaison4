@@ -10,6 +10,7 @@ import { auxiliaryLemmaForForm, diagnoseCoachAgreement, diagnoseCoachAnswer } fr
 import type { AppLocale } from '../i18n/locales'
 import { localizedLearnerErrorMessage, localizedLearnerErrorText } from '../i18n/learner-errors'
 import { withSwissObjectAliases } from './object-terminology'
+import { subjectPronounIssue, subjectPronounFeedback } from './subject-pronoun-feedback'
 
 export type LearnerErrorConfidence = 'high' | 'medium' | 'low'
 
@@ -43,13 +44,14 @@ export interface LearnerErrorTag {
   evidence?: Record<string, string>
 }
 
-export const LEARNER_ERROR_DETECTOR_VERSION = '1.3.0'
+export const LEARNER_ERROR_DETECTOR_VERSION = '1.4.0'
 
 function text(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
 }
 
 function expectedUsesEtre(question: ExerciseQuestion) {
+  if (question.voice === 'passive') return true
   return question.reponses.some(answer => (
     normalizeAnswer(answer, { ignoreWhitespace: false })
       .match(/\p{L}+/gu)
@@ -181,7 +183,9 @@ function agreementTag(
       ? 'agreement.cod_after'
       : diagnostic.agreementSource === 'coi'
         ? 'agreement.coi'
-        : 'agreement.subject'
+        : diagnostic.agreementSource === 'avoir'
+          ? 'agreement.avoir_unwarranted'
+          : 'agreement.subject'
   return tag(agreementCode, 'high', {
     features: text(diagnostic.agreementFeatures),
   })
@@ -192,6 +196,11 @@ export function diagnoseLearnerError(
   question: ExerciseQuestion,
 ): LearnerErrorTag[] {
   if (validateAnswer(answer, question.reponses).isCorrect) return []
+
+  const subjectIssue = subjectPronounIssue(answer, question)
+  if (subjectIssue) return uniqueTags([tag('person.other_form', 'high', {
+    expectedPerson: subjectIssue.expected, detectedPerson: subjectIssue.learner, subjectIssueKind: subjectIssue.kind,
+  })])
 
   const independentAgreement = agreementTag(diagnoseCoachAgreement(answer, question))
   const copiedComplement = copiedComplementTag(answer, question)
@@ -256,6 +265,7 @@ export function diagnoseLearnerError(
     return withDetectedContext(tag('compound.auxiliary', 'high', {
       learnerAuxiliary: text(diagnostic.learnerAuxiliary),
       expectedAuxiliary: text(diagnostic.expectedAuxiliary),
+      expectedAnswer: text(diagnostic.expectedAnswer),
     }))
   }
   if (diagnostic.errorKind === 'compound-participle') {
@@ -268,9 +278,6 @@ export function diagnoseLearnerError(
   if (diagnostic.errorKind === 'agreement') {
     const detectedAgreement = agreementTag(diagnostic)
     if (detectedAgreement) {
-      if (diagnostic.agreementSource === 'subject' && !expectedUsesEtre(question)) {
-        detectedAgreement.code = 'agreement.avoir_unwarranted'
-      }
       return withDetectedContext(detectedAgreement)
     }
   }
@@ -317,7 +324,9 @@ export function learnerErrorDetails(
         return [{
           code: item.code,
           label,
-          message: `Tu as confondu la personne. Tu as conjugué avec « ${item.evidence.detectedPerson} », alors que c’était « ${item.evidence.expectedPerson} ».`,
+          message: item.evidence.subjectIssueKind
+            ? subjectPronounFeedback({ kind: item.evidence.subjectIssueKind as 'typo' | 'mismatch', learner: item.evidence.detectedPerson, expected: item.evidence.expectedPerson })
+            : `Tu as confondu la personne. Tu as conjugué avec « ${item.evidence.detectedPerson} », alors que c’était « ${item.evidence.expectedPerson} ».`,
           learnerValue: item.evidence.detectedPerson,
           expectedValue: item.evidence.expectedPerson,
         }]
@@ -359,6 +368,18 @@ export function learnerErrorDetails(
           return 'La terminaison utilisée n’est pas possible avec cette personne.'
         }
         if (item.code === 'compound.auxiliary') {
+          const infinitive = text(question.infinitif)
+          const expectedAuxiliary = evidence.expectedAuxiliary?.split(/\s+/u)[0] || ''
+          const lemma = auxiliaryLemmaForForm(expectedAuxiliary)
+          if (infinitive && question.temps && lemma && evidence.expectedAnswer) {
+            const context = question.mode && question.mode !== 'indicatif' ? ` (${question.mode})` : ''
+            const voice = question.voice === 'passive' ? 'passive' : 'active'
+            const construction = `Au ${question.temps}${context}, à la voix ${voice}, « ${infinitive} » se construit avec l’auxiliaire « ${voice === 'passive' ? 'être' : lemma} » : « ${evidence.expectedAnswer} ».`
+            if (voice === 'active' && lemma === 'avoir' && question.agreementReminder?.kind !== 'cod-before') {
+              return `${construction} Avec avoir, sans COD placé avant, le participe passé reste invariable.`
+            }
+            return construction
+          }
           return evidence.learnerAuxiliary && evidence.expectedAuxiliary
             ? `Tu as utilisé l’auxiliaire « ${evidence.learnerAuxiliary} », alors qu’il fallait « ${evidence.expectedAuxiliary} ».`
             : 'Tu n’as pas utilisé le bon auxiliaire pour construire ce temps composé.'

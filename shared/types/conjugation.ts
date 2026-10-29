@@ -160,6 +160,8 @@ export interface ExerciseQuestion {
   tenseCode?: import('../utils/grammar-codes').GrammarTenseCode
   modeCode?: import('../utils/grammar-codes').GrammarModeCode
   isCompound?: boolean
+  /** Auxiliaires admis lorsque l’exercice ne fournit pas de contexte. */
+  auxiliaryChoices?: readonly ('avoir' | 'être')[]
   voice?: 'active' | 'passive'
   passiveSubject?: string
   passiveAgent?: string

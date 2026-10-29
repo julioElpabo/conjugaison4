@@ -196,7 +196,7 @@ describe('classement pédagogique des erreurs', () => {
     )
   })
 
-  it('conserve à la fois un véritable changement d’auxiliaire et l’erreur d’accord', () => {
+  it('traite le changement de construction avant de comparer les accords', () => {
     const target = question({
       reponses: ['ont lus'],
       reponsesPourCorrige: ['les articles qu’ils ont lus'],
@@ -218,18 +218,16 @@ describe('classement pédagogique des erreurs', () => {
 
     assert.deepEqual(tags.map(tag => tag.code), [
       'compound.auxiliary',
-      'agreement.cod_before',
     ])
-    assert.deepEqual(tags.map(tag => tag.primary), [true, false])
+    assert.deepEqual(tags.map(tag => tag.primary), [true])
     assert.equal(tags[0].evidence.learnerAuxiliary, 'était')
     assert.equal(tags[0].evidence.expectedAuxiliary, 'ont')
     assert.equal(
       learnerErrorDetailText(learnerErrorDetails('était lu', target)[0]),
-      'Tu as utilisé l’auxiliaire « était », alors qu’il fallait « ont ».',
+      'Au passé composé, à la voix active, « lire » se construit avec l’auxiliaire « avoir » : « les articles qu’ils ont lus ».',
     )
     assert.deepEqual(learnerErrorLabels('était lu', target), [
       'Auxiliaire incorrect',
-      'Accord avec un COD (CVD) placé avant',
     ])
   })
 

@@ -2,10 +2,11 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { after, before, describe, it } from 'node:test'
 import mysql from 'mysql2/promise'
-import { MISSING_DE_ACCENT_REPAIRS } from '../server/services/mail-request-repairs.ts'
+import { MISSING_VERB_ACCENT_REPAIRS } from '../server/services/mail-request-repairs.ts'
 
 const configured = Boolean(process.env.DB_HOST && process.env.DB_NAME && process.env.DB_USER)
-const excludedDirect = new Set(['douter', 'grandir', 'partir', 'pouvoir'])
+// Les emplois transitifs rares de tomber ne sont pas proposés dans les exercices de base.
+const excludedDirect = new Set(['douter', 'grandir', 'partir', 'pouvoir', 'tomber'])
 const additionalDirect = new Set(['cadrer', 'cesser', 'entrer', 'nager', 'naviguer', 'se brosser'])
 const expectedIndirect = new Set([
   'assister', 'croire', 'discuter', 'douter', 'écrire', 'jouer', 'manquer', 'parler', 'penser',
@@ -14,7 +15,7 @@ const expectedIndirect = new Set([
 ])
 let database
 let expectedDirect
-const repairedInfinitives = new Map(MISSING_DE_ACCENT_REPAIRS.map(({ before, after }) => [before, after]))
+const repairedInfinitives = new Map(MISSING_VERB_ACCENT_REPAIRS.map(({ before, after }) => [before, after]))
 
 before(async () => {
   if (!configured) return
@@ -44,7 +45,7 @@ describe('couverture exhaustive des compléments verbaux', { skip: !configured }
       WHERE v.est_archive=0 GROUP BY v.id, v.infinitif
     `)
     const totals = new Map(rows.map(row => [row.infinitif, Number(row.total)]))
-    assert.equal(expectedDirect.size, 377)
+    assert.equal(expectedDirect.size, 376)
     for (const infinitive of expectedDirect) {
       assert.ok((totals.get(infinitive) || 0) >= 10, `${infinitive} doit avoir au moins 10 COD`)
     }

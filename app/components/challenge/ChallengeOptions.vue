@@ -241,6 +241,14 @@ function onLearningSupportModeChange(event: Event) {
   emit('updateLearningSupportMode', (event.target as HTMLInputElement).value as LearningSupportMode)
 }
 
+function selectWithoutComplements(event: Event) {
+  if (prefilledRevealRunning.value) finishPrefilledReveal()
+  emit('updateComplementOptions', [])
+  // Sans complément reste sélectionné jusqu’au choix d’un COD ou d’un COI.
+  const input = event.target as HTMLInputElement
+  input.checked = true
+}
+
 function toggleComplementOption(option: ComplementOption, checked: boolean) {
   if (prefilledRevealRunning.value) finishPrefilledReveal()
   const next = new Set(props.complementOptions)
@@ -483,6 +491,10 @@ watch(passiveAvailable, (available) => {
       <Transition name="complement-panel">
         <fieldset v-if="gridLayout || complementsOpen" :id="complementPanelId" class="complement-options__panel">
           <legend class="sr-only">{{ ui('Présentation des compléments d’objets') }}</legend>
+          <label>
+            <input type="checkbox" :disabled="!hasConjugation || voiceMode === 'passive'" :checked="displayedComplementOptions.length === 0" @change="selectWithoutComplements">
+            <span><strong>{{ ui('Juste la conjugaison, sans COD ni COI') }}</strong></span>
+          </label>
           <label>
             <input type="checkbox" :disabled="!complementsAvailable || !codAvailable" :checked="displayedComplementOptions.includes('cod-after')" @change="toggleComplementOption('cod-after', ($event.target as HTMLInputElement).checked)">
             <span><strong>{{ ui('COD (CVD) placé après') }}</strong><small v-if="complementsAvailable && !codAvailable">{{ ui('Aucun verbe choisi ne possède de COD (CVD) validé.') }}</small></span>

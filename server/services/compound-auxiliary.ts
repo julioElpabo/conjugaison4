@@ -1,6 +1,6 @@
 import type { ConjugationSourceRow } from './question-formatter'
 import { AUXILIARY_SIMPLE_TENSES, compoundSimpleTense } from '../../shared/utils/compound-auxiliaries'
-import { hasVariableAuxiliary } from '../../shared/utils/variable-auxiliary'
+import { hasVariableAuxiliary, prefersEtreWithoutComplement } from '../../shared/utils/variable-auxiliary'
 
 export interface CompoundAuxiliaryForm {
   personne_id: number
@@ -86,7 +86,7 @@ export function variableAuxiliaryRows(row: ConjugationSourceRow): ConjugationSou
   const contextual = Boolean(row.complement_phrase || row.complement_anteposed)
   const auxiliaries: Array<'avoir' | 'être'> = contextual
     ? row.complement_function === 'cod' ? ['avoir'] : []
-    : normalized(row.auxiliaire) === 'être' ? ['être', 'avoir'] : ['avoir', 'être']
+    : prefersEtreWithoutComplement(row.infinitif) || normalized(row.auxiliaire) === 'être' ? ['être', 'avoir'] : ['avoir', 'être']
   if (!auxiliaries.length) return [row]
   return auxiliaries.map(auxiliary => {
     const form = paradigm.forms[auxiliary][person]

@@ -8,7 +8,7 @@ import { condensedExampleLabel, localizedCondensedTenseRule } from '../i18n/coac
 import type { ConjugationTense, ExerciseQuestion, Verb } from '../types/conjugation'
 import { withoutIndicativeMode } from './chat-mode-display'
 import { buildCompleteConjugationAdviceHtml, buildConjugationBaseHtml, buildConjugationEndingsHtml, buildPassiveVoiceHelpHtml, buildPassiveVoiceMethodHtml, decomposeConjugationForm, inferCompoundAuxiliary } from './conjugation-help'
-import { VARIABLE_AUXILIARY_EXPLANATION } from './variable-auxiliary'
+import { VARIABLE_AUXILIARY_EXPLANATION, hasMultipleAuxiliaryModels } from './variable-auxiliary'
 import { auxiliaryLemmaForForm } from './coach-feedback'
 import { condensedConjugationExample } from './condensed-conjugation-example'
 import { bareNearFutureInfinitive, isNearFutureTense, isPronominalNearFutureInfinitive, nearFutureReflexivePronoun } from './near-future'
@@ -1148,7 +1148,7 @@ export function coachHelpQuestionVariables(
   const passiveVoiceMethodAdviceHelp = buildPassiveVoiceMethodHtml(question, verb, tense, false)
   const referenceFormHelp = buildReferenceFormHelpHtml(question, verb, tense)
   const infinitive = question.infinitif || verb?.infinitif || ''
-  const variableAuxiliary = (question.auxiliaryChoices?.length || 0) > 1
+  const variableAuxiliary = hasMultipleAuxiliaryModels(question)
   const contextualVerb = verb && question.isCompound
     ? { ...verb, auxiliaire: variableAuxiliary ? null : inferCompoundAuxiliary(question, verb) }
     : verb

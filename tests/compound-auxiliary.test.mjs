@@ -44,7 +44,7 @@ describe('auxiliaire variable de sortir', () => {
     const row = useEtreForIntransitiveCompound(source(), auxiliaries)
     assert.equal(row.auxiliaire, 'être')
     assert.equal(row.conjugaison1, 'étais sorti')
-    assert.deepEqual(formatConjugationQuestion(row, 'je').reponsesPourCorrige, ["j'étais sorti", "j'étais sortie", "j'avais sorti"])
+    assert.deepEqual(formatConjugationQuestion(row, 'je').reponsesPourCorrige, ["j'étais sorti", "j'étais sortie"])
   })
 
   it('accorde les personnes du pluriel avec être', () => {
@@ -56,7 +56,7 @@ describe('auxiliaire variable de sortir', () => {
       temps_name: 'passé composé',
     }), auxiliaries)
     assert.equal(row.conjugaison1, 'sont sortis')
-    assert.deepEqual(formatConjugationQuestion(row, 'elles').reponsesPourCorrige, ['elles sont sorties', 'elles ont sorti'])
+    assert.deepEqual(formatConjugationQuestion(row, 'elles').reponsesPourCorrige, ['elles sont sorties'])
   })
 
   it('construit le conditionnel passé avec être', () => {
@@ -89,7 +89,7 @@ describe('deux auxiliaires admis sans contexte', () => {
 
   it('accepte le cas signalé et distingue les accords des deux auxiliaires', () => {
     const target = question()
-    assert.deepEqual(target.reponsesPourCorrige, ["j'ai monté", 'je suis monté', 'je suis montée'])
+    assert.deepEqual(target.reponsesPourCorrige, ['je suis monté', 'je suis montée'])
     for (const answer of ['Je suis monté', 'je suis montée', 'j’ai monté']) {
       assert.equal(validateConjugationAnswer(answer, target).isCorrect, true, answer)
       assert.deepEqual(learnerErrorDetails(answer, target), [])
@@ -105,7 +105,9 @@ describe('deux auxiliaires admis sans contexte', () => {
   ]) {
     it(`accorde les formes de ${infinitive} selon l’auxiliaire`, () => {
       const target = question({ infinitif: infinitive, participe_passe: participle, personne_id: 9 }, 'elles')
-      assert.deepEqual(new Set(target.reponsesPourCorrige), new Set([`elles ont ${participle}`, `elles sont ${participle}es`]))
+      assert.deepEqual(new Set(target.reponsesPourCorrige), new Set(infinitive === 'demeurer'
+        ? [`elles ont ${participle}`, `elles sont ${participle}es`] : [`elles sont ${participle}es`]))
+      assert.equal(validateConjugationAnswer(`elles ont ${participle}`, target).isCorrect, true)
       assert.equal(validateConjugationAnswer(`elles sont ${participle}`, target).isCorrect, false)
       assert.equal(validateConjugationAnswer(`elles ont ${participle}es`, target).isCorrect, false)
     })
@@ -180,19 +182,28 @@ describe('deux auxiliaires admis sans contexte', () => {
     }
   })
 
-  it('explique les deux auxiliaires dans les aides et les conseils sans réponses', () => {
+  it('présente le modèle avec être sans imposer deux auxiliaires à apprendre', () => {
     const target = question()
     const verb = { id: 1, infinitif: 'monter', participePasse: 'monté', auxiliaire: 'avoir', groupeConjugaison: 1, typePronominal: 'aucun' }
+    assert.equal(target.preferredAuxiliary, 'être')
+    assert.equal(target.conjugaison1, 'suis monté')
     const values = coachHelpQuestionVariables(target, verb)
-    assert.equal(values.auxiliaryAnswer, 'ai ou suis')
-    assert.equal(values.pastParticipleAnswer, 'monté ou montée')
+    assert.equal(values.auxiliaryAnswer, 'suis')
+    assert.equal(values.auxiliary, 'être')
     for (const html of [buildConjugationBaseHtml(target, verb), buildCompleteConjugationAdviceHtml(target, verb), values.condensedTenseRuleHelp]) {
-      assert.match(html, /auxiliaires avoir et être sont acceptés/u)
-      assert.match(html, /Avec être, accorde/u)
-      assert.match(html, /Avec avoir, sans COD placé avant/u)
-      assert.doesNotMatch(html, /utilise l’auxiliaire <strong>avoir<\/strong>/u)
+      assert.doesNotMatch(html, /auxiliaires avoir et être sont acceptés|Choisis avoir ou être|j'ai monté/u)
     }
-    assert.doesNotMatch(buildCompleteConjugationAdviceHtml(target, verb), /je suis monté|j'ai monté/u)
+    assert.doesNotMatch(buildCompleteConjugationAdviceHtml(target, verb), /je suis monté/u)
+  })
+
+  it('corrige les accords masculins même si une variante féminine est stockée', () => {
+    for (const [subject, person, expected] of [['il', 6, 'il est resté'], ['elle', 6, 'elle est restée'], ['ils', 9, 'ils sont restés'], ['elles', 9, 'elles sont restées']]) {
+      const target = question({ infinitif: 'rester', participe_passe: 'resté', auxiliaire: 'être', conjugaison1: person === 9 ? 'sont restées' : 'est restée', personne_id: person }, subject)
+      assert.deepEqual(target.reponsesPourCorrige, [expected])
+      assert.equal(validateConjugationAnswer(expected, target).isCorrect, true)
+      if (subject === 'il') assert.equal(validateConjugationAnswer('il est restée', target).isCorrect, false)
+      if (subject === 'ils') assert.equal(validateConjugationAnswer('ils sont restées', target).isCorrect, false)
+    }
   })
 
   it('accepte aussi les deux auxiliaires à l’infinitif passé et au gérondif passé', () => {
@@ -202,6 +213,7 @@ describe('deux auxiliaires admis sans contexte', () => {
     ]) {
       const target = formatNonFiniteQuestion({ id: 1, infinitif: 'monter', participe_present: 'montant', participe_passe: 'monté', auxiliaire_infinitif: 'avoir', auxiliaire_participe_present: 'ayant' }, { id: 1, name: 'passé', mode_name: mode, is_compound: 1 })
       for (const answer of answers) assert.equal(validateConjugationAnswer(answer, target).isCorrect, true, answer)
+      assert.ok(target.reponsesPourCorrige.every(answer => !/^(?:avoir|en ayant) /iu.test(answer)))
     }
   })
 })

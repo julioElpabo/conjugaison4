@@ -1,6 +1,6 @@
 import { defineComponent, defineAsyncComponent, ref, computed, shallowRef, useTemplateRef, watch, markRaw, withAsyncContext, mergeProps, unref, createVNode, resolveDynamicComponent, nextTick, reactive, withCtx, createTextVNode, toDisplayString, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrRenderClass, ssrInterpolate, ssrRenderAttr, ssrIncludeBooleanAttr, ssrRenderStyle, ssrRenderComponent, ssrRenderList, ssrRenderVNode, ssrRenderTeleport } from 'vue/server-renderer';
-import { aN as challengePresetGroupLabels, R as stripLocaleFromPath, aT as exerciseKindsFor, b5 as DEFAULT_SHARED_CHALLENGE_OPTIONS, b6 as legacyComplementOptions, b7 as legacyComplementConfig, ac as exerciseKindFor, aM as challengePresetGroupOrder, b8 as ultimateChallengeId } from '../nitro/nitro.mjs';
+import { b0 as challengePresetGroupLabels, R as stripLocaleFromPath, b6 as exerciseKindsFor, bk as DEFAULT_SHARED_CHALLENGE_OPTIONS, bl as legacyComplementOptions, bm as legacyComplementConfig, ad as exerciseKindFor, a$ as challengePresetGroupOrder, bn as ultimateChallengeId } from '../nitro/nitro.mjs';
 import { a as useZazizozuDiscovery, g as guidedTourCopy, _ as _imports_0$1 } from '../_/guided-tour.mjs';
 import { a as useLanguagePreferences, b as useRoute, w as useRequestURL, c as useState, i as useRequestHeaders, n as navigateTo } from './server.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';

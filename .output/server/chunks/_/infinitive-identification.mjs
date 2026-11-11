@@ -1,4 +1,4 @@
-import { aJ as hasVariableAuxiliary, aK as prefersEtreWithoutComplement, aL as formatAnswer, u as useDatabase } from '../nitro/nitro.mjs';
+import { aY as hasVariableAuxiliary, aZ as prefersEtreWithoutComplement, a_ as formatAnswer, u as useDatabase } from '../nitro/nitro.mjs';
 import { b as buildRadicalReference } from './radical-reference.mjs';
 import { g as generatePronominalRow } from './pronominal-formatter.mjs';
 import { i as isImpersonalVerb } from './impersonal-verbs.mjs';

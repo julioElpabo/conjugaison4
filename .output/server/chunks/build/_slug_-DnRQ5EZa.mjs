@@ -1,6 +1,6 @@
 import { defineComponent, withAsyncContext, mergeProps, unref, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrRenderComponent } from 'vue/server-renderer';
-import { w as withDutchVariants, as as localeLanguageTag } from '../nitro/nitro.mjs';
+import { w as withDutchVariants, aG as localeLanguageTag } from '../nitro/nitro.mjs';
 import { W as WizardChallengeWorkspace } from './WizardChallengeWorkspace-Cw-qhlug.mjs';
 import { b as useRoute, a as useLanguagePreferences, o as createError, n as navigateTo, q as usePageSeoOverride, u as useHead, g as useRuntimeConfig } from './server.mjs';
 import { u as useFetch } from './fetch-CBmzzU3B.mjs';

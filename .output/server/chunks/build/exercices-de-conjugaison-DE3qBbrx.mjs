@@ -1,7 +1,7 @@
 import { _ as __nuxt_component_0 } from './nuxt-link-icjx6oE7.mjs';
 import { defineComponent, computed, unref, withCtx, createTextVNode, toDisplayString, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrRenderComponent, ssrRenderList, ssrInterpolate } from 'vue/server-renderer';
-import { as as localeLanguageTag } from '../nitro/nitro.mjs';
+import { aG as localeLanguageTag } from '../nitro/nitro.mjs';
 import { W as WizardChallengeWorkspace } from './WizardChallengeWorkspace-Cw-qhlug.mjs';
 import { a as TENSE_EXERCISE_PAGES } from '../_/tense-exercise-pages.mjs';
 import { a as useLanguagePreferences, b as useRoute, u as useHead, g as useRuntimeConfig } from './server.mjs';

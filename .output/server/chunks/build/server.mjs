@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, toRef, isRef, watch, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, isReadonly, isShallow, isReactive, toRaw } from 'vue';
-import { ar as SUPPORTED_LOCALES, w as withDutchVariants, b9 as withSwissObjectAliases, ba as parseURL, bb as encodePath, bc as decodePath, bd as localeFromPath, z as normalizeLocale, be as getRequestHeaders, bf as klona, ax as hasProtocol, az as isScriptProtocol, ay as joinURL, c as createError$1, bg as withQuery, L as getRequestURL, bh as DEFAULT_LANGUAGE_PREFERENCES, av as localizePath, bi as getRequestHeader, bj as isEqual, bk as sanitizeStatusCode, bl as getContext, t as setCookie, x as getCookie, v as deleteCookie, bm as $fetch, as as localeLanguageTag, bn as defu, R as stripLocaleFromPath, aF as executeAsync, bo as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { aF as SUPPORTED_LOCALES, w as withDutchVariants, bo as withSwissObjectAliases, bp as parseURL, bq as encodePath, br as decodePath, bs as localeFromPath, z as normalizeLocale, bt as getRequestHeaders, bu as klona, aL as hasProtocol, aN as isScriptProtocol, aM as joinURL, c as createError$1, bv as withQuery, L as getRequestURL, bw as DEFAULT_LANGUAGE_PREFERENCES, aJ as localizePath, bx as getRequestHeader, by as isEqual, bz as sanitizeStatusCode, bA as getContext, t as setCookie, x as getCookie, v as deleteCookie, bB as $fetch, aG as localeLanguageTag, bC as defu, R as stripLocaleFromPath, aT as executeAsync, bD as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useHead$1, a as useSeoMeta$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -1720,7 +1720,7 @@ const _routes = [
   {
     name: "admin-users",
     path: "/admin/users",
-    component: () => import('./users-SxvLx2JD.mjs')
+    component: () => import('./users-DQFXhLyk.mjs')
   },
   {
     name: "admin-verbes",
@@ -1801,7 +1801,7 @@ const _routes = [
     name: "my-page",
     path: "/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-PavsducV.mjs')
+    component: () => import('./my-page-CYFTDhoS.mjs')
   },
   {
     name: "nouveau-defi",
@@ -1901,7 +1901,7 @@ const _routes = [
   {
     name: "localized-admin-users",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/admin/users",
-    component: () => import('./users-SxvLx2JD.mjs')
+    component: () => import('./users-DQFXhLyk.mjs')
   },
   {
     name: "localized-admin-verbes",
@@ -1982,7 +1982,7 @@ const _routes = [
     name: "localized-my-page",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/my-page",
     meta: { "middleware": "learner-auth" },
-    component: () => import('./my-page-PavsducV.mjs')
+    component: () => import('./my-page-CYFTDhoS.mjs')
   },
   {
     name: "localized-nouveau-defi",

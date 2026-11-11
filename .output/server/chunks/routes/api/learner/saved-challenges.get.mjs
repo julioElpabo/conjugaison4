@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, u as useDatabase, am as ensureSavedChallengeMetadata, a1 as parseDefiDefinition } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, u as useDatabase, aw as ensureSavedChallengeMetadata, ax as listSavedChallengeFolders, a4 as parseDefiDefinition } from '../../../nitro/nitro.mjs';
 import { r as requireLearnerDataSubject } from '../../../_/learner-data-subject.mjs';
 import 'node:http';
 import 'node:https';
@@ -19,15 +19,17 @@ const savedChallenges_get = defineEventHandler(async (event) => {
   const learner = await requireLearnerDataSubject(event);
   const database = useDatabase();
   await ensureSavedChallengeMetadata(database);
+  const folders = await listSavedChallengeFolders(database, learner.id);
   const [rows] = await database.execute(`
     SELECT d.name AS code, d.defi AS definitionJson, saved.saved_at AS savedAt,
-      saved.custom_title AS customTitle, saved.custom_description AS customDescription
+      saved.custom_title AS customTitle, saved.custom_description AS customDescription, saved.folder_id AS folderId
     FROM learner_saved_challenges saved
     INNER JOIN defis d ON d.id=saved.defi_id
     WHERE saved.account_id=?
     ORDER BY saved.saved_at DESC, d.id DESC
   `, [learner.id]);
   return {
+    folders,
     challenges: rows.flatMap((row) => {
       var _a, _b;
       try {
@@ -39,7 +41,8 @@ const savedChallenges_get = defineEventHandler(async (event) => {
           questionCount: definition.questionCount,
           verbCount: definition.verbIds.length,
           tenseCount: definition.tenseIds.length,
-          savedAt: row.savedAt
+          savedAt: row.savedAt,
+          folderId: row.folderId === null ? null : Number(row.folderId)
         }];
       } catch {
         return [];

@@ -1,6 +1,6 @@
 import { defineComponent, computed, useSSRContext } from 'vue';
 import { ssrRenderComponent } from 'vue/server-renderer';
-import { as as localeLanguageTag } from '../nitro/nitro.mjs';
+import { aG as localeLanguageTag } from '../nitro/nitro.mjs';
 import { W as WizardChallengeWorkspace } from './WizardChallengeWorkspace-Cw-qhlug.mjs';
 import { a as useLanguagePreferences, b as useRoute, u as useHead, g as useRuntimeConfig } from './server.mjs';
 import 'node:http';

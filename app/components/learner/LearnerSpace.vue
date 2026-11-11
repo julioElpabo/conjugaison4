@@ -14,10 +14,12 @@ import type {
 import type { CoachProfile } from '~~/shared/types/coach'
 import type { Catalogue } from '~/composables/useChallengeBuilder'
 import type { AppLocale } from '~~/shared/i18n/locales'
-import type { SavedChallenge } from '~~/shared/types/saved-challenge'
+import type { SavedChallenge, SavedChallengeFolder } from '~~/shared/types/saved-challenge'
 import type { LearnerPreferences, TenseClassification } from '~~/shared/types/learner-preferences'
 import { learnerSpaceCopy, learnerSpaceText } from '~~/shared/i18n/learner-space'
 import { savedChallengeRemovalCopy } from '~~/shared/i18n/saved-challenge-removal'
+import { savedChallengeFoldersCopy } from '~~/shared/i18n/saved-challenge-folders'
+import type { SavedChallengeFolderColor } from '~~/shared/utils/saved-challenge-folder-colors'
 import { groupSavedChallenges } from '~~/shared/utils/saved-challenge-dates'
 import {
   localizedLearnerErrorDomain,
@@ -89,6 +91,7 @@ interface DashboardResponse {
 
 interface SavedChallengesResponse {
   challenges: SavedChallenge[]
+  folders: SavedChallengeFolder[]
 }
 
 interface HistorySummaryResponse {
@@ -247,6 +250,14 @@ const requestedTab = (value: unknown): UserTab => (
 )
 const activeTab = ref<UserTab>(requestedTab(route.query.tab))
 const savedChallenges = ref<SavedChallenge[]>([])
+const folderCopy = computed(() => savedChallengeFoldersCopy(interfaceLocale.value))
+const {
+  folders: savedChallengeFolders, sortedFolders: sortedSavedChallengeFolders, filter: savedChallengeFolderFilter,
+  visibleChallenges: visibleSavedChallenges, action: savedChallengeFolderAction, pending: savedChallengeFolderPending,
+  error: savedChallengeFolderError, notice: savedChallengeFolderNotice, open: openSavedChallengeFolderAction,
+  close: closeSavedChallengeFolderAction, confirm: confirmSavedChallengeFolderAction,
+  createMoveFolder: createSavedChallengeMoveFolder,
+} = useSavedChallengeFolders(savedChallenges, () => props.readOnly)
 const removalCopy = computed(() => savedChallengeRemovalCopy(interfaceLocale.value))
 const {
   selecting: selectingSavedChallenges, selectedCodes: selectedSavedChallengeCodes,
@@ -256,8 +267,27 @@ const {
   toggleSelecting: toggleSavedChallengeSelection, toggle: toggleSavedChallenge,
   toggleAll: toggleAllSavedChallenges, requestRemoval: requestSavedChallengeRemoval,
   cancel: cancelSavedChallengeRemoval, confirm: confirmSavedChallengeRemoval,
-} = useSavedChallengeRemoval(savedChallenges, () => props.readOnly)
+} = useSavedChallengeRemoval(savedChallenges, () => props.readOnly || savedChallengeFolderPending.value, visibleSavedChallenges)
+watch(savedChallengeFolderFilter, () => {
+  selectedSavedChallengeCodes.value = []
+  selectingSavedChallenges.value = false
+})
+watch(savedChallengeFolderAction, (action) => {
+  if (action) savedChallengeRemovedCount.value = 0
+})
+watch(savedChallengeRemovalTargets, (targets) => {
+  if (targets.length) savedChallengeFolderNotice.value = ''
+})
 const savedChallengesHeading = useTemplateRef<HTMLElement>('saved-challenges-heading')
+
+async function saveSavedChallengeFolder(values: { name: string, folderId: number | null, color?: SavedChallengeFolderColor }) {
+  if (await confirmSavedChallengeFolderAction(values)) {
+    selectedSavedChallengeCodes.value = []
+    selectingSavedChallenges.value = false
+    await nextTick()
+    savedChallengesHeading.value?.focus({ preventScroll: true })
+  }
+}
 
 async function removeSavedChallenges() {
   if (await confirmSavedChallengeRemoval()) {
@@ -266,7 +296,7 @@ async function removeSavedChallenges() {
   }
 }
 const savedChallengesNow = ref(new Date())
-const savedChallengeGroups = computed(() => groupSavedChallenges(savedChallenges.value, savedChallengesNow.value, interfaceLocale.value))
+const savedChallengeGroups = computed(() => groupSavedChallenges(visibleSavedChallenges.value, savedChallengesNow.value, interfaceLocale.value))
 let savedChallengesClock: ReturnType<typeof setInterval> | undefined
 const savedChallengesLoaded = ref(false)
 const savedChallengesPending = ref(false)
@@ -283,6 +313,7 @@ async function toggleSavedChallengeForm() {
   }
 }
 const savedChallengeAdding = ref(false)
+const savedChallengeActionsDisabled = computed(() => savedChallengeAdding.value || savedChallengesPending.value || savedChallengeRemovalPending.value || savedChallengeFolderPending.value)
 const savedChallengeAddError = ref('')
 const savedChallengeAddNotice = ref('')
 const learnerProgress = ref<LearnerErrorProgressSummary>()
@@ -1146,6 +1177,10 @@ async function loadSavedChallenges(force = false) {
       credentials: 'same-origin',
     })
     savedChallenges.value = response.challenges
+    savedChallengeFolders.value = response.folders || []
+    if (typeof savedChallengeFolderFilter.value === 'number' && !savedChallengeFolders.value.some(folder => folder.id === savedChallengeFolderFilter.value)) {
+      savedChallengeFolderFilter.value = 'all'
+    }
     savedChallengesLoaded.value = true
   }
   catch {
@@ -1887,17 +1922,32 @@ async function confirmAccountAction() {
           <p class="learner-eyebrow">{{ savedCopy.eyebrow }}</p>
           <h2 id="saved-challenges-title" ref="saved-challenges-heading" tabindex="-1">{{ savedCopy.title }}</h2>
         </div>
-        <button v-if="!props.readOnly && savedChallenges.length" type="button" class="saved-challenges__select" :aria-pressed="selectingSavedChallenges" :disabled="savedChallengeAdding || savedChallengesPending" @click="toggleSavedChallengeSelection">
+        <button v-if="!props.readOnly && visibleSavedChallenges.length" type="button" class="saved-challenges__select" :aria-pressed="selectingSavedChallenges" :disabled="savedChallengeActionsDisabled" @click="toggleSavedChallengeSelection">
           {{ selectingSavedChallenges ? removalCopy.cancel : removalCopy.select }}
         </button>
       </div>
 
       <p class="saved-challenges__intro">{{ savedCopy.intro }}</p>
-      <p class="saved-challenges__notice" role="status">{{ savedChallengeRemovedCount ? removalCopy.removed(savedChallengeRemovedCount) : '' }}</p>
+      <LearnerSavedChallengeFolders
+        v-if="savedChallengesLoaded && !savedChallengesError"
+        v-model="savedChallengeFolderFilter"
+        :folders="sortedSavedChallengeFolders"
+        :challenges="savedChallenges"
+        :read-only="props.readOnly"
+        :disabled="savedChallengeActionsDisabled"
+        @create="openSavedChallengeFolderAction({ kind: 'create' })"
+        @rename="folder => openSavedChallengeFolderAction({ kind: 'rename', folder })"
+        @color="folder => openSavedChallengeFolderAction({ kind: 'color', folder })"
+        @remove="folder => openSavedChallengeFolderAction({ kind: 'delete', folder })"
+      />
+      <p class="saved-challenges__notice" role="status">{{ savedChallengeFolderNotice || (savedChallengeRemovedCount ? removalCopy.removed(savedChallengeRemovedCount) : '') }}</p>
 
-      <div v-if="selectingSavedChallenges && !props.readOnly && savedChallenges.length" class="saved-challenges__selection">
-        <button type="button" @click="toggleAllSavedChallenges">{{ allSavedChallengesSelected ? removalCopy.deselectAll : removalCopy.selectAll }}</button>
-        <button type="button" class="saved-challenges__remove" :disabled="!selectedSavedChallenges.length || savedChallengeAdding || savedChallengesPending" @click="requestSavedChallengeRemoval(selectedSavedChallenges)">
+      <div v-if="selectingSavedChallenges && !props.readOnly && visibleSavedChallenges.length" class="saved-challenges__selection">
+        <button type="button" :disabled="savedChallengeActionsDisabled" @click="toggleAllSavedChallenges">{{ allSavedChallengesSelected ? removalCopy.deselectAll : removalCopy.selectAll }}</button>
+        <button type="button" :disabled="!selectedSavedChallenges.length || savedChallengeActionsDisabled" @click="openSavedChallengeFolderAction({ kind: 'move', challenges: selectedSavedChallenges })">
+          {{ folderCopy.moveSelected(selectedSavedChallenges.length) }}
+        </button>
+        <button type="button" class="saved-challenges__remove" :disabled="!selectedSavedChallenges.length || savedChallengeActionsDisabled" @click="requestSavedChallengeRemoval(selectedSavedChallenges)">
           {{ removalCopy.removeSelected(selectedSavedChallenges.length) }}
         </button>
       </div>
@@ -1939,7 +1989,7 @@ async function confirmAccountAction() {
 
       <p v-if="savedChallengesPending && !savedChallengesLoaded" class="learner-empty">{{ savedCopy.loading }}</p>
       <p v-else-if="savedChallengesError" class="saved-challenge-form__error" role="alert">{{ savedChallengesError }}</p>
-      <div v-else-if="savedChallenges.length" class="saved-challenges__groups">
+      <div v-else-if="visibleSavedChallenges.length" class="saved-challenges__groups">
         <section v-for="group in savedChallengeGroups" :key="group.key" class="saved-challenges__group" :aria-labelledby="`saved-group-${group.key}`">
           <h3 :id="`saved-group-${group.key}`" class="saved-challenges__group-title">{{ group.title }}</h3>
           <div class="saved-challenges__grid">
@@ -1949,17 +1999,24 @@ async function confirmAccountAction() {
               :challenge="challenge"
               :date-label="dateLabel"
               :date-time="dateTime"
+              :folder-name="savedChallengeFolders.find(folder => folder.id === challenge.folderId)?.name || folderCopy.unfiled"
+              :folder-color="savedChallengeFolders.find(folder => folder.id === challenge.folderId)?.color"
               :read-only="props.readOnly"
               :selecting="selectingSavedChallenges"
               :selected="selectedSavedChallengeCodes.includes(challenge.code)"
-              :removal-disabled="savedChallengeAdding || savedChallengesPending"
+              :removal-disabled="savedChallengeActionsDisabled"
               @updated="updateSavedChallenge"
               @toggle-selected="toggleSavedChallenge(challenge.code)"
               @remove="requestSavedChallengeRemoval([challenge])"
+              @move="openSavedChallengeFolderAction({ kind: 'move', challenges: [challenge] })"
             />
           </div>
         </section>
       </div>
+      <p v-else-if="savedChallengeFolderFilter !== 'all'" class="learner-empty">
+        <strong>{{ folderCopy.empty }}</strong>
+        <span>{{ folderCopy.emptyHint }}</span>
+      </p>
       <p v-else class="learner-empty">
         <strong>{{ savedCopy.empty }}</strong>
         <span>{{ savedCopy.emptyHint }}</span>
@@ -1971,6 +2028,28 @@ async function confirmAccountAction() {
         :failed="savedChallengeRemovalFailed"
         @close="cancelSavedChallengeRemoval"
         @confirm="removeSavedChallenges"
+      />
+      <LearnerSavedChallengeFolderDialog
+        v-if="savedChallengeFolderAction && savedChallengeFolderAction.kind !== 'color' && !props.readOnly"
+        :key="savedChallengeFolderAction.kind"
+        :action="savedChallengeFolderAction"
+        :folders="sortedSavedChallengeFolders"
+        :pending="savedChallengeFolderPending"
+        :error="savedChallengeFolderError"
+        :create-folder="createSavedChallengeMoveFolder"
+        @clear-error="savedChallengeFolderError = ''"
+        @close="closeSavedChallengeFolderAction"
+        @confirm="saveSavedChallengeFolder"
+      />
+      <LearnerSavedChallengeFolderColorDialog
+        v-if="savedChallengeFolderAction?.kind === 'color' && !props.readOnly"
+        :key="savedChallengeFolderAction.folder.id"
+        :folder="savedChallengeFolderAction.folder"
+        :pending="savedChallengeFolderPending"
+        :error="savedChallengeFolderError"
+        @clear-error="savedChallengeFolderError = ''"
+        @close="closeSavedChallengeFolderAction"
+        @confirm="color => saveSavedChallengeFolder({ name: '', folderId: null, color })"
       />
     </section>
 

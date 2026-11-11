@@ -3,18 +3,22 @@ import QrcodeVue from 'qrcode.vue'
 import type { SavedChallenge } from '~~/shared/types/saved-challenge'
 import { savedChallengeCardCopy } from '~~/shared/i18n/saved-challenge-card'
 import { savedChallengeRemovalCopy } from '~~/shared/i18n/saved-challenge-removal'
+import { savedChallengeFoldersCopy } from '~~/shared/i18n/saved-challenge-folders'
+import { savedChallengeFolderColorStyle, type SavedChallengeFolderColor } from '~~/shared/utils/saved-challenge-folder-colors'
 import { copyText } from '~/utils/copy-text'
 
-const props = defineProps<{ challenge: SavedChallenge, dateLabel: string, dateTime?: string, readOnly?: boolean, selecting?: boolean, selected?: boolean, removalDisabled?: boolean }>()
+const props = defineProps<{ challenge: SavedChallenge, dateLabel: string, dateTime?: string, folderName?: string, folderColor?: SavedChallengeFolderColor, readOnly?: boolean, selecting?: boolean, selected?: boolean, removalDisabled?: boolean }>()
 const emit = defineEmits<{
   updated: [value: { code: string, title: string, description: string }]
   remove: []
+  move: []
   toggleSelected: []
 }>()
 const { interfaceLocale, localePath } = useLanguagePreferences()
 const config = useRuntimeConfig()
 const copy = computed(() => savedChallengeCardCopy(interfaceLocale.value))
 const removalCopy = computed(() => savedChallengeRemovalCopy(interfaceLocale.value))
+const folderCopy = computed(() => savedChallengeFoldersCopy(interfaceLocale.value))
 const challengePath = computed(() => localePath(`/defi/${props.challenge.code}`))
 const shareUrl = computed(() => new URL(challengePath.value, import.meta.client ? window.location.origin : String(config.public.siteUrl)).toString())
 const qrOpen = ref(false)
@@ -28,7 +32,13 @@ const copyStatus = ref<'idle' | 'success' | 'error'>('idle')
 const titleInput = useTemplateRef<HTMLInputElement>('title-input')
 const editButton = useTemplateRef<HTMLButtonElement>('edit-button')
 const valid = computed(() => title.value.trim().length >= 1 && title.value.trim().length <= 80 && description.value.trim().length <= 1000)
+const canClassifyFromBadge = computed(() => props.challenge.folderId == null && !props.readOnly)
 let copyTimer: ReturnType<typeof setTimeout> | undefined
+
+function classifyFromBadge() {
+  if (!canClassifyFromBadge.value || props.removalDisabled || props.selecting || editing.value || saving.value) return
+  emit('move')
+}
 
 async function copyCode() {
   if (copyTimer) clearTimeout(copyTimer)
@@ -81,7 +91,8 @@ onBeforeUnmount(() => { if (copyTimer) clearTimeout(copyTimer) })
       <div class="saved-card__heading">
         <time v-if="dateTime" :datetime="dateTime">{{ dateLabel }}</time><span v-else />
         <div v-if="!readOnly && !editing && !selecting" class="saved-card__actions">
-          <button ref="edit-button" type="button" class="saved-card__edit" @click="edit"><span aria-hidden="true">✎</span> {{ copy.edit }}</button>
+          <button ref="edit-button" type="button" class="saved-card__edit" :disabled="removalDisabled" @click="edit"><span aria-hidden="true">✎</span> {{ copy.edit }}</button>
+          <button type="button" class="saved-card__edit" :disabled="removalDisabled" :aria-label="`${folderCopy.move} — ${challenge.title}`" @click="emit('move')"><LearnerSavedChallengeFolderIcon class="saved-card__classify-icon" /> {{ folderCopy.move }}</button>
           <button type="button" class="saved-card__remove" :disabled="removalDisabled" :aria-label="`${removalCopy.removeOne} — ${challenge.title}`" @click="emit('remove')"><svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7" /></svg> {{ removalCopy.removeOne }}</button>
         </div>
       </div>
@@ -101,6 +112,18 @@ onBeforeUnmount(() => { if (copyTimer) clearTimeout(copyTimer) })
         <p v-if="challenge.description" class="saved-card__description">{{ challenge.description }}</p>
         <p v-if="notice" class="saved-card__notice" role="status">{{ notice }}</p>
       </div>
+      <component
+        :is="canClassifyFromBadge ? 'button' : 'p'"
+        class="saved-card__folder"
+        :style="savedChallengeFolderColorStyle(folderColor)"
+        :type="canClassifyFromBadge ? 'button' : undefined"
+        :title="canClassifyFromBadge ? folderCopy.move : undefined"
+        :disabled="canClassifyFromBadge ? removalDisabled || selecting || editing || saving : undefined"
+        @click="classifyFromBadge"
+      >
+        <LearnerSavedChallengeFolderIcon class="saved-card__folder-icon" />
+        <span><span v-if="challenge.folderId != null && folderName" class="saved-card__folder-label">{{ folderCopy.folder }} :</span> <strong>{{ challenge.folderId != null && folderName ? folderName : folderCopy.unfiledChallenge }}</strong></span>
+      </component>
       <dl class="saved-card__stats">
         <div><dt>{{ copy.verbs }}</dt><dd>{{ challenge.verbCount }}</dd></div>
         <div><dt>{{ copy.tenses }}</dt><dd>{{ challenge.tenseCount }}</dd></div>
@@ -125,6 +148,8 @@ onBeforeUnmount(() => { if (copyTimer) clearTimeout(copyTimer) })
 </template>
 
 <style scoped>
+:global(:root[data-theme='dark'] .saved-card .saved-card__folder){--folder-accent:var(--folder-color-dark,#c5a9ed)}
+.saved-card .saved-card__folder{--folder-accent:var(--folder-color-light,#7052a0);display:flex;align-items:flex-start;justify-self:start;gap:8px;max-width:100%;min-width:0;margin:0;padding:8px 10px;border:1px solid color-mix(in srgb,var(--folder-accent) 55%,var(--line));border-radius:10px;background:color-mix(in srgb,var(--folder-accent) 12%,var(--surface));color:var(--ink);font-size:.84rem;line-height:1.45}.saved-card__folder>span{min-width:0;overflow-wrap:anywhere}.saved-card__folder-label{color:var(--muted);font-size:.76rem}.saved-card__folder strong{font-weight:750}.saved-card button.saved-card__folder:not(:disabled):hover{border-color:var(--folder-accent);background:color-mix(in srgb,var(--folder-accent) 20%,var(--surface))}.saved-card__folder-icon{flex-shrink:0;width:20px;height:20px;color:var(--folder-accent)}.saved-card__classify-icon{flex-shrink:0;width:16px;height:16px}
 .saved-card__heading{flex-wrap:wrap}.saved-card__actions{margin-left:auto}
 .saved-card--selected{outline:3px solid #8c6cba;outline-offset:3px}.saved-card__actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}.saved-card__remove{display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--danger);font-size:.76rem!important}.saved-card__remove svg{flex-shrink:0}.saved-card__selection{display:flex;align-items:center;gap:10px;color:var(--ink);font-size:.85rem;cursor:pointer}.saved-card__selection input{width:20px;height:20px;margin:0;accent-color:#7052a0}.saved-card__selection input:focus-visible{outline:3px solid #8c6cba;outline-offset:3px}
 .saved-card__scope{margin:0 0 5px;color:var(--muted);font-size:.76rem;line-height:1.45}.saved-card__sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}

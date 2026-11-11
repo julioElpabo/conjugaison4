@@ -3,6 +3,7 @@ import { useDatabase } from '../utils/database'
 import { LEARNER_ERROR_TAXONOMY } from '~~/shared/utils/learner-error-diagnostics'
 import { CURRENT_PRIVACY_NOTICE_VERSION } from '~~/shared/data/privacy-notice'
 import { ensureLearnerPreferenceClassification } from '../services/learner-preferences'
+import { ensureSavedChallengeFolders } from '../services/saved-challenge-folders'
 
 export default defineNitroPlugin(async () => {
   try {
@@ -315,6 +316,8 @@ export default defineNitroPlugin(async () => {
           FOREIGN KEY (defi_id) REFERENCES defis(id) ON DELETE CASCADE
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `)
+    await ensureSavedChallengeFolders(database)
+    console.info('[database] Dossiers personnels des défis disponibles.')
     await database.query('DELETE FROM learner_sessions WHERE expires_at < CURRENT_TIMESTAMP')
     // Une inscription validée par l'API constitue désormais l'activation du compte.
     // Répare aussi les comptes créés avant ce correctif : leur suppression automatique

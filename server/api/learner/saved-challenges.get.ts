@@ -3,6 +3,7 @@ import type { DefiDefinition } from '../../types/public-api'
 import { parseDefiDefinition } from '../../services/public-api-validation'
 import { requireLearnerDataSubject } from '../../utils/learner-data-subject'
 import { ensureSavedChallengeMetadata } from '../../services/saved-challenge-metadata'
+import { listSavedChallengeFolders } from '../../services/saved-challenge-folders'
 
 interface SavedChallengeRow extends RowDataPacket {
   code: string
@@ -10,6 +11,7 @@ interface SavedChallengeRow extends RowDataPacket {
   savedAt: string
   customTitle: string | null
   customDescription: string | null
+  folderId: number | null
 }
 
 export default defineEventHandler(async (event) => {
@@ -17,9 +19,10 @@ export default defineEventHandler(async (event) => {
   const learner = await requireLearnerDataSubject(event)
   const database = useDatabase()
   await ensureSavedChallengeMetadata(database)
+  const folders = await listSavedChallengeFolders(database, learner.id)
   const [rows] = await database.execute<SavedChallengeRow[]>(`
     SELECT d.name AS code, d.defi AS definitionJson, saved.saved_at AS savedAt,
-      saved.custom_title AS customTitle, saved.custom_description AS customDescription
+      saved.custom_title AS customTitle, saved.custom_description AS customDescription, saved.folder_id AS folderId
     FROM learner_saved_challenges saved
     INNER JOIN defis d ON d.id=saved.defi_id
     WHERE saved.account_id=?
@@ -27,6 +30,7 @@ export default defineEventHandler(async (event) => {
   `, [learner.id])
 
   return {
+    folders,
     challenges: rows.flatMap((row) => {
       try {
         const definition: DefiDefinition = parseDefiDefinition(JSON.parse(row.definitionJson))
@@ -38,6 +42,7 @@ export default defineEventHandler(async (event) => {
           verbCount: definition.verbIds.length,
           tenseCount: definition.tenseIds.length,
           savedAt: row.savedAt,
+          folderId: row.folderId === null ? null : Number(row.folderId),
         }]
       }
       catch {

@@ -1,15 +1,15 @@
 import { computed, ref, toValue, type MaybeRefOrGetter, type Ref } from 'vue'
 import type { SavedChallenge } from '~~/shared/types/saved-challenge'
 
-export function useSavedChallengeRemoval(challenges: Ref<SavedChallenge[]>, readOnly: MaybeRefOrGetter<boolean>) {
+export function useSavedChallengeRemoval(challenges: Ref<SavedChallenge[]>, readOnly: MaybeRefOrGetter<boolean>, selectableChallenges: MaybeRefOrGetter<SavedChallenge[]> = challenges) {
   const selecting = ref(false)
   const selectedCodes = ref<string[]>([])
   const targets = ref<SavedChallenge[]>([])
   const pending = ref(false)
   const failed = ref(false)
   const removedCount = ref(0)
-  const selected = computed(() => challenges.value.filter(challenge => selectedCodes.value.includes(challenge.code)))
-  const allSelected = computed(() => challenges.value.length > 0 && selected.value.length === challenges.value.length)
+  const selected = computed(() => toValue(selectableChallenges).filter(challenge => selectedCodes.value.includes(challenge.code)))
+  const allSelected = computed(() => toValue(selectableChallenges).length > 0 && selected.value.length === toValue(selectableChallenges).length)
 
   function toggleSelecting() {
     if (toValue(readOnly) || pending.value) return
@@ -18,14 +18,14 @@ export function useSavedChallengeRemoval(challenges: Ref<SavedChallenge[]>, read
   }
 
   function toggle(code: string) {
-    if (toValue(readOnly) || pending.value || !selecting.value || !challenges.value.some(item => item.code === code)) return
+    if (toValue(readOnly) || pending.value || !selecting.value || !toValue(selectableChallenges).some(item => item.code === code)) return
     selectedCodes.value = selectedCodes.value.includes(code)
       ? selectedCodes.value.filter(item => item !== code) : [...selectedCodes.value, code]
   }
 
   function toggleAll() {
     if (toValue(readOnly) || pending.value || !selecting.value) return
-    selectedCodes.value = allSelected.value ? [] : challenges.value.map(item => item.code)
+    selectedCodes.value = allSelected.value ? [] : toValue(selectableChallenges).map(item => item.code)
   }
 
   function requestRemoval(items: SavedChallenge[]) {

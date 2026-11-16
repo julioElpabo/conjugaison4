@@ -13,6 +13,7 @@ import { legacyComplementConfig, legacyComplementOptions, normalizeComplementOpt
 import type { AtomicExerciseKind } from '../../shared/types/conjugation'
 import { exerciseKindFor, SELECTABLE_EXERCISE_KINDS } from '../../shared/utils/exercise-kinds'
 import { DEFAULT_SHARED_CHALLENGE_OPTIONS } from '../../shared/utils/challenge-defaults'
+import { CHALLENGE_PERSON_IDS, challengePersonSelection } from '../../shared/utils/challenge-persons'
 
 export class PublicInputError extends Error {}
 
@@ -28,6 +29,7 @@ const QUESTIONNAIRE_KEYS = new Set([
   'identificationSource',
   'literaryRegister',
   'pastSimplePronouns',
+  'personIds',
   'inclusivePronouns',
   'includeOnPronoun',
   'learningSupportMode',
@@ -49,6 +51,7 @@ const DEFI_KEYS = new Set([
   'identificationSource',
   'literaryRegister',
   'pastSimplePronouns',
+  'personIds',
   'inclusivePronouns',
   'includeOnPronoun',
   'learningSupportMode',
@@ -273,6 +276,15 @@ function parsePrintOptions(value: unknown): ChallengePrintOptions {
   return parsed
 }
 
+export function parseChallengePersonIds(value: unknown): number[] | undefined {
+  if (value === undefined) return undefined
+  if (!Array.isArray(value) || value.length === 0 || value.length > 6
+      || value.some(id => !Number.isInteger(id) || !(CHALLENGE_PERSON_IDS as readonly number[]).includes(id))) {
+    throw new PublicInputError('Choisis au moins une personne parmi les six personnes proposées')
+  }
+  return challengePersonSelection(value)
+}
+
 export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest {
   if (!isRecord(value)) {
     throw new PublicInputError('Le corps de la requête doit être un objet JSON')
@@ -308,6 +320,7 @@ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest 
     ? legacyComplementOptions(includeComplements, complementPlacement)
     : parseComplementOptions(value.complementOptions)
   const resolvedLegacy = legacyComplementConfig(complementOptions)
+  const personIds = parseChallengePersonIds(value.personIds)
   return {
     verbIds: parseIds(value.verbIds, 'verbIds', MAX_VERB_IDS, true),
     tenseIds: parseIds(value.tenseIds, 'tenseIds', 30),
@@ -320,6 +333,7 @@ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest 
       ? DEFAULT_SHARED_CHALLENGE_OPTIONS.literaryRegister
       : parseLiteraryRegister(value.literaryRegister),
     pastSimplePronouns: parsePastSimplePronouns(value.pastSimplePronouns),
+    ...(personIds ? { personIds } : {}),
     inclusivePronouns: value.inclusivePronouns,
     includeOnPronoun,
     learningSupportMode,
@@ -401,6 +415,7 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
   const resolvedLegacy = legacyComplementConfig(complementOptions)
   const title = parseChallengeTitle(modernValue.title)
   const description = parseChallengeDescription(modernValue.description)
+  const personIds = parseChallengePersonIds(modernValue.personIds)
   return {
     version: 1,
     ...(title === undefined ? {} : { title }),
@@ -412,6 +427,7 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
     identificationSource,
     literaryRegister,
     pastSimplePronouns,
+    ...(personIds ? { personIds } : {}),
     inclusivePronouns,
     includeOnPronoun,
     learningSupportMode,

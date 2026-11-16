@@ -1,6 +1,7 @@
 import type { RowDataPacket } from 'mysql2/promise'
 import type { ExerciseQuestion, QuestionnaireRequest } from '../types/public-api'
 import { exerciseKindsFor } from '../../shared/utils/exercise-kinds'
+import { includesChallengePerson } from '../../shared/utils/challenge-persons'
 import { identifyInfinitives } from './infinitive-identification'
 import { useDatabase } from '../utils/database'
 import { formatAnswer, formatConjugationQuestion } from './question-formatter'
@@ -609,6 +610,7 @@ async function validatedLiteraryCitations(
   verbIds: readonly number[] | null,
   tenseIds: readonly number[],
   literaryRegister: 'all' | 'courant' | 'soutenu' = 'all',
+  personIds?: readonly number[],
 ) {
   const citations = new Map<string, LiteraryCitationRow[]>()
   if (!tenseIds.length || (verbIds !== null && !verbIds.length)) return citations
@@ -620,7 +622,7 @@ async function validatedLiteraryCitations(
     const verbClause = verbIds === null
       ? ''
       : `AND target.verb_id IN (${placeholders(verbIds)})`
-    const parameters = verbIds === null ? [...tenseIds] : [...verbIds, ...tenseIds]
+    const parameters = [...(verbIds || []), ...tenseIds, ...(personIds || [])]
     const [coverageRows, randomRows] = await Promise.all([
       database.execute<LiteraryCitationRow[]>(`
       SELECT target.id,target.verb_id,target.tense_id,target.person_id,
@@ -638,6 +640,7 @@ async function validatedLiteraryCitations(
           ${verbIds === null ? '' : `AND covered.verb_id IN (${placeholders(verbIds)})`}
           AND covered.tense_id IN (${placeholders(tenseIds)})
           ${coverageRegisterClause}
+          ${personIds ? `AND covered.person_id IN (${placeholders(personIds)})` : ''}
         GROUP BY covered.tense_id
       ) coverage ON coverage.id=target.id
       INNER JOIN literary_sentences sentence ON sentence.id=target.sentence_id
@@ -664,6 +667,7 @@ async function validatedLiteraryCitations(
         ${verbClause}
         AND target.tense_id IN (${placeholders(tenseIds)})
         ${randomRegisterClause}
+        ${personIds ? `AND target.person_id IN (${placeholders(personIds)})` : ''}
       ORDER BY RAND()
       LIMIT 500
     `, parameters),
@@ -859,12 +863,14 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
       null,
       selectedTenses.map(row => Number(row.id)),
       request.literaryRegister ?? 'all',
+      request.personIds,
     )
     let literaryQuestions = [...citations.values()].flat()
+      .filter(citation => includesChallengePerson(request.personIds, Number(citation.person_id)))
       .map(citation => literaryIdentificationQuestion(citation, request.exerciseKind === 'mode-identification'))
     if (isInfinitive) literaryQuestions = await identifyInfinitives(literaryQuestions)
     if (!literaryQuestions.length) {
-      throw new QuestionnaireSelectionError('Aucune citation validée ne correspond aux temps sélectionnés')
+      throw new QuestionnaireSelectionError('Aucune citation validée ne correspond aux temps et aux personnes sélectionnés')
     }
     return request.exerciseKind === 'mode-identification'
       ? balancedModeIdentificationQuestions(literaryQuestions, request.questionCount)
@@ -878,6 +884,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
     const pastSimpleClause = request.pastSimplePronouns === 'third-person-only'
       ? "AND (t.name NOT IN ('passé simple', 'passé antérieur') OR p.pronom IN ('il', 'ils'))"
       : ''
+    const personClause = request.personIds ? `AND vc.personne_id IN (${placeholders(request.personIds)})` : ''
     const rows: ConjugationRow[] = []
     const literaryCitations = usesLiteraryCitations
       ? await validatedLiteraryCitations(null, finiteIds)
@@ -945,9 +952,10 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
         AND (COALESCE(v.est_impersonnel, 0) = 0 OR p.pronom = 'il')
         ${passivePersonClause}
         ${pastSimpleClause}
+        ${personClause}
       ORDER BY ${literaryOrderClause} RAND()
       LIMIT ${limit}
-      `, [...questionVerbIds, ...finiteIds, ...literaryCoordinates.flat()])
+      `, [...questionVerbIds, ...finiteIds, ...literaryCoordinates.flat(), ...(request.personIds || [])])
       rows.push(...storedRows)
     }
 
@@ -980,9 +988,10 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
             AND vc.temp_id IN (${placeholders(finiteIds)})
             AND vc.conjugaison1 <> ''
             ${pastSimpleClause}
+            ${personClause}
           ORDER BY RAND()
           LIMIT ${limit}
-        `, [...pronominalUseIds, ...finiteIds]),
+        `, [...pronominalUseIds, ...finiteIds, ...(request.personIds || [])]),
         database.execute<AuxiliaryFormRow[]>(`
           SELECT vc.personne_id, m.name AS mode_name, t.name AS temps_name, vc.conjugaison1
           FROM verbesconjugues vc
@@ -1040,7 +1049,8 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
       const perTenseLimit = Math.max(6, Math.ceil(limit / Math.max(1, finiteTenses.length)))
       for (const tense of nearFutureTenses) {
         rows.push(...limitedNearFutureRows(
-          nearFutureRows(tense, nearFutureVerbs[0], nearFutureUses[0], allerRows[0]),
+          nearFutureRows(tense, nearFutureVerbs[0], nearFutureUses[0], allerRows[0])
+            .filter(row => includesChallengePerson(request.personIds, Number(row.personne_id))),
           perTenseLimit,
           wantsActiveVoice,
           wantsPassiveVoice,
@@ -1109,8 +1119,8 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
       }
     }
 
-    const personalRows = rows.filter(row => !isImpersonalVerb(row.infinitif, row.est_impersonnel)
-      || row.pronom === 'il')
+    const personalRows = rows.filter(row => includesChallengePerson(request.personIds, Number(row.personne_id)))
+      .filter(row => !isImpersonalVerb(row.infinitif, row.est_impersonnel) || row.pronom === 'il')
     const eligibleRows = usesLiteraryCitations
       ? personalRows.filter(row => literaryCitations.has(literaryCitationKey(
           Number(row.verbe_id), Number(row.temp_id), Number(row.personne_id),
@@ -1294,7 +1304,9 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
       && wantsPassiveVoice
       && !questions.some(question => question.voice === 'passive')) {
     throw new QuestionnaireSelectionError(
-      'Aucune forme passive n’est disponible pour les verbes et les temps sélectionnés',
+      request.personIds
+        ? 'Aucune forme passive n’est disponible pour les verbes, les temps et les personnes sélectionnés'
+        : 'Aucune forme passive n’est disponible pour les verbes et les temps sélectionnés',
     )
   }
 

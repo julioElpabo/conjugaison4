@@ -1,0 +1,891 @@
+diff --git a/app/components/challenge/ChallengeOptions.vue b/app/components/challenge/ChallengeOptions.vue
+index 6a696e25..12242663 100644
+--- a/app/components/challenge/ChallengeOptions.vue
++++ b/app/components/challenge/ChallengeOptions.vue
+@@ -1,6 +1,8 @@
+ <script setup lang="ts">
+ import { faVolume } from '@fortawesome/free-solid-svg-icons'
+ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
++import { PERSON_SELECTION_ENABLED } from '~~/shared/config/feature-flags'
++import { CHALLENGE_PERSON_IDS, CHALLENGE_PERSON_CHOICES, challengePersonSelection } from '~~/shared/utils/challenge-persons'
+ const { ui } = useLanguagePreferences()
+ import { exerciseKindsFor, SELECTABLE_EXERCISE_KINDS } from '~~/shared/utils/exercise-kinds'
+ import type { AtomicExerciseKind, ExerciseQuestion } from '~~/shared/types/conjugation'
+@@ -14,6 +16,8 @@ const props = defineProps<{
+   identificationSource: IdentificationSource
+   inclusivePronouns: boolean
+   includeOnPronoun: boolean
++  personIds?: number[]
++  pastSimplePronouns?: 'all' | 'third-person-only'
+   learningSupportMode: LearningSupportMode
+   voiceMode: VoiceMode
+   complementOptions: ComplementOption[]
+@@ -40,6 +44,8 @@ const emit = defineEmits<{
+   updateIdentificationSource: [value: IdentificationSource]
+   updateInclusivePronouns: [value: boolean]
+   updateIncludeOnPronoun: [value: boolean]
++  updatePersonIds: [value: number[] | undefined]
++  clearLegacyPersonRestriction: []
+   updateLearningSupportMode: [value: LearningSupportMode]
+   updateVoiceMode: [value: VoiceMode]
+   updateComplementOptions: [value: ComplementOption[]]
+@@ -47,6 +53,18 @@ const emit = defineEmits<{
+ }>()
+ 
+ const selectedExerciseKinds = computed(() => exerciseKindsFor(props))
++const selectedPersons = computed(() => props.personIds ?? [...CHALLENGE_PERSON_IDS])
++function togglePerson(id: number) {
++  const selected = selectedPersons.value
++  if (selected.includes(id) && selected.length === 1) return
++  emit('updatePersonIds', challengePersonSelection(selected.includes(id)
++    ? selected.filter(person => person !== id) : [...selected, id]))
++}
++function personLabel(id: number, label: string) {
++  if (id === 6) return ['il', 'elle', ...(props.inclusivePronouns ? ['iel'] : []), ...(props.includeOnPronoun ? ['on'] : [])].join(' / ')
++  if (id === 9) return ['ils', 'elles', ...(props.inclusivePronouns ? ['iels'] : [])].join(' / ')
++  return label
++}
+ const hasConjugation = computed(() => selectedExerciseKinds.value.includes('conjugation'))
+ const hasIdentification = computed(() => selectedExerciseKinds.value.some(kind => kind !== 'conjugation'))
+ const exerciseChoices = [
+@@ -300,6 +318,29 @@ watch(passiveAvailable, (available) => {
+           </label>
+         </div>
+ 
++        <fieldset v-if="PERSON_SELECTION_ENABLED || personIds" class="option-fieldset option-group-card option-group-card--persons">
++          <legend>{{ ui('Personnes à travailler') }}</legend>
++          <p class="field-hint">{{ ui('Ne garde que les personnes que tu veux travailler.') }}</p>
++          <div class="person-choices">
++            <label v-for="person in CHALLENGE_PERSON_CHOICES" :key="person.id" class="person-choice">
++              <input
++                type="checkbox"
++                :value="person.id"
++                :checked="selectedPersons.includes(person.id)"
++                :disabled="selectedPersons.length === 1 && selectedPersons.includes(person.id)"
++                @change="togglePerson(person.id)"
++              >
++              <span>{{ personLabel(person.id, person.label) }}</span>
++            </label>
++          </div>
++          <button type="button" class="text-button" :disabled="selectedPersons.length === 6" @click="emit('updatePersonIds', undefined)">{{ ui('Toutes les personnes') }}</button>
++          <small class="field-hint">{{ ui('Garde au moins une personne. À l’impératif : tu, nous et vous. Les formes sans personne restent disponibles.') }}</small>
++        </fieldset>
++        <div v-if="PERSON_SELECTION_ENABLED && pastSimplePronouns === 'third-person-only'" class="option-group-card option-group-card--legacy-persons">
++          <p>{{ ui('Ce défi conserve sa restriction aux troisièmes personnes au passé simple et au passé antérieur.') }}</p>
++          <button type="button" class="text-button" @click="emit('clearLegacyPersonRestriction')">{{ ui('Utiliser les personnes choisies à tous les temps') }}</button>
++        </div>
++
+         <fieldset v-if="!falcMode" class="option-fieldset option-group-card option-group-card--pronouns">
+           <legend>{{ ui('Pronoms') }}</legend>
+           <label class="check-row">
+@@ -638,10 +679,25 @@ watch(passiveAvailable, (available) => {
+ .options-layout--columns .option-group-card--voice { grid-column: 1; }
+ .options-layout--columns .option-group-card--learning-support { grid-column: 1; }
+ .options-layout--columns .option-group-card--pronouns,
++.options-layout--columns .option-group-card--persons,
++.options-layout--columns .option-group-card--legacy-persons,
+ .options-layout--columns > .conjugation-example { grid-column: 2; }
+ .options-layout--columns .option-group-card--exercise,
+ .options-layout--columns .complement-options { grid-column: 3; }
+ .option-group-card { min-width: 0; padding: 15px; border: 1px solid #c8d8d3; border-radius: 13px; background: #fbfdfc; box-shadow: 0 3px 10px rgb(46 67 62 / 5%); }
++.person-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, auto); grid-auto-flow: column; gap: 6px; margin: 12px 0; }
++.person-choice { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px; border: 1px solid #c8d8d3; border-radius: 8px; cursor: pointer; overflow-wrap: anywhere; }
++.person-choice:has(input:checked) { background: var(--surface-soft, #eaf3ef); border-color: var(--brand-dark); }
++.person-choice:has(input:focus-visible) { outline: 2px solid var(--brand-dark); outline-offset: 2px; }
++.person-choice input { flex-shrink: 0; accent-color: var(--brand-dark); }
++.person-choice:has(input:disabled) { cursor: default; }
++:global(:root[data-theme='dark'] .person-choice:has(input:checked)) { background: #203b34; border-color: #8dcbb6; color: #f0f7f4; }
++:global(:root[data-theme='dark'] .option-group-card--persons .field-hint),
++:global(:root[data-theme='dark'] .person-choice),
++:global(:root[data-theme='dark'] .option-group-card--persons legend),
++:global(:root[data-theme='dark'] .option-group-card--persons .text-button),
++:global(:root[data-theme='dark'] .option-group-card--legacy-persons .text-button) { color: #c0ddd4; }
++:global(:root[data-theme='dark'] .person-choice:has(input:focus-visible)) { outline-color: #8dcbb6; }
+ .option-group-card > legend { padding: 0 5px; color: var(--brand-dark); font-size: .875rem; font-weight: 800; letter-spacing: .035em; text-transform: uppercase; }
+ .option-group-card__icon-legend { display: inline-flex; align-items: center; gap: 7px; }
+ .option-group-card .check-row { margin: 0; padding: 9px 0; }
+diff --git a/app/components/challenge/ChallengeWorkspace.vue b/app/components/challenge/ChallengeWorkspace.vue
+index 92c72a7d..8243b0b7 100644
+--- a/app/components/challenge/ChallengeWorkspace.vue
++++ b/app/components/challenge/ChallengeWorkspace.vue
+@@ -1,5 +1,6 @@
+ <script setup lang="ts">
+ import { exerciseKindFor, exerciseKindsFor, exerciseKindLabel } from '~~/shared/utils/exercise-kinds'
++import { CHALLENGE_PERSON_CHOICES } from '~~/shared/utils/challenge-persons'
+ import type { AtomicExerciseKind } from '~~/shared/types/conjugation'
+ import type { Component, ShallowRef } from 'vue'
+ const { ui, localePath } = useLanguagePreferences()
+@@ -208,6 +209,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
+   challenge.value.exerciseKinds = preset.exerciseKinds ? [...preset.exerciseKinds] : undefined
+   challenge.value.exerciseKind = preset.exerciseKind
+   challenge.value.identificationSource = preset.identificationSource
++  challenge.value.personIds = preset.personIds ? [...preset.personIds] : undefined
+   challenge.value.pastSimplePronouns = preset.pastSimplePronouns
+   challenge.value.inclusivePronouns = preset.inclusivePronouns
+   challenge.value.includeOnPronoun = preset.includeOnPronoun
+@@ -243,6 +245,7 @@ function beginExerciseTracking(presentation: 'classic' | 'chat') {
+       exerciseKind: challenge.value.exerciseKind,
+       ...(challenge.value.exerciseKinds ? { exerciseKinds: [...challenge.value.exerciseKinds] } : {}),
+       identificationSource: challenge.value.identificationSource,
++      ...(challenge.value.personIds ? { personIds: [...challenge.value.personIds] } : {}),
+       pastSimplePronouns: challenge.value.pastSimplePronouns,
+       inclusivePronouns: challenge.value.inclusivePronouns,
+       includeOnPronoun: challenge.value.includeOnPronoun,
+@@ -477,6 +480,8 @@ function onToggleTense(id: number) {
+             :identification-source="challenge.identificationSource"
+             :inclusive-pronouns="challenge.inclusivePronouns"
+             :include-on-pronoun="challenge.includeOnPronoun"
++            :person-ids="challenge.personIds"
++            :past-simple-pronouns="challenge.pastSimplePronouns"
+             :learning-support-mode="challenge.learningSupportMode"
+             :voice-mode="challenge.voiceMode"
+             :complement-options="challenge.complementOptions"
+@@ -486,6 +491,8 @@ function onToggleTense(id: number) {
+             @update-identification-source="challenge.identificationSource = $event; markAsCustom()"
+             @update-inclusive-pronouns="challenge.inclusivePronouns = $event; markAsCustom()"
+             @update-include-on-pronoun="challenge.includeOnPronoun = $event; markAsCustom()"
++            @update-person-ids="challenge.personIds = $event; challenge.pastSimplePronouns = 'all'; markAsCustom()"
++            @clear-legacy-person-restriction="challenge.pastSimplePronouns = 'all'; markAsCustom()"
+             @update-learning-support-mode="challenge.learningSupportMode = $event; markAsCustom()"
+             @update-voice-mode="challenge.voiceMode = $event; markAsCustom()"
+             @update-complement-options="updateComplementOptions"
+@@ -493,6 +500,7 @@ function onToggleTense(id: number) {
+         </div>
+ 
+         <div class="challenge-summary" :class="{ 'challenge-summary--incomplete': !isReady }" aria-live="polite">
++          <p v-if="challenge.personIds">{{ ui('Personnes à travailler') }} : {{ CHALLENGE_PERSON_CHOICES.filter(person => challenge.personIds?.includes(person.id)).map(person => person.label).join(' · ') }}</p>
+           <div>
+             <p class="builder-card__eyebrow">{{ ui('Résumé de ton défi') }}</p>
+             <strong v-if="isReady">
+diff --git a/app/components/challenge/TensePicker.vue b/app/components/challenge/TensePicker.vue
+index a4cc7f6c..70ed81ca 100644
+--- a/app/components/challenge/TensePicker.vue
++++ b/app/components/challenge/TensePicker.vue
+@@ -8,6 +8,7 @@ import type {
+ } from '~/composables/useChallengeBuilder'
+ import { conjugationTenseOrder } from '~~/shared/data/conjugation-display'
+ import { isNearFutureTense } from '~~/shared/utils/near-future'
++import { PERSON_SELECTION_ENABLED } from '~~/shared/config/feature-flags'
+ import {
+   classifyTenses,
+   classifiedTenseToggleIds,
+@@ -174,7 +175,7 @@ watch(exampleRequestKey, () => void loadExamples())
+ 
+               <Transition name="past-simple-option">
+                 <div
+-                  v-if="isPastSimple(tense) && isSelected(tense)"
++                  v-if="!PERSON_SELECTION_ENABLED && isPastSimple(tense) && isSelected(tense)"
+                   class="past-simple-option"
+                 >
+                   <label class="past-simple-option__choice">
+diff --git a/app/components/challenge/WizardChallengeWorkspace.vue b/app/components/challenge/WizardChallengeWorkspace.vue
+index a93df6c2..9171895c 100644
+--- a/app/components/challenge/WizardChallengeWorkspace.vue
++++ b/app/components/challenge/WizardChallengeWorkspace.vue
+@@ -1,5 +1,6 @@
+ <script setup lang="ts">
+ import { exerciseKindFor, exerciseKindsFor, exerciseKindLabel } from '~~/shared/utils/exercise-kinds'
++import { CHALLENGE_PERSON_CHOICES } from '~~/shared/utils/challenge-persons'
+ import type { AtomicExerciseKind } from '~~/shared/types/conjugation'
+ import type { Component, ShallowRef } from 'vue'
+ const { ui, localePath, interfaceLocale, setInterfaceLocale } = useLanguagePreferences()
+@@ -753,6 +754,7 @@ function restartChallenge() {
+   clearTenses()
+   if (falcMode.value) applyFalcTenseDefaults()
+   challenge.value.questionCount = 10
++  challenge.value.personIds = undefined
+   challenge.value.exerciseKinds = undefined
+   challenge.value.exerciseKind = 'conjugation'
+   challenge.value.pastSimplePronouns = 'all'
+@@ -922,6 +924,7 @@ function prepareTourChallenge() {
+     exerciseKind: 'conjugation',
+     exerciseKinds: undefined,
+     pastSimplePronouns: 'all',
++    personIds: undefined,
+     inclusivePronouns: false,
+     includeOnPronoun: false,
+     voiceMode: 'active',
+@@ -1429,6 +1432,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
+   challenge.value.exerciseKinds = preset.exerciseKinds ? [...preset.exerciseKinds] : undefined
+   challenge.value.exerciseKind = preset.exerciseKind
+   challenge.value.identificationSource = preset.identificationSource
++  challenge.value.personIds = preset.personIds ? [...preset.personIds] : undefined
+   challenge.value.pastSimplePronouns = preset.pastSimplePronouns
+   challenge.value.inclusivePronouns = preset.inclusivePronouns
+   challenge.value.includeOnPronoun = preset.includeOnPronoun
+@@ -1684,6 +1688,8 @@ watch(
+   [
+     () => challenge.value.verbIds.join(','),
+     () => challenge.value.tenseIds.join(','),
++    () => challenge.value.personIds?.join(','),
++    () => challenge.value.pastSimplePronouns,
+     () => challenge.value.includeComplements,
+     () => challenge.value.complementPlacement,
+     () => challenge.value.complementOptions.join(','),
+@@ -1737,6 +1743,7 @@ function beginExerciseTracking(presentation: 'classic' | 'chat') {
+       exerciseKind: challenge.value.exerciseKind,
+       ...(challenge.value.exerciseKinds ? { exerciseKinds: [...challenge.value.exerciseKinds] } : {}),
+       identificationSource: challenge.value.identificationSource,
++      ...(challenge.value.personIds ? { personIds: [...challenge.value.personIds] } : {}),
+       pastSimplePronouns: challenge.value.pastSimplePronouns,
+       inclusivePronouns: challenge.value.inclusivePronouns,
+       includeOnPronoun: challenge.value.includeOnPronoun,
+@@ -2237,6 +2244,8 @@ async function createSharedChallenge(title: string, description: string) {
+                 :identification-source="challenge.identificationSource"
+                 :inclusive-pronouns="challenge.inclusivePronouns"
+                 :include-on-pronoun="challenge.includeOnPronoun"
++                :person-ids="challenge.personIds"
++                :past-simple-pronouns="challenge.pastSimplePronouns"
+                 :learning-support-mode="challenge.learningSupportMode"
+                 :voice-mode="challenge.voiceMode"
+                 :complement-options="challenge.complementOptions"
+@@ -2260,6 +2269,8 @@ async function createSharedChallenge(title: string, description: string) {
+                 @update-identification-source="challenge.identificationSource = $event; markAsCustom()"
+                 @update-inclusive-pronouns="challenge.inclusivePronouns = $event; markAsCustom()"
+                 @update-include-on-pronoun="challenge.includeOnPronoun = $event; markAsCustom()"
++                @update-person-ids="challenge.personIds = $event; challenge.pastSimplePronouns = 'all'; markAsCustom()"
++                @clear-legacy-person-restriction="challenge.pastSimplePronouns = 'all'; markAsCustom()"
+                 @update-learning-support-mode="challenge.learningSupportMode = $event; markAsCustom()"
+                 @update-voice-mode="challenge.voiceMode = $event; markAsCustom()"
+                 @update-complement-options="updateComplementOptions"
+@@ -2296,6 +2307,7 @@ async function createSharedChallenge(title: string, description: string) {
+                   <span>{{ launchEditHint.after }}</span>
+                 </p>
+               </section>
++              <p v-if="challenge.personIds" class="launch-summary__description">{{ ui('Personnes à travailler') }} : {{ CHALLENGE_PERSON_CHOICES.filter(person => challenge.personIds?.includes(person.id)).map(person => person.label).join(' · ') }}</p>
+               <ChallengeActions
+                 data-tour="actions"
+                 :ready="isReady"
+diff --git a/app/composables/useChallengeApi.ts b/app/composables/useChallengeApi.ts
+index 2b7ab3ad..1e3a0373 100644
+--- a/app/composables/useChallengeApi.ts
++++ b/app/composables/useChallengeApi.ts
+@@ -12,6 +12,7 @@ export interface QuestionnaireRequest {
+   identificationSource: ChallengeConfig['identificationSource']
+   literaryRegister: NonNullable<ChallengeConfig['literaryRegister']>
+   pastSimplePronouns: ChallengeConfig['pastSimplePronouns']
++  personIds?: number[]
+   inclusivePronouns: boolean
+   includeOnPronoun: boolean
+   learningSupportMode: ChallengeConfig['learningSupportMode']
+@@ -22,6 +23,7 @@ export interface QuestionnaireRequest {
+ }
+ 
+ export function toQuestionnaireRequest(challenge: ChallengeConfig): QuestionnaireRequest {
++  const personIds = challenge.personIds?.length === 6 ? undefined : challenge.personIds?.slice()
+   return {
+     verbIds: [...challenge.verbIds],
+     tenseIds: [...challenge.tenseIds],
+@@ -31,6 +33,7 @@ export function toQuestionnaireRequest(challenge: ChallengeConfig): Questionnair
+     identificationSource: challenge.identificationSource ?? 'selected-verbs',
+     literaryRegister: challenge.literaryRegister ?? 'all',
+     pastSimplePronouns: challenge.pastSimplePronouns,
++    ...(personIds ? { personIds } : {}),
+     inclusivePronouns: challenge.inclusivePronouns,
+     includeOnPronoun: challenge.includeOnPronoun,
+     learningSupportMode: challenge.learningSupportMode,
+@@ -50,6 +53,7 @@ export function normalizeChallengeCode(value: string) {
+ }
+ 
+ export function toSharedChallengeRequest(challenge: ChallengeConfig, title?: string, description?: string) {
++  const personIds = challenge.personIds?.length === 6 ? undefined : challenge.personIds?.slice()
+   return {
+     version: 1 as const,
+     ...(title === undefined ? {} : { title: title.trim() }),
+@@ -62,6 +66,7 @@ export function toSharedChallengeRequest(challenge: ChallengeConfig, title?: str
+     identificationSource: challenge.identificationSource ?? 'selected-verbs',
+     literaryRegister: challenge.literaryRegister ?? 'all',
+     pastSimplePronouns: challenge.pastSimplePronouns,
++    ...(personIds ? { personIds } : {}),
+     inclusivePronouns: challenge.inclusivePronouns,
+     includeOnPronoun: challenge.includeOnPronoun,
+     learningSupportMode: challenge.learningSupportMode,
+diff --git a/app/composables/useChallengeBuilder.ts b/app/composables/useChallengeBuilder.ts
+index f345c610..1dfe119a 100644
+--- a/app/composables/useChallengeBuilder.ts
++++ b/app/composables/useChallengeBuilder.ts
+@@ -59,6 +59,7 @@ export interface SharedChallenge {
+   identificationSource?: IdentificationSource
+   literaryRegister?: LiteraryRegister
+   pastSimplePronouns?: PastSimplePronouns
++  personIds?: number[]
+   inclusivePronouns?: boolean
+   includeOnPronoun?: boolean
+   learningSupportMode?: LearningSupportMode
+@@ -124,6 +125,7 @@ export function useChallengeBuilder() {
+     challenge.value.verbIds.length > 0
+     && challenge.value.tenseIds.length > 0
+     && challenge.value.questionCount > 0
++    && (challenge.value.personIds === undefined || challenge.value.personIds.length > 0)
+     && exerciseKindsFor(challenge.value).length > 0
+   ))
+ 
+@@ -240,6 +242,7 @@ export function useChallengeBuilder() {
+       identificationSource: shared.identificationSource ?? defaults.identificationSource,
+       literaryRegister: shared.literaryRegister ?? defaults.literaryRegister,
+       pastSimplePronouns: shared.pastSimplePronouns ?? defaults.pastSimplePronouns,
++      personIds: shared.personIds ? [...shared.personIds] : undefined,
+       inclusivePronouns: shared.inclusivePronouns ?? defaults.inclusivePronouns,
+       includeOnPronoun: shared.includeOnPronoun ?? defaults.includeOnPronoun,
+       learningSupportMode: shared.learningSupportMode ?? defaults.learningSupportMode,
+diff --git a/server/api/questionnaires/index.post.ts b/server/api/questionnaires/index.post.ts
+index e579bc8c..f6c7d0e6 100644
+--- a/server/api/questionnaires/index.post.ts
++++ b/server/api/questionnaires/index.post.ts
+@@ -22,7 +22,9 @@ export default defineEventHandler(async (event) => {
+     if (questions.length === 0) {
+       throw createError({
+         statusCode: 422,
+-        statusMessage: 'Aucune question disponible pour cette sélection'
++        statusMessage: request.personIds
++          ? 'Aucune forme disponible pour ces verbes, ces temps et ces personnes. Choisis d’autres personnes ou d’autres temps.'
++          : 'Aucune question disponible pour cette sélection'
+       })
+     }
+     return request.exerciseKind === 'conjugation' && request.learningSupportMode === 'cif-fle'
+diff --git a/server/services/public-api-validation.ts b/server/services/public-api-validation.ts
+index b6622a17..3d945911 100644
+--- a/server/services/public-api-validation.ts
++++ b/server/services/public-api-validation.ts
+@@ -13,6 +13,7 @@ import { legacyComplementConfig, legacyComplementOptions, normalizeComplementOpt
+ import type { AtomicExerciseKind } from '../../shared/types/conjugation'
+ import { exerciseKindFor, SELECTABLE_EXERCISE_KINDS } from '../../shared/utils/exercise-kinds'
+ import { DEFAULT_SHARED_CHALLENGE_OPTIONS } from '../../shared/utils/challenge-defaults'
++import { CHALLENGE_PERSON_IDS, challengePersonSelection } from '../../shared/utils/challenge-persons'
+ 
+ export class PublicInputError extends Error {}
+ 
+@@ -28,6 +29,7 @@ const QUESTIONNAIRE_KEYS = new Set([
+   'identificationSource',
+   'literaryRegister',
+   'pastSimplePronouns',
++  'personIds',
+   'inclusivePronouns',
+   'includeOnPronoun',
+   'learningSupportMode',
+@@ -49,6 +51,7 @@ const DEFI_KEYS = new Set([
+   'identificationSource',
+   'literaryRegister',
+   'pastSimplePronouns',
++  'personIds',
+   'inclusivePronouns',
+   'includeOnPronoun',
+   'learningSupportMode',
+@@ -273,6 +276,15 @@ function parsePrintOptions(value: unknown): ChallengePrintOptions {
+   return parsed
+ }
+ 
++export function parseChallengePersonIds(value: unknown): number[] | undefined {
++  if (value === undefined) return undefined
++  if (!Array.isArray(value) || value.length === 0 || value.length > 6
++      || value.some(id => !Number.isInteger(id) || !(CHALLENGE_PERSON_IDS as readonly number[]).includes(id))) {
++    throw new PublicInputError('Choisis au moins une personne parmi les six personnes proposées')
++  }
++  return challengePersonSelection(value)
++}
++
+ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest {
+   if (!isRecord(value)) {
+     throw new PublicInputError('Le corps de la requête doit être un objet JSON')
+@@ -308,6 +320,7 @@ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest
+     ? legacyComplementOptions(includeComplements, complementPlacement)
+     : parseComplementOptions(value.complementOptions)
+   const resolvedLegacy = legacyComplementConfig(complementOptions)
++  const personIds = parseChallengePersonIds(value.personIds)
+   return {
+     verbIds: parseIds(value.verbIds, 'verbIds', MAX_VERB_IDS, true),
+     tenseIds: parseIds(value.tenseIds, 'tenseIds', 30),
+@@ -320,6 +333,7 @@ export function parseQuestionnaireRequest(value: unknown): QuestionnaireRequest
+       ? DEFAULT_SHARED_CHALLENGE_OPTIONS.literaryRegister
+       : parseLiteraryRegister(value.literaryRegister),
+     pastSimplePronouns: parsePastSimplePronouns(value.pastSimplePronouns),
++    ...(personIds ? { personIds } : {}),
+     inclusivePronouns: value.inclusivePronouns,
+     includeOnPronoun,
+     learningSupportMode,
+@@ -401,6 +415,7 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
+   const resolvedLegacy = legacyComplementConfig(complementOptions)
+   const title = parseChallengeTitle(modernValue.title)
+   const description = parseChallengeDescription(modernValue.description)
++  const personIds = parseChallengePersonIds(modernValue.personIds)
+   return {
+     version: 1,
+     ...(title === undefined ? {} : { title }),
+@@ -412,6 +427,7 @@ export function parseDefiDefinition(value: unknown): DefiDefinition {
+     identificationSource,
+     literaryRegister,
+     pastSimplePronouns,
++    ...(personIds ? { personIds } : {}),
+     inclusivePronouns,
+     includeOnPronoun,
+     learningSupportMode,
+diff --git a/server/services/questionnaire.ts b/server/services/questionnaire.ts
+index 393d0c47..6a6ea49e 100644
+--- a/server/services/questionnaire.ts
++++ b/server/services/questionnaire.ts
+@@ -1,6 +1,7 @@
+ import type { RowDataPacket } from 'mysql2/promise'
+ import type { ExerciseQuestion, QuestionnaireRequest } from '../types/public-api'
+ import { exerciseKindsFor } from '../../shared/utils/exercise-kinds'
++import { includesChallengePerson } from '../../shared/utils/challenge-persons'
+ import { identifyInfinitives } from './infinitive-identification'
+ import { useDatabase } from '../utils/database'
+ import { formatAnswer, formatConjugationQuestion } from './question-formatter'
+@@ -609,6 +610,7 @@ async function validatedLiteraryCitations(
+   verbIds: readonly number[] | null,
+   tenseIds: readonly number[],
+   literaryRegister: 'all' | 'courant' | 'soutenu' = 'all',
++  personIds?: readonly number[],
+ ) {
+   const citations = new Map<string, LiteraryCitationRow[]>()
+   if (!tenseIds.length || (verbIds !== null && !verbIds.length)) return citations
+@@ -620,7 +622,7 @@ async function validatedLiteraryCitations(
+     const verbClause = verbIds === null
+       ? ''
+       : `AND target.verb_id IN (${placeholders(verbIds)})`
+-    const parameters = verbIds === null ? [...tenseIds] : [...verbIds, ...tenseIds]
++    const parameters = [...(verbIds || []), ...tenseIds, ...(personIds || [])]
+     const [coverageRows, randomRows] = await Promise.all([
+       database.execute<LiteraryCitationRow[]>(`
+       SELECT target.id,target.verb_id,target.tense_id,target.person_id,
+@@ -638,6 +640,7 @@ async function validatedLiteraryCitations(
+           ${verbIds === null ? '' : `AND covered.verb_id IN (${placeholders(verbIds)})`}
+           AND covered.tense_id IN (${placeholders(tenseIds)})
+           ${coverageRegisterClause}
++          ${personIds ? `AND covered.person_id IN (${placeholders(personIds)})` : ''}
+         GROUP BY covered.tense_id
+       ) coverage ON coverage.id=target.id
+       INNER JOIN literary_sentences sentence ON sentence.id=target.sentence_id
+@@ -664,6 +667,7 @@ async function validatedLiteraryCitations(
+         ${verbClause}
+         AND target.tense_id IN (${placeholders(tenseIds)})
+         ${randomRegisterClause}
++        ${personIds ? `AND target.person_id IN (${placeholders(personIds)})` : ''}
+       ORDER BY RAND()
+       LIMIT 500
+     `, parameters),
+@@ -859,12 +863,14 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
+       null,
+       selectedTenses.map(row => Number(row.id)),
+       request.literaryRegister ?? 'all',
++      request.personIds,
+     )
+     let literaryQuestions = [...citations.values()].flat()
++      .filter(citation => includesChallengePerson(request.personIds, Number(citation.person_id)))
+       .map(citation => literaryIdentificationQuestion(citation, request.exerciseKind === 'mode-identification'))
+     if (isInfinitive) literaryQuestions = await identifyInfinitives(literaryQuestions)
+     if (!literaryQuestions.length) {
+-      throw new QuestionnaireSelectionError('Aucune citation validée ne correspond aux temps sélectionnés')
++      throw new QuestionnaireSelectionError('Aucune citation validée ne correspond aux temps et aux personnes sélectionnés')
+     }
+     return request.exerciseKind === 'mode-identification'
+       ? balancedModeIdentificationQuestions(literaryQuestions, request.questionCount)
+@@ -878,6 +884,7 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
+     const pastSimpleClause = request.pastSimplePronouns === 'third-person-only'
+       ? "AND (t.name NOT IN ('passé simple', 'passé antérieur') OR p.pronom IN ('il', 'ils'))"
+       : ''
++    const personClause = request.personIds ? `AND vc.personne_id IN (${placeholders(request.personIds)})` : ''
+     const rows: ConjugationRow[] = []
+     const literaryCitations = usesLiteraryCitations
+       ? await validatedLiteraryCitations(null, finiteIds)
+@@ -945,9 +952,10 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
+         AND (COALESCE(v.est_impersonnel, 0) = 0 OR p.pronom = 'il')
+         ${passivePersonClause}
+         ${pastSimpleClause}
++        ${personClause}
+       ORDER BY ${literaryOrderClause} RAND()
+       LIMIT ${limit}
+-      `, [...questionVerbIds, ...finiteIds, ...literaryCoordinates.flat()])
++      `, [...questionVerbIds, ...finiteIds, ...literaryCoordinates.flat(), ...(request.personIds || [])])
+       rows.push(...storedRows)
+     }
+ 
+@@ -980,9 +988,10 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
+             AND vc.temp_id IN (${placeholders(finiteIds)})
+             AND vc.conjugaison1 <> ''
+             ${pastSimpleClause}
++            ${personClause}
+           ORDER BY RAND()
+           LIMIT ${limit}
+-        `, [...pronominalUseIds, ...finiteIds]),
++        `, [...pronominalUseIds, ...finiteIds, ...(request.personIds || [])]),
+         database.execute<AuxiliaryFormRow[]>(`
+           SELECT vc.personne_id, m.name AS mode_name, t.name AS temps_name, vc.conjugaison1
+           FROM verbesconjugues vc
+@@ -1040,7 +1049,8 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
+       const perTenseLimit = Math.max(6, Math.ceil(limit / Math.max(1, finiteTenses.length)))
+       for (const tense of nearFutureTenses) {
+         rows.push(...limitedNearFutureRows(
+-          nearFutureRows(tense, nearFutureVerbs[0], nearFutureUses[0], allerRows[0]),
++          nearFutureRows(tense, nearFutureVerbs[0], nearFutureUses[0], allerRows[0])
++            .filter(row => includesChallengePerson(request.personIds, Number(row.personne_id))),
+           perTenseLimit,
+           wantsActiveVoice,
+           wantsPassiveVoice,
+@@ -1109,8 +1119,8 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
+       }
+     }
+ 
+-    const personalRows = rows.filter(row => !isImpersonalVerb(row.infinitif, row.est_impersonnel)
+-      || row.pronom === 'il')
++    const personalRows = rows.filter(row => includesChallengePerson(request.personIds, Number(row.personne_id)))
++      .filter(row => !isImpersonalVerb(row.infinitif, row.est_impersonnel) || row.pronom === 'il')
+     const eligibleRows = usesLiteraryCitations
+       ? personalRows.filter(row => literaryCitations.has(literaryCitationKey(
+           Number(row.verbe_id), Number(row.temp_id), Number(row.personne_id),
+@@ -1294,7 +1304,9 @@ export async function generateQuestionnaire(request: QuestionnaireRequest): Prom
+       && wantsPassiveVoice
+       && !questions.some(question => question.voice === 'passive')) {
+     throw new QuestionnaireSelectionError(
+-      'Aucune forme passive n’est disponible pour les verbes et les temps sélectionnés',
++      request.personIds
++        ? 'Aucune forme passive n’est disponible pour les verbes, les temps et les personnes sélectionnés'
++        : 'Aucune forme passive n’est disponible pour les verbes et les temps sélectionnés',
+     )
+   }
+ 
+diff --git a/server/utils/learner-progress.ts b/server/utils/learner-progress.ts
+index 5a380637..153dea7c 100644
+--- a/server/utils/learner-progress.ts
++++ b/server/utils/learner-progress.ts
+@@ -1,5 +1,6 @@
+ import { exerciseKindFor, SELECTABLE_EXERCISE_KINDS } from '../../shared/utils/exercise-kinds'
+ import { createHash } from 'node:crypto'
++import { parseChallengePersonIds, PublicInputError } from '../services/public-api-validation'
+ import type { ExerciseKind, ExerciseQuestion, LearnerChallengeSnapshot } from '~~/shared/types/conjugation'
+ 
+ const SAFE_IDENTIFIER = /^[A-Za-z0-9_-]{8,100}$/u
+@@ -40,6 +41,13 @@ export function learnerChallengeSnapshot(value: unknown): LearnerChallengeSnapsh
+   const exerciseKinds = Array.isArray(suppliedKinds)
+     ? SELECTABLE_EXERCISE_KINDS.filter(kind => suppliedKinds.includes(kind)) : undefined
+   if (exerciseKinds?.length) exerciseKind = exerciseKindFor(exerciseKinds)
++  let personIds: number[] | undefined
++  try {
++    personIds = parseChallengePersonIds(candidate.personIds)
++  } catch (error) {
++    if (error instanceof PublicInputError) throw createError({ statusCode: 400, statusMessage: error.message })
++    throw error
++  }
+   const questionCount = Math.min(200, Math.max(1, Number(candidate.questionCount) || 1))
+   const description = typeof candidate.description === 'string'
+     ? candidate.description.trim().slice(0, 1000)
+@@ -52,6 +60,7 @@ export function learnerChallengeSnapshot(value: unknown): LearnerChallengeSnapsh
+     ...(trainingReportTitle ? { trainingReportTitle } : {}),
+     verbIds: integerList(candidate.verbIds, 1000, true),
+     tenseIds: integerList(candidate.tenseIds),
++    ...(personIds ? { personIds } : {}),
+     questionCount,
+     exerciseKind,
+     ...(exerciseKinds?.length ? { exerciseKinds } : {}),
+diff --git a/shared/config/feature-flags.ts b/shared/config/feature-flags.ts
+index ef8b8279..6b7049f1 100644
+--- a/shared/config/feature-flags.ts
++++ b/shared/config/feature-flags.ts
+@@ -4,3 +4,6 @@
+  * tant que cette constante vaut false.
+  */
+ export const AUDIO_READING_ENABLED = false
++
++/** Retour à l’ancienne interface : false. Les défis enregistrés restent lisibles. */
++export const PERSON_SELECTION_ENABLED = true
+diff --git a/shared/i18n/ui-messages.ts b/shared/i18n/ui-messages.ts
+index b8b28ffa..54d8a850 100644
+--- a/shared/i18n/ui-messages.ts
++++ b/shared/i18n/ui-messages.ts
+@@ -11,6 +11,13 @@ type Translations = Record<Exclude<AppLocale, 'fr'>, string>
+  * pédagogiques, qui seront traduits dans une étape séparée.
+  */
+ export const uiMessages = {
++  "Personnes à travailler": withDutchVariants({"de": "Personen zum Üben", "en": "Persons to practise", "it": "Persone da esercitare", "es": "Personas para practicar", "nl": "Personen om te oefenen"}),
++  "Ne garde que les personnes que tu veux travailler.": withDutchVariants({"de": "Wähle nur die Personen, die du üben möchtest.", "en": "Keep only the persons you want to practise.", "it": "Tieni solo le persone che vuoi esercitare.", "es": "Deja solo las personas que quieras practicar.", "nl": "Behoud alleen de personen die je wilt oefenen."}),
++  "Toutes les personnes": withDutchVariants({"de": "Alle Personen", "en": "All persons", "it": "Tutte le persone", "es": "Todas las personas", "nl": "Alle personen"}),
++  "Garde au moins une personne. À l’impératif : tu, nous et vous. Les formes sans personne restent disponibles.": withDutchVariants({"de": "Wähle mindestens eine Person. Im Imperativ: tu, nous und vous. Formen ohne Person bleiben verfügbar.", "en": "Keep at least one person. In the imperative: tu, nous and vous. Forms without a person remain available.", "it": "Mantieni almeno una persona. All’imperativo: tu, nous e vous. Le forme senza persona restano disponibili.", "es": "Mantén al menos una persona. En el imperativo: tu, nous y vous. Las formas sin persona siguen disponibles.", "nl": "Behoud minstens één persoon. Bij de gebiedende wijs: tu, nous en vous. Vormen zonder persoon blijven beschikbaar."}),
++  "Ce défi conserve sa restriction aux troisièmes personnes au passé simple et au passé antérieur.": withDutchVariants({"de": "Diese Challenge behält ihre Beschränkung auf die dritte Person im passé simple und passé antérieur bei.", "en": "This challenge keeps its restriction to third persons in the passé simple and passé antérieur.", "it": "Questa sfida mantiene la restrizione alle terze persone al passé simple e al passé antérieur.", "es": "Este reto mantiene la restricción a las terceras personas en el passé simple y el passé antérieur.", "nl": "Deze uitdaging behoudt de beperking tot de derde personen in de passé simple en de passé antérieur."}),
++  "Utiliser les personnes choisies à tous les temps": withDutchVariants({"de": "Gewählte Personen in allen Zeiten verwenden", "en": "Use the selected persons in all tenses", "it": "Usare le persone scelte in tutti i tempi", "es": "Usar las personas elegidas en todos los tiempos", "nl": "Gebruik de gekozen personen in alle tijden"}),
++
+   "Vous aimez Tatitotu ?": withDutchVariants({"de": "Gefällt Ihnen Tatitotu?", "en": "Enjoying Tatitotu?", "it": "Ti piace Tatitotu?", "es": "¿Te gusta Tatitotu?", "nl": "Vind je Tatitotu leuk?"}),
+   "Découvrez Zazizozu.": withDutchVariants({"de": "Entdecken Sie Zazizozu.", "en": "Discover Zazizozu.", "it": "Scopri Zazizozu.", "es": "Descubre Zazizozu.", "nl": "Ontdek Zazizozu."}),
+   "Des jeux éducatifs pour progresser en lecture, en maths et dans la vie quotidienne.": withDutchVariants({"de": "Lernspiele für Fortschritte beim Lesen, in Mathematik und im Alltag.", "en": "Educational games to build reading, maths and everyday skills.", "it": "Giochi educativi per migliorare nella lettura, in matematica e nella vita quotidiana.", "es": "Juegos educativos para mejorar en lectura, matemáticas y en la vida cotidiana.", "nl": "Educatieve spellen om te groeien in lezen, rekenen en het dagelijks leven."}),
+diff --git a/shared/types/conjugation.ts b/shared/types/conjugation.ts
+index 9698b65c..3ca4b61a 100644
+--- a/shared/types/conjugation.ts
++++ b/shared/types/conjugation.ts
+@@ -100,6 +100,8 @@ export interface ChallengeConfig {
+   identificationSource: IdentificationSource
+   literaryRegister?: LiteraryRegister
+   pastSimplePronouns: PastSimplePronouns
++  /** Absente : toutes les personnes. Identifiants du catalogue, de 4 à 9. */
++  personIds?: PersonId[]
+   inclusivePronouns: boolean
+   includeOnPronoun: boolean
+   learningSupportMode: LearningSupportMode
+@@ -275,6 +277,7 @@ export interface LearnerChallengeSnapshot {
+   exerciseKinds?: AtomicExerciseKind[]
+   identificationSource?: IdentificationSource
+   pastSimplePronouns?: PastSimplePronouns
++  personIds?: PersonId[]
+   inclusivePronouns?: boolean
+   includeOnPronoun?: boolean
+   learningSupportMode?: LearningSupportMode
+diff --git a/shared/utils/challenge-persons.ts b/shared/utils/challenge-persons.ts
+new file mode 100644
+index 00000000..b8267e44
+--- /dev/null
++++ b/shared/utils/challenge-persons.ts
+@@ -0,0 +1,23 @@
++/** Identifiants des six personnes grammaticales dans le catalogue. */
++export const CHALLENGE_PERSON_IDS = [4, 5, 6, 7, 8, 9] as const
++
++export const CHALLENGE_PERSON_CHOICES = [
++  { id: 4, label: 'je' },
++  { id: 5, label: 'tu' },
++  { id: 6, label: 'il / elle' },
++  { id: 7, label: 'nous' },
++  { id: 8, label: 'vous' },
++  { id: 9, label: 'ils / elles' },
++] as const
++
++/** Une sélection complète est omise pour conserver le format des anciens défis. */
++export function challengePersonSelection(personIds?: readonly number[]): number[] | undefined {
++  if (personIds === undefined) return undefined
++  const selected = CHALLENGE_PERSON_IDS.filter(id => personIds.includes(id))
++  return selected.length === CHALLENGE_PERSON_IDS.length ? undefined : selected
++}
++
++/** Les formes sans personne (infinitif, participe, gérondif) restent disponibles. */
++export function includesChallengePerson(personIds: readonly number[] | undefined, personId: number | null | undefined) {
++  return personIds === undefined || personId == null || personIds.includes(Number(personId))
++}
+diff --git a/tests/challenge-persons.test.mjs b/tests/challenge-persons.test.mjs
+new file mode 100644
+index 00000000..c73dfadc
+--- /dev/null
++++ b/tests/challenge-persons.test.mjs
+@@ -0,0 +1,64 @@
++import assert from 'node:assert/strict'
++import { test } from 'node:test'
++import { parseDefiDefinition, parseQuestionnaireRequest, PublicInputError, serializeDefi } from '../server/services/public-api-validation.ts'
++import { toQuestionnaireRequest, toSharedChallengeRequest } from '../app/composables/useChallengeApi.ts'
++import { learnerChallengeSnapshot } from '../server/utils/learner-progress.ts'
++import { includesChallengePerson } from '../shared/utils/challenge-persons.ts'
++import { validateConjugationAnswer } from '../shared/utils/answer.ts'
++import { evaluateExerciseAnswer } from '../shared/utils/exercise-attempt.ts'
++
++const config = {
++  verbIds: [1], tenseIds: [1], questionCount: 10, exerciseKind: 'conjugation',
++  identificationSource: 'selected-verbs', pastSimplePronouns: 'all',
++  inclusivePronouns: false, includeOnPronoun: false,
++  learningSupportMode: 'normal', voiceMode: 'active',
++  includeComplements: false, complementPlacement: 'after', complementOptions: [],
++}
++
++test('je, tu et vous survivent au partage, à la relecture et au suivi élève', () => {
++  const selected = { ...config, personIds: [8, 4, 5, 5] }
++  const saved = parseDefiDefinition(toSharedChallengeRequest(selected, 'FLE'))
++  const loaded = parseDefiDefinition(JSON.parse(serializeDefi(saved)))
++  const snapshot = learnerChallengeSnapshot(loaded)
++  assert.deepEqual(saved.personIds, [4, 5, 8])
++  assert.deepEqual(snapshot.personIds, [4, 5, 8])
++  assert.deepEqual(parseQuestionnaireRequest(toQuestionnaireRequest(loaded)).personIds, [4, 5, 8])
++  assert.equal(config.personIds, undefined)
++})
++
++test('anciens défis et sélection complète gardent leur format sans personIds', () => {
++  const legacy = parseDefiDefinition([[1], [1], 10, ['ililsonly']])
++  assert.equal(legacy.pastSimplePronouns, 'third-person-only')
++  assert.equal('personIds' in legacy, false)
++  for (const personIds of [undefined, [4, 5, 6, 7, 8, 9]]) {
++    const selected = { ...config, personIds }
++    assert.equal('personIds' in toSharedChallengeRequest(selected), false)
++    assert.equal('personIds' in parseDefiDefinition(selected), false)
++    assert.equal('personIds' in parseQuestionnaireRequest(selected), false)
++  }
++})
++
++test('l’API refuse une sélection vide, les identifiants étrangers et les types ambigus', () => {
++  for (const personIds of [[], [1], [10], ['4'], [4.5], null, 'je', [4, 5, 6, 7, 8, 9, 4]]) {
++    assert.throws(() => parseDefiDefinition({ ...config, personIds }), PublicInputError)
++    assert.throws(() => parseQuestionnaireRequest({ ...config, personIds }), PublicInputError)
++  }
++})
++
++test('le filtre distingue les personnes et conserve les formes sans personne', () => {
++  assert.equal(includesChallengePerson([4, 5, 8], 6), false)
++  assert.equal(includesChallengePerson([4, 5, 8], 8), true)
++  assert.equal(includesChallengePerson([4], null), true)
++  assert.equal(includesChallengePerson(undefined, 9), true)
++})
++
++test('les apostrophes de claviers mobiles passent dans les deux parcours de correction', () => {
++  const question = { pronom: 'je', mode: 'indicatif', reponses: ["j'ai mangé"] }
++  for (const apostrophe of ["'", '’', '‘', 'ʼ', '＇', '`', '´']) {
++    const answer = `j${apostrophe}ai mangé`
++    assert.equal(validateConjugationAnswer(answer, question).isCorrect, true, answer)
++    assert.equal(evaluateExerciseAnswer(answer, question, false, true).result.isCorrect, true, answer)
++  }
++  assert.equal(validateConjugationAnswer('jai mangé', question).isCorrect, false)
++  assert.equal(validateConjugationAnswer('j’ai mangè', question).isCorrect, false)
++})
+diff --git a/tests/challenge-persons-database.test.mjs b/tests/challenge-persons-database.test.mjs
+new file mode 100644
+index 00000000..5d38fad6
+--- /dev/null
++++ b/tests/challenge-persons-database.test.mjs
+@@ -0,0 +1,94 @@
++import assert from 'node:assert/strict'
++import { after, before, describe, it } from 'node:test'
++import { useDatabase } from '../server/utils/database.ts'
++import { generateQuestionnaire } from '../server/services/questionnaire.ts'
++
++const configured = Boolean(process.env.DB_HOST && process.env.DB_NAME && process.env.DB_USER)
++let db
++let verbs
++let tenses
++let pronominalId
++const base = {
++  questionCount: 100, exerciseKind: 'conjugation', identificationSource: 'selected-verbs',
++  pastSimplePronouns: 'all', inclusivePronouns: true, includeOnPronoun: true,
++  learningSupportMode: 'normal', voiceMode: 'active', includeComplements: false,
++  complementPlacement: 'after', complementOptions: [],
++}
++
++before(async () => {
++  if (!configured) return
++  globalThis.useRuntimeConfig = () => ({ dbHost: process.env.DB_HOST, dbPort: Number(process.env.DB_PORT || 3306), dbName: process.env.DB_NAME, dbUser: process.env.DB_USER, dbPassword: process.env.DB_PASSWORD })
++  db = useDatabase()
++  ;[verbs] = await db.query("SELECT id, infinitif FROM verbes WHERE infinitif IN ('aimer', 'laver', 'pleuvoir') AND est_archive=0")
++  ;[tenses] = await db.query("SELECT t.id, t.name, m.name AS mode FROM temps t JOIN modes m ON m.id=t.mode_id WHERE m.name IN ('indicatif', 'impératif', 'infinitif')")
++  const [uses] = await db.query("SELECT id FROM emplois_pronominaux WHERE infinitif_pronominal='se laver' AND actif=1 AND verbe_id IS NOT NULL LIMIT 1")
++  pronominalId = uses[0] ? -Number(uses[0].id) : undefined
++})
++after(async () => {
++  await db?.end()
++  if (configured) delete globalThis.useRuntimeConfig
++})
++const verb = name => Number(verbs.find(item => item.infinitif === name)?.id)
++const tense = (name, mode = 'indicatif') => Number(tenses.find(item => item.name === name && item.mode === mode)?.id)
++
++describe('sélection des personnes avec les données réelles (lecture seule)', { skip: !configured }, () => {
++  for (const exerciseKind of ['conjugation', 'tense-identification', 'infinitive-identification']) {
++    it(`${exerciseKind} : je, tu et vous, y compris au futur proche`, async () => {
++      const tenseIds = [tense('présent'), tense('futur proche'), tense('passé simple')]
++      assert.ok(verb('aimer') && tenseIds.every(Boolean))
++      const questions = await generateQuestionnaire({ ...base, exerciseKind, verbIds: [verb('aimer')], tenseIds, personIds: [4, 5, 8] })
++      assert.ok(questions.length)
++      assert.ok(questions.every(question => [4, 5, 8].includes(question.personId)))
++      assert.deepEqual(new Set(questions.map(question => question.personId)), new Set([4, 5, 8]))
++      for (const id of tenseIds.slice(0, exerciseKind === 'infinitive-identification' ? 1 : 3)) {
++        assert.ok(questions.some(question => question.tenseId === id))
++      }
++    })
++  }
++  it('filtre aussi les verbes pronominaux', async () => {
++    assert.ok(pronominalId)
++    const questions = await generateQuestionnaire({ ...base, verbIds: [pronominalId], tenseIds: [tense('présent'), tense('futur proche')], personIds: [4, 5, 8] })
++    assert.ok(questions.length)
++    assert.ok(questions.every(question => [4, 5, 8].includes(question.personId)))
++    assert.equal(new Set(questions.map(question => question.tenseId)).size, 2)
++  })
++  it('l’impératif ne fournit que les personnes compatibles', async () => {
++    const tenseIds = [tense('présent', 'impératif')]
++    assert.ok(tenseIds[0])
++    const questions = await generateQuestionnaire({ ...base, verbIds: [verb('aimer')], tenseIds, personIds: [4, 5, 8] })
++    assert.deepEqual(new Set(questions.map(question => question.personId)), new Set([5, 8]))
++    assert.deepEqual(await generateQuestionnaire({ ...base, verbIds: [verb('aimer')], tenseIds, personIds: [4] }), [])
++  })
++  it('ne remplace pas une personne interdite pour un impersonnel', async () => {
++    assert.ok(verb('pleuvoir'))
++    const request = { ...base, verbIds: [verb('pleuvoir')], tenseIds: [tense('présent'), tense('futur proche')] }
++    assert.deepEqual(await generateQuestionnaire({ ...request, personIds: [4, 5, 8] }), [])
++    const questions = await generateQuestionnaire({ ...request, personIds: [6] })
++    assert.ok(questions.length)
++    assert.ok(questions.every(question => question.personId === 6 && question.pronom === 'il'))
++  })
++  it('conserve les formes sans personne', async () => {
++    const questions = await generateQuestionnaire({ ...base, verbIds: [verb('aimer')], tenseIds: [tense('présent', 'infinitif')], personIds: [4] })
++    assert.ok(questions.length)
++    assert.ok(questions.every(question => question.personId == null))
++  })
++  it('conserve la restriction historique par temps', async () => {
++    const questions = await generateQuestionnaire({ ...base, verbIds: [verb('aimer')], tenseIds: [tense('présent'), tense('passé simple'), tense('passé antérieur')], pastSimplePronouns: 'third-person-only' })
++    assert.ok(questions.some(question => question.temps === 'présent' && question.personId === 4))
++    assert.ok(questions.some(question => question.temps === 'passé simple'))
++    assert.ok(questions.filter(question => ['passé simple', 'passé antérieur'].includes(question.temps)).every(question => [6, 9].includes(question.personId)))
++  })
++  it('applique les personnes aux citations littéraires avant leur tirage', async () => {
++    const [targets] = await db.query("SELECT DISTINCT tense_id FROM literary_targets WHERE review_status='validated' AND person_id=4")
++    assert.ok(targets.length)
++    const questions = await generateQuestionnaire({ ...base, verbIds: [verb('aimer')], tenseIds: targets.map(row => Number(row.tense_id)), exerciseKind: 'tense-identification', identificationSource: 'literary-corpus', personIds: [4] })
++    assert.ok(questions.length)
++    assert.ok(questions.every(question => question.personId === 4 && question.literaryCitation))
++  })
++  it('conserve les personnes dans un mélange de types d’exercice', async () => {
++    const questions = await generateQuestionnaire({ ...base, verbIds: [verb('aimer')], tenseIds: [tense('présent')], questionCount: 6, exerciseKinds: ['conjugation', 'tense-identification'], personIds: [4, 5, 8] })
++    assert.equal(questions.length, 6)
++    assert.equal(new Set(questions.map(question => question.exerciseKind)).size, 2)
++    assert.ok(questions.every(question => [4, 5, 8].includes(question.personId)))
++  })
++})
+diff --git a/docs/person-selection-rollback.md b/docs/person-selection-rollback.md
+new file mode 100644
+index 00000000..9a2177db
+--- /dev/null
++++ b/docs/person-selection-rollback.md
+@@ -0,0 +1,57 @@
++# Choix des personnes et retour arrière
++
++Évolution du 16 novembre 2026. Révision de départ : `cbce9dec26d9ee550bdb5246388ef06fc6b6baae`.
++
++## Fonctionnement
++
++- Les six personnes sont sélectionnées par défaut. Une sélection comme « je, tu, vous » s’applique à tous les temps du défi.
++- La dernière personne cochée ne peut pas être décochée. « Toutes les personnes » rétablit la sélection complète.
++- Les troisièmes personnes regroupent il/elle et ils/elles ; les options on et iel/iels continuent de déterminer les variantes proposées.
++- Les personnes indisponibles ne sont pas remplacées : l’impératif ne propose que tu/nous/vous et un impersonnel conserve il. Les formes sans personne restent disponibles.
++- La sélection est conservée dans les défis partagés et les historiques élèves. La sélection complète est omise du JSON, comme avant.
++- Les anciens défis conservent leur restriction historique au passé simple et au passé antérieur. Une indication et un bouton permettent de la retirer explicitement. Modifier les personnes adopte le nouveau réglage général.
++- Aucune migration de base de données, aucune modification des défis existants, aucun déploiement dans le cadre de cette intervention.
++- Le correcteur accepte déjà les variantes d’apostrophes ; son fonctionnement est conservé et des tests couvrent les claviers mobiles.
++
++## Retour à l’ancienne interface, compatible avec les défis enregistrés
++
++Dans `shared/config/feature-flags.ts`, passer :
++
++```ts
++export const PERSON_SELECTION_ENABLED = false
++```
++
++Les nouveaux défis retrouvent la case « Uniquement il / ils » et ne présentent plus le sélecteur de personnes. Les défis enregistrés avec une sélection spécifique restent lisibles et leur sélection reste visible et modifiable. Le filtrage enregistré est conservé.
++
++Remettre `true` réactive le sélecteur. Il n’y a aucune restauration de données à effectuer.
++
++Pour publier cette bascule, utiliser les fichiers versionnés et le circuit habituel : `git push`, déploiement et redémarrage normaux dans Plesk. Laisser les actions supplémentaires de Plesk vides.
++
++## Annulation complète du code local avant publication
++
++Le fichier `docs/rollback-person-selection.patch` contient uniquement les changements de cette intervention, nouveaux fichiers compris. Depuis la racine du projet :
++
++```sh
++git apply --reverse --check docs/rollback-person-selection.patch
++git apply --reverse docs/rollback-person-selection.patch
++```
++
++La première commande vérifie la compatibilité sans modifier les fichiers. Si elle échoue après d’autres modifications, ne pas forcer : utiliser la bascule ou adapter l’annulation aux changements intervenus. Après annulation, le fichier patch reste disponible pour réappliquer les changements avec `git apply docs/rollback-person-selection.patch`.
++
++Si des défis avec une sélection spécifique ont déjà été enregistrés, privilégier la bascule : le code antérieur à cette évolution ne connaît pas le nouveau champ JSON `personIds`. Un retour intégral à l’ancien code demanderait alors une adaptation de lecture pour conserver ces défis, sans les réécrire.
++
++## Vérifications
++
++- 95 tests ciblés de validation, partage, suivi, correction et diversité réussis.
++- 10 tests avec la base MySQL locale, uniquement en lecture : conjugaison, identification, futur proche, verbes pronominaux, impératif, impersonnels, infinitif, anciens défis, citations et exercices mixtes.
++- Build de production et vérification TypeScript.
++- Les composants Vue réels ont été montés dans Chrome avec leur CSS : sélection, clavier, dernière case, réinitialisation, ancienne restriction, largeurs 1440/320/375 px, thème sombre et deux états de l’interrupteur. Ces contrôles de composants ne constituent pas un parcours complet du site déployé.
++
++Commandes reproductibles pour les tests ciblés :
++
++```sh
++node --import tsx --test tests/challenge-persons.test.mjs tests/challenge-validation.test.mjs tests/answer.test.mjs tests/question-diversity.test.mjs tests/learner-identification-history.test.mjs tests/mixed-exercise.test.mjs tests/infinitive-identification.test.mjs
++node --env-file-if-exists=.env --import tsx --test tests/challenge-persons-database.test.mjs
++npm run typecheck
++npm run build
++```

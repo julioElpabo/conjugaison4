@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { exerciseKindFor, exerciseKindsFor, exerciseKindLabel } from '~~/shared/utils/exercise-kinds'
+import { CHALLENGE_PERSON_CHOICES } from '~~/shared/utils/challenge-persons'
 import type { AtomicExerciseKind } from '~~/shared/types/conjugation'
 import type { Component, ShallowRef } from 'vue'
 const { ui, localePath } = useLanguagePreferences()
@@ -208,6 +209,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   challenge.value.exerciseKinds = preset.exerciseKinds ? [...preset.exerciseKinds] : undefined
   challenge.value.exerciseKind = preset.exerciseKind
   challenge.value.identificationSource = preset.identificationSource
+  challenge.value.personIds = preset.personIds ? [...preset.personIds] : undefined
   challenge.value.pastSimplePronouns = preset.pastSimplePronouns
   challenge.value.inclusivePronouns = preset.inclusivePronouns
   challenge.value.includeOnPronoun = preset.includeOnPronoun
@@ -243,6 +245,7 @@ function beginExerciseTracking(presentation: 'classic' | 'chat') {
       exerciseKind: challenge.value.exerciseKind,
       ...(challenge.value.exerciseKinds ? { exerciseKinds: [...challenge.value.exerciseKinds] } : {}),
       identificationSource: challenge.value.identificationSource,
+      ...(challenge.value.personIds ? { personIds: [...challenge.value.personIds] } : {}),
       pastSimplePronouns: challenge.value.pastSimplePronouns,
       inclusivePronouns: challenge.value.inclusivePronouns,
       includeOnPronoun: challenge.value.includeOnPronoun,
@@ -477,6 +480,8 @@ function onToggleTense(id: number) {
             :identification-source="challenge.identificationSource"
             :inclusive-pronouns="challenge.inclusivePronouns"
             :include-on-pronoun="challenge.includeOnPronoun"
+            :person-ids="challenge.personIds"
+            :past-simple-pronouns="challenge.pastSimplePronouns"
             :learning-support-mode="challenge.learningSupportMode"
             :voice-mode="challenge.voiceMode"
             :complement-options="challenge.complementOptions"
@@ -486,6 +491,8 @@ function onToggleTense(id: number) {
             @update-identification-source="challenge.identificationSource = $event; markAsCustom()"
             @update-inclusive-pronouns="challenge.inclusivePronouns = $event; markAsCustom()"
             @update-include-on-pronoun="challenge.includeOnPronoun = $event; markAsCustom()"
+            @update-person-ids="challenge.personIds = $event; challenge.pastSimplePronouns = 'all'; markAsCustom()"
+            @clear-legacy-person-restriction="challenge.pastSimplePronouns = 'all'; markAsCustom()"
             @update-learning-support-mode="challenge.learningSupportMode = $event; markAsCustom()"
             @update-voice-mode="challenge.voiceMode = $event; markAsCustom()"
             @update-complement-options="updateComplementOptions"
@@ -493,6 +500,7 @@ function onToggleTense(id: number) {
         </div>
 
         <div class="challenge-summary" :class="{ 'challenge-summary--incomplete': !isReady }" aria-live="polite">
+          <p v-if="challenge.personIds">{{ ui('Personnes à travailler') }} : {{ CHALLENGE_PERSON_CHOICES.filter(person => challenge.personIds?.includes(person.id)).map(person => person.label).join(' · ') }}</p>
           <div>
             <p class="builder-card__eyebrow">{{ ui('Résumé de ton défi') }}</p>
             <strong v-if="isReady">

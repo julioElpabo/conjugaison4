@@ -59,6 +59,7 @@ export interface SharedChallenge {
   identificationSource?: IdentificationSource
   literaryRegister?: LiteraryRegister
   pastSimplePronouns?: PastSimplePronouns
+  personIds?: number[]
   inclusivePronouns?: boolean
   includeOnPronoun?: boolean
   learningSupportMode?: LearningSupportMode
@@ -124,6 +125,7 @@ export function useChallengeBuilder() {
     challenge.value.verbIds.length > 0
     && challenge.value.tenseIds.length > 0
     && challenge.value.questionCount > 0
+    && (challenge.value.personIds === undefined || challenge.value.personIds.length > 0)
     && exerciseKindsFor(challenge.value).length > 0
   ))
 
@@ -240,6 +242,7 @@ export function useChallengeBuilder() {
       identificationSource: shared.identificationSource ?? defaults.identificationSource,
       literaryRegister: shared.literaryRegister ?? defaults.literaryRegister,
       pastSimplePronouns: shared.pastSimplePronouns ?? defaults.pastSimplePronouns,
+      personIds: shared.personIds ? [...shared.personIds] : undefined,
       inclusivePronouns: shared.inclusivePronouns ?? defaults.inclusivePronouns,
       includeOnPronoun: shared.includeOnPronoun ?? defaults.includeOnPronoun,
       learningSupportMode: shared.learningSupportMode ?? defaults.learningSupportMode,

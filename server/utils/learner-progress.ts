@@ -1,5 +1,6 @@
 import { exerciseKindFor, SELECTABLE_EXERCISE_KINDS } from '../../shared/utils/exercise-kinds'
 import { createHash } from 'node:crypto'
+import { parseChallengePersonIds, PublicInputError } from '../services/public-api-validation'
 import type { ExerciseKind, ExerciseQuestion, LearnerChallengeSnapshot } from '~~/shared/types/conjugation'
 
 const SAFE_IDENTIFIER = /^[A-Za-z0-9_-]{8,100}$/u
@@ -40,6 +41,13 @@ export function learnerChallengeSnapshot(value: unknown): LearnerChallengeSnapsh
   const exerciseKinds = Array.isArray(suppliedKinds)
     ? SELECTABLE_EXERCISE_KINDS.filter(kind => suppliedKinds.includes(kind)) : undefined
   if (exerciseKinds?.length) exerciseKind = exerciseKindFor(exerciseKinds)
+  let personIds: number[] | undefined
+  try {
+    personIds = parseChallengePersonIds(candidate.personIds)
+  } catch (error) {
+    if (error instanceof PublicInputError) throw createError({ statusCode: 400, statusMessage: error.message })
+    throw error
+  }
   const questionCount = Math.min(200, Math.max(1, Number(candidate.questionCount) || 1))
   const description = typeof candidate.description === 'string'
     ? candidate.description.trim().slice(0, 1000)
@@ -52,6 +60,7 @@ export function learnerChallengeSnapshot(value: unknown): LearnerChallengeSnapsh
     ...(trainingReportTitle ? { trainingReportTitle } : {}),
     verbIds: integerList(candidate.verbIds, 1000, true),
     tenseIds: integerList(candidate.tenseIds),
+    ...(personIds ? { personIds } : {}),
     questionCount,
     exerciseKind,
     ...(exerciseKinds?.length ? { exerciseKinds } : {}),

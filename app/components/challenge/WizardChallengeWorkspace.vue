@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { exerciseKindFor, exerciseKindsFor, exerciseKindLabel } from '~~/shared/utils/exercise-kinds'
+import { CHALLENGE_PERSON_CHOICES } from '~~/shared/utils/challenge-persons'
 import type { AtomicExerciseKind } from '~~/shared/types/conjugation'
 import type { Component, ShallowRef } from 'vue'
 const { ui, localePath, interfaceLocale, setInterfaceLocale } = useLanguagePreferences()
@@ -753,6 +754,7 @@ function restartChallenge() {
   clearTenses()
   if (falcMode.value) applyFalcTenseDefaults()
   challenge.value.questionCount = 10
+  challenge.value.personIds = undefined
   challenge.value.exerciseKinds = undefined
   challenge.value.exerciseKind = 'conjugation'
   challenge.value.pastSimplePronouns = 'all'
@@ -922,6 +924,7 @@ function prepareTourChallenge() {
     exerciseKind: 'conjugation',
     exerciseKinds: undefined,
     pastSimplePronouns: 'all',
+    personIds: undefined,
     inclusivePronouns: false,
     includeOnPronoun: false,
     voiceMode: 'active',
@@ -1429,6 +1432,7 @@ function selectPreset(preset: ChallengePreset, randomCount?: number) {
   challenge.value.exerciseKinds = preset.exerciseKinds ? [...preset.exerciseKinds] : undefined
   challenge.value.exerciseKind = preset.exerciseKind
   challenge.value.identificationSource = preset.identificationSource
+  challenge.value.personIds = preset.personIds ? [...preset.personIds] : undefined
   challenge.value.pastSimplePronouns = preset.pastSimplePronouns
   challenge.value.inclusivePronouns = preset.inclusivePronouns
   challenge.value.includeOnPronoun = preset.includeOnPronoun
@@ -1684,6 +1688,8 @@ watch(
   [
     () => challenge.value.verbIds.join(','),
     () => challenge.value.tenseIds.join(','),
+    () => challenge.value.personIds?.join(','),
+    () => challenge.value.pastSimplePronouns,
     () => challenge.value.includeComplements,
     () => challenge.value.complementPlacement,
     () => challenge.value.complementOptions.join(','),
@@ -1737,6 +1743,7 @@ function beginExerciseTracking(presentation: 'classic' | 'chat') {
       exerciseKind: challenge.value.exerciseKind,
       ...(challenge.value.exerciseKinds ? { exerciseKinds: [...challenge.value.exerciseKinds] } : {}),
       identificationSource: challenge.value.identificationSource,
+      ...(challenge.value.personIds ? { personIds: [...challenge.value.personIds] } : {}),
       pastSimplePronouns: challenge.value.pastSimplePronouns,
       inclusivePronouns: challenge.value.inclusivePronouns,
       includeOnPronoun: challenge.value.includeOnPronoun,
@@ -2237,6 +2244,8 @@ async function createSharedChallenge(title: string, description: string) {
                 :identification-source="challenge.identificationSource"
                 :inclusive-pronouns="challenge.inclusivePronouns"
                 :include-on-pronoun="challenge.includeOnPronoun"
+                :person-ids="challenge.personIds"
+                :past-simple-pronouns="challenge.pastSimplePronouns"
                 :learning-support-mode="challenge.learningSupportMode"
                 :voice-mode="challenge.voiceMode"
                 :complement-options="challenge.complementOptions"
@@ -2260,6 +2269,8 @@ async function createSharedChallenge(title: string, description: string) {
                 @update-identification-source="challenge.identificationSource = $event; markAsCustom()"
                 @update-inclusive-pronouns="challenge.inclusivePronouns = $event; markAsCustom()"
                 @update-include-on-pronoun="challenge.includeOnPronoun = $event; markAsCustom()"
+                @update-person-ids="challenge.personIds = $event; challenge.pastSimplePronouns = 'all'; markAsCustom()"
+                @clear-legacy-person-restriction="challenge.pastSimplePronouns = 'all'; markAsCustom()"
                 @update-learning-support-mode="challenge.learningSupportMode = $event; markAsCustom()"
                 @update-voice-mode="challenge.voiceMode = $event; markAsCustom()"
                 @update-complement-options="updateComplementOptions"
@@ -2296,6 +2307,7 @@ async function createSharedChallenge(title: string, description: string) {
                   <span>{{ launchEditHint.after }}</span>
                 </p>
               </section>
+              <p v-if="challenge.personIds" class="launch-summary__description">{{ ui('Personnes à travailler') }} : {{ CHALLENGE_PERSON_CHOICES.filter(person => challenge.personIds?.includes(person.id)).map(person => person.label).join(' · ') }}</p>
               <ChallengeActions
                 data-tour="actions"
                 :ready="isReady"

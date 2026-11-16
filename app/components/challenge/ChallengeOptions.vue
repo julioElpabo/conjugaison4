@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { faVolume } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { PERSON_SELECTION_ENABLED } from '~~/shared/config/feature-flags'
+import { CHALLENGE_PERSON_IDS, CHALLENGE_PERSON_CHOICES, challengePersonSelection } from '~~/shared/utils/challenge-persons'
 const { ui } = useLanguagePreferences()
 import { exerciseKindsFor, SELECTABLE_EXERCISE_KINDS } from '~~/shared/utils/exercise-kinds'
 import type { AtomicExerciseKind, ExerciseQuestion } from '~~/shared/types/conjugation'
@@ -14,6 +16,8 @@ const props = defineProps<{
   identificationSource: IdentificationSource
   inclusivePronouns: boolean
   includeOnPronoun: boolean
+  personIds?: number[]
+  pastSimplePronouns?: 'all' | 'third-person-only'
   learningSupportMode: LearningSupportMode
   voiceMode: VoiceMode
   complementOptions: ComplementOption[]
@@ -40,6 +44,8 @@ const emit = defineEmits<{
   updateIdentificationSource: [value: IdentificationSource]
   updateInclusivePronouns: [value: boolean]
   updateIncludeOnPronoun: [value: boolean]
+  updatePersonIds: [value: number[] | undefined]
+  clearLegacyPersonRestriction: []
   updateLearningSupportMode: [value: LearningSupportMode]
   updateVoiceMode: [value: VoiceMode]
   updateComplementOptions: [value: ComplementOption[]]
@@ -47,6 +53,18 @@ const emit = defineEmits<{
 }>()
 
 const selectedExerciseKinds = computed(() => exerciseKindsFor(props))
+const selectedPersons = computed(() => props.personIds ?? [...CHALLENGE_PERSON_IDS])
+function togglePerson(id: number) {
+  const selected = selectedPersons.value
+  if (selected.includes(id) && selected.length === 1) return
+  emit('updatePersonIds', challengePersonSelection(selected.includes(id)
+    ? selected.filter(person => person !== id) : [...selected, id]))
+}
+function personLabel(id: number, label: string) {
+  if (id === 6) return ['il', 'elle', ...(props.inclusivePronouns ? ['iel'] : []), ...(props.includeOnPronoun ? ['on'] : [])].join(' / ')
+  if (id === 9) return ['ils', 'elles', ...(props.inclusivePronouns ? ['iels'] : [])].join(' / ')
+  return label
+}
 const hasConjugation = computed(() => selectedExerciseKinds.value.includes('conjugation'))
 const hasIdentification = computed(() => selectedExerciseKinds.value.some(kind => kind !== 'conjugation'))
 const exerciseChoices = [
@@ -298,6 +316,29 @@ watch(passiveAvailable, (available) => {
               @input="onQuestionCountChange"
             >
           </label>
+        </div>
+
+        <fieldset v-if="PERSON_SELECTION_ENABLED || personIds" class="option-fieldset option-group-card option-group-card--persons">
+          <legend>{{ ui('Personnes à travailler') }}</legend>
+          <p class="field-hint">{{ ui('Ne garde que les personnes que tu veux travailler.') }}</p>
+          <div class="person-choices">
+            <label v-for="person in CHALLENGE_PERSON_CHOICES" :key="person.id" class="person-choice">
+              <input
+                type="checkbox"
+                :value="person.id"
+                :checked="selectedPersons.includes(person.id)"
+                :disabled="selectedPersons.length === 1 && selectedPersons.includes(person.id)"
+                @change="togglePerson(person.id)"
+              >
+              <span>{{ personLabel(person.id, person.label) }}</span>
+            </label>
+          </div>
+          <button type="button" class="text-button" :disabled="selectedPersons.length === 6" @click="emit('updatePersonIds', undefined)">{{ ui('Toutes les personnes') }}</button>
+          <small class="field-hint">{{ ui('Garde au moins une personne. À l’impératif : tu, nous et vous. Les formes sans personne restent disponibles.') }}</small>
+        </fieldset>
+        <div v-if="PERSON_SELECTION_ENABLED && pastSimplePronouns === 'third-person-only'" class="option-group-card option-group-card--legacy-persons">
+          <p>{{ ui('Ce défi conserve sa restriction aux troisièmes personnes au passé simple et au passé antérieur.') }}</p>
+          <button type="button" class="text-button" @click="emit('clearLegacyPersonRestriction')">{{ ui('Utiliser les personnes choisies à tous les temps') }}</button>
         </div>
 
         <fieldset v-if="!falcMode" class="option-fieldset option-group-card option-group-card--pronouns">
@@ -638,10 +679,25 @@ watch(passiveAvailable, (available) => {
 .options-layout--columns .option-group-card--voice { grid-column: 1; }
 .options-layout--columns .option-group-card--learning-support { grid-column: 1; }
 .options-layout--columns .option-group-card--pronouns,
+.options-layout--columns .option-group-card--persons,
+.options-layout--columns .option-group-card--legacy-persons,
 .options-layout--columns > .conjugation-example { grid-column: 2; }
 .options-layout--columns .option-group-card--exercise,
 .options-layout--columns .complement-options { grid-column: 3; }
 .option-group-card { min-width: 0; padding: 15px; border: 1px solid #c8d8d3; border-radius: 13px; background: #fbfdfc; box-shadow: 0 3px 10px rgb(46 67 62 / 5%); }
+.person-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, auto); grid-auto-flow: column; gap: 6px; margin: 12px 0; }
+.person-choice { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px; border: 1px solid #c8d8d3; border-radius: 8px; cursor: pointer; overflow-wrap: anywhere; }
+.person-choice:has(input:checked) { background: var(--surface-soft, #eaf3ef); border-color: var(--brand-dark); }
+.person-choice:has(input:focus-visible) { outline: 2px solid var(--brand-dark); outline-offset: 2px; }
+.person-choice input { flex-shrink: 0; accent-color: var(--brand-dark); }
+.person-choice:has(input:disabled) { cursor: default; }
+:global(:root[data-theme='dark'] .person-choice:has(input:checked)) { background: #203b34; border-color: #8dcbb6; color: #f0f7f4; }
+:global(:root[data-theme='dark'] .option-group-card--persons .field-hint),
+:global(:root[data-theme='dark'] .person-choice),
+:global(:root[data-theme='dark'] .option-group-card--persons legend),
+:global(:root[data-theme='dark'] .option-group-card--persons .text-button),
+:global(:root[data-theme='dark'] .option-group-card--legacy-persons .text-button) { color: #c0ddd4; }
+:global(:root[data-theme='dark'] .person-choice:has(input:focus-visible)) { outline-color: #8dcbb6; }
 .option-group-card > legend { padding: 0 5px; color: var(--brand-dark); font-size: .875rem; font-weight: 800; letter-spacing: .035em; text-transform: uppercase; }
 .option-group-card__icon-legend { display: inline-flex; align-items: center; gap: 7px; }
 .option-group-card .check-row { margin: 0; padding: 9px 0; }

@@ -100,6 +100,8 @@ export interface ChallengeConfig {
   identificationSource: IdentificationSource
   literaryRegister?: LiteraryRegister
   pastSimplePronouns: PastSimplePronouns
+  /** Absente : toutes les personnes. Identifiants du catalogue, de 4 à 9. */
+  personIds?: PersonId[]
   inclusivePronouns: boolean
   includeOnPronoun: boolean
   learningSupportMode: LearningSupportMode
@@ -275,6 +277,7 @@ export interface LearnerChallengeSnapshot {
   exerciseKinds?: AtomicExerciseKind[]
   identificationSource?: IdentificationSource
   pastSimplePronouns?: PastSimplePronouns
+  personIds?: PersonId[]
   inclusivePronouns?: boolean
   includeOnPronoun?: boolean
   learningSupportMode?: LearningSupportMode

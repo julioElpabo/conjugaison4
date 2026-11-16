@@ -4,3 +4,6 @@
  * tant que cette constante vaut false.
  */
 export const AUDIO_READING_ENABLED = false
+
+/** Retour à l’ancienne interface : false. Les défis enregistrés restent lisibles. */
+export const PERSON_SELECTION_ENABLED = true

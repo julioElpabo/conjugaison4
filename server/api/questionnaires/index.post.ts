@@ -22,7 +22,9 @@ export default defineEventHandler(async (event) => {
     if (questions.length === 0) {
       throw createError({
         statusCode: 422,
-        statusMessage: 'Aucune question disponible pour cette sélection'
+        statusMessage: request.personIds
+          ? 'Aucune forme disponible pour ces verbes, ces temps et ces personnes. Choisis d’autres personnes ou d’autres temps.'
+          : 'Aucune question disponible pour cette sélection'
       })
     }
     return request.exerciseKind === 'conjugation' && request.learningSupportMode === 'cif-fle'

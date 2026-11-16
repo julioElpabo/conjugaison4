@@ -12,6 +12,7 @@ export interface QuestionnaireRequest {
   identificationSource: ChallengeConfig['identificationSource']
   literaryRegister: NonNullable<ChallengeConfig['literaryRegister']>
   pastSimplePronouns: ChallengeConfig['pastSimplePronouns']
+  personIds?: number[]
   inclusivePronouns: boolean
   includeOnPronoun: boolean
   learningSupportMode: ChallengeConfig['learningSupportMode']
@@ -22,6 +23,7 @@ export interface QuestionnaireRequest {
 }
 
 export function toQuestionnaireRequest(challenge: ChallengeConfig): QuestionnaireRequest {
+  const personIds = challenge.personIds?.length === 6 ? undefined : challenge.personIds?.slice()
   return {
     verbIds: [...challenge.verbIds],
     tenseIds: [...challenge.tenseIds],
@@ -31,6 +33,7 @@ export function toQuestionnaireRequest(challenge: ChallengeConfig): Questionnair
     identificationSource: challenge.identificationSource ?? 'selected-verbs',
     literaryRegister: challenge.literaryRegister ?? 'all',
     pastSimplePronouns: challenge.pastSimplePronouns,
+    ...(personIds ? { personIds } : {}),
     inclusivePronouns: challenge.inclusivePronouns,
     includeOnPronoun: challenge.includeOnPronoun,
     learningSupportMode: challenge.learningSupportMode,
@@ -50,6 +53,7 @@ export function normalizeChallengeCode(value: string) {
 }
 
 export function toSharedChallengeRequest(challenge: ChallengeConfig, title?: string, description?: string) {
+  const personIds = challenge.personIds?.length === 6 ? undefined : challenge.personIds?.slice()
   return {
     version: 1 as const,
     ...(title === undefined ? {} : { title: title.trim() }),
@@ -62,6 +66,7 @@ export function toSharedChallengeRequest(challenge: ChallengeConfig, title?: str
     identificationSource: challenge.identificationSource ?? 'selected-verbs',
     literaryRegister: challenge.literaryRegister ?? 'all',
     pastSimplePronouns: challenge.pastSimplePronouns,
+    ...(personIds ? { personIds } : {}),
     inclusivePronouns: challenge.inclusivePronouns,
     includeOnPronoun: challenge.includeOnPronoun,
     learningSupportMode: challenge.learningSupportMode,

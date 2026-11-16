@@ -8,6 +8,7 @@ import type {
 } from '~/composables/useChallengeBuilder'
 import { conjugationTenseOrder } from '~~/shared/data/conjugation-display'
 import { isNearFutureTense } from '~~/shared/utils/near-future'
+import { PERSON_SELECTION_ENABLED } from '~~/shared/config/feature-flags'
 import {
   classifyTenses,
   classifiedTenseToggleIds,
@@ -174,7 +175,7 @@ watch(exampleRequestKey, () => void loadExamples())
 
               <Transition name="past-simple-option">
                 <div
-                  v-if="isPastSimple(tense) && isSelected(tense)"
+                  v-if="!PERSON_SELECTION_ENABLED && isPastSimple(tense) && isSelected(tense)"
                   class="past-simple-option"
                 >
                   <label class="past-simple-option__choice">

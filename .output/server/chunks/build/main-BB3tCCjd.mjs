@@ -1,5 +1,8 @@
 import { u as useLearnerAuth } from './useLearnerAuth-tqISusbB.mjs';
 
+const AUDIO_READING_ENABLED = false;
+const PERSON_SELECTION_ENABLED = true;
+
 let recordingQueue = Promise.resolve(true);
 function progressIdentifier(prefix) {
   const uuid = globalThis.crypto?.randomUUID?.();
@@ -112,5 +115,5 @@ function useLearnerProgress() {
   };
 }
 
-export { createLearnerTrackingContext as c, useLearnerProgress as u };
+export { AUDIO_READING_ENABLED as A, PERSON_SELECTION_ENABLED as P, createLearnerTrackingContext as c, useLearnerProgress as u };
 //# sourceMappingURL=main-BB3tCCjd.mjs.map

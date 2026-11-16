@@ -1,4 +1,4 @@
-import { b6 as exerciseKindsFor, u as useDatabase, aX as decodePronominalSelectionId, aY as hasVariableAuxiliary, b7 as indirectRelative, b8 as resolveVariableAuxiliary, b1 as formatConjugationQuestion, a_ as formatAnswer } from '../nitro/nitro.mjs';
+import { b7 as exerciseKindsFor, u as useDatabase, aY as decodePronominalSelectionId, b8 as includesChallengePerson, aZ as hasVariableAuxiliary, b9 as indirectRelative, ba as resolveVariableAuxiliary, b2 as formatConjugationQuestion, a$ as formatAnswer } from '../nitro/nitro.mjs';
 import { i as identifyInfinitives, f as formatNonFiniteQuestion } from './infinitive-identification.mjs';
 import { g as generatePronominalRow } from './pronominal-formatter.mjs';
 import { M as MODE_IDENTIFICATION_INSTRUCTION, T as TENSE_IDENTIFICATION_INSTRUCTION } from './exercise-instructions.mjs';
@@ -463,7 +463,7 @@ function identificationQuestion(row, citation, modeOnly = false, confusions = []
 function literaryCitationKey(verbId, tenseId, personId) {
   return `${verbId}:${tenseId}:${personId}`;
 }
-async function validatedLiteraryCitations(verbIds, tenseIds, literaryRegister = "all") {
+async function validatedLiteraryCitations(verbIds, tenseIds, literaryRegister = "all", personIds) {
   const citations = /* @__PURE__ */ new Map();
   if (!tenseIds.length || verbIds !== null) return citations;
   const database = useDatabase();
@@ -472,7 +472,7 @@ async function validatedLiteraryCitations(verbIds, tenseIds, literaryRegister = 
     const coverageRegisterClause = register ? `AND coveredSource.language_register='${register}'` : "";
     const randomRegisterClause = register ? `AND source.language_register='${register}'` : "";
     const verbClause = verbIds === null ? "" : `AND target.verb_id IN (${placeholders(verbIds)})`;
-    const parameters = verbIds === null ? [...tenseIds] : [...verbIds, ...tenseIds];
+    const parameters = [...verbIds || [], ...tenseIds, ...personIds || []];
     const [coverageRows, randomRows] = await Promise.all([
       database.execute(`
       SELECT target.id,target.verb_id,target.tense_id,target.person_id,
@@ -490,6 +490,7 @@ async function validatedLiteraryCitations(verbIds, tenseIds, literaryRegister = 
           ${verbIds === null ? "" : `AND covered.verb_id IN (${placeholders(verbIds)})`}
           AND covered.tense_id IN (${placeholders(tenseIds)})
           ${coverageRegisterClause}
+          ${personIds ? `AND covered.person_id IN (${placeholders(personIds)})` : ""}
         GROUP BY covered.tense_id
       ) coverage ON coverage.id=target.id
       INNER JOIN literary_sentences sentence ON sentence.id=target.sentence_id
@@ -516,6 +517,7 @@ async function validatedLiteraryCitations(verbIds, tenseIds, literaryRegister = 
         ${verbClause}
         AND target.tense_id IN (${placeholders(tenseIds)})
         ${randomRegisterClause}
+        ${personIds ? `AND target.person_id IN (${placeholders(personIds)})` : ""}
       ORDER BY RAND()
       LIMIT 500
     `, parameters)
@@ -687,12 +689,13 @@ async function generateQuestionnaire(request) {
     const citations = await validatedLiteraryCitations(
       null,
       selectedTenses.map((row) => Number(row.id)),
-      (_b = request.literaryRegister) != null ? _b : "all"
+      (_b = request.literaryRegister) != null ? _b : "all",
+      request.personIds
     );
-    let literaryQuestions = [...citations.values()].flat().map((citation) => literaryIdentificationQuestion(citation, request.exerciseKind === "mode-identification"));
+    let literaryQuestions = [...citations.values()].flat().filter((citation) => includesChallengePerson(request.personIds, Number(citation.person_id))).map((citation) => literaryIdentificationQuestion(citation, request.exerciseKind === "mode-identification"));
     if (isInfinitive) literaryQuestions = await identifyInfinitives(literaryQuestions);
     if (!literaryQuestions.length) {
-      throw new QuestionnaireSelectionError("Aucune citation valid\xE9e ne correspond aux temps s\xE9lectionn\xE9s");
+      throw new QuestionnaireSelectionError("Aucune citation valid\xE9e ne correspond aux temps et aux personnes s\xE9lectionn\xE9s");
     }
     return request.exerciseKind === "mode-identification" ? balancedModeIdentificationQuestions(literaryQuestions, request.questionCount) : balancedIdentificationQuestions(literaryQuestions, request.questionCount);
   }
@@ -701,6 +704,7 @@ async function generateQuestionnaire(request) {
     const storedFiniteTenses = finiteTenses.filter((tense) => !isNearFutureTense(tense));
     const finiteIds = storedFiniteTenses.map((row) => Number(row.id));
     const pastSimpleClause = request.pastSimplePronouns === "third-person-only" ? "AND (t.name NOT IN ('pass\xE9 simple', 'pass\xE9 ant\xE9rieur') OR p.pronom IN ('il', 'ils'))" : "";
+    const personClause = request.personIds ? `AND vc.personne_id IN (${placeholders(request.personIds)})` : "";
     const rows = [];
     const literaryCitations = usesLiteraryCitations ? await validatedLiteraryCitations(null, finiteIds) : /* @__PURE__ */ new Map();
     const selectedVerbCount = verbIds.length + pronominalUseIds.length;
@@ -754,9 +758,10 @@ async function generateQuestionnaire(request) {
         AND (COALESCE(v.est_impersonnel, 0) = 0 OR p.pronom = 'il')
         ${passivePersonClause}
         ${pastSimpleClause}
+        ${personClause}
       ORDER BY ${literaryOrderClause} RAND()
       LIMIT ${limit}
-      `, [...questionVerbIds, ...finiteIds, ...literaryCoordinates.flat()]);
+      `, [...questionVerbIds, ...finiteIds, ...literaryCoordinates.flat(), ...request.personIds || []]);
       rows.push(...storedRows);
     }
     if (!usesLiteraryCitations && pronominalUseIds.length > 0 && finiteIds.length > 0) {
@@ -788,9 +793,10 @@ async function generateQuestionnaire(request) {
             AND vc.temp_id IN (${placeholders(finiteIds)})
             AND vc.conjugaison1 <> ''
             ${pastSimpleClause}
+            ${personClause}
           ORDER BY RAND()
           LIMIT ${limit}
-        `, [...pronominalUseIds, ...finiteIds]),
+        `, [...pronominalUseIds, ...finiteIds, ...request.personIds || []]),
         database.execute(`
           SELECT vc.personne_id, m.name AS mode_name, t.name AS temps_name, vc.conjugaison1
           FROM verbesconjugues vc
@@ -840,7 +846,7 @@ async function generateQuestionnaire(request) {
       const perTenseLimit = Math.max(6, Math.ceil(limit / Math.max(1, finiteTenses.length)));
       for (const tense of nearFutureTenses) {
         rows.push(...limitedNearFutureRows(
-          nearFutureRows(tense, nearFutureVerbs[0], nearFutureUses[0], allerRows[0]),
+          nearFutureRows(tense, nearFutureVerbs[0], nearFutureUses[0], allerRows[0]).filter((row) => includesChallengePerson(request.personIds, Number(row.personne_id))),
           perTenseLimit,
           wantsActiveVoice,
           wantsPassiveVoice
@@ -902,7 +908,7 @@ async function generateQuestionnaire(request) {
         complementsByVerb.set(Number(complement.verbe_id), candidates);
       }
     }
-    const personalRows = rows.filter((row) => !isImpersonalVerb(row.infinitif, row.est_impersonnel) || row.pronom === "il");
+    const personalRows = rows.filter((row) => includesChallengePerson(request.personIds, Number(row.personne_id))).filter((row) => !isImpersonalVerb(row.infinitif, row.est_impersonnel) || row.pronom === "il");
     const eligibleRows = usesLiteraryCitations ? personalRows.filter((row) => literaryCitations.has(literaryCitationKey(
       Number(row.verbe_id),
       Number(row.temp_id),
@@ -1050,7 +1056,7 @@ async function generateQuestionnaire(request) {
   }
   if (request.exerciseKind === "conjugation" && wantsPassiveVoice && !questions.some((question) => question.voice === "passive")) {
     throw new QuestionnaireSelectionError(
-      "Aucune forme passive n\u2019est disponible pour les verbes et les temps s\xE9lectionn\xE9s"
+      request.personIds ? "Aucune forme passive n\u2019est disponible pour les verbes, les temps et les personnes s\xE9lectionn\xE9s" : "Aucune forme passive n\u2019est disponible pour les verbes et les temps s\xE9lectionn\xE9s"
     );
   }
   if (request.exerciseKind === "mode-identification") {

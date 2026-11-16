@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { computed, hasInjectionContext, inject, toRef, isRef, watch, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, defineAsyncComponent, h, unref, shallowRef, provide, shallowReactive, Suspense, Fragment, useSSRContext, createApp, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, reactive, effectScope, nextTick, mergeProps, getCurrentScope, isReadonly, isShallow, isReactive, toRaw } from 'vue';
-import { aF as SUPPORTED_LOCALES, w as withDutchVariants, bo as withSwissObjectAliases, bp as parseURL, bq as encodePath, br as decodePath, bs as localeFromPath, z as normalizeLocale, bt as getRequestHeaders, bu as klona, aL as hasProtocol, aN as isScriptProtocol, aM as joinURL, c as createError$1, bv as withQuery, L as getRequestURL, bw as DEFAULT_LANGUAGE_PREFERENCES, aJ as localizePath, bx as getRequestHeader, by as isEqual, bz as sanitizeStatusCode, bA as getContext, t as setCookie, x as getCookie, v as deleteCookie, bB as $fetch, aG as localeLanguageTag, bC as defu, R as stripLocaleFromPath, aT as executeAsync, bD as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
+import { aG as SUPPORTED_LOCALES, w as withDutchVariants, bt as withSwissObjectAliases, bu as parseURL, bv as encodePath, bw as decodePath, bx as localeFromPath, z as normalizeLocale, by as getRequestHeaders, bz as klona, aM as hasProtocol, aO as isScriptProtocol, aN as joinURL, c as createError$1, bA as withQuery, L as getRequestURL, bB as DEFAULT_LANGUAGE_PREFERENCES, aK as localizePath, bC as getRequestHeader, bD as isEqual, bE as sanitizeStatusCode, bF as getContext, t as setCookie, x as getCookie, v as deleteCookie, bG as $fetch, aH as localeLanguageTag, bH as defu, R as stripLocaleFromPath, aU as executeAsync, bI as DEFAULT_INTERFACE_LOCALE } from '../nitro/nitro.mjs';
 import { u as useHead$1, a as useSeoMeta$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
@@ -372,6 +372,12 @@ function translateAppMessage(locale, key, parameters = {}) {
 }
 
 const uiMessages = {
+  "Personnes \xE0 travailler": withDutchVariants({ "de": "Personen zum \xDCben", "en": "Persons to practise", "it": "Persone da esercitare", "es": "Personas para practicar", "nl": "Personen om te oefenen" }),
+  "Ne garde que les personnes que tu veux travailler.": withDutchVariants({ "de": "W\xE4hle nur die Personen, die du \xFCben m\xF6chtest.", "en": "Keep only the persons you want to practise.", "it": "Tieni solo le persone che vuoi esercitare.", "es": "Deja solo las personas que quieras practicar.", "nl": "Behoud alleen de personen die je wilt oefenen." }),
+  "Toutes les personnes": withDutchVariants({ "de": "Alle Personen", "en": "All persons", "it": "Tutte le persone", "es": "Todas las personas", "nl": "Alle personen" }),
+  "Garde au moins une personne. \xC0 l\u2019imp\xE9ratif : tu, nous et vous. Les formes sans personne restent disponibles.": withDutchVariants({ "de": "W\xE4hle mindestens eine Person. Im Imperativ: tu, nous und vous. Formen ohne Person bleiben verf\xFCgbar.", "en": "Keep at least one person. In the imperative: tu, nous and vous. Forms without a person remain available.", "it": "Mantieni almeno una persona. All\u2019imperativo: tu, nous e vous. Le forme senza persona restano disponibili.", "es": "Mant\xE9n al menos una persona. En el imperativo: tu, nous y vous. Las formas sin persona siguen disponibles.", "nl": "Behoud minstens \xE9\xE9n persoon. Bij de gebiedende wijs: tu, nous en vous. Vormen zonder persoon blijven beschikbaar." }),
+  "Ce d\xE9fi conserve sa restriction aux troisi\xE8mes personnes au pass\xE9 simple et au pass\xE9 ant\xE9rieur.": withDutchVariants({ "de": "Diese Challenge beh\xE4lt ihre Beschr\xE4nkung auf die dritte Person im pass\xE9 simple und pass\xE9 ant\xE9rieur bei.", "en": "This challenge keeps its restriction to third persons in the pass\xE9 simple and pass\xE9 ant\xE9rieur.", "it": "Questa sfida mantiene la restrizione alle terze persone al pass\xE9 simple e al pass\xE9 ant\xE9rieur.", "es": "Este reto mantiene la restricci\xF3n a las terceras personas en el pass\xE9 simple y el pass\xE9 ant\xE9rieur.", "nl": "Deze uitdaging behoudt de beperking tot de derde personen in de pass\xE9 simple en de pass\xE9 ant\xE9rieur." }),
+  "Utiliser les personnes choisies \xE0 tous les temps": withDutchVariants({ "de": "Gew\xE4hlte Personen in allen Zeiten verwenden", "en": "Use the selected persons in all tenses", "it": "Usare le persone scelte in tutti i tempi", "es": "Usar las personas elegidas en todos los tiempos", "nl": "Gebruik de gekozen personen in alle tijden" }),
   "Vous aimez Tatitotu ?": withDutchVariants({ "de": "Gef\xE4llt Ihnen Tatitotu?", "en": "Enjoying Tatitotu?", "it": "Ti piace Tatitotu?", "es": "\xBFTe gusta Tatitotu?", "nl": "Vind je Tatitotu leuk?" }),
   "D\xE9couvrez Zazizozu.": withDutchVariants({ "de": "Entdecken Sie Zazizozu.", "en": "Discover Zazizozu.", "it": "Scopri Zazizozu.", "es": "Descubre Zazizozu.", "nl": "Ontdek Zazizozu." }),
   "Des jeux \xE9ducatifs pour progresser en lecture, en maths et dans la vie quotidienne.": withDutchVariants({ "de": "Lernspiele f\xFCr Fortschritte beim Lesen, in Mathematik und im Alltag.", "en": "Educational games to build reading, maths and everyday skills.", "it": "Giochi educativi per migliorare nella lettura, in matematica e nella vita quotidiana.", "es": "Juegos educativos para mejorar en lectura, matem\xE1ticas y en la vida cotidiana.", "nl": "Educatieve spellen om te groeien in lezen, rekenen en het dagelijks leven." }),
@@ -1740,12 +1746,12 @@ const _routes = [
   {
     name: "defi-code",
     path: "/defi/:code()",
-    component: () => import('./_code_-Ce3mSDVq.mjs')
+    component: () => import('./_code_-D5NWZu_7.mjs')
   },
   {
     name: "defis-slug",
     path: "/defis/:slug()",
-    component: () => import('./_slug_-DnRQ5EZa.mjs')
+    component: () => import('./_slug_-yy0Gwimq.mjs')
   },
   {
     name: "exercices-parcours",
@@ -1790,7 +1796,7 @@ const _routes = [
   {
     name: "exercices-de-conjugaison",
     path: "/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-DE3qBbrx.mjs')
+    component: () => import('./exercices-de-conjugaison-CsUrVgVK.mjs')
   },
   {
     name: "mon-compte",
@@ -1806,7 +1812,7 @@ const _routes = [
   {
     name: "nouveau-defi",
     path: "/nouveau-defi",
-    component: () => import('./nouveau-defi-CGCyG2v5.mjs')
+    component: () => import('./nouveau-defi-2OyhtKtd.mjs')
   },
   {
     name: "signin",
@@ -1816,7 +1822,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-CDE5RqV3.mjs')
+    component: () => import('./index-CdCkmFfi.mjs')
   },
   {
     name: "mode-tense",
@@ -1921,12 +1927,12 @@ const _routes = [
   {
     name: "localized-defi-code",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defi/:code()",
-    component: () => import('./_code_-Ce3mSDVq.mjs')
+    component: () => import('./_code_-D5NWZu_7.mjs')
   },
   {
     name: "localized-defis-slug",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/defis/:slug()",
-    component: () => import('./_slug_-DnRQ5EZa.mjs')
+    component: () => import('./_slug_-yy0Gwimq.mjs')
   },
   {
     name: "localized-exercices-parcours",
@@ -1971,7 +1977,7 @@ const _routes = [
   {
     name: "localized-exercices-de-conjugaison",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/exercices-de-conjugaison",
-    component: () => import('./exercices-de-conjugaison-DE3qBbrx.mjs')
+    component: () => import('./exercices-de-conjugaison-CsUrVgVK.mjs')
   },
   {
     name: "localized-mon-compte",
@@ -1987,7 +1993,7 @@ const _routes = [
   {
     name: "localized-nouveau-defi",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/nouveau-defi",
-    component: () => import('./nouveau-defi-CGCyG2v5.mjs')
+    component: () => import('./nouveau-defi-2OyhtKtd.mjs')
   },
   {
     name: "localized-signin",
@@ -1997,7 +2003,7 @@ const _routes = [
   {
     name: "localized-index",
     path: "/:locale(fr|de|en|it|es|nl-NL|nl)/",
-    component: () => import('./index-CDE5RqV3.mjs')
+    component: () => import('./index-CdCkmFfi.mjs')
   },
   {
     name: "localized-mode-tense",

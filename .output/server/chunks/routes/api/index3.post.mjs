@@ -1,4 +1,4 @@
-import { d as defineEventHandler, aD as parseQuestionnaireRequest, a1 as PublicInputError, c as createError } from '../../nitro/nitro.mjs';
+import { d as defineEventHandler, aE as parseQuestionnaireRequest, a1 as PublicInputError, c as createError } from '../../nitro/nitro.mjs';
 import { g as generateQuestionnaire, Q as QuestionnaireSelectionError } from '../../_/questionnaire.mjs';
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../_/public-api-rate-limit.mjs';
 import { r as readLimitedJsonBody } from '../../_/limited-json-body.mjs';
@@ -40,7 +40,7 @@ const index_post = defineEventHandler(async (event) => {
     if (questions.length === 0) {
       throw createError({
         statusCode: 422,
-        statusMessage: "Aucune question disponible pour cette s\xE9lection"
+        statusMessage: request.personIds ? "Aucune forme disponible pour ces verbes, ces temps et ces personnes. Choisis d\u2019autres personnes ou d\u2019autres temps." : "Aucune question disponible pour cette s\xE9lection"
       });
     }
     return request.exerciseKind === "conjugation" && request.learningSupportMode === "cif-fle" ? questions.map(addClassicSpeechTokens) : questions;

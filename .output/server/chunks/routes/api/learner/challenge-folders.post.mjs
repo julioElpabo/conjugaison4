@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, c as createError, ae as parseChallengeFolderCreation, af as saveChallengeFolder, u as useDatabase, a1 as PublicInputError, ag as SavedChallengeFolderError } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, c as createError, af as parseChallengeFolderCreation, ag as saveChallengeFolder, u as useDatabase, a1 as PublicInputError, ah as SavedChallengeFolderError } from '../../../nitro/nitro.mjs';
 import { g as getLearnerSession } from '../../../_/learner-session.mjs';
 import { r as readLimitedJsonBody } from '../../../_/limited-json-body.mjs';
 import 'node:http';

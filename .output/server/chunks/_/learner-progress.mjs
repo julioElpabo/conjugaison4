@@ -1,4 +1,4 @@
-import { c as createError, ac as SELECTABLE_EXERCISE_KINDS, ad as exerciseKindFor } from '../nitro/nitro.mjs';
+import { c as createError, ac as SELECTABLE_EXERCISE_KINDS, ad as exerciseKindFor, ae as parseChallengePersonIds, a1 as PublicInputError } from '../nitro/nitro.mjs';
 import { createHash } from 'node:crypto';
 
 const SAFE_IDENTIFIER = /^[A-Za-z0-9_-]{8,100}$/u;
@@ -26,6 +26,13 @@ function learnerChallengeSnapshot(value) {
   const suppliedKinds = candidate.exerciseKinds;
   const exerciseKinds = Array.isArray(suppliedKinds) ? SELECTABLE_EXERCISE_KINDS.filter((kind) => suppliedKinds.includes(kind)) : void 0;
   if (exerciseKinds == null ? void 0 : exerciseKinds.length) exerciseKind = exerciseKindFor(exerciseKinds);
+  let personIds;
+  try {
+    personIds = parseChallengePersonIds(candidate.personIds);
+  } catch (error) {
+    if (error instanceof PublicInputError) throw createError({ statusCode: 400, statusMessage: error.message });
+    throw error;
+  }
   const questionCount = Math.min(200, Math.max(1, Number(candidate.questionCount) || 1));
   const description = typeof candidate.description === "string" ? candidate.description.trim().slice(0, 1e3) : "";
   const trainingReportTitle = typeof candidate.trainingReportTitle === "string" ? candidate.trainingReportTitle.trim().slice(0, 200) : "";
@@ -34,6 +41,7 @@ function learnerChallengeSnapshot(value) {
     ...trainingReportTitle ? { trainingReportTitle } : {},
     verbIds: integerList(candidate.verbIds, 1e3, true),
     tenseIds: integerList(candidate.tenseIds),
+    ...personIds ? { personIds } : {},
     questionCount,
     exerciseKind,
     ...(exerciseKinds == null ? void 0 : exerciseKinds.length) ? { exerciseKinds } : {},

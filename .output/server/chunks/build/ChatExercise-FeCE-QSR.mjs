@@ -1,17 +1,17 @@
 import { w as withoutIndicativeMode, f as literaryIdentificationCoachHelpBlocks, v as visibleCoachHelpBlocks, g as areOnlyIndicativeTenses, c as coachHelpQuestionVariables, l as localizedCoachVerbDefinition, s as sanitizeCoachHtml, _ as __nuxt_component_0 } from './CoachHelpPanel-D-N4HXfV.mjs';
 import { defineComponent, computed, ref, shallowRef, watch, markRaw, reactive, useTemplateRef, unref, createVNode, resolveDynamicComponent, nextTick, useSSRContext } from 'vue';
 import { ssrRenderTeleport, ssrRenderStyle, ssrRenderClass, ssrRenderAttr, ssrInterpolate, ssrRenderList, ssrRenderComponent, ssrIncludeBooleanAttr, ssrRenderVNode } from 'vue/server-renderer';
-import { bE as SUBJECT_PRONOUN_PLACEHOLDER, ab as questionExerciseKind, b9 as conjugationRequiresSubjectPronoun, bb as providedSubjunctiveInputPrefix, ba as conjugationAnswerPlaceholder, as as learnerErrorDetailText } from '../nitro/nitro.mjs';
+import { bs as SUBJECT_PRONOUN_PLACEHOLDER, ab as questionExerciseKind, bb as conjugationRequiresSubjectPronoun, bd as providedSubjunctiveInputPrefix, bc as conjugationAnswerPlaceholder, at as learnerErrorDetailText } from '../nitro/nitro.mjs';
 import { L as LearnerErrorFeedback, I as InfinitiveCoachHelp, S as ShareExerciseSummaryDialog, V as VerbConsultationModal } from './VerbConsultationModal-CzRYX635.mjs';
 import { faStop, faBullhorn, faSpinner, faVolume, faArrowUpFromBracket, faPrint } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { u as useLearnerProgress, A as AUDIO_READING_ENABLED } from './main-BB3tCCjd.mjs';
 import { d as coachMediaRule, a as createVariedCoachReaction, b as createCoachDialogueState } from '../_/coach-dialogue.mjs';
 import { w as withSentenceTerminalMark } from '../_/sentence-punctuation.mjs';
 import { c as coachHelpProfile, d as buildTargetedConjugationHelp } from '../_/coach-help-audit.mjs';
 import { i as identificationFormParts } from '../_/identification-form.mjs';
 import { a as useLanguagePreferences } from './server.mjs';
 import { u as useSiteAnalytics } from './useSiteAnalytics-B3_coq30.mjs';
-import { u as useLearnerProgress } from './main-BB3tCCjd.mjs';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
 import '../_/coach.mjs';
 import '../_/near-future.mjs';
@@ -30,6 +30,7 @@ import 'node:fs/promises';
 import 'node:url';
 import '../_/infinitive-identification2.mjs';
 import '../_/conjugation-display.mjs';
+import './useLearnerAuth-tqISusbB.mjs';
 import '../routes/renderer.mjs';
 import 'vue-bundle-renderer/runtime';
 import 'unhead/server';
@@ -38,9 +39,6 @@ import 'unhead/plugins';
 import 'unhead/utils';
 import 'vue-router';
 import '../_/analytics-consent.mjs';
-import './useLearnerAuth-tqISusbB.mjs';
-
-const AUDIO_READING_ENABLED = false;
 
 const CHAT_BUBBLE_DELAY_MS = 1e3;
 const CHAT_INCORRECT_DELAY_MS = 3e3;

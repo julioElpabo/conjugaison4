@@ -1,4 +1,4 @@
-import { b3 as hasMultipleAuxiliaryModels, b4 as AUXILIARY_SIMPLE_TENSES, b5 as VARIABLE_AUXILIARY_EXPLANATION, b6 as compoundSimpleTense } from '../nitro/nitro.mjs';
+import { b4 as hasMultipleAuxiliaryModels, b5 as AUXILIARY_SIMPLE_TENSES, b6 as VARIABLE_AUXILIARY_EXPLANATION, b7 as compoundSimpleTense } from '../nitro/nitro.mjs';
 import { i as isNearFutureTense, a as bareNearFutureInfinitive, c as isPronominalNearFutureInfinitive } from './near-future.mjs';
 import { a as COACH_HELP_ENGINE_KEYS } from './coach.mjs';
 

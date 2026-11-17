@@ -1,4 +1,4 @@
-import { aZ as hasVariableAuxiliary, a_ as prefersEtreWithoutComplement, a$ as formatAnswer, u as useDatabase, aX as generatePronominalRow } from '../nitro/nitro.mjs';
+import { a_ as hasVariableAuxiliary, a$ as prefersEtreWithoutComplement, b0 as formatAnswer, u as useDatabase, aY as generatePronominalRow } from '../nitro/nitro.mjs';
 import { b as buildRadicalReference } from './radical-reference.mjs';
 import { i as isImpersonalVerb } from './impersonal-verbs.mjs';
 import { c as infinitiveFormKey, d as INFINITIVE_IDENTIFICATION_INSTRUCTION, e as infinitiveAnswers } from './infinitive-identification2.mjs';

@@ -13,6 +13,8 @@ import 'web-push';
 import 'mysql2/promise';
 import 'node:fs/promises';
 import 'node:url';
+import '../../../../_/learner-question-snapshot.mjs';
+import '../../../../_/radical-reference.mjs';
 
 const attempt_post = defineEventHandler(async (event) => {
   setResponseHeader(event, "Cache-Control", "no-store");

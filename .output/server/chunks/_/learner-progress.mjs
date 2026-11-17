@@ -1,4 +1,5 @@
 import { c as createError, ab as SELECTABLE_EXERCISE_KINDS, ac as exerciseKindFor, ad as parseChallengePersonIds, a0 as PublicInputError } from '../nitro/nitro.mjs';
+import { r as restoreDiagnosticReference } from './learner-question-snapshot.mjs';
 import { createHash } from 'node:crypto';
 
 const SAFE_IDENTIFIER = /^[A-Za-z0-9_-]{8,100}$/u;
@@ -114,7 +115,7 @@ function learnerQuestionSnapshot(value) {
   const agreementKind = ["cod-before", "cod-after", "coi"].includes(String(agreement == null ? void 0 : agreement.kind)) ? agreement == null ? void 0 : agreement.kind : null;
   const citation = question.literaryCitation && typeof question.literaryCitation === "object" ? question.literaryCitation : null;
   const citationTarget = shortText(citation == null ? void 0 : citation.target, 200);
-  return {
+  const snapshot = {
     ...["conjugation", "tense-identification", "mode-identification", "infinitive-identification"].includes(String(question.exerciseKind)) ? { exerciseKind: question.exerciseKind } : {},
     titre: shortText(question.titre, 300),
     instruction: shortText(question.instruction, 300) || void 0,
@@ -131,6 +132,12 @@ function learnerQuestionSnapshot(value) {
     temps: shortText(question.temps, 100) || void 0,
     mode: shortText(question.mode, 100) || void 0,
     isCompound: question.isCompound === true,
+    pastParticiple: shortText(question.pastParticiple, 100) || void 0,
+    voice: question.voice === "passive" ? "passive" : "active",
+    passiveSubject: shortText(question.passiveSubject, 100) || void 0,
+    passiveAgent: shortText(question.passiveAgent, 200) || void 0,
+    auxiliaryChoices: Array.isArray(question.auxiliaryChoices) ? [...new Set(question.auxiliaryChoices.filter((item) => item === "avoir" || item === "\xEAtre"))] : void 0,
+    preferredAuxiliary: question.preferredAuxiliary === "avoir" || question.preferredAuxiliary === "\xEAtre" ? question.preferredAuxiliary : void 0,
     conjugaison1: shortText(question.conjugaison1, 300) || void 0,
     conjugaison2: shortText(question.conjugaison2, 300) || void 0,
     conjugaison3: shortText(question.conjugaison3, 300) || void 0,
@@ -165,6 +172,8 @@ function learnerQuestionSnapshot(value) {
       sourceUrl: shortText(citation.sourceUrl, 500)
     } : void 0
   };
+  snapshot.radicalReference = restoreDiagnosticReference(snapshot, radicalReference);
+  return snapshot;
 }
 function learnerFormKey(question, exerciseKind) {
   const source = [

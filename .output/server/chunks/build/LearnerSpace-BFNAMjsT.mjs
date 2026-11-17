@@ -1,7 +1,7 @@
 import { defineComponent, computed, ref, watch, useTemplateRef, reactive, withAsyncContext, nextTick, mergeProps, unref, isRef, toValue, createVNode, resolveDynamicComponent, withCtx, openBlock, createBlock, toDisplayString, createCommentVNode, createTextVNode, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrInterpolate, ssrRenderAttr, ssrRenderClass, ssrRenderStyle, ssrIncludeBooleanAttr, ssrRenderComponent, ssrRenderList, ssrRenderTeleport, ssrRenderVNode } from 'vue/server-renderer';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-1tPrXgE0.mjs';
-import { w as withDutchVariants, aH as localeLanguageTag, bL as localizedLearnerErrorMessageForCode, bM as DEFAULT_SAVED_CHALLENGE_FOLDER_COLOR, b7 as exerciseKindsFor, bN as exerciseKindLabel, bO as localizedLearnerErrorDomain, bP as localizedLearnerErrorLabel, bQ as isSavedChallengeFolderColor, bR as savedChallengeFolderColorStyle, bS as savedChallengeFolderColor, bT as SAVED_CHALLENGE_FOLDER_COLORS } from '../nitro/nitro.mjs';
+import { w as withDutchVariants, aG as localeLanguageTag, bL as localizedLearnerErrorMessageForCode, bM as DEFAULT_SAVED_CHALLENGE_FOLDER_COLOR, b7 as exerciseKindsFor, bN as exerciseKindLabel, bO as localizedLearnerErrorDomain, bP as localizedLearnerErrorLabel, bQ as isSavedChallengeFolderColor, bR as savedChallengeFolderColorStyle, bS as savedChallengeFolderColor, bT as SAVED_CHALLENGE_FOLDER_COLORS } from '../nitro/nitro.mjs';
 import { a as useLanguagePreferences, b as useRoute, k as useRequestFetch, c as useState, g as useRuntimeConfig } from './server.mjs';
 import { _ as __nuxt_component_0$3 } from './nuxt-link-icjx6oE7.mjs';
 import QrcodeVue from 'qrcode.vue';

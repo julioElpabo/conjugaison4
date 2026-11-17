@@ -4466,7 +4466,7 @@ function _expandFromEnv(value) {
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "490d6158-e1b2-4390-b98b-a1ca539356e8",
+    "buildId": "c07e8191-5d8e-430d-b6b5-06bdd2c4c001",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -6256,21 +6256,22 @@ const VARIABLE_AUXILIARY_VERBS = /* @__PURE__ */ new Set([
   "remonter",
   "repasser",
   "ressortir",
-  "demeurer"
+  "demeurer",
+  "convenir"
 ]);
 function hasVariableAuxiliary(infinitive) {
   return VARIABLE_AUXILIARY_VERBS.has(infinitive.trim().normalize("NFC").toLocaleLowerCase("fr"));
 }
 const VARIABLE_AUXILIARY_EXPLANATION = "Sans phrase de contexte, les auxiliaires avoir et \xEAtre sont accept\xE9s ici selon le sens du verbe. Avec \xEAtre, accorde le participe pass\xE9 avec le sujet. Avec avoir, sans COD plac\xE9 avant, le participe pass\xE9 reste invariable.";
 function prefersEtreWithoutComplement(infinitive) {
-  return hasVariableAuxiliary(infinitive) && infinitive.trim().toLocaleLowerCase("fr") !== "demeurer";
+  return hasVariableAuxiliary(infinitive) && !["demeurer", "convenir"].includes(infinitive.trim().toLocaleLowerCase("fr"));
 }
 function hasMultipleAuxiliaryModels(question) {
   var _a;
   return !question.preferredAuxiliary && (((_a = question.auxiliaryChoices) == null ? void 0 : _a.length) || 0) > 1;
 }
 
-function normalized$5(value) {
+function normalized$6(value) {
   return value.normalize("NFD").replace(/\p{Diacritic}/gu, "").trim().toLocaleLowerCase("fr");
 }
 const AUXILIARY_SIMPLE_TENSES = [
@@ -6286,7 +6287,7 @@ const AUXILIARY_SIMPLE_TENSES = [
   { mode: "participe", tense: "pr\xE9sent", pronouns: ["forme"], forms: { avoir: ["ayant"], \u00EAtre: ["\xE9tant"] } }
 ];
 function compoundSimpleTense(mode, tense) {
-  const key = `${normalized$5(mode)}:${normalized$5(tense)}`;
+  const key = `${normalized$6(mode)}:${normalized$6(tense)}`;
   const mappings = {
     "indicatif:passe compose": { mode: "indicatif", tense: "pr\xE9sent" },
     "indicatif:plus-que-parfait": { mode: "indicatif", tense: "imparfait" },
@@ -6305,16 +6306,16 @@ function compoundSimpleTense(mode, tense) {
   return mappings[key] || null;
 }
 
-function normalized$4(value) {
+function normalized$5(value) {
   return value.trim().toLocaleLowerCase("fr").normalize("NFC");
 }
 function findCompoundAuxiliaryForm(row, auxiliaryForms) {
   var _a;
   const target = compoundSimpleTense(row.mode_name, row.temps_name);
   if (!target) return null;
-  return (_a = auxiliaryForms.find((form) => Number(form.personne_id) === Number(row.personne_id) && normalized$4(form.mode_name) === target.mode && normalized$4(form.temps_name) === target.tense)) != null ? _a : null;
+  return (_a = auxiliaryForms.find((form) => Number(form.personne_id) === Number(row.personne_id) && normalized$5(form.mode_name) === target.mode && normalized$5(form.temps_name) === target.tense)) != null ? _a : null;
 }
-function participleForPerson(participle, personId) {
+function participleForPerson$1(participle, personId) {
   const form = participle.trim();
   if (![7, 8, 9].includes(Number(personId)) || /[sx]$/u.test(form)) return form;
   return `${form}s`;
@@ -6326,9 +6327,9 @@ function useEtreForIntransitiveCompound(row, auxiliaryForms) {
   if (!((_a = auxiliary == null ? void 0 : auxiliary.conjugaison1) == null ? void 0 : _a.trim())) {
     throw new Error(`Forme de l\u2019auxiliaire \xEAtre introuvable pour ${row.mode_name} \xB7 ${row.temps_name} \xB7 personne ${row.personne_id}.`);
   }
-  const conjugaison1 = `${auxiliary.conjugaison1.trim()} ${participleForPerson(row.participe_passe, row.personne_id)}`;
+  const conjugaison1 = `${auxiliary.conjugaison1.trim()} ${participleForPerson$1(row.participe_passe, row.personne_id)}`;
   const nousAuxiliary = findCompoundAuxiliaryForm({ ...row, personne_id: 7 }, auxiliaryForms);
-  const nousForm = ((_b = nousAuxiliary == null ? void 0 : nousAuxiliary.conjugaison1) == null ? void 0 : _b.trim()) ? `${nousAuxiliary.conjugaison1.trim()} ${participleForPerson(row.participe_passe, 7)}` : row.nous_form;
+  const nousForm = ((_b = nousAuxiliary == null ? void 0 : nousAuxiliary.conjugaison1) == null ? void 0 : _b.trim()) ? `${nousAuxiliary.conjugaison1.trim()} ${participleForPerson$1(row.participe_passe, 7)}` : row.nous_form;
   return {
     ...row,
     auxiliaire: "\xEAtre",
@@ -6339,7 +6340,12 @@ function useEtreForIntransitiveCompound(row, auxiliaryForms) {
   };
 }
 function resolveVariableAuxiliary(row, auxiliaryForms) {
-  if (hasVariableAuxiliary(row.infinitif) && normalized$4(row.infinitif) !== "demeurer" && Number(row.is_compound) && Boolean(row.complement_phrase || row.complement_anteposed) && row.complement_function !== "cod") {
+  if (normalized$5(row.infinitif) === "convenir") {
+    if (!Number(row.is_compound)) return row;
+    if (row.complement_preposition === "de") return useEtreForIntransitiveCompound(row, auxiliaryForms);
+    return row.complement_preposition === "\xE0" ? { ...row, conjugaison2: "", conjugaison3: "" } : row;
+  }
+  if (hasVariableAuxiliary(row.infinitif) && normalized$5(row.infinitif) !== "demeurer" && Number(row.is_compound) && Boolean(row.complement_phrase || row.complement_anteposed) && row.complement_function !== "cod") {
     return useEtreForIntransitiveCompound(row, auxiliaryForms);
   }
   return row;
@@ -6347,23 +6353,23 @@ function resolveVariableAuxiliary(row, auxiliaryForms) {
 function variableAuxiliaryRows(row) {
   if (!Number(row.is_compound) || !hasVariableAuxiliary(row.infinitif)) return [row];
   const target = compoundSimpleTense(row.mode_name, row.temps_name);
-  const paradigm = target && AUXILIARY_SIMPLE_TENSES.find((item) => normalized$4(item.mode) === normalized$4(target.mode) && normalized$4(item.tense) === normalized$4(target.tense));
+  const paradigm = target && AUXILIARY_SIMPLE_TENSES.find((item) => normalized$5(item.mode) === normalized$5(target.mode) && normalized$5(item.tense) === normalized$5(target.tense));
   if (!paradigm) return [row];
-  const person = normalized$4(row.mode_name) === "imp\xE9ratif" ? [5, 7, 8].indexOf(Number(row.personne_id)) : Number(row.personne_id) - 4;
+  const person = normalized$5(row.mode_name) === "imp\xE9ratif" ? [5, 7, 8].indexOf(Number(row.personne_id)) : Number(row.personne_id) - 4;
   const contextual = Boolean(row.complement_phrase || row.complement_anteposed);
-  const auxiliaries = contextual ? row.complement_function === "cod" ? ["avoir"] : [] : prefersEtreWithoutComplement(row.infinitif) || normalized$4(row.auxiliaire) === "\xEAtre" ? ["\xEAtre", "avoir"] : ["avoir", "\xEAtre"];
+  const auxiliaries = contextual ? row.complement_function === "cod" ? ["avoir"] : [] : prefersEtreWithoutComplement(row.infinitif) || normalized$5(row.auxiliaire) === "\xEAtre" ? ["\xEAtre", "avoir"] : ["avoir", "\xEAtre"];
   if (!auxiliaries.length) return [row];
   return auxiliaries.map((auxiliary) => {
     const form = paradigm.forms[auxiliary][person];
     if (!form) throw new Error(`Auxiliaire introuvable pour ${row.mode_name} \xB7 ${row.temps_name} \xB7 personne ${row.personne_id}.`);
-    const participle = auxiliary === "\xEAtre" ? participleForPerson(row.participe_passe, row.personne_id) : row.participe_passe.trim();
+    const participle = auxiliary === "\xEAtre" ? participleForPerson$1(row.participe_passe, row.personne_id) : row.participe_passe.trim();
     return {
       ...row,
       auxiliaire: auxiliary,
       conjugaison1: `${form} ${participle}`,
       conjugaison2: "",
       conjugaison3: "",
-      nous_form: `${paradigm.forms[auxiliary][normalized$4(row.mode_name) === "imp\xE9ratif" ? 1 : 3]} ${auxiliary === "\xEAtre" ? participleForPerson(row.participe_passe, 7) : row.participe_passe.trim()}`
+      nous_form: `${paradigm.forms[auxiliary][normalized$5(row.mode_name) === "imp\xE9ratif" ? 1 : 3]} ${auxiliary === "\xEAtre" ? participleForPerson$1(row.participe_passe, 7) : row.participe_passe.trim()}`
     };
   });
 }
@@ -6371,7 +6377,7 @@ function variableAuxiliaryRows(row) {
 function unique(values) {
   return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
 }
-function normalized$3(value) {
+function normalized$4(value) {
   return value.trim().toLocaleLowerCase("fr-CH");
 }
 function startsWithVowel(value) {
@@ -6380,10 +6386,10 @@ function startsWithVowel(value) {
 }
 const ASPIRATED_H_INFINITIVES = /* @__PURE__ */ new Set(["ha\xEFr"]);
 function startsWithElidableSound(value, infinitive = "") {
-  const normalizedValue = normalized$3(value).normalize("NFC");
+  const normalizedValue = normalized$4(value).normalize("NFC");
   if (startsWithVowel(normalizedValue)) return true;
   if (!normalizedValue.startsWith("h")) return false;
-  const normalizedInfinitive = normalized$3(infinitive).normalize("NFC");
+  const normalizedInfinitive = normalized$4(infinitive).normalize("NFC");
   if (ASPIRATED_H_INFINITIVES.has(normalizedInfinitive)) return false;
   if (/^ha(?:i|ï)/u.test(normalizedValue)) return false;
   return true;
@@ -6401,7 +6407,7 @@ function masculineSingularForm(form, participle) {
   return form;
 }
 function applyAgreement(form, pronoun, compound, auxiliary, participle, agreementRule) {
-  if (!compound || normalized$3(auxiliary) !== "\xEAtre") return form;
+  if (!compound || normalized$4(auxiliary) !== "\xEAtre") return form;
   if (agreementRule === "invariable") return masculineSingularForm(form, participle);
   const stem = masculineSingularForm(form, participle);
   if (pronoun === "il") return stem;
@@ -6415,7 +6421,7 @@ function applyAgreement(form, pronoun, compound, auxiliary, participle, agreemen
 function agreementVariants(form, pronoun, compound, auxiliary, participle, agreementRule, allowInvariableConstruction = false) {
   const canonical = applyAgreement(form, pronoun, compound, auxiliary, participle, agreementRule);
   const variants = [canonical];
-  if (!compound || normalized$3(auxiliary) !== "\xEAtre") return variants;
+  if (!compound || normalized$4(auxiliary) !== "\xEAtre") return variants;
   const stem = masculineSingularForm(form, participle);
   if (agreementRule === "invariable") return [stem];
   if (agreementRule === "selon_construction" && allowInvariableConstruction) variants.push(stem);
@@ -6448,7 +6454,7 @@ function withComplement(answer, complement) {
   return `${stem} ${complement.trim()}${punctuation ? ` ${punctuation}` : ""}`;
 }
 function applyAnteposedCodAgreement(form, row) {
-  if (row.complement_position !== "before" || row.complement_function === "coi" || !row.is_compound || normalized$3(row.auxiliaire) !== "avoir" || !row.participe_passe || !row.complement_gender || !row.complement_number || !form.endsWith(row.participe_passe)) {
+  if (row.complement_position !== "before" || row.complement_function === "coi" || !row.is_compound || normalized$4(row.auxiliaire) !== "avoir" || !row.participe_passe || !row.complement_gender || !row.complement_number || !form.endsWith(row.participe_passe)) {
     return form;
   }
   const agreed = agreePastParticiple(row.participe_passe, row.complement_gender, row.complement_number);
@@ -6466,17 +6472,17 @@ function splitAnteposedCodComplement(complement, relativePronoun) {
 }
 function anteposedComplementGrammar(antecedent, relativePronoun, gender, number) {
   var _a;
-  const normalizedGender = normalized$3(gender || "").normalize("NFD").replace(/\p{Diacritic}/gu, "");
-  const normalizedNumber = normalized$3(number || "");
+  const normalizedGender = normalized$4(gender || "").normalize("NFD").replace(/\p{Diacritic}/gu, "");
+  const normalizedNumber = normalized$4(number || "");
   if ((normalizedGender === "masculin" || normalizedGender === "feminin") && (normalizedNumber === "singulier" || normalizedNumber === "pluriel")) {
     return { gender: normalizedGender, number: normalizedNumber };
   }
-  const relative = normalized$3(relativePronoun || "").normalize("NFD").replace(/\p{Diacritic}/gu, "");
+  const relative = normalized$4(relativePronoun || "").normalize("NFD").replace(/\p{Diacritic}/gu, "");
   if (["auxquelles", "desquelles"].includes(relative)) return { gender: "feminin", number: "pluriel" };
   if (["auxquels", "desquels"].includes(relative)) return { gender: "masculin", number: "pluriel" };
   if (["a laquelle", "de laquelle"].includes(relative)) return { gender: "feminin", number: "singulier" };
   if (["auquel", "duquel"].includes(relative)) return { gender: "masculin", number: "singulier" };
-  const determiner = (_a = normalized$3(antecedent).match(/^(l['’]|le(?=\s)|la(?=\s)|les(?=\s)|un(?=\s)|une(?=\s)|des(?=\s)|ce(?=\s)|cet(?=\s)|cette(?=\s)|ces(?=\s))/u)) == null ? void 0 : _a[1];
+  const determiner = (_a = normalized$4(antecedent).match(/^(l['’]|le(?=\s)|la(?=\s)|les(?=\s)|un(?=\s)|une(?=\s)|des(?=\s)|ce(?=\s)|cet(?=\s)|cette(?=\s)|ces(?=\s))/u)) == null ? void 0 : _a[1];
   if (["les", "des", "ces"].includes(determiner || "")) return { gender: "masculin", number: "pluriel" };
   if (["la", "une", "cette"].includes(determiner || "")) return { gender: "feminin", number: "singulier" };
   return { gender: "masculin", number: "singulier" };
@@ -6495,14 +6501,14 @@ function subjunctiveRelativeAntecedent(antecedent, relativePronoun, gender, numb
 }
 function withRelativeLink(relativePronoun, pronoun, clause) {
   const relative = relativePronoun == null ? void 0 : relativePronoun.trim();
-  if (!relative || normalized$3(relative) === "que") {
+  if (!relative || normalized$4(relative) === "que") {
     return startsWithVowel(pronoun) ? `qu'${clause}` : `que ${clause}`;
   }
   return `${relative} ${clause}`;
 }
 function withAnteposedComplement(answer, pronoun, mode, complement, relativePronoun, gender, number) {
   const { antecedent, postposed } = splitAnteposedCodComplement(complement, relativePronoun);
-  if (normalized$3(mode) === "subjonctif") {
+  if (normalized$4(mode) === "subjonctif") {
     const framedAntecedent = subjunctiveRelativeAntecedent(antecedent, relativePronoun, gender, number);
     const clause2 = withoutSubjunctiveLink(answer);
     return [framedAntecedent, withRelativeLink(relativePronoun, pronoun, clause2), postposed].filter(Boolean).join(" ");
@@ -6516,17 +6522,17 @@ function withAnteposedComplement(answer, pronoun, mode, complement, relativePron
 function relativeSubjectPrefix(pronoun, form, mode, infinitive) {
   const formatted = formatAnswer(pronoun, form, mode, infinitive);
   const prefix = formatted.endsWith(form) ? formatted.slice(0, -form.length).trimEnd() : pronoun;
-  return normalized$3(mode) === "subjonctif" ? withoutSubjunctiveLink(prefix) : prefix;
+  return normalized$4(mode) === "subjonctif" ? withoutSubjunctiveLink(prefix) : prefix;
 }
 function inputPrefix(pronoun, form, mode, infinitive, position) {
-  if (normalized$3(mode) === "imp\xE9ratif") return "";
+  if (normalized$4(mode) === "imp\xE9ratif") return "";
   const formatted = formatAnswer(pronoun, form, mode, infinitive);
   const base = formatted.endsWith(form) ? formatted.slice(0, -form.length).trimEnd() : pronoun;
-  if (position !== "before" || normalized$3(mode) === "subjonctif") return base;
+  if (position !== "before" || normalized$4(mode) === "subjonctif") return base;
   return startsWithVowel(pronoun) ? `qu'${base}` : `que ${base}`;
 }
 function formatAnswer(pronoun, form, mode, infinitive = "") {
-  const normalizedMode = normalized$3(mode);
+  const normalizedMode = normalized$4(mode);
   if (normalizedMode === "imp\xE9ratif") return `${form.trimEnd()} !`;
   const phrase = withPronoun(pronoun, form, infinitive);
   if (normalizedMode === "subjonctif") {
@@ -6550,7 +6556,7 @@ function answerVariants(row, pronoun) {
       const agreedForm = applyAnteposedCodAgreement(form, row);
       const canonical = formatAnswer(pronoun, agreedForm, row.mode_name, row.infinitif);
       answers.push(canonical);
-      if (normalized$3(row.mode_name) === "imp\xE9ratif") {
+      if (normalized$4(row.mode_name) === "imp\xE9ratif") {
         answers.push(agreedForm, agreedForm.replace(/!$/, ""));
       } else {
         answers.push(withPronoun(pronoun, agreedForm, row.infinitif));
@@ -6595,9 +6601,9 @@ function formatSingleAuxiliaryQuestion(row, pronoun) {
     allowsInvariableConstruction(row)
   )).map((form) => applyAnteposedCodAgreement(form, row)).map((form) => formatAnswer(pronoun, form, row.mode_name, row.infinitif));
   const displayedCorrections = row.complement_position === "before" && row.complement_anteposed ? correctedForms.map((answer) => withAnteposedComplement(answer, pronoun, row.mode_name, row.complement_anteposed, row.complement_relative_pronoun, row.complement_gender, row.complement_number)) : row.complement_phrase ? correctedForms.map((answer) => withComplement(answer, row.complement_phrase)) : correctedForms;
-  const prompt = row.complement_position === "before" && row.complement_anteposed ? normalized$3(row.mode_name) === "subjonctif" ? `${subjunctiveRelativeAntecedent(anteposedComplement.antecedent, row.complement_relative_pronoun, row.complement_gender, row.complement_number)} ${withRelativeLink(row.complement_relative_pronoun, pronoun, relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif))} \u2026${anteposedComplement.postposed ? ` ${anteposedComplement.postposed}` : ""} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})` : row.complement_relative_pronoun ? `${anteposedComplement.antecedent} ${withRelativeLink(row.complement_relative_pronoun, pronoun, relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif))} \u2026 | ${row.infinitif} | ${row.temps_name} (${row.mode_name})` : `${anteposedComplement.antecedent} ${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif, "before")} \u2026${anteposedComplement.postposed ? ` ${anteposedComplement.postposed}` : ""} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})` : row.complement_phrase ? `${normalized$3(row.mode_name) === "imp\xE9ratif" ? "" : `${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif)} `}\u2026 ${row.complement_phrase} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})` : `${normalized$3(row.mode_name) === "subjonctif" ? `${startsWithVowel(pronoun) ? "qu'" : "que "}${pronoun}` : pronoun} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`;
+  const prompt = row.complement_position === "before" && row.complement_anteposed ? normalized$4(row.mode_name) === "subjonctif" ? `${subjunctiveRelativeAntecedent(anteposedComplement.antecedent, row.complement_relative_pronoun, row.complement_gender, row.complement_number)} ${withRelativeLink(row.complement_relative_pronoun, pronoun, relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif))} \u2026${anteposedComplement.postposed ? ` ${anteposedComplement.postposed}` : ""} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})` : row.complement_relative_pronoun ? `${anteposedComplement.antecedent} ${withRelativeLink(row.complement_relative_pronoun, pronoun, relativeSubjectPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif))} \u2026 | ${row.infinitif} | ${row.temps_name} (${row.mode_name})` : `${anteposedComplement.antecedent} ${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif, "before")} \u2026${anteposedComplement.postposed ? ` ${anteposedComplement.postposed}` : ""} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})` : row.complement_phrase ? `${normalized$4(row.mode_name) === "imp\xE9ratif" ? "" : `${inputPrefix(pronoun, row.conjugaison1, row.mode_name, row.infinitif)} `}\u2026 ${row.complement_phrase} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})` : `${normalized$4(row.mode_name) === "subjonctif" ? `${startsWithVowel(pronoun) ? "qu'" : "que "}${pronoun}` : pronoun} | ${row.infinitif} | ${row.temps_name} (${row.mode_name})`;
   const displayedComplement = row.complement_position === "before" ? anteposedComplement == null ? void 0 : anteposedComplement.antecedent : row.complement_phrase;
-  const hasAvoirParticipleRule = Boolean(row.is_compound) && normalized$3(row.auxiliaire) === "avoir" && Boolean(displayedComplement) && (row.complement_function === "cod" || row.complement_function === "coi");
+  const hasAvoirParticipleRule = Boolean(row.is_compound) && normalized$4(row.auxiliaire) === "avoir" && Boolean(displayedComplement) && (row.complement_function === "cod" || row.complement_function === "coi");
   const agreementReminder = hasAvoirParticipleRule ? {
     kind: row.complement_function === "coi" ? "coi" : row.complement_position === "before" ? "cod-before" : "cod-after",
     infinitive: row.infinitif,
@@ -6683,7 +6689,7 @@ const NON_FINITE_FORMS = {
 const GENERATED_FINITE_FORMS = {
   "indicatif:futur proche": "Je vais manger"
 };
-function normalized$2(value) {
+function normalized$3(value) {
   return value.trim().toLocaleLowerCase("fr").normalize("NFC");
 }
 function pickComplement(random) {
@@ -6716,7 +6722,7 @@ function buildTenseExamples(tenses, forms, random = Math.random) {
       const answer = formatAnswer(chosen.pronom, chosen.conjugaison1, chosen.mode_name, "manger");
       return [Number(tense.id), withComplementAfter(answer, pickComplement(random))];
     }
-    const key = `${normalized$2(tense.mode)}:${normalized$2(tense.name)}`;
+    const key = `${normalized$3(tense.mode)}:${normalized$3(tense.name)}`;
     const form = (_c = (_b = GENERATED_FINITE_FORMS[key]) != null ? _b : NON_FINITE_FORMS[key]) != null ? _c : "Manger";
     return [Number(tense.id), withComplementAfter(form, pickComplement(random))];
   }));
@@ -7102,7 +7108,7 @@ const catalogueCache = /* @__PURE__ */ new Map();
 const catalogueLoads = /* @__PURE__ */ new Map();
 let catalogueCacheVersion = 0;
 async function getCatalogue(locale = "fr") {
-  var _a, _b, _c, _d;
+  var _a, _b, _c, _d, _e;
   const database = useDatabase();
   const requestedLocale = normalizeLocale(locale, "fr");
   const [verbesResult, modesResult, tempsResult, semanticResult, meaningResult, pronominalResult, complementResult, mangerExamplesResult] = await Promise.all([
@@ -7146,7 +7152,7 @@ async function getCatalogue(locale = "fr") {
                ELSE COALESCE(requested.intitule, french.intitule, vs.intitule) END AS intitule,
              CASE WHEN ?='fr' THEN vs.definition
                ELSE COALESCE(requested.definition, french.definition, vs.definition) END AS definition,
-             vs.est_principal, vs.numero_sens
+             vs.est_principal, vs.numero_sens, vs.est_pronominal, vs.construction
       FROM verbe_sens vs
       LEFT JOIN verbe_sens_translations requested
         ON requested.sens_id=vs.id AND requested.locale=?
@@ -7203,12 +7209,18 @@ async function getCatalogue(locale = "fr") {
     semanticsByVerb.set(Number(row.verbe_id), categories);
   }
   const meaningByVerb = /* @__PURE__ */ new Map();
+  const pronominalMeanings = /* @__PURE__ */ new Map();
   for (const row of meaningResult[0]) {
     const verbId = Number(row.verbe_id);
-    if (meaningByVerb.has(verbId)) continue;
     const definition = (_b = row.definition) == null ? void 0 : _b.trim();
     const genericTitle = /^sens principal de\s+[«"']?/iu.test(row.intitule.trim());
     const meaning = definition || (genericTitle ? "" : row.intitule.trim());
+    if (Number(row.est_pronominal)) {
+      const key = `${verbId}:${(_c = row.construction) == null ? void 0 : _c.trim().replace(/’/gu, "'")}`;
+      if (meaning && !pronominalMeanings.has(key)) pronominalMeanings.set(key, meaning);
+      continue;
+    }
+    if (meaningByVerb.has(verbId)) continue;
     if (meaning) meaningByVerb.set(verbId, meaning);
   }
   const complementByVerb = /* @__PURE__ */ new Map();
@@ -7216,10 +7228,10 @@ async function getCatalogue(locale = "fr") {
   const anteposableComplementFunctionsByVerb = /* @__PURE__ */ new Map();
   for (const row of complementResult[0]) {
     const verbId = Number(row.verbe_id);
-    const functions = (_c = complementFunctionsByVerb.get(verbId)) != null ? _c : /* @__PURE__ */ new Set();
+    const functions = (_d = complementFunctionsByVerb.get(verbId)) != null ? _d : /* @__PURE__ */ new Set();
     functions.add(row.fonction_objet);
     complementFunctionsByVerb.set(verbId, functions);
-    const anteposable = (_d = anteposableComplementFunctionsByVerb.get(verbId)) != null ? _d : /* @__PURE__ */ new Set();
+    const anteposable = (_e = anteposableComplementFunctionsByVerb.get(verbId)) != null ? _e : /* @__PURE__ */ new Set();
     if (row.fonction_objet === "cod" && row.texte_antepose || row.fonction_objet === "coi" && indirectRelative(row.texte, row.preposition, row.genre, row.nombre)) {
       anteposable.add(row.fonction_objet);
     }
@@ -7233,7 +7245,7 @@ async function getCatalogue(locale = "fr") {
     }
   }
   const verbs = verbesResult[0].map((row) => {
-    var _a2, _b2, _c2, _d2, _e;
+    var _a2, _b2, _c2, _d2, _e2;
     return {
       id: Number(row.id),
       infinitif: row.infinitif,
@@ -7269,11 +7281,12 @@ async function getCatalogue(locale = "fr") {
       requiredPreposition: null,
       complementExample: (_c2 = complementByVerb.get(Number(row.id))) != null ? _c2 : null,
       complementFunctions: [...(_d2 = complementFunctionsByVerb.get(Number(row.id))) != null ? _d2 : []],
-      anteposableComplementFunctions: [...(_e = anteposableComplementFunctionsByVerb.get(Number(row.id))) != null ? _e : []]
+      anteposableComplementFunctions: [...(_e2 = anteposableComplementFunctionsByVerb.get(Number(row.id))) != null ? _e2 : []]
     };
   });
   const byId = new Map(verbs.map((verb) => [verb.id, verb]));
   const virtualPronominals = pronominalResult[0].flatMap((use) => {
+    var _a2;
     const base = byId.get(Number(use.verbe_id));
     if (!base) return [];
     const pronominalParticiple = (base.participePresent || "").split("-").map((form) => form.trim()).filter(Boolean).map((form) => {
@@ -7285,6 +7298,7 @@ async function getCatalogue(locale = "fr") {
       ...base,
       id: encodePronominalSelectionId(Number(use.id)),
       infinitif: use.infinitif_pronominal,
+      meaning: (_a2 = pronominalMeanings.get(`${base.id}:${use.infinitif_pronominal.replace(/’/gu, "'")}`)) != null ? _a2 : base.meaning,
       participePresent: pronominalParticiple,
       auxiliaire: "\xEAtre",
       typePronominal: use.type_emploi === "essentiel" ? "essentiel" : "occasionnel",
@@ -8144,9 +8158,9 @@ const semanticVerbSeeds = {
   nature: ["pleuvoir", "briller", "couler", "br\xFBler", "geler", "neiger", "fleurir", "pousser", "bouillir", "d\xE9border"]
 };
 
-const normalize = (value) => value.trim().toLocaleLowerCase("fr").normalize("NFC");
-const searchable = (value) => normalize(value).normalize("NFD").replace(/\p{Diacritic}/gu, "");
-const bare = (value) => normalize(value).replace(/^se\s+/u, "").replace(/^s['’]/u, "");
+const normalize$1 = (value) => value.trim().toLocaleLowerCase("fr").normalize("NFC");
+const searchable = (value) => normalize$1(value).normalize("NFD").replace(/\p{Diacritic}/gu, "");
+const bare = (value) => normalize$1(value).replace(/^se\s+/u, "").replace(/^s['’]/u, "");
 function ending$1(value) {
   if (value.endsWith("oir")) return "oir";
   if (value.endsWith("er")) return "er";
@@ -8183,13 +8197,13 @@ async function refreshVerbMetadata(database, verbId) {
     database.execute("SELECT infinitif, `participe_pr\xE9sent` AS participe_present FROM verbes")
   ]);
   if (!verb[0]) return;
-  const infinitive = normalize(verb[0].infinitif);
+  const infinitive = normalize$1(verb[0].infinitif);
   const base = bare(infinitive);
   const isPronominal = base !== infinitive;
   const group = base.endsWith("er") && base !== "aller" ? 1 : base.endsWith("ir") && searchable(verb[0].participe_present).replace(/^se\s+|^s['’]/u, "").endsWith("issant") ? 2 : 3;
   const familySlug = family(base, group);
   const [familyRows] = await database.execute("SELECT id FROM familles_conjugaison WHERE slug=?", [familySlug]);
-  const infinitiveSet = new Set(allInfinitives.map((row) => normalize(row.infinitif)));
+  const infinitiveSet = new Set(allInfinitives.map((row) => normalize$1(row.infinitif)));
   const levels = Object.entries(schoolVerbSeeds).filter(([, names]) => names.includes(infinitive)).map(([level]) => level);
   const cif = Object.entries(cifVerbSeeds).filter(([, names]) => names.includes(infinitive)).map(([level]) => level);
   const features = [];
@@ -122183,14 +122197,14 @@ const infinitiveCues = new Set([
 ]);
 
 const apostrophes$1 = value => String(value || '').replace(/[‘ʼ‛`´']/gu, '’');
-const normalized$1 = value => apostrophes$1(value).trim().toLocaleLowerCase('fr-CH');
-const folded$1 = value => normalized$1(value).normalize('NFD').replace(/\p{Diacritic}/gu, '');
+const normalized$2 = value => apostrophes$1(value).trim().toLocaleLowerCase('fr-CH');
+const folded$1 = value => normalized$2(value).normalize('NFD').replace(/\p{Diacritic}/gu, '');
 const beginsWithVowel$1 = (value) => 'aeiouy'.includes(value.trim().normalize('NFD').replace(/\p{Diacritic}/gu, '').charAt(0).toLowerCase());
 
 function subjectPrefix(pronoun, form, mode) {
-  if (normalized$1(mode) === 'impératif') return ''
+  if (normalized$2(mode) === 'impératif') return ''
   const subject = pronoun === 'je' && beginsWithVowel$1(form) ? 'j’' : `${pronoun} `;
-  return normalized$1(mode) === 'subjonctif'
+  return normalized$2(mode) === 'subjonctif'
     ? `${beginsWithVowel$1(pronoun) ? 'qu’' : 'que '}${subject}`
     : subject
 }
@@ -122210,7 +122224,7 @@ function occurrences$1(haystack, needle) {
 
 function tokenized(sentence) {
   return [...sentence.matchAll(/[\p{L}\p{N}]+(?:[’'’-][\p{L}\p{N}]+)*/gu)]
-    .map(match => ({ text: match[0], key: normalized$1(match[0]), start: Number(match.index), end: Number(match.index) + match[0].length }))
+    .map(match => ({ text: match[0], key: normalized$2(match[0]), start: Number(match.index), end: Number(match.index) + match[0].length }))
 }
 
 function relevantInfinitive(tokens, index, infinitiveKeys) {
@@ -122264,11 +122278,11 @@ async function inspectValidatedLiteraryEnrichment(connection) {
   const pastParticiples = new Set();
   const interveningAdverbs = new Set(['ainsi', 'assez', 'aussitôt', 'beaucoup', 'bien', 'déjà', 'encore', 'fort', 'même', 'parfaitement', 'simplement', 'toujours', 'trop']);
   for (const verb of verbs) {
-    const key = normalized$1(verb.infinitif);
+    const key = normalized$2(verb.infinitif);
     const rows = infinitivesByKey.get(key) || [];
     rows.push({ verbId: Number(verb.id), infinitive: verb.infinitif });
     infinitivesByKey.set(key, rows);
-    for (const part of String(verb.pastParticiple || '').split(/[-/,;|]/gu).map(normalized$1).filter(Boolean)) {
+    for (const part of String(verb.pastParticiple || '').split(/[-/,;|]/gu).map(normalized$2).filter(Boolean)) {
       pastParticiples.add(folded$1(part));
       pastParticiples.add(folded$1(`${part}e`));
       pastParticiples.add(folded$1(`${part}s`));
@@ -122283,7 +122297,7 @@ async function inspectValidatedLiteraryEnrichment(connection) {
       nextIndex += 1;
       skipped += 1;
     }
-    const rawNext = normalized$1(tokens[nextIndex]?.text || '');
+    const rawNext = normalized$2(tokens[nextIndex]?.text || '');
     return pastParticiples.has(folded$1(rawNext))
       || /(?:é|i|is|it|u|us|ut|ert|int)(?:e|s|es)?$/u.test(rawNext)
   };
@@ -122292,7 +122306,7 @@ async function inspectValidatedLiteraryEnrichment(connection) {
   for (const row of rareForms) {
     for (const form of new Set([row.conjugaison1, row.conjugaison2, row.conjugaison3].map(value => String(value || '').trim()).filter(Boolean))) {
       const display = `${subjectPrefix(row.pronom, form, row.mode)}${form}`;
-      const key = normalized$1(display);
+      const key = normalized$2(display);
       const candidates = rareDisplays.get(key) || [];
       candidates.push({
         verbId: Number(row.verbId), tenseId: Number(row.tenseId), personId: Number(row.personId),
@@ -122306,7 +122320,7 @@ async function inspectValidatedLiteraryEnrichment(connection) {
   const rareCandidates = [];
   for (const sentence of sentences) {
     const text = String(sentence.text);
-    const searchable = normalized$1(text);
+    const searchable = normalized$2(text);
     const spans = occupied.get(Number(sentence.id)) || new Set();
     const tokens = tokenized(text);
 
@@ -122341,7 +122355,7 @@ async function inspectValidatedLiteraryEnrichment(connection) {
         }
         const targetLength = candidate.targetText.length;
         const targetStart = end - targetLength;
-        const targetContext = normalized$1(text.slice(Math.max(0, targetStart - 50), targetStart));
+        const targetContext = normalized$2(text.slice(Math.max(0, targetStart - 50), targetStart));
         if (candidate.mode === 'subjonctif'
           && /(?:tandis|alors) que (?:j’|je|tu|il|elle|on|nous|vous|ils|elles)$/u.test(targetContext)) continue
         if (candidate.mode === 'subjonctif' && /c’est bien\b/u.test(targetContext)) continue
@@ -122489,8 +122503,8 @@ const MAX_PAST_INFINITIVES = 50;
 const MAX_GERUNDS = 50;
 
 const apostrophes = value => String(value || '').replace(/[‘ʼ‛`´']/gu, '’');
-const normalized = value => apostrophes(value).trim().toLocaleLowerCase('fr-CH');
-const folded = value => normalized(value).normalize('NFD').replace(/\p{Diacritic}/gu, '');
+const normalized$1 = value => apostrophes(value).trim().toLocaleLowerCase('fr-CH');
+const folded = value => normalized$1(value).normalize('NFD').replace(/\p{Diacritic}/gu, '');
 const beginsWithVowel = value => 'aeiouyh'.includes(folded(value).charAt(0));
 
 function occurrences(haystack, needle) {
@@ -122507,7 +122521,7 @@ function occurrences(haystack, needle) {
 }
 
 function variants(value) {
-  return String(value || '').split(/[-/,;|]/gu).map(normalized).filter(Boolean)
+  return String(value || '').split(/[-/,;|]/gu).map(normalized$1).filter(Boolean)
 }
 
 function agreedParticiples(value) {
@@ -122522,7 +122536,7 @@ function agreedParticiples(value) {
 }
 
 function auxiliaryFor(verb) {
-  const auxiliary = normalized(verb.auxiliary);
+  const auxiliary = normalized$1(verb.auxiliary);
   return auxiliary.includes('être') ? 'être' : 'avoir'
 }
 
@@ -122539,37 +122553,37 @@ function subjectPrefixes(pronoun, form, mode) {
 }
 
 function hasPastInfinitiveCue(text, start) {
-  const context = normalized(text.slice(Math.max(0, start - 55), start));
+  const context = normalized$1(text.slice(Math.max(0, start - 55), start));
   return /(?:^|[\s,;:—–-])(?:après|avant de|afin de|de|d’|pour|sans|semble|semblait|paraît|paraissait|devait|doit|peut|pouvait|croit|croyait|pensait|regrette|regrettait)\s*$/u.test(context)
 }
 
 function hasSubjunctiveCue(text, start, tense) {
   if (tense !== 'présent') return true
-  const context = normalized(text.slice(Math.max(0, start - 110), start));
+  const context = normalized$1(text.slice(Math.max(0, start - 110), start));
   return /(?:afin|avant|bien|encore|malgré|pour|quoique|sans|à moins|de peur|de crainte)\s*$/u.test(context)
     || /(?:faut|fallait|faudrait|faudra|veux|veut|voulait|voudrait|souhaite|souhaitait|désire|désirait|crains|craint|craignait|doute|doutait|regrette|regrettait|ordonne|ordonnait|demande|demandait|prie|priait|exige|exigeait|attends|attendait|empêche|empêchait|possible|nécessaire|heureux|heureuse|étonné|étonnée|surpris|surprise)[^.!?…]{0,45}$/u.test(context)
 }
 
 function hasCounterfactualCue(text, start) {
-  const context = normalized(text.slice(Math.max(0, start - 180), start));
+  const context = normalized$1(text.slice(Math.max(0, start - 180), start));
   return /(?:^|\b)(?:si|sans)\b/u.test(context)
     || /n’(?:eût|eussent|eussions|eussiez) été/u.test(context)
     || /\b(?:aurais|aurait|aurions|auriez|auraient|serais|serait|serions|seriez|seraient)\b[^.!?…]{0,90}\bqu[’e][^.!?…]{0,25}$/u.test(context)
 }
 
 function hasSubordinateQue(text, start) {
-  const context = normalized(text.slice(Math.max(0, start - 65), start));
+  const context = normalized$1(text.slice(Math.max(0, start - 65), start));
   return /(?:que|qu’)[^,.!?…:;]{1,55}$/u.test(context)
 }
 
 function hasSubjunctiveCompoundContext(text, start) {
   if (hasSubordinateQue(text, start)) return true
-  const context = normalized(text.slice(Math.max(0, start - 45), start));
+  const context = normalized$1(text.slice(Math.max(0, start - 45), start));
   return /comme\s+s[’'](?:il|elle|on|ils|elles|je|tu|nous|vous)\s*$/u.test(context)
 }
 
 function tokensWithSpans(text) {
-  return [...normalized(text).matchAll(/[\p{L}]+(?:[’'-][\p{L}]+)*/gu)]
+  return [...normalized$1(text).matchAll(/[\p{L}]+(?:[’'-][\p{L}]+)*/gu)]
     .flatMap((match) => {
       const raw = match[0];
       const baseStart = Number(match.index);
@@ -122687,7 +122701,7 @@ async function inspectValidatedLiteraryEnrichmentV2(connection) {
   const bareFiniteDisplays = new Map();
   const compoundFiniteDisplays = new Map();
   for (const row of finiteForms) {
-    for (const form of new Set([row.conjugaison1, row.conjugaison2, row.conjugaison3].map(normalized).filter(Boolean))) {
+    for (const form of new Set([row.conjugaison1, row.conjugaison2, row.conjugaison3].map(normalized$1).filter(Boolean))) {
       for (const display of subjectPrefixes(row.pronom, form, row.mode)) {
         const entries = finiteDisplays.get(display) || [];
         entries.push({
@@ -122724,7 +122738,7 @@ async function inspectValidatedLiteraryEnrichmentV2(connection) {
   const finiteCandidates = [];
   for (const sentence of sentences) {
     const text = String(sentence.text);
-    const searchable = normalized(text);
+    const searchable = normalized$1(text);
     occupied.get(Number(sentence.id)) || new Set();
     const ranges = occupiedRanges.get(Number(sentence.id)) || [];
     const details = existingDetails.get(Number(sentence.id)) || [];
@@ -122732,7 +122746,7 @@ async function inspectValidatedLiteraryEnrichmentV2(connection) {
     const overlapsExisting = (start, end) => ranges.some(([otherStart, otherEnd]) => start < otherEnd && end > otherStart);
     const targetBetweenClauseAnd = (start) => {
       const contextStart = Math.max(0, start - 65);
-      const context = normalized(text.slice(contextStart, start));
+      const context = normalized$1(text.slice(contextStart, start));
       const queOffset = Math.max(context.lastIndexOf('que '), context.lastIndexOf('qu’'));
       if (queOffset < 0) return false
       const clauseStart = contextStart + queOffset;
@@ -122802,7 +122816,7 @@ async function inspectValidatedLiteraryEnrichmentV2(connection) {
           const end = tokens[rightIndex].end;
           if (candidate.mode === 'subjonctif' && !hasSubjunctiveCompoundContext(text, start)) continue
           if (candidate.mode === 'conditionnel' && candidate.tense === 'passé 2') {
-            const context = normalized(text.slice(Math.max(0, start - 45), start));
+            const context = normalized$1(text.slice(Math.max(0, start - 45), start));
             if (/comme\s+s[’'][^.!?…]{0,20}$/u.test(context) || !hasCounterfactualCue(text, start)) continue
           }
           const overlaps = details.filter(item => start < item.end && end > item.start);
@@ -126578,7 +126592,7 @@ function databaseConfig() {
   return config
 }
 
-function json(value) {
+function json$1(value) {
   if (value === null || value === undefined) return null
   return typeof value === 'string' ? value : JSON.stringify(value)
 }
@@ -126684,21 +126698,21 @@ async function insertCandidate(
     group(candidate),
     model.famille_conjugaison_id,
     ending(candidate.lemma),
-    json([4, 5, 6, 7, 8, 9]),
+    json$1([4, 5, 6, 7, 8, 9]),
     model.type_h_initial,
     difficulty(candidate),
     pedagogy?.cefr || null,
     frequencyRank,
     candidate.lemma,
     pedagogy ? 'valide' : 'a_verifier',
-    json([
+    json$1([
       'source:lexique4',
       'formes:morphalou-3.1',
       'validation:academie-9e',
       ...(pedagogy ? [`pedagogie:${PILOT_SOURCE}`] : []),
     ]),
-    json(pedagogy?.schoolLevels || []),
-    json([]),
+    json$1(pedagogy?.schoolLevels || []),
+    json$1([]),
     pedagogy?.pronominalUse ? 1 : 0,
   ]);
   const verbId = Number(result.insertId);
@@ -126852,7 +126866,7 @@ async function insertPronominalUse(connection, table, verbId, pedagogy) {
     use.type,
     use.pronounFunction,
     use.agreementRule === 'sans_accord' ? 'invariable' : use.agreementRule,
-    json(use.allowedPersons),
+    json$1(use.allowedPersons),
     PILOT_SOURCE,
     pedagogy.sourceUrl,
   ]);
@@ -127406,7 +127420,7 @@ const _Gsjb0DrTn4ALdkEHuYoquQm8zSqtzzgTX9RdLcLGVvE = defineNitroPlugin(async () 
 });
 
 var schemaVersion = 1;
-var batchId = "challenge-publications-dutch-variants-20260905-001";
+var batchId$2 = "challenge-publications-dutch-variants-20260905-001";
 var publications = [
 	{
 		presetKey: "5P",
@@ -130603,7 +130617,7 @@ var publications = [
 ];
 const publicationDeployment = {
 	schemaVersion: schemaVersion,
-	batchId: batchId,
+	batchId: batchId$2,
 	publications: publications
 };
 
@@ -131039,6 +131053,34561 @@ const _0p9Qn2cgjufTUhq54tYFqiT9LNizSEnuaVDP0lL0mM = defineNitroPlugin((nitroApp)
   });
 });
 
+var batchId$1 = "fle-verbs-2026-11-17";
+var date$1 = "2026-11-17";
+var requested = [
+	"épeler",
+	"planter",
+	"décrire",
+	"posséder",
+	"coûter",
+	"détester",
+	"fermer",
+	"se maquiller",
+	"se peigner",
+	"se retrouver",
+	"revenir",
+	"conseiller",
+	"préparer",
+	"rédiger",
+	"réserver",
+	"regretter",
+	"se connecter",
+	"se garer",
+	"régler",
+	"récapituler",
+	"conseiller",
+	"se promener",
+	"patienter",
+	"raccrocher",
+	"quitter",
+	"démissionner",
+	"fonder",
+	"retourner",
+	"remercier",
+	"convenir",
+	"remplacer",
+	"préoccuper",
+	"s'énerver",
+	"se disputer",
+	"annuler",
+	"reporter",
+	"réparer",
+	"visser",
+	"toucher",
+	"supporter",
+	"tousser",
+	"s'entendre"
+];
+var entries = [
+	{
+		infinitive: "épeler",
+		definition: "Dire les lettres d’un mot une par une, dans leur ordre.",
+		semanticDomain: "communication",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "amonceler",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9E2140",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9E2140",
+		sourceHashes: {
+			article: "ab52f18248dcab2f98137145d4ad2957ffcbeccf54d3ae49e2ce8ed8cefddcff",
+			conjugation: "bb181e83e285532c0633bf9634cc78f9eab78f92291df833aa050c5d4c279916"
+		},
+		presentParticiple: "épelant",
+		pastParticiple: "épelé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"épelle",
+					"épèle"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"épelles",
+					"épèles"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"épelle",
+					"épèle"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"épelons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"épelez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"épellent",
+					"épèlent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"épelais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"épelais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"épelait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"épelions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"épeliez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"épelaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"épellerai",
+					"épèlerai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"épelleras",
+					"épèleras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"épellera",
+					"épèlera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"épellerons",
+					"épèlerons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"épellerez",
+					"épèlerez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"épelleront",
+					"épèleront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"épelai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"épelas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"épela"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"épelâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"épelâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"épelèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai épelé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as épelé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a épelé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons épelé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez épelé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont épelé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai épelé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras épelé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura épelé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons épelé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez épelé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront épelé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais épelé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais épelé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait épelé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions épelé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez épelé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient épelé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus épelé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus épelé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut épelé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes épelé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes épelé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent épelé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"épelle",
+					"épèle"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"épelons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"épelez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"épelle",
+					"épèle"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"épelles",
+					"épèles"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"épelle",
+					"épèle"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"épelions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"épeliez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"épellent",
+					"épèlent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie épelé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies épelé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait épelé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons épelé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez épelé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient épelé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"épellerais",
+					"épèlerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"épellerais",
+					"épèlerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"épellerait",
+					"épèlerait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"épellerions",
+					"épèlerions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"épelleriez",
+					"épèleriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"épelleraient",
+					"épèleraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais épelé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais épelé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait épelé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions épelé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez épelé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient épelé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"épelasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"épelasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"épelât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"épelassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"épelassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"épelassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse épelé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses épelé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût épelé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions épelé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez épelé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent épelé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie épelé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons épelé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez épelé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse épelé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses épelé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût épelé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions épelé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez épelé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent épelé"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "planter",
+		definition: "Mettre une plante ou une graine dans la terre pour la faire pousser.",
+		semanticDomain: "nature",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9P2749",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9P2749",
+		sourceHashes: {
+			article: "40d458d0cfa7a4440c8d3386f5afa3e96c06c9c2e90f21dfb2ab9a1b0dca0c85",
+			conjugation: "92bffe413618db6079b5bf106913e311118b73d95f512f2acaebfaf69093db5d"
+		},
+		presentParticiple: "plantant",
+		pastParticiple: "planté",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"plante"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"plantes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"plante"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"plantons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"plantez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"plantent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"plantais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"plantais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"plantait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"plantions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"plantiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"plantaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"planterai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"planteras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"plantera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"planterons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"planterez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"planteront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"plantai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"plantas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"planta"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"plantâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"plantâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"plantèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai planté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as planté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a planté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons planté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez planté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont planté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai planté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras planté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura planté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons planté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez planté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront planté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais planté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais planté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait planté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions planté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez planté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient planté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus planté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus planté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut planté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes planté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes planté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent planté"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"plante"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"plantons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"plantez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"plante"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"plantes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"plante"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"plantions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"plantiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"plantent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie planté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies planté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait planté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons planté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez planté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient planté"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"planterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"planterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"planterait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"planterions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"planteriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"planteraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais planté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais planté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait planté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions planté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez planté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient planté"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"plantasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"plantasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"plantât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"plantassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"plantassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"plantassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse planté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses planté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût planté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions planté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez planté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent planté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie planté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons planté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez planté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse planté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses planté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût planté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions planté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez planté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent planté"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "décrire",
+		definition: "Dire ou écrire comment est une personne, une chose ou un lieu.",
+		semanticDomain: "communication",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 3,
+		model: "écrire",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9D0648",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9D0648",
+		sourceHashes: {
+			article: "f2a566561b8b14470d55586d01a54cf1266eb40b7e10339a6feab59cbcc44211",
+			conjugation: "508d226f28749a4afaec856708734ceb814ff6176a1a5b292b254b8dcc0b9713"
+		},
+		presentParticiple: "décrivant",
+		pastParticiple: "décrit",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"décris"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"décris"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"décrit"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"décrivons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"décrivez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"décrivent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"décrivais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"décrivais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"décrivait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"décrivions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"décriviez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"décrivaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"décrirai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"décriras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"décrira"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"décrirons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"décrirez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"décriront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"décrivis"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"décrivis"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"décrivit"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"décrivîmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"décrivîtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"décrivirent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai décrit"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as décrit"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a décrit"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons décrit"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez décrit"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont décrit"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai décrit"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras décrit"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura décrit"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons décrit"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez décrit"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront décrit"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais décrit"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais décrit"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait décrit"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions décrit"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez décrit"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient décrit"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus décrit"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus décrit"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut décrit"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes décrit"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes décrit"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent décrit"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"décris"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"décrivons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"décrivez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"décrive"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"décrives"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"décrive"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"décrivions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"décriviez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"décrivent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie décrit"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies décrit"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait décrit"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons décrit"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez décrit"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient décrit"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"décrirais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"décrirais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"décrirait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"décririons"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"décririez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"décriraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais décrit"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais décrit"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait décrit"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions décrit"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez décrit"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient décrit"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"décrivisse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"décrivisses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"décrivît"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"décrivissions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"décrivissiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"décrivissent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse décrit"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses décrit"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût décrit"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions décrit"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez décrit"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent décrit"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie décrit"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons décrit"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez décrit"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse décrit"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses décrit"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût décrit"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions décrit"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez décrit"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent décrit"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "posséder",
+		definition: "Avoir une chose qui nous appartient.",
+		semanticDomain: "etat-existence",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "céder",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9P3586",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9P3586",
+		sourceHashes: {
+			article: "093f4705b5389397e929fcb19fbdd36d779339b79e9e85fdfdaa9586ed70cfe5",
+			conjugation: "37e1c042d472591225ada4eb0ef95d03ec31426899caefd89c80a48e161f5aec"
+		},
+		presentParticiple: "possédant",
+		pastParticiple: "possédé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"possède"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"possèdes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"possède"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"possédons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"possédez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"possèdent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"possédais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"possédais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"possédait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"possédions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"possédiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"possédaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"posséderai",
+					"possèderai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"posséderas",
+					"possèderas"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"possédera",
+					"possèdera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"posséderons",
+					"possèderons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"posséderez",
+					"possèderez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"posséderont",
+					"possèderont"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"possédai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"possédas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"posséda"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"possédâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"possédâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"possédèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai possédé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as possédé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a possédé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons possédé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez possédé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont possédé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai possédé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras possédé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura possédé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons possédé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez possédé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront possédé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais possédé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais possédé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait possédé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions possédé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez possédé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient possédé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus possédé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus possédé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut possédé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes possédé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes possédé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent possédé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"possède"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"possédons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"possédez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"possède"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"possèdes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"possède"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"possédions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"possédiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"possèdent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie possédé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies possédé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait possédé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons possédé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez possédé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient possédé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"posséderais",
+					"possèderais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"posséderais",
+					"possèderais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"posséderait",
+					"possèderait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"posséderions",
+					"possèderions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"posséderiez",
+					"possèderiez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"posséderaient",
+					"possèderaient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais possédé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais possédé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait possédé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions possédé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez possédé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient possédé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"possédasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"possédasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"possédât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"possédassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"possédassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"possédassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse possédé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses possédé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût possédé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions possédé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez possédé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent possédé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie possédé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons possédé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez possédé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse possédé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses possédé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût possédé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions possédé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez possédé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent possédé"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "coûter",
+		definition: "Avoir un prix ou demander une certaine somme d’argent.",
+		semanticDomain: "echange",
+		cefr: "A1",
+		transitivity: "intransitif",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9C4693",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9C4693",
+		sourceHashes: {
+			article: "f11e8d3816ca1080fff057e523d4196fc8179242472213d6157458c6eca60097",
+			conjugation: "2170584d1cd149f78ca638065a8cf687e776da10d4f93f7562154cd14b1ef762"
+		},
+		presentParticiple: "coûtant",
+		pastParticiple: "coûté",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"coûte"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"coûtes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"coûte"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"coûtons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"coûtez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"coûtent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"coûtais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"coûtais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"coûtait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"coûtions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"coûtiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"coûtaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"coûterai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"coûteras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"coûtera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"coûterons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"coûterez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"coûteront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"coûtai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"coûtas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"coûta"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"coûtâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"coûtâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"coûtèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai coûté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as coûté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a coûté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons coûté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez coûté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont coûté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai coûté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras coûté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura coûté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons coûté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez coûté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront coûté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais coûté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais coûté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait coûté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions coûté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez coûté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient coûté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus coûté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus coûté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut coûté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes coûté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes coûté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent coûté"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"coûte"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"coûtons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"coûtez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"coûte"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"coûtes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"coûte"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"coûtions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"coûtiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"coûtent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie coûté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies coûté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait coûté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons coûté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez coûté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient coûté"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"coûterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"coûterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"coûterait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"coûterions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"coûteriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"coûteraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais coûté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais coûté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait coûté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions coûté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez coûté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient coûté"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"coûtasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"coûtasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"coûtât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"coûtassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"coûtassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"coûtassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse coûté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses coûté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût coûté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions coûté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez coûté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent coûté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie coûté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons coûté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez coûté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse coûté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses coûté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût coûté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions coûté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez coûté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent coûté"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "détester",
+		definition: "Ne pas aimer du tout une personne, une chose ou une activité.",
+		semanticDomain: "emotion",
+		cefr: "A1",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9D2110",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9D2110",
+		sourceHashes: {
+			article: "fd846df47f42e1f367b2a7738db22a880f0b7565f6f5bf83304558e4e54fdc49",
+			conjugation: "128a3bd1b82ec4ddf66e0b5e1d2bf5f3c0d6650aca8d8b37da8a9a456043f089"
+		},
+		presentParticiple: "détestant",
+		pastParticiple: "détesté",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"déteste"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"détestes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"déteste"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"détestons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"détestez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"détestent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"détestais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"détestais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"détestait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"détestions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"détestiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"détestaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"détesterai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"détesteras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"détestera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"détesterons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"détesterez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"détesteront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"détestai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"détestas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"détesta"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"détestâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"détestâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"détestèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai détesté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as détesté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a détesté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons détesté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez détesté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont détesté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai détesté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras détesté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura détesté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons détesté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez détesté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront détesté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais détesté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais détesté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait détesté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions détesté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez détesté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient détesté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus détesté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus détesté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut détesté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes détesté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes détesté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent détesté"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"déteste"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"détestons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"détestez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"déteste"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"détestes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"déteste"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"détestions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"détestiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"détestent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie détesté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies détesté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait détesté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons détesté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez détesté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient détesté"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"détesterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"détesterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"détesterait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"détesterions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"détesteriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"détesteraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais détesté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais détesté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait détesté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions détesté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez détesté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient détesté"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"détestasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"détestasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"détestât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"détestassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"détestassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"détestassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse détesté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses détesté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût détesté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions détesté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez détesté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent détesté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie détesté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons détesté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez détesté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse détesté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses détesté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût détesté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions détesté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez détesté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent détesté"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "fermer",
+		definition: "Mettre une porte, une fenêtre ou un objet dans une position qui empêche le passage.",
+		semanticDomain: "manipulation",
+		cefr: "A1",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9F0498",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9F0498",
+		sourceHashes: {
+			article: "ef85b775d90a13b09c45e6af696ac1276e62c1754ea1c895aa593ad1f8ac081a",
+			conjugation: "9535651ddbc097127c97cdc4846cb092f02f08a0af9490576ec8f3f1b213223c"
+		},
+		presentParticiple: "fermant",
+		pastParticiple: "fermé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"ferme"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"fermes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"ferme"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"fermons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"fermez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"ferment"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"fermais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"fermais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"fermait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"fermions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"fermiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"fermaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"fermerai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"fermeras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"fermera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"fermerons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"fermerez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"fermeront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"fermai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"fermas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"ferma"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"fermâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"fermâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"fermèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai fermé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as fermé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a fermé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons fermé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez fermé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont fermé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai fermé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras fermé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura fermé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons fermé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez fermé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront fermé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais fermé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais fermé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait fermé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions fermé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez fermé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient fermé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus fermé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus fermé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut fermé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes fermé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes fermé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent fermé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"ferme"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"fermons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"fermez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"ferme"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"fermes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"ferme"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"fermions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"fermiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"ferment"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie fermé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies fermé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait fermé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons fermé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez fermé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient fermé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"fermerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"fermerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"fermerait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"fermerions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"fermeriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"fermeraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais fermé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais fermé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait fermé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions fermé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez fermé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient fermé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"fermasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"fermasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"fermât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"fermassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"fermassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"fermassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse fermé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses fermé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût fermé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions fermé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez fermé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent fermé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie fermé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons fermé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez fermé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse fermé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses fermé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût fermé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions fermé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez fermé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent fermé"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "maquiller",
+		definition: "Mettre des produits de maquillage sur le visage de quelqu’un.",
+		semanticDomain: "corps",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9M1009",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9M1009",
+		sourceHashes: {
+			article: "e283600c5861b81ad9fccf21eeb5ece03d9ce3bfa6a5a63cd670376cd1744257",
+			conjugation: "250ccf077e2a1038b49e3e2c94378977d85bc3750c8695ae8de2feb847442c36"
+		},
+		presentParticiple: "maquillant",
+		pastParticiple: "maquillé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"maquille"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"maquilles"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"maquille"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"maquillons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"maquillez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"maquillent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"maquillais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"maquillais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"maquillait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"maquillions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"maquilliez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"maquillaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"maquillerai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"maquilleras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"maquillera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"maquillerons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"maquillerez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"maquilleront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"maquillai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"maquillas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"maquilla"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"maquillâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"maquillâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"maquillèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai maquillé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as maquillé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a maquillé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons maquillé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez maquillé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont maquillé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai maquillé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras maquillé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura maquillé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons maquillé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez maquillé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront maquillé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais maquillé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais maquillé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait maquillé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions maquillé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez maquillé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient maquillé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus maquillé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus maquillé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut maquillé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes maquillé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes maquillé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent maquillé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"maquille"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"maquillons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"maquillez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"maquille"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"maquilles"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"maquille"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"maquillions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"maquilliez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"maquillent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie maquillé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies maquillé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait maquillé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons maquillé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez maquillé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient maquillé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"maquillerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"maquillerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"maquillerait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"maquillerions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"maquilleriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"maquilleraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais maquillé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais maquillé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait maquillé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions maquillé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez maquillé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient maquillé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"maquillasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"maquillasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"maquillât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"maquillassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"maquillassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"maquillassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse maquillé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses maquillé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût maquillé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions maquillé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez maquillé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent maquillé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie maquillé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons maquillé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez maquillé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse maquillé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses maquillé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût maquillé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions maquillé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez maquillé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent maquillé"
+				]
+			}
+		],
+		pronominal: {
+			infinitive: "se maquiller",
+			baseInfinitive: "maquiller",
+			definition: "Mettre des produits de maquillage sur son propre visage.",
+			allowedPersons: [
+				4,
+				5,
+				6,
+				7,
+				8,
+				9
+			],
+			agreement: "avec_sujet",
+			sourceUrl: "https://www.dictionnaire-academie.fr/article/A9M1009",
+			conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9M1009",
+			referenceRows: [
+				{
+					tenseId: 1,
+					personId: 4,
+					forms: [
+						"me maquille"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 5,
+					forms: [
+						"te maquilles"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 6,
+					forms: [
+						"se maquille"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 7,
+					forms: [
+						"nous maquillons"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 8,
+					forms: [
+						"vous maquillez"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 9,
+					forms: [
+						"se maquillent"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 4,
+					forms: [
+						"me maquillais"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 5,
+					forms: [
+						"te maquillais"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 6,
+					forms: [
+						"se maquillait"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 7,
+					forms: [
+						"nous maquillions"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 8,
+					forms: [
+						"vous maquilliez"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 9,
+					forms: [
+						"se maquillaient"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 4,
+					forms: [
+						"me maquillai"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 5,
+					forms: [
+						"te maquillas"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 6,
+					forms: [
+						"se maquilla"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 7,
+					forms: [
+						"nous maquillâmes"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 8,
+					forms: [
+						"vous maquillâtes"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 9,
+					forms: [
+						"se maquillèrent"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 4,
+					forms: [
+						"me maquillerai"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 5,
+					forms: [
+						"te maquilleras"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 6,
+					forms: [
+						"se maquillera"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 7,
+					forms: [
+						"nous maquillerons"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 8,
+					forms: [
+						"vous maquillerez"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 9,
+					forms: [
+						"se maquilleront"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 4,
+					forms: [
+						"me suis maquillé"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 5,
+					forms: [
+						"t'es maquillé"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 6,
+					forms: [
+						"s'est maquillé"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 7,
+					forms: [
+						"nous sommes maquillés"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 8,
+					forms: [
+						"vous êtes maquillés"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 9,
+					forms: [
+						"se sont maquillés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 4,
+					forms: [
+						"m'étais maquillé"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 5,
+					forms: [
+						"t'étais maquillé"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 6,
+					forms: [
+						"s'était maquillé"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 7,
+					forms: [
+						"nous étions maquillés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 8,
+					forms: [
+						"vous étiez maquillés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 9,
+					forms: [
+						"s'étaient maquillés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 4,
+					forms: [
+						"me fus maquillé"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 5,
+					forms: [
+						"te fus maquillé"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 6,
+					forms: [
+						"se fut maquillé"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 7,
+					forms: [
+						"nous fûmes maquillés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 8,
+					forms: [
+						"vous fûtes maquillés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 9,
+					forms: [
+						"se furent maquillés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 4,
+					forms: [
+						"me serai maquillé"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 5,
+					forms: [
+						"te seras maquillé"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 6,
+					forms: [
+						"se sera maquillé"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 7,
+					forms: [
+						"nous serons maquillés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 8,
+					forms: [
+						"vous serez maquillés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 9,
+					forms: [
+						"se seront maquillés"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 4,
+					forms: [
+						"me maquillerais"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 5,
+					forms: [
+						"te maquillerais"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 6,
+					forms: [
+						"se maquillerait"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 7,
+					forms: [
+						"nous maquillerions"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 8,
+					forms: [
+						"vous maquilleriez"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 9,
+					forms: [
+						"se maquilleraient"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 4,
+					forms: [
+						"me serais maquillé"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 5,
+					forms: [
+						"te serais maquillé"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 6,
+					forms: [
+						"se serait maquillé"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 7,
+					forms: [
+						"nous serions maquillés"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 8,
+					forms: [
+						"vous seriez maquillés"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 9,
+					forms: [
+						"se seraient maquillés"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 4,
+					forms: [
+						"me maquille"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 5,
+					forms: [
+						"te maquilles"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 6,
+					forms: [
+						"se maquille"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 7,
+					forms: [
+						"nous maquillions"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 8,
+					forms: [
+						"vous maquilliez"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 9,
+					forms: [
+						"se maquillent"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 4,
+					forms: [
+						"me maquillasse"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 5,
+					forms: [
+						"te maquillasses"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 6,
+					forms: [
+						"se maquillât"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 7,
+					forms: [
+						"nous maquillassions"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 8,
+					forms: [
+						"vous maquillassiez"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 9,
+					forms: [
+						"se maquillassent"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 4,
+					forms: [
+						"me sois maquillé"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 5,
+					forms: [
+						"te sois maquillé"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 6,
+					forms: [
+						"se soit maquillé"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 7,
+					forms: [
+						"nous soyons maquillés"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 8,
+					forms: [
+						"vous soyez maquillés"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 9,
+					forms: [
+						"se soient maquillés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 4,
+					forms: [
+						"me fusse maquillé"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 5,
+					forms: [
+						"te fusses maquillé"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 6,
+					forms: [
+						"se fût maquillé"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 7,
+					forms: [
+						"nous fussions maquillés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 8,
+					forms: [
+						"vous fussiez maquillés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 9,
+					forms: [
+						"se fussent maquillés"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 5,
+					forms: [
+						"maquille-toi"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 7,
+					forms: [
+						"maquillons-nous"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 8,
+					forms: [
+						"maquillez-vous"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 5,
+					forms: [
+						"sois-toi maquillé"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 7,
+					forms: [
+						"soyons-nous maquillés"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 8,
+					forms: [
+						"soyez-vous maquillés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 4,
+					forms: [
+						"me fusse maquillé"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 5,
+					forms: [
+						"te fusses maquillé"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 6,
+					forms: [
+						"se fût maquillé"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 7,
+					forms: [
+						"nous fussions maquillés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 8,
+					forms: [
+						"vous fussiez maquillés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 9,
+					forms: [
+						"se fussent maquillés"
+					]
+				}
+			]
+		}
+	},
+	{
+		infinitive: "peigner",
+		definition: "Passer un peigne dans les cheveux de quelqu’un.",
+		semanticDomain: "corps",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9P1218",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9P1218",
+		sourceHashes: {
+			article: "b7da89f0feb62151490ec871e52e90e33f467081db97a90c43756049786e12cf",
+			conjugation: "20e86df03f76fdbdc98bc7e711f5f446908a7ce281408f826472530ed48d5e33"
+		},
+		presentParticiple: "peignant",
+		pastParticiple: "peigné",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"peigne"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"peignes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"peigne"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"peignons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"peignez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"peignent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"peignais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"peignais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"peignait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"peignions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"peigniez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"peignaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"peignerai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"peigneras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"peignera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"peignerons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"peignerez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"peigneront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"peignai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"peignas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"peigna"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"peignâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"peignâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"peignèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai peigné"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as peigné"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a peigné"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons peigné"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez peigné"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont peigné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai peigné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras peigné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura peigné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons peigné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez peigné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront peigné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais peigné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais peigné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait peigné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions peigné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez peigné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient peigné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus peigné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus peigné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut peigné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes peigné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes peigné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent peigné"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"peigne"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"peignons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"peignez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"peigne"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"peignes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"peigne"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"peignions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"peigniez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"peignent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie peigné"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies peigné"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait peigné"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons peigné"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez peigné"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient peigné"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"peignerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"peignerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"peignerait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"peignerions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"peigneriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"peigneraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais peigné"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais peigné"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait peigné"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions peigné"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez peigné"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient peigné"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"peignasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"peignasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"peignât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"peignassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"peignassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"peignassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse peigné"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses peigné"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût peigné"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions peigné"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez peigné"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent peigné"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie peigné"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons peigné"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez peigné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse peigné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses peigné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût peigné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions peigné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez peigné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent peigné"
+				]
+			}
+		],
+		pronominal: {
+			infinitive: "se peigner",
+			baseInfinitive: "peigner",
+			definition: "Passer un peigne dans ses propres cheveux.",
+			allowedPersons: [
+				4,
+				5,
+				6,
+				7,
+				8,
+				9
+			],
+			agreement: "avec_sujet",
+			sourceUrl: "https://www.dictionnaire-academie.fr/article/A9P1218",
+			conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9P1218",
+			referenceRows: [
+				{
+					tenseId: 1,
+					personId: 4,
+					forms: [
+						"me peigne"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 5,
+					forms: [
+						"te peignes"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 6,
+					forms: [
+						"se peigne"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 7,
+					forms: [
+						"nous peignons"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 8,
+					forms: [
+						"vous peignez"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 9,
+					forms: [
+						"se peignent"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 4,
+					forms: [
+						"me peignais"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 5,
+					forms: [
+						"te peignais"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 6,
+					forms: [
+						"se peignait"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 7,
+					forms: [
+						"nous peignions"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 8,
+					forms: [
+						"vous peigniez"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 9,
+					forms: [
+						"se peignaient"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 4,
+					forms: [
+						"me peignai"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 5,
+					forms: [
+						"te peignas"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 6,
+					forms: [
+						"se peigna"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 7,
+					forms: [
+						"nous peignâmes"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 8,
+					forms: [
+						"vous peignâtes"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 9,
+					forms: [
+						"se peignèrent"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 4,
+					forms: [
+						"me peignerai"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 5,
+					forms: [
+						"te peigneras"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 6,
+					forms: [
+						"se peignera"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 7,
+					forms: [
+						"nous peignerons"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 8,
+					forms: [
+						"vous peignerez"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 9,
+					forms: [
+						"se peigneront"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 4,
+					forms: [
+						"me suis peigné"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 5,
+					forms: [
+						"t'es peigné"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 6,
+					forms: [
+						"s'est peigné"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 7,
+					forms: [
+						"nous sommes peignés"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 8,
+					forms: [
+						"vous êtes peignés"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 9,
+					forms: [
+						"se sont peignés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 4,
+					forms: [
+						"m'étais peigné"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 5,
+					forms: [
+						"t'étais peigné"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 6,
+					forms: [
+						"s'était peigné"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 7,
+					forms: [
+						"nous étions peignés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 8,
+					forms: [
+						"vous étiez peignés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 9,
+					forms: [
+						"s'étaient peignés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 4,
+					forms: [
+						"me fus peigné"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 5,
+					forms: [
+						"te fus peigné"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 6,
+					forms: [
+						"se fut peigné"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 7,
+					forms: [
+						"nous fûmes peignés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 8,
+					forms: [
+						"vous fûtes peignés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 9,
+					forms: [
+						"se furent peignés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 4,
+					forms: [
+						"me serai peigné"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 5,
+					forms: [
+						"te seras peigné"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 6,
+					forms: [
+						"se sera peigné"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 7,
+					forms: [
+						"nous serons peignés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 8,
+					forms: [
+						"vous serez peignés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 9,
+					forms: [
+						"se seront peignés"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 4,
+					forms: [
+						"me peignerais"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 5,
+					forms: [
+						"te peignerais"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 6,
+					forms: [
+						"se peignerait"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 7,
+					forms: [
+						"nous peignerions"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 8,
+					forms: [
+						"vous peigneriez"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 9,
+					forms: [
+						"se peigneraient"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 4,
+					forms: [
+						"me serais peigné"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 5,
+					forms: [
+						"te serais peigné"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 6,
+					forms: [
+						"se serait peigné"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 7,
+					forms: [
+						"nous serions peignés"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 8,
+					forms: [
+						"vous seriez peignés"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 9,
+					forms: [
+						"se seraient peignés"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 4,
+					forms: [
+						"me peigne"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 5,
+					forms: [
+						"te peignes"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 6,
+					forms: [
+						"se peigne"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 7,
+					forms: [
+						"nous peignions"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 8,
+					forms: [
+						"vous peigniez"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 9,
+					forms: [
+						"se peignent"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 4,
+					forms: [
+						"me peignasse"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 5,
+					forms: [
+						"te peignasses"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 6,
+					forms: [
+						"se peignât"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 7,
+					forms: [
+						"nous peignassions"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 8,
+					forms: [
+						"vous peignassiez"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 9,
+					forms: [
+						"se peignassent"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 4,
+					forms: [
+						"me sois peigné"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 5,
+					forms: [
+						"te sois peigné"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 6,
+					forms: [
+						"se soit peigné"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 7,
+					forms: [
+						"nous soyons peignés"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 8,
+					forms: [
+						"vous soyez peignés"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 9,
+					forms: [
+						"se soient peignés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 4,
+					forms: [
+						"me fusse peigné"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 5,
+					forms: [
+						"te fusses peigné"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 6,
+					forms: [
+						"se fût peigné"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 7,
+					forms: [
+						"nous fussions peignés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 8,
+					forms: [
+						"vous fussiez peignés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 9,
+					forms: [
+						"se fussent peignés"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 5,
+					forms: [
+						"peigne-toi"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 7,
+					forms: [
+						"peignons-nous"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 8,
+					forms: [
+						"peignez-vous"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 5,
+					forms: [
+						"sois-toi peigné"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 7,
+					forms: [
+						"soyons-nous peignés"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 8,
+					forms: [
+						"soyez-vous peignés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 4,
+					forms: [
+						"me fusse peigné"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 5,
+					forms: [
+						"te fusses peigné"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 6,
+					forms: [
+						"se fût peigné"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 7,
+					forms: [
+						"nous fussions peignés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 8,
+					forms: [
+						"vous fussiez peignés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 9,
+					forms: [
+						"se fussent peignés"
+					]
+				}
+			]
+		}
+	},
+	{
+		infinitive: "retrouver",
+		definition: "Trouver de nouveau une personne ou une chose que l’on cherchait.",
+		semanticDomain: "action-processus",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9R2323",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9R2323",
+		sourceHashes: {
+			article: "f316e5c1d3ebbeb476c83c86a78071f4b8acf810712d7720322d5e601ada90fd",
+			conjugation: "fae2a3e6c6d449ec4367e4fd4c43f13fadad4525744524a169ab9e5bb891fc79"
+		},
+		presentParticiple: "retrouvant",
+		pastParticiple: "retrouvé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"retrouve"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"retrouves"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"retrouve"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"retrouvons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"retrouvez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"retrouvent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"retrouvais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"retrouvais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"retrouvait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"retrouvions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"retrouviez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"retrouvaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"retrouverai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"retrouveras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"retrouvera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"retrouverons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"retrouverez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"retrouveront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"retrouvai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"retrouvas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"retrouva"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"retrouvâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"retrouvâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"retrouvèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai retrouvé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as retrouvé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a retrouvé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons retrouvé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez retrouvé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont retrouvé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai retrouvé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras retrouvé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura retrouvé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons retrouvé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez retrouvé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront retrouvé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais retrouvé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais retrouvé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait retrouvé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions retrouvé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez retrouvé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient retrouvé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus retrouvé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus retrouvé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut retrouvé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes retrouvé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes retrouvé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent retrouvé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"retrouve"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"retrouvons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"retrouvez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"retrouve"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"retrouves"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"retrouve"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"retrouvions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"retrouviez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"retrouvent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie retrouvé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies retrouvé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait retrouvé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons retrouvé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez retrouvé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient retrouvé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"retrouverais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"retrouverais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"retrouverait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"retrouverions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"retrouveriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"retrouveraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais retrouvé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais retrouvé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait retrouvé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions retrouvé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez retrouvé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient retrouvé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"retrouvasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"retrouvasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"retrouvât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"retrouvassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"retrouvassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"retrouvassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse retrouvé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses retrouvé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût retrouvé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions retrouvé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez retrouvé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent retrouvé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie retrouvé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons retrouvé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez retrouvé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse retrouvé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses retrouvé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût retrouvé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions retrouvé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez retrouvé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent retrouvé"
+				]
+			}
+		],
+		pronominal: {
+			infinitive: "se retrouver",
+			baseInfinitive: "retrouver",
+			definition: "Être de nouveau avec une personne ou dans un même lieu.",
+			allowedPersons: [
+				4,
+				5,
+				6,
+				7,
+				8,
+				9
+			],
+			agreement: "avec_sujet",
+			sourceUrl: "https://www.dictionnaire-academie.fr/article/A9R2323",
+			conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9R2323",
+			referenceRows: [
+				{
+					tenseId: 1,
+					personId: 4,
+					forms: [
+						"me retrouve"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 5,
+					forms: [
+						"te retrouves"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 6,
+					forms: [
+						"se retrouve"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 7,
+					forms: [
+						"nous retrouvons"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 8,
+					forms: [
+						"vous retrouvez"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 9,
+					forms: [
+						"se retrouvent"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 4,
+					forms: [
+						"me retrouvais"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 5,
+					forms: [
+						"te retrouvais"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 6,
+					forms: [
+						"se retrouvait"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 7,
+					forms: [
+						"nous retrouvions"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 8,
+					forms: [
+						"vous retrouviez"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 9,
+					forms: [
+						"se retrouvaient"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 4,
+					forms: [
+						"me retrouvai"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 5,
+					forms: [
+						"te retrouvas"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 6,
+					forms: [
+						"se retrouva"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 7,
+					forms: [
+						"nous retrouvâmes"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 8,
+					forms: [
+						"vous retrouvâtes"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 9,
+					forms: [
+						"se retrouvèrent"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 4,
+					forms: [
+						"me retrouverai"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 5,
+					forms: [
+						"te retrouveras"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 6,
+					forms: [
+						"se retrouvera"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 7,
+					forms: [
+						"nous retrouverons"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 8,
+					forms: [
+						"vous retrouverez"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 9,
+					forms: [
+						"se retrouveront"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 4,
+					forms: [
+						"me suis retrouvé"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 5,
+					forms: [
+						"t'es retrouvé"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 6,
+					forms: [
+						"s'est retrouvé"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 7,
+					forms: [
+						"nous sommes retrouvés"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 8,
+					forms: [
+						"vous êtes retrouvés"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 9,
+					forms: [
+						"se sont retrouvés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 4,
+					forms: [
+						"m'étais retrouvé"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 5,
+					forms: [
+						"t'étais retrouvé"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 6,
+					forms: [
+						"s'était retrouvé"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 7,
+					forms: [
+						"nous étions retrouvés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 8,
+					forms: [
+						"vous étiez retrouvés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 9,
+					forms: [
+						"s'étaient retrouvés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 4,
+					forms: [
+						"me fus retrouvé"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 5,
+					forms: [
+						"te fus retrouvé"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 6,
+					forms: [
+						"se fut retrouvé"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 7,
+					forms: [
+						"nous fûmes retrouvés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 8,
+					forms: [
+						"vous fûtes retrouvés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 9,
+					forms: [
+						"se furent retrouvés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 4,
+					forms: [
+						"me serai retrouvé"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 5,
+					forms: [
+						"te seras retrouvé"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 6,
+					forms: [
+						"se sera retrouvé"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 7,
+					forms: [
+						"nous serons retrouvés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 8,
+					forms: [
+						"vous serez retrouvés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 9,
+					forms: [
+						"se seront retrouvés"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 4,
+					forms: [
+						"me retrouverais"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 5,
+					forms: [
+						"te retrouverais"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 6,
+					forms: [
+						"se retrouverait"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 7,
+					forms: [
+						"nous retrouverions"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 8,
+					forms: [
+						"vous retrouveriez"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 9,
+					forms: [
+						"se retrouveraient"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 4,
+					forms: [
+						"me serais retrouvé"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 5,
+					forms: [
+						"te serais retrouvé"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 6,
+					forms: [
+						"se serait retrouvé"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 7,
+					forms: [
+						"nous serions retrouvés"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 8,
+					forms: [
+						"vous seriez retrouvés"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 9,
+					forms: [
+						"se seraient retrouvés"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 4,
+					forms: [
+						"me retrouve"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 5,
+					forms: [
+						"te retrouves"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 6,
+					forms: [
+						"se retrouve"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 7,
+					forms: [
+						"nous retrouvions"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 8,
+					forms: [
+						"vous retrouviez"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 9,
+					forms: [
+						"se retrouvent"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 4,
+					forms: [
+						"me retrouvasse"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 5,
+					forms: [
+						"te retrouvasses"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 6,
+					forms: [
+						"se retrouvât"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 7,
+					forms: [
+						"nous retrouvassions"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 8,
+					forms: [
+						"vous retrouvassiez"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 9,
+					forms: [
+						"se retrouvassent"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 4,
+					forms: [
+						"me sois retrouvé"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 5,
+					forms: [
+						"te sois retrouvé"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 6,
+					forms: [
+						"se soit retrouvé"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 7,
+					forms: [
+						"nous soyons retrouvés"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 8,
+					forms: [
+						"vous soyez retrouvés"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 9,
+					forms: [
+						"se soient retrouvés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 4,
+					forms: [
+						"me fusse retrouvé"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 5,
+					forms: [
+						"te fusses retrouvé"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 6,
+					forms: [
+						"se fût retrouvé"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 7,
+					forms: [
+						"nous fussions retrouvés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 8,
+					forms: [
+						"vous fussiez retrouvés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 9,
+					forms: [
+						"se fussent retrouvés"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 5,
+					forms: [
+						"retrouve-toi"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 7,
+					forms: [
+						"retrouvons-nous"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 8,
+					forms: [
+						"retrouvez-vous"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 5,
+					forms: [
+						"sois-toi retrouvé"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 7,
+					forms: [
+						"soyons-nous retrouvés"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 8,
+					forms: [
+						"soyez-vous retrouvés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 4,
+					forms: [
+						"me fusse retrouvé"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 5,
+					forms: [
+						"te fusses retrouvé"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 6,
+					forms: [
+						"se fût retrouvé"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 7,
+					forms: [
+						"nous fussions retrouvés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 8,
+					forms: [
+						"vous fussiez retrouvés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 9,
+					forms: [
+						"se fussent retrouvés"
+					]
+				}
+			]
+		}
+	},
+	{
+		infinitive: "revenir",
+		definition: "Venir de nouveau dans un lieu où l’on était auparavant.",
+		semanticDomain: "mouvement",
+		cefr: "A1",
+		transitivity: "intransitif",
+		preposition: null,
+		auxiliary: "être",
+		group: 3,
+		model: "tenir",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9R2376",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9R2376",
+		sourceHashes: {
+			article: "e8c5f6ce2cf70d590052f854852c74420a75b14e188389087be9affa43e42e93",
+			conjugation: "8288cc9cad258607fe801ac14ad843ccd14d773950dd60714e115848f17764c0"
+		},
+		presentParticiple: "revenant",
+		pastParticiple: "revenu",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"reviens"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"reviens"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"revient"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"revenons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"revenez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"reviennent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"revenais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"revenais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"revenait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"revenions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"reveniez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"revenaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"reviendrai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"reviendras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"reviendra"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"reviendrons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"reviendrez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"reviendront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"revins"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"revins"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"revint"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"revînmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"revîntes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"revinrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"suis revenu"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"es revenu"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"est revenu"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"sommes revenus"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"êtes revenus"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"sont revenus"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"serai revenu"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"seras revenu"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"sera revenu"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"serons revenus"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"serez revenus"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"seront revenus"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"étais revenu"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"étais revenu"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"était revenu"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"étions revenus"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"étiez revenus"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"étaient revenus"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"fus revenu"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"fus revenu"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"fut revenu"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"fûmes revenus"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"fûtes revenus"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"furent revenus"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"reviens"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"revenons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"revenez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"revienne"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"reviennes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"revienne"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"revenions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"reveniez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"reviennent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"sois revenu"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"sois revenu"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"soit revenu"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"soyons revenus"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"soyez revenus"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"soient revenus"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"reviendrais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"reviendrais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"reviendrait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"reviendrions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"reviendriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"reviendraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"serais revenu"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"serais revenu"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"serait revenu"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"serions revenus"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"seriez revenus"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"seraient revenus"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"revinsse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"revinsses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"revînt"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"revinssions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"revinssiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"revinssent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"fusse revenu"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"fusses revenu"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"fût revenu"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"fussions revenus"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"fussiez revenus"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"fussent revenus"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"sois revenu"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"soyons revenus"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"soyez revenus"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"fusse revenu"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"fusses revenu"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"fût revenu"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"fussions revenus"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"fussiez revenus"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"fussent revenus"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "conseiller",
+		definition: "Dire à quelqu’un ce qui pourrait l’aider ou ce qu’il pourrait faire.",
+		semanticDomain: "communication",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9C3676",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9C3676",
+		sourceHashes: {
+			article: "d3c2bcf8ec040ff339b6153b4eb5950511f205c241b68ff2ee2aaff077ca3bd7",
+			conjugation: "61f36435548d83edc67f121a9328b9241ec8164f6250e249ae9f676c95d282c6"
+		},
+		presentParticiple: "conseillant",
+		pastParticiple: "conseillé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"conseille"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"conseilles"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"conseille"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"conseillons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"conseillez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"conseillent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"conseillais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"conseillais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"conseillait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"conseillions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"conseilliez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"conseillaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"conseillerai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"conseilleras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"conseillera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"conseillerons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"conseillerez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"conseilleront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"conseillai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"conseillas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"conseilla"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"conseillâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"conseillâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"conseillèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai conseillé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as conseillé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a conseillé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons conseillé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez conseillé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont conseillé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai conseillé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras conseillé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura conseillé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons conseillé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez conseillé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront conseillé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais conseillé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais conseillé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait conseillé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions conseillé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez conseillé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient conseillé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus conseillé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus conseillé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut conseillé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes conseillé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes conseillé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent conseillé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"conseille"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"conseillons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"conseillez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"conseille"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"conseilles"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"conseille"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"conseillions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"conseilliez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"conseillent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie conseillé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies conseillé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait conseillé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons conseillé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez conseillé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient conseillé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"conseillerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"conseillerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"conseillerait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"conseillerions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"conseilleriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"conseilleraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais conseillé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais conseillé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait conseillé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions conseillé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez conseillé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient conseillé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"conseillasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"conseillasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"conseillât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"conseillassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"conseillassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"conseillassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse conseillé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses conseillé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût conseillé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions conseillé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez conseillé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent conseillé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie conseillé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons conseillé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez conseillé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse conseillé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses conseillé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût conseillé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions conseillé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez conseillé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent conseillé"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "préparer",
+		definition: "Faire ce qui est nécessaire pour qu’une chose soit prête.",
+		semanticDomain: "action-processus",
+		cefr: "A1",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9P4090",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9P4090",
+		sourceHashes: {
+			article: "81348ea2676d7a9a13bf18748b35195d7e7139d9d936fab031fb4c4b5bfc2241",
+			conjugation: "b47f0b136b060f245203d08ae19a2e65e297230d70caec86f892dc88a85a2d3a"
+		},
+		presentParticiple: "préparant",
+		pastParticiple: "préparé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"prépare"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"prépares"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"prépare"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"préparons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"préparez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"préparent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"préparais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"préparais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"préparait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"préparions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"prépariez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"préparaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"préparerai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"prépareras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"préparera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"préparerons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"préparerez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"prépareront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"préparai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"préparas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"prépara"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"préparâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"préparâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"préparèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai préparé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as préparé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a préparé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons préparé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez préparé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont préparé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai préparé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras préparé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura préparé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons préparé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez préparé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront préparé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais préparé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais préparé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait préparé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions préparé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez préparé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient préparé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus préparé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus préparé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut préparé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes préparé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes préparé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent préparé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"prépare"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"préparons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"préparez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"prépare"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"prépares"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"prépare"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"préparions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"prépariez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"préparent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie préparé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies préparé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait préparé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons préparé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez préparé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient préparé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"préparerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"préparerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"préparerait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"préparerions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"prépareriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"prépareraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais préparé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais préparé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait préparé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions préparé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez préparé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient préparé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"préparasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"préparasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"préparât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"préparassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"préparassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"préparassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse préparé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses préparé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût préparé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions préparé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez préparé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent préparé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie préparé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons préparé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez préparé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse préparé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses préparé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût préparé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions préparé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez préparé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent préparé"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "rédiger",
+		definition: "Écrire un texte en choisissant et en organisant ses mots.",
+		semanticDomain: "communication",
+		cefr: "B1",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "bouger",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9R1104",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9R1104",
+		sourceHashes: {
+			article: "2cc6ebb75ec4a96d87e6bc180b8de9005296268b0561e6db966fbe506dac697b",
+			conjugation: "c5246968af7a3a89b00883b5329fa88006cf696f09db623a0529511fda98c852"
+		},
+		presentParticiple: "rédigeant",
+		pastParticiple: "rédigé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"rédige"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"rédiges"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"rédige"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"rédigeons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"rédigez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"rédigent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"rédigeais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"rédigeais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"rédigeait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"rédigions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"rédigiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"rédigeaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"rédigerai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"rédigeras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"rédigera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"rédigerons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"rédigerez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"rédigeront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"rédigeai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"rédigeas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"rédigea"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"rédigeâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"rédigeâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"rédigèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai rédigé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as rédigé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a rédigé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons rédigé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez rédigé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont rédigé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai rédigé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras rédigé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura rédigé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons rédigé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez rédigé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront rédigé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais rédigé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais rédigé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait rédigé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions rédigé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez rédigé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient rédigé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus rédigé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus rédigé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut rédigé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes rédigé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes rédigé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent rédigé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"rédige"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"rédigeons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"rédigez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"rédige"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"rédiges"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"rédige"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"rédigions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"rédigiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"rédigent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie rédigé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies rédigé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait rédigé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons rédigé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez rédigé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient rédigé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"rédigerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"rédigerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"rédigerait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"rédigerions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"rédigeriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"rédigeraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais rédigé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais rédigé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait rédigé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions rédigé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez rédigé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient rédigé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"rédigeasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"rédigeasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"rédigeât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"rédigeassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"rédigeassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"rédigeassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse rédigé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses rédigé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût rédigé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions rédigé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez rédigé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent rédigé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie rédigé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons rédigé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez rédigé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse rédigé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses rédigé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût rédigé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions rédigé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez rédigé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent rédigé"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "réserver",
+		definition: "Demander à garder une place, une chambre ou un objet pour plus tard.",
+		semanticDomain: "echange",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9R2028",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9R2028",
+		sourceHashes: {
+			article: "fea244eedd17ff18552e0c84007a7ea280e29a483c036a5e386b3b1f6271e375",
+			conjugation: "7a04da37b302af96545d8b5530c5140913fbdd95010c622c08baafbbccbb665f"
+		},
+		presentParticiple: "réservant",
+		pastParticiple: "réservé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"réserve"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"réserves"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"réserve"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"réservons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"réservez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"réservent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"réservais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"réservais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"réservait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"réservions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"réserviez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"réservaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"réserverai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"réserveras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"réservera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"réserverons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"réserverez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"réserveront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"réservai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"réservas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"réserva"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"réservâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"réservâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"réservèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai réservé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as réservé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a réservé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons réservé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez réservé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont réservé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai réservé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras réservé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura réservé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons réservé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez réservé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront réservé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais réservé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais réservé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait réservé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions réservé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez réservé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient réservé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus réservé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus réservé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut réservé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes réservé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes réservé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent réservé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"réserve"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"réservons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"réservez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"réserve"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"réserves"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"réserve"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"réservions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"réserviez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"réservent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie réservé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies réservé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait réservé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons réservé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez réservé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient réservé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"réserverais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"réserverais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"réserverait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"réserverions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"réserveriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"réserveraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais réservé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais réservé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait réservé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions réservé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez réservé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient réservé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"réservasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"réservasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"réservât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"réservassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"réservassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"réservassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse réservé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses réservé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût réservé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions réservé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez réservé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent réservé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie réservé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons réservé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez réservé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse réservé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses réservé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût réservé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions réservé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez réservé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent réservé"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "regretter",
+		definition: "Être triste à cause d’une chose passée ou de l’absence de quelqu’un.",
+		semanticDomain: "emotion",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9R1366",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9R1366",
+		sourceHashes: {
+			article: "6848b5e93ea20e3c44924842843260c25e0781a03eb5c5cc9a64725d5853a9fe",
+			conjugation: "f28c441caceb5f133fe9a751629e0848e9cd39a4d00f3f5535619ddd840545c4"
+		},
+		presentParticiple: "regrettant",
+		pastParticiple: "regretté",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"regrette"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"regrettes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"regrette"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"regrettons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"regrettez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"regrettent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"regrettais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"regrettais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"regrettait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"regrettions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"regrettiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"regrettaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"regretterai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"regretteras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"regrettera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"regretterons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"regretterez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"regretteront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"regrettai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"regrettas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"regretta"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"regrettâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"regrettâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"regrettèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai regretté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as regretté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a regretté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons regretté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez regretté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont regretté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai regretté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras regretté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura regretté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons regretté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez regretté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront regretté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais regretté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais regretté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait regretté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions regretté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez regretté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient regretté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus regretté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus regretté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut regretté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes regretté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes regretté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent regretté"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"regrette"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"regrettons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"regrettez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"regrette"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"regrettes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"regrette"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"regrettions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"regrettiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"regrettent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie regretté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies regretté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait regretté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons regretté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez regretté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient regretté"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"regretterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"regretterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"regretterait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"regretterions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"regretteriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"regretteraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais regretté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais regretté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait regretté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions regretté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez regretté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient regretté"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"regrettasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"regrettasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"regrettât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"regrettassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"regrettassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"regrettassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse regretté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses regretté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût regretté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions regretté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez regretté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent regretté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie regretté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons regretté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez regretté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse regretté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses regretté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût regretté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions regretté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez regretté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent regretté"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "connecter",
+		definition: "Relier un appareil à un autre appareil ou à un réseau.",
+		semanticDomain: "action-processus",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9C3637",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9C3637",
+		sourceHashes: {
+			article: "e3b90483eadb2fd8bb7b563d4cd3a42bfb2324be93e23d1a4fdba78fd5b86bfe",
+			conjugation: "333cb9acc7c606a38ff2742a7088255e16ab45e2da328f8bfe91d420e6884ca1"
+		},
+		presentParticiple: "connectant",
+		pastParticiple: "connecté",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"connecte"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"connectes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"connecte"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"connectons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"connectez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"connectent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"connectais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"connectais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"connectait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"connections"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"connectiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"connectaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"connecterai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"connecteras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"connectera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"connecterons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"connecterez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"connecteront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"connectai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"connectas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"connecta"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"connectâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"connectâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"connectèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai connecté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as connecté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a connecté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons connecté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez connecté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont connecté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai connecté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras connecté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura connecté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons connecté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez connecté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront connecté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais connecté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais connecté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait connecté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions connecté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez connecté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient connecté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus connecté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus connecté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut connecté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes connecté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes connecté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent connecté"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"connecte"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"connectons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"connectez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"connecte"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"connectes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"connecte"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"connections"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"connectiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"connectent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie connecté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies connecté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait connecté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons connecté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez connecté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient connecté"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"connecterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"connecterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"connecterait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"connecterions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"connecteriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"connecteraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais connecté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais connecté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait connecté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions connecté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez connecté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient connecté"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"connectasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"connectasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"connectât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"connectassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"connectassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"connectassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse connecté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses connecté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût connecté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions connecté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez connecté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent connecté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie connecté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons connecté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez connecté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse connecté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses connecté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût connecté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions connecté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez connecté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent connecté"
+				]
+			}
+		],
+		pronominal: {
+			infinitive: "se connecter",
+			baseInfinitive: "connecter",
+			definition: "Accéder à un réseau ou à un service en ligne.",
+			allowedPersons: [
+				4,
+				5,
+				6,
+				7,
+				8,
+				9
+			],
+			agreement: "avec_sujet",
+			sourceUrl: "https://vitrinelinguistique.oqlf.gouv.qc.ca/fiche-gdt/fiche/506934/ouvrir-une-session",
+			conjugationUrl: "https://www.larousse.fr/conjugaison/francais/se%20connecter/9506",
+			referenceRows: [
+			]
+		}
+	},
+	{
+		infinitive: "garer",
+		definition: "Placer un véhicule à un endroit où il peut rester arrêté.",
+		semanticDomain: "position",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9G0271",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9G0271",
+		sourceHashes: {
+			article: "86c95ad18df7fab986f02b9a9ba1f7ba984ce1c3355ec4231956c3ce5d23e5dc",
+			conjugation: "06e8197559759e3993b99d1bc422d2cada00f2f16bfbc074993b79a0c9eb33ee"
+		},
+		presentParticiple: "garant",
+		pastParticiple: "garé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"gare"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"gares"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"gare"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"garons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"garez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"garent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"garais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"garais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"garait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"garions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"gariez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"garaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"garerai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"gareras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"garera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"garerons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"garerez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"gareront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"garai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"garas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"gara"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"garâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"garâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"garèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai garé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as garé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a garé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons garé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez garé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont garé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai garé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras garé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura garé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons garé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez garé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront garé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais garé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais garé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait garé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions garé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez garé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient garé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus garé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus garé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut garé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes garé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes garé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent garé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"gare"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"garons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"garez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"gare"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"gares"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"gare"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"garions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"gariez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"garent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie garé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies garé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait garé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons garé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez garé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient garé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"garerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"garerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"garerait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"garerions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"gareriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"gareraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais garé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais garé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait garé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions garé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez garé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient garé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"garasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"garasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"garât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"garassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"garassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"garassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse garé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses garé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût garé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions garé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez garé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent garé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie garé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons garé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez garé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse garé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses garé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût garé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions garé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez garé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent garé"
+				]
+			}
+		],
+		pronominal: {
+			infinitive: "se garer",
+			baseInfinitive: "garer",
+			definition: "S’arrêter avec son véhicule à un endroit où il peut rester.",
+			allowedPersons: [
+				4,
+				5,
+				6,
+				7,
+				8,
+				9
+			],
+			agreement: "avec_sujet",
+			sourceUrl: "https://www.dictionnaire-academie.fr/article/A9G0271",
+			conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9G0271",
+			referenceRows: [
+				{
+					tenseId: 1,
+					personId: 4,
+					forms: [
+						"me gare"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 5,
+					forms: [
+						"te gares"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 6,
+					forms: [
+						"se gare"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 7,
+					forms: [
+						"nous garons"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 8,
+					forms: [
+						"vous garez"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 9,
+					forms: [
+						"se garent"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 4,
+					forms: [
+						"me garais"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 5,
+					forms: [
+						"te garais"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 6,
+					forms: [
+						"se garait"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 7,
+					forms: [
+						"nous garions"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 8,
+					forms: [
+						"vous gariez"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 9,
+					forms: [
+						"se garaient"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 4,
+					forms: [
+						"me garai"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 5,
+					forms: [
+						"te garas"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 6,
+					forms: [
+						"se gara"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 7,
+					forms: [
+						"nous garâmes"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 8,
+					forms: [
+						"vous garâtes"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 9,
+					forms: [
+						"se garèrent"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 4,
+					forms: [
+						"me garerai"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 5,
+					forms: [
+						"te gareras"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 6,
+					forms: [
+						"se garera"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 7,
+					forms: [
+						"nous garerons"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 8,
+					forms: [
+						"vous garerez"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 9,
+					forms: [
+						"se gareront"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 4,
+					forms: [
+						"me suis garé"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 5,
+					forms: [
+						"t'es garé"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 6,
+					forms: [
+						"s'est garé"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 7,
+					forms: [
+						"nous sommes garés"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 8,
+					forms: [
+						"vous êtes garés"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 9,
+					forms: [
+						"se sont garés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 4,
+					forms: [
+						"m'étais garé"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 5,
+					forms: [
+						"t'étais garé"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 6,
+					forms: [
+						"s'était garé"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 7,
+					forms: [
+						"nous étions garés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 8,
+					forms: [
+						"vous étiez garés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 9,
+					forms: [
+						"s'étaient garés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 4,
+					forms: [
+						"me fus garé"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 5,
+					forms: [
+						"te fus garé"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 6,
+					forms: [
+						"se fut garé"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 7,
+					forms: [
+						"nous fûmes garés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 8,
+					forms: [
+						"vous fûtes garés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 9,
+					forms: [
+						"se furent garés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 4,
+					forms: [
+						"me serai garé"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 5,
+					forms: [
+						"te seras garé"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 6,
+					forms: [
+						"se sera garé"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 7,
+					forms: [
+						"nous serons garés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 8,
+					forms: [
+						"vous serez garés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 9,
+					forms: [
+						"se seront garés"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 4,
+					forms: [
+						"me garerais"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 5,
+					forms: [
+						"te garerais"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 6,
+					forms: [
+						"se garerait"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 7,
+					forms: [
+						"nous garerions"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 8,
+					forms: [
+						"vous gareriez"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 9,
+					forms: [
+						"se gareraient"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 4,
+					forms: [
+						"me serais garé"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 5,
+					forms: [
+						"te serais garé"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 6,
+					forms: [
+						"se serait garé"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 7,
+					forms: [
+						"nous serions garés"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 8,
+					forms: [
+						"vous seriez garés"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 9,
+					forms: [
+						"se seraient garés"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 4,
+					forms: [
+						"me gare"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 5,
+					forms: [
+						"te gares"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 6,
+					forms: [
+						"se gare"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 7,
+					forms: [
+						"nous garions"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 8,
+					forms: [
+						"vous gariez"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 9,
+					forms: [
+						"se garent"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 4,
+					forms: [
+						"me garasse"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 5,
+					forms: [
+						"te garasses"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 6,
+					forms: [
+						"se garât"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 7,
+					forms: [
+						"nous garassions"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 8,
+					forms: [
+						"vous garassiez"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 9,
+					forms: [
+						"se garassent"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 4,
+					forms: [
+						"me sois garé"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 5,
+					forms: [
+						"te sois garé"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 6,
+					forms: [
+						"se soit garé"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 7,
+					forms: [
+						"nous soyons garés"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 8,
+					forms: [
+						"vous soyez garés"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 9,
+					forms: [
+						"se soient garés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 4,
+					forms: [
+						"me fusse garé"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 5,
+					forms: [
+						"te fusses garé"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 6,
+					forms: [
+						"se fût garé"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 7,
+					forms: [
+						"nous fussions garés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 8,
+					forms: [
+						"vous fussiez garés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 9,
+					forms: [
+						"se fussent garés"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 5,
+					forms: [
+						"gare-toi"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 7,
+					forms: [
+						"garons-nous"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 8,
+					forms: [
+						"garez-vous"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 5,
+					forms: [
+						"sois-toi garé"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 7,
+					forms: [
+						"soyons-nous garés"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 8,
+					forms: [
+						"soyez-vous garés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 4,
+					forms: [
+						"me fusse garé"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 5,
+					forms: [
+						"te fusses garé"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 6,
+					forms: [
+						"se fût garé"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 7,
+					forms: [
+						"nous fussions garés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 8,
+					forms: [
+						"vous fussiez garés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 9,
+					forms: [
+						"se fussent garés"
+					]
+				}
+			]
+		}
+	},
+	{
+		infinitive: "régler",
+		definition: "Modifier un appareil pour qu’il fonctionne comme on le souhaite.",
+		semanticDomain: "manipulation",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "céder",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9R1342",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9R1342",
+		sourceHashes: {
+			article: "74c059df7d3ccdc48d5c24266179a69f7d7b22dadd3ef8c97ee016f32962eec4",
+			conjugation: "5269c9df12050d2feaf2ac2caee31d611b2be7d2da89404b4926ce6733110c56"
+		},
+		presentParticiple: "réglant",
+		pastParticiple: "réglé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"règle"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"règles"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"règle"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"réglons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"réglez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"règlent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"réglais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"réglais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"réglait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"réglions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"régliez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"réglaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"réglerai",
+					"règlerai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"régleras",
+					"règleras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"réglera",
+					"règlera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"réglerons",
+					"règlerons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"réglerez",
+					"règlerez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"régleront",
+					"règleront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"réglai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"réglas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"régla"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"réglâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"réglâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"réglèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai réglé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as réglé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a réglé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons réglé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez réglé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont réglé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai réglé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras réglé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura réglé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons réglé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez réglé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront réglé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais réglé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais réglé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait réglé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions réglé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez réglé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient réglé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus réglé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus réglé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut réglé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes réglé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes réglé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent réglé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"règle"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"réglons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"réglez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"règle"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"règles"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"règle"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"réglions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"régliez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"règlent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie réglé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies réglé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait réglé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons réglé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez réglé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient réglé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"réglerais",
+					"règlerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"réglerais",
+					"règlerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"réglerait",
+					"règlerait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"réglerions",
+					"règlerions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"régleriez",
+					"règleriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"régleraient",
+					"règleraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais réglé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais réglé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait réglé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions réglé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez réglé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient réglé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"réglasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"réglasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"réglât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"réglassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"réglassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"réglassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse réglé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses réglé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût réglé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions réglé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez réglé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent réglé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie réglé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons réglé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez réglé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse réglé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses réglé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût réglé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions réglé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez réglé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent réglé"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "récapituler",
+		definition: "Rappeler les points les plus importants de ce qui a été dit ou fait.",
+		semanticDomain: "communication",
+		cefr: "B1",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9R0805",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9R0805",
+		sourceHashes: {
+			article: "6ce3bb6ec7da729bfcfc65ef02a8517bb48c8c4660865c4bb2e587bcb9b0ace9",
+			conjugation: "4269748e95becf53dbca29fe1c36aa4203214d2ae076bcb8370ff8c8cfeea402"
+		},
+		presentParticiple: "récapitulant",
+		pastParticiple: "récapitulé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"récapitule"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"récapitules"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"récapitule"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"récapitulons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"récapitulez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"récapitulent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"récapitulais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"récapitulais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"récapitulait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"récapitulions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"récapituliez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"récapitulaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"récapitulerai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"récapituleras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"récapitulera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"récapitulerons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"récapitulerez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"récapituleront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"récapitulai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"récapitulas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"récapitula"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"récapitulâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"récapitulâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"récapitulèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai récapitulé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as récapitulé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a récapitulé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons récapitulé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez récapitulé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont récapitulé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai récapitulé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras récapitulé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura récapitulé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons récapitulé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez récapitulé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront récapitulé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais récapitulé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais récapitulé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait récapitulé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions récapitulé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez récapitulé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient récapitulé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus récapitulé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus récapitulé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut récapitulé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes récapitulé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes récapitulé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent récapitulé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"récapitule"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"récapitulons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"récapitulez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"récapitule"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"récapitules"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"récapitule"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"récapitulions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"récapituliez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"récapitulent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie récapitulé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies récapitulé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait récapitulé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons récapitulé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez récapitulé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient récapitulé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"récapitulerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"récapitulerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"récapitulerait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"récapitulerions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"récapituleriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"récapituleraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais récapitulé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais récapitulé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait récapitulé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions récapitulé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez récapitulé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient récapitulé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"récapitulasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"récapitulasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"récapitulât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"récapitulassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"récapitulassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"récapitulassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse récapitulé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses récapitulé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût récapitulé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions récapitulé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez récapitulé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent récapitulé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie récapitulé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons récapitulé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez récapitulé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse récapitulé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses récapitulé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût récapitulé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions récapitulé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez récapitulé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent récapitulé"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "promener",
+		definition: "Faire marcher quelqu’un ou un animal pour prendre l’air.",
+		semanticDomain: "mouvement",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "amener",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9P4558",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9P4558",
+		sourceHashes: {
+			article: "69428193ac5f1de00aa092d6a50b3eaf8a686e34447c05efb70d26ea5791fa4a",
+			conjugation: "6a78ab304a6a342f09169dd166d03588e34dbc5c2e2d56cf0a7a939f84e88d9d"
+		},
+		presentParticiple: "promenant",
+		pastParticiple: "promené",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"promène"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"promènes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"promène"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"promenons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"promenez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"promènent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"promenais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"promenais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"promenait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"promenions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"promeniez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"promenaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"promènerai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"promèneras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"promènera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"promènerons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"promènerez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"promèneront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"promenai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"promenas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"promena"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"promenâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"promenâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"promenèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai promené"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as promené"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a promené"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons promené"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez promené"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont promené"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai promené"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras promené"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura promené"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons promené"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez promené"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront promené"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais promené"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais promené"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait promené"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions promené"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez promené"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient promené"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus promené"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus promené"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut promené"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes promené"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes promené"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent promené"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"promène"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"promenons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"promenez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"promène"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"promènes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"promène"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"promenions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"promeniez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"promènent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie promené"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies promené"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait promené"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons promené"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez promené"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient promené"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"promènerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"promènerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"promènerait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"promènerions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"promèneriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"promèneraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais promené"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais promené"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait promené"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions promené"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez promené"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient promené"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"promenasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"promenasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"promenât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"promenassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"promenassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"promenassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse promené"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses promené"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût promené"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions promené"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez promené"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent promené"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie promené"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons promené"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez promené"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse promené"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses promené"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût promené"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions promené"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez promené"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent promené"
+				]
+			}
+		],
+		pronominal: {
+			infinitive: "se promener",
+			baseInfinitive: "promener",
+			definition: "Marcher pour le plaisir ou pour prendre l’air.",
+			allowedPersons: [
+				4,
+				5,
+				6,
+				7,
+				8,
+				9
+			],
+			agreement: "avec_sujet",
+			sourceUrl: "https://www.dictionnaire-academie.fr/article/A9P4558",
+			conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9P4558",
+			referenceRows: [
+				{
+					tenseId: 1,
+					personId: 4,
+					forms: [
+						"me promène"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 5,
+					forms: [
+						"te promènes"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 6,
+					forms: [
+						"se promène"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 7,
+					forms: [
+						"nous promenons"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 8,
+					forms: [
+						"vous promenez"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 9,
+					forms: [
+						"se promènent"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 4,
+					forms: [
+						"me promenais"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 5,
+					forms: [
+						"te promenais"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 6,
+					forms: [
+						"se promenait"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 7,
+					forms: [
+						"nous promenions"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 8,
+					forms: [
+						"vous promeniez"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 9,
+					forms: [
+						"se promenaient"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 4,
+					forms: [
+						"me promenai"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 5,
+					forms: [
+						"te promenas"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 6,
+					forms: [
+						"se promena"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 7,
+					forms: [
+						"nous promenâmes"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 8,
+					forms: [
+						"vous promenâtes"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 9,
+					forms: [
+						"se promenèrent"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 4,
+					forms: [
+						"me promènerai"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 5,
+					forms: [
+						"te promèneras"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 6,
+					forms: [
+						"se promènera"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 7,
+					forms: [
+						"nous promènerons"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 8,
+					forms: [
+						"vous promènerez"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 9,
+					forms: [
+						"se promèneront"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 4,
+					forms: [
+						"me suis promené"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 5,
+					forms: [
+						"t'es promené"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 6,
+					forms: [
+						"s'est promené"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 7,
+					forms: [
+						"nous sommes promenés"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 8,
+					forms: [
+						"vous êtes promenés"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 9,
+					forms: [
+						"se sont promenés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 4,
+					forms: [
+						"m'étais promené"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 5,
+					forms: [
+						"t'étais promené"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 6,
+					forms: [
+						"s'était promené"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 7,
+					forms: [
+						"nous étions promenés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 8,
+					forms: [
+						"vous étiez promenés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 9,
+					forms: [
+						"s'étaient promenés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 4,
+					forms: [
+						"me fus promené"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 5,
+					forms: [
+						"te fus promené"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 6,
+					forms: [
+						"se fut promené"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 7,
+					forms: [
+						"nous fûmes promenés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 8,
+					forms: [
+						"vous fûtes promenés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 9,
+					forms: [
+						"se furent promenés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 4,
+					forms: [
+						"me serai promené"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 5,
+					forms: [
+						"te seras promené"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 6,
+					forms: [
+						"se sera promené"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 7,
+					forms: [
+						"nous serons promenés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 8,
+					forms: [
+						"vous serez promenés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 9,
+					forms: [
+						"se seront promenés"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 4,
+					forms: [
+						"me promènerais"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 5,
+					forms: [
+						"te promènerais"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 6,
+					forms: [
+						"se promènerait"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 7,
+					forms: [
+						"nous promènerions"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 8,
+					forms: [
+						"vous promèneriez"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 9,
+					forms: [
+						"se promèneraient"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 4,
+					forms: [
+						"me serais promené"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 5,
+					forms: [
+						"te serais promené"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 6,
+					forms: [
+						"se serait promené"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 7,
+					forms: [
+						"nous serions promenés"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 8,
+					forms: [
+						"vous seriez promenés"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 9,
+					forms: [
+						"se seraient promenés"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 4,
+					forms: [
+						"me promène"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 5,
+					forms: [
+						"te promènes"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 6,
+					forms: [
+						"se promène"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 7,
+					forms: [
+						"nous promenions"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 8,
+					forms: [
+						"vous promeniez"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 9,
+					forms: [
+						"se promènent"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 4,
+					forms: [
+						"me promenasse"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 5,
+					forms: [
+						"te promenasses"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 6,
+					forms: [
+						"se promenât"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 7,
+					forms: [
+						"nous promenassions"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 8,
+					forms: [
+						"vous promenassiez"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 9,
+					forms: [
+						"se promenassent"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 4,
+					forms: [
+						"me sois promené"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 5,
+					forms: [
+						"te sois promené"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 6,
+					forms: [
+						"se soit promené"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 7,
+					forms: [
+						"nous soyons promenés"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 8,
+					forms: [
+						"vous soyez promenés"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 9,
+					forms: [
+						"se soient promenés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 4,
+					forms: [
+						"me fusse promené"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 5,
+					forms: [
+						"te fusses promené"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 6,
+					forms: [
+						"se fût promené"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 7,
+					forms: [
+						"nous fussions promenés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 8,
+					forms: [
+						"vous fussiez promenés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 9,
+					forms: [
+						"se fussent promenés"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 5,
+					forms: [
+						"promène-toi"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 7,
+					forms: [
+						"promenons-nous"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 8,
+					forms: [
+						"promenez-vous"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 5,
+					forms: [
+						"sois-toi promené"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 7,
+					forms: [
+						"soyons-nous promenés"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 8,
+					forms: [
+						"soyez-vous promenés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 4,
+					forms: [
+						"me fusse promené"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 5,
+					forms: [
+						"te fusses promené"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 6,
+					forms: [
+						"se fût promené"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 7,
+					forms: [
+						"nous fussions promenés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 8,
+					forms: [
+						"vous fussiez promenés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 9,
+					forms: [
+						"se fussent promenés"
+					]
+				}
+			]
+		}
+	},
+	{
+		infinitive: "patienter",
+		definition: "Attendre sans s’impatienter.",
+		semanticDomain: "action-processus",
+		cefr: "A2",
+		transitivity: "intransitif",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9P0972",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9P0972",
+		sourceHashes: {
+			article: "0c9f2d40fe94eb0b251d86fe1c71e8dfe4eeff8e9f68a443fa1805dc878d61eb",
+			conjugation: "094612523ff4912c2024787e066f358f1fc3d5835616adcb18a9d8208474b177"
+		},
+		presentParticiple: "patientant",
+		pastParticiple: "patienté",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"patiente"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"patientes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"patiente"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"patientons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"patientez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"patientent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"patientais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"patientais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"patientait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"patientions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"patientiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"patientaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"patienterai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"patienteras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"patientera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"patienterons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"patienterez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"patienteront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"patientai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"patientas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"patienta"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"patientâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"patientâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"patientèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai patienté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as patienté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a patienté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons patienté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez patienté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont patienté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai patienté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras patienté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura patienté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons patienté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez patienté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront patienté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais patienté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais patienté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait patienté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions patienté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez patienté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient patienté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus patienté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus patienté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut patienté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes patienté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes patienté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent patienté"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"patiente"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"patientons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"patientez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"patiente"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"patientes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"patiente"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"patientions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"patientiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"patientent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie patienté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies patienté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait patienté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons patienté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez patienté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient patienté"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"patienterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"patienterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"patienterait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"patienterions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"patienteriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"patienteraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais patienté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais patienté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait patienté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions patienté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez patienté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient patienté"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"patientasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"patientasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"patientât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"patientassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"patientassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"patientassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse patienté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses patienté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût patienté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions patienté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez patienté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent patienté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie patienté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons patienté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez patienté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse patienté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses patienté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût patienté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions patienté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez patienté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent patienté"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "raccrocher",
+		definition: "Terminer une conversation téléphonique en coupant la communication.",
+		semanticDomain: "communication",
+		cefr: "A2",
+		transitivity: "intransitif",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9R0081",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9R0081",
+		sourceHashes: {
+			article: "046d5bd21a12ccb467e3a422480eeb808912bef95fa98a3ad62105c62e15ef5c",
+			conjugation: "8d535c6a227d6c43221ee141e4732211d54a871ce3021dd764afd20faec4a7b4"
+		},
+		presentParticiple: "raccrochant",
+		pastParticiple: "raccroché",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"raccroche"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"raccroches"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"raccroche"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"raccrochons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"raccrochez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"raccrochent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"raccrochais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"raccrochais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"raccrochait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"raccrochions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"raccrochiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"raccrochaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"raccrocherai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"raccrocheras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"raccrochera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"raccrocherons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"raccrocherez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"raccrocheront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"raccrochai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"raccrochas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"raccrocha"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"raccrochâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"raccrochâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"raccrochèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai raccroché"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as raccroché"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a raccroché"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons raccroché"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez raccroché"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont raccroché"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai raccroché"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras raccroché"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura raccroché"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons raccroché"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez raccroché"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront raccroché"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais raccroché"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais raccroché"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait raccroché"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions raccroché"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez raccroché"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient raccroché"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus raccroché"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus raccroché"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut raccroché"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes raccroché"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes raccroché"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent raccroché"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"raccroche"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"raccrochons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"raccrochez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"raccroche"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"raccroches"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"raccroche"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"raccrochions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"raccrochiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"raccrochent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie raccroché"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies raccroché"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait raccroché"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons raccroché"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez raccroché"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient raccroché"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"raccrocherais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"raccrocherais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"raccrocherait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"raccrocherions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"raccrocheriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"raccrocheraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais raccroché"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais raccroché"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait raccroché"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions raccroché"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez raccroché"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient raccroché"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"raccrochasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"raccrochasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"raccrochât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"raccrochassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"raccrochassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"raccrochassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse raccroché"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses raccroché"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût raccroché"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions raccroché"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez raccroché"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent raccroché"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie raccroché"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons raccroché"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez raccroché"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse raccroché"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses raccroché"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût raccroché"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions raccroché"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez raccroché"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent raccroché"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "quitter",
+		definition: "Partir d’un lieu ou cesser d’être avec une personne.",
+		semanticDomain: "mouvement",
+		cefr: "A1",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9Q0304",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9Q0304",
+		sourceHashes: {
+			article: "555b250447c524ef8207ceb3e8a3036a009218d9b3bfe301a1a807743a1061fe",
+			conjugation: "358ac6e08f0465fdd46f5bfdafe5ce252c7b5658623890004746d856d13141fc"
+		},
+		presentParticiple: "quittant",
+		pastParticiple: "quitté",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"quitte"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"quittes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"quitte"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"quittons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"quittez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"quittent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"quittais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"quittais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"quittait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"quittions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"quittiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"quittaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"quitterai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"quitteras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"quittera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"quitterons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"quitterez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"quitteront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"quittai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"quittas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"quitta"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"quittâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"quittâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"quittèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai quitté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as quitté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a quitté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons quitté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez quitté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont quitté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai quitté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras quitté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura quitté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons quitté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez quitté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront quitté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais quitté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais quitté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait quitté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions quitté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez quitté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient quitté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus quitté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus quitté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut quitté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes quitté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes quitté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent quitté"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"quitte"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"quittons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"quittez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"quitte"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"quittes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"quitte"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"quittions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"quittiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"quittent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie quitté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies quitté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait quitté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons quitté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez quitté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient quitté"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"quitterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"quitterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"quitterait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"quitterions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"quitteriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"quitteraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais quitté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais quitté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait quitté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions quitté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez quitté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient quitté"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"quittasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"quittasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"quittât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"quittassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"quittassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"quittassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse quitté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses quitté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût quitté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions quitté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez quitté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent quitté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie quitté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons quitté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez quitté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse quitté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses quitté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût quitté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions quitté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez quitté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent quitté"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "démissionner",
+		definition: "Décider de quitter son emploi ou sa fonction.",
+		semanticDomain: "creation-travail",
+		cefr: "B1",
+		transitivity: "intransitif",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9D1243",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9D1243",
+		sourceHashes: {
+			article: "6b424f58d8480911a98ed26ec6c479ff3c9f95c682905125a2c4e653f7ca20cf",
+			conjugation: "0b574328d0b85d02e6d47be023ab7dde7b2959d2da48ec051861b675b2d42d84"
+		},
+		presentParticiple: "démissionnant",
+		pastParticiple: "démissionné",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"démissionne"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"démissionnes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"démissionne"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"démissionnons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"démissionnez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"démissionnent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"démissionnais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"démissionnais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"démissionnait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"démissionnions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"démissionniez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"démissionnaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"démissionnerai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"démissionneras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"démissionnera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"démissionnerons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"démissionnerez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"démissionneront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"démissionnai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"démissionnas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"démissionna"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"démissionnâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"démissionnâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"démissionnèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai démissionné"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as démissionné"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a démissionné"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons démissionné"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez démissionné"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont démissionné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai démissionné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras démissionné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura démissionné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons démissionné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez démissionné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront démissionné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais démissionné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais démissionné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait démissionné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions démissionné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez démissionné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient démissionné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus démissionné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus démissionné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut démissionné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes démissionné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes démissionné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent démissionné"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"démissionne"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"démissionnons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"démissionnez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"démissionne"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"démissionnes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"démissionne"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"démissionnions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"démissionniez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"démissionnent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie démissionné"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies démissionné"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait démissionné"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons démissionné"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez démissionné"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient démissionné"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"démissionnerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"démissionnerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"démissionnerait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"démissionnerions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"démissionneriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"démissionneraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais démissionné"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais démissionné"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait démissionné"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions démissionné"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez démissionné"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient démissionné"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"démissionnasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"démissionnasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"démissionnât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"démissionnassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"démissionnassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"démissionnassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse démissionné"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses démissionné"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût démissionné"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions démissionné"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez démissionné"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent démissionné"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie démissionné"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons démissionné"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez démissionné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse démissionné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses démissionné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût démissionné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions démissionné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez démissionné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent démissionné"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "fonder",
+		definition: "Créer une entreprise, une association ou une autre organisation.",
+		semanticDomain: "creation-travail",
+		cefr: "B1",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9F1190",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9F1190",
+		sourceHashes: {
+			article: "bdcf0148834d5adddd7adf6625572fbd8f8b3c4acbdf271e83e9431b3fc0fdc1",
+			conjugation: "c90b4797e61944cd64b61fa90c0f12478d6633be9e9d5c6f3a740cc1b6cab89d"
+		},
+		presentParticiple: "fondant",
+		pastParticiple: "fondé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"fonde"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"fondes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"fonde"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"fondons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"fondez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"fondent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"fondais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"fondais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"fondait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"fondions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"fondiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"fondaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"fonderai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"fonderas"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"fondera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"fonderons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"fonderez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"fonderont"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"fondai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"fondas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"fonda"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"fondâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"fondâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"fondèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai fondé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as fondé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a fondé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons fondé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez fondé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont fondé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai fondé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras fondé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura fondé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons fondé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez fondé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront fondé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais fondé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais fondé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait fondé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions fondé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez fondé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient fondé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus fondé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus fondé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut fondé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes fondé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes fondé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent fondé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"fonde"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"fondons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"fondez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"fonde"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"fondes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"fonde"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"fondions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"fondiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"fondent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie fondé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies fondé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait fondé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons fondé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez fondé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient fondé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"fonderais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"fonderais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"fonderait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"fonderions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"fonderiez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"fonderaient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais fondé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais fondé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait fondé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions fondé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez fondé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient fondé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"fondasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"fondasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"fondât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"fondassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"fondassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"fondassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse fondé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses fondé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût fondé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions fondé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez fondé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent fondé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie fondé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons fondé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez fondé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse fondé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses fondé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût fondé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions fondé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez fondé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent fondé"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "retourner",
+		definition: "Aller de nouveau dans un lieu où l’on était auparavant.",
+		semanticDomain: "mouvement",
+		cefr: "A2",
+		transitivity: "intransitif",
+		preposition: null,
+		auxiliary: "être",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9R2254",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9R2254",
+		sourceHashes: {
+			article: "1ac0b4a5812970eca2a36906e4231a34cbfcfe69547080d50f51b4c4a7b0c44c",
+			conjugation: "3bd54f21ba1e04c5cdfc215b7ac6b2be452a58b49aecdd3da2f3f8fdc7f1d1ed"
+		},
+		presentParticiple: "retournant",
+		pastParticiple: "retourné",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"retourne"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"retournes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"retourne"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"retournons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"retournez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"retournent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"retournais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"retournais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"retournait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"retournions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"retourniez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"retournaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"retournerai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"retourneras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"retournera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"retournerons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"retournerez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"retourneront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"retournai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"retournas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"retourna"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"retournâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"retournâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"retournèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"suis retourné",
+					"ai retourné"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"es retourné",
+					"as retourné"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"est retourné",
+					"a retourné"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"sommes retournés",
+					"avons retourné"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"êtes retournés",
+					"avez retourné"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"sont retournés",
+					"ont retourné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"serai retourné",
+					"aurai retourné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"seras retourné",
+					"auras retourné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"sera retourné",
+					"aura retourné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"serons retournés",
+					"aurons retourné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"serez retournés",
+					"aurez retourné"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"seront retournés",
+					"auront retourné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"étais retourné",
+					"avais retourné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"étais retourné",
+					"avais retourné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"était retourné",
+					"avait retourné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"étions retournés",
+					"avions retourné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"étiez retournés",
+					"aviez retourné"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"étaient retournés",
+					"avaient retourné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"fus retourné",
+					"eus retourné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"fus retourné",
+					"eus retourné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"fut retourné",
+					"eut retourné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"fûmes retournés",
+					"eûmes retourné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"fûtes retournés",
+					"eûtes retourné"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"furent retournés",
+					"eurent retourné"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"retourne"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"retournons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"retournez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"retourne"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"retournes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"retourne"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"retournions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"retourniez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"retournent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"sois retourné",
+					"aie retourné"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"sois retourné",
+					"aies retourné"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"soit retourné",
+					"ait retourné"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"soyons retournés",
+					"ayons retourné"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"soyez retournés",
+					"ayez retourné"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"soient retournés",
+					"aient retourné"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"retournerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"retournerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"retournerait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"retournerions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"retourneriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"retourneraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"serais retourné",
+					"aurais retourné"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"serais retourné",
+					"aurais retourné"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"serait retourné",
+					"aurait retourné"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"serions retournés",
+					"aurions retourné"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"seriez retournés",
+					"auriez retourné"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"seraient retournés",
+					"auraient retourné"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"retournasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"retournasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"retournât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"retournassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"retournassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"retournassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"fusse retourné",
+					"eusse retourné"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"fusses retourné",
+					"eusses retourné"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"fût retourné",
+					"eût retourné"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"fussions retournés",
+					"eussions retourné"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"fussiez retournés",
+					"eussiez retourné"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"fussent retournés",
+					"eussent retourné"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"sois retourné",
+					"aie retourné"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"soyons retournés",
+					"ayons retourné"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"soyez retournés",
+					"ayez retourné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"fusse retourné",
+					"eusse retourné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"fusses retourné",
+					"eusses retourné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"fût retourné",
+					"eût retourné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"fussions retournés",
+					"eussions retourné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"fussiez retournés",
+					"eussiez retourné"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"fussent retournés",
+					"eussent retourné"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "remercier",
+		definition: "Dire merci à quelqu’un pour ce qu’il a fait.",
+		semanticDomain: "communication",
+		cefr: "A1",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "crier",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9R1569",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9R1569",
+		sourceHashes: {
+			article: "6ecad70d4e3d806f390b62adf65b05d194646e58d30cf6b29fd1effb94118dea",
+			conjugation: "3850c39ccfce2f8591a1fcadb7f58d72031356c55595918efded3b7e8f92c7e6"
+		},
+		presentParticiple: "remerciant",
+		pastParticiple: "remercié",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"remercie"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"remercies"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"remercie"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"remercions"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"remerciez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"remercient"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"remerciais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"remerciais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"remerciait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"remerciions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"remerciiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"remerciaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"remercierai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"remercieras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"remerciera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"remercierons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"remercierez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"remercieront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"remerciai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"remercias"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"remercia"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"remerciâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"remerciâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"remercièrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai remercié"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as remercié"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a remercié"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons remercié"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez remercié"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont remercié"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai remercié"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras remercié"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura remercié"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons remercié"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez remercié"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront remercié"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais remercié"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais remercié"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait remercié"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions remercié"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez remercié"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient remercié"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus remercié"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus remercié"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut remercié"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes remercié"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes remercié"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent remercié"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"remercie"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"remercions"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"remerciez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"remercie"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"remercies"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"remercie"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"remerciions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"remerciiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"remercient"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie remercié"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies remercié"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait remercié"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons remercié"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez remercié"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient remercié"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"remercierais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"remercierais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"remercierait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"remercierions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"remercieriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"remercieraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais remercié"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais remercié"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait remercié"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions remercié"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez remercié"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient remercié"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"remerciasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"remerciasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"remerciât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"remerciassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"remerciassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"remerciassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse remercié"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses remercié"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût remercié"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions remercié"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez remercié"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent remercié"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie remercié"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons remercié"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez remercié"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse remercié"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses remercié"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût remercié"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions remercié"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez remercié"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent remercié"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "convenir",
+		definition: "Être adapté à une personne ou à une situation.",
+		semanticDomain: "relations",
+		cefr: "B1",
+		transitivity: "transitif_indirect",
+		preposition: "à",
+		auxiliary: "avoir",
+		group: 3,
+		model: "tenir",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9C4082",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9C4082",
+		sourceHashes: {
+			article: "d2db041bdad700f429075d5701d0adcd122598b49fcb49a193738daa2507f38a",
+			conjugation: "8b31afb4f1d3a0846c26c70fba5f5b9a7ff4ce579f9b3e8b39e8af879e1ec3c0"
+		},
+		presentParticiple: "convenant",
+		pastParticiple: "convenu",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"conviens"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"conviens"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"convient"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"convenons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"convenez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"conviennent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"convenais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"convenais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"convenait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"convenions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"conveniez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"convenaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"conviendrai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"conviendras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"conviendra"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"conviendrons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"conviendrez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"conviendront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"convins"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"convins"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"convint"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"convînmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"convîntes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"convinrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai convenu",
+					"suis convenu"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as convenu",
+					"es convenu"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a convenu",
+					"est convenu"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons convenu",
+					"sommes convenus"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez convenu",
+					"êtes convenus"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont convenu",
+					"sont convenus"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai convenu",
+					"serai convenu"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras convenu",
+					"seras convenu"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura convenu",
+					"sera convenu"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons convenu",
+					"serons convenus"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez convenu",
+					"serez convenus"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront convenu",
+					"seront convenus"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais convenu",
+					"étais convenu"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais convenu",
+					"étais convenu"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait convenu",
+					"était convenu"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions convenu",
+					"étions convenus"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez convenu",
+					"étiez convenus"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient convenu",
+					"étaient convenus"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus convenu",
+					"fus convenu"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus convenu",
+					"fus convenu"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut convenu",
+					"fut convenu"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes convenu",
+					"fûmes convenus"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes convenu",
+					"fûtes convenus"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent convenu",
+					"furent convenus"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"conviens"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"convenons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"convenez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"convienne"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"conviennes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"convienne"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"convenions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"conveniez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"conviennent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie convenu",
+					"sois convenu"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies convenu",
+					"sois convenu"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait convenu",
+					"soit convenu"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons convenu",
+					"soyons convenus"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez convenu",
+					"soyez convenus"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient convenu",
+					"soient convenus"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"conviendrais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"conviendrais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"conviendrait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"conviendrions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"conviendriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"conviendraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais convenu",
+					"serais convenu"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais convenu",
+					"serais convenu"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait convenu",
+					"serait convenu"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions convenu",
+					"serions convenus"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez convenu",
+					"seriez convenus"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient convenu",
+					"seraient convenus"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"convinsse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"convinsses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"convînt"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"convinssions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"convinssiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"convinssent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse convenu",
+					"fusse convenu"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses convenu",
+					"fusses convenu"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût convenu",
+					"fût convenu"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions convenu",
+					"fussions convenus"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez convenu",
+					"fussiez convenus"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent convenu",
+					"fussent convenus"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie convenu",
+					"sois convenu"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons convenu",
+					"soyons convenus"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez convenu",
+					"soyez convenus"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse convenu",
+					"fusse convenu"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses convenu",
+					"fusses convenu"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût convenu",
+					"fût convenu"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions convenu",
+					"fussions convenus"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez convenu",
+					"fussiez convenus"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent convenu",
+					"fussent convenus"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "remplacer",
+		definition: "Mettre une personne ou une chose à la place d’une autre.",
+		semanticDomain: "action-processus",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "avancer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9R1631",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9R1631",
+		sourceHashes: {
+			article: "cb83d52a5bc3e92bcfcb22f8d2b84d29db1b2a7400dd1e9004cf3c87f7f603af",
+			conjugation: "9f23f676700fbd17c7448149e5b111f489039f6e73bc396c9d75d22682bb0a90"
+		},
+		presentParticiple: "remplaçant",
+		pastParticiple: "remplacé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"remplace"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"remplaces"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"remplace"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"remplaçons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"remplacez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"remplacent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"remplaçais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"remplaçais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"remplaçait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"remplacions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"remplaciez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"remplaçaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"remplacerai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"remplaceras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"remplacera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"remplacerons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"remplacerez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"remplaceront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"remplaçai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"remplaças"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"remplaça"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"remplaçâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"remplaçâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"remplacèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai remplacé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as remplacé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a remplacé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons remplacé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez remplacé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont remplacé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai remplacé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras remplacé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura remplacé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons remplacé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez remplacé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront remplacé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais remplacé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais remplacé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait remplacé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions remplacé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez remplacé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient remplacé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus remplacé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus remplacé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut remplacé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes remplacé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes remplacé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent remplacé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"remplace"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"remplaçons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"remplacez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"remplace"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"remplaces"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"remplace"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"remplacions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"remplaciez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"remplacent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie remplacé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies remplacé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait remplacé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons remplacé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez remplacé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient remplacé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"remplacerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"remplacerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"remplacerait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"remplacerions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"remplaceriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"remplaceraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais remplacé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais remplacé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait remplacé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions remplacé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez remplacé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient remplacé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"remplaçasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"remplaçasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"remplaçât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"remplaçassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"remplaçassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"remplaçassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse remplacé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses remplacé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût remplacé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions remplacé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez remplacé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent remplacé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie remplacé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons remplacé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez remplacé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse remplacé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses remplacé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût remplacé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions remplacé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez remplacé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent remplacé"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "préoccuper",
+		definition: "Causer du souci à quelqu’un ou occuper beaucoup ses pensées.",
+		semanticDomain: "emotion",
+		cefr: "B1",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9P4080",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9P4080",
+		sourceHashes: {
+			article: "a5ae11546ef1b9e065916216bbc000541411d6e3643414db24fadf68acf3185b",
+			conjugation: "d778b90c5bc4992ada3a442343b9f4709306a80493e5c1a3dd8cb5441b4d8987"
+		},
+		presentParticiple: "préoccupant",
+		pastParticiple: "préoccupé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"préoccupe"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"préoccupes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"préoccupe"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"préoccupons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"préoccupez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"préoccupent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"préoccupais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"préoccupais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"préoccupait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"préoccupions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"préoccupiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"préoccupaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"préoccuperai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"préoccuperas"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"préoccupera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"préoccuperons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"préoccuperez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"préoccuperont"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"préoccupai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"préoccupas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"préoccupa"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"préoccupâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"préoccupâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"préoccupèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai préoccupé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as préoccupé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a préoccupé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons préoccupé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez préoccupé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont préoccupé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai préoccupé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras préoccupé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura préoccupé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons préoccupé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez préoccupé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront préoccupé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais préoccupé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais préoccupé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait préoccupé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions préoccupé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez préoccupé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient préoccupé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus préoccupé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus préoccupé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut préoccupé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes préoccupé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes préoccupé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent préoccupé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"préoccupe"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"préoccupons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"préoccupez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"préoccupe"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"préoccupes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"préoccupe"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"préoccupions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"préoccupiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"préoccupent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie préoccupé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies préoccupé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait préoccupé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons préoccupé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez préoccupé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient préoccupé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"préoccuperais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"préoccuperais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"préoccuperait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"préoccuperions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"préoccuperiez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"préoccuperaient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais préoccupé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais préoccupé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait préoccupé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions préoccupé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez préoccupé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient préoccupé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"préoccupasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"préoccupasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"préoccupât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"préoccupassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"préoccupassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"préoccupassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse préoccupé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses préoccupé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût préoccupé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions préoccupé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez préoccupé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent préoccupé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie préoccupé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons préoccupé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez préoccupé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse préoccupé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses préoccupé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût préoccupé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions préoccupé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez préoccupé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent préoccupé"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "énerver",
+		definition: "Mettre quelqu’un en colère ou lui faire perdre son calme.",
+		semanticDomain: "emotion",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9E1528",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9E1528",
+		sourceHashes: {
+			article: "de7f97744aedf7185c8b220e542873b54b540033f66c78ab9436dee3b13a35ed",
+			conjugation: "3e98f9cc1325cc7963ee76fbf3d359c015f40ce52d122e5fd1ed17f5bbb13d2e"
+		},
+		presentParticiple: "énervant",
+		pastParticiple: "énervé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"énerve"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"énerves"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"énerve"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"énervons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"énervez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"énervent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"énervais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"énervais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"énervait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"énervions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"énerviez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"énervaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"énerverai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"énerveras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"énervera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"énerverons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"énerverez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"énerveront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"énervai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"énervas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"énerva"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"énervâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"énervâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"énervèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai énervé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as énervé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a énervé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons énervé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez énervé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont énervé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai énervé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras énervé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura énervé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons énervé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez énervé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront énervé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais énervé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais énervé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait énervé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions énervé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez énervé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient énervé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus énervé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus énervé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut énervé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes énervé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes énervé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent énervé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"énerve"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"énervons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"énervez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"énerve"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"énerves"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"énerve"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"énervions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"énerviez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"énervent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie énervé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies énervé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait énervé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons énervé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez énervé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient énervé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"énerverais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"énerverais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"énerverait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"énerverions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"énerveriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"énerveraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais énervé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais énervé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait énervé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions énervé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez énervé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient énervé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"énervasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"énervasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"énervât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"énervassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"énervassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"énervassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse énervé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses énervé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût énervé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions énervé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez énervé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent énervé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie énervé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons énervé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez énervé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse énervé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses énervé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût énervé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions énervé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez énervé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent énervé"
+				]
+			}
+		],
+		pronominal: {
+			infinitive: "s'énerver",
+			baseInfinitive: "énerver",
+			definition: "Perdre son calme ou se mettre en colère.",
+			allowedPersons: [
+				4,
+				5,
+				6,
+				7,
+				8,
+				9
+			],
+			agreement: "avec_sujet",
+			sourceUrl: "https://www.dictionnaire-academie.fr/article/A9E1528",
+			conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9E1528",
+			referenceRows: [
+				{
+					tenseId: 1,
+					personId: 4,
+					forms: [
+						"m'énerve"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 5,
+					forms: [
+						"t'énerves"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 6,
+					forms: [
+						"s'énerve"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 7,
+					forms: [
+						"nous énervons"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 8,
+					forms: [
+						"vous énervez"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 9,
+					forms: [
+						"s'énervent"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 4,
+					forms: [
+						"m'énervais"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 5,
+					forms: [
+						"t'énervais"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 6,
+					forms: [
+						"s'énervait"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 7,
+					forms: [
+						"nous énervions"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 8,
+					forms: [
+						"vous énerviez"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 9,
+					forms: [
+						"s'énervaient"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 4,
+					forms: [
+						"m'énervai"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 5,
+					forms: [
+						"t'énervas"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 6,
+					forms: [
+						"s'énerva"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 7,
+					forms: [
+						"nous énervâmes"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 8,
+					forms: [
+						"vous énervâtes"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 9,
+					forms: [
+						"s'énervèrent"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 4,
+					forms: [
+						"m'énerverai"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 5,
+					forms: [
+						"t'énerveras"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 6,
+					forms: [
+						"s'énervera"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 7,
+					forms: [
+						"nous énerverons"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 8,
+					forms: [
+						"vous énerverez"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 9,
+					forms: [
+						"s'énerveront"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 4,
+					forms: [
+						"me suis énervé"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 5,
+					forms: [
+						"t'es énervé"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 6,
+					forms: [
+						"s'est énervé"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 7,
+					forms: [
+						"nous sommes énervés"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 8,
+					forms: [
+						"vous êtes énervés"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 9,
+					forms: [
+						"se sont énervés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 4,
+					forms: [
+						"m'étais énervé"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 5,
+					forms: [
+						"t'étais énervé"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 6,
+					forms: [
+						"s'était énervé"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 7,
+					forms: [
+						"nous étions énervés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 8,
+					forms: [
+						"vous étiez énervés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 9,
+					forms: [
+						"s'étaient énervés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 4,
+					forms: [
+						"me fus énervé"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 5,
+					forms: [
+						"te fus énervé"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 6,
+					forms: [
+						"se fut énervé"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 7,
+					forms: [
+						"nous fûmes énervés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 8,
+					forms: [
+						"vous fûtes énervés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 9,
+					forms: [
+						"se furent énervés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 4,
+					forms: [
+						"me serai énervé"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 5,
+					forms: [
+						"te seras énervé"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 6,
+					forms: [
+						"se sera énervé"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 7,
+					forms: [
+						"nous serons énervés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 8,
+					forms: [
+						"vous serez énervés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 9,
+					forms: [
+						"se seront énervés"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 4,
+					forms: [
+						"m'énerverais"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 5,
+					forms: [
+						"t'énerverais"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 6,
+					forms: [
+						"s'énerverait"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 7,
+					forms: [
+						"nous énerverions"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 8,
+					forms: [
+						"vous énerveriez"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 9,
+					forms: [
+						"s'énerveraient"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 4,
+					forms: [
+						"me serais énervé"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 5,
+					forms: [
+						"te serais énervé"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 6,
+					forms: [
+						"se serait énervé"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 7,
+					forms: [
+						"nous serions énervés"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 8,
+					forms: [
+						"vous seriez énervés"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 9,
+					forms: [
+						"se seraient énervés"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 4,
+					forms: [
+						"m'énerve"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 5,
+					forms: [
+						"t'énerves"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 6,
+					forms: [
+						"s'énerve"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 7,
+					forms: [
+						"nous énervions"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 8,
+					forms: [
+						"vous énerviez"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 9,
+					forms: [
+						"s'énervent"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 4,
+					forms: [
+						"m'énervasse"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 5,
+					forms: [
+						"t'énervasses"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 6,
+					forms: [
+						"s'énervât"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 7,
+					forms: [
+						"nous énervassions"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 8,
+					forms: [
+						"vous énervassiez"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 9,
+					forms: [
+						"s'énervassent"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 4,
+					forms: [
+						"me sois énervé"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 5,
+					forms: [
+						"te sois énervé"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 6,
+					forms: [
+						"se soit énervé"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 7,
+					forms: [
+						"nous soyons énervés"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 8,
+					forms: [
+						"vous soyez énervés"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 9,
+					forms: [
+						"se soient énervés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 4,
+					forms: [
+						"me fusse énervé"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 5,
+					forms: [
+						"te fusses énervé"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 6,
+					forms: [
+						"se fût énervé"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 7,
+					forms: [
+						"nous fussions énervés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 8,
+					forms: [
+						"vous fussiez énervés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 9,
+					forms: [
+						"se fussent énervés"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 5,
+					forms: [
+						"énerve-toi"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 7,
+					forms: [
+						"énervons-nous"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 8,
+					forms: [
+						"énervez-vous"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 5,
+					forms: [
+						"sois-toi énervé"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 7,
+					forms: [
+						"soyons-nous énervés"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 8,
+					forms: [
+						"soyez-vous énervés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 4,
+					forms: [
+						"me fusse énervé"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 5,
+					forms: [
+						"te fusses énervé"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 6,
+					forms: [
+						"se fût énervé"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 7,
+					forms: [
+						"nous fussions énervés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 8,
+					forms: [
+						"vous fussiez énervés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 9,
+					forms: [
+						"se fussent énervés"
+					]
+				}
+			]
+		}
+	},
+	{
+		infinitive: "disputer",
+		definition: "Participer à une compétition pour essayer de gagner.",
+		semanticDomain: "action-processus",
+		cefr: "B1",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9D2734",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9D2734",
+		sourceHashes: {
+			article: "5d11064237df4583f5d3d64b7148faf0caaa8d9edcea4f37babbfb7179224c4a",
+			conjugation: "0fc340b951aaec9090f07cfc970db6baeccb6b7e779e4210c04766e8020bd706"
+		},
+		presentParticiple: "disputant",
+		pastParticiple: "disputé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"dispute"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"disputes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"dispute"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"disputons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"disputez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"disputent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"disputais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"disputais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"disputait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"disputions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"disputiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"disputaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"disputerai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"disputeras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"disputera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"disputerons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"disputerez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"disputeront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"disputai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"disputas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"disputa"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"disputâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"disputâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"disputèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai disputé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as disputé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a disputé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons disputé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez disputé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont disputé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai disputé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras disputé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura disputé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons disputé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez disputé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront disputé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais disputé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais disputé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait disputé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions disputé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez disputé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient disputé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus disputé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus disputé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut disputé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes disputé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes disputé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent disputé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"dispute"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"disputons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"disputez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"dispute"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"disputes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"dispute"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"disputions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"disputiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"disputent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie disputé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies disputé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait disputé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons disputé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez disputé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient disputé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"disputerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"disputerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"disputerait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"disputerions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"disputeriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"disputeraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais disputé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais disputé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait disputé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions disputé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez disputé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient disputé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"disputasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"disputasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"disputât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"disputassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"disputassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"disputassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse disputé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses disputé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût disputé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions disputé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez disputé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent disputé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie disputé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons disputé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez disputé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse disputé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses disputé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût disputé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions disputé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez disputé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent disputé"
+				]
+			}
+		],
+		pronominal: {
+			infinitive: "se disputer",
+			baseInfinitive: "disputer",
+			definition: "Exprimer vivement un désaccord avec quelqu’un.",
+			allowedPersons: [
+				4,
+				5,
+				6,
+				7,
+				8,
+				9
+			],
+			agreement: "avec_sujet",
+			sourceUrl: "https://www.dictionnaire-academie.fr/article/A9D2734",
+			conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9D2734",
+			referenceRows: [
+				{
+					tenseId: 1,
+					personId: 4,
+					forms: [
+						"me dispute"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 5,
+					forms: [
+						"te disputes"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 6,
+					forms: [
+						"se dispute"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 7,
+					forms: [
+						"nous disputons"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 8,
+					forms: [
+						"vous disputez"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 9,
+					forms: [
+						"se disputent"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 4,
+					forms: [
+						"me disputais"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 5,
+					forms: [
+						"te disputais"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 6,
+					forms: [
+						"se disputait"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 7,
+					forms: [
+						"nous disputions"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 8,
+					forms: [
+						"vous disputiez"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 9,
+					forms: [
+						"se disputaient"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 4,
+					forms: [
+						"me disputai"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 5,
+					forms: [
+						"te disputas"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 6,
+					forms: [
+						"se disputa"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 7,
+					forms: [
+						"nous disputâmes"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 8,
+					forms: [
+						"vous disputâtes"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 9,
+					forms: [
+						"se disputèrent"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 4,
+					forms: [
+						"me disputerai"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 5,
+					forms: [
+						"te disputeras"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 6,
+					forms: [
+						"se disputera"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 7,
+					forms: [
+						"nous disputerons"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 8,
+					forms: [
+						"vous disputerez"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 9,
+					forms: [
+						"se disputeront"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 4,
+					forms: [
+						"me suis disputé"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 5,
+					forms: [
+						"t'es disputé"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 6,
+					forms: [
+						"s'est disputé"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 7,
+					forms: [
+						"nous sommes disputés"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 8,
+					forms: [
+						"vous êtes disputés"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 9,
+					forms: [
+						"se sont disputés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 4,
+					forms: [
+						"m'étais disputé"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 5,
+					forms: [
+						"t'étais disputé"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 6,
+					forms: [
+						"s'était disputé"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 7,
+					forms: [
+						"nous étions disputés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 8,
+					forms: [
+						"vous étiez disputés"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 9,
+					forms: [
+						"s'étaient disputés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 4,
+					forms: [
+						"me fus disputé"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 5,
+					forms: [
+						"te fus disputé"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 6,
+					forms: [
+						"se fut disputé"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 7,
+					forms: [
+						"nous fûmes disputés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 8,
+					forms: [
+						"vous fûtes disputés"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 9,
+					forms: [
+						"se furent disputés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 4,
+					forms: [
+						"me serai disputé"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 5,
+					forms: [
+						"te seras disputé"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 6,
+					forms: [
+						"se sera disputé"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 7,
+					forms: [
+						"nous serons disputés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 8,
+					forms: [
+						"vous serez disputés"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 9,
+					forms: [
+						"se seront disputés"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 4,
+					forms: [
+						"me disputerais"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 5,
+					forms: [
+						"te disputerais"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 6,
+					forms: [
+						"se disputerait"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 7,
+					forms: [
+						"nous disputerions"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 8,
+					forms: [
+						"vous disputeriez"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 9,
+					forms: [
+						"se disputeraient"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 4,
+					forms: [
+						"me serais disputé"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 5,
+					forms: [
+						"te serais disputé"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 6,
+					forms: [
+						"se serait disputé"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 7,
+					forms: [
+						"nous serions disputés"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 8,
+					forms: [
+						"vous seriez disputés"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 9,
+					forms: [
+						"se seraient disputés"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 4,
+					forms: [
+						"me dispute"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 5,
+					forms: [
+						"te disputes"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 6,
+					forms: [
+						"se dispute"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 7,
+					forms: [
+						"nous disputions"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 8,
+					forms: [
+						"vous disputiez"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 9,
+					forms: [
+						"se disputent"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 4,
+					forms: [
+						"me disputasse"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 5,
+					forms: [
+						"te disputasses"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 6,
+					forms: [
+						"se disputât"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 7,
+					forms: [
+						"nous disputassions"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 8,
+					forms: [
+						"vous disputassiez"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 9,
+					forms: [
+						"se disputassent"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 4,
+					forms: [
+						"me sois disputé"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 5,
+					forms: [
+						"te sois disputé"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 6,
+					forms: [
+						"se soit disputé"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 7,
+					forms: [
+						"nous soyons disputés"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 8,
+					forms: [
+						"vous soyez disputés"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 9,
+					forms: [
+						"se soient disputés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 4,
+					forms: [
+						"me fusse disputé"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 5,
+					forms: [
+						"te fusses disputé"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 6,
+					forms: [
+						"se fût disputé"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 7,
+					forms: [
+						"nous fussions disputés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 8,
+					forms: [
+						"vous fussiez disputés"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 9,
+					forms: [
+						"se fussent disputés"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 5,
+					forms: [
+						"dispute-toi"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 7,
+					forms: [
+						"disputons-nous"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 8,
+					forms: [
+						"disputez-vous"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 5,
+					forms: [
+						"sois-toi disputé"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 7,
+					forms: [
+						"soyons-nous disputés"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 8,
+					forms: [
+						"soyez-vous disputés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 4,
+					forms: [
+						"me fusse disputé"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 5,
+					forms: [
+						"te fusses disputé"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 6,
+					forms: [
+						"se fût disputé"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 7,
+					forms: [
+						"nous fussions disputés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 8,
+					forms: [
+						"vous fussiez disputés"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 9,
+					forms: [
+						"se fussent disputés"
+					]
+				}
+			]
+		}
+	},
+	{
+		infinitive: "annuler",
+		definition: "Décider qu’une chose prévue n’aura pas lieu ou n’est plus valable.",
+		semanticDomain: "action-processus",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9A1851",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9A1851",
+		sourceHashes: {
+			article: "8af49070d4deb93b55a1d3ca5d55ea947b4336bee6db30434c0f4aa781485845",
+			conjugation: "8f51319260344add78ad10a530749c5d8ec74179ac6a62b59216bd98e757bfcb"
+		},
+		presentParticiple: "annulant",
+		pastParticiple: "annulé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"annule"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"annules"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"annule"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"annulons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"annulez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"annulent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"annulais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"annulais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"annulait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"annulions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"annuliez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"annulaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"annulerai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"annuleras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"annulera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"annulerons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"annulerez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"annuleront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"annulai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"annulas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"annula"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"annulâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"annulâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"annulèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai annulé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as annulé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a annulé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons annulé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez annulé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont annulé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai annulé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras annulé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura annulé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons annulé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez annulé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront annulé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais annulé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais annulé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait annulé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions annulé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez annulé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient annulé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus annulé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus annulé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut annulé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes annulé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes annulé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent annulé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"annule"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"annulons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"annulez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"annule"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"annules"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"annule"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"annulions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"annuliez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"annulent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie annulé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies annulé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait annulé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons annulé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez annulé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient annulé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"annulerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"annulerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"annulerait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"annulerions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"annuleriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"annuleraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais annulé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais annulé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait annulé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions annulé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez annulé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient annulé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"annulasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"annulasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"annulât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"annulassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"annulassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"annulassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse annulé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses annulé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût annulé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions annulé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez annulé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent annulé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie annulé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons annulé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez annulé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse annulé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses annulé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût annulé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions annulé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez annulé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent annulé"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "reporter",
+		definition: "Déplacer un évènement prévu à une autre date.",
+		semanticDomain: "action-processus",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9R1905",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9R1905",
+		sourceHashes: {
+			article: "a180fa6e8b0063ce4706914ff420e6bfffbaacc849a1f9805d5c859e9b6322ca",
+			conjugation: "17e026e94eedaf01a222214945800e8471cc955f55256530a1e24b38d68ec7d1"
+		},
+		presentParticiple: "reportant",
+		pastParticiple: "reporté",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"reporte"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"reportes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"reporte"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"reportons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"reportez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"reportent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"reportais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"reportais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"reportait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"reportions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"reportiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"reportaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"reporterai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"reporteras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"reportera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"reporterons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"reporterez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"reporteront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"reportai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"reportas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"reporta"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"reportâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"reportâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"reportèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai reporté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as reporté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a reporté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons reporté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez reporté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont reporté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai reporté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras reporté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura reporté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons reporté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez reporté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront reporté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais reporté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais reporté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait reporté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions reporté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez reporté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient reporté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus reporté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus reporté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut reporté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes reporté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes reporté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent reporté"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"reporte"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"reportons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"reportez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"reporte"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"reportes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"reporte"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"reportions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"reportiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"reportent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie reporté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies reporté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait reporté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons reporté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez reporté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient reporté"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"reporterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"reporterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"reporterait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"reporterions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"reporteriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"reporteraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais reporté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais reporté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait reporté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions reporté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez reporté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient reporté"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"reportasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"reportasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"reportât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"reportassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"reportassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"reportassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse reporté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses reporté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût reporté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions reporté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez reporté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent reporté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie reporté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons reporté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez reporté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse reporté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses reporté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût reporté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions reporté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez reporté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent reporté"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "réparer",
+		definition: "Remettre en état une chose abîmée ou qui ne fonctionne plus.",
+		semanticDomain: "manipulation",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9R1820",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9R1820",
+		sourceHashes: {
+			article: "3e7c6684a80977b33e92e72129d2c8f2c4fa20dc880e48b4e2103a2f4db149cf",
+			conjugation: "899aaa9e5ca77331bc8fde6632890faad5233d1107c084adf9b1b9ece597f601"
+		},
+		presentParticiple: "réparant",
+		pastParticiple: "réparé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"répare"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"répares"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"répare"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"réparons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"réparez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"réparent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"réparais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"réparais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"réparait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"réparions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"répariez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"réparaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"réparerai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"répareras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"réparera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"réparerons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"réparerez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"répareront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"réparai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"réparas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"répara"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"réparâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"réparâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"réparèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai réparé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as réparé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a réparé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons réparé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez réparé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont réparé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai réparé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras réparé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura réparé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons réparé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez réparé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront réparé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais réparé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais réparé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait réparé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions réparé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez réparé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient réparé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus réparé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus réparé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut réparé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes réparé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes réparé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent réparé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"répare"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"réparons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"réparez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"répare"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"répares"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"répare"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"réparions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"répariez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"réparent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie réparé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies réparé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait réparé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons réparé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez réparé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient réparé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"réparerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"réparerais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"réparerait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"réparerions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"répareriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"répareraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais réparé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais réparé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait réparé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions réparé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez réparé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient réparé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"réparasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"réparasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"réparât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"réparassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"réparassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"réparassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse réparé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses réparé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût réparé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions réparé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez réparé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent réparé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie réparé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons réparé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez réparé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse réparé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses réparé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût réparé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions réparé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez réparé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent réparé"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "visser",
+		definition: "Faire tourner une vis ou une pièce pour la fixer.",
+		semanticDomain: "manipulation",
+		cefr: "B1",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9V0980",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9V0980",
+		sourceHashes: {
+			article: "2de8aaf947a98fd5315b3ae3b28243406b1e22d0deafff07332a81dabb921ee0",
+			conjugation: "19d90fc89653e853a126e77a655e454f73eecce2f7b691d8b46a3a2f846ad582"
+		},
+		presentParticiple: "vissant",
+		pastParticiple: "vissé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"visse"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"visses"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"visse"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"vissons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"vissez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"vissent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"vissais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"vissais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"vissait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"vissions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"vissiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"vissaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"visserai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"visseras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"vissera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"visserons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"visserez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"visseront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"vissai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"vissas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"vissa"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"vissâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"vissâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"vissèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai vissé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as vissé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a vissé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons vissé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez vissé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont vissé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai vissé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras vissé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura vissé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons vissé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez vissé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront vissé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais vissé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais vissé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait vissé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions vissé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez vissé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient vissé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus vissé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus vissé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut vissé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes vissé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes vissé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent vissé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"visse"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"vissons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"vissez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"visse"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"visses"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"visse"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"vissions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"vissiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"vissent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie vissé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies vissé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait vissé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons vissé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez vissé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient vissé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"visserais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"visserais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"visserait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"visserions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"visseriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"visseraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais vissé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais vissé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait vissé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions vissé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez vissé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient vissé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"vissasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"vissasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"vissât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"vissassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"vissassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"vissassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse vissé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses vissé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût vissé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions vissé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez vissé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent vissé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie vissé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons vissé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez vissé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse vissé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses vissé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût vissé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions vissé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez vissé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent vissé"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "toucher",
+		definition: "Mettre une partie du corps en contact avec une personne ou une chose.",
+		semanticDomain: "perception",
+		cefr: "A1",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9T1569",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9T1569",
+		sourceHashes: {
+			article: "558911694726c9dd66a4fb52a20c9a5bed43eb70019c3b064b073154d5a4766b",
+			conjugation: "cf9dade7a3b0719f6371c23c39c17f762ea8698fb494561b84c075f03d0a4b41"
+		},
+		presentParticiple: "touchant",
+		pastParticiple: "touché",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"touche"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"touches"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"touche"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"touchons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"touchez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"touchent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"touchais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"touchais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"touchait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"touchions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"touchiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"touchaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"toucherai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"toucheras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"touchera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"toucherons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"toucherez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"toucheront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"touchai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"touchas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"toucha"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"touchâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"touchâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"touchèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai touché"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as touché"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a touché"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons touché"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez touché"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont touché"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai touché"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras touché"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura touché"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons touché"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez touché"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront touché"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais touché"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais touché"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait touché"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions touché"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez touché"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient touché"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus touché"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus touché"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut touché"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes touché"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes touché"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent touché"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"touche"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"touchons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"touchez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"touche"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"touches"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"touche"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"touchions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"touchiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"touchent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie touché"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies touché"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait touché"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons touché"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez touché"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient touché"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"toucherais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"toucherais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"toucherait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"toucherions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"toucheriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"toucheraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais touché"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais touché"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait touché"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions touché"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez touché"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient touché"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"touchasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"touchasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"touchât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"touchassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"touchassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"touchassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse touché"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses touché"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût touché"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions touché"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez touché"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent touché"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie touché"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons touché"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez touché"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse touché"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses touché"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût touché"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions touché"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez touché"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent touché"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "supporter",
+		definition: "Réussir à accepter une chose difficile ou désagréable.",
+		semanticDomain: "emotion",
+		cefr: "A2",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9S3474",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9S3474",
+		sourceHashes: {
+			article: "a61be3c873b4d1fc79b44f5aa653ee1be331a040b6eb9627dd4f6ec555839765",
+			conjugation: "8fb67c246cda272149ad0e1f5b3b152bed911f4dca8c2a0ef09d9fbba6216bc0"
+		},
+		presentParticiple: "supportant",
+		pastParticiple: "supporté",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"supporte"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"supportes"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"supporte"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"supportons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"supportez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"supportent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"supportais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"supportais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"supportait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"supportions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"supportiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"supportaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"supporterai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"supporteras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"supportera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"supporterons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"supporterez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"supporteront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"supportai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"supportas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"supporta"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"supportâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"supportâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"supportèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai supporté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as supporté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a supporté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons supporté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez supporté"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont supporté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai supporté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras supporté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura supporté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons supporté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez supporté"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront supporté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais supporté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais supporté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait supporté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions supporté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez supporté"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient supporté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus supporté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus supporté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut supporté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes supporté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes supporté"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent supporté"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"supporte"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"supportons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"supportez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"supporte"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"supportes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"supporte"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"supportions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"supportiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"supportent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie supporté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies supporté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait supporté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons supporté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez supporté"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient supporté"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"supporterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"supporterais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"supporterait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"supporterions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"supporteriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"supporteraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais supporté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais supporté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait supporté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions supporté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez supporté"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient supporté"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"supportasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"supportasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"supportât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"supportassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"supportassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"supportassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse supporté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses supporté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût supporté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions supporté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez supporté"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent supporté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie supporté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons supporté"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez supporté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse supporté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses supporté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût supporté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions supporté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez supporté"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent supporté"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "tousser",
+		definition: "Rejeter brusquement de l’air par la bouche quand la gorge ou les poumons sont irrités.",
+		semanticDomain: "corps",
+		cefr: "A2",
+		transitivity: "intransitif",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 1,
+		model: "aimer",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9T1672",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9T1672",
+		sourceHashes: {
+			article: "cc0e24a5bc7fd0d1605b93c429cd0bd2964ebef87d8585d4f689ea9494c99e63",
+			conjugation: "2870a0d378c0ed4adfa350a5194a8a7ee34566ec438937da8455b973344c206d"
+		},
+		presentParticiple: "toussant",
+		pastParticiple: "toussé",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"tousse"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"tousses"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"tousse"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"toussons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"toussez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"toussent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"toussais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"toussais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"toussait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"toussions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"toussiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"toussaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"tousserai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"tousseras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"toussera"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"tousserons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"tousserez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"tousseront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"toussai"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"toussas"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"toussa"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"toussâmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"toussâtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"toussèrent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai toussé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as toussé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a toussé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons toussé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez toussé"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont toussé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai toussé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras toussé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura toussé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons toussé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez toussé"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront toussé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais toussé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais toussé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait toussé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions toussé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez toussé"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient toussé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus toussé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus toussé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut toussé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes toussé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes toussé"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent toussé"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"tousse"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"toussons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"toussez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"tousse"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"tousses"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"tousse"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"toussions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"toussiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"toussent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie toussé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies toussé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait toussé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons toussé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez toussé"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient toussé"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"tousserais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"tousserais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"tousserait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"tousserions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"tousseriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"tousseraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais toussé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais toussé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait toussé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions toussé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez toussé"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient toussé"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"toussasse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"toussasses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"toussât"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"toussassions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"toussassiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"toussassent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse toussé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses toussé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût toussé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions toussé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez toussé"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent toussé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie toussé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons toussé"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez toussé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse toussé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses toussé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût toussé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions toussé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez toussé"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent toussé"
+				]
+			}
+		]
+	},
+	{
+		infinitive: "entendre",
+		definition: "Percevoir un son avec les oreilles.",
+		semanticDomain: "perception",
+		cefr: "A1",
+		transitivity: "transitif_direct",
+		preposition: null,
+		auxiliary: "avoir",
+		group: 3,
+		model: "attendre",
+		sourceUrl: "https://www.dictionnaire-academie.fr/article/A9E1839",
+		conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9E1839",
+		sourceHashes: {
+			article: "e43865a7e30904facedb63c14806051f58657b5113c3f9ec8849433c8a3a216e",
+			conjugation: "a1911b5dc71c77b548053a211efe81538bed747b288deeb6bac54c53374d33b1"
+		},
+		presentParticiple: "entendant",
+		pastParticiple: "entendu",
+		rows: [
+			{
+				tenseId: 1,
+				personId: 4,
+				forms: [
+					"entends"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 5,
+				forms: [
+					"entends"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 6,
+				forms: [
+					"entend"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 7,
+				forms: [
+					"entendons"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 8,
+				forms: [
+					"entendez"
+				]
+			},
+			{
+				tenseId: 1,
+				personId: 9,
+				forms: [
+					"entendent"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 4,
+				forms: [
+					"entendais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 5,
+				forms: [
+					"entendais"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 6,
+				forms: [
+					"entendait"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 7,
+				forms: [
+					"entendions"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 8,
+				forms: [
+					"entendiez"
+				]
+			},
+			{
+				tenseId: 2,
+				personId: 9,
+				forms: [
+					"entendaient"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 4,
+				forms: [
+					"entendrai"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 5,
+				forms: [
+					"entendras"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 6,
+				forms: [
+					"entendra"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 7,
+				forms: [
+					"entendrons"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 8,
+				forms: [
+					"entendrez"
+				]
+			},
+			{
+				tenseId: 3,
+				personId: 9,
+				forms: [
+					"entendront"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 4,
+				forms: [
+					"entendis"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 5,
+				forms: [
+					"entendis"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 6,
+				forms: [
+					"entendit"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 7,
+				forms: [
+					"entendîmes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 8,
+				forms: [
+					"entendîtes"
+				]
+			},
+			{
+				tenseId: 4,
+				personId: 9,
+				forms: [
+					"entendirent"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 4,
+				forms: [
+					"ai entendu"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 5,
+				forms: [
+					"as entendu"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 6,
+				forms: [
+					"a entendu"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 7,
+				forms: [
+					"avons entendu"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 8,
+				forms: [
+					"avez entendu"
+				]
+			},
+			{
+				tenseId: 5,
+				personId: 9,
+				forms: [
+					"ont entendu"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 4,
+				forms: [
+					"aurai entendu"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 5,
+				forms: [
+					"auras entendu"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 6,
+				forms: [
+					"aura entendu"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 7,
+				forms: [
+					"aurons entendu"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 8,
+				forms: [
+					"aurez entendu"
+				]
+			},
+			{
+				tenseId: 6,
+				personId: 9,
+				forms: [
+					"auront entendu"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 4,
+				forms: [
+					"avais entendu"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 5,
+				forms: [
+					"avais entendu"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 6,
+				forms: [
+					"avait entendu"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 7,
+				forms: [
+					"avions entendu"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 8,
+				forms: [
+					"aviez entendu"
+				]
+			},
+			{
+				tenseId: 7,
+				personId: 9,
+				forms: [
+					"avaient entendu"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 4,
+				forms: [
+					"eus entendu"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 5,
+				forms: [
+					"eus entendu"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 6,
+				forms: [
+					"eut entendu"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 7,
+				forms: [
+					"eûmes entendu"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 8,
+				forms: [
+					"eûtes entendu"
+				]
+			},
+			{
+				tenseId: 8,
+				personId: 9,
+				forms: [
+					"eurent entendu"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 5,
+				forms: [
+					"entends"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 7,
+				forms: [
+					"entendons"
+				]
+			},
+			{
+				tenseId: 9,
+				personId: 8,
+				forms: [
+					"entendez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 4,
+				forms: [
+					"entende"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 5,
+				forms: [
+					"entendes"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 6,
+				forms: [
+					"entende"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 7,
+				forms: [
+					"entendions"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 8,
+				forms: [
+					"entendiez"
+				]
+			},
+			{
+				tenseId: 10,
+				personId: 9,
+				forms: [
+					"entendent"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 4,
+				forms: [
+					"aie entendu"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 5,
+				forms: [
+					"aies entendu"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 6,
+				forms: [
+					"ait entendu"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 7,
+				forms: [
+					"ayons entendu"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 8,
+				forms: [
+					"ayez entendu"
+				]
+			},
+			{
+				tenseId: 11,
+				personId: 9,
+				forms: [
+					"aient entendu"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 4,
+				forms: [
+					"entendrais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 5,
+				forms: [
+					"entendrais"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 6,
+				forms: [
+					"entendrait"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 7,
+				forms: [
+					"entendrions"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 8,
+				forms: [
+					"entendriez"
+				]
+			},
+			{
+				tenseId: 14,
+				personId: 9,
+				forms: [
+					"entendraient"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 4,
+				forms: [
+					"aurais entendu"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 5,
+				forms: [
+					"aurais entendu"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 6,
+				forms: [
+					"aurait entendu"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 7,
+				forms: [
+					"aurions entendu"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 8,
+				forms: [
+					"auriez entendu"
+				]
+			},
+			{
+				tenseId: 15,
+				personId: 9,
+				forms: [
+					"auraient entendu"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 4,
+				forms: [
+					"entendisse"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 5,
+				forms: [
+					"entendisses"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 6,
+				forms: [
+					"entendît"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 7,
+				forms: [
+					"entendissions"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 8,
+				forms: [
+					"entendissiez"
+				]
+			},
+			{
+				tenseId: 16,
+				personId: 9,
+				forms: [
+					"entendissent"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 4,
+				forms: [
+					"eusse entendu"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 5,
+				forms: [
+					"eusses entendu"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 6,
+				forms: [
+					"eût entendu"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 7,
+				forms: [
+					"eussions entendu"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 8,
+				forms: [
+					"eussiez entendu"
+				]
+			},
+			{
+				tenseId: 17,
+				personId: 9,
+				forms: [
+					"eussent entendu"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 5,
+				forms: [
+					"aie entendu"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 7,
+				forms: [
+					"ayons entendu"
+				]
+			},
+			{
+				tenseId: 18,
+				personId: 8,
+				forms: [
+					"ayez entendu"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 4,
+				forms: [
+					"eusse entendu"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 5,
+				forms: [
+					"eusses entendu"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 6,
+				forms: [
+					"eût entendu"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 7,
+				forms: [
+					"eussions entendu"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 8,
+				forms: [
+					"eussiez entendu"
+				]
+			},
+			{
+				tenseId: 19,
+				personId: 9,
+				forms: [
+					"eussent entendu"
+				]
+			}
+		],
+		pronominal: {
+			infinitive: "s'entendre",
+			baseInfinitive: "entendre",
+			definition: "Avoir de bonnes relations ou se mettre d’accord avec quelqu’un.",
+			allowedPersons: [
+				4,
+				5,
+				6,
+				7,
+				8,
+				9
+			],
+			agreement: "avec_sujet",
+			sourceUrl: "https://www.dictionnaire-academie.fr/article/A9E1839",
+			conjugationUrl: "https://www.dictionnaire-academie.fr/conjuguer/A9E1839",
+			referenceRows: [
+				{
+					tenseId: 1,
+					personId: 4,
+					forms: [
+						"m'entends"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 5,
+					forms: [
+						"t'entends"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 6,
+					forms: [
+						"s'entend"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 7,
+					forms: [
+						"nous entendons"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 8,
+					forms: [
+						"vous entendez"
+					]
+				},
+				{
+					tenseId: 1,
+					personId: 9,
+					forms: [
+						"s'entendent"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 4,
+					forms: [
+						"m'entendais"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 5,
+					forms: [
+						"t'entendais"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 6,
+					forms: [
+						"s'entendait"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 7,
+					forms: [
+						"nous entendions"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 8,
+					forms: [
+						"vous entendiez"
+					]
+				},
+				{
+					tenseId: 2,
+					personId: 9,
+					forms: [
+						"s'entendaient"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 4,
+					forms: [
+						"m'entendis"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 5,
+					forms: [
+						"t'entendis"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 6,
+					forms: [
+						"s'entendit"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 7,
+					forms: [
+						"nous entendîmes"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 8,
+					forms: [
+						"vous entendîtes"
+					]
+				},
+				{
+					tenseId: 4,
+					personId: 9,
+					forms: [
+						"s'entendirent"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 4,
+					forms: [
+						"m'entendrai"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 5,
+					forms: [
+						"t'entendras"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 6,
+					forms: [
+						"s'entendra"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 7,
+					forms: [
+						"nous entendrons"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 8,
+					forms: [
+						"vous entendrez"
+					]
+				},
+				{
+					tenseId: 3,
+					personId: 9,
+					forms: [
+						"s'entendront"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 4,
+					forms: [
+						"me suis entendu"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 5,
+					forms: [
+						"t'es entendu"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 6,
+					forms: [
+						"s'est entendu"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 7,
+					forms: [
+						"nous sommes entendus"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 8,
+					forms: [
+						"vous êtes entendus"
+					]
+				},
+				{
+					tenseId: 5,
+					personId: 9,
+					forms: [
+						"se sont entendus"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 4,
+					forms: [
+						"m'étais entendu"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 5,
+					forms: [
+						"t'étais entendu"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 6,
+					forms: [
+						"s'était entendu"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 7,
+					forms: [
+						"nous étions entendus"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 8,
+					forms: [
+						"vous étiez entendus"
+					]
+				},
+				{
+					tenseId: 7,
+					personId: 9,
+					forms: [
+						"s'étaient entendus"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 4,
+					forms: [
+						"me fus entendu"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 5,
+					forms: [
+						"te fus entendu"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 6,
+					forms: [
+						"se fut entendu"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 7,
+					forms: [
+						"nous fûmes entendus"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 8,
+					forms: [
+						"vous fûtes entendus"
+					]
+				},
+				{
+					tenseId: 8,
+					personId: 9,
+					forms: [
+						"se furent entendus"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 4,
+					forms: [
+						"me serai entendu"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 5,
+					forms: [
+						"te seras entendu"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 6,
+					forms: [
+						"se sera entendu"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 7,
+					forms: [
+						"nous serons entendus"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 8,
+					forms: [
+						"vous serez entendus"
+					]
+				},
+				{
+					tenseId: 6,
+					personId: 9,
+					forms: [
+						"se seront entendus"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 4,
+					forms: [
+						"m'entendrais"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 5,
+					forms: [
+						"t'entendrais"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 6,
+					forms: [
+						"s'entendrait"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 7,
+					forms: [
+						"nous entendrions"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 8,
+					forms: [
+						"vous entendriez"
+					]
+				},
+				{
+					tenseId: 14,
+					personId: 9,
+					forms: [
+						"s'entendraient"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 4,
+					forms: [
+						"me serais entendu"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 5,
+					forms: [
+						"te serais entendu"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 6,
+					forms: [
+						"se serait entendu"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 7,
+					forms: [
+						"nous serions entendus"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 8,
+					forms: [
+						"vous seriez entendus"
+					]
+				},
+				{
+					tenseId: 15,
+					personId: 9,
+					forms: [
+						"se seraient entendus"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 4,
+					forms: [
+						"m'entende"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 5,
+					forms: [
+						"t'entendes"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 6,
+					forms: [
+						"s'entende"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 7,
+					forms: [
+						"nous entendions"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 8,
+					forms: [
+						"vous entendiez"
+					]
+				},
+				{
+					tenseId: 10,
+					personId: 9,
+					forms: [
+						"s'entendent"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 4,
+					forms: [
+						"m'entendisse"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 5,
+					forms: [
+						"t'entendisses"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 6,
+					forms: [
+						"s'entendît"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 7,
+					forms: [
+						"nous entendissions"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 8,
+					forms: [
+						"vous entendissiez"
+					]
+				},
+				{
+					tenseId: 16,
+					personId: 9,
+					forms: [
+						"s'entendissent"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 4,
+					forms: [
+						"me sois entendu"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 5,
+					forms: [
+						"te sois entendu"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 6,
+					forms: [
+						"se soit entendu"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 7,
+					forms: [
+						"nous soyons entendus"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 8,
+					forms: [
+						"vous soyez entendus"
+					]
+				},
+				{
+					tenseId: 11,
+					personId: 9,
+					forms: [
+						"se soient entendus"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 4,
+					forms: [
+						"me fusse entendu"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 5,
+					forms: [
+						"te fusses entendu"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 6,
+					forms: [
+						"se fût entendu"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 7,
+					forms: [
+						"nous fussions entendus"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 8,
+					forms: [
+						"vous fussiez entendus"
+					]
+				},
+				{
+					tenseId: 17,
+					personId: 9,
+					forms: [
+						"se fussent entendus"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 5,
+					forms: [
+						"entends-toi"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 7,
+					forms: [
+						"entendons-nous"
+					]
+				},
+				{
+					tenseId: 9,
+					personId: 8,
+					forms: [
+						"entendez-vous"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 5,
+					forms: [
+						"sois-toi entendu"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 7,
+					forms: [
+						"soyons-nous entendus"
+					]
+				},
+				{
+					tenseId: 18,
+					personId: 8,
+					forms: [
+						"soyez-vous entendus"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 4,
+					forms: [
+						"me fusse entendu"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 5,
+					forms: [
+						"te fusses entendu"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 6,
+					forms: [
+						"se fût entendu"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 7,
+					forms: [
+						"nous fussions entendus"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 8,
+					forms: [
+						"vous fussiez entendus"
+					]
+				},
+				{
+					tenseId: 19,
+					personId: 9,
+					forms: [
+						"se fussent entendus"
+					]
+				}
+			]
+		}
+	}
+];
+const payloadJson = {
+	batchId: batchId$1,
+	date: date$1,
+	requested: requested,
+	entries: entries
+};
+
+var batchId = "fle-verbs-2026-11-17";
+var date = "2026-11-17";
+var payloadSha256 = "1ccdc01c5402e029271bc4a5e2b32042077676a49170a9ef22652e0b857d5151";
+var requestedLines = 42;
+var uniqueSelections = 41;
+var baseVerbs = 41;
+var finiteSlots = 3936;
+var morphalouComparedSlots = 1927;
+var pronominalReferenceSlots = 768;
+var morphalouSource = "https://repository.ortolang.fr/api/content/morphalou/4/Morphalou3.1_formatCSV_toutEnUn.zip";
+var morphalouLicense = "LGPL-LR";
+var officialOnlyVariants = [
+	{
+		infinitive: "épeler",
+		tenseId: 14,
+		personId: 4,
+		form: "épellerais",
+		evidence: "https://www.dictionnaire-academie.fr/conjuguer/A9E2140"
+	},
+	{
+		infinitive: "posséder",
+		tenseId: 14,
+		personId: 4,
+		form: "posséderais",
+		evidence: "https://www.dictionnaire-academie.fr/conjuguer/A9P3586"
+	},
+	{
+		infinitive: "régler",
+		tenseId: 14,
+		personId: 4,
+		form: "réglerais",
+		evidence: "https://www.dictionnaire-academie.fr/conjuguer/A9R1342"
+	}
+];
+var errors = [
+];
+var notes = [
+	"Définitions originales du site ; CECRL estimatifs.",
+	"Les variantes officielles absentes de Morphalou restent acceptées avec leur référence Académie.",
+	"Les 9 emplois pronominaux seront aussi contrôlés par le moteur réel avant insertion."
+];
+const auditJson = {
+	batchId: batchId,
+	date: date,
+	payloadSha256: payloadSha256,
+	requestedLines: requestedLines,
+	uniqueSelections: uniqueSelections,
+	baseVerbs: baseVerbs,
+	finiteSlots: finiteSlots,
+	morphalouComparedSlots: morphalouComparedSlots,
+	pronominalReferenceSlots: pronominalReferenceSlots,
+	morphalouSource: morphalouSource,
+	morphalouLicense: morphalouLicense,
+	officialOnlyVariants: officialOnlyVariants,
+	errors: errors,
+	notes: notes
+};
+
+function normalized(value) {
+  return value.trim().toLocaleLowerCase("fr").normalize("NFC");
+}
+function elidesBefore(form, hType) {
+  const normalizedForm = normalized(form);
+  const first = normalizedForm.normalize("NFD").replace(/\p{Diacritic}/gu, "").charAt(0);
+  if ("aeiouy".includes(first)) return true;
+  return first === "h" && hType !== "aspire";
+}
+function proclitic(personId, form, hType) {
+  const elided = elidesBefore(form, hType);
+  if (personId === 4) return elided ? "m'" : "me ";
+  if (personId === 5) return elided ? "t'" : "te ";
+  if (personId === 7) return "nous ";
+  if (personId === 8) return "vous ";
+  return elided ? "s'" : "se ";
+}
+function pronominalizeSimple(form, personId, mode, hType) {
+  if (!form.trim()) return "";
+  if (normalized(mode) === "imp\xE9ratif") {
+    const suffix = personId === 5 ? "toi" : personId === 7 ? "nous" : "vous";
+    return `${form.trim()}-${suffix}`;
+  }
+  return `${proclitic(personId, form, hType)}${form.trim()}`;
+}
+function participleForPerson(participle, personId, agreementRule) {
+  const form = participle.trim();
+  if (agreementRule === "invariable" || ![7, 8, 9].includes(Number(personId)) || /[sx]$/u.test(form)) {
+    return form;
+  }
+  return `${form}s`;
+}
+function generatePronominalRow(row, auxiliaryForms) {
+  var _a, _b, _c, _d, _e, _f, _g, _h;
+  const forms = [row.base_conjugaison1, row.base_conjugaison2, row.base_conjugaison3];
+  let generated;
+  if (Number(row.is_compound)) {
+    const auxiliary = findCompoundAuxiliaryForm(row, auxiliaryForms);
+    const auxiliaryForm = (_b = (_a = auxiliary == null ? void 0 : auxiliary.conjugaison1) == null ? void 0 : _a.trim()) != null ? _b : "";
+    if (!auxiliaryForm) {
+      generated = [];
+    } else if (normalized(row.mode_name) === "imp\xE9ratif") {
+      const suffix = Number(row.personne_id) === 5 ? "toi" : Number(row.personne_id) === 7 ? "nous" : "vous";
+      generated = [`${auxiliaryForm}-${suffix} ${participleForPerson(row.participe_passe, row.personne_id, row.regle_accord)}`];
+    } else {
+      generated = [`${proclitic(row.personne_id, auxiliaryForm, null)}${auxiliaryForm} ${participleForPerson(row.participe_passe, row.personne_id, row.regle_accord)}`];
+    }
+  } else {
+    generated = forms.map((form) => pronominalizeSimple(form, row.personne_id, row.mode_name, row.type_h_initial));
+  }
+  let nousForm = null;
+  if ((_c = row.nous_form) == null ? void 0 : _c.trim()) {
+    if (Number(row.is_compound)) {
+      const auxiliary = findCompoundAuxiliaryForm({ ...row, personne_id: 7 }, auxiliaryForms);
+      const auxiliaryForm = (_e = (_d = auxiliary == null ? void 0 : auxiliary.conjugaison1) == null ? void 0 : _d.trim()) != null ? _e : "";
+      if (auxiliaryForm) {
+        nousForm = normalized(row.mode_name) === "imp\xE9ratif" ? `${auxiliaryForm}-nous ${participleForPerson(row.participe_passe, 7, row.regle_accord)}` : `${proclitic(7, auxiliaryForm, null)}${auxiliaryForm} ${participleForPerson(row.participe_passe, 7, row.regle_accord)}`;
+      }
+    } else {
+      nousForm = pronominalizeSimple(row.nous_form, 7, row.mode_name, row.type_h_initial);
+    }
+  }
+  return {
+    ...row,
+    id: -(Number(row.pronominal_use_id) * 1e5 + Number(row.id)),
+    verbe_id: -Number(row.pronominal_use_id),
+    infinitif: row.infinitif_pronominal,
+    auxiliaire: Number(row.is_compound) ? "\xEAtre" : row.auxiliaire,
+    conjugaison1: (_f = generated[0]) != null ? _f : "",
+    conjugaison2: (_g = generated[1]) != null ? _g : "",
+    conjugaison3: (_h = generated[2]) != null ? _h : "",
+    agreement_rule: row.regle_accord,
+    nous_form: nousForm
+  };
+}
+
+const fleVerbBatch = payloadJson;
+const BATCH_ID = "fle-verbs-2026-11-17";
+const TAG = `import:${BATCH_ID}`;
+const JOURNAL = "fle_verb_import_journal";
+const marks = (items) => items.map(() => "?").join(",");
+const normalize = (value) => value.normalize("NFC").replace(/’/gu, "'").replace(/\s+/gu, " ").trim();
+const json = (value) => typeof value === "string" ? JSON.parse(value) : value;
+function validateFleVerbBatch(batch = fleVerbBatch, seal = auditJson) {
+  const hash = createHash("sha256").update(JSON.stringify(batch)).digest("hex");
+  if (seal.errors.length || seal.payloadSha256 !== hash || batch.batchId !== BATCH_ID) {
+    throw new Error("Lot FLE non audit\xE9 ou modifi\xE9 apr\xE8s audit. R\xE9g\xE9n\xE9rer les donn\xE9es et leur contr\xF4le avant import.");
+  }
+  if (batch.entries.length !== 41 || new Set(batch.requested).size !== 41 || batch.requested.length !== 42) throw new Error("Liste FLE incompl\xE8te ou dupliqu\xE9e.");
+  if (new Set(batch.entries.map((entry) => entry.infinitive)).size !== 41) throw new Error("Doublon de verbe dans le lot FLE.");
+  for (const entry of batch.entries) {
+    if (!entry.definition || entry.definition.length > 180 || !entry.sourceUrl.startsWith("https://www.dictionnaire-academie.fr/article/")) throw new Error(`M\xE9tadonn\xE9es incompl\xE8tes : ${entry.infinitive}`);
+    if (entry.rows.length !== 96 || new Set(entry.rows.map((row) => `${row.tenseId}:${row.personId}`)).size !== 96) throw new Error(`Paradigme incomplet : ${entry.infinitive}`);
+    for (const row of entry.rows) {
+      if (![4, 5, 6, 7, 8, 9].includes(row.personId) || !row.forms.length || row.forms.length > 3 || row.forms.some((form) => !form || /[<>\d]/u.test(form))) throw new Error(`Forme invalide : ${entry.infinitive} ${row.tenseId}:${row.personId}`);
+      if ([9, 18].includes(row.tenseId) && ![5, 7, 8].includes(row.personId)) throw new Error(`Personne interdite \xE0 l\u2019imp\xE9ratif : ${entry.infinitive}`);
+    }
+  }
+  return { hash, baseVerbs: batch.entries.length, finiteSlots: batch.entries.reduce((sum, entry) => sum + entry.rows.length, 0) };
+}
+async function auditFleVerbRuntime(connection) {
+  const integrity = validateFleVerbBatch();
+  const [tenses] = await connection.execute("SELECT t.id,t.name,m.name AS mode_name,t.isTempsCompose AS is_compound FROM temps t JOIN modes m ON m.id=t.mode_id");
+  const [auxiliaryForms] = await connection.execute(`
+    SELECT vc.personne_id,m.name AS mode_name,t.name AS temps_name,vc.conjugaison1
+    FROM verbesconjugues vc JOIN verbes v ON v.id=vc.verbe_id
+    JOIN temps t ON t.id=vc.temp_id JOIN modes m ON m.id=t.mode_id
+    WHERE v.infinitif='\xEAtre' AND t.isTempsCompose=0 AND vc.conjugaison1<>''
+  `);
+  let compoundForms = 0;
+  let pronominalForms = 0;
+  const errors = [];
+  for (const entry of fleVerbBatch.entries) {
+    for (const row of entry.rows) {
+      const tense = tenses.find((item) => Number(item.id) === row.tenseId);
+      if (!tense) {
+        errors.push(`${entry.infinitive} : temps ${row.tenseId} absent`);
+        continue;
+      }
+      if (Number(tense.is_compound)) {
+        const simple = compoundSimpleTense(tense.mode_name, tense.name);
+        const reference = simple && AUXILIARY_SIMPLE_TENSES.find((item) => item.mode === simple.mode && item.tense === simple.tense);
+        const personIndex = tense.mode_name === "imp\xE9ratif" ? [5, 7, 8].indexOf(row.personId) : row.personId - 4;
+        const auxiliaries = ["retourner", "convenir"].includes(entry.infinitive) ? ["avoir", "\xEAtre"] : [entry.auxiliary];
+        const expected = auxiliaries.flatMap((auxiliary) => {
+          const form = reference == null ? void 0 : reference.forms[auxiliary][personIndex];
+          const participle = entry.pastParticiple + (auxiliary === "\xEAtre" && row.personId >= 7 && !/[sx]$/u.test(entry.pastParticiple) ? "s" : "");
+          return form ? [`${form} ${participle}`] : [];
+        });
+        compoundForms++;
+        if (row.forms.some((form) => !expected.includes(normalize(form))) || expected.some((form) => !row.forms.map(normalize).includes(form))) errors.push(`${entry.infinitive} ${row.tenseId}:${row.personId} : temps compos\xE9 divergent`);
+      }
+      if (!entry.pronominal) continue;
+      const source = {
+        id: 1,
+        verbe_id: 1,
+        personne_id: row.personId,
+        temp_id: row.tenseId,
+        infinitif: entry.pronominal.infinitive,
+        auxiliaire: entry.auxiliary,
+        participe_passe: entry.pastParticiple,
+        temps_name: tense.name,
+        mode_name: tense.mode_name,
+        is_compound: tense.is_compound,
+        base_conjugaison1: row.forms[0],
+        base_conjugaison2: row.forms[1] || "",
+        base_conjugaison3: row.forms[2] || "",
+        conjugaison1: row.forms[0],
+        conjugaison2: row.forms[1] || "",
+        conjugaison3: row.forms[2] || "",
+        pronominal_use_id: 1,
+        infinitif_pronominal: entry.pronominal.infinitive,
+        regle_accord: entry.pronominal.agreement,
+        type_h_initial: null
+      };
+      const generated = generatePronominalRow(source, auxiliaryForms);
+      const official = entry.pronominal.referenceRows.find((item) => item.tenseId === row.tenseId && item.personId === row.personId);
+      pronominalForms++;
+      if (!generated.conjugaison1 || official && !official.forms.map(normalize).includes(normalize(generated.conjugaison1))) errors.push(`${entry.pronominal.infinitive} ${row.tenseId}:${row.personId} : \xAB ${generated.conjugaison1} \xBB \u2260 ${(official == null ? void 0 : official.forms.join(" / ")) || "forme attendue"}`);
+    }
+  }
+  if (errors.length) throw new Error(`Audit du moteur bloquant : ${errors.join("; ")}`);
+  return { ...integrity, compoundForms, pronominalForms, tenses };
+}
+async function inspectState(connection) {
+  var _a;
+  const names = fleVerbBatch.entries.map((entry) => entry.infinitive);
+  const [verbs] = await connection.execute(`SELECT id,infinitif,est_archive,pronominalisable,particularites FROM verbes WHERE infinitif IN (${marks(names)})`, names);
+  if (new Set(verbs.map((verb) => verb.infinitif)).size !== verbs.length) throw new Error("Plusieurs entr\xE9es existantes pour un m\xEAme infinitif : import bloqu\xE9.");
+  if (verbs.some((verb) => verb.est_archive)) throw new Error("Un verbe demand\xE9 est archiv\xE9 : r\xE9activation \xE9ditoriale n\xE9cessaire.");
+  const usesNames = fleVerbBatch.entries.flatMap((entry) => entry.pronominal ? [entry.pronominal.infinitive] : []);
+  const [uses] = await connection.execute(`SELECT id,verbe_id,infinitif_pronominal,actif FROM emplois_pronominaux WHERE infinitif_pronominal IN (${marks(usesNames)})`, usesNames);
+  if (new Set(uses.map((use) => use.infinitif_pronominal)).size !== uses.length) throw new Error("Emploi pronominal dupliqu\xE9 : import bloqu\xE9.");
+  for (const entry of fleVerbBatch.entries) {
+    const verb = verbs.find((row) => row.infinitif === entry.infinitive);
+    const use = uses.find((row) => {
+      var _a2;
+      return row.infinitif_pronominal === ((_a2 = entry.pronominal) == null ? void 0 : _a2.infinitive);
+    });
+    if (use && (!use.actif || Number(use.verbe_id) !== Number(verb == null ? void 0 : verb.id))) throw new Error(`Emploi pronominal existant incompatible : ${(_a = entry.pronominal) == null ? void 0 : _a.infinitive}`);
+  }
+  return { verbs, uses, missingVerbs: names.filter((name) => !verbs.some((verb) => verb.infinitif === name)), missingUses: usesNames.filter((name) => !uses.some((use) => use.infinitif_pronominal === name)) };
+}
+async function verifyStoredRows(connection, complete = true) {
+  const state = await inspectState(connection);
+  if (complete && (state.missingVerbs.length || state.missingUses.length)) throw new Error("V\xE9rification apr\xE8s import : entr\xE9es manquantes.");
+  if (!state.verbs.length) return state;
+  const [rows] = await connection.execute(`
+    SELECT v.infinitif,vc.personne_id,vc.temp_id,vc.conjugaison1,vc.conjugaison2,vc.conjugaison3
+    FROM verbesconjugues vc JOIN verbes v ON v.id=vc.verbe_id WHERE v.infinitif IN (${marks(state.verbs)})
+  `, state.verbs.map((verb) => verb.infinitif));
+  const inspectedEntries = fleVerbBatch.entries.filter((entry) => state.verbs.some((verb) => verb.infinitif === entry.infinitive && (complete || !json(verb.particularites || []).includes(TAG))));
+  for (const entry of inspectedEntries) for (const expected of entry.rows) {
+    const matches = rows.filter((row2) => row2.infinitif === entry.infinitive && Number(row2.personne_id) === expected.personId && Number(row2.temp_id) === expected.tenseId);
+    if (matches.length !== 1) throw new Error(`Coordonn\xE9e absente ou dupliqu\xE9e : ${entry.infinitive} ${expected.tenseId}:${expected.personId}`);
+    const row = matches[0];
+    const actual = [row.conjugaison1, row.conjugaison2, row.conjugaison3].filter(Boolean).map(normalize);
+    if (expected.forms.some((form) => !actual.includes(normalize(form)))) throw new Error(`Forme stock\xE9e divergente : ${entry.infinitive} ${expected.tenseId}:${expected.personId}`);
+  }
+  return state;
+}
+async function compensateIncompleteImport(connection, snapshot) {
+  if (snapshot.newInfinitives.length) {
+    const [owned] = await connection.execute(`SELECT id,infinitif,particularites FROM verbes WHERE infinitif IN (${marks(snapshot.newInfinitives)})`, snapshot.newInfinitives);
+    const ids = owned.filter((row) => json(row.particularites || []).includes(TAG)).map((row) => Number(row.id));
+    if (ids.length) {
+      await connection.execute(`DELETE FROM verbesconjugues WHERE verbe_id IN (${marks(ids)})`, ids);
+      await connection.execute(`DELETE FROM verbes WHERE id IN (${marks(ids)})`, ids);
+    }
+  }
+  for (const original of snapshot.originalFlags) await connection.execute("UPDATE verbes SET pronominalisable=? WHERE id=?", [original.value, original.id]);
+}
+async function importFleVerbBatch(connection, { apply = false } = {}) {
+  var _a;
+  const runtimeAudit = await auditFleVerbRuntime(connection);
+  const state = await verifyStoredRows(connection, false);
+  if (!apply) return { mode: "audit", ...runtimeAudit, missingVerbs: state.missingVerbs, missingUses: state.missingUses };
+  const [[lock]] = await connection.query("SELECT GET_LOCK(?,30) AS acquired", [BATCH_ID]);
+  if (Number(lock == null ? void 0 : lock.acquired) !== 1) throw new Error("Import FLE d\xE9j\xE0 en cours.");
+  let snapshot;
+  let transactionStarted = false;
+  try {
+    await connection.execute(`CREATE TABLE IF NOT EXISTS ${JOURNAL} (
+      batch_id VARCHAR(80) PRIMARY KEY, payload_sha256 CHAR(64) NOT NULL,
+      status VARCHAR(16) NOT NULL, snapshot_json JSON NOT NULL,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+    const [[journal]] = await connection.execute(`SELECT * FROM ${JOURNAL} WHERE batch_id=?`, [BATCH_ID]);
+    if (journal && journal.payload_sha256 !== runtimeAudit.hash) throw new Error("Le lot import\xE9 diff\xE8re du lot audit\xE9. Ne pas le remplacer automatiquement.");
+    if ((journal == null ? void 0 : journal.status) === "applied") {
+      await verifyStoredRows(connection);
+      return { mode: "already-applied", baseVerbs: runtimeAudit.baseVerbs, finiteSlots: runtimeAudit.finiteSlots };
+    }
+    if ((journal == null ? void 0 : journal.status) === "pending") await compensateIncompleteImport(connection, json(journal.snapshot_json));
+    const current = await inspectState(connection);
+    const [engines] = await connection.execute(`SELECT TABLE_NAME,ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('verbes','verbesconjugues','verbe_sens','verbe_sens_categories','emplois_pronominaux')`);
+    if (engines.length !== 5 || engines.some((row) => !["InnoDB", "MyISAM"].includes(row.ENGINE) || !["verbes", "verbesconjugues"].includes(row.TABLE_NAME) && row.ENGINE !== "InnoDB")) throw new Error("Moteurs SQL non pris en charge pour un import s\xFBr.");
+    const [categories] = await connection.execute("SELECT id,slug FROM categories_semantiques");
+    const [models] = await connection.execute("SELECT infinitif,famille_conjugaison_id FROM verbes WHERE est_archive=0");
+    for (const entry of fleVerbBatch.entries) if (!categories.some((category) => category.slug === entry.semanticDomain)) throw new Error(`Cat\xE9gorie absente : ${entry.semanticDomain}`);
+    snapshot = {
+      newInfinitives: current.missingVerbs,
+      originalFlags: current.verbs.filter((verb) => fleVerbBatch.entries.some((entry) => entry.infinitive === verb.infinitif && entry.pronominal)).map((verb) => ({ id: Number(verb.id), value: Number(verb.pronominalisable) }))
+    };
+    await connection.execute(`INSERT INTO ${JOURNAL} (batch_id,payload_sha256,status,snapshot_json) VALUES (?,?,'pending',?) ON DUPLICATE KEY UPDATE status='pending',snapshot_json=VALUES(snapshot_json)`, [BATCH_ID, runtimeAudit.hash, JSON.stringify(snapshot)]);
+    await connection.beginTransaction();
+    transactionStarted = true;
+    const ids = new Map(current.verbs.map((verb) => [verb.infinitif, Number(verb.id)]));
+    let insertedVerbs = 0;
+    let insertedForms = 0;
+    let insertedUses = 0;
+    for (const entry of fleVerbBatch.entries) {
+      let id = ids.get(entry.infinitive);
+      if (!id) {
+        const modelAliases = { amonceler: "appeler", bouger: "manger", avancer: "lancer", amener: "lever", crier: "crier" };
+        const model = models.find((item) => item.infinitif === entry.model) || models.find((item) => item.infinitif === modelAliases[entry.model]);
+        const ending = entry.infinitive.endsWith("er") ? "er" : entry.infinitive.endsWith("ir") ? "ir" : "re";
+        const [created] = await connection.execute(
+          `INSERT INTO verbes
+          (infinitif,\`participe_pr\xE9sent\`,\`participe_pass\xE9\`,auxiliaire,groupe_conjugaison,famille_conjugaison_id,
+           terminaison_infinitif,type_pronominal,est_impersonnel,est_defectif,personnes_disponibles,
+           type_h_initial,niveau_difficulte,niveau_cecrl,rang_frequence,registre_principal,forme_canonique,
+           statut_validation,particularites,niveaux_scolaires,parcours_cif,pronominalisable,est_archive)
+          VALUES (?,?,?,?,?,?,?,'aucun',0,0,?,NULL,?,?,NULL,'courant',?,'valide',?,?,?, ?,0)`,
+          [
+            entry.infinitive,
+            entry.presentParticiple,
+            entry.pastParticiple,
+            entry.auxiliary,
+            entry.group,
+            (_a = model == null ? void 0 : model.famille_conjugaison_id) != null ? _a : null,
+            ending,
+            JSON.stringify([4, 5, 6, 7, 8, 9]),
+            entry.group === 3 || entry.rows.some((row) => row.forms.length > 1) ? 2 : 1,
+            entry.cefr,
+            entry.infinitive,
+            JSON.stringify([TAG, "formes:academie", "controle:morphalou-3.1", "cecrl:estimation-editoriale"]),
+            "[]",
+            "[]",
+            entry.pronominal ? 1 : 0
+          ]
+        );
+        id = Number(created.insertId);
+        ids.set(entry.infinitive, id);
+        insertedVerbs++;
+        for (const row of entry.rows) {
+          await connection.execute("INSERT INTO verbesconjugues (verbe_id,verbe_infinitif,personne_id,temp_id,conjugaison1,conjugaison2,conjugaison3) VALUES (?,?,?,?,?,?,?)", [id, entry.infinitive, row.personId, row.tenseId, row.forms[0], row.forms[1] || "", row.forms[2] || ""]);
+          insertedForms++;
+        }
+        const senses = [
+          { definition: entry.definition, construction: entry.infinitive, pronominal: false, auxiliary: entry.auxiliary, transitivity: entry.transitivity, preposition: entry.preposition },
+          ...entry.infinitive === "convenir" ? [{ definition: "Se mettre d\u2019accord avec quelqu\u2019un sur une chose.", construction: "convenir de", pronominal: false, auxiliary: "\xEAtre", transitivity: "transitif_indirect", preposition: "de" }] : [],
+          ...entry.infinitive === "retourner" ? [{ definition: "Mettre une chose sur son autre face ou dans l\u2019autre sens.", construction: "retourner quelque chose", pronominal: false, auxiliary: "avoir", transitivity: "transitif_direct", preposition: null }] : []
+        ];
+        for (const [index, sense] of senses.entries()) await insertSense(connection, id, index + 1, sense, categories.find((category) => category.slug === entry.semanticDomain).id);
+      }
+      if (entry.pronominal && current.missingUses.includes(entry.pronominal.infinitive)) {
+        await connection.execute(
+          `INSERT INTO emplois_pronominaux
+          (verbe_id,infinitif_pronominal,type_emploi,fonction_pronom,regle_accord,preposition,personnes_autorisees,source,source_url,statut_validation,actif)
+          VALUES (?,?,'reflechi','variable',?,NULL,?,?,?,'valide',1)`,
+          [id, entry.pronominal.infinitive, entry.pronominal.agreement, JSON.stringify(entry.pronominal.allowedPersons), BATCH_ID, entry.pronominal.sourceUrl]
+        );
+        await connection.execute("UPDATE verbes SET pronominalisable=1 WHERE id=? AND pronominalisable<>1", [id]);
+        const [[number]] = await connection.execute("SELECT COALESCE(MAX(numero_sens),0)+1 AS nextNumber FROM verbe_sens WHERE verbe_id=?", [id]);
+        await insertSense(connection, id, Number(number.nextNumber), { definition: entry.pronominal.definition, construction: entry.pronominal.infinitive, pronominal: true, auxiliary: "\xEAtre", transitivity: "intransitif", preposition: null }, categories.find((category) => category.slug === entry.semanticDomain).id);
+        insertedUses++;
+      }
+    }
+    await verifyStoredRows(connection);
+    await connection.execute(`UPDATE ${JOURNAL} SET status='applied' WHERE batch_id=?`, [BATCH_ID]);
+    await connection.commit();
+    transactionStarted = false;
+    return { mode: "applied", insertedVerbs, insertedForms, insertedUses, baseVerbs: runtimeAudit.baseVerbs, finiteSlots: runtimeAudit.finiteSlots };
+  } catch (error) {
+    if (transactionStarted) await connection.rollback();
+    if (snapshot) await compensateIncompleteImport(connection, snapshot);
+    throw error;
+  } finally {
+    await connection.query("SELECT RELEASE_LOCK(?)", [BATCH_ID]);
+  }
+}
+async function insertSense(connection, id, number, sense, categoryId) {
+  const [created] = await connection.execute(
+    `INSERT INTO verbe_sens
+    (verbe_id,numero_sens,intitule,definition,construction,transitivite,preposition,auxiliaire,registre,est_pronominal,est_principal,source,sort_order)
+    VALUES (?,?,?,?,?,?,?,?,'courant',?,?,?,?)`,
+    [id, number, sense.definition.replace(/[.]$/u, ""), sense.definition, sense.construction, sense.transitivity, sense.preposition, sense.auxiliary, sense.pronominal ? 1 : 0, number === 1 ? 1 : 0, BATCH_ID, number]
+  );
+  await connection.execute("INSERT INTO verbe_sens_categories (sens_id,categorie_id) VALUES (?,?)", [created.insertId, categoryId]);
+}
+
+const _HAsdFZP49RW0J7GRupRyjnix0yJ22So9lKmqIdoWI8 = defineNitroPlugin(async () => {
+  const connection = await useDatabase().getConnection();
+  try {
+    const result = await importFleVerbBatch(connection, { apply: true });
+    console.info(`[database] Lot FLE du 17 novembre 2026 : ${result.mode}, 41 verbes de base contr\xF4l\xE9s.`);
+  } catch (error) {
+    console.error("[database] Import du lot FLE interrompu ; consulter le journal fle_verb_import_journal avant toute intervention manuelle.", error);
+  } finally {
+    connection.release();
+  }
+});
+
 const plugins = [
   _fezVZcq1ufSxtjt97QdykbftFN3NRLe5foWCBRN_0,
 _j6rhVa9vazQwWAo6ZokRIRcXkdzpBcvA9Sds0tqpZaM,
@@ -131073,3201 +165642,3202 @@ _814zagFqZVirl0AX1ucCZ2bAOmJBBaFwhnjGyTDxIPY,
 _LWTxJ9fVHK_pU1jweRMv5kXnmrienJVgJyNp7a_45Bo,
 _0T1W4DkA4XhxQ3mqRSifwqf7ZnOeJX9jNfES0b6RQ,
 _Gsjb0DrTn4ALdkEHuYoquQm8zSqtzzgTX9RdLcLGVvE,
-_0p9Qn2cgjufTUhq54tYFqiT9LNizSEnuaVDP0lL0mM
+_0p9Qn2cgjufTUhq54tYFqiT9LNizSEnuaVDP0lL0mM,
+_HAsdFZP49RW0J7GRupRyjnix0yJ22So9lKmqIdoWI8
 ];
 
 const assets = {
   "/.htaccess": {
     "type": "text/plain; charset=utf-8",
     "etag": "\"e7-hG2groYZxk6L7QIuDysXtOp31qQ\"",
-    "mtime": "2026-11-16T21:53:58.812Z",
+    "mtime": "2026-11-17T10:13:00.711Z",
     "size": 231,
     "path": "../public/.htaccess"
   },
   "/favicon-local.svg": {
     "type": "image/svg+xml",
     "etag": "\"a3-6sQqh51uu7FRJzZFzeV5GogzqMU\"",
-    "mtime": "2026-11-16T21:53:58.812Z",
+    "mtime": "2026-11-17T10:13:00.711Z",
     "size": 163,
     "path": "../public/favicon-local.svg"
   },
   "/admin-push-sw.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"630-1FkNEGm/zRHg0Yq1zs0jlZVqy84\"",
-    "mtime": "2026-11-16T21:53:58.812Z",
+    "mtime": "2026-11-17T10:13:00.711Z",
     "size": 1584,
     "path": "../public/admin-push-sw.js"
-  },
-  "/favicon.ico": {
-    "type": "image/vnd.microsoft.icon",
-    "etag": "\"10be-n8egyE9tcb7sKGr/pYCaQ4uWqxI\"",
-    "mtime": "2026-11-16T21:53:58.812Z",
-    "size": 4286,
-    "path": "../public/favicon.ico"
   },
   "/robots.txt": {
     "type": "text/plain; charset=utf-8",
     "etag": "\"ec-kp2rVzAC1D/F/bh6aXJ1btX17Ec\"",
-    "mtime": "2026-11-16T21:53:58.813Z",
+    "mtime": "2026-11-17T10:13:00.711Z",
     "size": 236,
     "path": "../public/robots.txt"
-  },
-  "/favicon.svg": {
-    "type": "image/svg+xml",
-    "etag": "\"74-WyA9ZQw0VL+p5r20HpGPoXfXkds\"",
-    "mtime": "2026-11-16T21:53:58.812Z",
-    "size": 116,
-    "path": "../public/favicon.svg"
-  },
-  "/images/ancien-site.webp": {
-    "type": "image/webp",
-    "etag": "\"3746-e734D11Dqjfh5NlFidUXIfqJ//8\"",
-    "mtime": "2026-11-16T21:53:58.806Z",
-    "size": 14150,
-    "path": "../public/images/ancien-site.webp"
   },
   "/theme-init.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"407-4l1aXP+l5JQ+fAQMlrR/DUmavNA\"",
-    "mtime": "2026-11-16T21:53:58.812Z",
+    "mtime": "2026-11-17T10:13:00.711Z",
     "size": 1031,
     "path": "../public/theme-init.js"
+  },
+  "/images/ancien-site.webp": {
+    "type": "image/webp",
+    "etag": "\"3746-e734D11Dqjfh5NlFidUXIfqJ//8\"",
+    "mtime": "2026-11-17T10:13:00.707Z",
+    "size": 14150,
+    "path": "../public/images/ancien-site.webp"
+  },
+  "/favicon.ico": {
+    "type": "image/vnd.microsoft.icon",
+    "etag": "\"10be-n8egyE9tcb7sKGr/pYCaQ4uWqxI\"",
+    "mtime": "2026-11-17T10:13:00.711Z",
+    "size": 4286,
+    "path": "../public/favicon.ico"
   },
   "/images/recharger-defi.svg": {
     "type": "image/svg+xml",
     "etag": "\"7da-sW4Yx/P5X4Hs5bsLkaNr7fae5Cw\"",
-    "mtime": "2026-11-16T21:53:58.806Z",
+    "mtime": "2026-11-17T10:13:00.707Z",
     "size": 2010,
     "path": "../public/images/recharger-defi.svg"
+  },
+  "/favicon.svg": {
+    "type": "image/svg+xml",
+    "etag": "\"74-WyA9ZQw0VL+p5r20HpGPoXfXkds\"",
+    "mtime": "2026-11-17T10:13:00.711Z",
+    "size": 116,
+    "path": "../public/favicon.svg"
   },
   "/images/site-mountains.svg": {
     "type": "image/svg+xml",
     "etag": "\"2fdd-Kp0xCymtx14aH6SsI0yTF9+0o2s\"",
-    "mtime": "2026-11-16T21:53:58.806Z",
+    "mtime": "2026-11-17T10:13:00.706Z",
     "size": 12253,
     "path": "../public/images/site-mountains.svg"
   },
   "/_nuxt/32S6qA2A.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"3dda-cTzTeM43mk9aLmJWQ3WMC3Eidw8\"",
-    "mtime": "2026-11-16T21:53:58.773Z",
+    "mtime": "2026-11-17T10:13:00.684Z",
     "size": 15834,
     "path": "../public/_nuxt/32S6qA2A.js"
   },
   "/_nuxt/4vm39nN3.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"b66-DuUipffjOkBS24wm6PMwewNwqrU\"",
-    "mtime": "2026-11-16T21:53:58.773Z",
+    "mtime": "2026-11-17T10:13:00.684Z",
     "size": 2918,
     "path": "../public/_nuxt/4vm39nN3.js"
-  },
-  "/_nuxt/76wm5Oab.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"f3f-KL8zzFdgLHW+BRXa02jsjJU0jFg\"",
-    "mtime": "2026-11-16T21:53:58.773Z",
-    "size": 3903,
-    "path": "../public/_nuxt/76wm5Oab.js"
   },
   "/_nuxt/31HKEOWS.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"c62e-ellGEIfGNopO03WR18VOaO0vIQs\"",
-    "mtime": "2026-11-16T21:53:58.773Z",
+    "mtime": "2026-11-17T10:13:00.684Z",
     "size": 50734,
     "path": "../public/_nuxt/31HKEOWS.js"
-  },
-  "/_nuxt/81CWBB1q.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"352-ljq3LcklHI30U4+Jusmy1mP/n+0\"",
-    "mtime": "2026-11-16T21:53:58.773Z",
-    "size": 850,
-    "path": "../public/_nuxt/81CWBB1q.js"
   },
   "/_nuxt/-EYEjQOf.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"23fdf-BQ3oZJjcfG0BaKr3sfWES1A1CGA\"",
-    "mtime": "2026-11-16T21:53:58.784Z",
+    "mtime": "2026-11-17T10:13:00.692Z",
     "size": 147423,
     "path": "../public/_nuxt/-EYEjQOf.js"
   },
-  "/_nuxt/AdminAuthBoundary.DHoXYhWa.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"1c12-XEnUtETb6UD7RNyeKpm3ySK5CEs\"",
-    "mtime": "2026-11-16T21:53:58.773Z",
-    "size": 7186,
-    "path": "../public/_nuxt/AdminAuthBoundary.DHoXYhWa.css"
-  },
-  "/_nuxt/B1Ji-9lG.js": {
+  "/_nuxt/81CWBB1q.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"4a4b-1pB6q0r9mRF4kcdM8mFl52I6ZMo\"",
-    "mtime": "2026-11-16T21:53:58.773Z",
-    "size": 19019,
-    "path": "../public/_nuxt/B1Ji-9lG.js"
+    "etag": "\"352-ljq3LcklHI30U4+Jusmy1mP/n+0\"",
+    "mtime": "2026-11-17T10:13:00.684Z",
+    "size": 850,
+    "path": "../public/_nuxt/81CWBB1q.js"
+  },
+  "/_nuxt/76wm5Oab.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"f3f-KL8zzFdgLHW+BRXa02jsjJU0jFg\"",
+    "mtime": "2026-11-17T10:13:00.684Z",
+    "size": 3903,
+    "path": "../public/_nuxt/76wm5Oab.js"
   },
   "/_nuxt/B0b8XpHc.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"557-3iOmbHtUUOCQnV+94xI8Y/L/tA4\"",
-    "mtime": "2026-11-16T21:53:58.773Z",
+    "mtime": "2026-11-17T10:13:00.684Z",
     "size": 1367,
     "path": "../public/_nuxt/B0b8XpHc.js"
+  },
+  "/_nuxt/B1Ji-9lG.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"4a4b-1pB6q0r9mRF4kcdM8mFl52I6ZMo\"",
+    "mtime": "2026-11-17T10:13:00.684Z",
+    "size": 19019,
+    "path": "../public/_nuxt/B1Ji-9lG.js"
+  },
+  "/_nuxt/AdminAuthBoundary.DHoXYhWa.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"1c12-XEnUtETb6UD7RNyeKpm3ySK5CEs\"",
+    "mtime": "2026-11-17T10:13:00.684Z",
+    "size": 7186,
+    "path": "../public/_nuxt/AdminAuthBoundary.DHoXYhWa.css"
   },
   "/_nuxt/B3PJhTCZ.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"ae34-qAWAxSnN9HSQm9XzXr06phsQnNw\"",
-    "mtime": "2026-11-16T21:53:58.774Z",
+    "mtime": "2026-11-17T10:13:00.684Z",
     "size": 44596,
     "path": "../public/_nuxt/B3PJhTCZ.js"
-  },
-  "/_nuxt/B53gxYaK.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"b0b1-1B1MY3NnCNRkSyvmHmfcS6jb5XI\"",
-    "mtime": "2026-11-16T21:53:58.774Z",
-    "size": 45233,
-    "path": "../public/_nuxt/B53gxYaK.js"
   },
   "/_nuxt/B5YpkWhb.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"22e8-Qz4B3yppm/0bdHKcaUgqfOix/64\"",
-    "mtime": "2026-11-16T21:53:58.774Z",
+    "mtime": "2026-11-17T10:13:00.684Z",
     "size": 8936,
     "path": "../public/_nuxt/B5YpkWhb.js"
   },
   "/_nuxt/B6qrylwq.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"d96-RkaRUfWClQnnAkIhEBbBB7xfbcg\"",
-    "mtime": "2026-11-16T21:53:58.774Z",
+    "mtime": "2026-11-17T10:13:00.684Z",
     "size": 3478,
     "path": "../public/_nuxt/B6qrylwq.js"
   },
   "/_nuxt/B8Nt-ERl.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"5a49-ESbUzwq0WOLhq2HY+Y3PhM254ME\"",
-    "mtime": "2026-11-16T21:53:58.774Z",
+    "mtime": "2026-11-17T10:13:00.685Z",
     "size": 23113,
     "path": "../public/_nuxt/B8Nt-ERl.js"
   },
   "/_nuxt/B9LmGInZ.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"9075-hjQbRsA6tOniO3iyF4af/Q5qwZo\"",
-    "mtime": "2026-11-16T21:53:58.774Z",
+    "mtime": "2026-11-17T10:13:00.685Z",
     "size": 36981,
     "path": "../public/_nuxt/B9LmGInZ.js"
+  },
+  "/_nuxt/B53gxYaK.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"b0b1-1B1MY3NnCNRkSyvmHmfcS6jb5XI\"",
+    "mtime": "2026-11-17T10:13:00.684Z",
+    "size": 45233,
+    "path": "../public/_nuxt/B53gxYaK.js"
   },
   "/_nuxt/BAMBA3Lu.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"92b-XLwa6N7RSaAsbUZ/etbtR3rNaG8\"",
-    "mtime": "2026-11-16T21:53:58.774Z",
+    "mtime": "2026-11-17T10:13:00.685Z",
     "size": 2347,
     "path": "../public/_nuxt/BAMBA3Lu.js"
   },
   "/_nuxt/BHkWCzqK.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"3a70-0KAh7oVxgfc0oYv4skq/UJcsXRE\"",
-    "mtime": "2026-11-16T21:53:58.774Z",
+    "mtime": "2026-11-17T10:13:00.685Z",
     "size": 14960,
     "path": "../public/_nuxt/BHkWCzqK.js"
   },
   "/_nuxt/BRJ-Bmaj.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1c3-+ceDLI3oMBnysq0NFhT1lLgABv4\"",
-    "mtime": "2026-11-16T21:53:58.774Z",
+    "mtime": "2026-11-17T10:13:00.685Z",
     "size": 451,
     "path": "../public/_nuxt/BRJ-Bmaj.js"
-  },
-  "/_nuxt/BhkGLd_x.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"4b4f-ZNsIrZlD6iwewvT7FLZKt53p5+4\"",
-    "mtime": "2026-11-16T21:53:58.775Z",
-    "size": 19279,
-    "path": "../public/_nuxt/BhkGLd_x.js"
-  },
-  "/_nuxt/Ba_ElYwy.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"43a-gYAKrztJ6aeJRtYCqklkQRLSl/Y\"",
-    "mtime": "2026-11-16T21:53:58.774Z",
-    "size": 1082,
-    "path": "../public/_nuxt/Ba_ElYwy.js"
   },
   "/_nuxt/Bbi4LATo.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"616-vnPXl3nA2OKTcZSiDDWRXVWV9JI\"",
-    "mtime": "2026-11-16T21:53:58.775Z",
+    "mtime": "2026-11-17T10:13:00.685Z",
     "size": 1558,
     "path": "../public/_nuxt/Bbi4LATo.js"
+  },
+  "/_nuxt/Ba_ElYwy.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"43a-gYAKrztJ6aeJRtYCqklkQRLSl/Y\"",
+    "mtime": "2026-11-17T10:13:00.685Z",
+    "size": 1082,
+    "path": "../public/_nuxt/Ba_ElYwy.js"
+  },
+  "/_nuxt/BhkGLd_x.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"4b4f-ZNsIrZlD6iwewvT7FLZKt53p5+4\"",
+    "mtime": "2026-11-17T10:13:00.685Z",
+    "size": 19279,
+    "path": "../public/_nuxt/BhkGLd_x.js"
   },
   "/_nuxt/BkAg-pa1.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"b313-WX8E6R6d2Gfzes7vGoH70oXMu8w\"",
-    "mtime": "2026-11-16T21:53:58.775Z",
+    "mtime": "2026-11-17T10:13:00.686Z",
     "size": 45843,
     "path": "../public/_nuxt/BkAg-pa1.js"
-  },
-  "/_nuxt/BqXrbh8x.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"3a12-HCLXLK2kTPVtSV5sZORw8DI/v5Y\"",
-    "mtime": "2026-11-16T21:53:58.775Z",
-    "size": 14866,
-    "path": "../public/_nuxt/BqXrbh8x.js"
-  },
-  "/_nuxt/BtxXTm3C.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"40-yZqbNLJDkxeFa9Njrk39cf3IIY0\"",
-    "mtime": "2026-11-16T21:53:58.775Z",
-    "size": 64,
-    "path": "../public/_nuxt/BtxXTm3C.js"
-  },
-  "/_nuxt/BwbvQChr.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"ba5-4RuOinQCgO9ZpP/AMoHY7Fp+Gnk\"",
-    "mtime": "2026-11-16T21:53:58.775Z",
-    "size": 2981,
-    "path": "../public/_nuxt/BwbvQChr.js"
-  },
-  "/_nuxt/Bwq88ox5.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"d0b-pGmvrAY0I5Y7XOmj57I3EYR1/gQ\"",
-    "mtime": "2026-11-16T21:53:58.775Z",
-    "size": 3339,
-    "path": "../public/_nuxt/Bwq88ox5.js"
   },
   "/_nuxt/BtUBq5Dv.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"8fa6-P3Ces1qdc2YDoG0QzD0gqGZaHQU\"",
-    "mtime": "2026-11-16T21:53:58.775Z",
+    "mtime": "2026-11-17T10:13:00.686Z",
     "size": 36774,
     "path": "../public/_nuxt/BtUBq5Dv.js"
+  },
+  "/_nuxt/BtxXTm3C.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"40-yZqbNLJDkxeFa9Njrk39cf3IIY0\"",
+    "mtime": "2026-11-17T10:13:00.686Z",
+    "size": 64,
+    "path": "../public/_nuxt/BtxXTm3C.js"
+  },
+  "/_nuxt/BqXrbh8x.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"3a12-HCLXLK2kTPVtSV5sZORw8DI/v5Y\"",
+    "mtime": "2026-11-17T10:13:00.686Z",
+    "size": 14866,
+    "path": "../public/_nuxt/BqXrbh8x.js"
+  },
+  "/_nuxt/BwbvQChr.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"ba5-4RuOinQCgO9ZpP/AMoHY7Fp+Gnk\"",
+    "mtime": "2026-11-17T10:13:00.686Z",
+    "size": 2981,
+    "path": "../public/_nuxt/BwbvQChr.js"
+  },
+  "/_nuxt/BOF6v8rb.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"643fd-4eAFzvIrVx6RBdakASdECPaZDE0\"",
+    "mtime": "2026-11-17T10:13:00.685Z",
+    "size": 410621,
+    "path": "../public/_nuxt/BOF6v8rb.js"
+  },
+  "/_nuxt/Bwq88ox5.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"d0b-pGmvrAY0I5Y7XOmj57I3EYR1/gQ\"",
+    "mtime": "2026-11-17T10:13:00.686Z",
+    "size": 3339,
+    "path": "../public/_nuxt/Bwq88ox5.js"
   },
   "/_nuxt/C-TFd5kI.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"2e7-C9Y+x10wKJEgim4hXLbiUmLvRt4\"",
-    "mtime": "2026-11-16T21:53:58.775Z",
+    "mtime": "2026-11-17T10:13:00.686Z",
     "size": 743,
     "path": "../public/_nuxt/C-TFd5kI.js"
   },
   "/_nuxt/C5tAnxjy.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"500-PjCxg8vYKxNOWJ8Rnr/v28mF1tM\"",
-    "mtime": "2026-11-16T21:53:58.775Z",
+    "mtime": "2026-11-17T10:13:00.686Z",
     "size": 1280,
     "path": "../public/_nuxt/C5tAnxjy.js"
   },
   "/_nuxt/C8UYk4TV.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1f8e-a45HNC1ncMrCmpdNJe5IR9JcrLY\"",
-    "mtime": "2026-11-16T21:53:58.775Z",
+    "mtime": "2026-11-17T10:13:00.686Z",
     "size": 8078,
     "path": "../public/_nuxt/C8UYk4TV.js"
   },
   "/_nuxt/C8wDve4A.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"bc0-MAYXS6hRISRa5inlf8W+vBiujGw\"",
-    "mtime": "2026-11-16T21:53:58.775Z",
+    "mtime": "2026-11-17T10:13:00.686Z",
     "size": 3008,
     "path": "../public/_nuxt/C8wDve4A.js"
   },
   "/_nuxt/C9IgvNla.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1627-7PvsqMCOEZNR9yNnKnS24E6ec/8\"",
-    "mtime": "2026-11-16T21:53:58.776Z",
+    "mtime": "2026-11-17T10:13:00.686Z",
     "size": 5671,
     "path": "../public/_nuxt/C9IgvNla.js"
-  },
-  "/_nuxt/BOF6v8rb.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"643fd-4eAFzvIrVx6RBdakASdECPaZDE0\"",
-    "mtime": "2026-11-16T21:53:58.775Z",
-    "size": 410621,
-    "path": "../public/_nuxt/BOF6v8rb.js"
-  },
-  "/_nuxt/CFSibyc5.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"420-B0T4eSIuEWRp/1gDeMuSlSLjTH0\"",
-    "mtime": "2026-11-16T21:53:58.776Z",
-    "size": 1056,
-    "path": "../public/_nuxt/CFSibyc5.js"
-  },
-  "/_nuxt/CMod1cM9.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"657-ruDzU1Yl6KuxXrS0masVDGliDqE\"",
-    "mtime": "2026-11-16T21:53:58.776Z",
-    "size": 1623,
-    "path": "../public/_nuxt/CMod1cM9.js"
-  },
-  "/_nuxt/CBw97mzt.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"dbf5-q0IGPjWJbZM5/Gs77+eThwK0+pg\"",
-    "mtime": "2026-11-16T21:53:58.776Z",
-    "size": 56309,
-    "path": "../public/_nuxt/CBw97mzt.js"
-  },
-  "/_nuxt/CNJe5opG.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"37a3-l+nd3+bley0jwK+pYOusecreJig\"",
-    "mtime": "2026-11-16T21:53:58.776Z",
-    "size": 14243,
-    "path": "../public/_nuxt/CNJe5opG.js"
   },
   "/_nuxt/BZgZ_c2O.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"5e478-4KgPpc17kMsx8vkkdey8ZPrvjIM\"",
-    "mtime": "2026-11-16T21:53:58.775Z",
+    "mtime": "2026-11-17T10:13:00.685Z",
     "size": 386168,
     "path": "../public/_nuxt/BZgZ_c2O.js"
+  },
+  "/_nuxt/CFSibyc5.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"420-B0T4eSIuEWRp/1gDeMuSlSLjTH0\"",
+    "mtime": "2026-11-17T10:13:00.686Z",
+    "size": 1056,
+    "path": "../public/_nuxt/CFSibyc5.js"
+  },
+  "/_nuxt/CBw97mzt.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"dbf5-q0IGPjWJbZM5/Gs77+eThwK0+pg\"",
+    "mtime": "2026-11-17T10:13:00.686Z",
+    "size": 56309,
+    "path": "../public/_nuxt/CBw97mzt.js"
+  },
+  "/_nuxt/CMod1cM9.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"657-ruDzU1Yl6KuxXrS0masVDGliDqE\"",
+    "mtime": "2026-11-17T10:13:00.687Z",
+    "size": 1623,
+    "path": "../public/_nuxt/CMod1cM9.js"
+  },
+  "/_nuxt/CNJe5opG.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"37a3-l+nd3+bley0jwK+pYOusecreJig\"",
+    "mtime": "2026-11-17T10:13:00.686Z",
+    "size": 14243,
+    "path": "../public/_nuxt/CNJe5opG.js"
   },
   "/_nuxt/CR32Timc.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"ba3-B48D6bdjjgOwAw5nsbq+j+dnM74\"",
-    "mtime": "2026-11-16T21:53:58.776Z",
+    "mtime": "2026-11-17T10:13:00.687Z",
     "size": 2979,
     "path": "../public/_nuxt/CR32Timc.js"
   },
   "/_nuxt/C88tMPXI.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"149cb2-b6kxQPtq5FiK8FKM56gjNEI65ZQ\"",
-    "mtime": "2026-11-16T21:53:58.777Z",
+    "mtime": "2026-11-17T10:13:00.687Z",
     "size": 1350834,
     "path": "../public/_nuxt/C88tMPXI.js"
-  },
-  "/_nuxt/CR73arlb.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"79d0-ADJQWfaUv9HgWbLN4DgHI6iWzNs\"",
-    "mtime": "2026-11-16T21:53:58.776Z",
-    "size": 31184,
-    "path": "../public/_nuxt/CR73arlb.js"
   },
   "/_nuxt/CSgG6m_L.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"ecf-9Ly65Judd0Vs5XeJLRXl8H+sXpk\"",
-    "mtime": "2026-11-16T21:53:58.776Z",
+    "mtime": "2026-11-17T10:13:00.687Z",
     "size": 3791,
     "path": "../public/_nuxt/CSgG6m_L.js"
   },
-  "/_nuxt/CVn2nIJm.js": {
+  "/_nuxt/CR73arlb.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"5f6e-6TyiBUAnRGw1b66n5dFgAYUZSNI\"",
-    "mtime": "2026-11-16T21:53:58.776Z",
-    "size": 24430,
-    "path": "../public/_nuxt/CVn2nIJm.js"
+    "etag": "\"79d0-ADJQWfaUv9HgWbLN4DgHI6iWzNs\"",
+    "mtime": "2026-11-17T10:13:00.687Z",
+    "size": 31184,
+    "path": "../public/_nuxt/CR73arlb.js"
   },
   "/_nuxt/CXlf8-D_.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"4bc-30DqI+ldm3I4v5fArgEYxpHU7+o\"",
-    "mtime": "2026-11-16T21:53:58.776Z",
+    "mtime": "2026-11-17T10:13:00.687Z",
     "size": 1212,
     "path": "../public/_nuxt/CXlf8-D_.js"
   },
-  "/_nuxt/ChatExercise.hu_nLL2X.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"8f98-7Y/W/qADB9RSoc/iEwdEXdVafhI\"",
-    "mtime": "2026-11-16T21:53:58.776Z",
-    "size": 36760,
-    "path": "../public/_nuxt/ChatExercise.hu_nLL2X.css"
+  "/_nuxt/CVn2nIJm.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"5f6e-6TyiBUAnRGw1b66n5dFgAYUZSNI\"",
+    "mtime": "2026-11-17T10:13:00.687Z",
+    "size": 24430,
+    "path": "../public/_nuxt/CVn2nIJm.js"
   },
   "/_nuxt/CiV_4fMG.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1419-PPdKQa6WsXGo6RkjQcGTtYBi/sw\"",
-    "mtime": "2026-11-16T21:53:58.776Z",
+    "mtime": "2026-11-17T10:13:00.687Z",
     "size": 5145,
     "path": "../public/_nuxt/CiV_4fMG.js"
+  },
+  "/_nuxt/ChatExercise.hu_nLL2X.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"8f98-7Y/W/qADB9RSoc/iEwdEXdVafhI\"",
+    "mtime": "2026-11-17T10:13:00.687Z",
+    "size": 36760,
+    "path": "../public/_nuxt/ChatExercise.hu_nLL2X.css"
   },
   "/_nuxt/CjoFa3Ch.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"24e6-QKCNrjBirvyHs0Ti8hOrhjx2vpM\"",
-    "mtime": "2026-11-16T21:53:58.777Z",
+    "mtime": "2026-11-17T10:13:00.687Z",
     "size": 9446,
     "path": "../public/_nuxt/CjoFa3Ch.js"
   },
   "/_nuxt/CnPzwPKP.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"4c2-hS1/TdV1VDDjoBLjvaV5cwCbWs4\"",
-    "mtime": "2026-11-16T21:53:58.777Z",
+    "mtime": "2026-11-17T10:13:00.687Z",
     "size": 1218,
     "path": "../public/_nuxt/CnPzwPKP.js"
   },
   "/_nuxt/CoHwu86U.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"e2-e2fuLyZZVDSkriJAqo2z+da+HUw\"",
-    "mtime": "2026-11-16T21:53:58.777Z",
+    "mtime": "2026-11-17T10:13:00.687Z",
     "size": 226,
     "path": "../public/_nuxt/CoHwu86U.js"
   },
   "/_nuxt/CoYRKfuD.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"35-VNA0DjxaxUUvg8NcaUbo2abQ+oU\"",
-    "mtime": "2026-11-16T21:53:58.777Z",
+    "mtime": "2026-11-17T10:13:00.687Z",
     "size": 53,
     "path": "../public/_nuxt/CoYRKfuD.js"
   },
   "/_nuxt/CoachPicker.Dum6JffZ.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"ea2-vs0FkxwyFCU6MTR1H/zozEwqKKQ\"",
-    "mtime": "2026-11-16T21:53:58.777Z",
+    "mtime": "2026-11-17T10:13:00.687Z",
     "size": 3746,
     "path": "../public/_nuxt/CoachPicker.Dum6JffZ.css"
+  },
+  "/_nuxt/CidJZVfe.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"2abf9-mq3qyaEu7nCUCyNMuRIS4AIpXPY\"",
+    "mtime": "2026-11-17T10:13:00.687Z",
+    "size": 175097,
+    "path": "../public/_nuxt/CidJZVfe.js"
   },
   "/_nuxt/CoachHelpPanel.CDNm5H3H.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"a4fe-TyNxx3z2FoxO3Hg0Gcq3wG/XKX0\"",
-    "mtime": "2026-11-16T21:53:58.777Z",
+    "mtime": "2026-11-17T10:13:00.687Z",
     "size": 42238,
     "path": "../public/_nuxt/CoachHelpPanel.CDNm5H3H.css"
   },
   "/_nuxt/CsRTiggW.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"278e-htHIDTd1bCmd64UUFRBQTGr0jUU\"",
-    "mtime": "2026-11-16T21:53:58.777Z",
+    "mtime": "2026-11-17T10:13:00.687Z",
     "size": 10126,
     "path": "../public/_nuxt/CsRTiggW.js"
-  },
-  "/_nuxt/CidJZVfe.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"2abf9-mq3qyaEu7nCUCyNMuRIS4AIpXPY\"",
-    "mtime": "2026-11-16T21:53:58.777Z",
-    "size": 175097,
-    "path": "../public/_nuxt/CidJZVfe.js"
   },
   "/_nuxt/CsqZAYq-.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"3759-aATr3uQf1mozgv1oL7hdZbV7Zfw\"",
-    "mtime": "2026-11-16T21:53:58.777Z",
+    "mtime": "2026-11-17T10:13:00.687Z",
     "size": 14169,
     "path": "../public/_nuxt/CsqZAYq-.js"
-  },
-  "/_nuxt/CxfvQOja.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"160-8YkvwIGcLN8VRaV6MRiK1OGMIBw\"",
-    "mtime": "2026-11-16T21:53:58.777Z",
-    "size": 352,
-    "path": "../public/_nuxt/CxfvQOja.js"
   },
   "/_nuxt/Ct9YZXiA.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"195ce-uFw78zU8JD2pjSsK+JGqMirFpyg\"",
-    "mtime": "2026-11-16T21:53:58.778Z",
+    "mtime": "2026-11-17T10:13:00.688Z",
     "size": 103886,
     "path": "../public/_nuxt/Ct9YZXiA.js"
+  },
+  "/_nuxt/CxfvQOja.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"160-8YkvwIGcLN8VRaV6MRiK1OGMIBw\"",
+    "mtime": "2026-11-17T10:13:00.688Z",
+    "size": 352,
+    "path": "../public/_nuxt/CxfvQOja.js"
   },
   "/_nuxt/CxmV_z3h.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"2d65-pb8NbBGzfiXxObWDwwzS6K0bUZQ\"",
-    "mtime": "2026-11-16T21:53:58.778Z",
+    "mtime": "2026-11-17T10:13:00.688Z",
     "size": 11621,
     "path": "../public/_nuxt/CxmV_z3h.js"
   },
   "/_nuxt/CyBQR-S7.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"58df-JXkeQxhco22sjaMuaTvz9Ur5yak\"",
-    "mtime": "2026-11-16T21:53:58.778Z",
+    "mtime": "2026-11-17T10:13:00.688Z",
     "size": 22751,
     "path": "../public/_nuxt/CyBQR-S7.js"
   },
   "/_nuxt/D0HHRKj0.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1c03-CxhmuxBHKFmoPthoTNNzwOGgqjA\"",
-    "mtime": "2026-11-16T21:53:58.778Z",
+    "mtime": "2026-11-17T10:13:00.688Z",
     "size": 7171,
     "path": "../public/_nuxt/D0HHRKj0.js"
   },
   "/_nuxt/D2HKDCiz.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"d7f-989lCdww+FIR/lnCVKbzFNocK4U\"",
-    "mtime": "2026-11-16T21:53:58.778Z",
+    "mtime": "2026-11-17T10:13:00.688Z",
     "size": 3455,
     "path": "../public/_nuxt/D2HKDCiz.js"
   },
   "/_nuxt/D3Xl8By6.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"22f9-St8ixIUpUgLi1zpe25iU5iEv+mg\"",
-    "mtime": "2026-11-16T21:53:58.778Z",
+    "mtime": "2026-11-17T10:13:00.688Z",
     "size": 8953,
     "path": "../public/_nuxt/D3Xl8By6.js"
   },
   "/_nuxt/D5ISLsed.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"2447-+S0FsKGBYiMVxq/iFDmWJDv0nu8\"",
-    "mtime": "2026-11-16T21:53:58.778Z",
+    "mtime": "2026-11-17T10:13:00.688Z",
     "size": 9287,
     "path": "../public/_nuxt/D5ISLsed.js"
   },
   "/_nuxt/CxgSlhy9.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"67d82-ceOmy0PNIpnxSw8rwm23CfsFg6A\"",
-    "mtime": "2026-11-16T21:53:58.778Z",
+    "mtime": "2026-11-17T10:13:00.688Z",
     "size": 425346,
     "path": "../public/_nuxt/CxgSlhy9.js"
   },
   "/_nuxt/D6uKVa8Q.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"174c-kJF3qhmoS6hStdY1xcs31nAfR5k\"",
-    "mtime": "2026-11-16T21:53:58.778Z",
+    "mtime": "2026-11-17T10:13:00.688Z",
     "size": 5964,
     "path": "../public/_nuxt/D6uKVa8Q.js"
   },
   "/_nuxt/D7ZXzVI_.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"ef8-GzL5NXyB/PBmEfJ1ScOaDRfVcdY\"",
-    "mtime": "2026-11-16T21:53:58.778Z",
+    "mtime": "2026-11-17T10:13:00.688Z",
     "size": 3832,
     "path": "../public/_nuxt/D7ZXzVI_.js"
-  },
-  "/_nuxt/D78Dw3NF.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"8e89-zhkaxbHTLVgjzgiq7Frc9AoKkjA\"",
-    "mtime": "2026-11-16T21:53:58.778Z",
-    "size": 36489,
-    "path": "../public/_nuxt/D78Dw3NF.js"
   },
   "/_nuxt/DAkE9Od3.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1766-I0LrdexgBmaeQ2GHabR+lWBUkJY\"",
-    "mtime": "2026-11-16T21:53:58.779Z",
+    "mtime": "2026-11-17T10:13:00.688Z",
     "size": 5990,
     "path": "../public/_nuxt/DAkE9Od3.js"
+  },
+  "/_nuxt/D78Dw3NF.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"8e89-zhkaxbHTLVgjzgiq7Frc9AoKkjA\"",
+    "mtime": "2026-11-17T10:13:00.688Z",
+    "size": 36489,
+    "path": "../public/_nuxt/D78Dw3NF.js"
   },
   "/_nuxt/DGYY3_nc.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"278-qtge3lUa1nQoFZ6e4c5cnJvaWEI\"",
-    "mtime": "2026-11-16T21:53:58.779Z",
+    "mtime": "2026-11-17T10:13:00.688Z",
     "size": 632,
     "path": "../public/_nuxt/DGYY3_nc.js"
-  },
-  "/_nuxt/DI1xmMj7.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"2420-8l60aYvc5tpx14ICRLJoSYmjKBs\"",
-    "mtime": "2026-11-16T21:53:58.779Z",
-    "size": 9248,
-    "path": "../public/_nuxt/DI1xmMj7.js"
-  },
-  "/_nuxt/DMfJydLl.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"494-E0MASbYm0oClZdbaqvEWekquhbY\"",
-    "mtime": "2026-11-16T21:53:58.779Z",
-    "size": 1172,
-    "path": "../public/_nuxt/DMfJydLl.js"
   },
   "/_nuxt/DH6TPU2u.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"aeef-UGugE9wncFbd8t45JembuFN6Deo\"",
-    "mtime": "2026-11-16T21:53:58.779Z",
+    "mtime": "2026-11-17T10:13:00.688Z",
     "size": 44783,
     "path": "../public/_nuxt/DH6TPU2u.js"
+  },
+  "/_nuxt/DMfJydLl.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"494-E0MASbYm0oClZdbaqvEWekquhbY\"",
+    "mtime": "2026-11-17T10:13:00.688Z",
+    "size": 1172,
+    "path": "../public/_nuxt/DMfJydLl.js"
+  },
+  "/_nuxt/DI1xmMj7.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"2420-8l60aYvc5tpx14ICRLJoSYmjKBs\"",
+    "mtime": "2026-11-17T10:13:00.688Z",
+    "size": 9248,
+    "path": "../public/_nuxt/DI1xmMj7.js"
   },
   "/_nuxt/DPHVC_ZF.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"fc-mZ/jlWtfTE+Vd32pZ3PxqW5Pt5w\"",
-    "mtime": "2026-11-16T21:53:58.779Z",
+    "mtime": "2026-11-17T10:13:00.688Z",
     "size": 252,
     "path": "../public/_nuxt/DPHVC_ZF.js"
   },
   "/_nuxt/DRbHpx__.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1f9b-Mi4RMavjMxadHvfoa+VLH3wR2p0\"",
-    "mtime": "2026-11-16T21:53:58.779Z",
+    "mtime": "2026-11-17T10:13:00.688Z",
     "size": 8091,
     "path": "../public/_nuxt/DRbHpx__.js"
   },
   "/_nuxt/DYnoA9sq.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"17dd-x69NEIyX0CZ81/iDaeeGaDiz/PI\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
+    "mtime": "2026-11-17T10:13:00.689Z",
     "size": 6109,
     "path": "../public/_nuxt/DYnoA9sq.js"
   },
   "/_nuxt/DO4kFrsM.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"1d5bc-PFQrYIP8Yhl8BD+Rh3nESof8oIw\"",
-    "mtime": "2026-11-16T21:53:58.779Z",
+    "mtime": "2026-11-17T10:13:00.688Z",
     "size": 120252,
     "path": "../public/_nuxt/DO4kFrsM.js"
+  },
+  "/_nuxt/Dj4CfABu.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"6345-RnYNDiaKvisSouzs1GSYqwk0FRo\"",
+    "mtime": "2026-11-17T10:13:00.689Z",
+    "size": 25413,
+    "path": "../public/_nuxt/Dj4CfABu.js"
   },
   "/_nuxt/DhufBLHn.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"8b5c-M21LT4VnB29Mg5MTgmL5JJITB9I\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
+    "mtime": "2026-11-17T10:13:00.689Z",
     "size": 35676,
     "path": "../public/_nuxt/DhufBLHn.js"
   },
   "/_nuxt/DlAUqK2U.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"5b-eFCz/UrraTh721pgAl0VxBNR1es\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
+    "mtime": "2026-11-17T10:13:00.689Z",
     "size": 91,
     "path": "../public/_nuxt/DlAUqK2U.js"
-  },
-  "/_nuxt/Dj4CfABu.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"6345-RnYNDiaKvisSouzs1GSYqwk0FRo\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
-    "size": 25413,
-    "path": "../public/_nuxt/Dj4CfABu.js"
   },
   "/_nuxt/DpQ11thr.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"fb-CxCyUBXyR1uueUis9Q/vU+XZ2zs\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
+    "mtime": "2026-11-17T10:13:00.689Z",
     "size": 251,
     "path": "../public/_nuxt/DpQ11thr.js"
   },
   "/_nuxt/ExerciseSummaryPrintPreview.DXPqfDFb.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"950-vLa73S0TarwjlGMxFOR3I/AVLvc\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
+    "mtime": "2026-11-17T10:13:00.689Z",
     "size": 2384,
     "path": "../public/_nuxt/ExerciseSummaryPrintPreview.DXPqfDFb.css"
-  },
-  "/_nuxt/DXEQVQnt.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"31151-TyUyRNm9rR2JDwpyAxcruTmmr6A\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
-    "size": 201041,
-    "path": "../public/_nuxt/DXEQVQnt.js"
   },
   "/_nuxt/PasswordInput.Bo7BswO2.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"3ab-krPYKdrCAQ+Cqj3Nu13l9SLwaHA\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
+    "mtime": "2026-11-17T10:13:00.689Z",
     "size": 939,
     "path": "../public/_nuxt/PasswordInput.Bo7BswO2.css"
   },
   "/_nuxt/VaSPOPhr.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"7032-uZQ20bhcE4YqMv2bJ83N97r01ek\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
+    "mtime": "2026-11-17T10:13:00.689Z",
     "size": 28722,
     "path": "../public/_nuxt/VaSPOPhr.js"
+  },
+  "/_nuxt/DXEQVQnt.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"31151-TyUyRNm9rR2JDwpyAxcruTmmr6A\"",
+    "mtime": "2026-11-17T10:13:00.689Z",
+    "size": 201041,
+    "path": "../public/_nuxt/DXEQVQnt.js"
   },
   "/_nuxt/LearnerSpace.C9mB3FiR.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"17768-6Qx3HFNifNbpdAUaJXWJC0fo6g0\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
+    "mtime": "2026-11-17T10:13:00.689Z",
     "size": 96104,
     "path": "../public/_nuxt/LearnerSpace.C9mB3FiR.css"
   },
   "/_nuxt/WizardChallengeWorkspace.CT49Kc2D.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"f416-6/iV8raFnMa2gtKHeJP3srLxnUI\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
+    "mtime": "2026-11-17T10:13:00.689Z",
     "size": 62486,
     "path": "../public/_nuxt/WizardChallengeWorkspace.CT49Kc2D.css"
   },
   "/_nuxt/XG69y_A7.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"2b5e-IMi9/uHWhSHFHY+vPTlSlmPVyq0\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
+    "mtime": "2026-11-17T10:13:00.689Z",
     "size": 11102,
     "path": "../public/_nuxt/XG69y_A7.js"
   },
   "/_nuxt/YUCGLg62.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"137c-J00KOEc0xqBUGV7s9u5rnZUVi94\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
+    "mtime": "2026-11-17T10:13:00.689Z",
     "size": 4988,
     "path": "../public/_nuxt/YUCGLg62.js"
   },
   "/_nuxt/_parcours_.Cq2EBnsY.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"d51-Y1nkHkKjv3B/qb7m0liupiPIOGU\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
+    "mtime": "2026-11-17T10:13:00.689Z",
     "size": 3409,
     "path": "../public/_nuxt/_parcours_.Cq2EBnsY.css"
   },
   "/_nuxt/_slug_.C7Qe_hQc.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"45-nLj5l1z86kSEQyHHv9dJC9iolFU\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
+    "mtime": "2026-11-17T10:13:00.689Z",
     "size": 69,
     "path": "../public/_nuxt/_slug_.C7Qe_hQc.css"
   },
   "/_nuxt/_temps_.ZfEtDN8m.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1a22-IJgT+1PmdbdzvLOtCoSwapWVqWw\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
+    "mtime": "2026-11-17T10:13:00.689Z",
     "size": 6690,
     "path": "../public/_nuxt/_temps_.ZfEtDN8m.css"
   },
   "/_nuxt/_token_.DJ5OGerv.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"dc9-CwghYy2kMoYAtHaFa3AIM1hySNM\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
+    "mtime": "2026-11-17T10:13:00.689Z",
     "size": 3529,
     "path": "../public/_nuxt/_token_.DJ5OGerv.css"
   },
   "/_nuxt/admins.dzDkGKEv.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"919-IcW5l1f9k07twX9+HuwUcwEj4n0\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
+    "mtime": "2026-11-17T10:13:00.689Z",
     "size": 2329,
     "path": "../public/_nuxt/admins.dzDkGKEv.css"
   },
   "/_nuxt/apprendre.DcIYaShe.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"3e28-BWI4WDyvXP6PnQIS5NSmJIScDA0\"",
-    "mtime": "2026-11-16T21:53:58.780Z",
+    "mtime": "2026-11-17T10:13:00.689Z",
     "size": 15912,
     "path": "../public/_nuxt/apprendre.DcIYaShe.css"
   },
   "/_nuxt/challenges.BUTqEZts.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"3d1c-t4JbsEfwjTamijoc19pakirPATA\"",
-    "mtime": "2026-11-16T21:53:58.781Z",
+    "mtime": "2026-11-17T10:13:00.690Z",
     "size": 15644,
     "path": "../public/_nuxt/challenges.BUTqEZts.css"
   },
   "/_nuxt/caracteres.Cz_-0d7j.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"5ed6-4ARrvmv5JL6K/PguTG9rORJ3E4E\"",
-    "mtime": "2026-11-16T21:53:58.781Z",
+    "mtime": "2026-11-17T10:13:00.690Z",
     "size": 24278,
     "path": "../public/_nuxt/caracteres.Cz_-0d7j.css"
   },
   "/_nuxt/coaches.BaDV-bQP.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"2220-x9RcJK5uh5+VaoyG5f2pdZ3z28E\"",
-    "mtime": "2026-11-16T21:53:58.781Z",
+    "mtime": "2026-11-17T10:13:00.690Z",
     "size": 8736,
     "path": "../public/_nuxt/coaches.BaDV-bQP.css"
   },
   "/_nuxt/conjugaison-fle.DaqVWH5M.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"b59-1QQ/R0WqLY/FVjwexnFWAWe/je0\"",
-    "mtime": "2026-11-16T21:53:58.782Z",
+    "mtime": "2026-11-17T10:13:00.690Z",
     "size": 2905,
     "path": "../public/_nuxt/conjugaison-fle.DaqVWH5M.css"
   },
   "/_nuxt/charts.BGqlPO3q.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"f3c0-jR9xRK0eN+JDHX5InrTJvNtJgtE\"",
-    "mtime": "2026-11-16T21:53:58.782Z",
+    "mtime": "2026-11-17T10:13:00.690Z",
     "size": 62400,
     "path": "../public/_nuxt/charts.BGqlPO3q.css"
-  },
-  "/_nuxt/contact.CEAlz-zn.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"8f4-ykOUqzOkUVv5IJI3yhju5VrDLdo\"",
-    "mtime": "2026-11-16T21:53:58.782Z",
-    "size": 2292,
-    "path": "../public/_nuxt/contact.CEAlz-zn.css"
   },
   "/_nuxt/avJGU7Vd.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"26d1e-paErMS2S5dLmhyGeL6kYS1I44ZE\"",
-    "mtime": "2026-11-16T21:53:58.781Z",
+    "mtime": "2026-11-17T10:13:00.690Z",
     "size": 159006,
     "path": "../public/_nuxt/avJGU7Vd.js"
+  },
+  "/_nuxt/contact.CEAlz-zn.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"8f4-ykOUqzOkUVv5IJI3yhju5VrDLdo\"",
+    "mtime": "2026-11-17T10:13:00.690Z",
+    "size": 2292,
+    "path": "../public/_nuxt/contact.CEAlz-zn.css"
   },
   "/_nuxt/consulter.CKEeJjlW.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"4ee2-10rzcvn48oeTMxAFBa9g6fu10w8\"",
-    "mtime": "2026-11-16T21:53:58.782Z",
+    "mtime": "2026-11-17T10:13:00.690Z",
     "size": 20194,
     "path": "../public/_nuxt/consulter.CKEeJjlW.css"
-  },
-  "/_nuxt/default.B3daTnOs.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"7cb0-8eD49S2nrv1W6k6U7RQMamMLPG0\"",
-    "mtime": "2026-11-16T21:53:58.782Z",
-    "size": 31920,
-    "path": "../public/_nuxt/default.B3daTnOs.css"
   },
   "/_nuxt/driver.BndHJ0Kk.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"bdc-pZVw+h6Z7S/VWJ2Rk//0/Yz+nYE\"",
-    "mtime": "2026-11-16T21:53:58.782Z",
+    "mtime": "2026-11-17T10:13:00.690Z",
     "size": 3036,
     "path": "../public/_nuxt/driver.BndHJ0Kk.css"
+  },
+  "/_nuxt/default.B3daTnOs.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"7cb0-8eD49S2nrv1W6k6U7RQMamMLPG0\"",
+    "mtime": "2026-11-17T10:13:00.690Z",
+    "size": 31920,
+    "path": "../public/_nuxt/default.B3daTnOs.css"
   },
   "/_nuxt/e-ekCQbG.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"27a4-Mc2X3tIOv3VhU7DMVGV77BjV2E8\"",
-    "mtime": "2026-11-16T21:53:58.782Z",
+    "mtime": "2026-11-17T10:13:00.690Z",
     "size": 10148,
     "path": "../public/_nuxt/e-ekCQbG.js"
-  },
-  "/_nuxt/error-404.C3kT2QX-.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"97e-Xk26Nv4oQLpK3PtofolSggS9Z1M\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
-    "size": 2430,
-    "path": "../public/_nuxt/error-404.C3kT2QX-.css"
   },
   "/_nuxt/entry.DSV6iIrA.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"6934-/Q6f1TD60E0Nk69Kt/3tyG0Zpuc\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
+    "mtime": "2026-11-17T10:13:00.690Z",
     "size": 26932,
     "path": "../public/_nuxt/entry.DSV6iIrA.css"
   },
   "/_nuxt/error-500.BW0Y54Of.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"773-NSoEX19gPmM2NozVKWotHuvxtho\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
+    "mtime": "2026-11-17T10:13:00.690Z",
     "size": 1907,
     "path": "../public/_nuxt/error-500.BW0Y54Of.css"
+  },
+  "/_nuxt/error-404.C3kT2QX-.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"97e-Xk26Nv4oQLpK3PtofolSggS9Z1M\"",
+    "mtime": "2026-11-17T10:13:00.690Z",
+    "size": 2430,
+    "path": "../public/_nuxt/error-404.C3kT2QX-.css"
   },
   "/_nuxt/errors.BjGnDVcv.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1362-+l8lZeseXcg1LBBZAI84EJMTHAg\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
+    "mtime": "2026-11-17T10:13:00.690Z",
     "size": 4962,
     "path": "../public/_nuxt/errors.BjGnDVcv.css"
   },
   "/_nuxt/exercices-de-conjugaison.lxgEXarf.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"2c0-YJ583lrNkxObiMRq+ye1KMkIyL0\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
+    "mtime": "2026-11-17T10:13:00.691Z",
     "size": 704,
     "path": "../public/_nuxt/exercices-de-conjugaison.lxgEXarf.css"
-  },
-  "/_nuxt/feedbacks.Dv4577Jd.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"1ad1-0+dvY0xeP8LCHeEHdSR1f0my11o\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
-    "size": 6865,
-    "path": "../public/_nuxt/feedbacks.Dv4577Jd.css"
   },
   "/_nuxt/g6ucs01C.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"160-gtb4LsLA85Vn+6lu9juD+DKhlTM\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
+    "mtime": "2026-11-17T10:13:00.691Z",
     "size": 352,
     "path": "../public/_nuxt/g6ucs01C.js"
+  },
+  "/_nuxt/feedbacks.Dv4577Jd.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"1ad1-0+dvY0xeP8LCHeEHdSR1f0my11o\"",
+    "mtime": "2026-11-17T10:13:00.691Z",
+    "size": 6865,
+    "path": "../public/_nuxt/feedbacks.Dv4577Jd.css"
   },
   "/_nuxt/help-verification.DODWt3zK.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1e41-GtHymoSAF4psafTipM39PN7Xytg\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
+    "mtime": "2026-11-17T10:13:00.691Z",
     "size": 7745,
     "path": "../public/_nuxt/help-verification.DODWt3zK.css"
   },
   "/_nuxt/helps.DZJ6t0nO.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"2207-jtfvJZDC3TYKKO8XFRnFINfGF8k\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
+    "mtime": "2026-11-17T10:13:00.691Z",
     "size": 8711,
     "path": "../public/_nuxt/helps.DZJ6t0nO.css"
   },
   "/_nuxt/identification-form.C1_FKXQg.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"2b1a-rRT1y3TyxyK31C1YpslQL5AVq7I\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
+    "mtime": "2026-11-17T10:13:00.691Z",
     "size": 11034,
     "path": "../public/_nuxt/identification-form.C1_FKXQg.css"
-  },
-  "/_nuxt/index.ChbAW3l-.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"159e-pTWsW+v8dmyhwauI7AAQ+7JzL+s\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
-    "size": 5534,
-    "path": "../public/_nuxt/index.ChbAW3l-.css"
   },
   "/_nuxt/index.PIH2PDiU.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1445-w5UooCkVzdBs/0rL4LFRAztGTQs\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
+    "mtime": "2026-11-17T10:13:00.691Z",
     "size": 5189,
     "path": "../public/_nuxt/index.PIH2PDiU.css"
   },
   "/_nuxt/jjOTu-Pf.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"12a-NVzbRtk9x3N5Sdag1kntESaoBHg\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
+    "mtime": "2026-11-17T10:13:00.691Z",
     "size": 298,
     "path": "../public/_nuxt/jjOTu-Pf.js"
+  },
+  "/_nuxt/index.ChbAW3l-.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"159e-pTWsW+v8dmyhwauI7AAQ+7JzL+s\"",
+    "mtime": "2026-11-17T10:13:00.691Z",
+    "size": 5534,
+    "path": "../public/_nuxt/index.ChbAW3l-.css"
   },
   "/_nuxt/literary-corpus.B2DRjof-.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"1d49-4rT2LXp/VIU3wxeTP6DJcMLavx4\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
+    "mtime": "2026-11-17T10:13:00.691Z",
     "size": 7497,
     "path": "../public/_nuxt/literary-corpus.B2DRjof-.css"
   },
   "/_nuxt/main.KflNctcI.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"d240-U3geS8nCzqjnZR9IYk79pA6z9fg\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
+    "mtime": "2026-11-17T10:13:00.691Z",
     "size": 53824,
     "path": "../public/_nuxt/main.KflNctcI.css"
   },
   "/_nuxt/mon-compte.Dd1pSVVr.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"c19-iFrdJXzcwNlsXbMwIx5pIVUg1cg\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
+    "mtime": "2026-11-17T10:13:00.691Z",
     "size": 3097,
     "path": "../public/_nuxt/mon-compte.Dd1pSVVr.css"
   },
   "/_nuxt/nVOyXvjn.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"62d-3/l5ylIoa/zT6m3sXBO/ANlaDNg\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
+    "mtime": "2026-11-17T10:13:00.691Z",
     "size": 1581,
     "path": "../public/_nuxt/nVOyXvjn.js"
   },
   "/_nuxt/phKQZarn.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"7fc-mRVkcZ0AUSE7tjxvglkIqTooAHw\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
+    "mtime": "2026-11-17T10:13:00.691Z",
     "size": 2044,
     "path": "../public/_nuxt/phKQZarn.js"
   },
   "/_nuxt/shared-summaries.ByFL8yZh.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"65b-PFjai3xJO+fBrqQOoI5SsmPeBzQ\"",
-    "mtime": "2026-11-16T21:53:58.783Z",
+    "mtime": "2026-11-17T10:13:00.691Z",
     "size": 1627,
     "path": "../public/_nuxt/shared-summaries.ByFL8yZh.css"
+  },
+  "/_nuxt/signin.Du-AyG8-.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"100e-T8sPE2nuhvu+ebwnW7ZqtwoALC4\"",
+    "mtime": "2026-11-17T10:13:00.691Z",
+    "size": 4110,
+    "path": "../public/_nuxt/signin.Du-AyG8-.css"
   },
   "/_nuxt/tLcURZMR.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"73a8-vX4TgVvvWfDobPWt803/DCY+VF4\"",
-    "mtime": "2026-11-16T21:53:58.784Z",
+    "mtime": "2026-11-17T10:13:00.691Z",
     "size": 29608,
     "path": "../public/_nuxt/tLcURZMR.js"
   },
   "/_nuxt/tests.BqPF9Zsa.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"39e7-GxuNd1OxNpLv+j5qgLOQuuK6myU\"",
-    "mtime": "2026-11-16T21:53:58.784Z",
+    "mtime": "2026-11-17T10:13:00.691Z",
     "size": 14823,
     "path": "../public/_nuxt/tests.BqPF9Zsa.css"
   },
   "/_nuxt/users.B1RX_mTk.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"24a0-GchT/cDiux2NRCiZ+VQBSZU7Iac\"",
-    "mtime": "2026-11-16T21:53:58.784Z",
+    "mtime": "2026-11-17T10:13:00.691Z",
     "size": 9376,
     "path": "../public/_nuxt/users.B1RX_mTk.css"
   },
   "/_nuxt/verbes.C567BY1t.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"488d-NTJnWUvJgIIojzRhFHQB1ji+PC0\"",
-    "mtime": "2026-11-16T21:53:58.784Z",
+    "mtime": "2026-11-17T10:13:00.692Z",
     "size": 18573,
     "path": "../public/_nuxt/verbes.C567BY1t.css"
   },
   "/coach-media/avatars/amel.jpg": {
     "type": "image/jpeg",
     "etag": "\"bdc2-XpfseHXprhgQ2kOwJnuzEG4Szrk\"",
-    "mtime": "2026-11-16T21:53:58.808Z",
+    "mtime": "2026-11-17T10:13:00.708Z",
     "size": 48578,
     "path": "../public/coach-media/avatars/amel.jpg"
   },
   "/coach-media/avatars/camille.jpg": {
     "type": "image/jpeg",
     "etag": "\"8236-iF9IFpUQ41mOrk3DW4giaY2v1A4\"",
-    "mtime": "2026-11-16T21:53:58.812Z",
+    "mtime": "2026-11-17T10:13:00.711Z",
     "size": 33334,
     "path": "../public/coach-media/avatars/camille.jpg"
   },
   "/coach-media/avatars/claire.jpg": {
     "type": "image/jpeg",
     "etag": "\"c54e-brF3vVSmHDKtuq1fWp3D7oFg51M\"",
-    "mtime": "2026-11-16T21:53:58.813Z",
+    "mtime": "2026-11-17T10:13:00.712Z",
     "size": 50510,
     "path": "../public/coach-media/avatars/claire.jpg"
+  },
+  "/images/zazizozu/ma-ville.webp": {
+    "type": "image/webp",
+    "etag": "\"1366a-8AmAfAWhsOSWvzjOmGT3DNhHZ+I\"",
+    "mtime": "2026-11-17T10:13:00.707Z",
+    "size": 79466,
+    "path": "../public/images/zazizozu/ma-ville.webp"
   },
   "/coach-media/avatars/gabriel.jpg": {
     "type": "image/jpeg",
     "etag": "\"bcf0-Gm00KTQi4TW4IfPKJlSbLvra1vY\"",
-    "mtime": "2026-11-16T21:53:58.813Z",
+    "mtime": "2026-11-17T10:13:00.712Z",
     "size": 48368,
     "path": "../public/coach-media/avatars/gabriel.jpg"
-  },
-  "/_nuxt/signin.Du-AyG8-.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"100e-T8sPE2nuhvu+ebwnW7ZqtwoALC4\"",
-    "mtime": "2026-11-16T21:53:58.784Z",
-    "size": 4110,
-    "path": "../public/_nuxt/signin.Du-AyG8-.css"
   },
   "/coach-media/avatars/hugo.jpg": {
     "type": "image/jpeg",
     "etag": "\"e0ab-BgIuErDh4c6iTXJy8Qw9D1fV2Y4\"",
-    "mtime": "2026-11-16T21:53:58.814Z",
+    "mtime": "2026-11-17T10:13:00.712Z",
     "size": 57515,
     "path": "../public/coach-media/avatars/hugo.jpg"
   },
   "/coach-media/avatars/karim.jpg": {
     "type": "image/jpeg",
     "etag": "\"f507-Nj981GfUvc5eTvpZtyN0ieyiCHU\"",
-    "mtime": "2026-11-16T21:53:58.813Z",
+    "mtime": "2026-11-17T10:13:00.712Z",
     "size": 62727,
     "path": "../public/coach-media/avatars/karim.jpg"
   },
   "/coach-media/avatars/lea.jpg": {
     "type": "image/jpeg",
     "etag": "\"f9f5-I+UeknSzltKnBgxau2s+TTvCXzM\"",
-    "mtime": "2026-11-16T21:53:58.814Z",
+    "mtime": "2026-11-17T10:13:00.712Z",
     "size": 63989,
     "path": "../public/coach-media/avatars/lea.jpg"
-  },
-  "/coach-media/avatars/lucas.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"10f02-mIKj8itqNevLJJvdMQvCLra5sZs\"",
-    "mtime": "2026-11-16T21:53:58.814Z",
-    "size": 69378,
-    "path": "../public/coach-media/avatars/lucas.jpg"
   },
   "/coach-media/avatars/nora.jpg": {
     "type": "image/jpeg",
     "etag": "\"f434-vbQD186KDkY42S4uGz7cixTeM3Y\"",
-    "mtime": "2026-11-16T21:53:58.814Z",
+    "mtime": "2026-11-17T10:13:00.712Z",
     "size": 62516,
     "path": "../public/coach-media/avatars/nora.jpg"
+  },
+  "/coach-media/avatars/lucas.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"10f02-mIKj8itqNevLJJvdMQvCLra5sZs\"",
+    "mtime": "2026-11-17T10:13:00.712Z",
+    "size": 69378,
+    "path": "../public/coach-media/avatars/lucas.jpg"
   },
   "/coach-media/avatars/sami.jpg": {
     "type": "image/jpeg",
     "etag": "\"b13e-AVASgC2NUl9cEqNeVXQZf710AtI\"",
-    "mtime": "2026-11-16T21:53:58.814Z",
+    "mtime": "2026-11-17T10:13:00.713Z",
     "size": 45374,
     "path": "../public/coach-media/avatars/sami.jpg"
   },
   "/coach-media/avatars/thomas.jpg": {
     "type": "image/jpeg",
     "etag": "\"cf97-C0nHicl9/0pZcc6nPoN1AK6qGxg\"",
-    "mtime": "2026-11-16T21:53:58.814Z",
+    "mtime": "2026-11-17T10:13:00.713Z",
     "size": 53143,
     "path": "../public/coach-media/avatars/thomas.jpg"
   },
   "/coach-media/avatars/zoe.jpg": {
     "type": "image/jpeg",
     "etag": "\"c393-S8Ro+/yzyBY+cBCNNh6M59U1lLI\"",
-    "mtime": "2026-11-16T21:53:58.815Z",
+    "mtime": "2026-11-17T10:13:00.713Z",
     "size": 50067,
     "path": "../public/coach-media/avatars/zoe.jpg"
   },
   "/coach-media/avatars-cartoon/Defi-de-conjugaison.pdf": {
     "type": "application/pdf",
     "etag": "\"1971-GvyCFxsExS5nnjCoRJihmJWjW1Y\"",
-    "mtime": "2026-11-16T21:53:58.880Z",
+    "mtime": "2026-11-17T10:13:00.724Z",
     "size": 6513,
     "path": "../public/coach-media/avatars-cartoon/Defi-de-conjugaison.pdf"
-  },
-  "/images/zazizozu/ma-ville.webp": {
-    "type": "image/webp",
-    "etag": "\"1366a-8AmAfAWhsOSWvzjOmGT3DNhHZ+I\"",
-    "mtime": "2026-11-16T21:53:58.807Z",
-    "size": 79466,
-    "path": "../public/images/zazizozu/ma-ville.webp"
   },
   "/coach-media/people/200.webp": {
     "type": "image/webp",
     "etag": "\"1d696-kiyalxZWWq76I5xPP32p65sny50\"",
-    "mtime": "2026-11-16T21:53:58.860Z",
+    "mtime": "2026-11-17T10:13:00.728Z",
     "size": 120470,
     "path": "../public/coach-media/people/200.webp"
   },
   "/coach-media/people/T01.06.01.xlsx": {
     "type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     "etag": "\"dcc6-yJKLWkGDw+a72V9Ge5nDtMengWg\"",
-    "mtime": "2026-11-16T21:53:58.858Z",
+    "mtime": "2026-11-17T10:13:00.709Z",
     "size": 56518,
     "path": "../public/coach-media/people/T01.06.01.xlsx"
   },
   "/coach-media/people/portrait1.jpg": {
     "type": "image/jpeg",
     "etag": "\"8236-iF9IFpUQ41mOrk3DW4giaY2v1A4\"",
-    "mtime": "2026-11-16T21:53:58.809Z",
+    "mtime": "2026-11-17T10:13:00.733Z",
     "size": 33334,
     "path": "../public/coach-media/people/portrait1.jpg"
   },
   "/coach-media/people/portrait10.jpg": {
     "type": "image/jpeg",
     "etag": "\"13242-oU9sw67fXaoOhBCspE1ufcKQVJk\"",
-    "mtime": "2026-11-16T21:53:58.860Z",
+    "mtime": "2026-11-17T10:13:00.733Z",
     "size": 78402,
     "path": "../public/coach-media/people/portrait10.jpg"
   },
   "/coach-media/people/portrait11.jpg": {
     "type": "image/jpeg",
     "etag": "\"122fb-lSrwI6GnjcqOU7p9bL3eLB6zbPk\"",
-    "mtime": "2026-11-16T21:53:58.860Z",
+    "mtime": "2026-11-17T10:13:00.733Z",
     "size": 74491,
     "path": "../public/coach-media/people/portrait11.jpg"
   },
   "/coach-media/people/portrait12.jpg": {
     "type": "image/jpeg",
     "etag": "\"f434-vbQD186KDkY42S4uGz7cixTeM3Y\"",
-    "mtime": "2026-11-16T21:53:58.861Z",
+    "mtime": "2026-11-17T10:13:00.733Z",
     "size": 62516,
     "path": "../public/coach-media/people/portrait12.jpg"
-  },
-  "/coach-media/avatars-cartoon/42f6c648-e545-4d49-8f0b-518fb3a2d186.png": {
-    "type": "image/png",
-    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
-    "mtime": "2026-11-16T21:53:58.869Z",
-    "size": 1500823,
-    "path": "../public/coach-media/avatars-cartoon/42f6c648-e545-4d49-8f0b-518fb3a2d186.png"
   },
   "/coach-media/avatars-cartoon/4f7a8330-834e-44e0-ad17-397d1e2a5891.png": {
     "type": "image/png",
     "etag": "\"15dca6-tSDm1naznyFNYIkdupEaTCi//zk\"",
-    "mtime": "2026-11-16T21:53:58.877Z",
+    "mtime": "2026-11-17T10:13:00.722Z",
     "size": 1432742,
     "path": "../public/coach-media/avatars-cartoon/4f7a8330-834e-44e0-ad17-397d1e2a5891.png"
+  },
+  "/coach-media/avatars-cartoon/42f6c648-e545-4d49-8f0b-518fb3a2d186.png": {
+    "type": "image/png",
+    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
+    "mtime": "2026-11-17T10:13:00.715Z",
+    "size": 1500823,
+    "path": "../public/coach-media/avatars-cartoon/42f6c648-e545-4d49-8f0b-518fb3a2d186.png"
   },
   "/coach-media/avatars-cartoon/732fe1f9-b633-4261-bdf8-542b99b2a98c.png": {
     "type": "image/png",
     "etag": "\"172bf9-bwNVo0D3pGzvGYiYtpjtpXMEyow\"",
-    "mtime": "2026-11-16T21:53:58.878Z",
+    "mtime": "2026-11-17T10:13:00.728Z",
     "size": 1518585,
     "path": "../public/coach-media/avatars-cartoon/732fe1f9-b633-4261-bdf8-542b99b2a98c.png"
   },
   "/coach-media/avatars-cartoon/8f23428e-ed2c-4938-9186-44447f1efcbe.png": {
     "type": "image/png",
     "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
-    "mtime": "2026-11-16T21:53:58.885Z",
+    "mtime": "2026-11-17T10:13:00.728Z",
     "size": 1562456,
     "path": "../public/coach-media/avatars-cartoon/8f23428e-ed2c-4938-9186-44447f1efcbe.png"
   },
   "/coach-media/people/portrait13.jpg": {
     "type": "image/jpeg",
     "etag": "\"e0ab-BgIuErDh4c6iTXJy8Qw9D1fV2Y4\"",
-    "mtime": "2026-11-16T21:53:58.861Z",
+    "mtime": "2026-11-17T10:13:00.733Z",
     "size": 57515,
     "path": "../public/coach-media/people/portrait13.jpg"
   },
   "/coach-media/avatars-cartoon/db266268-397e-4920-93bb-f134a85cd8b7.png": {
     "type": "image/png",
     "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
-    "mtime": "2026-11-16T21:53:58.883Z",
+    "mtime": "2026-11-17T10:13:00.736Z",
     "size": 1416623,
     "path": "../public/coach-media/avatars-cartoon/db266268-397e-4920-93bb-f134a85cd8b7.png"
-  },
-  "/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png": {
-    "type": "image/png",
-    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
-    "mtime": "2026-11-16T21:53:58.877Z",
-    "size": 1578337,
-    "path": "../public/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png"
-  },
-  "/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png": {
-    "type": "image/png",
-    "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
-    "mtime": "2026-11-16T21:53:58.869Z",
-    "size": 1745848,
-    "path": "../public/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png"
   },
   "/coach-media/avatars-cartoon/19f352b5-75f2-449a-b441-7b8203da9e6f.png": {
     "type": "image/png",
     "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
-    "mtime": "2026-11-16T21:53:58.868Z",
+    "mtime": "2026-11-17T10:13:00.715Z",
     "size": 1696814,
     "path": "../public/coach-media/avatars-cartoon/19f352b5-75f2-449a-b441-7b8203da9e6f.png"
   },
-  "/coach-media/avatars-cartoon/830a8cdd-fb26-4191-a673-42c5f28f2e73.png": {
+  "/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png": {
     "type": "image/png",
-    "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
-    "mtime": "2026-11-16T21:53:58.883Z",
-    "size": 1602205,
-    "path": "../public/coach-media/avatars-cartoon/830a8cdd-fb26-4191-a673-42c5f28f2e73.png"
-  },
-  "/coach-media/avatars-cartoon/1af3afdd-5c5a-41ef-b639-d2e415aaa4fd.png": {
-    "type": "image/png",
-    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
-    "mtime": "2026-11-16T21:53:58.869Z",
-    "size": 1993248,
-    "path": "../public/coach-media/avatars-cartoon/1af3afdd-5c5a-41ef-b639-d2e415aaa4fd.png"
+    "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
+    "mtime": "2026-11-17T10:13:00.722Z",
+    "size": 1578337,
+    "path": "../public/coach-media/avatars-cartoon/3b8a6868-873d-477c-a947-45d00761cd5d.png"
   },
   "/coach-media/avatars-cartoon/10f80bed-4250-41d9-8a65-fbaa5deba408.png": {
     "type": "image/png",
     "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
-    "mtime": "2026-11-16T21:53:58.811Z",
+    "mtime": "2026-11-17T10:13:00.710Z",
     "size": 1882140,
     "path": "../public/coach-media/avatars-cartoon/10f80bed-4250-41d9-8a65-fbaa5deba408.png"
+  },
+  "/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png": {
+    "type": "image/png",
+    "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
+    "mtime": "2026-11-17T10:13:00.716Z",
+    "size": 1745848,
+    "path": "../public/coach-media/avatars-cartoon/24ff9e4a-18bc-4fd6-86b6-1f4a3faf5e07.png"
+  },
+  "/coach-media/avatars-cartoon/1af3afdd-5c5a-41ef-b639-d2e415aaa4fd.png": {
+    "type": "image/png",
+    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
+    "mtime": "2026-11-17T10:13:00.715Z",
+    "size": 1993248,
+    "path": "../public/coach-media/avatars-cartoon/1af3afdd-5c5a-41ef-b639-d2e415aaa4fd.png"
   },
   "/coach-media/avatars-cartoon/5da085b6-2b23-4338-bc79-31f5e9a4b5bc.png": {
     "type": "image/png",
     "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-11-16T21:53:58.877Z",
+    "mtime": "2026-11-17T10:13:00.722Z",
     "size": 1993166,
     "path": "../public/coach-media/avatars-cartoon/5da085b6-2b23-4338-bc79-31f5e9a4b5bc.png"
   },
   "/coach-media/avatars-cartoon/8ced5816-480d-4d64-8e16-a33a743d155c.png": {
     "type": "image/png",
     "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
-    "mtime": "2026-11-16T21:53:58.885Z",
+    "mtime": "2026-11-17T10:13:00.727Z",
     "size": 1785490,
     "path": "../public/coach-media/avatars-cartoon/8ced5816-480d-4d64-8e16-a33a743d155c.png"
+  },
+  "/coach-media/avatars-cartoon/830a8cdd-fb26-4191-a673-42c5f28f2e73.png": {
+    "type": "image/png",
+    "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
+    "mtime": "2026-11-17T10:13:00.722Z",
+    "size": 1602205,
+    "path": "../public/coach-media/avatars-cartoon/830a8cdd-fb26-4191-a673-42c5f28f2e73.png"
   },
   "/coach-media/avatars-cartoon/b970ff06-9199-44c9-90d3-4adf29466ef2.png": {
     "type": "image/png",
     "etag": "\"191b76-HQFygNHbvhIArIsnfMO1th0D4OU\"",
-    "mtime": "2026-11-16T21:53:58.890Z",
+    "mtime": "2026-11-17T10:13:00.734Z",
     "size": 1645430,
     "path": "../public/coach-media/avatars-cartoon/b970ff06-9199-44c9-90d3-4adf29466ef2.png"
   },
   "/coach-media/avatars-cartoon/fad8cab6-7cd9-454b-a967-00de62cdde32.png": {
     "type": "image/png",
     "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
-    "mtime": "2026-11-16T21:53:58.890Z",
+    "mtime": "2026-11-17T10:13:00.729Z",
     "size": 1665643,
     "path": "../public/coach-media/avatars-cartoon/fad8cab6-7cd9-454b-a967-00de62cdde32.png"
   },
   "/coach-media/people/portrait14.jpg": {
     "type": "image/jpeg",
     "etag": "\"10f02-mIKj8itqNevLJJvdMQvCLra5sZs\"",
-    "mtime": "2026-11-16T21:53:58.861Z",
+    "mtime": "2026-11-17T10:13:00.733Z",
     "size": 69378,
     "path": "../public/coach-media/people/portrait14.jpg"
   },
   "/coach-media/people/portrait15.jpg": {
     "type": "image/jpeg",
     "etag": "\"e76c-vSk8fJrHyAqX+V28777ha8WbgNQ\"",
-    "mtime": "2026-11-16T21:53:58.861Z",
+    "mtime": "2026-11-17T10:13:00.734Z",
     "size": 59244,
     "path": "../public/coach-media/people/portrait15.jpg"
   },
   "/coach-media/people/portrait16.jpg": {
     "type": "image/jpeg",
     "etag": "\"cf97-C0nHicl9/0pZcc6nPoN1AK6qGxg\"",
-    "mtime": "2026-11-16T21:53:58.861Z",
+    "mtime": "2026-11-17T10:13:00.735Z",
     "size": 53143,
     "path": "../public/coach-media/people/portrait16.jpg"
   },
   "/coach-media/people/portrait18.jpg": {
     "type": "image/jpeg",
     "etag": "\"c54e-brF3vVSmHDKtuq1fWp3D7oFg51M\"",
-    "mtime": "2026-11-16T21:53:58.863Z",
+    "mtime": "2026-11-17T10:13:00.734Z",
     "size": 50510,
     "path": "../public/coach-media/people/portrait18.jpg"
   },
   "/coach-media/people/portrait17.jpg": {
     "type": "image/jpeg",
     "etag": "\"bcf0-Gm00KTQi4TW4IfPKJlSbLvra1vY\"",
-    "mtime": "2026-11-16T21:53:58.862Z",
+    "mtime": "2026-11-17T10:13:00.734Z",
     "size": 48368,
     "path": "../public/coach-media/people/portrait17.jpg"
   },
   "/coach-media/people/portrait19.jpg": {
     "type": "image/jpeg",
     "etag": "\"c393-S8Ro+/yzyBY+cBCNNh6M59U1lLI\"",
-    "mtime": "2026-11-16T21:53:58.862Z",
+    "mtime": "2026-11-17T10:13:00.734Z",
     "size": 50067,
     "path": "../public/coach-media/people/portrait19.jpg"
   },
   "/coach-media/people/portrait2.jpg": {
     "type": "image/jpeg",
     "etag": "\"bcdc-0QQ4XzMu+rYTbqYvpc9NTeUA8tY\"",
-    "mtime": "2026-11-16T21:53:58.862Z",
+    "mtime": "2026-11-17T10:13:00.734Z",
     "size": 48348,
     "path": "../public/coach-media/people/portrait2.jpg"
   },
   "/coach-media/people/portrait20.jpg": {
     "type": "image/jpeg",
     "etag": "\"b13e-AVASgC2NUl9cEqNeVXQZf710AtI\"",
-    "mtime": "2026-11-16T21:53:58.862Z",
+    "mtime": "2026-11-17T10:13:00.735Z",
     "size": 45374,
     "path": "../public/coach-media/people/portrait20.jpg"
   },
   "/coach-media/people/portrait21.jpg": {
     "type": "image/jpeg",
     "etag": "\"f9f5-I+UeknSzltKnBgxau2s+TTvCXzM\"",
-    "mtime": "2026-11-16T21:53:58.862Z",
+    "mtime": "2026-11-17T10:13:00.735Z",
     "size": 63989,
     "path": "../public/coach-media/people/portrait21.jpg"
   },
   "/coach-media/people/portrait22.jpg": {
     "type": "image/jpeg",
     "etag": "\"bdc2-XpfseHXprhgQ2kOwJnuzEG4Szrk\"",
-    "mtime": "2026-11-16T21:53:58.862Z",
+    "mtime": "2026-11-17T10:13:00.736Z",
     "size": 48578,
     "path": "../public/coach-media/people/portrait22.jpg"
   },
   "/coach-media/people/portrait23.jpg": {
     "type": "image/jpeg",
     "etag": "\"be4c-P8CT4CrVwbEaeQLat0jhjTQMjxo\"",
-    "mtime": "2026-11-16T21:53:58.863Z",
+    "mtime": "2026-11-17T10:13:00.736Z",
     "size": 48716,
     "path": "../public/coach-media/people/portrait23.jpg"
   },
   "/coach-media/people/portrait24.jpg": {
     "type": "image/jpeg",
     "etag": "\"abed-vXR8pegbgVS9EPJiKC3ZDRQ4dJg\"",
-    "mtime": "2026-11-16T21:53:58.864Z",
+    "mtime": "2026-11-17T10:13:00.736Z",
     "size": 44013,
     "path": "../public/coach-media/people/portrait24.jpg"
   },
   "/coach-media/people/portrait25.jpg": {
     "type": "image/jpeg",
     "etag": "\"e0a7-8029IuA0LaQ6Vf6lujX/+UuHaV0\"",
-    "mtime": "2026-11-16T21:53:58.863Z",
+    "mtime": "2026-11-17T10:13:00.736Z",
     "size": 57511,
     "path": "../public/coach-media/people/portrait25.jpg"
-  },
-  "/coach-media/people/portrait27.jpg": {
-    "type": "image/jpeg",
-    "etag": "\"e758-fcjR+RePqA6Bh1Ol6SdhNalWKxo\"",
-    "mtime": "2026-11-16T21:53:58.863Z",
-    "size": 59224,
-    "path": "../public/coach-media/people/portrait27.jpg"
   },
   "/coach-media/people/portrait26.jpg": {
     "type": "image/jpeg",
     "etag": "\"10adb-Y2avzIjFtKDJtMnigpGDItgDIK4\"",
-    "mtime": "2026-11-16T21:53:58.863Z",
+    "mtime": "2026-11-17T10:13:00.736Z",
     "size": 68315,
     "path": "../public/coach-media/people/portrait26.jpg"
+  },
+  "/coach-media/people/portrait27.jpg": {
+    "type": "image/jpeg",
+    "etag": "\"e758-fcjR+RePqA6Bh1Ol6SdhNalWKxo\"",
+    "mtime": "2026-11-17T10:13:00.739Z",
+    "size": 59224,
+    "path": "../public/coach-media/people/portrait27.jpg"
   },
   "/coach-media/people/portrait28.jpg": {
     "type": "image/jpeg",
     "etag": "\"ab15-QtgsG93oCrKL2cWD/M5wqljszjg\"",
-    "mtime": "2026-11-16T21:53:58.863Z",
+    "mtime": "2026-11-17T10:13:00.740Z",
     "size": 43797,
     "path": "../public/coach-media/people/portrait28.jpg"
   },
   "/coach-media/people/portrait29.jpg": {
     "type": "image/jpeg",
     "etag": "\"f507-Nj981GfUvc5eTvpZtyN0ieyiCHU\"",
-    "mtime": "2026-11-16T21:53:58.864Z",
+    "mtime": "2026-11-17T10:13:00.741Z",
     "size": 62727,
     "path": "../public/coach-media/people/portrait29.jpg"
   },
   "/coach-media/people/portrait3.jpg": {
     "type": "image/jpeg",
     "etag": "\"ce90-1wGjSDgtEHb8AUpH3znLDA47jOw\"",
-    "mtime": "2026-11-16T21:53:58.864Z",
+    "mtime": "2026-11-17T10:13:00.741Z",
     "size": 52880,
     "path": "../public/coach-media/people/portrait3.jpg"
   },
   "/coach-media/people/portrait30.jpg": {
     "type": "image/jpeg",
     "etag": "\"91aa-41JiP0aXvZq9y9u/b4pTIbC5DeU\"",
-    "mtime": "2026-11-16T21:53:58.864Z",
+    "mtime": "2026-11-17T10:13:00.739Z",
     "size": 37290,
     "path": "../public/coach-media/people/portrait30.jpg"
   },
   "/coach-media/people/portrait31.jpg": {
     "type": "image/jpeg",
     "etag": "\"ee72-6mKQvP6WUZZaZuh//G3t4u0EMBg\"",
-    "mtime": "2026-11-16T21:53:58.866Z",
+    "mtime": "2026-11-17T10:13:00.741Z",
     "size": 61042,
     "path": "../public/coach-media/people/portrait31.jpg"
   },
   "/coach-media/people/portrait32.jpg": {
     "type": "image/jpeg",
     "etag": "\"c2cc-IStqzFyonefLZL/ubYviGC+lI+w\"",
-    "mtime": "2026-11-16T21:53:58.864Z",
+    "mtime": "2026-11-17T10:13:00.741Z",
     "size": 49868,
     "path": "../public/coach-media/people/portrait32.jpg"
   },
   "/coach-media/people/portrait33.jpg": {
     "type": "image/jpeg",
     "etag": "\"e86f-wCIX8Pwsa0GqVd/2WH5WG1WSyNs\"",
-    "mtime": "2026-11-16T21:53:58.864Z",
+    "mtime": "2026-11-17T10:13:00.741Z",
     "size": 59503,
     "path": "../public/coach-media/people/portrait33.jpg"
   },
   "/coach-media/people/portrait34.jpg": {
     "type": "image/jpeg",
     "etag": "\"1002d-6T6Xf9AX5UafZW2vbYEzj+5xvO0\"",
-    "mtime": "2026-11-16T21:53:58.865Z",
+    "mtime": "2026-11-17T10:13:00.741Z",
     "size": 65581,
     "path": "../public/coach-media/people/portrait34.jpg"
   },
   "/coach-media/people/portrait4.jpg": {
     "type": "image/jpeg",
     "etag": "\"d171-TlrBkVdDwxLYUzqOqRWUkbkpkAo\"",
-    "mtime": "2026-11-16T21:53:58.865Z",
+    "mtime": "2026-11-17T10:13:00.742Z",
     "size": 53617,
     "path": "../public/coach-media/people/portrait4.jpg"
   },
   "/coach-media/people/portrait5.jpg": {
     "type": "image/jpeg",
     "etag": "\"c82f-tvc7CKCgsthto9vLFPf7pJndf5o\"",
-    "mtime": "2026-11-16T21:53:58.865Z",
+    "mtime": "2026-11-17T10:13:00.741Z",
     "size": 51247,
     "path": "../public/coach-media/people/portrait5.jpg"
   },
   "/coach-media/people/portrait6.jpg": {
     "type": "image/jpeg",
     "etag": "\"10235-GkA1z8RzeZJIqSW/DgPAy8/3Vj0\"",
-    "mtime": "2026-11-16T21:53:58.865Z",
+    "mtime": "2026-11-17T10:13:00.742Z",
     "size": 66101,
     "path": "../public/coach-media/people/portrait6.jpg"
   },
   "/coach-media/people/portrait7.jpg": {
     "type": "image/jpeg",
     "etag": "\"e4ac-HYcziHIjoK0r/C0hUk1bV4NjrUM\"",
-    "mtime": "2026-11-16T21:53:58.865Z",
+    "mtime": "2026-11-17T10:13:00.742Z",
     "size": 58540,
     "path": "../public/coach-media/people/portrait7.jpg"
   },
   "/coach-media/people/portrait8.jpg": {
     "type": "image/jpeg",
     "etag": "\"e800-jIBzhW7XT+HESqFyHPtIW1HuZc4\"",
-    "mtime": "2026-11-16T21:53:58.866Z",
+    "mtime": "2026-11-17T10:13:00.742Z",
     "size": 59392,
     "path": "../public/coach-media/people/portrait8.jpg"
   },
   "/coach-media/people/portrait9.jpg": {
     "type": "image/jpeg",
     "etag": "\"e386-JbEwT6JqpTHkIY1qDgk1a5zOrIc\"",
-    "mtime": "2026-11-16T21:53:58.865Z",
+    "mtime": "2026-11-17T10:13:00.742Z",
     "size": 58246,
     "path": "../public/coach-media/people/portrait9.jpg"
   },
   "/coach-media/uploads/538b12dc-7f77-437e-a281-3db72a0a987c.png": {
     "type": "image/png",
     "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
-    "mtime": "2026-11-16T21:53:58.811Z",
+    "mtime": "2026-11-17T10:13:00.744Z",
     "size": 1562456,
     "path": "../public/coach-media/uploads/538b12dc-7f77-437e-a281-3db72a0a987c.png"
-  },
-  "/coach-media/uploads/06e4101b-298e-4352-bf66-f4ea7a350500.png": {
-    "type": "image/png",
-    "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
-    "mtime": "2026-11-16T21:53:58.898Z",
-    "size": 1785490,
-    "path": "../public/coach-media/uploads/06e4101b-298e-4352-bf66-f4ea7a350500.png"
-  },
-  "/coach-media/uploads/2f16e10d-f885-45d1-9208-7faac71a6577.png": {
-    "type": "image/png",
-    "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
-    "mtime": "2026-11-16T21:53:58.818Z",
-    "size": 1696814,
-    "path": "../public/coach-media/uploads/2f16e10d-f885-45d1-9208-7faac71a6577.png"
   },
   "/coach-media/uploads/30fdf4c2-bf1e-492d-b2ee-e4c920be3e28.png": {
     "type": "image/png",
     "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
-    "mtime": "2026-11-16T21:53:58.817Z",
+    "mtime": "2026-11-17T10:13:00.745Z",
     "size": 1602205,
     "path": "../public/coach-media/uploads/30fdf4c2-bf1e-492d-b2ee-e4c920be3e28.png"
+  },
+  "/coach-media/uploads/2f16e10d-f885-45d1-9208-7faac71a6577.png": {
+    "type": "image/png",
+    "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
+    "mtime": "2026-11-17T10:13:00.745Z",
+    "size": 1696814,
+    "path": "../public/coach-media/uploads/2f16e10d-f885-45d1-9208-7faac71a6577.png"
+  },
+  "/coach-media/uploads/06e4101b-298e-4352-bf66-f4ea7a350500.png": {
+    "type": "image/png",
+    "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
+    "mtime": "2026-11-17T10:13:00.711Z",
+    "size": 1785490,
+    "path": "../public/coach-media/uploads/06e4101b-298e-4352-bf66-f4ea7a350500.png"
   },
   "/coach-media/uploads/4f43eb0e-1591-4688-9a04-ad786c1ed617.png": {
     "type": "image/png",
     "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-11-16T21:53:58.818Z",
+    "mtime": "2026-11-17T10:13:00.751Z",
     "size": 1993166,
     "path": "../public/coach-media/uploads/4f43eb0e-1591-4688-9a04-ad786c1ed617.png"
   },
   "/coach-media/uploads/58a1f2ac-9ac5-4c89-9453-f96b177e021a.png": {
     "type": "image/png",
     "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
-    "mtime": "2026-11-16T21:53:58.817Z",
+    "mtime": "2026-11-17T10:13:00.745Z",
     "size": 1416623,
     "path": "../public/coach-media/uploads/58a1f2ac-9ac5-4c89-9453-f96b177e021a.png"
   },
   "/coach-media/uploads/7c2bbc4c-d63f-430b-a18d-fcee64d2ee27.png": {
     "type": "image/png",
     "etag": "\"159daf-4edzaYomlV2+3x6M64Bky/SRlbg\"",
-    "mtime": "2026-11-16T21:53:58.833Z",
+    "mtime": "2026-11-17T10:13:00.758Z",
     "size": 1416623,
     "path": "../public/coach-media/uploads/7c2bbc4c-d63f-430b-a18d-fcee64d2ee27.png"
   },
   "/coach-media/uploads/841d5131-04ff-427b-893a-847773422907.png": {
     "type": "image/png",
     "etag": "\"17d758-OI0Dn0p4RUBHe8wmZnEaiLE1TOE\"",
-    "mtime": "2026-11-16T21:53:58.835Z",
+    "mtime": "2026-11-17T10:13:00.757Z",
     "size": 1562456,
     "path": "../public/coach-media/uploads/841d5131-04ff-427b-893a-847773422907.png"
   },
   "/coach-media/uploads/5b59b65b-55d0-4b8a-a0d0-37bf9385ba24.png": {
     "type": "image/png",
     "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
-    "mtime": "2026-11-16T21:53:58.826Z",
+    "mtime": "2026-11-17T10:13:00.750Z",
     "size": 1745848,
     "path": "../public/coach-media/uploads/5b59b65b-55d0-4b8a-a0d0-37bf9385ba24.png"
   },
   "/coach-media/uploads/5c10171b-755c-4d43-aa06-52e70ee0c28e.png": {
     "type": "image/png",
     "etag": "\"19e42e-iH1LFjD11ghq1jK6hmAx+ousOZA\"",
-    "mtime": "2026-11-16T21:53:58.825Z",
+    "mtime": "2026-11-17T10:13:00.751Z",
     "size": 1696814,
     "path": "../public/coach-media/uploads/5c10171b-755c-4d43-aa06-52e70ee0c28e.png"
   },
   "/coach-media/uploads/5d410305-96e0-4e99-ae37-0ad0346d2834.png": {
     "type": "image/png",
     "etag": "\"1b3e92-OvEuoxrwwJ+3kbm6/frWCWrki5s\"",
-    "mtime": "2026-11-16T21:53:58.826Z",
+    "mtime": "2026-11-17T10:13:00.752Z",
     "size": 1785490,
     "path": "../public/coach-media/uploads/5d410305-96e0-4e99-ae37-0ad0346d2834.png"
   },
   "/coach-media/uploads/5fef96f4-0377-4736-b0e0-f084e8c0acb1.png": {
     "type": "image/png",
     "etag": "\"18729d-vgPDIRQFPyqmy59+U/oQK3/Yp4M\"",
-    "mtime": "2026-11-16T21:53:58.826Z",
+    "mtime": "2026-11-17T10:13:00.757Z",
     "size": 1602205,
     "path": "../public/coach-media/uploads/5fef96f4-0377-4736-b0e0-f084e8c0acb1.png"
   },
   "/coach-media/uploads/c92ca73c-2c4e-4f00-8d40-78323ecc6d1d.png": {
     "type": "image/png",
     "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
-    "mtime": "2026-11-16T21:53:58.850Z",
+    "mtime": "2026-11-17T10:13:00.772Z",
     "size": 1500823,
     "path": "../public/coach-media/uploads/c92ca73c-2c4e-4f00-8d40-78323ecc6d1d.png"
-  },
-  "/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png": {
-    "type": "image/png",
-    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
-    "mtime": "2026-11-16T21:53:58.854Z",
-    "size": 1500823,
-    "path": "../public/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png"
-  },
-  "/coach-media/uploads/849249ef-60fe-497d-a0cc-1ff6224e1035.png": {
-    "type": "image/png",
-    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
-    "mtime": "2026-11-16T21:53:58.835Z",
-    "size": 1993248,
-    "path": "../public/coach-media/uploads/849249ef-60fe-497d-a0cc-1ff6224e1035.png"
   },
   "/coach-media/uploads/9e91555a-0c28-4378-8797-391dee96076d.png": {
     "type": "image/png",
     "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
-    "mtime": "2026-11-16T21:53:58.834Z",
+    "mtime": "2026-11-17T10:13:00.765Z",
     "size": 1993248,
     "path": "../public/coach-media/uploads/9e91555a-0c28-4378-8797-391dee96076d.png"
+  },
+  "/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png": {
+    "type": "image/png",
+    "etag": "\"16e697-lSZcsIa6taUTrpbXlngJJs5do7E\"",
+    "mtime": "2026-11-17T10:13:00.781Z",
+    "size": 1500823,
+    "path": "../public/coach-media/uploads/e8056f15-4264-4483-bde0-da27016883c3.png"
   },
   "/coach-media/uploads/a09d1eae-bb31-49b6-9b87-2f6b14cc7720.png": {
     "type": "image/png",
     "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
-    "mtime": "2026-11-16T21:53:58.841Z",
+    "mtime": "2026-11-17T10:13:00.765Z",
     "size": 1665643,
     "path": "../public/coach-media/uploads/a09d1eae-bb31-49b6-9b87-2f6b14cc7720.png"
+  },
+  "/coach-media/uploads/849249ef-60fe-497d-a0cc-1ff6224e1035.png": {
+    "type": "image/png",
+    "etag": "\"1e6a20-WtrSxDO1985qI/4CZZABrySuKig\"",
+    "mtime": "2026-11-17T10:13:00.758Z",
+    "size": 1993248,
+    "path": "../public/coach-media/uploads/849249ef-60fe-497d-a0cc-1ff6224e1035.png"
   },
   "/coach-media/uploads/a1ec228e-1055-4648-9252-fb2dd6fb5a02.png": {
     "type": "image/png",
     "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-11-16T21:53:58.843Z",
+    "mtime": "2026-11-17T10:13:00.778Z",
     "size": 1993166,
     "path": "../public/coach-media/uploads/a1ec228e-1055-4648-9252-fb2dd6fb5a02.png"
   },
   "/coach-media/uploads/a2a433ff-1b21-482b-a9d9-6cb0da8146f4.png": {
     "type": "image/png",
     "etag": "\"1aa3b8-TwwcoBqTa5YFLJ8/s7NpNGJYybo\"",
-    "mtime": "2026-11-16T21:53:58.843Z",
+    "mtime": "2026-11-17T10:13:00.766Z",
     "size": 1745848,
     "path": "../public/coach-media/uploads/a2a433ff-1b21-482b-a9d9-6cb0da8146f4.png"
   },
   "/coach-media/uploads/ab818ee2-0431-430e-a9af-e78936417633.png": {
     "type": "image/png",
     "etag": "\"196a6b-RvlHBrNGfK3RroJNjF3UpktyvXs\"",
-    "mtime": "2026-11-16T21:53:58.843Z",
+    "mtime": "2026-11-17T10:13:00.766Z",
     "size": 1665643,
     "path": "../public/coach-media/uploads/ab818ee2-0431-430e-a9af-e78936417633.png"
   },
   "/coach-media/uploads/aed28159-a121-45cb-9dd1-16ecc349b84d.png": {
     "type": "image/png",
     "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
-    "mtime": "2026-11-16T21:53:58.847Z",
+    "mtime": "2026-11-17T10:13:00.773Z",
     "size": 1578337,
     "path": "../public/coach-media/uploads/aed28159-a121-45cb-9dd1-16ecc349b84d.png"
   },
   "/coach-media/uploads/bf6f3f5e-efca-4554-9963-44587811c0f8.png": {
     "type": "image/png",
     "etag": "\"1e69ce-QlNHo6FKaD6iOL26iod9ZwyufwY\"",
-    "mtime": "2026-11-16T21:53:58.852Z",
+    "mtime": "2026-11-17T10:13:00.772Z",
     "size": 1993166,
     "path": "../public/coach-media/uploads/bf6f3f5e-efca-4554-9963-44587811c0f8.png"
   },
   "/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png": {
     "type": "image/png",
     "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
-    "mtime": "2026-11-16T21:53:58.845Z",
+    "mtime": "2026-11-17T10:13:00.773Z",
     "size": 1882140,
     "path": "../public/coach-media/uploads/c1fd77f5-5909-4c4c-ae98-b09d04e5e085.png"
-  },
-  "/coach-media/uploads/f8346f58-2678-4a95-aaa8-d37ba71ecb3b.png": {
-    "type": "image/png",
-    "etag": "\"191b76-HQFygNHbvhIArIsnfMO1th0D4OU\"",
-    "mtime": "2026-11-16T21:53:58.854Z",
-    "size": 1645430,
-    "path": "../public/coach-media/uploads/f8346f58-2678-4a95-aaa8-d37ba71ecb3b.png"
   },
   "/coach-media/uploads/e5108547-b1b3-4c96-89ca-6e00c0d1c60a.png": {
     "type": "image/png",
     "etag": "\"1cb81c-MRMBmg7AHvu65SJLBvBK8rFlodk\"",
-    "mtime": "2026-11-16T21:53:58.854Z",
+    "mtime": "2026-11-17T10:13:00.778Z",
     "size": 1882140,
     "path": "../public/coach-media/uploads/e5108547-b1b3-4c96-89ca-6e00c0d1c60a.png"
   },
+  "/coach-media/uploads/f8346f58-2678-4a95-aaa8-d37ba71ecb3b.png": {
+    "type": "image/png",
+    "etag": "\"191b76-HQFygNHbvhIArIsnfMO1th0D4OU\"",
+    "mtime": "2026-11-17T10:13:00.781Z",
+    "size": 1645430,
+    "path": "../public/coach-media/uploads/f8346f58-2678-4a95-aaa8-d37ba71ecb3b.png"
+  },
   "/_nuxt/builds/latest.json": {
     "type": "application/json",
-    "etag": "\"47-AWty9zXQ9T7nfZSDTD5454kGsVI\"",
-    "mtime": "2026-11-16T21:53:58.755Z",
+    "etag": "\"47-7+vU3jAcHbwAyqYFpSXF0GaMuRU\"",
+    "mtime": "2026-11-17T10:13:00.674Z",
     "size": 71,
     "path": "../public/_nuxt/builds/latest.json"
   },
   "/coach-media/animations/fail/fail1.webp": {
     "type": "image/webp",
     "etag": "\"3e6cc-CLBekLwBwSBNLCxvb1eKJT9+wZU\"",
-    "mtime": "2026-11-16T21:53:58.809Z",
+    "mtime": "2026-11-17T10:13:00.710Z",
     "size": 255692,
     "path": "../public/coach-media/animations/fail/fail1.webp"
   },
   "/coach-media/animations/fail/fail2.webp": {
     "type": "image/webp",
     "etag": "\"5e028-RHwRc2cf0IvG2H9MS53ShV8XyoY\"",
-    "mtime": "2026-11-16T21:53:58.890Z",
+    "mtime": "2026-11-17T10:13:00.801Z",
     "size": 385064,
     "path": "../public/coach-media/animations/fail/fail2.webp"
   },
   "/coach-media/animations/fail/fail10.webp": {
     "type": "image/webp",
     "etag": "\"ec4a8-LxdVywk4WTKCcK/Mz98lMc+PlrY\"",
-    "mtime": "2026-11-16T21:53:58.892Z",
+    "mtime": "2026-11-17T10:13:00.796Z",
     "size": 967848,
     "path": "../public/coach-media/animations/fail/fail10.webp"
   },
   "/coach-media/animations/fail/fail4.webp": {
     "type": "image/webp",
     "etag": "\"5cece-RjBisoBNjPRhvK+ndq3WET8sFcg\"",
-    "mtime": "2026-11-16T21:53:58.893Z",
+    "mtime": "2026-11-17T10:13:00.798Z",
     "size": 380622,
     "path": "../public/coach-media/animations/fail/fail4.webp"
   },
   "/coach-media/animations/fail/fail5.webp": {
     "type": "image/webp",
     "etag": "\"3418c-nUcgdhefQjLBbi5YPrFDciGNe1I\"",
-    "mtime": "2026-11-16T21:53:58.893Z",
+    "mtime": "2026-11-17T10:13:00.795Z",
     "size": 213388,
     "path": "../public/coach-media/animations/fail/fail5.webp"
   },
   "/coach-media/animations/fail/fail6.webp": {
     "type": "image/webp",
     "etag": "\"31e86-st4q2D401jTAQjaB6fQJge0HiLk\"",
-    "mtime": "2026-11-16T21:53:58.893Z",
+    "mtime": "2026-11-17T10:13:00.801Z",
     "size": 204422,
     "path": "../public/coach-media/animations/fail/fail6.webp"
-  },
-  "/coach-media/animations/fail/fail7.webp": {
-    "type": "image/webp",
-    "etag": "\"63788-deMgnTG8ziw8Sq9HQAAG5lpmaYQ\"",
-    "mtime": "2026-11-16T21:53:58.893Z",
-    "size": 407432,
-    "path": "../public/coach-media/animations/fail/fail7.webp"
   },
   "/coach-media/animations/fail/fail8.webp": {
     "type": "image/webp",
     "etag": "\"39a32-GZjK64v2UufujF0nhcGEc6ElNfk\"",
-    "mtime": "2026-11-16T21:53:58.902Z",
+    "mtime": "2026-11-17T10:13:00.801Z",
     "size": 236082,
     "path": "../public/coach-media/animations/fail/fail8.webp"
+  },
+  "/coach-media/animations/fail/fail7.webp": {
+    "type": "image/webp",
+    "etag": "\"63788-deMgnTG8ziw8Sq9HQAAG5lpmaYQ\"",
+    "mtime": "2026-11-17T10:13:00.801Z",
+    "size": 407432,
+    "path": "../public/coach-media/animations/fail/fail7.webp"
   },
   "/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png": {
     "type": "image/png",
     "etag": "\"181561-RMchrt2bobchfIO+Ry8cEH8QGsA\"",
-    "mtime": "2026-11-16T21:53:58.855Z",
+    "mtime": "2026-11-17T10:13:00.785Z",
     "size": 1578337,
     "path": "../public/coach-media/uploads/fe9fc5ec-02df-41ce-8f18-7cb14f9fe9e3.png"
   },
   "/coach-media/animations/bravo/bravo1.webp": {
     "type": "image/webp",
     "etag": "\"44738-4QhsLfUd9XIbDTSNeKIP8/efIFU\"",
-    "mtime": "2026-11-16T21:53:58.894Z",
+    "mtime": "2026-11-17T10:13:00.709Z",
     "size": 280376,
     "path": "../public/coach-media/animations/bravo/bravo1.webp"
-  },
-  "/coach-media/animations/bravo/bravo12.webp": {
-    "type": "image/webp",
-    "etag": "\"1205a-/7k+Wui1IgWSv4DPL8QXZSf1p2U\"",
-    "mtime": "2026-11-16T21:53:58.894Z",
-    "size": 73818,
-    "path": "../public/coach-media/animations/bravo/bravo12.webp"
   },
   "/coach-media/animations/bravo/bravo11.webp": {
     "type": "image/webp",
     "etag": "\"1a216-3xX4QCqG7FtxwZvgt1PBqgFlbzg\"",
-    "mtime": "2026-11-16T21:53:58.897Z",
+    "mtime": "2026-11-17T10:13:00.781Z",
     "size": 107030,
     "path": "../public/coach-media/animations/bravo/bravo11.webp"
   },
-  "/coach-media/animations/bravo/bravo16.webp": {
+  "/coach-media/animations/bravo/bravo12.webp": {
     "type": "image/webp",
-    "etag": "\"203f8-jg0MLG/nBqRrdnyLW65UaerRQNM\"",
-    "mtime": "2026-11-16T21:53:58.901Z",
-    "size": 132088,
-    "path": "../public/coach-media/animations/bravo/bravo16.webp"
-  },
-  "/coach-media/animations/bravo/bravo15.webp": {
-    "type": "image/webp",
-    "etag": "\"2b0e2-qaGuoSfLeg5vXhKMrtg/rxugwqA\"",
-    "mtime": "2026-11-16T21:53:58.901Z",
-    "size": 176354,
-    "path": "../public/coach-media/animations/bravo/bravo15.webp"
+    "etag": "\"1205a-/7k+Wui1IgWSv4DPL8QXZSf1p2U\"",
+    "mtime": "2026-11-17T10:13:00.783Z",
+    "size": 73818,
+    "path": "../public/coach-media/animations/bravo/bravo12.webp"
   },
   "/coach-media/animations/bravo/bravo14.webp": {
     "type": "image/webp",
     "etag": "\"34da4-cRZ9lyimIePouzhUvQ/mHfvEtuY\"",
-    "mtime": "2026-11-16T21:53:58.924Z",
+    "mtime": "2026-11-17T10:13:00.783Z",
     "size": 216484,
     "path": "../public/coach-media/animations/bravo/bravo14.webp"
   },
   "/coach-media/animations/bravo/bravo13.webp": {
     "type": "image/webp",
     "etag": "\"56106-bhB3PYpSVxWys8XQ9pz9OrU7QBA\"",
-    "mtime": "2026-11-16T21:53:58.900Z",
+    "mtime": "2026-11-17T10:13:00.785Z",
     "size": 352518,
     "path": "../public/coach-media/animations/bravo/bravo13.webp"
+  },
+  "/coach-media/animations/bravo/bravo15.webp": {
+    "type": "image/webp",
+    "etag": "\"2b0e2-qaGuoSfLeg5vXhKMrtg/rxugwqA\"",
+    "mtime": "2026-11-17T10:13:00.784Z",
+    "size": 176354,
+    "path": "../public/coach-media/animations/bravo/bravo15.webp"
+  },
+  "/coach-media/animations/bravo/bravo16.webp": {
+    "type": "image/webp",
+    "etag": "\"203f8-jg0MLG/nBqRrdnyLW65UaerRQNM\"",
+    "mtime": "2026-11-17T10:13:00.785Z",
+    "size": 132088,
+    "path": "../public/coach-media/animations/bravo/bravo16.webp"
   },
   "/coach-media/animations/bravo/bravo17.webp": {
     "type": "image/webp",
     "etag": "\"241a0-uyZNtAYraFvIQXIqjMvyOPE1jTw\"",
-    "mtime": "2026-11-16T21:53:58.901Z",
+    "mtime": "2026-11-17T10:13:00.785Z",
     "size": 147872,
     "path": "../public/coach-media/animations/bravo/bravo17.webp"
   },
   "/coach-media/animations/bravo/bravo18.webp": {
     "type": "image/webp",
     "etag": "\"a01a-cps+HXxadKCjeKKYWHbwcIGk6hU\"",
-    "mtime": "2026-11-16T21:53:58.901Z",
+    "mtime": "2026-11-17T10:13:00.790Z",
     "size": 40986,
     "path": "../public/coach-media/animations/bravo/bravo18.webp"
   },
   "/coach-media/animations/fail/fail9.webp": {
     "type": "image/webp",
     "etag": "\"f5f18-OaHXpPB3qd/rQVrqz8lBFShsxjI\"",
-    "mtime": "2026-11-16T21:53:58.895Z",
+    "mtime": "2026-11-17T10:13:00.803Z",
     "size": 1007384,
     "path": "../public/coach-media/animations/fail/fail9.webp"
   },
   "/coach-media/animations/bravo/bravo19.webp": {
     "type": "image/webp",
     "etag": "\"13352-7XcYb6ke3l0xF2LCw/KR+dXmc7Q\"",
-    "mtime": "2026-11-16T21:53:58.901Z",
+    "mtime": "2026-11-17T10:13:00.790Z",
     "size": 78674,
     "path": "../public/coach-media/animations/bravo/bravo19.webp"
   },
   "/coach-media/animations/bravo/bravo2.webp": {
     "type": "image/webp",
     "etag": "\"d0ca-uTre9Wq69Wtq99T7Vn3/dRXQFkg\"",
-    "mtime": "2026-11-16T21:53:58.901Z",
+    "mtime": "2026-11-17T10:13:00.785Z",
     "size": 53450,
     "path": "../public/coach-media/animations/bravo/bravo2.webp"
-  },
-  "/coach-media/animations/fail/fail3.webp": {
-    "type": "image/webp",
-    "etag": "\"19d1a6-49q6JpI6yKtRh2mygNyjyUsItIM\"",
-    "mtime": "2026-11-16T21:53:58.900Z",
-    "size": 1692070,
-    "path": "../public/coach-media/animations/fail/fail3.webp"
-  },
-  "/coach-media/animations/bravo/bravo10.webp": {
-    "type": "image/webp",
-    "etag": "\"adbd4-UywgFHyHGzDijqz6jodwTseMtkI\"",
-    "mtime": "2026-11-16T21:53:58.811Z",
-    "size": 711636,
-    "path": "../public/coach-media/animations/bravo/bravo10.webp"
   },
   "/coach-media/animations/bravo/bravo20.webp": {
     "type": "image/webp",
     "etag": "\"233b2-LlDa1c9jqNgHkGB9k+cU7ap5b0Y\"",
-    "mtime": "2026-11-16T21:53:58.902Z",
+    "mtime": "2026-11-17T10:13:00.786Z",
     "size": 144306,
     "path": "../public/coach-media/animations/bravo/bravo20.webp"
+  },
+  "/coach-media/animations/bravo/bravo10.webp": {
+    "type": "image/webp",
+    "etag": "\"adbd4-UywgFHyHGzDijqz6jodwTseMtkI\"",
+    "mtime": "2026-11-17T10:13:00.784Z",
+    "size": 711636,
+    "path": "../public/coach-media/animations/bravo/bravo10.webp"
   },
   "/coach-media/animations/bravo/bravo21.webp": {
     "type": "image/webp",
     "etag": "\"3da68-ISHGzxh2cgKoQraDg+pa1TIB3Eo\"",
-    "mtime": "2026-11-16T21:53:58.902Z",
+    "mtime": "2026-11-17T10:13:00.786Z",
     "size": 252520,
     "path": "../public/coach-media/animations/bravo/bravo21.webp"
   },
   "/coach-media/animations/bravo/bravo22.webp": {
     "type": "image/webp",
     "etag": "\"695d4-fo3c1QhJVPT0yXYAuoQyAXrIO9E\"",
-    "mtime": "2026-11-16T21:53:58.904Z",
+    "mtime": "2026-11-17T10:13:00.791Z",
     "size": 431572,
     "path": "../public/coach-media/animations/bravo/bravo22.webp"
+  },
+  "/coach-media/animations/fail/fail3.webp": {
+    "type": "image/webp",
+    "etag": "\"19d1a6-49q6JpI6yKtRh2mygNyjyUsItIM\"",
+    "mtime": "2026-11-17T10:13:00.797Z",
+    "size": 1692070,
+    "path": "../public/coach-media/animations/fail/fail3.webp"
   },
   "/coach-media/animations/bravo/bravo23.webp": {
     "type": "image/webp",
     "etag": "\"203f8-jg0MLG/nBqRrdnyLW65UaerRQNM\"",
-    "mtime": "2026-11-16T21:53:58.902Z",
+    "mtime": "2026-11-17T10:13:00.792Z",
     "size": 132088,
     "path": "../public/coach-media/animations/bravo/bravo23.webp"
   },
   "/coach-media/animations/bravo/bravo24.webp": {
     "type": "image/webp",
     "etag": "\"21c1c-BCPPzQaqjCgONCZQqIz0MRfkhnk\"",
-    "mtime": "2026-11-16T21:53:58.903Z",
+    "mtime": "2026-11-17T10:13:00.792Z",
     "size": 138268,
     "path": "../public/coach-media/animations/bravo/bravo24.webp"
   },
   "/coach-media/animations/bravo/bravo25.webp": {
     "type": "image/webp",
     "etag": "\"6e646-B09j5zbOGx/pB/KUZrJkPccQvk0\"",
-    "mtime": "2026-11-16T21:53:58.903Z",
+    "mtime": "2026-11-17T10:13:00.791Z",
     "size": 452166,
     "path": "../public/coach-media/animations/bravo/bravo25.webp"
   },
   "/coach-media/animations/bravo/bravo26.webp": {
     "type": "image/webp",
     "etag": "\"30b4-3zSDRUC/kfpm2SrLPRZXdNLOLHk\"",
-    "mtime": "2026-11-16T21:53:58.905Z",
+    "mtime": "2026-11-17T10:13:00.790Z",
     "size": 12468,
     "path": "../public/coach-media/animations/bravo/bravo26.webp"
   },
   "/coach-media/animations/bravo/bravo27.webp": {
     "type": "image/webp",
     "etag": "\"18b24-qcCeJs9S6OXbNHnCNtW2ImrJbvY\"",
-    "mtime": "2026-11-16T21:53:58.903Z",
+    "mtime": "2026-11-17T10:13:00.791Z",
     "size": 101156,
     "path": "../public/coach-media/animations/bravo/bravo27.webp"
   },
   "/coach-media/animations/bravo/bravo28.webp": {
     "type": "image/webp",
     "etag": "\"18612-7Zj+YVZPRJ6CKyZAwrxfXIc7fjI\"",
-    "mtime": "2026-11-16T21:53:58.903Z",
+    "mtime": "2026-11-17T10:13:00.791Z",
     "size": 99858,
     "path": "../public/coach-media/animations/bravo/bravo28.webp"
   },
   "/coach-media/animations/bravo/bravo29.webp": {
     "type": "image/webp",
     "etag": "\"163a6-ViRk6UjMsrG8Il8pS7HYT3/WiFk\"",
-    "mtime": "2026-11-16T21:53:58.903Z",
+    "mtime": "2026-11-17T10:13:00.792Z",
     "size": 91046,
     "path": "../public/coach-media/animations/bravo/bravo29.webp"
   },
   "/coach-media/animations/bravo/bravo3.webp": {
     "type": "image/webp",
     "etag": "\"80d8-WZGwWFCLsk3YDTm9XP5QCq8R7Es\"",
-    "mtime": "2026-11-16T21:53:58.903Z",
+    "mtime": "2026-11-17T10:13:00.793Z",
     "size": 32984,
     "path": "../public/coach-media/animations/bravo/bravo3.webp"
   },
   "/coach-media/animations/bravo/bravo31.webp": {
     "type": "image/webp",
     "etag": "\"2154c-mTHroY9VN55S8jkoGrrtwcul4rs\"",
-    "mtime": "2026-11-16T21:53:58.903Z",
+    "mtime": "2026-11-17T10:13:00.792Z",
     "size": 136524,
     "path": "../public/coach-media/animations/bravo/bravo31.webp"
   },
   "/coach-media/animations/bravo/bravo30.webp": {
     "type": "image/webp",
     "etag": "\"2be66-2mV/o9/SR26sBGn1HK62usspEXM\"",
-    "mtime": "2026-11-16T21:53:58.904Z",
+    "mtime": "2026-11-17T10:13:00.793Z",
     "size": 179814,
     "path": "../public/coach-media/animations/bravo/bravo30.webp"
-  },
-  "/coach-media/animations/bravo/bravo33.webp": {
-    "type": "image/webp",
-    "etag": "\"19ec0-c95YrxMrzqQW4G9FjU0ykKQ7V9o\"",
-    "mtime": "2026-11-16T21:53:58.908Z",
-    "size": 106176,
-    "path": "../public/coach-media/animations/bravo/bravo33.webp"
   },
   "/coach-media/animations/bravo/bravo32.webp": {
     "type": "image/webp",
     "etag": "\"3ddf2-eZeHr4gLF4RNVRJoLdRkGG/wq/4\"",
-    "mtime": "2026-11-16T21:53:58.904Z",
+    "mtime": "2026-11-17T10:13:00.793Z",
     "size": 253426,
     "path": "../public/coach-media/animations/bravo/bravo32.webp"
   },
-  "/coach-media/animations/bravo/bravo5.webp": {
+  "/coach-media/animations/bravo/bravo33.webp": {
     "type": "image/webp",
-    "etag": "\"120aa-WQCZmq2H4iAmCwkgGz0jbhroUMU\"",
-    "mtime": "2026-11-16T21:53:58.908Z",
-    "size": 73898,
-    "path": "../public/coach-media/animations/bravo/bravo5.webp"
+    "etag": "\"19ec0-c95YrxMrzqQW4G9FjU0ykKQ7V9o\"",
+    "mtime": "2026-11-17T10:13:00.794Z",
+    "size": 106176,
+    "path": "../public/coach-media/animations/bravo/bravo33.webp"
   },
   "/coach-media/animations/bravo/bravo4.webp": {
     "type": "image/webp",
     "etag": "\"301b0-kZdjup76tUvXnUsAqLJ/bPOuJLQ\"",
-    "mtime": "2026-11-16T21:53:58.908Z",
+    "mtime": "2026-11-17T10:13:00.794Z",
     "size": 197040,
     "path": "../public/coach-media/animations/bravo/bravo4.webp"
+  },
+  "/coach-media/animations/bravo/bravo5.webp": {
+    "type": "image/webp",
+    "etag": "\"120aa-WQCZmq2H4iAmCwkgGz0jbhroUMU\"",
+    "mtime": "2026-11-17T10:13:00.793Z",
+    "size": 73898,
+    "path": "../public/coach-media/animations/bravo/bravo5.webp"
   },
   "/coach-media/animations/bravo/bravo6.webp": {
     "type": "image/webp",
     "etag": "\"1a95c-STnlzMe66YjYqbDuY5yLt9ADvzM\"",
-    "mtime": "2026-11-16T21:53:58.909Z",
+    "mtime": "2026-11-17T10:13:00.793Z",
     "size": 108892,
     "path": "../public/coach-media/animations/bravo/bravo6.webp"
   },
   "/coach-media/animations/bravo/bravo7.webp": {
     "type": "image/webp",
     "etag": "\"29fa6-QguGsOjUTD8OjKKTZfpb9dijR5g\"",
-    "mtime": "2026-11-16T21:53:58.908Z",
+    "mtime": "2026-11-17T10:13:00.794Z",
     "size": 171942,
     "path": "../public/coach-media/animations/bravo/bravo7.webp"
   },
   "/coach-media/animations/bravo/bravo8.webp": {
     "type": "image/webp",
     "etag": "\"1d8b4-xhvLiSPfxFlQsAeh/JU1EhCyKtQ\"",
-    "mtime": "2026-11-16T21:53:58.912Z",
+    "mtime": "2026-11-17T10:13:00.794Z",
     "size": 121012,
     "path": "../public/coach-media/animations/bravo/bravo8.webp"
   },
   "/coach-media/animations/bravo/bravo9.webp": {
     "type": "image/webp",
     "etag": "\"1105e-m+/rIlVAaoiD3hxFGIcC7Skzq0k\"",
-    "mtime": "2026-11-16T21:53:58.909Z",
+    "mtime": "2026-11-17T10:13:00.794Z",
     "size": 69726,
     "path": "../public/coach-media/animations/bravo/bravo9.webp"
-  },
-  "/coach-media/emojis/danger/danger1.png": {
-    "type": "image/png",
-    "etag": "\"3036-eXYZ+J7eqF26NQJZHhXFXrNgGww\"",
-    "mtime": "2026-11-16T21:53:58.808Z",
-    "size": 12342,
-    "path": "../public/coach-media/emojis/danger/danger1.png"
-  },
-  "/coach-media/emojis/heureux/heureux1.png": {
-    "type": "image/png",
-    "etag": "\"5091-+uAnUfC4q2tlld3BzD89z3lKd4w\"",
-    "mtime": "2026-11-16T21:53:58.929Z",
-    "size": 20625,
-    "path": "../public/coach-media/emojis/heureux/heureux1.png"
-  },
-  "/coach-media/emojis/heureux/heureux10.png": {
-    "type": "image/png",
-    "etag": "\"5bbe-8dpJHwcxgGm/L+GGIgukoN99+qw\"",
-    "mtime": "2026-11-16T21:53:58.929Z",
-    "size": 23486,
-    "path": "../public/coach-media/emojis/heureux/heureux10.png"
-  },
-  "/coach-media/emojis/heureux/heureux11.png": {
-    "type": "image/png",
-    "etag": "\"60b8-LMMAFjmB/Rwe+6qwtxB0KRRjFVE\"",
-    "mtime": "2026-11-16T21:53:58.810Z",
-    "size": 24760,
-    "path": "../public/coach-media/emojis/heureux/heureux11.png"
-  },
-  "/coach-media/emojis/heureux/heureux12.png": {
-    "type": "image/png",
-    "etag": "\"79c6-gOXTGgNP0DRA6mU73TQkCLA2IZc\"",
-    "mtime": "2026-11-16T21:53:58.930Z",
-    "size": 31174,
-    "path": "../public/coach-media/emojis/heureux/heureux12.png"
-  },
-  "/coach-media/emojis/heureux/heureux2.png": {
-    "type": "image/png",
-    "etag": "\"54c1-7stf5vr0fIsbVKX4y+9cXcdF6Mo\"",
-    "mtime": "2026-11-16T21:53:58.930Z",
-    "size": 21697,
-    "path": "../public/coach-media/emojis/heureux/heureux2.png"
-  },
-  "/coach-media/emojis/heureux/heureux3.png": {
-    "type": "image/png",
-    "etag": "\"531f-VfeI7fmVy/9I1cJdA+JneCazNHU\"",
-    "mtime": "2026-11-16T21:53:58.930Z",
-    "size": 21279,
-    "path": "../public/coach-media/emojis/heureux/heureux3.png"
-  },
-  "/coach-media/emojis/heureux/heureux4.png": {
-    "type": "image/png",
-    "etag": "\"5885-WkglwLUYH5ALdE1dXhy9hL4kIX4\"",
-    "mtime": "2026-11-16T21:53:58.930Z",
-    "size": 22661,
-    "path": "../public/coach-media/emojis/heureux/heureux4.png"
-  },
-  "/coach-media/emojis/heureux/heureux5.png": {
-    "type": "image/png",
-    "etag": "\"5a47-dAmqVWfHl7YFERUDnBuBJDfdxvs\"",
-    "mtime": "2026-11-16T21:53:58.930Z",
-    "size": 23111,
-    "path": "../public/coach-media/emojis/heureux/heureux5.png"
-  },
-  "/coach-media/emojis/heureux/heureux6.png": {
-    "type": "image/png",
-    "etag": "\"536f-MLOUAyVp0bZpHOQ61BWW10gqYAk\"",
-    "mtime": "2026-11-16T21:53:58.930Z",
-    "size": 21359,
-    "path": "../public/coach-media/emojis/heureux/heureux6.png"
-  },
-  "/coach-media/emojis/heureux/heureux7.png": {
-    "type": "image/png",
-    "etag": "\"4c1e-5J3Hb2P7b9Dhw36q+lPFACHsBzo\"",
-    "mtime": "2026-11-16T21:53:58.930Z",
-    "size": 19486,
-    "path": "../public/coach-media/emojis/heureux/heureux7.png"
-  },
-  "/coach-media/emojis/heureux/heureux8.png": {
-    "type": "image/png",
-    "etag": "\"4c3d-xFJiCChiW5P5PT3dzl6b9pdUZCU\"",
-    "mtime": "2026-11-16T21:53:58.930Z",
-    "size": 19517,
-    "path": "../public/coach-media/emojis/heureux/heureux8.png"
-  },
-  "/coach-media/emojis/heureux/heureux9.png": {
-    "type": "image/png",
-    "etag": "\"53d1-nvrpEmDOGFDrOhR0CwIqhjydUqw\"",
-    "mtime": "2026-11-16T21:53:58.930Z",
-    "size": 21457,
-    "path": "../public/coach-media/emojis/heureux/heureux9.png"
-  },
-  "/coach-media/animations/happy/happy10.webp": {
-    "type": "image/webp",
-    "etag": "\"13102-1AwfKNNogN0hV9N7INQr8b/L5U0\"",
-    "mtime": "2026-11-16T21:53:58.931Z",
-    "size": 78082,
-    "path": "../public/coach-media/animations/happy/happy10.webp"
-  },
-  "/coach-media/animations/happy/happy11.webp": {
-    "type": "image/webp",
-    "etag": "\"c51c-aSSJ/YerC2d+QHIzkxapjUKX1xo\"",
-    "mtime": "2026-11-16T21:53:58.936Z",
-    "size": 50460,
-    "path": "../public/coach-media/animations/happy/happy11.webp"
-  },
-  "/coach-media/animations/happy/happy12.webp": {
-    "type": "image/webp",
-    "etag": "\"26dd0-kEufqOKIIc4EphkqsilP8Vg0anA\"",
-    "mtime": "2026-11-16T21:53:58.931Z",
-    "size": 159184,
-    "path": "../public/coach-media/animations/happy/happy12.webp"
-  },
-  "/coach-media/animations/happy/happy14.webp": {
-    "type": "image/webp",
-    "etag": "\"2b5e-Tlk4vz7sMxW+TPrlh/TTUPVQZ64\"",
-    "mtime": "2026-11-16T21:53:58.931Z",
-    "size": 11102,
-    "path": "../public/coach-media/animations/happy/happy14.webp"
-  },
-  "/coach-media/animations/happy/happy13.webp": {
-    "type": "image/webp",
-    "etag": "\"1b7c8-6YwhPgMDDi09N6QaiQGvB3MESN8\"",
-    "mtime": "2026-11-16T21:53:58.931Z",
-    "size": 112584,
-    "path": "../public/coach-media/animations/happy/happy13.webp"
-  },
-  "/coach-media/animations/happy/happy15.webp": {
-    "type": "image/webp",
-    "etag": "\"1f82e-GdfVpoK+FBOph2APqZZ2ksTEi/M\"",
-    "mtime": "2026-11-16T21:53:58.934Z",
-    "size": 129070,
-    "path": "../public/coach-media/animations/happy/happy15.webp"
-  },
-  "/coach-media/animations/happy/happy16.webp": {
-    "type": "image/webp",
-    "etag": "\"39676-m3hlL8MEmfcM8A6RQ/d34G7k4z4\"",
-    "mtime": "2026-11-16T21:53:58.935Z",
-    "size": 235126,
-    "path": "../public/coach-media/animations/happy/happy16.webp"
-  },
-  "/coach-media/animations/happy/happy1.webp": {
-    "type": "image/webp",
-    "etag": "\"9a9fe-dnJ60THXbLE/qdsCoy8mks8JEWo\"",
-    "mtime": "2026-11-16T21:53:58.812Z",
-    "size": 633342,
-    "path": "../public/coach-media/animations/happy/happy1.webp"
-  },
-  "/coach-media/animations/happy/happy17.webp": {
-    "type": "image/webp",
-    "etag": "\"6c236-lcuyQg6sSZcT0+fCpGNG/JhMi7U\"",
-    "mtime": "2026-11-16T21:53:58.935Z",
-    "size": 442934,
-    "path": "../public/coach-media/animations/happy/happy17.webp"
-  },
-  "/coach-media/animations/happy/happy18.webp": {
-    "type": "image/webp",
-    "etag": "\"38cca-HDXyFn4nw7hhDQ0f8voh7jHxFIU\"",
-    "mtime": "2026-11-16T21:53:58.935Z",
-    "size": 232650,
-    "path": "../public/coach-media/animations/happy/happy18.webp"
-  },
-  "/coach-media/animations/happy/happy19.webp": {
-    "type": "image/webp",
-    "etag": "\"7340-Mvycs8QTkYX6zm7iIfL2nLfxOe8\"",
-    "mtime": "2026-11-16T21:53:58.935Z",
-    "size": 29504,
-    "path": "../public/coach-media/animations/happy/happy19.webp"
-  },
-  "/coach-media/animations/bravo/bravo34.webp": {
-    "type": "image/webp",
-    "etag": "\"26ccac-0lLmGbQH56H1iPHEYHxgMHzvGqg\"",
-    "mtime": "2026-11-16T21:53:58.909Z",
-    "size": 2542764,
-    "path": "../public/coach-media/animations/bravo/bravo34.webp"
-  },
-  "/coach-media/animations/happy/happy2.webp": {
-    "type": "image/webp",
-    "etag": "\"1b638-CG1y3zibI0VpxAfTb3zZrzRaw90\"",
-    "mtime": "2026-11-16T21:53:58.935Z",
-    "size": 112184,
-    "path": "../public/coach-media/animations/happy/happy2.webp"
-  },
-  "/coach-media/animations/happy/happy20.webp": {
-    "type": "image/webp",
-    "etag": "\"31eb2-eG0f1RbiJPRwmWx1p+zVbeej7Jo\"",
-    "mtime": "2026-11-16T21:53:58.936Z",
-    "size": 204466,
-    "path": "../public/coach-media/animations/happy/happy20.webp"
-  },
-  "/coach-media/animations/happy/happy21.webp": {
-    "type": "image/webp",
-    "etag": "\"d20a-nJXSMlgY3QzHwwJw2j7rW4bD6HU\"",
-    "mtime": "2026-11-16T21:53:58.936Z",
-    "size": 53770,
-    "path": "../public/coach-media/animations/happy/happy21.webp"
-  },
-  "/coach-media/animations/happy/happy22.webp": {
-    "type": "image/webp",
-    "etag": "\"2be74-wts9jwpJqVDGud0ZifbURmTwf7g\"",
-    "mtime": "2026-11-16T21:53:58.937Z",
-    "size": 179828,
-    "path": "../public/coach-media/animations/happy/happy22.webp"
-  },
-  "/coach-media/animations/happy/happy23.webp": {
-    "type": "image/webp",
-    "etag": "\"e74a-F+BBio6AhOZ5hwHOGh8wKCLcoGA\"",
-    "mtime": "2026-11-16T21:53:58.936Z",
-    "size": 59210,
-    "path": "../public/coach-media/animations/happy/happy23.webp"
-  },
-  "/coach-media/animations/happy/happy25.webp": {
-    "type": "image/webp",
-    "etag": "\"16574-kubThW5vAMKccIZc2jswkTWLUoA\"",
-    "mtime": "2026-11-16T21:53:58.937Z",
-    "size": 91508,
-    "path": "../public/coach-media/animations/happy/happy25.webp"
-  },
-  "/coach-media/animations/happy/happy24.webp": {
-    "type": "image/webp",
-    "etag": "\"23e02-CIi7WeJXeH8cd/GgwMtt3CFFVkM\"",
-    "mtime": "2026-11-16T21:53:58.936Z",
-    "size": 146946,
-    "path": "../public/coach-media/animations/happy/happy24.webp"
-  },
-  "/coach-media/animations/happy/happy26.webp": {
-    "type": "image/webp",
-    "etag": "\"6c706-bOAKAMAiElDmC2MCxEJkrvr5A+k\"",
-    "mtime": "2026-11-16T21:53:58.938Z",
-    "size": 444166,
-    "path": "../public/coach-media/animations/happy/happy26.webp"
-  },
-  "/coach-media/animations/happy/happy27.webp": {
-    "type": "image/webp",
-    "etag": "\"1c662-1bbHXwmlK1/Q6duQFfbU/+Wg5Fg\"",
-    "mtime": "2026-11-16T21:53:58.937Z",
-    "size": 116322,
-    "path": "../public/coach-media/animations/happy/happy27.webp"
-  },
-  "/coach-media/animations/happy/happy28.webp": {
-    "type": "image/webp",
-    "etag": "\"2090a-cfPB8KwXDFTC2iWhg6Pn7kOvGeg\"",
-    "mtime": "2026-11-16T21:53:58.937Z",
-    "size": 133386,
-    "path": "../public/coach-media/animations/happy/happy28.webp"
-  },
-  "/coach-media/animations/happy/happy29.webp": {
-    "type": "image/webp",
-    "etag": "\"15a6e-F4FEHmzAIG7WW3pszvFsq0XKYGk\"",
-    "mtime": "2026-11-16T21:53:58.938Z",
-    "size": 88686,
-    "path": "../public/coach-media/animations/happy/happy29.webp"
-  },
-  "/coach-media/animations/happy/happy30.webp": {
-    "type": "image/webp",
-    "etag": "\"46140-52DID+yWWHNDhSWo2wqCW7AgztI\"",
-    "mtime": "2026-11-16T21:53:58.939Z",
-    "size": 287040,
-    "path": "../public/coach-media/animations/happy/happy30.webp"
-  },
-  "/coach-media/animations/happy/happy3.webp": {
-    "type": "image/webp",
-    "etag": "\"6438c-AQmLLI1sVtzVfySWLf8q8/SnoDQ\"",
-    "mtime": "2026-11-16T21:53:58.939Z",
-    "size": 410508,
-    "path": "../public/coach-media/animations/happy/happy3.webp"
-  },
-  "/coach-media/animations/happy/happy31.webp": {
-    "type": "image/webp",
-    "etag": "\"4d6ca-GZQfzSkO4AbRu7KJoQWgnIw6U6k\"",
-    "mtime": "2026-11-16T21:53:58.940Z",
-    "size": 317130,
-    "path": "../public/coach-media/animations/happy/happy31.webp"
-  },
-  "/coach-media/animations/happy/happy33.webp": {
-    "type": "image/webp",
-    "etag": "\"1ca8a-w5q1HyoRf3YSX2wny1ajxC1lVTw\"",
-    "mtime": "2026-11-16T21:53:58.940Z",
-    "size": 117386,
-    "path": "../public/coach-media/animations/happy/happy33.webp"
-  },
-  "/coach-media/animations/happy/happy34.webp": {
-    "type": "image/webp",
-    "etag": "\"7a6e-N4lUoynD0pY1HrZqbhKsKEJcIdY\"",
-    "mtime": "2026-11-16T21:53:58.940Z",
-    "size": 31342,
-    "path": "../public/coach-media/animations/happy/happy34.webp"
-  },
-  "/coach-media/animations/happy/happy32.webp": {
-    "type": "image/webp",
-    "etag": "\"1ce94-qd5mvwxqL3x8atGLGoQ6T5SBIM8\"",
-    "mtime": "2026-11-16T21:53:58.939Z",
-    "size": 118420,
-    "path": "../public/coach-media/animations/happy/happy32.webp"
-  },
-  "/coach-media/animations/happy/happy36.webp": {
-    "type": "image/webp",
-    "etag": "\"1480e-iU7KcSbk60IXH4CWOzNyttBsbE0\"",
-    "mtime": "2026-11-16T21:53:58.940Z",
-    "size": 83982,
-    "path": "../public/coach-media/animations/happy/happy36.webp"
-  },
-  "/coach-media/animations/happy/happy37.webp": {
-    "type": "image/webp",
-    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
-    "mtime": "2026-11-16T21:53:58.941Z",
-    "size": 57724,
-    "path": "../public/coach-media/animations/happy/happy37.webp"
-  },
-  "/coach-media/animations/happy/happy35.webp": {
-    "type": "image/webp",
-    "etag": "\"27e2a-nINbfIIzpb0aB5cQDbxz/GDwNug\"",
-    "mtime": "2026-11-16T21:53:58.940Z",
-    "size": 163370,
-    "path": "../public/coach-media/animations/happy/happy35.webp"
-  },
-  "/coach-media/animations/happy/happy38.webp": {
-    "type": "image/webp",
-    "etag": "\"20928-zE86yLQztSZEATTCxTKRuQFifnw\"",
-    "mtime": "2026-11-16T21:53:58.941Z",
-    "size": 133416,
-    "path": "../public/coach-media/animations/happy/happy38.webp"
-  },
-  "/coach-media/animations/happy/happy39.webp": {
-    "type": "image/webp",
-    "etag": "\"1031c-0I4f6s3jDJrqeEDNAVBubusuRqQ\"",
-    "mtime": "2026-11-16T21:53:58.941Z",
-    "size": 66332,
-    "path": "../public/coach-media/animations/happy/happy39.webp"
-  },
-  "/coach-media/animations/happy/happy4.webp": {
-    "type": "image/webp",
-    "etag": "\"80d8-WZGwWFCLsk3YDTm9XP5QCq8R7Es\"",
-    "mtime": "2026-11-16T21:53:58.940Z",
-    "size": 32984,
-    "path": "../public/coach-media/animations/happy/happy4.webp"
-  },
-  "/coach-media/animations/happy/happy41.webp": {
-    "type": "image/webp",
-    "etag": "\"a76a-Nmck64+pAP0tEnTHpG1mitI4ONk\"",
-    "mtime": "2026-11-16T21:53:58.941Z",
-    "size": 42858,
-    "path": "../public/coach-media/animations/happy/happy41.webp"
-  },
-  "/coach-media/animations/happy/happy40.webp": {
-    "type": "image/webp",
-    "etag": "\"116ba-M7X1kM6tt7dIECx3koEGYbji1us\"",
-    "mtime": "2026-11-16T21:53:58.942Z",
-    "size": 71354,
-    "path": "../public/coach-media/animations/happy/happy40.webp"
-  },
-  "/coach-media/animations/happy/happy42.webp": {
-    "type": "image/webp",
-    "etag": "\"7eba-Xqry0H+Qj7x/M1eDmO0CIQ+A7Mg\"",
-    "mtime": "2026-11-16T21:53:58.941Z",
-    "size": 32442,
-    "path": "../public/coach-media/animations/happy/happy42.webp"
-  },
-  "/coach-media/animations/happy/happy43.webp": {
-    "type": "image/webp",
-    "etag": "\"55a5e-kUYTswcDoeybUYnmGXDBV0ny564\"",
-    "mtime": "2026-11-16T21:53:58.943Z",
-    "size": 350814,
-    "path": "../public/coach-media/animations/happy/happy43.webp"
-  },
-  "/coach-media/animations/happy/happy44.webp": {
-    "type": "image/webp",
-    "etag": "\"24e16-Y7u+Md6oQPbYSDjE0D9H77j0Z5I\"",
-    "mtime": "2026-11-16T21:53:58.942Z",
-    "size": 151062,
-    "path": "../public/coach-media/animations/happy/happy44.webp"
-  },
-  "/coach-media/animations/happy/happy45.webp": {
-    "type": "image/webp",
-    "etag": "\"65a82-XxALJISFlOUdD3wSziHwFXHhxqc\"",
-    "mtime": "2026-11-16T21:53:58.943Z",
-    "size": 416386,
-    "path": "../public/coach-media/animations/happy/happy45.webp"
-  },
-  "/coach-media/animations/happy/happy46.webp": {
-    "type": "image/webp",
-    "etag": "\"13dec-uj4sm+IwuLOmQY7lGy1JeMzt2FM\"",
-    "mtime": "2026-11-16T21:53:58.942Z",
-    "size": 81388,
-    "path": "../public/coach-media/animations/happy/happy46.webp"
-  },
-  "/coach-media/animations/happy/happy47.webp": {
-    "type": "image/webp",
-    "etag": "\"234e4-DNBmLISLOFimd+G8XihNRgMsjGw\"",
-    "mtime": "2026-11-16T21:53:58.943Z",
-    "size": 144612,
-    "path": "../public/coach-media/animations/happy/happy47.webp"
-  },
-  "/coach-media/animations/happy/happy5.webp": {
-    "type": "image/webp",
-    "etag": "\"10784-0Rzy5v92HqFbOQ0qn2Jo9XRJ1r0\"",
-    "mtime": "2026-11-16T21:53:58.947Z",
-    "size": 67460,
-    "path": "../public/coach-media/animations/happy/happy5.webp"
-  },
-  "/coach-media/animations/happy/happy48.webp": {
-    "type": "image/webp",
-    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
-    "mtime": "2026-11-16T21:53:58.946Z",
-    "size": 566688,
-    "path": "../public/coach-media/animations/happy/happy48.webp"
-  },
-  "/coach-media/animations/happy/happy49.webp": {
-    "type": "image/webp",
-    "etag": "\"3123c-mf62C2iWRtx585STd9CHbYmICyM\"",
-    "mtime": "2026-11-16T21:53:58.947Z",
-    "size": 201276,
-    "path": "../public/coach-media/animations/happy/happy49.webp"
-  },
-  "/coach-media/animations/happy/happy50.webp": {
-    "type": "image/webp",
-    "etag": "\"2b72a-Xz8Gb2Cdj+rrnnpbXbSGBQRTFYw\"",
-    "mtime": "2026-11-16T21:53:58.946Z",
-    "size": 177962,
-    "path": "../public/coach-media/animations/happy/happy50.webp"
-  },
-  "/coach-media/animations/happy/happy51.webp": {
-    "type": "image/webp",
-    "etag": "\"29090-le1WcmrRN+RDX52joaRj6kdNQS0\"",
-    "mtime": "2026-11-16T21:53:58.946Z",
-    "size": 168080,
-    "path": "../public/coach-media/animations/happy/happy51.webp"
-  },
-  "/coach-media/animations/happy/happy53.webp": {
-    "type": "image/webp",
-    "etag": "\"57d0-WEnplvWuFKWqXkfuwNFuk472muo\"",
-    "mtime": "2026-11-16T21:53:58.946Z",
-    "size": 22480,
-    "path": "../public/coach-media/animations/happy/happy53.webp"
-  },
-  "/coach-media/animations/happy/happy52.webp": {
-    "type": "image/webp",
-    "etag": "\"4a9b0-bNgmWpmTSjuc06DQcbX6RkVvCnU\"",
-    "mtime": "2026-11-16T21:53:58.947Z",
-    "size": 305584,
-    "path": "../public/coach-media/animations/happy/happy52.webp"
-  },
-  "/coach-media/animations/happy/happy54.webp": {
-    "type": "image/webp",
-    "etag": "\"de70-7JEgp30lMgh1RT82Z43BnbOPyME\"",
-    "mtime": "2026-11-16T21:53:58.948Z",
-    "size": 56944,
-    "path": "../public/coach-media/animations/happy/happy54.webp"
-  },
-  "/coach-media/animations/happy/happy55.webp": {
-    "type": "image/webp",
-    "etag": "\"4b40a-Dq55EPJ++rGpcOm3dfVMczMYPaI\"",
-    "mtime": "2026-11-16T21:53:58.947Z",
-    "size": 308234,
-    "path": "../public/coach-media/animations/happy/happy55.webp"
-  },
-  "/coach-media/animations/happy/happy56.webp": {
-    "type": "image/webp",
-    "etag": "\"7ec86-JO0Q1vC7rgTxvmuYQZ3337jzHAM\"",
-    "mtime": "2026-11-16T21:53:58.948Z",
-    "size": 519302,
-    "path": "../public/coach-media/animations/happy/happy56.webp"
-  },
-  "/coach-media/animations/happy/happy59.webp": {
-    "type": "image/webp",
-    "etag": "\"e290-fQb7JlOst9pysXxzv35HJTcHlpE\"",
-    "mtime": "2026-11-16T21:53:58.949Z",
-    "size": 58000,
-    "path": "../public/coach-media/animations/happy/happy59.webp"
-  },
-  "/coach-media/animations/happy/happy57.webp": {
-    "type": "image/webp",
-    "etag": "\"74f88-eEN2CyUJ9rLsRvqY7OzSZS3p2IU\"",
-    "mtime": "2026-11-16T21:53:58.949Z",
-    "size": 479112,
-    "path": "../public/coach-media/animations/happy/happy57.webp"
-  },
-  "/coach-media/animations/happy/happy58.webp": {
-    "type": "image/webp",
-    "etag": "\"695d4-fo3c1QhJVPT0yXYAuoQyAXrIO9E\"",
-    "mtime": "2026-11-16T21:53:58.949Z",
-    "size": 431572,
-    "path": "../public/coach-media/animations/happy/happy58.webp"
-  },
-  "/coach-media/animations/happy/happy6.webp": {
-    "type": "image/webp",
-    "etag": "\"2f8ce-NjZdr7Vin1NbHT+GFgWzMwsZeZE\"",
-    "mtime": "2026-11-16T21:53:58.950Z",
-    "size": 194766,
-    "path": "../public/coach-media/animations/happy/happy6.webp"
-  },
-  "/coach-media/animations/happy/happy61.webp": {
-    "type": "image/webp",
-    "etag": "\"253e8-1Fqod1LG1PZNTdmri6v0gPMthaE\"",
-    "mtime": "2026-11-16T21:53:58.950Z",
-    "size": 152552,
-    "path": "../public/coach-media/animations/happy/happy61.webp"
-  },
-  "/coach-media/animations/happy/happy63.webp": {
-    "type": "image/webp",
-    "etag": "\"2b52a-B18WnXoFNFEoRmRiTpAPD0Xw4fA\"",
-    "mtime": "2026-11-16T21:53:58.951Z",
-    "size": 177450,
-    "path": "../public/coach-media/animations/happy/happy63.webp"
-  },
-  "/coach-media/animations/happy/happy62.webp": {
-    "type": "image/webp",
-    "etag": "\"4f8f8-tLTO1/dtiZumcCPIDjxNhkIrS9g\"",
-    "mtime": "2026-11-16T21:53:58.951Z",
-    "size": 325880,
-    "path": "../public/coach-media/animations/happy/happy62.webp"
-  },
-  "/coach-media/animations/happy/happy65.webp": {
-    "type": "image/webp",
-    "etag": "\"153e2-1MrE6YaWW1bqq3uRkAG3roDYdbI\"",
-    "mtime": "2026-11-16T21:53:58.951Z",
-    "size": 87010,
-    "path": "../public/coach-media/animations/happy/happy65.webp"
-  },
-  "/coach-media/animations/happy/happy67.webp": {
-    "type": "image/webp",
-    "etag": "\"26842-Ttlq6ska7bBpzXjvIXLqSUaPnIk\"",
-    "mtime": "2026-11-16T21:53:58.952Z",
-    "size": 157762,
-    "path": "../public/coach-media/animations/happy/happy67.webp"
-  },
-  "/coach-media/animations/happy/happy66.webp": {
-    "type": "image/webp",
-    "etag": "\"5aac0-EL5Dnfs0ZHXfZ2nFXHuqusIiA6U\"",
-    "mtime": "2026-11-16T21:53:58.955Z",
-    "size": 371392,
-    "path": "../public/coach-media/animations/happy/happy66.webp"
-  },
-  "/coach-media/animations/happy/happy69.webp": {
-    "type": "image/webp",
-    "etag": "\"1843a-+cJ0+7F0PNcalsjHJcXNkw7qRDw\"",
-    "mtime": "2026-11-16T21:53:58.956Z",
-    "size": 99386,
-    "path": "../public/coach-media/animations/happy/happy69.webp"
-  },
-  "/coach-media/animations/happy/happy68.webp": {
-    "type": "image/webp",
-    "etag": "\"3a9f6-uXcrvu87C4tyxdUD8qy84likyxA\"",
-    "mtime": "2026-11-16T21:53:58.957Z",
-    "size": 240118,
-    "path": "../public/coach-media/animations/happy/happy68.webp"
-  },
-  "/coach-media/animations/happy/happy64.webp": {
-    "type": "image/webp",
-    "etag": "\"8b070-7oC7TYj4LIldWg1605cOC8gYl+w\"",
-    "mtime": "2026-11-16T21:53:58.953Z",
-    "size": 569456,
-    "path": "../public/coach-media/animations/happy/happy64.webp"
-  },
-  "/coach-media/animations/happy/happy7.webp": {
-    "type": "image/webp",
-    "etag": "\"6dbe6-GIqYtKyf033a2vAUrfvCUdyYOmE\"",
-    "mtime": "2026-11-16T21:53:58.957Z",
-    "size": 449510,
-    "path": "../public/coach-media/animations/happy/happy7.webp"
-  },
-  "/coach-media/animations/happy/happy71.webp": {
-    "type": "image/webp",
-    "etag": "\"12890-iDkXNnqbnihYZd5fm+x9SogtFL0\"",
-    "mtime": "2026-11-16T21:53:58.955Z",
-    "size": 75920,
-    "path": "../public/coach-media/animations/happy/happy71.webp"
-  },
-  "/coach-media/animations/happy/happy72.webp": {
-    "type": "image/webp",
-    "etag": "\"1132e-N279XcIE77SVgWI5RK4HGZTKNNQ\"",
-    "mtime": "2026-11-16T21:53:58.957Z",
-    "size": 70446,
-    "path": "../public/coach-media/animations/happy/happy72.webp"
-  },
-  "/coach-media/animations/happy/happy73.webp": {
-    "type": "image/webp",
-    "etag": "\"12dd8-PuAHZqC2ZtYnGQM/yt5HL7w8Z5w\"",
-    "mtime": "2026-11-16T21:53:58.958Z",
-    "size": 77272,
-    "path": "../public/coach-media/animations/happy/happy73.webp"
-  },
-  "/coach-media/animations/happy/happy76.webp": {
-    "type": "image/webp",
-    "etag": "\"14a9e-d6rGydXTPMji/MdwYzCalRd2xW0\"",
-    "mtime": "2026-11-16T21:53:58.959Z",
-    "size": 84638,
-    "path": "../public/coach-media/animations/happy/happy76.webp"
-  },
-  "/coach-media/animations/happy/happy75.webp": {
-    "type": "image/webp",
-    "etag": "\"1cfd0-9c+pPyscG4ipyzhzbN//E8mdshQ\"",
-    "mtime": "2026-11-16T21:53:58.959Z",
-    "size": 118736,
-    "path": "../public/coach-media/animations/happy/happy75.webp"
-  },
-  "/coach-media/animations/happy/happy74.webp": {
-    "type": "image/webp",
-    "etag": "\"5deae-Nnfy+JPdNa90X/TKIQJKDHXtEDg\"",
-    "mtime": "2026-11-16T21:53:58.957Z",
-    "size": 384686,
-    "path": "../public/coach-media/animations/happy/happy74.webp"
-  },
-  "/coach-media/animations/happy/happy70.webp": {
-    "type": "image/webp",
-    "etag": "\"813fc-MRr6jjBP9Dwv9BEsHOHSRAaT2vg\"",
-    "mtime": "2026-11-16T21:53:58.958Z",
-    "size": 529404,
-    "path": "../public/coach-media/animations/happy/happy70.webp"
-  },
-  "/coach-media/animations/happy/happy60.webp": {
-    "type": "image/webp",
-    "etag": "\"1e7f54-IoOugN/ir+60blKcpy6Kl2RuTBI\"",
-    "mtime": "2026-11-16T21:53:58.952Z",
-    "size": 1998676,
-    "path": "../public/coach-media/animations/happy/happy60.webp"
-  },
-  "/coach-media/animations/happy/happy77.webp": {
-    "type": "image/webp",
-    "etag": "\"1e10a-1aPPim9G6xum8/Hs8Ro6u3VlG6U\"",
-    "mtime": "2026-11-16T21:53:58.959Z",
-    "size": 123146,
-    "path": "../public/coach-media/animations/happy/happy77.webp"
-  },
-  "/coach-media/animations/happy/happy79.webp": {
-    "type": "image/webp",
-    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
-    "mtime": "2026-11-16T21:53:58.958Z",
-    "size": 57724,
-    "path": "../public/coach-media/animations/happy/happy79.webp"
-  },
-  "/coach-media/animations/happy/happy78.webp": {
-    "type": "image/webp",
-    "etag": "\"17ba4-3h26xVZZTGib30A7sQhqoYBlgqs\"",
-    "mtime": "2026-11-16T21:53:58.958Z",
-    "size": 97188,
-    "path": "../public/coach-media/animations/happy/happy78.webp"
-  },
-  "/coach-media/animations/happy/happy8.webp": {
-    "type": "image/webp",
-    "etag": "\"9d5e-zP9Tu9ncCFIvZEyvVyuhVBachAE\"",
-    "mtime": "2026-11-16T21:53:58.959Z",
-    "size": 40286,
-    "path": "../public/coach-media/animations/happy/happy8.webp"
-  },
-  "/coach-media/animations/happy/happy80.webp": {
-    "type": "image/webp",
-    "etag": "\"1da90-C0sljbqRem33mzQhLpalQ7JqSpU\"",
-    "mtime": "2026-11-16T21:53:58.959Z",
-    "size": 121488,
-    "path": "../public/coach-media/animations/happy/happy80.webp"
-  },
-  "/coach-media/animations/happy/happy82.webp": {
-    "type": "image/webp",
-    "etag": "\"f1a4-tNEKunf3T9spLovIQWFozZvffw4\"",
-    "mtime": "2026-11-16T21:53:58.959Z",
-    "size": 61860,
-    "path": "../public/coach-media/animations/happy/happy82.webp"
-  },
-  "/coach-media/animations/happy/happy83.webp": {
-    "type": "image/webp",
-    "etag": "\"2fe42-Kmm0KGXV1dEPQbjoM5G8BWcNWBM\"",
-    "mtime": "2026-11-16T21:53:58.960Z",
-    "size": 196162,
-    "path": "../public/coach-media/animations/happy/happy83.webp"
-  },
-  "/coach-media/animations/happy/happy85.webp": {
-    "type": "image/webp",
-    "etag": "\"150ae-QMfLvsJpp/BJuZy4OwOXUD8OYUQ\"",
-    "mtime": "2026-11-16T21:53:58.960Z",
-    "size": 86190,
-    "path": "../public/coach-media/animations/happy/happy85.webp"
-  },
-  "/coach-media/animations/happy/happy84.webp": {
-    "type": "image/webp",
-    "etag": "\"7b984-0wPlyvPIzXRP9eIMHgiBJFl+27A\"",
-    "mtime": "2026-11-16T21:53:58.961Z",
-    "size": 506244,
-    "path": "../public/coach-media/animations/happy/happy84.webp"
-  },
-  "/coach-media/animations/happy/happy86.webp": {
-    "type": "image/webp",
-    "etag": "\"d7f8-QCvUvt2Z0TOPZeSr+n8EKTRxFUo\"",
-    "mtime": "2026-11-16T21:53:58.961Z",
-    "size": 55288,
-    "path": "../public/coach-media/animations/happy/happy86.webp"
-  },
-  "/coach-media/animations/happy/happy87.webp": {
-    "type": "image/webp",
-    "etag": "\"17dec-6w/mkYwGAw5T0lZlhGXtO5BcsZU\"",
-    "mtime": "2026-11-16T21:53:58.961Z",
-    "size": 97772,
-    "path": "../public/coach-media/animations/happy/happy87.webp"
-  },
-  "/coach-media/animations/happy/happy88.webp": {
-    "type": "image/webp",
-    "etag": "\"10722-eVPV4BPr+xXKB/m7b01HTc3BYvY\"",
-    "mtime": "2026-11-16T21:53:58.961Z",
-    "size": 67362,
-    "path": "../public/coach-media/animations/happy/happy88.webp"
-  },
-  "/coach-media/animations/happy/happy89.webp": {
-    "type": "image/webp",
-    "etag": "\"1c7e2-sUSfie0YAo/54wJ6tzJq/DwQ0Uw\"",
-    "mtime": "2026-11-16T21:53:58.962Z",
-    "size": 116706,
-    "path": "../public/coach-media/animations/happy/happy89.webp"
-  },
-  "/coach-media/animations/happy/happy81.webp": {
-    "type": "image/webp",
-    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
-    "mtime": "2026-11-16T21:53:58.961Z",
-    "size": 566688,
-    "path": "../public/coach-media/animations/happy/happy81.webp"
-  },
-  "/coach-media/animations/happy/happy9.webp": {
-    "type": "image/webp",
-    "etag": "\"48688-/orx463Bv1qJxQ1v4poLAvBrNjI\"",
-    "mtime": "2026-11-16T21:53:58.962Z",
-    "size": 296584,
-    "path": "../public/coach-media/animations/happy/happy9.webp"
-  },
-  "/coach-media/animations/happy/happy90.webp": {
-    "type": "image/webp",
-    "etag": "\"40b96-2KBRO6W19pvILapZ8+Vi3lurBCw\"",
-    "mtime": "2026-11-16T21:53:58.963Z",
-    "size": 265110,
-    "path": "../public/coach-media/animations/happy/happy90.webp"
-  },
-  "/coach-media/animations/happy/happy91.webp": {
-    "type": "image/webp",
-    "etag": "\"162e4-8HqkqL71/r+QJURh8ZbqNFMM6ZE\"",
-    "mtime": "2026-11-16T21:53:58.962Z",
-    "size": 90852,
-    "path": "../public/coach-media/animations/happy/happy91.webp"
-  },
-  "/coach-media/animations/happy/happy92.webp": {
-    "type": "image/webp",
-    "etag": "\"1eb3c-dpJ07uxpsVOLdaMyS3SOlqMT6/k\"",
-    "mtime": "2026-11-16T21:53:58.962Z",
-    "size": 125756,
-    "path": "../public/coach-media/animations/happy/happy92.webp"
-  },
-  "/coach-media/emojis/muet/muet1.png": {
-    "type": "image/png",
-    "etag": "\"51a6-vln2s/UdhcTRTaO8VHDa3lfz0h8\"",
-    "mtime": "2026-11-16T21:53:58.931Z",
-    "size": 20902,
-    "path": "../public/coach-media/emojis/muet/muet1.png"
-  },
-  "/coach-media/emojis/muet/muet2.png": {
-    "type": "image/png",
-    "etag": "\"4fd6-7oBC0gGyTBoUjDE6sag9tGTRXEk\"",
-    "mtime": "2026-11-16T21:53:58.932Z",
-    "size": 20438,
-    "path": "../public/coach-media/emojis/muet/muet2.png"
-  },
-  "/coach-media/emojis/muet/muet3.png": {
-    "type": "image/png",
-    "etag": "\"5287-ywn34jaL1+x0Qfo7jSf48qjMhfs\"",
-    "mtime": "2026-11-16T21:53:58.811Z",
-    "size": 21127,
-    "path": "../public/coach-media/emojis/muet/muet3.png"
-  },
-  "/coach-media/emojis/muet/muet4.png": {
-    "type": "image/png",
-    "etag": "\"56a5-+3X/CcPHmEJ0+beAZBYg2M7ZSgA\"",
-    "mtime": "2026-11-16T21:53:58.931Z",
-    "size": 22181,
-    "path": "../public/coach-media/emojis/muet/muet4.png"
-  },
-  "/coach-media/emojis/triste/triste1.png": {
-    "type": "image/png",
-    "etag": "\"4ad5-sZv/ngDIpKluR3uoIL+9/tVgBAk\"",
-    "mtime": "2026-11-16T21:53:58.813Z",
-    "size": 19157,
-    "path": "../public/coach-media/emojis/triste/triste1.png"
-  },
-  "/coach-media/emojis/triste/triste10.png": {
-    "type": "image/png",
-    "etag": "\"6ad7-6iFb9ksjGHu03kWI85GQAULPlgA\"",
-    "mtime": "2026-11-16T21:53:58.963Z",
-    "size": 27351,
-    "path": "../public/coach-media/emojis/triste/triste10.png"
-  },
-  "/coach-media/emojis/triste/triste11.png": {
-    "type": "image/png",
-    "etag": "\"7b07-5Y/2vAUDwkCG9yUv2xhGyKhfVv4\"",
-    "mtime": "2026-11-16T21:53:58.962Z",
-    "size": 31495,
-    "path": "../public/coach-media/emojis/triste/triste11.png"
-  },
-  "/coach-media/emojis/triste/triste4.png": {
-    "type": "image/png",
-    "etag": "\"51ea-mZrIfYhaUQQDvlUt7+NCSIE6cfI\"",
-    "mtime": "2026-11-16T21:53:58.963Z",
-    "size": 20970,
-    "path": "../public/coach-media/emojis/triste/triste4.png"
-  },
-  "/coach-media/emojis/triste/triste5.png": {
-    "type": "image/png",
-    "etag": "\"54c1-XD0mhNmrQPVAFqEXG0C1s1P3Oa4\"",
-    "mtime": "2026-11-16T21:53:58.963Z",
-    "size": 21697,
-    "path": "../public/coach-media/emojis/triste/triste5.png"
-  },
-  "/coach-media/emojis/triste/triste6.png": {
-    "type": "image/png",
-    "etag": "\"54c1-XD0mhNmrQPVAFqEXG0C1s1P3Oa4\"",
-    "mtime": "2026-11-16T21:53:58.963Z",
-    "size": 21697,
-    "path": "../public/coach-media/emojis/triste/triste6.png"
-  },
-  "/coach-media/emojis/triste/triste7.png": {
-    "type": "image/png",
-    "etag": "\"4663-GYg5O4kBtQpnNYQYt+t2VyLkYuE\"",
-    "mtime": "2026-11-16T21:53:58.963Z",
-    "size": 18019,
-    "path": "../public/coach-media/emojis/triste/triste7.png"
-  },
-  "/coach-media/emojis/triste/triste8.png": {
-    "type": "image/png",
-    "etag": "\"5281-YyJBOzW/kpn0XNWvaoOHWcnQ+0k\"",
-    "mtime": "2026-11-16T21:53:58.963Z",
-    "size": 21121,
-    "path": "../public/coach-media/emojis/triste/triste8.png"
-  },
-  "/coach-media/emojis/triste/triste9.png": {
-    "type": "image/png",
-    "etag": "\"56b5-7e4ksvafotKRdiRp4CmrqGW7UkM\"",
-    "mtime": "2026-11-16T21:53:58.963Z",
-    "size": 22197,
-    "path": "../public/coach-media/emojis/triste/triste9.png"
-  },
-  "/coach-media/animations/surprise/surprise10.webp": {
-    "type": "image/webp",
-    "etag": "\"131a0-flDD1aRXvJm4HKE+7qPrfT2YS20\"",
-    "mtime": "2026-11-16T21:53:58.810Z",
-    "size": 78240,
-    "path": "../public/coach-media/animations/surprise/surprise10.webp"
   },
   "/coach-media/animations/surprise/surprise1.webp": {
     "type": "image/webp",
     "etag": "\"4a370-9Oi37cBTqcZsmdkv+CmJExyHBlo\"",
-    "mtime": "2026-11-16T21:53:58.910Z",
+    "mtime": "2026-11-17T10:13:00.802Z",
     "size": 303984,
     "path": "../public/coach-media/animations/surprise/surprise1.webp"
+  },
+  "/coach-media/animations/surprise/surprise10.webp": {
+    "type": "image/webp",
+    "etag": "\"131a0-flDD1aRXvJm4HKE+7qPrfT2YS20\"",
+    "mtime": "2026-11-17T10:13:00.709Z",
+    "size": 78240,
+    "path": "../public/coach-media/animations/surprise/surprise10.webp"
   },
   "/coach-media/animations/surprise/surprise11.webp": {
     "type": "image/webp",
     "etag": "\"226fa-Xm81GJcMlpKVokcSNJtb09zW62k\"",
-    "mtime": "2026-11-16T21:53:58.910Z",
+    "mtime": "2026-11-17T10:13:00.803Z",
     "size": 141050,
     "path": "../public/coach-media/animations/surprise/surprise11.webp"
   },
   "/coach-media/animations/surprise/surprise12.webp": {
     "type": "image/webp",
     "etag": "\"a118-ZWkYpEVwrTmfFkTwYVBVpG6odjA\"",
-    "mtime": "2026-11-16T21:53:58.910Z",
+    "mtime": "2026-11-17T10:13:00.802Z",
     "size": 41240,
     "path": "../public/coach-media/animations/surprise/surprise12.webp"
   },
   "/coach-media/animations/surprise/surprise13.webp": {
     "type": "image/webp",
     "etag": "\"289d4-B/06SsPdfqNr35A+kWV5GqsWzHg\"",
-    "mtime": "2026-11-16T21:53:58.910Z",
+    "mtime": "2026-11-17T10:13:00.807Z",
     "size": 166356,
     "path": "../public/coach-media/animations/surprise/surprise13.webp"
   },
   "/coach-media/animations/surprise/surprise14.webp": {
     "type": "image/webp",
     "etag": "\"3f97e-wtHNBTyAPcvP3sC4pqeu2CzXJMs\"",
-    "mtime": "2026-11-16T21:53:58.911Z",
+    "mtime": "2026-11-17T10:13:00.807Z",
     "size": 260478,
     "path": "../public/coach-media/animations/surprise/surprise14.webp"
   },
   "/coach-media/animations/surprise/surprise16.webp": {
     "type": "image/webp",
     "etag": "\"10334-Gb5fHOWmtfoadRAb/ahHh2AADW0\"",
-    "mtime": "2026-11-16T21:53:58.911Z",
+    "mtime": "2026-11-17T10:13:00.807Z",
     "size": 66356,
     "path": "../public/coach-media/animations/surprise/surprise16.webp"
   },
   "/coach-media/animations/surprise/surprise17.webp": {
     "type": "image/webp",
     "etag": "\"1b95e-L11+Pw+wBWHBUC/2neg+jcazG2Y\"",
-    "mtime": "2026-11-16T21:53:58.911Z",
+    "mtime": "2026-11-17T10:13:00.804Z",
     "size": 112990,
     "path": "../public/coach-media/animations/surprise/surprise17.webp"
+  },
+  "/coach-media/animations/surprise/surprise15.webp": {
+    "type": "image/webp",
+    "etag": "\"83768-IbKQoFThb02i7K7OLM8NjZwMn+w\"",
+    "mtime": "2026-11-17T10:13:00.803Z",
+    "size": 538472,
+    "path": "../public/coach-media/animations/surprise/surprise15.webp"
   },
   "/coach-media/animations/surprise/surprise18.webp": {
     "type": "image/webp",
     "etag": "\"18598-xHc16X67VNu9v8+Gc1s2b0JpwDg\"",
-    "mtime": "2026-11-16T21:53:58.912Z",
+    "mtime": "2026-11-17T10:13:00.805Z",
     "size": 99736,
     "path": "../public/coach-media/animations/surprise/surprise18.webp"
   },
   "/coach-media/animations/surprise/surprise19.webp": {
     "type": "image/webp",
     "etag": "\"11b66-taP6NYs2DrSJ1/Fu0gCrYIFdJrI\"",
-    "mtime": "2026-11-16T21:53:58.912Z",
+    "mtime": "2026-11-17T10:13:00.807Z",
     "size": 72550,
     "path": "../public/coach-media/animations/surprise/surprise19.webp"
-  },
-  "/coach-media/animations/surprise/surprise15.webp": {
-    "type": "image/webp",
-    "etag": "\"83768-IbKQoFThb02i7K7OLM8NjZwMn+w\"",
-    "mtime": "2026-11-16T21:53:58.911Z",
-    "size": 538472,
-    "path": "../public/coach-media/animations/surprise/surprise15.webp"
-  },
-  "/coach-media/animations/surprise/surprise2.webp": {
-    "type": "image/webp",
-    "etag": "\"1b28c-nMtO/w3tSIWPnQA/P/d7OQO8Fos\"",
-    "mtime": "2026-11-16T21:53:58.912Z",
-    "size": 111244,
-    "path": "../public/coach-media/animations/surprise/surprise2.webp"
   },
   "/coach-media/animations/surprise/surprise20.webp": {
     "type": "image/webp",
     "etag": "\"193ea-58K//9bArX9XDu0po5Lr3OMkZHg\"",
-    "mtime": "2026-11-16T21:53:58.912Z",
+    "mtime": "2026-11-17T10:13:00.809Z",
     "size": 103402,
     "path": "../public/coach-media/animations/surprise/surprise20.webp"
+  },
+  "/coach-media/animations/surprise/surprise2.webp": {
+    "type": "image/webp",
+    "etag": "\"1b28c-nMtO/w3tSIWPnQA/P/d7OQO8Fos\"",
+    "mtime": "2026-11-17T10:13:00.808Z",
+    "size": 111244,
+    "path": "../public/coach-media/animations/surprise/surprise2.webp"
   },
   "/coach-media/animations/surprise/surprise21.webp": {
     "type": "image/webp",
     "etag": "\"a180-9IgNwh+Zz8BrStL5KFb1UAAyx08\"",
-    "mtime": "2026-11-16T21:53:58.912Z",
+    "mtime": "2026-11-17T10:13:00.808Z",
     "size": 41344,
     "path": "../public/coach-media/animations/surprise/surprise21.webp"
   },
   "/coach-media/animations/surprise/surprise22.webp": {
     "type": "image/webp",
     "etag": "\"14758-fKETCESGU4TOKmR+Tq2Jt5vsZv4\"",
-    "mtime": "2026-11-16T21:53:58.913Z",
+    "mtime": "2026-11-17T10:13:00.808Z",
     "size": 83800,
     "path": "../public/coach-media/animations/surprise/surprise22.webp"
-  },
-  "/coach-media/animations/surprise/surprise24.webp": {
-    "type": "image/webp",
-    "etag": "\"8ec6-3SAThVbqdRWZ2r2MmBs4qSDgNSA\"",
-    "mtime": "2026-11-16T21:53:58.913Z",
-    "size": 36550,
-    "path": "../public/coach-media/animations/surprise/surprise24.webp"
   },
   "/coach-media/animations/surprise/surprise23.webp": {
     "type": "image/webp",
     "etag": "\"309fc-vmf3IDCZQraeJiH2u5nNYnBmLE0\"",
-    "mtime": "2026-11-16T21:53:58.916Z",
+    "mtime": "2026-11-17T10:13:00.809Z",
     "size": 199164,
     "path": "../public/coach-media/animations/surprise/surprise23.webp"
+  },
+  "/coach-media/animations/surprise/surprise24.webp": {
+    "type": "image/webp",
+    "etag": "\"8ec6-3SAThVbqdRWZ2r2MmBs4qSDgNSA\"",
+    "mtime": "2026-11-17T10:13:00.808Z",
+    "size": 36550,
+    "path": "../public/coach-media/animations/surprise/surprise24.webp"
   },
   "/coach-media/animations/surprise/surprise25.webp": {
     "type": "image/webp",
     "etag": "\"34a6-dvr2Gjy94G6cfLjV7K9ojhZks7w\"",
-    "mtime": "2026-11-16T21:53:58.913Z",
+    "mtime": "2026-11-17T10:13:00.809Z",
     "size": 13478,
     "path": "../public/coach-media/animations/surprise/surprise25.webp"
-  },
-  "/coach-media/animations/surprise/surprise26.webp": {
-    "type": "image/webp",
-    "etag": "\"743c6-pt6mVsMYiG3+eBL112jrgey0Gzo\"",
-    "mtime": "2026-11-16T21:53:58.916Z",
-    "size": 476102,
-    "path": "../public/coach-media/animations/surprise/surprise26.webp"
   },
   "/coach-media/animations/surprise/surprise28.webp": {
     "type": "image/webp",
     "etag": "\"ad24-FgC+hvDgvud9BCFGf28pvxl71oQ\"",
-    "mtime": "2026-11-16T21:53:58.913Z",
+    "mtime": "2026-11-17T10:13:00.809Z",
     "size": 44324,
     "path": "../public/coach-media/animations/surprise/surprise28.webp"
   },
   "/coach-media/animations/surprise/surprise27.webp": {
     "type": "image/webp",
     "etag": "\"2fd12-RMFF8r6epFOKQpfSCriVPGTdgVU\"",
-    "mtime": "2026-11-16T21:53:58.916Z",
+    "mtime": "2026-11-17T10:13:00.809Z",
     "size": 195858,
     "path": "../public/coach-media/animations/surprise/surprise27.webp"
+  },
+  "/coach-media/animations/bravo/bravo34.webp": {
+    "type": "image/webp",
+    "etag": "\"26ccac-0lLmGbQH56H1iPHEYHxgMHzvGqg\"",
+    "mtime": "2026-11-17T10:13:00.796Z",
+    "size": 2542764,
+    "path": "../public/coach-media/animations/bravo/bravo34.webp"
+  },
+  "/coach-media/animations/surprise/surprise26.webp": {
+    "type": "image/webp",
+    "etag": "\"743c6-pt6mVsMYiG3+eBL112jrgey0Gzo\"",
+    "mtime": "2026-11-17T10:13:00.809Z",
+    "size": 476102,
+    "path": "../public/coach-media/animations/surprise/surprise26.webp"
   },
   "/coach-media/animations/surprise/surprise29.webp": {
     "type": "image/webp",
     "etag": "\"12cd0-q0YDo94p3qYkje+5yt5zOubu2/Q\"",
-    "mtime": "2026-11-16T21:53:58.914Z",
+    "mtime": "2026-11-17T10:13:00.809Z",
     "size": 77008,
     "path": "../public/coach-media/animations/surprise/surprise29.webp"
   },
   "/coach-media/animations/surprise/surprise31.webp": {
     "type": "image/webp",
     "etag": "\"8b78-fIpPGO3WzV7KeoLiRXPR1uc7I+0\"",
-    "mtime": "2026-11-16T21:53:58.918Z",
+    "mtime": "2026-11-17T10:13:00.809Z",
     "size": 35704,
     "path": "../public/coach-media/animations/surprise/surprise31.webp"
   },
   "/coach-media/animations/surprise/surprise32.webp": {
     "type": "image/webp",
     "etag": "\"1fc6e-bll0tlhrTsQvI87il4kKbajXbMg\"",
-    "mtime": "2026-11-16T21:53:58.920Z",
+    "mtime": "2026-11-17T10:13:00.810Z",
     "size": 130158,
     "path": "../public/coach-media/animations/surprise/surprise32.webp"
   },
   "/coach-media/animations/surprise/surprise34.webp": {
     "type": "image/webp",
     "etag": "\"39c0c-gOa+85OS+P0yapBXCLgb6G4e3KY\"",
-    "mtime": "2026-11-16T21:53:58.917Z",
+    "mtime": "2026-11-17T10:13:00.812Z",
     "size": 236556,
     "path": "../public/coach-media/animations/surprise/surprise34.webp"
   },
   "/coach-media/animations/surprise/surprise35.webp": {
     "type": "image/webp",
     "etag": "\"2fdf0-P29h6puCfyWcpyj5Hiuay3K7+XI\"",
-    "mtime": "2026-11-16T21:53:58.919Z",
+    "mtime": "2026-11-17T10:13:00.811Z",
     "size": 196080,
     "path": "../public/coach-media/animations/surprise/surprise35.webp"
   },
   "/coach-media/animations/surprise/surprise36.webp": {
     "type": "image/webp",
     "etag": "\"65d6a-XLUQAUVvNKrY0Ak4xmcIhKdi+kc\"",
-    "mtime": "2026-11-16T21:53:58.920Z",
+    "mtime": "2026-11-17T10:13:00.812Z",
     "size": 417130,
     "path": "../public/coach-media/animations/surprise/surprise36.webp"
-  },
-  "/coach-media/animations/surprise/surprise37.webp": {
-    "type": "image/webp",
-    "etag": "\"1c006-O6avPzSEEE8867z/qx4SNy/2Dbs\"",
-    "mtime": "2026-11-16T21:53:58.919Z",
-    "size": 114694,
-    "path": "../public/coach-media/animations/surprise/surprise37.webp"
   },
   "/coach-media/animations/surprise/surprise3.webp": {
     "type": "image/webp",
     "etag": "\"c1a0c-usHwa9n1ie+2Cm+CLsVeWK9PJMQ\"",
-    "mtime": "2026-11-16T21:53:58.918Z",
+    "mtime": "2026-11-17T10:13:00.811Z",
     "size": 793100,
     "path": "../public/coach-media/animations/surprise/surprise3.webp"
-  },
-  "/coach-media/animations/surprise/surprise38.webp": {
-    "type": "image/webp",
-    "etag": "\"13470-E9RJjOFPzc8oN6aIexSBkTIvvno\"",
-    "mtime": "2026-11-16T21:53:58.923Z",
-    "size": 78960,
-    "path": "../public/coach-media/animations/surprise/surprise38.webp"
   },
   "/coach-media/animations/surprise/surprise30.webp": {
     "type": "image/webp",
     "etag": "\"a5fd0-Hnpb/dNn7ssnoWT9WjuIq+4t5Qo\"",
-    "mtime": "2026-11-16T21:53:58.918Z",
+    "mtime": "2026-11-17T10:13:00.811Z",
     "size": 679888,
     "path": "../public/coach-media/animations/surprise/surprise30.webp"
+  },
+  "/coach-media/animations/surprise/surprise37.webp": {
+    "type": "image/webp",
+    "etag": "\"1c006-O6avPzSEEE8867z/qx4SNy/2Dbs\"",
+    "mtime": "2026-11-17T10:13:00.811Z",
+    "size": 114694,
+    "path": "../public/coach-media/animations/surprise/surprise37.webp"
+  },
+  "/coach-media/animations/surprise/surprise38.webp": {
+    "type": "image/webp",
+    "etag": "\"13470-E9RJjOFPzc8oN6aIexSBkTIvvno\"",
+    "mtime": "2026-11-17T10:13:00.818Z",
+    "size": 78960,
+    "path": "../public/coach-media/animations/surprise/surprise38.webp"
   },
   "/coach-media/animations/surprise/surprise39.webp": {
     "type": "image/webp",
     "etag": "\"3f126-BT2+LxctzUWG3/ThOwuDtTgAArY\"",
-    "mtime": "2026-11-16T21:53:58.920Z",
+    "mtime": "2026-11-17T10:13:00.812Z",
     "size": 258342,
     "path": "../public/coach-media/animations/surprise/surprise39.webp"
   },
   "/coach-media/animations/surprise/surprise4.webp": {
     "type": "image/webp",
     "etag": "\"435ca-axYlJUxq0dxVUcdPGXfx7jIjOqI\"",
-    "mtime": "2026-11-16T21:53:58.921Z",
+    "mtime": "2026-11-17T10:13:00.817Z",
     "size": 275914,
     "path": "../public/coach-media/animations/surprise/surprise4.webp"
   },
   "/coach-media/animations/surprise/surprise40.webp": {
     "type": "image/webp",
     "etag": "\"39564-nIAqPe45sz0KpkAx2CKOstSaCTA\"",
-    "mtime": "2026-11-16T21:53:58.923Z",
+    "mtime": "2026-11-17T10:13:00.813Z",
     "size": 234852,
     "path": "../public/coach-media/animations/surprise/surprise40.webp"
   },
   "/coach-media/animations/surprise/surprise41.webp": {
     "type": "image/webp",
     "etag": "\"a8cc-eJpn1iM/G93mG/y3J7MYZxb5oZk\"",
-    "mtime": "2026-11-16T21:53:58.921Z",
+    "mtime": "2026-11-17T10:13:00.816Z",
     "size": 43212,
     "path": "../public/coach-media/animations/surprise/surprise41.webp"
-  },
-  "/coach-media/animations/surprise/surprise43.webp": {
-    "type": "image/webp",
-    "etag": "\"4b24-EbrAgTKhgJEIluaU9wK/fZsqFQI\"",
-    "mtime": "2026-11-16T21:53:58.923Z",
-    "size": 19236,
-    "path": "../public/coach-media/animations/surprise/surprise43.webp"
   },
   "/coach-media/animations/surprise/surprise42.webp": {
     "type": "image/webp",
     "etag": "\"646bc-7+aKS5sl1K5hY8UDNYAFM4lfo6Y\"",
-    "mtime": "2026-11-16T21:53:58.924Z",
+    "mtime": "2026-11-17T10:13:00.821Z",
     "size": 411324,
     "path": "../public/coach-media/animations/surprise/surprise42.webp"
+  },
+  "/coach-media/animations/surprise/surprise43.webp": {
+    "type": "image/webp",
+    "etag": "\"4b24-EbrAgTKhgJEIluaU9wK/fZsqFQI\"",
+    "mtime": "2026-11-17T10:13:00.816Z",
+    "size": 19236,
+    "path": "../public/coach-media/animations/surprise/surprise43.webp"
   },
   "/coach-media/animations/surprise/surprise45.webp": {
     "type": "image/webp",
     "etag": "\"1a680-xKF6ecJOJz07Bq3nMYUvl7ZSmJo\"",
-    "mtime": "2026-11-16T21:53:58.924Z",
+    "mtime": "2026-11-17T10:13:00.817Z",
     "size": 108160,
     "path": "../public/coach-media/animations/surprise/surprise45.webp"
   },
   "/coach-media/animations/surprise/surprise46.webp": {
     "type": "image/webp",
     "etag": "\"b624-UVBhSbU4BcnZsHBEFLk/NJkigMs\"",
-    "mtime": "2026-11-16T21:53:58.924Z",
+    "mtime": "2026-11-17T10:13:00.818Z",
     "size": 46628,
     "path": "../public/coach-media/animations/surprise/surprise46.webp"
   },
   "/coach-media/animations/surprise/surprise47.webp": {
     "type": "image/webp",
     "etag": "\"ed28-q4uXmQ440B/uZ44347cvninGGos\"",
-    "mtime": "2026-11-16T21:53:58.925Z",
+    "mtime": "2026-11-17T10:13:00.817Z",
     "size": 60712,
     "path": "../public/coach-media/animations/surprise/surprise47.webp"
   },
   "/coach-media/animations/surprise/surprise48.webp": {
     "type": "image/webp",
     "etag": "\"132e0-ARE5bC0A3JVvXvF646DPkIObvBU\"",
-    "mtime": "2026-11-16T21:53:58.924Z",
+    "mtime": "2026-11-17T10:13:00.817Z",
     "size": 78560,
     "path": "../public/coach-media/animations/surprise/surprise48.webp"
-  },
-  "/coach-media/animations/surprise/surprise33.webp": {
-    "type": "image/webp",
-    "etag": "\"1ff378-3ceZyeJGfgZwkrgPrzBv1AbDx9o\"",
-    "mtime": "2026-11-16T21:53:58.920Z",
-    "size": 2093944,
-    "path": "../public/coach-media/animations/surprise/surprise33.webp"
   },
   "/coach-media/animations/surprise/surprise49.webp": {
     "type": "image/webp",
     "etag": "\"25b6c-wCdzxaXfkdqyDcw6a8xy07JXmzE\"",
-    "mtime": "2026-11-16T21:53:58.924Z",
+    "mtime": "2026-11-17T10:13:00.818Z",
     "size": 154476,
     "path": "../public/coach-media/animations/surprise/surprise49.webp"
   },
   "/coach-media/animations/surprise/surprise5.webp": {
     "type": "image/webp",
     "etag": "\"27cfa-OX0fnlOewddMbbATr6i9i2ynE3Y\"",
-    "mtime": "2026-11-16T21:53:58.925Z",
+    "mtime": "2026-11-17T10:13:00.818Z",
     "size": 163066,
     "path": "../public/coach-media/animations/surprise/surprise5.webp"
   },
   "/coach-media/animations/surprise/surprise51.webp": {
     "type": "image/webp",
     "etag": "\"2227a-5yeomBh1J53C2OweVlrUJRsy7d0\"",
-    "mtime": "2026-11-16T21:53:58.925Z",
+    "mtime": "2026-11-17T10:13:00.820Z",
     "size": 139898,
     "path": "../public/coach-media/animations/surprise/surprise51.webp"
   },
   "/coach-media/animations/surprise/surprise50.webp": {
     "type": "image/webp",
     "etag": "\"54ee6-utB6xrbIiRW/BR2zFsCbLOBuYQ0\"",
-    "mtime": "2026-11-16T21:53:58.927Z",
+    "mtime": "2026-11-17T10:13:00.819Z",
     "size": 347878,
     "path": "../public/coach-media/animations/surprise/surprise50.webp"
   },
-  "/coach-media/animations/surprise/surprise44.webp": {
+  "/coach-media/animations/surprise/surprise33.webp": {
     "type": "image/webp",
-    "etag": "\"a77fc-figlb0a9uvdibEtUPy5WQ390cJ0\"",
-    "mtime": "2026-11-16T21:53:58.926Z",
-    "size": 686076,
-    "path": "../public/coach-media/animations/surprise/surprise44.webp"
-  },
-  "/coach-media/animations/surprise/surprise52.webp": {
-    "type": "image/webp",
-    "etag": "\"142aa-ez2zkO6VqB8WIkeukvxz7D7f1lU\"",
-    "mtime": "2026-11-16T21:53:58.925Z",
-    "size": 82602,
-    "path": "../public/coach-media/animations/surprise/surprise52.webp"
+    "etag": "\"1ff378-3ceZyeJGfgZwkrgPrzBv1AbDx9o\"",
+    "mtime": "2026-11-17T10:13:00.812Z",
+    "size": 2093944,
+    "path": "../public/coach-media/animations/surprise/surprise33.webp"
   },
   "/coach-media/animations/surprise/surprise53.webp": {
     "type": "image/webp",
     "etag": "\"118e2-l9zmLQtW2P6gxSkdSTudjLq2c3Q\"",
-    "mtime": "2026-11-16T21:53:58.926Z",
+    "mtime": "2026-11-17T10:13:00.819Z",
     "size": 71906,
     "path": "../public/coach-media/animations/surprise/surprise53.webp"
+  },
+  "/coach-media/animations/surprise/surprise52.webp": {
+    "type": "image/webp",
+    "etag": "\"142aa-ez2zkO6VqB8WIkeukvxz7D7f1lU\"",
+    "mtime": "2026-11-17T10:13:00.819Z",
+    "size": 82602,
+    "path": "../public/coach-media/animations/surprise/surprise52.webp"
   },
   "/coach-media/animations/surprise/surprise54.webp": {
     "type": "image/webp",
     "etag": "\"1e178-jaNfsOInt+QvPbLkhzwWaJqG/Bs\"",
-    "mtime": "2026-11-16T21:53:58.927Z",
+    "mtime": "2026-11-17T10:13:00.819Z",
     "size": 123256,
     "path": "../public/coach-media/animations/surprise/surprise54.webp"
   },
-  "/coach-media/animations/surprise/surprise56.webp": {
+  "/coach-media/animations/surprise/surprise44.webp": {
     "type": "image/webp",
-    "etag": "\"1b960-DZp5H8cTkUG7OqYKTKt0Wb41j6Y\"",
-    "mtime": "2026-11-16T21:53:58.926Z",
-    "size": 112992,
-    "path": "../public/coach-media/animations/surprise/surprise56.webp"
-  },
-  "/coach-media/animations/surprise/surprise59.webp": {
-    "type": "image/webp",
-    "etag": "\"ad24-FgC+hvDgvud9BCFGf28pvxl71oQ\"",
-    "mtime": "2026-11-16T21:53:58.928Z",
-    "size": 44324,
-    "path": "../public/coach-media/animations/surprise/surprise59.webp"
+    "etag": "\"a77fc-figlb0a9uvdibEtUPy5WQ390cJ0\"",
+    "mtime": "2026-11-17T10:13:00.818Z",
+    "size": 686076,
+    "path": "../public/coach-media/animations/surprise/surprise44.webp"
   },
   "/coach-media/animations/surprise/surprise55.webp": {
     "type": "image/webp",
     "etag": "\"5a896-O68fUxVUguZ0BzBxfGlXQFyP0DA\"",
-    "mtime": "2026-11-16T21:53:58.928Z",
+    "mtime": "2026-11-17T10:13:00.820Z",
     "size": 370838,
     "path": "../public/coach-media/animations/surprise/surprise55.webp"
+  },
+  "/coach-media/animations/surprise/surprise56.webp": {
+    "type": "image/webp",
+    "etag": "\"1b960-DZp5H8cTkUG7OqYKTKt0Wb41j6Y\"",
+    "mtime": "2026-11-17T10:13:00.820Z",
+    "size": 112992,
+    "path": "../public/coach-media/animations/surprise/surprise56.webp"
   },
   "/coach-media/animations/surprise/surprise58.webp": {
     "type": "image/webp",
     "etag": "\"21a8a-Yf9qQLhbyXuD9/JZ+89b4mvgAKw\"",
-    "mtime": "2026-11-16T21:53:58.928Z",
+    "mtime": "2026-11-17T10:13:00.820Z",
     "size": 137866,
     "path": "../public/coach-media/animations/surprise/surprise58.webp"
   },
   "/coach-media/animations/surprise/surprise57.webp": {
     "type": "image/webp",
     "etag": "\"44ab8-mSBT2ojhhuQLKvtVbnLyoP47hJY\"",
-    "mtime": "2026-11-16T21:53:58.927Z",
+    "mtime": "2026-11-17T10:13:00.820Z",
     "size": 281272,
     "path": "../public/coach-media/animations/surprise/surprise57.webp"
+  },
+  "/coach-media/animations/surprise/surprise59.webp": {
+    "type": "image/webp",
+    "etag": "\"ad24-FgC+hvDgvud9BCFGf28pvxl71oQ\"",
+    "mtime": "2026-11-17T10:13:00.820Z",
+    "size": 44324,
+    "path": "../public/coach-media/animations/surprise/surprise59.webp"
   },
   "/coach-media/animations/surprise/surprise6.webp": {
     "type": "image/webp",
     "etag": "\"efbe-4a9rtfMIdF2+TFeY3gBQcGq2OOY\"",
-    "mtime": "2026-11-16T21:53:58.928Z",
+    "mtime": "2026-11-17T10:13:00.820Z",
     "size": 61374,
     "path": "../public/coach-media/animations/surprise/surprise6.webp"
   },
   "/coach-media/animations/surprise/surprise60.webp": {
     "type": "image/webp",
     "etag": "\"4b7a6-epNKh/4axQkdUr59kQLtvLuUWxk\"",
-    "mtime": "2026-11-16T21:53:58.928Z",
+    "mtime": "2026-11-17T10:13:00.821Z",
     "size": 309158,
     "path": "../public/coach-media/animations/surprise/surprise60.webp"
   },
   "/coach-media/animations/surprise/surprise61.webp": {
     "type": "image/webp",
     "etag": "\"12cd0-q0YDo94p3qYkje+5yt5zOubu2/Q\"",
-    "mtime": "2026-11-16T21:53:58.929Z",
+    "mtime": "2026-11-17T10:13:00.822Z",
     "size": 77008,
     "path": "../public/coach-media/animations/surprise/surprise61.webp"
   },
   "/coach-media/animations/surprise/surprise62.webp": {
     "type": "image/webp",
     "etag": "\"1c6a0-mXpnKRv+Hz25jP09BjR4foiD6qw\"",
-    "mtime": "2026-11-16T21:53:58.928Z",
+    "mtime": "2026-11-17T10:13:00.820Z",
     "size": 116384,
     "path": "../public/coach-media/animations/surprise/surprise62.webp"
   },
   "/coach-media/animations/surprise/surprise63.webp": {
     "type": "image/webp",
     "etag": "\"1eeba-iqr/NnLNgmJCGHzVJ166UGdRB4Q\"",
-    "mtime": "2026-11-16T21:53:58.929Z",
+    "mtime": "2026-11-17T10:13:00.821Z",
     "size": 126650,
     "path": "../public/coach-media/animations/surprise/surprise63.webp"
   },
   "/coach-media/animations/surprise/surprise7.webp": {
     "type": "image/webp",
     "etag": "\"28cf0-WZKrfZgxmWudkDiNqJ2t+yttmY4\"",
-    "mtime": "2026-11-16T21:53:58.929Z",
+    "mtime": "2026-11-17T10:13:00.822Z",
     "size": 167152,
     "path": "../public/coach-media/animations/surprise/surprise7.webp"
   },
   "/coach-media/animations/surprise/surprise9.webp": {
     "type": "image/webp",
     "etag": "\"3567c-XTH6klwiC89h9A35OVWjuAEqJ5A\"",
-    "mtime": "2026-11-16T21:53:58.930Z",
+    "mtime": "2026-11-17T10:13:00.822Z",
     "size": 218748,
     "path": "../public/coach-media/animations/surprise/surprise9.webp"
   },
-  "/_nuxt/builds/meta/490d6158-e1b2-4390-b98b-a1ca539356e8.json": {
+  "/coach-media/animations/happy/happy11.webp": {
+    "type": "image/webp",
+    "etag": "\"c51c-aSSJ/YerC2d+QHIzkxapjUKX1xo\"",
+    "mtime": "2026-11-17T10:13:00.822Z",
+    "size": 50460,
+    "path": "../public/coach-media/animations/happy/happy11.webp"
+  },
+  "/coach-media/animations/happy/happy10.webp": {
+    "type": "image/webp",
+    "etag": "\"13102-1AwfKNNogN0hV9N7INQr8b/L5U0\"",
+    "mtime": "2026-11-17T10:13:00.710Z",
+    "size": 78082,
+    "path": "../public/coach-media/animations/happy/happy10.webp"
+  },
+  "/coach-media/animations/happy/happy13.webp": {
+    "type": "image/webp",
+    "etag": "\"1b7c8-6YwhPgMDDi09N6QaiQGvB3MESN8\"",
+    "mtime": "2026-11-17T10:13:00.823Z",
+    "size": 112584,
+    "path": "../public/coach-media/animations/happy/happy13.webp"
+  },
+  "/coach-media/animations/happy/happy14.webp": {
+    "type": "image/webp",
+    "etag": "\"2b5e-Tlk4vz7sMxW+TPrlh/TTUPVQZ64\"",
+    "mtime": "2026-11-17T10:13:00.826Z",
+    "size": 11102,
+    "path": "../public/coach-media/animations/happy/happy14.webp"
+  },
+  "/coach-media/animations/happy/happy12.webp": {
+    "type": "image/webp",
+    "etag": "\"26dd0-kEufqOKIIc4EphkqsilP8Vg0anA\"",
+    "mtime": "2026-11-17T10:13:00.823Z",
+    "size": 159184,
+    "path": "../public/coach-media/animations/happy/happy12.webp"
+  },
+  "/coach-media/animations/happy/happy15.webp": {
+    "type": "image/webp",
+    "etag": "\"1f82e-GdfVpoK+FBOph2APqZZ2ksTEi/M\"",
+    "mtime": "2026-11-17T10:13:00.826Z",
+    "size": 129070,
+    "path": "../public/coach-media/animations/happy/happy15.webp"
+  },
+  "/coach-media/animations/happy/happy16.webp": {
+    "type": "image/webp",
+    "etag": "\"39676-m3hlL8MEmfcM8A6RQ/d34G7k4z4\"",
+    "mtime": "2026-11-17T10:13:00.826Z",
+    "size": 235126,
+    "path": "../public/coach-media/animations/happy/happy16.webp"
+  },
+  "/coach-media/animations/happy/happy17.webp": {
+    "type": "image/webp",
+    "etag": "\"6c236-lcuyQg6sSZcT0+fCpGNG/JhMi7U\"",
+    "mtime": "2026-11-17T10:13:00.827Z",
+    "size": 442934,
+    "path": "../public/coach-media/animations/happy/happy17.webp"
+  },
+  "/coach-media/animations/happy/happy19.webp": {
+    "type": "image/webp",
+    "etag": "\"7340-Mvycs8QTkYX6zm7iIfL2nLfxOe8\"",
+    "mtime": "2026-11-17T10:13:00.826Z",
+    "size": 29504,
+    "path": "../public/coach-media/animations/happy/happy19.webp"
+  },
+  "/coach-media/animations/happy/happy18.webp": {
+    "type": "image/webp",
+    "etag": "\"38cca-HDXyFn4nw7hhDQ0f8voh7jHxFIU\"",
+    "mtime": "2026-11-17T10:13:00.826Z",
+    "size": 232650,
+    "path": "../public/coach-media/animations/happy/happy18.webp"
+  },
+  "/coach-media/animations/happy/happy2.webp": {
+    "type": "image/webp",
+    "etag": "\"1b638-CG1y3zibI0VpxAfTb3zZrzRaw90\"",
+    "mtime": "2026-11-17T10:13:00.827Z",
+    "size": 112184,
+    "path": "../public/coach-media/animations/happy/happy2.webp"
+  },
+  "/coach-media/animations/happy/happy20.webp": {
+    "type": "image/webp",
+    "etag": "\"31eb2-eG0f1RbiJPRwmWx1p+zVbeej7Jo\"",
+    "mtime": "2026-11-17T10:13:00.827Z",
+    "size": 204466,
+    "path": "../public/coach-media/animations/happy/happy20.webp"
+  },
+  "/coach-media/animations/happy/happy1.webp": {
+    "type": "image/webp",
+    "etag": "\"9a9fe-dnJ60THXbLE/qdsCoy8mks8JEWo\"",
+    "mtime": "2026-11-17T10:13:00.823Z",
+    "size": 633342,
+    "path": "../public/coach-media/animations/happy/happy1.webp"
+  },
+  "/coach-media/animations/happy/happy21.webp": {
+    "type": "image/webp",
+    "etag": "\"d20a-nJXSMlgY3QzHwwJw2j7rW4bD6HU\"",
+    "mtime": "2026-11-17T10:13:00.827Z",
+    "size": 53770,
+    "path": "../public/coach-media/animations/happy/happy21.webp"
+  },
+  "/coach-media/animations/happy/happy22.webp": {
+    "type": "image/webp",
+    "etag": "\"2be74-wts9jwpJqVDGud0ZifbURmTwf7g\"",
+    "mtime": "2026-11-17T10:13:00.828Z",
+    "size": 179828,
+    "path": "../public/coach-media/animations/happy/happy22.webp"
+  },
+  "/coach-media/animations/happy/happy23.webp": {
+    "type": "image/webp",
+    "etag": "\"e74a-F+BBio6AhOZ5hwHOGh8wKCLcoGA\"",
+    "mtime": "2026-11-17T10:13:00.827Z",
+    "size": 59210,
+    "path": "../public/coach-media/animations/happy/happy23.webp"
+  },
+  "/coach-media/animations/happy/happy24.webp": {
+    "type": "image/webp",
+    "etag": "\"23e02-CIi7WeJXeH8cd/GgwMtt3CFFVkM\"",
+    "mtime": "2026-11-17T10:13:00.828Z",
+    "size": 146946,
+    "path": "../public/coach-media/animations/happy/happy24.webp"
+  },
+  "/coach-media/animations/happy/happy25.webp": {
+    "type": "image/webp",
+    "etag": "\"16574-kubThW5vAMKccIZc2jswkTWLUoA\"",
+    "mtime": "2026-11-17T10:13:00.829Z",
+    "size": 91508,
+    "path": "../public/coach-media/animations/happy/happy25.webp"
+  },
+  "/coach-media/animations/happy/happy27.webp": {
+    "type": "image/webp",
+    "etag": "\"1c662-1bbHXwmlK1/Q6duQFfbU/+Wg5Fg\"",
+    "mtime": "2026-11-17T10:13:00.828Z",
+    "size": 116322,
+    "path": "../public/coach-media/animations/happy/happy27.webp"
+  },
+  "/coach-media/animations/happy/happy26.webp": {
+    "type": "image/webp",
+    "etag": "\"6c706-bOAKAMAiElDmC2MCxEJkrvr5A+k\"",
+    "mtime": "2026-11-17T10:13:00.828Z",
+    "size": 444166,
+    "path": "../public/coach-media/animations/happy/happy26.webp"
+  },
+  "/coach-media/animations/happy/happy28.webp": {
+    "type": "image/webp",
+    "etag": "\"2090a-cfPB8KwXDFTC2iWhg6Pn7kOvGeg\"",
+    "mtime": "2026-11-17T10:13:00.828Z",
+    "size": 133386,
+    "path": "../public/coach-media/animations/happy/happy28.webp"
+  },
+  "/coach-media/animations/happy/happy29.webp": {
+    "type": "image/webp",
+    "etag": "\"15a6e-F4FEHmzAIG7WW3pszvFsq0XKYGk\"",
+    "mtime": "2026-11-17T10:13:00.829Z",
+    "size": 88686,
+    "path": "../public/coach-media/animations/happy/happy29.webp"
+  },
+  "/coach-media/animations/happy/happy3.webp": {
+    "type": "image/webp",
+    "etag": "\"6438c-AQmLLI1sVtzVfySWLf8q8/SnoDQ\"",
+    "mtime": "2026-11-17T10:13:00.831Z",
+    "size": 410508,
+    "path": "../public/coach-media/animations/happy/happy3.webp"
+  },
+  "/coach-media/animations/happy/happy30.webp": {
+    "type": "image/webp",
+    "etag": "\"46140-52DID+yWWHNDhSWo2wqCW7AgztI\"",
+    "mtime": "2026-11-17T10:13:00.831Z",
+    "size": 287040,
+    "path": "../public/coach-media/animations/happy/happy30.webp"
+  },
+  "/coach-media/animations/happy/happy31.webp": {
+    "type": "image/webp",
+    "etag": "\"4d6ca-GZQfzSkO4AbRu7KJoQWgnIw6U6k\"",
+    "mtime": "2026-11-17T10:13:00.829Z",
+    "size": 317130,
+    "path": "../public/coach-media/animations/happy/happy31.webp"
+  },
+  "/coach-media/animations/happy/happy32.webp": {
+    "type": "image/webp",
+    "etag": "\"1ce94-qd5mvwxqL3x8atGLGoQ6T5SBIM8\"",
+    "mtime": "2026-11-17T10:13:00.829Z",
+    "size": 118420,
+    "path": "../public/coach-media/animations/happy/happy32.webp"
+  },
+  "/coach-media/animations/happy/happy34.webp": {
+    "type": "image/webp",
+    "etag": "\"7a6e-N4lUoynD0pY1HrZqbhKsKEJcIdY\"",
+    "mtime": "2026-11-17T10:13:00.829Z",
+    "size": 31342,
+    "path": "../public/coach-media/animations/happy/happy34.webp"
+  },
+  "/coach-media/animations/happy/happy33.webp": {
+    "type": "image/webp",
+    "etag": "\"1ca8a-w5q1HyoRf3YSX2wny1ajxC1lVTw\"",
+    "mtime": "2026-11-17T10:13:00.830Z",
+    "size": 117386,
+    "path": "../public/coach-media/animations/happy/happy33.webp"
+  },
+  "/coach-media/animations/happy/happy37.webp": {
+    "type": "image/webp",
+    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
+    "mtime": "2026-11-17T10:13:00.830Z",
+    "size": 57724,
+    "path": "../public/coach-media/animations/happy/happy37.webp"
+  },
+  "/coach-media/animations/happy/happy36.webp": {
+    "type": "image/webp",
+    "etag": "\"1480e-iU7KcSbk60IXH4CWOzNyttBsbE0\"",
+    "mtime": "2026-11-17T10:13:00.830Z",
+    "size": 83982,
+    "path": "../public/coach-media/animations/happy/happy36.webp"
+  },
+  "/coach-media/animations/happy/happy35.webp": {
+    "type": "image/webp",
+    "etag": "\"27e2a-nINbfIIzpb0aB5cQDbxz/GDwNug\"",
+    "mtime": "2026-11-17T10:13:00.830Z",
+    "size": 163370,
+    "path": "../public/coach-media/animations/happy/happy35.webp"
+  },
+  "/coach-media/animations/happy/happy38.webp": {
+    "type": "image/webp",
+    "etag": "\"20928-zE86yLQztSZEATTCxTKRuQFifnw\"",
+    "mtime": "2026-11-17T10:13:00.831Z",
+    "size": 133416,
+    "path": "../public/coach-media/animations/happy/happy38.webp"
+  },
+  "/coach-media/animations/happy/happy39.webp": {
+    "type": "image/webp",
+    "etag": "\"1031c-0I4f6s3jDJrqeEDNAVBubusuRqQ\"",
+    "mtime": "2026-11-17T10:13:00.830Z",
+    "size": 66332,
+    "path": "../public/coach-media/animations/happy/happy39.webp"
+  },
+  "/coach-media/animations/happy/happy4.webp": {
+    "type": "image/webp",
+    "etag": "\"80d8-WZGwWFCLsk3YDTm9XP5QCq8R7Es\"",
+    "mtime": "2026-11-17T10:13:00.832Z",
+    "size": 32984,
+    "path": "../public/coach-media/animations/happy/happy4.webp"
+  },
+  "/coach-media/animations/happy/happy40.webp": {
+    "type": "image/webp",
+    "etag": "\"116ba-M7X1kM6tt7dIECx3koEGYbji1us\"",
+    "mtime": "2026-11-17T10:13:00.831Z",
+    "size": 71354,
+    "path": "../public/coach-media/animations/happy/happy40.webp"
+  },
+  "/coach-media/animations/happy/happy41.webp": {
+    "type": "image/webp",
+    "etag": "\"a76a-Nmck64+pAP0tEnTHpG1mitI4ONk\"",
+    "mtime": "2026-11-17T10:13:00.831Z",
+    "size": 42858,
+    "path": "../public/coach-media/animations/happy/happy41.webp"
+  },
+  "/coach-media/animations/happy/happy42.webp": {
+    "type": "image/webp",
+    "etag": "\"7eba-Xqry0H+Qj7x/M1eDmO0CIQ+A7Mg\"",
+    "mtime": "2026-11-17T10:13:00.832Z",
+    "size": 32442,
+    "path": "../public/coach-media/animations/happy/happy42.webp"
+  },
+  "/coach-media/animations/happy/happy44.webp": {
+    "type": "image/webp",
+    "etag": "\"24e16-Y7u+Md6oQPbYSDjE0D9H77j0Z5I\"",
+    "mtime": "2026-11-17T10:13:00.832Z",
+    "size": 151062,
+    "path": "../public/coach-media/animations/happy/happy44.webp"
+  },
+  "/coach-media/animations/happy/happy43.webp": {
+    "type": "image/webp",
+    "etag": "\"55a5e-kUYTswcDoeybUYnmGXDBV0ny564\"",
+    "mtime": "2026-11-17T10:13:00.832Z",
+    "size": 350814,
+    "path": "../public/coach-media/animations/happy/happy43.webp"
+  },
+  "/coach-media/animations/happy/happy45.webp": {
+    "type": "image/webp",
+    "etag": "\"65a82-XxALJISFlOUdD3wSziHwFXHhxqc\"",
+    "mtime": "2026-11-17T10:13:00.832Z",
+    "size": 416386,
+    "path": "../public/coach-media/animations/happy/happy45.webp"
+  },
+  "/coach-media/animations/happy/happy46.webp": {
+    "type": "image/webp",
+    "etag": "\"13dec-uj4sm+IwuLOmQY7lGy1JeMzt2FM\"",
+    "mtime": "2026-11-17T10:13:00.832Z",
+    "size": 81388,
+    "path": "../public/coach-media/animations/happy/happy46.webp"
+  },
+  "/coach-media/animations/happy/happy47.webp": {
+    "type": "image/webp",
+    "etag": "\"234e4-DNBmLISLOFimd+G8XihNRgMsjGw\"",
+    "mtime": "2026-11-17T10:13:00.835Z",
+    "size": 144612,
+    "path": "../public/coach-media/animations/happy/happy47.webp"
+  },
+  "/coach-media/animations/happy/happy5.webp": {
+    "type": "image/webp",
+    "etag": "\"10784-0Rzy5v92HqFbOQ0qn2Jo9XRJ1r0\"",
+    "mtime": "2026-11-17T10:13:00.835Z",
+    "size": 67460,
+    "path": "../public/coach-media/animations/happy/happy5.webp"
+  },
+  "/coach-media/animations/happy/happy49.webp": {
+    "type": "image/webp",
+    "etag": "\"3123c-mf62C2iWRtx585STd9CHbYmICyM\"",
+    "mtime": "2026-11-17T10:13:00.836Z",
+    "size": 201276,
+    "path": "../public/coach-media/animations/happy/happy49.webp"
+  },
+  "/coach-media/animations/happy/happy50.webp": {
+    "type": "image/webp",
+    "etag": "\"2b72a-Xz8Gb2Cdj+rrnnpbXbSGBQRTFYw\"",
+    "mtime": "2026-11-17T10:13:00.833Z",
+    "size": 177962,
+    "path": "../public/coach-media/animations/happy/happy50.webp"
+  },
+  "/coach-media/animations/happy/happy51.webp": {
+    "type": "image/webp",
+    "etag": "\"29090-le1WcmrRN+RDX52joaRj6kdNQS0\"",
+    "mtime": "2026-11-17T10:13:00.836Z",
+    "size": 168080,
+    "path": "../public/coach-media/animations/happy/happy51.webp"
+  },
+  "/coach-media/animations/happy/happy52.webp": {
+    "type": "image/webp",
+    "etag": "\"4a9b0-bNgmWpmTSjuc06DQcbX6RkVvCnU\"",
+    "mtime": "2026-11-17T10:13:00.836Z",
+    "size": 305584,
+    "path": "../public/coach-media/animations/happy/happy52.webp"
+  },
+  "/coach-media/animations/happy/happy53.webp": {
+    "type": "image/webp",
+    "etag": "\"57d0-WEnplvWuFKWqXkfuwNFuk472muo\"",
+    "mtime": "2026-11-17T10:13:00.836Z",
+    "size": 22480,
+    "path": "../public/coach-media/animations/happy/happy53.webp"
+  },
+  "/coach-media/animations/happy/happy48.webp": {
+    "type": "image/webp",
+    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
+    "mtime": "2026-11-17T10:13:00.836Z",
+    "size": 566688,
+    "path": "../public/coach-media/animations/happy/happy48.webp"
+  },
+  "/coach-media/animations/happy/happy54.webp": {
+    "type": "image/webp",
+    "etag": "\"de70-7JEgp30lMgh1RT82Z43BnbOPyME\"",
+    "mtime": "2026-11-17T10:13:00.837Z",
+    "size": 56944,
+    "path": "../public/coach-media/animations/happy/happy54.webp"
+  },
+  "/coach-media/animations/happy/happy55.webp": {
+    "type": "image/webp",
+    "etag": "\"4b40a-Dq55EPJ++rGpcOm3dfVMczMYPaI\"",
+    "mtime": "2026-11-17T10:13:00.837Z",
+    "size": 308234,
+    "path": "../public/coach-media/animations/happy/happy55.webp"
+  },
+  "/coach-media/animations/happy/happy59.webp": {
+    "type": "image/webp",
+    "etag": "\"e290-fQb7JlOst9pysXxzv35HJTcHlpE\"",
+    "mtime": "2026-11-17T10:13:00.838Z",
+    "size": 58000,
+    "path": "../public/coach-media/animations/happy/happy59.webp"
+  },
+  "/coach-media/animations/happy/happy58.webp": {
+    "type": "image/webp",
+    "etag": "\"695d4-fo3c1QhJVPT0yXYAuoQyAXrIO9E\"",
+    "mtime": "2026-11-17T10:13:00.838Z",
+    "size": 431572,
+    "path": "../public/coach-media/animations/happy/happy58.webp"
+  },
+  "/coach-media/animations/happy/happy6.webp": {
+    "type": "image/webp",
+    "etag": "\"2f8ce-NjZdr7Vin1NbHT+GFgWzMwsZeZE\"",
+    "mtime": "2026-11-17T10:13:00.838Z",
+    "size": 194766,
+    "path": "../public/coach-media/animations/happy/happy6.webp"
+  },
+  "/coach-media/animations/happy/happy57.webp": {
+    "type": "image/webp",
+    "etag": "\"74f88-eEN2CyUJ9rLsRvqY7OzSZS3p2IU\"",
+    "mtime": "2026-11-17T10:13:00.838Z",
+    "size": 479112,
+    "path": "../public/coach-media/animations/happy/happy57.webp"
+  },
+  "/coach-media/animations/happy/happy56.webp": {
+    "type": "image/webp",
+    "etag": "\"7ec86-JO0Q1vC7rgTxvmuYQZ3337jzHAM\"",
+    "mtime": "2026-11-17T10:13:00.837Z",
+    "size": 519302,
+    "path": "../public/coach-media/animations/happy/happy56.webp"
+  },
+  "/coach-media/animations/happy/happy61.webp": {
+    "type": "image/webp",
+    "etag": "\"253e8-1Fqod1LG1PZNTdmri6v0gPMthaE\"",
+    "mtime": "2026-11-17T10:13:00.839Z",
+    "size": 152552,
+    "path": "../public/coach-media/animations/happy/happy61.webp"
+  },
+  "/coach-media/animations/happy/happy63.webp": {
+    "type": "image/webp",
+    "etag": "\"2b52a-B18WnXoFNFEoRmRiTpAPD0Xw4fA\"",
+    "mtime": "2026-11-17T10:13:00.839Z",
+    "size": 177450,
+    "path": "../public/coach-media/animations/happy/happy63.webp"
+  },
+  "/coach-media/animations/happy/happy62.webp": {
+    "type": "image/webp",
+    "etag": "\"4f8f8-tLTO1/dtiZumcCPIDjxNhkIrS9g\"",
+    "mtime": "2026-11-17T10:13:00.845Z",
+    "size": 325880,
+    "path": "../public/coach-media/animations/happy/happy62.webp"
+  },
+  "/coach-media/animations/happy/happy65.webp": {
+    "type": "image/webp",
+    "etag": "\"153e2-1MrE6YaWW1bqq3uRkAG3roDYdbI\"",
+    "mtime": "2026-11-17T10:13:00.839Z",
+    "size": 87010,
+    "path": "../public/coach-media/animations/happy/happy65.webp"
+  },
+  "/coach-media/animations/happy/happy67.webp": {
+    "type": "image/webp",
+    "etag": "\"26842-Ttlq6ska7bBpzXjvIXLqSUaPnIk\"",
+    "mtime": "2026-11-17T10:13:00.840Z",
+    "size": 157762,
+    "path": "../public/coach-media/animations/happy/happy67.webp"
+  },
+  "/coach-media/animations/happy/happy66.webp": {
+    "type": "image/webp",
+    "etag": "\"5aac0-EL5Dnfs0ZHXfZ2nFXHuqusIiA6U\"",
+    "mtime": "2026-11-17T10:13:00.845Z",
+    "size": 371392,
+    "path": "../public/coach-media/animations/happy/happy66.webp"
+  },
+  "/coach-media/animations/happy/happy68.webp": {
+    "type": "image/webp",
+    "etag": "\"3a9f6-uXcrvu87C4tyxdUD8qy84likyxA\"",
+    "mtime": "2026-11-17T10:13:00.840Z",
+    "size": 240118,
+    "path": "../public/coach-media/animations/happy/happy68.webp"
+  },
+  "/coach-media/animations/happy/happy69.webp": {
+    "type": "image/webp",
+    "etag": "\"1843a-+cJ0+7F0PNcalsjHJcXNkw7qRDw\"",
+    "mtime": "2026-11-17T10:13:00.841Z",
+    "size": 99386,
+    "path": "../public/coach-media/animations/happy/happy69.webp"
+  },
+  "/coach-media/animations/happy/happy7.webp": {
+    "type": "image/webp",
+    "etag": "\"6dbe6-GIqYtKyf033a2vAUrfvCUdyYOmE\"",
+    "mtime": "2026-11-17T10:13:00.846Z",
+    "size": 449510,
+    "path": "../public/coach-media/animations/happy/happy7.webp"
+  },
+  "/coach-media/animations/happy/happy64.webp": {
+    "type": "image/webp",
+    "etag": "\"8b070-7oC7TYj4LIldWg1605cOC8gYl+w\"",
+    "mtime": "2026-11-17T10:13:00.841Z",
+    "size": 569456,
+    "path": "../public/coach-media/animations/happy/happy64.webp"
+  },
+  "/coach-media/animations/happy/happy71.webp": {
+    "type": "image/webp",
+    "etag": "\"12890-iDkXNnqbnihYZd5fm+x9SogtFL0\"",
+    "mtime": "2026-11-17T10:13:00.841Z",
+    "size": 75920,
+    "path": "../public/coach-media/animations/happy/happy71.webp"
+  },
+  "/coach-media/animations/happy/happy72.webp": {
+    "type": "image/webp",
+    "etag": "\"1132e-N279XcIE77SVgWI5RK4HGZTKNNQ\"",
+    "mtime": "2026-11-17T10:13:00.846Z",
+    "size": 70446,
+    "path": "../public/coach-media/animations/happy/happy72.webp"
+  },
+  "/coach-media/animations/happy/happy73.webp": {
+    "type": "image/webp",
+    "etag": "\"12dd8-PuAHZqC2ZtYnGQM/yt5HL7w8Z5w\"",
+    "mtime": "2026-11-17T10:13:00.844Z",
+    "size": 77272,
+    "path": "../public/coach-media/animations/happy/happy73.webp"
+  },
+  "/coach-media/animations/happy/happy74.webp": {
+    "type": "image/webp",
+    "etag": "\"5deae-Nnfy+JPdNa90X/TKIQJKDHXtEDg\"",
+    "mtime": "2026-11-17T10:13:00.845Z",
+    "size": 384686,
+    "path": "../public/coach-media/animations/happy/happy74.webp"
+  },
+  "/coach-media/animations/happy/happy75.webp": {
+    "type": "image/webp",
+    "etag": "\"1cfd0-9c+pPyscG4ipyzhzbN//E8mdshQ\"",
+    "mtime": "2026-11-17T10:13:00.845Z",
+    "size": 118736,
+    "path": "../public/coach-media/animations/happy/happy75.webp"
+  },
+  "/coach-media/animations/happy/happy76.webp": {
+    "type": "image/webp",
+    "etag": "\"14a9e-d6rGydXTPMji/MdwYzCalRd2xW0\"",
+    "mtime": "2026-11-17T10:13:00.847Z",
+    "size": 84638,
+    "path": "../public/coach-media/animations/happy/happy76.webp"
+  },
+  "/coach-media/animations/happy/happy77.webp": {
+    "type": "image/webp",
+    "etag": "\"1e10a-1aPPim9G6xum8/Hs8Ro6u3VlG6U\"",
+    "mtime": "2026-11-17T10:13:00.846Z",
+    "size": 123146,
+    "path": "../public/coach-media/animations/happy/happy77.webp"
+  },
+  "/coach-media/animations/happy/happy70.webp": {
+    "type": "image/webp",
+    "etag": "\"813fc-MRr6jjBP9Dwv9BEsHOHSRAaT2vg\"",
+    "mtime": "2026-11-17T10:13:00.844Z",
+    "size": 529404,
+    "path": "../public/coach-media/animations/happy/happy70.webp"
+  },
+  "/coach-media/animations/happy/happy60.webp": {
+    "type": "image/webp",
+    "etag": "\"1e7f54-IoOugN/ir+60blKcpy6Kl2RuTBI\"",
+    "mtime": "2026-11-17T10:13:00.841Z",
+    "size": 1998676,
+    "path": "../public/coach-media/animations/happy/happy60.webp"
+  },
+  "/coach-media/animations/happy/happy78.webp": {
+    "type": "image/webp",
+    "etag": "\"17ba4-3h26xVZZTGib30A7sQhqoYBlgqs\"",
+    "mtime": "2026-11-17T10:13:00.846Z",
+    "size": 97188,
+    "path": "../public/coach-media/animations/happy/happy78.webp"
+  },
+  "/coach-media/animations/happy/happy8.webp": {
+    "type": "image/webp",
+    "etag": "\"9d5e-zP9Tu9ncCFIvZEyvVyuhVBachAE\"",
+    "mtime": "2026-11-17T10:13:00.846Z",
+    "size": 40286,
+    "path": "../public/coach-media/animations/happy/happy8.webp"
+  },
+  "/coach-media/animations/happy/happy79.webp": {
+    "type": "image/webp",
+    "etag": "\"e17c-cpG9tAQA2HdkKWbtZensoAkI5NI\"",
+    "mtime": "2026-11-17T10:13:00.846Z",
+    "size": 57724,
+    "path": "../public/coach-media/animations/happy/happy79.webp"
+  },
+  "/coach-media/animations/happy/happy80.webp": {
+    "type": "image/webp",
+    "etag": "\"1da90-C0sljbqRem33mzQhLpalQ7JqSpU\"",
+    "mtime": "2026-11-17T10:13:00.847Z",
+    "size": 121488,
+    "path": "../public/coach-media/animations/happy/happy80.webp"
+  },
+  "/coach-media/animations/happy/happy82.webp": {
+    "type": "image/webp",
+    "etag": "\"f1a4-tNEKunf3T9spLovIQWFozZvffw4\"",
+    "mtime": "2026-11-17T10:13:00.847Z",
+    "size": 61860,
+    "path": "../public/coach-media/animations/happy/happy82.webp"
+  },
+  "/coach-media/animations/happy/happy83.webp": {
+    "type": "image/webp",
+    "etag": "\"2fe42-Kmm0KGXV1dEPQbjoM5G8BWcNWBM\"",
+    "mtime": "2026-11-17T10:13:00.847Z",
+    "size": 196162,
+    "path": "../public/coach-media/animations/happy/happy83.webp"
+  },
+  "/coach-media/animations/happy/happy85.webp": {
+    "type": "image/webp",
+    "etag": "\"150ae-QMfLvsJpp/BJuZy4OwOXUD8OYUQ\"",
+    "mtime": "2026-11-17T10:13:00.848Z",
+    "size": 86190,
+    "path": "../public/coach-media/animations/happy/happy85.webp"
+  },
+  "/coach-media/animations/happy/happy84.webp": {
+    "type": "image/webp",
+    "etag": "\"7b984-0wPlyvPIzXRP9eIMHgiBJFl+27A\"",
+    "mtime": "2026-11-17T10:13:00.848Z",
+    "size": 506244,
+    "path": "../public/coach-media/animations/happy/happy84.webp"
+  },
+  "/coach-media/animations/happy/happy86.webp": {
+    "type": "image/webp",
+    "etag": "\"d7f8-QCvUvt2Z0TOPZeSr+n8EKTRxFUo\"",
+    "mtime": "2026-11-17T10:13:00.848Z",
+    "size": 55288,
+    "path": "../public/coach-media/animations/happy/happy86.webp"
+  },
+  "/coach-media/animations/happy/happy87.webp": {
+    "type": "image/webp",
+    "etag": "\"17dec-6w/mkYwGAw5T0lZlhGXtO5BcsZU\"",
+    "mtime": "2026-11-17T10:13:00.847Z",
+    "size": 97772,
+    "path": "../public/coach-media/animations/happy/happy87.webp"
+  },
+  "/coach-media/animations/happy/happy88.webp": {
+    "type": "image/webp",
+    "etag": "\"10722-eVPV4BPr+xXKB/m7b01HTc3BYvY\"",
+    "mtime": "2026-11-17T10:13:00.847Z",
+    "size": 67362,
+    "path": "../public/coach-media/animations/happy/happy88.webp"
+  },
+  "/coach-media/animations/happy/happy81.webp": {
+    "type": "image/webp",
+    "etag": "\"8a5a0-gFczO6H6/tjC5WfcMHBF/H3NWBc\"",
+    "mtime": "2026-11-17T10:13:00.852Z",
+    "size": 566688,
+    "path": "../public/coach-media/animations/happy/happy81.webp"
+  },
+  "/coach-media/animations/happy/happy89.webp": {
+    "type": "image/webp",
+    "etag": "\"1c7e2-sUSfie0YAo/54wJ6tzJq/DwQ0Uw\"",
+    "mtime": "2026-11-17T10:13:00.852Z",
+    "size": 116706,
+    "path": "../public/coach-media/animations/happy/happy89.webp"
+  },
+  "/coach-media/animations/happy/happy9.webp": {
+    "type": "image/webp",
+    "etag": "\"48688-/orx463Bv1qJxQ1v4poLAvBrNjI\"",
+    "mtime": "2026-11-17T10:13:00.848Z",
+    "size": 296584,
+    "path": "../public/coach-media/animations/happy/happy9.webp"
+  },
+  "/coach-media/animations/happy/happy90.webp": {
+    "type": "image/webp",
+    "etag": "\"40b96-2KBRO6W19pvILapZ8+Vi3lurBCw\"",
+    "mtime": "2026-11-17T10:13:00.852Z",
+    "size": 265110,
+    "path": "../public/coach-media/animations/happy/happy90.webp"
+  },
+  "/coach-media/animations/happy/happy91.webp": {
+    "type": "image/webp",
+    "etag": "\"162e4-8HqkqL71/r+QJURh8ZbqNFMM6ZE\"",
+    "mtime": "2026-11-17T10:13:00.848Z",
+    "size": 90852,
+    "path": "../public/coach-media/animations/happy/happy91.webp"
+  },
+  "/coach-media/animations/happy/happy92.webp": {
+    "type": "image/webp",
+    "etag": "\"1eb3c-dpJ07uxpsVOLdaMyS3SOlqMT6/k\"",
+    "mtime": "2026-11-17T10:13:00.849Z",
+    "size": 125756,
+    "path": "../public/coach-media/animations/happy/happy92.webp"
+  },
+  "/coach-media/emojis/danger/danger1.png": {
+    "type": "image/png",
+    "etag": "\"3036-eXYZ+J7eqF26NQJZHhXFXrNgGww\"",
+    "mtime": "2026-11-17T10:13:00.708Z",
+    "size": 12342,
+    "path": "../public/coach-media/emojis/danger/danger1.png"
+  },
+  "/coach-media/emojis/muet/muet1.png": {
+    "type": "image/png",
+    "etag": "\"51a6-vln2s/UdhcTRTaO8VHDa3lfz0h8\"",
+    "mtime": "2026-11-17T10:13:00.711Z",
+    "size": 20902,
+    "path": "../public/coach-media/emojis/muet/muet1.png"
+  },
+  "/coach-media/emojis/muet/muet2.png": {
+    "type": "image/png",
+    "etag": "\"4fd6-7oBC0gGyTBoUjDE6sag9tGTRXEk\"",
+    "mtime": "2026-11-17T10:13:00.853Z",
+    "size": 20438,
+    "path": "../public/coach-media/emojis/muet/muet2.png"
+  },
+  "/coach-media/emojis/muet/muet3.png": {
+    "type": "image/png",
+    "etag": "\"5287-ywn34jaL1+x0Qfo7jSf48qjMhfs\"",
+    "mtime": "2026-11-17T10:13:00.853Z",
+    "size": 21127,
+    "path": "../public/coach-media/emojis/muet/muet3.png"
+  },
+  "/coach-media/emojis/muet/muet4.png": {
+    "type": "image/png",
+    "etag": "\"56a5-+3X/CcPHmEJ0+beAZBYg2M7ZSgA\"",
+    "mtime": "2026-11-17T10:13:00.853Z",
+    "size": 22181,
+    "path": "../public/coach-media/emojis/muet/muet4.png"
+  },
+  "/coach-media/emojis/triste/triste1.png": {
+    "type": "image/png",
+    "etag": "\"4ad5-sZv/ngDIpKluR3uoIL+9/tVgBAk\"",
+    "mtime": "2026-11-17T10:13:00.711Z",
+    "size": 19157,
+    "path": "../public/coach-media/emojis/triste/triste1.png"
+  },
+  "/coach-media/emojis/triste/triste10.png": {
+    "type": "image/png",
+    "etag": "\"6ad7-6iFb9ksjGHu03kWI85GQAULPlgA\"",
+    "mtime": "2026-11-17T10:13:00.853Z",
+    "size": 27351,
+    "path": "../public/coach-media/emojis/triste/triste10.png"
+  },
+  "/coach-media/emojis/triste/triste11.png": {
+    "type": "image/png",
+    "etag": "\"7b07-5Y/2vAUDwkCG9yUv2xhGyKhfVv4\"",
+    "mtime": "2026-11-17T10:13:00.854Z",
+    "size": 31495,
+    "path": "../public/coach-media/emojis/triste/triste11.png"
+  },
+  "/coach-media/emojis/triste/triste4.png": {
+    "type": "image/png",
+    "etag": "\"51ea-mZrIfYhaUQQDvlUt7+NCSIE6cfI\"",
+    "mtime": "2026-11-17T10:13:00.854Z",
+    "size": 20970,
+    "path": "../public/coach-media/emojis/triste/triste4.png"
+  },
+  "/coach-media/emojis/triste/triste5.png": {
+    "type": "image/png",
+    "etag": "\"54c1-XD0mhNmrQPVAFqEXG0C1s1P3Oa4\"",
+    "mtime": "2026-11-17T10:13:00.854Z",
+    "size": 21697,
+    "path": "../public/coach-media/emojis/triste/triste5.png"
+  },
+  "/coach-media/emojis/triste/triste6.png": {
+    "type": "image/png",
+    "etag": "\"54c1-XD0mhNmrQPVAFqEXG0C1s1P3Oa4\"",
+    "mtime": "2026-11-17T10:13:00.854Z",
+    "size": 21697,
+    "path": "../public/coach-media/emojis/triste/triste6.png"
+  },
+  "/coach-media/emojis/triste/triste7.png": {
+    "type": "image/png",
+    "etag": "\"4663-GYg5O4kBtQpnNYQYt+t2VyLkYuE\"",
+    "mtime": "2026-11-17T10:13:00.854Z",
+    "size": 18019,
+    "path": "../public/coach-media/emojis/triste/triste7.png"
+  },
+  "/coach-media/emojis/triste/triste8.png": {
+    "type": "image/png",
+    "etag": "\"5281-YyJBOzW/kpn0XNWvaoOHWcnQ+0k\"",
+    "mtime": "2026-11-17T10:13:00.853Z",
+    "size": 21121,
+    "path": "../public/coach-media/emojis/triste/triste8.png"
+  },
+  "/coach-media/emojis/triste/triste9.png": {
+    "type": "image/png",
+    "etag": "\"56b5-7e4ksvafotKRdiRp4CmrqGW7UkM\"",
+    "mtime": "2026-11-17T10:13:00.854Z",
+    "size": 22197,
+    "path": "../public/coach-media/emojis/triste/triste9.png"
+  },
+  "/coach-media/emojis/heureux/heureux1.png": {
+    "type": "image/png",
+    "etag": "\"5091-+uAnUfC4q2tlld3BzD89z3lKd4w\"",
+    "mtime": "2026-11-17T10:13:00.710Z",
+    "size": 20625,
+    "path": "../public/coach-media/emojis/heureux/heureux1.png"
+  },
+  "/coach-media/emojis/heureux/heureux10.png": {
+    "type": "image/png",
+    "etag": "\"5bbe-8dpJHwcxgGm/L+GGIgukoN99+qw\"",
+    "mtime": "2026-11-17T10:13:00.852Z",
+    "size": 23486,
+    "path": "../public/coach-media/emojis/heureux/heureux10.png"
+  },
+  "/coach-media/emojis/heureux/heureux11.png": {
+    "type": "image/png",
+    "etag": "\"60b8-LMMAFjmB/Rwe+6qwtxB0KRRjFVE\"",
+    "mtime": "2026-11-17T10:13:00.852Z",
+    "size": 24760,
+    "path": "../public/coach-media/emojis/heureux/heureux11.png"
+  },
+  "/coach-media/emojis/heureux/heureux12.png": {
+    "type": "image/png",
+    "etag": "\"79c6-gOXTGgNP0DRA6mU73TQkCLA2IZc\"",
+    "mtime": "2026-11-17T10:13:00.852Z",
+    "size": 31174,
+    "path": "../public/coach-media/emojis/heureux/heureux12.png"
+  },
+  "/coach-media/emojis/heureux/heureux2.png": {
+    "type": "image/png",
+    "etag": "\"54c1-7stf5vr0fIsbVKX4y+9cXcdF6Mo\"",
+    "mtime": "2026-11-17T10:13:00.849Z",
+    "size": 21697,
+    "path": "../public/coach-media/emojis/heureux/heureux2.png"
+  },
+  "/coach-media/emojis/heureux/heureux3.png": {
+    "type": "image/png",
+    "etag": "\"531f-VfeI7fmVy/9I1cJdA+JneCazNHU\"",
+    "mtime": "2026-11-17T10:13:00.852Z",
+    "size": 21279,
+    "path": "../public/coach-media/emojis/heureux/heureux3.png"
+  },
+  "/coach-media/emojis/heureux/heureux4.png": {
+    "type": "image/png",
+    "etag": "\"5885-WkglwLUYH5ALdE1dXhy9hL4kIX4\"",
+    "mtime": "2026-11-17T10:13:00.852Z",
+    "size": 22661,
+    "path": "../public/coach-media/emojis/heureux/heureux4.png"
+  },
+  "/coach-media/emojis/heureux/heureux5.png": {
+    "type": "image/png",
+    "etag": "\"5a47-dAmqVWfHl7YFERUDnBuBJDfdxvs\"",
+    "mtime": "2026-11-17T10:13:00.852Z",
+    "size": 23111,
+    "path": "../public/coach-media/emojis/heureux/heureux5.png"
+  },
+  "/coach-media/emojis/heureux/heureux6.png": {
+    "type": "image/png",
+    "etag": "\"536f-MLOUAyVp0bZpHOQ61BWW10gqYAk\"",
+    "mtime": "2026-11-17T10:13:00.852Z",
+    "size": 21359,
+    "path": "../public/coach-media/emojis/heureux/heureux6.png"
+  },
+  "/coach-media/emojis/heureux/heureux7.png": {
+    "type": "image/png",
+    "etag": "\"4c1e-5J3Hb2P7b9Dhw36q+lPFACHsBzo\"",
+    "mtime": "2026-11-17T10:13:00.853Z",
+    "size": 19486,
+    "path": "../public/coach-media/emojis/heureux/heureux7.png"
+  },
+  "/coach-media/emojis/heureux/heureux8.png": {
+    "type": "image/png",
+    "etag": "\"4c3d-xFJiCChiW5P5PT3dzl6b9pdUZCU\"",
+    "mtime": "2026-11-17T10:13:00.852Z",
+    "size": 19517,
+    "path": "../public/coach-media/emojis/heureux/heureux8.png"
+  },
+  "/coach-media/emojis/heureux/heureux9.png": {
+    "type": "image/png",
+    "etag": "\"53d1-nvrpEmDOGFDrOhR0CwIqhjydUqw\"",
+    "mtime": "2026-11-17T10:13:00.853Z",
+    "size": 21457,
+    "path": "../public/coach-media/emojis/heureux/heureux9.png"
+  },
+  "/_nuxt/builds/meta/c07e8191-5d8e-430d-b6b5-06bdd2c4c001.json": {
     "type": "application/json",
-    "etag": "\"58-bvDNKnfb/0k+k9ERbsCDNLnZluc\"",
-    "mtime": "2026-11-16T21:53:58.752Z",
+    "etag": "\"58-e6K4OyZTvNtp/uhgYgvL7rsdqaA\"",
+    "mtime": "2026-11-17T10:13:00.672Z",
     "size": 88,
-    "path": "../public/_nuxt/builds/meta/490d6158-e1b2-4390-b98b-a1ca539356e8.json"
+    "path": "../public/_nuxt/builds/meta/c07e8191-5d8e-430d-b6b5-06bdd2c4c001.json"
   }
 };
 
@@ -135309,5 +169879,5 @@ trapUnhandledNodeErrors();
 setupGracefulShutdown(listener, nitroApp);
 const nodeServer = {};
 
-export { findCompoundAuxiliaryForm as $, readMultipartFormData as A, getContactSettings as B, ChallengePublicationInputError as C, validateContactSettings as D, saveContactSettings as E, getHeader as F, previewDefisCleanup as G, parseCleanupRequest as H, deleteInactiveDefis as I, deleteExpiredExerciseSummaries as J, getExerciseSummaryAdminStats as K, getRequestURL as L, setResponseStatus as M, refreshVerbMetadata as N, normalizeComplementPreposition as O, withComplementPreposition as P, withoutComplementPreposition as Q, stripLocaleFromPath as R, getRequestIP as S, getExerciseSummary as T, ExerciseSummaryInputError as U, ExerciseSummaryNotFoundError as V, saveExerciseSummary as W, getCachedCatalogue as X, setResponseHeaders as Y, resolveChallengePublication as Z, listPublicChallengePublications as _, getQuery as a, formatAnswer as a$, normalizeDefiCode as a0, PublicInputError as a1, getDefi as a2, DefiNotFoundError as a3, parseDefiDefinition as a4, saveDefi as a5, validateConjugationAnswer as a6, validateAnswer as a7, diagnoseLearnerError as a8, LEARNER_ERROR_DETECTOR_VERSION as a9, parseSavedChallengeMetadata as aA, updateSavedChallengeMetadata as aB, parseSavedChallengeMove as aC, moveSavedChallenges as aD, parseQuestionnaireRequest as aE, synthesizeClassicSpeech as aF, SUPPORTED_LOCALES as aG, localeLanguageTag as aH, listPublishedChallengePublications as aI, setHeader as aJ, localizePath as aK, parseQuery as aL, hasProtocol as aM, joinURL as aN, isScriptProtocol as aO, withTrailingSlash as aP, withoutTrailingSlash as aQ, localizedLearnerErrorMessage as aR, learnerErrorInsteadOf as aS, hash$1 as aT, executeAsync as aU, challengePresetDefinitions as aV, agreePastParticiple as aW, splitPastParticipleAgreement as aX, decodePronominalSelectionId as aY, hasVariableAuxiliary as aZ, prefersEtreWithoutComplement as a_, applicableLearnerErrorTypes as aa, questionExerciseKind as ab, SELECTABLE_EXERCISE_KINDS as ac, exerciseKindFor as ad, parseChallengePersonIds as ae, parseChallengeFolderCreation as af, saveChallengeFolder as ag, SavedChallengeFolderError as ah, parseChallengeFolderId as ai, deleteChallengeFolder as aj, parseChallengeFolderPatch as ak, updateChallengeFolder as al, learnerErrorDetails as am, grammarTenseCode as an, LEARNER_ERROR_TAXONOMY as ao, normalizeAnswer as ap, readLearnerPreferences as aq, parseLearnerPreferencesPatch as ar, updateLearnerPreferences as as, learnerErrorDetailText as at, CURRENT_PRIVACY_NOTICE_VERSION as au, parseSavedChallengeRemoval as av, removeSavedChallenges as aw, ensureSavedChallengeMetadata as ax, listSavedChallengeFolders as ay, DefiStorageError as az, reorderChallengePresets as b, nodeServer as b$, challengePresetGroupOrder as b0, challengePresetGroupLabels as b1, formatConjugationQuestion as b2, hasMultipleAuxiliaryModels as b3, AUXILIARY_SIMPLE_TENSES as b4, VARIABLE_AUXILIARY_EXPLANATION as b5, compoundSimpleTense as b6, exerciseKindsFor as b7, includesChallengePerson as b8, indirectRelative as b9, withQuery as bA, DEFAULT_LANGUAGE_PREFERENCES as bB, getRequestHeader as bC, isEqual as bD, sanitizeStatusCode as bE, getContext as bF, $fetch as bG, defu as bH, DEFAULT_INTERFACE_LOCALE as bI, grammarModeCode as bJ, auxiliaryLemmaForForm as bK, localizedLearnerErrorMessageForCode as bL, DEFAULT_SAVED_CHALLENGE_FOLDER_COLOR as bM, exerciseKindLabel as bN, localizedLearnerErrorDomain as bO, localizedLearnerErrorLabel as bP, isSavedChallengeFolderColor as bQ, savedChallengeFolderColorStyle as bR, savedChallengeFolderColor as bS, SAVED_CHALLENGE_FOLDER_COLORS as bT, joinRelativeURL as bU, defineRenderHandler as bV, destr as bW, getRouteRules as bX, getResponseStatusText as bY, getResponseStatus as bZ, useNitroApp as b_, resolveVariableAuxiliary as ba, conjugationRequiresSubjectPronoun as bb, conjugationAnswerPlaceholder as bc, providedSubjunctiveInputPrefix as bd, getAlternativeCorrections as be, impossibleSingularEndingReminderMessage as bf, isFutureSimpleInsteadOfNearFuture as bg, findConjugationConfusions as bh, findImpossibleSingularEnding as bi, diagnoseCoachAgreement as bj, diagnoseCoachAnswer as bk, mergeLearnerErrorDetails as bl, DEFAULT_SHARED_CHALLENGE_OPTIONS as bm, legacyComplementOptions as bn, CHALLENGE_PERSON_CHOICES as bo, legacyComplementConfig as bp, ultimateChallengeId as bq, CHALLENGE_PERSON_IDS as br, SUBJECT_PRONOUN_PLACEHOLDER as bs, withSwissObjectAliases as bt, parseURL as bu, encodePath as bv, decodePath as bw, localeFromPath as bx, getRequestHeaders as by, klona as bz, createError$1 as c, defineEventHandler as d, parseChallengePresetPayload as e, replaceChallengePresetSelections as f, getRouterParam as g, parsePublicationLocale as h, parseChallengePublicationPayload as i, saveChallengePublication as j, ChallengePublicationConflictError as k, ChallengePublicationNotFoundError as l, listAdminChallengePublications as m, getCatalogue as n, listChallengePresetCategories as o, parseChallengePresetCategoryPayload as p, listStoredChallengePresets as q, readBody as r, setResponseHeader as s, setCookie as t, useDatabase as u, deleteCookie as v, withDutchVariants as w, getCookie as x, useRuntimeConfig as y, normalizeLocale as z };
+export { normalizeDefiCode as $, readMultipartFormData as A, getContactSettings as B, ChallengePublicationInputError as C, validateContactSettings as D, saveContactSettings as E, getHeader as F, previewDefisCleanup as G, parseCleanupRequest as H, deleteInactiveDefis as I, deleteExpiredExerciseSummaries as J, getExerciseSummaryAdminStats as K, getRequestURL as L, setResponseStatus as M, refreshVerbMetadata as N, normalizeComplementPreposition as O, withComplementPreposition as P, withoutComplementPreposition as Q, stripLocaleFromPath as R, getRequestIP as S, getExerciseSummary as T, ExerciseSummaryInputError as U, ExerciseSummaryNotFoundError as V, saveExerciseSummary as W, getCachedCatalogue as X, setResponseHeaders as Y, resolveChallengePublication as Z, listPublicChallengePublications as _, getQuery as a, formatAnswer as a$, PublicInputError as a0, getDefi as a1, DefiNotFoundError as a2, parseDefiDefinition as a3, saveDefi as a4, validateConjugationAnswer as a5, validateAnswer as a6, diagnoseLearnerError as a7, LEARNER_ERROR_DETECTOR_VERSION as a8, applicableLearnerErrorTypes as a9, updateSavedChallengeMetadata as aA, parseSavedChallengeMove as aB, moveSavedChallenges as aC, parseQuestionnaireRequest as aD, synthesizeClassicSpeech as aE, SUPPORTED_LOCALES as aF, localeLanguageTag as aG, listPublishedChallengePublications as aH, setHeader as aI, localizePath as aJ, parseQuery as aK, hasProtocol as aL, joinURL as aM, isScriptProtocol as aN, withTrailingSlash as aO, withoutTrailingSlash as aP, localizedLearnerErrorMessage as aQ, learnerErrorInsteadOf as aR, hash$1 as aS, executeAsync as aT, challengePresetDefinitions as aU, agreePastParticiple as aV, splitPastParticipleAgreement as aW, generatePronominalRow as aX, decodePronominalSelectionId as aY, hasVariableAuxiliary as aZ, prefersEtreWithoutComplement as a_, questionExerciseKind as aa, SELECTABLE_EXERCISE_KINDS as ab, exerciseKindFor as ac, parseChallengePersonIds as ad, parseChallengeFolderCreation as ae, saveChallengeFolder as af, SavedChallengeFolderError as ag, parseChallengeFolderId as ah, deleteChallengeFolder as ai, parseChallengeFolderPatch as aj, updateChallengeFolder as ak, learnerErrorDetails as al, grammarTenseCode as am, LEARNER_ERROR_TAXONOMY as an, normalizeAnswer as ao, readLearnerPreferences as ap, parseLearnerPreferencesPatch as aq, updateLearnerPreferences as ar, learnerErrorDetailText as as, CURRENT_PRIVACY_NOTICE_VERSION as at, parseSavedChallengeRemoval as au, removeSavedChallenges as av, ensureSavedChallengeMetadata as aw, listSavedChallengeFolders as ax, DefiStorageError as ay, parseSavedChallengeMetadata as az, reorderChallengePresets as b, nodeServer as b$, challengePresetGroupOrder as b0, challengePresetGroupLabels as b1, formatConjugationQuestion as b2, hasMultipleAuxiliaryModels as b3, AUXILIARY_SIMPLE_TENSES as b4, VARIABLE_AUXILIARY_EXPLANATION as b5, compoundSimpleTense as b6, exerciseKindsFor as b7, includesChallengePerson as b8, indirectRelative as b9, withQuery as bA, DEFAULT_LANGUAGE_PREFERENCES as bB, getRequestHeader as bC, isEqual as bD, sanitizeStatusCode as bE, getContext as bF, $fetch as bG, defu as bH, DEFAULT_INTERFACE_LOCALE as bI, grammarModeCode as bJ, auxiliaryLemmaForForm as bK, localizedLearnerErrorMessageForCode as bL, DEFAULT_SAVED_CHALLENGE_FOLDER_COLOR as bM, exerciseKindLabel as bN, localizedLearnerErrorDomain as bO, localizedLearnerErrorLabel as bP, isSavedChallengeFolderColor as bQ, savedChallengeFolderColorStyle as bR, savedChallengeFolderColor as bS, SAVED_CHALLENGE_FOLDER_COLORS as bT, joinRelativeURL as bU, defineRenderHandler as bV, destr as bW, getRouteRules as bX, getResponseStatusText as bY, getResponseStatus as bZ, useNitroApp as b_, resolveVariableAuxiliary as ba, conjugationRequiresSubjectPronoun as bb, conjugationAnswerPlaceholder as bc, providedSubjunctiveInputPrefix as bd, getAlternativeCorrections as be, impossibleSingularEndingReminderMessage as bf, isFutureSimpleInsteadOfNearFuture as bg, findConjugationConfusions as bh, findImpossibleSingularEnding as bi, diagnoseCoachAgreement as bj, diagnoseCoachAnswer as bk, mergeLearnerErrorDetails as bl, DEFAULT_SHARED_CHALLENGE_OPTIONS as bm, legacyComplementOptions as bn, CHALLENGE_PERSON_CHOICES as bo, legacyComplementConfig as bp, ultimateChallengeId as bq, CHALLENGE_PERSON_IDS as br, SUBJECT_PRONOUN_PLACEHOLDER as bs, withSwissObjectAliases as bt, parseURL as bu, encodePath as bv, decodePath as bw, localeFromPath as bx, getRequestHeaders as by, klona as bz, createError$1 as c, defineEventHandler as d, parseChallengePresetPayload as e, replaceChallengePresetSelections as f, getRouterParam as g, parsePublicationLocale as h, parseChallengePublicationPayload as i, saveChallengePublication as j, ChallengePublicationConflictError as k, ChallengePublicationNotFoundError as l, listAdminChallengePublications as m, getCatalogue as n, listChallengePresetCategories as o, parseChallengePresetCategoryPayload as p, listStoredChallengePresets as q, readBody as r, setResponseHeader as s, setCookie as t, useDatabase as u, deleteCookie as v, withDutchVariants as w, getCookie as x, useRuntimeConfig as y, normalizeLocale as z };
 //# sourceMappingURL=nitro.mjs.map

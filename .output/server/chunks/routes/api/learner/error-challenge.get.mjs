@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, a as getQuery, ao as LEARNER_ERROR_TAXONOMY, c as createError, u as useDatabase, a8 as diagnoseLearnerError, aa as applicableLearnerErrorTypes } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, a as getQuery, an as LEARNER_ERROR_TAXONOMY, c as createError, u as useDatabase, a7 as diagnoseLearnerError, a9 as applicableLearnerErrorTypes } from '../../../nitro/nitro.mjs';
 import { g as generateQuestionnaire } from '../../../_/questionnaire.mjs';
 import { r as requireLearnerDataSubject } from '../../../_/learner-data-subject.mjs';
 import 'node:http';
@@ -14,7 +14,6 @@ import 'node:fs/promises';
 import 'node:url';
 import '../../../_/infinitive-identification.mjs';
 import '../../../_/radical-reference.mjs';
-import '../../../_/pronominal-formatter.mjs';
 import '../../../_/impersonal-verbs.mjs';
 import '../../../_/infinitive-identification2.mjs';
 import '../../../_/exercise-instructions.mjs';

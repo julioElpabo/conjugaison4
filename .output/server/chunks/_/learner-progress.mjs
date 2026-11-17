@@ -1,4 +1,4 @@
-import { c as createError, ac as SELECTABLE_EXERCISE_KINDS, ad as exerciseKindFor, ae as parseChallengePersonIds, a1 as PublicInputError } from '../nitro/nitro.mjs';
+import { c as createError, ab as SELECTABLE_EXERCISE_KINDS, ac as exerciseKindFor, ad as parseChallengePersonIds, a0 as PublicInputError } from '../nitro/nitro.mjs';
 import { createHash } from 'node:crypto';
 
 const SAFE_IDENTIFIER = /^[A-Za-z0-9_-]{8,100}$/u;

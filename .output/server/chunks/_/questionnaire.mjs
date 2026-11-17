@@ -1,6 +1,5 @@
-import { b7 as exerciseKindsFor, u as useDatabase, aY as decodePronominalSelectionId, b8 as includesChallengePerson, aZ as hasVariableAuxiliary, b9 as indirectRelative, ba as resolveVariableAuxiliary, b2 as formatConjugationQuestion, a$ as formatAnswer } from '../nitro/nitro.mjs';
+import { b7 as exerciseKindsFor, u as useDatabase, aY as decodePronominalSelectionId, b8 as includesChallengePerson, aX as generatePronominalRow, aZ as hasVariableAuxiliary, b9 as indirectRelative, ba as resolveVariableAuxiliary, b2 as formatConjugationQuestion, a$ as formatAnswer } from '../nitro/nitro.mjs';
 import { i as identifyInfinitives, f as formatNonFiniteQuestion } from './infinitive-identification.mjs';
-import { g as generatePronominalRow } from './pronominal-formatter.mjs';
 import { M as MODE_IDENTIFICATION_INSTRUCTION, T as TENSE_IDENTIFICATION_INSTRUCTION } from './exercise-instructions.mjs';
 import { i as isPassivizableInfinitive } from './passive-voice.mjs';
 import { i as isImpersonalVerb } from './impersonal-verbs.mjs';

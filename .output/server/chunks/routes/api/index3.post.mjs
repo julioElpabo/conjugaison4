@@ -1,4 +1,4 @@
-import { d as defineEventHandler, aE as parseQuestionnaireRequest, a1 as PublicInputError, c as createError } from '../../nitro/nitro.mjs';
+import { d as defineEventHandler, aD as parseQuestionnaireRequest, a0 as PublicInputError, c as createError } from '../../nitro/nitro.mjs';
 import { g as generateQuestionnaire, Q as QuestionnaireSelectionError } from '../../_/questionnaire.mjs';
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../_/public-api-rate-limit.mjs';
 import { r as readLimitedJsonBody } from '../../_/limited-json-body.mjs';
@@ -16,7 +16,6 @@ import 'node:fs/promises';
 import 'node:url';
 import '../../_/infinitive-identification.mjs';
 import '../../_/radical-reference.mjs';
-import '../../_/pronominal-formatter.mjs';
 import '../../_/impersonal-verbs.mjs';
 import '../../_/infinitive-identification2.mjs';
 import '../../_/exercise-instructions.mjs';

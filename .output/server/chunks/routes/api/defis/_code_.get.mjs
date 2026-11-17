@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, a0 as normalizeDefiCode, g as getRouterParam, a1 as PublicInputError, c as createError, a2 as getDefi, a3 as DefiNotFoundError } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, $ as normalizeDefiCode, g as getRouterParam, a0 as PublicInputError, c as createError, a1 as getDefi, a2 as DefiNotFoundError } from '../../../nitro/nitro.mjs';
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../../_/public-api-rate-limit.mjs';
 import 'node:http';
 import 'node:https';

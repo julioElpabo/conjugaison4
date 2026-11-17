@@ -1,4 +1,4 @@
-import { d as defineEventHandler, a4 as parseDefiDefinition, a1 as PublicInputError, c as createError, a5 as saveDefi } from '../../nitro/nitro.mjs';
+import { d as defineEventHandler, a3 as parseDefiDefinition, a0 as PublicInputError, c as createError, a4 as saveDefi } from '../../nitro/nitro.mjs';
 import { a as assertPublicApiRateLimit, P as PUBLIC_RATE_LIMITS } from '../../_/public-api-rate-limit.mjs';
 import { r as readLimitedJsonBody } from '../../_/limited-json-body.mjs';
 import { g as getLearnerSession } from '../../_/learner-session.mjs';

@@ -1,4 +1,4 @@
-import { d as defineEventHandler, s as setResponseHeader, c as createError, g as getRouterParam, ai as parseChallengeFolderId, aj as deleteChallengeFolder, u as useDatabase, a1 as PublicInputError, ah as SavedChallengeFolderError } from '../../../../nitro/nitro.mjs';
+import { d as defineEventHandler, s as setResponseHeader, c as createError, g as getRouterParam, ah as parseChallengeFolderId, ai as deleteChallengeFolder, u as useDatabase, a0 as PublicInputError, ag as SavedChallengeFolderError } from '../../../../nitro/nitro.mjs';
 import { g as getLearnerSession } from '../../../../_/learner-session.mjs';
 import 'node:http';
 import 'node:https';

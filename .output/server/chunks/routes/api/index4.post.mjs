@@ -15,7 +15,6 @@ import 'node:fs/promises';
 import 'node:url';
 import '../../_/infinitive-identification.mjs';
 import '../../_/radical-reference.mjs';
-import '../../_/pronominal-formatter.mjs';
 import '../../_/impersonal-verbs.mjs';
 import '../../_/infinitive-identification2.mjs';
 import '../../_/exercise-instructions.mjs';

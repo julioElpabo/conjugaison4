@@ -7,3 +7,6 @@ export const AUDIO_READING_ENABLED = false
 
 /** Retour à l’ancienne interface : false. Les défis enregistrés restent lisibles. */
 export const PERSON_SELECTION_ENABLED = true
+
+/** Présentation progressive des erreurs. false réaffiche toutes les explications. */
+export const PROGRESSIVE_ERROR_FEEDBACK_ENABLED = true

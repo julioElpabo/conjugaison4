@@ -445,6 +445,7 @@ function formatSingleAuxiliaryQuestion(
     ...(row.tense_code ? { tenseCode: row.tense_code } : {}),
     ...(row.mode_code ? { modeCode: row.mode_code } : {}),
     isCompound: Boolean(row.is_compound),
+    ...(row.participe_passe ? { pastParticiple: row.participe_passe } : {}),
     voice: 'active',
     conjugaison1: row.conjugaison1,
     conjugaison2: row.conjugaison2 || '',

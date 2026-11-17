@@ -44,6 +44,7 @@ import { diagnoseCoachAgreement, diagnoseCoachAnswer } from '~~/shared/utils/coa
 import { subjectPronounIssue, subjectPronounFeedback } from '~~/shared/utils/subject-pronoun-feedback'
 import { coachHelpProgressionNotice } from '~~/shared/utils/coach-help-progression'
 import {
+  concealLearnerErrorDetail,
   learnerErrorDetailText,
   learnerErrorDisplayCoverage,
   learnerErrorDetails,
@@ -1450,19 +1451,7 @@ async function submit() {
           : currentErrorDetails
         const displayedErrorDetails = selectedCoachHelpProfile.value.revealsAnswers
           ? unconcealedErrorDetails
-          : unconcealedErrorDetails.map((detail) => {
-              const concealedMessage = detail.code === 'compound.auxiliary'
-                ? 'L’auxiliaire choisi ne convient pas pour construire ce temps composé.'
-                : detail.code === 'compound.participle_form'
-                  ? 'Après l’auxiliaire, emploie un participe passé et non une autre forme conjuguée.'
-                  : detail.message
-              return {
-                ...detail,
-                message: concealedMessage,
-                learnerValue: undefined,
-                expectedValue: undefined,
-              }
-            })
+          : unconcealedErrorDetails.map(concealLearnerErrorDetail)
         if (displayedErrorDetails.length) {
           await enqueueCoachBubble(() => ({
             text: displayedErrorDetails.map(detail => learnerErrorDetailText(detail, interfaceLocale.value)).join(' '),

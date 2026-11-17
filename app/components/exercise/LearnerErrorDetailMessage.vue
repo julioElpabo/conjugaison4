@@ -8,6 +8,7 @@ const props = defineProps<{ detail: LearnerErrorDetail }>()
 const { interfaceLocale } = useLanguagePreferences()
 const isPersonConfusion = computed(() => (
   props.detail.code === 'person.other_form'
+  && !props.detail.subjectIssueKind
   && Boolean(props.detail.learnerValue)
   && Boolean(props.detail.expectedValue)
 ))
@@ -36,5 +37,5 @@ const personSentence = computed(() => (withDutchVariants({
 .person-confusion-message mark{display:inline-block;padding:1px 5px;border-radius:6px;color:inherit;font-weight:800}
 .person-confusion-message .is-wrong{color:var(--danger);background:color-mix(in srgb,var(--danger) 18%,var(--surface));text-decoration:underline 2px;text-underline-offset:3px}
 .person-confusion-message .is-correct{color:#17613f;background:#cef0dd;box-shadow:inset 0 0 0 1px #8bc8a7}
-:global(:root[data-theme='dark']) .person-confusion-message .is-correct{color:#d9f7e6;background:#24543b;box-shadow:inset 0 0 0 1px #478566}
+:global(:root[data-theme='dark'] .person-confusion-message .is-correct){color:#d9f7e6;background:#24543b;box-shadow:inset 0 0 0 1px #478566}
 </style>

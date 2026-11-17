@@ -1,5 +1,6 @@
 import type { ExerciseQuestion } from '../types/conjugation'
 import { normalizeAnswer } from './answer'
+import { agreePastParticiple } from './past-participle-agreement'
 
 export type CoachErrorKind =
   | 'accent'
@@ -109,25 +110,68 @@ function differingWord(answer: string, expected: string) {
   return differences.length === 1 ? differences[0] : undefined
 }
 
-function agreementStems(value: string) {
-  const normalized = comparable(value)
-  return new Set([
-    normalized,
-    normalized.replace(/es$/u, ''),
-    normalized.replace(/s$/u, ''),
-    normalized.replace(/e$/u, ''),
-  ].filter(Boolean))
-}
-
-function belongsToSameAgreementFamily(left: string, right: string) {
-  const leftStems = agreementStems(left)
-  return [...agreementStems(right)].some(stem => leftStems.has(stem))
+function belongsToSameAgreementFamily(left: string, right: string, question: ExerciseQuestion) {
+  const family = (base: string) => new Set(['masculin', 'feminin'].flatMap(gender =>
+    ['singulier', 'pluriel'].map(number => comparable(agreePastParticiple(base, gender, number))),
+  ))
+  const canonical = comparable(question.pastParticiple || '')
+  if (canonical) {
+    const forms = family(canonical)
+    return forms.has(left) && forms.has(right)
+  }
+  // Anciens instantanés : ne jamais retirer le s de « pris » ou de « mis ».
+  // On ne retient que des transformations d'accord vérifiées dans le sens direct.
+  const bases = [right, left, right.replace(/es$/u, ''), right.replace(/e$/u, '')]
+  return bases.some(base => base && family(base).has(left) && family(base).has(right))
 }
 
 function commonPrefix(left: string, right: string) {
   let length = 0
   while (length < left.length && length < right.length && left[length] === right[length]) length += 1
   return length
+}
+
+/** Une terminaison doit être identifiée grammaticalement, pas comme tout le suffixe différent. */
+function expectedSimpleEnding(expectedWord: string, question: ExerciseQuestion) {
+  if (question.isCompound || question.voice === 'passive') return undefined
+  const reference = question.radicalReference
+  if (reference?.validated && reference.targetEnding !== undefined
+      && comparable(`${reference.radical}${reference.targetEnding}`) === expectedWord) {
+    return comparable(reference.targetEnding)
+  }
+
+  const personId = Number(question.personId) || ({
+    je: 4, tu: 5, il: 6, elle: 6, iel: 6, on: 6, nous: 7, vous: 8, ils: 9, elles: 9, iels: 9,
+  } as Record<string, number>)[words(question.pronom || '').at(-1) || '']
+  if (!personId || personId < 4 || personId > 9) return undefined
+  const mode = withoutDiacritics(question.mode || '')
+  const tense = withoutDiacritics(question.temps || '')
+  const infinitive = withoutDiacritics((question.infinitif || '').replace(/^(?:se\s+|s['’])/iu, ''))
+  const regularEr = infinitive.endsWith('er') && infinitive !== 'aller'
+  let endings: readonly string[] | undefined
+  if (regularEr && ((mode === 'indicatif' && tense === 'present') || mode === 'imperatif' && tense === 'present')) {
+    endings = ['e', 'es', 'e', 'ons', 'ez', 'ent']
+  } else if (['indicatif', 'impératif', 'imperatif'].includes(mode) && tense === 'present') {
+    endings = ['', '', '', 'ons', 'ez', 'ent']
+  } else if ((mode === 'indicatif' && tense === 'imparfait') || (mode === 'conditionnel' && tense === 'present')) {
+    endings = ['ais', 'ais', 'ait', 'ions', 'iez', 'aient']
+  } else if (mode === 'indicatif' && ['futur', 'futursimple'].includes(tense)) {
+    endings = ['ai', 'as', 'a', 'ons', 'ez', 'ont']
+  } else if (mode === 'subjonctif' && tense === 'present') {
+    endings = ['e', 'es', 'e', 'ions', 'iez', 'ent']
+  }
+  const ending = endings?.[personId - 4]
+  return ending && expectedWord.length > ending.length && expectedWord.endsWith(ending) ? ending : undefined
+}
+
+function endingDifference(difference: { learner: string, expected: string }, question: ExerciseQuestion) {
+  const expectedEnding = expectedSimpleEnding(difference.expected, question)
+  // Sans frontière grammaticale fiable, garder un diagnostic d’orthographe.
+  // Une fin correcte avec une faute plus tôt dans le mot n’est pas une erreur de terminaison.
+  if (!expectedEnding || difference.learner.endsWith(expectedEnding)) return undefined
+  const stem = difference.expected.slice(0, -expectedEnding.length)
+  if (!difference.learner.startsWith(stem)) return undefined
+  return { expectedEnding, learnerEnding: difference.learner.slice(stem.length) }
 }
 
 /** Repère la construction et le participe, sans confondre le complément avec lui. */
@@ -192,7 +236,7 @@ function compoundParticipleDifference(learnerAnswer: string, expectedAnswer: str
   const expectedParticiple = expected.participle
   const learnerForm = learner.participle
   if (!expectedParticiple || !learnerForm || expectedParticiple === learnerForm) return undefined
-  if (belongsToSameAgreementFamily(learnerForm, expectedParticiple)) return undefined
+  if (belongsToSameAgreementFamily(learnerForm, expectedParticiple, question)) return undefined
   if (commonPrefix(learnerForm, expectedParticiple) < 2) return undefined
   return {
     auxiliary: expected.auxiliaryPhrase,
@@ -243,7 +287,7 @@ export function diagnoseCoachAgreement(
       const expectedParticiple = candidate.structure.participle
       return expectedParticiple
         && learnerParticiple !== expectedParticiple
-        && belongsToSameAgreementFamily(learnerParticiple, expectedParticiple)
+        && belongsToSameAgreementFamily(learnerParticiple, expectedParticiple, question)
     })
     .sort((left, right) => left.distance - right.distance)[0]
   const expectedParticiple = expected?.structure.participle
@@ -333,11 +377,9 @@ export function diagnoseCoachAnswer(
   }
 
   if (difference) {
-    const prefixLength = commonPrefix(difference.learner, difference.expected)
-    const expectedEnding = difference.expected.slice(prefixLength)
-    const learnerEnding = difference.learner.slice(prefixLength)
-    if (prefixLength >= 3 && expectedEnding.length <= 6 && learnerEnding.length <= 6) {
-      return { ...base, errorKind: 'ending', confidence: 'high', expectedEnding, learnerEnding }
+    const ending = endingDifference(difference, question)
+    if (ending) {
+      return { ...base, errorKind: 'ending', confidence: 'high', ...ending }
     }
   }
 

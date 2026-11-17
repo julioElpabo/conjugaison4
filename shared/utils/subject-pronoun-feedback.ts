@@ -32,6 +32,7 @@ export function subjectPronounIssue(answer: string, question: { reponses: readon
   for (const candidate of question.reponses) {
     const expected = splitSubject(candidate)
     if (!expected || !subjects.has(expected.subject) || expected.subject === learner.subject
+        || [expected.subject, learner.subject].every(subject => subject === 'je' || subject === 'j')
         || normalizeAnswer(learner.rest) !== normalizeAnswer(expected.rest)) continue
     if (subjects.has(learner.subject)) return { kind: 'mismatch', learner: learner.subject, expected: question.pronom! }
     if (oneEditApart(learner.subject, expected.subject)) return { kind: 'typo', learner: learner.subject, expected: question.pronom! }

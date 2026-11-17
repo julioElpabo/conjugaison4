@@ -162,6 +162,8 @@ export interface ExerciseQuestion {
   tenseCode?: import('../utils/grammar-codes').GrammarTenseCode
   modeCode?: import('../utils/grammar-codes').GrammarModeCode
   isCompound?: boolean
+  /** Participe passé sans accord, pour distinguer sa forme de ses flexions. */
+  pastParticiple?: string
   /** Auxiliaires admis lorsque l’exercice ne fournit pas de contexte. */
   auxiliaryChoices?: readonly ('avoir' | 'être')[]
   /** Auxiliaire utilisé dans le modèle pédagogique sans restreindre les réponses admises. */
@@ -245,6 +247,10 @@ export interface LearnerErrorDetail {
   message: string
   learnerValue?: string
   expectedValue?: string
+  /** Précision conservée pour l'affichage et les traductions, sans changer la taxonomie. */
+  subjectIssueKind?: 'typo' | 'mismatch'
+  orthographyIssueKind?: 'elision' | 'word-spacing'
+  missingLetter?: string
 }
 
 export interface ExerciseAttempt {

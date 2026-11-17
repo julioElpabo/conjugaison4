@@ -1,0 +1,1268 @@
+diff --git a/app/components/exercise/ChatExercise.vue b/app/components/exercise/ChatExercise.vue
+index cb4a91b1..cb710076 100644
+--- a/app/components/exercise/ChatExercise.vue
++++ b/app/components/exercise/ChatExercise.vue
+@@ -44,6 +44,7 @@ import { diagnoseCoachAgreement, diagnoseCoachAnswer } from '~~/shared/utils/coa
+ import { subjectPronounIssue, subjectPronounFeedback } from '~~/shared/utils/subject-pronoun-feedback'
+ import { coachHelpProgressionNotice } from '~~/shared/utils/coach-help-progression'
+ import {
++  concealLearnerErrorDetail,
+   learnerErrorDetailText,
+   learnerErrorDisplayCoverage,
+   learnerErrorDetails,
+@@ -1450,19 +1451,7 @@ async function submit() {
+           : currentErrorDetails
+         const displayedErrorDetails = selectedCoachHelpProfile.value.revealsAnswers
+           ? unconcealedErrorDetails
+-          : unconcealedErrorDetails.map((detail) => {
+-              const concealedMessage = detail.code === 'compound.auxiliary'
+-                ? 'L’auxiliaire choisi ne convient pas pour construire ce temps composé.'
+-                : detail.code === 'compound.participle_form'
+-                  ? 'Après l’auxiliaire, emploie un participe passé et non une autre forme conjuguée.'
+-                  : detail.message
+-              return {
+-                ...detail,
+-                message: concealedMessage,
+-                learnerValue: undefined,
+-                expectedValue: undefined,
+-              }
+-            })
++          : unconcealedErrorDetails.map(concealLearnerErrorDetail)
+         if (displayedErrorDetails.length) {
+           await enqueueCoachBubble(() => ({
+             text: displayedErrorDetails.map(detail => learnerErrorDetailText(detail, interfaceLocale.value)).join(' '),
+diff --git a/app/components/exercise/LearnerErrorDetailMessage.vue b/app/components/exercise/LearnerErrorDetailMessage.vue
+index 2194ea62..0a0c22a5 100644
+--- a/app/components/exercise/LearnerErrorDetailMessage.vue
++++ b/app/components/exercise/LearnerErrorDetailMessage.vue
+@@ -8,6 +8,7 @@ const props = defineProps<{ detail: LearnerErrorDetail }>()
+ const { interfaceLocale } = useLanguagePreferences()
+ const isPersonConfusion = computed(() => (
+   props.detail.code === 'person.other_form'
++  && !props.detail.subjectIssueKind
+   && Boolean(props.detail.learnerValue)
+   && Boolean(props.detail.expectedValue)
+ ))
+@@ -36,5 +37,5 @@ const personSentence = computed(() => (withDutchVariants({
+ .person-confusion-message mark{display:inline-block;padding:1px 5px;border-radius:6px;color:inherit;font-weight:800}
+ .person-confusion-message .is-wrong{color:var(--danger);background:color-mix(in srgb,var(--danger) 18%,var(--surface));text-decoration:underline 2px;text-underline-offset:3px}
+ .person-confusion-message .is-correct{color:#17613f;background:#cef0dd;box-shadow:inset 0 0 0 1px #8bc8a7}
+-:global(:root[data-theme='dark']) .person-confusion-message .is-correct{color:#d9f7e6;background:#24543b;box-shadow:inset 0 0 0 1px #478566}
++:global(:root[data-theme='dark'] .person-confusion-message .is-correct){color:#d9f7e6;background:#24543b;box-shadow:inset 0 0 0 1px #478566}
+ </style>
+diff --git a/app/components/exercise/LearnerErrorFeedback.vue b/app/components/exercise/LearnerErrorFeedback.vue
+index 621ee189..682d87f2 100644
+--- a/app/components/exercise/LearnerErrorFeedback.vue
++++ b/app/components/exercise/LearnerErrorFeedback.vue
+@@ -1,6 +1,7 @@
+ <script setup lang="ts">
+ import type { LearnerErrorDetail } from '~~/shared/types/conjugation'
+-import { learnerErrorInsteadOf } from '~~/shared/i18n/learner-errors'
++import { learnerErrorInsteadOf, learnerErrorMorePoints } from '~~/shared/i18n/learner-errors'
++import { PROGRESSIVE_ERROR_FEEDBACK_ENABLED } from '~~/shared/config/feature-flags'
+ import LearnerErrorDetailMessage from '~/components/exercise/LearnerErrorDetailMessage.vue'
+ 
+ const props = defineProps<{
+@@ -10,12 +11,15 @@ const props = defineProps<{
+ 
+ const { interfaceLocale } = useLanguagePreferences()
+ const visibleDetails = computed(() => props.details)
++const expanded = ref(false)
++watch(() => props.details, () => { expanded.value = false })
++const hasSecondary = computed(() => PROGRESSIVE_ERROR_FEEDBACK_ENABLED && visibleDetails.value.length > 1)
+ </script>
+ 
+ <template>
+   <div v-if="visibleDetails.length" class="learner-error-feedback" :class="{ 'is-compact': compact }">
+     <ul>
+-      <li v-for="detail in visibleDetails" :key="detail.code">
++      <li v-for="(detail, index) in visibleDetails" v-show="index === 0 || !hasSecondary || expanded" :key="detail.code">
+         <b><LearnerErrorDetailMessage :detail="detail" /></b>
+         <span
+           v-if="detail.code !== 'person.other_form' && detail.learnerValue && detail.expectedValue"
+@@ -27,9 +31,19 @@ const visibleDetails = computed(() => props.details)
+         </span>
+       </li>
+     </ul>
++    <button
++      v-if="hasSecondary"
++      type="button"
++      class="learner-error-feedback__more"
++      :aria-expanded="expanded"
++      @click="expanded = !expanded"
++    >
++      {{ expanded ? '−' : '+' }} {{ learnerErrorMorePoints(interfaceLocale) }} ({{ visibleDetails.length - 1 }})
++    </button>
+   </div>
+ </template>
+ 
+ <style scoped>
+-.learner-error-feedback{display:grid;padding:12px 14px;border:1px solid color-mix(in srgb,var(--danger) 35%,var(--line));border-radius:12px;gap:8px;color:var(--ink);background:color-mix(in srgb,var(--danger) 7%,var(--surface))}.learner-error-feedback ul{display:grid;margin:0;padding:0;gap:8px;list-style:none}.learner-error-feedback li{display:flex;flex-wrap:wrap;align-items:center;gap:7px;line-height:1.4}.learner-error-feedback li>b{color:var(--ink)}.learner-error-feedback__comparison{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px}.learner-error-feedback del,.learner-error-feedback ins{padding:3px 8px;border-radius:7px;font-weight:900;text-decoration:none}.learner-error-feedback del{color:#8f2925;background:#ffd8d5;box-shadow:inset 0 0 0 1px #e9a39e}.learner-error-feedback ins{color:#17613f;background:#cef0dd;box-shadow:inset 0 0 0 1px #8bc8a7}.learner-error-feedback__comparison>span{color:var(--muted);font-size:.84em}.learner-error-feedback.is-compact{padding:8px 10px;gap:5px}.learner-error-feedback.is-compact li{font-size:.82rem}:global(:root[data-theme='dark']) .learner-error-feedback{border-color:#8d5753;background:#3b2929}:global(:root[data-theme='dark']) .learner-error-feedback del{color:#ffd8d5;background:#692f2c;box-shadow:inset 0 0 0 1px #9f504a}:global(:root[data-theme='dark']) .learner-error-feedback ins{color:#d9f7e6;background:#24543b;box-shadow:inset 0 0 0 1px #478566}
++.learner-error-feedback__more{justify-self:start;max-width:100%;padding:5px 0;border:0;background:transparent;color:var(--ink);font:inherit;text-align:start;cursor:pointer;text-decoration:underline;text-underline-offset:3px}.learner-error-feedback__more:focus-visible{outline:2px solid var(--ink);outline-offset:3px}.learner-error-feedback{min-width:0;overflow-wrap:anywhere}
++.learner-error-feedback{display:grid;padding:12px 14px;border:1px solid color-mix(in srgb,var(--danger) 35%,var(--line));border-radius:12px;gap:8px;color:var(--ink);background:color-mix(in srgb,var(--danger) 7%,var(--surface))}.learner-error-feedback ul{display:grid;margin:0;padding:0;gap:8px;list-style:none}.learner-error-feedback li{display:flex;flex-wrap:wrap;align-items:center;gap:7px;line-height:1.4}.learner-error-feedback li>b{color:var(--ink)}.learner-error-feedback__comparison{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px}.learner-error-feedback del,.learner-error-feedback ins{padding:3px 8px;border-radius:7px;font-weight:900;text-decoration:none}.learner-error-feedback del{color:#8f2925;background:#ffd8d5;box-shadow:inset 0 0 0 1px #e9a39e}.learner-error-feedback ins{color:#17613f;background:#cef0dd;box-shadow:inset 0 0 0 1px #8bc8a7}.learner-error-feedback__comparison>span{color:var(--muted);font-size:.84em}.learner-error-feedback.is-compact{padding:8px 10px;gap:5px}.learner-error-feedback.is-compact li{font-size:.82rem}:global(:root[data-theme='dark'] .learner-error-feedback){border-color:#8d5753;background:#3b2929}:global(:root[data-theme='dark'] .learner-error-feedback del){color:#ffd8d5;background:#692f2c;box-shadow:inset 0 0 0 1px #9f504a}:global(:root[data-theme='dark'] .learner-error-feedback ins){color:#d9f7e6;background:#24543b;box-shadow:inset 0 0 0 1px #478566}
+ </style>
+diff --git a/app/composables/useLearnerProgress.ts b/app/composables/useLearnerProgress.ts
+index 8fb3549a..0d9e5a9f 100644
+--- a/app/composables/useLearnerProgress.ts
++++ b/app/composables/useLearnerProgress.ts
+@@ -1,3 +1,4 @@
++import { compactLearnerQuestion } from '~~/shared/utils/learner-question-snapshot'
+ import type {
+   ExerciseAttempt,
+   ExerciseQuestion,
+@@ -25,58 +26,6 @@ export function createLearnerTrackingContext(input: {
+   }
+ }
+ 
+-function compactQuestion(question: ExerciseQuestion): ExerciseQuestion {
+-  return {
+-    exerciseKind: question.exerciseKind,
+-    titre: question.titre,
+-    instruction: question.instruction,
+-    consigne: question.consigne,
+-    reponses: [...question.reponses],
+-    reponsesPourCorrige: [...question.reponsesPourCorrige],
+-    futureSimpleAnswers: question.futureSimpleAnswers
+-      ? [...question.futureSimpleAnswers]
+-      : undefined,
+-    conjugationConfusions: question.conjugationConfusions
+-      ? question.conjugationConfusions.map(confusion => ({
+-          tense: confusion.tense,
+-          mode: confusion.mode,
+-          answers: [...confusion.answers],
+-        }))
+-      : undefined,
+-    verbeId: question.verbeId,
+-    tenseId: question.tenseId,
+-    personId: question.personId,
+-    infinitif: question.infinitif,
+-    pronom: question.pronom,
+-    temps: question.temps,
+-    mode: question.mode,
+-    isCompound: question.isCompound,
+-    conjugaison1: question.conjugaison1,
+-    conjugaison2: question.conjugaison2,
+-    conjugaison3: question.conjugaison3,
+-    radicalReference: question.radicalReference?.paradigmForms?.length
+-      ? {
+-          kind: question.radicalReference.kind,
+-          label: question.radicalReference.label,
+-          form: question.radicalReference.form,
+-          removableEnding: question.radicalReference.removableEnding,
+-          radical: question.radicalReference.radical,
+-          paradigmForms: question.radicalReference.paradigmForms.map(form => ({ ...form })),
+-        }
+-      : undefined,
+-    complement: question.complement,
+-    complementPosition: question.complementPosition,
+-    complementFunction: question.complementFunction,
+-    saisiePrefixe: question.saisiePrefixe,
+-    agreementReminder: question.agreementReminder
+-      ? { ...question.agreementReminder }
+-      : undefined,
+-    literaryCitation: question.literaryCitation
+-      ? { ...question.literaryCitation }
+-      : undefined,
+-  }
+-}
+-
+ export function useLearnerProgress() {
+   const { user, clearUser } = useLearnerAuth()
+ 
+@@ -92,7 +41,7 @@ export function useLearnerProgress() {
+           credentials: 'same-origin',
+           body: {
+             ...context,
+-            questions: questions.map(compactQuestion),
++            questions: questions.map(compactLearnerQuestion),
+           },
+         })
+         return true
+@@ -125,7 +74,7 @@ export function useLearnerProgress() {
+             ...context,
+             questionIndex: questionIndex + (context.questionIndexOffset || 0),
+             attemptNumber: attempt.attemptNumber || 1,
+-            question: compactQuestion(attempt.question),
++            question: compactLearnerQuestion(attempt.question),
+             answer: attempt.answer,
+             correct: attempt.status === 'correct' && !attempt.answerWasHeard,
+           },
+diff --git a/server/services/question-formatter.ts b/server/services/question-formatter.ts
+index e78ab817..71ce604f 100644
+--- a/server/services/question-formatter.ts
++++ b/server/services/question-formatter.ts
+@@ -445,6 +445,7 @@ function formatSingleAuxiliaryQuestion(
+     ...(row.tense_code ? { tenseCode: row.tense_code } : {}),
+     ...(row.mode_code ? { modeCode: row.mode_code } : {}),
+     isCompound: Boolean(row.is_compound),
++    ...(row.participe_passe ? { pastParticiple: row.participe_passe } : {}),
+     voice: 'active',
+     conjugaison1: row.conjugaison1,
+     conjugaison2: row.conjugaison2 || '',
+diff --git a/server/utils/learner-progress.ts b/server/utils/learner-progress.ts
+index 153dea7c..b8f3d00a 100644
+--- a/server/utils/learner-progress.ts
++++ b/server/utils/learner-progress.ts
+@@ -1,3 +1,4 @@
++import { restoreDiagnosticReference } from '../../shared/utils/learner-question-snapshot'
+ import { exerciseKindFor, SELECTABLE_EXERCISE_KINDS } from '../../shared/utils/exercise-kinds'
+ import { createHash } from 'node:crypto'
+ import { parseChallengePersonIds, PublicInputError } from '../services/public-api-validation'
+@@ -168,7 +169,7 @@ export function learnerQuestionSnapshot(value: unknown): ExerciseQuestion {
+     ? question.literaryCitation as Record<string, unknown>
+     : null
+   const citationTarget = shortText(citation?.target, 200)
+-  return {
++  const snapshot: ExerciseQuestion = {
+     ...(['conjugation', 'tense-identification', 'mode-identification', 'infinitive-identification'].includes(String(question.exerciseKind))
+       ? { exerciseKind: question.exerciseKind as Exclude<ExerciseKind, 'mixed'> }
+       : {}),
+@@ -187,6 +188,15 @@ export function learnerQuestionSnapshot(value: unknown): ExerciseQuestion {
+     temps: shortText(question.temps, 100) || undefined,
+     mode: shortText(question.mode, 100) || undefined,
+     isCompound: question.isCompound === true,
++    pastParticiple: shortText(question.pastParticiple, 100) || undefined,
++    voice: question.voice === 'passive' ? 'passive' : 'active',
++    passiveSubject: shortText(question.passiveSubject, 100) || undefined,
++    passiveAgent: shortText(question.passiveAgent, 200) || undefined,
++    auxiliaryChoices: Array.isArray(question.auxiliaryChoices)
++      ? [...new Set(question.auxiliaryChoices.filter((item): item is 'avoir' | 'être' => item === 'avoir' || item === 'être'))]
++      : undefined,
++    preferredAuxiliary: question.preferredAuxiliary === 'avoir' || question.preferredAuxiliary === 'être'
++      ? question.preferredAuxiliary : undefined,
+     conjugaison1: shortText(question.conjugaison1, 300) || undefined,
+     conjugaison2: shortText(question.conjugaison2, 300) || undefined,
+     conjugaison3: shortText(question.conjugaison3, 300) || undefined,
+@@ -231,6 +241,8 @@ export function learnerQuestionSnapshot(value: unknown): ExerciseQuestion {
+         }
+       : undefined,
+   }
++  snapshot.radicalReference = restoreDiagnosticReference(snapshot, radicalReference)
++  return snapshot
+ }
+ 
+ export function learnerFormKey(question: ExerciseQuestion, exerciseKind: string) {
+diff --git a/shared/config/feature-flags.ts b/shared/config/feature-flags.ts
+index 6b7049f1..9a72414d 100644
+--- a/shared/config/feature-flags.ts
++++ b/shared/config/feature-flags.ts
+@@ -7,3 +7,6 @@ export const AUDIO_READING_ENABLED = false
+ 
+ /** Retour à l’ancienne interface : false. Les défis enregistrés restent lisibles. */
+ export const PERSON_SELECTION_ENABLED = true
++
++/** Présentation progressive des erreurs. false réaffiche toutes les explications. */
++export const PROGRESSIVE_ERROR_FEEDBACK_ENABLED = true
+diff --git a/shared/i18n/learner-errors.ts b/shared/i18n/learner-errors.ts
+index e94043d6..28adc5cd 100644
+--- a/shared/i18n/learner-errors.ts
++++ b/shared/i18n/learner-errors.ts
+@@ -4,6 +4,7 @@ import type { AppLocale } from './locales'
+ import type { LearnerErrorDetail } from '../types/conjugation'
+ import type { LearnerErrorTypeCode } from '../utils/learner-error-diagnostics'
+ import { withSwissObjectAliases } from '../utils/object-terminology'
++import { subjectPronounFeedback } from '../utils/subject-pronoun-feedback'
+ 
+ type ErrorTranslations = Record<Exclude<AppLocale, 'fr'>, string>
+ 
+@@ -14,7 +15,7 @@ const learnerErrorMessages: Record<string, ErrorTranslations> = {
+   'person.other_form': withDutchVariants({ de: 'Du hast die grammatische Person verwechselt.', en: 'You used the form for a different grammatical person.', it: 'Hai confuso la persona grammaticale.', es: 'Has confundido la persona gramatical.', nl: "Je gebruikte de vorm van een andere grammaticale persoon.", }),
+   'person.impossible_ending': withDutchVariants({ de: 'Die verwendete Endung ist bei dieser Person nicht möglich.', en: 'The ending you used is not possible with this person.', it: 'La desinenza usata non è possibile con questa persona.', es: 'La terminación utilizada no es posible con esta persona.', nl: "De uitgang die je gebruikte, is niet mogelijk bij deze persoon.", }),
+   'compound.auxiliary': withDutchVariants({ de: 'Du hast nicht das richtige Hilfsverb für diese zusammengesetzte Zeitform verwendet.', en: 'You did not use the correct auxiliary for this compound tense.', it: 'Non hai usato l’ausiliare corretto per questo tempo composto.', es: 'No has usado el auxiliar correcto para este tiempo compuesto.', nl: "Je gebruikte niet het juiste hulpwerkwoord voor deze samengestelde tijd.", }),
+-  'compound.participle_form': withDutchVariants({ de: 'Nach dem Hilfsverb musstest du das Partizip Perfekt und keine andere konjugierte Form verwenden.', en: 'After the auxiliary, you had to use the past participle rather than another conjugated form.', it: 'Dopo l’ausiliare dovevi usare il participio passato e non un’altra forma coniugata.', es: 'Después del auxiliar debías usar el participio pasado y no otra forma conjugada.', nl: "Na het hulpwerkwoord moest je het voltooid deelwoord gebruiken, niet een andere vervoegde vorm.", }),
++  'compound.participle_form': withDutchVariants({ de: 'Prüfe die Form des Partizips Perfekt nach dem Hilfsverb.', en: 'Check the past participle form after the auxiliary.', it: 'Controlla la forma del participio passato dopo l’ausiliare.', es: 'Revisa la forma del participio pasado después del auxiliar.', nl: 'Controleer de vorm van het voltooid deelwoord na het hulpwerkwoord.' }),
+   'agreement.subject': withDutchVariants({ de: 'Das Partizip Perfekt wurde nicht richtig an das Subjekt angeglichen.', en: 'The past participle did not agree correctly with the subject.', it: 'Il participio passato non concordava correttamente con il soggetto.', es: 'El participio pasado no concordaba correctamente con el sujeto.', nl: "Het voltooid deelwoord kwam niet correct overeen met het onderwerp.", }),
+   'agreement.cod_before': withDutchVariants({ de: 'Das Partizip Perfekt musste an das vorangestellte direkte Objekt angeglichen werden.', en: 'The past participle had to agree with the direct object placed before it.', it: 'Il participio passato doveva concordare con il complemento oggetto posto prima.', es: 'El participio pasado debía concordar con el complemento directo colocado antes.', nl: "Het voltooid deelwoord moest overeenkomen met het lijdend voorwerp dat ervoor staat.", }),
+   'agreement.cod_after': withDutchVariants({ de: 'Du hast das Partizip Perfekt an ein nachgestelltes Objekt angeglichen, obwohl es unverändert bleiben musste.', en: 'You made the past participle agree with an object placed after it, although it had to remain unchanged.', it: 'Hai concordato il participio passato con un complemento posto dopo, mentre doveva restare invariato.', es: 'Has hecho concordar el participio pasado con un complemento colocado después, aunque debía permanecer invariable.', nl: "Je paste het voltooid deelwoord aan aan een voorwerp dat erna staat, terwijl het onveranderd moest blijven.", }),
+@@ -37,11 +38,28 @@ const insteadOf: Record<AppLocale, string> = withDutchVariants({
+ })
+ 
+ export function localizedLearnerErrorMessage(detail: LearnerErrorDetail, locale: AppLocale): string {
++  if (detail.subjectIssueKind && detail.learnerValue && detail.expectedValue) {
++    return subjectPronounFeedback({ kind: detail.subjectIssueKind, learner: detail.learnerValue, expected: detail.expectedValue }, locale)
++  }
++  if (detail.missingLetter && detail.expectedValue) {
++    return withDutchVariants({
++      fr: `Il manque un ${detail.missingLetter} : ${detail.expectedValue}.`,
++      de: `Ein ${detail.missingLetter} fehlt: ${detail.expectedValue}.`,
++      en: `The letter ${detail.missingLetter} is missing: ${detail.expectedValue}.`,
++      it: `Manca la lettera ${detail.missingLetter}: ${detail.expectedValue}.`,
++      es: `Falta una ${detail.missingLetter}: ${detail.expectedValue}.`,
++      nl: `Er ontbreekt een ${detail.missingLetter}: ${detail.expectedValue}.`,
++    })[locale]
++  }
+   return locale === 'fr'
+     ? withSwissObjectAliases(detail.message)
+     : learnerErrorMessages[detail.code]?.[locale] || detail.message
+ }
+ 
++export function learnerErrorMorePoints(locale: AppLocale): string {
++  return withDutchVariants({ fr: 'Autres points à vérifier', de: 'Weitere Punkte zum Prüfen', en: 'Other points to check', it: 'Altri punti da verificare', es: 'Otros puntos que revisar', nl: 'Andere punten om te controleren' })[locale]
++}
++
+ export function localizedLearnerErrorText(detail: LearnerErrorDetail, locale: AppLocale): string {
+   const message = localizedLearnerErrorMessage(detail, locale)
+   return detail.learnerValue && detail.expectedValue
+diff --git a/shared/types/conjugation.ts b/shared/types/conjugation.ts
+index 3ca4b61a..d303f6f4 100644
+--- a/shared/types/conjugation.ts
++++ b/shared/types/conjugation.ts
+@@ -162,6 +162,8 @@ export interface ExerciseQuestion {
+   tenseCode?: import('../utils/grammar-codes').GrammarTenseCode
+   modeCode?: import('../utils/grammar-codes').GrammarModeCode
+   isCompound?: boolean
++  /** Participe passé sans accord, pour distinguer sa forme de ses flexions. */
++  pastParticiple?: string
+   /** Auxiliaires admis lorsque l’exercice ne fournit pas de contexte. */
+   auxiliaryChoices?: readonly ('avoir' | 'être')[]
+   /** Auxiliaire utilisé dans le modèle pédagogique sans restreindre les réponses admises. */
+@@ -245,6 +247,9 @@ export interface LearnerErrorDetail {
+   message: string
+   learnerValue?: string
+   expectedValue?: string
++  /** Précision conservée pour l'affichage et les traductions, sans changer la taxonomie. */
++  subjectIssueKind?: 'typo' | 'mismatch'
++  missingLetter?: string
+ }
+ 
+ export interface ExerciseAttempt {
+diff --git a/shared/utils/coach-feedback.ts b/shared/utils/coach-feedback.ts
+index e82341d4..6d34ff6b 100644
+--- a/shared/utils/coach-feedback.ts
++++ b/shared/utils/coach-feedback.ts
+@@ -1,5 +1,6 @@
+ import type { ExerciseQuestion } from '../types/conjugation'
+ import { normalizeAnswer } from './answer'
++import { agreePastParticiple } from './past-participle-agreement'
+ 
+ export type CoachErrorKind =
+   | 'accent'
+@@ -109,19 +110,19 @@ function differingWord(answer: string, expected: string) {
+   return differences.length === 1 ? differences[0] : undefined
+ }
+ 
+-function agreementStems(value: string) {
+-  const normalized = comparable(value)
+-  return new Set([
+-    normalized,
+-    normalized.replace(/es$/u, ''),
+-    normalized.replace(/s$/u, ''),
+-    normalized.replace(/e$/u, ''),
+-  ].filter(Boolean))
+-}
+-
+-function belongsToSameAgreementFamily(left: string, right: string) {
+-  const leftStems = agreementStems(left)
+-  return [...agreementStems(right)].some(stem => leftStems.has(stem))
++function belongsToSameAgreementFamily(left: string, right: string, question: ExerciseQuestion) {
++  const family = (base: string) => new Set(['masculin', 'feminin'].flatMap(gender =>
++    ['singulier', 'pluriel'].map(number => comparable(agreePastParticiple(base, gender, number))),
++  ))
++  const canonical = comparable(question.pastParticiple || '')
++  if (canonical) {
++    const forms = family(canonical)
++    return forms.has(left) && forms.has(right)
++  }
++  // Anciens instantanés : ne jamais retirer le s de « pris » ou de « mis ».
++  // On ne retient que des transformations d'accord vérifiées dans le sens direct.
++  const bases = [right, left, right.replace(/es$/u, ''), right.replace(/e$/u, '')]
++  return bases.some(base => base && family(base).has(left) && family(base).has(right))
+ }
+ 
+ function commonPrefix(left: string, right: string) {
+@@ -235,7 +236,7 @@ function compoundParticipleDifference(learnerAnswer: string, expectedAnswer: str
+   const expectedParticiple = expected.participle
+   const learnerForm = learner.participle
+   if (!expectedParticiple || !learnerForm || expectedParticiple === learnerForm) return undefined
+-  if (belongsToSameAgreementFamily(learnerForm, expectedParticiple)) return undefined
++  if (belongsToSameAgreementFamily(learnerForm, expectedParticiple, question)) return undefined
+   if (commonPrefix(learnerForm, expectedParticiple) < 2) return undefined
+   return {
+     auxiliary: expected.auxiliaryPhrase,
+@@ -286,7 +287,7 @@ export function diagnoseCoachAgreement(
+       const expectedParticiple = candidate.structure.participle
+       return expectedParticiple
+         && learnerParticiple !== expectedParticiple
+-        && belongsToSameAgreementFamily(learnerParticiple, expectedParticiple)
++        && belongsToSameAgreementFamily(learnerParticiple, expectedParticiple, question)
+     })
+     .sort((left, right) => left.distance - right.distance)[0]
+   const expectedParticiple = expected?.structure.participle
+diff --git a/shared/utils/learner-error-diagnostics.ts b/shared/utils/learner-error-diagnostics.ts
+index ae01976a..ae56e442 100644
+--- a/shared/utils/learner-error-diagnostics.ts
++++ b/shared/utils/learner-error-diagnostics.ts
+@@ -44,7 +44,7 @@ export interface LearnerErrorTag {
+   evidence?: Record<string, string>
+ }
+ 
+-export const LEARNER_ERROR_DETECTOR_VERSION = '1.4.1'
++export const LEARNER_ERROR_DETECTOR_VERSION = '1.5.0'
+ 
+ function text(value: unknown) {
+   return typeof value === 'string' ? value.trim() : ''
+@@ -93,13 +93,21 @@ function otherPersonTag(answer: string, question: ExerciseQuestion) {
+     : null
+ }
+ 
+-function lastWord(value: string) {
+-  return normalizeAnswer(value, { ignoreWhitespace: false }).match(/\p{L}+/gu)?.at(-1) || ''
+-}
+-
+ function pluralPersonEndingTag(answer: string, question: ExerciseQuestion) {
+-  const learnerWord = lastWord(answer)
+-  const expectedWord = lastWord(question.reponses[0] || '')
++  // Ce raccourci ne prouve une confusion nous/ils qu'au futur simple.
++  if (question.isCompound || question.mode !== 'indicatif'
++    || !['futur', 'futur simple'].includes(question.temps || '')
++    || ![7, 9].includes(Number(question.personId))) return null
++  const verb = (value: string) => {
++    const tokens = normalizeAnswer(value, { ignoreWhitespace: false }).match(/\p{L}+/gu) || []
++    const prefixes = new Set(['que', 'qu', 'je', 'j', 'tu', 'il', 'elle', 'iel', 'on', 'nous', 'vous', 'ils', 'elles', 'iels', 'me', 'm', 'te', 't', 'se', 's', 'ne', 'n', 'le', 'la', 'les', 'l', 'lui', 'leur', 'y', 'en'])
++    let index = 0
++    while (prefixes.has(tokens[index] || '')) index += 1
++    return tokens[index] || ''
++  }
++  const learnerWord = verb(answer)
++  const expectedWord = verb(question.reponses[0] || '')
++  if (!learnerWord || learnerWord.slice(0, -3) !== expectedWord.slice(0, -3)) return null
+   if (learnerWord.endsWith('ont') && expectedWord.endsWith('ons')) {
+     return tag('person.other_form', 'high', {
+       detectedPerson: 'ils/elles',
+@@ -306,6 +314,25 @@ export function learnerErrorLabels(
+   return learnerErrorDetails(answer, question).map(detail => withSwissObjectAliases(detail.label))
+ }
+ 
++function missingLetterDetail(answer: string, question: ExerciseQuestion) {
++  const words = (value: string) => normalizeAnswer(value, { ignoreWhitespace: false }).match(/\p{L}+/gu) || []
++  const learner = words(answer)
++  for (const candidate of question.reponses) {
++    const expected = words(candidate)
++    if (learner.length !== expected.length) continue
++    const differences = expected.flatMap((word, index) => word === learner[index] ? [] : [{ expected: word, learner: learner[index]! }])
++    if (differences.length !== 1) continue
++    const difference = differences[0]!
++    if (difference.expected.length !== difference.learner.length + 1) continue
++    for (let index = 0; index < difference.expected.length; index += 1) {
++      if (difference.expected.slice(0, index) + difference.expected.slice(index + 1) === difference.learner) {
++        return { learnerValue: difference.learner, expectedValue: difference.expected, missingLetter: difference.expected[index]! }
++      }
++    }
++  }
++  return null
++}
++
+ export function learnerErrorDetails(
+   answer: string,
+   question: ExerciseQuestion,
+@@ -329,6 +356,7 @@ export function learnerErrorDetails(
+             : `Tu as confondu la personne. Tu as conjugué avec « ${item.evidence.detectedPerson} », alors que c’était « ${item.evidence.expectedPerson} ».`,
+           learnerValue: item.evidence.detectedPerson,
+           expectedValue: item.evidence.expectedPerson,
++          ...(item.evidence.subjectIssueKind ? { subjectIssueKind: item.evidence.subjectIssueKind as 'typo' | 'mismatch' } : {}),
+         }]
+       }
+       if (item.code === 'morphology.ending') {
+@@ -340,6 +368,13 @@ export function learnerErrorDetails(
+           ...(item.evidence?.expectedEnding ? { expectedValue: `-${item.evidence.expectedEnding}` } : {}),
+         }]
+       }
++      if (item.code === 'input.close_form') {
++        const missing = missingLetterDetail(answer, question)
++        if (missing) return [{
++          code: item.code, label, ...missing,
++          message: `Il manque un ${missing.missingLetter} : ${missing.expectedValue}.`,
++        }]
++      }
+       const evidence = item.evidence || {}
+       const message = (() => {
+         if (item.code === 'task.wrong_mode') {
+@@ -387,7 +422,7 @@ export function learnerErrorDetails(
+         if (item.code === 'compound.participle_form') {
+           return evidence.auxiliary && evidence.learnerForm && evidence.expectedParticiple
+             ? `Après l’auxiliaire « ${evidence.auxiliary} », il fallait employer le participe passé « ${evidence.expectedParticiple} », et non « ${evidence.learnerForm} ».`
+-            : 'Après l’auxiliaire, il fallait employer le participe passé et non une autre forme conjuguée.'
++            : 'Vérifie la forme du participe passé après l’auxiliaire.'
+         }
+         if (item.code === 'agreement.subject') {
+           return 'Le participe passé n’était pas correctement accordé avec le sujet.'
+@@ -432,6 +467,20 @@ export function mergeLearnerErrorDetails(...groups: LearnerErrorDetail[][]): Lea
+   return [...details.values()]
+ }
+ 
++/** Les profils sans correction conservent un conseil utile sans dévoiler la forme attendue. */
++export function concealLearnerErrorDetail(detail: LearnerErrorDetail): LearnerErrorDetail {
++  // Le pronom demandé est déjà dans la consigne ; conserver le sous-type évite une fausse accusation.
++  if (detail.subjectIssueKind) return { ...detail }
++  const message = detail.code === 'compound.auxiliary'
++    ? 'L’auxiliaire choisi ne convient pas pour construire ce temps composé.'
++    : detail.code === 'compound.participle_form'
++      ? 'Vérifie la forme du participe passé après l’auxiliaire.'
++      : detail.missingLetter
++        ? 'Ta réponse était proche de la bonne forme, mais elle contenait encore une différence orthographique.'
++        : detail.message
++  return { ...detail, message, learnerValue: undefined, expectedValue: undefined, missingLetter: undefined }
++}
++
+ export function learnerErrorDisplayCoverage(details: readonly LearnerErrorDetail[]) {
+   const codes = new Set(details.map(detail => detail.code))
+   return {
+@@ -444,7 +493,7 @@ export function learnerErrorDisplayCoverage(details: readonly LearnerErrorDetail
+ }
+ 
+ export function learnerErrorDetailText(detail: LearnerErrorDetail, locale: AppLocale = 'fr'): string {
+-  if (detail.code === 'person.other_form') return localizedLearnerErrorMessage(detail, locale)
++  if (detail.code === 'person.other_form' || detail.missingLetter) return localizedLearnerErrorMessage(detail, locale)
+   return localizedLearnerErrorText(detail, locale)
+ }
+ 
+diff --git a/shared/utils/learner-feedback-audit.ts b/shared/utils/learner-feedback-audit.ts
+new file mode 100644
+index 00000000..d06e2ac8
+--- /dev/null
++++ b/shared/utils/learner-feedback-audit.ts
+@@ -0,0 +1,65 @@
++import type { ExerciseQuestion, LearnerErrorDetail } from '../types/conjugation'
++import type { AppLocale } from '../i18n/locales'
++import type { CoachHelpAuditIssue, CoachHelpAuditResult } from './coach-help-audit'
++import { localizedLearnerErrorMessage } from '../i18n/learner-errors'
++import { normalizeAnswer } from './answer'
++import { agreePastParticiple } from './past-participle-agreement'
++
++const tokens = (value: string): string[] => normalizeAnswer(value, { ignoreWhitespace: false }).match(/\p{L}+/gu) || []
++const plain = (value: string) => value.replace(/\s+/gu, ' ').trim()
++
++/** Audit en lecture seule du commentaire effectivement rendu, y compris des traductions et profils. */
++export function auditRenderedLearnerFeedback(input: {
++  question: ExerciseQuestion
++  answer: string
++  details: readonly LearnerErrorDetail[]
++  renderedText: string
++  locale: AppLocale
++  revealsAnswers: boolean
++}): CoachHelpAuditResult {
++  const { question, answer, details, renderedText, locale } = input
++  const issues: CoachHelpAuditIssue[] = []
++  const fail = (code: string, detail: string) => issues.push({ code, severity: 'error', title: 'Commentaire incohérent', detail })
++  const learnerWords = tokens(answer)
++  const candidates = question.reponses.map(candidate => tokens(candidate))
++  if (/\b(?:undefined|null|NaN)\b/u.test(renderedText)) fail('feedback-invalid-value', 'Une valeur technique est affichée.')
++  for (const detail of details) {
++    const message = localizedLearnerErrorMessage(detail, locale)
++    if (!plain(renderedText).includes(plain(message)) && detail.code !== 'person.other_form') {
++      fail('feedback-message-missing', `Le commentaire ${detail.code} manque dans le rendu ${locale}.`)
++    }
++    if (detail.subjectIssueKind && !plain(renderedText).includes(plain(message))) {
++      fail('feedback-subject-subtype-lost', 'Le rendu a remplacé une erreur de pronom par une confusion de personne.')
++    }
++    if (detail.missingLetter) {
++      const expected = detail.expectedValue || ''
++      const learner = detail.learnerValue || ''
++      const reconstructed = Array.from(expected).some((letter, index) => letter === detail.missingLetter
++        && expected.slice(0, index) + expected.slice(index + 1) === learner)
++      if (!reconstructed || !learnerWords.includes(learner) || !candidates.some(words => words.includes(expected))) {
++        fail('feedback-unproven-missing-letter', 'La lettre signalée ne reconstitue pas la forme attendue.')
++      }
++    }
++    if (detail.code === 'morphology.ending' && detail.learnerValue && detail.expectedValue) {
++      const expectedEnding = detail.expectedValue.replace(/^-/, '')
++      const learnerEnding = detail.learnerValue.replace(/^-/, '')
++      const proven = candidates.some(words => words.some((expected, index) => {
++        const learner = learnerWords[index] || ''
++        return expected.endsWith(expectedEnding) && learner.endsWith(learnerEnding)
++          && expected.slice(0, -expectedEnding.length) === learner.slice(0, -learnerEnding.length)
++      }))
++      if (!proven) fail('feedback-unproven-ending', 'La différence ne porte pas uniquement sur les terminaisons indiquées.')
++    }
++    if (detail.code.startsWith('agreement.') && question.pastParticiple) {
++      const family = new Set(['masculin', 'feminin'].flatMap(gender => ['singulier', 'pluriel']
++        .map(number => agreePastParticiple(question.pastParticiple!, gender, number))))
++      if (!learnerWords.some(word => family.has(word))) {
++        fail('feedback-unproven-agreement', 'La forme saisie n’est pas une flexion du participe passé de ce verbe.')
++      }
++    }
++    if (!input.revealsAnswers && !detail.subjectIssueKind && (detail.expectedValue || detail.missingLetter)) {
++      fail('feedback-profile-answer-leak', 'Ce profil ne doit pas dévoiler la forme attendue.')
++    }
++  }
++  return { status: issues.length ? 'failed' : 'passed', issues }
++}
+diff --git a/shared/utils/learner-question-snapshot.ts b/shared/utils/learner-question-snapshot.ts
+new file mode 100644
+index 00000000..9aae592e
+--- /dev/null
++++ b/shared/utils/learner-question-snapshot.ts
+@@ -0,0 +1,109 @@
++import type { ExerciseQuestion } from '../types/conjugation'
++import { buildRadicalReference, type RadicalPrincipalForm } from './radical-reference'
++
++/** Conserve les preuves du diagnostic pour la reprise, sans les médias du questionnaire. */
++export function compactLearnerQuestion(question: ExerciseQuestion): ExerciseQuestion {
++  return {
++    exerciseKind: question.exerciseKind,
++    titre: question.titre,
++    instruction: question.instruction,
++    consigne: question.consigne,
++    reponses: [...question.reponses],
++    reponsesPourCorrige: [...question.reponsesPourCorrige],
++    futureSimpleAnswers: question.futureSimpleAnswers
++      ? [...question.futureSimpleAnswers]
++      : undefined,
++    conjugationConfusions: question.conjugationConfusions
++      ? question.conjugationConfusions.map(confusion => ({
++          tense: confusion.tense,
++          mode: confusion.mode,
++          answers: [...confusion.answers],
++        }))
++      : undefined,
++    verbeId: question.verbeId,
++    tenseId: question.tenseId,
++    personId: question.personId,
++    infinitif: question.infinitif,
++    pronom: question.pronom,
++    temps: question.temps,
++    mode: question.mode,
++    isCompound: question.isCompound,
++    pastParticiple: question.pastParticiple,
++    voice: question.voice,
++    passiveSubject: question.passiveSubject,
++    passiveAgent: question.passiveAgent,
++    auxiliaryChoices: question.auxiliaryChoices ? [...question.auxiliaryChoices] : undefined,
++    preferredAuxiliary: question.preferredAuxiliary,
++    conjugaison1: question.conjugaison1,
++    conjugaison2: question.conjugaison2,
++    conjugaison3: question.conjugaison3,
++    radicalReference: cloneDiagnosticReference(question.radicalReference),
++    complement: question.complement,
++    complementPosition: question.complementPosition,
++    complementFunction: question.complementFunction,
++    saisiePrefixe: question.saisiePrefixe,
++    agreementReminder: question.agreementReminder
++      ? { ...question.agreementReminder }
++      : undefined,
++    literaryCitation: question.literaryCitation
++      ? { ...question.literaryCitation }
++      : undefined,
++  }
++}
++
++function cloneDiagnosticReference(reference: ExerciseQuestion['radicalReference']): ExerciseQuestion['radicalReference'] {
++  if (!reference) return undefined
++  // Les questions viennent aussi de tableaux réactifs Vue : structuredClone rejette leurs Proxy.
++  return {
++    ...reference,
++    ...(reference.paradigmForms ? { paradigmForms: reference.paradigmForms.map(form => ({ ...form })) } : {}),
++    ...(reference.imperativePresentReferences ? { imperativePresentReferences: reference.imperativePresentReferences.map(form => ({ ...form })) } : {}),
++    ...(reference.subjunctivePresentReferences ? { subjunctivePresentReferences: reference.subjunctivePresentReferences.map(form => ({ ...form })) } : {}),
++    ...(reference.subjunctivePresentForms ? { subjunctivePresentForms: reference.subjunctivePresentForms.map(form => ({ ...form })) } : {}),
++  }
++}
++
++/** Reconstruit les transformations validées plutôt que de faire confiance au drapeau reçu. */
++export function restoreDiagnosticReference(
++  question: ExerciseQuestion,
++  source: Record<string, unknown> | null,
++): ExerciseQuestion['radicalReference'] {
++  const legacy = question.radicalReference
++  if (!source) return legacy
++  const text = (value: unknown) => typeof value === 'string' ? value.trim().slice(0, 300) : ''
++  const personIds: Record<string, number> = { je: 4, tu: 5, il: 6, nous: 7, vous: 8, ils: 9 }
++  const forms: RadicalPrincipalForm[] = (legacy?.paradigmForms || []).map(item => ({
++    ...item, mode: question.mode || '', tense: question.temps || '', pronoun: item.subject,
++  })).filter(item => !(Array.isArray(source.subjunctivePresentForms) && item.mode === 'subjonctif' && item.tense === 'présent'))
++  if (Array.isArray(source.subjunctivePresentForms)) {
++    for (const item of source.subjunctivePresentForms.slice(0, 12)) {
++      if (!item || typeof item !== 'object') continue
++      const personId = Number(item.personId)
++      if (![4, 5, 6, 7, 8, 9].includes(personId) || !text(item.form)) continue
++      forms.push({ mode: 'subjonctif', tense: 'présent', personId, pronoun: text(item.subject), form: text(item.form) })
++    }
++  }
++  const referenceSubject = text(source.referenceSubject)
++  if (personIds[referenceSubject] && text(source.form)) {
++    forms.push({
++      mode: text(source.referenceMode), tense: text(source.referenceTense),
++      personId: personIds[referenceSubject]!, pronoun: referenceSubject, form: text(source.form),
++    })
++  }
++  for (const key of ['imperativePresentReferences', 'subjunctivePresentReferences'] as const) {
++    if (!Array.isArray(source[key])) continue
++    for (const item of source[key].slice(0, 6)) {
++      if (!item || typeof item !== 'object') continue
++      const subject = text(item.subject)
++      if (!personIds[subject] || !text(item.form)) continue
++      forms.push({ mode: 'indicatif', tense: 'présent', personId: personIds[subject]!, pronoun: subject, form: text(item.form) })
++    }
++  }
++  // Sans la forme de base, les anciens instantanés conservent leur comportement prudent.
++  if (!question.conjugaison1 || !question.infinitif) return legacy
++  const rebuilt = buildRadicalReference({
++    infinitive: question.infinitif, mode: question.mode || '', tense: question.temps || '',
++    personId: question.personId ?? null, conjugation: question.conjugaison1, isCompound: question.isCompound,
++  }, forms)
++  return rebuilt ? { ...rebuilt, ...(legacy?.paradigmForms?.length ? { paradigmForms: legacy.paradigmForms } : {}) } : legacy
++}
+diff --git a/tests/coach-stem-feedback.test.mjs b/tests/coach-stem-feedback.test.mjs
+index d5d7c7ba..874c730a 100644
+--- a/tests/coach-stem-feedback.test.mjs
++++ b/tests/coach-stem-feedback.test.mjs
+@@ -24,7 +24,7 @@ describe('ne confond pas une faute dans le radical avec une terminaison fausse',
+     assert.equal(diagnoseCoachAnswer('il racroche', question, false).errorKind, 'close-form')
+     const details = learnerErrorDetails('il racroche', question)
+     assert.deepEqual(details.map(detail => detail.code), ['input.close_form'])
+-    assert.match(details[0].message, /différence orthographique/u)
++    assert.equal(details[0].message, 'Il manque un c : raccroche.')
+     assert.doesNotMatch(details[0].message, /terminaison/u)
+   })
+ 
+diff --git a/tests/fixtures/learner-feedback-cases.mjs b/tests/fixtures/learner-feedback-cases.mjs
+new file mode 100644
+index 00000000..29ea12fc
+--- /dev/null
++++ b/tests/fixtures/learner-feedback-cases.mjs
+@@ -0,0 +1,15 @@
++const simple = {
++  titre: 'raccrocher', infinitif: 'raccrocher', consigne: 'il | raccrocher | présent',
++  mode: 'indicatif', temps: 'présent', pronom: 'il', personId: 6,
++  reponses: ['il raccroche'], reponsesPourCorrige: ['il raccroche'],
++}
++export const learnerFeedbackCases = [
++  { name: 'lettre manquante', question: simple, answer: 'il racroche', codes: ['input.close_form'] },
++  { name: 'pronom mal recopié', question: simple, answer: 'i raccroche', codes: ['person.other_form'] },
++  { name: 'mauvais pronom, bon verbe', question: simple, answer: 'nous raccroche', codes: ['person.other_form'] },
++  { name: 'vraie terminaison', question: simple, answer: 'il raccroch', codes: ['morphology.ending'] },
++  { name: 'participe, pas accord', question: { ...simple, isCompound: true, temps: 'passé composé', pastParticiple: 'pris', reponses: ['il a pris'], reponsesPourCorrige: ['il a pris'] }, answer: 'il a prie', codes: ['compound.participle_form'] },
++  { name: 'vrai accord', question: { ...simple, isCompound: true, temps: 'passé composé', pastParticiple: 'pris', reponses: ['il a pris'], reponsesPourCorrige: ['il a pris'] }, answer: 'il a prises', codes: ['agreement.avoir_unwarranted'] },
++  { name: 'complément, pas personne', question: { ...simple, infinitif: 'manger', complement: 'les marrons', complementPosition: 'after', complementFunction: 'cod', reponses: ['il mange les marrons'], reponsesPourCorrige: ['il mange les marrons'] }, answer: 'il mange les marront', codes: ['orthography.copied_complement'] },
++  { name: 'deux diagnostics', question: { ...simple, infinitif: 'entrer', pronom: 'je', personId: 4, isCompound: true, temps: 'passé composé', pastParticiple: 'entré', reponses: ['je suis entré'], reponsesPourCorrige: ['je suis entré'], conjugationConfusions: [{ mode: 'indicatif', tense: 'futur antérieur', answers: ['je serai entré', 'je serai entrée'] }] }, answer: 'je serai entrée', codes: ['task.wrong_tense', 'agreement.subject'] },
++]
+diff --git a/tests/learner-feedback-audit.test.mjs b/tests/learner-feedback-audit.test.mjs
+new file mode 100644
+index 00000000..2bac9d98
+--- /dev/null
++++ b/tests/learner-feedback-audit.test.mjs
+@@ -0,0 +1,44 @@
++import assert from 'node:assert/strict'
++import { it } from 'node:test'
++import { learnerFeedbackCases } from './fixtures/learner-feedback-cases.mjs'
++import { auditRenderedLearnerFeedback } from '../shared/utils/learner-feedback-audit.ts'
++import { learnerErrorDetails, concealLearnerErrorDetail } from '../shared/utils/learner-error-diagnostics.ts'
++import { localizedLearnerErrorMessage } from '../shared/i18n/learner-errors.ts'
++import { SUPPORTED_LOCALES } from '../shared/i18n/locales.ts'
++import { COACH_HELP_PROFILES } from '../shared/data/coach-help-profiles.ts'
++
++for (const example of learnerFeedbackCases) {
++  it(`corpus audité : ${example.name}`, () => {
++    const detected = learnerErrorDetails(example.answer, example.question)
++    assert.deepEqual(detected.map(d => d.code), example.codes)
++    for (const locale of SUPPORTED_LOCALES) {
++      for (const profile of Object.values(COACH_HELP_PROFILES)) {
++        const details = profile.revealsAnswers ? detected : detected.map(concealLearnerErrorDetail)
++        const renderedText = details.map(d => localizedLearnerErrorMessage(d, locale)).join(' ')
++        const audit = auditRenderedLearnerFeedback({ ...example, details, locale, renderedText, revealsAnswers: profile.revealsAnswers })
++        assert.equal(audit.status, 'passed', JSON.stringify({ locale, profile: profile.id, audit }))
++      }
++    }
++  })
++}
++
++it('l’audit rejette les fausses indications de lettre, d’accord, de terminaison et les pertes de sous-type', () => {
++  const spelling = learnerFeedbackCases[0]
++  const details = learnerErrorDetails(spelling.answer, spelling.question)
++  const missing = { ...details[0], missingLetter: 'z' }
++  assert.ok(auditRenderedLearnerFeedback({ ...spelling, details: [missing], locale: 'fr', renderedText: localizedLearnerErrorMessage(missing, 'fr'), revealsAnswers: true }).issues.some(i => i.code === 'feedback-unproven-missing-letter'))
++  const ending = { code: 'morphology.ending', label: '', message: 'La terminaison est fausse.', learnerValue: '-e', expectedValue: '-e' }
++  assert.ok(auditRenderedLearnerFeedback({ ...spelling, details: [ending], locale: 'fr', renderedText: ending.message, revealsAnswers: true }).issues.some(i => i.code === 'feedback-unproven-ending'))
++  const compound = learnerFeedbackCases[4]
++  const agreement = { code: 'agreement.avoir_unwarranted', label: '', message: 'Accord indu.' }
++  assert.ok(auditRenderedLearnerFeedback({ ...compound, details: [agreement], locale: 'fr', renderedText: agreement.message, revealsAnswers: true }).issues.some(i => i.code === 'feedback-unproven-agreement'))
++  const pronoun = learnerFeedbackCases[1]
++  assert.ok(auditRenderedLearnerFeedback({ ...pronoun, details: learnerErrorDetails(pronoun.answer, pronoun.question), locale: 'en', renderedText: 'You confused the grammatical person.', revealsAnswers: true }).issues.some(i => i.code === 'feedback-subject-subtype-lost'))
++})
++
++it('l’audit rejette une correction divulguée dans un profil sans réponse', () => {
++  const example = learnerFeedbackCases[0]
++  const details = learnerErrorDetails(example.answer, example.question)
++  const renderedText = details.map(d => localizedLearnerErrorMessage(d, 'fr')).join(' ')
++  assert.ok(auditRenderedLearnerFeedback({ ...example, details, locale: 'fr', renderedText, revealsAnswers: false }).issues.some(i => i.code === 'feedback-profile-answer-leak'))
++})
+diff --git a/tests/learner-feedback-browser.test.mjs b/tests/learner-feedback-browser.test.mjs
+new file mode 100644
+index 00000000..ec360326
+--- /dev/null
++++ b/tests/learner-feedback-browser.test.mjs
+@@ -0,0 +1,282 @@
++import assert from 'node:assert/strict'
++import { spawn } from 'node:child_process'
++import { access, mkdtemp, readFile, writeFile, rm } from 'node:fs/promises'
++import { tmpdir } from 'node:os'
++import { delimiter, join } from 'node:path'
++import { fileURLToPath } from 'node:url'
++import { createRequire } from 'node:module'
++import { test } from 'node:test'
++
++const root = fileURLToPath(new URL('..', import.meta.url)).replace(/\/$/, '')
++const require = createRequire(import.meta.url)
++const enabled = process.env.FEEDBACK_BROWSER_TESTS === '1'
++let baseUrl = ''
++const delay = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
++
++async function firstExecutable(candidates) {
++  for (const candidate of candidates) {
++    if (!candidate) continue
++    try {
++      await access(candidate)
++      return candidate
++    } catch {
++      // Essaie le chemin suivant.
++    }
++  }
++  return ''
++}
++
++async function chromeExecutable() {
++  const pathCandidates = String(process.env.PATH || '')
++    .split(delimiter)
++    .flatMap(directory => ['google-chrome', 'google-chrome-stable', 'chromium', 'chromium-browser'].map(name => join(directory, name)))
++  return firstExecutable([
++    process.env.CHROME_BIN,
++    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
++    '/usr/bin/google-chrome',
++    '/usr/bin/google-chrome-stable',
++    '/usr/bin/chromium',
++    '/usr/bin/chromium-browser',
++    ...pathCandidates,
++  ])
++}
++
++async function launchBrowser() {
++  const executable = await chromeExecutable()
++  if (!executable) return { unavailable: 'Chrome ou Chromium n’est pas installé sur ce serveur.' }
++
++  const profile = await mkdtemp(join(tmpdir(), 'tatitotu-browser-tests-'))
++  const child = spawn(executable, [
++    '--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check',
++    '--no-sandbox', '--disable-dev-shm-usage', '--remote-debugging-address=127.0.0.1',
++    '--remote-debugging-port=0', '--window-size=1680,1300', `--user-data-dir=${profile}`, 'about:blank',
++  ], { stdio: 'ignore' })
++
++  const activePortFile = join(profile, 'DevToolsActivePort')
++  let debuggerAddress = ''
++  for (let attempt = 0; attempt < 80; attempt += 1) {
++    if (child.exitCode !== null) break
++    try {
++      const [port, browserPath] = (await readFile(activePortFile, 'utf8')).trim().split('\n')
++      if (port && browserPath) {
++        debuggerAddress = `ws://127.0.0.1:${port}${browserPath}`
++        break
++      }
++    } catch {
++      await delay(100)
++    }
++  }
++
++  if (!debuggerAddress) {
++    child.kill('SIGTERM')
++    await rm(profile, { recursive: true, force: true })
++    return { unavailable: 'Le navigateur sans interface n’a pas pu démarrer sur ce serveur.' }
++  }
++
++  return {
++    debuggerAddress,
++    async close() {
++      child.kill('SIGTERM')
++      await Promise.race([
++        new Promise(resolve => child.once('exit', resolve)),
++        delay(2_000),
++      ])
++      await rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
++    },
++  }
++}
++
++async function connect(debuggerAddress) {
++  const socket = new WebSocket(debuggerAddress)
++  const pending = new Map()
++  const events = new Map()
++  let nextId = 0
++
++  socket.onmessage = (event) => {
++    const message = JSON.parse(event.data)
++    if (message.id && pending.has(message.id)) {
++      const operation = pending.get(message.id)
++      pending.delete(message.id)
++      if (message.error) operation.reject(new Error(message.error.message))
++      else operation.resolve(message.result)
++      return
++    }
++    const key = `${message.sessionId || ''}:${message.method}`
++    const listeners = events.get(key) || []
++    events.delete(key)
++    for (const resolve of listeners) resolve(message.params)
++  }
++  await new Promise((resolve, reject) => {
++    socket.onopen = resolve
++    socket.onerror = () => reject(new Error('Connexion impossible au navigateur.'))
++  })
++
++  function send(method, params = {}, sessionId) {
++    const id = ++nextId
++    socket.send(JSON.stringify({ id, method, params, ...(sessionId ? { sessionId } : {}) }))
++    return new Promise((resolve, reject) => pending.set(id, { resolve, reject }))
++  }
++  function once(method, sessionId) {
++    const key = `${sessionId || ''}:${method}`
++    return new Promise(resolve => events.set(key, [...(events.get(key) || []), resolve]))
++  }
++
++  const target = await send('Target.createTarget', { url: 'about:blank' })
++  const attached = await send('Target.attachToTarget', { targetId: target.targetId, flatten: true })
++  const sessionId = attached.sessionId
++  await send('Page.enable', {}, sessionId)
++  await send('Runtime.enable', {}, sessionId)
++
++  return {
++    send: (method, params) => send(method, params, sessionId),
++    async evaluate(expression) {
++      const response = await send('Runtime.evaluate', {
++        expression,
++        awaitPromise: true,
++        returnByValue: true,
++      }, sessionId)
++      if (response.exceptionDetails) {
++        throw new Error(response.exceptionDetails.exception?.description || response.exceptionDetails.text || 'Erreur dans la page')
++      }
++      return response.result.value
++    },
++    async navigate(path) {
++      const loaded = once('Page.loadEventFired', sessionId)
++      await send('Page.navigate', { url: `${baseUrl}${path}` }, sessionId)
++      await loaded
++      await delay(1_800)
++    },
++    async close() {
++      await send('Target.closeTarget', { targetId: target.targetId })
++      socket.close()
++    },
++  }
++}
++
++async function waitFor(page, expression, timeoutMs = 10_000) {
++  const startedAt = Date.now()
++  let value
++  while (Date.now() - startedAt < timeoutMs) {
++    value = await page.evaluate(expression)
++    if (value) return value
++    await delay(200)
++  }
++  return value
++}
++
++async function buildHarness(directory, progressive) {
++  const { build } = require('esbuild')
++  const { parse, compileScript, compileStyle } = require('@vue/compiler-sfc')
++  const entry = `
++    import {createApp, h, reactive, ref, nextTick} from 'vue';
++    import Feedback from '${root}/app/components/exercise/LearnerErrorFeedback.vue';
++    import {learnerFeedbackCases as cases} from '${root}/tests/fixtures/learner-feedback-cases.mjs';
++    import {learnerErrorDetails,concealLearnerErrorDetail} from '${root}/shared/utils/learner-error-diagnostics.ts';
++    import {auditRenderedLearnerFeedback} from '${root}/shared/utils/learner-feedback-audit.ts';
++    import {SUPPORTED_LOCALES} from '${root}/shared/i18n/locales.ts';
++    import {COACH_HELP_PROFILES} from '${root}/shared/data/coach-help-profiles.ts';
++    import '${root}/app/assets/css/main.css';
++    import '${root}/app/assets/css/dark-theme.css';
++    window.feedbackLocale=ref('fr');
++    const state=reactive({details:[]}); let current;
++    window.nextRender=nextTick;
++    window.cases=cases;window.locales=SUPPORTED_LOCALES;window.profiles=Object.values(COACH_HELP_PROFILES);
++    window.renderCase=async(index,locale='fr',revealsAnswers=true)=>{
++      window.feedbackLocale.value=locale;
++      const example=cases[index];const detected=learnerErrorDetails(example.answer,example.question);
++      state.details=revealsAnswers?detected:detected.map(concealLearnerErrorDetail);
++      current={...example,details:state.details,locale,revealsAnswers};await nextTick();
++    };
++    window.auditCurrent=()=>auditRenderedLearnerFeedback({...current,renderedText:document.querySelector('.learner-error-feedback').innerText});
++    createApp({render:()=>h('main',{style:'max-width:800px;margin:auto;padding:12px'},h(Feedback,{details:state.details}))}).mount('#app');
++    window.ready=true;
++  `
++  await build({
++    stdin: { contents: entry, resolveDir: root, sourcefile: 'feedback-harness.js' },
++    absWorkingDir: root, bundle: true, format: 'iife', outfile: join(directory, 'harness.js'),
++    nodePaths: [join(root, 'node_modules')], alias: { '~~': root, '~': join(root, 'app') },
++    define: { 'process.env.NODE_ENV': '"development"' },
++    plugins: [{ name: 'actual-vue-components', setup(builder) {
++      builder.onLoad({ filter: /feature-flags\.ts$/ }, async args => ({
++        contents: (await readFile(args.path, 'utf8')).replace('PROGRESSIVE_ERROR_FEEDBACK_ENABLED = true', `PROGRESSIVE_ERROR_FEEDBACK_ENABLED = ${progressive}`), loader: 'ts',
++      }))
++      builder.onLoad({ filter: /\.vue$/ }, async args => {
++        const source = await readFile(args.path, 'utf8')
++        const { descriptor } = parse(source, { filename: args.path })
++        const id = args.path.includes('DetailMessage') ? 'data-v-feedback-message-test' : 'data-v-feedback-test'
++        const script = compileScript(descriptor, { id, inlineTemplate: true })
++        const css = descriptor.styles.map(style => compileStyle({ source: style.content, filename: args.path, id, scoped: style.scoped }).code).join('\n')
++        const globals = `import {computed,ref,watch} from 'vue'; const useLanguagePreferences=()=>({interfaceLocale:window.feedbackLocale});\n`
++        return {
++          contents: globals + script.content.replace('export default', 'const __component =') +
++            `\n__component.__scopeId=${JSON.stringify(id)};const style=document.createElement('style');style.textContent=${JSON.stringify(css)};document.head.append(style);export default __component;`,
++          loader: 'ts', resolveDir: fileURLToPath(new URL('.', `file://${args.path}`)),
++        }
++      })
++    } }],
++  })
++  const layout = parse(await readFile(join(root, 'app/layouts/default.vue'), 'utf8'))
++  const layoutCss = layout.descriptor.styles.map(style => style.content).join('\n')
++  await writeFile(join(directory, 'index.html'), `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="harness.css"><style>${layoutCss}</style></head><body><div id="app"></div><script src="harness.js"></script></body></html>`)
++}
++
++test('commentaires rendus : toutes les langues et tous les profils, mobile, sombre, clavier et repli', { skip: !enabled, timeout: 120_000 }, async () => {
++  const directory = await mkdtemp(join(tmpdir(), 'tatitotu-feedback-browser-'))
++  baseUrl = `file://${directory}`
++  await buildHarness(directory, true)
++  const browser = await launchBrowser()
++  assert.ok(browser.debuggerAddress, browser.unavailable)
++  const page = await connect(browser.debuggerAddress)
++  try {
++    await page.navigate('/index.html')
++    assert.ok(await waitFor(page, 'window.ready'))
++    const audited = await page.evaluate(`(async()=>{
++      let count=0;
++      for(const locale of window.locales) for(const profile of window.profiles) for(let index=0;index<window.cases.length;index++){
++        await renderCase(index,locale,profile.revealsAnswers);
++        const button=document.querySelector('.learner-error-feedback__more');if(button){button.click();await nextRender()}
++        const audit=auditCurrent();if(audit.status!=='passed')throw new Error(JSON.stringify({locale,profile:profile.id,index,audit}));count++;
++      }
++      return count;
++    })()`)
++    assert.equal(audited, 224)
++    await page.evaluate("renderCase(1,'fr',true)")
++    assert.ok((await page.evaluate('document.body.innerText')).includes('Vérifie le pronom'))
++    assert.ok(!(await page.evaluate('document.body.innerText')).includes('confondu la personne'))
++    await page.evaluate("renderCase(7,'fr',true)")
++    assert.equal(await page.evaluate("document.querySelector('button').getAttribute('aria-expanded')"), 'false')
++    assert.equal(await page.evaluate("[...document.querySelectorAll('li')].filter(li=>getComputedStyle(li).display!=='none').length"), 1)
++    await page.send('Page.bringToFront')
++    await page.evaluate("document.querySelector('button').focus()")
++    await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r', unmodifiedText: '\r' })
++    await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 })
++    await page.evaluate('nextRender()')
++    assert.equal(await page.evaluate("document.querySelector('button').getAttribute('aria-expanded')"), 'true')
++    assert.equal(await page.evaluate('auditCurrent().status'), 'passed')
++    for (const [label, width, dark] of [['desktop', 1440, false], ['mobile', 320, false], ['mobile-dark', 320, true]]) {
++      await page.send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: width < 500 })
++      await page.evaluate(`document.documentElement.dataset.theme='${dark ? 'dark' : 'light'}'`)
++      assert.equal(await page.evaluate('document.documentElement.scrollWidth>innerWidth'), false, label)
++      if (dark) {
++        assert.equal(await page.evaluate("getComputedStyle(document.documentElement).backgroundColor"), 'rgb(17, 27, 28)')
++        assert.equal(await page.evaluate("getComputedStyle(document.querySelector('.learner-error-feedback')).backgroundColor"), 'rgb(59, 41, 41)')
++        assert.equal(await page.evaluate("getComputedStyle(document.querySelector('.learner-error-feedback')).color"), 'rgb(220, 232, 230)')
++      }
++      const screenshot = await page.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true })
++      await writeFile(join(directory, `${label}.png`), Buffer.from(screenshot.data, 'base64'))
++    }
++    await page.evaluate("renderCase(7,'en',true)")
++    assert.equal(await page.evaluate("document.querySelector('button').getAttribute('aria-expanded')"), 'false')
++    await buildHarness(directory, false)
++    await page.navigate('/index.html')
++    assert.ok(await waitFor(page, 'window.ready'))
++    await page.evaluate("renderCase(7,'fr',true)")
++    assert.equal(await page.evaluate("Boolean(document.querySelector('.learner-error-feedback__more'))"), false)
++    assert.equal(await page.evaluate("[...document.querySelectorAll('li')].filter(li=>getComputedStyle(li).display!=='none').length"), 2)
++    console.log(JSON.stringify({ audited, keyboard: true, desktop: true, mobile320: true, dark: true, rollback: true, artifacts: directory }))
++  }
++  finally {
++    await page.close()
++    await browser.close()
++  }
++})
+diff --git a/tests/learner-feedback-safety.test.mjs b/tests/learner-feedback-safety.test.mjs
+new file mode 100644
+index 00000000..2b835bce
+--- /dev/null
++++ b/tests/learner-feedback-safety.test.mjs
+@@ -0,0 +1,144 @@
++import assert from 'node:assert/strict'
++import { describe, it } from 'node:test'
++import { learnerQuestionSnapshot } from '../server/utils/learner-progress.ts'
++import { compactLearnerQuestion } from '../shared/utils/learner-question-snapshot.ts'
++import { buildRadicalReference } from '../shared/utils/radical-reference.ts'
++import { learnerErrorDetails, learnerErrorDetailText, concealLearnerErrorDetail } from '../shared/utils/learner-error-diagnostics.ts'
++import { diagnoseCoachAgreement } from '../shared/utils/coach-feedback.ts'
++import { agreePastParticiple } from '../shared/utils/past-participle-agreement.ts'
++import { localizedLearnerErrorMessage } from '../shared/i18n/learner-errors.ts'
++import { SUPPORTED_LOCALES } from '../shared/i18n/locales.ts'
++import { reactive } from 'vue'
++
++function target(overrides = {}) {
++  return {
++    titre: 'raccrocher', infinitif: 'raccrocher', consigne: 'il | raccrocher | présent',
++    personId: 6, pronom: 'il', mode: 'indicatif', temps: 'présent',
++    reponses: ['il raccroche'], reponsesPourCorrige: ['il raccroche'], ...overrides,
++  }
++}
++
++describe('sépare le verbe du complément pour identifier la personne', () => {
++  for (const [pronom, personId, forme] of [['il', 6, 'mange'], ['nous', 7, 'mangeons'], ['ils', 9, 'mangent']]) {
++    it(`${pronom} : marront ne constitue pas une confusion nous/ils`, () => {
++      const question = target({ infinitif: 'manger', pronom, personId,
++        reponses: [`${pronom} ${forme} les marrons`], reponsesPourCorrige: [`${pronom} ${forme} les marrons`],
++        complement: 'les marrons', complementPosition: 'after', complementFunction: 'cod' })
++      assert.deepEqual(learnerErrorDetails(`${pronom} ${forme} les marront`, question).map(d => d.code), ['orthography.copied_complement'])
++    })
++  }
++  it('conserve une vraie confusion nous/ils au futur, avec ou sans complément', () => {
++    for (const [pronom, personId, forme, faute] of [['nous', 7, 'mangerons', 'mangeront'], ['ils', 9, 'mangeront', 'mangerons']]) {
++      for (const suffix of ['', ' les marrons']) {
++        const q = target({ infinitif: 'manger', pronom, personId, temps: 'futur',
++          reponses: [`${pronom} ${forme}${suffix}`], reponsesPourCorrige: [`${pronom} ${forme}${suffix}`] })
++        assert.ok(learnerErrorDetails(`${pronom} ${faute}${suffix}`, q).some(d => d.code === 'person.other_form'))
++      }
++    }
++  })
++  it('ne transforme pas un changement de radical en simple changement de personne', () => {
++    const q = target({ personId: 7, pronom: 'nous', temps: 'futur', reponses: ['nous mangerons'], reponsesPourCorrige: ['nous mangerons'] })
++    assert.ok(!learnerErrorDetails('nous rangeront', q).some(d => d.code === 'person.other_form'))
++  })
++})
++
++describe('ne diagnostique que des flexions réelles du participe passé', () => {
++  for (const [base, typo] of [['pris', 'prie'], ['mis', 'mie'], ['écrit', 'écrie'], ['dit', 'die']]) {
++    for (const canonical of [true, false]) {
++      it(`${typo}/${base}, ${canonical ? 'nouveau' : 'ancien'} questionnaire : forme, pas accord`, () => {
++        const q = target({ isCompound: true, temps: 'passé composé', pastParticiple: canonical ? base : undefined,
++          reponses: [`il a ${base}`], reponsesPourCorrige: [`il a ${base}`] })
++        assert.equal(diagnoseCoachAgreement(`il a ${typo}`, q), undefined)
++        assert.ok(!learnerErrorDetails(`il a ${typo}`, q).some(d => d.code.startsWith('agreement.')))
++      })
++    }
++  }
++  for (const base of ['pris', 'mis', 'fait', 'écrit', 'dit', 'parti', 'venu', 'été', 'dû', 'absous', 'dissous', 'mû', 'crû']) {
++    it(`conserve les vrais accords de ${base}`, () => {
++      const feminine = agreePastParticiple(base, 'feminin', 'pluriel')
++      const q = target({ isCompound: true, temps: 'passé composé', pastParticiple: base,
++        reponses: [`il a ${base}`], reponsesPourCorrige: [`il a ${base}`] })
++      assert.equal(diagnoseCoachAgreement(`il a ${feminine}`, q)?.errorKind, 'agreement')
++    })
++  }
++})
++
++describe('même diagnostic avant sauvegarde, après passage client/serveur et après reprise JSON', () => {
++  it('enregistre aussi les questions réactives de Vue sans partager leurs références', () => {
++    const q = reactive(target({ radicalReference: {
++      kind: 'present-ils', label: 'ils au présent', form: 'raccrochent', removableEnding: 'ent', radical: 'raccroch',
++      targetEnding: 'e', validated: true, paradigmForms: [{ subject: 'ils', personId: 9, form: 'raccrochent' }],
++    } }))
++    const compact = compactLearnerQuestion(q)
++    assert.doesNotThrow(() => JSON.stringify(compact))
++    assert.deepEqual(compact.radicalReference, q.radicalReference)
++    compact.radicalReference.paradigmForms[0].form = 'modifié'
++    assert.equal(q.radicalReference.paradigmForms[0].form, 'raccrochent')
++  })
++  const cases = [
++    ['raccrocher', 'indicatif', 'présent', 6, 'il', 'raccroche', 'raccrochz', 'indicatif', 'présent', 9, 'ils', 'raccrochent'],
++    ['raccrocher', 'indicatif', 'imparfait', 7, 'nous', 'raccrochions', 'raccrochionz', 'indicatif', 'présent', 7, 'nous', 'raccrochons'],
++    ['raccrocher', 'indicatif', 'futur', 7, 'nous', 'raccrocherons', 'raccrocheronz', 'indicatif', 'futur', 4, 'je', 'raccrocherai'],
++    ['raccrocher', 'conditionnel', 'présent', 8, 'vous', 'raccrocheriez', 'raccrocheries', 'indicatif', 'futur', 4, 'je', 'raccrocherai'],
++    ['raccrocher', 'indicatif', 'passé simple', 7, 'nous', 'raccrochâmes', 'raccrochâmez', 'indicatif', 'passé simple', 6, 'il', 'raccrocha'],
++    ['manger', 'indicatif', 'passé simple', 9, 'ils', 'mangèrent', 'mangèrenz', 'indicatif', 'passé simple', 6, 'il', 'mangea'],
++    ['placer', 'indicatif', 'passé simple', 9, 'ils', 'placèrent', 'placèrenz', 'indicatif', 'passé simple', 6, 'il', 'plaça'],
++    ['raccrocher', 'subjonctif', 'présent', 7, 'nous', 'raccrochions', 'raccrochionz', 'indicatif', 'présent', 7, 'nous', 'raccrochons'],
++    ['raccrocher', 'subjonctif', 'imparfait', 6, 'il', 'raccrochât', 'raccrochâz', 'indicatif', 'passé simple', 6, 'il', 'raccrocha'],
++    ['raccrocher', 'impératif', 'présent', 5, 'tu', 'raccroche', 'racroche', 'indicatif', 'présent', 5, 'tu', 'raccroches'],
++  ]
++  for (const [infinitif, mode, temps, personId, pronom, form, typo, sourceMode, sourceTense, sourceId, sourcePronoun, sourceForm] of cases) {
++    it(`${infinitif}, ${mode} ${temps}, ${pronom}`, () => {
++      const forms = [{ mode: sourceMode, tense: sourceTense, personId: sourceId, pronoun: sourcePronoun, form: sourceForm }]
++      const reference = buildRadicalReference({ infinitive: infinitif, mode, tense: temps, personId, conjugation: form }, forms)
++      assert.ok(reference?.validated)
++      reference.paradigmForms = [{ subject: pronom, personId, form }]
++      const prefix = mode === 'impératif' ? '' : `${pronom} `
++      const q = target({ infinitif, mode, temps, personId, pronom, conjugaison1: form, radicalReference: reference,
++        reponses: [`${prefix}${form}`], reponsesPourCorrige: [`${prefix}${form}`] })
++      const expected = learnerErrorDetails(`${prefix}${typo}`, q)
++      const compact = compactLearnerQuestion(q)
++      const stored = learnerQuestionSnapshot(compact)
++      for (const snapshot of [compact, stored, JSON.parse(JSON.stringify(stored)), learnerQuestionSnapshot(stored)]) {
++        assert.deepEqual(learnerErrorDetails(`${prefix}${typo}`, snapshot), expected)
++        assert.deepEqual(snapshot.radicalReference, q.radicalReference)
++      }
++    })
++  }
++  it('conserve les métadonnées des temps composés, de la voix et des auxiliaires variables', () => {
++    const q = target({ isCompound: true, voice: 'passive', passiveSubject: 'elle', passiveAgent: 'par Léa',
++      pastParticiple: 'pris', preferredAuxiliary: 'être', auxiliaryChoices: ['avoir', 'être'],
++      reponses: ['elle a été prise'], reponsesPourCorrige: ['elle a été prise'] })
++    const snapshot = learnerQuestionSnapshot(compactLearnerQuestion(q))
++    for (const key of ['pastParticiple', 'voice', 'passiveSubject', 'passiveAgent', 'preferredAuxiliary', 'auxiliaryChoices']) assert.deepEqual(snapshot[key], q[key])
++    assert.deepEqual(learnerErrorDetails('elle a été pris', snapshot), learnerErrorDetails('elle a été pris', q))
++  })
++  it('reconstruit la référence sans faire confiance à validated ou à une terminaison transmise', () => {
++    const q = target({ conjugaison1: 'raccroche', radicalReference: {
++      kind: 'memorized-stem', label: 'faux', form: 'fake', radical: 'rac', targetEnding: 'croche', validated: true,
++    } })
++    const snapshot = learnerQuestionSnapshot(q)
++    assert.ok(!snapshot.radicalReference?.validated)
++    assert.deepEqual(learnerErrorDetails('il racroche', snapshot).map(d => d.code), ['input.close_form'])
++  })
++})
++
++describe('commentaires utiles dans chaque langue et sans fuite dans les profils sans correction', () => {
++  for (const locale of SUPPORTED_LOCALES) {
++    it(locale, () => {
++      const [pronoun] = learnerErrorDetails('i raccroche', target())
++      assert.equal(pronoun.subjectIssueKind, 'typo')
++      const message = localizedLearnerErrorMessage(pronoun, locale)
++      assert.ok(message.includes('il') && message.includes('i'))
++      assert.doesNotMatch(message, /grammatical person|confondu la personne|grammatische Person|persona gramatical/u)
++      assert.equal(localizedLearnerErrorMessage(concealLearnerErrorDetail(pronoun), locale), message)
++      const [spelling] = learnerErrorDetails('il racroche', target())
++      assert.equal(spelling.missingLetter, 'c')
++      assert.ok(localizedLearnerErrorMessage(spelling, locale).includes('raccroche'))
++      const concealed = concealLearnerErrorDetail(spelling)
++      assert.ok(!learnerErrorDetailText(concealed, locale).includes('raccroche'))
++      assert.equal(concealed.expectedValue, undefined)
++      assert.equal(concealed.missingLetter, undefined)
++    })
++  }
++})
+diff --git a/tests/learner-identification-history.test.mjs b/tests/learner-identification-history.test.mjs
+index b616a75a..08b150b2 100644
+--- a/tests/learner-identification-history.test.mjs
++++ b/tests/learner-identification-history.test.mjs
+@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
+ import { readFile } from 'node:fs/promises'
+ import test from 'node:test'
+ 
++import { compactLearnerQuestion } from '../shared/utils/learner-question-snapshot.ts'
+ import { learnerChallengeSnapshot, learnerQuestionSnapshot } from '../server/utils/learner-progress.ts'
+ 
+ const [space, classicWorkspace, wizardWorkspace, chat, progress] = await Promise.all([
+@@ -48,23 +49,23 @@ test('les questions enregistrées conservent leur citation lors d’une reprise'
+     before: 'Il ', target: 'viendrait', after: ' demain.',
+     author: 'Une autrice', work: 'Une œuvre', chapter: null, sourceUrl: 'https://example.test',
+   }
+-  const question = learnerQuestionSnapshot({
++  const question = learnerQuestionSnapshot(compactLearnerQuestion({
+     titre: 'venir', consigne: 'Il viendrait demain.',
+     reponses: ['conditionnel présent'], reponsesPourCorrige: ['Le présent du conditionnel'],
+     literaryCitation,
+-  })
++  }))
+   assert.deepEqual(question.literaryCitation, literaryCitation)
+-  assert.match(progress, /literaryCitation: question\.literaryCitation/u)
++  assert.match(progress, /compactLearnerQuestion\(attempt\.question\)/u)
+ })
+ 
+ test('les questions enregistrées conservent la forme à surligner lors d’une reprise', () => {
+-  const question = learnerQuestionSnapshot({
++  const question = learnerQuestionSnapshot(compactLearnerQuestion({
+     titre: 'venir', consigne: 'il viendrait',
+     reponses: ['conditionnel présent'], reponsesPourCorrige: ['Le présent du conditionnel'],
+     conjugaison1: 'viendrait',
+-  })
++  }))
+   assert.equal(question.conjugaison1, 'viendrait')
+-  assert.match(progress, /conjugaison1: question\.conjugaison1/u)
++  assert.match(progress, /questions\.map\(compactLearnerQuestion\)/u)
+ })
+ 
+ test('affiche le type du défi sous le titre de la timeline MyPage', () => {

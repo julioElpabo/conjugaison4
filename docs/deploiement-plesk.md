@@ -49,6 +49,8 @@ pas nécessaire.
 
 ## 3. Déployer sans action supplémentaire
 
+La commande locale de publication `deploy-conjugaison` lance désormais obligatoirement `npm run test:feedback`, après installation des dépendances et avant tout commit ou push. Les anciennes et nouvelles régressions ainsi que Chrome doivent tous réussir ; aucun test ignoré n'est accepté. Chrome/Chromium doit être disponible sur la machine qui prépare la publication. Ce contrôle s'effectue avant l'envoi des fichiers et ne nécessite aucune action sur Plesk. Voir `docs/feedback-release-gate.md`.
+
 Ne configurer aucune commande après déploiement. En particulier, ne pas
 utiliser :
 

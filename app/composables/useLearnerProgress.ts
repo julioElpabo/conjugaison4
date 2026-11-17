@@ -1,3 +1,4 @@
+import { compactLearnerQuestion } from '~~/shared/utils/learner-question-snapshot'
 import type {
   ExerciseAttempt,
   ExerciseQuestion,
@@ -25,58 +26,6 @@ export function createLearnerTrackingContext(input: {
   }
 }
 
-function compactQuestion(question: ExerciseQuestion): ExerciseQuestion {
-  return {
-    exerciseKind: question.exerciseKind,
-    titre: question.titre,
-    instruction: question.instruction,
-    consigne: question.consigne,
-    reponses: [...question.reponses],
-    reponsesPourCorrige: [...question.reponsesPourCorrige],
-    futureSimpleAnswers: question.futureSimpleAnswers
-      ? [...question.futureSimpleAnswers]
-      : undefined,
-    conjugationConfusions: question.conjugationConfusions
-      ? question.conjugationConfusions.map(confusion => ({
-          tense: confusion.tense,
-          mode: confusion.mode,
-          answers: [...confusion.answers],
-        }))
-      : undefined,
-    verbeId: question.verbeId,
-    tenseId: question.tenseId,
-    personId: question.personId,
-    infinitif: question.infinitif,
-    pronom: question.pronom,
-    temps: question.temps,
-    mode: question.mode,
-    isCompound: question.isCompound,
-    conjugaison1: question.conjugaison1,
-    conjugaison2: question.conjugaison2,
-    conjugaison3: question.conjugaison3,
-    radicalReference: question.radicalReference?.paradigmForms?.length
-      ? {
-          kind: question.radicalReference.kind,
-          label: question.radicalReference.label,
-          form: question.radicalReference.form,
-          removableEnding: question.radicalReference.removableEnding,
-          radical: question.radicalReference.radical,
-          paradigmForms: question.radicalReference.paradigmForms.map(form => ({ ...form })),
-        }
-      : undefined,
-    complement: question.complement,
-    complementPosition: question.complementPosition,
-    complementFunction: question.complementFunction,
-    saisiePrefixe: question.saisiePrefixe,
-    agreementReminder: question.agreementReminder
-      ? { ...question.agreementReminder }
-      : undefined,
-    literaryCitation: question.literaryCitation
-      ? { ...question.literaryCitation }
-      : undefined,
-  }
-}
-
 export function useLearnerProgress() {
   const { user, clearUser } = useLearnerAuth()
 
@@ -92,7 +41,7 @@ export function useLearnerProgress() {
           credentials: 'same-origin',
           body: {
             ...context,
-            questions: questions.map(compactQuestion),
+            questions: questions.map(compactLearnerQuestion),
           },
         })
         return true
@@ -125,7 +74,7 @@ export function useLearnerProgress() {
             ...context,
             questionIndex: questionIndex + (context.questionIndexOffset || 0),
             attemptNumber: attempt.attemptNumber || 1,
-            question: compactQuestion(attempt.question),
+            question: compactLearnerQuestion(attempt.question),
             answer: attempt.answer,
             correct: attempt.status === 'correct' && !attempt.answerWasHeard,
           },

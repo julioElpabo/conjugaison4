@@ -14,6 +14,7 @@ export type AnswerValidationReason =
   | 'empty-answer'
   | 'no-expected-answer'
   | 'missing-subject-pronoun'
+  | 'incorrect-word-spacing'
   | 'no-match'
 
 export interface AnswerValidationResult {
@@ -143,6 +144,34 @@ export function validateAnswer(
   }
 }
 
+/** Tolère les espaces supplémentaires, sans effacer les frontières entre les mots. */
+export function normalizeConjugationSpacing(value: string, options: AnswerNormalizationOptions = {}) {
+  return normalizeAnswer(value, { ...options, ignoreWhitespace: false })
+    .replace(/\s+/gu, ' ')
+    .replace(/\s*'\s*/gu, "'")
+}
+
+export function findConjugationSpacingIssue(answer: unknown, question: { reponses: readonly unknown[] }, options: AnswerNormalizationOptions = {}) {
+  if (typeof answer !== 'string') return null
+  const learner = normalizeConjugationSpacing(answer, options)
+  const candidates = question.reponses.filter((value): value is string => typeof value === 'string')
+  if (candidates.some(value => normalizeConjugationSpacing(value, options) === learner)) return null
+  const expected = candidates.find(value => normalizeAnswer(value, { ...options, ignoreWhitespace: true })
+    === normalizeAnswer(answer, { ...options, ignoreWhitespace: true }))
+  if (!expected) return null
+  const learnerWords = learner.split(' ')
+  const expectedWords = normalizeConjugationSpacing(expected, options).split(' ')
+  while (learnerWords.length && expectedWords.length && learnerWords[0] === expectedWords[0]) {
+    learnerWords.shift()
+    expectedWords.shift()
+  }
+  while (learnerWords.length && expectedWords.length && learnerWords.at(-1) === expectedWords.at(-1)) {
+    learnerWords.pop()
+    expectedWords.pop()
+  }
+  return { learnerValue: learnerWords.join(' '), expectedValue: expectedWords.join(' ') }
+}
+
 function normalizedSubjectPronoun(value?: string) {
   const subject = normalizeAnswer(value || '', { ignoreWhitespace: false })
     .replace(/^(?:que\s+|qu')/u, '')
@@ -227,9 +256,12 @@ export function validateConjugationAnswer(
   options: AnswerNormalizationOptions = {},
 ): AnswerValidationResult {
   const result = validateAnswer(answer, question.reponses, options)
+  const checked = result.isCorrect && findConjugationSpacingIssue(answer, question, options)
+    ? { ...result, isCorrect: false, reason: 'incorrect-word-spacing' as const, matchedAnswer: null }
+    : result
   const pronoun = normalizedSubjectPronoun(question.pronom)
-  if (!pronoun || !conjugationRequiresSubjectPronoun(question)) return result
-  if (result.isCorrect && answerContainsSubjectPronoun(answer, pronoun)) return result
+  if (!pronoun || !conjugationRequiresSubjectPronoun(question)) return checked
+  if (result.isCorrect && answerContainsSubjectPronoun(answer, pronoun)) return checked
   if (result.isCorrect || answerMatchesWithoutSubjectPronoun(answer, question.reponses, pronoun)) {
     return {
       ...result,

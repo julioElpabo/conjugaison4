@@ -1,3 +1,4 @@
+import { restoreDiagnosticReference } from '../../shared/utils/learner-question-snapshot'
 import { exerciseKindFor, SELECTABLE_EXERCISE_KINDS } from '../../shared/utils/exercise-kinds'
 import { createHash } from 'node:crypto'
 import { parseChallengePersonIds, PublicInputError } from '../services/public-api-validation'
@@ -168,7 +169,7 @@ export function learnerQuestionSnapshot(value: unknown): ExerciseQuestion {
     ? question.literaryCitation as Record<string, unknown>
     : null
   const citationTarget = shortText(citation?.target, 200)
-  return {
+  const snapshot: ExerciseQuestion = {
     ...(['conjugation', 'tense-identification', 'mode-identification', 'infinitive-identification'].includes(String(question.exerciseKind))
       ? { exerciseKind: question.exerciseKind as Exclude<ExerciseKind, 'mixed'> }
       : {}),
@@ -187,6 +188,15 @@ export function learnerQuestionSnapshot(value: unknown): ExerciseQuestion {
     temps: shortText(question.temps, 100) || undefined,
     mode: shortText(question.mode, 100) || undefined,
     isCompound: question.isCompound === true,
+    pastParticiple: shortText(question.pastParticiple, 100) || undefined,
+    voice: question.voice === 'passive' ? 'passive' : 'active',
+    passiveSubject: shortText(question.passiveSubject, 100) || undefined,
+    passiveAgent: shortText(question.passiveAgent, 200) || undefined,
+    auxiliaryChoices: Array.isArray(question.auxiliaryChoices)
+      ? [...new Set(question.auxiliaryChoices.filter((item): item is 'avoir' | 'être' => item === 'avoir' || item === 'être'))]
+      : undefined,
+    preferredAuxiliary: question.preferredAuxiliary === 'avoir' || question.preferredAuxiliary === 'être'
+      ? question.preferredAuxiliary : undefined,
     conjugaison1: shortText(question.conjugaison1, 300) || undefined,
     conjugaison2: shortText(question.conjugaison2, 300) || undefined,
     conjugaison3: shortText(question.conjugaison3, 300) || undefined,
@@ -231,6 +241,8 @@ export function learnerQuestionSnapshot(value: unknown): ExerciseQuestion {
         }
       : undefined,
   }
+  snapshot.radicalReference = restoreDiagnosticReference(snapshot, radicalReference)
+  return snapshot
 }
 
 export function learnerFormKey(question: ExerciseQuestion, exerciseKind: string) {

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 
+import { compactLearnerQuestion } from '../shared/utils/learner-question-snapshot.ts'
 import { learnerChallengeSnapshot, learnerQuestionSnapshot } from '../server/utils/learner-progress.ts'
 
 const [space, classicWorkspace, wizardWorkspace, chat, progress] = await Promise.all([
@@ -48,23 +49,23 @@ test('les questions enregistrées conservent leur citation lors d’une reprise'
     before: 'Il ', target: 'viendrait', after: ' demain.',
     author: 'Une autrice', work: 'Une œuvre', chapter: null, sourceUrl: 'https://example.test',
   }
-  const question = learnerQuestionSnapshot({
+  const question = learnerQuestionSnapshot(compactLearnerQuestion({
     titre: 'venir', consigne: 'Il viendrait demain.',
     reponses: ['conditionnel présent'], reponsesPourCorrige: ['Le présent du conditionnel'],
     literaryCitation,
-  })
+  }))
   assert.deepEqual(question.literaryCitation, literaryCitation)
-  assert.match(progress, /literaryCitation: question\.literaryCitation/u)
+  assert.match(progress, /compactLearnerQuestion\(attempt\.question\)/u)
 })
 
 test('les questions enregistrées conservent la forme à surligner lors d’une reprise', () => {
-  const question = learnerQuestionSnapshot({
+  const question = learnerQuestionSnapshot(compactLearnerQuestion({
     titre: 'venir', consigne: 'il viendrait',
     reponses: ['conditionnel présent'], reponsesPourCorrige: ['Le présent du conditionnel'],
     conjugaison1: 'viendrait',
-  })
+  }))
   assert.equal(question.conjugaison1, 'viendrait')
-  assert.match(progress, /conjugaison1: question\.conjugaison1/u)
+  assert.match(progress, /questions\.map\(compactLearnerQuestion\)/u)
 })
 
 test('affiche le type du défi sous le titre de la timeline MyPage', () => {

@@ -2,6 +2,7 @@ import type { ExerciseQuestion, LearnerErrorDetail } from '../types/conjugation'
 import {
   findConjugationConfusions,
   findImpossibleSingularEnding,
+  findConjugationSpacingIssue,
   isFutureSimpleInsteadOfNearFuture,
   normalizeAnswer,
   validateAnswer,
@@ -11,6 +12,8 @@ import type { AppLocale } from '../i18n/locales'
 import { localizedLearnerErrorMessage, localizedLearnerErrorText } from '../i18n/learner-errors'
 import { withSwissObjectAliases } from './object-terminology'
 import { subjectPronounIssue, subjectPronounFeedback } from './subject-pronoun-feedback'
+import { findConjugationElisionIssue } from './conjugation-orthography'
+import { localizedOrthographyIssueMessage } from '../i18n/learner-errors'
 
 export type LearnerErrorConfidence = 'high' | 'medium' | 'low'
 
@@ -44,7 +47,7 @@ export interface LearnerErrorTag {
   evidence?: Record<string, string>
 }
 
-export const LEARNER_ERROR_DETECTOR_VERSION = '1.4.0'
+export const LEARNER_ERROR_DETECTOR_VERSION = '1.5.1'
 
 function text(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
@@ -93,13 +96,21 @@ function otherPersonTag(answer: string, question: ExerciseQuestion) {
     : null
 }
 
-function lastWord(value: string) {
-  return normalizeAnswer(value, { ignoreWhitespace: false }).match(/\p{L}+/gu)?.at(-1) || ''
-}
-
 function pluralPersonEndingTag(answer: string, question: ExerciseQuestion) {
-  const learnerWord = lastWord(answer)
-  const expectedWord = lastWord(question.reponses[0] || '')
+  // Ce raccourci ne prouve une confusion nous/ils qu'au futur simple.
+  if (question.isCompound || question.mode !== 'indicatif'
+    || !['futur', 'futur simple'].includes(question.temps || '')
+    || ![7, 9].includes(Number(question.personId))) return null
+  const verb = (value: string) => {
+    const tokens = normalizeAnswer(value, { ignoreWhitespace: false }).match(/\p{L}+/gu) || []
+    const prefixes = new Set(['que', 'qu', 'je', 'j', 'tu', 'il', 'elle', 'iel', 'on', 'nous', 'vous', 'ils', 'elles', 'iels', 'me', 'm', 'te', 't', 'se', 's', 'ne', 'n', 'le', 'la', 'les', 'l', 'lui', 'leur', 'y', 'en'])
+    let index = 0
+    while (prefixes.has(tokens[index] || '')) index += 1
+    return tokens[index] || ''
+  }
+  const learnerWord = verb(answer)
+  const expectedWord = verb(question.reponses[0] || '')
+  if (!learnerWord || learnerWord.slice(0, -3) !== expectedWord.slice(0, -3)) return null
   if (learnerWord.endsWith('ont') && expectedWord.endsWith('ons')) {
     return tag('person.other_form', 'high', {
       detectedPerson: 'ils/elles',
@@ -195,6 +206,12 @@ export function diagnoseLearnerError(
   answer: string,
   question: ExerciseQuestion,
 ): LearnerErrorTag[] {
+  if (!question.exerciseKind || question.exerciseKind === 'conjugation') {
+    const elision = findConjugationElisionIssue(answer, question)
+    if (elision) return uniqueTags([tag('orthography.punctuation', 'high', { ...elision, orthographyIssueKind: 'elision' })])
+    const spacing = findConjugationSpacingIssue(answer, question)
+    if (spacing) return uniqueTags([tag('orthography.punctuation', 'high', { ...spacing, orthographyIssueKind: 'word-spacing' })])
+  }
   if (validateAnswer(answer, question.reponses).isCorrect) return []
 
   const subjectIssue = subjectPronounIssue(answer, question)
@@ -306,6 +323,25 @@ export function learnerErrorLabels(
   return learnerErrorDetails(answer, question).map(detail => withSwissObjectAliases(detail.label))
 }
 
+function missingLetterDetail(answer: string, question: ExerciseQuestion) {
+  const words = (value: string) => normalizeAnswer(value, { ignoreWhitespace: false }).match(/\p{L}+/gu) || []
+  const learner = words(answer)
+  for (const candidate of question.reponses) {
+    const expected = words(candidate)
+    if (learner.length !== expected.length) continue
+    const differences = expected.flatMap((word, index) => word === learner[index] ? [] : [{ expected: word, learner: learner[index]! }])
+    if (differences.length !== 1) continue
+    const difference = differences[0]!
+    if (difference.expected.length !== difference.learner.length + 1) continue
+    for (let index = 0; index < difference.expected.length; index += 1) {
+      if (difference.expected.slice(0, index) + difference.expected.slice(index + 1) === difference.learner) {
+        return { learnerValue: difference.learner, expectedValue: difference.expected, missingLetter: difference.expected[index]! }
+      }
+    }
+  }
+  return null
+}
+
 export function learnerErrorDetails(
   answer: string,
   question: ExerciseQuestion,
@@ -318,6 +354,16 @@ export function learnerErrorDetails(
       if (item.code === 'unknown') return []
       const label = labels.get(item.code)
       if (!label) return []
+      if (item.code === 'orthography.punctuation'
+        && (item.evidence?.orthographyIssueKind === 'elision' || item.evidence?.orthographyIssueKind === 'word-spacing')) {
+        return [{
+          code: item.code, label,
+          orthographyIssueKind: item.evidence.orthographyIssueKind,
+          message: localizedOrthographyIssueMessage(item.evidence.orthographyIssueKind, 'fr'),
+          learnerValue: item.evidence.learnerValue,
+          expectedValue: item.evidence.expectedValue,
+        }]
+      }
       if (item.code === 'person.other_form'
         && item.evidence?.detectedPerson
         && item.evidence?.expectedPerson) {
@@ -329,6 +375,7 @@ export function learnerErrorDetails(
             : `Tu as confondu la personne. Tu as conjugué avec « ${item.evidence.detectedPerson} », alors que c’était « ${item.evidence.expectedPerson} ».`,
           learnerValue: item.evidence.detectedPerson,
           expectedValue: item.evidence.expectedPerson,
+          ...(item.evidence.subjectIssueKind ? { subjectIssueKind: item.evidence.subjectIssueKind as 'typo' | 'mismatch' } : {}),
         }]
       }
       if (item.code === 'morphology.ending') {
@@ -338,6 +385,13 @@ export function learnerErrorDetails(
           message: 'La terminaison est fausse.',
           ...(item.evidence?.learnerEnding ? { learnerValue: `-${item.evidence.learnerEnding}` } : {}),
           ...(item.evidence?.expectedEnding ? { expectedValue: `-${item.evidence.expectedEnding}` } : {}),
+        }]
+      }
+      if (item.code === 'input.close_form') {
+        const missing = missingLetterDetail(answer, question)
+        if (missing) return [{
+          code: item.code, label, ...missing,
+          message: `Il manque un ${missing.missingLetter} : ${missing.expectedValue}.`,
         }]
       }
       const evidence = item.evidence || {}
@@ -387,7 +441,7 @@ export function learnerErrorDetails(
         if (item.code === 'compound.participle_form') {
           return evidence.auxiliary && evidence.learnerForm && evidence.expectedParticiple
             ? `Après l’auxiliaire « ${evidence.auxiliary} », il fallait employer le participe passé « ${evidence.expectedParticiple} », et non « ${evidence.learnerForm} ».`
-            : 'Après l’auxiliaire, il fallait employer le participe passé et non une autre forme conjuguée.'
+            : 'Vérifie la forme du participe passé après l’auxiliaire.'
         }
         if (item.code === 'agreement.subject') {
           return 'Le participe passé n’était pas correctement accordé avec le sujet.'
@@ -432,6 +486,20 @@ export function mergeLearnerErrorDetails(...groups: LearnerErrorDetail[][]): Lea
   return [...details.values()]
 }
 
+/** Les profils sans correction conservent un conseil utile sans dévoiler la forme attendue. */
+export function concealLearnerErrorDetail(detail: LearnerErrorDetail): LearnerErrorDetail {
+  // Le pronom demandé est déjà dans la consigne ; conserver le sous-type évite une fausse accusation.
+  if (detail.subjectIssueKind) return { ...detail }
+  const message = detail.code === 'compound.auxiliary'
+    ? 'L’auxiliaire choisi ne convient pas pour construire ce temps composé.'
+    : detail.code === 'compound.participle_form'
+      ? 'Vérifie la forme du participe passé après l’auxiliaire.'
+      : detail.missingLetter
+        ? 'Ta réponse était proche de la bonne forme, mais elle contenait encore une différence orthographique.'
+        : detail.message
+  return { ...detail, message, learnerValue: undefined, expectedValue: undefined, missingLetter: undefined }
+}
+
 export function learnerErrorDisplayCoverage(details: readonly LearnerErrorDetail[]) {
   const codes = new Set(details.map(detail => detail.code))
   return {
@@ -444,7 +512,7 @@ export function learnerErrorDisplayCoverage(details: readonly LearnerErrorDetail
 }
 
 export function learnerErrorDetailText(detail: LearnerErrorDetail, locale: AppLocale = 'fr'): string {
-  if (detail.code === 'person.other_form') return localizedLearnerErrorMessage(detail, locale)
+  if (detail.code === 'person.other_form' || detail.missingLetter) return localizedLearnerErrorMessage(detail, locale)
   return localizedLearnerErrorText(detail, locale)
 }
 

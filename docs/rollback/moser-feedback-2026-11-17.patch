@@ -1,0 +1,528 @@
+diff --git a/docs/analyse-signalement-moser.md b/docs/analyse-signalement-moser.md
+index 4fc3a00d..07a0f208 100644
+--- a/docs/analyse-signalement-moser.md
++++ b/docs/analyse-signalement-moser.md
+@@ -1,6 +1,20 @@
+ # Analyse du signalement de Lise-Marie Moser — 17 novembre 2026
+ 
+-Analyse reproduite sur le code local, sans modification du validateur ni des commentaires pédagogiques. Le site publié n'a pas été vérifié pendant cette intervention.
++Le constat initial ci-dessous a été reproduit sur le code local. Les corrections ont ensuite été implémentées et vérifiées localement, après autorisation. Aucun déploiement ni aucune réécriture des historiques n'a été effectué.
++
++## Corrections réalisées
++
++- `je ai cru` est refusé avec « Il faut une apostrophe pour l’élision. », accompagné de `je ai` → `j'ai` lorsque le profil montre la correction. `je` et `j’` ne sont plus présentés comme deux personnes différentes.
++- `il acouru` et `on aparlé` sont refusés avec « Vérifie les espaces entre les mots. », et les comparaisons `acouru` → `a couru` et `aparlé` → `a parlé`.
++- La vérification des frontières entre les mots est limitée à `validateConjugationAnswer`. Le normaliseur historique et `validateAnswer`, utilisés pour les autres comparaisons et exercices de reconnaissance, restent compatibles. Les espaces supplémentaires, les apostrophes de clavier et les représentations Unicode équivalentes sont acceptés.
++- Le diagnostic repose sur une réponse admise et sur un reste de phrase exact. Aucune élision n'est inventée devant un h aspiré. Les formes pronominales, le subjonctif et les compléments sont couverts.
++- La précision élision/espace survit aux traductions et à la reprise, y compris avec les profils sans correction. Elle utilise le code existant `orthography.punctuation` et un sous-type facultatif, sans migration de base. Le détecteur passe à `1.5.1`.
++
++Contrôles réussis : `npm run test:feedback` (577 tests de non-régression et 308 rendus dans Chrome), typecheck et build. Les trois cas ont aussi été vérifiés sur de vrais questionnaires générés depuis le catalogue local, avant et après passage par les snapshots client/serveur. La comparaison avant/après sur les 489 tentatives archivées n'a changé aucune de leurs décisions de validation. Aucune tentative n'a été enregistrée par ces vérifications.
++
++Les nouveaux tests sont dans `tests/moser-feedback-regressions.test.mjs`, le corpus rendu et le manifeste obligatoire. L'audit rejette désormais aussi un commentaire qui oppose « je » à « je » ou à « j ».
++
++## Constat initial avant correction
+ 
+ | Saisie | Correction attendue | Résultat local reproduit | Origine |
+ | --- | --- | --- | --- |
+@@ -32,4 +46,15 @@ Commentaires proposés : « Sépare l’auxiliaire du participe passé : “a co
+ 4. Ajouter les trois exemples du courrier au corpus permanent lors de leur correction, avec `j'ai cru`, `j’ai cru`, `il a couru`, `on a parlé` et les espaces multiples/insécables comme cas corrects. Couvrir aussi `j'ai`, les formes pronominales et les phrases avec complément. Interdire explicitement le diagnostic « je au lieu de je » et tout résultat « correct » pour les deux fusions de mots signalées.
+ 5. Rejouer `npm run test:feedback`, les contrôles du validateur, les rendus classiques et conversationnels, puis comparer les décisions avant/après sur les cas archivés. Les changements attendus de validation doivent être documentés ; les scores et historiques déjà enregistrés ne doivent pas être réécrits.
+ 
+-Ces deux problèmes sont corrigeables. Ils persisteront pour ces cas tant que cette correction ciblée n'aura pas été implémentée puis déployée. La mise en place des tests obligatoires ne les corrige pas à elle seule.
++Ces deux problèmes sont désormais corrigés dans le code local. Leur correction sur le site public nécessite la publication normale de cette version ; elle n'a pas été effectuée pendant cette intervention.
++
++## Annuler uniquement ce correctif
++
++Le patch suivant restaure l'état précédant le correctif Moser, en conservant le contrôle obligatoire et les améliorations antérieures. Vérifier d'abord son applicabilité ; si la vérification échoue à cause de changements ultérieurs, ne pas forcer.
++
++```sh
++git apply --reverse --check docs/rollback/moser-feedback-2026-11-17.patch
++git apply --reverse docs/rollback/moser-feedback-2026-11-17.patch
++```
++
++Le patch a été vérifié dans des copies temporaires, dans les deux sens. Après annulation, repasser `npm run test:feedback`. Le présent fichier retrouvera son état d'analyse initial ; le patch peut rester présent.
+diff --git a/docs/feedback-release-gate.md b/docs/feedback-release-gate.md
+index dffba9c7..7a948371 100644
+--- a/docs/feedback-release-gate.md
++++ b/docs/feedback-release-gate.md
+@@ -26,4 +26,4 @@ Leur première exécution a donné quatre échecs. Aucun scénario n'a été ret
+ - **Écrire au futur** : une ancienne attente imposait la recette « sans le e final ». L'aide actuelle du troisième groupe utilise une forme repère, pour éviter d'étendre une recette mécanique à tous les verbes irréguliers. L'attente exige maintenant explicitement le radical repère du futur, l'ajout de la terminaison de la personne et les formes repères. Le contrôle d'absence de la réponse finale est maintenu.
+ - **Prendre au passé simple** : la fixture portait `prit - t = pri`, puis `pri + rent`. Le tableau de la même aide présentait les terminaisons usuelles en `-is, -it, -irent`, incohérentes avec cette ancienne segmentation. Elle utilise maintenant `prit - it = pr`, puis `pr + irent = prirent`, comme le générateur actuel. L'attente du mot « passé simple », déjà fourni par le contexte de la question, est remplacée par le contrôle concret de « il prit », du retrait de `-it` et du tableau complet de la série en i. Un test supplémentaire reconstruit exactement `prirent` avec la référence du générateur. Le contrôle d'absence de la réponse finale est maintenu.
+ 
+-Les signalements de Mme Moser restent analysés séparément dans `analyse-signalement-moser.md` et ne sont pas corrigés par l'installation de ce contrôle.
++Les signalements de Mme Moser ont ensuite été corrigés avec des tests permanents supplémentaires. Le détail est dans `analyse-signalement-moser.md`. Le contrôle actuel comprend ces corrections : 577 tests de non-régression et 308 rendus dans Chrome.
+diff --git a/docs/learner-feedback-safety.md b/docs/learner-feedback-safety.md
+index 5acaa1ad..e94b194a 100644
+--- a/docs/learner-feedback-safety.md
++++ b/docs/learner-feedback-safety.md
+@@ -1,6 +1,6 @@
+ # Commentaires après une réponse incorrecte — 17 novembre 2026
+ 
+-Les corrections concernent l’explication pédagogique. Le validateur, les réponses admises, les points et les historiques en base ne sont pas modifiés. Aucune migration ni nouvelle dépendance n’est nécessaire. Le détecteur passe à `1.5.0` pour identifier les nouvelles analyses ; les anciens tags ne sont pas recalculés en base.
++Les premières corrections décrites ici concernent l’explication pédagogique, sans modifier le validateur, les points ni les historiques. Elles ont introduit le détecteur `1.5.0`. Le correctif Moser ajouté ensuite vérifie aussi la séparation des mots dans les réponses de conjugaison et introduit `1.5.1` ; voir `analyse-signalement-moser.md`. Aucune migration ni nouvelle dépendance n’est nécessaire et les anciens tags ne sont pas recalculés en base.
+ 
+ ## Comportement
+ 
+@@ -17,7 +17,7 @@ Depuis l'activation du contrôle obligatoire, utiliser `npm run test:feedback` a
+ 
+ `auditRenderedLearnerFeedback` vérifie le texte rendu, les sous-types de pronom, les preuves des lettres et terminaisons annoncées, les flexions d’accord lorsque le participe est connu et les données de correction des profils sans réponse. Cet audit fonctionne dans les tests ; il ne crée pas de signalement automatique en production et ne remplace pas une relecture pédagogique.
+ 
+-Le corpus couvre huit situations, sept variantes de langue et quatre profils, soit 224 rendus contrôlés dans Chrome sur les vrais composants Vue. Le test navigateur vérifie aussi le clavier, le repli, une largeur de 320 px, les couleurs sombres et le commutateur de retour à l’affichage complet.
++Le corpus couvre désormais onze situations, dont les trois exemples de Mme Moser, sept variantes de langue et quatre profils, soit 308 rendus contrôlés dans Chrome sur les vrais composants Vue (huit situations et 224 rendus initialement). Le test navigateur vérifie aussi le clavier, le repli, une largeur de 320 px, les couleurs sombres et le commutateur de retour à l’affichage complet.
+ 
+ ```sh
+ node --import tsx --test tests/learner-feedback-safety.test.mjs tests/learner-feedback-audit.test.mjs tests/coach-stem-feedback.test.mjs tests/learner-error-diagnostics.test.mjs tests/coach-construction-feedback.test.mjs tests/learner-identification-history.test.mjs
+diff --git a/scripts/lib/feedback-test-gate.mjs b/scripts/lib/feedback-test-gate.mjs
+index 93c1a3b9..f18746f4 100644
+--- a/scripts/lib/feedback-test-gate.mjs
++++ b/scripts/lib/feedback-test-gate.mjs
+@@ -32,6 +32,7 @@ export const FEEDBACK_REGRESSION_FILES = [
+   'tests/coach-stem-feedback.test.mjs',
+   'tests/learner-feedback-safety.test.mjs',
+   'tests/learner-feedback-audit.test.mjs',
++  'tests/moser-feedback-regressions.test.mjs',
+   'tests/feedback-release-gate.test.mjs',
+ ]
+ 
+diff --git a/shared/i18n/learner-errors.ts b/shared/i18n/learner-errors.ts
+index 28adc5cd..9df92625 100644
+--- a/shared/i18n/learner-errors.ts
++++ b/shared/i18n/learner-errors.ts
+@@ -38,6 +38,7 @@ const insteadOf: Record<AppLocale, string> = withDutchVariants({
+ })
+ 
+ export function localizedLearnerErrorMessage(detail: LearnerErrorDetail, locale: AppLocale): string {
++  if (detail.orthographyIssueKind) return localizedOrthographyIssueMessage(detail.orthographyIssueKind, locale)
+   if (detail.subjectIssueKind && detail.learnerValue && detail.expectedValue) {
+     return subjectPronounFeedback({ kind: detail.subjectIssueKind, learner: detail.learnerValue, expected: detail.expectedValue }, locale)
+   }
+@@ -56,6 +57,26 @@ export function localizedLearnerErrorMessage(detail: LearnerErrorDetail, locale:
+     : learnerErrorMessages[detail.code]?.[locale] || detail.message
+ }
+ 
++export function localizedOrthographyIssueMessage(kind: NonNullable<LearnerErrorDetail['orthographyIssueKind']>, locale: AppLocale): string {
++  return (kind === 'elision'
++    ? withDutchVariants({
++        fr: 'Il faut une apostrophe pour l’élision.',
++        en: 'Elision requires an apostrophe.',
++        de: 'Die Elision erfordert einen Apostroph.',
++        it: 'L’elisione richiede un apostrofo.',
++        es: 'La elisión requiere un apóstrofo.',
++        nl: 'Bij elisie is een apostrof nodig.',
++      })
++    : withDutchVariants({
++        fr: 'Vérifie les espaces entre les mots.',
++        en: 'Check the spaces between words.',
++        de: 'Prüfe die Leerzeichen zwischen den Wörtern.',
++        it: 'Controlla gli spazi tra le parole.',
++        es: 'Revisa los espacios entre las palabras.',
++        nl: 'Controleer de spaties tussen de woorden.',
++      }))[locale]
++}
++
+ export function learnerErrorMorePoints(locale: AppLocale): string {
+   return withDutchVariants({ fr: 'Autres points à vérifier', de: 'Weitere Punkte zum Prüfen', en: 'Other points to check', it: 'Altri punti da verificare', es: 'Otros puntos que revisar', nl: 'Andere punten om te controleren' })[locale]
+ }
+diff --git a/shared/types/conjugation.ts b/shared/types/conjugation.ts
+index d303f6f4..807f08bd 100644
+--- a/shared/types/conjugation.ts
++++ b/shared/types/conjugation.ts
+@@ -249,6 +249,7 @@ export interface LearnerErrorDetail {
+   expectedValue?: string
+   /** Précision conservée pour l'affichage et les traductions, sans changer la taxonomie. */
+   subjectIssueKind?: 'typo' | 'mismatch'
++  orthographyIssueKind?: 'elision' | 'word-spacing'
+   missingLetter?: string
+ }
+ 
+diff --git a/shared/utils/answer.ts b/shared/utils/answer.ts
+index f6f5560a..3fcf3007 100644
+--- a/shared/utils/answer.ts
++++ b/shared/utils/answer.ts
+@@ -14,6 +14,7 @@ export type AnswerValidationReason =
+   | 'empty-answer'
+   | 'no-expected-answer'
+   | 'missing-subject-pronoun'
++  | 'incorrect-word-spacing'
+   | 'no-match'
+ 
+ export interface AnswerValidationResult {
+@@ -143,6 +144,34 @@ export function validateAnswer(
+   }
+ }
+ 
++/** Tolère les espaces supplémentaires, sans effacer les frontières entre les mots. */
++export function normalizeConjugationSpacing(value: string, options: AnswerNormalizationOptions = {}) {
++  return normalizeAnswer(value, { ...options, ignoreWhitespace: false })
++    .replace(/\s+/gu, ' ')
++    .replace(/\s*'\s*/gu, "'")
++}
++
++export function findConjugationSpacingIssue(answer: unknown, question: { reponses: readonly unknown[] }, options: AnswerNormalizationOptions = {}) {
++  if (typeof answer !== 'string') return null
++  const learner = normalizeConjugationSpacing(answer, options)
++  const candidates = question.reponses.filter((value): value is string => typeof value === 'string')
++  if (candidates.some(value => normalizeConjugationSpacing(value, options) === learner)) return null
++  const expected = candidates.find(value => normalizeAnswer(value, { ...options, ignoreWhitespace: true })
++    === normalizeAnswer(answer, { ...options, ignoreWhitespace: true }))
++  if (!expected) return null
++  const learnerWords = learner.split(' ')
++  const expectedWords = normalizeConjugationSpacing(expected, options).split(' ')
++  while (learnerWords.length && expectedWords.length && learnerWords[0] === expectedWords[0]) {
++    learnerWords.shift()
++    expectedWords.shift()
++  }
++  while (learnerWords.length && expectedWords.length && learnerWords.at(-1) === expectedWords.at(-1)) {
++    learnerWords.pop()
++    expectedWords.pop()
++  }
++  return { learnerValue: learnerWords.join(' '), expectedValue: expectedWords.join(' ') }
++}
++
+ function normalizedSubjectPronoun(value?: string) {
+   const subject = normalizeAnswer(value || '', { ignoreWhitespace: false })
+     .replace(/^(?:que\s+|qu')/u, '')
+@@ -227,9 +256,12 @@ export function validateConjugationAnswer(
+   options: AnswerNormalizationOptions = {},
+ ): AnswerValidationResult {
+   const result = validateAnswer(answer, question.reponses, options)
++  const checked = result.isCorrect && findConjugationSpacingIssue(answer, question, options)
++    ? { ...result, isCorrect: false, reason: 'incorrect-word-spacing' as const, matchedAnswer: null }
++    : result
+   const pronoun = normalizedSubjectPronoun(question.pronom)
+-  if (!pronoun || !conjugationRequiresSubjectPronoun(question)) return result
+-  if (result.isCorrect && answerContainsSubjectPronoun(answer, pronoun)) return result
++  if (!pronoun || !conjugationRequiresSubjectPronoun(question)) return checked
++  if (result.isCorrect && answerContainsSubjectPronoun(answer, pronoun)) return checked
+   if (result.isCorrect || answerMatchesWithoutSubjectPronoun(answer, question.reponses, pronoun)) {
+     return {
+       ...result,
+diff --git a/shared/utils/conjugation-orthography.ts b/shared/utils/conjugation-orthography.ts
+new file mode 100644
+index 00000000..edfecb82
+--- /dev/null
++++ b/shared/utils/conjugation-orthography.ts
+@@ -0,0 +1,25 @@
++import { normalizeConjugationSpacing } from './answer'
++
++/** Ne propose une élision que si elle figure dans une réponse admise et que le reste est exact. */
++export function findConjugationElisionIssue(answer: string, question: { reponses: readonly string[] }) {
++  const learner = normalizeConjugationSpacing(answer)
++  if (question.reponses.some(candidate => normalizeConjugationSpacing(candidate) === learner)) return null
++  const expansions: Record<string, string[]> = {
++    j: ['je', 'j'], m: ['me', 'm'], t: ['te', 't'], s: ['se', 's'],
++    l: ['le', 'la', 'l'], n: ['ne', 'n'], c: ['ce', 'c'], d: ['de', 'd'], qu: ['que', 'qu'],
++  }
++  for (const candidate of question.reponses) {
++    const expected = normalizeConjugationSpacing(candidate)
++    for (const match of expected.matchAll(/\b(qu|[jmtslncd])'(\p{L}+)/gu)) {
++      const short = match[1]!
++      const word = match[2]!
++      for (const expanded of expansions[short] || []) {
++        const replacement = `${expanded} ${word}`
++        if (expected.slice(0, match.index) + replacement + expected.slice(match.index + match[0].length) === learner) {
++          return { learnerValue: replacement, expectedValue: match[0] }
++        }
++      }
++    }
++  }
++  return null
++}
+diff --git a/shared/utils/learner-error-diagnostics.ts b/shared/utils/learner-error-diagnostics.ts
+index ae56e442..23601c4c 100644
+--- a/shared/utils/learner-error-diagnostics.ts
++++ b/shared/utils/learner-error-diagnostics.ts
+@@ -2,6 +2,7 @@ import type { ExerciseQuestion, LearnerErrorDetail } from '../types/conjugation'
+ import {
+   findConjugationConfusions,
+   findImpossibleSingularEnding,
++  findConjugationSpacingIssue,
+   isFutureSimpleInsteadOfNearFuture,
+   normalizeAnswer,
+   validateAnswer,
+@@ -11,6 +12,8 @@ import type { AppLocale } from '../i18n/locales'
+ import { localizedLearnerErrorMessage, localizedLearnerErrorText } from '../i18n/learner-errors'
+ import { withSwissObjectAliases } from './object-terminology'
+ import { subjectPronounIssue, subjectPronounFeedback } from './subject-pronoun-feedback'
++import { findConjugationElisionIssue } from './conjugation-orthography'
++import { localizedOrthographyIssueMessage } from '../i18n/learner-errors'
+ 
+ export type LearnerErrorConfidence = 'high' | 'medium' | 'low'
+ 
+@@ -44,7 +47,7 @@ export interface LearnerErrorTag {
+   evidence?: Record<string, string>
+ }
+ 
+-export const LEARNER_ERROR_DETECTOR_VERSION = '1.5.0'
++export const LEARNER_ERROR_DETECTOR_VERSION = '1.5.1'
+ 
+ function text(value: unknown) {
+   return typeof value === 'string' ? value.trim() : ''
+@@ -203,6 +206,12 @@ export function diagnoseLearnerError(
+   answer: string,
+   question: ExerciseQuestion,
+ ): LearnerErrorTag[] {
++  if (!question.exerciseKind || question.exerciseKind === 'conjugation') {
++    const elision = findConjugationElisionIssue(answer, question)
++    if (elision) return uniqueTags([tag('orthography.punctuation', 'high', { ...elision, orthographyIssueKind: 'elision' })])
++    const spacing = findConjugationSpacingIssue(answer, question)
++    if (spacing) return uniqueTags([tag('orthography.punctuation', 'high', { ...spacing, orthographyIssueKind: 'word-spacing' })])
++  }
+   if (validateAnswer(answer, question.reponses).isCorrect) return []
+ 
+   const subjectIssue = subjectPronounIssue(answer, question)
+@@ -345,6 +354,16 @@ export function learnerErrorDetails(
+       if (item.code === 'unknown') return []
+       const label = labels.get(item.code)
+       if (!label) return []
++      if (item.code === 'orthography.punctuation'
++        && (item.evidence?.orthographyIssueKind === 'elision' || item.evidence?.orthographyIssueKind === 'word-spacing')) {
++        return [{
++          code: item.code, label,
++          orthographyIssueKind: item.evidence.orthographyIssueKind,
++          message: localizedOrthographyIssueMessage(item.evidence.orthographyIssueKind, 'fr'),
++          learnerValue: item.evidence.learnerValue,
++          expectedValue: item.evidence.expectedValue,
++        }]
++      }
+       if (item.code === 'person.other_form'
+         && item.evidence?.detectedPerson
+         && item.evidence?.expectedPerson) {
+diff --git a/shared/utils/learner-feedback-audit.ts b/shared/utils/learner-feedback-audit.ts
+index d06e2ac8..481c1daf 100644
+--- a/shared/utils/learner-feedback-audit.ts
++++ b/shared/utils/learner-feedback-audit.ts
+@@ -2,7 +2,8 @@ import type { ExerciseQuestion, LearnerErrorDetail } from '../types/conjugation'
+ import type { AppLocale } from '../i18n/locales'
+ import type { CoachHelpAuditIssue, CoachHelpAuditResult } from './coach-help-audit'
+ import { localizedLearnerErrorMessage } from '../i18n/learner-errors'
+-import { normalizeAnswer } from './answer'
++import { normalizeAnswer, findConjugationSpacingIssue } from './answer'
++import { findConjugationElisionIssue } from './conjugation-orthography'
+ import { agreePastParticiple } from './past-participle-agreement'
+ 
+ const tokens = (value: string): string[] => normalizeAnswer(value, { ignoreWhitespace: false }).match(/\p{L}+/gu) || []
+@@ -24,6 +25,21 @@ export function auditRenderedLearnerFeedback(input: {
+   const candidates = question.reponses.map(candidate => tokens(candidate))
+   if (/\b(?:undefined|null|NaN)\b/u.test(renderedText)) fail('feedback-invalid-value', 'Une valeur technique est affichée.')
+   for (const detail of details) {
++    if (detail.code === 'person.other_form' && detail.learnerValue && detail.expectedValue) {
++      const subject = (value: string) => normalizeAnswer(value).replace(/^j$/u, 'je')
++      if (subject(detail.learnerValue) === subject(detail.expectedValue)) {
++        fail('feedback-identical-persons', 'Le commentaire oppose la même personne à elle-même.')
++      }
++    }
++    if (detail.orthographyIssueKind) {
++      const proof = detail.orthographyIssueKind === 'elision'
++        ? findConjugationElisionIssue(answer, question)
++        : findConjugationSpacingIssue(answer, question)
++      if (!proof || (detail.expectedValue && detail.expectedValue !== proof.expectedValue)
++        || (detail.learnerValue && detail.learnerValue !== proof.learnerValue)) {
++        fail('feedback-unproven-orthography', 'L’élision ou la séparation signalée ne correspond pas à la saisie.')
++      }
++    }
+     const message = localizedLearnerErrorMessage(detail, locale)
+     if (!plain(renderedText).includes(plain(message)) && detail.code !== 'person.other_form') {
+       fail('feedback-message-missing', `Le commentaire ${detail.code} manque dans le rendu ${locale}.`)
+diff --git a/shared/utils/subject-pronoun-feedback.ts b/shared/utils/subject-pronoun-feedback.ts
+index f676bb56..e0bd4c75 100644
+--- a/shared/utils/subject-pronoun-feedback.ts
++++ b/shared/utils/subject-pronoun-feedback.ts
+@@ -32,6 +32,7 @@ export function subjectPronounIssue(answer: string, question: { reponses: readon
+   for (const candidate of question.reponses) {
+     const expected = splitSubject(candidate)
+     if (!expected || !subjects.has(expected.subject) || expected.subject === learner.subject
++        || [expected.subject, learner.subject].every(subject => subject === 'je' || subject === 'j')
+         || normalizeAnswer(learner.rest) !== normalizeAnswer(expected.rest)) continue
+     if (subjects.has(learner.subject)) return { kind: 'mismatch', learner: learner.subject, expected: question.pronom! }
+     if (oneEditApart(learner.subject, expected.subject)) return { kind: 'typo', learner: learner.subject, expected: question.pronom! }
+diff --git a/tests/fixtures/learner-feedback-cases.mjs b/tests/fixtures/learner-feedback-cases.mjs
+index 29ea12fc..db9eda22 100644
+--- a/tests/fixtures/learner-feedback-cases.mjs
++++ b/tests/fixtures/learner-feedback-cases.mjs
+@@ -12,4 +12,7 @@ export const learnerFeedbackCases = [
+   { name: 'vrai accord', question: { ...simple, isCompound: true, temps: 'passé composé', pastParticiple: 'pris', reponses: ['il a pris'], reponsesPourCorrige: ['il a pris'] }, answer: 'il a prises', codes: ['agreement.avoir_unwarranted'] },
+   { name: 'complément, pas personne', question: { ...simple, infinitif: 'manger', complement: 'les marrons', complementPosition: 'after', complementFunction: 'cod', reponses: ['il mange les marrons'], reponsesPourCorrige: ['il mange les marrons'] }, answer: 'il mange les marront', codes: ['orthography.copied_complement'] },
+   { name: 'deux diagnostics', question: { ...simple, infinitif: 'entrer', pronom: 'je', personId: 4, isCompound: true, temps: 'passé composé', pastParticiple: 'entré', reponses: ['je suis entré'], reponsesPourCorrige: ['je suis entré'], conjugationConfusions: [{ mode: 'indicatif', tense: 'futur antérieur', answers: ['je serai entré', 'je serai entrée'] }] }, answer: 'je serai entrée', codes: ['task.wrong_tense', 'agreement.subject'] },
++  { name: 'Moser : élision', question: { ...simple, infinitif: 'croire', pronom: 'je', personId: 4, isCompound: true, temps: 'passé composé', reponses: ['j’ai cru'], reponsesPourCorrige: ['j’ai cru'] }, answer: 'je ai cru', codes: ['orthography.punctuation'], orthographyIssueKind: 'elision' },
++  { name: 'Moser : auxiliaire et participe collés', question: { ...simple, infinitif: 'courir', isCompound: true, temps: 'passé composé', reponses: ['il a couru'], reponsesPourCorrige: ['il a couru'] }, answer: 'il acouru', codes: ['orthography.punctuation'], orthographyIssueKind: 'word-spacing' },
++  { name: 'Moser : on a parlé', question: { ...simple, infinitif: 'parler', pronom: 'on', isCompound: true, temps: 'passé composé', reponses: ['on a parlé'], reponsesPourCorrige: ['on a parlé'] }, answer: 'on aparlé', codes: ['orthography.punctuation'], orthographyIssueKind: 'word-spacing' },
+ ]
+diff --git a/tests/learner-feedback-audit.test.mjs b/tests/learner-feedback-audit.test.mjs
+index 2bac9d98..e2965c74 100644
+--- a/tests/learner-feedback-audit.test.mjs
++++ b/tests/learner-feedback-audit.test.mjs
+@@ -11,6 +11,7 @@ for (const example of learnerFeedbackCases) {
+   it(`corpus audité : ${example.name}`, () => {
+     const detected = learnerErrorDetails(example.answer, example.question)
+     assert.deepEqual(detected.map(d => d.code), example.codes)
++    if (example.orthographyIssueKind) assert.equal(detected[0].orthographyIssueKind, example.orthographyIssueKind)
+     for (const locale of SUPPORTED_LOCALES) {
+       for (const profile of Object.values(COACH_HELP_PROFILES)) {
+         const details = profile.revealsAnswers ? detected : detected.map(concealLearnerErrorDetail)
+diff --git a/tests/learner-feedback-browser.test.mjs b/tests/learner-feedback-browser.test.mjs
+index ec360326..e0010323 100644
+--- a/tests/learner-feedback-browser.test.mjs
++++ b/tests/learner-feedback-browser.test.mjs
+@@ -172,6 +172,7 @@ async function buildHarness(directory, progressive) {
+     import Feedback from '${root}/app/components/exercise/LearnerErrorFeedback.vue';
+     import {learnerFeedbackCases as cases} from '${root}/tests/fixtures/learner-feedback-cases.mjs';
+     import {learnerErrorDetails,concealLearnerErrorDetail} from '${root}/shared/utils/learner-error-diagnostics.ts';
++    import {validateConjugationAnswer} from '${root}/shared/utils/answer.ts';
+     import {auditRenderedLearnerFeedback} from '${root}/shared/utils/learner-feedback-audit.ts';
+     import {SUPPORTED_LOCALES} from '${root}/shared/i18n/locales.ts';
+     import {COACH_HELP_PROFILES} from '${root}/shared/data/coach-help-profiles.ts';
+@@ -181,6 +182,7 @@ async function buildHarness(directory, progressive) {
+     const state=reactive({details:[]}); let current;
+     window.nextRender=nextTick;
+     window.cases=cases;window.locales=SUPPORTED_LOCALES;window.profiles=Object.values(COACH_HELP_PROFILES);
++    window.validationForCase=(index)=>validateConjugationAnswer(cases[index].answer,cases[index].question);
+     window.renderCase=async(index,locale='fr',revealsAnswers=true)=>{
+       window.feedbackLocale.value=locale;
+       const example=cases[index];const detected=learnerErrorDetails(example.answer,example.question);
+@@ -239,7 +241,14 @@ test('commentaires rendus : toutes les langues et tous les profils, mobile, somb
+       }
+       return count;
+     })()`)
+-    assert.equal(audited, 224)
++    assert.equal(audited, await page.evaluate('cases.length*locales.length*profiles.length'))
++    for (const index of [8, 9, 10]) {
++      assert.equal(await page.evaluate(`validationForCase(${index}).isCorrect`), false)
++      await page.evaluate(`renderCase(${index},'fr',true)`)
++      const text = await page.evaluate('document.body.innerText')
++      assert.doesNotMatch(text, /confondu|Bravo|terminaison/u)
++      assert.match(text, index === 8 ? /élision/u : /espaces/u)
++    }
+     await page.evaluate("renderCase(1,'fr',true)")
+     assert.ok((await page.evaluate('document.body.innerText')).includes('Vérifie le pronom'))
+     assert.ok(!(await page.evaluate('document.body.innerText')).includes('confondu la personne'))
+diff --git a/tests/moser-feedback-regressions.test.mjs b/tests/moser-feedback-regressions.test.mjs
+new file mode 100644
+index 00000000..201b8e9c
+--- /dev/null
++++ b/tests/moser-feedback-regressions.test.mjs
+@@ -0,0 +1,124 @@
++import assert from 'node:assert/strict'
++import { describe, it } from 'node:test'
++import { validateAnswer, validateConjugationAnswer, normalizeAnswer } from '../shared/utils/answer.ts'
++import { learnerErrorDetails, concealLearnerErrorDetail } from '../shared/utils/learner-error-diagnostics.ts'
++import { subjectPronounIssue } from '../shared/utils/subject-pronoun-feedback.ts'
++import { findConjugationElisionIssue } from '../shared/utils/conjugation-orthography.ts'
++import { evaluateExerciseAnswer } from '../shared/utils/exercise-attempt.ts'
++import { learnerQuestionSnapshot } from '../server/utils/learner-progress.ts'
++import { compactLearnerQuestion } from '../shared/utils/learner-question-snapshot.ts'
++import { localizedLearnerErrorMessage } from '../shared/i18n/learner-errors.ts'
++import { SUPPORTED_LOCALES } from '../shared/i18n/locales.ts'
++import { auditRenderedLearnerFeedback } from '../shared/utils/learner-feedback-audit.ts'
++
++function target(expected, overrides = {}) {
++  return {
++    titre: 'croire', infinitif: 'croire', consigne: 'je | croire | passé composé',
++    mode: 'indicatif', temps: 'passé composé', isCompound: true, personId: 4, pronom: 'je',
++    reponses: [expected], reponsesPourCorrige: [expected], ...overrides,
++  }
++}
++
++describe('signalement Moser : refus et commentaire correct sans fausse confusion de personne', () => {
++  for (const [answer, expected, pronom, kind, learnerValue, expectedValue] of [
++    ['je ai cru', 'j’ai cru', 'je', 'elision', 'je ai', "j'ai"],
++    ['il acouru', 'il a couru', 'il', 'word-spacing', 'acouru', 'a couru'],
++    ['on aparlé', 'on a parlé', 'on', 'word-spacing', 'aparlé', 'a parlé'],
++    ['j ai cru', "j'ai cru", 'je', 'elision', 'j ai', "j'ai"],
++    ["j'aicru", "j'ai cru", 'je', 'word-spacing', "j'aicru", "j'ai cru"],
++    ['je me appelle', "je m'appelle", 'je', 'elision', 'me appelle', "m'appelle"],
++    ['il se est garé', "il s'est garé", 'il', 'elision', 'se est', "s'est"],
++    ['je me suismaquillé', 'je me suis maquillé', 'je', 'word-spacing', 'suismaquillé', 'suis maquillé'],
++    ['il a par lé', 'il a parlé', 'il', 'word-spacing', 'par lé', 'parlé'],
++    ['il a cou ru', 'il a couru', 'il', 'word-spacing', 'cou ru', 'couru'],
++  ]) {
++    it(answer, () => {
++      const question = target(expected, { pronom })
++      assert.equal(validateConjugationAnswer(answer, question).isCorrect, false)
++      assert.equal(evaluateExerciseAnswer(answer, question, false, true).result.isCorrect, false)
++      const details = learnerErrorDetails(answer, question)
++      assert.deepEqual(details.map(d => d.code), ['orthography.punctuation'])
++      assert.equal(details[0].orthographyIssueKind, kind)
++      assert.equal(details[0].learnerValue, learnerValue)
++      assert.equal(details[0].expectedValue, expectedValue)
++      assert.ok(!details.some(d => /person\.|agreement\.|morphology\./u.test(d.code)))
++      assert.doesNotMatch(details[0].message, /confondu|personne|terminaison/u)
++      for (const snapshot of [compactLearnerQuestion(question), learnerQuestionSnapshot(compactLearnerQuestion(question)), JSON.parse(JSON.stringify(learnerQuestionSnapshot(question)))]) {
++        assert.equal(validateConjugationAnswer(answer, snapshot).isCorrect, false)
++        assert.deepEqual(learnerErrorDetails(answer, snapshot), details)
++      }
++      for (const locale of SUPPORTED_LOCALES) {
++        for (const revealsAnswers of [true, false]) {
++          const visible = revealsAnswers ? details : details.map(concealLearnerErrorDetail)
++          assert.equal(visible[0].orthographyIssueKind, kind)
++          if (!revealsAnswers) assert.equal(visible[0].expectedValue, undefined)
++          const renderedText = visible.map(d => localizedLearnerErrorMessage(d, locale)).join(' ')
++          assert.equal(auditRenderedLearnerFeedback({ answer, question, details: visible, locale, revealsAnswers, renderedText }).status, 'passed')
++        }
++      }
++    })
++  }
++})
++
++describe('conserve les bonnes réponses, sans élargir les autres règles de validation', () => {
++  for (const [answer, expected, pronom] of [
++    ["j'ai cru", 'j’ai cru', 'je'], ['J’AI CRU', "j'ai cru", 'je'], ['jʼai cru', 'j’ai cru', 'je'],
++    ['  il  a\t couru\n', 'il a couru', 'il'], ['on\u00a0a\u202fparlé', 'on a parlé', 'on'],
++    ['je me suis maquille\u0301', 'je me suis maquillé', 'je'],
++    ['je hais', 'je hais', 'je'], ['je hache', 'je hache', 'je'],
++    ['je me suis maquillée', 'je me suis maquillée', 'je'],
++  ]) {
++    it(answer, () => {
++      const question = target(expected, { pronom })
++      assert.equal(validateConjugationAnswer(answer, question).isCorrect, true)
++      assert.deepEqual(learnerErrorDetails(answer, question), [])
++    })
++  }
++  it('respecte les variantes admises, même si une autre aurait une différence d’élision', () => {
++    const q = target("j'ai cru", { reponses: ["j'ai cru", 'je ai cru'] })
++    assert.equal(findConjugationElisionIssue('je ai cru', q), null)
++  })
++  it('conserve le normaliseur historique pour les exercices de reconnaissance et les autres comparaisons', () => {
++    assert.equal(normalizeAnswer('il acouru'), normalizeAnswer('il a couru'))
++    assert.equal(validateAnswer('il acouru', ['il a couru']).isCorrect, true)
++    assert.equal(validateAnswer('passécomposé', ['passé composé']).isCorrect, true)
++  })
++  it('ne corrige pas silencieusement un accent, un trait d’union ou un mauvais auxiliaire', () => {
++    for (const [answer, expected, overrides] of [
++      ['il a parle', 'il a parlé', { pronom: 'il' }],
++      ['va t en', 'va-t’en', { pronom: 'tu', mode: 'impératif' }],
++      ['elle a partie', 'elle est partie', { pronom: 'elle' }],
++    ]) assert.equal(validateConjugationAnswer(answer, target(expected, overrides)).isCorrect, false)
++  })
++  it('ne transforme pas je/j en deux personnes lorsque plusieurs fautes sont présentes', () => {
++    assert.equal(subjectPronounIssue('je ai crus', target('j’ai cru')), null)
++    assert.ok(!learnerErrorDetails('je ai crus', target('j’ai cru')).some(d => d.code === 'person.other_form'))
++  })
++  it('conserve le pronom obligatoire et les bonnes réponses non personnelles', () => {
++    assert.equal(validateConjugationAnswer('ai cru', target("j'ai cru", { reponses: ['ai cru', "j'ai cru"] })).reason, 'missing-subject-pronoun')
++    assert.equal(validateConjugationAnswer('en  parlant', target('en parlant', { mode: 'gérondif', pronom: undefined })).isCorrect, true)
++    assert.equal(validateConjugationAnswer('enparlant', target('en parlant', { mode: 'gérondif', pronom: undefined })).isCorrect, false)
++  })
++})
++
++describe('élision avec subjonctif et complément', () => {
++  for (const [answer, expected] of [
++    ['que je aie cru', 'que j’aie cru'],
++    ['les histoires que je ai crues', 'les histoires que j’ai crues'],
++    ['je ai cru les histoires', 'j’ai cru les histoires'],
++    ['que il ait cru', 'qu’il ait cru'],
++  ]) it(answer, () => {
++    const q = target(expected, { mode: 'subjonctif', pronom: expected.startsWith('qu’il') ? 'il' : 'je' })
++    assert.equal(validateConjugationAnswer(answer, q).isCorrect, false)
++    assert.equal(learnerErrorDetails(answer, q)[0].orthographyIssueKind, 'elision')
++    assert.equal(validateConjugationAnswer(expected, q).isCorrect, true)
++  })
++})
++
++it('l’audit refuse désormais je contre je, et je contre j, même avec un texte traduit', () => {
++  for (const expected of ['je', 'j']) {
++    const detail = { code: 'person.other_form', label: '', message: 'Tu as confondu la personne.', learnerValue: 'je', expectedValue: expected }
++    const audit = auditRenderedLearnerFeedback({ question: target('j’ai cru'), answer: 'je ai cru', details: [detail], renderedText: detail.message, locale: 'fr', revealsAnswers: true })
++    assert.ok(audit.issues.some(issue => issue.code === 'feedback-identical-persons'))
++  }
++})

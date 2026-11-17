@@ -4,6 +4,7 @@ import type { AppLocale } from './locales'
 import type { LearnerErrorDetail } from '../types/conjugation'
 import type { LearnerErrorTypeCode } from '../utils/learner-error-diagnostics'
 import { withSwissObjectAliases } from '../utils/object-terminology'
+import { subjectPronounFeedback } from '../utils/subject-pronoun-feedback'
 
 type ErrorTranslations = Record<Exclude<AppLocale, 'fr'>, string>
 
@@ -14,7 +15,7 @@ const learnerErrorMessages: Record<string, ErrorTranslations> = {
   'person.other_form': withDutchVariants({ de: 'Du hast die grammatische Person verwechselt.', en: 'You used the form for a different grammatical person.', it: 'Hai confuso la persona grammaticale.', es: 'Has confundido la persona gramatical.', nl: "Je gebruikte de vorm van een andere grammaticale persoon.", }),
   'person.impossible_ending': withDutchVariants({ de: 'Die verwendete Endung ist bei dieser Person nicht möglich.', en: 'The ending you used is not possible with this person.', it: 'La desinenza usata non è possibile con questa persona.', es: 'La terminación utilizada no es posible con esta persona.', nl: "De uitgang die je gebruikte, is niet mogelijk bij deze persoon.", }),
   'compound.auxiliary': withDutchVariants({ de: 'Du hast nicht das richtige Hilfsverb für diese zusammengesetzte Zeitform verwendet.', en: 'You did not use the correct auxiliary for this compound tense.', it: 'Non hai usato l’ausiliare corretto per questo tempo composto.', es: 'No has usado el auxiliar correcto para este tiempo compuesto.', nl: "Je gebruikte niet het juiste hulpwerkwoord voor deze samengestelde tijd.", }),
-  'compound.participle_form': withDutchVariants({ de: 'Nach dem Hilfsverb musstest du das Partizip Perfekt und keine andere konjugierte Form verwenden.', en: 'After the auxiliary, you had to use the past participle rather than another conjugated form.', it: 'Dopo l’ausiliare dovevi usare il participio passato e non un’altra forma coniugata.', es: 'Después del auxiliar debías usar el participio pasado y no otra forma conjugada.', nl: "Na het hulpwerkwoord moest je het voltooid deelwoord gebruiken, niet een andere vervoegde vorm.", }),
+  'compound.participle_form': withDutchVariants({ de: 'Prüfe die Form des Partizips Perfekt nach dem Hilfsverb.', en: 'Check the past participle form after the auxiliary.', it: 'Controlla la forma del participio passato dopo l’ausiliare.', es: 'Revisa la forma del participio pasado después del auxiliar.', nl: 'Controleer de vorm van het voltooid deelwoord na het hulpwerkwoord.' }),
   'agreement.subject': withDutchVariants({ de: 'Das Partizip Perfekt wurde nicht richtig an das Subjekt angeglichen.', en: 'The past participle did not agree correctly with the subject.', it: 'Il participio passato non concordava correttamente con il soggetto.', es: 'El participio pasado no concordaba correctamente con el sujeto.', nl: "Het voltooid deelwoord kwam niet correct overeen met het onderwerp.", }),
   'agreement.cod_before': withDutchVariants({ de: 'Das Partizip Perfekt musste an das vorangestellte direkte Objekt angeglichen werden.', en: 'The past participle had to agree with the direct object placed before it.', it: 'Il participio passato doveva concordare con il complemento oggetto posto prima.', es: 'El participio pasado debía concordar con el complemento directo colocado antes.', nl: "Het voltooid deelwoord moest overeenkomen met het lijdend voorwerp dat ervoor staat.", }),
   'agreement.cod_after': withDutchVariants({ de: 'Du hast das Partizip Perfekt an ein nachgestelltes Objekt angeglichen, obwohl es unverändert bleiben musste.', en: 'You made the past participle agree with an object placed after it, although it had to remain unchanged.', it: 'Hai concordato il participio passato con un complemento posto dopo, mentre doveva restare invariato.', es: 'Has hecho concordar el participio pasado con un complemento colocado después, aunque debía permanecer invariable.', nl: "Je paste het voltooid deelwoord aan aan een voorwerp dat erna staat, terwijl het onveranderd moest blijven.", }),
@@ -37,9 +38,47 @@ const insteadOf: Record<AppLocale, string> = withDutchVariants({
 })
 
 export function localizedLearnerErrorMessage(detail: LearnerErrorDetail, locale: AppLocale): string {
+  if (detail.orthographyIssueKind) return localizedOrthographyIssueMessage(detail.orthographyIssueKind, locale)
+  if (detail.subjectIssueKind && detail.learnerValue && detail.expectedValue) {
+    return subjectPronounFeedback({ kind: detail.subjectIssueKind, learner: detail.learnerValue, expected: detail.expectedValue }, locale)
+  }
+  if (detail.missingLetter && detail.expectedValue) {
+    return withDutchVariants({
+      fr: `Il manque un ${detail.missingLetter} : ${detail.expectedValue}.`,
+      de: `Ein ${detail.missingLetter} fehlt: ${detail.expectedValue}.`,
+      en: `The letter ${detail.missingLetter} is missing: ${detail.expectedValue}.`,
+      it: `Manca la lettera ${detail.missingLetter}: ${detail.expectedValue}.`,
+      es: `Falta una ${detail.missingLetter}: ${detail.expectedValue}.`,
+      nl: `Er ontbreekt een ${detail.missingLetter}: ${detail.expectedValue}.`,
+    })[locale]
+  }
   return locale === 'fr'
     ? withSwissObjectAliases(detail.message)
     : learnerErrorMessages[detail.code]?.[locale] || detail.message
+}
+
+export function localizedOrthographyIssueMessage(kind: NonNullable<LearnerErrorDetail['orthographyIssueKind']>, locale: AppLocale): string {
+  return (kind === 'elision'
+    ? withDutchVariants({
+        fr: 'Il faut une apostrophe pour l’élision.',
+        en: 'Elision requires an apostrophe.',
+        de: 'Die Elision erfordert einen Apostroph.',
+        it: 'L’elisione richiede un apostrofo.',
+        es: 'La elisión requiere un apóstrofo.',
+        nl: 'Bij elisie is een apostrof nodig.',
+      })
+    : withDutchVariants({
+        fr: 'Vérifie les espaces entre les mots.',
+        en: 'Check the spaces between words.',
+        de: 'Prüfe die Leerzeichen zwischen den Wörtern.',
+        it: 'Controlla gli spazi tra le parole.',
+        es: 'Revisa los espacios entre las palabras.',
+        nl: 'Controleer de spaties tussen de woorden.',
+      }))[locale]
+}
+
+export function learnerErrorMorePoints(locale: AppLocale): string {
+  return withDutchVariants({ fr: 'Autres points à vérifier', de: 'Weitere Punkte zum Prüfen', en: 'Other points to check', it: 'Altri punti da verificare', es: 'Otros puntos que revisar', nl: 'Andere punten om te controleren' })[locale]
 }
 
 export function localizedLearnerErrorText(detail: LearnerErrorDetail, locale: AppLocale): string {

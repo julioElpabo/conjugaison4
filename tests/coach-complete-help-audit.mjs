@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
+import { buildRadicalReference } from '../shared/utils/radical-reference.ts'
 
 import { coachHelpQuestionVariables, conditionalCoachHelpBlocks, renderCoachHelpContent } from '../shared/utils/coach-help.ts'
 
@@ -23,6 +24,18 @@ function question(infinitif, answer, overrides = {}) {
   }
 }
 
+// Les formes et les retraits des anciennes fixtures doivent rester compatibles avec le générateur.
+it('la forme repère de prendre au passé simple reconstruit exactement prirent', () => {
+  const reference = buildRadicalReference({ infinitive: 'prendre', mode: 'indicatif', tense: 'passé simple', personId: 9, conjugation: 'prirent' }, [
+    { mode: 'indicatif', tense: 'passé simple', personId: 6, pronoun: 'il', form: 'prit' },
+  ])
+  assert.equal(reference.form, 'prit')
+  assert.equal(reference.removableEnding, 'it')
+  assert.equal(reference.radical, 'pr')
+  assert.equal(reference.targetEnding, 'irent')
+  assert.equal(reference.radical + reference.targetEnding, 'prirent')
+})
+
 const scenarios = [
   { name: 'chanter — présent régulier', verb: verb('chanter', { groupeConjugaison: 1, terminaison: 'er', participePasse: 'chanté' }), question: question('chanter', 'chantons'), expected: [/infinitif/iu, /radical/iu, /terminaison/iu] },
   { name: 'manger — imparfait — maintien du e', verb: verb('manger', { groupeConjugaison: 1, terminaison: 'er', participePasse: 'mangé', particularites: ['ger'] }), question: question('manger', 'mangions', { temps: 'imparfait' }), expected: [/radical/iu, /terminaison/iu] },
@@ -34,7 +47,7 @@ const scenarios = [
   { name: 'avoir — impératif présent — forme irrégulière', verb: verb('avoir', { terminaison: 'oir', participePresent: 'ayant', participePasse: 'eu' }), question: question('avoir', 'aie', { pronom: 'tu', mode: 'impératif' }), expected: [/impératif/iu, /forme.*repère|apprends/iu] },
   { name: 'savoir — impératif présent — forme irrégulière', verb: verb('savoir', { terminaison: 'oir', participePresent: 'sachant', participePasse: 'su' }), question: question('savoir', 'sachez', { pronom: 'vous', mode: 'impératif' }), expected: [/impératif/iu, /forme.*repère|apprends/iu] },
   { name: 'aller — subjonctif présent — deux radicaux', verb: verb('aller', { terminaison: 'er', participePasse: 'allé', auxiliaire: 'être' }), question: question('aller', 'allions', { mode: 'subjonctif', pronom: 'nous', radicalReference: { kind: 'present-nous', label: 'nous au présent', form: 'allons', removableEnding: 'ons', radical: 'all', targetEnding: 'ions', referenceMode: 'indicatif', referenceTense: 'présent', referenceSubject: 'nous', strategy: 'remove-ending', validated: true, subjunctivePresentReferences: [{ subject: 'ils', form: 'vont' }, { subject: 'nous', form: 'allons' }] } }), expected: [/subjonctif/iu, /forme.*repère/iu, /personne demandée/iu] },
-  { name: 'prendre — passé simple — série en i', verb: verb('prendre', { terminaison: 're', participePasse: 'pris', familleConjugaison: 'prendre' }), question: question('prendre', 'prirent', { pronom: 'ils', temps: 'passé simple', radicalReference: { kind: 'past-simple-il', label: 'il au passé simple', form: 'prit', removableEnding: 't', radical: 'pri', targetEnding: 'rent', referenceMode: 'indicatif', referenceTense: 'passé simple', referenceSubject: 'il', strategy: 'remove-ending', validated: true } }), expected: [/forme.*repère/iu, /passé simple/iu, /terminaison/iu] },
+  { name: 'prendre — passé simple — série en i', verb: verb('prendre', { terminaison: 're', participePasse: 'pris', familleConjugaison: 'prendre' }), question: question('prendre', 'prirent', { pronom: 'ils', temps: 'passé simple', radicalReference: { kind: 'past-simple-il', label: 'il au passé simple', form: 'prit', removableEnding: 'it', radical: 'pr', targetEnding: 'irent', referenceMode: 'indicatif', referenceTense: 'passé simple', referenceSubject: 'il', strategy: 'remove-ending', validated: true } }), expected: [/forme.*repère.*il prit/iu, /terminaison -it/iu, /je -is tu -is il \/ elle -it nous -îmes vous -îtes ils \/ elles -irent/iu] },
   { name: 'prendre — conditionnel présent', verb: verb('prendre', { terminaison: 're', participePasse: 'pris' }), question: question('prendre', 'prendraient', { pronom: 'ils', mode: 'conditionnel', temps: 'présent' }), expected: [/radical du futur/iu, /terminaison de l’imparfait/iu, /exemple/iu] },
   { name: 'partir — passé composé avec être', verb: verb('partir', { terminaison: 'ir', participePasse: 'parti', auxiliaire: 'être' }), question: question('partir', 'est partie', { pronom: 'elle', temps: 'passé composé', isCompound: true }), expected: [/auxiliaire/iu, /être/iu, /participe passé/iu, /accord/iu] },
   { name: 'se lever — passé composé pronominal', verb: verb('se lever', { groupeConjugaison: 1, terminaison: 'er', participePasse: 'levé', auxiliaire: 'être', typePronominal: 'essentiel', isPronominalForm: true }), question: question('se lever', 'se sont levées', { pronom: 'elles', temps: 'passé composé', isCompound: true }), expected: [/auxiliaire/iu, /être/iu, /pronominal|pronom réfléchi/iu, /accord/iu] },

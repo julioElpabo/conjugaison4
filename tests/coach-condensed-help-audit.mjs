@@ -41,10 +41,10 @@ const scenarios = [
     expected: [/3e groupe/u, /irréguli/u, /formes repères/iu],
   },
   {
-    name: 'écrire — 3e groupe en -re — futur — retrait du e final',
+    name: 'écrire — 3e groupe en -re — futur — forme repère',
     verb: { infinitif: 'écrire', groupeConjugaison: 3 },
     mode: 'indicatif', tense: 'futur', subject: 'nous', answer: 'écrirons',
-    expected: [/sans le « e » final/u, /formes repères/iu],
+    expected: [/radical repère du futur/iu, /ajoute la terminaison de la personne/iu, /formes repères/iu],
   },
   {
     name: 'prendre — 3e groupe — passé simple — série irrégulière',
@@ -119,13 +119,13 @@ const scenarios = [
     name: 'falloir — impersonnel — conditionnel présent',
     verb: { infinitif: 'falloir', groupeConjugaison: 3 },
     mode: 'conditionnel', tense: 'présent', subject: 'il', answer: 'faudrait',
-    expected: [/radical du futur/iu, /irréguli|formes repères/iu],
+    expected: [/radical(?: repère)? du futur/iu, /irréguli|formes repères/iu],
   },
   {
     name: 'pleuvoir — impersonnel — futur',
     verb: { infinitif: 'pleuvoir', groupeConjugaison: 3 },
     mode: 'indicatif', tense: 'futur', subject: 'il', answer: 'pleuvra',
-    expected: [/radical du futur/iu, /irréguli|formes repères/iu],
+    expected: [/radical(?: repère)? du futur/iu, /irréguli|formes repères/iu],
   },
   {
     name: 'payer — 1er groupe — futur — deux graphies admises',

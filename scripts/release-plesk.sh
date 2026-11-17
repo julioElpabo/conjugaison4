@@ -97,27 +97,30 @@ IFS= read -r commit_message
 [[ -n "${commit_message//[[:space:]]/}" ]] \
   || fail 'la description du commit ne peut pas être vide.'
 
-printf '\n[1/8] Passage sur %s\n' "$main_branch"
+printf '\n[1/9] Passage sur %s\n' "$main_branch"
 git -C "$repository_root" switch "$main_branch"
 
-printf '\n[2/8] Création du commit\n'
+printf '\n[2/9] Installation exacte des dépendances\n'
+npm --prefix "$repository_root" ci
+
+printf '\n[3/9] Contrôle obligatoire des feedbacks\n'
+npm --prefix "$repository_root" run test:feedback
+
+printf '\n[4/9] Création du commit\n'
 git -C "$repository_root" add -A
 if git -C "$repository_root" diff --cached --quiet; then
   fail 'aucune modification à enregistrer sur main.'
 fi
 git -C "$repository_root" commit -m "$commit_message"
 
-printf '\n[3/8] Envoi de %s vers %s\n' "$main_branch" "$github_remote"
+printf '\n[5/9] Envoi de %s vers %s\n' "$main_branch" "$github_remote"
 git -C "$repository_root" push "$github_remote" "$main_branch"
 
-printf '\n[4/8] Préparation de %s\n' "$release_branch"
+printf '\n[6/9] Préparation de %s\n' "$release_branch"
 git -C "$repository_root" switch "$release_branch"
 git -C "$repository_root" merge --no-edit "$main_branch"
 
-printf '\n[5/8] Installation exacte des dépendances\n'
-npm --prefix "$repository_root" ci
-
-printf '\n[6/8] Construction du paquet Nuxt\n'
+printf '\n[7/9] Construction du paquet Nuxt\n'
 node "$repository_root/scripts/retain-previous-nuxt-assets.mjs" \
   snapshot "$repository_root/.output" "$nuxt_asset_snapshot"
 npm --prefix "$repository_root" run build
@@ -140,7 +143,7 @@ if [[ -n "$unexpected_changes" ]]; then
   fail 'le build a créé ou modifié des fichiers inattendus en dehors de .output.'
 fi
 
-printf '\n[7/8] Enregistrement du paquet Plesk\n'
+printf '\n[8/9] Enregistrement du paquet Plesk\n'
 git -C "$repository_root" add -f -A .output
 if git -C "$repository_root" diff --cached --quiet; then
   printf 'Le paquet .output est déjà à jour : aucun commit de build nécessaire.\n'
@@ -148,7 +151,7 @@ else
   git -C "$repository_root" commit -m 'build: actualiser le paquet Plesk'
 fi
 
-printf '\n[8/8] Envoi de %s vers GitHub et Plesk\n' "$release_branch"
+printf '\n[9/9] Envoi de %s vers GitHub et Plesk\n' "$release_branch"
 git -C "$repository_root" push "$github_remote" "$release_branch"
 git -C "$repository_root" push "$plesk_remote" "$release_branch"
 git -C "$repository_root" switch "$main_branch"

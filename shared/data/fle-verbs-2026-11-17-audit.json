@@ -1,0 +1,42 @@
+{
+  "batchId": "fle-verbs-2026-11-17",
+  "date": "2026-11-17",
+  "payloadSha256": "1ccdc01c5402e029271bc4a5e2b32042077676a49170a9ef22652e0b857d5151",
+  "requestedLines": 42,
+  "uniqueSelections": 41,
+  "baseVerbs": 41,
+  "finiteSlots": 3936,
+  "morphalouComparedSlots": 1927,
+  "pronominalReferenceSlots": 768,
+  "morphalouSource": "https://repository.ortolang.fr/api/content/morphalou/4/Morphalou3.1_formatCSV_toutEnUn.zip",
+  "morphalouLicense": "LGPL-LR",
+  "officialOnlyVariants": [
+    {
+      "infinitive": "épeler",
+      "tenseId": 14,
+      "personId": 4,
+      "form": "épellerais",
+      "evidence": "https://www.dictionnaire-academie.fr/conjuguer/A9E2140"
+    },
+    {
+      "infinitive": "posséder",
+      "tenseId": 14,
+      "personId": 4,
+      "form": "posséderais",
+      "evidence": "https://www.dictionnaire-academie.fr/conjuguer/A9P3586"
+    },
+    {
+      "infinitive": "régler",
+      "tenseId": 14,
+      "personId": 4,
+      "form": "réglerais",
+      "evidence": "https://www.dictionnaire-academie.fr/conjuguer/A9R1342"
+    }
+  ],
+  "errors": [],
+  "notes": [
+    "Définitions originales du site ; CECRL estimatifs.",
+    "Les variantes officielles absentes de Morphalou restent acceptées avec leur référence Académie.",
+    "Les 9 emplois pronominaux seront aussi contrôlés par le moteur réel avant insertion."
+  ]
+}

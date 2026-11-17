@@ -1,0 +1,268 @@
+{
+  "date": "2026-11-17",
+  "oldRowsPreserved": true,
+  "counts": {
+    "verbes": 635,
+    "verbesconjugues": 62675,
+    "verbe_sens": 1003,
+    "verbe_sens_categories": 666,
+    "emplois_pronominaux": 240
+  },
+  "insertedCounts": {
+    "verbes": 40,
+    "verbesconjugues": 3840,
+    "verbe_sens": 51,
+    "verbe_sens_categories": 51,
+    "emplois_pronominaux": 9
+  },
+  "exercisedSelections": 41,
+  "totalQuestions": 4428,
+  "checks": [
+    {
+      "infinitive": "épeler",
+      "id": 768,
+      "questions": 108,
+      "meaning": "Dire les lettres d’un mot une par une, dans leur ordre."
+    },
+    {
+      "infinitive": "planter",
+      "id": 769,
+      "questions": 108,
+      "meaning": "Mettre une plante ou une graine dans la terre pour la faire pousser."
+    },
+    {
+      "infinitive": "décrire",
+      "id": 770,
+      "questions": 108,
+      "meaning": "Dire ou écrire comment est une personne, une chose ou un lieu."
+    },
+    {
+      "infinitive": "posséder",
+      "id": 771,
+      "questions": 108,
+      "meaning": "Avoir une chose qui nous appartient."
+    },
+    {
+      "infinitive": "coûter",
+      "id": 772,
+      "questions": 108,
+      "meaning": "Avoir un prix ou demander une certaine somme d’argent."
+    },
+    {
+      "infinitive": "détester",
+      "id": 773,
+      "questions": 108,
+      "meaning": "Ne pas aimer du tout une personne, une chose ou une activité."
+    },
+    {
+      "infinitive": "fermer",
+      "id": 774,
+      "questions": 108,
+      "meaning": "Mettre une porte, une fenêtre ou un objet dans une position qui empêche le passage."
+    },
+    {
+      "infinitive": "se maquiller",
+      "id": -573,
+      "questions": 108,
+      "meaning": "Mettre des produits de maquillage sur son propre visage."
+    },
+    {
+      "infinitive": "se peigner",
+      "id": -574,
+      "questions": 108,
+      "meaning": "Passer un peigne dans ses propres cheveux."
+    },
+    {
+      "infinitive": "se retrouver",
+      "id": -575,
+      "questions": 108,
+      "meaning": "Être de nouveau avec une personne ou dans un même lieu."
+    },
+    {
+      "infinitive": "revenir",
+      "id": 778,
+      "questions": 108,
+      "meaning": "Venir de nouveau dans un lieu où l’on était auparavant."
+    },
+    {
+      "infinitive": "conseiller",
+      "id": 779,
+      "questions": 108,
+      "meaning": "Dire à quelqu’un ce qui pourrait l’aider ou ce qu’il pourrait faire."
+    },
+    {
+      "infinitive": "préparer",
+      "id": 780,
+      "questions": 108,
+      "meaning": "Faire ce qui est nécessaire pour qu’une chose soit prête."
+    },
+    {
+      "infinitive": "rédiger",
+      "id": 781,
+      "questions": 108,
+      "meaning": "Écrire un texte en choisissant et en organisant ses mots."
+    },
+    {
+      "infinitive": "réserver",
+      "id": 782,
+      "questions": 108,
+      "meaning": "Demander à garder une place, une chambre ou un objet pour plus tard."
+    },
+    {
+      "infinitive": "regretter",
+      "id": 783,
+      "questions": 108,
+      "meaning": "Être triste à cause d’une chose passée ou de l’absence de quelqu’un."
+    },
+    {
+      "infinitive": "se connecter",
+      "id": -576,
+      "questions": 108,
+      "meaning": "Accéder à un réseau ou à un service en ligne."
+    },
+    {
+      "infinitive": "se garer",
+      "id": -577,
+      "questions": 108,
+      "meaning": "S’arrêter avec son véhicule à un endroit où il peut rester."
+    },
+    {
+      "infinitive": "régler",
+      "id": 786,
+      "questions": 108,
+      "meaning": "Modifier un appareil pour qu’il fonctionne comme on le souhaite."
+    },
+    {
+      "infinitive": "récapituler",
+      "id": 787,
+      "questions": 108,
+      "meaning": "Rappeler les points les plus importants de ce qui a été dit ou fait."
+    },
+    {
+      "infinitive": "se promener",
+      "id": -578,
+      "questions": 108,
+      "meaning": "Marcher pour le plaisir ou pour prendre l’air."
+    },
+    {
+      "infinitive": "patienter",
+      "id": 789,
+      "questions": 108,
+      "meaning": "Attendre sans s’impatienter."
+    },
+    {
+      "infinitive": "raccrocher",
+      "id": 790,
+      "questions": 108,
+      "meaning": "Terminer une conversation téléphonique en coupant la communication."
+    },
+    {
+      "infinitive": "quitter",
+      "id": 791,
+      "questions": 108,
+      "meaning": "Partir d’un lieu ou cesser d’être avec une personne."
+    },
+    {
+      "infinitive": "démissionner",
+      "id": 792,
+      "questions": 108,
+      "meaning": "Décider de quitter son emploi ou sa fonction."
+    },
+    {
+      "infinitive": "fonder",
+      "id": 793,
+      "questions": 108,
+      "meaning": "Créer une entreprise, une association ou une autre organisation."
+    },
+    {
+      "infinitive": "retourner",
+      "id": 794,
+      "questions": 108,
+      "meaning": "Aller de nouveau dans un lieu où l’on était auparavant."
+    },
+    {
+      "infinitive": "remercier",
+      "id": 795,
+      "questions": 108,
+      "meaning": "Dire merci à quelqu’un pour ce qu’il a fait."
+    },
+    {
+      "infinitive": "convenir",
+      "id": 796,
+      "questions": 108,
+      "meaning": "Être adapté à une personne ou à une situation."
+    },
+    {
+      "infinitive": "remplacer",
+      "id": 797,
+      "questions": 108,
+      "meaning": "Mettre une personne ou une chose à la place d’une autre."
+    },
+    {
+      "infinitive": "préoccuper",
+      "id": 798,
+      "questions": 108,
+      "meaning": "Causer du souci à quelqu’un ou occuper beaucoup ses pensées."
+    },
+    {
+      "infinitive": "s'énerver",
+      "id": -579,
+      "questions": 108,
+      "meaning": "Perdre son calme ou se mettre en colère."
+    },
+    {
+      "infinitive": "se disputer",
+      "id": -580,
+      "questions": 108,
+      "meaning": "Exprimer vivement un désaccord avec quelqu’un."
+    },
+    {
+      "infinitive": "annuler",
+      "id": 801,
+      "questions": 108,
+      "meaning": "Décider qu’une chose prévue n’aura pas lieu ou n’est plus valable."
+    },
+    {
+      "infinitive": "reporter",
+      "id": 802,
+      "questions": 108,
+      "meaning": "Déplacer un évènement prévu à une autre date."
+    },
+    {
+      "infinitive": "réparer",
+      "id": 803,
+      "questions": 108,
+      "meaning": "Remettre en état une chose abîmée ou qui ne fonctionne plus."
+    },
+    {
+      "infinitive": "visser",
+      "id": 804,
+      "questions": 108,
+      "meaning": "Faire tourner une vis ou une pièce pour la fixer."
+    },
+    {
+      "infinitive": "toucher",
+      "id": 805,
+      "questions": 108,
+      "meaning": "Mettre une partie du corps en contact avec une personne ou une chose."
+    },
+    {
+      "infinitive": "supporter",
+      "id": 806,
+      "questions": 108,
+      "meaning": "Réussir à accepter une chose difficile ou désagréable."
+    },
+    {
+      "infinitive": "tousser",
+      "id": 807,
+      "questions": 108,
+      "meaning": "Rejeter brusquement de l’air par la bouche quand la gorge ou les poumons sont irrités."
+    },
+    {
+      "infinitive": "s'entendre",
+      "id": -581,
+      "questions": 108,
+      "meaning": "Avoir de bonnes relations ou se mettre d’accord avec quelqu’un."
+    }
+  ]
+}

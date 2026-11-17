@@ -2,7 +2,7 @@
 // La liste est lexicale : l’absence de COD ne suffit pas à autoriser être.
 const VARIABLE_AUXILIARY_VERBS = new Set([
   'descendre', 'entrer', 'monter', 'passer', 'rentrer', 'retourner', 'sortir',
-  'redescendre', 'remonter', 'repasser', 'ressortir', 'demeurer',
+  'redescendre', 'remonter', 'repasser', 'ressortir', 'demeurer', 'convenir',
 ])
 
 export function hasVariableAuxiliary(infinitive: string) {
@@ -13,7 +13,7 @@ export const VARIABLE_AUXILIARY_EXPLANATION = 'Sans phrase de contexte, les auxi
 
 /** Modèle usuel des verbes de déplacement ; demeurer dépend davantage du sens. */
 export function prefersEtreWithoutComplement(infinitive: string) {
-  return hasVariableAuxiliary(infinitive) && infinitive.trim().toLocaleLowerCase('fr') !== 'demeurer'
+  return hasVariableAuxiliary(infinitive) && !['demeurer', 'convenir'].includes(infinitive.trim().toLocaleLowerCase('fr'))
 }
 
 export function hasMultipleAuxiliaryModels(question: { auxiliaryChoices?: readonly string[], preferredAuxiliary?: string }) {

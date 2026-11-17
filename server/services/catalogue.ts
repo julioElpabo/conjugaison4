@@ -42,6 +42,8 @@ interface MeaningRow extends RowDataPacket {
   definition: string | null
   est_principal: number
   numero_sens: number
+  est_pronominal: number
+  construction: string
 }
 interface ComplementExampleRow extends RowDataPacket {
   verbe_id: number
@@ -137,7 +139,7 @@ export async function getCatalogue(locale: AppLocale = 'fr') {
                ELSE COALESCE(requested.intitule, french.intitule, vs.intitule) END AS intitule,
              CASE WHEN ?='fr' THEN vs.definition
                ELSE COALESCE(requested.definition, french.definition, vs.definition) END AS definition,
-             vs.est_principal, vs.numero_sens
+             vs.est_principal, vs.numero_sens, vs.est_pronominal, vs.construction
       FROM verbe_sens vs
       LEFT JOIN verbe_sens_translations requested
         ON requested.sens_id=vs.id AND requested.locale=?
@@ -195,12 +197,18 @@ export async function getCatalogue(locale: AppLocale = 'fr') {
     semanticsByVerb.set(Number(row.verbe_id), categories)
   }
   const meaningByVerb = new Map<number, string>()
+  const pronominalMeanings = new Map<string, string>()
   for (const row of meaningResult[0]) {
     const verbId = Number(row.verbe_id)
-    if (meaningByVerb.has(verbId)) continue
     const definition = row.definition?.trim()
     const genericTitle = /^sens principal de\s+[«"']?/iu.test(row.intitule.trim())
     const meaning = definition || (genericTitle ? '' : row.intitule.trim())
+    if (Number(row.est_pronominal)) {
+      const key = `${verbId}:${row.construction?.trim().replace(/’/gu, "'")}`
+      if (meaning && !pronominalMeanings.has(key)) pronominalMeanings.set(key, meaning)
+      continue
+    }
+    if (meaningByVerb.has(verbId)) continue
     if (meaning) meaningByVerb.set(verbId, meaning)
   }
   const complementByVerb = new Map<number, Verb['complementExample']>()
@@ -283,6 +291,7 @@ export async function getCatalogue(locale: AppLocale = 'fr') {
       ...base,
       id: encodePronominalSelectionId(Number(use.id)),
       infinitif: use.infinitif_pronominal,
+      meaning: pronominalMeanings.get(`${base.id}:${use.infinitif_pronominal.replace(/’/gu, "'")}`) ?? base.meaning,
       participePresent: pronominalParticiple,
       auxiliaire: 'être',
       typePronominal: use.type_emploi === 'essentiel' ? 'essentiel' : 'occasionnel',

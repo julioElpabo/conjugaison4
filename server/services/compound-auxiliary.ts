@@ -60,6 +60,11 @@ export function resolveVariableAuxiliary<T extends ConjugationSourceRow>(
   row: T,
   auxiliaryForms: readonly CompoundAuxiliaryForm[],
 ): T {
+  if (normalized(row.infinitif) === 'convenir') {
+    if (!Number(row.is_compound)) return row
+    if (row.complement_preposition === 'de') return useEtreForIntransitiveCompound(row, auxiliaryForms)
+    return row.complement_preposition === 'à' ? { ...row, conjugaison2: '', conjugaison3: '' } : row
+  }
   if (
     hasVariableAuxiliary(row.infinitif)
     && normalized(row.infinitif) !== 'demeurer'
